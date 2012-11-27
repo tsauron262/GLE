@@ -1,0 +1,85 @@
+INSTALLATION SUR NEW VERSION DOLIBARR :{
+    Renommer projet => 1projet
+    renommer fichinter => 1fichinter
+    renommer main.inc.php => 1main.inc.php
+    renommer core/modules/ficheinter => 1fichinter
+
+
+    Copier 
+    Synopsis et babel dans
+    -/
+    -/admin
+    -/core/modules/ (fichier + dossier)
+    -/core/lib/ 
+
+    --
+    + Exception a copier egalement
+    --
+
+    /core/modules/moddemendeInterv.class.php
+    /core/modules/contratGA
+    /core/modules/contratGMAO
+    /core/modules/demendeInterv
+    /core/modules/fichinter *
+
+    /core/lib/demandeInterv.lib.php
+    /core/lib/task.class.php //Louche pas de class ici normalement
+
+    /fichinter *
+    /projet *
+
+    * Remplacemnt des fichier d'origine X3
+
+
+
+
+ //Refactoring coeur
+require\([a-zA-z0-9/."'_-]*.class.php   Pour rajouter _once
+}
+
+
+Parametrage :
+    - conf/conf.php
+    - Synopsis_Hrm/orange/lib/confs/Conf.php (Pour gestion ressources humaine)
+Zimbra
+    - dans le compte admin tous les contacte a partager avec qui on veut
+    - chaque utilisateur responsable de ressource peut partager le calandrier de la ressource (dans l'avenir l'admin aussi)
+
+
+
+
+MODIFICATION DU COEUR {
+    - main.inc.php (Pour ajouter les hook synopsis + modif du path)
+    - societe.class.php (aj de $option = "customer"; ln 1244 pour arriver directement dans l'onglet client ou prospect)
+    - capsim : ajout du chrono dans la fiche propal
+    - 
+}
+
+
+
+
+Creation des vue pour install 2 avec base client commune : {
+    CREATE VIEW gle2_societe_address as SELECT * FROM gle1_societe_address;
+    CREATE VIEW gle2_societe as SELECT * FROM gle1_societe;
+    CREATE VIEW gle2_societe_commerciaux as SELECT * FROM gle1_societe_commerciaux;
+    CREATE VIEW gle2_societe_extrafields as SELECT * FROM gle1_societe_extrafields;
+    CREATE VIEW gle2_societe_log as SELECT * FROM gle1_societe_log;
+    CREATE VIEW gle2_societe_prices as SELECT * FROM gle1_societe_prices;
+    CREATE VIEW gle2_societe_remise as SELECT * FROM gle1_societe_remise;
+    CREATE VIEW gle2_societe_remise_except as SELECT * FROM gle1_societe_remise_except;
+    CREATE VIEW gle2_societe_rib as SELECT * FROM gle1_societe_rib;
+}
+
+
+
+Capsim : 
+
+Modif coeur : main.inc.php rajouter le class path d'origine.
+Deplacer fichier projet vers synopsisprojet
+deplacer ficheir chrono vers synopsischrono
+Ajouter chrono a prop commerciale (habituellement dans onglet revision/Doc.indicable
+
+
+
+
+

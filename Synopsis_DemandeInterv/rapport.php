@@ -1,0 +1,384 @@
+<?php
+/* Copyright (C) 2003 Xavier DUTOIT        <doli@sydesy.com>
+ * Copyright (C) 2004 Laurent Destailleur  <eldy@users.sourceforge.net>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id: rapport.php,v 1.12 2007/06/22 08:44:46 hregis Exp $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsis_demandeinterv/rapport.php,v $
+ *
+ */
+/*
+  * GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Version 1.1
+  * Create on : 4-1-2009
+  *
+  * Infos on http://www.finapro.fr
+  *
+  */
+require("./pre.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+$html = new Form($db);
+if ($user->societe_id > 0)
+{
+  $socidUser = $user->societe_id ;
+}
+
+$socid = $_REQUEST['socid'];
+llxHeader();
+
+/*
+ * Liste
+ *
+ */
+
+$filterUser = $user->id;
+if ($user->rights->synopsisdemandeinterv->rapportTous){
+    $filterUser = false;
+}
+
+if ($_REQUEST['filterUser'] > 0)
+{
+    $filterUser=$_REQUEST['filterUser'];
+}
+
+if ($sortorder == "")
+{
+  $sortorder="ASC";
+}
+if ($sortfield == "")
+{
+  $sortfield="f.datei";
+}
+
+if ($page == -1) { $page = 0 ; }
+
+$limit = $conf->liste_limit;
+$offset = $limit * $page ;
+$pageprev = $page - 1;
+$pagenext = $page + 1;
+
+$sql = "SELECT s.nom,
+               s.rowid as socid,
+               f.description,
+               f.ref,
+               f.datei as dp,
+               f.rowid as fichid,
+               f.fk_statut,
+               f.duree";
+$sql .= " FROM ".MAIN_DB_PREFIX."societe as s,
+               llx_Synopsis_demandeInterv as f ";
+$sql .= "WHERE f.fk_soc = s.rowid";
+
+if($filterUser){
+    $sql .= " AND (fk_user_prisencharge = ".$filterUser." OR fk_user_target =".$filterUser.")";
+}
+
+
+$MM = $_REQUEST['MM'];
+$YY = $_REQUEST['YY'];
+
+if ($socid > 0)
+{
+  $sql .= " AND s.rowid = " . $socid;
+}
+
+if (empty ($MM))
+  $MM=utf8_decode(strftime("%m",time()));
+if (empty($YY))
+  $YY=strftime("%Y",time());;
+
+
+$start="$YY-$MM-01 00:00:00";
+if ($MM ==12)
+{
+  $y = $YY+1;
+  $end="$y-01-01 00:00:00";
+} else {
+  $m = $MM+1;
+  $end="$YY-$m-01 00:00:00";
+}
+$sql .= " AND datei >= '$start' AND datei < '$end'" ;
+if ($socid > 0)
+{
+    $sql .= " AND fk_soc = ".$socid ;
+}
+$sql .= " ORDER BY $sortfield $sortorder ";
+
+    $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
+    $requete .= " FROM ".MAIN_DB_PREFIX."societe as s, llx_Synopsis_demandeInterv as f ";
+    $requete .= " WHERE f.fk_soc = s.rowid";
+
+    $requete .= " AND datei >= '$start' AND datei < '$end'" ;
+    if($filterUser){
+        $requete .= " AND (fk_user_prisencharge = ".$filterUser." OR fk_user_target =".$filterUser.")";
+    }
+
+
+    $requete .= " ORDER BY $sortfield $sortorder ";
+
+    $sqlpre1 = $db->query($requete);
+    $selSoc =  "<select name='socid'>";
+    $selSoc .=  "<option value=''>S&eacute;lectioner -></option>";
+    while ($respre1 = $db->fetch_object($sqlpre1))
+    {
+        if ($socid > 0 && $socid == $respre1->socid)
+        {
+            $selSoc .=  "<option SELECTED value='".$respre1->socid."'>".$respre1->nom."</option>";
+        }else{
+            $selSoc .=  "<option value='".$respre1->socid."'>".$respre1->nom."</option>";
+        }
+
+    }
+    $selSoc .=  "</select>";
+
+//TODO si selection société filtrer
+//print $sql;
+$resql = $db->query($sql);
+if ( $resql )
+{
+    $num = $db->num_rows($resql);
+    $title = utf8_decode("Rapport d'activit&eacute; de " . strftime("%B %Y",strtotime ($start)));
+    print_barre_liste($title, $page, "rapport.php","&socid=$socid",$sortfield,$sortorder,'',$num);
+    print "<br/><br/>";
+    echo "<div style='float: right;  margin-top:-18px; margin-right: 20%; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
+    echo "\n<form action='rapport.php'>";
+    echo "<input type='hidden' name='socid' value='$socid'>";
+    $prevMM = $MM - 1;
+    $prevYY = $YY;
+    if ($prevMM < 1) {
+        $prevMM = 12;
+        $prevYY --;
+    }
+    $nxtMM = $MM + 1;
+    $nxtYY = $YY;
+    if ($nxtMM > 12) {
+        $nxtMM = 1;
+        $nextYY ++;
+    }
+    echo "<table><tr><td><a href='rapport.php?MM=". $prevMM ."&YY=".$prevYY."&g=Afficher'><span class='ui-icon ui-icon-circle-triangle-w' ></span></a>";
+    echo '           <td>'.$langs->trans("Month")." <input style='text-align:center' name='MM' size='2' value='$MM'>";
+    echo " Ann&eacute;e <input size='4' name='YY' style='text-align:center' value='$YY'></td>";
+    echo "<td><a href='rapport.php?MM=". $nxtMM ."&YY=".$nxtYY."&g=Afficher'><span class='ui-icon ui-icon-circle-triangle-e' ></span></a>";
+    echo "<td>&nbsp;";
+    echo "<td align=center>Soci&eacute;t&eacute;";
+
+    print $selSoc;
+    if ($user->rights->synopsisdemandeinterv->rapportTous){
+        echo "<td align=center>Intervenant";
+        $html->select_users($_REQUEST['filterUser'],'filterUser',1,'',0,1);
+        $filterUser = false;
+    }
+    echo "<tr><td colspan=6 align=center><input class='button ui-state-default' style='padding: 3px;' type='submit' name='g' value='Afficher le rapport'></td>";
+    echo "</table><form>";
+    echo "</div><br/><br/><br/>";
+    $i = 0;
+    print '<table class="noborder" width="100%" cellspacing="0" cellpadding="3">';
+    print "<tr class=\"liste_titre\">";
+    print '<td>Ref.</td>';
+    if (empty($socid))
+        print '<td>Soci&eacute;t&eacute;</td>';
+    print '<td align="center">'.$langs->trans("Description").'</td>';
+
+    print '<td align="center">Date</td>';
+    print '<td align="center">'.$langs->trans("Duration").'</td>';
+    print "</tr>\n";
+    $var=true;
+    $DureeTotal = 0;
+    while ($objp = $db->fetch_object($resql))
+    {
+        
+        $var = !$var;
+        $htmlTab .= "<tr $bc[$var]>";
+        $di = new DemandeInterv($db);
+        $di->fetch($objp->fichid);
+
+
+        $htmlTab .= "<td>" . $di->getNomUrl(1) . "</td>\n";
+
+        if (empty($socid)) {
+            if (!empty($MM))
+                $filter = "&MM=$MM&YY=$YY";
+            $tmpSoc = new Societe($db);
+            $tmpSoc->fetch($objp->socid);
+            $htmlTab .= '<td><a href="rapport.php?socid=' . $objp->socid . $filter . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/filter.png" border="0"></a>&nbsp;';
+            $htmlTab .= $tmpSoc->getNomUrl(1) . "</TD>\n";
+        }
+        $htmlTab .= '<td>' . nl2br($objp->description) . '</td>';
+        $htmlTab .= "<td>" . utf8_decode(strftime("%d %B %Y", $objp->dp)) . "</td>\n";
+        $durStr = convDur($objp->duree);
+        $htmlTab .= '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm</td>';
+
+
+
+
+
+
+
+
+        $demandeInterv = new demandeInterv($db);
+        $demandeInterv->id = $objp->fichid;
+        $demandeInterv->fetch($objp->fichid);
+        require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+        $com = new Commande($db);
+        $com->fetch($demandeInterv->fk_commande);
+//        $com->fetch_group_lines(0, 0, 0, 0, 1);//Groupe commande
+        $arrGrpCom = array($com->id => $com->id);
+//        $arrGrp = $com->listGroupMember(true);
+//        foreach ($arrGrp as $key => $commandeMember) {
+//            $arrGrpCom[$commandeMember->id] = $commandeMember->id;
+//        }
+
+//Vendu en euro
+        $requete = "SELECT SUM(total_ht) as tht
+              FROM llx_commandedet, commdet,
+                   llx_product as prod,
+                   llx_categorie_product as catprod,
+                   llx_categorie as cat
+             WHERE prod.rowid = commdet.fk_product
+               AND cat.rowid = catprod.fk_categorie
+               AND catprod.fk_product = prod.rowid
+               AND cat.rowid IN (SELECT catId FROM llx_Synopsis_PrepaCom_c_cat_total)
+               AND llx_commandedet.fk_commande IN (" . join(',', $arrGrpCom) . ")  ";
+        die($requete);
+        
+        $sql = $db->query($requete);
+        $res = $db->fetch_object($sql);
+        $vendu = $res->tht;
+        $totVendu += $vendu;
+
+//Prevu en euro et en temps
+        $requete = "SELECT SUM(det.duree) as durTot ,
+                   SUM(det.total_ht) as totHT
+              FROM llx_Synopsis_demandeInterv di,
+                   llx_Synopsis_demandeIntervdet as det,
+                   llx_Synopsis_fichinter_typeInterv as t
+             WHERE t.id=det.fk_typeinterv
+               AND det.fk_demandeinterv = di.rowid
+               AND t.inTotalRecap=1
+               AND fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
+        $sql = $db->query($requete);
+        $res = $db->fetch_object($sql);
+        $prevuEuro = $res->totHT;
+        $prevuTemp = $res->durTot;
+        $arr1 = convDur($res->durTot);
+        $totPrev += $res->totHT;
+        $totTPrev += $res->durTot;
+//Realise en euros et en temps
+        $requete = "SELECT SUM(det.duree) as durTot ,
+                   SUM(det.total_ht) as totHT
+              FROM llx_Synopsis_fichinter as inter,
+                   llx_Synopsis_fichinterdet as det,
+                   llx_Synopsis_fichinter_c_typeInterv as t
+             WHERE t.id=det.fk_typeinterv
+               AND det.fk_fichinter = inter.rowid
+               AND t.inTotalRecap=1
+               AND inter.fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
+//$htmlTab .= $requete;
+        $sql = $db->query($requete);
+        $res = $db->fetch_object($sql);
+        $realEuro = $res->totHT;
+        $realTemp = $res->durTot;
+        $arr2 = convDur($res->durTot);
+        $totReel += $res->totHT;
+        $totTReel += $res->durTot;
+        $htmlTab .= '<td align="center">' . price($prevuEuro) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
+        $htmlTab .= '<td align="center">' . price($vendu) . " &euro; </td>";
+        $htmlTab .= '<td align="center">' . price($realEuro) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';
+        $htmlTab .= '<td align="center">' . price(($prevuEuro - $realEuro) / $prevuEuro * 100) . " %" . '</td>';
+        $htmlTab .= '<td align="center">' . price(($vendu - $realEuro) / $vendu* 100) . " %" . '</td>';
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        $DureeTotal += $objp->duree;
+        $htmlTab .= "</tr>\n";
+    }
+    $arr1 = convDur($totTPrev);
+    $arr2 = convDur($totTReel);
+    $htmlTot = '<tr class="liste_titre"><td align="center">Total</td><td></td><td></td><td></td><td></td>';
+    $htmlTot .= '<td align="center">' . price($totPrev) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
+    $htmlTot .= '<td align="center">' . price($totVendu) . '</td>';
+    $htmlTot .= '<td align="center">' . price($totReel) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';
+    $htmlTot .= '<td align="center">' . price(($totPrev - $totReel) / $totPrev * 100) . " %" . '</td>';
+    $htmlTot .= '<td align="center">' . price(($totVendu - $totReel) / $totVendu * 100) . " %" . '</td>';
+    $htmlTot .= '</tr>';
+
+
+    print $htmlTot . $htmlTab . $htmlTot;
+
+    print "</table>";
+    $db->free();
+    $durStr = convDur($DureeTotal);
+    print "<br />" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
+} else {
+  dol_print_error($db);
+}
+$db->close();
+
+llxFooter("<em>Derni&egrave;re modification $Date: 2007/06/22 08:44:46 $ r&eacute;vision $Revision: 1.12 $</em>");
+
+function convDur($duration)
+{
+
+    // Initialisation
+    $duration = abs($duration);
+    $converted_duration = array();
+
+    // Conversion en semaines
+    $converted_duration['weeks']['abs'] = floor($duration / (60*60*24*7));
+    $modulus = $duration % (60*60*24*7);
+
+    // Conversion en jours
+    $converted_duration['days']['abs'] = floor($duration / (60*60*24));
+    $converted_duration['days']['rel'] = floor($modulus / (60*60*24));
+    $modulus = $modulus % (60*60*24);
+
+    // Conversion en heures
+    $converted_duration['hours']['abs'] = floor($duration / (60*60));
+    $converted_duration['hours']['rel'] = floor($modulus / (60*60));
+    $modulus = $modulus % (60*60);
+
+    // Conversion en minutes
+    $converted_duration['minutes']['abs'] = floor($duration / 60);
+    $converted_duration['minutes']['rel'] = floor($modulus / 60);
+    if ($converted_duration['minutes']['rel'] <10){$converted_duration['minutes']['rel'] ="0".$converted_duration['minutes']['rel']; } ;
+    $modulus = $modulus % 60;
+
+    // Conversion en secondes
+    $converted_duration['seconds']['abs'] = $duration;
+    $converted_duration['seconds']['rel'] = $modulus;
+
+    // Affichage
+    return( $converted_duration);
+}
+
+?>

@@ -1,0 +1,10 @@
+Bonjour #subordinate,
+
+Vous êtes informé par ce message que le congé demandé a été annulé par votre superviseur:
+
+Applied Date(s)    Type of Leave    Duration (hours)    Comments
+#{#date    #type        #duration        #comments}
+
+Thanks,
+
+GLE - HRM

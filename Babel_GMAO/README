@@ -1,0 +1,20 @@
+1) Intégration RT
+2) Intégration Contrat de support
+3) Montage du module
+4) Intégration nouveau contrat (temps,ticket, ticket avec temps max, illimité intervention,limité dans le temps)
+4a) Faire type de contrat
+5) dashboard & maintenance
+6) SAV,retour produit réparation et echange standard
+7) Sync user et group et droits => trigger
+8) Stock SAV
+9) Etiquettes
+10) Attribution user / societe avecrole (intervenant technique, formateur, chef de projet, commercial responsable de compte,commercial responsable de la facturation)
+11) Intégration dans la fiche societe
+
+
+
+
+TODO :widgets : Les contrats à renouveler
+Modifier produit - contrat pour faire soit SAV soit maintenance etc ... + produit associé
+SAV => cf TODOs dans fiche SAV
+reconduction auto

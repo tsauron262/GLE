@@ -1,0 +1,39 @@
+//module des retours
+
+
+Litiges, SAV, GA, contrat, commande
+
+: Permettre lors du retour d‘un produit de pouvoir listé le matériel entrant et détecter les litiges.
+   Si il n’y a pas de litiges, le retour au stock total est possible. La facturation et la clôture de la commande sont automatiques.
+   Si il ya litige, alors on peut :
+   Organiser un retour au stock partiel
+   Bloquer la facturation
+   Choisir le règlement du litige (Assurances, pertes, facturation, SAV)
+
+    widgets
+    afficher les 10 derniers retours (partiel/total)
+    afficher les retours partiel
+    afficher les contrats en retour (bientot et maintenant 2 widgets)
+    afficher les livraisons en litiges
+    afficher les commandes en litiges
+
+
+   Principe contrat de loc / commande / livraison:
+
+   1) Choisit le client
+   2) Choisit le contrat / la commande
+   3) Choix de :
+    -> Retour stock (total / partiel)
+    -> SAV
+   4a) Si retour stock, pointe le matériel => retour partiel ou total
+                                           => Litige sur ligne
+                                           => SAV sur ligne
+
+                                          Option : Mettre toute la commande / livraison / ... en litige
+                                                   Si litige:> bloque facturation en option $conf->MAIN_
+   4b) SAV :> GMAO attn au contrat / commande et date de SAV sur le produit
+
+   5) Si litige:> Résolution du litige :> Assurance, perte, facturation, SAV interne ou externe
+
+   6) Cloture du retour, possibilité de cloturer la facture, commande, livraison
+                                     de lancer la commande / facture / livraison ...

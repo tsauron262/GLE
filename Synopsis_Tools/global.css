@@ -1,0 +1,77 @@
+
+/*div.tabBar{
+    position: absolute;
+    bottom: 10px;
+    top: 81px;
+    right: 10px;
+    left: 205px;
+    overflow: auto;
+}*/
+
+
+div.tabBar.reglabe2{
+    overflow: auto;
+}
+div.fiche.reglabe{
+    position: absolute;
+    bottom: 0px;
+    top: 65px;
+    right: 0px;
+    left: 192px;
+    overflow: auto;
+    margin-right: 0;
+    margin-left: 10px;
+    padding-right: 5px;
+}
+
+
+
+
+
+div.fiche table.border > tbody > tr > td{
+    padding: 12px;
+    background-color: #fff;
+}
+div.fiche table.border > tbody > tr > td:first-child,
+div.fiche table.border > tbody > tr > td:first-child + td + td{
+    text-align: center;
+    background: url("../includes/jquery/css/smoothness/images/ui-bg_glass_75_e6e6e6_1x400.png") repeat-x scroll 50% 50% #E6E6E6;
+    border: 1px solid #D3D3D3;
+    color: #555555;
+}
+div.fiche table.border{
+    margin-left: 0;
+}
+body{
+    font-size: 13px;
+}
+div.mainmenu.Synopsis_Projet {
+    background-image: url(../theme/eldy/img/menus/project.png);
+}
+div.mainmenu.Ressources {
+    background-image: url(../theme/eldy/img/menus/shop.png);
+}   
+div.mainmenu.zimbra {
+    background-image: url(../Synopsis_Zimbra/e-mail.png);
+}      
+div.mainmenu.synopsisprojet {
+    background-image: url(../theme/eldy/img/menus/project.png);
+}   
+div.mainmenu.Process {
+    background-image: url(../Synopsis_Process/process.png);
+}
+div.mainmenu.Chrono {
+    background-image: url(../Synopsis_Chrono/chronoGr.png);
+}
+div.mainmenu.SynopsisTools {
+    background-image: url(../Synopsis_Tools/img/tools.png);
+}
+div.mainmenu.SynopsisToolsBug {
+    background-image: url(../Synopsis_Tools/img/bug.png);
+}
+
+
+
+td#mainmenutd_project{
+    display: none;
+}

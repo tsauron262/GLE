@@ -1,0 +1,264 @@
+DiscountShort=Rem.
+isOpt=Opt?
+DescriptionShort=Desc.
+HTBeforeDiscount=Tot. HT avant rem.
+HTAfterDiscount=Tot. HT apr&egrave;s rem.
+HTAfterDiscountLine=Tot. HT apr&egrave;s rem. ligne
+RemiseGlob = Remise globale
+ProduitsCommande = Produits dans la commande
+BabelQtyOrdered = Qt&eacute; com
+BabelQtyShipped = Qt&eacute; exp
+BabelKeepToShip = Qt&eacute; res
+BabelDateSending = Date exp
+BabelRefCustomerOrderShort = Ref. cli.
+
+//GSM BI
+BabelGSMpushECM = Placer dans l'ECM
+BabelGSMDlReport = Rapports statique
+BabelGSMGenReport = Rapports à la demande
+BabelGSMPush = Pousser
+BabelGSMGen = G&eacute;n&eacute;rer
+BabelGSMBiTitle = Interface GSM Jasper BI
+BabelGSMPushZimbra = Placer dans Zimbra
+BabelGSMWhere = O&ugrave;?
+BabelGSMWhat = Quoi?
+BabelGSMConfirmCrush = Un fichier de l'ECM va etre ecraser OK ?
+
+oui = oui
+non = non
+
+BabelStepName = Etape
+BabelMandatory = Etape obligatoire ?
+BabelStepDesc = Description &eacute;tape
+BabelStepDoc = Fichier associ&eacute; &agrave; l'&eacute;tape
+BabelStepValidator = Validateur de l'&eacute;tape
+
+BabelOption = En Option
+DownloadZip=T&eacute;l&eacute;charger tous les documents
+
+showUserPropal=Affiche les propositions commerciales cr&eacute;es par cet utilisateur
+showUserFacturePaye=Affiche les factures pay&eacute;es concernant cet utilisateur
+
+StatusSendingDelivered=Livr&eacute;
+
+
+sautpage=Saut de Page :
+soustot=Sous total :
+header=Section :
+header1Stot=Sous Section :
+header1=Sous Section :
+desc=
+
+
+JASPER_HOST=IP/Nom Serveur Jasper
+JASPER_PORT=Port du webservice Jasper
+JASPER_PROTO=Protocole d'acc&egrave;s
+JASPER_PATH=Chemin du webservice
+JASPER_REPO_PATH_GENERATED=Chemin vers les rapports autog&eacute;n&eacute;r&eacute;s
+JASPER_REPO_PATH_REPORT=Chemin vers les rapports PDF
+BABELJASPER_JASPER_USE_LDAP=Utilisation de LDAP pour l'acc&egrave;s &agrave; Jasper
+
+
+LoginIMDis=D&eacute;sactiver par l'utilisation de LDAP pour le module IM
+LoginJaspDis=D&eacute;sactiver par l'utilisation de LDAP pour le module BI
+LoginZimbraDis=D&eacute;sactiver par l'utilisation de LDAP pour le module de collaboration (Zimbra)
+
+IMLogin=Login de l'utilisateur pour le service IM
+IMPass=Mot de passe de l'utilisateur pour le service IM
+
+jasperLogin=Login de l'utilisateur pour le service BI
+jasperPass=Mot de passe de l'utilisateur pour le service BI
+
+ZimbraLogin=Login de l'utilisateur pour le service de collaboration (Zimbra)
+ZimbraPass=Mot de passe de l'utilisateur pour le service de collaboration (facultatif)
+
+getFromZimbra=Recherche Zimbra
+
+PROPALAUTHOR=Cr&eacute;teur de la propale
+PROPALVALID=Validation de la propale
+PROPALCLOTURE=Cloture de la propale
+
+COMMANDEAUTHOR=Cr&eacute;teur de la commande
+COMMANDEVALID=Validation de la cammande
+COMMANDECLOTURE=Cloture de la commande
+
+FACTUREAUTHOR=Cr&eacute;ateur de la commande
+FACTUREVALID=Validation de la cammande
+FACTURECLOTURE=Cl&ocirc;ture de la commande
+
+SOCCOMMERCIAL=Commercial du compte
+
+StatusContactValidated=Contact valide
+StatusContactNotValidated=Contact invalide
+
+Opened=Ouverts
+
+
+PDFSynopsisDescription=Mod&egrave;le standard de note de frais
+PDFContratSynopsisDescription=Mod&egrave;le standard de contrat
+
+ConfirmDemandeValid=Confirmer la demande de validation ?
+ConfirmValidateNdf=Confirmer la validation de la note de frais ?
+ConfirmRefuseNdf=Confirmer le refus de la note de frais ?
+
+StatusTripDraft=Brouillon
+StatusTripProcessing=En cours
+StatusTripValidated=Valid&eacute;
+StatusTripCloseRefuse=Refus&eacute;
+
+StatusTripDraftShort=Brouillon
+StatusTripProcessingShort=En cours
+StatusTripValidatedShort=Valid&eacute;
+StatusTripCloseRefuseShort=Refus&eacute;
+
+BoxTitledeplacement=Informations Ndfs
+BoxLastdeplacement=Informations sur les derniers d&eacute;placements
+TechPeopleArea=Zone Technique
+MenuTechPeople=Interv./Dep.
+
+ECMFileManager=Liste des documents
+ECMAuto=Documents GLE
+propal=Proposit. commerciale
+order=Commande
+bill=Facture
+delivery=Livraison
+sending=Exp&eacute;dition
+supplierscommande=Commandes fournisseurs
+cheque=Bordereau de remise
+ECMMan=Autres
+MyZimbra=Mon Zimbra
+RacineZimDocument=Documents
+Briefcase=Fichiers
+
+DescBImodule=Ce module vous permet de consulter les rapports configur&eacute;es dans JasperServer.<br>Les rapports disponibles sont <ul><li>onDemand : Rapport g&eacute;n&eacute;r&eacute; sur demande (peut prendre plusieurs minutes)<li> pr&eacute;-programm&eacute; : Rapport g&eacute;n&eacute;r&eacute; r&eacute;guli&egrave;rement par JasperServer</ul>Il vous est aussi possible de copier le rapport dans l'ECM, dans votre compte Zimbra ...
+
+
+ZIMBRA_HOST=IP public ou nom public du serveur Zimbra
+ZIMBRA_DOMAIN=domaine du serveur Zimbra
+ZIMBRA_PROTO=Protocole d'acc&egrave;s au serveur Zimbra
+ZIMBRA_PREAUTH=Preauth Key du serveur Zimbra
+ZIMBRA_WEBDAVPROTO=Protocole webdav &agrave; utiliser pour joindre le serveur Zimbra
+ZIMBRA_ADMINUSER=Nom de l'utilisateur GLE dans Zimbra
+ZIMBRA_ADMINPASS=Mot de passe de l'utilisateur GLE dans Zimbra
+ZIMBRA_ZIMBRA_USE_LDAP=Synchronisation des comptes Zimbra/GLE
+
+BABELJASPER_JASPER_USE_LDAP=Synchronisation des comptes JasperServer/GLE
+JASPER_REPO_PATH_REPORT=Chemin vers les r&eacute;pertoires des rapports GLE
+JASPER_REPO_PATH_GENERATED=Chemin vers les r&eacute;pertoires des rapports auto-g&eacute;n&eacute;r&eacute;s GLE
+JASPER_PATH=Chemin du WebService Jasper
+JASPER_PROTO=Protocole d'acc&egrave; au serveur
+JASPER_PORT=Port TCP du serveur Jasper
+JASPER_HOST=IP public ou nom public du serveur Jasper
+
+Parameter=Param&egrave;tre
+Value=Valeur
+Examples=Exemple
+
+populateSoc=Importer soci&eacute;t&eacute;
+populateProp=Importer les propales
+populateCommande=Importer les commandes
+populateFacture=Importer les factures
+populateIntervention=Importer les interventions
+populateExpedition=Importer les exp&eacute;ditions
+populateLivraison=Importer les livraisons
+populateActionCom=Importer les actions com.
+populatePaiement=Importer les payements
+populatePaiementFourn=Importer les paiements fourn.
+populateContact=Importer les contacts
+populateCalUtilisateur=Importers les calendriers utilisateurs
+Reinit:R&eacute;initialisation de Zimbra
+
+
+BABELIM=Messagerie instantann&eacute;e
+BABELIM_HOST=IP ou nom public du serveur Jabber
+BABELIM_PORT=Port TCP du serveur Jabber
+BABELIM_PROTO=Protocole d'acc&egrave;s au serveur Jabber
+BABELIM_DOMAIN=Domaine configurer sur le serveur Jabber
+BABELIM_IM_USE_LDAP=Synchronisation des comptes GLE avec les comptes Jabber
+BABELIM_XMLSOCKETPORT=Port TCP pour l'acc&egrave;s au serveur jabber en mode xml socket
+
+MAGENTO_HOST=IP ou nom public du serveur Magento
+MAGENTO_PORT=Port TCP du serveur Magento
+MAGENTO_PROTO=Protocole d'acc&egrave;s du serveur Magento
+MAGENTO_PATH=Chemin vers le service SOAP
+MAGENTO_USER=Utilisateur SOAP Magento
+MAGENTO_PASS=Mot de passe utilisateur SOAP Magento
+
+
+up=Vers le haut
+down=Vers le bas
+Compta=Ctrl de gestion
+
+
+
+
+PushToZimbra=Synchro avec mon Zimbra
+
+
+Lines=Lignes
+Line=Ligne
+SearchABill=Chercher une facture
+
+Element=&Eacute;l&eacute;ment
+
+
+//Action Comm
+
+AC_TELOUT=Appel T&eacute;l&eacute;phonique Sortant
+AC_FAX=Envoi Fax
+AC_PROP=Envoi Proposition
+AC_EMAIL=Envoi Email
+AC_RDV=Rendez-vous
+AC_COM=Envoi Commande
+AC_FAC=Envoi Facture
+AC_REL=Relance effectu&eacute;e
+AC_CLO=Cl&ocirc;ture
+AC_TELIN=Appel T&eacute;l&eacute;phonique Entrant
+AC_OTH=Autre
+
+
+HelpProspection=Ce module permet de visualiser et de configurer des campagnes de prospection.
+Cloturer=Cl&ocirc;turer
+Prefix=Pr&eacute;fixe
+
+
+intervention=Fiche Interv.
+DI=Demande Interv.
+Delivered=Livr&eacute;
+Canceled=Annul&eacute;
+
+
+CampagneStatusDraftShort=En pr&eacute;paration
+CampagneStatusSignedShort=En cours
+CampagneStatusOpenedShort=Valid&eacute;e
+CampagneStatusNotSignedShort=Refus&eacute;e
+CampagneStatusBilled=Cl&ocirc;tur&eacute;e
+
+ConfirmDemandeValidateProp=Confirmer la demande de validation
+PropalStatusWaitingValidation=En attente de validation
+PropalStatusWaitingValidationShort=Valid. en cours
+MAGENTOSetupSaved=configuration de magento enregistr&eacute;e
+
+CustomerPilotage=Pilotage GPI
+
+
+
+//GA
+ProductInGAStock=Produit en stock
+ProductInLocation=Produit en location
+ProductReSellL=Produit C&eacute;d&eacute;
+AddPropalGA=Cr&eacute;er une proposition
+LocationCard=Location
+RelatedContract=Contrats associ&eacute;s
+PDFcontratGASynopsisDescription=Synopsis Gestion d'Actif
+
+
+//Finapro
+
+PDFcontratGAfinaproStdDescription=Mod&egrave;le standard finapro
+
+
+AllDI=Liste des DI
+NewDI=Nouvelle DI
+
+NoTechRepresentativeAffected=Pas de technicien affecté

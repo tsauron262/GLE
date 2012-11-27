@@ -1,0 +1,40 @@
+1) left menu
+2) choix user => rights;
+3) liste prospect, ouverture de compte OK
+4) début compteur
+5) affichage pn par catégorie et total
+6) affichage tablo profil/prime
+7) gen XML => ajax
+8) Calcul Prime
+9) stock Payer et à payer avec date
+10) processus de commande, de réalisation et de facturation
+11) Validation PN (bascule payer / non payer)
+
+a tester : ajaxbox
+
+//index.php
+//TODO : Facture + Propale à droite :  trie et navigation dans les tableaux
+//TODO : Facture  :  Requete SQL
+//TODO : Planning des versements
+//TODO : Date embauche
+Details :
+/*
+ * 1) left menu
+2) choix user OK
+3) liste prospect, ouverture de compte OK
+
+//ouverture compte manque date OK
+//Liste client fk_user_creat => user create + datec => date creation + client => 0 = pas client pas prospect 1 = client 2 = prospect
+// contact effectué llx_c_stcomm
+4) début compteur // stocker dans la base dans une nouvelle table USELESS
+5) affichage pn par catégorie et total
+6) affichage tablo profil/prime OK
+7) gen XML => ajax
+8) Calcul Prime
+9) stocker Payer et à payer avec date
+10) processus de commande, de réalisation et de facturation OK
+11) Validation PN (bascule payer / non payer)
+12) Calcul des PN , ajoute prix achat ??? en oui :(
+13) lié commande fournisseur et commande client pour calcul PN
+14) donc calcul de la PN à faire pour chaque commande /fourn/commande/fiche.php à modifier + checker si prise de produit dans stocks
+15) gestion des insentives

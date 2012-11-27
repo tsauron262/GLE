@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="BabelNotification"
+ targetNamespace='urn:GLEInventory'
+ xmlns:tns='urn:GLEInventory'
+ xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/'
+ xmlns:xsd='http://www.w3.org/2001/XMLSchema'
+ xmlns:soapenc='http://schemas.xmlsoap.org/soap/encoding/'
+ xmlns:wsdl='http://schemas.xmlsoap.org/wsdl/'
+ xmlns='http://schemas.xmlsoap.org/wsdl/'>
+
+    <wsdl:message
+        name="getNotificationsRequest"
+    >
+        <wsdl:part
+            name="userId"
+            type="xsd:integer"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <wsdl:message
+        name="getNotificationsResponse"
+    >
+        <wsdl:part
+            name="output"
+            type="xsd:string"
+        >
+        </wsdl:part>
+    </wsdl:message>
+    <portType name="NotificationPortType">
+        <wsdl:operation name="getNotifications">
+            <wsdl:input message="tns:getNotificationsRequest">
+            </wsdl:input>
+            <wsdl:output message="tns:getNotificationsResponse">
+            </wsdl:output>
+        </wsdl:operation>
+    </portType>
+    <wsdl:binding
+        name="NotifBinding"
+        type="tns:NotificationPortType"
+    >
+        <soap:binding
+            style="rpc"
+            transport="http://schemas.xmlsoap.org/soap/http"
+        />
+        <wsdl:operation name="getNotifications">
+            <soap:operation
+                soapAction="urn:GLEInventory/getNotifications"
+            />
+            <wsdl:input>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLEInventory"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body
+                    use="encoded"
+                    namespace="urn:GLEInventory"
+                    encodingStyle="http://schemas.xmlsoap.org/soap/encoding/"
+                />
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <service
+        name="BabelNotification"
+    >
+        <wsdl:port
+            name="BabelPort"
+            binding="tns:NotifBinding"
+        >
+            <soap:address
+                location="http://127.0.0.1/GLE-1.2/main/htdocs/Babel_WS/ws_notifications.php" />
+        </wsdl:port>
+    </service>
+</definitions>

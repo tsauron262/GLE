@@ -1,0 +1,14 @@
+formInactif=Inactif
+formActif=Actif
+processInactif=Inactif
+processActif=Actif
+processName=Nom du process
+processDescription=Description
+Unknown=Inconnu
+PDFModules=Modèles de PDF
+PDFPholosDescription=Modèle PDF de base
+processDetBrouillon=Brouillon
+processDetValiderPartiel=Valider Partiel
+processDetValider=Validé
+processDetAskValid=Demande de validation
+processDetReviser=Réviser

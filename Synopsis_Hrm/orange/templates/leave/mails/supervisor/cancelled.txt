@@ -1,0 +1,12 @@
+Bonjour,
+
+#subordinate a annulé la demande de congé suivante:
+
+Date(s)    Type     Durée (heures)    Commentaire
+#{#date    #type        #duration        #comments}
+
+En tant que supérieur hiérarchique de #subordinate, vous êtes prévenu de cette annulation.
+
+Merci,
+
+GLE - HRM

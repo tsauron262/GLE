@@ -1,0 +1,11 @@
+Bonjour #subordinate,
+
+Vous êtes informé par ce message que le congé demandé est maintenant approuvé par votre superviseur :
+
+
+Date(s)    Type     Durée (heures)    Commentaire
+#{#date    #type        #duration        #comments}
+
+Merci,
+
+GLE - HRM

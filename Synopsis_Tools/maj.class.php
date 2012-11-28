@@ -27,6 +27,7 @@ class maj {
             
             $i = $i+2;
         }
+        $this->infoL("Succes !!!!!!");
     }
     
     private function erreurL($text){

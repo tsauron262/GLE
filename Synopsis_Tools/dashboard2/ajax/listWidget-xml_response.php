@@ -26,16 +26,16 @@ $disableArr = array();
 
 $userid = $_REQUEST['userid'];
 $type = $_REQUEST['type'];
-$requete = "SELECT llx_Synopsis_dashboard_widget.id,
-                        llx_Synopsis_dashboard_widget.nom,
-                        llx_Synopsis_dashboard_widget.module
-                   FROM llx_Synopsis_dashboard_module,
-                        llx_Synopsis_dashboard_widget
-                  WHERE llx_Synopsis_dashboard_widget.id = llx_Synopsis_dashboard_module.module_refid";
+$requete = "SELECT llx_Synopsis_Dashboard_widget.id,
+                        llx_Synopsis_Dashboard_widget.nom,
+                        llx_Synopsis_Dashboard_widget.module
+                   FROM llx_Synopsis_Dashboard_module,
+                        llx_Synopsis_Dashboard_widget
+                  WHERE llx_Synopsis_Dashboard_widget.id = llx_Synopsis_Dashboard_module.module_refid";
 if ($type != 0)
     $requete .= " AND type_refid = '" . $type . "'";
-$requete .= " AND llx_Synopsis_dashboard_widget.active = 1
-               ORDER BY llx_Synopsis_dashboard_widget.nom ";
+$requete .= " AND llx_Synopsis_Dashboard_widget.active = 1
+               ORDER BY llx_Synopsis_Dashboard_widget.nom ";
 $sql = $db->query($requete);
 $arr = array();
 while ($res = $db->fetch_object($sql)) {
@@ -47,12 +47,12 @@ while ($res = $db->fetch_object($sql)) {
 $requete = "";
 if ($userid > 0) {
     $requete = "SELECT params
-                       FROM llx_Synopsis_dashboard
+                       FROM llx_Synopsis_Dashboard
                       WHERE dash_type_refid = '" . $type . "'
                         AND user_refid =" . $userid;
 } else {
     $requete = "SELECT params
-                       FROM llx_Synopsis_dashboard
+                       FROM llx_Synopsis_Dashboard
                       WHERE dash_type_refid = '" . $type . "'
                         AND user_refid is null";
 }

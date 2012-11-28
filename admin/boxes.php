@@ -36,7 +36,7 @@ $action = GETPOST('action');
 
 // Definition des positions possibles pour les boites
 $pos_array = array(0);                             // Positions possibles pour une boite (0,1,2,...)
-$pos_name = array(0=>$langs->trans("Home"));       // Nom des positions 0=Homepage, 1=...
+$pos_name = array(0=>$langs->trans("Home"), 1=>$langs->trans("Fiche Inter"));       // Nom des positions 0=Homepage, 1=...
 $boxes = array();
 
 

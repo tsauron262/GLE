@@ -50,7 +50,7 @@ require_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
 
 $action=GETPOST('action','alpha');
 $original_file=GETPOST("file");
-$original_file = str_replace("capsim", "capsim2", $original_file);
+$original_file = str_replace("capsim.png", "capsim.gif", $original_file);
 $modulepart=GETPOST('modulepart','alpha');
 //die($modulepart."|");
 $urlsource=GETPOST("urlsource");

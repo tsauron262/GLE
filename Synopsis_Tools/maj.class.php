@@ -14,6 +14,7 @@ class maj {
     function maj($dbS, $dbD) {
         $this->dbS = $dbS;
         $this->dbD = $dbD;
+        $this->timeDeb = microtime(true);
     }
     
     public function rectifId($tabId){
@@ -32,7 +33,7 @@ class maj {
     
     private function erreurL($text){
         $this->erreur++;
-        $text = "<br/>".$this->getTime()." s | Erreur : ".$text."<br/>";
+        $text = "<br/>".$this->getTime()." | Erreur : ".$text."<br/>";
         if($this->erreur > $this->maxErreur)
             die($text . "<br/><br/><br/>Max erreur !!!!!");
         else
@@ -40,11 +41,10 @@ class maj {
     }
     
     private function infoL($text){
-        echo "<br/>".$this->getTime()." s | Info : ".$text."<br/>";
+        echo "<br/>".$this->getTime()." | Info : ".$text."<br/>";
     }
 
     public function startMAj($tab) {
-        $this->timeDeb = microtime(true);
         $this->netoyerTables($tab);
 
         $requete = "ALTER TABLE llx_commande DROP FOREIGN KEY fk_commande_fk_projet ,
@@ -243,7 +243,7 @@ class maj {
     }
 
     private function getTime() {
-        return ((microtime(true) - $this->timeDeb)) . "sec.";
+        return number_format((microtime(true) - $this->timeDeb), 2, ',', ' ') . " sec.";
     }
 
 }

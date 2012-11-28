@@ -15,6 +15,32 @@ class maj {
         $this->dbS = $dbS;
         $this->dbD = $dbD;
     }
+    
+    public function rectifId($tabId){
+        $i = 0;
+        while($i+1<count($tabId)){
+            $requete = "UPDATE llx_synopsis_chrono_value SET chrono_refid=".$tabId[$i+1]." WHERE rowid = ".$tabId[$i];
+            $result = $this->queryD($requete);
+            if(!$result){
+                $this->erreurL("Impossible de modifier l'id . Requete : ".$requete);
+            }
+            
+            $i = $i+2;
+        }
+    }
+    
+    private function erreurL($text){
+        $this->erreur++;
+        $text = "<br/>".$this->getTime()." s | Erreur : ".$text."<br/>";
+        if($this->erreur > $this->maxErreur)
+            die($text . "<br/><br/><br/>Max erreur !!!!!");
+        else
+            echo($text);
+    }
+    
+    private function infoL($text){
+        echo "<br/>".$this->getTime()." s | Info : ".$text."<br/>";
+    }
 
     public function startMAj($tab) {
         $this->timeDeb = microtime(true);
@@ -47,7 +73,7 @@ class maj {
             $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1]);
         }
 
-        echo "Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! en " . $this->getTime();
+        $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
     private function netoyeDet($table, $table2 = null, $prefTab = null) {
@@ -74,9 +100,9 @@ class maj {
         $requete = "INSERT into llx_usergroup_rights (fk_usergroup, fk_id) VALUES " . implode(",", $tabVal) . ";";
         $result = $this->queryD($requete);
         if ($result)
-            echo "Droit ajouté.";
+            $this->infoL("Droit ajouté.");
         else
-            echo "Erreur ajout de droit";
+            $this->erreurL("Erreur ajout de droit");
     }
 
     private function queryD($query) {
@@ -98,7 +124,6 @@ class maj {
         $data = $this->queryS($requete);
         $i = 0;
         $tabIns = array();
-//        echo "<br/><br/>".$requete;
         while ($ligne = $this->dbS->fetch_array($data)) {
             if (!isset($destCol[0]))
                 foreach ($ligne as $cle => $val)
@@ -176,7 +201,7 @@ class maj {
         }
         if (isset($tabIns[0]))
             $this->envoyerDonnee($tableDest, $destCol, $tabIns);
-        echo "<br/>" . $i . " lignes importées de la table " . $tableSrc . " vers la table " . $tableDest . ".<br/>";
+        $this->infoL($i . " lignes importées de la table " . $tableSrc . " vers la table " . $tableDest);
     }
 
     private function netoyerTables($tab) {
@@ -196,9 +221,9 @@ class maj {
             $requete = "DELETE FROM " . $ligne[1] . " WHERE " . $where;
             $result = $this->queryD($requete);
             if (!$result)
-                die("<br/><br/>Temp execution avant erreur : " . $this->getTime() . "<br/> Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+                $this->erreur("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
             else
-                echo "<br/>Donnees de la table " . $ligne[1] . " supprimees.<br/>";
+                $this->infoL ("Donnees de la table " . $ligne[1] . " supprimees.");
         }
     }
 
@@ -211,14 +236,8 @@ class maj {
             if (!$rechercheErreur)//On re essaye ligne par ligne pour voir le probléme
                 foreach ($tabIns as $ligne)
                     $this->envoyerDonnee($tableDest, $destCol, array($ligne), true);
-            else{
-                $message = "<br/><br/>Erreur Time : " . $this->getTime() . "<br/><br/>Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete;
-                $this->erreur++;
-                if($this->erreur > $this->maxErreur)
-                    die($message."<br/><br/>Max erreur!!!");
-                else
-                    echo $message;
-            }
+            else
+                $this->erreurl("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
         }
     }
 

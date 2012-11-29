@@ -1,8 +1,7 @@
 <?php
 /* Copyright (C) 2002-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2005 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
- * Copyright (C) 2011-2012 Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2005-2007 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,34 +14,62 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
+  * GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Version 1.1
+  * Create on : 4-1-2009
+  *
+  * Infos on http://www.synopsis-erp.com
+  *
+  */
+/*
+ *
+ * $Id: apercu.php,v 1.5 2008/01/29 19:03:36 eldy Exp $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/fichinter/apercu.php,v $
  */
 
 /**
- * 		\file		htdocs/fichinter/apercu.php
- * 		\ingroup	fichinter
- * 		\brief		Page de l'onglet apercu d'une fiche d'intervention
- */
+        \file        htdocs/fichinter/apercu.php
+        \ingroup    fichinter
+        \brief        Page de l'onglet apercu d'une fiche d'intervention
+        \version    $Revision: 1.5 $
+*/
 
-require("../main.inc.php");
+require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/fichinter.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
-require_once(DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php');
-if ($conf->projet->enabled)	require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
+
+if (!$user->rights->synopsisficheinter->lire)
+    accessforbidden();
 
 $langs->load('interventions');
 
+require_once(DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php');
 
-// Security check
-$socid=0;
-$id = GETPOST('id','int');
-$ref = GETPOST('ref','alpha');
-if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'ficheinter', $id, 'fichinter');
+if ($conf->projet->enabled)
+{
+    require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
+}
+
+
+/*
+ * Securite acces client
+*/
+if ($user->societe_id > 0)
+{
+    $action = '';
+    $socid = $user->societe_id;
+}
 
 llxHeader();
 
-$form = new Form($db);
+$html = new Form($db);
 
 /* *************************************************************************** */
 /*                                                                             */
@@ -50,141 +77,175 @@ $form = new Form($db);
 /*                                                                             */
 /* *************************************************************************** */
 
-if ($id > 0 || ! empty($ref))
-{
-	$object = new Fichinter($db);
+if ($_GET["id"] > 0) {
+    $fichinter = new Fichinter($db);
 
-	if ($object->fetch($id,$ref) > 0)
-	{
-		$soc = new Societe($db);
-		$soc->fetch($object->socid);
+    if ( $fichinter->fetch($_GET["id"], $user->societe_id) > 0)
+        {
+        $soc = new Societe($db, $fichinter->socid);
+        $soc->fetch($fichinter->socid);
 
-		$head = fichinter_prepare_head($object);
-		dol_fiche_head($head, 'preview', $langs->trans("InterventionCard"), 0, 'intervention');
 
-		/*
-		 *   Fiche intervention
-		 */
-		print '<table class="border" width="100%">';
+        $head = Synopsis_fichinter_prepare_head($fichinter);
+    dol_fiche_head($head, 'preview', $langs->trans("InterventionCard"));
 
-		// Ref
-		print '<tr><td width="18%">'.$langs->trans("Ref")."</td>";
-		print '<td colspan="2">'.$object->ref.'</td>';
 
-		$nbrow=4;
-		print '<td rowspan="'.$nbrow.'" valign="top" width="50%">';
+        /*
+        *   Fiche intervention
+        */
+        $sql = 'SELECT s.nom, s.rowid, fi.fk_projet, fi.ref, fi.description, fi.fk_statut, fi.datei as di,';
+        $sql.= ' fi.fk_user_author, fi.fk_user_valid, fi.datec, fi.date_valid';
+        $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'Synopsis_fichinter as fi';
+        $sql.= ' WHERE fi.fk_soc = s.rowid';
+        $sql.= ' AND fi.rowid = '.$fichinter->id;
+        if ($socid) $sql .= ' AND s.rowid = '.$socid;
 
-		/*
-		 * Documents
-		 */
-		$objectref = dol_sanitizeFileName($object->ref);
-		$dir_output = $conf->ficheinter->dir_output . "/";
-		$filepath = $dir_output . $objectref . "/";
-		$file = $filepath . $objectref . ".pdf";
-		$filedetail = $filepath . $objectref . "-detail.pdf";
-		$relativepath = "${objectref}/${objectref}.pdf";
-		$relativepathdetail = "${objectref}/${objectref}-detail.pdf";
+        $result = $db->query($sql);
 
-		// Chemin vers png apercus
-		$fileimage = $file.".png";          // Si PDF d'1 page
-		$fileimagebis = $file."-0.png";     // Si PDF de plus d'1 page
+        if ($result)
+        {
+            if ($db->num_rows($result))
+            {
+                $obj = $db->fetch_object($result);
 
-		$var=true;
+                $societe = new Societe($db);
+                $societe->fetch($obj->rowid);
 
-		// Si fichier PDF existe
-		if (file_exists($file))
-		{
-			$encfile = urlencode($file);
-			print_titre($langs->trans("Documents"));
-			print '<table class="border" width="100%">';
+                print '<table class="border" width="100%">';
 
-			print "<tr $bc[$var]><td>".$langs->trans("Intervention")." PDF</td>";
+                //  Ref
+                print '<tr><td width="18%" class="ui-widget-header ui-state-default">'.$langs->trans("Ref")."</td>";
+                print '<td colspan="2" class="ui-widget-content">'.$fichinter->ref.'</td>';
 
-			print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=ficheinter&file='.urlencode($relativepath).'">'.$object->ref.'.pdf</a></td>';
-			print '<td align="right">'.dol_print_size(dol_filesize($file)).'</td>';
-			print '<td align="right">'.dol_print_date(dol_filemtime($file),'dayhour').'</td>';
-			print '</tr>';
+                $nbrow=4;
+                print '<td  class="ui-widget-content" rowspan="'.$nbrow.'" valign="top" width="50%">';
 
-			// Si fichier detail PDF existe
-			if (file_exists($filedetail))
-			{
-				print "<tr $bc[$var]><td>Fiche d'intervention detaillee</td>";
+                /*
+            * Documents
+                */
+                $fichinterref = sanitize_string($fichinter->ref);
+                $dir_output = $conf->fichinter->dir_output . "/";
+                $filepath = $dir_output . $fichinterref . "/";
+                $file = $filepath . $fichinterref . ".pdf";
+                $filedetail = $filepath . $fichinterref . "-detail.pdf";
+                $relativepath = "${fichinterref}/${fichinterref}.pdf";
+                $relativepathdetail = "${fichinterref}/${fichinterref}-detail.pdf";
 
-				print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=ficheinter&file='.urlencode($relativepathdetail).'">'.$object->ref.'-detail.pdf</a></td>';
-				print '<td align="right">'.dol_print_size(dol_filesize($filedetail)).'</td>';
-				print '<td align="right">'.dol_print_date(dol_filemtime($filedetail),'dayhour').'</td>';
-				print '</tr>';
-			}
-			print "</table>\n";
+        // Chemin vers png apercus
+                $relativepathimage = "${fichinterref}/${fichinterref}.pdf.png";
+                $fileimage = $file.".png";          // Si PDF d'1 page
+                $fileimagebis = $file.".png.0";     // Si PDF de plus d'1 page
 
-			// Conversion du PDF en image png si fichier png non existant
-			if (! file_exists($fileimage) && ! file_exists($fileimagebis))
-			{
-				if (class_exists("Imagick"))
-				{
-					$ret = dol_convert_file($file);
-					if ($ret < 0) $error++;
-				}
-				else
-				{
-					$langs->load("errors");
-					print '<font class="error">'.$langs->trans("ErrorNoImagickReadimage").'</font>';
-				}
-			}
-		}
+                $var=true;
 
-		print "</td></tr>";
+                // Si fichier PDF existe
+                if (file_exists($file))
+                {
+                    $encfile = urlencode($file);
+                    print_titre($langs->trans("Documents"));
+                    print '<table class="border" width="100%">';
 
-		// Client
-		print "<tr><td>".$langs->trans("Customer")."</td>";
-		print '<td colspan="2">';
-		print '<a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$soc->id.'">'.$soc->nom.'</a>';
-		print '</td>';
-		print '</tr>';
+                    print "<tr $bc[$var]><td>".$langs->trans("Intervention")." PDF</td>";
 
-		// Statut
-		print '<tr><td>'.$langs->trans("Status").'</td>';
-		print "<td colspan=\"2\">".$object->getLibStatut(4)."</td>\n";
-		print '</tr>';
+                    print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=ficheinter&file='.urlencode($relativepath).'">'.$fichinter->ref.'.pdf</a></td>';
+                    print '<td align="right">'.filesize($file). ' bytes</td>';
+                    print '<td align="right">'.dol_print_date(filemtime($file),'dayhour').'</td>';
+                    print '</tr>';
 
-		// Date
-		print '<tr><td>'.$langs->trans("Date").'</td>';
-		print "<td colspan=\"2\">".dol_print_date($object->date,"daytext")."</td>\n";
-		print '</tr>';
+                    // Si fichier detail PDF existe
+                    if (file_exists($filedetail)) { // fichinter detaillee supplementaire
+                        print "<tr $bc[$var]><td>Fiche d'intervention d&eacute;taill&eacute;e</td>";
 
-		print '</table>';
-	}
-	else
-	{
-		// Object not found
-		print $langs->trans("ErrorFichinterNotFound",$id);
-	}
+                        print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=ficheinter&file='.urlencode($relativepathdetail).'">'.$fichinter->ref.'-detail.pdf</a></td>';
+                        print '<td align="right">'.filesize($filedetail). ' bytes</td>';
+                        print '<td align="right">'.dol_print_date(filemtime($filedetail),'dayhour').'</td>';
+                        print '</tr>';
+                    }
+                    print "</table>\n";
+
+                    // Conversion du PDF en image png si fichier png non existant
+                    if (! file_exists($fileimage) && ! file_exists($fileimagebis))
+                    {
+                        /* Create the Imagick object */
+                        $im = new Imagick();
+
+                        /* Read the image file */
+                        $im->readImage(  $file );
+
+                        /* Thumbnail the image ( width 100, preserve dimensions ) */
+                        $im->thumbnailImage( 400, null );
+
+                        /* Write the thumbail to disk */
+                         $im->writeImage( $file .".png" );
+
+                         /* Free resources associated to the Imagick object */
+                         $im->destroy();
+
+                    }
+                }
+
+                print "</td></tr>";
+
+
+                // Client
+                print "<tr><td class='ui-widget-header ui-state-default'>".$langs->trans("Customer")."</td>";
+                print '<td colspan="2" class="ui-widget-content">';
+                print '<a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$societe->id.'">'.$societe->nom.'</a>';
+                print '</td>';
+                print '</tr>';
+
+                // Statut
+                print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("Status").'</td>';
+                print "<td  class=\"ui-widget-content\" colspan=\"2\">".$fichinter->getLibStatut(4)."</td>\n";
+                print '</tr>';
+
+                // Date
+                print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("Date").'</td>';
+                print "<td  class=\"ui-widget-content\" colspan=\"2\">".dol_print_date($fichinter->date,"day")."</td>\n";
+                print '</tr>';
+
+                print '</table>';
+            }
+        } else {
+            dol_print_error($db);
+        }
+    } else {
+    // Intervention non trouvee
+    print $langs->trans("ErrorFichinterNotFound",$_GET["id"]);
+    }
 }
 
 // Si fichier png PDF d'1 page trouve
 if (file_exists($fileimage))
-{
-	print '<img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercufichinter&file='.urlencode($relativepathimage).'">';
-}
+    {
+    print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercufichinter&file='.urlencode($relativepathimage).'"></center>';
+    }
 // Si fichier png PDF de plus d'1 page trouve
 elseif (file_exists($fileimagebis))
-{
-	$multiple = $relativepath . "-";
+    {
+        $multiple = $relativepathimage . ".";
 
-	for ($i = 0; $i < 20; $i++)
-	{
-		$preview = $multiple.$i.'.png';
+        for ($i = 0; $i < 20; $i++)
+        {
+            $preview = $multiple.$i;
 
-		if (file_exists($dir_output.$preview))
-		{
-			print '<img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercufichinter&file='.urlencode($preview).'"><p>';
-		}
-	}
-}
+            if (file_exists($dir_output.$preview))
+      {
+        print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercufichinter&file='.urlencode($preview).'"><p></center>';
+      }
+        }
+    }
+
 
 print '</div>';
 
+
+// Juste pour eviter bug IE qui reorganise mal div precedents si celui-ci absent
+print '<div class="tabsAction">';
+print '</div>';
+
+
 $db->close();
 
-llxFooter();
+llxFooter('$Date: 2008/01/29 19:03:36 $ - $Revision: 1.5 $');
 ?>

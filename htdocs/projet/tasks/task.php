@@ -1,7 +1,6 @@
 <?php
-/* Copyright (C) 2005		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
- * Copyright (C) 2006-2012	Laurent Destailleur		<eldy@users.sourceforge.net>
- * Copyright (C) 2010-2012	Regis Houssin			<regis@dolibarr.fr>
+/* Copyright (C) 2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
+ * Copyright (C) 2006 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,387 +13,487 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ *
+ * $Id: task.php,v 1.6 2007/05/28 11:51:00 hregis Exp $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/projet/tasks/task.php,v $
  */
-
+/*
+  ** GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Version 1.0
+  * Create on : 4-1-2009
+  *
+  * Infos on http://www.finapro.fr
+  *
+  */
 /**
- *	\file       htdocs/projet/tasks/task.php
- *	\ingroup    project
- *	\brief      Page of a project task
- */
+   \file       htdocs/projet/tasks/task.php
+   \ingroup    projet
+   \brief      Fiche taches d'un projet
+   \version    $Revision: 1.6 $
+*/
 
-require ("../../main.inc.php");
+require("./pre.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsis_project.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
-require_once(DOL_DOCUMENT_ROOT."/projet/class/task.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
 
-$id=GETPOST('id','int');
-$ref=GETPOST('ref','alpha');
-$action=GETPOST('action','alpha');
-$confirm=GETPOST('confirm','alpha');
-$withproject=GETPOST('withproject','int');
-$project_ref=GETPOST('project_ref','alpha');
+if (!$user->rights->synopsisprojet->lire) accessforbidden();
+
+
 
 // Security check
-$socid=0;
-if ($user->societe_id > 0) $socid = $user->societe_id;
-if (! $user->rights->projet->lire) accessforbidden();
-
-$object = new Task($db);
-$projectstatic = new Project($db);
+if ($user->societe_id) $socid=$user->societe_id;
+$result = restrictedArea($user, 'synopsisprojet', $projetid);
 
 
-/*
- * Actions
- */
-
-if ($action == 'update' && ! $_POST["cancel"] && $user->rights->projet->creer)
+if($_REQUEST['action'] == "modtask")
 {
-	$error=0;
+        $taskId=$_REQUEST['id'];
+        $name = addslashes($_REQUEST['label']);
+        $parentId = $_REQUEST['parent'];
+        $dur=$_REQUEST['dur'] * 3600;
+        if ($parentId <0) $parentId ="";
+        $note = addslashes($_REQUEST['note']);
+        $statut = addslashes($_REQUEST['statut']);
+        $progress = $_REQUEST['slidercomplet'];
+        $progress = floatval($progress);
+        $progress = preg_replace("/[,]/",".",$progress);
+        $description = addslashes($_REQUEST['description']);
+        $shortDescription = addslashes($_REQUEST['shortDesc']);
+        $url =addslashes($_REQUEST['url']);
+        if (! preg_match('/^[http:\/\/]/',$url))
+        {
+            $url = 'http://'.$url;
+        }
+        $fk_task_type = $_REQUEST['type'];
 
-	if (empty($_POST["label"]))
-	{
-		$error++;
-		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
-	}
-	if (! $error)
-	{
-		$object->fetch($id);
+        $datedeb = $_REQUEST['dateDeb'];
+        $debdateUS="";
+        $debts="0";
+        $finddateUS="";
+        $fints="0";
+        if (preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/",$datedeb,$arr))
+        {
+            $debdateUS = $arr[3]."-".$arr[2]."-".$arr[1]." ".$arr[4].":".$arr[5];
+            $debts = strtotime($arr[3]."-".$arr[2]."-".$arr[1]);
+            $debts += $arr[5]*60 + $arr[4] * 3600;
+        }
 
-		$tmparray=explode('_',$_POST['task_parent']);
-		$task_parent=$tmparray[1];
-		if (empty($task_parent)) $task_parent = 0;	// If task_parent is ''
+        $level = 1;
+        //Get parent Level
+        if ($parentId . "x" != "x")
+        {
+            $requete = "SELECT level FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE rowid = ".$parentId;
+            $sql = $db->query($requete);
+            $res = $db->fetch_object($sql);
+            $level = $res->level + 1;
 
-		$object->label = $_POST["label"];
-		$object->description = $_POST['description'];
-		$object->fk_task_parent = $task_parent;
-		$object->date_start = dol_mktime(12,0,0,$_POST['dateomonth'],$_POST['dateoday'],$_POST['dateoyear']);
-		$object->date_end = dol_mktime(12,0,0,$_POST['dateemonth'],$_POST['dateeday'],$_POST['dateeyear']);
-		$object->progress = $_POST['progress'];
+        }
 
-		$result=$object->update($user);
-	}
-	else
-	{
-		$action='edit';
-	}
+
+
+        $db->begin();
+
+        if ($parentId . 'x' == 'x')
+        {
+            $parentId = "NULL";
+        }
+
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_projet_task
+                       SET fk_task_parent = $parentId,
+                           title = '$name',
+                           duration = $dur,
+                           statut = '$statut',
+                           
+                           note = '$note',
+                           progress = $progress,
+                           description = '$description',
+                           shortDesc = '$shortDescription',
+                           url = '$url',
+                           fk_task_type = $fk_task_type,
+                           level = $level
+                     WHERE rowid = ".$taskId;
+                     //dateDeb = '$debdateUS',
+        $sql = $db->query($requete);
+        if ($sql)
+        {
+            //ressource et role et dependance
+
+                $db->commit();
+
+                require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
+                $taskObj = new ProjectTask($db);
+                $taskObj->fetch($taskId);
+                //appel triggers
+                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                $interface=new Interfaces($db);
+                global $user;
+                $result=$interface->run_triggers('PROJECT_UPDATE_TASK',$taskObj,$user,$langs,$conf);
+                if ($result < 0) { $error++; $errors=$interface->errors; }
+                 //Fin appel triggers
+
+        } else {
+            $xml = "<response>Error</response>";
+            $xml .= "<requete>".$requete."</requete>";
+            $xml .= "<error>".$db->lastqueryerror."</error>";
+            $xml .= "<error>".$db->lasterror."</error>";
+            $xml .= "<error>".print_r($db,true)."</error>";
+            $db->rollback();
+        }
 }
 
-if ($action == 'confirm_delete' && $confirm == "yes" && $user->rights->projet->supprimer)
-{
-	if ($object->fetch($id) >= 0 )
-	{
-		$result=$projectstatic->fetch($object->fk_projet);
-		if (! empty($projectstatic->socid))
-		{
-			$projectstatic->societe->fetch($projectstatic->socid);
-		}
+$jspath = DOL_URL_ROOT."/Synopsis_Common/jquery";
+$jqueryuipath = DOL_URL_ROOT."/Synopsis_Common/jquery/ui";
+$css = DOL_URL_ROOT."/Synopsis_Common/css";
+$imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
 
-		if ($object->delete($user) > 0)
-		{
-			Header("Location: index.php");
-			exit;
-		}
-		else
-		{
-			$langs->load("errors");
-			$mesg='<div class="error">'.$langs->trans($object->error).'</div>';
-			$action='';
-		}
-	}
+$js =<<<EOF
+<script>
+var Complet = 0;
+    jQuery(document).ready(function(){
+        jQuery('.datepicker').datepicker();
+        jQuery("#progressBar").progressbar({ value: Complet });
+        jQuery('#accordion').accordion({navigation: true});
+        jQuery('#slider').slider({
+            animate: true,
+            range: 'min',
+            max: 100,
+            min: 0,
+            step: 1,
+            tooltips: function(t){ return (Math.round(t*100)/100 + " %") },
+            change: function(event, ui){
+                jQuery('#slidercomplet').val(ui.value);
+            },
+            slide: function(event, ui)
+            {
+            },
+            values: 0
+        });
+
+    });
+</script>
+<style type='text/css'>.ui-progressbar{ height: 13px; background-color: #ffffff; margin: 0px;}</style>
+<style type='text/css'>.ui-progressbar-value{ border:1px solid #000000; }</style>
+<style>#ui-datepicker-div, #ui-timepicker-div { z-Index: 99999999; }</style>
+
+EOF;
+$js .= ' <script src="'.$jqueryuipath.'/ui.slider.js" type="text/javascript"></script>';
+
+
+llxHeader($js,$langs->trans("Task"));
+
+if ($_REQUEST["id"] > 0)
+{
+
+  /*
+   * Fiche projet en mode visu
+   *
+   */
+    $task = new ProjectTask($db);
+    if ($task->fetch($_REQUEST["id"]) > 0 )
+    {
+        $projet = new Project($db);
+        $projet->fetch($task->projet_id);
+        $projet->societe->fetch($projet->societe->id);
+
+        $h=0;
+        $head = array();
+        $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/task.php?id='.$task->id;
+        $head[$h][1] = $langs->trans("Tasks");
+        $head[$h][2] = 'tasks';
+        $h++;
+
+        dol_fiche_head($head, 'tasks', $langs->trans("Tasks"));
+
+        if ($_REQUEST['action'] == 'modify')
+        {
+            print '<form method="POST" action="task.php?id='.$task->id.'">';
+            print '<input type="hidden" name="action" value="modtask">';
+            print '<table width="100%" cellpadding=15>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Ref").'</th><td class="ui-widget-content">'.$projet->ref.'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Label").'</th><td class="ui-widget-content">'.$projet->getNomUrl(1).'</td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Task").'</th><td class="ui-widget-content" colspan="1"><input name="label" value="'.$task->title.'"></td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Company").'</th><td class="ui-widget-content">'.$projet->societe->getNomUrl(1).'</td></tr>';
+            $requete = "SELECT *
+                          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+                         WHERE fk_projet = " .$_REQUEST['id'];
+            $sql = $db->query($requete);
+            $optDependStr = "";
+            $optGrpStr = "";
+            while ($res = $db->fetch_object($sql))
+            {
+                $optDependStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
+                //si c'est un group
+                if ($res->fk_task_type == 3 && $res->rowid == $task->fk_task_parent)
+                {
+                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
+                } else if ($res->fk_task_type == 3){
+                    $optGrpStr .= "<option value='".$res->rowid."'>".$res->title."</option>";
+                }
+            }
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Parent").'</th><td class="ui-widget-content" colspan="1">';
+            print '         <SELECT id="parent"  name="parent">';
+            print '             <option value="-2">S&eacute;lection-></option>';
+            if (!$res->fk_task_parent > 0)
+                print '             <option SELECTED value="-1">Racine du projet</option>';
+            else
+                print '             <option value="-1">Racine du projet</option>';
+
+            print  $optGrpStr;
+            print '         </SELECT>';
+            print '</td>';
+
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Type de t&acirc;che").'</th><td class="ui-widget-content" colspan="1">';
+            print '        <SELECT id="type"  name="type">';
+            if ($res->fk_task_type == 1)
+                print '          <option SELECTED value="1">Etape</option>';
+            else
+                print '          <option value="1">Etape</option>';
+            if ($res->fk_task_type == 2)
+                print '          <option SELECTED value="2">T&acirc;che</option>';
+            else
+                print '          <option value="2">T&acirc;che</option>';
+            if ($res->fk_task_type == 3)
+                print '          <option SELECTED value="3">Groupe</option>';
+            else
+                print '          <option value="3">Groupe</option>';
+            print '        </SELECT>';
+
+            print '</td></tr>';
+
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateDebFRFull.'</td>';
+            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            $sql = $db->query($requete);
+            $res = $db->fetch_object($sql);
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$res->task_date.'</td>';
+            $totCompute = 0;
+            $requete ="SELECT SUM(task_duration) / 36 as dur FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            $sql = $db->query($requete);
+            $res = $db->fetch_object($sql);
+            $totCompute = round($res->dur)/100;
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale (h)").'</th><td class="ui-widget-content" colspan="1"><input name="dur" id="dur" value="'.round($task->duration*100/3600) /100 .'">&nbsp;<span onClick="jQuery(\'input#dur\').val('.$totCompute.');" title="Reajuster selon les attributions" style="cursor: pointer; display:inline-block;" class="ui-icon ui-icon-refresh"></span></td>';
+			print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration).'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Eff. totale (h)").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration_effective).'</td>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Statut").'</th><td class="ui-widget-content" colspan="1">';
+            print '        <SELECT id="statut"  name="statut">';
+            if ($task->statut == 'open')
+            {
+                print '          <option SELECTED value="open">Ouvert</option>';
+                print '          <option value="close">Ferm&eacute;</option>';
+            } else {
+                print '          <option value="open">Ouvert</option>';
+                print '          <option SELECTED value="close">Ferm&eacute;</option>';
+            }
+            print '        </SELECT>';
+
+            print '</td>';
+
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Progression").'</th><td class="ui-widget-content" colspan="1">';
+            print '       <div id="slider" class="slider"></div>';
+            print '         <input type="hidden" id="slidercomplet" name="slidercomplet" value="'.$task->progress.'">';
+            print "<script>jQuery(document).ready(function(){ jQuery('#slider').slider('value',".$task->progress.") });</script>";
+$task->user_creat->fetch($task->user_creat->id);
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Description courte").'</th><td class="ui-widget-content" colspan="1"><input type="text" name="shortDesc" value="'.$task->shortDesc.'"></td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Cr&eacute;ateur").'</th><td class="ui-widget-content" colspan="1">'.$task->user_creat->getNomUrl(1).'</td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Note").'</th><td class="ui-widget-content" colspan="1"><textarea style="width:100%;" name="note">'.$task->note.'</textarea></td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("URL").'</th><td class="ui-widget-content" colspan="1"><input name="url" value="'.$task->url.'"></td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Description").'</th><td class="ui-widget-content" colspan="3"><textarea name="description" style="width:100%;">'.$task->description.'</textarea></td>';
+
+
+            if($projet->hasGantt == 1)
+                print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Couleur").'</th><td class="ui-widget-content" colspan="3"><input name="color" value="'.$task->color.'"></td></tr>';
+
+            print "</table>";
+            print "<div class='tabsAction'>";
+            print "    <button class='butAction' onClick='location.href=\"task.php?id=".$task->id."\"; return(false);'>Annuler</button>";
+            print "    <button class='butAction'>Modifier</button>";
+            print "</div>";
+            print "</form>";
+
+
+
+        } else {
+            print '<table width="100%" cellpadding=15>';
+
+            print '<tr><th width=20% class="ui-widget-header ui-state-default">'.$langs->trans("Ref").'</th><td width=30% class="ui-widget-content">'.$projet->ref.'</td>';
+            print '    <th width=20% class="ui-widget-header ui-state-default">'.$langs->trans("Label").'</th><td width=30% class="ui-widget-content">'.$projet->getNomUrl(1).'</td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Task").'</th><td class="ui-widget-content" colspan="1">'.$task->getNomUrl(1).'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Company").'</th><td class="ui-widget-content">'.$projet->societe->getNomUrl(1).'</td></tr>';
+
+            $parent = false;
+            if ($res->fk_task_parent > 0)
+            {
+                $parent = new ProjectTask($db);
+                $parent->fetch($res->fk_task_parent);
+            }
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Parent").'</th><td class="ui-widget-content" colspan="1">'.($parent?$parent->getNomUrl(1):"").'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Type t&acirc;che").'</th><td class="ui-widget-content" colspan="1">'.$langs->trans($task->task_type).'</td></tr>';
+
+            //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$task->dateDebFRFull.'</td>';
+            $requete ="SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time WHERE fk_task = ".$task->id;
+            $sql = $db->query($requete);
+            $res = $db->fetch_object($sql);
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Date d&eacute;but").'</th><td class="ui-widget-content" colspan="3">'.$res->task_date.'</td>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Pr&eacute;v totale").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration).'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Dur Eff. totale").'</th><td class="ui-widget-content" colspan="1">'.$projet->sec2hour($task->duration_effective).'</td>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Statut").'</th><td class="ui-widget-content" colspan="1">'.$task->statut.'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Progression").'</th><td class="ui-widget-content" colspan="1">';
+            print '       <div style="float: left; background-color: #FFFFFF; margin-left: 50%; margin-top: -1px; padding: 2px; padding-left: 5px; padding-right: 5px; opacity: 0.95; " class="ui-corner-all">'.$task->progress.'%</div>';
+            print '       <div id="progressBar"></div>';
+            print '<script>Complet="'.($task->progress>0?$task->progress:0).'";</script>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Description courte").'</th><td class="ui-widget-content" colspan="1">'.$task->shortDesc.'</td>';
+            $task->user_creat->fetch($task->user_creat->id);
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Cr&eacute;ateur").'</th><td class="ui-widget-content" colspan="1">'.$task->user_creat->getNomUrl(1).'</td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Note").'</th><td class="ui-widget-content" colspan="1">'.$task->note.'</td>';
+            print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("URL").'</th><td class="ui-widget-content" colspan="1">'.$task->url.'</td></tr>';
+
+            print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Description").'</th><td class="ui-widget-content" colspan="3">'.$task->description.'</td>';
+
+
+            if($projet->hasGantt == 1)
+                print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Couleur").'</th><td class="ui-widget-content" colspan="3"><div style="background-color: #'.$task->color.'; width:1em; height: 1em;"></td></tr>';
+
+
+
+          /* Liste des taches */
+
+            $sql = " SELECT t.task_date,
+                            sum(t.task_duration) as task_duration,
+                            t.fk_user
+                       FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as t, ".MAIN_DB_PREFIX."user as u
+                      WHERE t.fk_task =".$task->id. " AND u.rowid = t.fk_user
+                   GROUP BY t.task_date,  t.fk_user
+                   ORDER BY u.firstname ASC ,t.task_date ASC";
+
+            $sql1 = " SELECT t.task_date_effective,
+                             sum(t.task_duration_effective) as task_duration_effective,
+                             t.fk_user
+                        FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective as t, ".MAIN_DB_PREFIX."user as u
+                       WHERE t.fk_task =".$task->id. " AND u.rowid = t.fk_user
+                    GROUP BY t.task_date_effective,  t.fk_user
+                    ORDER BY u.firstname ASC , t.task_date_effective ASC";
+
+
+            $var=true;
+            $resql = $db->query($sql);
+            if ($resql)
+            {
+                $num = $db->num_rows($resql);
+                $tasks = array();
+                while ($res = $db->fetch_object($resql))
+                {
+                    $tmpUser = false;
+                    if ($res->fk_user > 0)
+                    {
+                        $tmpUser = new User($db);
+                        $tmpUser->id = $res->fk_user;
+                        $tmpUser->fetch();
+                    }
+                    $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date))] = array('date' => $res->task_date, 'dur' => $res->task_duration, 'user' => $tmpUser);
+                    $i++;
+                }
+                $db->free();
+            } else {
+                dol_print_error($db);
+            }
+            $resql = $db->query($sql1);
+            if ($resql)
+            {
+                $num = $db->num_rows($resql);
+                while ($res = $db->fetch_object($resql))
+                {
+                    $tmpUser = false;
+                    if ($res->fk_user > 0)
+                    {
+                        $tmpUser = new User($db);
+                        $tmpUser->id = $res->fk_user;
+                        $tmpUser->fetch();
+                    }
+                    if(is_array($tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]))
+                        $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))] = array('dateEff' => $res->task_date_effective,
+                                                                                 'durEff'  => $res->task_duration_effective,
+                                                                                 'date'    => $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]['date'],
+                                                                                 'dur'     => $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]['dur'],
+                                                                                 'user'    => $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]['user']);
+                    else
+                        $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))] = array('date'    => $res->task_date_effective,
+                                                                                 'dateEff' => $res->task_date_effective,
+                                                                                 'durEff'  => $res->task_duration_effective,
+                                                                                 'dur'     => 0,
+                                                                                 'user'    =>$tmpUser);
+                }
+                $db->free();
+            } else {
+                dol_print_error($db);
+            }
+            print '</table></form><br />';
+
+            print "<div class='tabsAction'>";
+            print "<button class='butAction' onClick='location.href=\"task.php?action=modify&id=".$_REQUEST['id']."\"'>Modifier</button>";
+            print "</div>";
+
+            print "<div id='accordion' style='width:60%;'>";
+
+
+            foreach ($tasks as $userid=>$tasks)
+            {
+                $remUser = false;
+                $remUser2 = false;
+                $tot = 0;
+                $totEff = 0;
+                $html = "";
+                ksort($tasks);
+                foreach($tasks as $date => $task_time)
+                {
+                    $html .= "<tr>";
+                    $html .= '<td class="ui-widget-content" align=center>'.dol_print_date($task_time['date'],'day').'</td>';
+                    $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["dur"]).'</td>';
+                    $tot += $task_time["dur"];
+                    $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["durEff"]).'</td>';
+                    $totEff += $task_time["durEff"];
+                    $task_time["user"]->fetch($task_time["user"]->id);
+                    $remUser = ($task_time["user"]->getNomUrl(1)?$task_time["user"]->getNomUrl(1):false);
+                    $remUser2 = ($task_time["user"]->fullname?$task_time["user"]->fullname:"");
+                    $html .= "</tr>\n";
+                }
+                print '<h3><a href="#">'.$remUser2.'</a></h3>';
+                print '<div>';
+                print '<table class="" cellpadding=10 width="100%">';
+                print "<tr><th colspan=4 class='ui-widget-header ui-state-hover'>".($remUser?$remUser:'NA');
+                print '<tr class="liste_titre"  style="padding:7px">';
+                print '<th style="padding:7px" class="ui-widget-header ui-state-default">'.$langs->trans("Date").'</td>';
+                print '<th style="padding:7px" class="ui-widget-header ui-state-default">'.$langs->trans("Duration").' Pr&eacute;vue</td>';
+                print '<th style="padding:7px" class="ui-widget-header ui-state-default">'.$langs->trans("DurationEffective").'</td>';
+                print "</tr>\n";
+                print $html;
+                print "<tr><th class='ui-widget-header ui-state-default'>Total";
+                print "    <td align=center class='ui-widget-content ui-priority-primary'>".$projet->sec2hour($tot);
+                print "    <td align=center class='ui-widget-content ui-priority-primary'>".$projet->sec2hour($totEff);
+                print "</table>";
+                print '</div>';
+            }
+            print '</div>';
+        }
+    }
 }
 
-// Retreive First Task ID of Project if withprojet is on to allow project prev next to work
-if (! empty($project_ref) && ! empty($withproject))
-{
-	if ($projectstatic->fetch('',$project_ref) > 0)
-	{
-		$tasksarray=$object->getTasksArray(0, 0, $projectstatic->id, $socid, 0);
-		if (count($tasksarray) > 0)
-		{
-			$id=$tasksarray[0]->id;
-		}
-		else
-		{
-			Header("Location: ".DOL_URL_ROOT.'/projet/tasks.php?id='.$projectstatic->id.(empty($mode)?'':'&mode='.$mode));
-		}
-	}
-}
-
-/*
- * View
- */
-
-llxHeader("",$langs->trans("Task"));
-
-$form = new Form($db);
-$formother = new FormOther($db);
-
-if ($id > 0 || ! empty($ref))
-{
-	if ($object->fetch($id) > 0)
-	{
-		$result=$projectstatic->fetch($object->fk_project);
-		if (! empty($projectstatic->socid)) $projectstatic->societe->fetch($projectstatic->socid);
-
-		$userWrite  = $projectstatic->restrictedProjectArea($user,'write');
-
-		if (! empty($withproject))
-		{
-    		// Tabs for project
-    		$tab='tasks';
-    		$head=project_prepare_head($projectstatic);
-    		dol_fiche_head($head, $tab, $langs->trans("Project"),0,($projectstatic->public?'projectpub':'project'));
-
-    		$param=($mode=='mine'?'&mode=mine':'');
-
-    		print '<table class="border" width="100%">';
-
-    		// Ref
-    		print '<tr><td width="30%">';
-    		print $langs->trans("Ref");
-    		print '</td><td>';
-    		// Define a complementary filter for search of next/prev ref.
-    		if (! $user->rights->projet->all->lire)
-    		{
-    		    $projectsListId = $projectstatic->getProjectsAuthorizedForUser($user,$mine,0);
-    		    $projectstatic->next_prev_filter=" rowid in (".(count($projectsListId)?join(',',array_keys($projectsListId)):'0').")";
-    		}
-    		print $form->showrefnav($projectstatic,'project_ref','',1,'ref','ref','',$param.'&withproject=1');
-    		print '</td></tr>';
-
-    		print '<tr><td>'.$langs->trans("Label").'</td><td>'.$projectstatic->title.'</td></tr>';
-
-    		print '<tr><td>'.$langs->trans("Company").'</td><td>';
-    		if (! empty($projectstatic->societe->id)) print $projectstatic->societe->getNomUrl(1);
-    		else print '&nbsp;';
-    		print '</td>';
-    		print '</tr>';
-
-    		// Visibility
-    		print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
-    		if ($projectstatic->public) print $langs->trans('SharedProject');
-    		else print $langs->trans('PrivateProject');
-    		print '</td></tr>';
-
-    		// Statut
-    		print '<tr><td>'.$langs->trans("Status").'</td><td>'.$projectstatic->getLibStatut(4).'</td></tr>';
-
-    		print '</table>';
-
-    		dol_fiche_end();
-
-		    print '<br>';
-		}
-
-		/*
-		* Actions
-		*/
-		/*print '<div class="tabsAction">';
-
-		if ($user->rights->projet->all->creer || $user->rights->projet->creer)
-		{
-		    if ($projectstatic->public || $userWrite > 0)
-		    {
-		        print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&action=create'.$param.'">'.$langs->trans('AddTask').'</a>';
-		    }
-		    else
-		    {
-		        print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('AddTask').'</a>';
-		    }
-		}
-		else
-		{
-		    print '<a class="butActionRefused" href="#" title="'.$langs->trans("NoPermission").'">'.$langs->trans('AddTask').'</a>';
-		}
-
-		print '</div>';
-		*/
-
-		// To verify role of users
-		//$userAccess = $projectstatic->restrictedProjectArea($user); // We allow task affected to user even if a not allowed project
-		//$arrayofuseridoftask=$object->getListContactId('internal');
-
-		dol_htmloutput_mesg($mesg);
-
-		$head=task_prepare_head($object);
-		dol_fiche_head($head, 'task_task', $langs->trans("Task"),0,'projecttask');
-
-		if ($action == 'edit' && $user->rights->projet->creer)
-		{
-			print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-			print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
-			print '<input type="hidden" name="action" value="update">';
-			print '<input type="hidden" name="withproject" value="'.$withproject.'">';
-			print '<input type="hidden" name="id" value="'.$object->id.'">';
-
-			print '<table class="border" width="100%">';
-
-			// Ref
-			print '<tr><td width="30%">'.$langs->trans("Ref").'</td>';
-			print '<td>'.$object->ref.'</td></tr>';
-
-			// Label
-			print '<tr><td>'.$langs->trans("Label").'</td>';
-			print '<td><input size="30" name="label" value="'.$object->label.'"></td></tr>';
-
-			// Project
-			if (empty($withproject))
-			{
-    			print '<tr><td>'.$langs->trans("Project").'</td><td colspan="3">';
-    			print $projectstatic->getNomUrl(1);
-    			print '</td></tr>';
-
-    			// Third party
-    			print '<td>'.$langs->trans("Company").'</td><td colspan="3">';
-    			if ($projectstatic->societe->id) print $projectstatic->societe->getNomUrl(1);
-    			else print '&nbsp;';
-    			print '</td></tr>';
-			}
-
-			// Task parent
-			print '<tr><td>'.$langs->trans("ChildOfTask").'</td><td>';
-			print $formother->selectProjectTasks($object->fk_task_parent,$projectstatic->id, 'task_parent', $user->admin?0:1, 0);
-			print '</td></tr>';
-
-			// Date start
-			print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
-			print $form->select_date($object->date_start,'dateo');
-			print '</td></tr>';
-
-			// Date end
-			print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
-			print $form->select_date($object->date_end?$object->date_end:-1,'datee');
-			print '</td></tr>';
-
-			// Progress
-			print '<tr><td>'.$langs->trans("Progress").'</td><td colspan="3">';
-			print $formother->select_percent($object->progress,'progress');
-			print '</td></tr>';
-
-			// Description
-			print '<tr><td valign="top">'.$langs->trans("Description").'</td>';
-			print '<td>';
-			print '<textarea name="description" wrap="soft" cols="80" rows="'.ROWS_3.'">'.$object->description.'</textarea>';
-			print '</td></tr>';
-
-			print '</table>';
-
-			print '<center><br>';
-			print '<input type="submit" class="button" name="update" value="'.$langs->trans("Modify").'"> &nbsp; ';
-			print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
-			print '<center>';
-
-			print '</form>';
-		}
-		else
-		{
-			/*
-			 * Fiche tache en mode visu
-			 */
-		    $param=($withproject?'&withproject=1':'');
-		    $linkback=$withproject?'<a href="'.DOL_URL_ROOT.'/projet/tasks.php?id='.$projectstatic->id.'">'.$langs->trans("BackToList").'</a>':'';
-
-			if ($action == 'delete')
-			{
-				$ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$_GET["id"].'&withproject='.$withproject,$langs->trans("DeleteATask"),$langs->trans("ConfirmDeleteATask"),"confirm_delete");
-				if ($ret == 'html') print '<br>';
-			}
-
-			print '<table class="border" width="100%">';
-
-			// Ref
-			print '<tr><td width="30%">';
-			print $langs->trans("Ref");
-			print '</td><td colspan="3">';
-			if (! GETPOST('withproject') || empty($projectstatic->id))
-			{
-			    $projectsListId = $projectstatic->getProjectsAuthorizedForUser($user,$mine,1);
-			    $object->next_prev_filter=" fk_projet in (".$projectsListId.")";
-			}
-			else $object->next_prev_filter=" fk_projet = ".$projectstatic->id;
-			print $form->showrefnav($object,'id',$linkback,1,'rowid','ref','',$param);
-			print '</td>';
-			print '</tr>';
-
-			// Label
-			print '<tr><td>'.$langs->trans("Label").'</td><td colspan="3">'.$object->label.'</td></tr>';
-
-			// Project
-			if (empty($withproject))
-			{
-    			print '<tr><td>'.$langs->trans("Project").'</td><td colspan="3">';
-    			print $projectstatic->getNomUrl(1);
-    			print '</td></tr>';
-
-    			// Third party
-    			print '<td>'.$langs->trans("Company").'</td><td colspan="3">';
-    			if ($projectstatic->societe->id) print $projectstatic->societe->getNomUrl(1);
-    			else print '&nbsp;';
-    			print '</td></tr>';
-			}
-
-			// Date start
-			print '<tr><td>'.$langs->trans("DateStart").'</td><td colspan="3">';
-			print dol_print_date($object->date_start,'day');
-			print '</td></tr>';
-
-			// Date end
-			print '<tr><td>'.$langs->trans("DateEnd").'</td><td colspan="3">';
-			print dol_print_date($object->date_end,'day');
-			print '</td></tr>';
-
-			// Progress
-			print '<tr><td>'.$langs->trans("Progress").'</td><td colspan="3">';
-			print $object->progress.' %';
-			print '</td></tr>';
-
-			// Description
-			print '<td valign="top">'.$langs->trans("Description").'</td><td colspan="3">';
-			print nl2br($object->description);
-			print '</td></tr>';
-
-			print '</table>';
-
-		}
-
-		dol_fiche_end();
-
-
-		if ($_GET["action"] != 'edit')
-		{
-			/*
-			 * Actions
-			 */
-			print '<div class="tabsAction">';
-
-			// Modify
-			if ($user->rights->projet->creer)
-			{
-				print '<a class="butAction" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=edit&amp;withproject='.$withproject.'">'.$langs->trans('Modify').'</a>';
-			}
-			else
-			{
-				print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans('Modify').'</a>';
-			}
-
-			// Delete
-			if ($user->rights->projet->supprimer && ! $object->hasChildren())
-			{
-				print '<a class="butActionDelete" href="'.$_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;action=delete&amp;withproject='.$withproject.'">'.$langs->trans('Delete').'</a>';
-			}
-			else
-			{
-				print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans('Delete').'</a>';
-			}
-
-			print '</div>';
-		}
-	}
-}
-
-
-llxFooter();
 $db->close();
+
+llxFooter('$Date: 2007/05/28 11:51:00 $ - $Revision: 1.6 $');
 ?>

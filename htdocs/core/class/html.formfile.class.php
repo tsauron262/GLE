@@ -278,7 +278,7 @@ class FormFile
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/synopsisficheinter/modules_fichinter.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/fichinter/modules_fichinter.php');
                     $modellist=ModelePDFFicheinter::liste_modeles($this->db);
                 }
             }
@@ -364,7 +364,7 @@ class FormFile
                 }
                 else
                 {
-                    dol_print_error($this->db,'Bad value for modulepart'.$class);
+                    dol_print_error($this->db,'Bad value for modulepart');
                     return -1;
                 }
             }

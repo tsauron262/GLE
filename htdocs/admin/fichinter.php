@@ -233,7 +233,7 @@ foreach ($dirmodels as $reldir)
 					$file = $reg[1];
 					$classname = substr($file,4);
 
-					require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/".$file.".php");
+					require_once(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/".$file.".php");
 
 					$module = new $file;
 

@@ -44,9 +44,6 @@ ini_set('post_max_size', 10000);
 // For optionnal tuning. Enabled if environment variable DOL_TUNING is defined.
 // A call first. Is the equivalent function dol_microtime_float not yet loaded.
 $micro_start_time=0;
-
-
-die("ok");
 if (! empty($_SERVER['DOL_TUNING']))
 {
     list($usec, $sec) = explode(" ", microtime());

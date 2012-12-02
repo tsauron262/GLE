@@ -36,15 +36,15 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 //
 //echo $stat1 . $stat2;
 
-include_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/PHPGit/Repository.php");
-//$repo = new PHPGit_Repository('/home/jean/Bureau2/Workspace GLE/GIT/PROJET/gle-dol-maj');
-$repo = new PHPGit_Repository('/opt/GLE/main');
+//include_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/PHPGit/Repository.php");
+////$repo = new PHPGit_Repository('/home/jean/Bureau2/Workspace GLE/GIT/PROJET/gle-dol-maj');
+//$repo = new PHPGit_Repository('/opt/GLE/main');
+//
+////print_r($repo->getBranches());
+//$repo->git('pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git');
 
-//print_r($repo->getBranches());
-$repo->git('pull');
 
-
-
+exec("cd '/opt/GLE/main' && /usr/bin/git pull https://dsauron@bitbucket.org/dsauron/gle-dol-maj.git");
 
 llxFooter();
 

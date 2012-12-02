@@ -120,7 +120,7 @@ class modSynopsisTools extends DolibarrModules
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/myAdmin.php',
                             'langs'=>'',
-                            'position'=>1,
+                            'position'=>999,
                             'perms'=>'$user->rights->SynopsisTools->Global->read',
                             'target'=>'',
                             'user'=>0);
@@ -174,7 +174,7 @@ class modSynopsisTools extends DolibarrModules
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/repportBug.php',
                             'langs'=>'',
-                            'position'=>1,
+                            'position'=>1000,
                             'perms'=>'',
                             'target'=>'',
                             'user'=>0);

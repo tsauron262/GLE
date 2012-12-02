@@ -101,6 +101,14 @@ class modSynopsisTools extends DolibarrModules
         $this->rights[$r][5] = 'fileInfo'; // Droit
         $r ++;
 
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Administrer les bug';
+        $this->rights[$r][2] = 'r'; //useless
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'Global'; // Famille
+        $this->rights[$r][5] = 'adminBug'; // Droit
+        $r ++;
+
 
 
         $this->menus = array();            // List of menus to add
@@ -184,7 +192,13 @@ class modSynopsisTools extends DolibarrModules
   `file` varchar(50) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`rowid`)
-)");
+)",
+            "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Tools_bug` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_user` int(11) NOT NULL,
+  `text` varchar(1000) NOT NULL,
+  `resolu` tinyint(1) NOT NULL,
+  PRIMARY KEY (`rowid`))");
     return $this->_init($sql);
   }
 

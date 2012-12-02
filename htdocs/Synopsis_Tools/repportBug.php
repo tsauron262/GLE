@@ -31,7 +31,10 @@ function getBug($user) {
     $requete = "SELECT * FROM llx_Synopsis_Tools_bug";
     if (!$user->rights->SynopsisTools->Global->adminBug)
         $requete .= " WHERE fk_user = " . $user->id;
-    $requete .= " ORDER BY rowid desc";
+    if ($user->rights->SynopsisTools->Global->adminBug)
+        $requete .= " ORDER BY resolu ASC, rowid desc";
+    else
+        $requete .= " ORDER BY rowid desc";
     $sql = $db->query($requete);
     $html = '';
 

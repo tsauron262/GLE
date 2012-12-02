@@ -714,6 +714,71 @@ if ($id > 0)
 		}
 	}
 
+	/*
+	 *   Modif drsi
+         *  List projet
+	 */
+	if ($conf->projet->enabled)
+	{
+		$facturestatic = new Project($db);
+
+		$sql = 'SELECT f.*,';
+		$sql.= ' s.nom, s.rowid as socid';
+		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."projet as f";
+		$sql.= " WHERE f.fk_soc = s.rowid AND s.rowid = ".$object->id;
+		$sql.= ' GROUP BY f.rowid';
+		$sql.= " ORDER BY f.datec DESC";
+
+		$resql=$db->query($sql);
+		if ($resql)
+		{
+			$var=true;
+			$num = $db->num_rows($resql);
+			$i = 0;
+			if ($num > 0)
+			{
+		        print '<br/><table class="noborder" width="100%">';
+
+			    $tableaushown=1;
+				print '<tr class="liste_titre">';
+				print '<td colspan="4"><table width="100%" class="nobordernopadding"><tr><td>'.$langs->trans("Les dernier projets",($num<=$MAXLIST?"":$MAXLIST)).'</td><td align="right"><a href="'.DOL_URL_ROOT.'/projet/liste.php?socid='.$object->id.'">'.$langs->trans("Tous les projets").' ('.$num.')</a></td>';
+				print '</tr></table></td>';
+				print '</tr>';
+			}
+
+			while ($i < $num && $i < $MAXLIST)
+			{
+				$objp = $db->fetch_object($resql);
+				$var=!$var;
+				print "<tr $bc[$var]>";
+				print '<td>';
+				$facturestatic->fetch($objp->rowid);
+				print $facturestatic->getNomUrl(1);
+				print '</td>';
+				if ($objp->datec > 0)
+				{
+					print "<td align=\"right\">".dol_print_date($db->jdate($objp->datec),'day')."</td>\n";
+				}
+				else
+				{
+					print "<td align=\"right\"><b>!!!</b></td>\n";
+				}
+
+				print '<td align="right" nowrap="nowrap">'.$facturestatic->getLibStatut(5)."</td>\n";
+				print "</tr>\n";
+				$i++;
+			}
+			$db->free($resql);
+
+			if ($num > 0) print "</table>";
+		}
+		else
+		{
+			dol_print_error($db);
+		}
+	}
+        /*Fin modif drsi*/
+
 	print "</td></tr>";
 	print "</table>";
 

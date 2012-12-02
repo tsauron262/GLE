@@ -533,5 +533,5 @@ print "</ajax-response>";
 //header("Content-Type: text/xml");
 //$xmlStr = '<'.'?xml version="1.0" encoding="ISO-8859-1"?'.'>';
 //print $xmlStr . $xml;
-function rien($str){ return str; }
+function rien($str){ return $str; }
 ?>

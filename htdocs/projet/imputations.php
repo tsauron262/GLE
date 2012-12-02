@@ -320,7 +320,7 @@ $requete = "SELECT DISTINCT t.rowid as tid,
               AND p.fk_statut <> 50
               AND p.fk_statut <> 999
 		AND a.fk_user = $userId 
-	    ORDER BY p.dateo";
+	    ORDER BY p.rowid";
 
 $sql = $db->query($requete);
 $remProjId = false;

@@ -1,5 +1,3 @@
-# Dolibarr language file - fr_FR - projects
-CHARSET=UTF-8
 Project=Projet
 Projects=Projets
 SharedProject=Tout le monde
@@ -85,7 +83,9 @@ TaskIsNotAffectedToYou=Tâche qui ne vous est pas affectée
 ErrorTimeSpentIsEmpty=Le temps consommé n'est pas renseigné
 ThisWillAlsoRemoveTasks=Cette opération détruira également les tâches du projet (<b>%s</b> tâches actuellement) et le suivi des consommés.
 IfNeedToUseOhterObjectKeepEmpty=Si des objets (facture, commande, ...), appartenant à un autre tiers que celui choisi, doivent être liés au projet à créer, laisser vide afin de laisser le projet multi-tiers.
-##### Types de contacts #####
+
+
+
 TypeContact_project_internal_PROJECTLEADER=Chef de projet
 TypeContact_project_external_PROJECTLEADER=Chef de projet
 TypeContact_project_internal_CONTRIBUTOR=Intervenant
@@ -94,5 +94,7 @@ TypeContact_project_task_internal_TASKEXECUTIVE=Responsable
 TypeContact_project_task_external_TASKEXECUTIVE=Responsable
 TypeContact_project_task_internal_CONTRIBUTOR=Intervenant
 TypeContact_project_task_external_CONTRIBUTOR=Intervenant
-# Documents models
+
+
+
 DocumentModelBaleine=Modèle de rapport de projet complet (logo...)

@@ -112,7 +112,6 @@ if ($id > 0) {
                                                     sopt:["eq","ne","le","lt","ge","gt"],
                                                 }';
         } else {
-            $colModelArr[$i]['stype'] = 'select';
             $colModelArr[$i]['editable'] = false;
             $colModelArr[$i]['searchoptions'] = '{sopt:["eq","ne","nc","cn","bw","ew","nb","ne"]}';
             $colModelArr[$i]['formoptions'] = '{ elmprefix:"*  " }';

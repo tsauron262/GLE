@@ -153,18 +153,18 @@ function getTab() {
             array('rowid', 'fk_propal', 'fk_product', 'description', 'fk_remise_except', 'tva_tx', 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', 'total_ttc', 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang'/* , 'coef', 'dureeLoc' */),
             array('rowid', 'fk_propal', /* 'fk_parent_line', */'fk_product', 'description', 'fk_remise_except', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx'*, */ 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc'/* , 'product_type', 'date_start', 'date_end' */, 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang')
         ),
-        array("Babel_Chrono", "llx_Synopsis_Chrono",
-            array(),
-            array()
-        ),
-        array("Babel_Chrono_group_rights", "llx_Synopsis_Chrono_group_rights",
-            array(),
-            array()
-        ),
-        array("Babel_Chrono_value", "llx_Synopsis_Chrono_value",
-            array(),
-            array()
-        ),
+//        array("Babel_Chrono", "llx_Synopsis_Chrono",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Chrono_group_rights", "llx_Synopsis_Chrono_group_rights",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Chrono_value", "llx_Synopsis_Chrono_value",
+//            array(),
+//            array()
+//        ),
 //        array("Babel_Process_group_rights", "llx_Synopsis_Process_group_rights",
 //            array(),
 //            array()

@@ -8,7 +8,7 @@ class maj {
 
     private $maxLigne = 500;
     private $maxTime = 100;
-    private $maxErreur = 5;
+    private $maxErreur = 50;
     private $erreur = 0;
 
     function maj($dbS, $dbD) {

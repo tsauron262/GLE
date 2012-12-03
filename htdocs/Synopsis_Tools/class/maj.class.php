@@ -8,7 +8,7 @@ class maj {
 
     private $maxLigne = 500;
     private $maxTime = 100;
-    private $maxErreur = 50;
+    private $maxErreur = 5;
     private $erreur = 0;
 
     function maj($dbS, $dbD) {
@@ -16,52 +16,53 @@ class maj {
         $this->dbD = $dbD;
         $this->timeDeb = microtime(true);
     }
-    
-    public function rectifId($tabId){
+
+    public function rectifId($tabId) {
         $i = 0;
-        while($i+1<count($tabId)){
-            $requete = "UPDATE llx_Synopsis_Chrono_value SET chrono_refid=".$tabId[$i+1]." WHERE id = ".$tabId[$i];
+        while ($i + 1 < count($tabId)) {
+            $requete = "UPDATE llx_Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
             $result = $this->queryD($requete);
-            if(!$result){
-                $this->erreurL("Impossible de modifier l'id . Requete : ".$requete);
+            if (!$result) {
+                $this->erreurL("Impossible de modifier l'id . Requete : " . $requete);
             }
-            
-            $i = $i+2;
+
+            $i = $i + 2;
         }
         $this->infoL("Succes !!!!!!");
     }
-    
-    private function erreurL($text){
+
+    private function erreurL($text) {
         $this->erreur++;
-        $text = "<br/>".$this->getTime()." | Erreur : ".$text."<br/>";
-        if($this->erreur > $this->maxErreur)
+        $text = "<br/>" . $this->getTime() . " | Erreur : " . $text . "<br/>";
+        if ($this->erreur > $this->maxErreur)
             die($text . "<br/><br/><br/>Max erreur !!!!!");
         else
             echo($text);
     }
-    
-    private function infoL($text){
-        echo "<br/>".$this->getTime()." | Info : ".$text."<br/>";
+
+    private function infoL($text) {
+        echo "<br/>" . $this->getTime() . " | Info : " . $text . "<br/>";
     }
 
-    public function startMAj($tab) {
-        $this->netoyerTables($tab);
+    public function startMAj($tab, $update = false) {
+        if (!$update) {
+            $this->netoyerTables($tab);
 
-        $requete = "ALTER TABLE llx_commande DROP FOREIGN KEY fk_commande_fk_projet ,
+            $requete = "ALTER TABLE llx_commande DROP FOREIGN KEY fk_commande_fk_projet ,
                 ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-        $this->queryD($requete);
-        $requete = "ALTER TABLE llx_propal DROP FOREIGN KEY fk_propal_fk_projet ,
+            $this->queryD($requete);
+            $requete = "ALTER TABLE llx_propal DROP FOREIGN KEY fk_propal_fk_projet ,
                 ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-        $this->queryD($requete);
-        $requete = "ALTER TABLE llx_facture DROP FOREIGN KEY fk_facture_fk_projet ,
+            $this->queryD($requete);
+            $requete = "ALTER TABLE llx_facture DROP FOREIGN KEY fk_facture_fk_projet ,
                 ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-        $this->queryD($requete);
-        $requete = "ALTER TABLE llx_categorie DROP KEY uk_categorie_ref;";
-        $this->queryD($requete);
-        
+            $this->queryD($requete);
+            $requete = "ALTER TABLE llx_categorie DROP KEY uk_categorie_ref;";
+            $this->queryD($requete);
+        }
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("commande");
 //        $this->netoyeDet("propal");
@@ -71,7 +72,7 @@ class maj {
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
         foreach ($tab as $ligne) {
-            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1]);
+            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
         }
 
         $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -115,7 +116,7 @@ class maj {
         return $this->dbS->query($query);
     }
 
-    private function traiteSql($srcCol, $destCol, $tableSrc, $tableDest) {
+    private function traiteSql($srcCol, $destCol, $tableSrc, $tableDest, $update) {
         $srcCol2 = array();
         foreach ($srcCol as $ligne) {//Supression des champ fixe
             if (stripos($ligne, "$%") === false)
@@ -150,8 +151,8 @@ class maj {
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == "llx_element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;
-                
-                    
+
+
                 if ($cle == "fk_statut" && $tableDest == "llx_propal" && $val == "99")//On vire les statue 99 sur les propal
                     $val = "3";
                 if ((($cle == "fk_projet")
@@ -192,16 +193,16 @@ class maj {
                     $destCol[1001] = "extraparams";
                     $tabVal[1001] = ($ligne->sui ? $ligne->sui : 'NULL');
                 }
-                $tabIns[] = "(" . implode(",", $tabVal) . ")";
+                $tabIns[] = $tabVal;
 
                 if (isset($tabIns[$this->maxLigne])) { //Si plus grnad que valeur on envoie et vide le tableau
-                    $this->envoyerDonnee($tableDest, $destCol, $tabIns);
+                    $this->envoyerDonnee($tableDest, $destCol, $tabIns, $update);
                     $tabIns = array();
                 }
             }
         }
         if (isset($tabIns[0]))
-            $this->envoyerDonnee($tableDest, $destCol, $tabIns);
+            $this->envoyerDonnee($tableDest, $destCol, $tabIns, $update);
         $this->infoL($i . " lignes importées de la table " . $tableSrc . " vers la table " . $tableDest);
     }
 
@@ -224,21 +225,46 @@ class maj {
             if (!$result)
                 $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
             else
-                $this->infoL ("Donnees de la table " . $ligne[1] . " supprimees.");
+                $this->infoL("Donnees de la table " . $ligne[1] . " supprimees.");
         }
     }
 
-    private function envoyerDonnee($tableDest, $destCol, $tabIns, $rechercheErreur = false) {
+    private function envoyerDonnee($tableDest, $destCol, $tabIns, $update, $rechercheErreur = false) {
         if ($this->getTime() > $this->maxTime)
             die("Temps max attein !!");
-        $requete = "INSERT into " . $tableDest . " (" . implode(", ", $destCol) . ") VALUES " . implode(",", $tabIns) . ";";
-        $result = $this->queryD($requete);
-        if (!$result) {
-            if (!$rechercheErreur)//On re essaye ligne par ligne pour voir le probléme
-                foreach ($tabIns as $ligne)
-                    $this->envoyerDonnee($tableDest, $destCol, array($ligne), true);
-            else
-                $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+        if ($update) {
+            foreach ($destCol as $id => $col) {
+                if ($col == "rowid" || $col == "id") {
+                    $nomId = $col;
+                    $idColId = $id;
+                }
+            }
+            foreach ($tabIns as $ligne) {
+                $tabSet = array();
+                foreach ($ligne as $id => $val) {
+                    if ($id != $idColId)
+                        $tabSet[] = $destCol[$id] . "=" . $val;
+                }
+                $requete = "UPDATE " . $tableDest . " SET " . implode(",", $tabSet) . " WHERE " . $nomId . "=" . $ligne[$idColId];
+                $result = $this->queryD($requete);
+                if (!$result) {
+                    $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+                }
+            }
+        } else {
+            $insert = array();
+            foreach ($tabIns as $ligne) {
+                $insert[] = "(" . implode(",", $ligne) . ")";
+            }
+            $requete = "INSERT into " . $tableDest . " (" . implode(", ", $destCol) . ") VALUES " . implode(",", $insert) . ";";
+            $result = $this->queryD($requete);
+            if (!$result) {
+                if (!$rechercheErreur)//On re essaye ligne par ligne pour voir le probléme
+                    foreach ($tabIns as $ligne)
+                        $this->envoyerDonnee($tableDest, $destCol, array($ligne), $update, true);
+                else
+                    $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+            }
         }
     }
 

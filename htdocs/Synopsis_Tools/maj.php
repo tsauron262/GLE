@@ -36,6 +36,11 @@ $dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "freeparty", "old
     include_once("./class/maj.class.php");
     $maj = new maj($dbS, $dbD);
     $maj->startMaj(getTab());
+    $maj->startMaj(array(
+        array("babel_categorie_association", "llx_categorie",
+            array('fk_categorie_fille_babel', 'fk_categorie_mere_babel'),
+            array('rowid', 'fk_parent')
+        )), true);
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
 } else {
     echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
@@ -236,10 +241,6 @@ function getTab() {
         array("Babel_prepaCom_c_cat_total", "llx_Synopsis_PrepaCom_c_cat_total",
             array(),
             array()
-        ),
-        array("babel_categorie_association", "llx_categorie_association",
-            array('fk_categorie_fille_babel', 'fk_categorie_mere_babel'),
-            array('fk_categorie_fille', 'fk_categorie_mere')
         ),
         array("babel_categorie_product", "llx_categorie_product",
             array(),

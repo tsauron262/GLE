@@ -181,7 +181,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
             "INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type) VALUES('".$this->const[0][2]."','synopsisdemandeinterv')",
             );
         
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "llx_Synopsis_demandeInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_demandeInterv` (
   `rowid` int(11) NOT NULL auto_increment,
   `fk_soc` int(11) NOT NULL,
   `fk_projet` int(11) default '0',
@@ -214,7 +214,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
   KEY `idx_demandeInterv_fk_soc` (`fk_soc`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2280 ;";
         
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "llx_Synopsis_demandeIntervdet` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet` (
   `rowid` int(11) NOT NULL auto_increment,
   `fk_demandeInterv` int(11) default NULL,
   `date` date default NULL,

@@ -1,524 +1,623 @@
 <?php
-
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2007 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2005-2012 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
-
  * it under the terms of the GNU General Public License as published by
-
  * the Free Software Foundation; either version 2 of the License, or
-
  * (at your option) any later version.
-
  *
-
  * This program is distributed in the hope that it will be useful,
-
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
-
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-
  * GNU General Public License for more details.
-
  *
-
  * You should have received a copy of the GNU General Public License
-
- * along with this program; if not, write to the Free Software
-
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
- */
-/*
-  /*
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 /**
- *    \file       htdocs/projet/fiche.php
- *    \ingroup    projet
- *    \brief      Fiche projet
- *    \version    $Id: fiche.php,v 1.57.2.1 2008/09/10 09:46:02 eldy Exp $
+ *	\file       htdocs/projet/fiche.php
+ *	\ingroup    projet
+ *	\brief      Project card
  */
-require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-//require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 
-$langs->load("projects@projet");
+require("../main.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
+require_once(DOL_DOCUMENT_ROOT."/projet/class/task.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/project/modules_project.php");
 
-$projetid = '';
-if ($_GET["id"]) {
-    $projetid = $_GET["id"];
+$langs->load("projects");
+$langs->load('companies');
+
+$id=GETPOST('id','int');
+$ref = GETPOST('ref','alpha');
+$action=GETPOST('action','alpha');
+$backtopage=GETPOST('backtopage','alpha');
+
+if ($id == '' && $ref == '' && ($action != "create" && $action != "add" && $action != "update" && ! $_POST["cancel"])) accessforbidden();
+
+$mine = GETPOST('mode')=='mine' ? 1 : 0;
+//if (! $user->rights->projet->all->lire) $mine=1;	// Special for projects
+
+
+// Security check
+$socid=0;
+if ($user->societe_id > 0) $socid=$user->societe_id;
+$result = restrictedArea($user, 'projet', $id);
+
+$object = new Project($db);
+$object->fetch($id,$ref);
+if ($object->id > 0)
+{
+	$object->fetch_thirdparty();
 }
-
-
-if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add" && $_POST["action"] != "update" && !$_POST["cancel"]))
-    accessforbidden();
-
-// SecuritrestrictedAreay check
-if ($user->societe_id)
-    $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid);
 
 
 /*
  * Actions
  */
-if ($_REQUEST['action'] == "valid" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->valid() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut lancer la planification de ce projet " . $pro->error;
-    }
-}
-if ($_REQUEST['action'] == "cloture" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->cloture() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut cl&ocirc;turer ce projet " . $pro->error;
-    }
-}
-if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->launch() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut lancer ce projet " . $pro->error;
-    }
+
+// Cancel
+if (GETPOST("cancel") && ! empty($backtopage))
+{
+    header("Location: ".$backtopage);
+    exit;
 }
 
-if ($_POST["action"] == 'add' && $user->rights->synopsisprojet->creer) {
-    //print $_POST["socid"];
-    $pro = new Project($db);
+if ($action == 'add' && $user->rights->projet->creer)
+{
+    $error=0;
+    if (empty($_POST["ref"]))
+    {
+        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")).'</div>';
+        $error++;
+    }
+    if (empty($_POST["title"]))
+    {
+        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
+        $error++;
+    }
 
-    $tmpSoc = new Societe($db);
-    $tmpSoc->fetch($_POST["socid"]);
-    $requete = "SELECT refAddOn FROM ".MAIN_DB_PREFIX."Synopsis_projet_type WHERE id=" . $_POST['type'];
-    $sql = $db->query($requete);
-    $res = $db->fetch_object($sql);
+    if (! $error)
+    {
+        $error=0;
 
-    $pro->socid = $_POST["socid"];
-    $pro->title = $_POST["title"];
-    $pro->type_id = $_POST["type"];
-    $pro->type_inRef = $res->refAddOn;
-    $pro->user_resp_id = $_POST["officer_project"];
-    $pro->ref = $pro->getNextNumRef($tmpSoc);
+        $db->begin();
 
-    $result = $pro->create($user);
-    if ($result > 0) {
-        Header("Location:fiche.php?id=" . $pro->id);
+        $object->ref             = GETPOST('ref','alpha');
+        $object->title           = GETPOST('title','alpha');
+        $object->socid           = GETPOST('socid','int');
+        $object->description     = GETPOST('description','alpha');
+        $object->public          = GETPOST('public','alpha');
+        $object->datec=dol_now();
+        $object->date_start=dol_mktime(0,0,0,GETPOST('projectmonth','int'),GETPOST('projectday','int'),GETPOST('projectyear','int'));
+        $object->date_end=dol_mktime(0,0,0,GETPOST('projectendmonth','int'),GETPOST('projectendday','int'),GETPOST('projectendyear','int'));
+
+        $result = $object->create($user);
+        if ($result > 0)
+        {
+            // Add myself as project leader
+            $result = $object->add_contact($user->id, 'PROJECTLEADER', 'internal');
+            if ($result < 0)
+            {
+                $langs->load("errors");
+                $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
+                $error++;
+            }
+        }
+        else
+        {
+            $langs->load("errors");
+            $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
+            $error++;
+        }
+
+        if (! $error)
+        {
+            $db->commit();
+
+            Header("Location:fiche.php?id=".$object->id);
+            exit;
+        }
+        else
+        {
+            $db->rollback();
+
+            $action = 'create';
+        }
+    }
+    else
+    {
+        $action = 'create';
+    }
+}
+
+if ($action == 'update' && ! $_POST["cancel"] && $user->rights->projet->creer)
+{
+    $error=0;
+
+    if (empty($ref))
+    {
+        $error++;
+        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
+        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")).'</div>';
+    }
+    if (empty($_POST["title"]))
+    {
+        $error++;
+        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
+        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
+    }
+    if (! $error)
+    {
+        $object->oldcopy = dol_clone($object);
+
+		$old_start_date = $object->date_start;
+
+        $object->ref             = GETPOST('ref','alpha');
+        $object->title           = GETPOST('title','alpha');
+        $object->socid           = GETPOST('socid','int');
+        $object->description     = GETPOST('description','alpha');
+        $object->public          = GETPOST('public','alpha');
+        $object->date_start   = empty($_POST["project"])?'':dol_mktime(0,0,0,GETPOST('projectmonth'),GETPOST('projectday'),GETPOST('projectyear'));
+        $object->date_end     = empty($_POST["projectend"])?'':dol_mktime(0,0,0,GETPOST('projectendmonth'),GETPOST('projectendday'),GETPOST('projectendyear'));
+
+        $result=$object->update($user);
+
+    }
+    else
+    {
+        $action='edit';
+    }
+}
+
+// Build doc
+if ($action == 'builddoc' && $user->rights->projet->creer)
+{
+    if (GETPOST('model'))
+    {
+        $object->setDocModel($user, GETPOST('model'));
+    }
+
+    $outputlangs = $langs;
+    if (GETPOST('lang_id'))
+    {
+        $outputlangs = new Translate("",$conf);
+        $outputlangs->setDefaultLang(GETPOST('lang_id'));
+    }
+    $result=project_pdf_create($db, $object, $object->modelpdf, $outputlangs);
+    if ($result <= 0)
+    {
+        dol_print_error($db,$result);
         exit;
-    } else {
-        $langs->load("errors");
-        //print $pro->error;
-        if (preg_match('/^Duplicate entry/', $pro->error)) {
-            $mesg = '<div class="error ui-state-error">Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;</div>';
-        } else {
-            $mesg = '<div class="error ui-state-error">' . $langs->trans($pro->error) . '</div>';
-        }
-        $_GET["action"] = 'create';
+    }
+    else
+    {
+        Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id.(empty($conf->global->MAIN_JUMP_TAG)?'':'#builddoc'));
+        exit;
     }
 }
 
-if ($_POST["action"] == 'update' && $user->rights->synopsisprojet->creer) {
-    if (!$_POST["cancel"]) {
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE rowid=" . $_POST['id'];
-        $sql = $db->query($requete);
-        $res = $db->fetch_object($sql);
-        $_POST["ref"] = $res->ref;
+// Delete file in doc form
+if ($action == 'remove_file' && $user->rights->projet->creer)
+{
+    require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
-        $error = 0;
-        if (empty($_POST["ref"])) {
-            $error++;
-            $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
-            $mesg = '<div class="error ui-state-error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")) . '</div>';
-        }
-        if (empty($_POST["title"])) {
-            $error++;
-            $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
-            $mesg = '<div class="error ui-state-error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Label")) . '</div>';
-        }
-        if (!$error) {
-            $projet = new Project($db);
-            $projet->id = $_POST["id"];
-            $projet->ref = $_POST["ref"];
-            $projet->title = $_POST["title"];
-            $projet->socid = $_POST["socid"];
-            $projet->user_resp_id = $_POST["officer_project"];
-            $projet->update($user);
-
-            $_GET["id"] = $projet->id;  // On retourne sur la fiche projet
-        }
-    } else {
-        $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
+    if ($object->id > 0)
+    {
+        $langs->load("other");
+        $upload_dir =	$conf->projet->dir_output . "/";
+        $file =	$upload_dir	. '/' .	GETPOST('file');
+        dol_delete_file($file);
+        $mesg	= '<div	class="ok">'.$langs->trans("FileWasRemoved",GETPOST('file')).'</div>';
     }
 }
 
-if ($_POST["action"] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
-    $projet = new Project($db);
-    $projet->id = $_GET["id"];
-    if ($projet->delete($user) == 0) {
+if ($action == 'confirm_validate' && GETPOST('confirm') == 'yes')
+{
+    $result = $object->setValid($user);
+    if ($result <= 0)
+    {
+        $mesg='<div class="error">'.$object->error.'</div>';
+    }
+}
+
+if ($action == 'confirm_close' && GETPOST('confirm') == 'yes')
+{
+    $result = $object->setClose($user);
+    if ($result <= 0)
+    {
+        $mesg='<div class="error">'.$object->error.'</div>';
+    }
+}
+
+if ($action == 'confirm_reopen' && GETPOST('confirm') == 'yes')
+{
+    $result = $object->setValid($user);
+    if ($result <= 0)
+    {
+        $mesg='<div class="error">'.$object->error.'</div>';
+    }
+}
+
+if ($action == 'confirm_delete' && GETPOST("confirm") == "yes" && $user->rights->projet->supprimer)
+{
+    $object->fetch($id);
+    $result=$object->delete($user);
+    if ($result > 0)
+    {
         Header("Location: index.php");
         exit;
-    } else {
-        Header("Location: fiche.php?id=" . $projet->id);
-        exit;
+    }
+    else
+    {
+        dol_syslog($object->error,LOG_DEBUG);
+        $mesg='<div class="error">'.$langs->trans("CantRemoveProject").'</div>';
     }
 }
 
 
 /*
- *    View
+ *	View
  */
 
-if ($_GET["action"] != 'create') {
-    $csspath = DOL_URL_ROOT . '/Synopsis_Common/css/';
-    $jspath = DOL_URL_ROOT . '/Synopsis_Common/jquery/';
-    $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
-
-    $header = '<script language="javascript" src="' . $jspath . 'jquery.dimensions.js"></script>' . "\n";
-    $header .= '<script language="javascript" src="' . $jspath . 'jquery.tooltip.js"></script>' . "\n";
-    $header .= "<style type='text/css'>.ui-progressbar{ height: 13px; background-color: #ffffff; margin: 0px;}</style>";
-    $header .= "<style type='text/css'>.ui-progressbar-value{ border:1px solid #000000; }</style>";
-
-    $header .= "<script language='javascript'>";
-    $projet = new Project($db);
-    $projet->fetch($_GET["id"]);
-    $projet->societe->fetch($projet->societe->id);
-
-    $projet->getAllStats();
-    $avancTime = $projet->workedPercentTime;
-    $avancQual = $projet->statAvgProgByGroup[0];
-
-    $header .= <<<EOF
-
-jQuery(document).ready(function(){
-    jQuery("#progressBarTime").progressbar({ value: $avancTime });
-    jQuery("#progressBarQual").progressbar({ value: $avancQual });
-    jQuery('#actoTooltip a').each(function(){
-        jQuery(this).tooltip({
-            delay: 0,
-            showURL: false,
-            showBody: " - ",
-            fade: 250,
-            bodyHandler: function() {
-                var ret =  "<div>"+jQuery(this).parent().find('.jqtoolTipInfo').html()+"</div>";
-                //alert ($(this).parent().find('.jqtoolTipInfo').html());
-                return(jQuery(ret));
-            },
-            extraClass: "floatTooltip ui-corner-all",
-            top: 0,
-            left: 5,
-            track: true
-        });
-    });
-
-});
-
-EOF;
-
-    $header .= "</script>";
-    $header .= "<style>.floatTooltip { position: absolute; background-color: #ffff99; border: 1px Solid #000000; padding : 10px; }</style>";
-}
+$form = new Form($db);
+$formfile = new FormFile($db);
+$userstatic = new User($db);
 
 
-//llxHeader($header,$langs->trans("Projects"),"Projet","1");
+$help_url="EN:Module_Projects|FR:Module_Projets|ES:M&oacute;dulo_Proyectos";
+llxHeader("",$langs->trans("Projects"),$help_url);
 
 
-llxHeader($header, $langs->trans("Project"));
-
-if (isset($msg) && $msg . "x" != "x") {
-    print "<br/>";
-    print "<div class='ui-state-error error'>" . $msg . "</div>";
-    print "<br/>";
-    print "<br/>";
-}
-
-$html = new Form($db);
-
-if ($_GET["action"] == 'create' && $user->rights->synopsisprojet->creer) {
+if ($action == 'create' && $user->rights->projet->creer)
+{
     /*
      * Create
      */
-    print_titre($langs->trans("NewProject"));
+    print_fiche_titre($langs->trans("NewProject"));
 
-    if (isset($mesg))
-        print $mesg;
+    dol_htmloutput_mesg($mesg);
 
-    print '<form action="' . $_SERVER["PHP_SELF"] . '" method="post">';
-    //if ($_REQUEST["socid"]) print '<input type="hidden" name="socid" value="'.$_REQUEST["socid"].'">';
-    print '<table cellpadding=15 class="border" width="100%">';
+    print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+    print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
     print '<input type="hidden" name="action" value="add">';
+    print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
+
+    print '<table class="border" width="100%">';
+
+    $defaultref='';
+    $obj = empty($conf->global->PROJECT_ADDON)?'mod_project_simple':$conf->global->PROJECT_ADDON;
+    if (! empty($conf->global->PROJECT_ADDON) && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/project/".$conf->global->PROJECT_ADDON.".php"))
+    {
+        require_once(DOL_DOCUMENT_ROOT ."/core/modules/project/".$conf->global->PROJECT_ADDON.".php");
+        $modProject = new $obj;
+        $defaultref = $modProject->getNextValue($soc,$object);
+    }
+
+    if (is_numeric($defaultref) && $defaultref <= 0) $defaultref='';
 
     // Ref
-//    print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Ref").'</th>
-//               <td class="ui-widget-content"><input size="8" type="text" name="ref" value="'.$_POST["ref"].'"></td></tr>';
-    //Type
-    print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Type") . '</th>
-               <td class="ui-widget-content">';
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet_type WHERE active = 1 ORDER BY type";
-    $sql = $db->query($requete);
-    print "<SELECT name='type' id='type'>";
-    while ($res = $db->fetch_object($sql)) {
-        if ($res->defaut == 1)
-            print "<OPTION SELECTED value='" . $res->id . "'>" . $res->type . "</OPTION>";
-        else
-            print "<OPTION value='" . $res->id . "'>" . $res->type . "</OPTION>";
-    }
-    print "</SELECT>";
-    print '</td></tr>';
+    print '<tr><td><span class="fieldrequired">'.$langs->trans("Ref").'</span></td><td><input size="12" type="text" name="ref" value="'.($_POST["ref"]?$_POST["ref"]:$defaultref).'"></td></tr>';
 
     // Label
-    print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
-               <td class="ui-widget-content"><input size="30" type="text" name="title" value="' . (isset($_POST["title"]) ? $_POST["title"] : '') . '"></td></tr>';
+    print '<tr><td><span class="fieldrequired">'.$langs->trans("Label").'</span></td><td><input size="30" type="text" name="title" value="'.$_POST["title"].'"></td></tr>';
 
-    // Client
-    print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Company") . '</th>
-               <td class="ui-widget-content">';
-    //print $_REQUEST["socid"];
-    print $html->select_company($_REQUEST["socid"], 'socid', '', 1);
+    // Customer
+    print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+    $text=$form->select_company(GETPOST('socid','int'),'socid','',1,1);
+    $texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
+    print $form->textwithtooltip($text.' '.img_help(),$texthelp,1);
     print '</td></tr>';
 
-    // Auteur du projet
-    print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Author") . '</th>
-               <td class="ui-widget-content">' . $user->getNomUrl(1, 6) . '</td></tr>';
-
-    // Responsable du projet
-    print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("OfficerProject") . '</th>
-               <td class="ui-widget-content">';
-    $html->select_users($user->id, 'officer_project', 1);
+    // Public
+    print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
+    $array=array(0 => $langs->trans("PrivateProject"),1 => $langs->trans("SharedProject"));
+    print $form->selectarray('public',$array,$object->public);
     print '</td></tr>';
 
-    print '<tr><th class="ui-widget-header ui-state-default" colspan="2" align="center"><button class="butAction ui-widget-header ui-state-default ui-corner-all" value="' . $langs->trans("Create") . '">' . $langs->trans("Create") . '</button></tr>';
+    // Date start
+    print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
+    print $form->select_date('','project');
+    print '</td></tr>';
+
+    // Date end
+    print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
+    print $form->select_date(-1,'projectend');
+    print '</td></tr>';
+
+    // Description
+    print '<tr><td valign="top">'.$langs->trans("Description").'</td>';
+    print '<td>';
+    print '<textarea name="description" wrap="soft" cols="80" rows="'.ROWS_3.'">'.$_POST["description"].'</textarea>';
+    print '</td></tr>';
+
     print '</table>';
+
+    print '<br><center>';
+    print '<input type="submit" class="button" value="'.$langs->trans("Create").'">';
+    if (! empty($backtopage))
+    {
+        print ' &nbsp; &nbsp; ';
+	    print '<input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
+    }
+    print '</center>';
+
     print '</form>';
-} else {
+
+}
+else
+{
     /*
      * Show or edit
      */
 
-    if ($mesg)
-        print $mesg;
+    dol_htmloutput_mesg($mesg);
+
+    if ($object->societe->id > 0)  $result=$object->societe->fetch($object->societe->id);
+
+    // To verify role of users
+    $userAccess = $object->restrictedProjectArea($user,'read');
+    $userWrite  = $object->restrictedProjectArea($user,'write');
+    $userDelete = $object->restrictedProjectArea($user,'delete');
+    //print "userAccess=".$userAccess." userWrite=".$userWrite." userDelete=".$userDelete;
 
 
-    $head = synopsis_project_prepare_head($projet);
-    dol_fiche_head($head, 'project', $langs->trans("Project"));
+    $head=project_prepare_head($object);
+    dol_fiche_head($head, 'project', $langs->trans("Project"),0,($object->public?'projectpub':'project'));
 
-    if ($_GET["action"] == 'delete') {
-        $html->form_confirm("fiche.php?id=" . $_GET["id"], $langs->trans("DeleteAProject"), $langs->trans("ConfirmDeleteAProject"), "confirm_delete");
-        print "<br>";
+    // Confirmation validation
+    if ($action == 'validate')
+    {
+        $ret=$form->form_confirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateProject'), $langs->trans('ConfirmValidateProject'), 'confirm_validate','',0,1);
+        if ($ret == 'html') print '<br>';
+    }
+    // Confirmation close
+    if ($action == 'close')
+    {
+        $ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("CloseAProject"),$langs->trans("ConfirmCloseAProject"),"confirm_close",'','',1);
+        if ($ret == 'html') print '<br>';
+    }
+    // Confirmation reopen
+    if ($action == 'reopen')
+    {
+        $ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("ReOpenAProject"),$langs->trans("ConfirmReOpenAProject"),"confirm_reopen",'','',1);
+        if ($ret == 'html') print '<br>';
+    }
+    // Confirmation delete
+    if ($action == 'delete')
+    {
+        $text=$langs->trans("ConfirmDeleteAProject");
+        $task=new Task($db);
+        $taskarray=$task->getTasksArray(0,0,$object->id,0,0);
+        $nboftask=count($taskarray);
+        if ($nboftask) $text.='<br>'.img_warning().' '.$langs->trans("ThisWillAlsoRemoveTasks",$nboftask);
+        $ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("DeleteAProject"),$text,"confirm_delete",'','',1);
+        if ($ret == 'html') print '<br>';
     }
 
-    if ($_GET["action"] == 'edit') {
-        print '<form method="post" action="fiche.php">';
+    if ($action == 'edit' && $userWrite > 0)
+    {
+        print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
+        print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
         print '<input type="hidden" name="action" value="update">';
-        print '<input type="hidden" name="id" value="' . $_GET["id"] . '">';
+        print '<input type="hidden" name="id" value="'.$object->id.'">';
 
-        print '<table class="border" width="100%" cellpadding="15">';
+        print '<table class="border" width="100%">';
 
         // Ref
-        print '<tr><th class="ui-widget-header ui-state-default" width="25%">' . $langs->trans("Ref") . '</th>
-                   <td class="ui-widget-content">' . $projet->ref . '</td>';
+        print '<tr><td width="30%">'.$langs->trans("Ref").'</td>';
+        print '<td><input size="12" name="ref" value="'.$object->ref.'"></td></tr>';
 
         // Label
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
-                   <td class="ui-widget-content"><input size="30" name="title" value="' . $projet->title . '"></td></tr>';
+        print '<tr><td>'.$langs->trans("Label").'</td>';
+        print '<td><input size="30" name="title" value="'.$object->title.'"></td></tr>';
 
-        // Client
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Company") . '</th>
-                   <td class="ui-widget-content">';
-        print   $html->select_company($projet->societe->id, 'socid', '', 1);
+        // Customer
+        print '<tr><td>'.$langs->trans("Company").'</td><td>';
+        $text=$form->select_company($object->societe->id,'socid','',1,1);
+        $texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
+        print $form->textwithtooltip($text.' '.img_help(),$texthelp,1);
         print '</td></tr>';
 
-        // Responsable du projet
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("OfficerProject") . '</th>
-                   <td class="ui-widget-content" valign=middle>';
-        $html->select_users($projet->user_resp_id, 'officer_project', 1);
+        // Visibility
+        print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
+        $array=array(0 => $langs->trans("PrivateProject"),1 => $langs->trans("SharedProject"));
+        print $form->selectarray('public',$array,$object->public);
         print '</td></tr>';
-
-        print '<tr><td align="center" colspan="2" class="ui-widget-header ui-state-default"><input name="update" class="button" type="submit" value="' . $langs->trans("Modify") . '"> &nbsp; <input type="submit" class="button" name="cancel" Value="' . $langs->trans("Cancel") . '"></td></tr>';
-        print '</table>';
-        print '</form>';
-    } else {
-        $projet->fetch_user($projet->user_resp_id);
-        //saveHistoUser($projet->id, "projet", $projet->ref);
-
-        print '<table class="border" width="100%" cellpadding=15>';
-
-
-        // Ref
-        print '<tr><th class="ui-widget-header ui-state-default" width="25%">' . $langs->trans("Ref") . '</th>
-                   <td class="ui-widget-content">' . $projet->ref . '</td>';
 
         // Statut
-        print '     <th class="ui-widget-header ui-state-default" width="25%">' . $langs->trans("Statut") . '</th>
-                    <td class="ui-widget-content">' . $projet->getLibStatut(4) . '</td></tr>';
- 
-        // Third party
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Company") . '</th>
-                   <td class="ui-widget-content" colspan=3>';
-        if ($projet->societe->id > 0)
-            print $projet->societe->getNomUrl(1);
-        else
-            print'&nbsp;';
+        print '<tr><td>'.$langs->trans("Status").'</td><td>'.$object->getLibStatut(4).'</td></tr>';
+
+        // Date start
+        print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
+        print $form->select_date($object->date_start,'project');
+        print '</td></tr>';
+
+        // Date end
+        print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
+        print $form->select_date($object->date_end?$object->date_end:-1,'projectend');
+        print '</td></tr>';
+
+        // Description
+        print '<tr><td valign="top">'.$langs->trans("Description").'</td>';
+        print '<td>';
+        print '<textarea name="description" wrap="soft" cols="80" rows="'.ROWS_3.'">'.$object->description.'</textarea>';
+        print '</td></tr>';
+
+        print '</table>';
+
+        print '<div align="center"><br>';
+        print '<input name="update" class="button" type="submit" value="'.$langs->trans("Modify").'"> &nbsp; ';
+        print '<input type="submit" class="button" name="cancel" Value="'.$langs->trans("Cancel").'"></div>';
+
+        print '</form>';
+    }
+    else
+    {
+        print '<table class="border" width="100%">';
+
+        // Ref
+        print '<tr><td width="30%">'.$langs->trans("Ref").'</td><td>';
+        // Define a complementary filter for search of next/prev ref.
+        if (! $user->rights->projet->all->lire)
+        {
+            $objectsListId = $object->getProjectsAuthorizedForUser($user,$mine,0);
+            $object->next_prev_filter=" rowid in (".(count($objectsListId)?join(',',array_keys($objectsListId)):'0').")";
+        }
+        print $form->showrefnav($object,'ref','',1,'ref','ref');
         print '</td></tr>';
 
         // Label
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
-                   <td class="ui-widget-content" colspan=3>' . $projet->title . '</td></tr>';
+        print '<tr><td>'.$langs->trans("Label").'</td><td>'.$object->title.'</td></tr>';
 
-        // Project leader
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("OfficerProject") . '</th>
-                   <td class="ui-widget-content" colspan=3>' . $projet->user->getNomUrl(1) . '</td></tr>';
-
-        //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectBegin").'</th>
-        //         <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_valid)).'</td>';
-        //print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectEnd").'</th>
-        //           <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_cloture)).'</td></tr>';
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("ProjectActors") . '</th>
-                   <td class="ui-widget-content" id="actoTooltip" colspan=3>';
-        $arr = array();
-        $arrObj = array();
-        foreach ($projet->tasks as $key1 => $val1) {
-            if (isset($val1['acto']) && is_array($val1['acto'])) {
-                foreach ($val1['acto'] as $key2 => $val2) {
-                    foreach ($val2 as $key => $val) {
-                        if ('x' . $val['userid'] != 'x') {
-                            if (!in_array($val['userid'], $arr)) {
-                                $arr[] = $val['userid'];
-                                $arrObj[] = $val['userobj'];
-                                //Tooltip
-                                print "<div class='jqtooltip'><div style='display:none;' class='jqtoolTipInfo'>";
-                                print $val['userobj']->getNomUrl(1);
-                                $requete2 = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.title , ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.role
-                                           FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                                                ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                          WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task
-                                            AND fk_user = " . $val['userid'] . " AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = " . $_REQUEST['id'] . " ORDER BY role ASC";
-                                $sql2 = $db->query($requete2);
-                                print "<table width=100% border=1 style='border-collapse: collapse; min-width:300px '>";
-                                print "<tr class='ui-widget-header ui-state-default'><th align='center' style='width: 200px'>T&acirc;che</th><th align='center'>R&ocirc;le</th></tr>";
-                                $pair = false;
-                                $remRole = false;
-                                while ($res2 = $db->fetch_object($sql2)) {
-                                    $class = "impair";
-                                    if ($res2->role != $remRole) {
-                                        $pair = !$pair;
-                                    }
-                                    if ($pair) {
-                                        $class = "pair";
-                                    }
-                                    $remRole = $res2->role;
-                                    print "<tr class='" . $class . "'><td align='center'>" . $res2->title . "</td><td align='center'>" . $res2->role . "</td></tr>";
-                                }
-                                print "</table>";
-
-
-                                print "</div>";
-                                //Affichage
-                                $val['userobj']->fetch($val['userobj']->id);
-                                print $val['userobj']->getNomUrl(1) . "</div>";
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        // Third party
+        print '<tr><td>'.$langs->trans("Company").'</td><td>';
+        if ($object->societe->id > 0) print $object->societe->getNomUrl(1);
+        else print'&nbsp;';
         print '</td></tr>';
 
-
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("ProjectStats") . '</td><td style="padding: 0;" class="ui-widget-content" colspan=3>';
-        print '<table  style="border-collapse: collapse;" width=100% cellpadding=10><tbody><tr>
-                    <th style="border-top:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('AvancementTemps') . '</td>
-                    <td style="border-top:0px;border-right:0px;" class="ui-widget-content"> <div style="float: left; background-color: #FFFFFF; margin-left: 50%; margin-top: -1px; padding: 2px; padding-left: 5px; padding-right: 5px; opacity: 0.95; " class="ui-corner-all">' . $avancTime . '%</div>';
-        //Avancement qualitatif
-        print '<div id="progressBarTime"></div>';
-        print '</td></tr><tr><th style="border-top:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('AvancementQualitatif') . '</td>
-                             <td style="border-top:0px;border-right:0px;" class="ui-widget-content"><div style="float: left; background-color: #FFFFFF; margin-left: 50%; margin-top: -1px; padding: 2px; padding-left: 5px; padding-right: 5px; opacity: 0.95; " class="ui-corner-all">' . $projet->statAvgProgByGroup[0] . '%</div>';
-        //Avancement Horaire
-        print '<div id="progressBarQual"></div>';
-        print '<tr><th style="border-top:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsPrevu') . '</th><td style="border-top:0px; border-right:0px;" class="ui-widget-content">' . sec2time($projet->totDuration) . '</td></tr>';
-        print '<tr><th style="border-top:0px;border-bottom:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsEffectue') . '</th><td style="border-right:0px; border-top:0px" class="ui-widget-content">' . sec2time($projet->workedDuration) . '</td></tr>';
-
+        // Visibility
+        print '<tr><td>'.$langs->trans("Visibility").'</td><td>';
+        if ($object->public) print $langs->trans('SharedProject');
+        else print $langs->trans('PrivateProject');
         print '</td></tr>';
-        print "</tbody></table>";
+
+        // Statut
+        print '<tr><td>'.$langs->trans("Status").'</td><td>'.$object->getLibStatut(4).'</td></tr>';
+
+        // Date start
+        print '<tr><td>'.$langs->trans("DateStart").'</td><td>';
+        print dol_print_date($object->date_start,'day');
+        print '</td></tr>';
+
+        // Date end
+        print '<tr><td>'.$langs->trans("DateEnd").'</td><td>';
+        print dol_print_date($object->date_end,'day');
+        print '</td></tr>';
+
+        // Description
+        print '<td valign="top">'.$langs->trans("Description").'</td><td>';
+        print nl2br($object->description);
+        print '</td></tr>';
 
         print '</table>';
     }
 
-    print '</div>';
+    dol_fiche_end();
+
     /*
      * Boutons actions
      */
     print '<div class="tabsAction">';
 
-    if ($_GET["action"] != "edit") {
-        if ($user->rights->synopsisprojet->creer) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
+    if ($action != "edit" )
+    {
+        // Validate
+        if ($object->statut == 0 && $user->rights->projet->creer)
+        {
+            if ($userWrite > 0)
+            {
+                print '<a class="butAction" href="fiche.php?id='.$object->id.'&action=validate">'.$langs->trans("Valid").'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('Valid').'</a>';
+            }
         }
 
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 0) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=valid">' . $langs->trans("Planifier") . '</a>';
-        }
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 5) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=launch">' . $langs->trans("Lancer") . '</a>';
-        }
-        if ($user->rights->synopsisprojet->creer && $projet->statut == 10) {
-            print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=cloture">' . $langs->trans("Cloturer") . '</a>';
+        // Modify
+        if ($object->statut != 2 && $user->rights->projet->creer)
+        {
+            if ($userWrite > 0)
+            {
+                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=edit">'.$langs->trans("Modify").'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('Modify').'</a>';
+            }
         }
 
-        if ($user->rights->synopsisprojet->supprimer) {
-            print '<a class="butActionDelete" href="fiche.php?id=' . $projet->id . '&amp;action=delete">' . $langs->trans("Delete") . '</a>';
+        // Close
+        if ($object->statut == 1 && $user->rights->projet->creer)
+        {
+            if ($userWrite > 0)
+            {
+                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=close">'.$langs->trans("Close").'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('Close').'</a>';
+            }
+        }
+
+        // Reopen
+        if ($object->statut == 2 && $user->rights->projet->creer)
+        {
+            if ($userWrite > 0)
+            {
+                print '<a class="butAction" href="fiche.php?id='.$object->id.'&amp;action=reopen">'.$langs->trans("ReOpen").'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('ReOpen').'</a>';
+            }
+        }
+
+        // Delete
+        if ($user->rights->projet->supprimer)
+        {
+            if ($userDelete > 0)
+            {
+                print '<a class="butActionDelete" href="fiche.php?id='.$object->id.'&amp;action=delete">'.$langs->trans("Delete").'</a>';
+            }
+            else
+            {
+                print '<a class="butActionRefused" href="#" title="'.$langs->trans("NotOwnerOfProject").'">'.$langs->trans('Delete').'</a>';
+            }
         }
     }
 
     print "</div>";
+    print "<br>\n";
+
+    if ($action != 'presend')
+    {
+        print '<table width="100%"><tr><td width="50%" valign="top">';
+        print '<a name="builddoc"></a>'; // ancre
+
+
+        /*
+         * Documents generes
+         */
+        $filename=dol_sanitizeFileName($object->ref);
+        $filedir=$conf->projet->dir_output . "/" . dol_sanitizeFileName($object->ref);
+        $urlsource=$_SERVER["PHP_SELF"]."?id=".$object->id;
+        $genallowed=($user->rights->projet->lire && $userAccess > 0);
+        $delallowed=($user->rights->projet->creer && $userWrite > 0);
+
+        $var=true;
+
+        $somethingshown=$formfile->show_documents('project',$filename,$filedir,$urlsource,$genallowed,$delallowed,$object->modelpdf);
+
+        print '</td><td valign="top" width="50%">';
+
+        // List of actions on element
+        include_once(DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php');
+        $formactions=new FormActions($db);
+        $somethingshown=$formactions->showactions($object,'project',$socid);
+
+        print '</td></tr></table>';
+    }
+
 }
+
+llxFooter();
 
 $db->close();
-
-llxFooter('$Date: 2008/09/10 09:46:02 $ - $Revision: 1.57.2.1 $');
-
-function sec2time($sec) {
-    $returnstring = " ";
-    $days = intval($sec / 86400);
-    $hours = intval(($sec / 3600) - ($days * 24));
-    $minutes = intval(($sec - (($days * 86400) + ($hours * 3600))) / 60);
-    $seconds = $sec - ( ($days * 86400) + ($hours * 3600) + ($minutes * 60));
-
-    $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-    $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-    $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-    $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-    $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-    //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-    //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-    return ($returnstring);
-}
-
-function sec2hour($sec) {
-    $days = false;
-    $returnstring = " ";
-    $hours = intval(($sec / 3600));
-    $minutes = intval(($sec - ( ($hours * 3600))) / 60);
-    $seconds = $sec - ( ($hours * 3600) + ($minutes * 60));
-
-    $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-    $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-    $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-    $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-    $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-    //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-    //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-    return ($returnstring);
-}
-
 ?>

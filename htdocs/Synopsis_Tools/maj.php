@@ -165,26 +165,26 @@ function getTab() {
             array(),
             array()
         ),
-        array("Babel_Process_group_rights", "llx_Synopsis_Process_group_rights",
-            array(),
-            array()
-        ),
-        array("Babel_Processdet", "llx_Synopsis_Processdet",
-            array(),
-            array()
-        ),
-        array("Babel_Processdet_active", "llx_Synopsis_Processdet_active",
-            array(),
-            array()
-        ),
-        array("Babel_Processdet_validation", "llx_Synopsis_Processdet_validation",
-            array(),
-            array()
-        ),
-        array("Babel_Processdet_value", "llx_Synopsis_Processdet_value",
-            array(),
-            array()
-        ),
+//        array("Babel_Process_group_rights", "llx_Synopsis_Process_group_rights",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Processdet", "llx_Synopsis_Processdet",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Processdet_active", "llx_Synopsis_Processdet_active",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Processdet_validation", "llx_Synopsis_Processdet_validation",
+//            array(),
+//            array()
+//        ),
+//        array("Babel_Processdet_value", "llx_Synopsis_Processdet_value",
+//            array(),
+//            array()
+//        ),
         array("llx_facture", "llx_facture",
             array('rowid', 'facnumber', 'ref_client', 'type', 'increment', 'fk_soc', 'datec', 'datef', 'date_valid', 'paye', 'amount', 'remise_percent', 'remise_absolue', 'remise', 'close_code', 'close_note', 'tva', 'total', 'total_ttc', 'fk_statut', 'fk_user_author', 'fk_user_valid', 'fk_facture_source', 'fk_projet', 'fk_cond_reglement', 'fk_mode_reglement', 'date_lim_reglement', 'note', 'note_public', 'model_pdf'),
             array('rowid', 'facnumber'/* , 'entity', 'ref_ext', 'ref_int' */, 'ref_client', 'type', 'increment', 'fk_soc', 'datec', 'datef', 'date_valid'/* , 'tms' */, 'paye', 'amount', 'remise_percent', 'remise_absolue', 'remise', 'close_code', 'close_note', 'tva', /* 'localtax1', 'localtax2', */ 'total', 'total_ttc', 'fk_statut', 'fk_user_author', 'fk_user_valid', 'fk_facture_source', 'fk_projet'/* , 'fk_account', 'fk_currency' */, 'fk_cond_reglement', 'fk_mode_reglement', 'date_lim_reglement', 'note', 'note_public', 'model_pdf'/* , 'import_key', 'extraparams' */)

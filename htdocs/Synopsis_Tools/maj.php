@@ -70,8 +70,8 @@ function getTab() {
             array('rowid', 'fk_user', 'fk_usergroup')
         ),
         array("llx_societe", "llx_societe",
-            array("rowid", "nom", "external_id", "statut", "parent", "tms", "datec", "datea", "titre", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", "fk_secteur", "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", "description", "fk_stcomm", "note", "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj"),
-            array("rowid", "nom", "ref_ext", "statut", "parent", "tms", "datec", "datea", "status", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", "fk_secteur", "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", "description", "fk_stcomm", "note", "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj")
+            array("rowid", "nom", "external_id", "statut", "parent", "tms", "datec", "datea", "titre", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", /*"fk_secteur",*/ "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", "description", "fk_stcomm", "note", "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj"),
+            array("rowid", "nom", "ref_ext", "statut", "parent", "tms", "datec", "datea", "status", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", /*"fk_secteur",*/ "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", "description", "fk_stcomm", "note", "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj")
         ),
         array("llx_socpeople", "llx_socpeople",
             array('rowid', 'datec', 'tms', 'fk_soc', 'civilite', 'name', 'firstname', 'address', 'cp', 'ville', 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'/* , 'email2', 'email3', 'email4' */),
@@ -93,38 +93,38 @@ function getTab() {
             array('rowid', 'code', 'sortorder', 'active', 'libelle', 'libelle_facture', 'fdm', 'nbjour', 'decalage'),
             array('rowid', 'code', 'sortorder', 'active', 'libelle', 'libelle_facture', 'fdm', 'nbjour', 'decalage')
         ),
-        array("babel_projet", "llx_Synopsis_projet",
-            array(),
-            array()
-        ),
-        array("babel_projet_document_group", "llx_Synopsis_projet_document_group",
-            array(),
-            array()
-        ),
-        array("babel_projet_risk_group", "llx_Synopsis_projet_risk_group",
-            array(),
-            array()
-        ),
-        array("babel_projet_task", "llx_Synopsis_projet_task",
-            array(),
-            array()
-        ),
-        array("babel_projet_task_actors", "llx_Synopsis_projet_task_actors",
-            array(),
-            array()
-        ),
-        array("babel_projet_task_time", "llx_Synopsis_projet_task_time",
-            array(),
-            array()
-        ),
-        array("babel_projet_task_time_effective", "llx_Synopsis_projet_task_time_effective",
-            array(),
-            array()
-        ),
-        array("babel_projet_task_time_special", "llx_Synopsis_projet_task_time_special",
-            array(),
-            array()
-        ),
+//        array("babel_projet", "llx_Synopsis_projet",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_document_group", "llx_Synopsis_projet_document_group",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_risk_group", "llx_Synopsis_projet_risk_group",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_task", "llx_Synopsis_projet_task",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_task_actors", "llx_Synopsis_projet_task_actors",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_task_time", "llx_Synopsis_projet_task_time",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_task_time_effective", "llx_Synopsis_projet_task_time_effective",
+//            array(),
+//            array()
+//        ),
+//        array("babel_projet_task_time_special", "llx_Synopsis_projet_task_time_special",
+//            array(),
+//            array()
+//        ),
         array("llx_product", "llx_product",
             array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
             array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')

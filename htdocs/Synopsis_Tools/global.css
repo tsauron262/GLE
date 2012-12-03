@@ -69,6 +69,9 @@ div.mainmenu.SynopsisTools {
 div.mainmenu.SynopsisToolsBug {
     background-image: url(../Synopsis_Tools/img/bug.png);
 }
+div.mainmenu.synopsisficheinter {
+    background-image: url(../fichinter/img/ficheinter.png);
+}
 
 
 

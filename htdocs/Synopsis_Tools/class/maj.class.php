@@ -222,7 +222,7 @@ class maj {
             $requete = "DELETE FROM " . $ligne[1] . " WHERE " . $where;
             $result = $this->queryD($requete);
             if (!$result)
-                $this->erreur("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+                $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
             else
                 $this->infoL ("Donnees de la table " . $ligne[1] . " supprimees.");
         }
@@ -238,7 +238,7 @@ class maj {
                 foreach ($tabIns as $ligne)
                     $this->envoyerDonnee($tableDest, $destCol, array($ligne), true);
             else
-                $this->erreurl("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
+                $this->erreurL("Requete SQL : <br/>" . $this->dbD->lasterror . "<br/><br/>" . $requete);
         }
     }
 

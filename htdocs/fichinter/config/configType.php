@@ -182,4 +182,6 @@ EOF;
 
   print "</table></ul></form>";
 
+  
+  llxFooter();
 ?>

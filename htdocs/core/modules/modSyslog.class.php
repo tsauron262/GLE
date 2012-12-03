@@ -24,11 +24,10 @@
  *	\brief      Fichier de description et activation du module de syslog
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 /**
- *	\class      modSyslog
- *	\brief      Class to enable/disable module Logs
+ *	Class to enable/disable module Logs
  */
 class modSyslog extends DolibarrModules
 {
@@ -38,7 +37,7 @@ class modSyslog extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modSyslog($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 42;

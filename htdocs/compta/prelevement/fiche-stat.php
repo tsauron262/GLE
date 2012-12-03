@@ -1,4 +1,4 @@
-<?PHP
+<?php
 /* Copyright (C) 2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2005 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2010-2012 Juanjo Menent   <jmenent@2byte.es>
@@ -19,13 +19,14 @@
 
 /**
  *	\file       htdocs/compta/prelevement/fiche-stat.php
- *	\brief      Prelevement
+ *  \ingroup    prelevement
+ *	\brief      Prelevement statistics
  */
 
-require("../bank/pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/prelevement.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/prelevement/class/bon-prelevement.class.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/prelevement/class/ligne-prelevement.class.php");
+require '../bank/pre.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/prelevement.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/bonprelevement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/ligneprelevement.class.php';
 
 // Security check
 if ($user->societe_id > 0) accessforbidden();
@@ -57,24 +58,17 @@ if ($prev_id)
 		print '<tr><td width="20%">'.$langs->trans("Ref").'</td><td>'.$bon->getNomUrl(1).'</td></tr>';
 		print '<tr><td width="20%">'.$langs->trans("Date").'</td><td>'.dol_print_date($bon->datec,'day').'</td></tr>';
 		print '<tr><td width="20%">'.$langs->trans("Amount").'</td><td>'.price($bon->amount).'</td></tr>';
-		print '<tr><td width="20%">'.$langs->trans("File").'</td><td>';
-
-		$relativepath = 'receipts/'.$bon->ref;
-
-		print '<a href="'.DOL_URL_ROOT.'/document.php?type=text/plain&amp;modulepart=prelevement&amp;file='.urlencode($relativepath).'">'.$relativepath.'</a>';
-
-		print '</td></tr>';
-
+	
 		// Status
 		print '<tr><td width="20%">'.$langs->trans('Status').'</td>';
 		print '<td>'.$bon->getLibStatut(1).'</td>';
 		print '</tr>';
-		
+	
 		if($bon->date_trans <> 0)
 		{
 			$muser = new User($db);
 			$muser->fetch($bon->user_trans);
-
+	
 			print '<tr><td width="20%">'.$langs->trans("TransData").'</td><td>';
 			print dol_print_date($bon->date_trans,'day');
 			print ' '.$langs->trans("By").' '.$muser->getFullName($langs).'</td></tr>';
@@ -88,10 +82,19 @@ if ($prev_id)
 			print dol_print_date($bon->date_credit,'day');
 			print '</td></tr>';
 		}
-		
+	
 		print '</table>';
-
-		print '</div>';
+	
+		print '<br>';
+	
+		print '<table class="border" width="100%"><tr><td width="20%">';
+		print $langs->trans("WithdrawalFile").'</td><td>';
+		$relativepath = 'receipts/'.$bon->ref;
+		print '<a href="'.DOL_URL_ROOT.'/document.php?type=text/plain&amp;modulepart=prelevement&amp;file='.urlencode($relativepath).'">'.$relativepath.'</a>';
+		print '</td></tr></table>';
+	
+		dol_fiche_end();
+		
 	}
 	else
 	{
@@ -104,7 +107,7 @@ if ($prev_id)
 	 *
 	 */
 	$ligne=new LignePrelevement($db,$user);
-	
+
 	$sql = "SELECT sum(pl.amount), pl.statut";
 	$sql.= " FROM ".MAIN_DB_PREFIX."prelevement_lignes as pl";
 	$sql.= " WHERE pl.fk_prelevement_bons = ".$prev_id;
@@ -128,7 +131,7 @@ if ($prev_id)
 			$row = $db->fetch_row($resql);
 
 			print "<tr $bc[$var]><td>";
-	
+
 			print $ligne->LibStatut($row[1],1);
 
 			print '</td><td align="right">';

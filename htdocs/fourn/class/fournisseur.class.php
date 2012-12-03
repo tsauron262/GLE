@@ -23,9 +23,9 @@
  *	\ingroup    fournisseur,societe
  *	\brief      File of class to manage suppliers
  */
-require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
-require_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.commande.class.php");
-require_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.product.class.php");
+require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
 
 
 /**
@@ -41,17 +41,13 @@ class Fournisseur extends Societe
 	 *
 	 *  @param	DoliDB	$db		Database handler
 	 */
-	function Fournisseur($db)
+	function __construct($db)
 	{
-		global $config;
-
 		$this->db = $db;
 		$this->client = 0;
 		$this->fournisseur = 0;
 		$this->effectif_id  = 0;
 		$this->forme_juridique_code  = 0;
-
-		return 0;
 	}
 
 

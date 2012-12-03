@@ -23,11 +23,11 @@
  *      \brief      Description and activation file for module ECM
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
-/**     \class      modECM
- *      \brief      Description and activation class for module ECM
+/**
+ * 	Description and activation class for module ECM
  */
 class modECM extends DolibarrModules
 {
@@ -37,7 +37,7 @@ class modECM extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
     */
-	function modECM($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 

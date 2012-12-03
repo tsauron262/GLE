@@ -24,10 +24,10 @@
  */
 
 require ("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
+require_once DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 
 
 $langs->load("contracts");
@@ -62,7 +62,7 @@ if ($action == 'addcontact' && $user->rights->contrat->creer)
 
 	if ($result >= 0)
 	{
-		Header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
 		exit;
 	}
 	else
@@ -100,7 +100,7 @@ if ($action == 'deletecontact' && $user->rights->contrat->creer)
 
 	if ($result >= 0)
 	{
-		Header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+		header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
 		exit;
 	}
 }
@@ -144,9 +144,11 @@ if ($id > 0 || ! empty($ref))
 		 */
 		print '<table class="border" width="100%">';
 
+		$linkback = '<a href="'.DOL_URL_ROOT.'/contrat/liste.php'.(! empty($socid)?'?socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+
 		// Reference du contrat
 		print '<tr><td width="25%">'.$langs->trans("Ref").'</td><td colspan="3">';
-		print $object->ref;
+		print $form->showrefnav($object, 'ref', $linkback, 1, 'ref', 'ref', '');
 		print "</td></tr>";
 
 		// Customer
@@ -171,7 +173,7 @@ if ($id > 0 || ! empty($ref))
 		print '<br>';
 		
 		// Contacts lines
-		include(DOL_DOCUMENT_ROOT.'/core/tpl/contacts.tpl.php');
+		include DOL_DOCUMENT_ROOT.'/core/tpl/contacts.tpl.php';
 
 	}
 	else

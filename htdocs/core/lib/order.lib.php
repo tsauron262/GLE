@@ -34,13 +34,13 @@
 function commande_prepare_head($object)
 {
 	global $langs, $conf, $user;
-	if ($conf->expedition->enabled) $langs->load("sendings");
+	if (! empty($conf->expedition->enabled)) $langs->load("sendings");
 	$langs->load("orders");
 
 	$h = 0;
 	$head = array();
 
-	if ($conf->commande->enabled && $user->rights->commande->lire)
+	if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 	{
 		$head[$h][0] = DOL_URL_ROOT.'/commande/fiche.php?id='.$object->id;
 		$head[$h][1] = $langs->trans("OrderCard");
@@ -67,7 +67,7 @@ function commande_prepare_head($object)
 		$head[$h][2] = 'preview';
 		$h++;
 	}
-	
+
 	if (empty($conf->global->MAIN_DISABLE_CONTACTS_TAB))
 	{
 		$head[$h][0] = DOL_URL_ROOT.'/commande/contact.php?id='.$object->id;
@@ -79,18 +79,18 @@ function commande_prepare_head($object)
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
-    // $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
+    // $this->tabs = array('entity:-tabname);   												to remove a tab
     complete_head_from_modules($conf,$langs,$object,$head,$h,'order');
 
     $head[$h][0] = DOL_URL_ROOT.'/commande/document.php?id='.$object->id;
 	/*$filesdir = $conf->commande->dir_output . "/" . dol_sanitizeFileName($commande->ref);
-	include_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 	$listoffiles=dol_dir_list($filesdir,'files',1);
 	$head[$h][1] = (count($listoffiles)?$langs->trans('DocumentsNb',count($listoffiles)):$langs->trans('Documents'));*/
 	$head[$h][1] = $langs->trans('Documents');
 	$head[$h][2] = 'documents';
 	$h++;
-	
+
 	if (empty($conf->global->MAIN_DISABLE_NOTES_TAB))
 	{
 		$head[$h][0] = DOL_URL_ROOT.'/commande/note.php?id='.$object->id;
@@ -104,7 +104,9 @@ function commande_prepare_head($object)
 	$head[$h][2] = 'info';
 	$h++;
 
-	return $head;
+    complete_head_from_modules($conf,$langs,$object,$head,$h,'order','remove');
+
+    return $head;
 }
 
 ?>

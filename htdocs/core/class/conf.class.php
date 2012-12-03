@@ -52,21 +52,15 @@ class Conf
 	public $smart_menu;
 
 	public $modules					= array();	// List of activated modules
-	public $modules_parts			= array();	// List of modules parts
+	public $modules_parts			= array('css'=>array(), 'js'=>array(),'triggers'=>array(),'login'=>array(),'substitutions'=>array(),'menus'=>array(),'theme'=>array(),'tpl'=>array(),'barcode'=>array(),'models'=>array(),'hooks'=>array(),'dir'=>array());	// List of modules parts
 
-	// TODO Remove all thoose tabs with one generic
-	public $sms_engine_modules		= array();
-	public $css_modules				= array();
+	// TODO Remove thoose arrays with generic module_parts
 	public $tabs_modules			= array();
-	public $triggers_modules		= array();
-	public $menus_modules			= array();
-	public $hooks_modules			= array();
-	public $login_modules			= array();
-	public $barcode_modules			= array();
-	public $substitutions_modules	= array();
+	public $sms_engine_modules		= array();
 	public $societe_modules	        = array();
 
 	var $logbuffer					= array();
+	var $loghandlers                = array();
 
 	//! To store properties of multi-company
 	public $multicompany;
@@ -82,7 +76,7 @@ class Conf
 	 *
 	 * @return Conf
 	 */
-	function Conf()
+	function __construct()
 	{
 		// Avoid warnings when filling this->xxx
 		$this->file				= (object) array();
@@ -167,35 +161,32 @@ class Conf
 					if ($value && preg_match('/^MAIN_MODULE_/',$key))
 					{
 						// If this is constant for a new tab page activated by a module.
-						if (preg_match('/^MAIN_MODULE_([A-Z_]+)_TABS_/i',$key))
+						if (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_TABS_/i',$key))
 						{
 							$params=explode(':',$value,2);
 							$this->tabs_modules[$params[0]][]=$value;
 						}
 						// If this is constant for a sms engine
-						elseif (preg_match('/^MAIN_MODULE_([A-Z_]+)_SMS$/i',$key,$reg))
+						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_SMS$/i',$key,$reg))
 						{
 							$modulename=strtolower($reg[1]);
 							$this->sms_engine_modules[$modulename]=$modulename;    // Add this module in list of modules that provide SMS
 						}
 						// If this is constant for all generic part activated by a module
-						elseif (preg_match('/^MAIN_MODULE_([A-Z_]+)_([A-Z]+)$/i',$key,$reg))
+						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_([A-Z]+)$/i',$key,$reg))
 						{
 							$modulename = strtolower($reg[1]);
 							$partname = strtolower($reg[2]);
-							$varname = $partname.'_modules';  // TODO deprecated
-							if (! isset($this->$varname) || ! is_array($this->$varname)) { $this->$varname = array(); } // TODO deprecated
 							if (! isset($this->modules_parts[$partname]) || ! is_array($this->modules_parts[$partname])) { $this->modules_parts[$partname] = array(); }
 							$arrValue = json_decode($value,true);
 							if (is_array($arrValue) && ! empty($arrValue)) $value = $arrValue;
-							else if (in_array($partname,array('login','menus','substitutions','triggers'))) $value = '/'.$modulename.'/core/'.$partname.'/';
+							else if (in_array($partname,array('login','menus','substitutions','triggers','tpl','theme'))) $value = '/'.$modulename.'/core/'.$partname.'/';
 							else if (in_array($partname,array('models'))) $value = '/'.$modulename.'/';
 							else if ($value == 1) $value = '/'.$modulename.'/core/modules/'.$partname.'/';
-							$this->$varname = array_merge($this->$varname, array($modulename => $value));  // TODO deprecated
 							$this->modules_parts[$partname] = array_merge($this->modules_parts[$partname], array($modulename => $value));
 						}
                         // If this is a module constant (must be at end)
-						elseif (preg_match('/^MAIN_MODULE_([A-Z_]+)$/i',$key,$reg))
+						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)$/i',$key,$reg))
 						{
 							$modulename=strtolower($reg[1]);
 							if ($modulename == 'propale') $modulename='propal';
@@ -268,11 +259,30 @@ class Conf
 		// Define default dir_output and dir_temp for directories of modules
 		foreach($this->modules as $module)
 		{
+			// For multicompany sharings
 			$this->$module->multidir_output	= array($this->entity => $rootfordata."/".$module);
 			$this->$module->multidir_temp	= array($this->entity => $rootfordata."/".$module."/temp");
 			// For backward compatibility
 			$this->$module->dir_output	= $rootfordata."/".$module;
 			$this->$module->dir_temp	= $rootfordata."/".$module."/temp";
+		}
+
+		// External modules storage
+		if (! empty($this->modules_parts['dir']))
+		{
+			foreach($this->modules_parts['dir'] as $module => $dirs)
+			{
+				foreach($dirs as $type => $name)
+				{
+					$subdir=($type=='temp'?'/temp':'');
+					// For multicompany sharings
+					$varname = 'multidir_'.$type;
+					$this->$module->$varname = array($this->entity => $rootfordata."/".$name.$subdir);
+					// For backward compatibility
+					$varname = 'dir_'.$type;
+					$this->$module->$varname = $rootfordata."/".$name.$subdir;
+				}
+			}
 		}
 
 		// For mycompany storage
@@ -362,7 +372,7 @@ class Conf
 		$this->css  = "/theme/".$this->theme."/style.css.php";
 
 		// conf->email_from = email pour envoi par dolibarr des mails automatiques
-		$this->email_from = "dolibarr-robot@domain.com";
+		$this->email_from = "robot@domain.com";
 		if (! empty($this->global->MAIN_MAIL_EMAIL_FROM)) $this->email_from = $this->global->MAIN_MAIL_EMAIL_FROM;
 
 		// conf->notification->email_from = email pour envoi par Dolibarr des notifications
@@ -384,10 +394,16 @@ class Conf
         $this->format_date_hour_text_short="%d %b %Y %H:%M";
         $this->format_date_hour_text="%d %B %Y %H:%M";
 
+        // Duration of workday
+        if (! isset($conf->global->MAIN_DURATION_OF_WORKDAY)) $this->global->MAIN_DURATION_OF_WORKDAY=86400;
+
 		// Limites decimales si non definie (peuvent etre egale a 0)
 		if (! isset($this->global->MAIN_MAX_DECIMALS_UNIT))  $this->global->MAIN_MAX_DECIMALS_UNIT=5;
 		if (! isset($this->global->MAIN_MAX_DECIMALS_TOT))   $this->global->MAIN_MAX_DECIMALS_TOT=2;
 		if (! isset($this->global->MAIN_MAX_DECIMALS_SHOWN)) $this->global->MAIN_MAX_DECIMALS_SHOWN=8;
+
+		// Default max file size for upload
+		$this->maxfilesize = (! empty($this->global->MAIN_UPLOAD_DOC) ? $this->global->MAIN_UPLOAD_DOC * 1024 : 0);
 
 		// Timeouts
         if (empty($this->global->MAIN_USE_CONNECT_TIMEOUT)) $this->global->MAIN_USE_CONNECT_TIMEOUT=10;
@@ -440,6 +456,27 @@ class Conf
         if (! defined('NOREQUIREMC') && ! empty($this->multicompany->enabled))
         {
         	if (is_object($mc)) $mc->setValues($this);
+        }
+
+        // We init log handlers
+        if (defined('SYSLOG_HANDLERS')) $handlers = json_decode(constant('SYSLOG_HANDLERS'));
+        else $handlers = array();
+        foreach ($handlers as $handler)
+        {
+        	$file = DOL_DOCUMENT_ROOT.'/core/modules/syslog/'.$handler.'.php';
+           	if (!file_exists($file))
+        	{
+        		throw new Exception('Missing log handler file '.$handler.'.php');
+        	}
+
+        	require_once $file;
+        	$loghandlerinstance = new $handler();
+        	if (!$loghandlerinstance instanceof LogHandlerInterface)
+        	{
+        		throw new Exception('Log handler does not extend LogHandlerInterface');
+        	}
+
+        	$this->loghandlers[]=$loghandlerinstance;
         }
 	}
 }

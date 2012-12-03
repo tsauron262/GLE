@@ -24,12 +24,11 @@
  *	\author     Rodolphe Quiedeville
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
+require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 
 
 /**
- *	\class      AdherentType
- *	\brief      Class to manage members type
+ *	Class to manage members type
  */
 class AdherentType extends CommonObject
 {
@@ -48,11 +47,11 @@ class AdherentType extends CommonObject
     /**
 	 *	Constructor
 	 *
-	 *	@param 		DoliDB		$DB		Database handler
+	 *	@param 		DoliDB		$db		Database handler
      */
-    function AdherentType($DB)
+    function __construct($db)
     {
-        $this->db = $DB ;
+        $this->db = $db;
         $this->statut = 1;
     }
 

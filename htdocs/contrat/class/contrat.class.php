@@ -23,14 +23,14 @@
 /**
  *	\file       htdocs/contrat/class/contrat.class.php
  *	\ingroup    contrat
- *	\brief      Fichier de la classe des contrats
+ *	\brief      File of class to manage contracts
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
+require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+
 
 /**
- *	\class      Contrat
- *	\brief      Classe permettant la gestion des contrats
+ *	Class to manage contracts
  */
 class Contrat extends CommonObject
 {
@@ -72,7 +72,7 @@ class Contrat extends CommonObject
 	 *
 	 *  @param		DoliDB		$db      Database handler
 	 */
-	function Contrat($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 	}
@@ -100,7 +100,7 @@ class Contrat extends CommonObject
 		// Chargement de la classe de numerotation
 		$classname = $conf->global->CONTRACT_ADDON;
 
-		$result=include_once($dir.'/'.$file);
+		$result=include_once $dir.'/'.$file;
 		if ($result)
 		{
 			$obj = new $classname();
@@ -156,7 +156,7 @@ class Contrat extends CommonObject
 		if ($resql)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('CONTRACT_SERVICE_ACTIVATE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -204,7 +204,7 @@ class Contrat extends CommonObject
 		if ($resql)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('CONTRACT_SERVICE_CLOSE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -242,7 +242,7 @@ class Contrat extends CommonObject
 			// Close line not already closed
 	        if ($contratline->statut != 5)
 	        {
-				$contratline->date_cloture=mktime();
+				$contratline->date_cloture=dol_now();
 				$contratline->fk_user_cloture=$user->id;
 				$contratline->statut='5';
 				$result=$contratline->update($user);
@@ -290,7 +290,7 @@ class Contrat extends CommonObject
 		if ($resql)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('CONTRACT_VALIDATE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -622,11 +622,13 @@ class Contrat extends CommonObject
 
 		$this->db->begin();
 
+		$now=dol_now();
+
 		// Insert contract
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."contrat (datec, fk_soc, fk_user_author, date_contrat,";
 		$sql.= " fk_commercial_signature, fk_commercial_suivi, fk_projet,";
 		$sql.= " ref, entity)";
-		$sql.= " VALUES (".$this->db->idate(mktime()).",".$this->socid.",".$user->id;
+		$sql.= " VALUES (".$this->db->idate($now).",".$this->socid.",".$user->id;
 		$sql.= ",".$this->db->idate($this->date_contrat);
 		$sql.= ",".($this->commercial_signature_id>0?$this->commercial_signature_id:"NULL");
 		$sql.= ",".($this->commercial_suivi_id>0?$this->commercial_suivi_id:"NULL");
@@ -652,7 +654,7 @@ class Contrat extends CommonObject
 			if (! $error)
 			{
 				// Appel des triggers
-				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
 				$result=$interface->run_triggers('CONTRACT_CREATE',$this,$user,$langs,$conf);
 				if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -823,6 +825,37 @@ class Contrat extends CommonObject
 
 		if (! $error)
 		{
+			// Appel des triggers
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+			$interface=new Interfaces($this->db);
+			$result=$interface->run_triggers('CONTRACT_DELETE',$this,$user,$langs,$conf);
+			if ($result < 0) {
+				$error++; $this->errors=$interface->errors;
+			}
+			// Fin appel triggers
+		}
+
+		if (! $error)
+		{
+			// We remove directory
+			$ref = dol_sanitizeFileName($this->ref);
+			if ($conf->contrat->dir_output)
+			{
+				$dir = $conf->contrat->dir_output . "/" . $ref;
+				if (file_exists($dir))
+				{
+					$res=@dol_delete_dir_recursive($dir);
+					if (! $res)
+					{
+						$this->error='ErrorFailToDeleteDir';
+						$error++;
+					}
+				}
+			}
+		}
+
+		if (! $error)
+		{
 			$this->db->commit();
 			return 1;
 		}
@@ -890,7 +923,7 @@ class Contrat extends CommonObject
 			// qty, pu, remise_percent et txtva
 			// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 			// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-			$tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits);
+			$tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, 1);
 			$total_ht  = $tabprice[0];
 			$total_tva = $tabprice[1];
 			$total_ttc = $tabprice[2];
@@ -993,6 +1026,7 @@ class Contrat extends CommonObject
 		$tvatx = price2num($tvatx);
 		$localtax1tx = price2num($localtax1tx);
 		$localtax2tx = price2num($localtax2tx);
+
 		$subprice = $price;
 		$remise = 0;
 		if (dol_strlen($remise_percent) > 0)
@@ -1013,7 +1047,7 @@ class Contrat extends CommonObject
 		// qty, pu, remise_percent et txtva
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits);
+		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1);
 		$total_ht  = $tabprice[0];
 		$total_tva = $tabprice[1];
 		$total_ttc = $tabprice[2];
@@ -1107,7 +1141,7 @@ class Contrat extends CommonObject
 			}
 
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('CONTRACTLINE_DELETE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -1619,7 +1653,7 @@ class ContratLigne
      *
      *  @param      DoliDb		$db      Database handler
 	 */
-	function ContratLigne($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 	}
@@ -1877,7 +1911,7 @@ class ContratLigne
 		// qty, pu, remise_percent et txtva
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-		$tabprice=calcul_price_total($this->qty, $this->price_ht, $this->remise_percent, $this->tva_tx, $this->localtax1_tx, $this->localtax2_tx, 0, 'HT', 0);
+		$tabprice=calcul_price_total($this->qty, $this->price_ht, $this->remise_percent, $this->tva_tx, $this->localtax1_tx, $this->localtax2_tx, 0, 'HT', 0, 1);
 		$this->total_ht  = $tabprice[0];
 		$this->total_tva = $tabprice[1];
 		$this->total_ttc = $tabprice[2];
@@ -1935,7 +1969,7 @@ class ContratLigne
 		if (! $notrigger)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('MYOBJECT_MODIFY',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }

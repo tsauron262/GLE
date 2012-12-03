@@ -23,12 +23,10 @@
  *	\ingroup    notification
  *	\brief      Fichier de description et activation du module Notification
  */
-
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 /**
- *	\class      modNotification
- *	\brief      Classe de description et activation du module Mailing
+ *	Classe de description et activation du module Mailing
  */
 class modNotification extends DolibarrModules
 {
@@ -38,7 +36,7 @@ class modNotification extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modNotification($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 600;

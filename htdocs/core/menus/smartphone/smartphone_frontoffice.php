@@ -38,7 +38,7 @@ class MenuSmart
 	 *
 	 *  @param		DoliDB		$db      Database handler
 	 */
-	function MenuSmart($db)
+	function __construct($db)
 	{
 		$this->db=$db;
 	}
@@ -52,7 +52,7 @@ class MenuSmart
 	 */
 	function showmenu($limitmenuto)
 	{
-		require_once(DOL_DOCUMENT_ROOT.'/core/menus/smartphone/smartphone.lib.php');
+		require_once DOL_DOCUMENT_ROOT.'/core/menus/smartphone/smartphone.lib.php';
 
 		print_smartphone_menu($this->db,$this->atarget,$this->hideifnotallowed,$limitmenuto);
 	}

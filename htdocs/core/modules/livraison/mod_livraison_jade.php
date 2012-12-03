@@ -24,7 +24,7 @@
  *   \brief      Fichier contenant la classe du modele de numerotation de reference de bon de livraison Jade
  */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/livraison/modules_livraison.php");
+require_once DOL_DOCUMENT_ROOT .'/core/modules/livraison/modules_livraison.php';
 
 
 /**
@@ -106,7 +106,7 @@ class mod_livraison_jade extends ModeleNumRefDeliveryOrder
 	 *  @param  Object		$object		Object we need next value for
 	 *  @return string      			Value if KO, <0 if KO
 	 */
-    function getNextValue($objsoc=0,$object='')
+    function getNextValue($objsoc,$object)
     {
         global $db,$conf;
 

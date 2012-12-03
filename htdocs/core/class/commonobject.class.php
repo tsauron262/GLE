@@ -2,7 +2,9 @@
 /* Copyright (C) 2006-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis@dolibarr.fr>
  * Copyright (C) 2010-2011 Juanjo Menent        <jmenent@2byte.es>
- * Copyright (C) 2012      Christophe Battarel   <christophe.battarel@altairis.fr>
+ * Copyright (C) 2012      Christophe Battarel  <christophe.battarel@altairis.fr>
+ * Copyright (C) 2011-2012 Philippe Grand	    <philippe.grand@atoo-net.com>
+ * Copyright (C) 2012      Marcos García        <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +37,13 @@ abstract class CommonObject
     public $errors;
     public $canvas;                // Contains canvas name if it is
 
+    public $lastname;
+    public $firstname;
+    public $name;
+    public $nom;
+    public $civility_id;
+
+    public $array_options=array();
 
     // No constructor as it is an abstract class
 
@@ -65,7 +74,7 @@ abstract class CommonObject
         }
 
         // If order not defined, we use the setup
-        if ($nameorder < 0) $nameorder=(! $conf->global->MAIN_FIRSTNAME_NAME_POSITION);
+        if ($nameorder < 0) $nameorder=(empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION));
 
         if ($nameorder)
         {
@@ -179,7 +188,7 @@ abstract class CommonObject
             if (! $notrigger)
             {
                 // Call triggers
-                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                 $interface=new Interfaces($this->db);
                 $result=$interface->run_triggers(strtoupper($this->element).'_ADD_CONTACT',$this,$user,$langs,$conf);
                 if ($result < 0) {
@@ -212,14 +221,16 @@ abstract class CommonObject
      *      @param	int		$rowid              Id of line contact-element
      * 		@param	int		$statut	            New status of link
      *      @param  int		$type_contact_id    Id of contact type (not modified if 0)
+     *      @param  int		$fk_socpeople	    Id of soc_people to update (not modified if 0)
      *      @return int                 		<0 if KO, >= 0 if OK
      */
-    function update_contact($rowid, $statut, $type_contact_id=0)
+    function update_contact($rowid, $statut, $type_contact_id=0, $fk_socpeople=0)
     {
         // Insertion dans la base
         $sql = "UPDATE ".MAIN_DB_PREFIX."element_contact set";
         $sql.= " statut = ".$statut;
         if ($type_contact_id) $sql.= ", fk_c_type_contact = '".$type_contact_id ."'";
+        if ($fk_socpeople) $sql.= ", fk_socpeople = '".$fk_socpeople ."'";
         $sql.= " where rowid = ".$rowid;
         $resql=$this->db->query($sql);
         if ($resql)
@@ -255,7 +266,7 @@ abstract class CommonObject
             if (! $notrigger)
             {
                 // Call triggers
-                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                 $interface=new Interfaces($this->db);
                 $result=$interface->run_triggers(strtoupper($this->element).'_DELETE_CONTACT',$this,$user,$langs,$conf);
                 if ($result < 0) {
@@ -520,7 +531,7 @@ abstract class CommonObject
      */
     function fetch_contact($contactid)
     {
-        require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+        require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
         $contact = new Contact($this->db);
         $result=$contact->fetch($contactid);
         $this->contact = $contact;
@@ -766,13 +777,13 @@ abstract class CommonObject
 
         $sql = "SELECT MAX(te.".$fieldid.")";
         $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as te";
-        if ($this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && empty($user->rights->societe->client->voir))) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && empty($user->rights->societe->client->voir))) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
         $sql.= " WHERE te.".$fieldid." < '".$this->db->escape($this->ref)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if ($this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
-        if ($this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
 
         //print $sql."<br>";
         $result = $this->db->query($sql);
@@ -787,13 +798,13 @@ abstract class CommonObject
 
         $sql = "SELECT MIN(te.".$fieldid.")";
         $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as te";
-        if ($this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
         $sql.= " WHERE te.".$fieldid." > '".$this->db->escape($this->ref)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if ($this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
-        if ($this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
         // Rem: Bug in some mysql version: SELECT MIN(rowid) FROM llx_socpeople WHERE rowid > 1 when one row in database with rowid=1, returns 1 instead of null
 
         //print $sql."<br>";
@@ -1011,7 +1022,9 @@ abstract class CommonObject
 
 
     /**
-     *  Stocke un numero de rang pour toutes les lignes de detail d'un element qui n'en ont pas.
+     *  Save a new position (field rang) for details lines.
+     *  You can choose to ser position for lines with already a position or lines wihtout any position defined.
+     *  Call this function only for table that contains a field fk_parent_line.
      *
      * 	@param		boolean		$renum			true to renum all already ordered lines, false to renum only not already ordered lines.
      * 	@param		string		$rowidorder		ASC or DESC
@@ -1030,7 +1043,9 @@ abstract class CommonObject
             return -1;
         }
 
-		$sql = 'SELECT count(rowid) FROM '.MAIN_DB_PREFIX.$this->table_element_line;
+        // Count number of lines to reorder (according to choice $renum)
+    	$nl=0;
+        $sql = 'SELECT count(rowid) FROM '.MAIN_DB_PREFIX.$this->table_element_line;
 		$sql.= ' WHERE '.$this->fk_element.'='.$this->id;
 		if (! $renum) $sql.= ' AND rang = 0';
 		if ($renum) $sql.= ' AND rang <> 0';
@@ -1042,16 +1057,20 @@ abstract class CommonObject
 			$row = $this->db->fetch_row($resql);
 			$nl = $row[0];
 		}
+		else dol_print_error($this->db);
 		if ($nl > 0)
 		{
+			// The goal of this part is to reorder all lines, with all children lines sharing the same
+			// counter that parents.
 			$rows=array();
 
+			// We frist search all lines that are parent lines (for multilevel details lines)
 			$sql = 'SELECT rowid FROM '.MAIN_DB_PREFIX.$this->table_element_line;
 			$sql.= ' WHERE '.$this->fk_element.' = '.$this->id;
 			$sql.= ' AND fk_parent_line IS NULL';
 			$sql.= ' ORDER BY rang ASC, rowid '.$rowidorder;
 
-			dol_syslog(get_class($this)."::line_order sql=".$sql, LOG_DEBUG);
+			dol_syslog(get_class($this)."::line_order search all parent lines sql=".$sql, LOG_DEBUG);
 			$resql = $this->db->query($sql);
 			if ($resql)
 			{
@@ -1060,7 +1079,7 @@ abstract class CommonObject
 				while ($i < $num)
 				{
 					$row = $this->db->fetch_row($resql);
-					$rows[] = $row[0];
+					$rows[] = $row[0];	// Add parent line into array rows
 					$childrens = $this->getChildrensOfLine($row[0]);
 					if (! empty($childrens))
 					{
@@ -1072,6 +1091,7 @@ abstract class CommonObject
 					$i++;
 				}
 
+				// Now we set a new number for each lines (parent and children with children included into parent tree)
 				if (! empty($rows))
 				{
 					foreach($rows as $key => $row)
@@ -1079,6 +1099,10 @@ abstract class CommonObject
 						$this->updateRangOfLine($row, ($key+1));
 					}
 				}
+			}
+			else
+			{
+				dol_print_error($this->db);
 			}
 		}
 	}
@@ -1098,7 +1122,7 @@ abstract class CommonObject
 		$sql.= ' AND fk_parent_line = '.$id;
 		$sql.= ' ORDER BY rang ASC';
 
-		dol_syslog(get_class($this)."::getChildrenOfLines sql=".$sql, LOG_DEBUG);
+		dol_syslog(get_class($this)."::getChildrenOfLines search children lines for line ".$id." sql=".$sql, LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
@@ -1446,7 +1470,7 @@ abstract class CommonObject
      */
     function update_price($exclspec=0,$roundingadjust=-1,$nodatabaseupdate=0)
     {
-        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
+        include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
         if ($roundingadjust < 0 && isset($conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND)) $roundingadjust=$conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND;
         if ($roundingadjust < 0) $roundingadjust=0;
@@ -1494,44 +1518,55 @@ abstract class CommonObject
                 $this->total_localtax2 += $obj->total_localtax2;
                 $this->total_ttc       += $obj->total_ttc;
 
-                // Define vatrates with totals for each line and for all lines
-                $vatrates[$this->vatrate][]=array(
-                	'total_ht'       =>$obj->total_ht,
-                	'total_tva'      =>$obj->total_tva,
-                	'total_ttc'      =>$obj->total_ttc,
-                	'total_localtax1'=>$obj->total_localtax1,
-                	'total_localtax2'=>$obj->total_localtax2
-                );
-                if (! isset($vatrates_alllines[$this->vatrate]['total_ht']))        $vatrates_alllines[$this->vatrate]['total_ht']=0;
-                if (! isset($vatrates_alllines[$this->vatrate]['total_tva']))       $vatrates_alllines[$this->vatrate]['total_tva']=0;
-                if (! isset($vatrates_alllines[$this->vatrate]['total_localtax1'])) $vatrates_alllines[$this->vatrate]['total_localtax1']=0;
-                if (! isset($vatrates_alllines[$this->vatrate]['total_localtax2'])) $vatrates_alllines[$this->vatrate]['total_localtax2']=0;
-                if (! isset($vatrates_alllines[$this->vatrate]['total_ttc']))       $vatrates_alllines[$this->vatrate]['total_ttc']=0;
-                $vatrates_alllines[$this->vatrate]['total_ht']       +=$obj->total_ht;
-                $vatrates_alllines[$this->vatrate]['total_tva']      +=$obj->total_tva;
-                $vatrates_alllines[$this->vatrate]['total_localtax1']+=$obj->total_localtax1;
-                $vatrates_alllines[$this->vatrate]['total_localtax2']+=$obj->total_localtax2;
-                $vatrates_alllines[$this->vatrate]['total_ttc']      +=$obj->total_ttc;
+                // Check if global invoice tax for this vat rate
+                if (! empty($obj->vatrate))
+                {
+                    if ($this->total_localtax1 == 0)
+                    {
+						// Search local taxes
+						$sql  = "SELECT t.localtax1, t.localtax1_type";
+						$sql .= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_pays as p";
+						$sql .= " WHERE t.fk_pays = p.rowid AND p.code = '".$this->client->country_code."'";
+						$sql .= " AND t.taux = ".$obj->vatrate." AND t.active = 1";
+
+						dol_syslog("get_localtax sql=".$sql);
+						$resqlt=$this->db->query($sql);
+						if ($resqlt)
+						{
+							$objt = $this->db->fetch_object($resqlt);
+       						if ($objt->localtax1_type == '7')
+							{
+                 				$this->total_localtax1 += $objt->localtax1;
+                 				$this->total_ttc       += $objt->localtax1;
+							}
+						}
+					}
+                    if ($this->total_localtax2 == 0)
+                    {
+						// Search local taxes
+						$sql  = "SELECT t.localtax2, t.localtax2_type";
+						$sql .= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_pays as p";
+						$sql .= " WHERE t.fk_pays = p.rowid AND p.code = '".$this->client->country_code."'";
+						$sql .= " AND t.taux = ".$obj->vatrate." AND t.active = 1";
+
+						dol_syslog("get_localtax sql=".$sql);
+						$resqlt=$this->db->query($sql);
+						if ($resqlt)
+						{
+							$objt = $this->db->fetch_object($resqlt);
+       						if ($objt->localtax2_type == '7')
+							{
+                 				$this->total_localtax2 += $objt->localtax2;
+                 				$this->total_ttc       += $objt->localtax2;
+							}
+						}
+					}
+                }
 
                 $i++;
             }
 
             $this->db->free($resql);
-
-            // TODO
-            if ($roundingadjust)
-            {
-                // For each vatrate, calculate if two method of calculation differs
-
-
-                // If it differs
-                if (1==2)
-                {
-                    // Adjust a line and update it
-
-
-                }
-            }
 
             // Now update global field total_ht, total_ttc and tva
             $fieldht='total_ht';
@@ -1639,9 +1674,19 @@ abstract class CommonObject
 
         $justsource=false;
         $justtarget=false;
+        $withtargettype=false;
+        $withsourcetype=false;
 
-        if (! empty($sourceid) && ! empty($sourcetype) && empty($targetid) && empty($targettype)) $justsource=true;
-        if (empty($sourceid) && empty($sourcetype) && ! empty($targetid) && ! empty($targettype)) $justtarget=true;
+        if (! empty($sourceid) && ! empty($sourcetype) && empty($targetid))
+        {
+        	$justsource=true;
+        	if (! empty($targettype)) $withtargettype=true;
+        }
+        if (! empty($targetid) && ! empty($targettype) && empty($sourceid))
+        {
+        	$justtarget=true;
+        	if (! empty($sourcetype)) $withsourcetype=true;
+        }
 
         $sourceid = (! empty($sourceid) ? $sourceid : $this->id);
         $targetid = (! empty($targetid) ? $targetid : $this->id);
@@ -1654,8 +1699,16 @@ abstract class CommonObject
         $sql.= " WHERE ";
         if ($justsource || $justtarget)
         {
-            if ($justsource) $sql.= "fk_source = '".$sourceid."' AND sourcetype = '".$sourcetype."'";
-            if ($justtarget) $sql.= "fk_target = '".$targetid."' AND targettype = '".$targettype."'";
+            if ($justsource)
+            {
+            	$sql.= "fk_source = '".$sourceid."' AND sourcetype = '".$sourcetype."'";
+            	if ($withtargettype) $sql.= " AND targettype = '".$targettype."'";
+            }
+            else if ($justtarget)
+            {
+            	$sql.= "fk_target = '".$targetid."' AND targettype = '".$targettype."'";
+            	if ($withsourcetype) $sql.= " AND sourcetype = '".$sourcetype."'";
+            }
         }
         else
         {
@@ -1808,15 +1861,43 @@ abstract class CommonObject
 	/**
 	 *	Delete all links between an object $this
 	 *
+	 *	@param	int		$sourceid		Object source id
+     *	@param  string	$sourcetype		Object source type
+     *	@param  int		$targetid		Object target id
+     *	@param  string	$targettype		Object target type
 	 *	@return     int	>0 if OK, <0 if KO
 	 */
-	function deleteObjectLinked()
+	function deleteObjectLinked($sourceid='', $sourcetype='', $targetid='', $targettype='')
 	{
+		$deletesource=false;
+		$deletetarget=false;
+
+		if (! empty($sourceid) && ! empty($sourcetype) && empty($targetid) && empty($targettype)) $deletesource=true;
+		else if (empty($sourceid) && empty($sourcetype) && ! empty($targetid) && ! empty($targettype)) $deletetarget=true;
+
+		$sourceid = (! empty($sourceid) ? $sourceid : $this->id);
+		$sourcetype = (! empty($sourcetype) ? $sourcetype : $this->element);
+		$targetid = (! empty($targetid) ? $targetid : $this->id);
+		$targettype = (! empty($targettype) ? $targettype : $this->element);
+
 		$sql = "DELETE FROM ".MAIN_DB_PREFIX."element_element";
 		$sql.= " WHERE";
-		$sql.= " (fk_source = ".$this->id." AND sourcetype = '".$this->element."')";
-		$sql.= " OR";
-		$sql.= " (fk_target = ".$this->id." AND targettype = '".$this->element."')";
+		if ($deletesource)
+		{
+			$sql.= " fk_source = ".$sourceid." AND sourcetype = '".$sourcetype."'";
+			$sql.= " AND fk_target = ".$this->id." AND targettype = '".$this->element."'";
+		}
+		else if ($deletetarget)
+		{
+			$sql.= " fk_target = ".$targetid." AND targettype = '".$targettype."'";
+			$sql.= " AND fk_source = ".$this->id." AND sourcetype = '".$this->element."'";
+		}
+		else
+		{
+			$sql.= " (fk_source = ".$this->id." AND sourcetype = '".$this->element."')";
+			$sql.= " OR";
+			$sql.= " (fk_target = ".$this->id." AND targettype = '".$this->element."')";
+		}
 
 		dol_syslog(get_class($this)."::deleteObjectLinked sql=".$sql, LOG_DEBUG);
 		if ($this->db->query($sql))
@@ -1944,7 +2025,7 @@ abstract class CommonObject
         if (! is_array($optionsArray))
         {
             // optionsArray not already loaded, so we load it
-            require_once(DOL_DOCUMENT_ROOT."/core/class/extrafields.class.php");
+            require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
             $extrafields = new ExtraFields($this->db);
             $optionsArray = $extrafields->fetch_name_optionals_label();
         }
@@ -1999,11 +2080,11 @@ abstract class CommonObject
 
 		$error=0;
 
-        if (count($this->array_options) > 0)
+        if (! empty($this->array_options))
         {
             // Check parameters
             $langs->load('admin');
-            require_once(DOL_DOCUMENT_ROOT."/core/class/extrafields.class.php");
+            require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
             $extrafields = new ExtraFields($this->db);
             $optionsArray = $extrafields->fetch_name_optionals_label($this->elementType);
 
@@ -2131,11 +2212,6 @@ abstract class CommonObject
     {
         $nb=0;
 
-        //if (empty($this->table_element_line)) dol_print_error('Call hasPredefinedProducts on a class with no table_element_line property');
-
-        //$sql ='SELECT COUNT(rowid) FROM '.MAIN_DB_PREFIX.$this->table_element_line;
-        //$sql.='WHERE ...';
-        //var_dump($this->lines);
         foreach($this->lines as $key => $val)
         {
             $qualified=0;
@@ -2146,6 +2222,27 @@ abstract class CommonObject
         }
         dol_syslog(get_class($this).'::hasProductsOrServices we found '.$nb.' qualified lines of products/servcies');
         return $nb;
+    }
+
+    /**
+     * Function that returns the total amount of discounts applied.
+     * 
+     * @return false|float False is returned if the discount couldn't be retrieved
+     */
+    function getTotalDiscount()
+    {
+        $sql = 'SELECT (SUM(`subprice`) - SUM(`total_ht`)) as `discount` FROM '.MAIN_DB_PREFIX.$this->table_element.'det WHERE `'.$this->fk_element.'` = '.$this->id;
+
+        $query = $this->db->query($sql);
+        
+        if ($query)
+        {
+            $result = $this->db->fetch_object($query);
+
+            return price2num($result->discount);
+        }
+
+        return false;
     }
 
     /**
@@ -2315,59 +2412,81 @@ abstract class CommonObject
      *  TODO Move this into html.class.php
      *  But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
      *
+     *	@param	HookManager		$hookmanager		Hook manager instance
      *  @return	void
      */
-    function showLinkedObjectBlock()
+    function showLinkedObjectBlock($hookmanager=false)
     {
-        global $langs,$bc;
+        global $conf,$langs,$bc;
 
         $this->fetchObjectLinked();
 
-        $num = count($this->linkedObjects);
-
-        foreach($this->linkedObjects as $objecttype => $objects)
+        // Bypass the default method
+        if (! is_object($hookmanager))
         {
-            $tplpath = $element = $subelement = $objecttype;
-
-            if (preg_match('/^([^_]+)_([^_]+)/i',$objecttype,$regs))
-            {
-                $element = $regs[1];
-                $subelement = $regs[2];
-                $tplpath = $element.'/'.$subelement;
-            }
-
-            // To work with non standard path
-            if ($objecttype == 'facture')          {
-                $tplpath = 'compta/'.$element;
-            }
-            else if ($objecttype == 'propal')           {
-                $tplpath = 'comm/'.$element;
-            }
-            else if ($objecttype == 'shipping')         {
-                $tplpath = 'expedition';
-            }
-            else if ($objecttype == 'delivery')         {
-                $tplpath = 'livraison';
-            }
-            else if ($objecttype == 'invoice_supplier') {
-                $tplpath = 'fourn/facture';
-            }
-            else if ($objecttype == 'order_supplier')   {
-                $tplpath = 'fourn/commande';
-            }
-
-            global $linkedObjectBlock;
-            $linkedObjectBlock = $objects;
-
-            dol_include_once('/'.$tplpath.'/tpl/linkedobjectblock.tpl.php');
+        	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+        	$hookmanager=new HookManager($this->db);
         }
+        $hookmanager->initHooks(array('commonobject'));
+        $parameters=array();
+        $reshook=$hookmanager->executeHooks('showLinkedObjectBlock',$parameters,$this,$action);    // Note that $action and $object may have been modified by hook
 
-        return $num;
+        if (! $reshook)
+        {
+        	$num = count($this->linkedObjects);
+
+        	foreach($this->linkedObjects as $objecttype => $objects)
+        	{
+        		$tplpath = $element = $subelement = $objecttype;
+
+        		if (preg_match('/^([^_]+)_([^_]+)/i',$objecttype,$regs))
+        		{
+        			$element = $regs[1];
+        			$subelement = $regs[2];
+        			$tplpath = $element.'/'.$subelement;
+        		}
+
+        		// To work with non standard path
+        		if ($objecttype == 'facture')          {
+        			$tplpath = 'compta/'.$element;
+        			if (empty($conf->facture->enabled)) continue;	// Do not show if module disabled
+        		}
+        		else if ($objecttype == 'propal')           {
+        			$tplpath = 'comm/'.$element;
+        			if (empty($conf->propal->enabled)) continue;	// Do not show if module disabled
+        		}
+        		else if ($objecttype == 'shipping')         {
+        			$tplpath = 'expedition';
+        			if (empty($conf->expedition->enabled)) continue;	// Do not show if module disabled
+        		}
+        		else if ($objecttype == 'delivery')         {
+        			$tplpath = 'livraison';
+        		}
+        		else if ($objecttype == 'invoice_supplier') {
+        			$tplpath = 'fourn/facture';
+        		}
+        		else if ($objecttype == 'order_supplier')   {
+        			$tplpath = 'fourn/commande';
+        		}
+
+        		global $linkedObjectBlock;
+        		$linkedObjectBlock = $objects;
+
+        		// Output template part (modules that overwrite templates must declare this into descriptor)
+        		$dirtpls=array_merge($conf->modules_parts['tpl'],array('/'.$tplpath.'/tpl'));
+        		foreach($dirtpls as $reldir)
+        		{
+        			$res=@include dol_buildpath($reldir.'/linkedobjectblock.tpl.php');
+        			if ($res) break;
+        		}
+        	}
+
+        	return $num;
+        }
     }
 
 
     /* This is to show add lines */
-
 
     /**
      *	Show add predefined products/services form
@@ -2377,16 +2496,17 @@ abstract class CommonObject
      *  @param  int	    		$dateSelector       1=Show also date range input fields
      *  @param	Societe			$seller				Object thirdparty who sell
      *  @param	Societe			$buyer				Object thirdparty who buy
-	 *	@param	HookManager		$hookmanager		Hook manager instance
-	 *	@return	void
-	 */
-	function formAddPredefinedProduct($dateSelector,$seller,$buyer,$hookmanager=false)
-	{
-		global $conf,$langs,$object;
-		global $form,$bcnd,$var;
+     *	@param	HookManager		$hookmanager		Hook manager instance
+     *	@return	void
+     *	@deprecated
+     */
+    function formAddPredefinedProduct($dateSelector,$seller,$buyer,$hookmanager=false)
+    {
+    	global $conf,$langs,$object;
+    	global $form,$bcnd,$var;
 
-        // Use global variables + $dateSelector + $seller and $buyer
-        include(DOL_DOCUMENT_ROOT.'/core/tpl/predefinedproductline_create.tpl.php');
+    	// Use global variables + $dateSelector + $seller and $buyer
+    	include(DOL_DOCUMENT_ROOT.'/core/tpl/predefinedproductline_create.tpl.php');
     }
 
     /**
@@ -2399,14 +2519,47 @@ abstract class CommonObject
      *  @param	Societe			$buyer				Object thirdparty who buy
      *	@param	HookManager		$hookmanager		Hook manager instance
      *	@return	void
+     *	@deprecated
      */
-	function formAddFreeProduct($dateSelector,$seller,$buyer,$hookmanager=false)
+    function formAddFreeProduct($dateSelector,$seller,$buyer,$hookmanager=false)
+    {
+    	global $conf,$langs,$object;
+    	global $form,$bcnd,$var;
+
+    	// Use global variables + $dateSelector + $seller and $buyer
+    	include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_create.tpl.php');
+    }
+
+
+    /**
+     *	Show add free and predefined products/services form
+     *  TODO Edit templates to use global variables and include them directly in controller call
+     *  But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
+     *
+     *  @param	int		        $dateSelector       1=Show also date range input fields
+     *  @param	Societe			$seller				Object thirdparty who sell
+     *  @param	Societe			$buyer				Object thirdparty who buy
+     *	@param	HookManager		$hookmanager		Hook manager instance
+     *	@return	void
+     */
+	function formAddObjectLine($dateSelector,$seller,$buyer,$hookmanager=false)
 	{
-		global $conf,$langs,$object;
+		global $conf,$user,$langs,$object;
 		global $form,$bcnd,$var;
 
+		// Output template part (modules that overwrite templates must declare this into descriptor)
         // Use global variables + $dateSelector + $seller and $buyer
-        include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_create.tpl.php');
+		$dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
+		foreach($dirtpls as $reldir)
+		{
+			$tpl = dol_buildpath($reldir.'/objectline_add.tpl.php');
+			if (empty($conf->file->strict_mode)) {
+				$res=@include $tpl;
+			} else {
+				$res=include $tpl; // for debug
+			}
+		    if ($res) break;
+		}
     }
 
 
@@ -2428,7 +2581,7 @@ abstract class CommonObject
 	 *	@param	HookManager	$hookmanager		Hookmanager
 	 *	@return	void
 	 */
-	function printObjectLines($action,$seller,$buyer,$selected=0,$dateSelector=0,$hookmanager=false)
+	function printObjectLines($action, $seller, $buyer, $selected=0, $dateSelector=0, $hookmanager=false)
 	{
 		global $conf,$langs;
 
@@ -2440,8 +2593,20 @@ abstract class CommonObject
 		print '<td>'.$langs->trans('Description').'</td>';
 		print '<td align="right" width="50">'.$langs->trans('VAT').'</td>';
 		print '<td align="right" width="80">'.$langs->trans('PriceUHT').'</td>';
+		if ($conf->global->MAIN_FEATURES_LEVEL > 1)
+			print '<td align="right" width="80">&nbsp;</td>';
 		print '<td align="right" width="50">'.$langs->trans('Qty').'</td>';
 		print '<td align="right" width="50">'.$langs->trans('ReductionShort').'</td>';
+		if (! empty($conf->margin->enabled)) {
+			if ($conf->global->MARGIN_TYPE == "1")
+				print '<td align="right" width="80">'.$langs->trans('BuyingPrice').'</td>';
+			else
+				print '<td align="right" width="80">'.$langs->trans('BuyingCost').'</td>';
+			if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+				print '<td align="right" width="50">'.$langs->trans('MarginRate').'</td>';
+			if (! empty($conf->global->DISPLAY_MARK_RATES))
+				print '<td align="right" width="50">'.$langs->trans('MarkRate').'</td>';
+		}
 		print '<td align="right" width="50">'.$langs->trans('TotalHTShort').'</td>';
 		print '<td width="10">&nbsp;</td>';
 		print '<td width="10">&nbsp;</td>';
@@ -2461,7 +2626,7 @@ abstract class CommonObject
 				if (empty($line->fk_parent_line))
 				{
 					$parameters = array('line'=>$line,'var'=>$var,'num'=>$num,'i'=>$i,'dateSelector'=>$dateSelector,'seller'=>$seller,'buyer'=>$buyer,'selected'=>$selected);
-					$reshook=$hookmanager->executeHooks('printObjectLine',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+					$reshook=$hookmanager->executeHooks('printObjectLine', $parameters, $this, $action);    // Note that $action and $object may have been modified by some hooks
 				}
 			}
 			else
@@ -2476,8 +2641,6 @@ abstract class CommonObject
 	/**
 	 *	Return HTML content of a detail line
 	 *	TODO Move this into an output class file (htmlline.class.php)
-	 *	If lines are into a template, title must also be into a template
-	 *	But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
 	 *
 	 *	@param	string		$action				GET/POST action
 	 *	@param	array	    $line		       	Selected object line to output
@@ -2497,13 +2660,23 @@ abstract class CommonObject
 		global $form,$bc,$bcdd;
 
 		$element=$this->element;
+		$text='';
 
 		// Show product and description
-		$type=$line->product_type?$line->product_type:$line->fk_product_type;
-		// Try to enhance type detection using date_start and date_end for free lines where type
-		// was not saved.
-		if (! empty($line->date_start)) $type=1;
-		if (! empty($line->date_end)) $type=1;
+		$type=(! empty($line->product_type)?$line->product_type:$line->fk_product_type);
+		// Try to enhance type detection using date_start and date_end for free lines where type was not saved.
+		if (! empty($line->date_start)) $type=1; // deprecated
+		if (! empty($line->date_end)) $type=1; // deprecated
+
+		if ($line->fk_product > 0)
+		{
+			$product_static = new Product($this->db);
+
+			$product_static->type=$line->fk_product_type;
+			$product_static->id=$line->fk_product;
+			$product_static->ref=$line->ref;
+			$text=$product_static->getNomUrl(1);
+		}
 
 		// Ligne en mode visu
 		if ($action != 'editline' || $selected != $line->id)
@@ -2511,13 +2684,11 @@ abstract class CommonObject
 			// Produit
 			if ($line->fk_product > 0)
 			{
-				$product_static = new Product($this->db);
-
 				// Define output language
 				if (! empty($conf->global->MAIN_MULTILANGS) && ! empty($conf->global->PRODUIT_TEXTS_IN_THIRDPARTY_LANGUAGE))
 				{
 					$this->fetch_thirdparty();
-					$prod = new Product($this->db, $line->fk_product);
+					$prod = new Product($this->db);
 
 					$outputlangs = $langs;
 					$newlang='';
@@ -2529,43 +2700,53 @@ abstract class CommonObject
 						$outputlangs->setDefaultLang($newlang);
 					}
 
-					$label = (! empty($prod->multilangs[$outputlangs->defaultlang]["libelle"])) ? $prod->multilangs[$outputlangs->defaultlang]["libelle"] : $line->product_label;
+					$label = (! empty($prod->multilangs[$outputlangs->defaultlang]["label"])) ? $prod->multilangs[$outputlangs->defaultlang]["label"] : $line->product_label;
 				}
 				else
 				{
 					$label = $line->product_label;
 				}
 
-				$product_static->type=$line->fk_product_type;
-				$product_static->id=$line->fk_product;
-				$product_static->ref=$line->ref;
-				$product_static->libelle=$label;
-				$text=$product_static->getNomUrl(1);
-				$text.= ' - '.$label;
-				$description=($conf->global->PRODUIT_DESC_IN_FORM?'':dol_htmlentitiesbr($line->description));
-
-				// Use global variables + $seller and $buyer
-				include(DOL_DOCUMENT_ROOT.'/core/tpl/predefinedproductline_view.tpl.php');
+				$text.= ' - '.(! empty($line->label)?$line->label:$label);
+				$description=(! empty($conf->global->PRODUIT_DESC_IN_FORM)?'':dol_htmlentitiesbr($line->description));
 			}
-			else
+
+			// Output template part (modules that overwrite templates must declare this into descriptor)
+			// Use global variables + $dateSelector + $seller and $buyer
+			$dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
+			foreach($dirtpls as $reldir)
 			{
-				// Use global variables + $dateSelector + $seller and $buyer
-				include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_view.tpl.php');
+				$tpl = dol_buildpath($reldir.'/objectline_view.tpl.php');
+				if (empty($conf->file->strict_mode)) {
+					$res=@include $tpl;
+				} else {
+					$res=include $tpl; // for debug
+				}
+				if ($res) break;
 			}
 		}
 
 		// Ligne en mode update
 		if ($this->statut == 0 && $action == 'editline' && $selected == $line->id)
 		{
-			if ($line->fk_product > 0)
+			$label = (! empty($line->label) ? $line->label : (($line->fk_product > 0) ? $line->product_label : ''));
+			if (! empty($conf->global->MAIN_HTML5_PLACEHOLDER)) $placeholder=' placeholder="'.$langs->trans("Label").'"';
+			else $placeholder=' title="'.$langs->trans("Label").'"';
+
+			$pu_ttc = price2num($line->subprice * (1 + ($line->tva_tx/100)), 'MU');
+
+			// Output template part (modules that overwrite templates must declare this into descriptor)
+			// Use global variables + $dateSelector + $seller and $buyer
+			$dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
+			foreach($dirtpls as $reldir)
 			{
-				// Use global variables + $dateSelector + $seller and $buyer
-				include(DOL_DOCUMENT_ROOT.'/core/tpl/predefinedproductline_edit.tpl.php');
-			}
-			else
-			{
-				// Use global variables + $dateSelector + $seller and $buyer
-				include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_edit.tpl.php');
+				$tpl = dol_buildpath($reldir.'/objectline_edit.tpl.php');
+				if (empty($conf->file->strict_mode)) {
+					$res=@include $tpl;
+				} else {
+					$res=include $tpl; // for debug
+				}
+				if ($res) break;
 			}
 		}
 	}
@@ -2603,7 +2784,7 @@ abstract class CommonObject
         {
             $var=!$var;
 
-            if (is_object($hookmanager) && ( ($line->product_type == 9 && ! empty($line->special_code)) || ! empty($line->fk_parent_line) ) )
+            if (is_object($hookmanager) && (($line->product_type == 9 && ! empty($line->special_code)) || ! empty($line->fk_parent_line)))
             {
                 if (empty($line->fk_parent_line))
                 {
@@ -2633,7 +2814,7 @@ abstract class CommonObject
      */
     function printOriginLine($line,$var)
     {
-        global $langs,$bc;
+        global $conf,$langs,$bc;
 
         //var_dump($line);
 
@@ -2651,14 +2832,14 @@ abstract class CommonObject
             $discount->fk_soc = $this->socid;
             $this->tpl['label'].= $discount->getNomUrl(0,'discount');
         }
-        else if ($line->fk_product)
+        else if (! empty($line->fk_product))
         {
             $productstatic = new Product($this->db);
             $productstatic->id = $line->fk_product;
             $productstatic->ref = $line->ref;
             $productstatic->type = $line->fk_product_type;
             $this->tpl['label'].= $productstatic->getNomUrl(1);
-            $this->tpl['label'].= $line->label?' - '.$line->label:'';
+            $this->tpl['label'].= ' - '.(! empty($line->label)?$line->label:$line->product_label);
             // Dates
             if ($line->product_type == 1 && ($date_start || $date_end))
             {
@@ -2676,7 +2857,7 @@ abstract class CommonObject
             }
         }
 
-        if ($line->desc)
+        if (! empty($line->desc))
         {
             if ($line->desc == '(CREDIT_NOTE)')  // TODO Not sure this is used for source object
             {
@@ -2705,8 +2886,162 @@ abstract class CommonObject
         $this->tpl['qty'] = (($line->info_bits & 2) != 2) ? $line->qty : '&nbsp;';
         $this->tpl['remise_percent'] = (($line->info_bits & 2) != 2) ? vatrate($line->remise_percent, true) : '&nbsp;';
 
-        include(DOL_DOCUMENT_ROOT.'/core/tpl/originproductline.tpl.php');
+        // Output template part (modules that overwrite templates must declare this into descriptor)
+        // Use global variables + $dateSelector + $seller and $buyer
+        $dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
+        foreach($dirtpls as $reldir)
+        {
+            $tpl = dol_buildpath($reldir.'/originproductline.tpl.php');
+            if (empty($conf->file->strict_mode)) {
+            	$res=@include $tpl;
+            } else {
+            	$res=include $tpl; // for debug
+            }
+            if ($res) break;
+        }
     }
+
+
+
+  function getMarginInfos($force_price=false) {
+  	global $conf;
+    require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
+    $marginInfos = array(
+      'pa_products' => 0,
+      'pv_products' => 0,
+      'margin_on_products' => 0,
+      'margin_rate_products' => '',
+      'mark_rate_products' => '',
+      'pa_services' => 0,
+      'pv_services' => 0,
+      'margin_on_services' => 0,
+      'margin_rate_services' => '',
+      'mark_rate_services' => '',
+      'pa_total' => 0,
+      'pv_total' => 0,
+      'total_margin' => 0,
+      'total_margin_rate' => '',
+      'total_mark_rate' => ''
+    );
+    foreach($this->lines as $line) {
+      if (isset($line->fk_fournprice) && !$force_price) {
+        $product = new ProductFournisseur($this->db);
+        if ($product->fetch_product_fournisseur_price($line->fk_fournprice))
+          $line->pa_ht = $product->fourn_unitprice;
+          if (isset($conf->global->MARGIN_TYPE) && $conf->global->MARGIN_TYPE == "2" && $product->fourn_unitcharges > 0)
+          	$line->pa_ht += $product->fourn_unitcharges;
+      }
+      // si prix d'achat non renseigné et devrait l'être, alors prix achat = prix vente
+      if ((!isset($line->pa_ht) || $line->pa_ht == 0) && $line->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1)) {
+      	$line->pa_ht = $line->subprice * (1 - ($line->remise_percent / 100));
+      }
+
+      // calcul des marges
+      if (isset($line->fk_remise_except) && isset($conf->global->MARGIN_METHODE_FOR_DISCOUNT)) {    // remise
+        if ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '1') { // remise globale considérée comme produit
+          $marginInfos['pa_products'] += $line->pa_ht;// ($line->pa_ht != 0)?$line->pa_ht:$line->subprice * (1 - $line->remise_percent / 100);
+          $marginInfos['pv_products'] += $line->subprice * (1 - $line->remise_percent / 100);
+			    $marginInfos['pa_total'] +=  $line->pa_ht;// ($line->pa_ht != 0)?$line->pa_ht:$line->subprice * (1 - $line->remise_percent / 100);
+			    $marginInfos['pv_total'] +=  $line->subprice * (1 - $line->remise_percent / 100);
+				}
+        elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '2') { // remise globale considérée comme service
+          $marginInfos['pa_services'] += $line->pa_ht;// ($line->pa_ht != 0)?$line->pa_ht:$line->subprice * (1 - $line->remise_percent / 100);
+          $marginInfos['pv_services'] += $line->subprice * (1 - ($line->remise_percent / 100));
+			    $marginInfos['pa_total'] +=  $line->pa_ht;// ($line->pa_ht != 0)?$line->pa_ht:$line->subprice * (1 - $line->remise_percent / 100);
+			    $marginInfos['pv_total'] +=  $line->subprice * (1 - $line->remise_percent / 100);
+				}
+        elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '3') { // remise globale prise en compte uniqt sur total
+          $marginInfos['pa_total'] += $line->pa_ht;// ($line->pa_ht != 0)?$line->pa_ht:$line->subprice * (1 - $line->remise_percent / 100);
+          $marginInfos['pv_total'] += $line->subprice * (1 - ($line->remise_percent / 100));
+				}
+			}
+      else {
+        $type=$line->product_type?$line->product_type:$line->fk_product_type;
+        if ($type == 0) {  // product
+          $marginInfos['pa_products'] += $line->qty * $line->pa_ht;
+          $marginInfos['pv_products'] += $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
+			    $marginInfos['pa_total'] +=  $line->qty * $line->pa_ht;
+			    $marginInfos['pv_total'] +=  $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
+        }
+        elseif ($type == 1) {  // service
+          $marginInfos['pa_services'] += $line->qty * $line->pa_ht;
+          $marginInfos['pv_services'] += $line->qty * $line->subprice * (1 - ($line->remise_percent / 100));
+			    $marginInfos['pa_total'] +=  $line->qty * $line->pa_ht;
+			    $marginInfos['pv_total'] +=  $line->qty * $line->subprice * (1 - $line->remise_percent / 100);
+        }
+      }
+    }
+
+    $marginInfos['margin_on_products'] = $marginInfos['pv_products'] - $marginInfos['pa_products'];
+    if ($marginInfos['pa_products'] > 0)
+      $marginInfos['margin_rate_products'] = 100 * round($marginInfos['margin_on_products'] / $marginInfos['pa_products'],5);
+    if ($marginInfos['pv_products'] > 0)
+      $marginInfos['mark_rate_products'] = 100 * round($marginInfos['margin_on_products'] / $marginInfos['pv_products'],5);
+
+    $marginInfos['margin_on_services'] = $marginInfos['pv_services'] - $marginInfos['pa_services'];
+    if ($marginInfos['pa_services'] > 0)
+      $marginInfos['margin_rate_services'] = 100 * round($marginInfos['margin_on_services'] / $marginInfos['pa_services'],5);
+    if ($marginInfos['pv_services'] > 0)
+      $marginInfos['mark_rate_services'] = 100 * round($marginInfos['margin_on_services'] / $marginInfos['pv_services'],5);
+
+
+    $marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
+    if ($marginInfos['pa_total'] > 0)
+      $marginInfos['total_margin_rate'] = 100 * round($marginInfos['total_margin'] / $marginInfos['pa_total'],5);
+    if ($marginInfos['pv_total'] > 0)
+      $marginInfos['total_mark_rate'] = 100 * round($marginInfos['total_margin'] / $marginInfos['pv_total'],5);
+
+    return $marginInfos;
+  }
+
+  function displayMarginInfos($force_price=false) {
+    global $langs, $conf;
+    $marginInfo = $this->getMarginInfos($force_price);
+    print '<table class="noborder" width="100%">';
+    print '<tr class="liste_titre">';
+    print '<td width="30%">'.$langs->trans('Margins').'</td>';
+    print '<td width="20%" align="right">'.$langs->trans('SellingPrice').'</td>';
+    print '<td width="20%" align="right">'.$langs->trans('BuyingPrice').'</td>';
+    print '<td width="20%" align="right">'.$langs->trans('Margin').'</td>';
+    if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+      print '<td align="right">'.$langs->trans('MarginRate').'</td>';
+    if (! empty($conf->global->DISPLAY_MARK_RATES))
+      print '<td align="right">'.$langs->trans('MarkRate').'</td>';
+      print '</tr>';
+    //if ($marginInfo['margin_on_products'] != 0 && $marginInfo['margin_on_services'] != 0) {
+      print '<tr class="impair">';
+      print '<td>'.$langs->trans('MarginOnProducts').'</td>';
+      print '<td align="right">'.price($marginInfo['pv_products']).'</td>';
+      print '<td align="right">'.price($marginInfo['pa_products']).'</td>';
+      print '<td align="right">'.price($marginInfo['margin_on_products']).'</td>';
+      if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+        print '<td align="right">'.(($marginInfo['margin_rate_products'] == '')?'n/a':price($marginInfo['margin_rate_products']).'%').'</td>';
+      if (! empty($conf->global->DISPLAY_MARK_RATES))
+        print '<td align="right">'.(($marginInfo['mark_rate_products'] == '')?'n/a':price($marginInfo['mark_rate_products']).'%').'</td>';
+      print '</tr>';
+      print '<tr class="pair">';
+      print '<td>'.$langs->trans('MarginOnServices').'</td>';
+      print '<td align="right">'.price($marginInfo['pv_services']).'</td>';
+      print '<td align="right">'.price($marginInfo['pa_services']).'</td>';
+      print '<td align="right">'.price($marginInfo['margin_on_services']).'</td>';
+      if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+        print '<td align="right">'.(($marginInfo['margin_rate_services'] == '')?'n/a':price($marginInfo['margin_rate_services']).'%').'</td>';
+      if (! empty($conf->global->DISPLAY_MARK_RATES))
+        print '<td align="right">'.(($marginInfo['mark_rate_services'] == '')?'n/a':price($marginInfo['mark_rate_services']).'%').'</td>';
+      print '</tr>';
+    //}
+    print '<tr class="impair">';
+    print '<td>'.$langs->trans('TotalMargin').'</td>';
+    print '<td align="right">'.price($marginInfo['pv_total']).'</td>';
+    print '<td align="right">'.price($marginInfo['pa_total']).'</td>';
+    print '<td align="right">'.price($marginInfo['total_margin']).'</td>';
+    if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+      print '<td align="right">'.(($marginInfo['total_margin_rate'] == '')?'n/a':price($marginInfo['total_margin_rate']).'%').'</td>';
+    if (! empty($conf->global->DISPLAY_MARK_RATES))
+      print '<td align="right">'.(($marginInfo['total_mark_rate'] == '')?'n/a':price($marginInfo['total_mark_rate']).'%').'</td>';
+    print '</tr>';
+    print '</table>';
+  }
 }
 
 ?>

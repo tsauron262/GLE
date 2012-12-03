@@ -22,11 +22,11 @@
  *      \brief      Run repair script
  */
 
-include_once("./inc.php");
-if (file_exists($conffile)) include_once($conffile);
-require_once($dolibarr_main_document_root."/core/lib/admin.lib.php");
-require_once($dolibarr_main_document_root."/core/class/extrafields.class.php");
-require_once("lib/repair.lib.php");
+include_once 'inc.php';
+if (file_exists($conffile)) include_once $conffile;
+require_once $dolibarr_main_document_root.'/core/lib/admin.lib.php';
+require_once $dolibarr_main_document_root.'/core/class/extrafields.class.php';
+require_once 'lib/repair.lib.php';
 
 $grant_query='';
 $etape = 2;
@@ -77,7 +77,7 @@ $error=0;
 // If password is encoded, we decode it
 if (preg_match('/crypted:/i',$dolibarr_main_db_pass) || ! empty($dolibarr_main_db_encrypted_pass))
 {
-    require_once($dolibarr_main_document_root."/core/lib/security.lib.php");
+    require_once $dolibarr_main_document_root.'/core/lib/security.lib.php';
     if (preg_match('/crypted:/i',$dolibarr_main_db_pass))
     {
         $dolibarr_main_db_pass = preg_replace('/crypted:/i', '', $dolibarr_main_db_pass);
@@ -181,7 +181,7 @@ if ($ok)
     foreach($filelist as $file)
     {
         print '<tr><td nowrap>';
-        print $langs->trans("ChoosedMigrateScript").'</td><td align="right">'.$file.'</td></tr>';
+        print $langs->trans("Script").'</td><td align="right">'.$file.'</td></tr>';
 
         $name = substr($file, 0, dol_strlen($file) - 4);
 
@@ -189,6 +189,105 @@ if ($ok)
         $ok=run_sql($dir.$file, 0, '', 1);
     }
 }
+
+
+// Search list of fields declared and list of fields created into databases and create fields missing
+$extrafields=new ExtraFields($db);
+$listofmodulesextra=array('societe'=>'company','adherent'=>'member','product'=>'product');
+foreach($listofmodulesextra as $tablename => $elementtype)
+{
+    // Get list of fields
+    $tableextra=MAIN_DB_PREFIX.$tablename.'_extrafields';
+
+    // Define $arrayoffieldsdesc
+    $arrayoffieldsdesc=$extrafields->fetch_name_optionals_label($elementtype);
+
+    // Define $arrayoffieldsfound
+    $arrayoffieldsfound=array();
+    $resql=$db->DDLDescTable($tableextra);
+    if ($resql)
+    {
+        print '<tr><td>Check availability of extra field for '.$tableextra."<br>\n";
+        $i=0;
+        while($obj=$db->fetch_object($resql))
+        {
+            $fieldname=$fieldtype='';
+            if (preg_match('/mysql/',$db->type))
+            {
+                $fieldname=$obj->Field;
+                $fieldtype=$obj->Type;
+            }
+            else
+            {
+                $fieldname = isset($obj->Key)?$obj->Key:$obj->attname;
+                $fieldtype = isset($obj->Type)?$obj->Type:'varchar';
+            }
+
+            if (empty($fieldname)) continue;
+            if (in_array($fieldname,array('rowid','tms','fk_object','import_key'))) continue;
+            $arrayoffieldsfound[$fieldname]=array('type'=>$fieldtype);
+        }
+
+        // If it does not match, we create fields
+        foreach($arrayoffieldsdesc as $code => $label)
+        {
+            if (! in_array($code,array_keys($arrayoffieldsfound)))
+            {
+                print 'Found field '.$code.' declared into '.MAIN_DB_PREFIX.'extrafields table but not found into desc of table '.$tableextra." -> ";
+                $type=$extrafields->attribute_type[$code]; $value=$extrafields->attribute_size[$code]; $attribute=''; $default=''; $extra=''; $null='null';
+                $field_desc=array(
+                	'type'=>$type,
+                	'value'=>$value,
+                	'attribute'=>$attribute,
+                	'default'=>$default,
+                	'extra'=>$extra,
+                	'null'=>$null
+                );
+                //var_dump($field_desc);exit;
+
+                $result=$db->DDLAddField($tableextra,$code,$field_desc,"");
+                if ($result < 0)
+                {
+                    print "KO ".$db->lasterror."<br>\n";
+                }
+                else
+                {
+                    print "OK<br>\n";
+                }
+            }
+        }
+
+        print "</td><td>&nbsp;</td></tr>\n";
+    }
+}
+
+
+// Clean data into ecm_directories table
+clean_data_ecm_directories();
+
+
+// Check and clean linked elements
+if (GETPOST('clean_linked_elements'))
+{
+	// propal => order
+	print "</td><td>".checkLinkedElements('propal', 'commande')."</td></tr>\n";
+
+	// propal => invoice
+	print "</td><td>".checkLinkedElements('propal', 'facture')."</td></tr>\n";
+
+	// order => invoice
+	print "</td><td>".checkLinkedElements('commande', 'facture')."</td></tr>\n";
+
+	// order => shipping
+	print "</td><td>".checkLinkedElements('commande', 'shipping')."</td></tr>\n";
+
+	// shipping => delivery
+	print "</td><td>".checkLinkedElements('shipping', 'delivery')."</td></tr>\n";
+
+	// order_supplier => invoice_supplier
+	print "</td><td>".checkLinkedElements('order_supplier', 'invoice_supplier')."</td></tr>\n";
+}
+
 
 
 // Search list of fields declared and list of fields created into databases and create fields missing
@@ -311,37 +410,37 @@ if (GETPOST('purge'))
         // To show ref or specific information according to view to show (defined by $module)
         if ($modulepart == 'invoice')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
             $object_instance=new Facture($db);
         }
         else if ($modulepart == 'invoice_supplier')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
             $object_instance=new FactureFournisseur($db);
         }
         else if ($modulepart == 'propal')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
             $object_instance=new Propal($db);
         }
         else if ($modulepart == 'order')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
             $object_instance=new Commande($db);
         }
         else if ($modulepart == 'order_supplier')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
             $object_instance=new CommandeFournisseur($db);
         }
         else if ($modulepart == 'contract')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
             $object_instance=new Contrat($db);
         }
         else if ($modulepart == 'tax')
         {
-            include_once(DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php');
+            include_once DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php';
             $object_instance=new ChargeSociales($db);
         }
 

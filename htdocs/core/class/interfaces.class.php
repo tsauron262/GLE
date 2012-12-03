@@ -38,7 +38,7 @@ class Interfaces
      *
      *  @param		DoliDB		$db      Database handler
      */
-    function Interfaces($db)
+    function __construct($db)
     {
         $this->db = $db;
     }
@@ -74,7 +74,7 @@ class Interfaces
         $orders = array();
 		$i=0;
 
-		$dirtriggers=array_merge(array('/core/triggers'),$conf->triggers_modules);
+		$dirtriggers=array_merge(array('/core/triggers'),$conf->modules_parts['triggers']);
         foreach($dirtriggers as $reldir)
         {
             $dir=dol_buildpath($reldir,0);
@@ -107,7 +107,7 @@ class Interfaces
                         }
                         else
                         {
-                            include_once($newdir.'/'.$file);
+                            include_once $newdir.'/'.$file;
                         }
 
                         // Check if trigger file is disabled by name
@@ -203,7 +203,7 @@ class Interfaces
         $orders = array();
         $i = 0;
 
-        $dirtriggers=array_merge(array('/core/triggers/'),$conf->triggers_modules);
+        $dirtriggers=array_merge(array('/core/triggers/'),$conf->modules_parts['triggers']);
         foreach($dirtriggers as $reldir)
         {
             $dir=dol_buildpath($reldir,0);
@@ -233,7 +233,7 @@ class Interfaces
                         }
                         else
                         {
-                            include_once($newdir.'/'.$file);
+                            include_once $newdir.'/'.$file;
                         }
 
                         $files[$i] = $file;

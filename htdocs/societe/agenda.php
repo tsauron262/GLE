@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2001-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2005      Brice Davoleau       <brice.davoleau@gmail.com>
- * Copyright (C) 2005-2009 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (C) 2005-2012 Regis Houssin        <regis@dolibarr.fr>
  * Copyright (C) 2006-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2007      Patrick Raguin  		<patrick.raguin@gmail.com>
  * Copyright (C) 2010      Juanjo Menent        <jmenent@2byte.es>
@@ -26,18 +26,16 @@
  *  \brief      Page of third party events
  */
 
-require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 
 $langs->load("companies");
-
-$mesg=isset($_GET["mesg"])?'<div class="ok">'.$_GET["mesg"].'</div>':'';
 
 // Security check
 $socid = GETPOST('socid','int');
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'societe', $socid);
+$result = restrictedArea($user, 'societe', $socid, '&societe');
 
 
 /*
@@ -61,8 +59,8 @@ $form = new Form($db);
  */
 if ($socid)
 {
-	require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
-	require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+	require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
+	require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
 	$langs->load("companies");
 
@@ -71,7 +69,7 @@ if ($socid)
 	$result = $soc->fetch($socid);
 	llxHeader("",$langs->trans("Agenda"),'');
 
-	if ($conf->notification->enabled) $langs->load("mails");
+	if (! empty($conf->notification->enabled)) $langs->load("mails");
 	$head = societe_prepare_head($soc);
 
 	dol_fiche_head($head, 'agenda', $langs->trans("ThirdParty"),0,'company');
@@ -105,7 +103,7 @@ if ($socid)
 		print '</td></tr>';
 	}
 
-	if ($conf->global->MAIN_MODULE_BARCODE)
+	if (! empty($conf->barcode->enabled))
 	{
 		print '<tr><td>'.$langs->trans('Gencod').'</td><td colspan="3">'.$soc->barcode.'</td></tr>';
 	}
@@ -145,16 +143,13 @@ if ($socid)
 	print '</div>';
 
 
-	dol_htmloutput_mesg($mesg);
-
-
     /*
      * Barre d'action
      */
 
     print '<div class="tabsAction">';
 
-    if ($conf->agenda->enabled)
+    if (! empty($conf->agenda->enabled))
     {
         print '<a class="butAction" href="'.DOL_URL_ROOT.'/comm/action/fiche.php?action=create&socid='.$socid.'">'.$langs->trans("AddAction").'</a>';
     }

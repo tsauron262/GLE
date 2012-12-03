@@ -80,7 +80,7 @@ class DoliDBSqlite
 	 *	@param	    int		$port		Port of database server
 	 *	@return	    int					1 if OK, 0 if not
      */
-    function DoliDBSqlite($type, $host, $user, $pass, $name='', $port=0)
+    function __construct($type, $host, $user, $pass, $name='', $port=0)
     {
         global $conf,$langs;
 
@@ -146,7 +146,7 @@ class DoliDBSqlite
      *  @param     string	$type	Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
      *  @return    string   		SQL request line converted
      */
-    function convertSQLFromMysql($line,$type='ddl')
+    static function convertSQLFromMysql($line,$type='ddl')
     {
 		// Removed empty line if this is a comment line for SVN tagging
 		if (preg_match('/^--\s\$Id/i',$line)) {
@@ -416,12 +416,14 @@ class DoliDBSqlite
             {
                 $this->transaction_opened++;
                 dol_syslog("BEGIN Transaction",LOG_DEBUG);
+				dol_syslog('',0,1);
             }
             return $ret;
         }
         else
         {
             $this->transaction_opened++;
+			dol_syslog('',0,1);
             return 1;
         }
     }
@@ -434,7 +436,8 @@ class DoliDBSqlite
      */
     function commit($log='')
     {
-        if ($this->transaction_opened<=1)
+		dol_syslog('',0,-1);
+    	if ($this->transaction_opened<=1)
         {
             $ret=$this->query("COMMIT");
             if ($ret)
@@ -445,8 +448,8 @@ class DoliDBSqlite
             return $ret;
         }
         else
-        {
-            $this->transaction_opened--;
+       {
+       		$this->transaction_opened--;
             return 1;
         }
     }
@@ -459,7 +462,8 @@ class DoliDBSqlite
      */
     function rollback($log='')
     {
-        if ($this->transaction_opened<=1)
+		dol_syslog('',0,-1);
+    	if ($this->transaction_opened<=1)
         {
             $ret=$this->query("ROLLBACK");
             $this->transaction_opened=0;
@@ -1153,7 +1157,9 @@ class DoliDBSqlite
     {
         $sql = "ALTER TABLE ".$table;
         $sql .= " MODIFY COLUMN ".$field_name." ".$field_desc['type'];
-        if ($field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') $sql.="(".$field_desc['value'].")";
+        if ($field_desc['type'] == 'tinyint' || $field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') {
+        	$sql.="(".$field_desc['value'].")";
+        }
 
         dol_syslog(get_class($this)."::DDLUpdateField ".$sql,LOG_DEBUG);
         if (! $this->query($sql))

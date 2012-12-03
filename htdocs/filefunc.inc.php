@@ -1,7 +1,7 @@
-<?PHP
+<?php
 /* Copyright (C) 2002-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2003      Xavier Dutoit        <doli@sydesy.com>
- * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2004      Sebastien Di Cintio  <sdicintio@ressource-toi.org>
  * Copyright (C) 2004      Benoit Mortier       <benoit.mortier@opensides.be>
  * Copyright (C) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
@@ -29,7 +29,7 @@
  *  \brief      File that include conf.php file and commons lib like functions.lib.php
  */
 
-if (! defined('DOL_VERSION')) define('DOL_VERSION','3.2.2');	// Also defined in htdocs/install/inc.php (Ex: x.y.z-alpha, x.y.z)
+if (! defined('DOL_VERSION')) define('DOL_VERSION','3.3.0-alpha');
 if (! defined('EURO')) define('EURO',chr(128));
 
 // Define syslog constants
@@ -53,10 +53,8 @@ if (! defined('LOG_DEBUG'))
     }
 }
 
-// Force PHP error_reporting setup (Dolibarr may report warning without this)
-if (! defined('E_DEPRECATED')) define('E_DEPRECATED',0);	// For PHP < 5.3.0 compatibility
-error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED));
-//error_reporting(E_ALL | E_STRICT);
+// End of common declaration part
+if (defined('DOL_INC_FOR_VERSION_ERROR')) return;
 
 
 // Define vars
@@ -70,12 +68,26 @@ $conffiletoshow = "htdocs/conf/conf.php";
 
 
 // Include configuration
-$result=@include_once($conffile);
+$result=@include_once $conffile;
 if (! $result && ! empty($_SERVER["GATEWAY_INTERFACE"]))    // If install not done and we are in a web session
 {
 	header("Location: install/index.php");
 	exit;
 }
+
+// Force PHP error_reporting setup (Dolibarr may report warning without this)
+if (! empty($dolibarr_strict_mode))
+{
+	error_reporting(E_ALL | E_STRICT);
+}
+else
+{
+	if (! defined('E_DEPRECATED')) define('E_DEPRECATED',0);	// For PHP < 5.3.0 compatibility
+	error_reporting(E_ALL & ~(E_STRICT|E_NOTICE|E_DEPRECATED));
+}
+
+// Disable php display errors
+if (! empty($dolibarr_main_prod)) ini_set('display_errors','Off');
 
 
 // Disable php display errors
@@ -101,6 +113,7 @@ if (empty($dolibarr_main_db_cryptkey)) $dolibarr_main_db_cryptkey='';
 if (empty($dolibarr_main_limit_users)) $dolibarr_main_limit_users=0;
 if (empty($dolibarr_mailing_limit_sendbyweb)) $dolibarr_mailing_limit_sendbyweb=0;
 if (empty($force_charset_do_notuse)) $force_charset_do_notuse='UTF-8';
+if (empty($dolibarr_strict_mode)) $dolibarr_strict_mode=0; // For debug in php strict mode
 if (empty($multicompany_transverse_mode)) $multicompany_transverse_mode=0;
 if (empty($multicompany_force_entity)) $multicompany_force_entity=0; // To force entity in login page
 
@@ -116,8 +129,8 @@ if (! defined('NOCSRFCHECK') && empty($dolibarr_nocsrfcheck) && ! empty($_SERVER
 }
 if (empty($dolibarr_main_db_host))
 {
-	print 'Dolibarr setup is not yet complete.<br><br>'."\n";
-	print '<a href="install/index.php">Click here to finish Dolibarr install process</a> ...'."\n";
+	print '<div align="center">Dolibarr setup is not yet complete.<br><br>'."\n";
+	print '<a href="install/index.php">Click here to finish Dolibarr install process</a> ...</div>'."\n";
 	die;
 }
 if (empty($dolibarr_main_url_root))
@@ -152,7 +165,7 @@ $concatpath='';
 foreach($paths as $tmppath)
 {
     if ($tmppath) $concatpath.='/'.$tmppath;
-    //print $real_$dolibarr_main_document_root.'-'.realpath($pathroot.$concatpath).'<br>';
+    //print $_SERVER["SCRIPT_NAME"].'-'.$pathroot.'-'.$concatpath.'-'.$real_dolibarr_main_document_root.'-'.realpath($pathroot.$concatpath).'<br>';
     if ($real_dolibarr_main_document_root == @realpath($pathroot.$concatpath))    // @ avoid warning when safe_mode is on.
     {
         $tmp3=$concatpath;
@@ -160,7 +173,9 @@ foreach($paths as $tmppath)
         $found=1;
         break;
     }
+    //else print "Not found yet for concatpath=".$concatpath."<br>\n";
 }
+
 if (! $found)	// If autodetect fails (Ie: when using apache alias that point outside default DOCUMENT_ROOT.
 {
 	$tmp=$dolibarr_main_url_root;
@@ -223,7 +238,7 @@ if (! defined('DOL_DEFAULT_TTF_BOLD')) { define('DOL_DEFAULT_TTF_BOLD', (!isset(
  * Include functions
  */
 
-if (! defined('ADODB_DATE_VERSION')) include_once(ADODB_PATH.'adodb-time.inc.php');
+if (! defined('ADODB_DATE_VERSION')) include_once ADODB_PATH.'adodb-time.inc.php';
 
 if (! file_exists(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php"))
 {
@@ -233,8 +248,8 @@ if (! file_exists(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php"))
 }
 
 // Included by default
-include_once(DOL_DOCUMENT_ROOT ."/core/lib/functions.lib.php");
-include_once(DOL_DOCUMENT_ROOT ."/core/lib/security.lib.php");
+include_once DOL_DOCUMENT_ROOT .'/core/lib/functions.lib.php';
+include_once DOL_DOCUMENT_ROOT .'/core/lib/security.lib.php';
 //print memory_get_usage();
 
 // If password is encoded, we decode it

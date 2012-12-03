@@ -1,5 +1,5 @@
 <?php
-/*
+/**
  * Copyright (C) 2004      Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2005-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2012	   Florian Henry  <florian.henry@open-concept.pro>
@@ -20,7 +20,7 @@
 
 
 /**
- *      \file       scripts/emailings/mailing-unsubscribe.php
+ *      \file       public/emailing/mailing-unsubscribe.php
  *      \ingroup    mailing
  *      \brief      Script use to update unsubcribe contact to prospect mailing list
  */
@@ -28,8 +28,8 @@
 define("NOLOGIN",1);		// This means this output page does not require to be logged.
 define("NOCSRFCHECK",1);	// We accept to go on this page from external web site.
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
 global $user, $conf, $langs;
 

@@ -20,7 +20,8 @@
  *	\ingroup    service
  *	\brief      File with class of actions for canvas service
  */
-include_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
+include_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
+
 
 
 /**
@@ -43,14 +44,14 @@ class ActionsCardService
 	/**
 	 *    Constructor
 	 *
-     *    @param   DoliDB	$DB             Handler acces base de donnees
+     *    @param   DoliDB	$db             Handler acces base de donnees
      *    @param   string	$targetmodule   Name of directory of module where canvas is stored
      *    @param   string	$canvas         Name of canvas
      *    @param   string	$card           Name of tab (sub-canvas)
 	 */
-	function ActionsCardService($DB,$targetmodule,$canvas,$card)
+	function __construct($db,$targetmodule,$canvas,$card)
 	{
-		$this->db 				= $DB;
+		$this->db 				= $db;
 		$this->targetmodule     = $targetmodule;
         $this->canvas           = $canvas;
         $this->card             = $card;
@@ -105,7 +106,7 @@ class ActionsCardService
 		$this->tpl['description'] = nl2br($this->description);
 
 		// Statut
-		$this->tpl['status'] = $this->getLibStatut(2);
+		$this->tpl['status'] = $this->object->getLibStatut(2);
 
 		// Note
 		$this->tpl['note'] = nl2br($this->note);

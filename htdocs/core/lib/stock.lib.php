@@ -52,7 +52,7 @@ function stock_prepare_head($object)
 	*/
 
 	/* Disabled because will never be implemented. Table always empty.
-	if ($conf->global->STOCK_USE_WAREHOUSE_BY_USER)
+	if (! empty($conf->global->STOCK_USE_WAREHOUSE_BY_USER))
 	{
 		// Should not be enabled by defaut because does not work yet correctly because
 		// personnal stocks are not tagged into table llx_entrepot
@@ -66,7 +66,7 @@ function stock_prepare_head($object)
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
-    // $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
+    // $this->tabs = array('entity:-tabname);   												to remove a tab
     complete_head_from_modules($conf,$langs,$object,$head,$h,'stock');
 
     $head[$h][0] = DOL_URL_ROOT.'/product/stock/info.php?id='.$object->id;
@@ -74,7 +74,9 @@ function stock_prepare_head($object)
 	$head[$h][2] = 'info';
 	$h++;
 
-	return $head;
+    complete_head_from_modules($conf,$langs,$object,$head,$h,'stock','remove');
+
+    return $head;
 }
 
 ?>

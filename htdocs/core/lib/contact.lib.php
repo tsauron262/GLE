@@ -1,6 +1,6 @@
 <?php
-/* Copyright (C) 2006-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2010      Regis Houssin		<regis@dolibarr.fr>
+/* Copyright (C) 2006-2010	Laurent Destailleur	<eldy@users.sourceforge.net>
+ * Copyright (C) 2010-2012	Regis Houssin		<regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ function contact_prepare_head($object)
 	$head[$h][2] = 'card';
 	$h++;
 
-	if ($conf->ldap->enabled && $conf->global->LDAP_CONTACT_ACTIVE)
+	if (! empty($conf->ldap->enabled) && ! empty($conf->global->LDAP_CONTACT_ACTIVE))
 	{
 		$langs->load("ldap");
 
@@ -63,7 +63,7 @@ function contact_prepare_head($object)
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
-    // $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
+    // $this->tabs = array('entity:-tabname);   												to remove a tab
     complete_head_from_modules($conf,$langs,$object,$head,$h,'contact');
 
     $head[$h][0] = DOL_URL_ROOT.'/contact/info.php?id='.$object->id;
@@ -71,7 +71,7 @@ function contact_prepare_head($object)
 	$head[$h][2] = 'info';
 	$h++;
 
-
+	complete_head_from_modules($conf,$langs,$object,$head,$h,'contact','remove');
 
 	return $head;
 }

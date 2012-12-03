@@ -1,7 +1,7 @@
 <?php
 /* Copyright (c) 2005      Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (c) 2005-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (c) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (c) 2005-2012 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
  *	 \brief      File of class to manage user groups
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/class/commonobject.class.php");
+require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 if (! empty($conf->ldap->enabled)) require_once (DOL_DOCUMENT_ROOT."/core/class/ldap.class.php");
 
 
@@ -55,7 +55,7 @@ class UserGroup extends CommonObject
      *
      *    @param   DoliDb  $db     Database handler
 	 */
-	function UserGroup($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 
@@ -239,13 +239,13 @@ class UserGroup extends CommonObject
 
 		$this->db->begin();
 
-		if ($rid)
+		if (! empty($rid))
 		{
 			// Si on a demande ajout d'un droit en particulier, on recupere
 			// les caracteristiques (module, perms et subperms) de ce droit.
 			$sql = "SELECT module, perms, subperms";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
-			$sql.= " WHERE id = '".$rid."'";
+			$sql.= " WHERE id = '".$this->db->escape($rid)."'";
 			$sql.= " AND entity = ".$conf->entity;
 
 			$result=$this->db->query($sql);
@@ -261,7 +261,7 @@ class UserGroup extends CommonObject
 			}
 
 			// Where pour la liste des droits a ajouter
-			$whereforadd="id=".$rid;
+			$whereforadd="id=".$this->db->escape($rid);
 			// Ajout des droits induits
 			if ($subperms)   $whereforadd.=" OR (module='$module' AND perms='$perms' AND (subperms='lire' OR subperms='read'))";
 			else if ($perms) $whereforadd.=" OR (module='$module' AND (perms='lire' OR perms='read') AND subperms IS NULL)";
@@ -272,12 +272,12 @@ class UserGroup extends CommonObject
 		}
 		else {
 			// Where pour la liste des droits a ajouter
-			if ($allmodule) $whereforadd="module='$allmodule'";
-			if ($allperms)  $whereforadd=" AND perms='$allperms'";
+			if (! empty($allmodule)) $whereforadd="module='".$this->db->escape($allmodule)."'";
+			if (! empty($allperms))  $whereforadd=" AND perms='".$this->db->escape($allperms)."'";
 		}
 
 		// Ajout des droits de la liste whereforadd
-		if ($whereforadd)
+		if (! empty($whereforadd))
 		{
 			//print "$module-$perms-$subperms";
 			$sql = "SELECT id";
@@ -339,13 +339,13 @@ class UserGroup extends CommonObject
 
 		$this->db->begin();
 
-		if ($rid)
+		if (! empty($rid))
 		{
 			// Si on a demande supression d'un droit en particulier, on recupere
 			// les caracteristiques module, perms et subperms de ce droit.
 			$sql = "SELECT module, perms, subperms";
 			$sql.= " FROM ".MAIN_DB_PREFIX."rights_def";
-			$sql.= " WHERE id = '".$rid."'";
+			$sql.= " WHERE id = '".$this->db->escape($rid)."'";
 			$sql.= " AND entity = ".$conf->entity;
 
 			$result=$this->db->query($sql);
@@ -361,7 +361,7 @@ class UserGroup extends CommonObject
 			}
 
 			// Where pour la liste des droits a supprimer
-			$wherefordel="id=".$rid;
+			$wherefordel="id=".$this->db->escape($rid);
 			// Suppression des droits induits
 			if ($subperms=='lire' || $subperms=='read') $wherefordel.=" OR (module='$module' AND perms='$perms' AND subperms IS NOT NULL)";
 			if ($perms=='lire' || $perms=='read')    $wherefordel.=" OR (module='$module')";
@@ -372,12 +372,12 @@ class UserGroup extends CommonObject
 		}
 		else {
 			// Where pour la liste des droits a supprimer
-			if ($allmodule) $wherefordel="module='$allmodule'";
-			if ($allperms)  $wherefordel=" AND perms='$allperms'";
+			if (! empty($allmodule)) $wherefordel="module='".$this->db->escape($allmodule)."'";
+			if (! empty($allperms))  $wherefordel=" AND perms='".$this->db->escape($allperms)."'";
 		}
 
 		// Suppression des droits de la liste wherefordel
-		if ($wherefordel)
+		if (! empty($wherefordel))
 		{
 			//print "$module-$perms-$subperms";
 			$sql = "SELECT id";
@@ -437,7 +437,7 @@ class UserGroup extends CommonObject
 			return;
 		}
 
-		if ($this->all_permissions_are_loaded)
+		if (! empty($this->all_permissions_are_loaded))
 		{
 			// Si les permissions ont deja ete chargees, on quitte
 			return;
@@ -470,8 +470,11 @@ class UserGroup extends CommonObject
 
 				if ($perms)
 				{
+					if (! isset($this->rights)) $this->rights = (object) array(); // For avoid error
+					if (! isset($this->rights->$module) || ! is_object($this->rights->$module)) $this->rights->$module = (object) array();
 					if ($subperms)
 					{
+						if (! isset($this->rights->$module->$perms) || ! is_object($this->rights->$module->$perms)) $this->rights->$module->$perms = (object) array();
 						$this->rights->$module->$perms->$subperms = 1;
 					}
 					else
@@ -527,7 +530,7 @@ class UserGroup extends CommonObject
 		if ($result)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('USER_DELETE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -584,7 +587,7 @@ class UserGroup extends CommonObject
 			if (! $notrigger)
 			{
 				// Appel des triggers
-				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
 				$result=$interface->run_triggers('GROUP_CREATE',$this,$user,$langs,$conf);
 				if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -625,14 +628,14 @@ class UserGroup extends CommonObject
 		$sql.= ", note = '" . $this->db->escape($this->note) . "'";
 		$sql.= " WHERE rowid = " . $this->id;
 
-		dol_syslog("Usergroup::update sql=".$sql);
+		dol_syslog(get_class($this)."::update sql=".$sql);
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
 			if (! $notrigger)
 			{
 				// Appel des triggers
-				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
 				$result=$interface->run_triggers('GROUP_MODIFY',$this,$user,$langs,$conf);
 				if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -684,10 +687,10 @@ class UserGroup extends CommonObject
 		$info["objectclass"]=explode(',',$conf->global->LDAP_GROUP_OBJECT_CLASS);
 
 		// Champs
-		if ($this->nom && $conf->global->LDAP_GROUP_FIELD_FULLNAME) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = $this->nom;
-		//if ($this->nom && $conf->global->LDAP_GROUP_FIELD_NAME) $info[$conf->global->LDAP_GROUP_FIELD_NAME] = $this->nom;
-		if ($this->note && $conf->global->LDAP_GROUP_FIELD_DESCRIPTION) $info[$conf->global->LDAP_GROUP_FIELD_DESCRIPTION] = $this->note;
-		if ($conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS)
+		if ($this->nom && ! empty($conf->global->LDAP_GROUP_FIELD_FULLNAME)) $info[$conf->global->LDAP_GROUP_FIELD_FULLNAME] = $this->nom;
+		//if ($this->nom && ! empty($conf->global->LDAP_GROUP_FIELD_NAME)) $info[$conf->global->LDAP_GROUP_FIELD_NAME] = $this->nom;
+		if ($this->note && ! empty($conf->global->LDAP_GROUP_FIELD_DESCRIPTION)) $info[$conf->global->LDAP_GROUP_FIELD_DESCRIPTION] = $this->note;
+		if (! empty($conf->global->LDAP_GROUP_FIELD_GROUPMEMBERS))
 		{
 			$valueofldapfield=array();
 			foreach($this->members as $key=>$val)    // This is array of users for group into dolibarr database.

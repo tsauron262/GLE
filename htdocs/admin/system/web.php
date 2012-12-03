@@ -20,9 +20,9 @@
  *		\brief      Page with web server system information
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
-require_once(DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php');
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
 
 $langs->load("admin");
 
@@ -42,7 +42,7 @@ if (!$user->admin) accessforbidden();
 
 llxHeader();
 
-print_fiche_titre($langs->trans("WebServer"),'','setup');
+print_fiche_titre($langs->trans("InfoWebServer"),'','setup');
 
 print '<table class="noborder" width="100%">';
 print "<tr class=\"liste_titre\"><td>".$langs->trans("Parameter")."</td><td>".$langs->trans("Value")."</td></tr>\n";

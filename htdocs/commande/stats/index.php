@@ -24,10 +24,10 @@
  *		\brief      Page with customers or suppliers orders statistics
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-require_once(DOL_DOCUMENT_ROOT."/commande/class/commandestats.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commandestats.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/dolgraph.class.php';
 
 $WIDTH=500;
 $HEIGHT=200;
@@ -73,7 +73,7 @@ if ($mode == 'supplier')
     $dir=$conf->fournisseur->dir_output.'/commande/temp';
 }
 
-print_fiche_titre($title, $mesg);
+print_fiche_titre($title);
 
 dol_mkdir($dir);
 
@@ -217,10 +217,11 @@ if (! $mesg)
 $data = $stats->getAllByYear();
 $arrayyears=array();
 foreach($data as $val) {
-    $arrayyears[$val['year']]=$val['year'];
+	if (! empty($val['year'])) {
+		$arrayyears[$val['year']]=$val['year'];
+	}
 }
 if (! count($arrayyears)) $arrayyears[$nowyear]=$nowyear;
-
 
 $h=0;
 $head = array();
@@ -232,6 +233,7 @@ $h++;
 if ($mode == 'customer') $type='order_stats';
 if ($mode == 'supplier') $type='supplier_order_stats';
 
+$object=(object) array(); // TODO $object not defined ?
 complete_head_from_modules($conf,$langs,$object,$head,$h,$type);
 
 dol_fiche_head($head,'byyear',$langs->trans("Statistics"));
@@ -241,23 +243,25 @@ if (empty($socid))
 	print '<table class="notopnoleftnopadd" width="100%"><tr>';
 	print '<td align="center" valign="top">';
 
+//if (empty($socid))
+//{
 	// Show filter box
 	print '<form name="stats" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="mode" value="'.$mode.'">';
 	print '<table class="border" width="100%">';
 	print '<tr><td class="liste_titre" colspan="2">'.$langs->trans("Filter").'</td></tr>';
 	// Company
-	print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+	print '<tr><td align="left">'.$langs->trans("ThirdParty").'</td><td align="left">';
 	if ($mode == 'customer') $filter='s.client in (1,2,3)';
 	if ($mode == 'supplier') $filter='s.fournisseur = 1';
 	print $form->select_company($socid,'socid',$filter,1);
 	print '</td></tr>';
 	// User
-	print '<tr><td>'.$langs->trans("User").'/'.$langs->trans("SalesRepresentative").'</td><td>';
+	print '<tr><td align="left">'.$langs->trans("User").'/'.$langs->trans("SalesRepresentative").'</td><td align="left">';
 	print $form->select_users($userid,'userid',1);
 	print '</td></tr>';
 	// Year
-	print '<tr><td>'.$langs->trans("Year").'</td><td>';
+	print '<tr><td align="left">'.$langs->trans("Year").'</td><td align="left">';
 	if (! in_array($year,$arrayyears)) $arrayyears[$year]=$year;
 	arsort($arrayyears);
 	print $form->selectarray('year',$arrayyears,$year,0);
@@ -266,7 +270,7 @@ if (empty($socid))
 	print '</table>';
 	print '</form>';
 	print '<br><br>';
-}
+//}
 
 print '<table class="border" width="100%">';
 print '<tr height="24">';
@@ -279,24 +283,26 @@ print '</tr>';
 $oldyear=0;
 foreach ($data as $val)
 {
-    $year = $val['year'];
-    while ($year && $oldyear > $year+1)
-    {	// If we have empty year
-        $oldyear--;
-        print '<tr height="24">';
-        print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$oldyear.'&amp;mode='.$mode.'">'.$oldyear.'</a></td>';
-        print '<td align="right">0</td>';
-        print '<td align="right">0</td>';
-        print '<td align="right">0</td>';
-        print '</tr>';
-    }
-    print '<tr height="24">';
-    print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&amp;mode='.$mode.'">'.$year.'</a></td>';
-    print '<td align="right">'.$val['nb'].'</td>';
-    print '<td align="right">'.price(price2num($val['total'],'MT'),1).'</td>';
-    print '<td align="right">'.price(price2num($val['avg'],'MT'),1).'</td>';
-    print '</tr>';
-    $oldyear=$year;
+	$year = $val['year'];
+	while (! empty($year) && $oldyear > $year+1)
+	{ // If we have empty year
+	$oldyear--;
+	print '<tr height="24">';
+	print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$oldyear.'&amp;mode='.$mode.'">'.$oldyear.'</a></td>';
+
+	print '<td align="right">0</td>';
+	print '<td align="right">0</td>';
+	print '<td align="right">0</td>';
+	print '</tr>';
+	}
+
+	print '<tr height="24">';
+	print '<td align="center"><a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&amp;mode='.$mode.'">'.$year.'</a></td>';
+	print '<td align="right">'.$val['nb'].'</td>';
+	print '<td align="right">'.price(price2num($val['total'],'MT'),1).'</td>';
+	print '<td align="right">'.price(price2num($val['avg'],'MT'),1).'</td>';
+	print '</tr>';
+	$oldyear=$year;
 }
 
 print '</table>';

@@ -26,12 +26,11 @@
  * \brief      Fichier de description et activation du module Comptabilite
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *		\class 		modComptabilite
- *      \brief      Classe de description et activation du module Comptabilite
+ *	Classe de description et activation du module Comptabilite
  */
 class modComptabilite extends DolibarrModules
 {
@@ -41,7 +40,7 @@ class modComptabilite extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
     */
-	function modComptabilite($db)
+	function __construct($db)
 	{
 		global $conf;
 

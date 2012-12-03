@@ -17,21 +17,19 @@
  */
 
 /**
- *	\defgroup   clicktodial      Module clicktodial
- *	\brief      Module pour gerer l'appel automatique
- *	\file       htdocs/core/modules/modClickToDial.class.php
- *	\ingroup    clicktodial
+ *	\defgroup   mailmanspip      Module mailmanspip
+ *	\brief      Module to manage mailman and spip
+ *	\file       htdocs/core/modules/modMailmanSpip.class.php
+ *	\ingroup    mailmanspip
  *	\brief      Fichier de description et activation du module de click to Dial
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *	\class      modMailmanSpip
- *	\brief      Classe de description et activation du module de Click to Dial
+ *	Classe de description et activation du module de Click to Dial
  */
-
 class modMailmanSpip extends DolibarrModules
 {
 
@@ -40,7 +38,7 @@ class modMailmanSpip extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modMailmanSpip($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 105;
@@ -68,7 +66,10 @@ class modMailmanSpip extends DolibarrModules
 
 		// Constants
 		$this->const = array();
-
+		$this->const[1] = array("ADHERENT_MAILMAN_UNSUB_URL","chaine","http://lists.domain.com/cgi-bin/mailman/admin/%LISTE%/members?adminpw=%MAILMAN_ADMINPW%&user=%EMAIL%","Url de désinscription aux listes mailman");
+		$this->const[2] = array("ADHERENT_MAILMAN_URL","chaine","http://lists.domain.com/cgi-bin/mailman/admin/%LISTE%/members?adminpw=%MAILMAN_ADMINPW%&send_welcome_msg_to_this_batch=1&subscribees=%EMAIL%","Url pour les inscriptions mailman");
+		$this->const[3] = array("ADHERENT_MAILMAN_LISTS","chaine","","Mailing-list to subscribe new members to");
+		
 		// Boxes
 		$this->boxes = array();
 

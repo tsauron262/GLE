@@ -26,8 +26,8 @@
  *      TODO 		Deal with recurrent invoices as well
  */
 
-require('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/compta/tva/class/tva.class.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/tva/class/tva.class.php';
 
 $year=$_GET["year"];
 if ($year == 0 )
@@ -238,7 +238,7 @@ if ($conf->global->COMPTA_MODE == "CREANCES-DETTES")
 			$x_both[$my_coll_rate]['paye']['vat'] = 0;
 			$x_both[$my_coll_rate]['coll']['links'] = '';
 			foreach($x_coll[$my_coll_rate]['facid'] as $id=>$dummy){
-				$x_both[$my_coll_rate]['coll']['links'] .= '<a href="../facture.php?facid='.$x_coll[$my_coll_rate]['facid'][$id].'" title="'.$x_coll[$my_coll_rate]['facnum'][$id].'">..'.substr($x_coll[$my_coll_rate]['facnum'][$id],-2).'</a> ';
+				$x_both[$my_coll_rate]['coll']['links'] .= '<a href="'.DOL_URL_ROOT.'/compta/facture.php?facid='.$x_coll[$my_coll_rate]['facid'][$id].'" title="'.$x_coll[$my_coll_rate]['facnum'][$id].'">..'.substr($x_coll[$my_coll_rate]['facnum'][$id],-2).'</a> ';
 			}
 		}
 		foreach(array_keys($x_paye) as $my_paye_rate){

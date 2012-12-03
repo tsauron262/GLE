@@ -42,11 +42,11 @@ class AccountancySystem
 	/**
 	 *	Constructor
 	 *
-	 *  @param		DoliDB		$DB      Database handler
+	 *  @param		DoliDB		$db      Database handler
 	 */
-	function AccountancySystem($DB)
+	function __construct($db)
 	{
-		$this->db = $DB;
+		$this->db = $db;
 	}
 
 
@@ -58,9 +58,11 @@ class AccountancySystem
 	 */
 	function create($user)
 	{
+		$now=dol_now();
+		
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."accountingsystem";
 		$sql.= " (date_creation, fk_user_author, numero,intitule)";
-		$sql.= " VALUES (".$this->db->idate(mktime()).",".$user->id.",'".$this->numero."','".$this->intitule."')";
+		$sql.= " VALUES (".$this->db->idate($now).",".$user->id.",'".$this->numero."','".$this->intitule."')";
 
 		$resql = $this->db->query($sql);
 		if ($resql)

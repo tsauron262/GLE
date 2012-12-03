@@ -26,14 +26,13 @@
  *	\brief      File of class to manage suppliers invoices
  */
 
-include_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+include_once DOL_DOCUMENT_ROOT.'/core/class/commoninvoice.class.php';
 
 
 /**
- *	\class      FactureFournisseur
- *	\brief      Class to manage suppliers invoices
+ *	Class to manage suppliers invoices
  */
-class FactureFournisseur extends Facture
+class FactureFournisseur extends CommonInvoice
 {
     public $element='invoice_supplier';
     public $table_element='facture_fourn';
@@ -77,7 +76,8 @@ class FactureFournisseur extends Facture
     var $propalid;
 
     var $lines;
-    var $fournisseur;
+    var $fournisseur;	// deprecated
+	var $thirdparty;	// To store thirdparty
 
     var $extraparams=array();
 
@@ -87,7 +87,7 @@ class FactureFournisseur extends Facture
 	 *
 	 *  @param		DoliDB		$db      Database handler
      */
-    function FactureFournisseur($db)
+    function __construct($db)
     {
         $this->db = $db;
 
@@ -148,7 +148,7 @@ class FactureFournisseur extends Facture
         $sql.= ", ".$conf->entity;
         $sql.= ", '".$this->db->escape($this->libelle)."'";
         $sql.= ", ".$this->socid;
-        $sql.= ", ".$this->db->idate($now);
+        $sql.= ", '".$this->db->idate($now)."'";
         $sql.= ", '".$this->db->idate($this->date)."'";
         $sql.= ", '".$this->db->escape($this->note)."'";
         $sql.= ", '".$this->db->escape($this->note_public)."'";
@@ -164,7 +164,7 @@ class FactureFournisseur extends Facture
 
 
             // Add object linked
-            if (! $error && $this->id && $this->origin && $this->origin_id)
+            if (! $error && $this->id && ! empty($this->origin) && ! empty($this->origin_id))
             {
                 $ret = $this->add_object_linked();
                 if (! $ret)
@@ -195,7 +195,7 @@ class FactureFournisseur extends Facture
                         $this->lines[$i]->qty,
                         $this->lines[$i]->fk_product,
                         'HT',
-                        $this->lines[$i]->info_bits,
+                        (! empty($this->lines[$i]->info_bits)?$this->lines[$i]->info_bits:''),
                         $this->lines[$i]->product_type
                     );
                 }
@@ -205,7 +205,7 @@ class FactureFournisseur extends Facture
             if ($result > 0)
             {
                 // Appel des triggers
-                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                 $interface=new Interfaces($this->db);
                 $result=$interface->run_triggers('BILL_SUPPLIER_CREATE',$this,$user,$langs,$conf);
                 if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -386,7 +386,7 @@ class FactureFournisseur extends Facture
      */
     function fetch_lines()
     {
-        $sql = 'SELECT f.rowid, f.description, f.pu_ht, f.pu_ttc, f.qty, f.tva_tx, f.tva';
+        $sql = 'SELECT f.rowid, f.description, f.pu_ht, f.pu_ttc, f.qty, f.remise_percent, f.tva_tx, f.tva';
         $sql.= ', f.localtax1_tx, f.localtax2_tx, f.total_localtax1, f.total_localtax2 ';
         $sql.= ', f.total_ht, f.tva as total_tva, f.total_ttc, f.fk_product, f.product_type';
         $sql.= ', p.rowid as product_id, p.ref as product_ref, p.label as label, p.description as product_desc';
@@ -405,27 +405,30 @@ class FactureFournisseur extends Facture
                 while ($i < $num_rows)
                 {
                     $obj = $this->db->fetch_object($resql_rows);
-                    $this->lines[$i]->rowid            = $obj->rowid;
-                    $this->lines[$i]->description      = $obj->description;
-                    $this->lines[$i]->ref              = $obj->product_ref;       // TODO deprecated
-                    $this->lines[$i]->product_ref      = $obj->product_ref;       // Internal reference
-                    //$this->lines[$i]->ref_fourn        = $obj->ref_fourn;       // Reference fournisseur du produit
-                    $this->lines[$i]->libelle          = $obj->label;           // Label du produit
-                    $this->lines[$i]->product_desc     = $obj->product_desc;    // Description du produit
-                    $this->lines[$i]->pu_ht            = $obj->pu_ht;
-                    $this->lines[$i]->pu_ttc           = $obj->pu_ttc;
-                    $this->lines[$i]->tva_tx           = $obj->tva_tx;
-                    $this->lines[$i]->localtax1_tx     = $obj->localtax1_tx;
-                    $this->lines[$i]->localtax2_tx     = $obj->localtax2_tx;
-                    $this->lines[$i]->qty              = $obj->qty;
-                    $this->lines[$i]->tva              = $obj->tva;
-                    $this->lines[$i]->total_ht         = $obj->total_ht;
-                    $this->lines[$i]->total_tva        = $obj->total_tva;
-                    $this->lines[$i]->total_localtax1  = $obj->total_localtax1;
-                    $this->lines[$i]->total_localtax2  = $obj->total_localtax2;
-                    $this->lines[$i]->total_ttc        = $obj->total_ttc;
-                    $this->lines[$i]->fk_product       = $obj->fk_product;
-                    $this->lines[$i]->product_type     = $obj->product_type;
+
+                    $this->lines[$i]					= (object) array();
+                    $this->lines[$i]->rowid				= $obj->rowid;
+                    $this->lines[$i]->description		= $obj->description;
+                    $this->lines[$i]->ref				= $obj->product_ref;       // TODO deprecated
+                    $this->lines[$i]->product_ref		= $obj->product_ref;       // Internal reference
+                    //$this->lines[$i]->ref_fourn		= $obj->ref_fourn;       // Reference fournisseur du produit
+                    $this->lines[$i]->libelle			= $obj->label;           // Label du produit
+                    $this->lines[$i]->product_desc		= $obj->product_desc;    // Description du produit
+                    $this->lines[$i]->pu_ht				= $obj->pu_ht;
+                    $this->lines[$i]->pu_ttc			= $obj->pu_ttc;
+                    $this->lines[$i]->tva_tx			= $obj->tva_tx;
+                    $this->lines[$i]->localtax1_tx		= $obj->localtax1_tx;
+                    $this->lines[$i]->localtax2_tx		= $obj->localtax2_tx;
+                    $this->lines[$i]->qty				= $obj->qty;
+                    $this->lines[$i]->remise_percent    = $obj->remise_percent;
+                    $this->lines[$i]->tva				= $obj->tva;
+                    $this->lines[$i]->total_ht			= $obj->total_ht;
+                    $this->lines[$i]->total_tva			= $obj->total_tva;
+                    $this->lines[$i]->total_localtax1	= $obj->total_localtax1;
+                    $this->lines[$i]->total_localtax2	= $obj->total_localtax2;
+                    $this->lines[$i]->total_ttc			= $obj->total_ttc;
+                    $this->lines[$i]->fk_product		= $obj->fk_product;
+                    $this->lines[$i]->product_type		= $obj->product_type;
 
                     $i++;
                 }
@@ -535,7 +538,7 @@ class FactureFournisseur extends Facture
             if (! $notrigger)
             {
                 // Call triggers
-                //include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                //include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                 //$interface=new Interfaces($this->db);
                 //$result=$interface->run_triggers('BILL_SUPPLIER_MODIFY',$this,$user,$langs,$conf);
                 //if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -600,7 +603,7 @@ class FactureFournisseur extends Facture
         if (! $error)
         {
         	// Appel des triggers
-        	include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+        	include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
         	$interface=new Interfaces($this->db);
         	$result=$interface->run_triggers('INVOICE_SUPPLIER_DELETE',$this,$user,$langs,$conf);
         	if ($result < 0) {
@@ -614,6 +617,8 @@ class FactureFournisseur extends Facture
         	// We remove directory
         	if ($conf->fournisseur->facture->dir_output)
         	{
+        		include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
         		$ref = dol_sanitizeFileName($this->ref);
         		$dir = $conf->fournisseur->facture->dir_output.'/'.get_exdir($this->id, 2).$ref;
         		$file = $dir . "/" . $ref . ".pdf";
@@ -628,6 +633,7 @@ class FactureFournisseur extends Facture
         		if (file_exists($dir))
         		{
         			$res=@dol_delete_dir_recursive($dir);
+
         			if (! $res)
         			{
         				$this->error='ErrorFailToDeleteDir';
@@ -707,7 +713,7 @@ class FactureFournisseur extends Facture
         if ($resql)
         {
             // Appel des triggers
-            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+            include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
             $interface=new Interfaces($this->db);
             $result=$interface->run_triggers('BILL_SUPPLIER_PAYED',$this,$user,$langs,$conf);
             if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -757,7 +763,7 @@ class FactureFournisseur extends Facture
         if ($resql)
         {
             // Appel des triggers
-            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+            include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
             $interface=new Interfaces($this->db);
             $result=$interface->run_triggers('BILL_SUPPLIER_UNPAYED',$this,$user,$langs,$conf);
             if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -835,9 +841,9 @@ class FactureFournisseur extends Facture
         if ($resql)
         {
             // Si on incrémente le produit principal et ses composants à la validation de facture fournisseur
-            if (! $error && $conf->stock->enabled && $conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)
+            if (! $error && ! empty($conf->stock->enabled) && ! empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL))
             {
-                require_once(DOL_DOCUMENT_ROOT."/product/stock/class/mouvementstock.class.php");
+                require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
                 $langs->load("agenda");
 
                 $cpt=count($this->lines);
@@ -856,7 +862,7 @@ class FactureFournisseur extends Facture
             if (! $error)
             {
                 // Appel des triggers
-                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
                 $interface=new Interfaces($this->db);
                 $result=$interface->run_triggers('BILL_SUPPLIER_VALIDATE',$this,$user,$langs,$conf);
                 if ($result < 0) { $error++; $this->errors=$interface->errors; }
@@ -913,9 +919,9 @@ class FactureFournisseur extends Facture
         if ($result)
         {
             // Si on incremente le produit principal et ses composants a la validation de facture fournisseur, on decremente
-            if ($result >= 0 && $conf->stock->enabled && $conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL)
+            if ($result >= 0 && ! empty($conf->stock->enabled) && ! empty($conf->global->STOCK_CALCULATE_ON_SUPPLIER_BILL))
             {
-                require_once(DOL_DOCUMENT_ROOT."/product/stock/class/mouvementstock.class.php");
+                require_once DOL_DOCUMENT_ROOT.'/product/stock/class/mouvementstock.class.php';
                 $langs->load("agenda");
 
                 $cpt=count($this->lines);
@@ -972,12 +978,13 @@ class FactureFournisseur extends Facture
      *	@param    	string	$price_base_type 	HT ou TTC
      *	@param		int		$type				Type of line (0=product, 1=service)
      *  @param      int		$rang            	Position of line
+     *  @param		int		$notrigger			Disable triggers
      *	@return    	int             			>0 if OK, <0 if KO
      */
-    function addline($desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0, $rang=-1)
+    function addline($desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product=0, $remise_percent=0, $date_start='', $date_end='', $ventil=0, $info_bits='', $price_base_type='HT', $type=0, $rang=-1, $notrigger=false)
     {
         dol_syslog(get_class($this)."::addline $desc,$pu,$qty,$txtva,$fk_product,$remise_percent,$date_start,$date_end,$ventil,$info_bits,$price_base_type,$type", LOG_DEBUG);
-        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
+        include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
         // Clean parameters
         if (empty($remise_percent)) $remise_percent=0;
@@ -1004,16 +1011,29 @@ class FactureFournisseur extends Facture
 
         $sql = 'INSERT INTO '.MAIN_DB_PREFIX.'facture_fourn_det (fk_facture_fourn)';
         $sql.= ' VALUES ('.$this->id.')';
-        dol_syslog("Fournisseur.facture::addline sql=".$sql);
+        dol_syslog(get_class($this)."::addline sql=".$sql);
 
         $resql = $this->db->query($sql);
         if ($resql)
         {
             $idligne = $this->db->last_insert_id(MAIN_DB_PREFIX.'facture_fourn_det');
 
-            $result=$this->updateline($idligne, $desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product, $price_base_type, $info_bits, $type, $remise_percent);
+            $result=$this->updateline($idligne, $desc, $pu, $txtva, $txlocaltax1, $txlocaltax2, $qty, $fk_product, $price_base_type, $info_bits, $type, $remise_percent, true);
             if ($result > 0)
             {
+                $this->rowid = $idligne;
+
+                if (! $notrigger)
+                {
+                    global $conf, $langs, $user;
+                    // Appel des triggers
+                    include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                    $interface=new Interfaces($this->db);
+                    $result=$interface->run_triggers('LINEBILL_SUPPLIER_CREATE',$this,$user,$langs,$conf);
+                    if ($result < 0) { $error++; $this->errors=$interface->errors; }
+                    // Fin appel triggers
+                }
+
                 $this->db->commit();
                 return 1;
             }
@@ -1047,15 +1067,17 @@ class FactureFournisseur extends Facture
      * @param	  	int		$info_bits			Miscellanous informations of line
      * @param		int		$type				Type of line (0=product, 1=service)
      * @param     	double	$remise_percent  	Pourcentage de remise de la ligne
+     *  @param		int		$notrigger			Disable triggers
      * @return    	int           				<0 if KO, >0 if OK
      */
-    function updateline($id, $label, $pu, $vatrate, $txlocaltax1=0, $txlocaltax2=0, $qty=1, $idproduct=0, $price_base_type='HT', $info_bits=0, $type=0, $remise_percent=0)
+    function updateline($id, $label, $pu, $vatrate, $txlocaltax1=0, $txlocaltax2=0, $qty=1, $idproduct=0, $price_base_type='HT', $info_bits=0, $type=0, $remise_percent=0, $notrigger=false)
     {
         dol_syslog(get_class($this)."::updateline $id,$label,$pu,$vatrate,$qty,$idproduct,$price_base_type,$info_bits,$type,$remise_percent", LOG_DEBUG);
-        include_once(DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php');
+        include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
         $pu = price2num($pu);
         $qty  = price2num($qty);
+		$remise_percent=price2num($remise_percent);
 
         // Check parameters
         if (! is_numeric($pu) || ! is_numeric($qty)) return -1;
@@ -1072,7 +1094,7 @@ class FactureFournisseur extends Facture
         // qty, pu, remise_percent et txtva
         // TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
         // la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-        $tabprice = calcul_price_total($qty, $pu, $remise_percent, $vatrate, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits);
+        $tabprice = calcul_price_total($qty, $pu, $remise_percent, $vatrate, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type, $this->thirdparty);
         $total_ht  = $tabprice[0];
         $total_tva = $tabprice[1];
         $total_ttc = $tabprice[2];
@@ -1098,6 +1120,7 @@ class FactureFournisseur extends Facture
         $sql.= ", pu_ht = ".price2num($pu_ht);
         $sql.= ", pu_ttc = ".price2num($pu_ttc);
         $sql.= ", qty = ".price2num($qty);
+        $sql.= ", remise_percent = ".price2num($remise_percent);
         $sql.= ", tva_tx = ".price2num($vatrate);
         $sql.= ", localtax1_tx = ".price2num($txlocaltax1);
         $sql.= ", localtax2_tx = ".price2num($txlocaltax2);
@@ -1111,10 +1134,23 @@ class FactureFournisseur extends Facture
         $sql.= ", product_type = ".$product_type;
         $sql.= " WHERE rowid = ".$id;
 
-        dol_syslog("Fournisseur.facture::updateline sql=".$sql);
+        dol_syslog(get_class($this)."::updateline sql=".$sql);
         $resql=$this->db->query($sql);
         if ($resql)
         {
+            $this->rowid = $id;
+
+            if (! $notrigger)
+            {
+                global $conf, $langs, $user;
+                // Appel des triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface=new Interfaces($this->db);
+                $result=$interface->run_triggers('LINEBILL_SUPPLIER_UPDATE',$this,$user,$langs,$conf);
+                if ($result < 0) { $error++; $this->errors=$interface->errors; }
+                // Fin appel triggers
+            }
+
             // Update total price into invoice record
             $result=$this->update_price();
 
@@ -1123,7 +1159,7 @@ class FactureFournisseur extends Facture
         else
         {
             $this->error=$this->db->lasterror();
-            dol_syslog("Fournisseur.facture::updateline error=".$this->error, LOG_ERR);
+            dol_syslog(get_class($this)."::updateline error=".$this->error, LOG_ERR);
             return -1;
         }
     }
@@ -1280,6 +1316,7 @@ class FactureFournisseur extends Facture
     function initAsSpecimen()
     {
         global $langs,$conf;
+		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 
         $now = dol_now();
 
@@ -1324,6 +1361,7 @@ class FactureFournisseur extends Facture
             $line->desc=$langs->trans("Description")." ".$xnbp;
             $line->qty=1;
             $line->subprice=100;
+            $line->pu_ht=100;		// the canelle template use pu_ht and not subprice
             $line->price=100;
             $line->tva_tx=19.6;
             $line->localtax1_tx=0;
@@ -1340,7 +1378,7 @@ class FactureFournisseur extends Facture
 			    $line->total_ht=100;
 			    $line->total_ttc=119.6;
 			    $line->total_tva=19.6;
-    			$line->remise_percent=00;
+    			$line->remise_percent=0;
 			}
 
 			$prodid = rand(1, $num_prods);
@@ -1400,7 +1438,7 @@ class FactureFournisseur extends Facture
         // Loop on each line of new invoice
         foreach($object->lines as $i => $line)
         {
-            if (($object->lines[$i]->info_bits & 0x02) == 0x02)	// We do not clone line of discounts
+            if (isset($object->lines[$i]->info_bits) && ($object->lines[$i]->info_bits & 0x02) == 0x02)	// We do not clone line of discounts
             {
                 unset($object->lines[$i]);
             }

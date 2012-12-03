@@ -23,11 +23,11 @@
  *  \ingroup    gravatar
  *  \brief      Description and activation file for module Gravatar
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
-/**     \class      modGravatar
- *      \brief      Description and activation class for module Gravatar
+/**
+ * 	Description and activation class for module Gravatar
  */
 class modGravatar extends DolibarrModules
 {
@@ -36,7 +36,7 @@ class modGravatar extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modGravatar($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 
@@ -220,7 +220,7 @@ class modGravatar extends DolibarrModules
 	 */
 	function load_tables()
 	{
-		return $this->_load_tables('/mymodule/sql/');
+		return $this->_load_tables('');
 	}
 }
 

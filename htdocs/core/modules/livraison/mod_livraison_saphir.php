@@ -23,7 +23,7 @@
  *	\ingroup    expedition
  *	\brief      Fichier contenant la classe du modele de numerotation de reference de livraison Saphir
  */
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/livraison/modules_livraison.php");
+require_once DOL_DOCUMENT_ROOT .'/core/modules/livraison/modules_livraison.php';
 
 /**
  *	\class      mod_livraison_saphir
@@ -102,16 +102,16 @@ class mod_livraison_saphir extends ModeleNumRefDeliveryOrder
 	 *  Return next value
 	 *
 	 *  @param	Societe		$objsoc     	Object third party
-	 *  @param  Object		$livraison		Object delivery
+	 *  @param  Object		$object			Object delivery
 	 *  @return string      				Value if OK, 0 if KO
 	 */
-    function getNextValue($objsoc=0,$livraison='')
+    function getNextValue($objsoc,$object)
     {
 		global $db,$conf;
 
-		require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
+		require_once DOL_DOCUMENT_ROOT .'/core/lib/functions2.lib.php';
 
-		// On d�fini critere recherche compteur
+		// On defini critere recherche compteur
 		$mask=$conf->global->LIVRAISON_SAPHIR_MASK;
 
 		if (! $mask)

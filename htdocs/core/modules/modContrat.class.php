@@ -25,14 +25,12 @@
  *	\brief      Fichier de description et activation du module Contrat
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- \class      modContrat
- \brief      Classe de description et activation du module Contrat
+ *	Classe de description et activation du module Contrat
  */
-
 class modContrat extends DolibarrModules
 {
 
@@ -41,7 +39,7 @@ class modContrat extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modContrat($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 54;
@@ -62,7 +60,7 @@ class modContrat extends DolibarrModules
 		$this->dirs = array("/contracts/temp");
 
 		// Dependances
-		$this->depends = array("modService");
+		$this->depends = array("modSociete","modService");
 		$this->requiredby = array();
 
 		// Config pages

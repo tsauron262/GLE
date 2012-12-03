@@ -36,6 +36,9 @@ function llxHeaderPaypal($title, $head = "")
 
 	header("Content-type: text/html; charset=".$conf->file->character_set_client);
 
+	$appli='Dolibarr';
+	if (!empty($conf->global->MAIN_APPLICATION_TITLE)) $appli=$conf->global->MAIN_APPLICATION_TITLE;
+
 	print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">';
 	//print '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" http://www.w3.org/TR/1999/REC-html401-19991224/strict.dtd>';
 	print "\n";
@@ -43,10 +46,10 @@ function llxHeaderPaypal($title, $head = "")
 	print "<head>\n";
 	print '<meta name="robots" content="noindex,nofollow">'."\n";
 	print '<meta name="keywords" content="dolibarr,payment,online">'."\n";
-	print '<meta name="description" content="Welcome on Dolibarr online payment form">'."\n";
+	print '<meta name="description" content="Welcome on '.$appli.' online payment form">'."\n";
 	print "<title>".$title."</title>\n";
 	if ($head) print $head."\n";
-	if ($conf->global->PAYPAL_CSS_URL) print '<link rel="stylesheet" type="text/css" href="'.$conf->global->PAYPAL_CSS_URL.'?lang='.$langs->defaultlang.'">'."\n";
+	if (! empty($conf->global->PAYPAL_CSS_URL)) print '<link rel="stylesheet" type="text/css" href="'.$conf->global->PAYPAL_CSS_URL.'?lang='.$langs->defaultlang.'">'."\n";
 	else
 	{
 		print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.$conf->css.'?lang='.$langs->defaultlang.'">'."\n";
@@ -63,9 +66,6 @@ function llxHeaderPaypal($title, $head = "")
 
 		// Output standard javascript links
 		$ext='.js';
-		if (isset($conf->global->MAIN_OPTIMIZE_SPEED) && ($conf->global->MAIN_OPTIMIZE_SPEED & 0x01)) {
-			$ext='.jgz';
-		}	// mini='_mini', ext='.gz'
 
 		// JQuery. Must be before other includes
 		print '<!-- Includes JS for JQuery -->'."\n";
@@ -73,8 +73,8 @@ function llxHeaderPaypal($title, $head = "")
 		// jQuery jnotify
 		if (empty($conf->global->MAIN_DISABLE_JQUERY_JNOTIFY))
 		{
-			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min.js"></script>'."\n";
-			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/jnotify.js"></script>'."\n";
+			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/includes/jquery/plugins/jnotify/jquery.jnotify.min'.$ext.'"></script>'."\n";
+			print '<script type="text/javascript" src="'.DOL_URL_ROOT.'/core/js/jnotify'.$ext.'"></script>'."\n";
 		}
 	}
 	print "</head>\n";
@@ -182,8 +182,10 @@ function paypaladmin_prepare_head()
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
-    // $this->tabs = array('entity:-tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to remove a tab
-    complete_head_from_modules($conf,$langs,$object,$head,$h,'paypaladmin');
+    // $this->tabs = array('entity:-tabname);   												to remove a tab
+	complete_head_from_modules($conf,$langs,$object,$head,$h,'paypaladmin');
+
+	complete_head_from_modules($conf,$langs,$object,$head,$h,'paypaladmin','remove');
 
     return $head;
 }
@@ -643,7 +645,7 @@ function hash_call($methodName,$nvpStr)
 
     // TODO problem with triggers
     $API_version="56";
-	if ($conf->global->PAYPAL_API_SANDBOX)
+	if (! empty($conf->global->PAYPAL_API_SANDBOX))
 	{
 	    $API_Endpoint = "https://api-3t.sandbox.paypal.com/nvp";
 	    $API_Url = "https://www.sandbox.paypal.com/webscr?cmd=_express-checkout&token=";
@@ -656,13 +658,13 @@ function hash_call($methodName,$nvpStr)
 
 	// Clean parameters
 	$PAYPAL_API_USER="";
-	if ($conf->global->PAYPAL_API_USER) $PAYPAL_API_USER=$conf->global->PAYPAL_API_USER;
+	if (! empty($conf->global->PAYPAL_API_USER)) $PAYPAL_API_USER=$conf->global->PAYPAL_API_USER;
 	$PAYPAL_API_PASSWORD="";
-	if ($conf->global->PAYPAL_API_PASSWORD) $PAYPAL_API_PASSWORD=$conf->global->PAYPAL_API_PASSWORD;
+	if (! empty($conf->global->PAYPAL_API_PASSWORD)) $PAYPAL_API_PASSWORD=$conf->global->PAYPAL_API_PASSWORD;
 	$PAYPAL_API_SIGNATURE="";
-	if ($conf->global->PAYPAL_API_SIGNATURE) $PAYPAL_API_SIGNATURE=$conf->global->PAYPAL_API_SIGNATURE;
+	if (! empty($conf->global->PAYPAL_API_SIGNATURE)) $PAYPAL_API_SIGNATURE=$conf->global->PAYPAL_API_SIGNATURE;
 	$PAYPAL_API_SANDBOX="";
-	if ($conf->global->PAYPAL_API_SANDBOX) $PAYPAL_API_SANDBOX=$conf->global->PAYPAL_API_SANDBOX;
+	if (! empty($conf->global->PAYPAL_API_SANDBOX)) $PAYPAL_API_SANDBOX=$conf->global->PAYPAL_API_SANDBOX;
 	// TODO END problem with triggers
 
     dol_syslog("Paypal API endpoint ".$API_Endpoint);

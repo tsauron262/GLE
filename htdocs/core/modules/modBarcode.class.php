@@ -25,13 +25,11 @@
  *	\brief      Fichier de description et activation du module Barcode
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 /**
- *	\class      modBarcode
- *	\brief      Classe de description et activation du module Barcode
+ *	Classe de description et activation du module Barcode
  */
-
 class modBarcode extends DolibarrModules
 {
 
@@ -40,7 +38,7 @@ class modBarcode extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modBarcode($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 55;

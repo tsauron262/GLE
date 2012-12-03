@@ -141,6 +141,42 @@ abstract class Stats
 		return $data;
 	}
 
+	/**
+	 * Return average of entity by month for several years
+	 *
+	 * @param	int		$endyear		Start year
+	 * @param	int		$startyear		End year
+	 * @return 	array					Array of values
+	 */
+	function getAverageByMonthWithPrevYear($endyear,$startyear)
+	{
+        if ($startyear > $endyear) return -1;
+
+        $datay=array();
+
+		$year=$startyear;
+		while($year <= $endyear)
+		{
+			$datay[$year] = $this->getAverageByMonth($year);
+			$year++;
+		}
+
+		$data = array();
+
+		for ($i = 0 ; $i < 12 ; $i++)
+		{
+			$data[$i][]=$datay[$endyear][$i][0];
+			$year=$startyear;
+			while($year <= $endyear)
+			{
+				$data[$i][]=$datay[$year][$i][1];
+				$year++;
+			}
+		}
+
+		return $data;
+	}
+
 
 	/**
 	 * 	Return nb of elements by year
@@ -214,7 +250,8 @@ abstract class Stats
 	 */
 	function _getNbByMonth($year, $sql)
 	{
-		$result = array();
+		$result=array();
+		$res=array();
 
 		dol_syslog(get_class($this)."::_getNbByMonth sql=".$sql);
 		$resql=$this->db->query($sql);
@@ -238,7 +275,7 @@ abstract class Stats
 
 		for ($i = 1 ; $i < 13 ; $i++)
 		{
-			$res[$i] = $result[$i] + 0;
+			$res[$i] = (isset($result[$i])?$result[$i]:0);
 		}
 
 		$data = array();
@@ -263,7 +300,8 @@ abstract class Stats
 	 */
 	function _getAmountByMonth($year, $sql)
 	{
-		$result = array();
+		$result=array();
+		$res=array();
 
 		dol_syslog(get_class($this)."::_getAmountByMonth sql=".$sql);
 
@@ -285,7 +323,7 @@ abstract class Stats
 
 		for ($i = 1 ; $i < 13 ; $i++)
 		{
-			$res[$i] = (int) round($result[$i]) + 0;
+			$res[$i] = (int) round((isset($result[$i])?$result[$i]:0));
 		}
 
 		$data = array();
@@ -309,7 +347,8 @@ abstract class Stats
 	 */
 	function _getAverageByMonth($year, $sql)
 	{
-		$result = array();
+		$result=array();
+		$res=array();
 
 		dol_syslog(get_class($this)."::_getAverageByMonth sql=".$sql);
 		$resql=$this->db->query($sql);
@@ -330,7 +369,7 @@ abstract class Stats
 
 		for ($i = 1 ; $i < 13 ; $i++)
 		{
-			$res[$i] = $result[$i] + 0;
+			$res[$i] = (isset($result[$i])?$result[$i]:0);
 		}
 
 		$data = array();

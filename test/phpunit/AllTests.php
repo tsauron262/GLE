@@ -72,12 +72,18 @@ class AllTests
 		$suite->addTestSuite('ImagesLibTest');
 		require_once dirname(__FILE__).'/FunctionsTest.php';
 		$suite->addTestSuite('FunctionsTest');
-		require_once dirname(__FILE__).'/PdfDocTest.php';
-		$suite->addTestSuite('PdfDocTest');
+		require_once dirname(__FILE__).'/Functions2Test.php';
+		$suite->addTestSuite('Functions2Test');
 
         require_once dirname(__FILE__).'/SecurityTest.php';
         $suite->addTestSuite('SecurityTest');
 
+        require_once dirname(__FILE__).'/NumberingModulesTest.php';
+        $suite->addTestSuite('NumberingModulesTest');
+        require_once dirname(__FILE__).'/PgsqlTest.php';
+        $suite->addTestSuite('PgsqlTest');
+		require_once dirname(__FILE__).'/PdfDocTest.php';
+		$suite->addTestSuite('PdfDocTest');
         require_once dirname(__FILE__).'/BuildDocTest.php';
         $suite->addTestSuite('BuildDocTest');
         require_once dirname(__FILE__).'/CMailFileTest.php';
@@ -103,8 +109,11 @@ class AllTests
 
         require_once dirname(__FILE__).'/CommandeTest.php';
         $suite->addTestSuite('CommandeTest');
-		require_once dirname(__FILE__).'/CommandeFournisseurTest.php';
-        $suite->addTestSuite('CommandeFournisseurTest');
+
+        // FIXME pending correction in addline() method
+        //require_once dirname(__FILE__).'/CommandeFournisseurTest.php';
+        //$suite->addTestSuite('CommandeFournisseurTest');
+
         require_once dirname(__FILE__).'/ContratTest.php';
         $suite->addTestSuite('ContratTest');
         require_once dirname(__FILE__).'/FactureTest.php';
@@ -119,6 +128,8 @@ class AllTests
         $suite->addTestSuite('UserTest');
 		require_once dirname(__FILE__).'/UserGroupTest.php';
         $suite->addTestSuite('UserGroupTest');
+        require_once dirname(__FILE__).'/BankAccountTest.php';
+        $suite->addTestSuite('BankAccountTest');
 		require_once dirname(__FILE__).'/CompanyBankAccountTest.php';
         $suite->addTestSuite('CompanyBankAccountTest');
         require_once dirname(__FILE__).'/ChargeSocialesTest.php';

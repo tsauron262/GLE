@@ -58,7 +58,7 @@ class FactureTest extends PHPUnit_Framework_TestCase
 	 *
 	 * @return FactureTest
 	 */
-	function FactureTest()
+	function __construct()
 	{
 		//$this->sharedFixture
 		global $conf,$user,$langs,$db;
@@ -268,7 +268,7 @@ class FactureTest extends PHPUnit_Framework_TestCase
 		$result=$localobject->delete($id);
 
 		print __METHOD__." id=".$id." result=".$result."\n";
-    	$this->assertLessThan($result, 0);
+    	$this->assertGreaterThanOrEqual(0, $result);
     	return $result;
     }
 

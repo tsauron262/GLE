@@ -14,7 +14,7 @@ Summary(es): Software ERP y CRM para pequeñas y medianas empresas, asociaciones
 Summary(fr): Logiciel ERP & CRM de gestion de PME/PMI, auto-entrepreneurs ou associations
 Summary(it): Programmo gestionale per piccole imprese, fondazioni e liberi professionisti
 
-License: GPLv2+
+License: GPL-2+
 #Packager: Laurent Destailleur (Eldy) <eldy@users.sourceforge.net>
 Vendor: Dolibarr dev team
 
@@ -25,9 +25,9 @@ BuildArch: noarch
 BuildRoot: %{_tmppath}/%{name}-%{version}-build
 
 Group: Productivity/Office/Management
-Requires: apache2, apache2-mod_php5, php5 >= 5.3.0, php5-gd, php5-ldap, php5-imap, php5-mysql, php5-openssl, fonts-ttf-dejavu
+Requires: apache2, apache2-mod_php5, php5 >= 5.3.0, php5-gd, php5-ldap, php5-imap, php5-mysql, php5-openssl, dejavu
 Requires: mysql-community-server, mysql-community-server-client 
-#BuildRequires: update-desktop-files fdupes
+BuildRequires: update-desktop-files fdupes
 
 # Set yes to build test package, no for release (this disable need of /usr/bin/php not found by OpenSuse)
 AutoReqProv: no
@@ -104,23 +104,27 @@ cui hai bisogno ed essere facile da usare.
 %{__rm} -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs/includes/fonts
 
 # Lang
+echo "%defattr(0644, root, root, 0755)" > %{name}.lang
+echo "%dir %{_datadir}/%{name}/htdocs/langs" >> %{name}.lang
 for i in $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs/langs/*_*
 do
   lang=$(basename $i)
   lang1=`expr substr $lang 1 2`; 
   lang2=`expr substr $lang 4 2 | tr "[:upper:]" "[:lower:]"`; 
+  echo "%dir %{_datadir}/%{name}/htdocs/langs/${lang}" >> %{name}.lang
   if [ "$lang1" = "$lang2" ] ; then
 	echo "%lang(${lang1}) %{_datadir}/%{name}/htdocs/langs/${lang}/*.lang"
   else
 	echo "%lang(${lang}) %{_datadir}/%{name}/htdocs/langs/${lang}/*.lang"
   fi
-done >%{name}.lang
+done >>%{name}.lang
+
 
 # Enable this command to tag desktop file for suse
-#%suse_update_desktop_file dolibarr
+%suse_update_desktop_file dolibarr
 
 # Enable this command to allow suse detection of duplicate files and create hardlinks instead
-#%fdupes $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs
+%fdupes $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs
 
 
 #---- clean
@@ -133,6 +137,9 @@ done >%{name}.lang
 %files -f %{name}.lang
 
 %defattr(0755, root, root, 0755)
+
+%dir %_datadir/dolibarr
+
 %dir %_datadir/dolibarr/scripts
 %_datadir/dolibarr/scripts/*
 
@@ -141,6 +148,8 @@ done >%{name}.lang
 
 %_datadir/pixmaps/dolibarr.png
 %_datadir/applications/dolibarr.desktop
+
+%dir %_datadir/dolibarr/build
 
 %dir %_datadir/dolibarr/build/rpm
 %_datadir/dolibarr/build/rpm/*
@@ -159,6 +168,7 @@ done >%{name}.lang
 %_datadir/dolibarr/htdocs/categories
 %_datadir/dolibarr/htdocs/comm
 %_datadir/dolibarr/htdocs/commande
+%_datadir/dolibarr/htdocs/commissions
 %_datadir/dolibarr/htdocs/compta
 %_datadir/dolibarr/htdocs/conf
 %_datadir/dolibarr/htdocs/contact
@@ -172,11 +182,14 @@ done >%{name}.lang
 %_datadir/dolibarr/htdocs/fichinter
 %_datadir/dolibarr/htdocs/fourn
 %_datadir/dolibarr/htdocs/ftp
+%_datadir/dolibarr/htdocs/holiday
 %_datadir/dolibarr/htdocs/imports
 %_datadir/dolibarr/htdocs/includes
 %_datadir/dolibarr/htdocs/install
 %_datadir/dolibarr/htdocs/langs/HOWTO-Translation.txt
 %_datadir/dolibarr/htdocs/livraison
+%_datadir/dolibarr/htdocs/mailmanspip
+%_datadir/dolibarr/htdocs/margin
 %_datadir/dolibarr/htdocs/paybox
 %_datadir/dolibarr/htdocs/paypal
 %_datadir/dolibarr/htdocs/product
@@ -192,7 +205,9 @@ done >%{name}.lang
 %_datadir/dolibarr/htdocs/*.php
 %_datadir/dolibarr/htdocs/*.txt
 
-%defattr(0664, -, -)
+%dir %{_sysconfdir}/dolibarr
+
+%defattr(0664, root, www)
 %config(noreplace) %{_sysconfdir}/dolibarr/conf.php
 %config(noreplace) %{_sysconfdir}/dolibarr/apache.conf
 %config(noreplace) %{_sysconfdir}/dolibarr/install.forced.php
@@ -202,6 +217,8 @@ done >%{name}.lang
 
 #---- post (after unzip during install)
 %post
+
+echo Run post script of packager dolibarr_opensuse.spec
 
 # Define vars
 export docdir="/var/lib/dolibarr/documents"
@@ -241,8 +258,13 @@ fi
 
 # Create a config link dolibarr.conf
 if [ ! -L $apachelink ]; then
-    echo Create dolibarr web server config link $apachelink
-    ln -fs %{_sysconfdir}/dolibarr/apache.conf $apachelink
+    apachelinkdir=`dirname $apachelink`
+    if [ -d $apachelinkdir ]; then
+        echo Create dolibarr web server config link from %{_sysconfdir}/dolibarr/apache.conf to $apachelink
+        ln -fs %{_sysconfdir}/dolibarr/apache.conf $apachelink
+    else
+        echo Do not create link $apachelink - web server conf dir $apachelinkdir not found. web server package may not be installed
+    fi
 fi
 
 echo Set permission to $apacheuser:$apachegroup on /var/lib/dolibarr

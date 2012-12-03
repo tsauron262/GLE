@@ -77,15 +77,16 @@ for (0..@ARGV-1) {
 }
 $SOURCE="$DIR/..";
 $DESTI="$SOURCE/build";
-if ($ENV{"DESTI"}) { $DESTI = $ENV{"DESTI"}; }		# Force output dir if env DESTI is defined
+if ($ENV{"DESTIMODULES"}) { $DESTI = $ENV{"DESTIMODULES"}; }		# Force output dir if env DESTIMODULES is defined
+$NEWDESTI=$DESTI;
 
 
 print "Makepack for modules version $VERSION\n";
 print "Source directory: $SOURCE\n";
-print "Target directory: $DESTI\n";
+print "Target directory: $NEWDESTI\n";
 
 
-# Ask and set version $MAJOR and $MINOR
+# Ask and set version $MAJOR, $MINOR and $BUILD
 print "Enter value for version: ";
 $PROJVERSION=<STDIN>;
 chomp($PROJVERSION);
@@ -139,8 +140,8 @@ foreach my $PROJECT (@PROJECTLIST) {
 	}
 	
 	$FILENAME="$PROJECT";
-	$FILENAMETGZ="module_$PROJECT-$MAJOR.$MINOR";
-	$FILENAMEZIP="module_$PROJECT-$MAJOR.$MINOR";
+	$FILENAMETGZ="module_$PROJECT-$MAJOR.$MINOR".($BUILD ne ''?".$BUILD":"");
+	$FILENAMEZIP="module_$PROJECT-$MAJOR.$MINOR".($BUILD ne ''?".$BUILD":"");
 	if (-d "/usr/src/redhat") {
 	    # redhat
 	    $RPMDIR="/usr/src/redhat";
@@ -253,7 +254,7 @@ foreach my $PROJECT (@PROJECTLIST) {
 		
 				print "Create version file $BUILDROOT/$PROJECT/build/version-".$PROJECT.".txt with date ".$fulldate."\n";
 				$ret=`mkdir -p "$BUILDROOT/$PROJECT/build"`;
-				print VF "Version: ".$MAJOR.".".$MINOR."\n";
+				print VF "Version: ".$MAJOR.".".$MINOR.($BUILD ne ''?".$BUILD":"")."\n";
 				print VF "Build  : ".$fulldate."\n";
 				close VF;
 		    }

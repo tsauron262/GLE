@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2010 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2010-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
      *
      * @return CoreTest
      */
-    function FunctionsTest()
+    function __construct()
     {
         //$this->sharedFixture
         global $conf,$user,$langs,$db;
@@ -151,6 +151,41 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('533.21.1',$tmp['browserversion']);
     }
 
+
+    /**
+     * testDolTextIsHtml
+     *
+     * @return void
+     */
+    public function testDolTextIsHtml()
+    {
+        // True
+        $input='<html>xxx</html>';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+        $input='<body>xxx</body>';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+        $input='xxx <b>yyy</b> zzz';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+        $input='xxx<br>';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+        $input='text with <div>some div</div>';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+        $input='text with HTML &nbsp; entities';
+        $after=dol_textishtml($input);
+        $this->assertTrue($after);
+
+        // False
+        $input='xxx < br>';
+        $after=dol_textishtml($input);
+        $this->assertFalse($after);
+    }
+
+
     /**
      * testDolHtmlCleanLastBr
      *
@@ -200,38 +235,32 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
         return true;
     }
 
-    /**
-     * testDolTextIsHtml
-     *
-     * @return void
-     */
-    public function testDolTextIsHtml()
-    {
-        // True
-        $input='<html>xxx</html>';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
-        $input='<body>xxx</body>';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
-        $input='xxx <b>yyy</b> zzz';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
-        $input='xxx<br>';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
-        $input='text with <div>some div</div>';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
-        $input='text with HTML &nbsp; entities';
-        $after=dol_textishtml($input);
-        $this->assertTrue($after);
 
-        // False
-        $input='xxx < br>';
-        $after=dol_textishtml($input);
-        $this->assertFalse($after);
+    /**
+     * testDolNbOfLinesBis
+     *
+     * @return boolean
+     */
+    public function testDolNbOfLinesBis()
+    {
+        // This is not a html string so nb of lines depends on \n
+        $input="A string\nwith a é, &, < and > and bold tag.\nThird line";
+        $after=dol_nboflines_bis($input,0);
+        $this->assertEquals($after,3);
+
+        // This is a html string so nb of lines depends on <br>
+        $input="A string\nwith a é, &, < and > and <b>bold</b> tag.\nThird line";
+        $after=dol_nboflines_bis($input,0);
+        $this->assertEquals($after,1);
+
+        // This is a html string so nb of lines depends on <br>
+        $input="A string<br>with a é, &, < and > and <b>bold</b> tag.<br>Third line";
+        $after=dol_nboflines_bis($input,0);
+        $this->assertEquals($after,3);
+
+        return true;
     }
+
 
     /**
      * testDolTextIsHtml
@@ -328,6 +357,91 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(7200-($tz*3600),$result);        // Should be 7200 if we are at greenwich winter
     }
 
+
+    /**
+     * testDolEscapeJs
+     *
+     * @return	void
+     */
+    public function testDolEscapeJs()
+    {
+        $input="x&<b>#</b>,\"'";    // " will be converted into '
+        $result=dol_escape_js($input);
+        $this->assertEquals("x&<b>#<\/b>,\'\'",$result);
+    }
+
+
+    /**
+    * testDolEscapeHtmlTag
+    *
+    * @return	void
+    */
+    public function testDolEscapeHtmlTag()
+    {
+        $input='x&<b>#</b>,"';    // & and " are converted into html entities, <b> are removed
+        $result=dol_escape_htmltag($input);
+        $this->assertEquals('x&amp;#,&quot;',$result);
+
+        $input='x&<b>#</b>,"';    // & and " are converted into html entities, <b> are not removed
+        $result=dol_escape_htmltag($input,1);
+        $this->assertEquals('x&amp;&lt;b&gt;#&lt;/b&gt;,&quot;',$result);
+    }
+
+
+    /**
+     * testDolFormatAddress
+     *
+     * @return	void
+     */
+    public function testDolFormatAddress()
+    {
+    	global $conf,$user,$langs,$db;
+		$conf=$this->savconf;
+		$user=$this->savuser;
+		$langs=$this->savlangs;
+		$db=$this->savdb;
+
+		$object=new Societe($db);
+		$object->initAsSpecimen();
+
+		$object->country_code='FR';
+    	$address=dol_format_address($object);
+    	$this->assertEquals("21 jump street\n99999 MyTown",$address);
+
+		$object->country_code='GB';
+    	$address=dol_format_address($object);
+    	$this->assertEquals("21 jump street\nMyTown, MyState\n99999",$address);
+
+		$object->country_code='US';
+    	$address=dol_format_address($object);
+    	$this->assertEquals("21 jump street\nMyTown, MyState, 99999",$address);
+    }
+
+    /**
+     * testImgPicto
+     *
+     * @return	void
+     */
+    public function testImgPicto()
+    {
+        $s=img_picto('alt','user');
+        print __METHOD__." s=".$s."\n";
+        $this->assertContains('theme',$s,'testImgPicto1');
+
+    	$s=img_picto('alt','img.png','style="float: right"',0);
+        print __METHOD__." s=".$s."\n";
+        $this->assertContains('theme',$s,'testImgPicto2');
+        $this->assertContains('style="float: right"',$s,'testImgPicto2');
+
+        $s=img_picto('alt','/fullpath/img.png','',1);
+        print __METHOD__." s=".$s."\n";
+        $this->assertEquals($s,'<img src="/fullpath/img.png" border="0" alt="alt" title="alt">','testImgPicto3');
+
+        $s=img_picto('alt','/fullpath/img.png','',true);
+        print __METHOD__." s=".$s."\n";
+        $this->assertEquals($s,'<img src="/fullpath/img.png" border="0" alt="alt" title="alt">','testImgPicto3');
+    }
+
     /**
      * testDolNow
      *
@@ -337,7 +451,7 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
     {
         $now=dol_now('gmt');
         $nowtzserver=dol_now('tzserver');
-        print __METHOD__."getServerTimeZoneInt=".(getServerTimeZoneInt('now')*3600)."\n";
+        print __METHOD__." getServerTimeZoneInt=".(getServerTimeZoneInt('now')*3600)."\n";
         $this->assertEquals(getServerTimeZoneInt('now')*3600,($nowtzserver-$now));
     }
 
@@ -379,20 +493,176 @@ class FunctionsTest extends PHPUnit_Framework_TestCase
         $this->savdb=$db;
 
         $arraytotest=array(0=>array('key'=>1,'value'=>'PRODREF','label'=>'Product ref with é and special chars \\ \' "'));
-        
+
         $encoded=json_encode($arraytotest);
         //var_dump($encoded);
         $this->assertEquals('[{"key":1,"value":"PRODREF","label":"Product ref with \u00e9 and special chars \\\\ \' \""}]',$encoded);
         $decoded=json_decode($encoded,true);
         //var_dump($decoded);
         $this->assertEquals($arraytotest,$decoded);
-        
+
         $encoded=dol_json_encode($arraytotest);
         //var_dump($encoded);
         $this->assertEquals('[{"key":1,"value":"PRODREF","label":"Product ref with \u00e9 and special chars \\\\ \' \""}]',$encoded);
         $decoded=dol_json_decode($encoded,true);
         //var_dump($decoded);
         $this->assertEquals($arraytotest,$decoded);
+    }
+
+    /**
+     * testGetDefaultTva
+     *
+     * @return	void
+     */
+    public function testGetDefaultTva()
+    {
+        global $conf,$user,$langs,$db;
+        $this->savconf=$conf;
+        $this->savuser=$user;
+        $this->savlangs=$langs;
+        $this->savdb=$db;
+
+        $companyfrnovat=new Societe($db);
+        $companyfrnovat->country_code='FR';
+        $companyfrnovat->tva_assuj=0;
+
+        $companyfr=new Societe($db);
+        $companyfr->country_code='FR';
+        $companyfr->tva_assuj=1;
+
+        $companymc=new Societe($db);
+        $companymc->country_code='MC';
+        $companymc->tva_assuj=1;
+
+        $companyit=new Societe($db);
+        $companyit->country_code='IT';
+        $companyit->tva_assuj=1;
+        $companyit->tva_intra='IT99999';
+
+        $notcompanyit=new Societe($db);
+        $notcompanyit->country_code='IT';
+        $notcompanyit->tva_assuj=1;
+        $notcompanyit->tva_intra='';
+        $notcompanyit->typent_code='TE_PRIVATE';
+
+        $companyus=new Societe($db);
+        $companyus->country_code='US';
+        $companyus->tva_assuj=1;
+        $companyus->tva_intra='';
+
+        // Test RULE 1-2
+        $vat=get_default_tva($companyfrnovat,$companymc,0);
+        $this->assertEquals(0,$vat);
+
+        // Test RULE 3 (FR-FR)
+        $vat=get_default_tva($companyfr,$companyfr,0);
+        $this->assertEquals(19.6,$vat);
+
+        // Test RULE 3 (FR-MC)
+        $vat=get_default_tva($companyfr,$companymc,0);
+        $this->assertEquals(19.6,$vat);
+
+        // Test RULE 4 (FR-IT)
+        $vat=get_default_tva($companyfr,$companyit,0);
+        $this->assertEquals(0,$vat);
+
+        // Test RULE 5 (FR-IT)
+        $vat=get_default_tva($companyfr,$notcompanyit,0);
+        $this->assertEquals(19.6,$vat);
+
+        // Test RULE 6 (FR-IT)
+        // Not tested
+
+        // Test RULE 7 (FR-US)
+        $vat=get_default_tva($companyfr,$companyus,0);
+        $this->assertEquals(0,$vat);
+    }
+
+    /**
+     * testGetDefaultTva
+     *
+     * @return	void
+     */
+    public function testGetDefaultLocalTax()
+    {
+    	global $conf,$user,$langs,$db;
+    	$this->savconf=$conf;
+    	$this->savuser=$user;
+    	$this->savlangs=$langs;
+    	$this->savdb=$db;
+
+    	$companyfrnovat=new Societe($db);
+    	$companyfrnovat->country_code='FR';
+    	$companyfrnovat->tva_assuj=0;
+    	$companyfrnovat->localtax1_assuj=0;
+    	$companyfrnovat->localtax2_assuj=0;
+
+    	$companyes=new Societe($db);
+    	$companyes->country_code='ES';
+    	$companyes->tva_assuj=1;
+    	$companyes->localtax1_assuj=1;
+    	$companyes->localtax2_assuj=1;
+
+    	$companymc=new Societe($db);
+    	$companymc->country_code='MC';
+    	$companymc->tva_assuj=1;
+    	$companymc->localtax1_assuj=0;
+    	$companymc->localtax2_assuj=0;
+
+    	$companyit=new Societe($db);
+    	$companyit->country_code='IT';
+    	$companyit->tva_assuj=1;
+    	$companyit->tva_intra='IT99999';
+    	$companyit->localtax1_assuj=0;
+    	$companyit->localtax2_assuj=0;
+
+    	$notcompanyit=new Societe($db);
+    	$notcompanyit->country_code='IT';
+    	$notcompanyit->tva_assuj=1;
+    	$notcompanyit->tva_intra='';
+    	$notcompanyit->typent_code='TE_PRIVATE';
+    	$notcompanyit->localtax1_assuj=0;
+    	$notcompanyit->localtax2_assuj=0;
+
+    	$companyus=new Societe($db);
+    	$companyus->country_code='US';
+    	$companyus->tva_assuj=1;
+    	$companyus->tva_intra='';
+    	$companyus->localtax1_assuj=0;
+    	$companyus->localtax2_assuj=0;
+
+    	// Test RULE FR-MC
+    	$vat1=get_default_localtax($companyfrnovat,$companymc,1,0);
+    	$vat2=get_default_localtax($companyfrnovat,$companymc,2,0);
+    	$this->assertEquals(0,$vat1);
+    	$this->assertEquals(0,$vat2);
+
+    	// Test RULE ES-ES
+    	$vat1=get_default_localtax($companyes,$companyes,1,0);
+    	$vat2=get_default_localtax($companyes,$companyes,2,0);
+    	$this->assertEquals(5.2,$vat1);
+    	$this->assertEquals(-15,$vat2);
+
+    	// Test RULE ES-IT
+    	$vat1=get_default_localtax($companyes,$companyit,1,0);
+    	$vat2=get_default_localtax($companyes,$companyit,2,0);
+    	$this->assertEquals(0,$vat1);
+    	$this->assertEquals(0,$vat2);
+
+    	// Test RULE ES-IT
+    	$vat1=get_default_localtax($companyes,$notcompanyit,1,0);
+    	$vat2=get_default_localtax($companyes,$notcompanyit,2,0);
+    	$this->assertEquals(0,$vat1);
+    	$this->assertEquals(0,$vat2);
+
+    	// Test RULE FR-IT
+    	// Not tested
+
+    	// Test RULE ES-US
+    	$vat1=get_default_localtax($companyes,$companyus,1,0);
+    	$vat2=get_default_localtax($companyes,$companyus,2,0);
+    	$this->assertEquals(0,$vat1);
+    	$this->assertEquals(0,$vat2);
     }
 }
 ?>

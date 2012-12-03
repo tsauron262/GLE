@@ -3,8 +3,105 @@ English Dolibarr ChangeLog
 --------------------------------------------------------------
 
 
-***** ChangeLog for 3.2.2 compared to 3.2.1 *****
+***** ChangeLog for 3.3 compared to 3.2.2 *****
+For users:
+- New: [ task #289 ] Can reorder tasks.
+- New: Add field "signature" into thirdparty card. If filled, text is added 
+       at end of predefined email texts. If option MAIL_DO_NOT_USE_SIGN is on, this
+       feature is disabled.
+- New: Add link "Back to list" on all cards.
+- New: After first install, warning are visible onto mandatory setup not
+       configured. Show also total number of activated modules.
+- New: Can filter list of proposal, order or invoice on sales representative.
+- New: Add supplier ref on supplier orders.
+- New: Can export supplier orders and customers shipments.
+- New: First change to install external plugins from gui (experimental). 
+- New: Monaco is like France for default vat calculation
+- New: Can list elements (invoices, orders or proposals) on a particular
+  user contact). This allow to view a "basket" of its elements.
+- New: Show bank account on payment list of invoice card.
+- New: Cloning project allow to clones task, notes, files, contacts. 
+- New: Enhance default style.
+- New: Can edit and resiliate member status from list.
+- New: Can insert URL links into elements lines. Also reported into PDF.
+- New: When a member is validated, we can subscribe to mailing-lists
+       according to its type.
+- New: Add a tab into members statistics to count members by nature.
+- New: Add link to third party into sells and purchase journal.
+- New: Suggest a method to generate a backup file for user with no access
+       to mysqldump binary.
+- New: Can also use extrafields on contacts/addresses and users.
+- New: Support unique field for extrafields.
+- New: Extra fields supports more types (int, string, double, date, datetime).
+- New: Can correct stock of a warehouse from warehouse card.
+- New: [ task #185 ]: Can input amount when correcting stock to recalculate PMP.
+- New: [ task #454 ]: Add "No category" into filters on category.
+- New: Auto check box on page to edit interface options of user.
+- New: More surface control on stock correction page.
+- New: Add great britain provinces.
+- New: [ task #494 ] Send an email to foundation when a new member has auto-subscribed.
+- New: [ task #326 ]: Add a numbering module to suggest automatically a product ref.
+- New: Add conditional substitution IF/ELSEIF/ENDIF for ODT templates.
+- New: Add unit foot2, inch2, foot3 and inch3 for surface and volumes.
+- New: Can select thirdparties into emailing targets, even if module category is not enabled.
+- New: [ task #498 ] Improvement of the block to add products/services lines.
+- New: ECM autodir works also for files joined to products and services.
+- New: Add a selection module for emailing to enter a recipient from gui.
+- New: Allow to search thirds and products from barcodes directly from the permanent mini search left box.
+- New: Allow to search product from barcodes directly from invoices, proposals... through AJAX.
+- New: Can make one invoice for several orders.
+- New: POS module can works with only one payment method (cach, chq, credit card).
+- New: Add possibility to defined position/job of a user.
+- New: Add hidden option to add slashes between lines into PDF.
+- New: [ task #210 ] Can choose cash account during POS login.
+- New: [ task #104 ] Can create an invoice from several orders.
+- New: Update libs/tools/logo for DoliWamp (now use PHP 5.3).
+- New: Added ODT Template tag {object_total_discount}
+- New: Add new import options: Third parties bank details, warehouses and stocks, categories and suppliers prices
+- New: English bank account need a bank code (called sort code) to identify an account. 
+- New: Can choose menu entry to show with external site module.
+- New: Add hidden option MAIN_PDF_MARGIN_LEFT, MAIN_PDF_MARGIN_RIGHT, MAIN_PDF_MARGIN_TOP, MAIN_PDF_MARGIN_BOTTOM
+       to force margins of generated PDF.
+- New:  [ task #314 ] Can define if prof id are mandatory or not
+New experimental modules:
+- New: Add margin management module.
+- New: Add commissions management module.
 
+
+- Fix: [ bug #499 ]: Supplier order input method not translated
+- Fix: No images into product description lines as PDF generation does
+  not work with this.
+- Fix: Errors weren't being shown in customer's & supplier's orders
+- Fix: Lastname wasn't being recorded in xinputuser emailing module.
+
+For developers:
+- New: Add webservice for thirdparty creation and list.
+- New: A module can overwrite templates parts.
+- New: Can add a link on title field of added dictionnary.
+- New: Uniformize code.
+- New: Add option WORKFLOW_DISABLE_CREATE_INVOICE_FROM_ORDER and 
+       WORKFLOW_DISABLE_CLASSIFY_BILLED_FROM_ORDER.
+- New: A module can add several css and js.
+- New: removed deprecated methods
+       ldap::connect, formadmin::select_lang,
+       html::select_tva
+- New: Add custom substitution function for ODT product lines: mymodule_completesubstitutionarray_lines()
+- New: Basic implementation of hooks and triggers for a lot (most) of core modules: 
+  action/calendar, trips and expenses, dons, vat payment, contact/society, contract, product lines, 
+  expedition, order supplier and order invoice (lines included), intervention card, project, tasks.
+- New: Add ChromePHP output into syslog module.
+- New: Add PRODUCT_PRICE_MODIFY trigger.
+- New: Created function to retrieve total amount of discount of an invoice/proposal...
+- New: We can use a dynamic value ($conf->global->XXX for example) into titles of menus.
+
+For translators:
+- New: Update language files (de, tr, pt, ca, es, en, fr).
+- New: Added bg_BG autotranslated language.
+- New: Translate the donation receipt.
+
+
+
+***** ChangeLog for 3.2.2 compared to 3.2.1 *****
 - Fix: Modify spanish VAT to new rates.
 - Fix: Add error message when creating already existing product.
 - Fix: Edition of percentage of an event.
@@ -16,7 +113,6 @@ English Dolibarr ChangeLog
 
 
 ***** ChangeLog for 3.2.1 compared to 3.2.0 *****
-
 - Fix: Edit of projects.
 - Fix: Activation of modules does not fails if directory install was removed.
 - Fix: [ bug #444 ] Regression on auto-closing for proposals and orders.
@@ -45,7 +141,6 @@ English Dolibarr ChangeLog
 
 
 ***** ChangeLog for 3.2.0 compared to 3.1.3 *****
-
 WARNING: PHP lower than 5.x are no more supported.
 WARNING: Because of a major datastructure change onto supplier prices tables, be aware
 to make a backup of your database before making upgrade.
@@ -53,7 +148,7 @@ to make a backup of your database before making upgrade.
 For users:
 - New: Each user can remove/add its own boxes.
 - New: Add signature at end of predefined email text.
-- New: Can use personalized fields of products/services.
+- New: Can use personalized fields on products/services.
 - New: Can attach files on social contributions.
 - New: Show payments terms and conditions onto muscadet template.
 - New: Can open back a closed commercial proposal.
@@ -71,7 +166,7 @@ For users:
 - New: task #10606 : more comprehensive message error.
 - New: task #11278 : Option into point of sale module to add services in list.
 - New: task #11261 : Add an entry into menu called "New shipment".
-- New: [ task #187 ] Gerer les evenement recurrents dans les imports ical
+- New: [ task #187 ] Gerer les evenement recurrents dans les imports ical.
 - New: Make option MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT available by default.
 - New: Can build PDF in USLetter format or canada format (change paper size).
 - New: Can export into Excel 2007 format.
@@ -86,7 +181,7 @@ For users:
 - New: Reduce seriously size of packages.
 - New: Can define country code for import.
 - New: When invoice was generated from order, order date is visible on PDF, after order ref.
-- New: [ task #181 ] Hide password of click2dial in user card
+- New: [ task #181 ] Hide password of click2dial in user card.
 - New: Chart are faster to build
 - New: Value of data into charts are visible on mouse hover.
 - New: Import wizard can import contacts.

@@ -30,7 +30,7 @@
  */
 
 /**
-    \file       htdocs/core/modules/synopsis_demandeinterv/mod_atlantic.php
+    \file       htdocs/core/modules/synopsisdemandeinterv/mod_atlantic.php
     \ingroup    fiche intervention
     \brief      Fichier contenant la classe du modele de numerotation de reference de fiche intervention atlantic
     \version    $Id: mod_atlantic.php,v 1.5 2008/07/08 23:02:17 eldy Exp $

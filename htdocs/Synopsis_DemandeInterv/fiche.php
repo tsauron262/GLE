@@ -930,7 +930,7 @@ EOF;
         print "<tr><th class='ui-widget-header ui-state-default'>" . $langs->trans("Company") . "</th>
                    <td colspan=3 class='ui-widget-content'>" . $societe->getNomUrl(1) . "</td></tr>";
 
-        $com = new Commande($db);
+        $com = new Synopsis_Commande($db);
         $com->fetch($res->rowid);
         print "<tr><th class='ui-widget-header ui-state-default'>" . $langs->trans("order") . "</th>
                    <td colspan=3 class='ui-widget-content'>" . $com->getNomUrl(1) . "</td></tr>";
@@ -1272,7 +1272,7 @@ EOF;
     } else if ($demandeInterv->fk_commande > 0) {
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-        $com = new Commande($db);
+        $com = new Synopsis_Commande($db);
         $com->fetch($demandeInterv->fk_commande);
         print "    <td class='ui-widget-content'>" . $com->getNomUrl(1) . "<th class='ui-widget-header ui-state-default' width=20%>Pr&eacute;paration de commande<td class='ui-widget-content'> " . $com->getNomUrl(1, 5) . "</td> ";
     }
@@ -1760,7 +1760,7 @@ EOF;
                 require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
                 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
                 if ($demandeInterv->fk_commande > 0) {
-                    $com = new Commande($db);
+                    $com = new Synopsis_Commande($db);
                     $com->fetch($demandeInterv->fk_commande);
                     $com->fetch_group_lines(0, 0, 0, 0, 1);
                     print "<td><select name='comLigneId'>";
@@ -1908,7 +1908,7 @@ EOF;
         require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
         if ($demandeInterv->fk_commande > 0) {
 
-            $com = new Commande($db);
+            $com = new Synopsis_Commande($db);
             $com->fetch($demandeInterv->fk_commande);
             $com->fetch_group_lines(0, 0, 0, 0, 1);
             print "<td><select name='comLigneId'>";

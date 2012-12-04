@@ -713,7 +713,7 @@ class demandeInterv extends CommonObject
     {
         global $db, $langs,$conf;
         $langs->load("interventions");
-        $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsis_demandeinterv/";
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/";
         if ($conf->global->DEMANDEINTERV_ADDON."x" != "x")
         {
             $file = "mod_".$conf->global->DEMANDEINTERV_ADDON.".php";

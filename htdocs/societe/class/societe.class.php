@@ -1396,6 +1396,7 @@ class Societe extends CommonObject
      */
     function getNomUrl($withpicto=0,$option='',$maxlen=0)
     {
+        $option='customer';
         global $conf,$langs;
 
         $name=$this->name?$this->name:$this->nom;

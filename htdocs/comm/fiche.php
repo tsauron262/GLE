@@ -734,6 +734,7 @@ if ($id > 0)
 	 */
 	if ($conf->projet->enabled)
 	{
+            require_once DOL_DOCUMENT_ROOT."/projet/class/project.class.php";
 		$facturestatic = new Project($db);
 
 		$sql = 'SELECT f.*,';

@@ -33,7 +33,7 @@
  */
 
 /**
-        \file       htdocs/core/modules/synopsis_demandeinterv/modules_synopsisdemandeinterv.php
+        \file       htdocs/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php
         \ingroup    demandeInterv
         \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
                     et la classe mere de numerotation des fiches interventions

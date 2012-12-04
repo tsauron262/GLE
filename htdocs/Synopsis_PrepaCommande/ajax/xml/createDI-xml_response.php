@@ -27,7 +27,7 @@
     $xmlStr = "<ajax-response>";
     //1 create DI principale
     $di = new demandeInterv($db);
-    $di->socid = $com->societe->id;
+    $di->socid = $com->socid;
     $di->fk_commande = $id;
     $di->date = convertDate($_REQUEST['datei']);
     $di->ref=$di->getNextNumRef($com->societe);

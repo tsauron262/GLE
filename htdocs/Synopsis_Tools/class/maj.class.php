@@ -33,7 +33,7 @@ class maj {
 
     private function erreurL($text) {
         $this->erreur++;
-        $text = "<br/>" . $this->getTime() . " | Erreur : " . $text . "<br/>";
+        $text = "<br/><br/>" . $this->getTime() . " | Erreur : " . $text . "<br/>";
         if ($this->erreur > $this->maxErreur)
             die($text . "<br/><br/><br/>Max erreur !!!!!");
         else

@@ -149,7 +149,7 @@ if ($_REQUEST["id"] > 0) {
     if ($fichinter->fk_commande > 0) {
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-        $com = new Commande($db);
+        $com = new Synopsis_Commande($db);
         $com->fetch($fichinter->fk_commande);
         print "<td class='ui-widget-content'>" . $com->getNomUrl(1);
         /* print "<th class='ui-widget-header ui-state-default' width=20%>Pr&eacute;paration de commande";
@@ -202,7 +202,7 @@ if ($_REQUEST["id"] > 0) {
     $tabDI = $fichinter->getDI();
     $requete = "SELECT *
                   FROM llx_Synopsis_demandeInterv
-                 WHERE rowid IN (" . implode(",", $tabDI).")";
+                 WHERE rowid IN (" . implode(",", $tabDI) . ")";
     print "<table class='nobordernopadding' width=100%>";
     if ($resql = $db->query($requete)) {
         while ($res = $db->fetch_object($resql)) {
@@ -251,32 +251,34 @@ if ($_REQUEST["id"] > 0) {
         $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
         while ($res3 = $db->fetch_object($sql3)) {
-            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id ==  20 || $res3->id == 21) {
-		    if ($res3->id == $prestation->fk_typeinterv) {
-		        $selectHtml .= "<OPTION SELECTED value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
-		    } else {
-		        $selectHtml .= "<OPTION value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
-		    }
-	    }
+            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21) {
+                if ($res3->id == $prestation->fk_typeinterv) {
+                    $selectHtml .= "<OPTION SELECTED value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
+                } else {
+                    $selectHtml .= "<OPTION value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
+                }
+            }
         }
         $selectHtml .= "</SELECT></td>";
 
 
         $htmlSelect2 = "";
         if ($fichinter->fk_commande > 0) {
-            $com = new Commande($db);
+            $com = new Synopsis_Commande($db);
             $com->fetch($fichinter->fk_commande);
             $com->fetch_group_lines(0, 0, 0, 0, 1);
             $htmlSelect2 .= "<select name='" . $prefId . "fk_prod'>";
             $htmlSelect2 .= "<option value='0'>S&eacute;lectionner-></option>";
 
             foreach ($com->lines as $key => $val) {
-                $prod = new Product($db);
-                $prod->fetch($val->fk_product);
-                if ($prod->id == $prestation->fk_depProduct) {//$objp->fk_commandedet){
-                    $htmlSelect2 .= "<option SELECTED value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . " </option>";
-                } else {
-                    $htmlSelect2 .= "<option value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                if (isset($val->fk_product) && $val->fk_product != '') {
+                    $prod = new Product($db);
+                    $prod->fetch($val->fk_product);
+                    if ($prod->id == $prestation->fk_depProduct) {//$objp->fk_commandedet){
+                        $htmlSelect2 .= "<option SELECTED value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . " </option>";
+                    } else {
+                        $htmlSelect2 .= "<option value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                    }
                 }
             }
             $htmlSelect2 .= "</select>";
@@ -412,24 +414,26 @@ $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 O
 $sql3 = $db->query($requete);
 $selectHtml .= '<OPTION value="-1">Selectionner-></OPTION>';
 while ($res3 = $db->fetch_object($sql3)) {
-    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id ==  20 || $res3->id == 21) 
-    	$selectHtml .= '<OPTION value="' . $res3->id . '">' . $res3->label . '</OPTION>';
+    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21)
+        $selectHtml .= '<OPTION value="' . $res3->id . '">' . $res3->label . '</OPTION>';
 }
 $selectHtml .= "</SELECT>";
 
 
 $htmlSelect2 = "";
 if ($fichinter->fk_commande > 0) {
-    $com = new Commande($db);
+    $com = new Synopsis_Commande($db);
     $com->fetch($fichinter->fk_commande);
     $com->fetch_group_lines(0, 0, 0, 0, 1);
     $htmlSelect2 .= '<select-supprjs name="\'+prefId+\'fk_prod">';
     $htmlSelect2 .= '<option value="0">S&eacute;lectionner-></option>';
 
     foreach ($com->lines as $key => $val) {
-        $prod = new Product($db);
-        $prod->fetch($val->fk_product);
-        $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
+        if (isset($val->fk_product) && $val->fk_product != '') {
+            $prod = new Product($db);
+            $prod->fetch($val->fk_product);
+            $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
+        }
     }
     $htmlSelect2 .= "</select>";
 }
@@ -746,7 +750,7 @@ function saveForm() {
                 $result = $fichinterline->update();
             }
             else
-                $fichinterline->delete_line ();
+                $fichinterline->delete_line();
         }
     }
 
@@ -785,7 +789,7 @@ function extra($cle, $val = null) {
     else {
         if (is_null(extra($cle)))
             $req = "INSERT INTO `llx_Synopsis_fichinter_extra_value` (`extra_value`, extra_key_refid, `interv_refid`, typeI) VALUES('" . $val . "', " . $cle . "," . $fichinter->id . ", 'FI')";
-        else 
+        else
             $req = "UPDATE  `llx_Synopsis_fichinter_extra_value` SET  `extra_value` =  '" . $val . "' WHERE extra_key_refid = " . $cle . " AND `interv_refid` =" . $fichinter->id;
         $sql = $db->query($req);
         return true;
@@ -843,5 +847,7 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
             return '';
     }
 }
+    
+    llxfooter();
 
 ?>

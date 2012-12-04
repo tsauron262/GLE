@@ -180,6 +180,7 @@ require_once(DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php');
 while($resContent = $db->fetch_object($sqlContent))
 {
     $cat = new Categorie($db,$resContent->catId);
+    $cat->fetch($resContent->catId);
     $catsTmp = $cat->get_filles();
     if (!sizeof($catsTmp) >0){
         continue;
@@ -222,10 +223,8 @@ while($resContent = $db->fetch_object($sqlContent))
                     
                     $requete = "SELECT llx_categorie.rowid,
                                        llx_categorie.label
-                                  FROM llx_categorie,
-                                       llx_categorie_association
-                                 WHERE fk_categorie_mere = llx_categorie.rowid
-                                   AND fk_categorie_fille = ".$res1->fk_categorie."
+                                  FROM llx_categorie
+                                 WHERE fk_parent = ".$res1->fk_categorie."
                               ORDER BY label ASC";
                     $sql2 = $db->query($requete);
 //                    print $requete."<br/>";

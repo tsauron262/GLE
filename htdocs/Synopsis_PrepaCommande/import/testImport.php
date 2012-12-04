@@ -1674,14 +1674,14 @@ function updateCategorie($ref,$prodId,$val)
         //  Gamme
         //
         if (!$gammeWasFound && $val["ArtGammeEnu"]."x" != "x"){
-            $requete = "INSERT INTO llx_categorie (visible,label,type,level) VALUES (1,'".$val["ArtGammeEnu"]."',0,3)";
-            $sql = $db->query($requete);
-            $newId = $db->last_insert_id('llx_categorie');
             global $gammeCatId;
-            $requete = "INSERT INTO llx_categorie_association
-                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-                             VALUES (".$gammeCatId.",".$newId.")";
-            $sql1 = $db->query($requete);
+            $requete = "INSERT INTO llx_categorie (visible,label,type,level, fk_parent) VALUES (1,'".$val["ArtGammeEnu"]."',0,3, ".$gammeCatId.")";
+            $sql = $db->query($requete);
+//            $newId = $db->last_insert_id('llx_categorie');
+//            $requete = "INSERT INTO llx_categorie_association
+//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
+//                             VALUES (".$gammeCatId.",".$newId.")";
+//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
 
@@ -1690,14 +1690,14 @@ function updateCategorie($ref,$prodId,$val)
         //  Famille
         //
         if (!$familleWasFound && $val["ArtFamilleEnu"]."x" != "x"){
-            $requete = "INSERT INTO llx_categorie (visible,label,type,level) VALUES (1,'".$val["ArtFamilleEnu"]."',0,3)";
-            $sql = $db->query($requete);
-            $newId = $db->last_insert_id('llx_categorie');
             global $familleCatId;
-            $requete = "INSERT INTO llx_categorie_association
-                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-                             VALUES (".$familleCatId.",".$newId.")";
-            $sql1 = $db->query($requete);
+            $requete = "INSERT INTO llx_categorie (visible,label,type,level,fk_parent) VALUES (1,'".$val["ArtFamilleEnu"]."',0,3,".$familleCatId.")";
+            $sql = $db->query($requete);
+//            $newId = $db->last_insert_id('llx_categorie');
+//            $requete = "INSERT INTO llx_categorie_association
+//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
+//                             VALUES (".$familleCatId.",".$newId.")";
+//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
 
@@ -1706,14 +1706,14 @@ function updateCategorie($ref,$prodId,$val)
         //  Nature
         //
         if (!$natureWasFound && $val["ArtNatureEnu"]."x" != "x"){
-            $requete = "INSERT INTO llx_categorie (visible,label,type,level) VALUES (1,'".$val["ArtNatureEnu"]."',0,3)";
-            $sql = $db->query($requete);
-            $newId = $db->last_insert_id('llx_categorie');
             global $natureCatId;
-            $requete = "INSERT INTO llx_categorie_association
-                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-                             VALUES (".$natureCatId.",".$newId.")";
-            $sql1 = $db->query($requete);
+            $requete = "INSERT INTO llx_categorie (visible,label,type,level,fk_parent) VALUES (1,'".$val["ArtNatureEnu"]."',0,3,".$natureCatId.")";
+            $sql = $db->query($requete);
+//            $newId = $db->last_insert_id('llx_categorie');
+//            $requete = "INSERT INTO llx_categorie_association
+//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
+//                             VALUES (".$natureCatId.",".$newId.")";
+//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
         }
@@ -1721,14 +1721,14 @@ function updateCategorie($ref,$prodId,$val)
         //  Selection BIMP
         //
         if (!$selectBIMPWasFound && $val["ArtCategEnu"]."x" != "x"){
-            $requete = "INSERT INTO llx_categorie (visible,label,type,level) VALUES (1,'".$val["ArtCategEnu"]."',0,3)";
-            $sql = $db->query($requete);
-            $newId = $db->last_insert_id('llx_categorie');
             global $selectBIMPCatId;
-            $requete = "INSERT INTO llx_categorie_association
-                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-                             VALUES (".$selectBIMPCatId.",".$newId.")";
-            $sql1 = $db->query($requete);
+            $requete = "INSERT INTO llx_categorie (visible,label,type,level,fk_parent) VALUES (1,'".$val["ArtCategEnu"]."',0,3,".$selectBIMPCatId.")";
+            $sql = $db->query($requete);
+//            $newId = $db->last_insert_id('llx_categorie');
+//            $requete = "INSERT INTO llx_categorie_association
+//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
+//                             VALUES (".$selectBIMPCatId.",".$newId.")";
+//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
         }
@@ -1738,14 +1738,14 @@ function updateCategorie($ref,$prodId,$val)
         //
 
         if (!$collecWasFound && $val["ArtCollectEnu"]."x" != "x"){
-            $requete = "INSERT INTO llx_categorie (visible,label,type,level) VALUES (1,'".$val["ArtCollectEnu"]."',0,3)";
-            $sql = $db->query($requete);
-            $newId = $db->last_insert_id('llx_categorie');
             global $collectionCatId;
-            $requete = "INSERT INTO llx_categorie_association
-                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-                             VALUES (".$collectionCatId.",".$newId.")";
-            $sql1 = $db->query($requete);
+            $requete = "INSERT INTO llx_categorie (visible,label,type,level,fk_parent) VALUES (1,'".$val["ArtCollectEnu"]."',0,3,".$collectionCatId.")";
+            $sql = $db->query($requete);
+//            $newId = $db->last_insert_id('llx_categorie');
+//            $requete = "INSERT INTO llx_categorie_association
+//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
+//                             VALUES (".$collectionCatId.",".$newId.")";
+//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO llx_categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
         }

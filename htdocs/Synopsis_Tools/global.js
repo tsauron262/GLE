@@ -58,6 +58,7 @@ function traiteScroll(heightDif){
 
 
 function ajNoteAjax(){
+    fermable = true;
     datas = 'url='+window.location;
     jQuery.ajax({
         url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
@@ -67,27 +68,35 @@ function ajNoteAjax(){
         cache: false,
         success:function(msg){
             if(msg != "0"){
-                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                //                $('.tabBar').append(htmlDiv);
+                var htmlDiv  = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 $('.tabBar').append(htmlDiv);
+                //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
+                //                $('a#note').append(htmlDiv);
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
-                $(".controlBut").click(function(){
-                    if($(this).val() == "<"){
-                        $(this).val(">");
-                    }
-                    else{
-                        $(this).val("<");
-                    }                    
-                    $(".noteAjax .note").animate({
-                        width: 'toggle'
-                    });
-                })
+                $('a#note, .noteAjax').hover(shownNote, hideNote);
+                $('a#note').addClass("lienNote");
+                
+//                $(".controlBut").click(function(){
+//                    if($(this).val() == "<"){
+//                        $(this).val(">");
+//                    }
+//                    else{
+//                        $(this).val("<");
+//                    }     
+//                    shownHideNote();   
+//                })
                 
                 jQuery('.editable').click(function(){
+                    fermable = false;
                     $(this).parent().find('.editable').html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+jQuery(this).html().split('<br>').join('\n')+"</textarea>");
                     jQuery(this).removeClass('editable');
                     $(".editableTextarea").focus();
                     $(".editableTextarea").val($(".editableTextarea").val()+"\n");
                     $(".editableTextarea").focusout(function(){
+                        fermable = true;
+                        hideNote();
                         datas = datas+'&note='+$(".editableTextarea").val();
                         jQuery.ajax({
                             url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
@@ -105,22 +114,27 @@ function ajNoteAjax(){
             }
         }
     });
-//    jQuery('#notePublicEdit').editable('ajax/xml/notePublic-xmlresponse.php', {
-//        type      : 'textarea',
-//        cancel    : 'Annuler',
-//        submit    : 'OK',
-//        indicator : '<img src="img/ajax-loader.gif">',
-//        tooltip   : 'Editer',
-//        placeholder : 'Cliquer pour &eacute;diter',
-//        onblur : 'cancel',
-//        width: '95%',
-//        height:"18em",
-//        submitdata : {
-//            id: 1
-//        },
-//        data : function(value, settings) {
-//            var retval = value; //Global var
-//            return retval;
-//        }
-//    });
+    
+    function shownHideNote(){
+        $(".noteAjax .note").animate({
+            width: 'toggle'
+        });
+    }
+    function shownNote(){
+        $(".noteAjax .note").slideDown({
+            width: 'toggle'
+        });
+        fermer = false;
+    }
+    function hideNote(){
+        if(fermable){
+            fermer = true;
+            setTimeout(function(){
+                if(fermer)
+                    $(".noteAjax .note").slideUp({
+                        width: 'toggle'
+                    });
+            }, 500);
+        }
+    }
 }

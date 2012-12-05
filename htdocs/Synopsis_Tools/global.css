@@ -86,8 +86,8 @@ div.mainmenu.synopsisficheinter {
 
 .noteAjax{
     position: absolute;
-    right: 0;
-    top: 80px;  
+    top: 0;
+    left: 340px;  
 }
 .noteAjax > div{
     float:left;
@@ -111,4 +111,8 @@ div.mainmenu.synopsisficheinter {
     margin: 0px 3% 0px 1%;
     height: 350px;
     width: 250px;
+}
+a#note.lienNote{
+    background-color: #FAE580;
+    background-image: none;
 }

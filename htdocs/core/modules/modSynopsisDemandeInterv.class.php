@@ -74,7 +74,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
 
     $this->const_name = 'MAIN_MODULE_SYNOPSISDEMANDEINTERV';
     $this->special = 0;
-    $this->picto = "demandeInterv";
+    $this->picto = "demandeInterv@Synopsis_DemandeInterv";
 
     // Dir
     $this->dirs = array();

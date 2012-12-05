@@ -46,7 +46,7 @@ class modSynopsisPrepaCommande extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPREPACOMMANDE';
         $this->special = 0;
-        $this->picto='GMAO';
+        $this->picto='prepaCommande@Synopsis_PrepaCommande';
 
         // Dir
         $this->dirs = array();

@@ -1677,11 +1677,6 @@ function updateCategorie($ref,$prodId,$val)
             global $gammeCatId;
             $requete = "INSERT INTO ".MAIN_DB_PREFIX."categorie (visible,label,type,level, fk_parent) VALUES (1,'".$val["ArtGammeEnu"]."',0,3, ".$gammeCatId.")";
             $sql = $db->query($requete);
-//            $newId = $db->last_insert_id(MAIN_DB_PREFIX.'categorie');
-//            $requete = "INSERT INTO ".MAIN_DB_PREFIX."categorie_association
-//                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
-//                             VALUES (".$gammeCatId.",".$newId.")";
-//            $sql1 = $db->query($requete);
             $requete = "INSERT INTO ".MAIN_DB_PREFIX."categorie_product (fk_categorie, fk_product) VALUES (".$res->rowid.",".$prodId.")";
             $sql1 = $db->query($requete);
 

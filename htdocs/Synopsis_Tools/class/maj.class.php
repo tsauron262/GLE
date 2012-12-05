@@ -20,7 +20,7 @@ class maj {
     public function rectifId($tabId) {
         $i = 0;
         while ($i + 1 < count($tabId)) {
-            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
             $result = $this->queryD($requete);
             if (!$result) {
                 $this->erreurL("Impossible de modifier l'id . Requete : " . $requete);
@@ -48,19 +48,19 @@ class maj {
         if (!$update) {
             $this->netoyerTables($tab);
 
-            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."commande DROP FOREIGN KEY fk_commande_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."propal DROP FOREIGN KEY fk_propal_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "propal DROP FOREIGN KEY fk_propal_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."facture DROP FOREIGN KEY fk_facture_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "facture DROP FOREIGN KEY fk_facture_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."categorie DROP KEY uk_categorie_ref;";
+            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "categorie DROP KEY uk_categorie_ref;";
             $this->queryD($requete);
         }
 //        $this->netoyeDet("propal");
@@ -99,7 +99,7 @@ class maj {
             foreach ($tabDroit as $droit)
                 $tabVal[] = "(" . $gr . "," . $droit . ")";
         }
-        $requete = "INSERT into ".MAIN_DB_PREFIX."usergroup_rights (fk_usergroup, fk_id) VALUES " . implode(",", $tabVal) . ";";
+        $requete = "INSERT into " . MAIN_DB_PREFIX . "usergroup_rights (fk_usergroup, fk_id) VALUES " . implode(",", $tabVal) . ";";
         $result = $this->queryD($requete);
         if ($result)
             $this->infoL("Droit ajouté.");
@@ -127,6 +127,7 @@ class maj {
         $i = 0;
         $tabIns = array();
         while ($ligne = $this->dbS->fetch_array($data)) {
+            $tabClone = array();
             if (!isset($destCol[0]))
                 foreach ($ligne as $cle => $val)
                     if (!is_int($cle))
@@ -144,16 +145,16 @@ class maj {
 
                 //Exception
                 $newCle = $destCol[$id];
-                if ($cle == "rowid" && $tableDest == MAIN_DB_PREFIX."user" && $val == "1")//On laisse l'admin de la nouvelle version
+                if ($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
-                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX."user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
+                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
-                        $tableDest == MAIN_DB_PREFIX."element_element" && !($val > 0))//La ligne ne sert a rien
+                        $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;
 
 
-                if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX."propal" && $val == "99")//On vire les statue 99 sur les propal
+                if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX . "propal" && $val == "99")//On vire les statue 99 sur les propal
                     $val = "3";
                 if ((($cle == "fk_projet")
                         || ($cle == "fk_user_author")
@@ -165,8 +166,22 @@ class maj {
                         || ($cle == "fk_user_valid")
                         ) && $val == "20")//On remplace 0 par null
                     $val = NULL;
-                if ($cle == "description" && $tableDest == MAIN_DB_PREFIX."propaldet")//On laisse l'admin de la nouvelle version
+                if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
+                if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights")) {//Nouveau num des droit
+                    if ($val > 59 && $val < 70){
+                        $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
+                    }
+                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
+                        $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
+                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
+                    }
+                    if ($val > 29 && $val < 40){
+                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
+                    }
+                    if (stripos($val, "222341") !== false) 
+                        $val = str_replace(222341, 2227, $val);
+                }
                 //Fin exception
 
                 if (is_null($val))
@@ -180,11 +195,11 @@ class maj {
 
 
                 //Exception
-                if ($tableDest == MAIN_DB_PREFIX."propal") {
+                if ($tableDest == MAIN_DB_PREFIX . "propal") {
                     $requete = "SELECT p2.rowid as pre, p3.rowid as sui 
-                                FROM ".MAIN_DB_PREFIX."propal p1 
-                                LEFT JOIN ".MAIN_DB_PREFIX."propal p2 on p1.revision = (p2.revision+1) AND p1.orig_ref = p2.orig_ref
-                                LEFT JOIN ".MAIN_DB_PREFIX."propal p3 on p1.revision = (p3.revision-1) AND p1.orig_ref = p3.orig_ref 
+                                FROM " . MAIN_DB_PREFIX . "propal p1 
+                                LEFT JOIN " . MAIN_DB_PREFIX . "propal p2 on p1.revision = (p2.revision+1) AND p1.orig_ref = p2.orig_ref
+                                LEFT JOIN " . MAIN_DB_PREFIX . "propal p3 on p1.revision = (p3.revision-1) AND p1.orig_ref = p3.orig_ref 
                                 WHERE p1.rowid = " . $tabVal[0];
                     $result = $this->queryS($requete);
                     $ligne = $this->dbS->fetch_object($result);
@@ -194,6 +209,13 @@ class maj {
                     $tabVal[1001] = ($ligne->sui ? $ligne->sui : 'NULL');
                 }
                 $tabIns[] = $tabVal;
+                
+                foreach($tabClone as $clone){
+                    $newTab = $tabVal;
+                    foreach($clone as $cle => $newVal)
+                        $newTab[$cle] = $newVal;
+                    $tabIns[] = $newTab;
+                }
 
                 if (isset($tabIns[$this->maxLigne])) { //Si plus grnad que valeur on envoie et vide le tableau
                     $this->envoyerDonnee($tableDest, $destCol, $tabIns, $update);
@@ -212,11 +234,11 @@ class maj {
             $where = "1";
 //            if ($ligne[1] == MAIN_DB_PREFIX."element_element")
 //                $where = "0";
-            if ($ligne[1] == MAIN_DB_PREFIX."user")
+            if ($ligne[1] == MAIN_DB_PREFIX . "user")
                 $where = "rowid != 1";
-            if ($ligne[1] == MAIN_DB_PREFIX."user_rights")
+            if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
                 $where = "fk_user != 1";
-            if ($ligne[1] == MAIN_DB_PREFIX."facture") {
+            if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE kf_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau
             }

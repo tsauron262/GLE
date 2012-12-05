@@ -130,10 +130,10 @@ function getTab() {
 //            array(),
 //            array()
 //        ),
-        array("llx_product", "llx_product",
-            array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
-            array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
-        ),
+//        array("llx_product", "llx_product",
+//            array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
+//            array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
+//        ),
         array("llx_commande", "llx_commande",
             array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison", "fk_adresse_livraison"),
             array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison", "fk_adresse_livraison")
@@ -272,6 +272,10 @@ function getTab() {
         ),
         array("llx_co_exp", "llx_element_element",
             array("fk_commande", 'fk_expedition', '$%commande', '$%shipping'),
+            array("fk_source", "fk_target", 'sourcetype', "targettype")
+        ),
+        array("Babel_li_interv", "llx_element_element",
+            array("di_refid", 'fi_refid', '$%DI', '$%FI'),
             array("fk_source", "fk_target", 'sourcetype', "targettype")
         ),
         array("Babel_contrat_annexe", "llx_Synopsis_contrat_annexe",

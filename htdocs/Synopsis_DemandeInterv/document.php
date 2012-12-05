@@ -16,7 +16,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -27,7 +29,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -59,7 +62,7 @@ if ($user->societe_id)
     $action='';
     $socid = $user->societe_id;
 }
-$result = restrictedArea($user, 'demandeInterv', $id, 'demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $id, 'demandeInterv');
 
 // Get parameters
 $page=$_GET["page"];
@@ -197,7 +200,7 @@ if ($id > 0)
         $societe->fetch($demandeInterv->socid);
 
         $head = demandeInterv_prepare_head($demandeInterv);
-        dol_fiche_head($head, 'document', $langs->trans('DI'));
+        dol_fiche_head($head, 'documents', $langs->trans('DI'));
 
 
         // Construit liste des fichiers

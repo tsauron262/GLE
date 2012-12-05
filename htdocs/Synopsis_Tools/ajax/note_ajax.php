@@ -30,6 +30,9 @@ if (isset($_POST['url'])) {
             || stripos($url, '/Babel_GMAO/intervByContrat.php')) {
         $table = "llx_contrat";
     }
+    if (stripos($url, '/Synopsis_DemandeInterv/') !== false) {
+        $table = "llx_Synopsis_demandeInterv";
+    }
 
     foreach ($tabUrl as $val) {
         if (stripos($val, $nomId) !== false)

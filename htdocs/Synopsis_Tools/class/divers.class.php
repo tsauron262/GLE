@@ -31,6 +31,7 @@ class synopsisHook {
     static function footer() {
         global $conf;
         echo '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
+        echo "<script type=\"text/javascript\">var DOL_URL_ROOT = '".DOL_URL_ROOT."';</script>\n";
         echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/global.js"></script>';
 
         $nameFile = DOL_DATA_ROOT . "/special.css";

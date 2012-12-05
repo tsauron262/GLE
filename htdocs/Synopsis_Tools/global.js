@@ -60,7 +60,7 @@ function traiteScroll(heightDif){
 function ajNoteAjax(){
     datas = 'url='+window.location;
     jQuery.ajax({
-        url:'/gle4/Synopsis_Tools/ajax/note_ajax.php',
+        url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
         data:datas,
         datatype:"xml",
         type:"POST",
@@ -90,7 +90,7 @@ function ajNoteAjax(){
                     $(".editableTextarea").focusout(function(){
                         datas = datas+'&note='+$(".editableTextarea").val();
                         jQuery.ajax({
-                            url:'/gle4/Synopsis_Tools/ajax/note_ajax.php',
+                            url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
                             data:datas,
                             datatype:"xml",
                             type:"POST",

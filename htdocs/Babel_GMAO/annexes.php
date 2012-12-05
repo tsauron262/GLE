@@ -447,10 +447,11 @@ EOF;
             $i++;
         }
         print "</ul>";
-
-        print "<tr><th class='ui-widget-header' colspan=2 align=right><button class='butAction' onClick='location.href=\"annexeModele.php?id=".$contrat->id."\"'>Ajouter un mod&egrave;le</button>";
-        print "</table>";
+print "</table>";
         print "</div>";
+        print "</div>";
+        print "<div align=right><button class='butAction' onClick='location.href=\"annexeModele.php?id=".$contrat->id."\"'>Ajouter un mod&egrave;le</button></div>";
+        
         //1 les annexes séléctionnés + num + rang
         //2 les annexes modèles
 
@@ -458,5 +459,5 @@ EOF;
 
 
     }
-
+    llxFooter();
 ?>

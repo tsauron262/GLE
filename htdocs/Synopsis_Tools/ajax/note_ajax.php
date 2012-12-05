@@ -9,7 +9,7 @@ if (isset($_POST['url'])) {
     $tabUrl = explode("&", $tabUrl[1]);
     
         $nomId = "id";
-        $nomChampNote = "note";
+        $nomChampNote = "note_public";
     
     
     if (stripos($url, '/societe/') !== false
@@ -17,14 +17,18 @@ if (isset($_POST['url'])) {
             || stripos($url, '/categories/categorie.php')) {
         $table = "llx_societe";
         $nomId = "socid";
+        $nomChampNote = "note";
     }
     if (stripos($url, '/commande/') !== false) {
         $table = "llx_commande";
-        $nomChampNote = "note_public";
     }
     if (stripos($url, '/fichinter/') !== false) {
         $table = "llx_Synopsis_fichinter";
-        $nomChampNote = "note_public";
+    }
+    if (stripos($url, '/contrat/') !== false
+            || stripos($url, '/Babel_GMAO/annexes.php')
+            || stripos($url, '/Babel_GMAO/intervByContrat.php')) {
+        $table = "llx_contrat";
     }
 
     foreach ($tabUrl as $val) {

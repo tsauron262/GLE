@@ -209,13 +209,13 @@ elseif (! empty($mysoc->logo_small) && is_readable($conf->mycompany->dir_output.
 	$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=companylogo&amp;file='.urlencode($mysoc->logo);
 	$width=128;
 }
-elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png'))
+elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/gle_logo.png'))
 {
-	$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
+	$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/gle_logo.png';
 }
-elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png'))
+elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/gle_logo.png'))
 {
-	$urllogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
+	$urllogo=DOL_URL_ROOT.'/theme/gle_logo.png';
 }
 
 // Security graphical code

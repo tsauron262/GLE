@@ -354,7 +354,7 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
     print '<body>'."\n";
 
     print '<div style="text-align:center">';
-    print '<img src="../theme/dolibarr_logo.png" alt="Dolibarr logo"><br>';
+    print '<img src="../theme/gle_logo.png" alt="Dolibarr logo"><br>';
     print DOL_VERSION;
     print '</div><br><br>';
 

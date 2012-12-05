@@ -86,7 +86,7 @@ div.mainmenu.synopsisficheinter {
 
 .noteAjax{
     position: absolute;
-    top: 0;
+    top: 20px;
     left: 340px;  
 }
 .noteAjax > div{
@@ -111,6 +111,7 @@ div.mainmenu.synopsisficheinter {
     margin: 0px 3% 0px 1%;
     height: 350px;
     width: 250px;
+    cursor: pointer;
 }
 a#note.lienNote{
     background-color: #FAE580;

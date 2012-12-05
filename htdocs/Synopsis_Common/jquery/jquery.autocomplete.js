@@ -218,9 +218,9 @@ $.Autocompleter = function(input, options) {
         hideResultsNow();
         console.log(selected);
         //Babel Modif
-        if( options.babelReturnSelId )
+        if( options.modifAutocompleteSynopsisReturnSelId )
         {
-            options.babelReturnSelId(selected);
+            options.modifAutocompleteSynopsisReturnSelId(selected);
         }
         //Fin Babel Modif
         $input.trigger("result", [selected.data, selected.value]);
@@ -404,7 +404,7 @@ $.Autocompleter.defaults = {
     cacheLength: 10,
     max: 100,
     mustMatch: false,
-    babelReturnSelId : false,
+    modifAutocompleteSynopsisReturnSelId : false,
     extraParams: {},
     selectFirst: true,
     formatItem: function(row) { return row[0]; },

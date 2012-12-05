@@ -1998,7 +1998,7 @@ print <<<EOF
         });
         jQuery("#jsContrat li").dblclick(function(){
             var id = jQuery(this).attr('id');
-            location.href=DOL_URL_ROOT+'/Babel_GMAO/contratDetail.php?id='+id;
+            location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
         });
     });
 EOF;

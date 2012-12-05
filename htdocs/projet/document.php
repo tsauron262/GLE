@@ -571,7 +571,7 @@ $header .= <<< EOF
                         var id=data[2];
                        return data[1];
                     },
-                    babelReturnSelId: function(selected)
+                    modifAutocompleteSynopsisReturnSelId: function(selected)
                     {
                         ZimId = selected.data[2];
                     }
@@ -585,7 +585,7 @@ $header .= <<< EOF
                         var id=data[2];
                        return data[1];
                     },
-                    babelReturnSelId: function(selected)
+                    modifAutocompleteSynopsisReturnSelId: function(selected)
                     {
                         GLEId = selected.data[2];
                     }

@@ -48,7 +48,7 @@ function widget_statOfcService() {
 
 
     $sql  = "SELECT p.rowid, p.label, p.ref, fk_product_type, count(*) as c";
-    $sql .= " FROM llx_propaldet as pd, llx_propal as pl, babel_product as p";
+    $sql .= " FROM llx_propaldet as pd, llx_propal as pl, llx_product as p";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir)
     {
       $sql.= " LEFT JOIN llx_categorie_product as cp ON cp.fk_product = p.rowid";

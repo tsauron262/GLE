@@ -28,7 +28,7 @@ function widget_listService() {
     $max=50;
     $sql = "SELECT p.rowid, p.label, p.price, p.ref, p.fk_product_type, p.envente,";
     $sql.= " ".$db->pdate("tms")." as datem";
-    $sql.= " FROM babel_product as p";
+    $sql.= " FROM llx_product as p";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir)
     {
       $sql.= " LEFT JOIN llx_categorie_product as cp ON cp.fk_product = p.rowid";

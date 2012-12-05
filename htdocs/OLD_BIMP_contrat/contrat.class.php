@@ -18,15 +18,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  * GLE by Babel-Services
+  * GLE by Synopsis & DRSI
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
 /*
@@ -432,7 +432,7 @@ class Contrat extends CommonObject
                        date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
                        date_format(d.date_cloture,'%d/%m/%Y') as date_cloture
                   FROM ".MAIN_DB_PREFIX."contratdet as d,
-                       babel_product as p
+                       llx_product as p
                  WHERE d.fk_contrat = ".$this->id ." AND d.fk_product = p.rowid
               ORDER BY d.line_order, d.rowid ASC";
 

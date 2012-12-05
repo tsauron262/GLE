@@ -1004,7 +1004,7 @@ EOF;
                 print '</tr>';
 
                 $sql = "SELECT pt.rowid, p.label as product, p.ref, pt.price, pt.qty, p.rowid as prodid, pt.remise_percent";
-                $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pt, babel_product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
+                $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pt, llx_product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
                 $sql .= " ORDER BY pt.rowid ASC";
                 $result = $db->query($sql);
                 if ($result) {
@@ -1255,7 +1255,7 @@ EOF;
                             require_once(DOL_DOCUMENT_ROOT . "/commande/commande.class.php");
                             $comm = new Commande($db);
                             $comm->fetch($val1);
-                            if ($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1) {
+                            if ($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1) {
                                 print "</table><td colspan=1 class='ui-widget-content'>" . $comm->getNomUrl(1);
                                 print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                                 print "<td colspan=1 class='ui-widget-content'>" . $comm->getNomUrl(1, 5);
@@ -1298,7 +1298,7 @@ EOF;
                             print 'Commandes associ&eacute;es';
 //                            print $comm->getNomUrl(1);
 
-                            if ($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1) {
+                            if ($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1) {
                                 print "<td colspan=1 class='ui-widget-content'>" . $comm->getNomUrl(1);
                                 print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                                 print "<td colspan=1 class='ui-widget-content'>" . $comm->getNomUrl(1, 5);

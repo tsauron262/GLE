@@ -1,15 +1,15 @@
 <?php
 
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.0
  * Created on : 11 mars 2010
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
 /**
@@ -656,7 +656,7 @@ switch ($action) {
                 $xml.='<fk_product><![CDATA[' . $res->fk_product . ']]></fk_product>';
                 if ($res->fk_product > 0) {
                     $requete = "SELECT *
-                              FROM babel_product
+                              FROM llx_product
                              WHERE rowid = " . $res->fk_product;
                     $sql1 = $db->query($requete);
                     $res1 = $db->fetch_object($sql1);

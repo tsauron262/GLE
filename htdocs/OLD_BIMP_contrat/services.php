@@ -17,15 +17,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  * GLE by Babel-Services
+  * GLE by Synopsis & DRSI
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
 /*
@@ -88,7 +88,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
 $sql.= " ".MAIN_DB_PREFIX."societe as s,";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
 $sql.= " ".MAIN_DB_PREFIX."contratdet as cd";
-$sql.= " LEFT JOIN babel_product as p ON cd.fk_product = p.rowid";
+$sql.= " LEFT JOIN llx_product as p ON cd.fk_product = p.rowid";
 $sql.= " WHERE";
 $sql.= " c.rowid = cd.fk_contrat";
 $sql.= " AND c.fk_soc = s.rowid";
@@ -110,7 +110,7 @@ MIN(unix_timestamp(cd.date_ouverture)) as date_ouverture,
 MIN(unix_timestamp(cd.date_fin_validite)) as date_fin_validite, 
 MIN(unix_timestamp(cd.date_cloture)) as date_cloture 
 
-FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN babel_product as p ON cd.fk_product = p.rowid WHERE c.rowid = cd.fk_contrat AND c.fk_soc = s.rowid AND cd.statut = 4 AND date_fin_validite < (sysdate() + INTERVAL '1' MONTH) GROUP BY c.rowid";
+FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN llx_product as p ON cd.fk_product = p.rowid WHERE c.rowid = cd.fk_contrat AND c.fk_soc = s.rowid AND cd.statut = 4 AND date_fin_validite < (sysdate() + INTERVAL '1' MONTH) GROUP BY c.rowid";
 }
 
 

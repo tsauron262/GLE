@@ -129,7 +129,7 @@
         $head = $contrat->getExtraHeadTab($head);
 
         $h = count($head);
-        $head[$h][0] = DOL_URL_ROOT.'/Babel_GMAO/contratDetail.php?id='.$idLigne;
+        $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Contrat/contratDetail.php?id='.$idLigne;
         $head[$h][1] = $langs->trans("D&eacute;tail");
         $head[$h][2] = 'D&eacute;tail';
 
@@ -215,7 +215,7 @@
                         require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
                         $comm = new Commande($db);
                         $comm->fetch($val1);
-                        if($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1){
+                        if($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1){
                             print "</table><td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1);
                             print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                             print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1,5);
@@ -261,7 +261,7 @@
                             print 'Commandes associ&eacute;es';
                             print $comm->getNomUrl(1);
 
-                            if($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1){
+                            if($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1){
                                 print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1);
                                 print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                                 print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1,5);
@@ -624,7 +624,7 @@
                 }
 
                 print "</td></tr>";
-                $requete = "SELECT * FROM Babel_product_serial_cont WHERE element_id = ".$idLigne;
+                $requete = "SELECT * FROM llx_product_serial_cont WHERE element_id = ".$idLigne;
                 $sqlsn = $db->query($requete);
                 if ($db->num_rows($sqlsn) > 0)
                 {

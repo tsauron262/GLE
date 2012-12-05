@@ -314,7 +314,7 @@ if ($_REQUEST['dateFinConf'])
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
 
-                    $requete = "INSERT INTO Babel_product_serial_cont (element_id, serial_number, date_creation, fk_user_author,element_type)
+                    $requete = "INSERT INTO llx_product_serial_cont (element_id, serial_number, date_creation, fk_user_author,element_type)
                                      VALUES (".$contrat->newContractLigneId.", '".$_REQUEST['serial']."',now(),".$user->id.",'contratMnt')";
                     $result1 = $db->query($requete);
                     $xml .= "<OK>OK</OK>";
@@ -435,7 +435,7 @@ if ($_REQUEST['dateFinConf'])
                                WHERE contratdet_refid=".$_REQUEST['lineid'];
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
-                    $requete = "UPDATE Babel_product_serial_cont
+                    $requete = "UPDATE llx_product_serial_cont
                                    SET serial_number = '".$_REQUEST['serial']."',
                                        date_fin_SAV = date_add('".date('Y-m-d',$date_start)."', INTERVAL ".$totalSAV." MONTH),
                                        fk_user_author = ".$user->id."
@@ -601,11 +601,11 @@ if ($_REQUEST['dateFinConf'])
                 $xml .= "<libelleProduit>".$res1->label."</libelleProduit>";
                 $xml .= "<descriptionProduit>".$res1->description."</descriptionProduit>";
             }
-            $requete = "SELECT durValid, qte,Babel_product_serial_cont.serial_number,
+            $requete = "SELECT durValid, qte,llx_product_serial_cont.serial_number,
                                date_format(DateDeb,'%d/%m/%Y') as DateDeb,fk_contrat_prod,
                                date_format(date_add(DateDeb,INTERVAL durValid MONTH),'%d/%m/%Y') as DateFin
                           FROM Babel_GMAO_contratdet_prop
-                     LEFT JOIN Babel_product_serial_cont ON Babel_product_serial_cont.element_id = Babel_GMAO_contratdet_prop.contratdet_refid AND Babel_product_serial_cont.element_type='contratMnt'
+                     LEFT JOIN llx_product_serial_cont ON llx_product_serial_cont.element_id = Babel_GMAO_contratdet_prop.contratdet_refid AND llx_product_serial_cont.element_type='contratMnt'
                          WHERE contratdet_refid =".$idLigne;
 //print $requete;
             $sql2 = $db->query($requete);

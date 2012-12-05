@@ -9,7 +9,7 @@
  * Version 1.0
  * Created on : 6 juil. 2010
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
 /**

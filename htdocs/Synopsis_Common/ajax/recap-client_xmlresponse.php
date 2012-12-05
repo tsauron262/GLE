@@ -1,14 +1,14 @@
 <?php
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.1
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
 global $langs;
@@ -180,15 +180,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(babel_product.rowid) as cnt," .
-            "          babel_product.description" .
+    $requete = "SELECT count(llx_product.rowid) as cnt," .
+            "          llx_product.description" .
             "     FROM ".MAIN_DB_PREFIX."propaldet," .
-            "          babel_product" .
-            "    WHERE babel_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+            "          llx_product" .
+            "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND babel_product.fk_product_type = 0 " .
-            " GROUP BY babel_product.rowid" .
-            " ORDER BY count(babel_product.rowid) DESC LIMIT 25";
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND llx_product.fk_product_type = 0 " .
+            " GROUP BY llx_product.rowid" .
+            " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
     $resql=$db->query($requete);
     if ($resql)
     {
@@ -207,15 +207,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(babel_product.rowid) as cnt," .
-            "          babel_product.description" .
+    $requete = "SELECT count(llx_product.rowid) as cnt," .
+            "          llx_product.description" .
             "     FROM ".MAIN_DB_PREFIX."propaldet," .
-            "          babel_product" .
-            "    WHERE babel_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+            "          llx_product" .
+            "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND babel_product.fk_product_type = 1 " .
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND llx_product.fk_product_type = 1 " .
             " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
-            " ORDER BY count(babel_product.rowid) DESC LIMIT 25";
+            " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
 
     $resql=$db->query($requete);
     if ($resql)

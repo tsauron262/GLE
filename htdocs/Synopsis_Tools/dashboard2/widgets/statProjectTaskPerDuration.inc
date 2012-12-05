@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 22 juil. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**

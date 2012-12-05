@@ -20,7 +20,7 @@ function widget_statProduit() {
         $prodser[0][0]=$prodser[0][1]=$prodser[1][0]=$prodser[1][1]=0;
 
         $sql = "SELECT COUNT(p.rowid) as total, p.fk_product_type, p.envente";
-        $sql.= " FROM babel_product as p";
+        $sql.= " FROM llx_product as p";
         $sql.= " GROUP BY p.fk_product_type, p.envente";
         $result = $db->query($sql);
         while ($objp = $db->fetch_object($result))

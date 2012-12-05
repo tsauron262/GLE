@@ -186,12 +186,12 @@
     $tmp = $cont->getTypeContrat();
     print "<tr><th>Type<td>".$tmp['Nom'];
     print "<tr><th>Statut<td>".$cont->getLibStatut(4);
-        $requete = "SELECT Babel_GMAO_contrat_prop.qte * Babel_product.qte as qtetot
+        $requete = "SELECT Babel_GMAO_contrat_prop.qte * llx_product.qte as qtetot
                       FROM ".MAIN_DB_PREFIX."contrat,
                            Babel_GMAO_contrat_prop,
-                           Babel_product
+                           llx_product
                      WHERE Babel_GMAO_contrat_prop.contrat_refid = ".MAIN_DB_PREFIX."contrat.rowid
-                       AND Babel_GMAO_contrat_prop.fk_prod = Babel_product.rowid
+                       AND Babel_GMAO_contrat_prop.fk_prod = llx_product.rowid
                        AND ".MAIN_DB_PREFIX."contrat.rowid = ".$contid;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);

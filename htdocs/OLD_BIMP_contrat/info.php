@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
-  * GLE by Babel-Services
+  * GLE by Synopsis & DRSI
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   *//*
  */
@@ -110,7 +110,7 @@ print  <<<EOF
     jQuery(document).ready(function(){
         jQuery("#jsContrat li").dblclick(function(){
             var id = jQuery(this).attr('id');
-            location.href=DOL_URL_ROOT+'/Babel_GMAO/contratDetail.php?id='+id;
+            location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
                 });
             });
 

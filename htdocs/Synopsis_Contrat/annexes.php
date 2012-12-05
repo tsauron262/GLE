@@ -308,7 +308,7 @@ EOF;
                             require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
                             $comm = new Commande($db);
                             $comm->fetch($val1);
-                            if($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1){
+                            if($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1){
                                 print "</table><td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1);
                                 print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                                 print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1,5);
@@ -356,7 +356,7 @@ EOF;
                             print 'Commandes associ&eacute;es';
                             print $comm->getNomUrl(1);
 
-                            if($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1){
+                            if($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1){
                                 print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1);
                                 print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
                                 print "<td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1,5);

@@ -31,7 +31,7 @@ function widget_listPrepaCommandeContratAFaire() {
     if ($conf->commande->enabled && $user->rights->commande->lire)
     {
         $sql = "SELECT distinct dt.fk_commande
-                  FROM babel_product AS p,
+                  FROM llx_product AS p,
                        llx_commandedet AS dt,
                        llx_commande as c
                  WHERE p.rowid = dt.fk_product

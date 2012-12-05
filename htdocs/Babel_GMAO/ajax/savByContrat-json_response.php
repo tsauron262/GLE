@@ -53,7 +53,7 @@ if(!$sidx) $sidx =1;
                        s.serial_number,
                        ifnull(p.ref,c.description) as description
                   FROM ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN ".MAIN_DB_PREFIX."product as p ON c.fk_product = p.rowid,
-                       Babel_GMAO_contratdet_prop as g LEFT JOIN Babel_product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
+                       Babel_GMAO_contratdet_prop as g LEFT JOIN llx_product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
                  WHERE c.fk_contrat=".$id."
                    AND c.rowid = g.contratdet_refid
               ORDER BY $sidx $sord

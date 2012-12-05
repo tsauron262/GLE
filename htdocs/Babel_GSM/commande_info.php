@@ -1,14 +1,14 @@
 <?php
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.1
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
     include_once ("../master.inc.php");
@@ -251,7 +251,7 @@ if ($_GET["commande_id"] > 0)
 
     $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty, cd.rowid, cd.tva_tx, cd.subprice";
     $sql.= " FROM ".MAIN_DB_PREFIX."commandedet as cd ";
-    $sql.= " LEFT JOIN babel_product as p ON cd.fk_product = p.rowid";
+    $sql.= " LEFT JOIN llx_product as p ON cd.fk_product = p.rowid";
     $sql.= " WHERE cd.fk_commande = ".$commande->id;
     $sql.= " AND p.fk_product_type <> 1";
     $sql.= " ORDER BY cd.rowid";

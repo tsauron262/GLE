@@ -452,7 +452,7 @@ EOF;
         $prodTmp->id = $res->fk_product;
         $prodTmp->fetch($prodTmp->id);
         $serial = false;
-        $requete = "SELECT * FROM Babel_product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
+        $requete = "SELECT * FROM llx_product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
         $sql = $this->db->query($requete);
         $res1 = $this->db->fetch_object($sql);
         $serial = ($res1->serial_number."x" != "x"?$res1->serial_number:false);

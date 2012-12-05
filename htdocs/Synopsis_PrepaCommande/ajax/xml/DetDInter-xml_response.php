@@ -25,8 +25,8 @@
   if ($id > 0)
   {
     $requete = "SELECT *
-                  FROM llx_Synopsis_demandeIntervdet as ft
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
+                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as ft
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
                  WHERE fk_demandeInterv = ".$id. "
               ORDER BY ft.rang ";
     $sql = $db->query($requete);
@@ -41,7 +41,7 @@
             $requete = "SELECT *
                           FROM ".MAIN_DB_PREFIX."product p,
                                ".MAIN_DB_PREFIX."commandedet cdet
-                         WHERE llx_product.fk_product_type=3
+                         WHERE ".MAIN_DB_PREFIX."product.fk_product_type=3
                            AND cdet.rowid = ".$res->fk_commandedet."
                            AND cdet.fk_product = p.rowid";
             $sql1 = $db->query($requete);

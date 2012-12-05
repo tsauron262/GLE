@@ -45,11 +45,11 @@ $limit = $_REQUEST['rows'];
 
   $requete = "SELECT ".MAIN_DB_PREFIX."facturedet.rowid as id,
                      ".MAIN_DB_PREFIX."facturedet.fk_product,
-                     ifnull(llx_product.description,".MAIN_DB_PREFIX."facturedet.description) as description,
+                     ifnull(".MAIN_DB_PREFIX."product.description,".MAIN_DB_PREFIX."facturedet.description) as description,
                      ".MAIN_DB_PREFIX."facturedet.qty,
                      ".MAIN_DB_PREFIX."facturedet.total_ht
                 FROM ".MAIN_DB_PREFIX."facturedet
-           LEFT JOIN llx_product on llx_product.rowid = ".MAIN_DB_PREFIX."facturedet.fk_product
+           LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."facturedet.fk_product
                WHERE ".MAIN_DB_PREFIX."facturedet.fk_facture = $contratId
             ORDER BY $sidx $sord
                LIMIT $start , $limit";

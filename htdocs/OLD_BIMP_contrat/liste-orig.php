@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -80,10 +83,10 @@ $sql.= ' sum('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NULL OR cd.d
 $sql.= ' sum('.$db->ifsql("cd.statut=5",1,0).') as nb_closed,';
 $sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut, s.nom, s.rowid as socid";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM llx_societe as s,";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
-$sql.= " llx_contrat as c";
-$sql.= " LEFT JOIN llx_contratdet as cd ON c.rowid = cd.fk_contrat";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,";
+if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
+$sql.= " ".MAIN_DB_PREFIX."contrat as c";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
 $sql.= " WHERE c.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($search_nom)      $sql.= " AND s.nom like '%".addslashes($search_nom)."%'";

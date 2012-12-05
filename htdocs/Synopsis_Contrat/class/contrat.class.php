@@ -3,7 +3,7 @@ require_once DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php";
 class Synopsis_Contrat extends Contrat{
     public function getTypeContrat_noLoad($id)
     {
-        $requete = "SELECT * FROM llx_contrat WHERE rowid = ".$id;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE rowid = ".$id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         return($res->extraparams);
@@ -31,7 +31,7 @@ class Synopsis_Contrat extends Contrat{
             {
                 case "p":
                     //test si commande facture
-                    $requete = "SELECT * FROM llx_co_pr WHERE fk_propale = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_pr WHERE fk_propale = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -39,7 +39,7 @@ class Synopsis_Contrat extends Contrat{
                             array_push($this->linkedArray['co'],$res->fk_commande);
                         }
                     }
-                    $requete = "SELECT * FROM llx_fa_pr WHERE fk_propale = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."fa_pr WHERE fk_propale = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -50,7 +50,7 @@ class Synopsis_Contrat extends Contrat{
                 break;
                 case "c":
                     //test si commande propal ...
-                    $requete = "SELECT * FROM llx_co_pr WHERE fk_commande = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_pr WHERE fk_commande = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -58,7 +58,7 @@ class Synopsis_Contrat extends Contrat{
                             array_push($this->linkedArray['pr'],$res->fk_propale);
                         }
                     }
-                    $requete = "SELECT * FROM llx_co_fa WHERE fk_commande = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_commande = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -69,7 +69,7 @@ class Synopsis_Contrat extends Contrat{
                 break;
                 case "f":
                     //test si propal facture ...
-                    $requete = "SELECT * FROM llx_co_fa WHERE fk_facture = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_facture = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -77,7 +77,7 @@ class Synopsis_Contrat extends Contrat{
                             array_push($this->linkedArray['co'],$res->fk_commande);
                         }
                     }
-                    $requete = "SELECT * FROM llx_fa_pr WHERE fk_facture = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."fa_pr WHERE fk_facture = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))

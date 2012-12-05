@@ -10,7 +10,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -158,8 +159,8 @@ class pdf_contratGMAO_BIMP extends ModelePDFContrat
                 $pdf1=new FPDI('P','mm',$this->format);
 
                 $requete = "SELECT *
-                              FROM llx_Synopsis_contrat_annexePdf as p,
-                                   llx_Synopsis_contrat_annexe as a
+                              FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p,
+                                   ".MAIN_DB_PREFIX."Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id."
                           ORDER BY a.rang";
@@ -913,8 +914,8 @@ au ".$val->date_fin_prevue),0,'C',1);
 //                $pdf->SetAutoPageBreak(0,1);
 
                 $requete = "SELECT *
-                              FROM llx_Synopsis_contrat_annexePdf as p,
-                                   llx_Synopsis_contrat_annexe as a
+                              FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p,
+                                   ".MAIN_DB_PREFIX."Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id. "
                           ORDER BY a.rang";

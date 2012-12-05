@@ -24,7 +24,7 @@
   {
     $requete = "SELECT *
                   FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
                  WHERE fk_fichinter = ".$id. "
               ORDER BY ft.rang ";
     $sql = $db->query($requete);

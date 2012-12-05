@@ -76,7 +76,7 @@ if ($_COOKIE['adminRH'] == "admin" && $_COOKIE['Loggedin'] != 'True') {
 //            $_REQUEST['txtPassword']=$conf->global->ORANGE_PASS;
 
             $_REQUEST['txtUserName'] = $_SESSION['dol_login'];
-            $requete = "SELECT pass FROM llx_user WHERE login='" . $_SESSION['dol_login'] . "'";
+            $requete = "SELECT pass FROM ".MAIN_DB_PREFIX."user WHERE login='" . $_SESSION['dol_login'] . "'";
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
 

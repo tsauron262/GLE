@@ -23,7 +23,7 @@ $langs->load("interventions");
 
 
         global $user,$langs,$conf;
-$req = "SELECT rowid FROM llx_Synopsis_fichinter";
+$req = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter";
 $sqlI = $db->query($req);
 while($inter = $db->fetch_object($sqlI)){
 	$idInter = $inter->rowid;
@@ -31,11 +31,11 @@ while($inter = $db->fetch_object($sqlI)){
                            sum(total_tva) as stva,
                            sum(total_ttc) as sttc,
                            sum(duree) as sdur
-                      FROM llx_Synopsis_fichinterdet
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet
                      WHERE fk_fichinter = ".$idInter;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
-        $requete = "UPDATE llx_Synopsis_fichinter
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter
                        SET total_ht = '".$res->sht."',
                            total_tva = '".$res->stva."' ,
                            total_ttc = '".$res->sttc ."',

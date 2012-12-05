@@ -108,7 +108,7 @@ class demandeInterv extends CommonObject
     
     function getFI(){
         $return = array(); 
-        $requete = "SELECT * FROM llx_element_element WHERE sourcetype='DI' AND targettype='FI' AND fk_source = ".$this->id;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype='DI' AND targettype='FI' AND fk_source = ".$this->id;
         $res = $this->db->query($requete);
         while($result = $this->db->fetch_object($res)){
             $return[] = $result->fk_target;
@@ -143,7 +143,7 @@ class demandeInterv extends CommonObject
         $result=$soc->fetch($this->socid);
         $this->verifyNumRef($soc);
 
-        $sql = "INSERT INTO llx_Synopsis_demandeInterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
+        $sql = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_demandeInterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id) $sql.=  ", fk_projet";
         if ($this->fk_user_prisencharge > 0) $sql.=  ", fk_user_prisencharge";
         if ($this->fk_commande > 0) $sql.=  ", fk_commande";
@@ -164,7 +164,7 @@ class demandeInterv extends CommonObject
         $result=$this->db->query($sql);
         if ($result)
         {
-            $this->id=$this->db->last_insert_id("llx_Synopsis_demandeInterv");
+            $this->id=$this->db->last_insert_id("".MAIN_DB_PREFIX."Synopsis_demandeInterv");
             $this->db->commit();
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -200,7 +200,7 @@ class demandeInterv extends CommonObject
         /*
         *  Insertion dans la base
         */
-        $sql = "UPDATE llx_Synopsis_demandeInterv SET ";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv SET ";
         $sql .= " datei = ".$this->db->idate($this->date);
         $sql .= ", description  = '".addslashes($this->description)."'";
         $sql .= ", duree = ".$this->duree;
@@ -233,7 +233,7 @@ class demandeInterv extends CommonObject
     {
         $sql = "SELECT ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf";
-        $sql.= " FROM llx_Synopsis_demandeInterv";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " WHERE rowid=".$rowid;
 
         dol_syslog("demandeInterv::fetch sql=".$sql);
@@ -311,7 +311,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_statut = 1, date_valid=now(), fk_user_valid=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -377,7 +377,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_statut = 0, date_valid=now(), fk_user_valid=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." ";
 
@@ -420,7 +420,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_user_target=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." ";
 
@@ -478,7 +478,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_statut = 2, date_prisencharge=now(), fk_user_prisencharge=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 1";
 
@@ -541,7 +541,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_user_prisencharge=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut < 2";
 
@@ -591,7 +591,7 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_demandeInterv";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_statut = 3, date_cloture=now(), fk_user_cloture=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 2";
 
@@ -688,7 +688,7 @@ class demandeInterv extends CommonObject
     */
     function verifyNumRef($soc)
     {
-        $sql = "SELECT rowid FROM llx_Synopsis_demandeInterv";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " WHERE ref = '".$this->ref."'";
 
         $result = $this->db->query($sql);
@@ -755,7 +755,7 @@ class demandeInterv extends CommonObject
         $sql.= ", f.fk_user_author, f.fk_user_valid";
         $sql.= ", f.fk_user_target, f.fk_user_prisencharge";
         $sql.= ", f.fk_user_cloture ";
-        $sql.= " FROM llx_Synopsis_demandeInterv as f";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as f";
         $sql.= " WHERE f.rowid = ".$id;
 
         $result = $this->db->query($sql);
@@ -828,7 +828,7 @@ class demandeInterv extends CommonObject
                 if ($numprojet > 0)
                 {
                     $this->projetidp=$project_id;
-                    $sql = 'UPDATE llx_Synopsis_demandeInterv SET fk_projet = '.$project_id;
+                    $sql = 'UPDATE '.MAIN_DB_PREFIX.'Synopsis_demandeInterv SET fk_projet = '.$project_id;
                     $sql .= ' WHERE rowid = '.$this->id.' AND fk_statut = 0 ;';
                     $this->db->query($sql);
                 }
@@ -851,11 +851,11 @@ class demandeInterv extends CommonObject
 
         $this->db->begin();
 
-        $sql = "DELETE FROM llx_Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$this->id;
+        $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$this->id;
         dol_syslog("demandeInterv::delete sql=".$sql);
         if ( $this->db->query($sql) )
         {
-            $sql = "DELETE FROM llx_Synopsis_demandeInterv WHERE rowid = ".$this->id;
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE rowid = ".$this->id;
             dol_syslog("demandeInterv::delete sql=".$sql);
             if ( $this->db->query($sql) )
             {
@@ -921,7 +921,7 @@ class demandeInterv extends CommonObject
         global $langs,$conf;
         if ($user->rights->synopsisdemandeinterv->creer)
         {
-            $sql = "UPDATE llx_Synopsis_demandeInterv ";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv ";
             $sql.= " SET datei = ".$this->db->idate($date_delivery);
             $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -956,7 +956,7 @@ class demandeInterv extends CommonObject
         global $langs,$conf;
         if ($user->rights->synopsisdemandeinterv->creer)
         {
-            $sql = "UPDATE llx_Synopsis_demandeInterv ";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv ";
             $sql.= " SET description = '".addslashes($description)."'";
             $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -1071,7 +1071,7 @@ class demandeInterv extends CommonObject
 
         // Charge tableau des produits prodids
         $prodids = array();
-        $sql = "SELECT rowid FROM llx_product  WHERE envente=1";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."product  WHERE envente=1";
         $resql = $this->db->query($sql);
         if ($resql)
         {
@@ -1126,7 +1126,7 @@ class demandeInterv extends CommonObject
     function fetch_lines()
     {
         $sql = 'SELECT rowid';
-        $sql.= '  FROM llx_Synopsis_demandeIntervdet';
+        $sql.= '  FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet';
         $sql.= ' WHERE fk_demandeInterv = '.$this->id;
 
         dol_syslog("demandeInterv::fetch_lines sql=".$sql);
@@ -1189,7 +1189,7 @@ class demandeIntervLigne
     public $db;
     public $error;
 
-    // From llx_Synopsis_demandeIntervdet
+    // From ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet
     public $rowid;
     public $fk_demandeInterv;
     public $desc;              // Description ligne
@@ -1235,8 +1235,8 @@ class demandeIntervLigne
                             ft.tx_tva,
                             ft.date as dateiunformated,';
         $sql.= '            ft.date as datei ';
-        $sql.= '       FROM llx_Synopsis_demandeIntervdet as ft';
-        $sql .= " LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON ft.fk_typeinterv=t.id";
+        $sql.= '       FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet as ft';
+        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON ft.fk_typeinterv=t.id";
         $sql.= '      WHERE ft.rowid = '.$rowid;
         dol_syslog("demandeIntervLigne::fetch sql=".$sql);
         $result = $this->db->query($sql);
@@ -1319,7 +1319,7 @@ class demandeIntervLigne
         $total_tva = 0.196 * $this->total_ht;
 
         // Insertion dans base de la ligne
-        $sql = 'INSERT INTO llx_Synopsis_demandeIntervdet';
+        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet';
         $sql.= ' (fk_demandeInterv, description, date, duree, rang,fk_typeinterv, isForfait ';
         if ($this->qte > 0) $sql .= ',qte ';
         if ($this->pu_ht > 0) $sql .= ',pu_ht, total_ht, total_tva, total_ttc ';
@@ -1394,7 +1394,7 @@ class demandeIntervLigne
 
 
         // Mise a jour ligne en base
-        $sql = "UPDATE llx_Synopsis_demandeIntervdet SET";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet SET";
         $sql.= " description='".addslashes($this->desc)."'";
         $sql.= ",date=".$this->db->idate($this->datei);
         $sql.= ",duree=".$this->duration;
@@ -1453,13 +1453,13 @@ class demandeIntervLigne
     {
         global $user,$langs,$conf;
 //        $sql = "SELECT SUM(duree) as total_duration";
-//        $sql.= " FROM llx_Synopsis_demandeIntervdet";
+//        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet";
 //        $sql.= " WHERE fk_demandeInterv=".$this->fk_demandeInterv;
         $result = 1;
-                $requete = "SELECT sum(total_ht) as sht, sum(total_tva) as stva, sum(total_ttc) as sttc, sum(duree) as sdur FROM llx_Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$this->fk_demandeInterv;
+                $requete = "SELECT sum(total_ht) as sht, sum(total_tva) as stva, sum(total_ttc) as sttc, sum(duree) as sdur FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$this->fk_demandeInterv;
                 $sql = $this->db->query($requete);
                 $res = $this->db->fetch_object($sql);
-                $requete = "UPDATE llx_Synopsis_demandeInterv SET total_ht = ".$res->sht.", total_tva = ".$res->stva." , total_ttc = ".$res->sttc .", duree = ".$res->sdur." WHERE rowid = ".$this->fk_demandeInterv;
+                $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv SET total_ht = ".$res->sht.", total_tva = ".$res->stva." , total_ttc = ".$res->sttc .", duree = ".$res->sdur." WHERE rowid = ".$this->fk_demandeInterv;
                 $sql = $this->db->query($requete);
                 if ($sql){ $result = 1;}
                 $this->db->commit();
@@ -1479,7 +1479,7 @@ class demandeIntervLigne
 //            $total_duration=0;
 //            if ($obj) $total_duration = $obj->total_duration;
 //
-//            $sql = "UPDATE llx_Synopsis_demandeInterv";
+//            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
 //            $sql.= " SET duree = ".$total_duration;
 //            $sql.= " WHERE rowid = ".$this->fk_demandeInterv;
 //
@@ -1525,7 +1525,7 @@ class demandeIntervLigne
             dol_syslog("demandeIntervLigne::delete_line lineid=".$this->rowid);
             $this->db->begin();
 
-            $sql = "DELETE FROM llx_Synopsis_demandeIntervdet WHERE rowid = ".$this->rowid;
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet WHERE rowid = ".$this->rowid;
             $resql = $this->db->query($sql);
             dol_syslog("demandeIntervLigne::delete_line sql=".$sql);
 

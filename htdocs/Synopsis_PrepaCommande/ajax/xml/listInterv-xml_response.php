@@ -41,7 +41,7 @@
                            ref,
                            ifnull(fk_user_target, fk_user_prisencharge) as fk_interv,
                            UNIX_TIMESTAMP(datei) as dateinterv
-                      FROM llx_Synopsis_demandeInterv
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
                      WHERE fk_commande  = ".join(',',$arrGrpCom). "
                   ORDER BY datei DESC ";
         $sql = $db->query($requete);

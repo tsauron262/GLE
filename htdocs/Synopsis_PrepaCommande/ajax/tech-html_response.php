@@ -82,7 +82,7 @@ if ($socid>0)
 
     $sql = "SELECT u.rowid, u.name, u.firstname";
     $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
-    $sql .= " , llx_element_element as elel";
+    $sql .= " , ".MAIN_DB_PREFIX."element_element as elel";
     $sql .= " WHERE elel.fk_source =".$soc->id;
     $sql .= " AND elel.fk_target = u.rowid";
     $sql .= " AND elel.targettype = 'userTech'";

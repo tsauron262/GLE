@@ -109,7 +109,7 @@ print_titre($langs->trans("ProposalsPDFModules"));
 // Defini tableau def de modele propal
 $def = array();
 $sql = "SELECT nom";
-$sql.= " FROM llx_document_model";
+$sql.= " FROM ".MAIN_DB_PREFIX."document_model";
 $sql.= " WHERE type = 'propal'";
 $resql=$db->query($sql);
 if ($resql)

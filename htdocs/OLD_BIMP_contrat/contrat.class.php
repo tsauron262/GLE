@@ -118,7 +118,7 @@ class Contrat extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_contratdet SET statut = 4,";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET statut = 4,";
         $sql.= " date_ouverture = '".$this->db->idate($date)."',";
         if ($date_end) $sql.= " date_fin_validite = '".$this->db->idate($date_end)."',";
         $sql.= " fk_user_ouverture = ".$user->id.",";
@@ -160,7 +160,7 @@ class Contrat extends CommonObject
 
         // statut actif : 4
 
-        $sql = "UPDATE llx_contratdet SET statut = 5,";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET statut = 5,";
         $sql.= " date_cloture = '".$this->db->idate($date_end)."',";
         $sql.= " fk_user_cloture = ".$user->id;
         $sql.= " WHERE rowid = ".$line_id . " AND statut = 4";
@@ -190,7 +190,7 @@ class Contrat extends CommonObject
 
         // statut actif : 4
 
-        $sql = "UPDATE llx_contratdet SET statut = 0 ";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET statut = 0 ";
         $sql.= " WHERE rowid = ".$line_id . " AND statut = 4";
         $resql = $this->db->query($sql) ;
         if ($resql)
@@ -220,7 +220,7 @@ class Contrat extends CommonObject
      */
     public function cloture($user,$langs='',$conf='')
     {
-        $sql = "UPDATE llx_contrat SET statut = 2";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 2";
         $sql .= " , date_cloture = now(), fk_user_cloture = ".$user->id;
         $sql .= " WHERE rowid = ".$this->id . " AND statut = 1";
 
@@ -253,7 +253,7 @@ class Contrat extends CommonObject
      */
     public function validate($user,$langs,$conf)
     {
-        $sql = "UPDATE llx_contrat SET statut = 1 ,date_valid=now()";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 1 ,date_valid=now()";
         $sql .= " WHERE rowid = ".$this->id. " AND statut = 0";
         $resql = $this->db->query($sql) ;
         if ($resql)
@@ -277,7 +277,7 @@ class Contrat extends CommonObject
 
     public function devalidate($user,$langs,$conf)
     {
-        $sql = "UPDATE llx_contrat SET statut = 0 ,date_valid=now()";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 0 ,date_valid=now()";
         $sql .= " WHERE rowid = ".$this->id. " AND statut != 0";
         $resql = $this->db->query($sql) ;
         if ($resql)
@@ -298,7 +298,7 @@ class Contrat extends CommonObject
      */
     public function annule($user,$langs='',$conf='')
     {
-        $sql = "UPDATE llx_contrat SET statut = 0";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 0";
         $sql .= " , date_cloture = now(), fk_user_cloture = ".$user->id;
         $sql .= " WHERE rowid = ".$this->id . " AND statut = 1";
 
@@ -339,7 +339,7 @@ class Contrat extends CommonObject
         $sql.= " is_financement,";
         $sql.= " fk_commercial_signature, fk_commercial_suivi,";
         $sql.= " note, note_public, type, condReg_refid, modeReg_refid";
-        $sql.= " FROM llx_contrat WHERE rowid = ".$id;
+        $sql.= " FROM ".MAIN_DB_PREFIX."contrat WHERE rowid = ".$id;
 
         dolibarr_syslog("Contrat::fetch sql=".$sql);
         $resql = $this->db->query($sql) ;
@@ -431,7 +431,7 @@ class Contrat extends CommonObject
                        date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
                        date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
                        date_format(d.date_cloture,'%d/%m/%Y') as date_cloture
-                  FROM llx_contratdet as d,
+                  FROM ".MAIN_DB_PREFIX."contratdet as d,
                        babel_product as p
                  WHERE d.fk_contrat = ".$this->id ." AND d.fk_product = p.rowid
               ORDER BY d.line_order, d.rowid ASC";
@@ -517,7 +517,7 @@ class Contrat extends CommonObject
                        date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
                        date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
                        date_format(d.date_cloture,'%d/%m/%Y') as date_cloture
-                 FROM llx_contratdet as d
+                 FROM ".MAIN_DB_PREFIX."contratdet as d
                 WHERE d.fk_contrat = ".$this->id ."
                   AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 garde pour compatibilite
 
@@ -610,7 +610,7 @@ class Contrat extends CommonObject
         $this->db->begin();
         $this->verifyNumRef();
         // Insert contract
-        $sql = "INSERT INTO llx_contrat (type,datec, fk_soc, fk_user_author, date_contrat";
+        $sql = "INSERT INTO ".MAIN_DB_PREFIX."contrat (type,datec, fk_soc, fk_user_author, date_contrat";
         $sql.= ", fk_commercial_signature, fk_commercial_suivi,ref, linkedTo";
         if ($this->fk_projet ."x" != "x")
         {
@@ -654,7 +654,7 @@ class Contrat extends CommonObject
         {
             $error=0;
 
-            $this->id = $this->db->last_insert_id("llx_contrat");
+            $this->id = $this->db->last_insert_id("".MAIN_DB_PREFIX."contrat");
 
             // Insere contacts commerciaux ('SALESREPSIGN','contrat')
             $result=$this->add_contact($this->commercial_signature_id,'SALESREPSIGN','internal');
@@ -749,7 +749,7 @@ class Contrat extends CommonObject
     }
     public function getTypeContrat_noLoad($id)
     {
-        $requete = "SELECT * FROM llx_contrat WHERE rowid = ".$id;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE rowid = ".$id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         return($res->type);
@@ -773,14 +773,14 @@ class Contrat extends CommonObject
             // Delete element_contact
             /*
             $sql = "DELETE ec";
-            $sql.= " FROM llx_element_contact as ec, llx_c_type_contact as tc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."element_contact as ec, ".MAIN_DB_PREFIX."c_type_contact as tc";
             $sql.= " WHERE ec.fk_c_type_contact = tc.rowid";
             $sql.= " AND tc.element='".$this->element."'";
             $sql.= " AND ec.element_id=".$this->id;
             */
 
             $sql = "SELECT ec.rowid as ecrowid";
-            $sql.= " FROM llx_element_contact as ec, llx_c_type_contact as tc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."element_contact as ec, ".MAIN_DB_PREFIX."c_type_contact as tc";
             $sql.= " WHERE ec.fk_c_type_contact = tc.rowid";
             $sql.= " AND tc.element='".$this->element."'";
             $sql.= " AND ec.element_id=".$this->id;
@@ -803,8 +803,8 @@ class Contrat extends CommonObject
                 }
                 $this->db->free($resql);
 
-                $sql= "DELETE FROM llx_element_contact ";
-                $sql.= " WHERE llx_element_contact.rowid IN (".implode(",",$tab_resql).")";
+                $sql= "DELETE FROM ".MAIN_DB_PREFIX."element_contact ";
+                $sql.= " WHERE ".MAIN_DB_PREFIX."element_contact.rowid IN (".implode(",",$tab_resql).")";
 
                 dolibarr_syslog("Contrat::delete element_contact sql=".$sql,LOG_DEBUG);
                 $resql=$this->db->query($sql);
@@ -821,11 +821,11 @@ class Contrat extends CommonObject
             // Delete contratdet_log
             /*
             $sql = "DELETE cdl";
-            $sql.= " FROM llx_contratdet_log as cdl, llx_contratdet as cd";
+            $sql.= " FROM ".MAIN_DB_PREFIX."contratdet_log as cdl, ".MAIN_DB_PREFIX."contratdet as cd";
             $sql.= " WHERE cdl.fk_contratdet=cd.rowid AND cd.fk_contrat=".$this->id;
             */
             $sql = "SELECT cdl.rowid as cdlrowid ";
-            $sql.= " FROM llx_contratdet_log as cdl, llx_contratdet as cd";
+            $sql.= " FROM ".MAIN_DB_PREFIX."contratdet_log as cdl, ".MAIN_DB_PREFIX."contratdet as cd";
             $sql.= " WHERE cdl.fk_contratdet=cd.rowid AND cd.fk_contrat=".$this->id;
 
             dolibarr_syslog("Contrat::delete contratdet_log sql=".$sql, LOG_DEBUG);
@@ -846,8 +846,8 @@ class Contrat extends CommonObject
                 }
                 $this->db->free($resql);
 
-                $sql= "DELETE FROM llx_contratdet_log ";
-                $sql.= " WHERE llx_contratdet_log.rowid IN (".implode(",",$tab_resql).")";
+                $sql= "DELETE FROM ".MAIN_DB_PREFIX."contratdet_log ";
+                $sql.= " WHERE ".MAIN_DB_PREFIX."contratdet_log.rowid IN (".implode(",",$tab_resql).")";
 
                 dolibarr_syslog("Contrat::delete contratdet_log sql=".$sql, LOG_DEBUG);
                 $resql=$this->db->query($sql);
@@ -862,7 +862,7 @@ class Contrat extends CommonObject
         if (! $error)
         {
             // Delete contratdet
-            $sql = "DELETE FROM llx_contratdet";
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."contratdet";
             $sql.= " WHERE fk_contrat=".$this->id;
 
             dolibarr_syslog("Contrat::delete contratdet sql=".$sql, LOG_DEBUG);
@@ -877,7 +877,7 @@ class Contrat extends CommonObject
         if (! $error)
         {
             // Delete contrat
-            $sql = "DELETE FROM llx_contrat";
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."contrat";
             $sql.= " WHERE rowid=".$this->id;
 
             dolibarr_syslog("Contrat::delete contrat sql=".$sql);
@@ -976,13 +976,13 @@ class Contrat extends CommonObject
             }
 
             //rang
-            $requete = "SELECT max(line_order) as mx FROM llx_contratdet WHERE fk_contrat = ".$this->id;
+            $requete = "SELECT max(line_order) as mx FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = ".$this->id;
             $sql = $this->db->query($requete);
             $res = $this->db->fetch_object($sql);
             $cnt = $res->mx + 1;
             $lineOrder = ($res->mx."x"=="x"?1:$cnt);
             // Insertion dans la base
-            $sql = "INSERT INTO llx_contratdet";
+            $sql = "INSERT INTO ".MAIN_DB_PREFIX."contratdet";
             $sql.= " (line_order, fk_contrat, label, description, fk_product, qty, tva_tx,";
             $sql.= " remise_percent, subprice,fk_user_author, ";
             $sql.= " total_ht, total_tva, total_ttc,";
@@ -1013,13 +1013,13 @@ class Contrat extends CommonObject
             $resql=$this->db->query($sql);
             if ($resql)
             {
-                $lastid = $this->db->last_insert_id("llx_contratdet");
+                $lastid = $this->db->last_insert_id("".MAIN_DB_PREFIX."contratdet");
                 $result=$this->update_total_contrat();
                 if ($result > 0)
                 {
 
                     $label="cont-".trim($this->id).'-opt'.$lastid;
-                    $requet = "UPDATE llx_contratdet SET label ='".$label."' WHERE rowid = ".$lastid;
+                    $requet = "UPDATE ".MAIN_DB_PREFIX."contratdet SET label ='".$label."' WHERE rowid = ".$lastid;
                     $this->db->query($requet);
 
 
@@ -1100,7 +1100,7 @@ class Contrat extends CommonObject
         dolibarr_syslog("Contrat::UpdateLine $rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $date_debut_reel, $date_fin_reel, $tvatx");
 
         $this->db->begin();
-        $sql = "UPDATE llx_contratdet set description='".addslashes($desc)."'";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet set description='".addslashes($desc)."'";
         $sql .= ",price_ht='" .     price2num($price)."'";
         $sql .= ",subprice='" .     price2num($price)."'";
         $sql .= ",total_ht='" .     price2num($total_ht)."'";
@@ -1158,7 +1158,7 @@ class Contrat extends CommonObject
         if ($contrat->statut == 0 ||
             ($contrat->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )
         {
-            $sql = "DELETE FROM llx_contratdet";
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."contratdet";
             $sql.= " WHERE rowid=".$idline;
 
             dolibarr_syslog("Contratdet::delete sql=".$sql);
@@ -1191,7 +1191,7 @@ class Contrat extends CommonObject
     public function update_total_contrat()
     {
         //Change le montant du contrat , retourn le total HT
-        $requete = "SELECT sum(total_ht) as totHT, sum(total_ttc) as totTTC, sum(total_tva) as totTVA FROM llx_contratdet WHERE fk_contrat = ".$this->id;
+        $requete = "SELECT sum(total_ht) as totHT, sum(total_ttc) as totTTC, sum(total_tva) as totTVA FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = ".$this->id;
         //print $requete;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
@@ -1202,7 +1202,7 @@ class Contrat extends CommonObject
         $this->total_tva = $totttc;
         $this->total_ttc = $tottva;
 
-//        $requete ="UPDATE llx_contrat set total_ht = ".$tot . " , total_ttc = ".$totttc." , tva = ".$tottva." WHERE id = ".$this->id;
+//        $requete ="UPDATE ".MAIN_DB_PREFIX."contrat set total_ht = ".$tot . " , total_ttc = ".$totttc." , tva = ".$tottva." WHERE id = ".$this->id;
 //        $sql = $this->db->query($requete);
         return ($tot);
 
@@ -1359,7 +1359,7 @@ class Contrat extends CommonObject
         $sql.= " fk_user_author, fk_user_cloture";
         $sql.= " fk_commercial_signature, fk_commercial_suivi";
         $sql.= " fk_user_mise_en_service";
-        $sql.= " FROM llx_contrat as c";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c";
         $sql.= " WHERE c.rowid = ".$id;
 
         $result=$this->db->query($sql);
@@ -1425,7 +1425,7 @@ class Contrat extends CommonObject
         $tab=array();
 
         $sql = "SELECT cd.rowid";
-        $sql.= " FROM llx_contratdet as cd";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd";
         $sql.= " WHERE fk_contrat =".$this->id;
         if ($statut >= 0) $sql.= " AND statut = '$statut'";
 
@@ -1465,8 +1465,8 @@ class Contrat extends CommonObject
         {
             $sql = "SELECT cd.rowid,".$this->db->pdate("cd.date_ouverture_prevue")." as datefin";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", sc.fk_soc, sc.fk_user";
-            $sql.= " FROM llx_contrat as c, llx_contratdet as cd";
-            if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", llx_societe_commerciaux as sc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd";
+            if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
             $sql.= " WHERE c.statut = 1 AND c.rowid = cd.fk_contrat";
             $sql.= " AND cd.statut = 0";
         }
@@ -1474,8 +1474,8 @@ class Contrat extends CommonObject
         {
             $sql = "SELECT cd.rowid,".$this->db->pdate("cd.date_fin_validite")." as datefin";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", sc.fk_soc, sc.fk_user";
-            $sql.= " FROM llx_contrat as c, llx_contratdet as cd";
-            if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", llx_societe_commerciaux as sc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd";
+            if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
             $sql.= " WHERE c.statut = 1 AND c.rowid = cd.fk_contrat";
             $sql.= " AND cd.statut = 4";
             $sql.= " AND cd.date_fin_validite < '".$this->db->idate(time())."'";
@@ -1508,7 +1508,7 @@ class Contrat extends CommonObject
         global $conf;
         if ($conf->global->MAIN_MODULE_BABELGA == 1)
         {
-            $requete = "SELECT count(*) as cnt FROM llx_contrat WHERE is_financement=1 AND rowid = ".$id;
+            $requete = "SELECT count(*) as cnt FROM ".MAIN_DB_PREFIX."contrat WHERE is_financement=1 AND rowid = ".$id;
 //            print $requete;
             $sql= $this->db->query($requete);
             $res=$this->db->fetch_object($sql);
@@ -1559,7 +1559,7 @@ class Contrat extends CommonObject
             {
                 case "p":
                     //test si commande facture
-                    $requete = "SELECT * FROM llx_co_pr WHERE fk_propale = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_pr WHERE fk_propale = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1567,7 +1567,7 @@ class Contrat extends CommonObject
                             array_push($this->linkedArray['co'],$res->fk_commande);
                         }
                     }
-                    $requete = "SELECT * FROM llx_fa_pr WHERE fk_propale = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."fa_pr WHERE fk_propale = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1578,7 +1578,7 @@ class Contrat extends CommonObject
                 break;
                 case "c":
                     //test si commande propal ...
-                    $requete = "SELECT * FROM llx_co_pr WHERE fk_commande = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_pr WHERE fk_commande = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1586,7 +1586,7 @@ class Contrat extends CommonObject
                             array_push($this->linkedArray['pr'],$res->fk_propale);
                         }
                     }
-                    $requete = "SELECT * FROM llx_co_fa WHERE fk_commande = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_commande = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1597,7 +1597,7 @@ class Contrat extends CommonObject
                 break;
                 case "f":
                     //test si propal facture ...
-                    $requete = "SELECT * FROM llx_co_fa WHERE fk_facture = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_facture = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1605,7 +1605,7 @@ class Contrat extends CommonObject
                             array_push($this->linkedArray['co'],$res->fk_commande);
                         }
                     }
-                    $requete = "SELECT * FROM llx_fa_pr WHERE fk_facture = ".$arr[2];
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."fa_pr WHERE fk_facture = ".$arr[2];
                     if ($resql = $db->query($requete))
                     {
                         while ($res = $db->fetch_object($resql))
@@ -1656,15 +1656,15 @@ class Contrat extends CommonObject
     public function info_contratdet($id)
     {
         $sql = "SELECT DISTINCT fk_user_author";
-        $sql.= " FROM llx_contratdet as c";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql.= " WHERE c.fk_contrat = ".$id;
 
         $sql1 = "SELECT DISTINCT fk_user_ouverture";
-        $sql1.= " FROM llx_contratdet as c";
+        $sql1.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql1.= " WHERE c.fk_contrat = ".$id;
 
         $sql2 = "SELECT DISTINCT fk_user_cloture";
-        $sql2.= " FROM llx_contratdet as c";
+        $sql2.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql2.= " WHERE c.fk_contrat = ".$id;
 
         $result=$this->db->query($sql);
@@ -1713,7 +1713,7 @@ class Contrat extends CommonObject
     }
     public function verifyNumRef()
     {
-        $sql = "SELECT rowid FROM llx_contrat";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."contrat";
         $sql.= " WHERE ref = '".$this->ref."'";
 
         $result = $this->db->query($sql);
@@ -2354,7 +2354,7 @@ class ContratLigne
         $sql.= " t.fk_user_cloture,";
         $sql.= " t.commentaire";
 
-        $sql.= " FROM llx_contratdet as t";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as t";
         $sql.= " WHERE t.rowid = ".$id;
         dolibarr_syslog("Contratdet::fetch sql=".$sql, LOG_DEBUG);
         $resql=$this->db->query($sql);
@@ -2490,7 +2490,7 @@ class ContratLigne
         // Put here code to add control on parameters values
 
         // Update request
-        $sql = "UPDATE llx_contratdet SET";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET";
         $sql.= " fk_contrat='".$this->fk_contrat."',";
         $sql.= " fk_product=".($this->fk_product?"'".$this->fk_product."'":'null').",";
         $sql.= " statut='".$this->statut."',";
@@ -2555,7 +2555,7 @@ class ContratLigne
         $this->db->begin();
         global $user,$langs,$conf;
         // Mise a jour ligne en base
-        $sql = "UPDATE llx_contratdet SET";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET";
         $sql.= " total_ht=".price2num($this->total_ht,'MT')."";
         $sql.= ",total_tva=".price2num($this->total_tva,'MT')."";
         $sql.= ",total_ttc=".price2num($this->total_ttc,'MT')."";
@@ -2585,15 +2585,15 @@ class ContratLigne
     public function info_contratdet($id)
     {
         $sql = "SELECT DISTINCT fk_user_author";
-        $sql.= " FROM llx_contratdet as c";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql.= " WHERE c.fk_contrat = ".$id;
 
         $sql1 = "SELECT DISTINCT fk_user_ouverture";
-        $sql1.= " FROM llx_contratdet as c";
+        $sql1.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql1.= " WHERE c.fk_contrat = ".$id;
 
         $sql2 = "SELECT DISTINCT fk_user_cloture";
-        $sql2.= " FROM llx_contratdet as c";
+        $sql2.= " FROM ".MAIN_DB_PREFIX."contratdet as c";
         $sql2.= " WHERE c.fk_contrat = ".$id;
 
         $result=$this->db->query($sql);

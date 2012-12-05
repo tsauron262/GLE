@@ -42,7 +42,7 @@ llxHeader('',$langs->trans('Fiche PN'),'Fiche PN');
     $sql.= ' p.label as product, p.ref, p.fk_product_type, p.rowid as prodid,';
     $sql.= ' p.description as product_desc';
     $sql.= ' FROM '.MAIN_DB_PREFIX.'propaldet as pt';
-    $sql.= ' LEFT JOIN llx_product as p ON pt.fk_product=p.rowid';
+    $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON pt.fk_product=p.rowid';
     $sql.= ' WHERE pt.fk_propal = '.$propal->id;
     $sql.= '   AND pt.description NOT LIKE "[header]%"';
     $sql.= '   AND pt.description NOT LIKE "[header1]%"';

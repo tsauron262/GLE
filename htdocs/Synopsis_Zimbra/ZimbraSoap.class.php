@@ -3921,23 +3921,23 @@ class Zimbra {
 
         //Attn soc KO
         $db = $this->db;
-        $requete = "SELECT llx_Synopsis_demandeInterv.rowid,
-                           llx_Synopsis_demandeInterv.fk_soc,
-                           llx_Synopsis_demandeInterv.fk_contrat,
-                           llx_Synopsis_demandeInterv.datec,
-                           llx_Synopsis_demandeInterv.date_valid,
-                           llx_Synopsis_demandeInterv.datei,
-                           llx_Synopsis_demandeInterv.fk_user_author,
-                           llx_Synopsis_demandeInterv.fk_user_valid,
-                           llx_Synopsis_demandeInterv.fk_statut,
-                           llx_Synopsis_demandeInterv.description,
-                           llx_Synopsis_demandeInterv.note_private,
-                           llx_Synopsis_demandeInterv.note_public,
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_contrat,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datec,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.date_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_statut,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.description,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_private,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_public,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid
-                      FROM llx_Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
-                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = llx_Synopsis_demandeInterv.fk_soc
-                       AND ( llx_Synopsis_demandeInterv.fk_user_author = " . $userid . " OR llx_Synopsis_demandeInterv.fk_user_valid = " . $userid . " ) ";
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
+                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc
+                       AND ( ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author = " . $userid . " OR ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid = " . $userid . " ) ";
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -3957,7 +3957,7 @@ class Zimbra {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3966,7 +3966,7 @@ class Zimbra {
 
                     if ($res->datei) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3976,7 +3976,7 @@ class Zimbra {
 
                     if ($res->date_valid) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -4013,23 +4013,23 @@ class Zimbra {
 
         //Attn soc KO
         $db = $this->db;
-        $requete = "SELECT llx_Synopsis_demandeInterv.rowid,
-                           llx_Synopsis_demandeInterv.fk_soc,
-                           llx_Synopsis_demandeInterv.fk_contrat,
-                           llx_Synopsis_demandeInterv.datec,
-                           llx_Synopsis_demandeInterv.date_valid,
-                           llx_Synopsis_demandeInterv.datei,
-                           llx_Synopsis_demandeInterv.fk_user_author,
-                           llx_Synopsis_demandeInterv.fk_user_valid,
-                           llx_Synopsis_demandeInterv.fk_statut,
-                           llx_Synopsis_demandeInterv.description,
-                           llx_Synopsis_demandeInterv.note_private,
-                           llx_Synopsis_demandeInterv.note_public,
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_contrat,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datec,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.date_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_statut,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.description,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_private,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_public,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid
-                      FROM llx_Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
-                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = llx_Synopsis_demandeInterv.fk_soc
-                       AND llx_Synopsis_demandeInterv.rowid =  " . $diid;
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
+                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc
+                       AND ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid =  " . $diid;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -4056,7 +4056,7 @@ class Zimbra {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -4065,7 +4065,7 @@ class Zimbra {
 
                     if ($res->datei) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -4075,7 +4075,7 @@ class Zimbra {
 
                     if ($res->date_valid) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -4111,22 +4111,22 @@ class Zimbra {
 
         //Attn soc KO
         $db = $this->db;
-        $requete = "SELECT llx_Synopsis_demandeInterv.rowid,
-                           llx_Synopsis_demandeInterv.fk_soc,
-                           llx_Synopsis_demandeInterv.fk_contrat,
-                           llx_Synopsis_demandeInterv.datec,
-                           llx_Synopsis_demandeInterv.date_valid,
-                           llx_Synopsis_demandeInterv.datei,
-                           llx_Synopsis_demandeInterv.fk_user_author,
-                           llx_Synopsis_demandeInterv.fk_user_valid,
-                           llx_Synopsis_demandeInterv.fk_statut,
-                           llx_Synopsis_demandeInterv.description,
-                           llx_Synopsis_demandeInterv.note_private,
-                           llx_Synopsis_demandeInterv.note_public,
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_contrat,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datec,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.date_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_statut,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.description,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_private,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_public,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid
-                      FROM llx_Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
-                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = llx_Synopsis_demandeInterv.fk_soc";
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv, " . MAIN_DB_PREFIX . "societe
+                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc";
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -4150,7 +4150,7 @@ class Zimbra {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datec, "Créat. la DI ' " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention' " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -4159,7 +4159,7 @@ class Zimbra {
 
                     if ($res->datei) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -4169,7 +4169,7 @@ class Zimbra {
 
                     if ($res->date_valid) {
                         $arrRes = $this->Babel_pushDateArr(
-                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra

@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -69,7 +72,7 @@ class ModelePDFPropalesGA extends FPDF
         $type='propalGA';
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
-        $sql.=" FROM llx_document_model";
+        $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
         $sql.=" WHERE type = '".$type."'";
 
         $resql = $db->query($sql);

@@ -610,7 +610,7 @@ function reinit_Intervention($zim,$db)
     $db->query($requete);
     $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger
                       WHERE type_event_refid = (SELECT id FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type WHERE val='appointment')
-                        AND event_table_link='llx_Synopsis_demandeInterv'";
+                        AND event_table_link='".MAIN_DB_PREFIX."Synopsis_demandeInterv'";
     $db->query($requete);
     $zim->Synopsis_Zimbra_GetDemandeIntervention();
     $zim->Synopsis_Zimbra_GetIntervention();

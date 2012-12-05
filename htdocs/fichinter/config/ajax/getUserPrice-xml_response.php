@@ -23,8 +23,8 @@
   $requete = "SELECT t.id as tid,
                      t.label as tlabel,
                      p.prix_ht
-                FROM llx_Synopsis_fichinter_User_PrixTypeInterv as p
-          RIGHT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = p.typeInterv_refid
+                FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixTypeInterv as p
+          RIGHT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = p.typeInterv_refid
                  AND user_refid = ".$id. "
             ORDER BY t.rang";
   $sql = $db->query($requete);
@@ -42,8 +42,8 @@
   $requete = "SELECT i.fk_product as tid,
                      i.prix_ht,
                      p.rowid as pid
-                FROM llx_product as p
-           LEFT JOIN llx_Synopsis_fichinter_User_PrixDepInterv as i ON i.fk_product = p.rowid AND user_refid = ".$id. "
+                FROM ".MAIN_DB_PREFIX."product as p
+           LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv as i ON i.fk_product = p.rowid AND user_refid = ".$id. "
                WHERE p.fk_product_type=3
             ORDER BY p.ref";
   $sql = $db->query($requete);

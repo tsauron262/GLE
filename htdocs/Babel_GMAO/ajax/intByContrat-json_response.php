@@ -100,7 +100,7 @@ if(!$sidx) $sidx =1;
 
         $SQL = "SELECT t.label as type, t.isDeplacement, fd.date, fd.description, fd.total_ht, fk_depProduct, fd.fk_typeinterv, fd.duree
                   FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
                  WHERE fd.fk_fichinter = ".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";

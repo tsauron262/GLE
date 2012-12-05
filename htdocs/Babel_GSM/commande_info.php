@@ -372,7 +372,7 @@ if ($_GET["commande_id"] > 0)
 //            $propals = $commande->propals;
             $propals=array();
             $requete="SELECT * " .
-                    "   FROM llx_co_pr " .
+                    "   FROM ".MAIN_DB_PREFIX."co_pr " .
                     "  WHERE fk_commande = ".$commandeid;
             $resql=$db->query($requete);
             if ($resql)
@@ -420,7 +420,7 @@ if ($_GET["commande_id"] > 0)
                 {
                     //Est ce qu'il y a des factures rattachees e� la commande
                     $requete = "SELECT count(*) as cnt " .
-                            "     FROM llx_co_fa " .
+                            "     FROM ".MAIN_DB_PREFIX."co_fa " .
                             "    WHERE fk_commande  = ".$commandeid."";
 //                     print $requete;
                      $resql = $db->query($requete);
@@ -448,7 +448,7 @@ if ($_GET["commande_id"] > 0)
                         $var=true;
 
                             $requete = "SELECT fk_facture " .
-                                    "     FROM llx_co_fa " .
+                                    "     FROM ".MAIN_DB_PREFIX."co_fa " .
                                     "    WHERE fk_commande = " . $commandeid;
                             $resql = $db->query($requete);
                             if ($resql)

@@ -64,14 +64,14 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
     $requete1 = false;
     $requete2 = false;
     if ($_REQUEST['fk_contrat'] > 0){
-        $requete = "UPDATE llx_Synopsis_fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete = "UPDATE llx_Synopsis_fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
     }
     if ($_REQUEST['fk_commande'] > 0){
-        $requete1 = "UPDATE llx_Synopsis_fichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete1 = "UPDATE llx_Synopsis_fichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
     }
 //    if ($_REQUEST['fk_ref'] > 0){
         $fichInter->setDI($_REQUEST['fk_ref']);
@@ -103,8 +103,8 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
  /*
 *$requete = "SELECT *
  *                 FROM Babel_li_interv,
-  *                     llx_Synopsis_demandeInterv
-   *              WHERE di_refid = llx_Synopsis_demandeInterv.rowid
+  *                     ".MAIN_DB_PREFIX."Synopsis_demandeInterv
+   *              WHERE di_refid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid
     *               AND fi_refid = ".$fichinter->id;
 */
 /*
@@ -146,7 +146,7 @@ if($user->rights->synopsisficheinter->rattacher){
     print "<div class='titre'>Rattacher la FI &agrave;</div>";
     print"<form action='info.php?id=".$fichinter->id."&action=changeSrc' METHOD=POST>";
     print "<table cellpadding=15 WIDTH=400>";
-    $requete = "SELECT * FROM llx_commande WHERE fk_soc =".$fichinter->fk_soc;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>La commande ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_commande' id='fk_commande'>";
@@ -161,7 +161,7 @@ if($user->rights->synopsisficheinter->rattacher){
     }
 
    print "<td class='ui-widget-content' rowspan=3><button class='ui-button'>Modifier</button>";
-    $requete = "SELECT * FROM llx_contrat WHERE fk_soc =".$fichinter->fk_soc;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>Le contrat ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_contrat' id='fk_contrat'>";
@@ -178,7 +178,7 @@ if($user->rights->synopsisficheinter->rattacher){
 
 
 //print "<td class='ui-widget-content' rowspan=2><button class='ui-button'>Modifier</button>";
-$requete = "SELECT * FROM llx_Synopsis_demandeInterv WHERE fk_soc =".$fichinter->fk_soc;
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>La demande d invervention ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_ref' id='fk_ref'>";

@@ -429,7 +429,7 @@ EOF;
 //            $sql = $db->query($requete);
 //            $statusBIMP = 1;
 //        }
-        $requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status WHERE id =  " . $statusBIMP;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status WHERE id =  " . $statusBIMP;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . ' BIMP</th>';
@@ -445,7 +445,7 @@ EOF;
     }
 }
 print '<div id="bimpStatusDial">';
-$requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status";
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status";
 $sql = $db->query($requete);
 print "<select id='newStatus'>";
 while ($res = $db->fetch_object($sql)) {

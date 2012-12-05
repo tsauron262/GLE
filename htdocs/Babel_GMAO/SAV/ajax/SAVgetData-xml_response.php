@@ -34,7 +34,7 @@
 
   if ($serial ."x" != "x")
   {
-    $requete = "SELECT * FROM llx_product_serial_view WHERE serial_number = '".$serial."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE serial_number = '".$serial."'";
     $sql = $db->query($requete);
     while($res=$db->fetch_object($sql))
     {
@@ -112,7 +112,7 @@
     {
         if ($db->num_rows($sql) > 0)
         {
-            $requete = "SELECT * FROM llx_product_serial_view WHERE element_type LIKE 'contrat%' AND element_id =".$res->rowid;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE element_type LIKE 'contrat%' AND element_id =".$res->rowid;
             $sql1 = $db->query($requete);
             $res1 = $db->fetch_object($sql1);
 
@@ -139,7 +139,7 @@
     $sql = $db->query($requete);
     while($res=$db->fetch_object($sql))
     {
-        $requete = "SELECT * FROM llx_product_serial_view WHERE element_type = 'facture' AND element_id = ".$res->rowid;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE element_type = 'facture' AND element_id = ".$res->rowid;
         $sql1 = $db->query($requete);
         if ($db->num_rows($sql1) > 0)
         {
@@ -167,7 +167,7 @@
     $sql = $db->query($requete);
     while($res=$db->fetch_object($sql))
     {
-        $requete = "SELECT * FROM llx_product_serial_view WHERE element_type LIKE 'expedition'";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE element_type LIKE 'expedition'";
         $sql1 = $db->query($requete);
         if ($db->num_rows($sql1) > 0)
         {

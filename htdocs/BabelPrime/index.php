@@ -598,7 +598,7 @@ $requeteProd = "SELECT * FROM ";
 
 
 /*requete => categorie, prix et total pour 1 utilisateur pour 1 commande
- * select  Babel_Prime_CatPN.name , qty, ".MAIN_DB_PREFIX."commandedet.price, subprice, ".MAIN_DB_PREFIX."commandedet.total_ht  from Babel_Prime_CatPN,  llx_product, ".MAIN_DB_PREFIX."commandedet , ".MAIN_DB_PREFIX."commande where ".MAIN_DB_PREFIX."commande.fk_user_author = 2 AND  ".MAIN_DB_PREFIX."commandedet.fk_commande = ".MAIN_DB_PREFIX."commande.rowid AND ".MAIN_DB_PREFIX."commandedet.fk_product = llx_product.rowid  AND llx_product.Categorie_refid = Babel_Prime_CatPN.id ;
+ * select  Babel_Prime_CatPN.name , qty, ".MAIN_DB_PREFIX."commandedet.price, subprice, ".MAIN_DB_PREFIX."commandedet.total_ht  from Babel_Prime_CatPN,  ".MAIN_DB_PREFIX."product, ".MAIN_DB_PREFIX."commandedet , ".MAIN_DB_PREFIX."commande where ".MAIN_DB_PREFIX."commande.fk_user_author = 2 AND  ".MAIN_DB_PREFIX."commandedet.fk_commande = ".MAIN_DB_PREFIX."commande.rowid AND ".MAIN_DB_PREFIX."commandedet.fk_product = ".MAIN_DB_PREFIX."product.rowid  AND ".MAIN_DB_PREFIX."product.Categorie_refid = Babel_Prime_CatPN.id ;
  *
  *
  */
@@ -615,7 +615,7 @@ $requeteProd = "SELECT * FROM ";
  */
  /*
   *
-  * select (llx_product.price - llx_product_fournisseur_price.price) AS PN   from llx_product_fournisseur_price,  ".MAIN_DB_PREFIX."commandedet, llx_product, llx_product_fournisseur  where fk_commande = 10 AND llx_product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product AND llx_product_fournisseur.fk_product = llx_product.rowid and llx_product_fournisseur.rowid = llx_product_fournisseur_price.fk_product_fournisseur ;
+  * select (".MAIN_DB_PREFIX."product.price - ".MAIN_DB_PREFIX."product_fournisseur_price.price) AS PN   from ".MAIN_DB_PREFIX."product_fournisseur_price,  ".MAIN_DB_PREFIX."commandedet, ".MAIN_DB_PREFIX."product, ".MAIN_DB_PREFIX."product_fournisseur  where fk_commande = 10 AND ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product AND ".MAIN_DB_PREFIX."product_fournisseur.fk_product = ".MAIN_DB_PREFIX."product.rowid and ".MAIN_DB_PREFIX."product_fournisseur.rowid = ".MAIN_DB_PREFIX."product_fournisseur_price.fk_product_fournisseur ;
   *
   *
   */

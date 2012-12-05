@@ -60,11 +60,11 @@ if ($user->societe_id > 0 && isset($_GET["id"]) && $_GET["id"] > 0) {
 
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'addTech') {
-    $requete = "INSERT into llx_element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('soc', " . $_REQUEST['socid'] . ", 'userTech', " . $_REQUEST['userid'] . ");";
+    $requete = "INSERT into ".MAIN_DB_PREFIX."element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('soc', " . $_REQUEST['socid'] . ", 'userTech', " . $_REQUEST['userid'] . ");";
     $db->query($requete);
 }
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'delTech') {
-    $requete = "DELETE FROM llx_element_element WHERE sourcetype = 'soc' AND fk_source = " . $_REQUEST['socid'] . " AND targettype = 'userTech' AND fk_target = " . $_REQUEST['userid'] . ";";
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = 'soc' AND fk_source = " . $_REQUEST['socid'] . " AND targettype = 'userTech' AND fk_target = " . $_REQUEST['userid'] . ";";
     $db->query($requete);
 }   
 
@@ -366,27 +366,27 @@ foreach ($arrGrp as $key => $commandeMember) {
 //Vendu en euro
 $requete = "SELECT SUM(total_ht) as tht
               FROM " . MAIN_DB_PREFIX . "commandedet,
-                   llx_product,
-                   llx_categorie_product,
-                   llx_categorie
-             WHERE llx_product.rowid = " . MAIN_DB_PREFIX . "commandedet.fk_product
-               AND llx_categorie.rowid = llx_categorie_product.fk_categorie
-               AND llx_categorie_product.fk_product = llx_product.rowid
-               AND llx_categorie.rowid IN (SELECT catId FROM llx_Synopsis_PrepaCom_c_cat_total)
+                   ".MAIN_DB_PREFIX."product,
+                   ".MAIN_DB_PREFIX."categorie_product,
+                   ".MAIN_DB_PREFIX."categorie
+             WHERE ".MAIN_DB_PREFIX."product.rowid = " . MAIN_DB_PREFIX . "commandedet.fk_product
+               AND ".MAIN_DB_PREFIX."categorie.rowid = ".MAIN_DB_PREFIX."categorie_product.fk_categorie
+               AND ".MAIN_DB_PREFIX."categorie_product.fk_product = ".MAIN_DB_PREFIX."product.rowid
+               AND ".MAIN_DB_PREFIX."categorie.rowid IN (SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_total)
                AND " . MAIN_DB_PREFIX . "commandedet.fk_commande IN (" . join(',', $arrGrpCom) . ")  ";
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
 $vendu = $res->tht;
 
 //Prevu en euro et en temps
-$requete = "SELECT SUM(llx_Synopsis_demandeIntervdet.duree) as durTot ,
-                   SUM(llx_Synopsis_demandeIntervdet.total_ht) as totHT
-              FROM llx_Synopsis_demandeInterv,
-                   llx_Synopsis_demandeIntervdet,
-                   llx_Synopsis_fichinter_c_typeInterv
-             WHERE llx_Synopsis_fichinter_c_typeInterv.id=llx_Synopsis_demandeIntervdet.fk_typeinterv
-               AND llx_Synopsis_demandeIntervdet.fk_demandeinterv = llx_Synopsis_demandeInterv.rowid
-               AND llx_Synopsis_fichinter_c_typeInterv.inTotalRecap=1
+$requete = "SELECT SUM(".MAIN_DB_PREFIX."Synopsis_demandeIntervdet.duree) as durTot ,
+                   SUM(".MAIN_DB_PREFIX."Synopsis_demandeIntervdet.total_ht) as totHT
+              FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv,
+                   ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv
+             WHERE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv.id=".MAIN_DB_PREFIX."Synopsis_demandeIntervdet.fk_typeinterv
+               AND ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet.fk_demandeinterv = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid
+               AND ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv.inTotalRecap=1
                AND fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
@@ -398,10 +398,10 @@ $requete = "SELECT SUM(" . MAIN_DB_PREFIX . "fichinterdet.duree) as durTot ,
                    SUM(" . MAIN_DB_PREFIX . "fichinterdet.total_ht) as totHT
               FROM " . MAIN_DB_PREFIX . "fichinter,
                    " . MAIN_DB_PREFIX . "fichinterdet,
-                   llx_Synopsis_fichinter_c_typeInterv
-             WHERE llx_Synopsis_fichinter_c_typeInterv.id=" . MAIN_DB_PREFIX . "fichinterdet.fk_typeinterv
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv
+             WHERE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv.id=" . MAIN_DB_PREFIX . "fichinterdet.fk_typeinterv
                AND " . MAIN_DB_PREFIX . "fichinterdet.fk_fichinter = " . MAIN_DB_PREFIX . "fichinter.rowid
-               AND llx_Synopsis_fichinter_c_typeInterv.inTotalRecap=1
+               AND ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv.inTotalRecap=1
                AND " . MAIN_DB_PREFIX . "fichinter.fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
 //print $requete;
 $sql = $db->query($requete);
@@ -453,7 +453,7 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par type interv
 
 //table avec le dispatch
 $requete = "SELECT SUM(dt.total_ht) as tht, t.label
-              FROM llx_Synopsis_demandeInterv as d,llx_Synopsis_demandeIntervdet as dt,llx_Synopsis_fichinter_c_typeInterv as t
+              FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as d,".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as dt,".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
         " AND t.id = dt.fk_typeinterv
                AND d.rowid = dt.fk_demandeInterv
@@ -471,7 +471,7 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par type interv
 
 //table avec le dispatch
 $requete = "SELECT SUM(dt.total_ht) as tht, t.label
-              FROM " . MAIN_DB_PREFIX . "fichinter as d," . MAIN_DB_PREFIX . "fichinterdet as dt,llx_Synopsis_fichinter_c_typeInterv as t
+              FROM " . MAIN_DB_PREFIX . "fichinter as d," . MAIN_DB_PREFIX . "fichinterdet as dt,".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
         " AND t.id = dt.fk_typeinterv
                AND d.rowid = dt.fk_fichinter
@@ -483,7 +483,7 @@ while ($res = $db->fetch_object($sql)) {
 }
 print "</table>";
 //Categorie
-$requete = "SELECT l.catId, c.label FROM llx_Synopsis_PrepaCom_c_cat_listContent as l, llx_categorie as c WHERE l.catId = c.rowid";
+$requete = "SELECT l.catId, c.label FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_listContent as l, ".MAIN_DB_PREFIX."categorie as c WHERE l.catId = c.rowid";
 $sqlContent = $db->query($requete);
 $iter = 0;
 require_once(DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php');
@@ -508,22 +508,22 @@ while ($resContent = $db->fetch_object($sqlContent)) {
     foreach ($com->lines as $key => $val) {
         if ($val->fk_product > 0) {
             $requete = "SELECT ct.fk_categorie, c.label, c.position, c.rowid
-                      FROM llx_categorie_product as ct
-                 LEFT JOIN llx_categorie as c ON ct.fk_categorie = c.rowid
+                      FROM ".MAIN_DB_PREFIX."categorie_product as ct
+                 LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON ct.fk_categorie = c.rowid
                      WHERE ct.fk_product = " . $val->fk_product . "
                        AND c.position is not null
-                       AND c.rowid IN (SELECT catId FROM llx_Synopsis_PrepaCom_c_cat_listContent)
+                       AND c.rowid IN (SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_listContent)
                   ORDER BY position";
             $sql = $db->query($requete);
 //            print $requete."<br/>";
             if ($sql) {
                 while ($res1 = $db->fetch_object($sql)) {
-                    $requete = "SELECT llx_categorie.rowid,
-                                       llx_categorie.position,
-                                       llx_categorie.label
-                                  FROM llx_categorie,
-                                       llx_categorie_association
-                                 WHERE fk_categorie_mere_babel = llx_categorie.rowid
+                    $requete = "SELECT ".MAIN_DB_PREFIX."categorie.rowid,
+                                       ".MAIN_DB_PREFIX."categorie.position,
+                                       ".MAIN_DB_PREFIX."categorie.label
+                                  FROM ".MAIN_DB_PREFIX."categorie,
+                                       ".MAIN_DB_PREFIX."categorie_association
+                                 WHERE fk_categorie_mere_babel = ".MAIN_DB_PREFIX."categorie.rowid
                                    AND fk_categorie_fille_babel = " . $res1->fk_categorie . "
                               ORDER BY position ASC,label ASC";
                     $sql2 = $db->query($requete);
@@ -564,19 +564,19 @@ while ($resContent = $db->fetch_object($sqlContent)) {
 //{
 //    if ($val->fk_product > 0){
 //        $requete = "SELECT ct.fk_categorie, c.label, c.position
-//                  FROM llx_categorie_product as ct
-//             LEFT JOIN llx_categorie as c ON ct.fk_categorie = c.rowid
+//                  FROM ".MAIN_DB_PREFIX."categorie_product as ct
+//             LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON ct.fk_categorie = c.rowid
 //                 WHERE  ct.fk_product = ".$val->fk_product." AND c.position is not null ORDER BY position";
 //        $sql = $db->query($requete);
 //        if ($sql)
 //        {
 //            while ($res1 = $db->fetch_object($sql))
 //            {
-//                $requete = "SELECT llx_categorie.label,
-//                                   llx_categorie.position
-//                              FROM llx_categorie,
-//                                   llx_categorie_association
-//                             WHERE fk_categorie_mere_babel = llx_categorie.rowid
+//                $requete = "SELECT ".MAIN_DB_PREFIX."categorie.label,
+//                                   ".MAIN_DB_PREFIX."categorie.position
+//                              FROM ".MAIN_DB_PREFIX."categorie,
+//                                   ".MAIN_DB_PREFIX."categorie_association
+//                             WHERE fk_categorie_mere_babel = ".MAIN_DB_PREFIX."categorie.rowid
 //                               AND fk_categorie_fille_babel = ".$res1->fk_categorie."
 //                          ORDER BY position ASC,label ASC";
 ////print $requete."<br/>";
@@ -612,18 +612,18 @@ while ($resContent = $db->fetch_object($sqlContent)) {
 //{
 //    if ($val->fk_product > 0){
 //        $requete = "SELECT ct.fk_categorie, c.label
-//                  FROM llx_categorie_product as ct
-//             LEFT JOIN llx_categorie as c ON ct.fk_categorie = c.rowid
+//                  FROM ".MAIN_DB_PREFIX."categorie_product as ct
+//             LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON ct.fk_categorie = c.rowid
 //                 WHERE  ct.fk_product = ".$val->fk_product."";
 //        $sql = $db->query($requete);
 //        if ($sql)
 //        {
 //            while ($res1 = $db->fetch_object($sql))
 //            {
-//                $requete = "SELECT llx_categorie.label
-//                              FROM llx_categorie,
-//                                   llx_categorie_association
-//                             WHERE fk_categorie_mere_babel = llx_categorie.rowid
+//                $requete = "SELECT ".MAIN_DB_PREFIX."categorie.label
+//                              FROM ".MAIN_DB_PREFIX."categorie,
+//                                   ".MAIN_DB_PREFIX."categorie_association
+//                             WHERE fk_categorie_mere_babel = ".MAIN_DB_PREFIX."categorie.rowid
 //                               AND fk_categorie_fille_babel = ".$res1->fk_categorie;
 //                $sql2 = $db->query($requete);
 //                while($res2= $db->fetch_object($sql2))

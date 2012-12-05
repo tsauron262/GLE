@@ -53,7 +53,7 @@ class Synopsis_Commande extends Commande {
 
     function fetch($id) {
         $return = parent::fetch($id);
-        $sql = $this->db->query("SELECT * FROM llx_Synopsis_commande WHERE rowid = " . $id);
+        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_commande WHERE rowid = " . $id);
         $result = $this->db->fetch_object($sql);
         $this->logistique_ok = $result->logistique_ok;
         $this->logistique_statut = $result->logistique_statut;
@@ -152,7 +152,7 @@ class Synopsis_OrderLine extends OrderLine {
 
     function fetch($id) {
         $return = parent::fetch($id);
-        $sql = $this->db->query("SELECT * FROM llx_Synopsis_commandedet WHERE rowid = " . $id);
+        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_commandedet WHERE rowid = " . $id);
         $result = $this->db->fetch_object($sql);
         $this->logistique_ok = $result->logistique_ok;
         $this->finance_ok = $result->finance_ok;

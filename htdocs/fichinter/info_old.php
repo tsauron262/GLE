@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -56,14 +59,14 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
     $requete = false;
     $requete1 = false;
     if ($_REQUEST['fk_contrat'] > 0){
-        $requete = "UPDATE llx_Synopsis_fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete = "UPDATE llx_Synopsis_fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
     }
     if ($_REQUEST['fk_commande'] > 0){
-        $requete1 = "UPDATE llx_Synopsis_fichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete1 = "UPDATE llx_Synopsis_fichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
     }
     if ($requete) $sql = $db->query($requete);
     if ($requete1) $sql1 = $db->query($requete1);
@@ -114,7 +117,7 @@ if($user->rights->synopsisficheinter->rattacher){
     print "<div class='titre'>Rattacher la FI &agrave;</div>";
     print"<form action='info.php?id=".$fichinter->id."&action=changeSrc' METHOD=POST>";
     print "<table cellpadding=15 WIDTH=400>";
-    $requete = "SELECT * FROM llx_commande WHERE fk_soc =".$fichinter->fk_soc;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>La commande ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_commande' id='fk_commande'>";
@@ -128,7 +131,7 @@ if($user->rights->synopsisficheinter->rattacher){
         }
     }
     print "<td class='ui-widget-content' rowspan=2><button class='ui-button'>Modifier</button>";
-    $requete = "SELECT * FROM llx_contrat WHERE fk_soc =".$fichinter->fk_soc;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>Le contrat ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_contrat' id='fk_contrat'>";

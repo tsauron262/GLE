@@ -37,7 +37,7 @@ if ($arrGrp && count($arrGrp) > 0)
         $arrGrpCom[$commandeMember->id] = $commandeMember->id;
     }
 $requete = "SELECT *
-                FROM llx_Synopsis_demandeIntervdet
+                FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet
                WHERE fk_commandedet IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande IN (" . join(",", $arrGrpCom) . " ))";
 $sql = $db->query($requete);
 $arrDi = array();
@@ -107,7 +107,7 @@ if ($cnt > 0) {
 }
 print "<div class='titre'>Interventions attribu&eacute;es</div>";
 $requete = "SELECT *
-                  FROM llx_Synopsis_demandeInterv
+                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
                  WHERE fk_commande IN (" . join(",", $arrGrpCom) . ")";
 $sql = $db->query($requete);
 print "<table cellpadding=15 width=100%>";
@@ -184,7 +184,7 @@ print $html->tmpReturn;
 print "<tr><th class='ui-widget-header ui-state-default'>Description globale</th>";
 print "<td colspan=3 class='ui-widget-content'><textarea style='width:100%' name='desc'></textarea>";
 $requete = "SELECT *
-                      FROM llx_Synopsis_fichinter_extra_key
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                      WHERE (isQuality is NULL OR isQuality <> 1)
                        AND isInMainPanel = 1
                        AND active = 1
@@ -232,7 +232,7 @@ while ($res = $db->fetch_object($sql)) {
             break;
         case "radio": {
                 print "<td colspan=2 valign='middle' class='ui-widget-content'>";
-                $requete = "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
                 $sql1 = $db->query($requete);
                 if ($db->num_rows($sql1) > 0) {
                     print "<table width=100%>";
@@ -827,7 +827,7 @@ EOF;
 
 print "<div style='display:none;'>";
 print "<select id='templateTypeInterv' class='typeInterv' name='templateTypeInterv'>";
-$requete = " SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+$requete = " SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql)) {
     if ($res->default == 1) {

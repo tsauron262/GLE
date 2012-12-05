@@ -900,7 +900,7 @@ class FichinterLigne
 	var $db;
 	var $error;
 
-	// From llx_fichinterdet
+	// From ".MAIN_DB_PREFIX."fichinterdet
 	var $rowid;
 	var $fk_fichinter;
 	var $desc;          	// Description ligne
@@ -1068,7 +1068,7 @@ class FichinterLigne
 	}
 
 	/**
-	 *	Update total duration into llx_fichinter
+	 *	Update total duration into ".MAIN_DB_PREFIX."fichinter
 	 *
 	 *	@return		int		<0 si ko, >0 si ok
 	 */

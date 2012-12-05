@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -159,8 +162,8 @@ $js = '
 //        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.type, ";
 //        $sql.= " s.nom, s.rowid as socid";
 //        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-//        $sql .= " FROM llx_contrat as c, llx_contratdet as cd, llx_societe as s";
-//        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+//        $sql .= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."societe as s";
+//        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 //        $sql .= " WHERE s.rowid = c.fk_soc
 //                    AND c.statut = 0
 //                    AND cd.fk_contrat = c.rowid ";
@@ -242,10 +245,10 @@ $js = '
 //$sql.= ' sum('.$db->ifsql("cd.statut=5",1,0).') as nb_closed,';
 //$sql.= " c.rowid as cid, c.ref, c.datec, c.tms, c.statut, s.nom, s.rowid as socid";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql.= " FROM llx_societe as s,";
-//if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
-//$sql.= " llx_contrat as c";
-//$sql.= " LEFT JOIN llx_contratdet as cd ON c.rowid = cd.fk_contrat";
+//$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,";
+//if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
+//$sql.= " ".MAIN_DB_PREFIX."contrat as c";
+//$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
 //$sql.= " WHERE c.fk_soc = s.rowid AND c.statut > 0";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 //if ($socid > 0) $sql .= " AND s.rowid = ".$socid;
@@ -310,8 +313,8 @@ $js = '
 //// Not activated services
 //$sql = "SELECT cd.rowid as cid, c.ref, cd.statut, cd.label, cd.description as note, cd.fk_contrat, c.fk_soc, s.nom";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql.= " FROM llx_contratdet as cd, llx_contrat as c, llx_societe as s";
-//if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+//$sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+//if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 //$sql.= " WHERE c.statut=1 AND cd.statut = 0";
 //$sql.= " AND is_financement = 0 AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -375,8 +378,8 @@ $js = '
 //$sql.= " cd.rowid as cid, cd.statut, cd.label, cd.description as note, cd.fk_contrat,";
 //$sql.= " s.nom";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-//$sql.= " FROM llx_contratdet as cd, llx_contrat as c, llx_societe as s";
-//if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+//$sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+//if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 //$sql.= " WHERE is_financement = 0 AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 //if ($socid > 0) $sql.= " AND s.rowid = ".$socid;

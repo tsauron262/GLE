@@ -104,7 +104,7 @@ function getContratObj($id) {
 
 function getTypeContrat_noLoad($id) {
     global $db;
-    $requete = "SELECT * FROM llx_contrat WHERE rowid = " . $id;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE rowid = " . $id;
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
     return($res->extraparams);
@@ -390,7 +390,7 @@ function getTypeAndId() {
 function getAdresseLivraisonComm($commId) {
     global $db, $langs;
     $return = '';
-    $sql = "SELECT a.* FROM `llx_element_contact` c, llx_c_type_contact t, llx_socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
+    $sql = "SELECT a.* FROM `".MAIN_DB_PREFIX."element_contact` c, ".MAIN_DB_PREFIX."c_type_contact t, ".MAIN_DB_PREFIX."socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
 
     $resql = $db->query($sql);
 //        if ($resql) {
@@ -408,13 +408,13 @@ function getAdresseLivraisonComm($commId) {
 
 function addElementElement($typeS, $typeD, $idS, $idD) {
     global $db;
-    $req = "INSERT INTO llx_element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
+    $req = "INSERT INTO ".MAIN_DB_PREFIX."element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
     return $db->query($req);
 }
 
 function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "DELETE FROM llx_element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "DELETE FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -424,7 +424,7 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
 
 function getElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "SELECT * FROM llx_element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "SELECT * FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))

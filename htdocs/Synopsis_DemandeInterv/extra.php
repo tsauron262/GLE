@@ -66,7 +66,7 @@ llxHeader($js);
                 $type = $_REQUEST['type-'.$idExtraKey];
                 //Y'a quelque chose ?
                 $requete = "DELETE
-                              FROM llx_Synopsis_fichinter_extra_value
+                              FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                              WHERE interv_refid = ".$_REQUEST['id']. "
                                AND typeI = 'FI'
                                AND extra_key_refid= ".$idExtraKey;
@@ -74,23 +74,23 @@ llxHeader($js);
                 if ($type == 'checkbox')
                 {
                     if($val == 'On' || $val =='on' || $val=='ON'){
-                         $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                                  (interv_refid,extra_key_refid,extra_value,typeI)
                                           VALUES (".$_REQUEST['id'].",".$idExtraKey.",1,'FI')";
                           $sql = $db->query($requete);
                     } else {
-                         $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                                  (interv_refid,extra_key_refid,extra_value,typeI)
                                           VALUES (".$_REQUEST['id'].",".$idExtraKey.",0,'FI')";
                          $sql = $db->query($requete);
                     }
                 } else if($type=='3stars' && $_REQUEST['extraKey-'.$idExtraKey]."x" =="x"){
-                     $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (".$_REQUEST['id'].",".$idExtraKey.",NULL,'FI')";
                       $sql = $db->query($requete);
                 } else {
-                     $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (".$_REQUEST['id'].",".$idExtraKey.",'".addslashes($val)."','FI')";
                       $sql = $db->query($requete);
@@ -188,8 +188,8 @@ if ($_REQUEST["id"] > 0) {
                        k.type,
                        k.id,
                        v.extra_value, description
-                  FROM llx_Synopsis_fichinter_extra_key as k
-             LEFT JOIN llx_Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = ".$demandeInterv->id." AND typeI = 'FI'
+                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key as k
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = ".$demandeInterv->id." AND typeI = 'FI'
                  WHERE k.active = 1 AND (isQuality <> 1 OR isQuality IS NULL) AND (isInMainPanel <> 1 OR isInMainPanel IS NULL)";
     $sql = $db->query($requete);
     while ($res=$db->fetch_object($sql))
@@ -249,7 +249,7 @@ if ($_REQUEST["id"] > 0) {
                 case "radio":
                 {
                     print "<td colspan=2 valign='middle' class='ui-widget-content'>";
-                    $requete= "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
+                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
                     $sql1 = $db->query($requete);
                     if ($db->num_rows($sql1)> 0)
                     {
@@ -272,7 +272,7 @@ if ($_REQUEST["id"] > 0) {
 //            {
 //                print '    <td colspan=3 class="ui-widget-content">'.($res->extra_value==1?'Oui':'Non').'</td></tr>';
 //            } else if($res->type=='radio'){
-//                $requete = "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id." AND value = ".$res->extra_value;
+//                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id." AND value = ".$res->extra_value;
 //                $sql1 = $db->query($requete);
 //                $res1 = $db->fetch_object($sql1);
 //                print '    <td colspan=3 class="ui-widget-content">'.$res1->label.'</td></tr>';

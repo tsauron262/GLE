@@ -15,23 +15,23 @@ if (isset($_POST['url'])) {
     if (stripos($url, '/societe/') !== false
             || stripos($url, '/comm/fiche.php')
             || stripos($url, '/categories/categorie.php')) {
-        $table = "llx_societe";
+        $table = MAIN_DB_PREFIX."societe";
         $nomId = "socid";
         $nomChampNote = "note";
     }
     if (stripos($url, '/commande/') !== false) {
-        $table = "llx_commande";
+        $table = MAIN_DB_PREFIX."commande";
     }
     if (stripos($url, '/fichinter/') !== false) {
-        $table = "llx_Synopsis_fichinter";
+        $table = MAIN_DB_PREFIX."Synopsis_fichinter";
     }
     if (stripos($url, '/contrat/') !== false
             || stripos($url, '/Babel_GMAO/annexes.php')
             || stripos($url, '/Babel_GMAO/intervByContrat.php')) {
-        $table = "llx_contrat";
+        $table = MAIN_DB_PREFIX."contrat";
     }
     if (stripos($url, '/Synopsis_DemandeInterv/') !== false) {
-        $table = "llx_Synopsis_demandeInterv";
+        $table = MAIN_DB_PREFIX."Synopsis_demandeInterv";
     }
 
     foreach ($tabUrl as $val) {

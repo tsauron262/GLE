@@ -51,14 +51,14 @@ $limit = $_REQUEST['rows'];
   $requete = "SELECT ".MAIN_DB_PREFIX."contratdet.rowid as id,
                      ".MAIN_DB_PREFIX."contratdet.fk_product,
                      ".MAIN_DB_PREFIX."contratdet.statut,
-                     ifnull(llx_product.label,".MAIN_DB_PREFIX."contratdet.label) as label,
-                     ifnull(llx_product.description,".MAIN_DB_PREFIX."contratdet.description) as description,
+                     ifnull(".MAIN_DB_PREFIX."product.label,".MAIN_DB_PREFIX."contratdet.label) as label,
+                     ifnull(".MAIN_DB_PREFIX."product.description,".MAIN_DB_PREFIX."contratdet.description) as description,
                      ".MAIN_DB_PREFIX."contratdet.date_ouverture,
                      ".MAIN_DB_PREFIX."contratdet.date_fin_validite,
                      ".MAIN_DB_PREFIX."contratdet.qty,
                      ".MAIN_DB_PREFIX."contratdet.total_ht
                 FROM ".MAIN_DB_PREFIX."contratdet
-           LEFT JOIN llx_product on llx_product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
+           LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
                WHERE ".MAIN_DB_PREFIX."contratdet.fk_contrat = $contratId
             ORDER BY $sidx $sord
                LIMIT $start , $limit";

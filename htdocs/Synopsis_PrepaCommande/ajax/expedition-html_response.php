@@ -52,7 +52,7 @@ if ($_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
     $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
     if (isset($tabEntrep[0])) {
         $idEntr = $tabEntrep[0]['d'];
-        $requete = "SELECT description as email FROM llx_entrepot WHERE rowid = " . $idEntr;
+        $requete = "SELECT description as email FROM ".MAIN_DB_PREFIX."entrepot WHERE rowid = " . $idEntr;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
 
@@ -161,7 +161,7 @@ if ($_REQUEST["id"] > 0) {
         print '<a href="#" onClick="changeSiteDepot();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
         print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
         if ($_REQUEST['action'] == 'editDepot') {
-            $requete = "SELECT * FROM llx_entrepot";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."entrepot";
             print "<select name='newDepot' id='newDepot'>";
             $sql6 = $db->query($requete);
             while ($res6 = $db->fetch_object($sql6)) {
@@ -173,7 +173,7 @@ if ($_REQUEST["id"] > 0) {
             $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
             if (isset($tabEntrep[0])) {
                 $idEntr = $tabEntrep[0]['d'];
-                $requete = "SELECT lieu FROM llx_entrepot WHERE rowid = " . $idEntr;
+                $requete = "SELECT lieu FROM ".MAIN_DB_PREFIX."entrepot WHERE rowid = " . $idEntr;
                 $sql6 = $db->query($requete);
                 $res6 = $db->fetch_object($sql6);
                 if ($res6->lieu . "x" != 'x')
@@ -299,7 +299,7 @@ EOF;
 
         $sql = "SELECT cd.fk_product, cd.description, cd.price, sum(cd.qty) as qty, cd.rowid, cd.tva_tx, cd.subprice";
         $sql.= " FROM " . MAIN_DB_PREFIX . "commandedet as cd ";
-        $sql.= " LEFT JOIN llx_product as p ON cd.fk_product = p.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
         if ($arrGrpTmp) {
             $arrTmp = array();
             foreach ($arrGrpTmp as $key => $val)

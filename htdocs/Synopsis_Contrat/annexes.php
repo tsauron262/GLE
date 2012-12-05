@@ -41,7 +41,7 @@
     {
         $idAnnexe = $_REQUEST['modele'];
         $id = $_REQUEST['id'];
-        $requete = "DELETE FROM llx_Synopsis_contrat_annexe WHERE contrat_refid = ".$id . " AND annexe_refid = ".$idAnnexe;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexe WHERE contrat_refid = ".$id . " AND annexe_refid = ".$idAnnexe;
         $sql = $db->query($requete);
         header('location:annexes.php?id='.$id);
     }
@@ -411,8 +411,8 @@ EOF;
         $requete = "SELECT p.modeleName,
                            p.id,
                            p.ref
-                      FROM llx_Synopsis_contrat_annexe as a,
-                           llx_Synopsis_contrat_annexePdf as p
+                      FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexe as a,
+                           ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p
                      WHERE a.annexe_refid = p.id
                        AND contrat_refid = ".$contrat->id."
                   ORDER BY a.rang";
@@ -434,8 +434,8 @@ EOF;
         $requete = "SELECT p.modeleName,
                            p.id,
                            p.ref
-                      FROM llx_Synopsis_contrat_annexePdf as p
-                     WHERE p.id NOT IN (SELECT annexe_refid FROM llx_Synopsis_contrat_annexe WHERE contrat_refid =".$contrat->id.")
+                      FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p
+                     WHERE p.id NOT IN (SELECT annexe_refid FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexe WHERE contrat_refid =".$contrat->id.")
                   ORDER BY p.modeleName";
         $sql = $db->query($requete);
         print '<ul id="draggable">';

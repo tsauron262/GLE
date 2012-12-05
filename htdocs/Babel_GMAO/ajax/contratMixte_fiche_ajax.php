@@ -916,7 +916,7 @@ if ($_REQUEST['dateFinConf'])
                       FROM ".MAIN_DB_PREFIX."contratdet as c
                  LEFT JOIN ".MAIN_DB_PREFIX."commandedet as o ON c.fk_commande_ligne = o.rowid
                  LEFT JOIN Babel_GMAO_contratdet_prop as g ON g.contratdet_refid = c.rowid
-                 LEFT JOIN llx_product as p ON  c.fk_product = p.rowid
+                 LEFT JOIN ".MAIN_DB_PREFIX."product as p ON  c.fk_product = p.rowid
                  LEFT JOIN Babel_product_serial_cont as sc ON sc.element_id = c.rowid AND sc.element_type LIKE 'contrat%'
                      WHERE c.rowid = ".$idLigne. " LIMIT 1 ";
         $sql = $db->query($requete);

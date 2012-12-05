@@ -35,13 +35,13 @@ $gsm->MainInit();
 
 print '<TABLE  width="100%" class="nobordernopadding">';
 //Liste les propal, le montant total HT, le status Fichinter
-$requete = "SELECT llx_Synopsis_demandeInterv.rowid," .
-        "          llx_Synopsis_demandeInterv.fk_soc," .
-        "          concat_ws('/',day(llx_Synopsis_demandeInterv.datei),month(llx_Synopsis_demandeInterv.datei),year(llx_Synopsis_demandeInterv.datei)) as dateFi" .
-        "     FROM llx_Synopsis_demandeInterv ";
+$requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid," .
+        "          ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc," .
+        "          concat_ws('/',day(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei),month(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei),year(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei)) as dateFi" .
+        "     FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv ";
 if ($_GET["societe_id"] && $_GET["societe_id"] > 0)
 {
-    $requete .= " WHERE llx_Synopsis_demandeInterv.fk_soc = ".$_GET['societe_id'];
+    $requete .= " WHERE ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc = ".$_GET['societe_id'];
 }
 $requete .= " ORDER BY datei," .
         "          fk_statut," .

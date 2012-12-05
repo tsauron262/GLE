@@ -91,7 +91,7 @@ switch ($action) {
         $newSrc = $_REQUEST['Link'];
         $contTmp = new Contrat($db);
         $contTmp->fetch($_REQUEST['id']);
-        $requete = "UPDATE llx_contrat set linkedTo='" . $newSrc . "' WHERE rowid =" . $_REQUEST['id'];
+        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat set linkedTo='" . $newSrc . "' WHERE rowid =" . $_REQUEST['id'];
         $resql = $db->query($requete);
         break;
 
@@ -124,7 +124,7 @@ switch ($action) {
         $id = $_REQUEST['id'];
         //1 On update le contrat
         $db->begin();
-        $requete = "UPDATE llx_contrat SET fournisseur_refid = '" . $_REQUEST['fournisseur'] . "' ,
+        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat SET fournisseur_refid = '" . $_REQUEST['fournisseur'] . "' ,
                                            cessionnaire_refid= '" . $_REQUEST['cessionnaire'] . "',
                                            tva_tx = '" . $_REQUEST['Linetva_tx'] . "'
                      WHERE rowid = " . $id;
@@ -140,7 +140,7 @@ switch ($action) {
         $client_signataire_refid = $contrat->client_signataire_refid;
 
         if ($sql) {
-            $requete = "DELETE FROM llx_contratdet WHERE fk_product is null AND fk_contrat = " . $id;
+            $requete = "DELETE FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_product is null AND fk_contrat = " . $id;
             $sql = $db->query($requete);
             if (!$sql) {
                 $xml .= "<KO>KO</KO>";
@@ -158,7 +158,7 @@ switch ($action) {
                     $taux = preg_replace('/,/', '.', $_REQUEST['taux-' . $idx]);
                     $desc = $val;
                     $lineOrder = 0;
-                    $requete = "SELECT max(line_order) as mx FROM llx_contratdet WHERE fk_contrat = " . $id;
+                    $requete = "SELECT max(line_order) as mx FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = " . $id;
                     $sql = $db->query($requete);
                     $res = $db->fetch_object($sql);
                     $lineOrder = $res->mx + 1;
@@ -650,7 +650,7 @@ switch ($action) {
                                    fk_user_ouverture,
                                    fk_user_cloture,
                                    commentaire,
-                                   line_order FROM llx_contratdet WHERE rowid = " . $idLigne . " ORDER BY line_order, rowid";
+                                   line_order FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $idLigne . " ORDER BY line_order, rowid";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
                 $xml.='<fk_product><![CDATA[' . $res->fk_product . ']]></fk_product>';
@@ -727,7 +727,7 @@ switch ($action) {
             foreach ($data as $key => $val) {
 
                 $newOrder = $key + 1;
-                $requete = ' UPDATE llx_contratdet  SET line_order = ' . $newOrder . '  WHERE rowid = ' . $val;
+                $requete = ' UPDATE '.MAIN_DB_PREFIX.'contratdet  SET line_order = ' . $newOrder . '  WHERE rowid = ' . $val;
                 $sql = $db->query($requete);
                 if (!$sql) {
                     $return = false;
@@ -779,7 +779,7 @@ switch ($action) {
         }
         break;
     case 'subQty': {
-            $requete = "SELECT qty FROM llx_contratdet WHERE rowid = " . $_REQUEST['lineId'];
+            $requete = "SELECT qty FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $_REQUEST['lineId'];
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $qty = $res->qty;
@@ -787,7 +787,7 @@ switch ($action) {
                 $qty--;
             }
 
-            $requete = "UPDATE llx_contratdet SET qty=" . $qty . " WHERE rowid =" . $_REQUEST['lineId'];
+            $requete = "UPDATE ".MAIN_DB_PREFIX."contratdet SET qty=" . $qty . " WHERE rowid =" . $_REQUEST['lineId'];
             $db->query($requete);
             $xml .= "<OK>OK</OK>";
             $xml .= "<OKtext><![CDATA[";
@@ -796,13 +796,13 @@ switch ($action) {
         }
         break;
     case 'addQty': {
-            $requete = "SELECT qty FROM llx_contratdet WHERE rowid = " . $_REQUEST['lineId'];
+            $requete = "SELECT qty FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $_REQUEST['lineId'];
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $qty = ($res->qty . 'x' == 'x' ? 1 : $res->qty);
             $qty++;
 
-            $requete = "UPDATE llx_contratdet SET qty=" . $qty . " WHERE rowid =" . $_REQUEST['lineId'];
+            $requete = "UPDATE ".MAIN_DB_PREFIX."contratdet SET qty=" . $qty . " WHERE rowid =" . $_REQUEST['lineId'];
             $db->query($requete);
             $xml .= "<OK>OK</OK>";
             $xml .= "<OKtext><![CDATA[";
@@ -811,7 +811,7 @@ switch ($action) {
         }
         break;
     case 'delGAline': {
-            $requete = "DELETE FROM llx_contratdet WHERE rowid = " . $_REQUEST['lineId'];
+            $requete = "DELETE FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $_REQUEST['lineId'];
             $sql = $db->query($requete);
             if ($sql) {
                 $xml .= "<OK>OK</OK>";

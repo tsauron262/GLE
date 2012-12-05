@@ -20,13 +20,13 @@
 $wh = "";
 if ($_REQUEST["q"] ."x" != "x" && $_REQUEST['type']=="s")
 {
-    $wh = " AND llx_product.label LIKE '".utf8_decode($_REQUEST["q"]) ."%'";
+    $wh = " AND ".MAIN_DB_PREFIX."product.label LIKE '".utf8_decode($_REQUEST["q"]) ."%'";
 } else {
-    $wh = " AND (llx_product.label LIKE '%".utf8_decode($_REQUEST["q"]) ."%'
-             OR llx_product.ref  LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
-             OR llx_product.label LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
-             OR llx_product.description LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
-             OR llx_product.note LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%' ) ";
+    $wh = " AND (".MAIN_DB_PREFIX."product.label LIKE '%".utf8_decode($_REQUEST["q"]) ."%'
+             OR ".MAIN_DB_PREFIX."product.ref  LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
+             OR ".MAIN_DB_PREFIX."product.label LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
+             OR ".MAIN_DB_PREFIX."product.description LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%'
+             OR ".MAIN_DB_PREFIX."product.note LIKE '%".addslashes(utf8_decode($_REQUEST["q"]))."%' ) ";
 }
 $limit="";
 if ($_REQUEST['limit'] ."x" != "x")
@@ -39,29 +39,29 @@ if ($_REQUEST['limit'] ."x" != "x")
 
 
 require_once('../../main.inc.php');
-  $requete = "SELECT * FROM llx_product";
+  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product";
   if ($_REQUEST['fournid']."x" != "x" && preg_match('/[0-9]*/',$_REQUEST['fournid']))
 {
-    $requete .= " , llx_product_fournisseur";
+    $requete .= " , ".MAIN_DB_PREFIX."product_fournisseur";
 }
     $requete .= " WHERE 1=1 ";
 if ($_REQUEST['fournid']."x" != "x" && preg_match('/[0-9]*/',$_REQUEST['fournid']))
 {
-    $requete .= " AND llx_product_fournisseur.fk_soc = ".$_REQUEST['fournid'];
-    $requete .= " AND llx_product_fournisseur.fk_product = llx_product.rowid ";
+    $requete .= " AND ".MAIN_DB_PREFIX."product_fournisseur.fk_soc = ".$_REQUEST['fournid'];
+    $requete .= " AND ".MAIN_DB_PREFIX."product_fournisseur.fk_product = ".MAIN_DB_PREFIX."product.rowid ";
 }
 if ("x".$_REQUEST['typeId'] != "x")
 {
-    $requete .= " AND llx_product.fk_product_type =  ".$_REQUEST["typeId"];
+    $requete .= " AND ".MAIN_DB_PREFIX."product.fk_product_type =  ".$_REQUEST["typeId"];
 }
 if ('x'.$_REQUEST['envente'] != "x")
 {
-    $requete .= " AND llx_product.envente =  ".$_REQUEST["envente"];
+    $requete .= " AND ".MAIN_DB_PREFIX."product.envente =  ".$_REQUEST["envente"];
 }
 
 
 $requete .= $wh;
-$requete .= " ORDER BY llx_product.label ";
+$requete .= " ORDER BY ".MAIN_DB_PREFIX."product.label ";
 $requete .= $limit;
 
 

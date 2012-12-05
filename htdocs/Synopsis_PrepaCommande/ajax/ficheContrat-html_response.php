@@ -78,8 +78,8 @@
                                ".MAIN_DB_PREFIX."commandedet.qty,
                                ".MAIN_DB_PREFIX."commandedet.rowid
                           FROM ".MAIN_DB_PREFIX."commandedet,
-                               llx_product
-                         WHERE llx_product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product
+                               ".MAIN_DB_PREFIX."product
+                         WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product
                            AND fk_product_type = 2
                            AND fk_commande = ".$id;
             $sql = $db->query($requete);

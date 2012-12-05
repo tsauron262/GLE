@@ -47,11 +47,11 @@
     $com->fetch_group_lines(0,0,0,0,1);
 
     $requete="SELECT fk_user_target, fk_user_prisencharge , datei, duree, description, fk_statut, note_private, note_public, rowid
-                FROM llx_Synopsis_demandeInterv
+                FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
                WHERE fk_commande IN (".join(',',$arrGrpCom).")";
     if ($DiId>0)
     {
-        $requete .= " AND llx_Synopsis_demandeInterv.rowid = ".$DiId;
+        $requete .= " AND ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid = ".$DiId;
     }
     $requete .= "
             ORDER BY fk_user_prisencharge, fk_user_target, datei DESC";

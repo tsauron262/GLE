@@ -75,8 +75,8 @@ llxHeader("","Liste des FI");
 
 $sql = "SELECT s.nom,s.rowid as socid, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM llx_societe as s, llx_Synopsis_fichinter as f ";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_fichinter as f ";
+if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE f.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($socid > 0)
@@ -123,9 +123,9 @@ if ($result)
         print '<td align="center">'.dol_print_date($objp->dp,'day')."</td>\n";
         print '<td align="right">'.ConvertSecondToTime($objp->duree).'</td>';
         $requete = "SELECT fk_contrat, fk_commande
-                      FROM llx_Synopsis_fichinter as f
-                 LEFT JOIN llx_commande as c ON c.rowid = f.fk_commande
-                 LEFT JOIN llx_contrat as o  ON o.rowid = f.fk_contrat
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f
+                 LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON c.rowid = f.fk_commande
+                 LEFT JOIN ".MAIN_DB_PREFIX."contrat as o  ON o.rowid = f.fk_contrat
                      WHERE (fk_contrat >0 OR fk_commande >0)
                        AND f.rowid = ".$objp->fichid;
         $sql1=$db->query($requete);

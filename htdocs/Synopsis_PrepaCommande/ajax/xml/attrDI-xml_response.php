@@ -26,7 +26,7 @@
   $userId = $_REQUEST['userId'];
 
   $xmlStr = "<ajax-response>";
-  $requete = "UPDATE llx_Synopsis_demandeInterv SET fk_user_prisencharge=".$userId." WHERE rowid = ".$id;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv SET fk_user_prisencharge=".$userId." WHERE rowid = ".$id;
   $sql = $db->query($requete);
   if ($sql){
       $xmlStr .= "<OK>OK</OK>";

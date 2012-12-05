@@ -22,13 +22,13 @@ if (isset($_POST['action']) && $_POST['action'] == "send") {
     bug($user, $_POST['text'], $_POST['oldUrl']);
 }
 if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
-    $requete = "UPDATE llx_Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
     $db->query($requete);
 }
 
 function getBug($user) {
     global $db, $langs;
-    $requete = "SELECT * FROM llx_Synopsis_Tools_bug";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug";
     if (!$user->rights->SynopsisTools->Global->adminBug)
         $requete .= " WHERE fk_user = " . $user->id;
     if ($user->rights->SynopsisTools->Global->adminBug)
@@ -89,7 +89,7 @@ function bug($user, $text, $adresse) {
         \n Utlisateur : " . $user->getNomUrl() . "
         \n Message : " . $text;
 
-    $requete = "INSERT into llx_Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
+    $requete = "INSERT into ".MAIN_DB_PREFIX."Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
     $db->query($requete);
 
     mail("tommy@drsi.fr", "Bug Gle", $message, $headers);

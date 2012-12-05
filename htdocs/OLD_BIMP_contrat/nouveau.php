@@ -43,9 +43,9 @@
     }
     $sql.= " s.siren as idprof1, s.siret as idprof2, ape as idprof3, idprof4 as idprof4";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-    $sql.= " FROM llx_societe as s";
-    $sql.= ", llx_c_stcomm as st";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
+    $sql.= ", ".MAIN_DB_PREFIX."c_stcomm as st";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql.= " WHERE s.fk_stcomm = st.id AND client > 0";
     if ($socid)
     {

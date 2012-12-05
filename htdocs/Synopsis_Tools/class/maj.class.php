@@ -20,7 +20,7 @@ class maj {
     public function rectifId($tabId) {
         $i = 0;
         while ($i + 1 < count($tabId)) {
-            $requete = "UPDATE llx_Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
             $result = $this->queryD($requete);
             if (!$result) {
                 $this->erreurL("Impossible de modifier l'id . Requete : " . $requete);
@@ -48,27 +48,27 @@ class maj {
         if (!$update) {
             $this->netoyerTables($tab);
 
-            $requete = "ALTER TABLE llx_commande DROP FOREIGN KEY fk_commande_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."commande DROP FOREIGN KEY fk_commande_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE llx_propal DROP FOREIGN KEY fk_propal_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."propal DROP FOREIGN KEY fk_propal_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE llx_facture DROP FOREIGN KEY fk_facture_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES llx_Synopsis_projet (rowid) 
+            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."facture DROP FOREIGN KEY fk_facture_fk_projet ,
+                ADD FOREIGN KEY (fk_projet) REFERENCES ".MAIN_DB_PREFIX."Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
-            $requete = "ALTER TABLE llx_categorie DROP KEY uk_categorie_ref;";
+            $requete = "ALTER TABLE ".MAIN_DB_PREFIX."categorie DROP KEY uk_categorie_ref;";
             $this->queryD($requete);
         }
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("commande");
 //        $this->netoyeDet("propal");
-//        $this->netoyeDet("usergroup", "llx_usergroup_user");
-//        $this->netoyeDet("user", "llx_usergroup_user");
-//        $this->netoyeDet("user", "llx_user_rights");
+//        $this->netoyeDet("usergroup", MAIN_DB_PREFIX."usergroup_user");
+//        $this->netoyeDet("user", MAIN_DB_PREFIX."usergroup_user");
+//        $this->netoyeDet("user", MAIN_DB_PREFIX."user_rights");
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
         foreach ($tab as $ligne) {
@@ -82,14 +82,14 @@ class maj {
         if ($prefTab)
             $nomTable = $prefTab . $table;
         else
-            $nomTable = "llx_" . $table;
+            $nomTable = MAIN_DB_PREFIX . $table;
         if ($table2)
             $nomTable2 = $table2;
         else
             $nomTable2 = $nomTable . "det";
         $requete = "DELETE FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
         $this->queryS($requete);
-//        $requete = "DELETE FROM llx_propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM llx_propal WHERE 1);";
+//        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
 //        $this->queryS($requete);
     }
 
@@ -99,7 +99,7 @@ class maj {
             foreach ($tabDroit as $droit)
                 $tabVal[] = "(" . $gr . "," . $droit . ")";
         }
-        $requete = "INSERT into llx_usergroup_rights (fk_usergroup, fk_id) VALUES " . implode(",", $tabVal) . ";";
+        $requete = "INSERT into ".MAIN_DB_PREFIX."usergroup_rights (fk_usergroup, fk_id) VALUES " . implode(",", $tabVal) . ";";
         $result = $this->queryD($requete);
         if ($result)
             $this->infoL("Droit ajouté.");
@@ -144,16 +144,16 @@ class maj {
 
                 //Exception
                 $newCle = $destCol[$id];
-                if ($cle == "rowid" && $tableDest == "llx_user" && $val == "1")//On laisse l'admin de la nouvelle version
+                if ($cle == "rowid" && $tableDest == MAIN_DB_PREFIX."user" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
-                if ($cle == "fk_user" && $tableDest == "llx_user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
+                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX."user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
-                        $tableDest == "llx_element_element" && !($val > 0))//La ligne ne sert a rien
+                        $tableDest == MAIN_DB_PREFIX."element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;
 
 
-                if ($cle == "fk_statut" && $tableDest == "llx_propal" && $val == "99")//On vire les statue 99 sur les propal
+                if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX."propal" && $val == "99")//On vire les statue 99 sur les propal
                     $val = "3";
                 if ((($cle == "fk_projet")
                         || ($cle == "fk_user_author")
@@ -165,7 +165,7 @@ class maj {
                         || ($cle == "fk_user_valid")
                         ) && $val == "20")//On remplace 0 par null
                     $val = NULL;
-                if ($cle == "description" && $tableDest == "llx_propaldet")//On laisse l'admin de la nouvelle version
+                if ($cle == "description" && $tableDest == MAIN_DB_PREFIX."propaldet")//On laisse l'admin de la nouvelle version
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
                 //Fin exception
 
@@ -180,11 +180,11 @@ class maj {
 
 
                 //Exception
-                if ($tableDest == "llx_propal") {
+                if ($tableDest == MAIN_DB_PREFIX."propal") {
                     $requete = "SELECT p2.rowid as pre, p3.rowid as sui 
-                                FROM llx_propal p1 
-                                LEFT JOIN llx_propal p2 on p1.revision = (p2.revision+1) AND p1.orig_ref = p2.orig_ref
-                                LEFT JOIN llx_propal p3 on p1.revision = (p3.revision-1) AND p1.orig_ref = p3.orig_ref 
+                                FROM ".MAIN_DB_PREFIX."propal p1 
+                                LEFT JOIN ".MAIN_DB_PREFIX."propal p2 on p1.revision = (p2.revision+1) AND p1.orig_ref = p2.orig_ref
+                                LEFT JOIN ".MAIN_DB_PREFIX."propal p3 on p1.revision = (p3.revision-1) AND p1.orig_ref = p3.orig_ref 
                                 WHERE p1.rowid = " . $tabVal[0];
                     $result = $this->queryS($requete);
                     $ligne = $this->dbS->fetch_object($result);
@@ -210,13 +210,13 @@ class maj {
         for ($i = count($tab); $i > 0; $i--) {
             $ligne = $tab[$i - 1];
             $where = "1";
-//            if ($ligne[1] == "llx_element_element")
+//            if ($ligne[1] == MAIN_DB_PREFIX."element_element")
 //                $where = "0";
-            if ($ligne[1] == "llx_user")
+            if ($ligne[1] == MAIN_DB_PREFIX."user")
                 $where = "rowid != 1";
-            if ($ligne[1] == "llx_user_rights")
+            if ($ligne[1] == MAIN_DB_PREFIX."user_rights")
                 $where = "fk_user != 1";
-            if ($ligne[1] == "llx_facture") {
+            if ($ligne[1] == MAIN_DB_PREFIX."facture") {
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE kf_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau
             }

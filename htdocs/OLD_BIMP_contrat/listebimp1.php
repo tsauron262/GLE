@@ -53,7 +53,7 @@ $js .= ' <script src="'.$jspath.'/jqGrid-3.5/js/grid.formedit.js" type="text/jav
 
 $js .= "<style type='text/css'>body { position: static; }</style>
         <script type='text/javascript'>";
-$requete = "SELECT DISTINCT llx_contrat.fk_soc, llx_societe.nom FROM llx_contrat,llx_societe WHERE llx_societe.rowid = fk_soc";
+$requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."contrat.fk_soc, ".MAIN_DB_PREFIX."societe.nom FROM ".MAIN_DB_PREFIX."contrat,".MAIN_DB_PREFIX."societe WHERE ".MAIN_DB_PREFIX."societe.rowid = fk_soc";
 $sql = $db->query($requete);
 $js .= 'var socRess = "';
 $js .=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->"))))  . ";";

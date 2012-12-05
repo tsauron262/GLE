@@ -75,7 +75,7 @@ class ModeleSynopsisficheinter extends CommonDocGenerator
         $type='ficheinter';
         $liste=array();
         $sql ="SELECT nom as id, nom as lib";
-        $sql.=" FROM llx_document_model";
+        $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
         $sql.=" WHERE type = '".$type."'";
 
         $resql = $db->query($sql);

@@ -29,7 +29,7 @@ if ($sql)
     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
     $commande = new Synopsis_Commande($db);
     $commande->fetch($id);
-    $requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status WHERE id = ".$statut;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status WHERE id = ".$statut;
     $sql = $db->query($requete);
     $res =$db->fetch_object($sql);
     $tmpUser = new User($db);

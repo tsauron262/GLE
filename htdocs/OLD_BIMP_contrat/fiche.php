@@ -44,13 +44,13 @@ if ($_REQUEST['action'] == "doChangeDateContrat") {
     $date = $_REQUEST['dateContrat'];
     if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/', $date, $arrMatch)) {
         $dateUS = $arrMatch[3] . '-' . $arrMatch[2] . "-" . $arrMatch[1];
-//        $requete = "SELECT rowid as id, fk_contrat as idContrat,date_ouverture as dateOuv, (date_fin_validite - date_ouverture) as dureeJ FROM llx_contratdet WHERE fk_contrat = ".$_REQUEST['id'];
+//        $requete = "SELECT rowid as id, fk_contrat as idContrat,date_ouverture as dateOuv, (date_fin_validite - date_ouverture) as dureeJ FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = ".$_REQUEST['id'];
 
-        $requete = "Update llx_contratdet set date_ouverture_prevue = '" . $dateUS . "', date_fin_validite = DATE_ADD(date_ouverture_prevue, INTERVAL DATEDIFF(date_fin_validite, date_ouverture) DAY) , date_ouverture = date_ouverture_prevue where fk_contrat = " . $_REQUEST['id'] . ";";
-        $requete2 = "Update Babel_GMAO_contratdet_prop set DateDeb = '" . $dateUS . "' WHERE contratdet_refid IN (SELECT rowid FROM llx_contratdet WHERE fk_contrat = " . $_REQUEST['id'] . ");";
+        $requete = "Update ".MAIN_DB_PREFIX."contratdet set date_ouverture_prevue = '" . $dateUS . "', date_fin_validite = DATE_ADD(date_ouverture_prevue, INTERVAL DATEDIFF(date_fin_validite, date_ouverture) DAY) , date_ouverture = date_ouverture_prevue where fk_contrat = " . $_REQUEST['id'] . ";";
+        $requete2 = "Update Babel_GMAO_contratdet_prop set DateDeb = '" . $dateUS . "' WHERE contratdet_refid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = " . $_REQUEST['id'] . ");";
         $sql = $db->query($requete);
         $sql = $db->query($requete2);
-        $requete = "UPDATE llx_contrat set date_contrat = '" . $dateUS . "' WHERE rowid = " . $_REQUEST['id'];
+        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat set date_contrat = '" . $dateUS . "' WHERE rowid = " . $_REQUEST['id'];
         $sql = $db->query($requete);
     }
     if ($result > 0) {
@@ -83,7 +83,7 @@ if ($_REQUEST['action'] == "chgSrvAction") {
     $newSrc = $_REQUEST['Link'];
     $contrat = $contrat = getContratObj($_REQUEST["id"]);
     $contrat->fetch($_REQUEST['id']);
-    $requete = "UPDATE llx_contrat set linkedTo='" . $newSrc . "' WHERE rowid =" . $_REQUEST['id'];
+    $requete = "UPDATE ".MAIN_DB_PREFIX."contrat set linkedTo='" . $newSrc . "' WHERE rowid =" . $_REQUEST['id'];
     $resql = $db->query($requete);
 //    print $requete;
 }
@@ -249,7 +249,7 @@ if ($_REQUEST['typeContrat'] == 'LocationFinanciere' && $_REQUEST["action"] == '
     $result = $contrat->create($user, $langs, $conf);
     if ($result > 0) {
         if ($_REQUEST['condid'] >= 0 && $_REQUEST['paiementtype'] >= 0) {
-            $requete = "UPDATE llx_contrat
+            $requete = "UPDATE ".MAIN_DB_PREFIX."contrat
                            SET condReg_refid = " . $_REQUEST['condid'] . " ,
                                modeReg_refid = " . $_REQUEST['paiementtype'] . "
                          WHERE rowid =" . $contrat->id;
@@ -642,7 +642,7 @@ if ($_REQUEST["action"] == 'create') {
     $new_contrat = new Contrat($db);
 
     $sql = "SELECT s.nom, s.prefix_comm, s.rowid";
-    $sql.= " FROM llx_societe as s";
+    $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
     $sql.= " WHERE s.rowid = " . $_REQUEST["socid"];
 
     $resql = $db->query($sql);
@@ -778,20 +778,20 @@ if ($_REQUEST["action"] == 'create') {
             $optgroupName[1] = 'Commandes';
             $optgroupName[2] = 'Factures';
             $optgroup = array();
-            $requete = "SELECT * FROM llx_propal WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."propal WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[0]["p" . $res->rowid] = $res->ref . " (" . round($res->total_ht, 0) . " &euro;)";
                 }
             }
 
-            $requete = "SELECT * FROM llx_commande WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[1]["c" . $res->rowid] = $res->ref . " (" . round($res->total_ht, 0) . " &euro;)";
                 }
             }
-            $requete = "SELECT * FROM llx_facture WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[2]["f" . $res->rowid] = $res->facnumber . " (" . round($res->total, 0) . " &euro;)";
@@ -1004,7 +1004,7 @@ EOF;
                 print '</tr>';
 
                 $sql = "SELECT pt.rowid, p.label as product, p.ref, pt.price, pt.qty, p.rowid as prodid, pt.remise_percent";
-                $sql .= " FROM llx_propaldet as pt, babel_product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
+                $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pt, babel_product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
                 $sql .= " ORDER BY pt.rowid ASC";
                 $result = $db->query($sql);
                 if ($result) {
@@ -1024,7 +1024,7 @@ EOF;
                     }
                 }
                 $sql = "SELECT pt.rowid, pt.description as product, pt.price, pt.qty, pt.remise_percent";
-                $sql.= " FROM llx_propaldet as pt";
+                $sql.= " FROM ".MAIN_DB_PREFIX."propaldet as pt";
                 $sql.= " WHERE  pt.fk_propal = $propalid AND pt.fk_product = 0";
                 $sql.= " ORDER BY pt.rowid ASC";
                 $result = $db->query($sql);
@@ -1208,20 +1208,20 @@ EOF;
             $optgroupName[1] = 'Commandes';
             $optgroupName[2] = 'Factures';
             $optgroup = array();
-            $requete = "SELECT * FROM llx_propal WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."propal WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[0]["p" . $res->rowid] = $res->ref . " (" . round($res->total_ht, 0) . " &euro;)";
                 }
             }
 
-            $requete = "SELECT * FROM llx_commande WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[1]["c" . $res->rowid] = $res->ref . " (" . round($res->total_ht, 0) . " &euro;)";
                 }
             }
-            $requete = "SELECT * FROM llx_facture WHERE fk_soc = " . $soc->id;
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."facture WHERE fk_soc = " . $soc->id;
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
                     $optgroup[2]["f" . $res->rowid] = $res->facnumber . " (" . round($res->total, 0) . " &euro;)";

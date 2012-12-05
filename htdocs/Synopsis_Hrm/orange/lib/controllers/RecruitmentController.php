@@ -770,7 +770,7 @@ class RecruitmentController {
 //            if ($conf->global->MAIN_MODULE_BABELPRIME == 1)
 //            {
 //                //Get new userid
-//                $requete = "SELECT last_insert_id() as lid FROM llx_user";
+//                $requete = "SELECT last_insert_id() as lid FROM ".MAIN_DB_PREFIX."user";
 //                $resql=$db->query($requete);
 //                $newId = 0;
 //                if ($resql)
@@ -788,7 +788,7 @@ class RecruitmentController {
 //            if ($conf->global->MAIN_MODULE_ZIMBRA == 1)
 //            {
 //                //Get new userid
-//                $requete = "SELECT last_insert_id() as lid FROM llx_user";
+//                $requete = "SELECT last_insert_id() as lid FROM ".MAIN_DB_PREFIX."user";
 //                $resql=$db->query($requete);
 //                $newId = 0;
 //                if ($resql)
@@ -798,7 +798,7 @@ class RecruitmentController {
 //                }
 //                if ($newId != 0)
 //                {
-//                    $requete = "INSERT INTO llx_Synopsis_Zimbra_li_User (ZimbraLogin, ZimbraPass , User_refid) VALUES ('".$_POST['ZimbraLogin']."','".$_POST['ZimbraPass']."',".$newId.")";
+//                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User (ZimbraLogin, ZimbraPass , User_refid) VALUES ('".$_POST['ZimbraLogin']."','".$_POST['ZimbraPass']."',".$newId.")";
 //                    $db->query($requete);
 //                }
 //
@@ -806,7 +806,7 @@ class RecruitmentController {
 //            if ($conf->global->MAIN_MODULE_JASPERBABEL == 1)
 //            {
 //                //Get new userid
-//                $requete = "SELECT last_insert_id() AS lid FROM llx_user";
+//                $requete = "SELECT last_insert_id() AS lid FROM ".MAIN_DB_PREFIX."user";
 //                $resql=$db->query($requete);
 //                $newId = 0;
 //                if ($resql)
@@ -824,7 +824,7 @@ class RecruitmentController {
 //            if ($conf->global->MAIN_MODULE_BABELIM == 1)
 //            {
 //                //Get new userid
-//                $requete = "SELECT last_insert_id() as lid FROM llx_user";
+//                $requete = "SELECT last_insert_id() as lid FROM ".MAIN_DB_PREFIX."user";
 //                $resql=$db->query($requete);
 //                $newId = 0;
 //                if ($resql)

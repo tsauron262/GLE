@@ -95,7 +95,7 @@ if ($_GET["id"] > 0) {
         */
         $sql = 'SELECT s.nom, s.rowid, fi.fk_projet, fi.ref, fi.description, fi.fk_statut,';
         $sql.= ' fi.fk_user_author, fi.fk_user_valid, fi.datec, fi.date_valid';
-        $sql.= ' FROM ".MAIN_DB_PREFIX."societe as s, llx_Synopsis_demandeInterv as fi';
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_demandeInterv as fi";
         $sql.= ' WHERE fi.fk_soc = s.rowid';
         $sql.= ' AND fi.rowid = '.$demandeInterv->id;
         if ($socid) $sql .= ' AND s.rowid = '.$socid;

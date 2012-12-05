@@ -179,11 +179,11 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                     $total_ttc += $val->total_ttc;
                     $total_duree += $val->duration;
                     if ($val->fk_commandedet > 0) {
-                        $requete = "SELECT llx_product.ref
-                                      FROM llx_commandedet,
-                                           llx_product
-                                     WHERE llx_product.rowid = llx_commandedet.fk_product
-                                       AND llx_commandedet.rowid =" . $val->fk_commandedet;
+                        $requete = "SELECT ".MAIN_DB_PREFIX."product.ref
+                                      FROM ".MAIN_DB_PREFIX."commandedet,
+                                           ".MAIN_DB_PREFIX."product
+                                     WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product
+                                       AND ".MAIN_DB_PREFIX."commandedet.rowid =" . $val->fk_commandedet;
                         $sql1 = $this->db->query($requete);
                         $res1 = $this->db->fetch_object($sql1);
                         if ($res1->ref == 'FPR40') {
@@ -278,7 +278,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //CUSTOMER / BILLING sinon
 //Contact de la commande
                 $requete = "SELECT *
-                              FROM llx_element_contact
+                              FROM ".MAIN_DB_PREFIX."element_contact
                              WHERE fk_c_type_contact IN (130,131) AND element_id =  " . $fichinter->id;
                 $sql1 = $this->db->query($requete);
                 $arrContact = array();
@@ -287,7 +287,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 }
                 if (isset($fichinter->fk_commande) && $fichinter->fk_commande > 0) {
                     $requete = "SELECT *
-                              FROM llx_element_contact
+                              FROM ".MAIN_DB_PREFIX."element_contact
                              WHERE fk_c_type_contact IN (101) AND element_id =  " . $fichinter->fk_commande;
                     $sql1 = $this->db->query($requete);
                     while ($res1 = $this->db->fetch_object($sql1)) {
@@ -408,7 +408,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
 
                 if (isset($fichinter->fk_commande) && $fichinter->fk_commande > 0) {
-                    $req = "SELECT * FROM llx_commande where rowid = " . $fichinter->fk_commande;
+                    $req = "SELECT * FROM ".MAIN_DB_PREFIX."commande where rowid = " . $fichinter->fk_commande;
                     $sql = $this->db->query($req);
                     $res99 = $this->db->fetch_object($sql);
 
@@ -418,7 +418,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 }
 
                 if (isset($fichinter->fk_contrat) && $fichinter->fk_contrat > 0) {
-                    $req = "SELECT * FROM llx_contrat where rowid = " . $fichinter->fk_contrat;
+                    $req = "SELECT * FROM ".MAIN_DB_PREFIX."contrat where rowid = " . $fichinter->fk_contrat;
                     $sql = $this->db->query($req);
                     $res99 = $this->db->fetch_object($sql);
                     $pdf->SetXY(174.3, 14.1);
@@ -467,7 +467,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //                     $tmpArr[]=$this->sec2time($val->duration)." - ".$val->desc;
 
                     if ($val->fk_contratdet > 0) {
-                        $requete = "SELECT description FROM llx_contratdet WHERE rowid = " . $val->fk_contratdet;
+                        $requete = "SELECT description FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $val->fk_contratdet;
                         $sql = $this->db->query($requete);
                         $res = $this->db->fetch_object($sql);
                         $tmpdesc = ($res->description . "x" != "x" ? $res->description . " :\n" . $val->desc : $val->desc);

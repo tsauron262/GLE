@@ -75,7 +75,7 @@ llxHeader();
 
 $sql = "SELECT s.nom,s.rowid as socid, f.ref, f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, llx_Synopsis_demandeInterv as f ";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_demandeInterv as f ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE f.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;

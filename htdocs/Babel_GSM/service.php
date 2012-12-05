@@ -35,9 +35,9 @@ $gsm->MainInit();
 
 print '<TABLE  width="100%" class="nobordernopadding">';
 //Liste les propal, le montant total HT, le status
-$requete = "SELECT llx_product.rowid" .
-        "     FROM llx_product " .
-        "    WHERE llx_product.fk_product_type = 1" . //produits
+$requete = "SELECT ".MAIN_DB_PREFIX."product.rowid" .
+        "     FROM ".MAIN_DB_PREFIX."product " .
+        "    WHERE ".MAIN_DB_PREFIX."product.fk_product_type = 1" . //produits
         " ORDER BY label" .
         "          ";
 //print $requete;

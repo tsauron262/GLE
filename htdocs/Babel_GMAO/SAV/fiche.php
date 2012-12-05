@@ -247,7 +247,7 @@ $form =new Form($db);
     }
 //TODO refaire avec lien par element_id et element_type puis retrouver propriété serial
 //SAV , contrat ...
-    $requete = "SELECT * FROM llx_product_serial_view WHERE serial_number = '".$objsav->serial."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE serial_number = '".$objsav->serial."'";
     $sql = $db->query($requete);
     while($res=$db->fetch_object($sql))
     {

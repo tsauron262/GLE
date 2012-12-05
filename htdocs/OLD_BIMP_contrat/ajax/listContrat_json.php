@@ -111,10 +111,10 @@ switch ($action)
     default :
     {
         $SQL = "SELECT count(*) as cnt";
-        $SQL.= " FROM llx_societe as s,";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
-        $SQL.= " llx_contrat as c";
-        $SQL.= " LEFT JOIN llx_contratdet as cd ON c.rowid = cd.fk_contrat";
+        $SQL.= " FROM ".MAIN_DB_PREFIX."societe as s,";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
+        $SQL.= " ".MAIN_DB_PREFIX."contrat as c";
+        $SQL.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
         $SQL.= " WHERE c.fk_soc = s.rowid ";
         if ($_REQUEST['socid'] > 0) $SQL .= " AND c.fk_soc = ".$_REQUEST['socid'];
         $SQL .= "  ".$wh;
@@ -152,10 +152,10 @@ $sql.= " c.rowid as cid,
          s.nom as socname,
          s.rowid as socid";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM llx_societe as s,";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
-$sql.= " llx_contrat as c";
-$sql.= " LEFT JOIN llx_contratdet as cd ON c.rowid = cd.fk_contrat";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,";
+if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
+$sql.= " ".MAIN_DB_PREFIX."contrat as c";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
 $sql.= " WHERE c.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($_REQUEST['socid'] > 0) $sql .= " AND c.fk_soc = ".$_REQUEST['socid'];
@@ -180,10 +180,10 @@ $sql.= " GROUP BY c.rowid, c.datec, c.statut, s.nom, s.rowid
 //                       Babel_global_resatype.name as typeResa,
 //                       OCTET_LENGTH(Babel_global_ressources.photo) as sizePhoto,
 //                       (SELECT nom FROM Babel_global_ressources WHERE id = fk_parent_ressource) as categorie
-//                  FROM llx_user,
+//                  FROM ".MAIN_DB_PREFIX."user,
 //                       Babel_global_ressources
 //             LEFT JOIN Babel_global_resatype ON Babel_global_resatype.id = Babel_global_ressources.fk_resa_type
-//                 WHERE llx_user.rowid = Babel_global_ressources.fk_user_resp  ";
+//                 WHERE ".MAIN_DB_PREFIX."user.rowid = Babel_global_ressources.fk_user_resp  ";
 //
 //        if ("x".$parentId != "x")
 //        {

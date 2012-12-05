@@ -56,7 +56,7 @@ if($searchOn=='true')
     }
     if ($searchField == 'p.nom')
     {
-        $searchField = "llx_product.label";
+        $searchField = "".MAIN_DB_PREFIX."product.label";
     }
     if ($searchField == 'departement')
     {
@@ -193,33 +193,33 @@ switch ($action)
 
 
         $sql = "SELECT Babel_GA_entrepotdet.id as id,
-                       llx_product.label as nom ";
+                       ".MAIN_DB_PREFIX."product.label as nom ";
         $sql .= " FROM Babel_GA_entrepotdet";
-        $sql .= " LEFT JOIN llx_product on llx_product.rowid = Babel_GA_entrepotdet.fk_product";
+        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = Babel_GA_entrepotdet.fk_product";
         $sql.= " WHERE cessionnaire_refid =".$_REQUEST['SubRowId']." ";
 
         if ($_REQUEST['fournisseur'])
         {
             $sql = "SELECT Babel_GA_entrepotdet.id as id,
-                           llx_product.label as nom ";
+                           ".MAIN_DB_PREFIX."product.label as nom ";
             $sql .= " FROM Babel_GA_entrepotdet";
-            $sql .= " LEFT JOIN llx_product on llx_product.rowid = Babel_GA_entrepotdet.fk_product";
+            $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = Babel_GA_entrepotdet.fk_product";
             $sql.= " WHERE fournisseur_refid =".$_REQUEST['SubRowId']." ";
         }
         if ($_REQUEST['client'])
         {
             $sql = "SELECT Babel_GA_entrepotdet.id as id,
-                           llx_product.label as nom ";
+                           ".MAIN_DB_PREFIX."product.label as nom ";
             $sql .= " FROM Babel_GA_entrepotdet";
-            $sql .= " LEFT JOIN llx_product on llx_product.rowid = Babel_GA_entrepotdet.fk_product";
+            $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = Babel_GA_entrepotdet.fk_product";
             $sql.= " WHERE client_refid =".$_REQUEST['SubRowId']." ";
         }
         if ($_REQUEST['cessionnaire'])
         {
             $sql = "SELECT Babel_GA_entrepotdet.id as id,
-                           llx_product.label as nom ";
+                           ".MAIN_DB_PREFIX."product.label as nom ";
             $sql .= " FROM Babel_GA_entrepotdet";
-            $sql .= " LEFT JOIN llx_product on llx_product.rowid = Babel_GA_entrepotdet.fk_product";
+            $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = Babel_GA_entrepotdet.fk_product";
             $sql.= " WHERE cessionnaire_refid =".$_REQUEST['SubRowId']." ";
         }
 
@@ -281,9 +281,9 @@ switch ($action)
 
 
         $sql = "SELECT Babel_GA_entrepotdet.id as id,
-                       llx_product.label as nom ";
+                       ".MAIN_DB_PREFIX."product.label as nom ";
         $sql .= " FROM Babel_GA_entrepotdet";
-        $sql .= " LEFT JOIN llx_product on llx_product.rowid = Babel_GA_entrepotdet.fk_product";
+        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product on ".MAIN_DB_PREFIX."product.rowid = Babel_GA_entrepotdet.fk_product";
 
         $sql .= "  ".$wh."
                 ORDER BY $sidx $sord

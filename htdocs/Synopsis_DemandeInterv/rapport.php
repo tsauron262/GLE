@@ -85,7 +85,7 @@ $sql = "SELECT s.nom,
                f.fk_statut,
                f.duree";
 $sql .= " FROM ".MAIN_DB_PREFIX."societe as s,
-               llx_Synopsis_demandeInterv as f ";
+               ".MAIN_DB_PREFIX."Synopsis_demandeInterv as f ";
 $sql .= "WHERE f.fk_soc = s.rowid";
 
 if($filterUser){
@@ -124,7 +124,7 @@ if ($socid > 0)
 $sql .= " ORDER BY $sortfield $sortorder ";
 
     $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-    $requete .= " FROM ".MAIN_DB_PREFIX."societe as s, llx_Synopsis_demandeInterv as f ";
+    $requete .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_demandeInterv as f ";
     $requete .= " WHERE f.fk_soc = s.rowid";
 
     $requete .= " AND datei >= '$start' AND datei < '$end'" ;
@@ -249,15 +249,15 @@ if ( $resql )
 
 //Vendu en euro
         $requete = "SELECT SUM(total_ht) as tht
-              FROM llx_commandedet, commdet,
-                   llx_product as prod,
-                   llx_categorie_product as catprod,
-                   llx_categorie as cat
+              FROM ".MAIN_DB_PREFIX."commandedet, commdet,
+                   ".MAIN_DB_PREFIX."product as prod,
+                   ".MAIN_DB_PREFIX."categorie_product as catprod,
+                   ".MAIN_DB_PREFIX."categorie as cat
              WHERE prod.rowid = commdet.fk_product
                AND cat.rowid = catprod.fk_categorie
                AND catprod.fk_product = prod.rowid
-               AND cat.rowid IN (SELECT catId FROM llx_Synopsis_PrepaCom_c_cat_total)
-               AND llx_commandedet.fk_commande IN (" . join(',', $arrGrpCom) . ")  ";
+               AND cat.rowid IN (SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_total)
+               AND ".MAIN_DB_PREFIX."commandedet.fk_commande IN (" . join(',', $arrGrpCom) . ")  ";
         die($requete);
         
         $sql = $db->query($requete);
@@ -268,9 +268,9 @@ if ( $resql )
 //Prevu en euro et en temps
         $requete = "SELECT SUM(det.duree) as durTot ,
                    SUM(det.total_ht) as totHT
-              FROM llx_Synopsis_demandeInterv di,
-                   llx_Synopsis_demandeIntervdet as det,
-                   llx_Synopsis_fichinter_typeInterv as t
+              FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv di,
+                   ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as det,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter_typeInterv as t
              WHERE t.id=det.fk_typeinterv
                AND det.fk_demandeinterv = di.rowid
                AND t.inTotalRecap=1
@@ -285,9 +285,9 @@ if ( $resql )
 //Realise en euros et en temps
         $requete = "SELECT SUM(det.duree) as durTot ,
                    SUM(det.total_ht) as totHT
-              FROM llx_Synopsis_fichinter as inter,
-                   llx_Synopsis_fichinterdet as det,
-                   llx_Synopsis_fichinter_c_typeInterv as t
+              FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as inter,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinterdet as det,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t
              WHERE t.id=det.fk_typeinterv
                AND det.fk_fichinter = inter.rowid
                AND t.inTotalRecap=1

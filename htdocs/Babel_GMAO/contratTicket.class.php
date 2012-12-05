@@ -126,7 +126,7 @@ class contratTicket extends contrat{
             $qty = $res->qty;
             if ($res->fk_product > 0)
             {
-                $requete = "SELECT * FROM llx_product WHERE rowid = ".$res->fk_product;
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE rowid = ".$res->fk_product;
                 $sql1 = $this->db->query($requete);
                 $res1 = $this->db->fetch_object($sql1);
                 $qty = $res->qty * $res1->qte;

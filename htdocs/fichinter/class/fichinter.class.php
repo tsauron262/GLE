@@ -122,7 +122,7 @@ class Fichinter extends CommonObject
         $result=$soc->fetch($this->socid);
         $this->verifyNumRef($soc);
 
-        $sql = "INSERT INTO llx_Synopsis_fichinter (fk_soc, datec, ref, fk_user_author, description, model_pdf";
+        $sql = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id) $sql.=  ", fk_projet";
         if ($this->fk_user_prisencharge > 0) $sql.=  ", fk_user_prisencharge";
         if ($this->fk_commande > 0) $sql.=  ", fk_commande";
@@ -143,7 +143,7 @@ class Fichinter extends CommonObject
         $result=$this->db->query($sql);
         if ($result)
         {
-            $this->id=$this->db->last_insert_id("llx_Synopsis_fichinter");
+            $this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."Synopsis_fichinter");
             $this->db->commit();
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -188,7 +188,7 @@ class Fichinter extends CommonObject
         /*
         *  Insertion dans la base
         */
-        $sql = "UPDATE llx_Synopsis_fichinter SET ";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET ";
         $sql .= " datei = ".$this->db->idate($this->date);
         $sql .= ", description  = '".addslashes($this->description)."'";
         $sql .= ", duree = ".$this->duree;
@@ -222,7 +222,7 @@ class Fichinter extends CommonObject
     {
         $sql = "SELECT ref, description, fk_soc, fk_user_author, fk_statut, fk_contrat, fk_commande, total_ht, total_tva, total_ttc,";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf, natureInter";
-        $sql.= " FROM llx_Synopsis_fichinter";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinter";
         $sql.= " WHERE rowid=".$rowid;
 
 //        dol_syslog("Fichinter::fetch sql=".$sql);
@@ -297,7 +297,7 @@ class Fichinter extends CommonObject
 
         $this->db->begin();
 
-        $sql = "UPDATE llx_Synopsis_fichinter";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter";
         $sql.= " SET fk_statut = 1, date_valid=now(), fk_user_valid=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -383,7 +383,7 @@ class Fichinter extends CommonObject
     */
     function verifyNumRef($soc)
     {
-        $sql = "SELECT rowid FROM llx_Synopsis_fichinter";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter";
         $sql.= " WHERE ref = '".$this->ref."'";
 
         $result = $this->db->query($sql);
@@ -401,7 +401,7 @@ class Fichinter extends CommonObject
     
     function getDI(){
         $return = array(); 
-        $requete = "SELECT * FROM llx_element_element WHERE sourcetype='DI' AND targettype='FI' AND fk_target = ".$this->id;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype='DI' AND targettype='FI' AND fk_target = ".$this->id;
         $res = $this->db->query($requete);
         while($result = $this->db->fetch_object($res)){
             $return[] = $result->fk_source;
@@ -410,13 +410,13 @@ class Fichinter extends CommonObject
     }
     
     function setDI($idDI){
-        $requete = "DELETE FROM llx_element_element WHERE fk_target = ".$this->id;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."element_element WHERE fk_target = ".$this->id;
         $res = $this->db->query($requete);
         $this->addDI($idDI);
     }
     
     function addDI($idDI){
-        $requete = "INSERT INTO llx_element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('DI', ".$idDI.", 'FI', ".$this->id.")";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('DI', ".$idDI.", 'FI', ".$this->id.")";
         $res = $this->db->query($requete);
     }
     
@@ -474,7 +474,7 @@ class Fichinter extends CommonObject
         $sql = "SELECT f.rowid, ";
         $sql.= "f.datec as datec, f.date_valid as datev";
         $sql.= ", f.fk_user_author, f.fk_user_valid";
-        $sql.= " FROM llx_Synopsis_fichinter as f";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f";
         $sql.= " WHERE f.rowid = ".$id;
 
         $result = $this->db->query($sql);
@@ -551,11 +551,11 @@ class Fichinter extends CommonObject
 
         $this->db->begin();
 
-        $sql = "DELETE FROM llx_Synopsis_fichinterdet WHERE fk_fichinter = ".$this->id;
+        $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet WHERE fk_fichinter = ".$this->id;
         dol_syslog("Fichinter::delete sql=".$sql);
         if ( $this->db->query($sql) )
         {
-            $sql = "DELETE FROM llx_Synopsis_fichinter WHERE rowid = ".$this->id;
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE rowid = ".$this->id;
             dol_syslog("Fichinter::delete sql=".$sql);
             if ( $this->db->query($sql) )
             {
@@ -628,8 +628,8 @@ class Fichinter extends CommonObject
     {
         $requete= "SELECT ifnull(c.label,e.extra_value) as val,
                           extra_key_refid
-                     FROM llx_Synopsis_fichinter_extra_value as e
-                LEFT JOIN llx_Synopsis_fichinter_extra_values_choice as c ON e.extra_key_refid = c .key_refid AND c.value = e.extra_value
+                     FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value as e
+                LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice as c ON e.extra_key_refid = c .key_refid AND c.value = e.extra_value
                     WHERE e.typeI = 'FI'
                       AND e.interv_refid = ".$this->id;
         $sql = $this->db->query($requete);
@@ -648,7 +648,7 @@ class Fichinter extends CommonObject
         global $langs,$conf;
         if ($user->rights->synopsisficheinter->creer)
         {
-            $sql = "UPDATE llx_Synopsis_fichinter ";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter ";
             $sql.= " SET datei = ".$this->db->idate($date_delivery);
             $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -683,7 +683,7 @@ class Fichinter extends CommonObject
         global $langs,$conf;
         if ($user->rights->synopsisficheinter->creer)
         {
-            $sql = "UPDATE llx_Synopsis_fichinter ";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter ";
             $sql.= " SET description = '".addslashes($description)."'";
             $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -715,7 +715,7 @@ class Fichinter extends CommonObject
         global $langs,$conf;
         if ($user->rights->synopsisficheinter->creer)
         {
-            $sql = "UPDATE llx_Synopsis_fichinter ";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter ";
             $sql.= " SET note_private = '".addslashes($description)."'";
             $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
 
@@ -815,7 +815,7 @@ class Fichinter extends CommonObject
 
         // Charge tableau des id de societe socids
         $socids = array();
-        $sql = "SELECT rowid FROM llx_societe WHERE client=1 LIMIT 10";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."societe WHERE client=1 LIMIT 10";
         $resql = $this->db->query($sql);
         if ($resql)
         {
@@ -832,7 +832,7 @@ class Fichinter extends CommonObject
 
         // Charge tableau des produits prodids
         $prodids = array();
-        $sql = "SELECT rowid FROM llx_product WHERE envente=1";
+        $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."product WHERE envente=1";
         $resql = $this->db->query($sql);
         if ($resql)
         {
@@ -887,7 +887,7 @@ class Fichinter extends CommonObject
     function fetch_lines()
     {
         $sql = 'SELECT rowid';
-        $sql.= ' FROM llx_Synopsis_fichinterdet';
+        $sql.= ' FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet';
         $sql.= ' where fk_fichinter = '.$this->id;
 
         dol_syslog("Fichinter::fetch_lines sql=".$sql);
@@ -958,7 +958,7 @@ class FichinterLigne
     public $db;
     public $error;
 
-    // From llx_Synopsis_fichinterdet
+    // From ".MAIN_DB_PREFIX."Synopsis_fichinterdet
     public $rowid;
     public $fk_fichinter;
     public $desc;              // Description ligne
@@ -988,8 +988,8 @@ class FichinterLigne
         $sql = 'SELECT ft.rowid, ft.fk_fichinter, ft.description, ft.duree, ft.rang, ft.fk_typeinterv, f.label as typeinterv ';
         $sql .= ',`tx_tva`,`pu_ht` ,`qte`,`total_ht`,`total_tva`,`total_ttc`,`fk_contratdet`,`fk_commandedet`,`isForfait`';
         $sql.= ' ,ft.date as datei,fk_depProduct';
-        $sql.= ' FROM llx_Synopsis_fichinterdet as ft';
-        $sql.= " LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
+        $sql.= ' FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft';
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
 
         $sql.= ' WHERE ft.rowid = '.$rowid;
         dol_syslog("FichinterLigne::fetch sql=".$sql);
@@ -1040,7 +1040,7 @@ class FichinterLigne
         if ($rangToUse == -1)
         {
             // Recupere rang max de la ligne d'intervention dans $rangmax
-            $sql = 'SELECT max(rang) as max FROM llx_Synopsis_fichinterdet';
+            $sql = 'SELECT max(rang) as max FROM '.MAIN_DB_PREFIX.'Synopsis_fichinterdet';
             $sql.= ' WHERE fk_fichinter ='.$this->fk_fichinter;
             $resql = $this->db->query($sql);
             if ($resql)
@@ -1068,7 +1068,7 @@ class FichinterLigne
         $total_tva = 0.196 * $this->total_ht;
 
         // Insertion dans base de la ligne
-        $sql = 'INSERT INTO llx_Synopsis_fichinterdet';
+        $sql = 'INSERT INTO '.MAIN_DB_PREFIX.'Synopsis_fichinterdet';
         $sql.= ' (fk_fichinter, description, date, duree, rang,fk_typeinterv, isForfait ';
         if ($this->qte > 0) $sql .= ',qte ';
         if ($this->pu_ht > 0) $sql .= ',pu_ht, total_ht, total_tva, total_ttc ';
@@ -1141,14 +1141,14 @@ class FichinterLigne
         $total_ttc = 1.196 * $this->total_ht;
         $total_tva = 0.196 * $this->total_ht;
 
-        $requete = "SELECT isDeplacement FROM llx_Synopsis_fichinter_c_typeInterv WHERE id =".$this->fk_typeinterv;
+        $requete = "SELECT isDeplacement FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE id =".$this->fk_typeinterv;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $isDep = false;
         if ($res->isDeplacement == 1 || 1) $isDep = true;
 
         // Mise a jour ligne en base
-        $sql = "UPDATE llx_Synopsis_fichinterdet SET";
+        $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinterdet SET";
         $sql.= " description='".addslashes($this->desc)."'";
         $sql.= ",date=".$this->db->idate($this->datei);
         $sql.= ",duree=".$this->duration;
@@ -1201,14 +1201,14 @@ class FichinterLigne
     }
 
     /**
-    *      \brief         Mise a jour duree total dans table llx_Synopsis_fichinter
+    *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."Synopsis_fichinter
     *        \return        int        <0 si ko, >0 si ok
     */
     function update_total()
     {
         global $user,$langs,$conf;
 /*        $sql = "SELECT SUM(duree) as total_duration";
-        $sql.= " FROM llx_Synopsis_fichinterdet";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet";
         $sql.= " WHERE fk_fichinter=".$this->fk_fichinter;
 
         dol_syslog("FichinterLigne::update_total sql=".$sql);
@@ -1219,7 +1219,7 @@ class FichinterLigne
             $total_duration=0;
             if ($obj) $total_duration = $obj->total_duration;
 
-            $sql = "UPDATE llx_Synopsis_fichinter";
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter";
             $sql.= " SET duree = ".$total_duration;
             $sql.= " WHERE rowid = ".$this->fk_fichinter;
 
@@ -1257,11 +1257,11 @@ class FichinterLigne
                                    sum(total_tva) as stva,
                                    sum(total_ttc) as sttc,
                                    sum(duree) as sdur
-                              FROM llx_Synopsis_fichinterdet
+                              FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet
                              WHERE fk_fichinter = ".$this->fk_fichinter;
                 $sql = $this->db->query($requete);
                 $res = $this->db->fetch_object($sql);
-                $requete = "UPDATE llx_Synopsis_fichinter
+                $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter
                                SET total_ht = '".$res->sht."',
                                    total_tva = '".$res->stva."' ,
                                    total_ttc = '".$res->sttc ."',
@@ -1293,7 +1293,7 @@ class FichinterLigne
             dol_syslog("FichinterLigne::delete_line lineid=".$this->rowid);
             $this->db->begin();
 
-            $sql = "DELETE FROM llx_Synopsis_fichinterdet WHERE rowid = ".$this->rowid;
+            $sql = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet WHERE rowid = ".$this->rowid;
             $resql = $this->db->query($sql);
             dol_syslog("FichinterLigne::delete_line sql=".$sql);
 

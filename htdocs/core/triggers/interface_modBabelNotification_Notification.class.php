@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  *
  * $Id: interface_modNotification_Notification.class.php,v 1.1 2007/12/27 21:18:25 eldy Exp $
  */
@@ -302,8 +305,8 @@ class InterfaceNotification
 //                          p.email as people_email
 //                     FROM Babel_li_notification_destinataire as l,
 //                          Babel_notification_destinataire as d
-//                LEFT JOIN llx_user as u ON d.user_refid = u.rowid
-//                LEFT JOIN llx_socpeople as p ON d.contact_refid = p.rowid
+//                LEFT JOIN ".MAIN_DB_PREFIX."user as u ON d.user_refid = u.rowid
+//                LEFT JOIN ".MAIN_DB_PREFIX."socpeople as p ON d.contact_refid = p.rowid
 //                    WHERE l.notification_refid = ".$notif_id."
 //                      AND l.destinataire_refid = d.id";
 //        $sql = $this->db->query($requete);

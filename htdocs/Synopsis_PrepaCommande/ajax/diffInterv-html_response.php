@@ -65,9 +65,9 @@ if ($res>0)
                        dt.duree,
                        dt.total_ht,
                        t.label
-                  FROM llx_Synopsis_demandeInterv as d,
-                       llx_Synopsis_fichinter_c_typeInterv as t,
-                       llx_Synopsis_demandeIntervdet as dt
+                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as d,
+                       ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t,
+                       ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as dt
                  WHERE d.fk_commande IN (".join(',',$arrGrpCom).")
                    AND dt.fk_demandeinterv = d.rowid
                    AND dt.fk_typeinterv = t.id ";

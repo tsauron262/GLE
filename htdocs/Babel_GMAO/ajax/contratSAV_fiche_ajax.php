@@ -635,7 +635,7 @@ if ($_REQUEST['dateFinConf'])
             if ($res->fk_product > 0)
             {
                 $requete = "SELECT *
-                              FROM llx_product
+                              FROM ".MAIN_DB_PREFIX."product
                              WHERE rowid = ".$res->fk_product;
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);
@@ -662,7 +662,7 @@ if ($_REQUEST['dateFinConf'])
             if ($res2->fk_contrat_prod > 0)
             {
                 $requete = "SELECT *
-                              FROM llx_product
+                              FROM ".MAIN_DB_PREFIX."product
                              WHERE rowid = ".$res2->fk_contrat_prod;
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);

@@ -224,7 +224,7 @@ class magento_product extends magento_soap{
             $this->gleCatArr['rowid']=utf8_encode($res->level);
             //cherche les enfants
             $requete = "SELECT *
-                          FROM llx_categorie_association
+                          FROM ".MAIN_DB_PREFIX."categorie_association
                          WHERE fk_categorie_mere =".$res->rowid;
             $sql1 = $db->query($requete);
 //            $this->gleCatArr[]["children"]=array();
@@ -257,7 +257,7 @@ class magento_product extends magento_soap{
                             );
             $idx=count($catArr) - 1;
             $requete = "SELECT *
-                          FROM llx_categorie_association
+                          FROM ".MAIN_DB_PREFIX."categorie_association
                          WHERE fk_categorie_mere =".$res->rowid;
             $sql1 = $db->query($requete);
             //$catArr['children']=array();
@@ -336,7 +336,7 @@ class magento_product extends magento_soap{
         $magProdid = $prodInfo['product_id'];
         require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
         $prod = new Product($db);
-        $requete = "SELECT  * FROM llx_product WHERE magento_id =". $magProdid;
+        $requete = "SELECT  * FROM ".MAIN_DB_PREFIX."product WHERE magento_id =". $magProdid;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $gleId = $res->rowid;
@@ -373,7 +373,7 @@ class magento_product extends magento_soap{
     {
         $magProdid = $prodInfo['product_id'];
         $requete = "SELECT  *
-                      FROM llx_product
+                      FROM ".MAIN_DB_PREFIX."product
                      WHERE magento_id =". $magProdid;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);

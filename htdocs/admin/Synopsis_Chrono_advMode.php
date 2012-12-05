@@ -58,7 +58,7 @@ $id = $_REQUEST['id'];
     $res = file_put_contents($newFilet,$widgetTxt);
     $res = file_put_contents($newFile,$widgetTxt);
     //2 active le widget
-    $requete = "SELECT * FROM llx_Synopsis_dashboard_widget WHERE module = 'listChronoModele".$id."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = 'listChronoModele".$id."'";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0)
     {
@@ -66,17 +66,17 @@ $id = $_REQUEST['id'];
         $sql2 = true;
         $sql3 = true;
     } else {
-        $requete = "INSERT INTO llx_Synopsis_dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
         $sql1 = $db->query($requete);
-        $newId = $db->last_insert_id("llx_Synopsis_dashboard_widget");
+        $newId = $db->last_insert_id("".MAIN_DB_PREFIX."Synopsis_dashboard_widget");
         $sql2 = false;
         $sql3 = false;
         //3 page chrono (46) et page principale (4)
         if ($newId > 0)
         {
-            $requete = "INSERT INTO llx_Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
             $sql2 = $db->query($requete);
-            $requete = "INSERT INTO llx_Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
             $sql3 = $db->query($requete);
         }
     }

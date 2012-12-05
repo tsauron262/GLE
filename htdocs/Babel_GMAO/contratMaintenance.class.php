@@ -79,8 +79,8 @@ class contratMaintenance extends contrat {
             $this->isSAV = $res->isSAV;
 //TODO Prob pas le serial_number
 
-            $requete = "SELECT unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(llx_product.durSav,0) MONTH)) as dfinprev,
-                               unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(llx_product.durSav,0) MONTH)) as dfin,
+            $requete = "SELECT unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfinprev,
+                               unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfin,
                                unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddeb,
                                unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddebprev,
                                ".MAIN_DB_PREFIX."contratdet.qty,
@@ -90,7 +90,7 @@ class contratMaintenance extends contrat {
                                Babel_GMAO_contratdet_prop.fk_contrat_prod,
                                Babel_product_serial_cont.serial_number
                           FROM Babel_GMAO_contratdet_prop, ".MAIN_DB_PREFIX."contratdet
-                     LEFT JOIN llx_product ON llx_product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
+                     LEFT JOIN ".MAIN_DB_PREFIX."product ON ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
                      LEFT JOIN Babel_product_serial_cont ON Babel_product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND Babel_product_serial_cont.element_type = 'contratSAV'
                          WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
                            AND fk_contrat =".$id;
@@ -402,20 +402,20 @@ class contratMaintenance extends contrat {
 
         //Par statut d'intervention
 
-        $requete = " SELECT DISTINCT fk_statut FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
+        $requete = " SELECT DISTINCT fk_statut FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while($res=$this->db->fetch_object($sql))
         {
             $this->sumDInterByStatut[$res->fk_statut]=0;
         }
 
-        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
+        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while($res=$this->db->fetch_object($sql))
         {
             $this->sumDInterByUser[$res->fk_user]=0;
         }
-        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." GROUP BY fk_contrat";
+        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." GROUP BY fk_contrat";
         $sql = $this->db->query($requete);
         $res=$this->db->fetch_object($sql);
         $mini = strtotime($res->mini);
@@ -435,7 +435,7 @@ class contratMaintenance extends contrat {
             $this->sumDInterCal[$i]=0;
         }
 
-        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id.' ORDER BY datei DESC';
+        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id.' ORDER BY datei DESC';
         $sql = $this->db->query($requete);
         $this->totalDInter = 0;
         while ($res = $this->db->fetch_object($sql))

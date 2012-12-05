@@ -142,7 +142,7 @@ class retour extends CommonObject{
                     {
                         $clause = "";
                         $serial = "";
-                        $requete = "SELECT * FROM llx_product_serial_view WHERE element_type like '".$typeRef."%' AND element_id =".$key. " ORDER BY tms DESC";
+                        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE element_type like '".$typeRef."%' AND element_id =".$key. " ORDER BY tms DESC";
                         $sql = $this->db->query($requete);
                         $res = $this->db->fetch_object($sql);
                         $serial = $res->serial_number;

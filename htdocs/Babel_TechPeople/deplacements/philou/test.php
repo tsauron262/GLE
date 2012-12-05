@@ -3,7 +3,6 @@
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
-  * Author: Philippe LE FEVRE <p.lefevre@synopsis-erp.com>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1

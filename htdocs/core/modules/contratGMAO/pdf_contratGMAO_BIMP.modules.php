@@ -19,7 +19,7 @@
  \file       htdocs/core/modules/contrat/pdf_contrat_babel.modules.php
  \ingroup    contrat
  \brief      Fichier de la classe permettant de generer les contrats au modele babel
- \author     Jean-Marc LE FEVRE
+ \author     Tommy SAURON
  \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
@@ -1011,55 +1011,6 @@ au ".$val->date_fin_prevue),0,'C',1);
                 $annexe = preg_replace('/'.$code."/",$val['obj']->$val0,$annexe);
             }
         }
-
-
-
-/*
-
-
-Contact-external-SALESREPSIGN-fullname  Nom complet     M. PIROCHE
-Contact-external-SALESREPSIGN-civilite  Civilité
-Contact-external-SALESREPSIGN-nom   Nom     PIROCHE
-Contact-external-SALESREPSIGN-prenom    Préom
-Contact-external-SALESREPSIGN-cp    Code postal
-Contact-external-SALESREPSIGN-ville     Ville
-Contact-external-SALESREPSIGN-email     Email
-Contact-external-SALESREPSIGN-tel   N° tel
-Contact-external-SALESREPSIGN-fax   N° fax
-
-Contact-internal-SALESREPFOLL-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-SALESREPFOLL-civilite  Civilité
-Contact-internal-SALESREPFOLL-nom   Nom     LE FEVRE
-Contact-internal-SALESREPFOLL-prenom    Préom   Jean-Marcéé
-Contact-internal-SALESREPFOLL-cp    Code postal
-Contact-internal-SALESREPFOLL-ville     Ville
-Contact-internal-SALESREPFOLL-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-SALESREPFOLL-tel   N° tel
-Contact-internal-SALESREPFOLL-fax   N° fax
-
-Contact-internal-TECHRESP-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-TECHRESP-civilite  Civilité
-Contact-internal-TECHRESP-nom   Nom     LE FEVRE
-Contact-internal-TECHRESP-prenom    Préom   Jean-Marcéé
-Contact-internal-TECHRESP-cp    Code postal
-Contact-internal-TECHRESP-ville     Ville
-Contact-internal-TECHRESP-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-TECHRESP-tel   N° tel
-Contact-internal-TECHRESP-fax   N° fax
-
-Contact-internal-SALESREPSIGN-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-SALESREPSIGN-civilite  Civilité
-Contact-internal-SALESREPSIGN-nom   Nom     LE FEVRE
-Contact-internal-SALESREPSIGN-prenom    Préom   Jean-Marcéé
-Contact-internal-SALESREPSIGN-cp    Code postal
-Contact-internal-SALESREPSIGN-ville     Ville
-Contact-internal-SALESREPSIGN-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-SALESREPSIGN-tel   N° tel
-Contact-internal-SALESREPSIGN-fax   N° fax
-
-
- */
-
 
                     $pdf->multicell(155,5,utf8_decode(utf8_encode($annexe)));
 

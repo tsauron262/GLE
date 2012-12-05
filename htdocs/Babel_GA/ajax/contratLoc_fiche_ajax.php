@@ -197,15 +197,15 @@ if ($_REQUEST['dateFinConf'])
                 $total_ht = $contrat->getTotalLigne($subprice,$debutLoc,$finLoc,$duration_value.$duration_unit,$qte);
                 $contrat->update_totalLigne($idLigne,$total_ht);
                 //Update serial
-                $requete = "SELECT * FROM llx_product_serial_cont WHERE element_id = ".$idLigne." AND element_type='contratLoc'";
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$idLigne." AND element_type='contratLoc'";
                 $sql = $db->query($requete);
                 if ($db->num_rows($sql) > 0)
                 {
                     $res = $db->fetch_object($sql);
-                    $requete = "UPDATE llx_product_serial_cont SET serial_number='".addslashes($serial)."' WHERE id = ".$res->id;
+                    $requete = "UPDATE ".MAIN_DB_PREFIX."product_serial_cont SET serial_number='".addslashes($serial)."' WHERE id = ".$res->id;
                     $sql = $db->query($requete);
                 } else {
-                    $requete = "INSERT INTO llx_product_serial_cont
+                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."product_serial_cont
                                             (serial_number,date_creation, element_id, tms, fk_user_author, element_type)
                                      VALUES ('".addslashes($serial)."',now(),".$idLigne.",now(),".$user->id.",'contratLoc')";
                     $sql = $db->query($requete);
@@ -354,7 +354,7 @@ if ($_REQUEST['dateFinConf'])
             $xml.='<prod_duree_loc><![CDATA['.$res->prod_duree_loc.']]></prod_duree_loc>';
             $xml.='<prod_duree_loc_unit><![CDATA['.preg_replace('/[0-9]*/',"",$res->prod_duree_loc).']]></prod_duree_loc_unit>';
             $xml.='<prod_duree_loc_value><![CDATA['.preg_replace('/[^0-9]*/',"",$res->prod_duree_loc).']]></prod_duree_loc_value>';
-            $requete = "SELECT * FROM llx_product_serial_cont WHERE element_id = ".$idLigne." AND element_type='contratLoc'";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$idLigne." AND element_type='contratLoc'";
             $sql = $db->query($requete);
             $res1 = $db->fetch_object($sql);
             $serial = ($res1->serial_number."x" != "x"?$res1->serial_number:false);
@@ -521,7 +521,7 @@ if ($_REQUEST['dateFinConf'])
 
             if ($res)
             {
-                $requete = "INSERT INTO llx_product_serial_cont
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."product_serial_cont
                                         (serial_number,date_creation, element_id, tms, fk_user_author, element_type)
                                  VALUES ('".addslashes($serial)."',now(),".$contrat->newContractLigneId.",now(),".$user->id.",'contratLoc')";
                 $sql = $db->query($requete);
@@ -664,7 +664,7 @@ if ($_REQUEST['dateFinConf'])
         if ($sql)
         {
             $xml .= "<OK>OK</OK>";
-            $requete = "DELETE FROM llx_product_serial_cont WHERE element_id = ".$_REQUEST['lineId'];
+            $requete = "DELETE FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$_REQUEST['lineId'];
             $sql = $db->query($requete);
         } else {
             $xml .= "<KO><![CDATA[".$db->lastqueryerror . "\n ". $db->lasterror ."]]></KO>";

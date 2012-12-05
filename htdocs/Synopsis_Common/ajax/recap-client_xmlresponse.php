@@ -180,15 +180,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(llx_product.rowid) as cnt," .
-            "          llx_product.description" .
+    $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+            "          ".MAIN_DB_PREFIX."product.description" .
             "     FROM ".MAIN_DB_PREFIX."propaldet," .
-            "          llx_product" .
-            "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+            "          ".MAIN_DB_PREFIX."product" .
+            "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND llx_product.fk_product_type = 0 " .
-            " GROUP BY llx_product.rowid" .
-            " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND ".MAIN_DB_PREFIX."product.fk_product_type = 0 " .
+            " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
+            " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
     $resql=$db->query($requete);
     if ($resql)
     {
@@ -207,15 +207,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(llx_product.rowid) as cnt," .
-            "          llx_product.description" .
+    $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+            "          ".MAIN_DB_PREFIX."product.description" .
             "     FROM ".MAIN_DB_PREFIX."propaldet," .
-            "          llx_product" .
-            "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+            "          ".MAIN_DB_PREFIX."product" .
+            "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND llx_product.fk_product_type = 1 " .
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND ".MAIN_DB_PREFIX."product.fk_product_type = 1 " .
             " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
-            " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
+            " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
 
     $resql=$db->query($requete);
     if ($resql)

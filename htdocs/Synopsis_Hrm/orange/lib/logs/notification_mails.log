@@ -17,7 +17,7 @@ Sat, 27 Mar 2010 16:58:21 +0100 Sending Seeking approval to hire applicant for P
 Reason: No receipients
 Sat, 27 Mar 2010 17:00:10 +0100 Sending Approved hiring of applicant for Position of Maintenance Engineer  - FAILED 
 Reason: No receipients
-Sat, 27 Mar 2010 20:06:00 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 0 day(s) to
+Sat, 27 Mar 2010 20:06:00 +0100 Sending Leave Notification - Ancien Admin applied for 0 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -31,7 +31,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:06:25 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 8 day(s) to
+Sat, 27 Mar 2010 20:06:25 +0100 Sending Leave Notification - Ancien Admin applied for 8 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -45,20 +45,20 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:36:08 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 41 day(s) to
+Sat, 27 Mar 2010 20:36:08 +0100 Sending Leave Notification - Ancien Admin applied for 41 day(s) to
 
 CC to
 eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:37:32 +0100 Sending Leave Notification - LE FEVRE Jean-Marc cancelled leave for 41 day(s) to
+Sat, 27 Mar 2010 20:37:32 +0100 Sending Leave Notification - Ancien Admin cancelled leave for 41 day(s) to
 
 CC to
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:37:55 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 43 day(s) to
+Sat, 27 Mar 2010 20:37:55 +0100 Sending Leave Notification - Ancien Admin applied for 43 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -72,7 +72,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:42:05 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 108 day(s) to
+Sat, 27 Mar 2010 20:42:05 +0100 Sending Leave Notification - Ancien Admin applied for 108 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -86,7 +86,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 20:47:07 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 14 day(s) to
+Sat, 27 Mar 2010 20:47:07 +0100 Sending Leave Notification - Ancien Admin applied for 14 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -126,7 +126,7 @@ Sat, 27 Mar 2010 23:27:14 +0100 Sending Test Email Using SMTP to eos@synopsis-er
 Sat, 27 Mar 2010 23:29:15 +0100 Sending Test Email Using SMTP to eos@synopsis-erp.com Succeeded 
 Sat, 27 Mar 2010 23:30:21 +0100 Sending Test Email Using SMTP to eos@synopsis-erp.com Succeeded 
 Sat, 27 Mar 2010 23:30:43 +0100 Sending Test Email Using SMTP to eos@synopsis-erp.com Succeeded 
-Sat, 27 Mar 2010 23:31:19 +0100 Sending Leave Notification - LE FEVRE Jean-Marc cancelled leave for 43 day(s) to
+Sat, 27 Mar 2010 23:31:19 +0100 Sending Leave Notification - Ancien Admin cancelled leave for 43 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -174,7 +174,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sat, 27 Mar 2010 23:36:17 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 2 day(s) to
+Sat, 27 Mar 2010 23:36:17 +0100 Sending Leave Notification - Ancien Admin applied for 2 day(s) to
 
 CC to
 eos@synopsis-erp.com
@@ -195,7 +195,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: 538 5.7.0 Encryption required for requested authentication mechanism
 
-Sun, 28 Mar 2010 00:04:55 +0100 Sending Leave Notification - LE FEVRE Jean-Marc applied for 2 day(s) to
+Sun, 28 Mar 2010 00:04:55 +0100 Sending Leave Notification - Ancien Admin applied for 2 day(s) to
 eos@synopsis-erp.com
 eos@synopsis-erp.com
 CC to
@@ -229,13 +229,13 @@ CC to
 eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: none is unsupported SSL type
-Sun, 28 Mar 2010 00:11:47 +0100 Sending Leave Notification - LE FEVRE Jean-Marc cancelled leave for 2 day(s) to
+Sun, 28 Mar 2010 00:11:47 +0100 Sending Leave Notification - Ancien Admin cancelled leave for 2 day(s) to
 CC to
 eos@synopsis-erp.com
 eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: No to address set
-Sun, 28 Mar 2010 00:14:04 +0100 Sending Leave Notification - LE FEVRE Jean-Marc cancelled leave for 2 day(s) to
+Sun, 28 Mar 2010 00:14:04 +0100 Sending Leave Notification - Ancien Admin cancelled leave for 2 day(s) to
 CC to
 eos@synopsis-erp.com
 eos@synopsis-erp.com
@@ -315,7 +315,7 @@ eos@synopsis-erp.com
 eos@synopsis-erp.com - FAILED 
 Reason: No to address set
 Sun, 04 Apr 2010 17:49:53 +0200 Sending Interview Test test for the position of Maintenance Engineer 
-LE FEVRE Jean-Marc<eos@synopsis-erp.com> - SUCCEEDED
+Ancien Admin<eos@synopsis-erp.com> - SUCCEEDED
 Fri, 02 Nov 2012 21:08:42 +0100 Sending Notification d'absence - un employer pour 4 jour(s) to - FAILED 
 Reason: No to address set
 Fri, 02 Nov 2012 21:08:42 +0100 Sending Notification d'absence - OK pour 4 jour(s) to

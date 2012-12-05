@@ -88,7 +88,7 @@ $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
 $sql.= " ".MAIN_DB_PREFIX."societe as s,";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
 $sql.= " ".MAIN_DB_PREFIX."contratdet as cd";
-$sql.= " LEFT JOIN llx_product as p ON cd.fk_product = p.rowid";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
 $sql.= " WHERE";
 $sql.= " c.rowid = cd.fk_contrat";
 $sql.= " AND c.fk_soc = s.rowid";
@@ -110,7 +110,7 @@ MIN(unix_timestamp(cd.date_ouverture)) as date_ouverture,
 MIN(unix_timestamp(cd.date_fin_validite)) as date_fin_validite, 
 MIN(unix_timestamp(cd.date_cloture)) as date_cloture 
 
-FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN llx_product as p ON cd.fk_product = p.rowid WHERE c.rowid = cd.fk_contrat AND c.fk_soc = s.rowid AND cd.statut = 4 AND date_fin_validite < (sysdate() + INTERVAL '1' MONTH) GROUP BY c.rowid";
+FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid WHERE c.rowid = cd.fk_contrat AND c.fk_soc = s.rowid AND cd.statut = 4 AND date_fin_validite < (sysdate() + INTERVAL '1' MONTH) GROUP BY c.rowid";
 }
 
 

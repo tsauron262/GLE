@@ -624,7 +624,7 @@
                 }
 
                 print "</td></tr>";
-                $requete = "SELECT * FROM llx_product_serial_cont WHERE element_id = ".$idLigne;
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$idLigne;
                 $sqlsn = $db->query($requete);
                 if ($db->num_rows($sqlsn) > 0)
                 {

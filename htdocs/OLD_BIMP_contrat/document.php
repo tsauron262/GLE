@@ -17,7 +17,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis & DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -28,7 +30,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -94,7 +97,7 @@ if ($_REQUEST['BabelAction'] == 'dlZip' && $contratRes)
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)
             {
-                $zip->setArchiveComment('Generate by GLE - Babel-Services');
+                $zip->setArchiveComment('Generate by GLE - Synopsis & DRSI');
 //    print 'toto';
                 foreach($filearray as $key=>$val)
                 {

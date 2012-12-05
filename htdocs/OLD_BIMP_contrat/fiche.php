@@ -1004,7 +1004,7 @@ EOF;
                 print '</tr>';
 
                 $sql = "SELECT pt.rowid, p.label as product, p.ref, pt.price, pt.qty, p.rowid as prodid, pt.remise_percent";
-                $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pt, llx_product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
+                $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pt, ".MAIN_DB_PREFIX."product as p WHERE pt.fk_product = p.rowid AND pt.fk_propal = $propalid";
                 $sql .= " ORDER BY pt.rowid ASC";
                 $result = $db->query($sql);
                 if ($result) {

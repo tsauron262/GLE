@@ -202,7 +202,7 @@ jQuery(document).ready(function(){
                     jQuery('#subFI').replaceWith('<div id="subFI">'+longHtml+'</div>');
                 }
             });
-            jQuery('#subFI').replaceWith('<div id="subFI"><table><tr><td width=20><td>FI-0000<td>01/09/2010<td>Jean-Marc LE FEVRE</table></div>');
+            jQuery('#subFI').replaceWith('<div id="subFI"><table><tr><td width=20><td>FI-0000<td>01/09/2010<td>Nom Utilisateur</table></div>');
             reloadResult();
         } else {
             jQuery('#subFI').replaceWith('<div id="subFI"></div>');

@@ -88,10 +88,10 @@ class contratMaintenance extends contrat {
                                ".MAIN_DB_PREFIX."contratdet.subprice as pu,
                                Babel_GMAO_contratdet_prop.durValid as durVal,
                                Babel_GMAO_contratdet_prop.fk_contrat_prod,
-                               llx_product_serial_cont.serial_number
+                               ".MAIN_DB_PREFIX."product_serial_cont.serial_number
                           FROM Babel_GMAO_contratdet_prop, ".MAIN_DB_PREFIX."contratdet
                      LEFT JOIN ".MAIN_DB_PREFIX."product ON ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
-                     LEFT JOIN llx_product_serial_cont ON llx_product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND llx_product_serial_cont.element_type = 'contratSAV'
+                     LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont ON ".MAIN_DB_PREFIX."product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND ".MAIN_DB_PREFIX."product_serial_cont.element_type = 'contratSAV'
                          WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
                            AND fk_contrat =".$id;
             $sql = $this->db->query($requete);

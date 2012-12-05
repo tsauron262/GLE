@@ -209,11 +209,11 @@ $form =new Form($db);
         //SAV normal + contrat d'extension
         $requete = " SELECT Babel_GMAO_contratdet_prop.durValid, ".MAIN_DB_PREFIX."contratdet.fk_contrat, element_type
                        FROM ".MAIN_DB_PREFIX."contratdet,
-                            llx_product_serial_cont,
+                            ".MAIN_DB_PREFIX."product_serial_cont,
                             Babel_GMAO_contratdet_prop
                       WHERE serial_number = '".$objsav->serial."'
                         AND element_type like 'contrat%'
-                        AND ".MAIN_DB_PREFIX."contratdet.rowid = llx_product_serial_cont.element_id
+                        AND ".MAIN_DB_PREFIX."contratdet.rowid = ".MAIN_DB_PREFIX."product_serial_cont.element_id
                         AND Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid ";
 //        print $requete;
         $sql1 = $db->query($requete);

@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -32,7 +35,7 @@
  \file       htdocs/core/modules/contratGA/mod_contratGA_malachite.php
  \ingroup    commande
  \brief      Fichier contenant la classe du modele de numerotation de reference de contratGA Malachite
- \version    $Id: mod_commande_malachite.php,v 1.9 2010 Jean-Marc LE FEVRE Exp $
+ \version    $Id: mod_commande_malachite.php,v 1.9 2010 Tommy SAURON Exp $
  */
 
 include_once("modules_contratGA.php");

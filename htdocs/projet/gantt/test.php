@@ -155,7 +155,7 @@ print $html;
                                     <td>
                                         <SELECT id="SelUser" style="max-width: 200px;width: 200px;" disabled=false>
                                             <OPTION SELECTED value="-1">Select-></OPTION>
-                                            <OPTION value="59">Jean-Marc LE FEVRE</OPTION>
+                                            <OPTION value="59">Utilisateur</OPTION>
                                             <OPTION value="39">Demo Demo</OPTION>
                                         </SELECT>
                                     </td>

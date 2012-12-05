@@ -1,13 +1,13 @@
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.0
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
 dojo.provide("BabelCalWidget.widget.Calendar");
@@ -226,7 +226,7 @@ dojo.declare(
                     prevDatestr = currentDatestr;
                 }
 
-                //calcul la durée de l'event entre minuit à la start date et minuit à la end date
+                //calcul la durï¿½e de l'event entre minuit ï¿½ la start date et minuit ï¿½ la end date
                 if (oDateObject) {
 
                     startDate = dojo.date.stamp.fromISOString(this.calendarEvents[i].starttime);

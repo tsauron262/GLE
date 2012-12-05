@@ -1,16 +1,17 @@
 <?php
 /*
-  * GLE by finaproStd-Services
+  * GLE by Synopsis & DRSI
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@finaproStd-services.com>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.finaproStd-services.com
+  * Infos on http://www.Synopsis-erp.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 

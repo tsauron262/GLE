@@ -432,7 +432,7 @@ class Contrat extends CommonObject
                        date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
                        date_format(d.date_cloture,'%d/%m/%Y') as date_cloture
                   FROM ".MAIN_DB_PREFIX."contratdet as d,
-                       llx_product as p
+                       ".MAIN_DB_PREFIX."product as p
                  WHERE d.fk_contrat = ".$this->id ." AND d.fk_product = p.rowid
               ORDER BY d.line_order, d.rowid ASC";
 

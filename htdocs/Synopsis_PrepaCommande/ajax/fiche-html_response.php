@@ -170,8 +170,7 @@ EOF;
         print $langs->trans('Commercial cde');
         print '</th><td colspan="2" class="ui-widget-content">';
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         print traiteStr($tmpUser->getNomUrl(1));
         print '</td>';

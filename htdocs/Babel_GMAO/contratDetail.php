@@ -102,7 +102,7 @@
     {
         $contrat=getContratObj($id);
         $result=$contrat->fetch($id);
-        if ($result > 0) $result=$contrat->fetch_lignes(true);
+        if ($result > 0) $result=$contrat->fetch_lines(true);
         if ($result < 0)
         {
             dol_print_error($db,$contrat->error);

@@ -41,7 +41,7 @@
     {
         $idAnnexe = $_REQUEST['modele'];
         $id = $_REQUEST['id'];
-        $requete = "DELETE FROM Babel_contrat_annexe WHERE contrat_refid = ".$id . " AND annexe_refid = ".$idAnnexe;
+        $requete = "DELETE FROM llx_Synopsis_contrat_annexe WHERE contrat_refid = ".$id . " AND annexe_refid = ".$idAnnexe;
         $sql = $db->query($requete);
         header('location:annexes.php?id='.$id);
     }
@@ -60,6 +60,7 @@ $js = <<<EOF
                 saveAnnexe();
            },
            receive: function(event, ui) {
+                jQuery('ul#sortable').find('.ui-draggable').attr('id', jQuery(ui.item).attr('id'));
                 jQuery('ul#sortable').find('.ui-draggable').removeClass("ui-draggable");
                 jQuery(ui.item).remove();
                 saveAnnexe();
@@ -149,7 +150,7 @@ EOF;
         $contrat=getContratObj($id);
         $result=$contrat->fetch($id);
         //saveHistoUser($contrat->id, "contrat",$contrat->ref);
-        if ($result > 0) $result=$contrat->fetch_lignes();
+        if ($result > 0) $result=$contrat->fetch_lines();
         if ($result < 0)
         {
             dol_print_error($db,$contrat->error);
@@ -173,9 +174,9 @@ EOF;
         $commercial_suivi->fetch();
 
         $head = contract_prepare_head($contrat);
-        $head = $contrat->getExtraHeadTab($head);
+//        $head = $contrat->getExtraHeadTab($head);
 
-        $hselected = "Annexes";
+        $hselected = "annexe";
 
         dol_fiche_head($head, $hselected, $langs->trans("Contract"));
 
@@ -194,8 +195,10 @@ EOF;
         print "</td>";
 
         // Customer
+        $societe = new Societe($db);
+        $societe->fetch($contrat->socid);
         print '   <th class="ui-widget-header ui-state-default">'.$langs->trans("Customer").'</th>';
-        print '    <td colspan="1" class="ui-widget-content">'.$contrat->societe->getNomUrl(1).'</td></tr>';
+        print '    <td colspan="1" class="ui-widget-content">'.$societe->getNomUrl(1).'</td></tr>';
 
         // Statut contrat
         print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Status").'</th>
@@ -304,7 +307,7 @@ EOF;
                             print 'la commande<td>';
                             print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=chSrc&amp;id='.$id.'">'.img_edit($langs->trans("Change la source")).'</a>';
                             require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-                            $comm = new Commande($db);
+                            $comm = new Synopsis_Commande($db);
                             $comm->fetch($val1);
                             if($conf->global->MAIN_MODULE_BABELPREPACOMMANDE == 1){
                                 print "</table><td colspan=1 class='ui-widget-content'>".$comm->getNomUrl(1);
@@ -346,7 +349,7 @@ EOF;
                     if ($val1 > 0)
                     {
                         require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-                        $comm = new Commande($db);
+                        $comm = new Synopsis_Commande($db);
                         $result=$comm->fetch($val1);
                         if ($result>0){
                             print '<tr><th class="ui-widget-header ui-state-default">';
@@ -408,8 +411,8 @@ EOF;
         $requete = "SELECT p.modeleName,
                            p.id,
                            p.ref
-                      FROM Babel_contrat_annexe as a,
-                           Babel_contrat_annexePdf as p
+                      FROM llx_Synopsis_contrat_annexe as a,
+                           llx_Synopsis_contrat_annexePdf as p
                      WHERE a.annexe_refid = p.id
                        AND contrat_refid = ".$contrat->id."
                   ORDER BY a.rang";
@@ -431,8 +434,8 @@ EOF;
         $requete = "SELECT p.modeleName,
                            p.id,
                            p.ref
-                      FROM Babel_contrat_annexePdf as p
-                     WHERE p.id NOT IN (SELECT annexe_refid FROM Babel_contrat_annexe WHERE contrat_refid =".$contrat->id.")
+                      FROM llx_Synopsis_contrat_annexePdf as p
+                     WHERE p.id NOT IN (SELECT annexe_refid FROM llx_Synopsis_contrat_annexe WHERE contrat_refid =".$contrat->id.")
                   ORDER BY p.modeleName";
         $sql = $db->query($requete);
         print '<ul id="draggable">';

@@ -55,11 +55,11 @@ $contrat->fetch($_GET["id"]);
 $contrat->info($_GET["id"]);
 
 $head = contract_prepare_head($contrat);
-$head = $contrat->getExtraHeadTab($head);
+//$head = $contrat->getExtraHeadTab($head);
 
 $hselected = 5;
 
-dol_fiche_head($head, 'SAV', $langs->trans("Contract"));
+dol_fiche_head($head, 'sav', $langs->trans("Contract"));
 
 
 //jqGrid SAV

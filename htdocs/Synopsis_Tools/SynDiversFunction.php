@@ -46,9 +46,10 @@ function select_duration($prefix, $iSecond = '') {
 function getContratObj($id) {
     global $db, $conf;
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
     if ($conf->global->MAIN_MODULE_BABELGA == 1 || $conf->global->MAIN_MODULE_BABELGMAO) {
-        $contrat = new Contrat($db);
-        $contratTmp = new Contrat($db);
+        $contrat = new Synopsis_Contrat($db);
+        $contratTmp = new Synopsis_Contrat($db);
         $type = $contratTmp->getTypeContrat_noLoad($id);
         //if ($contrat->isGA($id))
         switch ($type) {
@@ -92,11 +93,11 @@ function getContratObj($id) {
                 break;
 
             default:
-                $contrat = new Contrat($db);
+                $contrat = new Synopsis_Contrat($db);
                 break;
         }
     } else {
-        $contrat = new Contrat($db);
+        $contrat = new Synopsis_Contrat($db);
     }
     return ($contrat);
 }

@@ -273,6 +273,14 @@ function getTab() {
         array("llx_co_exp", "llx_element_element",
             array("fk_commande", 'fk_expedition', '$%commande', '$%shipping'),
             array("fk_source", "fk_target", 'sourcetype', "targettype")
+        ),
+        array("Babel_contrat_annexe", "llx_Synopsis_contrat_annexe",
+            array(),
+            array()
+        ),
+        array("Babel_contrat_annexePdf", "llx_Synopsis_contrat_annexePdf",
+            array(),
+            array()
         )
     );
 }

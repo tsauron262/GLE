@@ -352,4 +352,6 @@ function sec2time($sec){
     //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
     return ($returnstring);
 }
+
+llxFooter();
 ?>

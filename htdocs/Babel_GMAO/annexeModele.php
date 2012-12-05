@@ -55,12 +55,12 @@ EOF;
         $annexe = addslashes($_REQUEST['annexe']);
         $ref = addslashes($_REQUEST['ref']);
         $afficheTitre = ($_REQUEST['afficheTitre']."x"=="x"?0:1);
-        $requete = "SELECT * FROM Babel_contrat_annexePdf  WHERE ref = '".$ref."'";
+        $requete = "SELECT * FROM llx_Synopsis_contrat_annexePdf  WHERE ref = '".$ref."'";
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0){
             $msg = "Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;e";
         } else {
-            $requete = "INSERT INTO Babel_contrat_annexePdf (modeleName, annexe,ref,afficheTitre) VALUES ('".$modeleName."','".$annexe."','".$ref."',".$afficheTitre.")";
+            $requete = "INSERT INTO llx_Synopsis_contrat_annexePdf (modeleName, annexe,ref,afficheTitre) VALUES ('".$modeleName."','".$annexe."','".$ref."',".$afficheTitre.")";
             $sql = $db->query($requete);
             if ($sql && $id > 0)
             {
@@ -89,7 +89,7 @@ EOF;
         {
                 header('Location:annexes.php?id='.$id);
         } else if ($_REQUEST['effacer'] == 1) {
-            $requete = "DELETE FROM Babel_contrat_annexePdf  WHERE id = '".$modele."'";
+            $requete = "DELETE FROM llx_Synopsis_contrat_annexePdf  WHERE id = '".$modele."'";
             $sql = $db->query($requete);
             if ($sql)
             {
@@ -99,25 +99,25 @@ EOF;
                 $msg = "Erreur inconnue";
             }
         } else if($_REQUEST['clone'] == 1) {
-            $requete = "SELECT * FROM Babel_contrat_annexePdf  WHERE ref = '".$ref."'";
+            $requete = "SELECT * FROM llx_Synopsis_contrat_annexePdf  WHERE ref = '".$ref."'";
             $sql1 = $db->query($requete);
             if ($db->num_rows($sql1) > 0){
                 $msg = "Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;e";
                 $sql=false;
             } else {
-                $requete = "INSERT INTO Babel_contrat_annexePdf
+                $requete = "INSERT INTO llx_Synopsis_contrat_annexePdf
                                         (modeleName, annexe, ref, afficheTitre)
                                  VALUES ('".$modeleName."','".$annexe."','".$ref."',".$afficheTitre.")";
                 $sql = $db->query($requete);
             }
         } else {
-            $requete = "SELECT * FROM Babel_contrat_annexePdf  WHERE ref = '".$ref."' AND id <> ".$modele;
+            $requete = "SELECT * FROM llx_Synopsis_contrat_annexePdf  WHERE ref = '".$ref."' AND id <> ".$modele;
             $sql1 = $db->query($requete);
             if ($db->num_rows($sql1) > 0){
                 $msg = "Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;e";
                 $sql=false;
             } else {
-                $requete = "UPDATE Babel_contrat_annexePdf
+                $requete = "UPDATE llx_Synopsis_contrat_annexePdf
                                SET ref = '".$ref."',
                                    annexe = '".$annexe."',
                                    modeleName = '".$modeleName."',
@@ -144,7 +144,7 @@ EOF;
         $contrat=getContratObj($id);
         $result=$contrat->fetch($id);
         //saveHistoUser($contrat->id, "contrat",$contrat->ref);
-        if ($result > 0) $result=$contrat->fetch_lignes();
+        if ($result > 0) $result=$contrat->fetch_lines();
         if ($result < 0)
         {
             dol_print_error($db,$contrat->error);
@@ -152,7 +152,7 @@ EOF;
         }
         $head = contract_prepare_head($contrat);
         $head = $contrat->getExtraHeadTab($head);
-        $hselected = "Annexes";
+        $hselected = "annexe";
         dol_fiche_head($head, $hselected, $langs->trans("Contract"));
     }
 
@@ -163,7 +163,7 @@ EOF;
         {
             print "<div class='error ui-state-error'>".$msg."</div>";
         }
-        $requete = "SELECT * FROM Babel_contrat_annexePdf WHERE id = ".$_REQUEST['modele'];
+        $requete = "SELECT * FROM llx_Synopsis_contrat_annexePdf WHERE id = ".$_REQUEST['modele'];
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         print "<form name='form' id='form'  method='POST' action='annexeModele.php?modele=".$res->id."&action=modifyModele".($id>0?"&id=".$id:"") . "'>";
@@ -309,5 +309,5 @@ EOF;
     }
 
 
-
+llxfooter();
 ?>

@@ -41,7 +41,7 @@
             $contrat->fetch($contratId);
         }
         $contrat->info($contratId);
-        $contrat->fetch_lignes();
+        $contrat->fetch_lines();
         $requete = "SELECT *
         FROM ".MAIN_DB_PREFIX."contratdet
         WHERE fk_contrat=".$contratId;

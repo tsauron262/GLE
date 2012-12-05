@@ -1557,7 +1557,7 @@ EOF;
                 $type = getTypeContrat_noLoad($fichinter->fk_contrat);
                 if ($type == 7) {
                     $contrat->fetch($fichinter->fk_contrat);
-                    $contrat->fetch_lignes(true);
+                    $contrat->fetch_lines(true);
                     print "<tr id='contratLigne" . $val->id . "' " . $bc[$var] . ">";
                     print "<td id='showDetail' class='showDetail'><span style='float: left;' class='ui-icon ui-icon-search'></span>D&eacute;tail<td colspan=10><table style='display: none;'>";
                     foreach ($contrat->lignes as $key => $val) {
@@ -1695,7 +1695,7 @@ EOF;
                 $type = getTypeContrat_noLoad($fichinter->fk_contrat);
                 if ($type == 7) {
                     $contrat->fetch($fichinter->fk_contrat);
-                    $contrat->fetch_lignes(true);
+                    $contrat->fetch_lines(true);
                     print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
                     foreach ($contrat->lignes as $key => $val) {
 //TODO ajouter filtre
@@ -1826,7 +1826,7 @@ EOF;
             $type = getTypeContrat_noLoad($fichinter->fk_contrat);
             if ($type == 7) {
                 $contrat->fetch($fichinter->fk_contrat);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
                 print "<tr><td colspan=11 style='border:1px Solid; border-top: 0px;'><table width=100%>";
                 foreach ($contrat->lignes as $key => $val) {
                     if ($val->statut >= 0 && $val->statut < 5 && !in_array($val->id, $arrTmp)) {

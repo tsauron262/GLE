@@ -142,7 +142,7 @@ if ($_REQUEST['dateFinConf'])
         require_once(DOL_DOCUMENT_ROOT.'/Babel_GA/ContratGA.class.php');
         $contrat = new ContratGA($db);
         $contrat->fetch($id);
-        $contrat->fetch_lignes();
+        $contrat->fetch_lines();
 
         $client_signataire_refid = $contrat->client_signataire_refid;
 
@@ -597,7 +597,7 @@ if ($_REQUEST['dateFinConf'])
         $contrat->id = $_REQUEST["id"];
         if ($contrat->fetch($_REQUEST["id"]))
         {
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
 
             $xml.="<srvPanel>";
             $xml .= "<![CDATA[<div>";

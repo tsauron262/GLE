@@ -556,8 +556,8 @@ EOF;
 
 
         $requete = "SELECT fd.rowid, fd.duree
-                      FROM ".MAIN_DB_PREFIX."fichinter as f,
-                           ".MAIN_DB_PREFIX."fichinterdet as fd,
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
+                           ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
                            llx_Synopsis_fichinter_c_typeInterv as b
                      WHERE b.id = fd.fk_typeinterv
                        AND fd.fk_fichinter = f.rowid
@@ -1932,7 +1932,7 @@ EOF;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumDI = ($res->sDI>0?$res->sDI:0);
-        $requete = "SELECT count(rowid) as sFI FROM ".MAIN_DB_PREFIX."fichinter WHERE fk_contrat = ".$this->id;
+        $requete = "SELECT count(rowid) as sFI FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_contrat = ".$this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumFI = ($res->sFI>0?$res->sFI:0);

@@ -1700,7 +1700,7 @@ EOF;
                 $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);
                 if ($type == 7) {
                     $contrat->fetch($demandeInterv->fk_contrat);
-                    $contrat->fetch_lignes();
+                    $contrat->fetch_lines();
                     print "<tr id='contratLigne" . $val->id . "' " . $bc[$var] . ">";
                     print "<td id='showDetail' class='showDetail'><span style='float: left;' class='ui-icon ui-icon-search'></span>D&eacute;tail<td colspan=10><table style='display: none;'>";
                     foreach ($contrat->lignes as $key => $val) {
@@ -1803,7 +1803,7 @@ EOF;
                 $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);
                 if ($type == 7) {
                     $contrat->fetch($demandeInterv->fk_contrat);
-                    $contrat->fetch_lignes();
+                    $contrat->fetch_lines();
                     print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
                     foreach ($contrat->lignes as $key => $val) {
                         if ($val->statut >= 0 && $val->statut < 5) {
@@ -1945,7 +1945,7 @@ EOF;
             $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);
             if ($type == 7) {
                 $contrat->fetch($demandeInterv->fk_contrat);
-                $contrat->fetch_lignes();
+                $contrat->fetch_lines();
                 print "<tr><td colspan=11 style='border:1px Solid; border-top: 0px;'><table width=100%>";
                 foreach ($contrat->lignes as $key => $val) {
                     if ($val->statut >= 0 && $val->statut < 5) {

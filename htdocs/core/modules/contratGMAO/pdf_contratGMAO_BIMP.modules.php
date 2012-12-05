@@ -111,11 +111,11 @@ class pdf_contratGMAO_BIMP extends ModelePDFContrat
                 require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/contratMixte.class.php");
                 $contrat=getContratObj($id);
                 $contrat->fetch($id);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
 //                $contrat = new ContratMixte($this->db);
 //                $ret=$contrat->fetch($id);
             } else {
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
             }
 
             // Definition de $dir et $file
@@ -158,8 +158,8 @@ class pdf_contratGMAO_BIMP extends ModelePDFContrat
                 $pdf1=new FPDI('P','mm',$this->format);
 
                 $requete = "SELECT *
-                              FROM Babel_contrat_annexePdf as p,
-                                   Babel_contrat_annexe as a
+                              FROM llx_Synopsis_contrat_annexePdf as p,
+                                   llx_Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id."
                           ORDER BY a.rang";
@@ -913,8 +913,8 @@ au ".$val->date_fin_prevue),0,'C',1);
 //                $pdf->SetAutoPageBreak(0,1);
 
                 $requete = "SELECT *
-                              FROM Babel_contrat_annexePdf as p,
-                                   Babel_contrat_annexe as a
+                              FROM llx_Synopsis_contrat_annexePdf as p,
+                                   llx_Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id. "
                           ORDER BY a.rang";

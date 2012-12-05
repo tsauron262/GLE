@@ -325,7 +325,7 @@ if ($_REQUEST["id"] > 0) {
             $type = getTypeContrat_noLoad($fichinter->fk_contrat);
             if ($type == 7) {
                 $contrat->fetch($fichinter->fk_contrat);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
                 $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
             <td class="ui-widget-content" colspan="3">';
@@ -475,7 +475,7 @@ if ($fichinter->fk_contrat > 0) {
     $type = getTypeContrat_noLoad($fichinter->fk_contrat);
     if ($type == 7) {
         $contrat->fetch($fichinter->fk_contrat);
-        $contrat->fetch_lignes(true);
+        $contrat->fetch_lines(true);
         $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
             <td class="ui-widget-content" colspan="3">';

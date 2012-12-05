@@ -140,7 +140,7 @@ if ($_REQUEST['dateFinConf'])
         $contrat->id = $_REQUEST["id"];
         if ($contrat->fetch($_REQUEST["id"]))
         {
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
 
             $xml.="<srvPanel>";
             $xml .= "<![CDATA[<div>";

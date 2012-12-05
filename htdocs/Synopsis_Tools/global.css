@@ -78,3 +78,37 @@ div.mainmenu.synopsisficheinter {
 #mainmenutd_project{
     display: none;
 }
+
+
+.tabBar{
+    position: relative;
+}
+
+.noteAjax{
+    position: absolute;
+    right: 0;
+    top: 80px;  
+}
+.noteAjax > div{
+    float:left;
+}
+.noteAjax .note{
+    display: none;
+    background: white;
+    border: 1px dotted black;
+}
+.noteAjax input{
+    height: 50px;
+    background: none repeat scroll 0% 0% rgb(250, 229, 128); 
+    margin-top: 150px;
+    margin-right: 10px;
+}
+#notePublicEdit{
+    padding: 5px;
+    overflow-y: hidden;
+    color: rgb(0, 0, 0);
+    background: none repeat scroll 0% 0% rgb(250, 229, 128); 
+    margin: 0px 3% 0px 1%;
+    height: 350px;
+    width: 250px;
+}

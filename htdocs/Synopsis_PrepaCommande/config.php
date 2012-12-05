@@ -149,8 +149,21 @@ if ($_REQUEST["action"] == 'totalCatList')
       $arrCat[$res->catId] = $res->catId;
   }
   $cate_arbo = $cat->get_full_arbo(0);
+//  echo "<pre>";print_r($cate_arbo);die;
   if (sizeof($cate_arbo))
   {
+      foreach($cate_arbo as $key => $val){
+          $newTab[$val['id']] = $val;
+      }
+      $cate_arbo = $newTab;
+      foreach($cate_arbo as $key => $val){
+          if(isset($val['fk_parent']) && $val['fk_parent'] != $key && $val['fk_parent'] != '')
+              $cate_arbo[$val['fk_parent']]['id_children'][] = $key;
+      }
+      
+      
+      
+      
 //        require_once(DOL_DOCUMENT_ROOT.'/includes/treemenu/TreeMenu.php');
         // Ajoute id_mere sur tableau cate_arbo
         $i=0;
@@ -167,15 +180,15 @@ if ($_REQUEST["action"] == 'totalCatList')
                     foreach($val['id_children'] as $key1=>$val1)
                     {
                         //$table .= print_r($cate_arbo,true);
-                        $tmpId = false;
-                        foreach($cate_arbo as $key2=>$val2)
-                        {
-                            if ($val2['id'] == $val1)
-                            {
-                                $tmpId = $key2;
-                                break;
-                            }
-                        }
+                        $tmpId = $val1;
+//                        foreach($cate_arbo as $key2=>$val2)
+//                        {
+//                            if ($val2['id'] == $val1)
+//                            {
+//                                $tmpId = $key2;
+//                                break;
+//                            }
+//                        }
                         if ($tmpId  && count($cate_arbo[$tmpId]['id_children']) > 0)
                         {
                             print recurse_tree($val1,$cate_arbo,$arrCat);
@@ -216,6 +229,14 @@ if ($_REQUEST["action"] == 'totalCatList')
     {
 //        require_once(DOL_DOCUMENT_ROOT.'/includes/treemenu/TreeMenu.php');
         // Ajoute id_mere sur tableau cate_arbo
+      foreach($cate_arbo as $key => $val){
+          $newTab[$val['id']] = $val;
+      }
+      $cate_arbo = $newTab;
+      foreach($cate_arbo as $key => $val){
+          if(isset($val['fk_parent']) && $val['fk_parent'] != $key && $val['fk_parent'] != '')
+              $cate_arbo[$val['fk_parent']]['id_children'][] = $key;
+      }
         $i=0;
         print "<ul id='checkboxTree' class='checkboxTree'>";
         foreach ($cate_arbo as $key => $val)
@@ -320,15 +341,15 @@ function recurse_tree($idChild,$cate_arbo,$arrCat){
                 foreach($val['id_children'] as $key1=>$val1)
                 {
                     //$table .= print_r($cate_arbo,true);
-                    $tmpId = false;
-                    foreach($cate_arbo as $key2=>$val2)
-                    {
-                        if ($val2['id'] == $val1)
-                        {
-                            $tmpId = $key2;
-                            break;
-                        }
-                    }
+                    $tmpId = $val1;
+//                    foreach($cate_arbo as $key2=>$val2)
+//                    {
+//                        if ($val2['id'] == $val1)
+//                        {
+//                            $tmpId = $key2;
+//                            break;
+//                        }
+//                    }
                     if ($tmpId  && count($cate_arbo[$tmpId]['id_children']) > 0)
                     {
 //                        $html .= "<li>";

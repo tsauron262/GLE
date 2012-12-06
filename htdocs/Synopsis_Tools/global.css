@@ -80,14 +80,14 @@ div.mainmenu.synopsisficheinter {
 }
 
 
-.tabBar{
+.tabBar, .fiche{
     position: relative;
 }
 
 .noteAjax{
     position: absolute;
     top: 20px;
-    left: 340px;  
+    left: 280px;  
 }
 .noteAjax > div{
     float:left;
@@ -111,7 +111,9 @@ div.mainmenu.synopsisficheinter {
     margin: 0px 3% 0px 1%;
     height: 350px;
     width: 250px;
-    cursor: pointer;
+}
+#notePublicEdit.editable{
+    cursor: pointer;    
 }
 a#note.lienNote{
     background-color: #FAE580;

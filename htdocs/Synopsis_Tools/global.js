@@ -6,7 +6,7 @@ $(window).load(function(){
     traiteScroll(heightDif);
     
     
-    $("#mainmenua_SynopsisTools.tmenudisabled").parent().hide();
+    $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
     
     
     ajNoteAjax();   
@@ -70,7 +70,12 @@ function ajNoteAjax(){
             if(msg != "0"){
                 //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 //                $('.tabBar').append(htmlDiv);
-                var htmlDiv  = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                classEdit = "";
+                if(msg.indexOf("[1]") > -1){
+                    classEdit = "editable";
+                    msg = msg.replace("[1]", "");
+                }
+                var htmlDiv  = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="'+classEdit+'" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 $('.fiche').append(htmlDiv);
                 //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
                 //                $('a#note').append(htmlDiv);
@@ -78,15 +83,15 @@ function ajNoteAjax(){
                 $('a#note, .noteAjax').hover(shownNote, hideNote);
                 $('a#note').addClass("lienNote");
                 
-//                $(".controlBut").click(function(){
-//                    if($(this).val() == "<"){
-//                        $(this).val(">");
-//                    }
-//                    else{
-//                        $(this).val("<");
-//                    }     
-//                    shownHideNote();   
-//                })
+                //                $(".controlBut").click(function(){
+                //                    if($(this).val() == "<"){
+                //                        $(this).val(">");
+                //                    }
+                //                    else{
+                //                        $(this).val("<");
+                //                    }     
+                //                    shownHideNote();   
+                //                })
                 
                 jQuery('.editable').click(function(){
                     fermable = false;
@@ -105,6 +110,9 @@ function ajNoteAjax(){
                             type:"POST",
                             cache: false,
                             success:function(msg){
+                                if(msg.indexOf("[1]") > -1){
+                                    msg = msg.replace("[1]", "");
+                                }
                                 $("#notePublicEdit").html(msg);
                                 $("#notePublicEdit").addClass("editable");
                             }

@@ -1,10 +1,11 @@
 $(window).load(function(){
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
+    if($("div.tmenudiv").is(':visible')){
     $(window).resize(function(){
         traiteScroll(heightDif);
     });
     traiteScroll(heightDif);
-    
+}
     
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
     

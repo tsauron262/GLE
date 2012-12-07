@@ -1,6 +1,6 @@
 <?php
 
-function printHead($type){
+function printHead($type, $id){
     global $db, $langs;
     switch ($type) {
         case "Commande": {

@@ -306,7 +306,7 @@ switch ($type) {
 $obj = false;
 
 if ($id > 0 && $type . "x" != "x") {
-    printHead($type);
+    printHead($type, $id);
     $arrProcess = getIdleProcess($db, $type, $id);
 
     if (count($arrProcess) > 0) {

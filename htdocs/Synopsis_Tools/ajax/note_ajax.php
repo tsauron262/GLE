@@ -45,6 +45,16 @@ if (isset($_POST['url'])) {
         $droit1 = $user->rights->synopsisdemandeinterv->lire;
         $droit2 = $user->rights->synopsisdemandeinterv->creer;
     }
+    if (stripos($url, '/Synopsis_DemandeInterv/') !== false) {
+        $table = MAIN_DB_PREFIX."Synopsis_demandeInterv";
+        $droit1 = $user->rights->synopsisdemandeinterv->lire;
+        $droit2 = $user->rights->synopsisdemandeinterv->creer;
+    }
+    if (stripos($url, '/comm/propal') !== false) {
+        $table = MAIN_DB_PREFIX."propal";
+        $droit1 = $user->rights->propal->lire;
+        $droit2 = $user->rights->propal->creer;
+    }
 
     foreach ($tabUrl as $val) {
         if (stripos($val, $nomId) !== false)

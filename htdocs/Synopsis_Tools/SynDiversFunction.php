@@ -1,5 +1,20 @@
 <?php
 
+
+
+function getHeader(){
+        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
+        $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '".DOL_URL_ROOT."';</script>\n";
+        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/global.js"></script>';
+
+        $nameFile = DOL_DATA_ROOT . "/special.css";
+        if (is_file($nameFile)) {
+            $css = file_get_contents($nameFile);
+            $return .= "<style>" . $css . "</style>";
+        }
+        return $return; 
+}
+
 function sanitize_string($str, $newstr = '_') {
     $forbidden_chars_to_underscore = array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=");
     //$forbidden_chars_to_remove=array("(",")");

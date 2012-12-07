@@ -602,7 +602,7 @@ EOF;
         } else {
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
-                    print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?propalid=" . $res->rowid . "'>" . $res->ref . "</a></td>";
+                    print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a></td>";
                 }
             }
         }

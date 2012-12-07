@@ -93,7 +93,7 @@
                     $message = "Bonjour,<br/>\n<br/>\n    Le contrat de financement ".$contrat->ref.' arrive bient&ocirc;t &agrave; terme<br/>\n<br/>\nCordialement,';
 
                     $sql1 = false;
-                    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+                    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
                     $mailfile = new CMailFile($subject,$to,$from,$message,$filepath,$mimetype,$filename,$sendtocc,'',$deliveryreceipt=false);
                     if ($mailfile->error)
                     {

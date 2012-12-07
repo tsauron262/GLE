@@ -20,7 +20,7 @@
   */
 
   require_once('../../../main.inc.php');
-  require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
   $id = $_REQUEST['comId'];
   $xmlStr = "<ajax-response>";
   $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET finance_statut=0 WHERE rowid = ".$id;
@@ -68,7 +68,7 @@
         $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject,$to,$from,$msg,array(),array(),array(),$addr_cc,'',0,1,$from);
 
   } else {

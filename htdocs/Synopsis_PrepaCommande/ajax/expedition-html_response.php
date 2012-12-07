@@ -84,7 +84,7 @@ if ($_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
     $from = $conf->global->BIMP_MAIL_FROM;
     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
 
-    require_once(DOL_DOCUMENT_ROOT . '/core/lib/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
     $msg = "Le mail a &eacute;t&eacute; envoy&eacute;";
     $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (SELECT ce.fk_expedition FROM " . MAIN_DB_PREFIX . "co_exp as ce WHERE fk_commande=" . $commande->id . ") ";
@@ -165,7 +165,7 @@ if ($_REQUEST["id"] > 0) {
             print "<select name='newDepot' id='newDepot'>";
             $sql6 = $db->query($requete);
             while ($res6 = $db->fetch_object($sql6)) {
-                print "<option value='" . $res6->rowid . "'>" . utf8_encode($res6->lieu) . "</option>";
+                print "<option value='" . $res6->rowid . "'>" . traite_str($res6->lieu) . "</option>";
             }
             print "</select>";
             print "<button onClick='validateDepot();' class='butAction'>OK</button>";
@@ -177,7 +177,7 @@ if ($_REQUEST["id"] > 0) {
                 $sql6 = $db->query($requete);
                 $res6 = $db->fetch_object($sql6);
                 if ($res6->lieu . "x" != 'x')
-                    print utf8_encode($res6->lieu);
+                    print traite_str($res6->lieu);
             }
         }
         print '</td>';
@@ -281,9 +281,9 @@ EOF;
         print '</th><td colspan="2" class="ui-widget-content">';
 
 //        if ($_REQUEST['action'] == 'editdelivery_adress') {
-//            print utf8_encode($html->form_adresse_livraison($_SERVER['PHP_SELF'] . '?id=' . $commande->id, $commande->adresse_livraison_id, $_REQUEST['socid'], 'adresse_livraison_id', 'commande', $commande->id, false));
+//            print traite_str($html->form_adresse_livraison($_SERVER['PHP_SELF'] . '?id=' . $commande->id, $commande->adresse_livraison_id, $_REQUEST['socid'], 'adresse_livraison_id', 'commande', $commande->id, false));
 //        } else {
-//            print utf8_encode($html->form_adresse_livraison($_SERVER['PHP_SELF'] . '?id=' . $commande->id, $commande->adresse_livraison_id, $_REQUEST['socid'], 'none', 'commande', $commande->id, false));
+//            print traite_str($html->form_adresse_livraison($_SERVER['PHP_SELF'] . '?id=' . $commande->id, $commande->adresse_livraison_id, $_REQUEST['socid'], 'none', 'commande', $commande->id, false));
 //        }
         print getAdresseLivraisonComm($commande->id);
         print '</td>';
@@ -346,10 +346,10 @@ EOF;
                     print '<td>';
                     print '<a href="' . DOL_URL_ROOT . '/product/fiche.php?id=' . $objp->fk_product . '">';
                     print img_object($langs->trans("Product"), "product") . ' ' . $product->ref . '</a>';
-                    print utf8_encode($product->libelle ? ' - ' . $product->libelle : '');
+                    print traite_str($product->libelle ? ' - ' . $product->libelle : '');
                     print '</td>';
                 } else {
-                    print "<td>" . utf8_encode(nl2br($objp->description)) . "</td>\n";
+                    print "<td>" . traite_str(nl2br($objp->description)) . "</td>\n";
                 }
 
                 print '<td align="center">' . $objp->qty . '</td>';
@@ -476,6 +476,6 @@ function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         return -1;
     }
 }
-
+function traite_str($str){ return $str;}
 $db->close();
 ?>

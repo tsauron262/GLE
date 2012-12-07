@@ -988,7 +988,7 @@ class FichinterLigne
         $sql = 'SELECT ft.rowid, ft.fk_fichinter, ft.description, ft.duree, ft.rang, ft.fk_typeinterv, f.label as typeinterv ';
         $sql .= ',`tx_tva`,`pu_ht` ,`qte`,`total_ht`,`total_tva`,`total_ttc`,`fk_contratdet`,`fk_commandedet`,`isForfait`';
         $sql.= ' ,ft.date as datei,fk_depProduct';
-        $sql.= ' FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft';
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
 
         $sql.= ' WHERE ft.rowid = '.$rowid;

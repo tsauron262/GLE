@@ -58,7 +58,7 @@ if ($conf->global->BIMP_MAIL_TO ."x" == 'x' || $conf->global->BIMP_MAIL_FROM."x"
     {
         global $mysoc;
 
-          require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+          require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
 
           global $langs, $user;
           $mail = new CMailFile($subject,$to,$from,$msg,

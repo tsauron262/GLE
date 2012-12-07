@@ -344,8 +344,18 @@ class modSynopsisPrepaCommande extends DolibarrModules
   `logistique_date_dispo` date NOT NULL,
   `coef` int(11) NOT NULL,
   PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-");
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;",
+            "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_PrepaCom_messages` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `commande_refid` int(11) DEFAULT NULL,
+  `type` varchar(50) DEFAULT NULL,
+  `message` longtext,
+  `user_author` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_author` (`user_author`),
+  KEY `commande_refid` (`commande_refid`)
+)");
     return $this->_init($sql);
   }
 

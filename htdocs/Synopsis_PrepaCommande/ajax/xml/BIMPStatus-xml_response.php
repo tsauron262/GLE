@@ -56,7 +56,7 @@ if ($sql)
     $from = $conf->global->BIMP_MAIL_FROM;
     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject,$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
 
 }

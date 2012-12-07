@@ -25,7 +25,7 @@
   require_once('Var_Dump.php');
 
   require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-  require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
   include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
   require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 

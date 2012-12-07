@@ -262,3 +262,9 @@ AllDI=Liste des DI
 NewDI=Nouvelle DI
 
 NoTechRepresentativeAffected=Pas de technicien affecté
+
+createFI=Créer FI
+
+ConfirmValidateDI = Valider la demande d'intervention ?
+PrisEnCharge = Prise en charge inter
+ConfirmPrisEnChargeDI = Prendre en charge l\'intervention ?

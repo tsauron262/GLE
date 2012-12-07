@@ -18,7 +18,7 @@
   */
 
   require_once("../../main.inc.php");
-  require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
   require_once(DOL_DOCUMENT_ROOT."/Babel_plaquette/plaquette.class.php");
 
   global $langs, $user;

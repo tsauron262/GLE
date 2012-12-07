@@ -10,6 +10,8 @@ $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 //$conf->global->PROJET_ADDON = "mod_projet_tourmaline";
 
 
+$conf->global->devMailTo = 'tommy@drsi.fr';
+
 
 
 

@@ -219,7 +219,7 @@ if ($_REQUEST["id"] > 0) {
     print '    <th width="25%" class="ui-widget-header ui-state-default">Type de prestation</th>
                <td class="ui-widget-content" colspan="1"><select name="typeInter">' . $selectHtml . '</select></td>';
     print '    <th width="25%" class="ui-widget-header ui-state-default">Nature de la prestation</th>
-               <td class="ui-widget-content" colspan="1"><select name="natureInter">' . utf8_decode($selectHtml2) . '</select></td>';
+               <td class="ui-widget-content" colspan="1"><select name="natureInter">' . $selectHtml2 . '</select></td>';
     print '</tr>';
 
 

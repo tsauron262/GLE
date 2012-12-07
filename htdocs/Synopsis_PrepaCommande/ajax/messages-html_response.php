@@ -178,10 +178,10 @@ function displayConv($id,$type=false)
     global $db,$user,$commande;
     $commande->fetch($id);
     $arrGrpTmp = $commande->listGroupMember(false);
-    $requete = "SELECT * FROM BIMP_messages WHERE commande_refid = ".$id. " AND type is NULL ORDER BY tms DESC";
+    $requete = "SELECT * FROM llx_Synopsis_PrepaCom_messages WHERE commande_refid = ".$id. " AND type is NULL ORDER BY tms DESC";
     if ($type)
     {
-        $requete = "SELECT * FROM BIMP_messages WHERE commande_refid = ".$id. " AND type = '".$type."' ORDER BY tms DESC";
+        $requete = "SELECT * FROM llx_Synopsis_PrepaCom_messages WHERE commande_refid = ".$id. " AND type = '".$type."' ORDER BY tms DESC";
     }
 
     if ($arrGrpTmp)
@@ -189,10 +189,10 @@ function displayConv($id,$type=false)
         $arrSql = array();
         foreach($arrGrpTmp as $key=>$val)
             $arrSql[$val->id]=$val->id;
-        $requete = "SELECT * FROM BIMP_messages WHERE commande_refid IN (".join(',',$arrSql). ") AND type is NULL ORDER BY tms DESC";
+        $requete = "SELECT * FROM llx_Synopsis_PrepaCom_messages WHERE commande_refid IN (".join(',',$arrSql). ") AND type is NULL ORDER BY tms DESC";
         if ($type)
         {
-            $requete = "SELECT * FROM BIMP_messages WHERE commande_refid IN (".join(',',$arrSql). ") AND type = '".$type."' ORDER BY tms DESC";
+            $requete = "SELECT * FROM llx_Synopsis_PrepaCom_messages WHERE commande_refid IN (".join(',',$arrSql). ") AND type = '".$type."' ORDER BY tms DESC";
         }
     }
     $sql = $db->query($requete);

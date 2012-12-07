@@ -133,7 +133,7 @@ class plaquette {
             $this->fk_soc = $mysoc->id;
         }
 
-          require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+          require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
 
           global $langs, $user;
           if ($model == 0)

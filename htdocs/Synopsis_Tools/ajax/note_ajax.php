@@ -3,6 +3,8 @@
 require_once('../../main.inc.php');
 $return = 0;
 
+$forceRightEdit = false;
+
 if (isset($_POST['url'])) {
     $url = $_POST['url'];
     $tabUrl = explode("?", $url);
@@ -48,6 +50,9 @@ if (isset($_POST['url'])) {
         if (stripos($val, $nomId) !== false)
             $id = str_replace($nomId . "=", "", $val);
     }
+    
+    if($forceRightEdit)
+        $droit2 = $droit1;
 
 
     if (isset($table) && isset($id) && $droit1) {

@@ -1,5 +1,263 @@
 <?php
 
+function printHead($type){
+    global $db, $langs;
+    switch ($type) {
+        case "Commande": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/order.lib.php");
+                $obj = new Commande($db);
+                $obj->fetch($id);
+                $head = commande_prepare_head($obj);
+                $titreType = "CustomerOrder";
+                $nomType = "commande";
+            }
+
+            break;
+        case "Propal": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/propal.lib.php");
+                $obj = new Propal($db);
+                $obj->fetch($id);
+                $head = propal_prepare_head($obj);
+                $titreType = "Proposal";
+                $nomType = "proposition";
+            }
+
+            break;
+        case "Facture": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/invoice.lib.php");
+                $obj = new Facture($db);
+                $obj->fetch($id);
+                $head = facture_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Expedition": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/expedition/class/expedition.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/sendings.lib.php");
+                $obj = new Expedition($db);
+                $obj->fetch($id);
+                $head = sending_prepare_head($obj);
+                $titreType = "Sending";
+                $nomType = "l\'expédition";
+            }
+
+            break;
+        case "ActionComm": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/actionco.lib.php");
+                $obj = new ActionComm($db);
+                $obj->fetch($id);
+                $head = actionco_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Affaire": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/Affaire.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/fct_affaire.php");
+                $obj = new Affaire($db);
+                $obj->fetch($id);
+                $head = affaire_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "FactureFournisseur": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.facture.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/fourn.lib.php");
+                $obj = new FactureFournisseur($db);
+                $obj->fetch($id);
+                $head = facturefourn_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "CommandeFournisseur": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.commande.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/fourn.lib.php");
+                $obj = new CommandeFournisseur($db);
+                $obj->fetch($id);
+                $head = commandefourn_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Contrat": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+                $obj = new Contrat($db);
+                $obj->fetch($id);
+                $head = contract_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Chrono": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_chrono.lib.php");
+                $obj = new Chrono($db);
+                $obj->fetch($id);
+                $head = chrono_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Societe": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
+                $obj = new Societe($db);
+                $obj->fetch($id);
+                $head = societe_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Contact": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/contact.lib.php");
+                $obj = new Contact($db);
+                $obj->fetch($id);
+                $head = contact_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "demandeInterv": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/demandeInterv.lib.php");
+                $obj = new demandeInterv($db);
+                $obj->fetch($id);
+                $head = demandeInterv_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Fichinter": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
+                $obj = new Fichinter($db);
+                $obj->fetch($id);
+                $head = fichinter_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Livraison": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/livraison/livraison.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/sendings.lib.php");
+                $obj = new Livraison($db);
+                $obj->fetch($id);
+                $head = delivery_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+
+            break;
+        case "Paiement": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/paiement.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/paiement.lib.php");
+                $obj = new Paiement($db);
+                $obj->fetch($id);
+                $head = paiement_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+            break;
+        case "PaiementFourn": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/fourn/facture/paiementfourn.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/paiement.lib.php");
+                $obj = new PaiementFourn($db);
+                $obj->fetch($id);
+                $head = paiementFourn_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+            break;
+        case "Product": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/product.lib.php");
+                $obj = new Product($db);
+                $obj->fetch($id);
+                $head = product_prepare_head($obj, $user);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+            break;
+        case "Project": {
+
+                require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
+                $obj = new Project($db);
+                $obj->fetch($id);
+                $head = project_prepare_head($obj);
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+            break;
+        case "Campagne": {
+                global $langs, $conf;
+                require_once(DOL_DOCUMENT_ROOT . "/BabelProspect/Campagne.class.php");
+                $obj = new Campagne($db);
+                $obj->fetch($id);
+                $head = array();
+                $h = 0;
+                $head[$h][0] = DOL_URL_ROOT . '/BabelProspect/affichePropection.php?action=list&campagneId=' . $obj->id;
+                $head[$h][1] = $langs->trans("Retour campagne");
+                $head[$h][2] = 'campagne';
+                $h++;
+                $head[$h][0] = DOL_URL_ROOT . '/Synopsis_Process/listProcessForElement.php?type=Campagne&id=' . $obj->id;
+                $head[$h][1] = $langs->trans("Process");
+                $head[$h][2] = 'process';
+                $head[$h][4] = 'ui-icon ui-icon-gear';
+                $titreType = "Invoice";
+                $nomType = "facture";
+            }
+            break;
+    }
+    
+    llxHeader('', $langs->trans('Process de la ' . $nomType));
+
+    dol_fiche_head($head, 'process', $langs->trans($titreType));
+}
+
+
+
+
+
+
 function getNomSoc($socId){
     global $db;
     $soc = new societe($db);
@@ -1535,13 +1793,13 @@ class listform extends formulaireSource {
             $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/listBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        $picto = 'formListe';
+        $picto = 'formListe@Synopsis_Process';
         $label = $langs->trans("Liste") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, 16, 16, 'ABSMIDDLE') . $lienfin);
+            $result.=($lien . img_object($label, $picto, false,false, 'ABSMIDDLE') . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, 16, 16, false, true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false,false, false, true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;
@@ -2030,13 +2288,13 @@ class requete extends formulaireSource {
             $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/queryBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        $picto = 'query';
+        $picto = 'query@Synopsis_Process';
         $label = $langs->trans("Requ&ecirc;te") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, 16, 16, 'absmiddle') . $lienfin);
+            $result.=($lien . img_object($label, $picto, false,false, 'absmiddle') . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, 16, 16, false, true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false,fasle, false, true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;
@@ -2310,13 +2568,13 @@ class fct extends formulaireSource {
             $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/fctBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        $picto = 'fct';
+        $picto = 'fct@Synopsis_Process';
         $label = $langs->trans("Fonction") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, 16, 16, 'ABSMIDDLE') . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, 'ABSMIDDLE') . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, 16, 16, false, true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, false, true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;
@@ -2462,13 +2720,13 @@ class formulaire extends process {
             $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        $picto = 'formulaire';
+        $picto = 'formulaire@Synopsis_Process';
         $label = $langs->trans("Formulaire") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, 16, 16) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false) . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, 16, 16, "ABSMIDDLE", true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, "ABSMIDDLE", true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;

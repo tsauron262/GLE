@@ -473,9 +473,10 @@ EOF;
     }
 //    print "<xmp>".$js."</xmp>";
     if (!$_REQUEST['fromIframe'] == 1) {
-        llxHeader($js, $process->label);
-        $tabType = getTypeAndId();
-        dol_fiche_head($head, $tabType[0], $langs->trans($tabType[0]));
+//        llxHeader($js, $process->label);
+//        $tabType = getTypeAndId();
+//        dol_fiche_head($head, $tabType[0], $langs->trans($tabType[0]));
+        printHead($process->typeElement->type);
         //saveHistoUser($processDetId, "process",$process->detail[$processDetId]->ref);
     } else {
         top_htmlhead($js);

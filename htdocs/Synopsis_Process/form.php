@@ -473,7 +473,7 @@ EOF;
     }
 //    print "<xmp>".$js."</xmp>";
     if (!$_REQUEST['fromIframe'] == 1) {
-        printHead($process->typeElement->type, $process->typeElement->element->id);
+        printHead($process->typeElement->type, $process->typeElement->element->id, $js);
     } else {
         top_htmlhead($js);
         $displayHead = false;

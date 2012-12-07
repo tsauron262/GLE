@@ -1,6 +1,6 @@
 <?php
 
-function printHead($type, $id){
+function printHead($type, $id, $js = ''){
     global $db, $langs;
     switch ($type) {
         case "Commande": {
@@ -248,7 +248,7 @@ function printHead($type, $id){
             break;
     }
     
-    llxHeader('', $langs->trans('Process de la ' . $nomType));
+    llxHeader($js, $langs->trans('Process de la ' . $nomType));
 
     dol_fiche_head($head, 'process', $langs->trans($titreType));
 }

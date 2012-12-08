@@ -15,7 +15,6 @@ $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
 $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
 $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
-$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER)? $conf->global->MAIN_HTML_HEADER : ""). getHeader();
 //$conf->global->PROJET_ADDON = "mod_projet_tourmaline";
 
 
@@ -38,6 +37,8 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     
     
     
+$synopsisHook = new synopsisHook();
+global $synopsisHook;
    
-
+$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER)? $conf->global->MAIN_HTML_HEADER : ""). $synopsisHook->getHeader();
 ?>

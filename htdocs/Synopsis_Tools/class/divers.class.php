@@ -20,12 +20,27 @@ class synopsisHook {
         }
     }
 
-    static function menu() {
+    static function getMenu() {
         global $conf;
+        $return = '';
         if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
             histoNavigation::saveHisto();
-            histoNavigation::getBlocHisto();
+            $return .= histoNavigation::getBlocHisto();
         }
+        return $return;
+    }
+
+    static function getHeader() {
+        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
+        $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
+        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/global.js"></script>';
+
+        $nameFile = DOL_DATA_ROOT . "/special.css";
+        if (is_file($nameFile)) {
+            $css = file_get_contents($nameFile);
+            $return .= "<style>" . $css . "</style>";
+        }
+        return $return;
     }
 
     static function footer() {
@@ -44,7 +59,7 @@ class Synopsis_Commande extends Commande {
 
     function fetch($id) {
         $return = parent::fetch($id);
-        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_commande WHERE rowid = " . $id);
+        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $id);
         $result = $this->db->fetch_object($sql);
         $this->logistique_ok = $result->logistique_ok;
         $this->logistique_statut = $result->logistique_statut;
@@ -143,7 +158,7 @@ class Synopsis_OrderLine extends OrderLine {
 
     function fetch($id) {
         $return = parent::fetch($id);
-        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_commandedet WHERE rowid = " . $id);
+        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commandedet WHERE rowid = " . $id);
         $result = $this->db->fetch_object($sql);
         $this->logistique_ok = $result->logistique_ok;
         $this->finance_ok = $result->finance_ok;
@@ -159,10 +174,10 @@ class histoNavigation {
     static function getBlocHisto() {
         global $db, $user;
 //        if ($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher) {
-        print '<div class="blockvmenupair">';
-        print '<div class="menu_titre">';
-        print '<a href="#" class="vmenu">Historique navigation</a>';
-        print "</div>";
+        $return =  '<div class="blockvmenupair">';
+        $return .= '<div class="menu_titre">';
+        $return .= '<a href="#" class="vmenu">Historique navigation</a>';
+        $return .= "</div>";
         $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                      WHERE user_refid = " . $user->id .
@@ -174,11 +189,10 @@ class histoNavigation {
             //print '<a href="#" class="vsmenu">'..'</a>';
             $ret = self::histoUser($res);
             if ($ret)
-                print "<div class='menu_contenu'>  " . $ret . "</div>";
+                $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
         }
-        print "</div>";
-
-//        }
+        $return .= "</div>";
+        return $return;
     }
 
     private static function getObj($type) {

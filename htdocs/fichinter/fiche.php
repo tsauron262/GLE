@@ -1,8 +1,4 @@
 <?php
-
-//ini_set('display_errors', 1);
-//error_reporting(E_ALL);
-
 /* Copyright (C) 2002-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2007 Regis Houssin        <regis@dolibarr.fr>
@@ -62,7 +58,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 
-if ($conf->projet->enabled) {
+if (isset($conf->projet->enabled)) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 }
@@ -87,12 +83,12 @@ $result = restrictedArea($user, 'synopsisficheinter', $fichinterid, 'fichinter')
 /*
  * Traitements des actions
  */
-if ($_REQUEST["action"] != 'create' && $_REQUEST["action"] != 'add' && !$_REQUEST["id"] > 0) {
+if ((isset($_REQUEST["action"]) && $_REQUEST["action"] != 'create' && $_REQUEST["action"] != 'add') && !$_REQUEST["id"] > 0) {
     Header("Location: index.php");
     return;
 }
 
-if ($_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
     $fichinter = new Fichinter($db);
     $fichinter->id = $_REQUEST["id"];
     $fichinter->fetch($_REQUEST["id"]);
@@ -108,7 +104,7 @@ if ($_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') 
         $mesg = '<div class="error ui-state-error">' . $fichinter->error . '</div>';
     }
 }
-if ($_REQUEST['action'] == 'editExtra') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
     $remId = array();
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^extraKey-([0-9]*)/', $key, $arr) || preg_match('/^type-([0-9]*)/', $key, $arr)) {
@@ -149,7 +145,7 @@ if ($_REQUEST['action'] == 'editExtra') {
     }
 }
 
-if ($_REQUEST["action"] == 'add') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 
     $fichinter = new Fichinter($db);
 
@@ -192,7 +188,7 @@ if (!($user->admin || isset($groups[11])) && !(isset($_REQUEST['action']) && $_R
         header('Location: ' . str_replace("fiche.php", "ficheFast.php", "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 
 
-if ($_POST["action"] == 'update') {
+if (isset($_POST["action"]) && $_POST["action"] == 'update') {
     $fichinter = new Fichinter($db);
 
     $fichinter->date = dol_mktime($_POST["phour"], $_POST["pmin"], $_POST["psec"], $_POST["remonth"], $_POST["reday"], $_POST["reyear"]);
@@ -208,7 +204,7 @@ if ($_POST["action"] == 'update') {
 /*
  * Generer ou regenerer le document PDF
  */
-if ($_REQUEST['action'] == 'builddoc') {    // En get ou en post
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'builddoc') {    // En get ou en post
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->fetch_lines();
@@ -238,13 +234,13 @@ if ($_REQUEST['action'] == 'builddoc') {    // En get ou en post
 /*
  * Classer dans un projet
  */
-if ($_POST['action'] == 'classin') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'classin') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->set_project($user, $_POST['projetidp']);
 }
 
-if ($_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
     if ($user->rights->synopsisficheinter->supprimer) {
         $fichinter = new Fichinter($db);
         $fichinter->fetch($_REQUEST['id']);
@@ -254,7 +250,7 @@ if ($_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
     exit;
 }
 
-if ($_POST['action'] == 'setdate_delivery') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdate_delivery') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_date_delivery($user, dol_mktime(12, 0, 0, $_POST['liv_month'], $_POST['liv_day'], $_POST['liv_year']));
@@ -262,7 +258,7 @@ if ($_POST['action'] == 'setdate_delivery') {
         dol_print_error($db, $fichinter->error);
 }
 
-if ($_POST['action'] == 'setdescription') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_description($user, $_POST['description']);
@@ -271,7 +267,7 @@ if ($_POST['action'] == 'setdescription') {
 }
 
 
-if ($_POST['action'] == 'setdescription2') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription2') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_note_private($user, $_POST['description2']);
@@ -285,7 +281,7 @@ if ($_POST['action'] == 'setdescription2') {
 //    var_dump($_REQUEST);
 //    exit;
 
-if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) {
     if ($_POST['np_desc'] && ($_POST['durationhour'] || $_POST['durationmin'])) {
         $fichinter = new Fichinter($db);
         $ret = $fichinter->fetch($_POST['fichinterid']);
@@ -358,7 +354,7 @@ if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) 
 /*
  *  Mise a jour d'une ligne d'intervention
  */
-if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->creer && $_POST["save"] == $langs->trans("Save")) {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->creer && $_POST["save"] == $langs->trans("Save")) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_POST['ligne']) <= 0) {
         dol_print_error($db);
@@ -432,7 +428,7 @@ if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->cree
 /*
  *  Supprime une ligne d'intervention SANS confirmation
  */
-if ($_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
         dol_print_error($db);
@@ -454,7 +450,7 @@ if ($_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->cr
 /*
  *  Supprime une ligne d'intervention AVEC confirmation
  */
-if ($_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes' && $conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes' && $conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     if ($user->rights->synopsisficheinter->creer) {
         $fichinterline = new FichinterLigne($db);
         if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
@@ -481,7 +477,7 @@ if ($_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes'
  * Ordonnancement des lignes
  */
 
-if ($_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->line_up($_REQUEST['rowid']);
@@ -494,7 +490,7 @@ if ($_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
     exit;
 }
 
-if ($_REQUEST['action'] == 'down' && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'down' && $user->rights->synopsisficheinter->creer) {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->line_down($_REQUEST['rowid']);
@@ -523,7 +519,7 @@ launchRunningProcess($db, 'Fichinter', $_GET['id']);
 
 llxHeader($js, "Fiche intervention");
 
-if ($_REQUEST["action"] == 'create') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     /*
      * Mode creation
      * Creation d'une nouvelle fiche d'intervention
@@ -761,7 +757,7 @@ if ($_REQUEST["action"] == 'create') {
 
         print '</table>';
         print '</form>';
-    } else if ($_REQUEST['action'] == "create" && $_REQUEST['comLigneId'] > 0) {
+    } else if (isset($_REQUEST["action"]) && $_REQUEST['action'] == "create" && $_REQUEST['comLigneId'] > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
         $socid = false;
         $requete = "SELECT fk_soc,

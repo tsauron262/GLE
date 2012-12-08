@@ -31,13 +31,6 @@
 
 
 
-/*Mod drsi*/
-error_reporting(E_ALL);
-
-ini_set('display_errors', 1); 
-ini_set('upload_max_filesize', 10000);
-ini_set('post_max_size', 10000); 
-/*FMod Drsi*/
 
 //@ini_set('memory_limit', '64M');	// This may be useless if memory is hard limited by your PHP
 

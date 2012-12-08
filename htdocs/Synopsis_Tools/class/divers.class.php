@@ -57,8 +57,8 @@ class synopsisHook {
 
 class Synopsis_Commande extends Commande {
 
-    function fetch($id) {
-        $return = parent::fetch($id);
+    function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
+        $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
         $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $id);
         $result = $this->db->fetch_object($sql);
         $this->logistique_ok = $result->logistique_ok;
@@ -172,7 +172,7 @@ class Synopsis_OrderLine extends OrderLine {
 class histoNavigation {
 
     static function getBlocHisto() {
-        global $db, $user;
+        global $db, $user, $conf;
 //        if ($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher) {
         $return =  '<div class="blockvmenupair">';
         $return .= '<div class="menu_titre">';
@@ -182,7 +182,7 @@ class histoNavigation {
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                      WHERE user_refid = " . $user->id .
                 " AND ref != '' AND element_type != '' ORDER BY tms DESC" .
-                ($conf->global->BABEL_MINIHISTO_LENGTH > 0 ? " LIMIT " . $conf->global->BABEL_MINIHISTO_LENGTH : " LIMIT 5");
+                (isset($conf->global->BABEL_MINIHISTO_LENGTH) && $conf->global->BABEL_MINIHISTO_LENGTH > 0 ? " LIMIT " . $conf->global->BABEL_MINIHISTO_LENGTH : " LIMIT 5");
 
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {
@@ -364,7 +364,7 @@ class histoNavigation {
 //        //saveHistoUser($fichinter->id, "FI", $fichinter->ref);
 
 
-        if (isset($element_id) && $element_type != '' && $element_id > 0) {
+        if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
             $obj = self::getObj($element_type);
             if ($obj) {
                 $obj->fetch($element_id);

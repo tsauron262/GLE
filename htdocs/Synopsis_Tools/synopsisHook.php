@@ -1,8 +1,9 @@
 <?php
 
 ini_set('display_errors', 1);
-error_reporting(E_ALL);
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
+ini_set('upload_max_filesize', 10000);
+ini_set('post_max_size', 10000); 
 
 
 include_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/divers.class.php");

@@ -732,7 +732,7 @@ if ($id > 0)
 	 *   Modif drsi
          *  List projet
 	 */
-	if ($conf->projet->enabled)
+	if (isset($conf->projet->enabled))
 	{
             require_once DOL_DOCUMENT_ROOT."/projet/class/project.class.php";
 		$facturestatic = new Project($db);

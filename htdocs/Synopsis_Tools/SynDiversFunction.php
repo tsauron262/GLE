@@ -50,7 +50,7 @@ function getContratObj($id) {
     global $db, $conf;
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
-    if ($conf->global->MAIN_MODULE_BABELGA == 1 || $conf->global->MAIN_MODULE_BABELGMAO) {
+    if (isset($conf->global->MAIN_MODULE_BABELGA) || isset($conf->global->MAIN_MODULE_BABELGMAO)) {
         $contrat = new Synopsis_Contrat($db);
         $contratTmp = new Synopsis_Contrat($db);
         $type = $contratTmp->getTypeContrat_noLoad($id);
@@ -174,7 +174,7 @@ function getIdleProcess($db, $type_str, $element_id) {
 
 function DoesElementhasProcess($db, $element_type) {
     global $conf, $user;
-    if ($conf->global->MAIN_MODULE_PROCESS) {
+    if (isset($conf->global->MAIN_MODULE_PROCESS)) {
         $requete = "SELECT p.id
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Process as p,
                            " . MAIN_DB_PREFIX . "Synopsis_Process_type_element as e

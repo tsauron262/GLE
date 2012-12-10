@@ -51,7 +51,7 @@ if($searchOn=='true')
     {
         $searchField = "CONCAT(name,' ' ,firstname)";
     }
-    if ($searchField == "c.date_create")
+    if ($searchField == "date_create")
     {
         $searchField = "date_format(c.date_create,'%Y-%m-%d')";
         if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/',$searchString,$arr))
@@ -111,19 +111,56 @@ if($searchOn=='true')
 }
 //print $wh;
 
-if ($_REQUEST['c_model_refid'] > 0)
+function searchdate($nom, $pref = ''){
+    $wh = '';
+    $searchString = $_REQUEST[$nom] ;
+    $searchField=$pref.$nom;
+    $searchString = explode("/", $searchString);
+    $searchString = $searchString[2]."-".$searchString[1]."-".$searchString[0];
+    $oper = '>';
+    $oper2 = '<';
+    $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";
+    $wh .=  " AND " . "ADDDATE(".$searchField.", INTERVAL -1 DAY)  ".$oper2." '".$searchString."'";
+    return $wh;    
+}
+function searchtext($nom, $pref = ''){
+    $searchString = $_REQUEST[$nom] ;
+    $searchField=$pref.$nom;
+    $oper = 'LIKE';
+    return  " AND " . $searchField . " ".$oper." '%".$searchString."%'";    
+}
+
+if ($_REQUEST['date_create'] > 0)
+    $wh .= searchdate('date_create');
+if ($_REQUEST['tms'] > 0)
+    $wh .= searchdate('tms', 'c.');
+
+if ($_REQUEST['model_refid'] > 0)
 {
-    $searchString = $_REQUEST['c_model_refid'] ;
+    $searchString = $_REQUEST['model_refid'] ;
     $searchField='c.model_refid';
     $oper = '=';
     $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";
 
 }
 
+if ($_REQUEST['fk_statut'] > 0)
+{
+    $searchString = $_REQUEST['fk_statut'] ;
+    $searchField='fk_statut';
+    $oper = '=';
+    $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";
+
+}
+
+
+if ($_REQUEST['ref'] > 0)
+    $wh .= searchtext('ref');
+
 if ($_REQUEST['type'] > 0)
 {
     $searchString = $_REQUEST['type'] ;
-    $searchField='c.model_refid';
+    $searchField='model_refid';
     $oper = '=';
     $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";
 }
@@ -169,6 +206,8 @@ switch ($action)
                 LIMIT $start , $limit";
 
         $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
+        class general{}
+        $responce = new general();
         $responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;

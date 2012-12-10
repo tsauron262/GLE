@@ -303,7 +303,7 @@ class Chrono extends CommonObject {
 
     private function LibStatut($statut, $mode) {
         global $langs;
-        $langs->load("chrono");
+$langs->load("chrono@Synopsis_Chrono");
 
         if ($mode == 0) {
             if ($statut == 0)
@@ -424,9 +424,9 @@ class Chrono extends CommonObject {
             $chrono = $res->p;
             $module = $res->pr;
             if ($val == 1)
-                $userObj->rights->$module->$chrono->$code = 1;
+                @$userObj->rights->$module->$chrono->$code = 1;
             else
-                $userObj->rights->$module->$chrono->$code = false;
+                @$userObj->rights->$module->$chrono->$code = false;
         }
 //        $groups = $userObj->listGroupIn();
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");

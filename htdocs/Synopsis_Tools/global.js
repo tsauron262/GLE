@@ -1,16 +1,32 @@
 $(window).load(function(){
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if($("div.tmenudiv").is(':visible')){
-    $(window).resize(function(){
+        $(window).resize(function(){
+            traiteScroll(heightDif);
+        });
         traiteScroll(heightDif);
-    });
-    traiteScroll(heightDif);
-}
+    }
     
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
     
     
     ajNoteAjax();   
+    
+//    $(".ui-search-toolbar input").keypress(function(e) {
+//	//alert(e.keyCode);
+//	if(e.keyCode == 13) {
+//		alert('Enter key was pressed.');
+//	}
+//        else
+//		alert('Enter oser    was pressed.'+e.keyCode );
+//    });
+    
+    $(".ui-search-toolbar input").focusout(function(){
+        setTimeout(function(){
+        var e = jQuery.Event("keypress", { keyCode: 13 });
+        $(".ui-search-toolbar input").trigger(e);   
+        }, 500);
+    });
 });
 
 function dialogConfirm(url, titre, yes, no, id){

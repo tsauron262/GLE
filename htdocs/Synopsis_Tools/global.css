@@ -119,3 +119,6 @@ a#note.lienNote{
     background-color: #FAE580;
     background-image: none;
 }
+
+
+.ui-jqgrid .ui-jqgrid-htable th div{ height: auto; }

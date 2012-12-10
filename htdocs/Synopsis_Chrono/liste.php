@@ -40,6 +40,7 @@ $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath 
 //$js .= ' <script src="'.$jspath.'/ajaxfileupload.js" type="text/javascript"></script>';
 
 $js .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
+$js .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css" />' . "\n";
 
 $js .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-latest.min.js"></script>' . "\n";
 $js .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui-latest.custom.min.js"></script>' . "\n";
@@ -49,7 +50,8 @@ $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" typ
 $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
 $js .= ' <script src="' . $jspath . '/jqGrid-3.5/js/grid.custom.js" type="text/javascript"></script>';
 $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/tiptip/jquery.tipTip.min.js" type="text/javascript"></script>';
-
+$js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jnotify/jquery.jnotify.min.js" type="text/javascript"></script>';
+$js .= ' <script src="' . DOL_URL_ROOT . '/core/js/jnotify.js" type="text/javascript"></script>';
 
 
 $js .= "<style type='text/css'>body { position: static; }                 .ui-datepicker select.ui-datepicker-month, .ui-datepicker select.ui-datepicker-year  {width:48%;}
@@ -83,7 +85,7 @@ $js .= '";';
 
 
 
-$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
+$requete = "SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
 $sql = $db->query($requete);
 $js .= 'var statutRess = "';
 $js .= "-1:" . preg_replace("/'/", "\\'", utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->")))) . ";";
@@ -148,20 +150,20 @@ if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
 else
     $jqgridJs .= "colNames:['id' ,'hasRev','Ref', 'Type','Date cr&eacute;ation','Dern. modif.','Statut', 'Nb Doc'],";
 $jqgridJs .= <<<EOF
-            colModel:[  {name:'id',index:'c.id', width:0, hidden:true,key:true,hidedlg:true,search:false},
+            colModel:[  {name:'id',index:'id', width:0, hidden:true,key:true,hidedlg:true,search:false},
                         {name:'hasRev',index:'hasRev', width:0, hidden:true,hidedlg:true,search:false},
                         {
                             name:'Ref',
-                            index:'c.ref',
+                            index:'ref',
                             align:"left",
                             width: 250,
-                            stype: 'select',
-                            edittype: 'select',
+                            stype: 'text',
+                            edittype: 'text ',
                             editable: false,
                             search: true,
                         }, {
                             name:'Type',
-                            index:'c.model_refid',
+                            index:'model_refid',
                             align:"left",
                             width: 250,
                             stype: 'select',
@@ -177,7 +179,7 @@ if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
     $jqgridJs .= <<<EOF
                          {
                             name:'Tiers',
-                            index:'s.nom',
+                            index:'nom',
                             align:"left",
                             width: 250,
                             stype: 'select',
@@ -189,7 +191,7 @@ if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
                             },formoptions:{ elmprefix:"*  " }
                         }, {
                             name:'Contact',
-                            index:'p.name',
+                            index:'name',
                             align:"left",
                             width: 250,
                             stype: 'select',
@@ -202,7 +204,7 @@ EOF;
 $jqgridJs .= <<<EOF
                         {
                             name:'date',
-                            index:'c.date_create',
+                            index:'date_create',
                             width:180,
                             align:"center",
                             sorttype:"date",
@@ -228,7 +230,7 @@ $jqgridJs .= <<<EOF
                             },
                         }, {
                             name:'date_modify',
-                            index:'c.tms',
+                            index:'tms',
                             width:180,
                             align:"center",
                             sorttype:"date",
@@ -254,20 +256,21 @@ $jqgridJs .= <<<EOF
                             },
                         }, {
                             name:'Statut',
-                            index:'c.fk_statut',
+                            index:'fk_statut',
                             align:"left",
                             width: 205,
                             stype: 'select',
-                            edittype: 'select',
                             editable: false,
                             searchoptions:{sopt:['eq','ne']},
                             editoptions: {
                                 value: statutRess,
-                            },formoptions:{ elmprefix:"*  " }
+                            },
+                            formoptions:{ elmprefix:"*  " }
                         }, {
                             name:'Nb Doc',
-                            index:'c.nb_doc',
+                            index:'nb_doc',
                             align:"right",
+                            search:false,
                             width: 60
                         }
 EOF;
@@ -416,6 +419,7 @@ $jqgridJs .= <<<EOF
                             index:'nb_doc',
                             align:"right",
                             sorttype:"int",
+                            search:false,
                             width: 60
                         },
                         ],
@@ -433,10 +437,12 @@ $jqgridJs.= '    }).navGrid("#gridListProspectPager",' . "\n";
 $jqgridJs.= '                   { view:false, add:false,' . "\n";
 $jqgridJs.= '                     del:false,' . "\n";
 $jqgridJs.= '                     edit:false,' . "\n";
-$jqgridJs.= '                     search:true,' . "\n";
+$jqgridJs.= '                     search:false,' . "\n";
 $jqgridJs.= '                     position:"left"' . "\n";
 $jqgridJs.= '                     });' . "\n";
 
+$jqgridJs .= "     jQuery('#gridListProspect').filterToolbar('');";
+    
 $jqgridJs .= "    sg = jQuery('#mysearch').filterGrid('#gridListProspect',{
                                                             gridModel:false,
                                                             filterModel: [{label:'', stype:'select',sopt:{value: typeRess},name:'type' }],

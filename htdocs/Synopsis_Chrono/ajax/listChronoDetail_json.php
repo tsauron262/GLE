@@ -6,6 +6,13 @@
  * GLE-1.1
  */
 
+function searchtext($nom, $pref = ''){
+    $searchString = $_REQUEST[$nom] ;
+    $searchField=$pref.$nom;
+    $oper = 'LIKE';
+    return  " AND " . $searchField . " ".$oper." '%".$searchString."%'";    
+}
+
 
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
@@ -41,14 +48,33 @@ $wh = "";
 $searchOn = $_REQUEST['_search'];
 if ($searchOn == 'true') {
     $oper = "";
-    $searchField = $_REQUEST['searchField'];
-    $searchString = $_REQUEST['searchString'];
+//    $searchField = $_REQUEST['searchField'];
+//    $searchString = $_REQUEST['searchString'];
+
+
+
+    if ($_REQUEST['fk_statut'] > 0) {
+        $searchString = $_REQUEST['fk_statut'];
+        $searchField = 'fk_statut';
+        $oper = '=';
+        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+    }
+
+
+    if ($_REQUEST['ref'] > 0)
+        $wh .= searchtext('ref');
+
+
 
     $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key WHERE inDetList = 1 AND model_refid =  " . $id;
     $sqlPre = $db->query($requetePre);
     while ($resPre = $db->fetch_object($sqlPre)) {
         $nom = sanitize_string($resPre->nom);
-        if ($nom == $searchField) {
+//        if ($nom == $searchField) {
+        if (isset($_REQUEST[sanitize_string($nom)])) {
+//            die("cool");
+            $searchField = sanitize_string($nom);
+            $searchString = $_REQUEST[sanitize_string($nom)];
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur WHERE id = " . $resPre->type_valeur;
 
             $sql1 = $db->query($requete);
@@ -66,10 +92,7 @@ if ($searchOn == 'true') {
                 }
             }
         }
-    }
-
-
-
+//    }
 //    if ($searchField == "c.date_create")
 //    {
 //        $searchField = "date_format(c.date_create,'%Y-%m-%d')";
@@ -77,41 +100,48 @@ if ($searchOn == 'true') {
 //        {
 //            $searchString = $arr[3].'-'.$arr[2].'-'.$arr[1];
 //        }
-//    }
-    if ($_REQUEST['searchOper'] == 'eq') {
-        $oper = '=';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'ne') {
-        $oper = '<>';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'lt') {
-        $oper = '<';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'gt') {
-        $oper = '>';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'le') {
-        $oper = '<=';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'ge') {
-        $oper = '>=';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'bw') {
-        $wh .= ' AND ' . $searchField . " LIKE  '" . $searchString . "%'";
-    } else if ($_REQUEST['searchOper'] == 'bn') {
-        $wh .= ' AND ' . $searchField . " NOT LIKE  '" . $searchString . "%'";
-    } else if ($_REQUEST['searchOper'] == 'in') {
-        $wh .= ' AND ' . $searchField . " IN  ('" . $searchString . "')";
-    } else if ($_REQUEST['searchOper'] == 'ni') {
-        $wh .= ' AND ' . $searchField . " NOT IN  ('" . $searchString . "')";
-    } else if ($_REQUEST['searchOper'] == 'ew') {
-        $wh .= ' AND ' . $searchField . " LIKE  '%" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'en') {
-        $wh .= ' AND ' . $searchField . " NOT LIKE  '%" . $searchString . "'";
-    } else if ($_REQUEST['searchOper'] == 'cn') {
-        $wh .= ' AND ' . $searchField . " LIKE  '%" . $searchString . "%'";
-    } else if ($_REQUEST['searchOper'] == 'nc') {
-        $wh .= ' AND ' . $searchField . " NOT LIKE  '%" . $searchString . "%'";
+//    }.
+
+        if (isset($searchField)) {
+            if ($_REQUEST['searchOper'] == 'eq') {
+                $oper = '=';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'ne') {
+                $oper = '<>';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'lt') {
+                $oper = '<';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'gt') {
+                $oper = '>';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'le') {
+                $oper = '<=';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'ge') {
+                $oper = '>=';
+                $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'bw') {
+                $wh .= ' AND ' . $searchField . " LIKE  '" . $searchString . "%'";
+            } else if ($_REQUEST['searchOper'] == 'bn') {
+                $wh .= ' AND ' . $searchField . " NOT LIKE  '" . $searchString . "%'";
+            } else if ($_REQUEST['searchOper'] == 'in') {
+                $wh .= ' AND ' . $searchField . " IN  ('" . $searchString . "')";
+            } else if ($_REQUEST['searchOper'] == 'ni') {
+                $wh .= ' AND ' . $searchField . " NOT IN  ('" . $searchString . "')";
+            } else if ($_REQUEST['searchOper'] == 'ew') {
+                $wh .= ' AND ' . $searchField . " LIKE  '%" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'en') {
+                $wh .= ' AND ' . $searchField . " NOT LIKE  '%" . $searchString . "'";
+            } else if ($_REQUEST['searchOper'] == 'cn') {
+                $wh .= ' AND ' . $searchField . " LIKE  '%" . $searchString . "%'";
+            } else if ($_REQUEST['searchOper'] == 'nc') {
+                $wh .= ' AND ' . $searchField . " NOT LIKE  '%" . $searchString . "%'";
+            } else {
+                $oper = 'LIKE';
+                $wh .= " AND " . $searchField . " " . $oper . " '%" . $searchString . "%'";
+            }
+        }
     }
 }
 //print $wh;
@@ -291,6 +321,12 @@ switch ($action) {
                 $start = $limit * $page - $limit; // do not put $limit*($page - 1)
                 if ($start < 0)
                     $start = 0;
+
+                class general {
+                    
+                }
+
+                $responce = new general();
                 $responce->page = $page;
                 $responce->total = $total_pages;
                 $responce->records = $i;

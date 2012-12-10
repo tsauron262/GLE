@@ -74,7 +74,7 @@ $js .= '";';
 $requete = "SELECT " . MAIN_DB_PREFIX . "societe.rowid, " . MAIN_DB_PREFIX . "societe.nom FROM " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "Synopsis_Chrono.fk_societe";
 $sql = $db->query($requete);
 $js .= 'var socRess = "';
-$js .= "-1:" . preg_replace("/'/", "\\'", html_entity_decode("S&eacute;lection ->")) . ";";
+$js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
 
 while ($res = $db->fetch_object($sql)) {
     $js .= $res->rowid . ":" . preg_replace("/'/", "\\'", $res->nom) . ";";
@@ -88,7 +88,7 @@ $js .= '";';
 $requete = "SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
 $sql = $db->query($requete);
 $js .= 'var statutRess = "';
-$js .= "-1:" . preg_replace("/'/", "\\'", html_entity_decode("S&eacute;lection ->")) . ";";
+$js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
 
 while ($res = $db->fetch_object($sql)) {
     $fakeChrono = new Chrono($db);

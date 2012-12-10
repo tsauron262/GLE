@@ -88,13 +88,13 @@ $js .= '";';
 $requete = "SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
 $sql = $db->query($requete);
 $js .= 'var statutRess = "';
-$js .= "-1:" . preg_replace("/'/", "\\'", utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->")))) . ";";
+$js .= "-1:" . preg_replace("/'/", "\\'", html_entity_decode("S&eacute;lection ->")) . ";";
 
 while ($res = $db->fetch_object($sql)) {
     $fakeChrono = new Chrono($db);
     $fakeChrono->statut = $res->fk_statut;
 
-    $js .= $res->fk_statut . ":" . preg_replace("/'/", "\\'", utf8_decode(utf8_encode(html_entity_decode($fakeChrono->getLibStatut(0))))) . ";";
+    $js .= $res->fk_statut . ":" . preg_replace("/'/", "\\'", html_entity_decode($fakeChrono->getLibStatut(0))) . ";";
 }
 
 $js = preg_replace('/;$/', '', $js);

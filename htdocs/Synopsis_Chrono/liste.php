@@ -64,7 +64,7 @@ $js .= 'var typeRess = "';
 $js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
 
 while ($res = $db->fetch_object($sql)) {
-    $js .= $res->id . ":" . preg_replace("/'/", "\\'", $res->titre) . ";";
+    $js .= $res->id . ":" . html_entity_decode($res->titre) . ";";
     $arrModel[$res->id] = $res->titre;
 }
 
@@ -74,10 +74,10 @@ $js .= '";';
 $requete = "SELECT " . MAIN_DB_PREFIX . "societe.rowid, " . MAIN_DB_PREFIX . "societe.nom FROM " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "Synopsis_Chrono.fk_societe";
 $sql = $db->query($requete);
 $js .= 'var socRess = "';
-$js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
+$js .= "-1:" . html_entity_decode("S&eacute;lection ->") . ";";
 
 while ($res = $db->fetch_object($sql)) {
-    $js .= $res->rowid . ":" . preg_replace("/'/", "\\'", $res->nom) . ";";
+    $js .= $res->rowid . ":" . html_entity_decode($res->nom) . ";";
 }
 
 $js = preg_replace('/;$/', '', $js);
@@ -88,13 +88,13 @@ $js .= '";';
 $requete = "SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
 $sql = $db->query($requete);
 $js .= 'var statutRess = "';
-$js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
+$js .= "-1:" . preg_replace("/'/", "\\'", html_entity_decode("S&eacute;lection ->")) . ";";
 
 while ($res = $db->fetch_object($sql)) {
     $fakeChrono = new Chrono($db);
     $fakeChrono->statut = $res->fk_statut;
 
-    $js .= $res->fk_statut . ":" . preg_replace("/'/", "\\'", $fakeChrono->getLibStatut(0)) . ";";
+    $js .= $res->fk_statut . ":" . html_entity_decode($fakeChrono->getLibStatut(0)) . ";";
 }
 
 $js = preg_replace('/;$/', '', $js);

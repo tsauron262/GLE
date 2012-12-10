@@ -1,7 +1,7 @@
 StatusDraft=Brouillon
-StatusValidated=Valid&eacute;
-StatusRevised=R&eacute;vis&eacute;
-StatusClotured=Clotur&eacute;
+StatusValidated=Validé
+StatusRevised=Révisé
+StatusClotured=Cloturé
 StatusDraftShort=Brouil.
 StatusValidatedShort=Valid.
 StatusRevisedShort=Revis.

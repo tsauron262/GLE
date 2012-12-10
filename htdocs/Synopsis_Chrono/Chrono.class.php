@@ -298,7 +298,7 @@ class Chrono extends CommonObject {
      */
     private function traiteLib($lib) {
         global $langs;
-        return htmlspecialchars_decode($langs->trans($lib));
+        return $langs->trans($lib);
     }
 
     private function LibStatut($statut, $mode) {

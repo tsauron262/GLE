@@ -195,8 +195,8 @@ $js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
 while ($res = $db->fetch_object($sql)) {
     $fakeChrono = new Chrono($db);
     $fakeChrono->statut = $res->fk_statut;
-
-    $js .= $res->fk_statut . ":" . preg_replace("/'/", "\\'", $fakeChrono->getLibStatut(0)) . ";";
+    
+    $js .= $res->fk_statut . ":" . html_entity_decode($fakeChrono->getLibStatut(0)) . ";";
 }
 
 $js = preg_replace('/;$/', '', $js);

@@ -161,6 +161,9 @@ switch ($action)
                 LIMIT $start , $limit";
 
         $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
+        class geneClass{}
+        
+        $responce = new geneClass();
         $responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;

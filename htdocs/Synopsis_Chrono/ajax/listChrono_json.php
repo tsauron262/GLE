@@ -144,9 +144,11 @@ if ($_REQUEST['model_refid'] > 0)
 
 }
 
-if ($_REQUEST['fk_statut'] > 0)
+if (isset($_REQUEST['fk_statut']) && $_REQUEST['fk_statut'] > -1)
 {
     $searchString = $_REQUEST['fk_statut'] ;
+    if(!$searchString > 0)
+        $searchString = "0";
     $searchField='fk_statut';
     $oper = '=';
     $wh .=  " AND " . $searchField . " ".$oper." '".$searchString."'";

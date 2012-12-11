@@ -1,13 +1,15 @@
 <?php
 
-ini_set('display_errors', 1);
-error_reporting(E_ALL ^ E_NOTICE ^ E_STRICT);
+if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
+    ini_set('display_errors', 1);
+    error_reporting(E_ALL);
+}
 ini_set('upload_max_filesize', 10000);
-ini_set('post_max_size', 10000); 
+ini_set('post_max_size', 10000);
 
 
-include_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/divers.class.php");
-include_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/SynDiversFunction.php");
+include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
+include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
 
 global $conf;
 
@@ -32,14 +34,14 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
 }
 //if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHINTER)) {
 //    die;
-    $conf->ficheinter->enabled = true;
+$conf->ficheinter->enabled = true;
 //}
 
-    
-    
-    
+
+
+
 $synopsisHook = new synopsisHook();
 global $synopsisHook;
-   
-$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER)? $conf->global->MAIN_HTML_HEADER : ""). $synopsisHook->getHeader();
+
+$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
 ?>

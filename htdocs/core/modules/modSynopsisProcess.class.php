@@ -59,7 +59,7 @@ class modSynopsisProcess extends DolibarrModules {
         $this->numero = 229200;
 
         $this->family = "Synopsis";
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = "Process";
         $this->description = "Gestion des process";
         $this->version = '0.1';            // 'development' or 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPROCESS';

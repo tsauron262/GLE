@@ -41,8 +41,8 @@ class modSynopsisContrat extends DolibarrModules
         $this->numero = 8000;
 
         $this->family = "Synopsis";
-        $this->name = "synopsiscontrat";
-        $this->description = utf8_decode("Contrat +");
+        $this->name = "Contrat +";
+        $this->description = "Amélioration des contrat";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISCONTRAT';
         $this->special = 0;

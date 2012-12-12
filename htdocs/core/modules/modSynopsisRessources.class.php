@@ -41,7 +41,7 @@ class modSynopsisRessources extends DolibarrModules
         $this->numero = 22232;
 
         $this->family = "Synopsis";
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = "Ressources materielles";
         $this->description = "Gestion des ressources materielles";
         $this->version = '2';
         $this->const_name = 'MAIN_MODULE_SYNOPSISRESSOURCES';

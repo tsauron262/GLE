@@ -60,7 +60,7 @@ class modSynopsisProjet extends DolibarrModules {
         $this->numero = 4000;
 
         $this->family = "Synopsis";
-        $this->name = strtolower(preg_replace('/^mod/i', '', get_class($this)));
+        $this->name = "Projet +";
         $this->description = "Gestion des projets avancé";
         $this->version = 2;
         $this->const_name = 'MAIN_MODULE_SYNOPSISPROJET';

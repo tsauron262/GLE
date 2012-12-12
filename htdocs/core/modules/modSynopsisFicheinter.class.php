@@ -61,8 +61,8 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->numero = 8745;
 
         $this->family = "Synopsis";
-        $this->name = "synopsisficheinter";
-        $this->description = "Gestion des fiches d'intervention";
+        $this->name = "Fiche inter +";
+        $this->description = "Gestion des fiches d'intervention amélioré";
 
         $this->revision = explode(" ", "$Revision: 1.33 $");
         $this->version = $this->revision[1];

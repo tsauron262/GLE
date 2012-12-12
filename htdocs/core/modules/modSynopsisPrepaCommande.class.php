@@ -41,7 +41,7 @@ class modSynopsisPrepaCommande extends DolibarrModules
         $this->numero = 2227;
 
         $this->family = "Synopsis";
-        $this->name = "SynopsisPrepaCommande";
+        $this->name = "Prepa Commande";
         $this->description = "Pr&eacute;paration de commande";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPREPACOMMANDE';

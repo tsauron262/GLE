@@ -41,7 +41,7 @@ class modSynopsisTools extends DolibarrModules
         $this->numero = 8088;
 
         $this->family = "Synopsis";
-        $this->name = "SynopsisTools";
+        $this->name = "Synopsis Tools";
         $this->description = utf8_decode("Outil de gestion");
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISTOOLS';

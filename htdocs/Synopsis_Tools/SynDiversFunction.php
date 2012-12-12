@@ -453,8 +453,10 @@ function asPosition($str) {
 }
 
 function mailSyn($to, $sujet, $text, $headers = null) {
-    $text = "OrigineTo = " . $to . "\n\n" . $text;
-    $to = "tommy@drsi.fr";
+    if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
+        $text = "OrigineTo = " . $to . "\n\n" . $text;
+        $to = "tommy@drsi.fr";
+    }
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";

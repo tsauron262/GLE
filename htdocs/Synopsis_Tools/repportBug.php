@@ -28,8 +28,8 @@ if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
     $obj = $db->fetch_object($sql);
     
     
-    $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolu. '."\n\n"
-            .'Si le bug reaparais ou est toujours présent, merci de le resignalé : '.$obj->text."\n\n"
+    $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolut. '."\n\n"
+            .'Si le bug réapparaît ou est toujours présent, merci de le resignaler : '."\n\n"
             .'Message : '.$obj->text;
 
     $userT = new User($db);

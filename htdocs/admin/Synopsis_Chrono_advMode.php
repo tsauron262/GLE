@@ -375,8 +375,11 @@ print '<br>';
         {
             $col++;
             $type = $res1->code;
-            print "    <td class='ui-widget-content' align=center><input type='checkbox' name='u".$tmpuser->id."-".$res1->id."' ".($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?"Checked >":">");
-            print ($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?($tmpuser->rights->chrono_user->$chrono_right_ref->$type=='g'?img_tick_group('H&eacute;rit&eacute;'):img_tick('Oui')):"");
+            print "    <td class='ui-widget-content' align=center>";
+            if($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type && $tmpuser->rights->chrono_user->$chrono_right_ref->$type=='g')
+                    print img_picto($langs->trans("H&eacute;rit&eacute;"), 'tick');//$form->textwithtooltip($langs->trans("Inherited"), $langs->trans("PermissionInheritedFromAGroup"));//img_tick_group('H&eacute;rit&eacute;'):img_tick('Oui')):"");
+                else
+            print "<input type='checkbox' name='u".$tmpuser->id."-".$res1->id."' ".($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?"Checked >":">");
         }
     }
     print "    <tr><th class='ui-widget-header' align=center colspan='".$col."'><button class='butAction'>Modifier</button></th>";
@@ -413,7 +416,7 @@ print '<br>';
             $type = $res1->code;
 //                    print "    <td class='ui-widget-content' align=center>".($tmpgrp->rights->chrono->$chrono_right_ref && $tmpgrp->rights->chrono->$chrono_right_ref->$type?"Oui":"Non");
             print "    <td class='ui-widget-content' align=center><input type='checkbox' name='g".$tmpgrp->id."-".$res1->id."' ".($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?"Checked >":">");
-            print ($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?img_tick("Oui"):"");
+//            print ($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?img_tick("Oui"):"");
         }
     }
     print "    <tr><th class='ui-widget-header' align=center colspan='".$col."'><button class='butAction'>Modifier</button></th>";

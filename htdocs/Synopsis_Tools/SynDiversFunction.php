@@ -452,16 +452,17 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn($to, $sujet, $text, $header = null) {
+function mailSyn($to, $sujet, $text, $headers = null) {
     $text = "OrigineTo = " . $to . "\n\n" . $text;
     $to = "tommy@drsi.fr";
-    if(!$header){
-     $headers  = 'MIME-Version: 1.0' . "\r\n";
-     $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-     $headers .= 'To: ' .$to. "\r\n";
-     $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
-     $headers .= 'Cc: Tommy SAURON <tommmy@drsi.fr>' . "\r\n";
-     $headers .= 'Reply-To: Tommy SAURON <tommmy@drsi.fr>' . "\r\n";
+    if (!$headers) {
+        $headers = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+        $headers .= 'To: ' . $to . "\r\n";
+        $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
+        $headers .= 'Cc: Tommy SAURON <tommy@drsi.fr>' . "\r\n";
+        $headers .= 'Reply-To: Tommy SAURON <tommy@drsi.fr>' . "\r\n";
+        $text = str_replace("\n", "<br/>", $text);
     }
     if (isset($to) && $to != '')
         mail($to, $sujet, $text, $headers);

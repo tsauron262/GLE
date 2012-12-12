@@ -1,9 +1,11 @@
 <?php
 
-if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
     ini_set('display_errors', 1);
+if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
     error_reporting(E_ALL);
 }
+else
+    error_reporting(E_ERROR | E_PARSE);
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 

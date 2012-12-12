@@ -361,11 +361,10 @@ print '<br>';
     while ($res = $db->fetch_object($sql))
     {
         $tmpuser = new User($db);
-        $tmpuser->id = $res->rowid;
-        $tmpuser->fetch();
+        $tmpuser->fetch($res->rowid);
         $chr->getRights($tmpuser);
 
-        print "<tr><td class='ui-widget-content'>".$tmpuser->fullname;
+        print "<tr><td class='ui-widget-content'>".$tmpuser->getNomUrl(1);
         $chrono_right_ref = "chrono".$chr->model_refid;
 
         $requete1 = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_rights_def WHERE active=1 ORDER BY rang ";
@@ -399,7 +398,6 @@ print '<br>';
     while ($res = $db->fetch_object($sql))
     {
         $tmpgrp = new UserGroup($db);
-        $tmpgrp->id = $res->rowid;
         $tmpgrp->fetch($res->rowid);
         $tmpgrp = $chr->getGrpRights($tmpgrp);
 //var_dump($tmpgrp->rights);

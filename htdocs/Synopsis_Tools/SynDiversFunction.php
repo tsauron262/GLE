@@ -460,7 +460,7 @@ function mailSyn($to, $sujet, $text, $headers = null) {
         $to = MOD_DEV_SYN_MAIL;
     }
     if (!isset($to) || $to == ''){
-        $text = "Pas de mail expediteur definit."."\n\n";
+        $text = "Pas de mail expediteur definit."."\n\n".$text;
         $to = $toReplay;
     }
     if (!$headers) {

@@ -453,16 +453,22 @@ function asPosition($str) {
 }
 
 function mailSyn($to, $sujet, $text, $headers = null) {
-    if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
+    $toReplay = "Tommy SAURON <tommy@drsi.fr>";
+    $ccAdmin = $toReplay.", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
+    if (defined('MOD_DEV_SYN_MAIL')) {
         $text = "OrigineTo = " . $to . "\n\n" . $text;
-        $to = "tommy@drsi.fr";
+        $to = MOD_DEV_SYN_MAIL;
+    }
+    if (!isset($to) || $to == ''){
+        $text = "Pas de mail expediteur definit.";
+        $to = $toReplay;
     }
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
         $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
-        $headers .= 'Cc: Tommy SAURON <tommy@drsi.fr>' . "\r\n";
-        $headers .= 'Reply-To: Tommy SAURON <tommy@drsi.fr>' . "\r\n";
+        $headers .= 'Cc: ' .$ccAdmin. "\r\n";
+        $headers .= 'Reply-To: ' .$toReplay. "\r\n";
         $text = str_replace("\n", "<br/>", $text);
     }
     if (isset($to) && $to != '')

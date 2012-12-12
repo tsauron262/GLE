@@ -28,14 +28,11 @@ if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
     $obj = $db->fetch_object($sql);
     
     
-    $headers = 'From: no-replay@synopsis-erp.com' . "\r\n" .
-            'Reply-To: tommy@drsi.fr' . "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
     $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolu. \n \n Message : '.$obj->text;
 
     $userT = new User($db);
     $userT->fetch($obj->fk_user);
-    mailSyn($userT->email, "Bug Gle résolu", $message, $headers);
+    mailSyn($userT->email, "Bug Gle résolu", $message);
     
     
     $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
@@ -98,9 +95,6 @@ function getBug($user) {
 
 function bug($user, $text, $adresse) {
     global $db;
-    $headers = 'From: no-replay@synopsis-erp.com' . "\r\n" .
-            'Reply-To: tommy@drsi.fr' . "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
     $message = "<a href='" . $adresse . "'>Adresse : " . $adresse . "</a>
         \n Utlisateur : " . $user->getNomUrl() . "
         \n Message : " . $text;
@@ -108,7 +102,7 @@ function bug($user, $text, $adresse) {
     $requete = "INSERT into ".MAIN_DB_PREFIX."Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
     $db->query($requete);
 
-    mailSyn("tommy@drsi.fr", "Bug Gle", $message, $headers);
+    mailSyn("tommy@drsi.fr", "Bug Gle", $message);
     dol_htmloutput_mesg("Merci", $mesgs);
 }
 

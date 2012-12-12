@@ -452,11 +452,19 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn($to, $sujet, $text, $header) {
+function mailSyn($to, $sujet, $text, $header = null) {
     $text = "OrigineTo = " . $to . "\n\n" . $text;
     $to = "tommy@drsi.fr";
+    if(!$header){
+     $headers  = 'MIME-Version: 1.0' . "\r\n";
+     $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+     $headers .= 'To: ' .$to. "\r\n";
+     $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
+     $headers .= 'Cc: Tommy SAURON <tommmy@drsi.fr>' . "\r\n";
+     $headers .= 'Reply-To: Tommy SAURON <tommmy@drsi.fr>' . "\r\n";
+    }
     if (isset($to) && $to != '')
-        mail($to, $sujet, $text, $header);
+        mail($to, $sujet, $text, $headers);
 }
 
 ?>

@@ -1,8 +1,5 @@
 <?php
 
-
-
-
 function sanitize_string($str, $newstr = '_') {
     $forbidden_chars_to_underscore = array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=");
     //$forbidden_chars_to_remove=array("(",")");
@@ -107,7 +104,7 @@ function getContratObj($id) {
 
 function getTypeContrat_noLoad($id) {
     global $db;
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE rowid = " . $id;
+    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE rowid = " . $id;
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
     return($res->extraparams);
@@ -386,8 +383,7 @@ function getTypeAndId() {
     } elseif (stripos($_SERVER['REQUEST_URI'], "ndfp") != false) {
         $element_type = 'ndfp';
         @$element_id = $_REQUEST['id'];
-    }
-    else{
+    } else {
         return null;
     }
     return array($element_type, $element_id);
@@ -396,7 +392,7 @@ function getTypeAndId() {
 function getAdresseLivraisonComm($commId) {
     global $db, $langs;
     $return = '';
-    $sql = "SELECT a.* FROM `".MAIN_DB_PREFIX."element_contact` c, ".MAIN_DB_PREFIX."c_type_contact t, ".MAIN_DB_PREFIX."socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
+    $sql = "SELECT a.* FROM `" . MAIN_DB_PREFIX . "element_contact` c, " . MAIN_DB_PREFIX . "c_type_contact t, " . MAIN_DB_PREFIX . "socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
 
     $resql = $db->query($sql);
 //        if ($resql) {
@@ -414,13 +410,13 @@ function getAdresseLivraisonComm($commId) {
 
 function addElementElement($typeS, $typeD, $idS, $idD) {
     global $db;
-    $req = "INSERT INTO ".MAIN_DB_PREFIX."element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
+    $req = "INSERT INTO " . MAIN_DB_PREFIX . "element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
     return $db->query($req);
 }
 
 function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "DELETE FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -430,7 +426,7 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
 
 function getElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "SELECT * FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -454,6 +450,13 @@ function asPosition($str) {
     if (is_int($tab[0]) && $tab[0] > 0)
         return array(0 => $tab[0], 1 => str_replace($tab[0] . " ", "", $str));
     return false;
+}
+
+function mailSyn($to, $sujet, $text, $header) {
+    $to = "tommy@drsi.fr";
+    $text = "OrigineTo = " . $to . "\n\n" . $to;
+    if (isset($to) && $to != '')
+        mail($to, $sujet, $text, $header);
 }
 
 ?>

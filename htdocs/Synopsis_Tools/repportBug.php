@@ -22,6 +22,22 @@ if (isset($_POST['action']) && $_POST['action'] == "send") {
     bug($user, $_POST['text'], $_POST['oldUrl']);
 }
 if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
+    
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['resolu'];
+    $sql = $db->query($requete);
+    $obj = $db->fetch_object($sql);
+    
+    
+    $headers = 'From: no-replay@synopsis-erp.com' . "\r\n" .
+            'Reply-To: tommy@drsi.fr' . "\r\n" .
+            'X-Mailer: PHP/' . phpversion();
+    $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolu. \n \n Message : '.$obj->text;
+
+    $userT = new User($db);
+    $userT->fetch($obj->fk_user);
+    mailSyn($userT->email, "Bug Gle résolu", $message, $headers);
+    
+    
     $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
     $db->query($requete);
 }
@@ -92,7 +108,7 @@ function bug($user, $text, $adresse) {
     $requete = "INSERT into ".MAIN_DB_PREFIX."Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
     $db->query($requete);
 
-    mail("tommy@drsi.fr", "Bug Gle", $message, $headers);
+    mailSyn("tommy@drsi.fr", "Bug Gle", $message, $headers);
     dol_htmloutput_mesg("Merci", $mesgs);
 }
 

@@ -453,8 +453,8 @@ function asPosition($str) {
 }
 
 function mailSyn($to, $sujet, $text, $header) {
-    $to = "tommy@drsi.fr";
     $text = "OrigineTo = " . $to . "\n\n" . $text;
+    $to = "tommy@drsi.fr";
     if (isset($to) && $to != '')
         mail($to, $sujet, $text, $header);
 }

@@ -385,7 +385,8 @@ else
 							});
 
 							$("#copyaddressfromsoc").click(function() {
-								$(\'textarea[name="address"]\').text("'.addslashes($objsoc->address).'");
+                                                                var adresseTemp = "'.  str_replace(array("/r/n", "\r\n", "/n/r", "\n\r", "/n", "/r", "\n", "\r"), "$7£", addslashes($objsoc->address)).'";
+                                                                adresseTemp =  adresseTemp.split("$7£").join("\n");
 								$(\'input[name="zipcode"]\').val("'.addslashes($objsoc->zip).'");
 								$(\'input[name="town"]\').val("'.addslashes($objsoc->town).'");
 								$(\'select[name="country_id"]\').val("'.addslashes($objsoc->country_id).'");

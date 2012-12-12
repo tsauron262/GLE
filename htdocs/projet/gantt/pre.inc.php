@@ -42,7 +42,7 @@ require ("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/task.class.php");
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 $langs->load("companies");
 
 function llxHeader($head = "", $title="", $help_url='')

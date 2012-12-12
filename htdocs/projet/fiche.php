@@ -47,7 +47,7 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 //require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 
 $projetid = '';
 if ($_GET["id"]) {

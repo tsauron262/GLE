@@ -47,7 +47,7 @@ if ($user->societe_id > 0)
   $socid = $user->societe_id;
 }
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 $head = '<script type="text/javascript" src="'.DOL_URL_ROOT.'/Synopsis_Common/js/swfobject.js"></script>';
 
 

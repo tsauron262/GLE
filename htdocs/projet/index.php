@@ -43,7 +43,7 @@
 */
 
 require("./pre.inc.php");
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 
 if (!$user->rights->synopsisprojet->lire) accessforbidden();
 

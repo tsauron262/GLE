@@ -460,7 +460,6 @@ function mailSyn($to, $sujet, $text, $headers = null) {
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        $headers .= 'To: ' . $to . "\r\n";
         $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
         $headers .= 'Cc: Tommy SAURON <tommy@drsi.fr>' . "\r\n";
         $headers .= 'Reply-To: Tommy SAURON <tommy@drsi.fr>' . "\r\n";

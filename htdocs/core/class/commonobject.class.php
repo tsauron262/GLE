@@ -2527,7 +2527,17 @@ abstract class CommonObject
     	global $form,$bcnd,$var;
 
     	// Use global variables + $dateSelector + $seller and $buyer
-    	include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_create.tpl.php');
+        $dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
+        foreach($dirtpls as $reldir)
+        {
+                $tpl = dol_buildpath($reldir.'/freeproductline_create.tpl.php');
+                if (empty($conf->file->strict_mode)) {
+                        $res=@include $tpl;
+                } else {
+                        $res=include $tpl; // for debug
+                }
+                if ($res) break;
+        }
     }
 
 

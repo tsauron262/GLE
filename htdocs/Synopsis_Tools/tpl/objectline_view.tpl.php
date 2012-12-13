@@ -77,7 +77,7 @@
                                 global $tabTypeLigne;
 				if (! empty($line->fk_parent_line)) echo img_picto('', 'rightarrow');
 				if ($type==1) $text = img_object($langs->trans('Service'),'service');
-				elseif ($type==0) $text = img_object($langs->trans('Product'),'product');
+				elseif ($type==0 || $type==2) $text = img_object($langs->trans('Product'),'product');
 				else $text = img_help(1, $langs->trans($tabTypeLigne[$type]));
 
 				if (! empty($line->label)) {
@@ -93,7 +93,7 @@
 		}
 		?>
 	</td>
-<?php if($type < 2){ ?>
+<?php if($type == 1 || $type == 0 || $type == 2){ ?>
 	<td align="right" nowrap="nowrap"><?php echo vatrate($line->tva_tx,'%',$line->info_bits); ?></td>
 
 	<td align="right" nowrap="nowrap"><?php echo price($line->subprice); ?></td>

@@ -31,7 +31,7 @@ $conf->global->devMailTo = 'tommy@drsi.fr';
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
 global $tabTypeLigne;
-$tabTypeLigne = array("Product", "Service", "Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+$tabTypeLigne = array("Product", "Service", "Product", "Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     $conf->projet->enabled = true;

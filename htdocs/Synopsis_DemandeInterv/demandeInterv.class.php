@@ -686,7 +686,7 @@ class demandeInterv extends CommonObject
     *      \brief      Verifie si la ref n'est pas deja utilisee
     *      \param        soc                      objet societe
     */
-    function verifyNumRef($soc)
+   /* function verifyNumRef($soc)
     {
         $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " WHERE ref = '".$this->ref."'";
@@ -700,7 +700,7 @@ class demandeInterv extends CommonObject
                 $this->ref = $this->getNextNumRef($soc);
             }
         }
-    }
+    }*/
 
 
     /**

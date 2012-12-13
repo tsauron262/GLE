@@ -84,7 +84,7 @@ if ($_REQUEST['action'] == 'validationForm') {
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
     $process = new process($db);
     $res1 = $process->fetch($process_id);
-    $process->validate($element_id, $type);
+    $process->validateDet($element_id, $type);
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
     $eval = $process->validAction;

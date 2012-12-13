@@ -70,32 +70,18 @@ class ModeleSynopsisficheinter extends CommonDocGenerator
     /**
      *      \brief      Renvoi la liste des modeles actifs
      */
-    function liste_modeles($db)
-    {
-        $type='ficheinter';
-        $liste=array();
-        $sql ="SELECT nom as id, nom as lib";
-        $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
-        $sql.=" WHERE type = '".$type."'";
+    static function liste_modeles($db,$maxfilenamelength=0)
+	{
+		global $conf;
 
-        $resql = $db->query($sql);
-        if ($resql)
-        {
-            $num = $db->num_rows($resql);
-            $i = 0;
-            while ($i < $num)
-            {
-                $row = $db->fetch_row($resql);
-                $liste[$row[0]]=$row[1];
-                $i++;
-            }
-        }
-        else
-        {
-            return -1;
-        }
-        return $liste;
-    }
+		$type='ficheinter';
+		$liste=array();
+
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+		$liste=getListOfModels($db,$type,$maxfilenamelength);
+
+		return $liste;
+	}
 
 }
 

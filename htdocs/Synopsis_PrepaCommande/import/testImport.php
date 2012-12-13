@@ -22,7 +22,7 @@
       $displayHTML = false;
   }
   require_once('pre.inc.php');
-  require_once('Var_Dump.php');
+//  require_once('Var_Dump.php');
 
   require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
   require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');

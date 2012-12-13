@@ -1,11 +1,12 @@
 <?php
 
     ini_set('display_errors', 1);
-if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) {
+if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) 
     error_reporting(E_ALL);
-}
+elseif(isset($_REQUEST['action']) && $_REQUEST['action'] == 'builddoc')
+    error_reporting(E_ALL ^ (E_NOTICE | E_STRICT));
 else
-    error_reporting(E_ERROR | E_PARSE);
+    error_reporting(E_ALL ^ (E_NOTICE));
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 
@@ -34,9 +35,9 @@ global $tabTypeLigne;
 $tabTypeLigne = array("Product", "Service", "Product", "Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
-    $conf->projet->enabled = true;
+    @$conf->projet->enabled = true;
     $conf->projet->dir_output = $conf->synopsisprojet->dir_output;
-    $conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
+    @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
 }
 //if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHINTER)) {
 //    die;

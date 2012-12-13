@@ -465,7 +465,7 @@ class process extends CommonObject {
         return($userObj);
     }
 
-    public function validate($element_id, $type_validation) {
+    public function validateDet($element_id, $type_validation) {
         global $user;
         $this->db->begin();
         $typeId = $this->getValidationType($type_validation);

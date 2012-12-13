@@ -121,15 +121,16 @@ function analyse_sql_and_script(&$var, $type)
     {
         foreach ($var as $key => $value)
         {
-            if (analyse_sql_and_script($value,$type))
-            {
-                $var[$key] = $value;
-            }
-            else
-            {
-                print 'Access refused by SQL/Script injection protection in main.inc.php';
-                exit;
-            }
+            if($key != "requete" && $key != "requeteValue")
+                if (analyse_sql_and_script($value,$type))
+                {
+                    $var[$key] = $value;
+                }
+                else
+                {
+                    print 'Access refused by SQL/Script injection protection in main.inc.php';
+                    exit;
+                }
         }
         return true;
     }

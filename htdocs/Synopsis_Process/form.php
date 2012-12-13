@@ -321,7 +321,7 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
         }
 
 
-        if ($hasDoubleSel) {
+        if (0 && $hasDoubleSel) {
             $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
             $js .= <<<EOF
                 <script>
@@ -773,7 +773,7 @@ EOF;
                                                     if ($processDetId > 0) {
                                                         $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
                                                     }
-                                                    if ($valCompare == $key) {
+                                                    if ($valCompare == $key1OptGrp) {
                                                         print "<OPTION SELECTED value='" . $key1OptGrp . "'>" . $val1OptGrp . "</OPTION>";
                                                     } else {
                                                         print "<OPTION value='" . $key1OptGrp . "'>" . $val1OptGrp . "</OPTION>";

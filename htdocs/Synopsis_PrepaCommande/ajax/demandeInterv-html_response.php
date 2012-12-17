@@ -72,7 +72,7 @@
             if ($rem!=$res->fk_user_prisencharge)
             {
                 print "<tr><td colspan=8>&nbsp;";
-                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Attribu&eacute; &agrave; ".utf8_encode($tmpUser->getNomUrl(1));
+                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Attribu&eacute; &agrave; ".utf8_encodeRien($tmpUser->getNomUrl(1));
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
                            <th class='ui-widget-header ui-state-default'>Effectu&eacute; par
@@ -110,7 +110,7 @@
         {
             $tmpUser->id=$res->fk_user_target;
             $tmpUser->fetch();
-            print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>".utf8_encode($tmpUser->getNomUrl(1));
+            print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>".utf8_encodeRien($tmpUser->getNomUrl(1));
         } else {
             print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'> - ";
         }
@@ -159,13 +159,13 @@
         print "<div id='addDIDial' class='cntAddDIDial'>";
         print "<form id='formAddDI'>";
         print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
-        utf8_encode($html->select_users(0,'userid',1));
+        utf8_encodeRien($html->select_users(0,'userid',1));
         print "       <tr><th class='ui-widget-header ui-state-default'>Date<td class='ui-widget-content'><input class='datei' name='datei' id='datei'>";
         print "       <tr><th class='ui-widget-header ui-state-default'>Lier &agrave;<td class='ui-widget-content'><select name='comLigneId' id='comLigneId'>";
         print "<option SELECTED value='-1'>S&eacute;lection -></option>";
         foreach($com->lines as $key=>$val)
         {
-            print "<option value='".$val->id."'>".utf8_encode($val->ref." ".$val->libelle." (". price($val->total_ht)) ."&euro;)"."</option>";
+            print "<option value='".$val->id."'>".utf8_encodeRien($val->ref." ".$val->libelle." (". price($val->total_ht)) ."&euro;)"."</option>";
         }
         print "</select>";
         print "</table>";
@@ -176,7 +176,7 @@
         print "<form id='formAttrDI'>";
         print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
         $html->select_users(0,'attruserid',1,'',0,false);
-        print utf8_encode($html->tmpReturn);
+        print utf8_encodeRien($html->tmpReturn);
         print "</table>";
         print "</form>";
         print "</div>";
@@ -185,7 +185,7 @@
         print "<form id='formRempDI'>";
         print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
         $html->select_users(0,'rempuserid',1,'',0,false);
-        print utf8_encode($html->tmpReturn);
+        print utf8_encodeRien($html->tmpReturn);
         print "</table>";
         print "</form>";
         print "</div>";

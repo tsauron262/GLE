@@ -54,7 +54,7 @@
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";
             $xmlStr .= "<date><![CDATA[".date('d/m/Y',$res->dateinterv)."]]></date>";
-            $xmlStr .= "<interv><![CDATA[".utf8_encode($tmpUser->fullname)."]]></interv>";
+            $xmlStr .= "<interv><![CDATA[".utf8_encodeRien($tmpUser->fullname)."]]></interv>";
             $xmlStr .= "</datainterv>";
         }
 
@@ -79,7 +79,7 @@
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";
             $xmlStr .= "<date><![CDATA[".date('d/m/Y',$res->dateinterv)."]]></date>";
-            $xmlStr .= "<interv><![CDATA[".utf8_encode($tmpUser->fullname)."]]></interv>";
+            $xmlStr .= "<interv><![CDATA[".utf8_encodeRien($tmpUser->fullname)."]]></interv>";
             $xmlStr .= "</datainterv>";
         }
 

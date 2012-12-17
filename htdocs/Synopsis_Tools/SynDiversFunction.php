@@ -475,4 +475,8 @@ function mailSyn($to, $sujet, $text, $headers = null) {
         mail($to, $sujet, $text, $headers);
 }
 
+
+function utf8_encodeRien($str){
+    return $str;
+}
 ?>

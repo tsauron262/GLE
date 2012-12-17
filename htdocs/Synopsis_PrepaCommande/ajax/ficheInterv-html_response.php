@@ -67,7 +67,7 @@
             if ($rem!=$res->fk_user_author)
             {
                 print "<tr><td colspan=8>&nbsp;";
-                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Effectu&eacute; par ". utf8_encode($tmpUser->getNomUrl(1));
+                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Effectu&eacute; par ". utf8_encodeRien($tmpUser->getNomUrl(1));
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
                            <th class='ui-widget-header ui-state-default'>Date

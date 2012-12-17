@@ -61,13 +61,13 @@
         if ($fuser->rights->SynopsisPrepaCom->all->AfficherPrix)
         {
             $responce->rows[$i]['cell']=array($row->rowid,
-                                               utf8_encode($commande->getNomUrl(1)),
+                                               utf8_encodeRien($commande->getNomUrl(1)),
                                                $row->date_commande,
                                                price($commande->total_ht),
                                                $commande->getLibStatut(4));
         } else {
             $responce->rows[$i]['cell']=array($row->rowid,
-                                               utf8_encode($commande->getNomUrl(1)),
+                                               utf8_encodeRien($commande->getNomUrl(1)),
                                                $row->date_commande,
                                                $commande->getLibStatut(4));
         }

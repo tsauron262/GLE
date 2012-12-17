@@ -105,7 +105,7 @@
 
 
       require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
-      sendMail($subject,$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
+      sendMail($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
   } else {
       $xmlStr .= "<KO>KO</KO>";
   }

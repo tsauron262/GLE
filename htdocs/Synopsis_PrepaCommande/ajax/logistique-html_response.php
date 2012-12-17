@@ -644,10 +644,10 @@ function displayLogistique($com) {
                         print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                     }
                 }
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encode($prod->getNomUrl(1));
-                print "    <td width=20 class='ui-widget-content'>" . utf8_encode($val->qty);
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encode($val->libelle);
-                print "    <td class='ui-widget-content'>" . utf8_encode($val->desc);
+                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
+                print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);
+                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($val->libelle);
+                print "    <td class='ui-widget-content'>" . utf8_encodeRien($val->desc);
             }
         }
     } else {

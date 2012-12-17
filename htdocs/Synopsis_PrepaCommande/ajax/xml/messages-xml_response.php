@@ -96,7 +96,7 @@
 
 
     require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
-    sendMail(utf8_encode($subject),$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
+    sendMail(utf8_encodeRien($subject),$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
 
 
     } else {

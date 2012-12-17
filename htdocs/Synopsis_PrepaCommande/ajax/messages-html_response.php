@@ -204,7 +204,7 @@ function displayConv($id,$type=false)
         $tmpUser->id = $res->user_author;
         $tmpUser->fetch();
         print "<tr><td rowspan=2 width=20 class='ui-widget-content'>#".$i."<td colspan=2 class='ui-widget-content'><div style='border:1px Solid #0073EA; padding: 10px; font-size: 12pt ;' class='ui-corner-all'>".nl2br($res->message)."</div>";
-        print "<tr><th class='ui-widget-header ui-state-default black' width=30%>Par ".utf8_encode($tmpUser->getNomUrl(1))."<td style='font-size: 10px; font-weight:0;' class='ui-state-default ui-wiget-header'>Le ".date('d/m/Y',strtotime($res->tms))." &agrave; ".date('H:i',strtotime($res->tms));
+        print "<tr><th class='ui-widget-header ui-state-default black' width=30%>Par ".utf8_encodeRien($tmpUser->getNomUrl(1))."<td style='font-size: 10px; font-weight:0;' class='ui-state-default ui-wiget-header'>Le ".date('d/m/Y',strtotime($res->tms))." &agrave; ".date('H:i',strtotime($res->tms));
         $i--;
     }
     $display=false;

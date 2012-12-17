@@ -56,7 +56,7 @@ if ($res>0)
       $arrLabel = array();
       while ($res = $db->fetch_object($sql))
       {
-          $arrLabel[$res->label]=utf8_encode($res->label);
+          $arrLabel[$res->label]=utf8_encodeRien($res->label);
       }
 
       $requete="SELECT ifnull(d.fk_user_prisencharge,d.fk_user_target) as fk_user,
@@ -74,7 +74,7 @@ if ($res>0)
       $sql = $db->query($requete);
       $arr=array();
       while($res = $db->fetch_object($sql)){
-          $arr[$res->fk_user]['DI'][utf8_encode($res->ref)][utf8_encode($res->label)]+=$res->total_ht;
+          $arr[$res->fk_user]['DI'][utf8_encodeRien($res->ref)][utf8_encodeRien($res->label)]+=$res->total_ht;
       }
 
       $requete="SELECT f.fk_user_author as fk_user,
@@ -91,7 +91,7 @@ if ($res>0)
                    AND ft.fk_typeinterv = t.id ";
       $sql = $db->query($requete);
       while($res = $db->fetch_object($sql)){
-          $arr[$res->fk_user]['FI'][utf8_encode($res->ref)][utf8_encode($res->label)]+=$res->total_ht;
+          $arr[$res->fk_user]['FI'][utf8_encodeRien($res->ref)][utf8_encodeRien($res->label)]+=$res->total_ht;
       }
 
       //meme cat ds FI et DI
@@ -120,7 +120,7 @@ if ($res>0)
               $tmpUser = new User($db);
               $tmpUser->id = $userid;
               $tmpUser->fetch($userid);
-              print "<tr><th colspan=1 class='ui-state-hover' style='color: white!important;'>".utf8_encode($tmpUser->getNomUrl(1));
+              print "<tr><th colspan=1 class='ui-state-hover' style='color: white!important;'>".utf8_encodeRien($tmpUser->getNomUrl(1));
               print "<tr><td class='ui-widget-content'>";
               print "        <table width=100% cellpadding=10>";
               $tmpArr1=array();

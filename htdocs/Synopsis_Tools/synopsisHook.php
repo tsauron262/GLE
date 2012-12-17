@@ -1,10 +1,13 @@
 <?php
 
     ini_set('display_errors', 1);
-if (defined('MOD_DEV_SYN') && MOD_DEV_SYN) 
-    error_reporting(E_ALL);
-elseif(isset($_REQUEST['action']) && $_REQUEST['action'] == 'builddoc')
+    $builddoc = (isset($_REQUEST['action']));
+if($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
+    error_reporting(E_ALL ^ (E_STRICT));
+elseif($builddoc)
     error_reporting(E_ALL ^ (E_NOTICE | E_STRICT));
+elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN) 
+    error_reporting(E_ALL);
 else
     error_reporting(E_ALL ^ (E_NOTICE));
 ini_set('upload_max_filesize', 10000);
@@ -39,10 +42,9 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     $conf->projet->dir_output = $conf->synopsisprojet->dir_output;
     @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
 }
-//if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHINTER)) {
-//    die;
-$conf->ficheinter->enabled = true;
-//}
+if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
+    @$conf->ficheinter->enabled = true;
+}
 
 
 

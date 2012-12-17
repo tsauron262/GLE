@@ -37,7 +37,7 @@ $qty = $res->qty;
 $sql = false;
 for($i=0;$i<$qty;$i++)
 {
-    $line0 = 0;
+    /*$line0 = 0;
     $requete = "SELECT max(line_order) + 1 as mx
                   FROM ".MAIN_DB_PREFIX."contratdet
                  WHERE fk_contrat = ".$contratId;
@@ -66,19 +66,22 @@ for($i=0;$i<$qty;$i++)
         $sql3 = $db->query($requete);
         $res3 = $db->fetch_object($sql3);
         $avenant= $res3->mx;
-    }
+    }*/
 
     $requete = "INSERT INTO ".MAIN_DB_PREFIX."contratdet
                             (fk_contrat,fk_product,statut,description,
                              tva_tx,qty,subprice,price_ht,
                              total_ht, total_tva, total_ttc,fk_user_author,
-                             line_order,fk_commande_ligne,avenant,date_ouverture_prevue,date_ouverture, date_fin_validite)
+                             "/*line_order,fk_commande_ligne,avenant,*/."date_ouverture_prevue,date_ouverture, date_fin_validite)
                      VALUES (". $contratId .",NULL,0,'Import depuis la commande ".$com->ref."',
                              19.6,1,".$res->subprice.",".$res->subprice.",
-                             ".$res->subprice.",".$total_tva.",".$total_ttc.",".$user->id.",
-                             ".$lineO.",".$comLigneId.",".$avenant.",now(),now(), date_add(now(),INTERVAL ".($tmpProd->durVal>0?$tmpProd->durVal:0)." MONTH))";
+                             ".$res->subprice.",".$total_tva.",".$total_ttc.",".$user->id."
+                             "./*$lineO.",".$comLigneId.",".$avenant.*/",now(),now(), date_add(now(),INTERVAL ".($tmpProd->durVal>0?$tmpProd->durVal:0)." MONTH))";
     $sql = $db->query($requete);
-    $cdid = $db->last_insert_id('".MAIN_DB_PREFIX."contratdet');
+//    die($requete);
+    $cdid = $db->last_insert_id(MAIN_DB_PREFIX."contratdet");
+    
+    setElementElement("commandedet", "contratdet", $comLigneId, $cdid);
 
     //Mode de reglement et condition de reglement
     if ($res2->condReg_refid != $com->cond_reglement_id || $res2->modeReg_refid != $com->mode_reglement_id )

@@ -98,14 +98,14 @@
 	?>
 	</td>
 
-	<td align="right" <?php if ($type > 1) { echo 'style="display:none;"'; } ?>><?php echo $form->load_tva('tva_tx',$line->tva_tx,$seller,$buyer,0,$line->info_bits,$line->product_type); ?></td>
+	<td align="right" <?php if ($type > 2) { echo 'style="display:none;"'; } ?>><?php echo $form->load_tva('tva_tx',$line->tva_tx,$seller,$buyer,0,$line->info_bits,$line->product_type); ?></td>
 
-	<td align="right" <?php if ($type > 1) { echo 'style="display:none;"'; } ?>><input type="text" class="flat" size="8" id="price_ht" name="price_ht" value="<?php echo price($line->subprice,0,'',0); ?>"></td>
+	<td align="right" <?php if ($type > 2) { echo 'style="display:none;"'; } ?>><input type="text" class="flat" size="8" id="price_ht" name="price_ht" value="<?php echo price($line->subprice,0,'',0); ?>"></td>
 	<?php if ($conf->global->MAIN_FEATURES_LEVEL > 1) { ?>
-	<td align="right" <?php if ($type > 1) { echo 'style="display:none;"'; } ?>><input type="text" class="flat" size="8" id="price_ttc" name="price_ttc" value="<?php echo price($pu_ttc,0,'',0); ?>"></td>
+	<td align="right" <?php if ($type > 2) { echo 'style="display:none;"'; } ?>><input type="text" class="flat" size="8" id="price_ttc" name="price_ttc" value="<?php echo price($pu_ttc,0,'',0); ?>"></td>
 	<?php } ?>
 
-	<td align="right" <?php if ($type > 1) { echo 'style="display:none;"'; } ?>>
+	<td align="right" <?php if ($type > 2) { echo 'style="display:none;"'; } ?>>
 	<?php if (($line->info_bits & 2) != 2) {
 		// I comment this because it shows info even when not required
 		// for example always visible on invoice but must be visible only if stock module on and stock decrease option is on invoice validation and status is not validated
@@ -118,7 +118,7 @@
 	<?php } ?>
 	</td>
 
-	<td align="right" nowrap <?php if ($type > 1) { echo 'style="display:none;"'; } ?>>
+	<td align="right" nowrap <?php if ($type > 2) { echo 'style="display:none;"'; } ?>>
 	<?php if (($line->info_bits & 2) != 2) { ?>
 		<input size="1" type="text" class="flat" name="remise_percent" value="<?php echo $line->remise_percent; ?>">%
 	<?php } else { ?>
@@ -127,7 +127,7 @@
 	</td>
 
 	<?php if (! empty($conf->margin->enabled)) { ?>
-	<td align="right" <?php if ($type > 1) { echo 'style="display:none;"'; } ?>>
+	<td align="right" <?php if ($type > 2) { echo 'style="display:none;"'; } ?>>
 		<select id="fournprice" name="fournprice" class="hideobject"></select>
 		<input type="text" size="5" id="buying_price" name="buying_price" class="hideobject" value="<?php echo price($line->pa_ht,0,'',0); ?>">
 	</td>

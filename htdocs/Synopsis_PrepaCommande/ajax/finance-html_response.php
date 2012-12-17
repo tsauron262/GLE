@@ -264,7 +264,7 @@ jQuery(document).ready(function(){
                                 jQuery('#DeValdialogFin').dialog("close");
                                 //reload
                                 jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
-                                jQuery('#DeValdialogFin').dialog( "destroy" );
+//                                jQuery('#DeValdialogFin').dialog( "destroy" );
                                 jQuery('#DeValdialogFin').remove();
                                 jQuery.ajax({
                                     url: "ajax/finance-html_response.php",
@@ -519,11 +519,11 @@ print <<<EOF
 jQuery(document).ready(function(){
 
     if(jQuery('.cntValdialogFin').length > 1){
-        jQuery('#valdialogFin').dialog( "destroy" );
+//        jQuery('#valdialogFin').dialog( "destroy" );
         jQuery('#valdialogFin').remove();
     }
     if(jQuery('.cntModdialogFin').length > 1){
-        jQuery('#moddialogFin').dialog( "destroy" );
+//        jQuery('#moddialogFin').dialog( "destroy" );
         jQuery('#moddialogFin').remove();
     }
 

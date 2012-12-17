@@ -9,8 +9,8 @@ class Synopsis_Contrat extends Contrat{
         return($res->extraparams);
     }
     
-    public function fetch($id){
-        parent::fetch($id);
+    public function fetch($id, $ref = ''){
+        parent::fetch($id, $ref);
         $this->type = $this->extraparams;
     }
     public function displayExtraInfoCartouche()

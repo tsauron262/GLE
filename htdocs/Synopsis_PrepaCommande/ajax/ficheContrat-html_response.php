@@ -87,10 +87,14 @@
             {
                 $prodTmp = new Product($db);
                 $prodTmp->fetch($res->fk_product);
+                $tab = getElementElement("commandedet", "contratdet", $res->rowid);
+                $tabId = array();
+                foreach ($tab as $ligne)
+                    $tabId[] = $ligne['d'];
                 print "<tr><td class='ui-widget-content'>".$prodTmp->getNomUrl(1)." ".utf8_encode($prodTmp->libelle)."<td align=center class='ui-widget-content'>".$res->qty;
                 $requete = "SELECT *
                               FROM ".MAIN_DB_PREFIX."contratdet
-                             WHERE fk_commande_ligne = ".$res->rowid;
+                             WHERE rowid in(".implode(", ", $tabId).")";
                 $sql1 = $db->query($requete);
                 $num = $db->num_rows($sql1);
                 print "<td class='ui-widget-content' align=center>";

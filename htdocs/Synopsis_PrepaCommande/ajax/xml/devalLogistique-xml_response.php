@@ -24,7 +24,7 @@
   require_once('../../../main.inc.php');
   $id = $_REQUEST['comId'];
   $xmlStr = "<ajax-response>";
-  $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET logistique_statut=0 WHERE rowid = ".$id;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET logistique_statut=0 WHERE rowid = ".$id;
   $sql = $db->query($requete);
 
   require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
@@ -33,7 +33,7 @@
   $arrGrpTmp = $commande->listGroupMember();
   foreach($arrGrpTmp as $key=>$val)
   {
-      $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET logistique_statut=0 WHERE rowid = ".$val->id;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET logistique_statut=0 WHERE rowid = ".$val->id;
       $sql = $db->query($requete);
   }
 
@@ -74,17 +74,17 @@
           $subject="[Non Dispo Produit] Nouveau message concernant la logistique de la commande ".$commande->ref;
         // Appel des triggers
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-        $interface=new Interfaces($this->db);
+        $interface=new Interfaces($db);
         $result=$interface->run_triggers('PREPACOM_MOD_INDISPO_PROD',$this,$user,$langs,$conf);
-        if ($result < 0) { $error++; $this->errors=$interface->errors; }
+        if ($result < 0) { $error++; $errors=$interface->errors; }
         // Fin appel triggers
 
       } else {
         // Appel des triggers
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-        $interface=new Interfaces($this->db);
+        $interface=new Interfaces($db);
         $result=$interface->run_triggers('PREPACOM_MOD_DISPO_PROD',$this,$user,$langs,$conf);
-        if ($result < 0) { $error++; $this->errors=$interface->errors; }
+        if ($result < 0) { $error++; $errors=$interface->errors; }
         // Fin appel triggers
 
       }

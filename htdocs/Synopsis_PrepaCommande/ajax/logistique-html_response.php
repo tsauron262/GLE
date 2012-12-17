@@ -250,15 +250,15 @@ print <<<EOF
           spinner: 'Chargement ...',
         });
     if(jQuery('.cntValDialog').length > 1){
-        jQuery('#valDialog').dialog( "destroy" );
+//        jQuery('#valDialog').dialog( "destroy" );
         jQuery('#valDialog').remove();
     }
     if(jQuery('.cntModDialog').length > 1){
-        jQuery('#modDialog').dialog( "destroy" );
+//        jQuery('#modDialog').dialog( "destroy" );
         jQuery('#modDialog').remove();
     }
     if(jQuery('.cntDeValDialog').length > 1){
-        jQuery('#modDevalidationDialog').dialog( "destroy" );
+//        jQuery('#modDevalidationDialog').dialog( "destroy" );
         jQuery('#modDevalidationDialog').remove();
     }
 

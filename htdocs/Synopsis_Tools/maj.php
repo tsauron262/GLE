@@ -296,8 +296,8 @@ function getTab() {
             array('rowid', 'label', 'lieu', "description")
         ),
         array("BIMP_messages", MAIN_DB_PREFIX."Synopsis_PrepaComm_messages",
-            array('id', 'label', 'label', 'email'),
-            array('rowid', 'label', 'lieu', "description")
+            array(),
+            array()
         )
     );
 }

@@ -127,8 +127,8 @@ class modSynopsisJasper extends DolibarrModules {
         $this->tabs = array();
 
         // Dictionnaries
-        if (!isset($conf->mymodule->enabled))
-            $conf->mymodule->enabled = 0;
+//        if (!isset($conf->mymodule->enabled))
+//            $conf->mymodule->enabled = 0;
         $this->dictionnaries = array();
         /* Example:
           if (! isset($conf->mymodule->enabled)) $conf->mymodule->enabled=0;	// This is to avoid warnings

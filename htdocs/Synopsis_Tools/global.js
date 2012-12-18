@@ -44,12 +44,17 @@ function traiteScroll(heightDif){
         scrollY  = $(".tabBar").scrollTop();
     height =parseInt(window.innerHeight);
     var i = 0;
+    var j = 0;
+    var h = 0;
     $(".fiche").parent().parent().children("td").each(function(){
-        i = i+1;
+        i = i+1;//Nb d'element dans parent dans div principale'
+    });
+    $(".fiche").parent().children("div").each(function(){
+        h = h+1;
     });
     //    if(height > 560 && i < 3)
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight())+30;
-    if(height > hauteurMenu && i < 3){//On active le scroll 2
+    if(height > hauteurMenu && i < 3 && h == 1){//On active le scroll 2
         $(".fiche").addClass("reglabe");
         heightNew = ($(".fiche").innerHeight() - heightDif) - 20;
         if(heightNew > 300){//On active le scroll 3 (le scroll 2 ne doit plus étre utile

@@ -30,7 +30,7 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 if (isset($_GET['action']) && $_GET['action'] == "import") {
     $dbD = $db;
-$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "x", "synopsis_oldBimp", $Hconf->dbport);
+$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "x", "synopsis_oldBimp3", $Hconf->dbport);
 //    $dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "freeparty", "oldCapsim2", $Hconf->dbport);
 
     include_once("./class/maj.class.php");

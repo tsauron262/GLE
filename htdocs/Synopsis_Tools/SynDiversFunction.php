@@ -454,29 +454,48 @@ function asPosition($str) {
 
 function mailSyn($to, $sujet, $text, $headers = null) {
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
-    $ccAdmin = $toReplay.", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
+    $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {
         $text = "OrigineTo = " . $to . "\n\n" . $text;
         $to = MOD_DEV_SYN_MAIL;
     }
-    if (!isset($to) || $to == ''){
-        $text = "Pas de mail expediteur definit."."\n\n".$text;
+    if (!isset($to) || $to == '') {
+        $text = "Pas de mail expediteur definit." . "\n\n" . $text;
         $to = $toReplay;
     }
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
         $headers .= 'From: Application GLE <no-replay@synopsis-erp.com>' . "\r\n";
-        $headers .= 'Cc: ' .$ccAdmin. "\r\n";
-        $headers .= 'Reply-To: ' .$toReplay. "\r\n";
+        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
+        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
         $text = str_replace("\n", "<br/>", $text);
     }
     if (isset($to) && $to != '')
         mail($to, $sujet, $text, $headers);
 }
 
-
-function utf8_encodeRien($str){
+function utf8_encodeRien($str) {
     return $str;
 }
+
+function php2js($var) {
+    if (is_array($var)) {
+        $res = "[";
+        $array = array();
+        foreach ($var as $a_var) {
+            $array[] = php2js($a_var);
+        }
+        return "[" . join(",", $array) . "]";
+    } elseif (is_bool($var)) {
+        return $var ? "true" : "false";
+    } elseif (is_int($var) || is_integer($var) || is_double($var) || is_float($var)) {
+        return $var;
+    } elseif (is_string($var)) {
+        return "\"" . addslashes(stripslashes($var)) . "\"";
+    }
+    // autres cas: objets, on ne les gère pas
+    return FALSE;
+}
+
 ?>

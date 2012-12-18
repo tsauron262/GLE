@@ -85,6 +85,7 @@ if ($id > 0) {
                            AND fk_product_type = 2
                            AND fk_commande = " . $id;
     $sql = $db->query($requete);
+    $touCreer = false;
     while ($res = $db->fetch_object($sql)) {
         $prodTmp = new Product($db);
         $prodTmp->fetch($res->fk_product);
@@ -137,6 +138,7 @@ if ($id > 0) {
                     $longHtml .= "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
                 }
                 $longHtml .= "</select>";
+                $touCreer = true;
                 $longHtml .= "<button onClick='createContrat2(" . $res->fk_product . "," . $res->rowid . ")' class='butAction'>Ajouter au contrat</button>";
             }
             $arr[] = $longHtml;
@@ -155,18 +157,77 @@ if ($id > 0) {
                     print "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
                 }
                 print "</select>";
+                $touCreer = true;
                 print "<button onClick='createContrat2(" . $res->fk_product . "," . $res->rowid . ")' class='butAction'>Ajouter au contrat</button>";
             } else {
                 //Sinon creer un nouveau contrat et reviens ici
                 print "<button onClick='createContrat(" . $res->fk_product . ")' class='butAction'>Cr&eacute;er le contrat</button>";
             }
         }
+            $tabLigneIdS[] = array($res->fk_product, $res->rowid);
+    }
+    if ($touCreer) {
+        print '<tr><td colspan="3">';
+        $requete = "SELECT *
+                                  FROM " . MAIN_DB_PREFIX . "contrat
+                                 WHERE fk_soc = " . $commande->socid;
+        $sql2 = $db->query($requete);
+        if ($db->num_rows($sql2) > 0) {
+            print "<select name='fk_contratT' id='fk_contratT'>";
+            while ($res2 = $db->fetch_object($sql2)) {
+                print "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
+            }
+            print "</select>";
+            print "<button onClick='ajoutContratAll(tabLigneIdS)' class='butAction'>Tous ajouter au contrat</button>";
+        }
+        print '</td></tr>';
     }
     print "</table>";
 }
 
+print '<script>';
+print 'var tabLigneIdS =' . php2js($tabLigneIdS) . '; ';
+
 print <<<EOF
-<script>
+var nbResult = 0;
+    var ok = true;
+function boucleAttendreResult(nbResultT){
+    if(nbResult == nbResultT){
+        if(ok == true)
+           location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+jQuery('#fk_contratT').find(':selected').val();
+        else
+           alert("Il y a eu une erreur");
+    }
+    else{
+        setTimeout(function(){boucleAttendreResult(nbResultT, ok);}, 500);
+    }
+}
+   
+
+function ajoutContratAll(tabLigne)
+{
+    for(var i=0; i<tabLigne.length;i++){
+        pId = tabLigne[i][0];
+        ligneId = tabLigne[i][1];
+        jQuery.ajax({
+               url:"ajax/xml/addProdToContrat-xml_response.php",
+               data:"id="+comId+"&contratId="+jQuery('#fk_contratT').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId,
+               datatype:"xml",
+               type:"POST",
+               cache:false,
+               success:function(msg){
+                nbResult++;
+                   if(!jQuery(msg).find('OK').length > 0)
+                        ok = false;
+               },
+               error:function(msg){
+               nbResult++;
+                 ok =false;
+               }
+        }); 
+    }
+    boucleAttendreResult(tabLigne.length);
+}
 function createContrat2(pId,ligneId)
 {
 //    //TODO ajoute la ligne, ouvre la page

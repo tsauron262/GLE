@@ -555,7 +555,6 @@ EOF;
                 print "<tr><td align=left  width=20%>" . $res3->label;
                 print "    <td align=left>";
                 $tmpUser = new User($db);
-                $tmpUser->id = ;
                 $tmpUser->fetch($res3->user_refid);
                 if ($res3->validation == 1) {
                     print img_tick("Valider");

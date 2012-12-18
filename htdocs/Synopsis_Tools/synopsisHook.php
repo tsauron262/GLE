@@ -1,14 +1,14 @@
 <?php
-date_default_timezone_set('Europe/Paris'); 
+date_default_timezone_set('Europe/Paris');
 
+ini_set('display_errors', 1);
 
-    ini_set('display_errors', 1);
-    $builddoc = (isset($_REQUEST['action']));
-if($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
+$builddoc = (isset($_REQUEST['action']));
+if ($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL ^ (E_STRICT));
-elseif($builddoc)
+elseif ($builddoc)
     error_reporting(E_ALL ^ (E_NOTICE | E_STRICT));
-elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN) 
+elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL);
 else
     error_reporting(E_ALL ^ (E_NOTICE));

@@ -54,8 +54,7 @@ class Ressource
             $this->nom = $res->nom;
             $this->fk_user_resp = $res->fk_user_resp;
             $tmpUser = new User($this->db);
-            $tmpUser->id = $res->fk_user_resp;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_resp);
             $this->user_resp = $tmpUser;
             $this->description = $res->decription;
             $this->fk_parent_ressource = $res->fk_parent_ressource;

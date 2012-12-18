@@ -77,8 +77,7 @@ if (count($inProjetArr) > 0)
     {
         if ($pairimpair == "pair") { $pairimpair = 'impair'; } else { $pairimpair = "pair"; }
         $fuser = new User($db);
-        $fuser->id = $key;
-        $fuser->fetch();
+        $fuser->fetch($key);
         print "<TR class='$pairimpair'><TD>";
         print utf8_encode($fuser->getNomUrl(1));
         print "</TD><TD>";

@@ -43,8 +43,7 @@
         $commande = new Synopsis_Commande($db);
         $commande->fetch($id);
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         //Notification
         //TO commercial author

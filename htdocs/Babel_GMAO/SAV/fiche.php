@@ -327,8 +327,7 @@ $form =new Form($db);
 
         print '<td width="10%" align=center colspan="1" class="ui-widget-content">';
         $tmpUser = new User($db);
-        $tmpUser->id = $objsav->histo[$i]['user_author'];
-        $tmpUser->fetch();
+        $tmpUser->fetch($objsav->histo[$i]['user_author']);
         print $tmpUser->getNomUrl(1);
         print '</td></tr>';
 

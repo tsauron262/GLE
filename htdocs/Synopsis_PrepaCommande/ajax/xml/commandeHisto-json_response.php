@@ -22,8 +22,7 @@
    require_once('../../../main.inc.php');
    $userId = $_REQUEST['userId'];
    $fuser = new User($db);
-   $fuser->id = $userId;
-   $fuser->fetch();
+   $fuser->fetch($userId);
    $fuser->getrights();
 
    require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");

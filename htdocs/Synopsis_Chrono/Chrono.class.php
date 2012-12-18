@@ -59,15 +59,13 @@ class Chrono extends CommonObject {
                 $this->user_author_id = $res->fk_user_author;
                 if ($this->user_author_id > 0) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $this->user_author_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($this->user_author_id);
                     $this->user_author = $tmpUser;
                 }
                 $this->user_modif_id = $res->fk_user_modif;
                 if ($this->user_modif_id > 0) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $this->user_modif_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($this->user_modif_id);
                     $this->user_modif = $tmpUser;
                 }
 

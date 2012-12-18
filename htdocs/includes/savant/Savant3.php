@@ -59,7 +59,7 @@ class Savant3 {
 	protected $__config = array(
 		'template_path' => array(),
 		'resource_path' => array(),
-		'error_text'    => "\n\ntemplate error, examine fetch() result\n\n",
+		'error_text'    => "\n\ntemplate error, examine fetch(id) result\n\n",
 		'exceptions'    => false,
 		'autoload'      => false,
 		'compiler'      => null,
@@ -219,7 +219,7 @@ class Savant3 {
 	* 
 	* Note that if there is an error, this will output a simple
 	* error text string and will not return an error object.  Use
-	* fetch() to get an error object when errors occur.
+	* fetch(id) to get an error object when errors occur.
 	* 
 	* @access public
 	*  

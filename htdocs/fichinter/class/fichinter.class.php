@@ -496,8 +496,8 @@ class Fichinter extends CommonObject
 
                 if ($obj->fk_user_valid)
                 {
-                    $vuser = new User($this->db, $obj->fk_user_valid);
-                    $vuser->fetch();
+                    $vuser = new User($this->db);
+                    $vuser->fetch($obj->fk_user_valid);
                     $this->user_validation     = $vuser;
                 } else {
                     $this->user_validation=false;

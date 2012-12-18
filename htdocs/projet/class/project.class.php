@@ -307,11 +307,9 @@ class Project extends CommonObject {
         $this->fk_user_resp = $res->fk_user_resp;
         $this->fk_user_creat = $res->fk_user_creat;
         $tmpUser = new User($this->db);
-        $tmpUser->id = $this->fk_user_resp;
-        $tmpUser->fetch();
+        $tmpUser->fetch($this->fk_user_resp);
         $this->user_resp = $tmpUser;
-        $tmpUser->id = $this->fk_user_creat;
-        $tmpUser->fetch();
+        $tmpUser->fetch($this->fk_user_creat);
         $this->user_creat = $tmpUser;
     }
 
@@ -459,8 +457,7 @@ class Project extends CommonObject {
                         $iter = 0;
                         while ($res3 = $this->db->fetch_object($resql3)) {
                             $tmpUsr = new User($this->db);
-                            $tmpUsr->id = $res3->userid;
-                            $tmpUsr->fetch();
+                            $tmpUsr->fetch($res3->userid);
 
                             $this->tasks[$res3->tid]['acto'][$res3->role][$iter]['userid'] = $res3->userid;
                             $this->tasks[$res3->tid]['acto'][$res3->role][$iter]['userobj'] = $tmpUsr;
@@ -2256,8 +2253,7 @@ class ProjectTask extends commonObject {
             $this->duration = $res->duration;
             $this->fk_user_creat = $res->fk_user_creat;
             $tmpUser = new User($this->db);
-            $tmpUser->id = $res->fk_user_creat;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_creat);
             $this->user_creat = $tmpUser;
             $this->statut = $res->statut;
             $this->note = $res->note;

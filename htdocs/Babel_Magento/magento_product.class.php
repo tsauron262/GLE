@@ -287,8 +287,8 @@ class magento_product extends magento_soap{
     public function createProdGle($prodInfo,$db)
     {
         require_once('../product.class.php');
-        $user = new User($db,1);
-        $user->fetch();
+        $user = new User($db);
+        $user->fetch(1);
         require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
         $prod = new Product($db);
         $prod->magento_Sku = $prodInfo['sku'];
@@ -330,8 +330,8 @@ class magento_product extends magento_soap{
 
     public function updateProdGle($prodInfo,$db)
     {
-        $user = new User($db,1);
-        $user->fetch();
+        $user = new User($db);
+        $user->fetch(1);
 
         $magProdid = $prodInfo['product_id'];
         require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");

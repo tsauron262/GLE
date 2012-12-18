@@ -85,8 +85,7 @@ function widget_statOfcPropalStatusAll() {
             $table2 .= $objp->ref.'</a></td>';
             $table2 .= '<td>';
             $tmpUser = new User($db);
-            $tmpUser->id=$objp->fk_user_author;
-            $tmpUser->fetch();
+            $tmpUser->fetch($objp->fk_user_author);
             $table2 .= $tmpUser->getNomUrl(1);
             $table2 .= '</td>';
             $table2 .= '<td>'.$objp->label.'</td>';

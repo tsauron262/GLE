@@ -33,8 +33,7 @@ if ($sql)
     $sql = $db->query($requete);
     $res =$db->fetch_object($sql);
     $tmpUser = new User($db);
-    $tmpUser->id = $commande->user_author_id;
-    $tmpUser->fetch();
+    $tmpUser->fetch($commande->user_author_id);
 
     // Appel des triggers
     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");

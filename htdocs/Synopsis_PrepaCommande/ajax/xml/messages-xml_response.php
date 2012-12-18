@@ -40,12 +40,10 @@
         $commande = new Synopsis_Commande($db);
         $commande->fetch($id);
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         $tmpUser1 = new User($db);
-        $tmpUser1->id = $userId;
-        $tmpUser1->fetch();
+        $tmpUser1->fetch($userId);
 
         $addr_cc .= ", ".$tmpUser1->email;
 

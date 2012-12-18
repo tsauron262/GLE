@@ -185,8 +185,7 @@ if ($lightMode.'x' !="x")
     {
         $responce->rows[$i]['id']=$row[rowid];
         $tmpuser = new User($db);
-        $tmpuser->id = $row[fk_user];
-        $tmpuser->fetch();
+        $tmpuser->fetch($row[fk_user]);
         $task = new ProjectTask($db);
         $task->fetch($row['rowid']);
         $responce->rows[$i]['cell']=array($row[rowid],
@@ -206,8 +205,7 @@ if ($lightMode.'x' !="x")
     {
         $responce->rows[$i]['id']=$row[rowid];
         $tmpuser = new User($db);
-        $tmpuser->id = $row[fk_user];
-        $tmpuser->fetch();
+        $tmpuser->fetch($row[fk_user]);
         $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),traiteStr($row[role]),($tmpuser->id >0?$tmpuser->getNomUrl(1):""),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])));
         $i++;
     }
@@ -218,8 +216,7 @@ if ($lightMode.'x' !="x")
     {
         $responce->rows[$i]['id']=$row[rowid];
         $tmpuser = new User($db);
-        $tmpuser->id = $row[fk_user];
-        $tmpuser->fetch();
+        $tmpuser->fetch($row[fk_user]);
         $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),traiteStr($row[role]),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])));
         $i++;
     }
@@ -229,8 +226,7 @@ if ($lightMode.'x' !="x")
     {
         $responce->rows[$i]['id']=$row[rowid];
         $tmpuser = new User($db);
-        $tmpuser->id = $row[fk_user];
-        $tmpuser->fetch();
+        $tmpuser->fetch($row[fk_user]);
         $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])),traiteStr(($tmpuser->id>0?$tmpuser->getNomUrl(1):"")));
         $i++;
     }

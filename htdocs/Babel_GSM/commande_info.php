@@ -133,8 +133,7 @@ if ($_GET["commande_id"] > 0)
     $soc->fetch($commande->socid);
 
     $author = new User($db);
-    $author->id = $commande->user_author_id;
-    $author->fetch();
+    $author->fetch($commande->user_author_id);
 
 //        $head = commande_prepare_head($commande);
 //    dolibarr_fiche_head($head, 'shipping', $langs->trans("CustomerOrder"));

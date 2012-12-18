@@ -2843,8 +2843,8 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $tmpUser = new User($this->db, $userId);
-                $tmpUser->fetch();
+                $tmpUser = new User($this->db);
+                $tmpUser->fetch($userId);
                 $url = $this->dolibarr_main_url_root . "/comm/propal.php?propalid=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
@@ -3847,8 +3847,8 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                 $url = $this->dolibarr_main_url_root . "/fichinter/fiche.php?id=" . $res->rowid;
                 if ($res->datec) {
-                    $tmpUser = new User($this->db, $userId);
-                    $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
                                              folder_uid as fid
@@ -4037,8 +4037,8 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                 $url = $this->dolibarr_main_url_root . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid;
                 if ($res->datec) {
-                    $tmpUser = new User($this->db, $userId);
-                    $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
                                              folder_uid as fid
@@ -4432,8 +4432,8 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $tmpUser = new User($this->db, $userId);
-                $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                 $url = $this->dolibarr_main_url_root . "/expedition/fiche.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
@@ -4716,8 +4716,8 @@ class Zimbra {
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $tmpUser = new User($this->db, $userId);
-                $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                 $url = $this->dolibarr_main_url_root . "/livraison/fiche.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     //get Loc Zimbra
@@ -5181,8 +5181,7 @@ class Zimbra {
                 $url = $this->dolibarr_main_url_root . "/commande/fiche.php?id=" . $res->rowid;
                 if ($res->date_creation) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $userid;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($userId);
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
                                              folder_uid as fid
@@ -5664,8 +5663,8 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                 $url = $this->dolibarr_main_url_root . "/contrat/fiche.php?id=" . $res->rowid;
                 if ($res->date_ouverture) {
-                    $tmpUser = new User($this->db, $userId);
-                    $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
                                              folder_uid as fid
@@ -5778,8 +5777,8 @@ class Zimbra {
             while ($res = $db->fetch_object($resql)) {
                 $url = $this->dolibarr_main_url_root . "/contrat/fiche.php?id=" . $res->rowid;
                 if ($res->datec) {
-                    $tmpUser = new User($this->db, $userId);
-                    $tmpUser->fetch();
+                    $tmpUser = new User($this->db);
+                    $tmpUser->fetch($userId);
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
                                              folder_uid as fid

@@ -70,8 +70,7 @@ switch($action)
         while ($res2 = $db->fetch_object($sql2))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $res2->user_refid;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res2->user_refid);
             $xml.= "<histo><date><![CDATA[".$res2->dateModif."]]></date>";
             $xml.= "<userid><![CDATA[".$tmpUser->getNomUrl(1)."]]></userid>";
             $xml.= "<raison><![CDATA[".$res2->raison."]]></raison>";

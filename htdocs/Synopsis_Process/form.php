@@ -1000,8 +1000,7 @@ EOF;
                             if ($resValue) {
                                 print "<tr style='line-height:40px;'><th class='ui-widget-header ui-state-default'>" . $resValue->label;
                                 $tmpUser = new User($db);
-                                $tmpUser->id = $resValue->user_refid;
-                                $tmpUser->fetch();
+                                $tmpUser->fetch($resValue->user_refid);
                                 print "<td align=right class='ui-widget-content'>" . $resValue->note;
                                 print "<td align=center class='ui-widget-content' colspan=2>";
                                 if ($resValue->valeur == 1) {
@@ -1053,8 +1052,7 @@ EOF;
                         if ($resValue) {
                             print "<tr style='line-height:40px;'><th class='ui-widget-header ui-state-default'>" . $res->label;
                             $tmpUser = new User($db);
-                            $tmpUser->id = $resValue->user_refid;
-                            $tmpUser->fetch();
+                            $tmpUser->fetch($resValue->user_refid);
                             print "<td align=right class='ui-widget-content'>" . $resValue->note;
                             print "<td align=center class='ui-widget-content' colspan=2>";
                             if ($resValue->valeur == 1) {

@@ -100,10 +100,10 @@ $bool = false;
     }
 
 
-    $usertodo=new User($db,$affectTo);
+    $usertodo=new User($db);
     if ($affectTo > 0)
     {
-        $usertodo->fetch();
+        $usertodo->fetch($affectTo);
     }
     $actioncomm->usertodo = $usertodo;
 

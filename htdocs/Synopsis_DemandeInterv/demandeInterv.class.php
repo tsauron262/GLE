@@ -771,33 +771,33 @@ class demandeInterv extends CommonObject
                 $this->date_creation     = $obj->datec;
                 $this->date_validation   = $obj->datev;
 
-                $cuser = new User($this->db, $obj->fk_user_author);
-                $cuser->fetch();
+                $cuser = new User($this->db);
+                $cuser->fetch($obj->fk_user_author);
                 $this->user_creation     = $cuser;
 
                 if ($obj->fk_user_valid)
                 {
-                    $vuser = new User($this->db, $obj->fk_user_valid);
-                    $vuser->fetch();
+                    $vuser = new User($this->db);
+                    $vuser->fetch($obj->fk_user_valid);
                     $this->user_validation     = $vuser;
                 }
 
                 if ($obj->fk_user_target)
                 {
-                    $vuser = new User($this->db, $obj->fk_user_target);
-                    $vuser->fetch();
+                    $vuser = new User($this->db);
+                    $vuser->fetch($obj->fk_user_target);
                     $this->user_target     = $vuser;
                 }
                 if ($obj->fk_user_prisencharge)
                 {
-                    $vuser = new User($this->db, $obj->fk_user_prisencharge);
-                    $vuser->fetch();
+                    $vuser = new User($this->db);
+                    $vuser->fetch($obj->fk_user_prisencharge);
                     $this->user_prisencharge     = $vuser;
                 }
                 if ($obj->fk_user_cloture)
                 {
-                    $vuser = new User($this->db, $obj->fk_user_cloture);
-                    $vuser->fetch();
+                    $vuser = new User($this->db);
+                    $vuser->fetch($obj->fk_user_cloture);
                     $this->user_cloture     = $vuser;
                 }
 

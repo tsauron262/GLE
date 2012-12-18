@@ -155,8 +155,7 @@ function imputations_pdf_create($db, $id, $modele='', $outputlangs='')
         $fuser = $user;
         if($_REQUEST['userId'] > 0)
         {
-            $fuser->id = $_REQUEST['userId'];
-            $fuser->fetch();
+            $fuser->fetch($_REQUEST['userId']);
         }
         if ($obj->write_file($id, $outputlangs,$fuser) > 0)
         {

@@ -799,8 +799,7 @@ if ($_REQUEST["action"] == 'create') {
 
         if ($_REQUEST['userid'] > 0) {
             $tmpUser = new User($db);
-            $tmpUser->id = $_REQUEST['userid'];
-            $tmpUser->fetch();
+            $tmpUser->fetch($_REQUEST['userid']);
             print "<tr><th class='ui-widget-header ui-state-default'>Attribu&eacute; &agrave;</th>
                        <td colspan=3 class='ui-widget-content'>" . $tmpUser->getNomUrl(1) . "</td></tr>";
             print "<input type=\"hidden\" name=\"userid\" value=\"" . $_REQUEST['userid'] . "\">";

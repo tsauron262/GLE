@@ -34,8 +34,7 @@ $userId = $_REQUEST['userid'];
 
 //Connect Zimbra
 $tmpUser = new User($db);
-$tmpUser->id = $userId;
-$tmpUser->fetch();
+$tmpUser->fetch($userId);
 
 $zimuser="";
 if ($conf->global->ZIMBRA_ZIMBRA_USE_LDAP=="true")

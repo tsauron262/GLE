@@ -269,8 +269,7 @@ class InterfaceNotification
                     $tmpUser = new User($db);
                     if ($res->email_str > 0)
                     {
-                        $tmpUser->id = $res->email_str;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->email_str);
                         $arr[$val][]=$tmpUser->email;
                     }
                 } else if ($res->type=='contact')

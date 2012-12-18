@@ -19,8 +19,7 @@ require_once('../../main.inc.php');
 
  $action = $_REQUEST['action'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -191,8 +190,7 @@ switch ($action)
             $soc->fetch($row[socid]);
             $responce->rows[$i]['id']=$row[id];
             $localUser = new User($db);
-            $localUser->id = $row[fk_user_resp];
-            $localUser->fetch();
+            $localUser->fetch($row[fk_user_resp]);
             $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
             $responce->rows[$i]['cell']=array($row[id],
                                               $row[dateModiff],
@@ -288,8 +286,7 @@ switch ($action)
             $soc->fetch($row[socid]);
             $responce->rows[$i]['id']=$row[id];
             $localUser = new User($db);
-            $localUser->id = $row[user_id];
-            $localUser->fetch();
+            $localUser->fetch($row[user_id]);
             $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
             $imgClose =  $arrStcomm["a".$row[closeStComm]]."\n";
             if ($arrStcomm["a".$row[closeStComm]] . "x" == "x" )

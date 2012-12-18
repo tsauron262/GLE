@@ -29,8 +29,7 @@
             ORDER BY t.rang";
   $sql = $db->query($requete);
   $tmpUser= new User($db);
-  $tmpUser->id = $id;
-  $tmpUser->fetch();
+  $tmpUser->fetch($id);
   $xml .= "<userDesc><![CDATA[".$tmpUser->getNomUrl(1)."]]></userDesc>";
 
   while ($res=$db->fetch_object($sql))

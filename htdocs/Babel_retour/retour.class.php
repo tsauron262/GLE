@@ -70,14 +70,12 @@ class retour extends CommonObject{
                 $this->soc =$tmpSoc;
                 $this->user_author_refid = $res->user_author_refid;
                 $tmpUser = new User($this->db);
-                $tmpUser->id = $res->user_author_refid;
-                $tmpUser->fetch();
+                $tmpUser->fetch($res->user_author_refid);
                 $this->user_author = $tmpUser;
 
                 $this->user_resp_refid = $res->user_resp_refid;
                 $tmpUser = new User($this->db);
-                $tmpUser->id = $res->user_resp_refid;
-                $tmpUser->fetch();
+                $tmpUser->fetch($res->user_resp_refid);
                 $this->user_resp = $tmpUser;
 
                 $this->date_creation = $res->date_createU;

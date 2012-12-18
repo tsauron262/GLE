@@ -1372,29 +1372,29 @@ class Contrat extends CommonObject
                 $this->id = $obj->rowid;
 
                 if ($obj->fk_user_author) {
-                    $cuser = new User($this->db, $obj->fk_user_author);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_author);
                     $this->user_creation     = $cuser;
                 }
 
                 if ($obj->fk_user_cloture) {
-                    $cuser = new User($this->db, $obj->fk_user_cloture);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_cloture);
                     $this->user_cloture = $cuser;
                 }
                 if ($obj->fk_commercial_signature) {
-                    $cuser = new User($this->db, $obj->fk_commercial_signature);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_commercial_signature);
                     $this->commercial_signature     = $cuser;
                 }
                 if ($obj->fk_commercial_suivi) {
-                    $cuser = new User($this->db, $obj->fk_commercial_suivi);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_commercial_suivi);
                     $this->commercial_suivi     = $cuser;
                 }
                 if ($obj->fk_user_mise_en_service) {
-                    $cuser = new User($this->db, $obj->fk_user_mise_en_service);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_mise_en_service);
                     $this->user_mise_en_service     = $cuser;
                 }
 
@@ -1680,24 +1680,24 @@ class Contrat extends CommonObject
             while ($obj = $this->db->fetch_object($result))
             {
                 if ($obj->fk_user_author) {
-                    $cuser = new User($this->db, $obj->fk_user_author);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_author);
                     array_push($this->user_creation, $cuser);
                 }
             }
             while ($obj = $this->db->fetch_object($result1))
             {
                 if ($obj->fk_user_ouverture) {
-                    $cuser = new User($this->db, $obj->fk_user_ouverture);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_ouverture);
                     array_push($this->user_ouverture, $cuser);
                 }
             }
             while ($obj = $this->db->fetch_object($result2))
             {
                 if ($obj->fk_user_cloture) {
-                    $cuser = new User($this->db, $obj->fk_user_cloture);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_cloture);
                     array_push($this->user_cloture, $cuser);
                 }
             }
@@ -2607,24 +2607,24 @@ class ContratLigne
             while ($obj = $this->db->fetch_object($result))
             {
                 if ($obj->fk_user_author) {
-                    $cuser = new User($this->db, $obj->fk_user_author);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_author);
                     array_push($this->user_creation, $cuser);
                 }
             }
             while ($obj = $this->db->fetch_object($result1))
             {
                 if ($obj->fk_user_ouverture) {
-                    $cuser = new User($this->db, $obj->fk_user_ouverture);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_ouverture);
                     array_push($this->user_ouverture, $cuser);
                 }
             }
             while ($obj = $this->db->fetch_object($result2))
             {
                 if ($obj->fk_user_cloture) {
-                    $cuser = new User($this->db, $obj->fk_user_cloture);
-                    $cuser->fetch();
+                    $cuser = new User($this->db);
+                    $cuser->fetch($obj->fk_user_cloture);
                     array_push($this->user_cloture, $cuser);
                 }
             }

@@ -48,8 +48,7 @@
         while ($res = $db->fetch_object($sql))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_interv;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_interv);
             $xmlStr .= "<datainterv id='".$res->rowid."'>";
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";
@@ -73,8 +72,7 @@
         while ($res = $db->fetch_object($sql))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_interv;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_interv);
             $xmlStr .= "<datainterv id='".$res->rowid."'>";
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";

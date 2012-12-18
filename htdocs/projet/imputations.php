@@ -20,8 +20,7 @@ $comref = sanitize_string("Imputations-" . date('Y') . '-' . $user->login);
 $filedir = $conf->imputations->dir_output;
 
 $curUser = new User($db);
-$curUser->id = $userId;
-$curUser->fetch();
+$curUser->fetch($userId);
 
 $format = 'weekly';
 if ($_REQUEST['format'] . 'x' != "x")

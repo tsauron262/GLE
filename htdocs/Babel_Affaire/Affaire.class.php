@@ -110,8 +110,7 @@ class Affaire extends CommonObject {
             $this->user_author_id = $res->fk_user_create;
             $this->modelContactPDF_refid = $res->modelContactPDF_refid;
             $this->modelPNPDF_refid = $res->modelPNPDF_refid;
-            $tmpUser->id = $res->fk_user_create;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_create);
             $this->user_author = $tmpUser;
             $this->statut = $res->statut;
         } else {

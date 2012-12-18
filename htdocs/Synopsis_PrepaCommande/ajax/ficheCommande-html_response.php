@@ -139,8 +139,7 @@ EOF;
             $soc->fetch($commande->socid);
 
             $author = new User($db);
-            $author->id = $commande->user_author_id;
-            $author->fetch();
+            $author->fetch($commande->user_author_id);
             $nbrow=6;
 
             print '<table cellpadding=10 class="border" width="700">';

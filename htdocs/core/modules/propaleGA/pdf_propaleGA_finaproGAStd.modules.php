@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -230,8 +233,7 @@ class pdf_propaleGA_finaproGAStd extends ModelePDFPropalesGA
                 $this->WriteHTML($finaHeader,1,0,$pdf);
 
                 $tmpUrs = new User($propale->db);
-                $tmpUrs->id = $propale->commercial_signataire_refid;
-                $tmpUrs->fetch();
+                $tmpUrs->fetch($propale->commercial_signataire_refid);
 
                 $pdf->MultiCell($this->page_largeur-($this->marge_gauche + $this->marge_droite), 5, strtoupper(utf8_decode(utf8_encode($tmpUrs->fullname))), 0, 'R', 0);
 

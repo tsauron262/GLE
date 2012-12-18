@@ -402,8 +402,7 @@ $task->user_creat->fetch($task->user_creat->id);
                     if ($res->fk_user > 0)
                     {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user);
                     }
                     $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date))] = array('date' => $res->task_date, 'dur' => $res->task_duration, 'user' => $tmpUser);
                     $i++;
@@ -422,8 +421,7 @@ $task->user_creat->fetch($task->user_creat->id);
                     if ($res->fk_user > 0)
                     {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user);
                     }
                     if(is_array($tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]))
                         $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))] = array('dateEff' => $res->task_date_effective,

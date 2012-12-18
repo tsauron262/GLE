@@ -57,8 +57,7 @@ if ($_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
         $res = $db->fetch_object($sql);
 
 //              $tmpUser = new User($db);
-//              $tmpUser->id = $res->email;
-//              $tmpUser->fetch();
+//              $tmpUser->fetch($res->email);
         //Notification
         //TO service depositaire
         //CC Resp Tech
@@ -129,8 +128,7 @@ if ($_REQUEST["id"] > 0) {
         $soc->fetch($commande->socid);
 
         $author = new User($db);
-        $author->id = $commande->user_author_id;
-        $author->fetch();
+        $author->fetch($commande->user_author_id);
 
 
         // Onglet commande

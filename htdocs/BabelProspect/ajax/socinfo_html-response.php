@@ -40,9 +40,8 @@ $langs->load('main');
 
 $campagne = new Campagne($db);
 $campagne->fetch($campagne_id);
-$user=new User($db,$userId);
-$user->id=$userId;
-$user->fetch();
+$user=new User($db);
+$user->fetch($userId);
 $user->getrights();
 
 //duree par default
@@ -483,8 +482,7 @@ EOF;
                             if ($res->{$val})
                             {
                                 $tmpUserCreate = new User($db);
-                                $tmpUserCreate->id =$res->{$val};
-                                $tmpUserCreate->fetch();
+                                $tmpUserCreate->fetch($res->{$val});
         //                        var_dump($tmpUserCreate);
                                 array_push($contactArr,array('source' => 'internal',
                                                       'socid' => '-1',

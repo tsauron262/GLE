@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -316,8 +319,7 @@ class Deplacement extends CommonObject
         $totKm=intval($totKm);
         //get CV from userid //TODO
         $fuser = new User($this->db);
-        $fuser->id = $userId;
-        $fuser->fetch();
+        $fuser->fetch($userId);
         $cv=$fuser->CV_ndf;
 //        $requete = "SELECT * FROM Babel_distance order by seuil + 0 desc";
 //        if ($resql=$this->db->query($requete))
@@ -1049,8 +1051,7 @@ class Ndf extends CommonObject
         //get CV from userid //TODO
         $cv=3;
         $tuser = new User($this->db);
-        $tuser->id=$userId;
-        $tuser->fetch();
+        $tuser->fetch($userId);
         $cv = $tuser->CV_ndf;
         if ("x".$cv == "x")
         {

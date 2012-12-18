@@ -25,8 +25,7 @@ require_once('../../main.inc.php');
 
  $action = $_REQUEST['action'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid

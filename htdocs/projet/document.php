@@ -511,8 +511,7 @@ $tableInProj = "<div style=\'max-height: 300px; overflow-y: auto;\'><table width
 while ($res = $db->fetch_object($sql))
 {
     $tmpUser = new User($db);
-    $tmpUser->id = $res->fk_user;
-    $tmpUser->fetch();
+    $tmpUser->fetch($res->fk_user);
     $tableInProj .= "<tr><td>".$tmpUser->getNomUrl(1)."</td><td>".$tmpUser->email."</td><td>"./*img_GLE('Ajouter',"plus.gif").*/"</td></tr>";
 }
 $tableInProj .= "</tbody></table></div>";

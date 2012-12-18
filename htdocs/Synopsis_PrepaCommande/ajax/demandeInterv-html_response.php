@@ -108,8 +108,7 @@
         print "    <td style='padding:15px 10px 10px 10px;' valign=top width=130 class='ui-widget-content' >".$di->getNomUrl(1);
         if ($res->fk_user_target > 0)
         {
-            $tmpUser->id=$res->fk_user_target;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_target);
             print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>".utf8_encodeRien($tmpUser->getNomUrl(1));
         } else {
             print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'> - ";

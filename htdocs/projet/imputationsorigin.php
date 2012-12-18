@@ -14,8 +14,7 @@
 	$userId = $_REQUEST[ 'userid' ] ;
 
     $curUser = new User( $db ) ;
-    $curUser->id = $userId ;
-    $curUser->fetch() ;
+    $curUser->fetch($userId) ;
 
     $format = 'weekly' ;
     if ( $_REQUEST[ 'format' ] . 'x' != "x" )

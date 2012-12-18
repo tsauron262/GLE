@@ -128,8 +128,7 @@ EOF;
                     $tmpUser = new User($db);
                     if ($res->email_str > 0)
                     {
-                        $tmpUser->id = $res->email_str;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->email_str);
                         print '<tr><td>'.$tmpUser->getNomUrl(1);
                         print '<td width=16><table><tr><td><span class="ui-icon ui-icon-trash"></span></table>';
                     } else {

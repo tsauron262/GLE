@@ -105,8 +105,7 @@ if (!is_file(ROOT_PATH . '/lib/confs/Conf.php')) {
     exit();
 }
 $tmpUser = new User($db);
-$tmpUser->id = $_COOKIE['userid'];
-$tmpUser->fetch();
+$tmpUser->fetch($_COOKIE['userid']);
 $fullname = $tmpUser->fullname;
 
 //session_start();

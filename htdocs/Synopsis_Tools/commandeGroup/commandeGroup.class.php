@@ -108,7 +108,7 @@ class CommandeGroup extends CommonObject{
         }
     }
     public function addCom($comId){
-        if ($this->nom."x"=="x") $this->fetch();
+        if ($this->nom."x"=="x") $this->fetch($comId);
         $com = new Commande($this->db);
         $com->fetch($comId);
         $requete1 = "DELETE FROM Babel_commande_grpdet WHERE command_refid = ".$com->id;

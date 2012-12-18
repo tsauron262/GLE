@@ -250,8 +250,7 @@ foreach($hrm->teamRessource as $teamid => $val) // pour chaque team
             //Foreach($usr in team)
             // si vacances :> affiche vacances
             $tmpUser=new User($db);
-            $tmpUser->id = $val1['GLEId'];
-            $tmpUser->fetch();
+            $tmpUser->fetch($val1['GLEId']);
             $bool = !$bool;
             print "<tr class='".$pairImpair[$bool]."'>";
             print "<td>".$tmpUser->getNomUrl(1)."</td>";

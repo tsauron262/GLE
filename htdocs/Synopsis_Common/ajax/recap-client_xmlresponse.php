@@ -357,8 +357,8 @@ if ($_REQUEST['level'] == 1)
         if ($resqlPre){
             while ($res = $societe->db->fetch_object($resqlPre))
             {
-                $tmpUser = new User($db,$res->fk_user);
-                $tmpUser->fetch();
+                $tmpUser = new User($db);
+                $tmpUser->fetch($res->fk_user);
                 array_push($contactArr,array('source' => 'internal',
                                              'socid' => '-1',
                                              'id' => $tmpUser->id,
@@ -582,8 +582,7 @@ if ($_REQUEST['level'] == 1)
                     if ($res->{$val})
                     {
                         $tmpUserCreate = new User($db);
-                        $tmpUserCreate->id =$res->{$val};
-                        $tmpUserCreate->fetch();
+                        $tmpUserCreate->fetch($res->{$val});
 //                        var_dump($tmpUserCreate);
                         array_push($contactArr,
                                         array('source' => 'internal',

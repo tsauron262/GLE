@@ -142,8 +142,7 @@ EOF;
         $soc->fetch($commande->socid);
 
         $author = new User($db);
-        $author->id = $commande->user_author_id;
-        $author->fetch();
+        $author->fetch($commande->user_author_id);
         $nbrow = 8;
         if ($conf->projet->enabled)
             $nbrow++;

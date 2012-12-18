@@ -156,8 +156,7 @@ class pdf_contratGA_finaproStd extends ModelePDFContratGA
                 $pdf->AddFont('Vera','I','VeraIt.php');
 
                 $tmpSignature = new User($contratGA->db);
-                $tmpSignature->id = $contratGA->commercial_signature_id;
-                $tmpSignature->fetch();
+                $tmpSignature->fetch($contratGA->commercial_signature_id);
 
 
                 $pdf->SetDrawColor(128,128,128);

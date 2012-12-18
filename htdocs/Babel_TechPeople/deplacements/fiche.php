@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -339,8 +341,8 @@ if ($_GET["action"] == 'create')
                 print '<tr><td>'.$langs->trans("Type").'</td><td>'.$deplacement->type_dep.'</td></tr>';
 
 //                print '<tr><td>'.$langs->trans("Person").'</td><td>';
-//                $userfee=new User($db,$deplacement->fk_user);
-//                $userfee->fetch();
+//                $userfee=new User($db);
+//                $userfee->fetch($deplacement->fk_user);
 //                print $userfee->getNomUrl(1);
 //                print '</td></tr>';
 

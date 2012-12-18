@@ -96,8 +96,7 @@ switch($action)
             $newAccountDet['sn']=$nom;
             $newAccountDet['st']="";
             $tmpUser = new User($db);
-            $tmpUser->id = $user_resp;
-            $tmpUser->fetch();
+            $tmpUser->fetch($user_resp);
 
             $newAccountDet['telephoneNumber']= $tmpUser->prefPhone;
             $newAccountDet['zimbraCalResType']="Equipment"; //Equipment ou Location
@@ -229,8 +228,7 @@ switch($action)
 //                $newAccountDet['sn']=$nom;
 //                $newAccountDet['st']="";
 //                $tmpUser = new User($db);
-//                $tmpUser->id = $user_resp;
-//                $tmpUser->fetch();
+//                $tmpUser->fetch($user_resp);
 //
 //                $newAccountDet['telephoneNumber']= $tmpUser->prefPhone;
 //                $newAccountDet['zimbraCalResType']="Equipment"; //Equipment ou Location

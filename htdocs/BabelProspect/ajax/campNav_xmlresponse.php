@@ -36,8 +36,7 @@ $campId = $_REQUEST['campid'];
 $userId = $_REQUEST['userId'];
 
 $user = new User($db);
-$user->id = $userId;
-$user->fetch();
+$user->fetch($userId);
 
 $camp->id = $campId;
 $camp->stats();

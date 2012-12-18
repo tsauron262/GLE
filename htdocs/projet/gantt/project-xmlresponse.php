@@ -123,8 +123,7 @@ switch ($action) {
                 while ($res1 = $db->fetch_object($sql1)) {
                     if ($res1->type == "user") {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res1->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res1->fk_user);
 
                         $xml .= "<user>";
                         $xml .="<userid>" . $res1->fk_user . '</userid>';
@@ -156,8 +155,7 @@ switch ($action) {
                 while ($res1 = $db->fetch_object($sql1)) {
                     if ($res1->type == "user") {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res1->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res1->fk_user);
 
                         $xml .= "<user>";
                         $xml .="<userid>" . $res1->fk_user . '</userid>';
@@ -594,8 +592,7 @@ function do_select($db, $project_id) {
     $res = $db->fetch_object($sql);
 
     $user1 = new User($db, $res->fk_user_resp);
-    $user1->id = $res->fk_user_resp;
-    $user1->fetch();
+    $user1->fetch($res->fk_user_resp);
     $xml = "<project>\n";
     $xml .= "<task>\n";
     $xml .= "  <pID>-1</pID>\n";
@@ -665,8 +662,7 @@ function do_select($db, $project_id) {
         while ($res1 = $db->fetch_object($sql1)) {
             if ($res1->type == "user") {
                 $user1 = new User($db, $res1->fk_user);
-                $user1->id = $res1->fk_user;
-                $user1->fetch();
+                $user1->fetch($res1->fk_user);
 
                 $userStr .= $res1->role . ": " . $user1->fullname . " (" . $res1->percent . "%)<br>\n";
             } else if (isset($conf->global->MAIN_MODULE_SYNOPSISHRM)) {
@@ -756,8 +752,7 @@ function recursList($taskId, $db) {
         $userStr = "";
         while ($res1 = $db->fetch_object($sql1)) {
             $user1 = new User($db, $res1->fk_user);
-            $user1->id = $res1->fk_user;
-            $user1->fetch();
+            $user1->fetch($res1->fk_user);
 
             $userStr .= $res1->role . ": " . $user1->fullname . "<br>\n";
         }

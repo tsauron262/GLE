@@ -791,8 +791,7 @@ class InterfaceZimbraSync {
                     $zimpass = "";
                     $zimuser1 = "";
                     $zimpass1 = "";
-                    $object->id = $object->id;
-                    $object->fetch();
+                    $object->fetch($object->id);
                     $userAdminZim = $conf->global->ZIMBRA_ADMINUSER;
                     $passAdminZim = $conf->global->ZIMBRA_ADMINPASS;
                     $zim1 = new Zimbra($userAdminZim);
@@ -1431,8 +1430,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim1 = false;
                     if ($res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim1 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1447,8 +1445,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ($res->fk_user_valid != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_valid;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_valid);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1636,8 +1633,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim1 = false;
                     if ($res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim1 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1652,8 +1648,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ($res->fk_user_valid != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_valid;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_valid);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2383,8 +2378,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ("x" . $res->fk_user_author != "x" && $res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2399,8 +2393,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim3 = false;
                     if ("x" . $res->fk_user_action != "x" && $res->fk_user_action != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_action;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_action);
                         $requeteLocZim3 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2415,8 +2408,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim4 = false;
                     if ("x" . $res->fk_user_done != "x" && $res->fk_user_done != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_done;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_done);
                         $requeteLocZim4 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2431,8 +2423,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim5 = false;
                     if ("x" . $res->fk_user_mod != "x" && $res->fk_user_mod != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_mod;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_mod);
                         $requeteLocZim5 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2604,8 +2595,7 @@ class InterfaceZimbraSync {
         $requeteLocZim3 = false;
         if ($res->user_validation->id . "x" != "x" && $res->user_validation->id != $user->id) {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_user_valid;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_valid);
             $requeteLocZim3 = "SELECT folder_type_refid as ftid,
                                      folder_uid as fid
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder

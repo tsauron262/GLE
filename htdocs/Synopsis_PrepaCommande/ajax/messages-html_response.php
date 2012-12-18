@@ -91,7 +91,7 @@ var typeMsg="";
 jQuery(document).ready(function(){
 
     if(jQuery('.cntNewMsgDialog').length > 1){
-        jQuery('#newMsgDialog').dialog( "destroy" );
+//        jQuery('#newMsgDialog').dialog( "destroy" );
         jQuery('#newMsgDialog').remove();
     }
 
@@ -201,8 +201,7 @@ function displayConv($id,$type=false)
     $i=$db->num_rows($sql);;
     while ($res = $db->fetch_object($sql))
     {
-        $tmpUser->id = $res->user_author;
-        $tmpUser->fetch();
+        $tmpUser->fetch($res->user_author);
         print "<tr><td rowspan=2 width=20 class='ui-widget-content'>#".$i."<td colspan=2 class='ui-widget-content'><div style='border:1px Solid #0073EA; padding: 10px; font-size: 12pt ;' class='ui-corner-all'>".nl2br($res->message)."</div>";
         print "<tr><th class='ui-widget-header ui-state-default black' width=30%>Par ".utf8_encodeRien($tmpUser->getNomUrl(1))."<td style='font-size: 10px; font-weight:0;' class='ui-state-default ui-wiget-header'>Le ".date('d/m/Y',strtotime($res->tms))." &agrave; ".date('H:i',strtotime($res->tms));
         $i--;

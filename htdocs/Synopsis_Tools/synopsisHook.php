@@ -10,6 +10,7 @@ elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL);
 else
     error_reporting(E_ALL ^ (E_NOTICE));
+
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 
@@ -18,6 +19,10 @@ include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
 
 global $conf;
+
+$conf->global->MAIN_MAX_DECIMALS_TOT = 5;
+$conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
+$conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;
 
 $conf->global->MAIN_APPLICATION_TITLE = "GLE";
 $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;

@@ -372,9 +372,9 @@ class process extends CommonObject {
             $this->arrRightValid[$code] = array('isValidationRight' => ($res->isValidationRight > 0 ? true : false),
                 'isValidationForAll' => ($res->isValidationForAll > 0 ? true : false));
             if ($val == 1)
-                $userObj->rights->$module->$process->$code = 1;
+                @$userObj->rights->$module->$process->$code = 1;
             else
-                $userObj->rights->$module->$process->$code = false;
+                @$userObj->rights->$module->$process->$code = false;
         }
         return $userObj;
     }

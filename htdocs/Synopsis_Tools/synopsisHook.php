@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Europe/Paris'); 
+
 
     ini_set('display_errors', 1);
     $builddoc = (isset($_REQUEST['action']));

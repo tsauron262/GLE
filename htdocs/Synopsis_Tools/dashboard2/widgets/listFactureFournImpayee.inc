@@ -34,9 +34,9 @@ function widget_listFactureFournImpayee() {
         $sql.= " sum(pf.amount) as am,";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql.= " FROM llx_societe as s, llx_facture_fourn as ff";
-        $sql.= " LEFT JOIN llx_paiementfourn_facturefourn as pf on ff.rowid=pf.fk_facturefourn";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture_fourn as ff";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."paiementfourn_facturefourn as pf on ff.rowid=pf.fk_facturefourn";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= " WHERE s.rowid = ff.fk_soc";
         $sql.= " AND ff.paye=0 AND ff.fk_statut = 1";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;

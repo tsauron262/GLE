@@ -891,7 +891,7 @@ abstract class DolibarrModules
                     if ($reinitadminperms)
                     {
                     	if (! class_exists('User')) {
-                    		require DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
+                    		require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
                     	}
                         $sql="SELECT rowid FROM ".MAIN_DB_PREFIX."user WHERE admin = 1";
                         dol_syslog(get_class($this)."::insert_permissions Search all admin users sql=".$sql);

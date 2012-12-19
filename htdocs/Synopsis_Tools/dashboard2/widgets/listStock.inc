@@ -27,7 +27,7 @@ function widget_listStock() {
 
 
     $max=50;
-    $sql = "SELECT e.label, e.rowid, e.statut FROM llx_entrepot as e";
+    $sql = "SELECT e.label, e.rowid, e.statut FROM ".MAIN_DB_PREFIX."entrepot as e";
     $sql .= " WHERE statut in (0,1) ORDER BY e.statut DESC ";
     $sql .= $db->plimit($max ,0);
     $result = $db->query($sql) ;

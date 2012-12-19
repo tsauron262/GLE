@@ -31,15 +31,15 @@ function widget_listPrepaCommandeContratAFaire() {
     if ($conf->commande->enabled && $user->rights->commande->lire)
     {
         $sql = "SELECT distinct dt.fk_commande
-                  FROM llx_product AS p,
-                       llx_commandedet AS dt,
-                       llx_commande as c
+                  FROM ".MAIN_DB_PREFIX."product AS p,
+                       ".MAIN_DB_PREFIX."commandedet AS dt,
+                       ".MAIN_DB_PREFIX."commande as c
                  WHERE p.rowid = dt.fk_product
                    AND p.`fk_product_type` = 2
                    AND c.rowid = dt.fk_commande
                    AND dt.rowid NOT IN (SELECT cd.`fk_commande_ligne`
                                           FROM Babel_GMAO_contratdet_prop AS cdp,
-                                               llx_contratdet  AS cd
+                                               ".MAIN_DB_PREFIX."contratdet  AS cd
                                          WHERE cd.rowid = cdp.contratdet_refid
                                            AND cd.`fk_commande_ligne` IS NOT NULL)";
         $sql .= " ORDER BY c.date_creation DESC LIMIT 50";

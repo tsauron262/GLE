@@ -22,8 +22,8 @@ function widget_listPropaleOuverte() {
 
     $sql = "SELECT p.rowid, p.ref, p.total_ht, s.rowid as socid, s.nom";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-    $sql.= " FROM llx_propal as p, llx_societe as s";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql.= " FROM ".MAIN_DB_PREFIX."propal as p, ".MAIN_DB_PREFIX."societe as s";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql.= " WHERE p.fk_statut = 1 and p.fk_soc = s.rowid";
     if ($socid)
     {

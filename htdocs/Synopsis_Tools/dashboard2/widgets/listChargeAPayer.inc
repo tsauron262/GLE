@@ -26,7 +26,7 @@ function widget_listChargeAPayer() {
     {
         $sql = "SELECT c.rowid, c.amount, ".$db->pdate("c.date_ech")." as date_ech,";
             $sql.= " cc.libelle";
-            $sql.= " FROM llx_chargesociales as c, llx_c_chargesociales as cc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."chargesociales as c, ".MAIN_DB_PREFIX."c_chargesociales as cc";
             $sql.= " WHERE c.fk_type = cc.id AND c.paye=0";
 
         $sql .= " ORDER BY c.date_ech DESC LIMIT 50";

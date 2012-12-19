@@ -46,7 +46,7 @@ function widget_statOfcPropalStatusAll() {
     $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Les 20 meilleurs ventes</thead><tbody><tr><td colspan=2>&nbsp</tbody>';
 
     $requete = "SELECT *
-                FROM llx_c_propalst
+                FROM ".MAIN_DB_PREFIX."c_propalst
                 WHERE active = 1";
     $presql = $db->query($requete);
     while ($resql = $db->fetch_object($presql))
@@ -55,7 +55,7 @@ function widget_statOfcPropalStatusAll() {
         if ($trans == $langs->trans($trans))
         $trans = $resql->label;
         $sql = "SELECT *
-                FROM llx_propal
+                FROM ".MAIN_DB_PREFIX."propal
                 WHERE datep > date_sub(now(),interval 6 month)
                 AND fk_statut = ".$resql->id."
             ORDER BY total_ht DESC ";

@@ -27,13 +27,13 @@ function widget_listExpedition() {
         $sql = "SELECT e.rowid, e.ref";
         $sql.= ", s.nom, s.rowid as socid";
         $sql.= ", c.ref as commande_ref, c.rowid as commande_id";
-        $sql.= " FROM llx_expedition as e";
-        $sql.= " LEFT JOIN llx_co_exp as ce ON e.rowid = ce.fk_expedition";
-        $sql.= " LEFT JOIN llx_commande as c ON ce.fk_commande = c.rowid";
-        $sql.= " LEFT JOIN llx_societe as s ON s.rowid = e.fk_soc";
+        $sql.= " FROM ".MAIN_DB_PREFIX."expedition as e";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."co_exp as ce ON e.rowid = ce.fk_expedition";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON ce.fk_commande = c.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = e.fk_soc";
         if (!$user->rights->societe->client->voir && !$socid)
         {
-            $sql.= " LEFT JOIN llx_societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
+            $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
             $sql.= $clause." sc.fk_user = " .$user->id;
             $clause = " AND ";
         }

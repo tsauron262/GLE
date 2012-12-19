@@ -49,9 +49,9 @@ function widget_statOfcSoldeBanque() {
         $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=17 class="ui-widget-header ui-state-default">Op&eacute;rations sur 18 mois</thead><tbody><tr><td colspan=2>&nbsp</tbody>';
 
         $sql = "    SELECT count(*) as nb
-                      FROM llx_bank as b
-                 LEFT JOIN llx_bank_url as bu ON bu.fk_bank = b.rowid AND bu.type='company'
-                 LEFT JOIN llx_societe as s ON bu.url_id = s.rowid";
+                      FROM ".MAIN_DB_PREFIX."bank as b
+                 LEFT JOIN ".MAIN_DB_PREFIX."bank_url as bu ON bu.fk_bank = b.rowid AND bu.type='company'
+                 LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON bu.url_id = s.rowid";
 
 
         $result=$db->query($sql);
@@ -97,9 +97,9 @@ function widget_statOfcSoldeBanque() {
                        s.rowid as socid,
                        s.nom as thirdparty,
                        fk_account
-                  FROM llx_bank as b
-             LEFT JOIN llx_bank_url as bu ON bu.fk_bank = b.rowid AND bu.type='company'
-             LEFT JOIN llx_societe as s ON bu.url_id = s.rowid
+                  FROM ".MAIN_DB_PREFIX."bank as b
+             LEFT JOIN ".MAIN_DB_PREFIX."bank_url as bu ON bu.fk_bank = b.rowid AND bu.type='company'
+             LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON bu.url_id = s.rowid
                  WHERE b.datev > date_sub(now(), interval 18 month)
               ORDER BY b.datev ASC";
 

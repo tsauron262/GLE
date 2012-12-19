@@ -28,7 +28,7 @@
     $userId = $_REQUEST['userid'];
     $typeMsg = ($_REQUEST['typeMsg']=='general'?false:$_REQUEST['typeMsg']);
 
-    $requete = "INSERT INTO llx_Synopsis_PrepaCom_messages
+    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_PrepaCom_messages
                             (message,user_author,commande_refid,type)
                      VALUES ('".$message."',".$userId.",".$id.",".($typeMsg?"'".$typeMsg."'":"NULL").")";
     $sql = $db->query($requete);

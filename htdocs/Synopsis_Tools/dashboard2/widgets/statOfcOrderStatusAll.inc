@@ -47,7 +47,7 @@ function widget_statOfcOrderStatusAll() {
     $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Mes 20 meilleures commandes</thead><tbody><tr><td colspan=2>&nbsp</tbody>';
 
     $requete = "SELECT *
-                FROM llx_c_order_statut
+                FROM ".MAIN_DB_PREFIX."c_order_statut
                 WHERE active = 1";
     $presql = $db->query($requete);
     while ($resql = $db->fetch_object($presql))
@@ -56,7 +56,7 @@ function widget_statOfcOrderStatusAll() {
         if ($trans == $langs->trans($trans))
         $trans = $resql->label;
         $sql = "SELECT *
-                FROM llx_commande
+                FROM ".MAIN_DB_PREFIX."commande
                 WHERE date_commande > date_sub(now(),interval 6 month)
                 AND fk_statut = ".$resql->id."
                 AND facture = ".$resql->facturer."

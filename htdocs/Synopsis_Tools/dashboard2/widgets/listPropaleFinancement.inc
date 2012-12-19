@@ -27,9 +27,9 @@ if ( $user->rights->propale->lire == 1)
                    total_ht,
                    ref,
                    unix_timestamp(tms) as uts";
-    $sql .= " FROM llx_propal";
+    $sql .= " FROM ".MAIN_DB_PREFIX."propal";
     $sql .= " WHERE isFinancement = 1";
-    $sql .= " ORDER BY llx_propal.tms DESC";
+    $sql .= " ORDER BY ".MAIN_DB_PREFIX."propal.tms DESC";
     $sql .= $db->plimit(50, 0);
 //$table .= $sql;
     $resql=$db->query($sql);

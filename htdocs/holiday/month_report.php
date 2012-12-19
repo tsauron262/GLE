@@ -60,8 +60,8 @@ if(empty($year)) {
 }
 
 $sql = "SELECT cp.fk_user, cp.date_debut, cp.date_fin";
-$sql.= " FROM llx_holiday cp";
-$sql.= " LEFT JOIN llx_user u ON cp.fk_user = u.rowid";
+$sql.= " FROM ".MAIN_DB_PREFIX."holiday cp";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user u ON cp.fk_user = u.rowid";
 $sql.= " WHERE cp.rowid > '0'";
 $sql.= " AND cp.statut = 3";
 $sql.= " AND (date_format(cp.date_debut, '%Y-%m') = '$year-$month'

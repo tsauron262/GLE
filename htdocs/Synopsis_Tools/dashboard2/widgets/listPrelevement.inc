@@ -27,7 +27,7 @@ function widget_listPrelevement() {
 
         $sql = "SELECT p.rowid, p.ref, p.amount,".$db->pdate("p.datec")." as datec";
         $sql .= " ,p.statut ";
-        $sql .= " FROM llx_prelevement_bons as p";
+        $sql .= " FROM ".MAIN_DB_PREFIX."prelevement_bons as p";
         $sql .= " ORDER BY datec DESC LIMIT 50";
 
         $result = $db->query($sql);

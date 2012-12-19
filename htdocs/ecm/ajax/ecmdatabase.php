@@ -48,7 +48,7 @@ if (isset($action) && ! empty($action))
 
 	if ($action == 'build' && ! empty($element))
 	{
-		require DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
+		require_once DOL_DOCUMENT_ROOT . '/ecm/class/ecmdirectory.class.php';
 
 		$ecmdirstatic = new EcmDirectory($db);
 

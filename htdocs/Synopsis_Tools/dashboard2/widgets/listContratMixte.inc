@@ -31,8 +31,8 @@ function widget_listContratMixte() {
         $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.type, ";
         $sql.= " s.nom, s.rowid as socid,  cd.date_fin_validite";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql .= " FROM llx_societe as s,  llx_contrat as c LEFT JOIN llx_contratdet as cd ON c.rowid = cd.fk_contrat ";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql .= " FROM ".MAIN_DB_PREFIX."societe as s,  ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat ";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE s.rowid = c.fk_soc AND c.statut < 5 AND c.type = 7 AND cd.date_fin_validite is not null ";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 

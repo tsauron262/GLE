@@ -43,9 +43,9 @@ function widget_listChronoModele[MARK1]() {
     if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO && ($user->rights->synopsischrono->read || $user->rights->chrono_user->chrono[MARK1]->voir))
     {
         $requete = "SELECT value
-                      FROM llx_Synopsis_dashboard_settings,llx_Synopsis_dashboard_widget
-                     WHERE module_id = llx_Synopsis_dashboard_widget.id
-                       AND llx_Synopsis_dashboard_widget.module = 'listChronoModele[MARK1]'
+                      FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings,".MAIN_DB_PREFIX."Synopsis_dashboard_widget
+                     WHERE module_id = ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.id
+                       AND ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.module = 'listChronoModele[MARK1]'
                        AND user_id = ".$user->id;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
@@ -151,14 +151,14 @@ function widget_listChronoModele[MARK1]_settings() {
   global $user,$db;
   $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
   $type = "listChronoModele[MARK1]";
-  $requete = "SELECT * FROM llx_Synopsis_dashboard_widget WHERE module = '".$type."'";
+  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = '".$type."'";
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
   $typeId = $res->id;
 
   if ($c)
   {
-      $requete= "DELETE FROM llx_Synopsis_dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
+      $requete= "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
       $sql = $db->query($requete);
       $c = explode(',',$c);
       $c1 = array();
@@ -168,13 +168,13 @@ function widget_listChronoModele[MARK1]_settings() {
         $c1[] = $val;
       }
       $c = join(',',$c1);
-      $requete = "INSERT INTO llx_Synopsis_dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
+      $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
       $sql = $db->query($requete);
       $c = explode(',',$c);
 
   } else {
     $c = array();
-    $requete = "SELECT * FROM  llx_Synopsis_dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
+    $requete = "SELECT * FROM  ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
     $sql = $db->query($requete);
     if ($sql)
     {

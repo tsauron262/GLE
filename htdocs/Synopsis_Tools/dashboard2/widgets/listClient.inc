@@ -34,8 +34,8 @@ function widget_listClient() {
     {
         $requete = "SELECT s.rowid,s.nom,s.client,datec";
         if (!$user->rights->societe->client->voir && !$socid) $requete .= ", sc.fk_soc, sc.fk_user";
-        $requete.= " FROM llx_societe as s";
-        if (!$user->rights->societe->client->voir && !$socid) $requete .= ", llx_societe_commerciaux as sc";
+        $requete.= " FROM ".MAIN_DB_PREFIX."societe as s";
+        if (!$user->rights->societe->client->voir && !$socid) $requete .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $requete.= " WHERE s.client = 1";
         if ($socid)
         {

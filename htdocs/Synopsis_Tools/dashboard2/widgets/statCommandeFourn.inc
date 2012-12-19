@@ -24,8 +24,8 @@ function widget_statCommandeFourn() {
          */
         $commande = new CommandeFournisseur($db);
         $sql = "SELECT count(cf.rowid), fk_statut";
-        $sql.= " FROM llx_societe as s,";
-        $sql.= " llx_commande_fournisseur as cf";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s,";
+        $sql.= " ".MAIN_DB_PREFIX."commande_fournisseur as cf";
         $sql.= " WHERE cf.fk_soc = s.rowid ";
         $sql.= " GROUP BY cf.fk_statut";
 

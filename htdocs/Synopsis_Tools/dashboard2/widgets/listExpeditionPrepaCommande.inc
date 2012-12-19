@@ -25,15 +25,15 @@ function widget_listExpeditionPrepaCommande() {
     {
         $clause = " WHERE ";
         $sql = "  SELECT c.rowid as comId, c.date_livraison, bs.label, e.rowid as expId
-                    FROM llx_commande AS c
+                    FROM ".MAIN_DB_PREFIX."commande AS c
                LEFT JOIN BIMP_site_commande AS b ON c.rowid = b.fk_commande
                LEFT JOIN BIMP_site AS bs ON b.site_id = bs.id
-               LEFT JOIN llx_societe AS s ON s.rowid  = c.fk_soc
-               LEFT JOIN llx_co_exp AS ce ON c.rowid = ce.fk_commande
-               LEFT JOIN llx_expedition AS e ON e.rowid = ce.fk_expedition ";
+               LEFT JOIN ".MAIN_DB_PREFIX."societe AS s ON s.rowid  = c.fk_soc
+               LEFT JOIN ".MAIN_DB_PREFIX."co_exp AS ce ON c.rowid = ce.fk_commande
+               LEFT JOIN ".MAIN_DB_PREFIX."expedition AS e ON e.rowid = ce.fk_expedition ";
     if (!$user->rights->societe->client->voir && !$socid)
     {
-        $sql.= " LEFT JOIN llx_societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
         $sql.= $clause." sc.fk_user = " .$user->id;
         $clause = " AND ";
     }

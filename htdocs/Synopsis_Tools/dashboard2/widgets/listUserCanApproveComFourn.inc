@@ -28,8 +28,8 @@ $table .= '<tr valign="top"><td class="notopnoleft" width="30%">';
 
 $sql = "SELECT count(cf.rowid), fk_statut";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM llx_societe as s, llx_commande_fournisseur as cf";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."commande_fournisseur as cf";
+if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE cf.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) //restriction
 {
@@ -48,10 +48,10 @@ if ($resql)
       $table .= '<tr class="liste_titre"><td>'.$langs->trans("Status").'</td><td align="center">'.$langs->trans("Nb").'</td><td>&nbsp;</td>';
       $table .= "</tr>\n";
       $sql = "SELECT u.name, u.firstname
-          FROM llx_user as u,
-               llx_user_rights as ur
+          FROM ".MAIN_DB_PREFIX."user as u,
+               ".MAIN_DB_PREFIX."user_rights as ur
          WHERE u.rowid = ur.fk_user
-           AND ur.fk_id = (SELECT id FROM llx_rights_def WHERE module='fournisseur' AND perms='commande' AND subperms='approuver')";
+           AND ur.fk_id = (SELECT id FROM ".MAIN_DB_PREFIX."rights_def WHERE module='fournisseur' AND perms='commande' AND subperms='approuver')";
 
         $resql = $db->query($sql);
         if ($resql)

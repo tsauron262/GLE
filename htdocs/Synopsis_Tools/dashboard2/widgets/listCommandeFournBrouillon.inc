@@ -27,7 +27,7 @@ function widget_listCommandeFournBrouillon() {
     if ($user->rights->fournisseur->commande->lire)
     {
         $sql = "SELECT c.rowid, c.ref, c.total_ttc, s.nom, s.rowid as socid";
-        $sql.= " FROM llx_commande_fournisseur as c, llx_societe as s";
+        $sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseur as c, ".MAIN_DB_PREFIX."societe as s";
         $sql.= " WHERE c.fk_soc = s.rowid AND c.fk_statut = 0";
         if ($socid)
         {

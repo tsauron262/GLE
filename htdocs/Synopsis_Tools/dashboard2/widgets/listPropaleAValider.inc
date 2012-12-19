@@ -26,9 +26,9 @@ if ( $user->rights->propale->valider == 1)
                    rowid,
                    ref,
                    unix_timestamp(tms) as uts";
-    $sql .= " FROM llx_propal";
+    $sql .= " FROM ".MAIN_DB_PREFIX."propal";
     $sql .= " WHERE fk_statut = 5";
-    $sql .= " ORDER BY llx_propal.tms DESC";
+    $sql .= " ORDER BY ".MAIN_DB_PREFIX."propal.tms DESC";
     $sql .= $db->plimit(50, 0);
 //$table .= $sql;
     $resql=$db->query($sql);

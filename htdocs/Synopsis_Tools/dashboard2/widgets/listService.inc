@@ -28,13 +28,13 @@ function widget_listService() {
     $max=50;
     $sql = "SELECT p.rowid, p.label, p.price, p.ref, p.fk_product_type, p.envente,";
     $sql.= " ".$db->pdate("tms")." as datem";
-    $sql.= " FROM llx_product as p";
+    $sql.= " FROM ".MAIN_DB_PREFIX."product as p";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir)
     {
-      $sql.= " LEFT JOIN llx_categorie_product as cp ON cp.fk_product = p.rowid";
-      $sql.= " LEFT JOIN llx_categorie as c ON cp.fk_categorie = c.rowid";
+      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
+      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cp.fk_categorie = c.rowid";
     }
-    $sql.= " LEFT JOIN llx_product_subproduct as sp ON p.rowid = sp.fk_product_subproduct";
+    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product_subproduct as sp ON p.rowid = sp.fk_product_subproduct";
     $sql.= " WHERE sp.fk_product_subproduct IS NULL AND p.fk_product_type = 1";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir) $sql.= " AND IFNULL(c.visible,1)=1 ";
 //    if (isset($_GET["type"])) $sql.= " AND p.fk_product_type = ".$_GET["type"];
@@ -68,7 +68,7 @@ function widget_listService() {
         //Multilangs
         if ($conf->global->MAIN_MULTILANGS)
         {
-            $sql = "SELECT label FROM llx_product_det";
+            $sql = "SELECT label FROM ".MAIN_DB_PREFIX."product_det";
             $sql.= " WHERE fk_product=".$objp->rowid." AND lang='". $langs->getDefaultLang() ."'";
             $resultd = $db->query($sql);
             if ($resultd)

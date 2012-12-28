@@ -311,7 +311,7 @@ if ($resql)
 		print '</td>';
 
 		print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
-		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && $db->jdate($objp->date_valid) < ($now - $conf->commande->client->warning_delay)) print img_picto($langs->trans("Late"),"warning");
+		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && $db->jdate($objp->date_livraison) < ($now - $conf->commande->client->warning_delay)) print img_picto($langs->trans("Late"),"warning");
 		print '</td>';
 
 		print '<td width="16" align="right" class="nobordernopadding">';

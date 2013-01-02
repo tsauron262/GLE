@@ -1,7 +1,7 @@
 <?php
 
 /*
- ** GLE by Synopsis et DRSI
+ * * GLE by Synopsis et DRSI
  *
  * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
@@ -280,7 +280,7 @@ jQuery(document).ready(function(){
             );
 
 EOF;
-    if($user->rights->synopsisprojet->attribution){
+    if ($user->rights->synopsisprojet->attribution) {
         $js .= <<< EOF
     jQuery('#userTimeDialog').dialog({
         autoOpen: false,
@@ -352,7 +352,7 @@ EOF;
     });
   
 EOF;
-}
+    }
 
     $js .= <<< EOF
     step2 = false;
@@ -872,7 +872,7 @@ $head = synopsis_project_prepare_head($projet);
 dol_fiche_head($head, 'tasks', $langs->trans("Project"));
 //saveHistoUser($projet->id, "projet",$projet->ref);
 $requete = "SELECT *
-              FROM ".MAIN_DB_PREFIX."user
+              FROM " . MAIN_DB_PREFIX . "user
              WHERE statut = 1
           ORDER BY firstname, name";
 $sql = $db->query($requete);
@@ -910,7 +910,7 @@ print '</div>';
 // fk_projet   fk_task_parent  title   duration_effective  fk_user_creat   statut  note    progress    description color   url fk_task_type    shortDesc   level   tms
 $project_id = $_REQUEST['id'];
 $requete = "SELECT *
-              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
+              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
              WHERE fk_projet = " . $project_id;
 $sql = $db->query($requete);
 $optDependStr = "";
@@ -1089,8 +1089,8 @@ if ($user->rights->synopsisprojet->creer) {
     print '            <li id="ajouter">';
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/edit_add.png" />';
     print '                Ajouter</li>';
-    
-    if($user->rights->synopsisprojet->attribution){
+
+    if ($user->rights->synopsisprojet->attribution) {
         print '            <li id="attribuer">';
         print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/add_user.png" />';
         print '                Attribuer</li>';
@@ -1112,37 +1112,41 @@ print ' <div id="deldialog">';
 print " &Ecirc;tes vous s&ucirc;r(e) de vouloir supprimer cette t&acirc;che ?";
 print ' </div>';
 
-print " <div id='userTimeDialog'>";
-print "  <form id='userTimeForm'>";
+
+
+if ($user->rights->synopsisprojet->attribution) {
+    print " <div id='userTimeDialog'>";
+    print "  <form id='userTimeForm'>";
 //1 Liste des utilisateurs
-$requete = "SELECT firstname,
+    $requete = "SELECT firstname,
                    name,
                    rowid as id
-              FROM ".MAIN_DB_PREFIX."user
+              FROM " . MAIN_DB_PREFIX . "user
              WHERE statut = 1
           ORDER BY firstname, name";
-$sql = $db->query($requete);
-print "<table width=100% cellpadding=10>";
-print "<tr><th class='ui-widget-header ui-state-hover'>Nom";
-print "    <th class='ui-widget-header ui-state-hover'>R&ocirc;le";
-print "    <th class='ui-widget-header ui-state-hover'>D&eacute;but";
-print "    <th class='ui-widget-header ui-state-hover'>Dur&eacute;e";
-while ($res = $db->fetch_object($sql)) {
-    print "<tr><th class='ui-widget-header ui-state-default'>" . $res->firstname . " " . $res->name;
-    print "    <td class='ui-widget-content'><SELECT class='resetRole' id='role" . $res->id . "' name='role" . $res->id . "'><OPTION value='admin'>Admin</OPTION><OPTION value='acto'>Intervenant</OPTION><OPTION value='read'>Lecteur</OPTION><OPTION value='info'>Info</OPTION></SELECT> ";
-    print "    <td align=center class='ui-widget-content'><input class='FRDateNoReq resettaskDateDeb datepicker' name='taskDateDeb" . $res->id . "' id='taskDateDeb" . $res->id . "' style='text-align:center; width:8em;'></input>";
-    print "    <td align=center class='ui-widget-content'><input class='resetDur' name='dur" . $res->id . "' id='dur" . $res->id . "' style='text-align:center; width:4em;'></input>";
-}
-print "<tr><th style='font-size: 1.3em;' class='ui-widget-header ui-state-default' colspan=3>Total";
-print "    <td align=center class='ui-widget-content'><span style='min-width:2em; font-size: 1.3em; font-weight: 900;' id='userTotal'>h</span>";
+    $sql = $db->query($requete);
+    print "<table width=100% cellpadding=10>";
+    print "<tr><th class='ui-widget-header ui-state-hover'>Nom";
+    print "    <th class='ui-widget-header ui-state-hover'>R&ocirc;le";
+    print "    <th class='ui-widget-header ui-state-hover'>D&eacute;but";
+    print "    <th class='ui-widget-header ui-state-hover'>Dur&eacute;e";
+    while ($res = $db->fetch_object($sql)) {
+        print "<tr><th class='ui-widget-header ui-state-default'>" . $res->firstname . " " . $res->name;
+        print "    <td class='ui-widget-content'><SELECT class='resetRole' id='role" . $res->id . "' name='role" . $res->id . "'><OPTION value='admin'>Admin</OPTION><OPTION value='acto'>Intervenant</OPTION><OPTION value='read'>Lecteur</OPTION><OPTION value='info'>Info</OPTION></SELECT> ";
+        print "    <td align=center class='ui-widget-content'><input class='FRDateNoReq resettaskDateDeb datepicker' name='taskDateDeb" . $res->id . "' id='taskDateDeb" . $res->id . "' style='text-align:center; width:8em;'></input>";
+        print "    <td align=center class='ui-widget-content'><input class='resetDur' name='dur" . $res->id . "' id='dur" . $res->id . "' style='text-align:center; width:4em;'></input>";
+    }
+    print "<tr><th style='font-size: 1.3em;' class='ui-widget-header ui-state-default' colspan=3>Total";
+    print "    <td align=center class='ui-widget-content'><span style='min-width:2em; font-size: 1.3em; font-weight: 900;' id='userTotal'>h</span>";
 
 //2 Temps prevu
-print "</table>";
-print "</form>";
-print ' </div>';
+    print "</table>";
+    print "</form>";
+    print ' </div>';
+}
 
 print "<div id='Assocdialog'>";
-$requete = "SELECT p.* FROM ".MAIN_DB_PREFIX."propal p, ".MAIN_DB_PREFIX."Synopsis_projet p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
+$requete = "SELECT p.* FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_projet p2 WHERE p.fk_soc = p2.fk_soc AND p2.rowid = " . $projetid;
 print "<form id='Assocform'>";
 print "<table width=100% cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-default'>Proposition du projet";
@@ -1160,7 +1164,7 @@ print "</form>";
 print "</div>";
 
 print "<div id='commandedialog'>";
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."commande WHERE fk_soc = " . $projet->socid;
+$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc = " . $projet->socid;
 print "<form id='commandeform'>";
 print "<table width=100% cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-default'>Commande à importer";

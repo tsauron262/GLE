@@ -390,12 +390,12 @@ while ($res = $db->fetch_object($sql)) {
         $res1 = $db->fetch_object($sql1);
         $nbHeure = ($res1->task_duration_effective > 0 ? (round($res1->task_duration_effective * 100) / 100) : 0);
         $totalDay[$tmpDate] += $res1->task_duration_effective;
-        $html2 = '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
-        $html3 = '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html2 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html3 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html2 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        $html3 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html3 .=              $nbHeure;
         $html2 .= '     </td>';
         $html3 .= '     </td>';
         $tmpDate += 3600 * 24;

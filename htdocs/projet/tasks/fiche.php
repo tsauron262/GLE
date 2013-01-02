@@ -280,7 +280,7 @@ jQuery(document).ready(function(){
             );
 
 EOF;
-    if($user->rights->synopsischrono->attribution){
+    if($user->rights->synopsisprojet->attribution){
         $js .= <<< EOF
     jQuery('#userTimeDialog').dialog({
         autoOpen: false,
@@ -1090,7 +1090,7 @@ if ($user->rights->synopsisprojet->creer) {
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/edit_add.png" />';
     print '                Ajouter</li>';
     
-    if($user->rights->synopsischrono->attribution){
+    if($user->rights->synopsisprojet->attribution){
         print '            <li id="attribuer">';
         print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/add_user.png" />';
         print '                Attribuer</li>';

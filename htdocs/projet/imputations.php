@@ -308,16 +308,13 @@ $requete = "SELECT DISTINCT t.rowid as tid,
                   p.ref as pref,
                   t.title,
                   t.statut
+                  p.fk_statut
              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors AS a,
                   " . MAIN_DB_PREFIX . "Synopsis_projet AS p,
                   " . MAIN_DB_PREFIX . "Synopsis_projet_task AS t
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
-              AND p.fk_statut <> 0
-              AND p.fk_statut <> 5
-              AND p.fk_statut <> 50
-              AND p.fk_statut <> 999
 		AND a.fk_user = $userId 
 	    ORDER BY p.rowid";
 
@@ -405,7 +402,8 @@ while ($res = $db->fetch_object($sql)) {
     $html2 .= '    </tr>';
     $html3 .= '    </tr>';
 
-    if ($res->statut == 'open')
+    $stat = $res->fk_statut;
+    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         echo $html . $html2;
     elseif (!$tousVide)
         echo $html . $html3;

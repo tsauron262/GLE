@@ -102,7 +102,7 @@ class modSynopsisProjet extends DolibarrModules {
 
         // Permissions
         $this->rights = array();
-        $this->rights_class = $this->name;
+        $this->rights_class = 'synopsisprojet';
 
         $this->rights[1][0] = 41; // id de la permission
         $this->rights[1][1] = 'Lire les projets/t&acirc;ches'; // libelle de la permission

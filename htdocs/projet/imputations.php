@@ -307,7 +307,7 @@ $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
                   t.title,
-                  t.statut
+                  t.statut,
                   p.fk_statut
              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors AS a,
                   " . MAIN_DB_PREFIX . "Synopsis_projet AS p,
@@ -358,7 +358,6 @@ while ($res = $db->fetch_object($sql)) {
     $res2 = $db->fetch_object($sql2);
     $restant = round(intval($res1->sumTps - $res2->sumTps) / 36) / 100;
     $totalLigne = round(intval($res2->sumTps) / 36) / 100;
-    $grandTotalLigne += intval($res2->sumTps) / 3600;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
     $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 
@@ -370,7 +369,7 @@ while ($res = $db->fetch_object($sql)) {
     //Total h
     $html .= '     <td nowrap class="display_value">' . $totalLigne . '</td>';
     //Total jh
-    $html .=  '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
+    $html .= '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
 
 
     $tmpDate = $date;
@@ -385,17 +384,17 @@ while ($res = $db->fetch_object($sql)) {
         $sql1 = $db->query($requete);
         $res1 = $db->fetch_object($sql1);
         $nbHeure = ($res1->task_duration_effective > 0 ? (round($res1->task_duration_effective * 100) / 100) : 0);
-        $totalDay[$tmpDate] += $res1->task_duration_effective;
+        $totalDay2[$tmpDate] = $res1->task_duration_effective;
         $html2 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html3 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html2 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        $html3 .=              $nbHeure;
+        $html3 .= $nbHeure;
         $html2 .= '     </td>';
         $html3 .= '     </td>';
         $tmpDate += 3600 * 24;
-        if($nbHeure > 0)
+        if ($nbHeure > 0)
             $tousVide = false;
     }
 
@@ -407,6 +406,11 @@ while ($res = $db->fetch_object($sql)) {
         echo $html . $html2;
     elseif (!$tousVide)
         echo $html . $html3;
+    else
+        continue;
+    $grandTotalLigne += intval($res2->sumTps) / 3600;
+    foreach($totalDay2 as $cle => $val)
+        $totalDay[$cle] += $totalDay2[$cle];
 }
 print '    </tbody>';
 

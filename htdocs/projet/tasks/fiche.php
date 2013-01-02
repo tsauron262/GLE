@@ -279,6 +279,9 @@ jQuery(document).ready(function(){
                 "Merci de s&eacute;lectionner un &eacute;l&eacute;ment dans la liste"
             );
 
+EOF;
+    if($user->rights->synopsischrono->attribution){
+        $js .= <<< EOF
     jQuery('#userTimeDialog').dialog({
         autoOpen: false,
         modal: true ,
@@ -347,6 +350,11 @@ jQuery(document).ready(function(){
             }
         } // Close button
     });
+  
+EOF;
+}
+
+    $js .= <<< EOF
     step2 = false;
     jQuery("#Assocdialog").dialog({
         autoOpen: false,
@@ -1081,9 +1089,12 @@ if ($user->rights->synopsisprojet->creer) {
     print '            <li id="ajouter">';
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/edit_add.png" />';
     print '                Ajouter</li>';
-    print '            <li id="attribuer">';
-    print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/add_user.png" />';
-    print '                Attribuer</li>';
+    
+    if($user->rights->synopsischrono->attribution){
+        print '            <li id="attribuer">';
+        print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/add_user.png" />';
+        print '                Attribuer</li>';
+    }
     print '            <li id="editer">';
     print '                <img height=16 width=16 src="' . DOL_URL_ROOT . '/projet/img/fromCrystal/edit.png" />';
     print '                Editer</li>';

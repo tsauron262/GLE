@@ -315,10 +315,6 @@ $requete = "SELECT DISTINCT t.rowid as tid,
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
               AND t.statut = 'open'
-              AND p.fk_statut <> 0
-              AND p.fk_statut <> 5
-              AND p.fk_statut <> 50
-              AND p.fk_statut <> 999
 		AND a.fk_user = $userId 
 	    ORDER BY p.rowid";
 
@@ -374,7 +370,7 @@ while ($res = $db->fetch_object($sql)) {
     //Total h
     $html .= '     <td nowrap class="display_value">' . $totalLigne . '</td>';
     //Total jh
-    print '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
+    $html .=  '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
 
 
     $tmpDate = $date;

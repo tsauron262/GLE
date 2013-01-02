@@ -189,7 +189,7 @@ EOF;
     print '              </table>' ;
 
 
-    if ( $user->rights->voirImputations )
+    if ( $user->rights->synopsisprojet->voirImputations )
     {
 	require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php") ;
 	$html = new Form( $db ) ;

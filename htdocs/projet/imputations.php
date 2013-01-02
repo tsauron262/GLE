@@ -306,7 +306,8 @@ print '<tbody class="div_scrollable_medium">';
 $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
-                  t.title
+                  t.title,
+                  p.fk_statut
              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors AS a,
                   " . MAIN_DB_PREFIX . "Synopsis_projet AS p,
                   " . MAIN_DB_PREFIX . "Synopsis_projet_task AS t
@@ -331,18 +332,20 @@ $proj = new Project($db);
 $arrTaskId = array();
 $grandTotalLigne = 0;
 while ($res = $db->fetch_object($sql)) {
+    $tousVide = true;
+    $html = '';
     $bool = !$bool;
     $arrTaskId[$res->tid] = $res->tid;
-    print '<tr class="' . $arrPairImpair[$bool] . '">';
-    print '  <td class="nowrap" colspan="1">';
+    $html .= '<tr class="' . $arrPairImpair[$bool] . '">';
+    $html .= '  <td class="nowrap" colspan="1">';
     if (!$remProjId || $remProjId != $res->pid) {
         $proj->fetch($res->pid);
-        print "<label title='".$proj->title."'/>".$proj->ref." - " . $proj->getNomUrl(1, '', 25)."</label>";
+        $html .= "<label title='" . $proj->title . "'/>" . $proj->ref . " - " . $proj->getNomUrl(1, '', 25) . "</label>";
         $remProjId = $res->pid;
     }
-    print '  <td class="nowrap" colspan="1">';
-    print $res->title;
-    print '     </td>';
+    $html .= '  <td class="nowrap" colspan="1">';
+    $html .= $res->title;
+    $html .= '     </td>';
 
     $requete1 = "SELECT sum(task_duration) as sumTps
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
@@ -365,16 +368,17 @@ while ($res = $db->fetch_object($sql)) {
 
     //Restant
     if ($restant < 0)
-        print '     <td nowrap class="display_value error">' . $restant . '</td>';
+        $html .= '     <td nowrap class="display_value error">' . $restant . '</td>';
     else
-        print '     <td nowrap class="display_value">' . $restant . '</td>';
+        $html .= '     <td nowrap class="display_value">' . $restant . '</td>';
     //Total h
-    print '     <td nowrap class="display_value">' . $totalLigne . '</td>';
+    $html .= '     <td nowrap class="display_value">' . $totalLigne . '</td>';
     //Total jh
     print '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
 
 
     $tmpDate = $date;
+    $html2 = $html3 = '';
     for ($i = 0; $i < $arrNbJour[$format]; $i++) {
         $nbHeure = 0;
         $requete = "SELECT (task_duration_effective / 3600) as task_duration_effective
@@ -386,14 +390,27 @@ while ($res = $db->fetch_object($sql)) {
         $res1 = $db->fetch_object($sql1);
         $nbHeure = ($res1->task_duration_effective > 0 ? (round($res1->task_duration_effective * 100) / 100) : 0);
         $totalDay[$tmpDate] += $res1->task_duration_effective;
-        print '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
-        print '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        print '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        print '     </td>';
+        $html2 = '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html3 = '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html2 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html3 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html2 .= '     </td>';
+        $html3 .= '     </td>';
         $tmpDate += 3600 * 24;
+        if($nbHeure > 0)
+            $tousVide = false;
     }
 
-    print '    </tr>';
+    $html2 .= '    </tr>';
+    $html3 .= '    </tr>';
+
+    $stat = $res->fk_statut;
+    if ($stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+        echo $html . $html2;
+    elseif (!$tousVide)
+        echo $html . $html3;
 }
 print '    </tbody>';
 

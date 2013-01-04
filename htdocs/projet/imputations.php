@@ -388,7 +388,7 @@ while ($res = $db->fetch_object($sql)) {
         $html2 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html3 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+//        $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html2 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
         $html3 .= $nbHeure;
         $html2 .= '     </td>';
@@ -401,6 +401,7 @@ while ($res = $db->fetch_object($sql)) {
     $html2 .= '    </tr>';
     $html3 .= '    </tr>';
 
+    $grandTotalLigne += intval($res2->sumTps) / 3600;
     $stat = $res->fk_statut;
     if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         echo $html . $html2;
@@ -408,7 +409,6 @@ while ($res = $db->fetch_object($sql)) {
         echo $html . $html3;
     else
         continue;
-    $grandTotalLigne += intval($res2->sumTps) / 3600;
     foreach($totalDay2 as $cle => $val)
         $totalDay[$cle] += $totalDay2[$cle];
 }

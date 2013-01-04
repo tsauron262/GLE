@@ -405,10 +405,10 @@ while ($res = $db->fetch_object($sql)) {
     foreach($totalDay2 as $cle => $val)
         $totalDay[$cle] += $totalDay2[$cle];
     $stat = $res->fk_statut;
-//    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         echo $html . $html2;
-//    elseif (!$tousVide)
-//        echo $html . $html3;
+    elseif (!$tousVide)
+        echo $html . $html3;
 }
 print '    </tbody>';
 

@@ -402,15 +402,13 @@ while ($res = $db->fetch_object($sql)) {
     $html3 .= '    </tr>';
 
     $grandTotalLigne += intval($res2->sumTps) / 3600;
-    $stat = $res->fk_statut;
-    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
-        echo $html . $html2;
-    elseif (!$tousVide)
-        echo $html . $html3;
-    else
-        continue;
     foreach($totalDay2 as $cle => $val)
         $totalDay[$cle] += $totalDay2[$cle];
+    $stat = $res->fk_statut;
+//    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+        echo $html . $html2;
+//    elseif (!$tousVide)
+//        echo $html . $html3;
 }
 print '    </tbody>';
 

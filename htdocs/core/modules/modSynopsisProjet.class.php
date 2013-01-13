@@ -135,11 +135,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->rights[5][3] = 1; // La permission est-elle une permission par defaut
         $this->rights[5][4] = 'voirImputations';
 
-        $this->rights[5][0] = 47; // id de la permission
-        $this->rights[5][1] = 'Attribution/modification de budgets d’heures associées aux tâches et attribués aux utilisateurs'; // libelle de la permission
-        $this->rights[5][2] = 'c'; // type de la permission (deprecie a ce jour)
-        $this->rights[5][3] = 1; // La permission est-elle une permission par defaut
-        $this->rights[5][4] = 'attribution';
+        $this->rights[6][0] = 47; // id de la permission
+        $this->rights[6][1] = 'Attribution/modification de budgets d’heures associées aux tâches et attribués aux utilisateurs'; // libelle de la permission
+        $this->rights[6][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[6][3] = 1; // La permission est-elle une permission par defaut
+        $this->rights[6][4] = 'attribution';
 
 
 

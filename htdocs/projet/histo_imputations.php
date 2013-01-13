@@ -560,8 +560,10 @@ if ($modVal != 2) {
 
 
     ksort($totalDay);
+    $i=0;
     foreach ($totalDay as $tmpDate => $val) {
-        if ($tmpDate >= $date) {
+        if ($tmpDate >= $date && $i < $arrNbJour[$format]) {
+            $i++;
             if (!$val > 0) {
                 $val = 0;
             }

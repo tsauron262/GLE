@@ -521,7 +521,7 @@ while ($res = $db->fetch_object($sql)) {
 
     $html .= '     <td nowrap class="display_value">' . toAffiche($totalPeriode) . '</td>';
 
-    if ($modVal == 1 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+    if ($modVal == 1 && $userId != -2 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         echo $html . $html2;
     elseif (!$tousVide)
         echo $html . $html3;

@@ -541,7 +541,7 @@ class Project extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             $nump = $this->db->num_rows($result);
-            if ($nump) {
+//            if ($nump) {
                 $i = 0;
                 while ($i < $nump) {
                     $obj = $this->db->fetch_object($result);
@@ -554,7 +554,7 @@ class Project extends CommonObject {
 
                 /* Return array */
                 return $elements;
-            }
+//            }
         } else {
             dol_print_error($this->db);
         }

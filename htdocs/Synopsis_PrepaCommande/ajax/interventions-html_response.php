@@ -287,6 +287,29 @@ jQuery(document).ready(function(){
         $("#repliDate").click(function(){
             $("#toReplace .datePicker").val($("#datei").val());
         });
+        
+        function initSynScript(){
+            $("#toReplace tr").each(function(){
+                id = $(this).attr("id");
+                $(this).find("#qte"+id).val(1);
+                desc = $(this).find("#desci"+id);
+                forfait = $(this).find("#isForfait"+id);
+                i=0;
+                $(this).find("a").each(function(){
+                    i++;
+                    if(i == 2){
+                        if($(this).html() == "FPR50")
+                            desc.html("Installation comprennent : ");
+                        if($(this).html() == "FPR30")
+                            desc.html("Intervention comprennent : ");
+                        if($(this).html().match("FD.*")){
+                            desc.html("Déplacement comprennent : ");
+                            forfait.attr('checked', true);
+                        }
+                    }
+                });
+            });
+        }
 
 
         jQuery.datepicker.setDefaults(jQuery.extend({showMonthAfterYear: false,
@@ -558,6 +581,7 @@ jQuery(document).ready(function(){
                         jQuery('#toReplace').replaceWith('<div id="toReplace">'+longHtml+'</div>');
                         jQuery('.datePicker').datepicker();
                         reinitAutoPrice();
+                        initSynScript();
 //                        jQuery('#toReplace select').selectmenu({style: 'dropdown', maxHeight: 300 });
 
 

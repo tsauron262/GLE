@@ -61,6 +61,7 @@ class modSynopsisProjet extends DolibarrModules {
 
         $this->family = "Synopsis";
         $this->name = "Projet +";
+        $this->nameI = "synopsisprojet";
         $this->description = "Gestion des projets avancé";
         $this->version = 2;
         $this->const_name = 'MAIN_MODULE_SYNOPSISPROJET';
@@ -147,12 +148,12 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 0,
             'type' => 'top',
             'titre' => 'Projet',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'leftmenu' => '0',
             'url' => '/projet/liste.php',
             'langs' => 'project@projet',
             'position' => 7,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -161,12 +162,12 @@ class modSynopsisProjet extends DolibarrModules {
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
-            'titre' => $this->name,
-            'mainmenu' => $this->name,
+            'titre' => $this->nameI,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/index.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 0,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -174,11 +175,24 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'Imputations',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/imputations.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 0,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
+            'target' => '',
+            'user' => 0,
+            'constraints' => array(0 => '$leftmenu==projects'));
+        $r++;
+        
+        $this->menu[$r] = array('fk_menu' => 'r=' . $s,
+            'type' => 'left',
+            'titre' => 'Test NEW Imputations',
+            'mainmenu' => $this->nameI,
+            'url' => '/projet/histo_imputations.php?leftmenu=projects',
+            'langs' => 'project@projet',
+            'position' => 0,
+            'perms' => '$user->rights->' . $this->nameI . '->voirImputations',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
@@ -188,11 +202,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'NewProject',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/nouveau.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->creer',
+            'perms' => '$user->rights->' . $this->nameI . '->creer',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
@@ -201,11 +215,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'List',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/liste.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 101,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
@@ -214,11 +228,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'MenuConfig',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/config.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 101,
-            'perms' => '$user->rights->' . $this->name . '->configure',
+            'perms' => '$user->rights->' . $this->nameI . '->configure',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects'));
         $s = $r;
@@ -233,7 +247,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/tasks/index.php?leftmenu=projects_task',
             'langs' => 'project@projet',
             'position' => 1,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -248,7 +262,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/tasks/mytasks.php?leftmenu=projects_task',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects_task'));
         $r++;
@@ -261,7 +275,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/activity/index.php?leftmenu=projects_activity',
             'langs' => 'project@projet',
             'position' => 2,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -274,7 +288,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/activity/myactivity.php?leftmenu=projects_activity',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects_activity'));
         $r++;
@@ -360,7 +374,8 @@ class modSynopsisProjet extends DolibarrModules {
   `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`, `code`, `label`, `active`) VALUES
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;", 
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`, `code`, `label`, `active`) VALUES
 (0, 'PROJDRAFT', 'Brouillon', 1),
 (5, 'PROJPLANNING', 'Planification', 1),
 (10, 'PROJRUNNING', 'En cours', 1),
@@ -727,7 +742,7 @@ class modSynopsisProjet extends DolibarrModules {
      */
     function remove($option = '') {
         $sql = array("DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;");
-//    $requete = "DELETE FROM ".MAIN_DB_PREFIX."menu WHERE mainmenu='".$this->name."'";
+//    $requete = "DELETE FROM ".MAIN_DB_PREFIX."menu WHERE mainmenu='".$this->nameI."'";
 //    $sql = $this->db->query($requete);
 
         return $this->_remove($sql, $option);

@@ -4,8 +4,8 @@
  */
 /**
  *
- * Name : imputations.php
- * GLE-1.2
+ * Name : histo_imputations.php
+ * GLE-2
  */
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
@@ -29,6 +29,32 @@ $date = strtotime(date('Y-m-d'));
 if ($_REQUEST['date'] . 'x' != "x")
     $date = $_REQUEST['date'];
 
+
+global $modVal;
+$modVal = 1;
+if (isset($_SESSION['modVal']))
+    $modVal = $_SESSION['modVal'];
+if (isset($_REQUEST['modVal'])) {
+    $modVal = $_REQUEST['modVal'];
+    $_SESSION['modVal'] = $_REQUEST['modVal'];
+}
+
+
+
+$formatView = 'norm';
+if (isset($_SESSION['view']))
+    $formatView = $_SESSION['view'];
+if (isset($_REQUEST['view'])) {
+    $formatView = $_REQUEST['view'];
+    $_SESSION['view'] = $_REQUEST['view'];
+}
+if ($formatView == "month" && $format != 'annualy' && $format != "monthly") {
+    if (isset($_REQUEST['view']))
+        $format = 'annualy';
+    else
+        $formatView = "norm";
+}
+
 $monthDur = 30;
 
 //Si format => weekly => debute un lundi, idem bi weekly
@@ -39,6 +65,8 @@ if (($format == "weekly" || $format == "biweekly") && date('w', $date) != 1) {
     }
 } else if ($format == 'monthly' && date('j', $date) != 1) {
     $date = strtotime(date('Y', $date) . "-" . date('m', $date) . "-01");
+} else if ($format == 'annualy') {
+    $date = strtotime(date('Y', $date) . "-01-01");
 }
 if ($format == 'monthly')
     $monthDur = date('t', $date);
@@ -111,11 +139,11 @@ if ($_REQUEST['action'] == 'save') {
                 $sql3 = $db->query($requete3);
                 $res3 = $db->fetch_object($sql3);
                 $existant = false;
-                if($res3)
+                if ($res3)
                     $existant = true;
                 $x = $_REQUEST['activity'][$key][$key1];
                 $somh = $res2->sommeheure;
-                if($existant)
+                if ($existant)
                     $somh = $somh - $res3->task_duration_effective;
                 if ($_REQUEST['activity'][$key][$key1] != $val1 && $_REQUEST['activity'][$key][$key1] < 9 && (($somh / 3600) + $x) < 9) {//verif que on respecte le max d'heure par jour et par tache
                     if ($existant) {
@@ -143,7 +171,7 @@ if ($_REQUEST['action'] == 'save') {
         $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET progress = 100-((duration - duration_effective) *100)/duration WHERE rowid = " . $taskId;
         $sql = $db->query($requete);
     }
-    header('location: imputations.php?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . "&format=" . $format . "&date=" . $date);
+    header('location: ?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . "&format=" . $format . "&date=" . $date);
 }
 
 
@@ -191,7 +219,23 @@ print "<br/>";
 
 
 print '    <div id="struct_main" class="activities">';
-print '<p><table width=100%><tr><td style="width:130px;"><b>Format d\'affichage :</b>';
+
+
+print '<p><table width=100%><tr><td style="width:130px;"><b>Type valeur d\'affichage :</b>';
+print '          <td><table>';
+if ($modVal != '1')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=1">Heure</a>';
+if ($modVal != '2')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=2">Pourcentages</a>';
+if ($modVal != '3')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=3">Euro</a>';
+print '              </table>';
+print '</table></p>';
+
+
+
+
+print '<p><table width=100%><tr><td style="width:130px;"><b>Periode d\'affichage :</b>';
 print '          <td><table>';
 if ($format != 'monthly')
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=monthly&amp;date=' . $date . '">Mensuel</a>';
@@ -199,7 +243,11 @@ if ($format != 'biweekly')
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=biweekly&amp;date=' . $date . '">Bihebdomadaire</a>';
 if ($format != 'weekly')
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=weekly&amp;date=' . $date . '">Hebdomadaire</a>';
+if ($format != 'annualy')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=annualy&amp;date=' . $date . '">Annuel</a>';
 print '              </table>';
+
+
 
 
 if ($user->rights->synopsisprojet->voirImputations) {
@@ -214,6 +262,19 @@ if ($user->rights->synopsisprojet->voirImputations) {
 }
 
 print '</table></p>';
+
+
+print '<p><table width=100%><tr><td style="width:130px;"><b>Type d\'affichage :</b>';
+print '          <td><table>';
+if ($formatView != 'month')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;view=month">Par mois</a>';
+if ($formatView != 'norm')
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;view=norm">Par jour</a>';
+print '              </table>';
+print '</table></p>';
+
+
+
 print '<form method="post" action="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . '&action=save&format=' . $format . '&date=' . $date . '">';
 print '<input type="hidden" name="userid" value="' . $userId . '"></input>';
 print '    <div style="width:100%;">';
@@ -228,11 +289,15 @@ print '           <th class="ui-state-hover ui-widget-header navigation" colspan
 print '                 &nbsp;';
 
 $prevDate = intval($date - 3600 * 24 * 7);
-if ($format == "monthly")
-    $prevDate = strtotime(date('Y-m-d', strtotime(date('Y', $date) . "-" . intval((date('m', $date) - 1 > 9 ? date('m', $date) - 1 : "0" . date('m', $date) - 1)) . "-01")));
 $nextDate = intval($date + 3600 * 24 * 7);
-if ($format == "monthly")
-    $nextDate = strtotime(date('Y-m-d', strtotime(date('Y', $date) . "-" . intval((date('m', $date) + 1 > 9 ? date('m', $date) + 1 : "0" . date('m', $date) + 1)) . "-01")));
+if ($format == "monthly") {
+    $prevDate = strtotime("-1 month", $date);
+    $nextDate = strtotime("+1 month", $date);
+}
+if ($format == "annualy") {
+    $prevDate = strtotime(date('Y', $date) - 1 . "-01-01");
+    $nextDate = strtotime(date('Y', $date) + 1 . "-01-01");
+}
 print '                 <a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $prevDate . '">';
 print '                     <span class="ui-icon ui-icon-arrowthickstop-1-w" title="' . $arrTitleNav['prev' . $format] . '" style="float:left"></span>';
 print '                 </a>';
@@ -244,23 +309,37 @@ print '                     <span class="ui-icon ui-icon-arrowthickstop-1-e" tit
 print '                 </a>';
 $arrMonthFR = array('1' => 'Jan', "2" => "Fev", "3" => "Mar", "4" => "Avr", "5" => "Mai", "6" => "Jun", "7" => "Jui", "8" => "Aou", "9" => "Sep", "10" => "Oct", "11" => "Nov", "12" => "Dec");
 if ($format == 'weekly') {
-    print '                 Activit&eacute;s de la semaine ' . date('W', $date);
+    print '                 Activit&eacute;s de la semaine ' . date('W', $date) . " - ";
 } else if ($format == 'biweekly') {
-    print '                 Activit&eacute;s des semaines ' . date('W', $date) . ' / ' . intval(date('W', $date) + 1);
+    print '                 Activit&eacute;s des semaines ' . date('W', $date) . ' / ' . intval(date('W', $date) + 1) . " - ";
 } else if ($format == 'monthly') {
-    print '                 Activit&eacute;s du mois de ' . $arrMonthFR[date('n', $date)];
+    print '                 Activit&eacute;s du mois de ' . $arrMonthFR[date('n', $date)] . " - ";
 }
-print ' - ' . date('Y', $date) . '</th>             <th class="ui-state-hover ui-widget-header" colspan="1"></th>';
+print date('Y', $date) . '</th>             <th class="ui-state-hover ui-widget-header" colspan="1"></th>';
 print '             <th class="ui-state-hover ui-widget-header" colspan="2">Total</th>';
 
-$arrNbJour = array('monthly' => $monthDur, 'weekly' => 7, "biweekly" => 14);
+
+$arrNbMonth = array('monthly' => 1, "annualy" => 12);
 $totalDay = array();
 
 $tmpDate = $date;
-for ($i = 0; $i < $arrNbJour[$format]; $i++) {
-    print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d', $tmpDate) . '</th>';
-    $tmpDate += 3600 * 24;
-    $totalDay[$tmpDate] = 0;
+if ($formatView == "month") {
+    $arrNbJour = array('monthly' => 1, "annualy" => 12);
+    for ($i = 0; $i < $arrNbMonth[$format]; $i++) {
+        print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('m', $tmpDate) . '</th>';
+        $tmpDate = strtotime(date('Y-', $tmpDate) . (date('m', $tmpDate) + 1) . "-01");
+        $totalDay[$tmpDate] = 0;
+    }
+} else {
+    $arrNbJour = array('monthly' => $monthDur, 'weekly' => 7, "biweekly" => 14, "annualy" => 365);
+    for ($i = 0; $i < $arrNbJour[$format]; $i++) {
+        if ($format != 'annualy')
+            print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d', $tmpDate) . '</th>';
+        else
+            print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d/m', $tmpDate) . '</th>';
+        $tmpDate += 3600 * 24;
+        $totalDay[$tmpDate] = 0;
+    }
 }
 print "</tr>";
 print '<tr>';
@@ -268,14 +347,23 @@ print '  <th class="ui-widget-header" style="width:270px;">';
 print '  </th>';
 print '  <th class="ui-widget-header">&nbsp;&nbsp;</th>';
 print '             <th class="ui-widget-header" title="Restant">Res&nbsp;</th>';
-print '             <th class="ui-widget-header">h</th>';
-print '             <th class="ui-widget-header">jh</th>';
+print '             <th class="ui-widget-header">Global</th>';
+print '             <th class="ui-widget-header">Période</th>';
 $tmpDate = $date;
-$arrJourFR = array(0 => "Dim", 1 => "Lun", 2 => "Mar", 3 => "Mer", 4 => "Jeu", 5 => "Ven", 6 => "Sam");
-for ($i = 0; $i < $arrNbJour[$format]; $i++) {
-    print '<th class="ui-widget-header day_' . date('w', $tmpDate) . '">' . $arrJourFR[date('w', $tmpDate)] . '</th>';
-    $tmpDate += 3600 * 24;
+if ($formatView == "month") {
+    $arrJourFR = array(1 => "Janv", 2 => "Fev", 3 => "Mars", 4 => "Avril", 5 => "Mai", 6 => "Juin", 7 => "Juillet", 8 => "Aout", 9 => "Sept", 10 => "Oct", 11 => "Nov", 12 => "Dec");
+    for ($i = 0; $i < $arrNbJour[$format]; $i++) {
+        print '<th class="ui-widget-header day_' . date('w', $tmpDate) . '">' . $arrJourFR[round(date('m', $tmpDate))] . '</th>';
+        $tmpDate = strtotime(date('Y-', $tmpDate) . (date('m', $tmpDate) + 1) . "-01");
+    }
+} else {
+    $arrJourFR = array(0 => "Dim", 1 => "Lun", 2 => "Mar", 3 => "Mer", 4 => "Jeu", 5 => "Ven", 6 => "Sam");
+    for ($i = 0; $i < $arrNbJour[$format]; $i++) {
+        print '<th class="ui-widget-header day_' . date('w', $tmpDate) . '">' . $arrJourFR[date('w', $tmpDate)] . '</th>';
+        $tmpDate += 3600 * 24;
+    }
 }
+
 print "</tr>";
 print "</thead>";
 print '<tbody class="div_scrollable_medium">';
@@ -312,6 +400,7 @@ require_once(DOL_DOCUMENT_ROOT . '/projet/class/project.class.php');
 $proj = new Project($db);
 $arrTaskId = array();
 $grandTotalLigne = 0;
+$grandTotalLigne2 = 0;
 while ($res = $db->fetch_object($sql)) {
     $tousVide = true;
     $html = '';
@@ -341,11 +430,26 @@ while ($res = $db->fetch_object($sql)) {
                    AND fk_task = " . $res->tid;
     $sql2 = $db->query($requete2);
     $res2 = $db->fetch_object($sql2);
+
+    $prevue = round(intval($res1->sumTps) / 36) / 100;
+    $commandes = $proj->get_element_list('order');
+    $prixTot = 0;
+    foreach ($commandes as $commande) {
+        $comm = new Commande($db);
+        $comm->fetch($commande);
+        $prixTot += $comm->total_ht;
+    }
+    $pourcTache = $prevue / ($proj->getStatsDuration() / 3600);
+    $prixTot = $prixTot * $pourcTache;
+    global $prevue, $prixTot;
+
     $restant = round(intval($res1->sumTps - $res2->sumTps) / 36) / 100;
     $totalLigne = round(intval($res2->sumTps) / 36) / 100;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
     $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 
+    $restant = toAffiche($restant);
+    $totalLigne = toAffiche($totalLigne);
     //Restant
     if ($restant < 0)
         $html .= '     <td nowrap class="display_value error">' . $restant . '</td>';
@@ -354,22 +458,33 @@ while ($res = $db->fetch_object($sql)) {
     //Total h
     $html .= '     <td nowrap class="display_value">' . $totalLigne . '</td>';
     //Total jh
-    $html .= '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
 
 
     $tmpDate = $date;
     $html2 = $html3 = '';
+    $totalPeriode = 0;
     for ($i = 0; $i < $arrNbJour[$format]; $i++) {
+        if ($formatView == "month") {
+            if (date('m', $tmpDate) < 12)
+                $tmpDate2 = strtotime(date('Y-', $tmpDate) . (date('m', $tmpDate) + 1) . date('-d', $tmpDate) . ' 00:00:00');
+            else
+                $tmpDate2 = strtotime((date('Y', $tmpDate) + 1) . '-01' . date('-d', $tmpDate) . ' 00:00:00');
+        }
+        else
+            $tmpDate2 = strtotime(date('Y-m-d', $tmpDate) . ' 23:59:59');
         $nbHeure = 0;
-        $requete = "SELECT (task_duration_effective / 3600) as task_duration_effective
+        $requete = "SELECT sum(task_duration_effective / 3600) as task_duration_effective
                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as e
                     WHERE fk_task = " . $res->tid . "
                       AND fk_user =" . $userId . "
-                      AND task_date_effective >= '" . date('Y-m-d', $tmpDate) . " 00:00:00' AND task_date_effective <= '" . date('Y-m-d', $tmpDate) . " 23:59:59'";
+                      AND task_date_effective >= '" . date('Y-m-d', $tmpDate) . " 00:00:00' AND task_date_effective < '" . date('Y-m-d H:i:s', $tmpDate2) . "'";
+
         $sql1 = $db->query($requete);
         $res1 = $db->fetch_object($sql1);
         $nbHeure = ($res1->task_duration_effective > 0 ? (round($res1->task_duration_effective * 100) / 100) : 0);
-        $totalDay2[$tmpDate] = $res1->task_duration_effective;
+        $totalPeriode += $nbHeure;
+        $nbHeure = toAffiche($nbHeure);
+        $totalDay2[$tmpDate] = $nbHeure;
         $html2 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html3 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
         $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
@@ -378,7 +493,10 @@ while ($res = $db->fetch_object($sql)) {
         $html3 .= $nbHeure;
         $html2 .= '     </td>';
         $html3 .= '     </td>';
-        $tmpDate += 3600 * 24;
+        if ($formatView == "month")
+            $tmpDate = $tmpDate2;
+        else
+            $tmpDate += 3600 * 24;
         if ($nbHeure > 0)
             $tousVide = false;
     }
@@ -386,77 +504,100 @@ while ($res = $db->fetch_object($sql)) {
     $html2 .= '    </tr>';
     $html3 .= '    </tr>';
 
-    $grandTotalLigne += intval($res2->sumTps) / 3600;
     foreach ($totalDay2 as $cle => $val)
         $totalDay[$cle] += $totalDay2[$cle];
     $stat = $res->fk_statut;
-    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+
+    $html .= '     <td nowrap class="display_value">' . toAffiche($totalPeriode) . '</td>';
+
+    if ($modVal == 1 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         echo $html . $html2;
     elseif (!$tousVide)
         echo $html . $html3;
+
+    $grandTotalLigne += $totalLigne;
+    $grandTotalLigne2 += toAffiche($totalPeriode);
 }
+
+
 print '    </tbody>';
 
 print "<tfoot>";
-print '         <tr>';
-print '             <th class="ui-state-default ui-widget-header" colspan=3 align=right>Total&nbsp;';
+if ($modVal != 2) {
+    print '         <tr>';
+    print '             <th class="ui-state-default ui-widget-header" colspan=3 align=right>Total&nbsp;';
 
-$hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
-$grandTotalLignePerDay = round($grandTotalLigne * 100 / $hourPerDay) / 100;
-$grandTotalLigne = round($grandTotalLigne * 100) / 100;
-
+//  $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
+//  $grandTotalLignePerDay = round($grandTotalLigne * 100 / $hourPerDay) / 100;
+//  $grandTotalLigne = round($grandTotalLigne * 100) / 100;
 //Total h
-print '             <th class="ui-state-default ui-widget-header">' . $grandTotalLigne . '</th>';
+    print '             <th class="ui-state-default ui-widget-header">' . getUnite($grandTotalLigne) . '</th>';
 //Total h/j
-print '             <th class="ui-state-default ui-widget-header">' . $grandTotalLignePerDay . '</th>';
+    print '             <th class="ui-state-default ui-widget-header">' . getUnite($grandTotalLigne2) . '</th>';
 
-$tmpDate = $date;
-for ($i = 0; $i < $arrNbJour[$format]; $i++) {
-    if (!$totalDay[$tmpDate] > 0) {
-        $totalDay[$tmpDate] = 0;
+//    $tmpDate = $date;
+//    print_r($totalDay);
+//    for ($i = 0; $i < $arrNbJour[$format]; $i++) {
+//        echo $tmpDate;
+//        if (!$totalDay[$tmpDate] > 0) {
+//            $totalDay[$tmpDate] = 0;
+//        }
+//        print '<th class="ui-state-default ui-widget-header day_' . date('w', $tmpDate) . '">' . getUnite($totalDay[$tmpDate]) . '</th>';
+//        $tmpDate += 3600 * 24;
+//    }
+
+
+
+    ksort($totalDay);
+    foreach ($totalDay as $tmpDate => $val) {
+        if ($tmpDate >= $date) {
+            if (!$val > 0) {
+                $val = 0;
+            }
+            print '<th class="ui-state-default ui-widget-header day_' . date('w', $tmpDate) . '">' . getUnite($val) . '</th>';
+        }
     }
-    print '<th class="ui-state-default ui-widget-header day_' . date('w', $tmpDate) . '">' . $totalDay[$tmpDate] . '</th>';
-    $tmpDate += 3600 * 24;
-}
-print "</tr>";
 
-//Total Mois
-$requete = "SELECT sum(task_duration_effective) / 3600 as durEff
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-             WHERE fk_user = " . $userId . "
-               AND month(task_date_effective) = " . date('m', $date) . "
-               AND year(task_date_effective) = " . date('Y', $date) . "
-               AND fk_task in (" . join(',', $arrTaskId) . ")";
 
-$sql = $db->query($requete);
-
-if ($sql) {
-    $res = $db->fetch_object($sql);
-
-    $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
-    print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
-    print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='5'>Total mensuel&nbsp;</td>";
-    print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='5'>" . round($res->durEff * 100) / 100 . " h</td>";
     print "</tr>";
 }
+
+if ($modVal == 1) {
+    $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
+//Total Mois
+    $requete = "SELECT sum(task_duration_effective) / 3600 as durEff
+  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
+  WHERE fk_user = " . $userId . "
+  AND month(task_date_effective) = " . date('m', $date) . "
+  AND year(task_date_effective) = " . date('Y', $date) . "
+  AND fk_task in (" . join(',', $arrTaskId) . ")";
+
+    $sql = $db->query($requete);
+
+    if ($sql) {
+        $res = $db->fetch_object($sql);
+        print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
+        print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='" . ($colspan > 1 ? '5' : '3') . "'>Total mensuel&nbsp;</td>";
+        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . " h</td>";
+        print "</tr>";
+    }
 
 //Total Annee
-$requete = "SELECT sum(task_duration_effective) / 3600 as durEff
-              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-             WHERE fk_user = " . $userId . "
-               AND year(task_date_effective) = " . date('Y', $date) . "
-               AND fk_task in (" . join(',', $arrTaskId) . ")";
+    $requete = "SELECT sum(task_duration_effective) / 3600 as durEff
+  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
+  WHERE fk_user = " . $userId . "
+  AND year(task_date_effective) = " . date('Y', $date) . "
+  AND fk_task in (" . join(',', $arrTaskId) . ")";
 
-$sql = $db->query($requete);
+    $sql = $db->query($requete);
 
-if ($sql) {
-    $res = $db->fetch_object($sql);
-
-    $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
-    print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
-    print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='5'>Total annuel&nbsp;</td>";
-    print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='5'>" . round($res->durEff * 100) / 100 . " h</td>";
-    print "</tr>";
+    if ($sql) {
+        $res = $db->fetch_object($sql);
+        print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
+        print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='" . ($colspan > 1 ? '5' : '3') . "'>Total annuel&nbsp;</td>";
+        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . " h</td>";
+        print "</tr>";
+    }
 }
 print "</tfoot>";
 
@@ -492,4 +633,25 @@ $somethingshown = @$formfile->show_documents('imputations', $comref, $filedir . 
 
 print "</table>";
 llxFooter("<em>Derni&egrave;re modification $Date: 2008/06/18 20:01:02 $ r&eacute;vision $Revision: 1.41 $</em>");
+
+function toAffiche($val) {
+    global $prevue, $prixTot, $modVal;
+    if ($modVal == 3)
+        $val = $prixTot * $val / $prevue;
+    elseif ($modVal == 2)
+        $val = $val / $prevue * 100;
+    return getUnite($val);
+}
+
+function getUnite($val) {
+    global $modVal;
+    $val = round($val * 100) / 100;
+    if ($modVal == 3)
+        return $val . " €";
+    elseif ($modVal == 1)
+        return $val;
+    elseif ($modVal == 2)
+        return $val . " %";
+}
+
 ?>

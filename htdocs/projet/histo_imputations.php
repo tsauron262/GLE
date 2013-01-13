@@ -12,7 +12,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
 $langs->load("projectsSyn@projet");
 $userId = $user->id;
-if ($_REQUEST['userid'] > 0)
+if ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2)
     $userId = $_REQUEST['userid'];
 
 
@@ -197,6 +197,10 @@ jQuery(document).ready(function(){
     jQuery('SELECT#userid').change(function(){
         jQuery('SELECT#userid').parents('form').submit();
     });
+    jQuery('.tousUser').click(function(){
+        window.location = "?userid=-2";
+        return false;
+    });
 
 });
 </script>
@@ -257,6 +261,7 @@ if ($user->rights->synopsisprojet->voirImputations) {
     print "<table><tr><td>";
     $html->select_users($userId, 'userid', 1, '', 0, $display = true);
     print "<td><button class='butAction'>OK</button>";
+    print "<td><button class='butAction tousUser'>Tous</button>";
     print "</table>";
     print "</form>";
 }
@@ -281,6 +286,8 @@ print '    <div style="width:100%;">';
 print '    <table class="calendar" width=100%>';
 if ($user->id == $userId)
     print '     <caption class="ui-state-default ui-widget-header">Mes imputations</caption>';
+elseif($userId == -2)
+    print '     <caption class="ui-state-default ui-widget-header">Toutes les imputations</caption>';
 else
     print '     <caption class="ui-state-default ui-widget-header">Les imputations de ' . $curUser->getNomUrl(1) . '</caption>';
 print '       <thead>';
@@ -376,6 +383,10 @@ print '<tbody class="div_scrollable_medium">';
   $res1 = $db->fetch_object( $sql1 ) ;
 
   print '     <td nowrap class="display_value">' .$res1->sommeheure. '</td>' ; */
+
+
+//$userId = -2;
+
 $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
@@ -388,7 +399,7 @@ $requete = "SELECT DISTINCT t.rowid as tid,
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
-		AND a.fk_user = $userId 
+		".(($userId != -2)?" AND a.fk_user = $userId " : ""). "
 	    ORDER BY p.rowid";
 
 $sql = $db->query($requete);
@@ -419,15 +430,15 @@ while ($res = $db->fetch_object($sql)) {
 
     $requete1 = "SELECT sum(task_duration) as sumTps
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
-                 WHERE fk_user = " . $userId . "
-                   AND fk_task = " . $res->tid;
+                 WHERE fk_task = " . $res->tid 
+		.(($userId != -2)?" AND fk_user = $userId " : "");
     $sql1 = $db->query($requete1);
     $res1 = $db->fetch_object($sql1);
 
     $requete2 = "SELECT sum(task_duration_effective) as sumTps
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-                 WHERE fk_user = " . $userId . "
-                   AND fk_task = " . $res->tid;
+                 WHERE fk_task = " . $res->tid."
+		".(($userId != -2)?" AND fk_user = $userId " : "");
     $sql2 = $db->query($requete2);
     $res2 = $db->fetch_object($sql2);
 
@@ -439,7 +450,7 @@ while ($res = $db->fetch_object($sql)) {
         $comm->fetch($commande);
         $prixTot += $comm->total_ht;
     }
-    $pourcTache = $prevue / ($proj->getStatsDuration() / 3600);
+    $pourcTache = ($proj->getStatsDuration() > 0)? $prevue / ($proj->getStatsDuration() / 3600) : 0;
     $prixTot = $prixTot * $pourcTache;
     global $prevue, $prixTot;
 
@@ -476,7 +487,7 @@ while ($res = $db->fetch_object($sql)) {
         $requete = "SELECT sum(task_duration_effective / 3600) as task_duration_effective
                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as e
                     WHERE fk_task = " . $res->tid . "
-                      AND fk_user =" . $userId . "
+		".(($userId != -2)?" AND fk_user = $userId " : ""). "
                       AND task_date_effective >= '" . date('Y-m-d', $tmpDate) . " 00:00:00' AND task_date_effective < '" . date('Y-m-d H:i:s', $tmpDate2) . "'";
 
         $sql1 = $db->query($requete);
@@ -567,10 +578,10 @@ if ($modVal == 1) {
 //Total Mois
     $requete = "SELECT sum(task_duration_effective) / 3600 as durEff
   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-  WHERE fk_user = " . $userId . "
-  AND month(task_date_effective) = " . date('m', $date) . "
+  WHERE month(task_date_effective) = " . date('m', $date) . "
   AND year(task_date_effective) = " . date('Y', $date) . "
-  AND fk_task in (" . join(',', $arrTaskId) . ")";
+  AND fk_task in (" . join(',', $arrTaskId) . ")
+		".(($userId != -2)?" AND fk_user = $userId " : "");
 
     $sql = $db->query($requete);
 
@@ -585,9 +596,9 @@ if ($modVal == 1) {
 //Total Annee
     $requete = "SELECT sum(task_duration_effective) / 3600 as durEff
   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-  WHERE fk_user = " . $userId . "
-  AND year(task_date_effective) = " . date('Y', $date) . "
-  AND fk_task in (" . join(',', $arrTaskId) . ")";
+  WHERE year(task_date_effective) = " . date('Y', $date) . "
+  AND fk_task in (" . join(',', $arrTaskId) . ")
+		".(($userId != -2)?" AND fk_user = $userId " : "");
 
     $sql = $db->query($requete);
 

@@ -199,7 +199,8 @@
 
 #struct_main.activities table.calendar input[type=text]
 {
-    width: 1em;
+    width: 1,5em;
+    text-align: center;
 }
 
 .display_value

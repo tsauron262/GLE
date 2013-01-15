@@ -43,7 +43,7 @@ if (isset($_REQUEST['modVal'])) {
     $_SESSION['modVal'] = $_REQUEST['modVal'];
 }
 //print_r($user->rights->synopsisprojet->caImput);die;
-if(!$user->rights->synopsisprojet->caImput && $modVal == 3)
+if (!$user->rights->synopsisprojet->caImput && $modVal == 3)
     $modVal = 2;
 
 
@@ -189,7 +189,7 @@ if ($_REQUEST['action'] == 'save') {
                             }
                         }
                         else
-                            $messErreur[] = "Plus de 9 h pour la journée ".date('Y-m-d H:i:s', $key1);
+                            $messErreur[] = "Plus de 9 h pour la journée " . date('Y-m-d H:i:s', $key1);
                     } elseif ($grandType == 2) {
 //                    echo "<pre>";print_r($_REQUEST);die;
                         $requete2 = "SELECT sum(val) as sommeheure, rowid
@@ -202,24 +202,24 @@ if ($_REQUEST['action'] == 'save') {
                         $res2 = $db->fetch_object($sql2);
                         $existant = false;
                         $totPourc = getMoyPourc($key, 0, $userId);
-                        if (isset($res2->sommeheure)){
+                        if (isset($res2->sommeheure)) {
                             $existant = true;
                             $totPourc -= $res2->sommeheure;
                         }
-                        if(($totPourc + $newVal) <= 100){
-                        if ($existant) {
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ
+                        if (($totPourc + $newVal) <= 100) {
+                            if ($existant) {
+                                $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ
                                        SET val = " . intval($newVal) . "
                                      WHERE rowid = " . $res2->rowid;
-                            $sql1 = $db->query($requete);
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ (val, date, fk_task, fk_user)
+                                $sql1 = $db->query($requete);
+                            } else {
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ (val, date, fk_task, fk_user)
                                          VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
-                            $sql1 = $db->query($requete);
-                        }
+                                $sql1 = $db->query($requete);
+                            }
                         }
                         else
-                            $messErreur[] = "Plus de 100% pour la tache ".$res2->rowid;
+                            $messErreur[] = "Plus de 100% pour la tache " . $res2->rowid;
                     }
                 }
             }
@@ -286,8 +286,8 @@ print "<br/>";
 print "<div class='titre'>Imputations projet</div>";
 
 
-foreach($messErreur as $erreur){
-    echo "<div class='error'>".$erreur ."</div>";
+foreach ($messErreur as $erreur) {
+    echo "<div class='error'>" . $erreur . "</div>";
 }
 
 print '    <div id="struct_main" class="activities">';
@@ -313,7 +313,7 @@ if ($modVal != '1' && $grandType == 1)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=1">Heures</a>';
 if ($modVal != '2')
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=2">Pourcentages</a>';
-if ($modVal != '3'  && $user->rights->synopsisprojet->caImput)
+if ($modVal != '3' && $user->rights->synopsisprojet->caImput)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=3">Euros</a>';
 print '              </table>';
 print '</table></p>';
@@ -539,14 +539,12 @@ while ($res = $db->fetch_object($sql)) {
 
         $totalLigne = getSumHeure($res->tid, null, $userId);
         $restant = $prevue - $totalLigne;
-    } 
-    elseif($grandType == 3){
-            $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
-            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId) / $prevue *100;
-            $totalLigne = $pourcHeure - $pourcAvenc;
+    } elseif ($grandType == 3) {
+        $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
+        $pourcAvenc = getSumHeure($res->tid, $prevue, $userId) / $prevue * 100;
+        $totalLigne = $pourcHeure - $pourcAvenc;
         $restant = "n/c";
-    }
-    else {
+    } else {
         $totalLigne = getMoyPourc($res->tid, $prevue, $userId);
         $restant = 100 - $totalLigne;
     }
@@ -613,12 +611,12 @@ while ($res = $db->fetch_object($sql)) {
             $tmpDate2 = strtotime(date('Y-m-d', $tmpDate) . ' 23:59:59');
         if ($grandType == 1)
             $nbHeure = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
-        elseif ($grandType == 3){
+        elseif ($grandType == 3) {
             $pourcHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
-            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2) / $prevue *100;
-            if($pourcAvenc > 0 || $pourcHeure > 0){
+            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2) / $prevue * 100;
+            if ($pourcAvenc > 0 || $pourcHeure > 0) {
                 $tousVide = false;
-            $nbHeure = $pourcHeure - $pourcAvenc;
+                $nbHeure = $pourcHeure - $pourcAvenc;
             }
             else
                 $nbHeure = "n/c";
@@ -648,7 +646,7 @@ while ($res = $db->fetch_object($sql)) {
             $tmpDate = $tmpDate2;
         else
             $tmpDate += 3600 * 24;
-        if ($nbHeure > 0)
+        if ($nbHeure > 0 && toAffiche($nbHeure) > 0)
             $tousVide = false;
     }
 
@@ -800,9 +798,9 @@ function toAffiche($val, $unite = true) {
 
     if ($val === "n/c")
         return '';
-        
-        
-    if ($grandType == 1){
+
+
+    if ($grandType == 1) {
         if ($modVal == 3)
             $val = $prixTot * $val / $prevue;
         elseif ($modVal == 2)

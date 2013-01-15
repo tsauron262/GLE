@@ -42,6 +42,9 @@ if (isset($_REQUEST['modVal'])) {
     $modVal = $_REQUEST['modVal'];
     $_SESSION['modVal'] = $_REQUEST['modVal'];
 }
+//print_r($user->rights->synopsisprojet->caImput);die;
+if(!$user->rights->synopsisprojet->caImput && $modVal == 3)
+    $modVal = 2;
 
 
 $grandType = 1;
@@ -150,6 +153,7 @@ if ($_REQUEST['action'] == 'save') {
             foreach ($val as $key1 => $val1) {
                 $newVal = $_REQUEST['activity'][$key][$key1];
                 if ($newVal != $val1) {
+                    echo "ll";
                     if ($grandType == 1) {
                         $requete2 = "SELECT sum(task_duration_effective) as sommeheure
                                    FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
@@ -307,7 +311,7 @@ if ($modVal != '1' && $grandType == 1)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=1">Heures</a>';
 if ($modVal != '2')
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=2">Pourcentages</a>';
-if ($modVal != '3')
+if ($modVal != '3'  && $user->rights->synopsisprojet->caImput)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;modVal=3">Euros</a>';
 print '              </table>';
 print '</table></p>';
@@ -716,7 +720,7 @@ if ($modVal == 1) {
         $res = $db->fetch_object($sql);
         print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
         print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='" . ($colspan > 1 ? '5' : '3') . "'>Total mensuel&nbsp;</td>";
-        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . " h</td>";
+        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . "</td>";
         print "</tr>";
     }
 
@@ -733,7 +737,7 @@ if ($modVal == 1) {
         $res = $db->fetch_object($sql);
         print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
         print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='" . ($colspan > 1 ? '5' : '3') . "'>Total annuel&nbsp;</td>";
-        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . " h</td>";
+        print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='" . ($colspan > 1 ? '5' : '2') . "'>" . getUnite($res->durEff) . "</td>";
         print "</tr>";
     }
 }

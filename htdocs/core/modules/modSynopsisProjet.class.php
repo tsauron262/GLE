@@ -141,6 +141,12 @@ class modSynopsisProjet extends DolibarrModules {
         $this->rights[6][3] = 1; // La permission est-elle une permission par defaut
         $this->rights[6][4] = 'attribution';
 
+        $this->rights[7][0] = 48; // id de la permission
+        $this->rights[7][1] = 'Voir les CA dans les imputations'; // libelle de la permission
+        $this->rights[7][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[7][3] = 1; // La permission est-elle une permission par defaut
+        $this->rights[7][4] = 'caImput';
+
 
 
 
@@ -730,7 +736,15 @@ class modSynopsisProjet extends DolibarrModules {
   ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
             "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
-  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;"
+  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
+            "CREATE TABLE IF NOT EXISTS `l" . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_task` int(11) NOT NULL,
+  `fk_user` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `val` int(11) NOT NULL,
+  PRIMARY KEY (`rowid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;"
             );
 
         return $this->_init($sql);

@@ -796,7 +796,7 @@ function getUnite($val) {
     if ($modVal == 3)
         return $val . " €";
     elseif ($modVal == 1)
-        return $val;
+        return $val . " h";
     elseif ($modVal == 2)
         return $val . " %";
 }

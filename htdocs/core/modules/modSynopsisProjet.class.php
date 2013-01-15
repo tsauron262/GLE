@@ -704,47 +704,47 @@ class modSynopsisProjet extends DolibarrModules {
             "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "CREATE VIEW ". MAIN_DB_PREFIX ."projet as (SELECT rowid, fk_soc, date_create as datec, tms, dateo, date_cloture as datee, ref, entity, title, note as description, fk_user_creat, '' as public, fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM ". MAIN_DB_PREFIX ."Synopsis_projet);",
-            
-            
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element`
-  ADD CONSTRAINT `liaison_fk` FOREIGN KEY (`ecm_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_auto` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element_assoc`
-  ADD CONSTRAINT `liaison_ecm_assoc` FOREIGN KEY (`ecm_assoc_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_assoc` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources`
-  ADD CONSTRAINT `fk_parent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ressource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa`
-  ADD CONSTRAINT `resa_ressource_key ` FOREIGN KEY (`fk_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE NO ACTION,
-  ADD CONSTRAINT `user_author_resa_ressource_key` FOREIGN KEY (`fk_user_author`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `user_imputation_resa_ressource_key ` FOREIGN KEY (`fk_user_imputation`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", 
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet`
-  ADD CONSTRAINT `" . MAIN_DB_PREFIX . "Synopsis_projet_ibfk_1` FOREIGN KEY (`fk_statut`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources`
-  ADD CONSTRAINT `fk_global_ressource_key` FOREIGN KEY (`fk_global_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_user_resa_key` FOREIGN KEY (`fk_user_resa`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources`
-  ADD CONSTRAINT `fk_projessource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION,
-  ADD CONSTRAINT `fk_projparent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_risk`
-  ADD CONSTRAINT `fk_projet_risk` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_projet_task_risk` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task`
-  ADD CONSTRAINT `fk_parent_task_sql` FOREIGN KEY (`fk_task_parent`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_projet_task` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors`
-  ADD CONSTRAINT `fk_parent_task_actor_sql` FOREIGN KEY (`fk_projet_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends`
-  ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
-  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "CREATE TABLE IF NOT EXISTS `l" . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) NOT NULL,
   `fk_user` int(11) NOT NULL,
   `date` date NOT NULL,
   `val` int(11) NOT NULL,
   PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;"
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;",
+            
+            
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element`
+  ADD CONSTRAINT `liaison_fk` FOREIGN KEY (`ecm_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_auto` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element_assoc`
+  ADD CONSTRAINT `liaison_ecm_assoc` FOREIGN KEY (`ecm_assoc_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_assoc` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources`
+  ADD CONSTRAINT `fk_parent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_ressource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa`
+  ADD CONSTRAINT `resa_ressource_key ` FOREIGN KEY (`fk_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE NO ACTION,
+  ADD CONSTRAINT `user_author_resa_ressource_key` FOREIGN KEY (`fk_user_author`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_imputation_resa_ressource_key ` FOREIGN KEY (`fk_user_imputation`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", 
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet`
+  ADD CONSTRAINT `" . MAIN_DB_PREFIX . "Synopsis_projet_ibfk_1` FOREIGN KEY (`fk_statut`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources`
+  ADD CONSTRAINT `fk_global_ressource_key` FOREIGN KEY (`fk_global_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_user_resa_key` FOREIGN KEY (`fk_user_resa`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources`
+  ADD CONSTRAINT `fk_projessource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION,
+  ADD CONSTRAINT `fk_projparent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_risk`
+  ADD CONSTRAINT `fk_projet_risk` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_projet_task_risk` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task`
+  ADD CONSTRAINT `fk_parent_task_sql` FOREIGN KEY (`fk_task_parent`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_projet_task` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors`
+  ADD CONSTRAINT `fk_parent_task_actor_sql` FOREIGN KEY (`fk_projet_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends`
+  ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
+  ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;"
             );
 
         return $this->_init($sql);

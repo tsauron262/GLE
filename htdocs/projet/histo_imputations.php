@@ -75,7 +75,7 @@ if ($formatView == "month" && $format != 'annualy' && $format != "monthly") {
 
 
 
-if ($grandType == 2) {
+if ($grandType != 1) {
     if ($modVal == 1)
         $modVal = 2;
     $format = "annualy";
@@ -300,6 +300,8 @@ if ($grandType != 1)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;grandType=1">Par heures</a>';
 if ($grandType != 2)
     print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;grandType=2">Par avancements</a>';
+if ($grandType != 3)
+    print '                     <tr><td><a href="?' . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . 'userid=' . $userId . '&format=' . $format . '&amp;date=' . $date . '&amp;grandType=3">Ratio</a>';
 print '              </table>';
 print '</table></p>';
 
@@ -537,7 +539,14 @@ while ($res = $db->fetch_object($sql)) {
 
         $totalLigne = getSumHeure($res->tid, null, $userId);
         $restant = $prevue - $totalLigne;
-    } else {
+    } 
+    elseif($grandType == 3){
+            $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
+            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId) / $prevue *100;
+            $totalLigne = $pourcHeure - $pourcAvenc;
+        $restant = "n/c";
+    }
+    else {
         $totalLigne = getMoyPourc($res->tid, $prevue, $userId);
         $restant = 100 - $totalLigne;
     }
@@ -604,6 +613,16 @@ while ($res = $db->fetch_object($sql)) {
             $tmpDate2 = strtotime(date('Y-m-d', $tmpDate) . ' 23:59:59');
         if ($grandType == 1)
             $nbHeure = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
+        elseif ($grandType == 3){
+            $pourcHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
+            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2) / $prevue *100;
+            if($pourcAvenc > 0 || $pourcHeure > 0){
+                $tousVide = false;
+            $nbHeure = $pourcHeure - $pourcAvenc;
+            }
+            else
+                $nbHeure = "n/c";
+        }
         else
             $nbHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
 
@@ -644,7 +663,7 @@ while ($res = $db->fetch_object($sql)) {
     $html .= '     <td nowrap class="display_value">' . toAffiche($totalPeriode) . '</td>';
 
     $affiche = true;
-    if ($userId != -2 && (($grandType == 2 && $modVal == 2) || ($modVal == 1 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)))
+    if ($userId != -2 && (($grandType == 2 && $modVal == 2) || ($grandType == 1 && $modVal == 1 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)))
         $html .= $html2;
     elseif (!$tousVide)
         $html .= $html3;
@@ -779,7 +798,11 @@ llxFooter("<em>Derni&egrave;re modification $Date: 2008/06/18 20:01:02 $ r&eacut
 function toAffiche($val, $unite = true) {
     global $prevue, $prixTot, $modVal, $grandType;
 
-    if ($grandType == 1) {
+    if ($val === "n/c")
+        return '';
+        
+        
+    if ($grandType == 1){
         if ($modVal == 3)
             $val = $prixTot * $val / $prevue;
         elseif ($modVal == 2)

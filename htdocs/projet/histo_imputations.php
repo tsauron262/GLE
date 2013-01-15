@@ -153,7 +153,6 @@ if ($_REQUEST['action'] == 'save') {
             foreach ($val as $key1 => $val1) {
                 $newVal = $_REQUEST['activity'][$key][$key1];
                 if ($newVal != $val1) {
-                    echo "ll";
                     if ($grandType == 1) {
                         $requete2 = "SELECT sum(task_duration_effective) as sommeheure
                                    FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
@@ -615,7 +614,8 @@ while ($res = $db->fetch_object($sql)) {
             $pourcHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
             $pourcAvenc = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2) / $prevue * 100;
             if ($pourcAvenc > 0 || $pourcHeure > 0) {
-                $tousVide = false;
+                if ($modVal != 3)
+                    $tousVide = false;
                 $nbHeure = $pourcHeure - $pourcAvenc;
             }
             else
@@ -646,7 +646,7 @@ while ($res = $db->fetch_object($sql)) {
             $tmpDate = $tmpDate2;
         else
             $tmpDate += 3600 * 24;
-        if ($nbHeure > 0 && toAffiche($nbHeure) > 0)
+        if ($nbHeure != 0 && toAffiche($nbHeure) != 0)
             $tousVide = false;
     }
 

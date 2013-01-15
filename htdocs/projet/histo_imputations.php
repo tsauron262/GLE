@@ -147,7 +147,7 @@ if ($_REQUEST['action'] == 'builddoc') {    // In get or post
 
 if ($_REQUEST['action'] == 'save') {
     $arrModTask = array();
-    if ($userId > 0) {
+    if ($userId > 0 && isset($_REQUEST['activity_hidden'])) {
         foreach ($_REQUEST['activity_hidden'] as $key => $val) {
             $arrModTask[$key] = $key;
             foreach ($val as $key1 => $val1) {

@@ -462,9 +462,9 @@ $langs->load("chrono@Synopsis_Chrono");
             $chrono = $res->p;
             $module = $res->pr;
             if ($val == 1)
-                $grpObj->rights->$module->$chrono->$code = 1;
+                @$grpObj->rights->$module->$chrono->$code = 1;
             else
-                $grpObj->rights->$module->$chrono->$code = false;
+                @$grpObj->rights->$module->$chrono->$code = false;
         }
         return $grpObj;
     }

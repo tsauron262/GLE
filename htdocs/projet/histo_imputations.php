@@ -215,7 +215,7 @@ if ($_REQUEST['action'] == 'save') {
                                 $sql1 = $db->query($requete);
                             } else {
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ (val, date, fk_task, fk_user)
-                                         VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . (($userId != -2 && _IMPUT_POURC_MULTI_USER_)? $userId : 0) . ")";
+                                         VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
                                 $sql1 = $db->query($requete);
                             }
                         }

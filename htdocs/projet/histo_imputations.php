@@ -14,6 +14,8 @@ $langs->load("projectsSyn@projet");
 $userId = $user->id;
 
 
+define('_IMPUT_POURC_MULTI_USER_', false);
+
 $messErreur = array();
 
 if ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2)
@@ -474,7 +476,12 @@ print '<tbody class="div_scrollable_medium">';
 
 
 //$userId = -2;
-
+if ($userId != -2 && $grandType > 1 && !_IMPUT_POURC_MULTI_USER_)
+    $contraiteUser = " AND p.fk_user_resp = $userId ";
+elseif ($userId != -2)
+    $contraiteUser = " AND a.fk_user = $userId ";
+else
+    $contraiteUser = '';
 $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
@@ -487,7 +494,7 @@ $requete = "SELECT DISTINCT t.rowid as tid,
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
-		" . (($userId != -2) ? " AND a.fk_user = $userId " : "") . "
+		" . $contraiteUser . "
 	    ORDER BY p.rowid";
 
 $sql = $db->query($requete);
@@ -858,8 +865,7 @@ function getMoyPourc($fk_task, $prevue, $userId = -2, $tmpDate = null, $tmpDate2
         ;
         $sql100 = $db->query($requete100);
         $res100 = $db->fetch_object($sql100);
-//            echo($requete100);
-        if ($userId == -2)
+        if ($userId == -2 && _IMPUT_POURC_MULTI_USER_)
             $pourcUserTache = $res100->sumTps / $prevue / 3600;
         else
             $pourcUserTache = 1;

@@ -197,7 +197,7 @@ if ($_REQUEST['action'] == 'save') {
                                    FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ
                                  WHERE date = '" . date('Y-m-d H:i:s', $key1) . "'
                                      AND fk_task = " . $key . "
-                                   AND fk_user = " . $userId;
+		" . (($userId != -2 && _IMPUT_POURC_MULTI_USER_) ? " AND fk_user = $userId " : "");
                         //AND fk_task = " . $key ;                     
                         $sql2 = $db->query($requete2);
                         $res2 = $db->fetch_object($sql2);
@@ -215,7 +215,7 @@ if ($_REQUEST['action'] == 'save') {
                                 $sql1 = $db->query($requete);
                             } else {
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ (val, date, fk_task, fk_user)
-                                         VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
+                                         VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . (($userId != -2 && _IMPUT_POURC_MULTI_USER_)? $userId : 0) . ")";
                                 $sql1 = $db->query($requete);
                             }
                         }
@@ -850,7 +850,7 @@ function getMoyPourc($fk_task, $prevue, $userId = -2, $tmpDate = null, $tmpDate2
     $requete = "SELECT val, fk_user
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ
                  WHERE fk_task = " . $fk_task . "
-		" . (($userId != -2) ? " AND fk_user = $userId " : "")
+		" . (($userId != -2 && _IMPUT_POURC_MULTI_USER_) ? " AND fk_user = $userId " : "")
             . (($tmpDate) ? " AND date >= '" . date('Y-m-d', $tmpDate) . " 00:00:00' AND date < '" . date('Y-m-d H:i:s', $tmpDate2) . "'" : "");
 
     ;

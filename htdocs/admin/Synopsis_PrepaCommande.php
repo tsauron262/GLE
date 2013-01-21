@@ -17,8 +17,8 @@
   * GLE-1.2
   */
 
-require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require("../main.inc.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 
 $langs->load("admin");
 $langs->load("bills");
@@ -38,14 +38,14 @@ if ($_POST["action"] == 'form_PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY')
     dolibarr_set_const($db, "PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY",$_POST["PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY"]);
 }
 
-llxHeader('',$langs->trans(utf8_decode("Préparation de commande")));
+llxHeader('',$langs->trans(utf8_decode("Pr&eacute;paration de commande")));
 
 $dir = "../includes/modules/Affaire/";
 $html=new Form($db);
 
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans(utf8_decode("Préparation de commande")),$linkback,'setup');
+print_fiche_titre($langs->trans(utf8_decode("Pr&eacute;paration de commande")),$linkback,'setup');
 
 // Valider la commande apres cloture de la propale
 // permet de na pas passer par l'option commande provisoire

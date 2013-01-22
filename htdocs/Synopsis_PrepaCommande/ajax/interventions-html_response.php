@@ -64,7 +64,7 @@ if ($res > 0) {
             }
             if (isset($val->fk_product) && $val->fk_product > 0) {
                 $prod->fetch($val->fk_product);
-                if ($prod->type == 1) {
+                if ($prod->type == 1 || $prod->type == 3) {
                     if ($cnt == 0) {
                         print "<table  cellpadding=10>";
                         print "<tr><th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Ref.

@@ -16,6 +16,10 @@ class maj {
         $this->dbD = $dbD;
         $this->timeDeb = microtime(true);
     }
+    
+    public function req($req){
+        $this->queryD($req);
+    }
 
     public function rectifId($tabId) {
         $i = 0;

@@ -17,7 +17,7 @@
  * Name : testImport.php
  * GLE-1.2
  */
-$maxFileImport = 20;
+$maxFileImport = 2000;
 
 
 ini_set('max_execution_time', 0);
@@ -1329,6 +1329,13 @@ if (is_dir($dir)) {
                                     $sqlUpt[] = " total_ttc = '" . $totalCom_ttc . "'";
                                 if ($res1->total_tva != $totalCom_tva)
                                     $sqlUpt[] = " total_tva = '" . $totalCom_tva . "'";
+                                if ($val['PlvCode'])
+                                    $prodType = getProdType($val['PlvCode']);
+                                else
+                                    $prodType = 3;
+                                    if ($res1->product_type != $prodType)
+                                        $sqlUpt[] = " product_type = '" . $prodType . "'";
+                                
 
                                 $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
                                 if (count($sqlUpt) > 0) {
@@ -1351,6 +1358,10 @@ if (is_dir($dir)) {
                                 }
                             } else {
                                 //Insert
+                                if ($val['PlvCode'])
+                                    $prodType = getProdType($val['PlvCode']);
+                                else
+                                    $prodType = 3;
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
                                        (fk_commande,
                                         fk_product,
@@ -1363,7 +1374,8 @@ if (is_dir($dir)) {
                                         tva_tx,
                                         total_tva,
                                         total_ttc,
-                                        buy_price_ht)
+                                        buy_price_ht,
+                                        product_type)
                                 VALUES (" . $comId . ",
                                         " . ($prodId > 0 ? $prodId : "NULL") . ",
                                         '" . $val['PlvLib'] . "',
@@ -1788,7 +1800,16 @@ function updateCategorie($ref, $prodId, $val) {
 $remTypeGlob = false;
 
 function updateType($ref, $prodId) {
+        global $db;
     if ($ref . 'x' != "x" && $prodId > 0) {
+        $type = getProdType($ref);
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET fk_product_type = '" . $type . "' WHERE rowid = " . $prodId;
+            $sql = $db->query($requete);
+    }
+}
+
+function getProdType($ref) {
+    if ($ref . 'x' != "x") {
         global $remTypeGlob, $db;
         if (!is_array($remTypeGlob)) {
             $remTypeGlob = array();
@@ -1800,10 +1821,10 @@ function updateType($ref, $prodId) {
         }
         foreach ($remTypeGlob as $id => $arrReco) {
             if (preg_match('/' . str_replace('/', '\/', $arrReco['pattern']) . '/', $ref)) {
-                $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET fk_product_type = '" . $arrReco['product_type'] . "' WHERE rowid = " . $prodId;
-                $sql = $db->query($requete);
+                return $arrReco['product_type'];
             }
         }
+        return 0;
     }
 }
 

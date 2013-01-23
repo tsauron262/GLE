@@ -51,6 +51,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
 }
 if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
     @$conf->ficheinter->enabled = true;
+    @$user->rights->ficheinter->lire = true;
 }
 
 

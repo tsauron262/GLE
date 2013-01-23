@@ -171,8 +171,8 @@ class maj {
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
                     $importOff = true;
-                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
-                    $importOff = true;
+//                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
+//                    $importOff = true;
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;

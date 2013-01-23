@@ -171,8 +171,8 @@ class maj {
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
                     $importOff = true;
-//                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
-//                    $importOff = true;
+                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
+                    $importOff = true;
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;
@@ -196,18 +196,18 @@ class maj {
                 if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
                 if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights")) {//Nouveau num des droit
-//                    if ($val > 59 && $val < 70){
-//                        $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
-//                    }
-//                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
-//                        $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
-//                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
-//                    }
-//                    if ($val > 29 && $val < 40){
-//                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
-//                    }
-//                    if (stripos($val, "222341") !== false) 
-//                        $val = str_replace(222341, 2227, $val);
+                    if ($val > 59 && $val < 70){
+                        $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
+                    }
+                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
+                        $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
+                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
+                    }
+                    if ($val > 29 && $val < 40){
+                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
+                    }
+                    if (stripos($val, "222341") !== false) 
+                        $val = str_replace(222341, 2227, $val);
                 }
                 //Fin exception
 
@@ -263,8 +263,8 @@ class maj {
 //                $where = "0";
             if ($ligne[1] == MAIN_DB_PREFIX . "user")
                 $where = "rowid != 1";
-//            if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
-//                $where = "fk_user != 1";
+            if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
+                $where = "fk_user != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau

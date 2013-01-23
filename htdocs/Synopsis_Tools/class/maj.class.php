@@ -263,8 +263,8 @@ class maj {
 //                $where = "0";
             if ($ligne[1] == MAIN_DB_PREFIX . "user")
                 $where = "rowid != 1";
-            if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
-                $where = "fk_user != 1";
+//            if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
+//                $where = "fk_user != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau

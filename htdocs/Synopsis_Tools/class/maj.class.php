@@ -53,7 +53,7 @@ class maj {
         if (!$update) {
             $this->netoyerTables($tab);
 
-            /*$requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
+            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
                 ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
@@ -66,7 +66,7 @@ class maj {
                 ON DELETE RESTRICT ON UPDATE RESTRICT ;";
             $this->queryD($requete);
             $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "categorie DROP KEY uk_categorie_ref;";
-            $this->queryD($requete);*/
+            $this->queryD($requete);
         }
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("commande");

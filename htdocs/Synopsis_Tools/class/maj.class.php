@@ -196,18 +196,18 @@ class maj {
                 if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
                 if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights")) {//Nouveau num des droit
-                    if ($val > 59 && $val < 70){
-                        $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
-                    }
-                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
-                        $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
-                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
-                    }
-                    if ($val > 29 && $val < 40){
-                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
-                    }
-                    if (stripos($val, "222341") !== false) 
-                        $val = str_replace(222341, 2227, $val);
+//                    if ($val > 59 && $val < 70){
+//                        $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
+//                    }
+//                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
+//                        $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
+//                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
+//                    }
+//                    if ($val > 29 && $val < 40){
+//                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
+//                    }
+//                    if (stripos($val, "222341") !== false) 
+//                        $val = str_replace(222341, 2227, $val);
                 }
                 //Fin exception
 

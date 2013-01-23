@@ -10,6 +10,7 @@ class maj {
     private $maxTime = 100;
     private $maxErreur = 5;
     private $erreur = 0;
+    private $tabNonImport = array();
 
     function maj($dbS, $dbD) {
         $this->dbS = $dbS;
@@ -71,7 +72,8 @@ class maj {
 //        $this->netoyeDet("commande");
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("usergroup", MAIN_DB_PREFIX."usergroup_user");
-        $this->netoyeDet("user", MAIN_DB_PREFIX."usergroup_user");
+//        $this->netoyeDet("user", MAIN_DB_PREFIX."usergroup_user");
+        $this->setTabNonImport("user", MAIN_DB_PREFIX."usergroup_user");
 //        $this->netoyeDet("user", MAIN_DB_PREFIX."user_rights");
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
@@ -82,7 +84,23 @@ class maj {
         $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
     }
 
-    private function netoyeDet($table, $table2 = null, $prefTab = null) {
+//    private function netoyeDet($table, $table2 = null, $prefTab = null) {
+//        if ($prefTab)
+//            $nomTable = $prefTab . $table;
+//        else
+//            $nomTable = MAIN_DB_PREFIX . $table;
+//        if ($table2)
+//            $nomTable2 = $table2;
+//        else
+//            $nomTable2 = $nomTable . "det";
+//        $requete = "DELETE FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
+//        $this->queryS($requete);
+////        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
+////        $this->queryS($requete);
+//    }
+    
+    private function setTabNonImport($table, $table2 = null, $prefTab = null){
+        global $db;
         if ($prefTab)
             $nomTable = $prefTab . $table;
         else
@@ -91,10 +109,10 @@ class maj {
             $nomTable2 = $table2;
         else
             $nomTable2 = $nomTable . "det";
-        $requete = "DELETE FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
-        $this->queryS($requete);
-//        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
-//        $this->queryS($requete);
+        $requete = "SELECT * FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
+        $result = $this->queryS($requete);
+        while($ligne = $this->dbS->fetch_object($result))
+            $this->tabNonImport[$nomTable2][$ligne->rowid]    = true;    
     }
 
     public function ajoutDroitGr($tabGr, $tabDroit) {
@@ -150,6 +168,8 @@ class maj {
                 //Exception
                 $newCle = $destCol[$id];
                 if ($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user" && $val == "1")//On laisse l'admin de la nouvelle version
+                    $importOff = true;
+                if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
                     $importOff = true;
                 if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
@@ -246,7 +266,7 @@ class maj {
             if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
                 $where = "fk_user != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
-                $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE kf_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
+                $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau
             }
             $requete = "DELETE FROM " . $ligne[1] . " WHERE " . $where;

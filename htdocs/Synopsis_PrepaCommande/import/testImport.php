@@ -1387,7 +1387,8 @@ if (is_dir($dir)) {
                                         " . preg_replace('/,/', '.', $val['TaxTaux']) . ",
                                         " . ($totalCom_tva > 0 ? $totalCom_tva : 0) . ",
                                         " . ($totalCom_ttc > 0 ? $totalCom_ttc : 0) . ",
-                                        " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ")";
+                                        " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
+                                        " . $prodType.")";
 
 
                                 $sql = $db->query($requete);

@@ -892,7 +892,7 @@ else
                         $productstatic->type=$objp->ptype;
                         $productstatic->ref=$objp->pref;
                         print $productstatic->getNomUrl(1,'',20);
-                        print $objp->label?' - '.dol_trunc($objp->label,16):'';
+                        print $objp->label?' - '.dol_trunc($objp->label,56):'';
                         if ($objp->description) print '<br>'.dol_nl2br($objp->description);
                         print '</td>';
                     }
@@ -990,7 +990,7 @@ else
                         $productstatic->type=$objp->ptype;
                         $productstatic->ref=$objp->pref;
                         print $productstatic->getNomUrl(1,'',20);
-                        print $objp->label?' - '.dol_trunc($objp->label,16):'';
+                        print $objp->label?' - '.dol_trunc($objp->label,56):'';
                         print '<br>';
                     }
                     else

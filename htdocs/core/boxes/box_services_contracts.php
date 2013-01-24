@@ -127,7 +127,7 @@ class box_services_contracts extends ModeleBoxes
 
 					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
                     'text' => $objp->label,
-                    'maxlength' => 16,
+                    'maxlength' => 56,
                     'url' => DOL_URL_ROOT."/contrat/fiche.php?id=".$objp->rowid);
 
 					$this->info_box_contents[$i][2] = array('td' => 'align="left" width="16"',

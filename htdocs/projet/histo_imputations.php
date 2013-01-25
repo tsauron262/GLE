@@ -525,7 +525,8 @@ while ($res = $db->fetch_object($sql)) {
     $requete1 = "SELECT sum(task_duration) as sumTps
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
                  WHERE fk_task = " . $res->tid
-            . (($userId != -2) ? " AND fk_user = $userId " : "");
+            . (($userId != -2 && ($grandType == 1 || _IMPUT_POURC_MULTI_USER_)) ? " AND fk_user = $userId " : "");
+    
     $sql1 = $db->query($requete1);
     $res1 = $db->fetch_object($sql1);
 
@@ -589,6 +590,7 @@ while ($res = $db->fetch_object($sql)) {
         $comm->fetch($commande);
         $prixTot += $comm->total_ht;
     }
+//    die("lll".$proj->getStatsDuration() / 3600);
     $pourcTache = ($proj->getStatsDuration() > 0) ? $prevue / ($proj->getStatsDuration() / 3600) : 0;
     $prixTot = $prixTot * $pourcTache;
     global $prevue, $prixTot;
@@ -853,8 +855,7 @@ function getMoyPourc($fk_task, $prevue, $userId = -2, $tmpDate = null, $tmpDate2
 		" . (($userId != -2 && _IMPUT_POURC_MULTI_USER_) ? " AND fk_user = $userId " : "")
             . (($tmpDate) ? " AND date >= '" . date('Y-m-d', $tmpDate) . " 00:00:00' AND date < '" . date('Y-m-d H:i:s', $tmpDate2) . "'" : "");
 
-    ;
-//        die($requete);
+
     $sql = $db->query($requete);
     $total = 0;
     while ($result = $db->fetch_object($sql)) {

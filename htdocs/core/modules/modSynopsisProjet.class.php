@@ -182,7 +182,7 @@ class modSynopsisProjet extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Imputations',
             'mainmenu' => $this->nameI,
-            'url' => '/projet/imputations.php?leftmenu=projects',
+            'url' => '/projet/histo_imputations.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 0,
             'perms' => '$user->rights->' . $this->nameI . '->lire',
@@ -191,7 +191,7 @@ class modSynopsisProjet extends DolibarrModules {
             'constraints' => array(0 => '$leftmenu==projects'));
         $r++;
         
-        $this->menu[$r] = array('fk_menu' => 'r=' . $s,
+       /* $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'Test NEW Imputations',
             'mainmenu' => $this->nameI,
@@ -202,7 +202,7 @@ class modSynopsisProjet extends DolibarrModules {
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
-        $r++;
+        $r++;*/
 
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,

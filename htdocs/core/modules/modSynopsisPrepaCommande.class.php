@@ -212,32 +212,10 @@ class modSynopsisPrepaCommande extends DolibarrModules
         $r++;*/
 
 
+        
         $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools',
                             'type'=>'left',
-                            'titre'=>'Prepa.',
-                            'leftmenu'=>'SynopsisPrepa',
-                            'url'=>'/Synopsis_PrepaCommande/index.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>1,
-                            'perms'=>'$user->rights->SynopsisPrepaCom->all->Afficher',
-                            'target'=>'',
-                            'user'=>0);
-        $s0 = $r;
-        $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools,fk_leftmenu=SynopsisPrepa',
-                            'type'=>'left',
-                            'titre'=>'Config.',
-                            'url'=>'/Synopsis_PrepaCommande/config.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>1,
-                            'perms'=>'$user->rights->SynopsisPrepaCom->config->Admin',
-                            'target'=>'',
-                            'user'=>0);
-        $s0 = $r;
-        $r++;
-        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools',
-                            'type'=>'left',
-                            'titre'=>'Import',
+                            'titre'=>'Importation 8Sens',
                             'leftmenu'=>'SynPrepaImp',
                             'url'=>'/Synopsis_PrepaCommande/import/index.php',
                             'langs' => 'synopsisGene@Synopsis_Tools',
@@ -266,6 +244,31 @@ class modSynopsisPrepaCommande extends DolibarrModules
                             'perms'=>'$user->rights->SynopsisPrepaCom->import->Admin',
                             'target'=>'',
                             'user'=>0);
+        $r++;
+        
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools',
+                            'type'=>'left',
+                            'titre'=>'Prepa.',
+                            'leftmenu'=>'SynopsisPrepa',
+                            'url'=>'/Synopsis_PrepaCommande/index.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'position'=>1,
+                            'perms'=>'$user->rights->SynopsisPrepaCom->all->Afficher',
+                            'target'=>'',
+                            'user'=>0);
+        $s0 = $r;
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools,fk_leftmenu=SynopsisPrepa',
+                            'type'=>'left',
+                            'titre'=>'Config.',
+                            'url'=>'/Synopsis_PrepaCommande/config.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'position'=>1,
+                            'perms'=>'$user->rights->SynopsisPrepaCom->config->Admin',
+                            'target'=>'',
+                            'user'=>0);
+        $s0 = $r;
+        $r++;
         
         $this->tabs = array('order:+prepaCommande:Prepa Commande:@monmodule:/Synopsis_PrepaCommande/prepacommande.php?id=__ID__');
     }
@@ -354,8 +357,24 @@ class modSynopsisPrepaCommande extends DolibarrModules
   `user_author` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_author` (`user_author`),
-  KEY `commande_refid` (`commande_refid`)
-)");
+  KEY `commande_refid` (`commande_refid`))",
+            "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_commande_grp` (
+  `id` int(11) NOT NULL auto_increment,
+  `nom` varchar(150) default NULL,
+  `tms` timestamp NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+  `datec` datetime default NULL,
+  PRIMARY KEY  (`id`)
+);",
+        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_commande_grpdet` (
+  `id` int(11) NOT NULL auto_increment,
+  `commande_group_refid` int(11) default NULL,
+  `command_refid` int(11) default NULL,
+  `refCommande` varchar(50) default NULL,
+  PRIMARY KEY  (`id`),
+  KEY `commande_group_refid` (`commande_group_refid`)
+)", 
+        "ALTER TABLE `".MAIN_DB_PREFIX."Synopsis_commande_grpdet`
+  ADD CONSTRAINT `".MAIN_DB_PREFIX."Synopsis_commande_grpdet_ibfk_1` FOREIGN KEY (`commande_group_refid`) REFERENCES `".MAIN_DB_PREFIX."Synopsis_commande_grp` (`id`) ON DELETE CASCADE;");
     return $this->_init($sql);
   }
 

@@ -29,12 +29,12 @@ function widget_listPrepaGroupCommande() {
 
     if ($conf->commande->enabled && $user->rights->commande->commande->group)
     {
-        $sql = "SELECT count(Babel_commande_grpdet.commande_group_refid) as cnt,
-                       Babel_commande_grp.id
-                  FROM Babel_commande_grp
-             LEFT JOIN Babel_commande_grpdet ON Babel_commande_grp.id = Babel_commande_grpdet.commande_group_refid
-              GROUP BY Babel_commande_grp.id
-              ORDER BY Babel_commande_grp.tms DESC LIMIT 50";
+        $sql = "SELECT count(".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid) as cnt,
+                       ".MAIN_DB_PREFIX."Synopsis_commande_grp.id
+                  FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_commande_grpdet ON ".MAIN_DB_PREFIX."Synopsis_commande_grp.id = ".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid
+              GROUP BY ".MAIN_DB_PREFIX."Synopsis_commande_grp.id
+              ORDER BY ".MAIN_DB_PREFIX."Synopsis_commande_grp.tms DESC LIMIT 50";
 
 //$table .= $sql;
 

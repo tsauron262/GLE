@@ -1441,58 +1441,58 @@ if (is_dir($dir)) {
                              */
 
 
-//                if ($val['AffCode'] . "x" == "x") {
-//                    //Verifier par rapport à la référence. => supression
-//                    $requete = "DELETE FROM Babel_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-//                    $sql = $db->query($requete);
-//                    if ($sql) {
-//                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
-//                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
-//                    } else {
-//                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-//                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
-//                    }
-//                } else {
-//                    //Recupere le groupeId
-//                    $requete = "SELECT id FROM Babel_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
-//                    $sql = $db->query($requete);
-//                    $res = $db->fetch_object($sql);
-//                    $grpId = $res->id;
-//                    if (!$grpId > 0) {
-//                        $requete = "INSERT INTO Babel_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
-//                        $sql = $db->query($requete);
-//                        $grpId = $db->last_insert_id('Babel_commande_grp');
-//                        if ($sql) {
-//                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
-//                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
-//                        } else {
-//                            $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-//                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
-//                        }
-//                    } else {
-//                        $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
-//                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
-//                    }
-//
-//                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
-//                    $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
-//                    //efface la ref
-//                    $requete = "DELETE FROM Babel_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-//                    $sql = $db->query($requete);
-//                    //ajoute la ref dans le groupe
-//                    $requete = "INSERT INTO Babel_commande_grpdet
-//                                            (commande_group_refid,refCommande,command_refid )
-//                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
-//                    $sql = $db->query($requete);
-//                    if ($sql) {
-//                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
-//                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
-//                    } else {
-//                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-//                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
-//                    }
-//                }
-//                
+                if ($val['AffCode'] . "x" == "x") {
+                    //Verifier par rapport à la référence. => supression
+                    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                    $sql = $db->query($requete);
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                    }
+                } else {
+                    //Recupere le groupeId
+                    $requete = "SELECT id FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
+                    $sql = $db->query($requete);
+                    $res = $db->fetch_object($sql);
+                    $grpId = $res->id;
+                    if (!$grpId > 0) {
+                        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
+                        $sql = $db->query($requete);
+                        $grpId = $db->last_insert_id(MAIN_DB_PREFIX.'Synopsis_commande_grp');
+                        if ($sql) {
+                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
+                        } else {
+                            $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
+                        }
+                    } else {
+                        $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
+                    }
+
+                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
+                    $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
+                    //efface la ref
+                    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                    $sql = $db->query($requete);
+                    //ajoute la ref dans le groupe
+                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grpdet
+                                            (commande_group_refid,refCommande,command_refid )
+                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
+                    $sql = $db->query($requete);
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                    }
+                }
+                
                         }
                     }
                 }

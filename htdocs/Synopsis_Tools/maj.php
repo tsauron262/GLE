@@ -30,7 +30,8 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 if (isset($_GET['action']) && $_GET['action'] == "import") {
     $dbD = $db;
-$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "roland2007", "gle1main", $Hconf->dbport);
+//$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "roland2007", "gle1main", $Hconf->dbport);
+$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "x", "synopsis_oldBimp3", $Hconf->dbport);
 //    $dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "freeparty", "oldCapsim2", $Hconf->dbport);
 
     include_once("./class/maj.class.php");
@@ -152,6 +153,14 @@ function getTab() {
         array($oldPref."commandedet", MAIN_DB_PREFIX."Synopsis_commandedet",
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef'),
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef')
+        ),
+        array("Babel_commande_grp", MAIN_DB_PREFIX."Synopsis_commande_grp",
+            array(),
+            array()
+        ),
+        array("Babel_commande_grpdet", MAIN_DB_PREFIX."Synopsis_commande_grpdet",
+            array(),
+            array()
         ),
         array($oldPref."propal", MAIN_DB_PREFIX."propal",
             array('rowid', 'ref', 'ref_client', 'fk_soc', 'fk_projet', 'tms', 'datec', 'datep', 'fin_validite', 'date_valid', 'date_cloture', 'fk_user_author', 'fk_user_valid', 'fk_user_cloture', 'fk_statut', 'price', 'remise_percent', 'remise_absolue', 'remise'/* , 'date_abandon', 'fk_user_abandon', 'accompte_ht' */, 'total_ht', 'tva', 'total', 'fk_cond_reglement', 'fk_mode_reglement', 'note', 'note_public', 'model_pdf', 'date_livraison', 'fk_adresse_livraison'/* , 'date_demandeValid', 'isFinancement', 'isLocation', 'date_devis_fourn', 'fournisseur_refid', 'tva_tx_fin_refid', 'revision', 'orig_ref' */),

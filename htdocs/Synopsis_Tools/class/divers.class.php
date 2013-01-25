@@ -114,11 +114,11 @@ class Synopsis_Commande extends Commande {
 
     //La commande est elle membre d'un groupe
     public function isGroupMember() {
-        return false;
-        $requete = "SELECT Babel_commande_grp.id as gid
-                      FROM Babel_commande_grpdet,
-                           Babel_commande_grp
-                     WHERE Babel_commande_grp.id=Babel_commande_grpdet.commande_group_refid
+//        return false;
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_commande_grp.id as gid
+                      FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet,
+                           ".MAIN_DB_PREFIX."Synopsis_commande_grp
+                     WHERE ".MAIN_DB_PREFIX."Synopsis_commande_grp.id=".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid
                        AND command_refid = " . $this->id;
         $sql = $this->db->query($requete);
         if ($this->db->num_rows($sql) > 0) {
@@ -149,7 +149,13 @@ class Synopsis_Commande extends Commande {
     }
 
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
-        return $this->fetch_lines($only_product);
+        $this->lines = array();
+        foreach($this->listGroupMember() as $commande){
+            $commande->fetch_lines();
+            $this->lines = array_merge($this->lines, $commande->lines);
+        }
+        return $this->lines;
+//        return $this->fetch_lines($only_product);
     }
 
 }

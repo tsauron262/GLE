@@ -1113,6 +1113,11 @@ else
             {
             	// TODO change for compatibility with edit in place
             	$typeformat='select;0:'.$langs->trans("Product").',1:'.$langs->trans("Service");
+                $tabTemp = array();
+                global $tabProductType;
+                foreach($tabProductType as $id => $label)
+                    $tabTemp[] = $id.":".$label;
+                $typeformat= "select;".implode(",", $tabTemp);
                 print '<tr><td>'.$form->editfieldkey("Type",'fk_product_type',$object->type,$object,$user->rights->produit->creer||$user->rights->service->creer,$typeformat).'</td><td colspan="2">';
                 print $form->editfieldval("Type",'fk_product_type',$object->type,$object,$user->rights->produit->creer||$user->rights->service->creer,$typeformat);
                 print '</td></tr>';

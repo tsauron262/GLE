@@ -38,6 +38,10 @@ $conf->global->devMailTo = 'tommy@drsi.fr';
 
 
 
+  $tabProductType = array(0=>$langs->trans("Product"),1=>$langs->trans("Service"),2=>$langs->trans("Produit de contrat"), 3=>$langs->trans("Déplacement"));
+
+
+
 
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 

@@ -178,14 +178,23 @@ print '</ul>';
     print "<table cellpadding=15 >";
     print "<tr><td width=200 style='width:200px;' class='ui-widget-content'><input type='text' value='".$res->pattern."' name='pattern'>";
     $sel ="<SELECT name='type' >";
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_type";
-    $sql1 = $db->query($requete);
-    while($res1 = $db->fetch_object($sql1))
-    {
-        if ($res->type == $res1->id){
-            $sel .= "<OPTION SELECTED value='".$res1->id."'>".$res1->label."</OPTION>";
+//    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_type";
+//    $sql1 = $db->query($requete);
+//    
+//    while($res1 = $db->fetch_object($sql1))
+//    {
+//        if ($res->type == $res1->id){
+//            $sel .= "<OPTION SELECTED value='".$res1->id."'>".$res1->label."</OPTION>";
+//        } else {
+//            $sel .= "<OPTION value='".$res1->id."'>".$res1->label."</OPTION>";
+//        }
+//    }
+    
+    foreach($tabProductType as $id => $label){
+        if ($res->type == $id){
+            $sel .= "<OPTION SELECTED value='".$id."'>".$label."</OPTION>";
         } else {
-            $sel .= "<OPTION value='".$res1->id."'>".$res1->label."</OPTION>";
+            $sel .= "<OPTION value='".$id."'>".$label."</OPTION>";
         }
     }
     $sel .= "</SELECT>";
@@ -205,12 +214,21 @@ print '</ul>';
   print "<tr><th class='ui-state-hover ui-widget-header' style='padding:5px; border:1px Solid;' colspan=4>Nouveau";
   print "<tr><td style='width:198px;' width=198 class='ui-widget-content'><input type='text' value='".$res->pattern."' name='NewPattern'>";
   $sel ="<SELECT name='type' >";
-  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_type";
-  $sql1 = $db->query($requete);
-  while($res1 = $db->fetch_object($sql1))
-  {
-      $sel .= "<OPTION value='".$res1->id."'>".$res1->label."</OPTION>";
-  }
+//  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_type";
+//  $sql1 = $db->query($requete);
+//  while($res1 = $db->fetch_object($sql1))
+//  {
+//      $sel .= "<OPTION value='".$res1->id."'>".$res1->label."</OPTION>";
+//  }
+  
+  foreach($tabProductType as $id => $label){
+        if ($res->type == $id){
+            $sel .= "<OPTION SELECTED value='".$id."'>".$label."</OPTION>";
+        } else {
+            $sel .= "<OPTION value='".$id."'>".$label."</OPTION>";
+        }
+    }
+  
   $sel .= "</SELECT>";
 
   print "<td  class='ui-widget-content' style='width:203px;'>".$sel;

@@ -18,7 +18,7 @@ define('_IMPUT_POURC_MULTI_USER_', false);
 
 $messErreur = array();
 
-if ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2)
+if ($user->rights->synopsisprojet->voirImputations && ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2))
     $userId = $_REQUEST['userid'];
 
 

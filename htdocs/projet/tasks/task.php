@@ -407,7 +407,7 @@ $task->user_creat->fetch($task->user_creat->id);
                     $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date))] = array('date' => $res->task_date, 'dur' => $res->task_duration, 'user' => $tmpUser);
                     $i++;
                 }
-                $db->free();
+                $db->free($resql);
             } else {
                 dol_print_error($db);
             }
@@ -436,7 +436,7 @@ $task->user_creat->fetch($task->user_creat->id);
                                                                                  'dur'     => 0,
                                                                                  'user'    =>$tmpUser);
                 }
-                $db->free();
+                $db->free($resql);
             } else {
                 dol_print_error($db);
             }

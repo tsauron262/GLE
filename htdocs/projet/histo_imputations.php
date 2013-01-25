@@ -668,7 +668,7 @@ while ($res = $db->fetch_object($sql)) {
     $html .= '     <td nowrap class="display_value">' . toAffiche($totalPeriode) . '</td>';
 
     $affiche = true;
-    if ($userId != -2 && (($grandType == 2 && $modVal == 2) || ($grandType == 1 && $modVal == 1 && $formatView == 'norm' && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)))
+    if ($userId != -2 && (($grandType == 2 && $modVal == 2) || ($grandType == 1 && $modVal == 1 && $formatView == 'norm')) && $res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
         $html .= $html2;
     elseif (!$tousVide)
         $html .= $html3;

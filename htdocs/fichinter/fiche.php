@@ -1559,11 +1559,11 @@ EOF;
                         $contrat->fetch_lines(true);
                         print "<tr id='contratLigne" . $val->id . "' " . $bc[$var] . ">";
                         print "<td id='showDetail' class='showDetail'><span style='float: left;' class='ui-icon ui-icon-search'></span>D&eacute;tail<td colspan=10><table style='display: none;'>";
-                        foreach ($contrat->lignes as $key => $val) {
+                        foreach ($contrat->lines as $key => $val) {
                             if ($val->id == $objp->fk_contratdet) {
                                 print "<tr><td>";
                                 print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                                $tmp = preg_replace('/tt' . $objp->fk_contratdet . '/', "ttedit" . $objp->fk_contratdet . "", $contrat->display1Line($val));
+                                $tmp = preg_replace('/tt' . $objp->fk_contratdet . '/', "ttedit" . $objp->fk_contratdet . "", $contrat->display1Line($contrat, $val));
                                 print $tmp;
                                 print "</ul>";
                             }
@@ -1648,10 +1648,10 @@ EOF;
                 $html->select_duration('duration', $objp->duree);
                 print '</td>';
 
-                require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
+                require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/divers.class.php');
                 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
                 if ($fichinter->fk_commande > 0) {
-                    $com = new Commande($db);
+                    $com = new Synopsis_Commande($db);
                     $com->fetch($fichinter->fk_commande);
                     $com->fetch_group_lines(0, 0, 0, 0, 1);
                     print "<td><select name='comLigneId'>";
@@ -1697,7 +1697,7 @@ EOF;
                     $contrat->fetch($fichinter->fk_contrat);
                     $contrat->fetch_lines(true);
                     print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
-                    foreach ($contrat->lignes as $key => $val) {
+                    foreach ($contrat->lines as $key => $val) {
 //TODO ajouter filtre
                         if ($val->statut >= 0 && $val->statut < 5) {
                             $extra = "";
@@ -1706,7 +1706,7 @@ EOF;
                             if ($val->id == $objp->fk_contratdet) {
                                 print "<tr><td>";
                                 print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                                print $contrat->display1Line($val);
+                                print $contrat->display1Line($contrat, $val);
                                 print "</ul>";
                             }
                         }
@@ -1828,11 +1828,11 @@ EOF;
                 $contrat->fetch($fichinter->fk_contrat);
                 $contrat->fetch_lines(true);
                 print "<tr><td colspan=11 style='border:1px Solid; border-top: 0px;'><table width=100%>";
-                foreach ($contrat->lignes as $key => $val) {
+                foreach ($contrat->lines as $key => $val) {
                     if ($val->statut >= 0 && $val->statut < 5 && !in_array($val->id, $arrTmp)) {
                         print "<tr><td><input type=checkbox name='fk_contratdet-" . $val->id . "' value='" . $val->id . "'><td>";
                         print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                        print $contrat->display1Line($val);
+                        print $contrat->display1Line($contrat, $val);
                         print "</ul>";
                     }
                 }

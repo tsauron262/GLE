@@ -1524,15 +1524,8 @@ if (is_dir($dir)) {
                     $webContent.= "<td class='ui-widget-content'>KO</td>";
 
                 $webContent .= "</table>";
-                echo $webContent . memory_get_usage() / 1024 / 1024 . "|" . sizeofvar($mailContent) / 1024 / 1024 . "|" . sizeofvar($webContent) / 1024 / 1024;
-                $webContent = '';
-                unset($tmpSoc);
-                unset($tmpProd);
-                unset($comm);
+                echo $webContent;
                 unset($mailContent);
-                echo "|" . memory_get_usage() / 1024 / 1024 . "<br/><br/>";
-                if (memory_get_usage() / 1024 / 1024 > 40)
-                    die("Trop de temp");
             }
         }
         closedir($dh);

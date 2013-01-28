@@ -393,7 +393,7 @@ EOF;
             print '<td class="ui-widget-content" colspan="4" style="padding: 0px; border:0px Solid;">';
             print "<table width=100% cellpadding=5>";
 //                while($res = $db->fetch_object($sql))
-            for ($iter = 0; $iter < count($tabExpe) - 1; $iter++) {
+            for ($iter = 0; $iter < count($tabExpe); $iter++) {
                 $exp = new expedition($db);
                 $exp->fetch($tabExpe[$iter]['d']);
                 if ($iter % 2 != 1)

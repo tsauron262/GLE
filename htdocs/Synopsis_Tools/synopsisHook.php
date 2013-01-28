@@ -4,7 +4,7 @@ date_default_timezone_set('Europe/Paris');
 
 ini_set('display_errors', 1);
 
-$builddoc = (isset($_REQUEST['action']));
+$builddoc = 1;//(isset($_REQUEST['action']));
 if ($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL ^ (E_STRICT));
 elseif ($builddoc)
@@ -12,7 +12,7 @@ elseif ($builddoc)
 elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL);
 else
-    error_reporting(E_ALL ^ (E_NOTICE)^ (E_STRICT));
+    error_reporting(E_ALL ^ (E_NOTICE));
 
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);

@@ -80,7 +80,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
     $this->dirs = array();
 
     // Config pages
-    $this->config_page_url = array("demandeInterv.php");
+    $this->config_page_url = array("Synopsis_DemandeInterv.php");
 
     // Dependances
     $this->depends = array("modSociete","modCommercial","modFicheinter");

@@ -429,10 +429,10 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //               $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 10);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), 'B', 20);
                 $pdf->SetTextColor(245, 93, 0);
-                $pdf->SetXY(159, 27.8);
+                $pdf->SetXY(159, 25.8);
                 $pdf->MultiCell(50, 5, date('d/m/Y', strtotime($fichinter->date)), 0, 'C', 0);
 
-                $pdf->SetXY(92, 27.5);
+                $pdf->SetXY(92, 26);
                 $pdf->MultiCell(102, 5, strtoupper($fichinter->ref), 0, 'L', 0);
 
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 6.5);

@@ -12,7 +12,7 @@ elseif ($builddoc)
 elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL);
 else
-    error_reporting(E_ALL ^ (E_NOTICE));
+    error_reporting(E_ALL ^ (E_NOTICE)^ (E_STRICT));
 
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);

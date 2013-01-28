@@ -1477,6 +1477,7 @@ EOF;
         if ($num) {
             print '<tr class="liste_titre">';
             print '<td>' . $langs->trans('Description') . '</td>';
+            print '<td></td>';
             print '<td>' . $langs->trans('Type') . '</td>';
             print '<td>' . $langs->trans('Date') . '</td>';
             print '<td>' . $langs->trans('Duration') . '</td>';
@@ -1491,7 +1492,7 @@ EOF;
             // Ligne en mode visu
             if ($_REQUEST['action'] != 'editline' || $_REQUEST['ligne'] != $objp->rowid) {
                 print '<tr ' . $bc[$var] . '>';
-                print '<td>';
+                print '<td colspan="2">';
                 print '<a name="' . $objp->rowid . '"></a>'; // ancre pour retourner sur la ligne
                 print nl2br($objp->description);
 

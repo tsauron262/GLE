@@ -23,7 +23,7 @@ if (isset($_POST['url'])) {
         $nomId = "socid";
         $nomChampNote = "note";
     }
-    if (stripos($url, '/commande/') !== false) {
+    if (stripos($url, '/commande/') !== false || stripos($url, '/Synopsis_PrepaCommande/prepacommande.php') !== false) {
         $table = MAIN_DB_PREFIX."commande";
         $droit1 = $user->rights->commande->lire;
         $droit2 = $user->rights->commande->creer;

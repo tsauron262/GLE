@@ -111,6 +111,7 @@ class Synopsis_Contrat extends Contrat {
     function display1Line($object, $objL) {
         global $langs;
         $langs->load("contracts");
+        $langs->load("bills");
         $idLigne = $objL->id;
         $db = $this->db;
         $productstatic = new Product($db);

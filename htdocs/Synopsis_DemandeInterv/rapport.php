@@ -213,11 +213,11 @@ if ($resql) {
                 $filter = "&MM=$MM&YY=$YY";
             $tmpSoc = new Societe($db);
             $tmpSoc->fetch($objp->socid);
-            $htmlTab .= '<td><a href="rapport.php?socid=' . $objp->socid . $filter . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/filter.png" border="0"></a>&nbsp;';
+            $htmlTab .= '<td align="center"><a href="rapport.php?socid=' . $objp->socid . $filter . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/filter.png" border="0"></a>&nbsp;';
             $htmlTab .= $tmpSoc->getNomUrl(1) . "</TD>\n";
         }
-        $htmlTab .= '<td>' . nl2br($objp->description) . '</td>';
-        $htmlTab .= "<td>" . strftime("%d %B %Y", strtotime($objp->dp)). "</td>\n";
+        $htmlTab .= '<td align="center">' . nl2br($objp->description) . '</td>';
+        $htmlTab .= '<td align="center">' . strftime("%d %B %Y", strtotime($objp->dp)). "</td>\n";
         $durStr = convDur($objp->duree);
         $htmlTab .= '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm</td>';
 
@@ -323,9 +323,9 @@ if ($resql) {
     $arr1 = convDur($totTPrev);
     $arr2 = convDur($totTReel);
     $htmlTot = "<tr class=\"liste_titre\">";
-    $htmlTot .= '<td>Ref.</td>';
+    $htmlTot .= '<td align="center">Ref.</td>';
     if (empty($socid))
-        $htmlTot .= '<td>Soci&eacute;t&eacute;</td>';
+        $htmlTot .= '<td align="center">Soci&eacute;t&eacute;</td>';
     $htmlTot .= '<td align="center">' . $langs->trans("Description") . '</td>';
 
     $htmlTot .= '<td align="center">Date</td>';

@@ -2,8 +2,8 @@ DiscountShort=Rem.
 isOpt=Opt?
 DescriptionShort=Desc.
 HTBeforeDiscount=Tot. HT avant rem.
-HTAfterDiscount=Tot. HT apr&egrave;s rem.
-HTAfterDiscountLine=Tot. HT apr&egrave;s rem. ligne
+HTAfterDiscount=Tot. HT après rem.
+HTAfterDiscountLine=Tot. HT après rem. ligne
 RemiseGlob = Remise globale
 ProduitsCommande = Produits dans la commande
 BabelQtyOrdered = Qté com
@@ -30,7 +30,7 @@ non = non
 BabelStepName = Etape
 BabelMandatory = Etape obligatoire ?
 BabelStepDesc = Description étape
-BabelStepDoc = Fichier associé &agrave; l'étape
+BabelStepDoc = Fichier associé à l'étape
 BabelStepValidator = Validateur de l'étape
 
 BabelOption = En Option
@@ -52,11 +52,11 @@ desc=
 
 JASPER_HOST=IP/Nom Serveur Jasper
 JASPER_PORT=Port du webservice Jasper
-JASPER_PROTO=Protocole d'acc&egrave;s
+JASPER_PROTO=Protocole d'accès
 JASPER_PATH=Chemin du webservice
 JASPER_REPO_PATH_GENERATED=Chemin vers les rapports autogénérés
 JASPER_REPO_PATH_REPORT=Chemin vers les rapports PDF
-BABELJASPER_JASPER_USE_LDAP=Utilisation de LDAP pour l'acc&egrave;s &agrave; Jasper
+BABELJASPER_JASPER_USE_LDAP=Utilisation de LDAP pour l'accès à Jasper
 
 
 LoginIMDis=Désactiver par l'utilisation de LDAP pour le module IM
@@ -84,7 +84,7 @@ COMMANDECLOTURE=Cloture de la commande
 
 FACTUREAUTHOR=Créateur de la commande
 FACTUREVALID=Validation de la cammande
-FACTURECLOTURE=Cl&ocirc;ture de la commande
+FACTURECLOTURE=Clôture de la commande
 
 SOCCOMMERCIAL=Commercial du compte
 
@@ -94,8 +94,8 @@ StatusContactNotValidated=Contact invalide
 Opened=Ouverts
 
 
-PDFSynopsisDescription=Mod&egrave;le standard de note de frais
-PDFContratSynopsisDescription=Mod&egrave;le standard de contrat
+PDFSynopsisDescription=Modèle standard de note de frais
+PDFContratSynopsisDescription=Modèle standard de contrat
 
 ConfirmDemandeValid=Confirmer la demande de validation ?
 ConfirmValidateNdf=Confirmer la validation de la note de frais ?
@@ -130,14 +130,14 @@ MyZimbra=Mon Zimbra
 RacineZimDocument=Documents
 Briefcase=Fichiers
 
-DescBImodule=Ce module vous permet de consulter les rapports configurées dans JasperServer.<br>Les rapports disponibles sont <ul><li>onDemand : Rapport généré sur demande (peut prendre plusieurs minutes)<li> pré-programmé : Rapport généré réguli&egrave;rement par JasperServer</ul>Il vous est aussi possible de copier le rapport dans l'ECM, dans votre compte Zimbra ...
+DescBImodule=Ce module vous permet de consulter les rapports configurées dans JasperServer.<br>Les rapports disponibles sont <ul><li>onDemand : Rapport généré sur demande (peut prendre plusieurs minutes)<li> pré-programmé : Rapport généré régulièrement par JasperServer</ul>Il vous est aussi possible de copier le rapport dans l'ECM, dans votre compte Zimbra ...
 
 
 ZIMBRA_HOST=IP public ou nom public du serveur Zimbra
 ZIMBRA_DOMAIN=domaine du serveur Zimbra
-ZIMBRA_PROTO=Protocole d'acc&egrave;s au serveur Zimbra
+ZIMBRA_PROTO=Protocole d'accès au serveur Zimbra
 ZIMBRA_PREAUTH=Preauth Key du serveur Zimbra
-ZIMBRA_WEBDAVPROTO=Protocole webdav &agrave; utiliser pour joindre le serveur Zimbra
+ZIMBRA_WEBDAVPROTO=Protocole webdav à utiliser pour joindre le serveur Zimbra
 ZIMBRA_ADMINUSER=Nom de l'utilisateur GLE dans Zimbra
 ZIMBRA_ADMINPASS=Mot de passe de l'utilisateur GLE dans Zimbra
 ZIMBRA_ZIMBRA_USE_LDAP=Synchronisation des comptes Zimbra/GLE
@@ -146,11 +146,11 @@ BABELJASPER_JASPER_USE_LDAP=Synchronisation des comptes JasperServer/GLE
 JASPER_REPO_PATH_REPORT=Chemin vers les répertoires des rapports GLE
 JASPER_REPO_PATH_GENERATED=Chemin vers les répertoires des rapports auto-générés GLE
 JASPER_PATH=Chemin du WebService Jasper
-JASPER_PROTO=Protocole d'acc&egrave; au serveur
+JASPER_PROTO=Protocole d'accè au serveur
 JASPER_PORT=Port TCP du serveur Jasper
 JASPER_HOST=IP public ou nom public du serveur Jasper
 
-Parameter=Param&egrave;tre
+Parameter=Paramètre
 Value=Valeur
 Examples=Exemple
 
@@ -172,14 +172,14 @@ Reinit:Réinitialisation de Zimbra
 BABELIM=Messagerie instantannée
 BABELIM_HOST=IP ou nom public du serveur Jabber
 BABELIM_PORT=Port TCP du serveur Jabber
-BABELIM_PROTO=Protocole d'acc&egrave;s au serveur Jabber
+BABELIM_PROTO=Protocole d'accès au serveur Jabber
 BABELIM_DOMAIN=Domaine configurer sur le serveur Jabber
 BABELIM_IM_USE_LDAP=Synchronisation des comptes GLE avec les comptes Jabber
-BABELIM_XMLSOCKETPORT=Port TCP pour l'acc&egrave;s au serveur jabber en mode xml socket
+BABELIM_XMLSOCKETPORT=Port TCP pour l'accès au serveur jabber en mode xml socket
 
 MAGENTO_HOST=IP ou nom public du serveur Magento
 MAGENTO_PORT=Port TCP du serveur Magento
-MAGENTO_PROTO=Protocole d'acc&egrave;s du serveur Magento
+MAGENTO_PROTO=Protocole d'accès du serveur Magento
 MAGENTO_PATH=Chemin vers le service SOAP
 MAGENTO_USER=Utilisateur SOAP Magento
 MAGENTO_PASS=Mot de passe utilisateur SOAP Magento
@@ -212,13 +212,13 @@ AC_RDV=Rendez-vous
 AC_COM=Envoi Commande
 AC_FAC=Envoi Facture
 AC_REL=Relance effectuée
-AC_CLO=Cl&ocirc;ture
+AC_CLO=Clôture
 AC_TELIN=Appel Téléphonique Entrant
 AC_OTH=Autre
 
 
 HelpProspection=Ce module permet de visualiser et de configurer des campagnes de prospection.
-Cloturer=Cl&ocirc;turer
+Cloturer=Clôturer
 Prefix=Préfixe
 
 
@@ -232,7 +232,7 @@ CampagneStatusDraftShort=En préparation
 CampagneStatusSignedShort=En cours
 CampagneStatusOpenedShort=Validée
 CampagneStatusNotSignedShort=Refusée
-CampagneStatusBilled=Cl&ocirc;turée
+CampagneStatusBilled=Clôturée
 
 ConfirmDemandeValidateProp=Confirmer la demande de validation
 PropalStatusWaitingValidation=En attente de validation
@@ -255,7 +255,7 @@ PDFcontratGASynopsisDescription=Synopsis Gestion d'Actif
 
 //Finapro
 
-PDFcontratGAfinaproStdDescription=Mod&egrave;le standard finapro
+PDFcontratGAfinaproStdDescription=Modèle standard finapro
 
 
 
@@ -264,30 +264,30 @@ PDFcontratGAfinaproStdDescription=Mod&egrave;le standard finapro
 DI=Demande d'interv.
 DIs=Demandes d'interventions
 NewDI=Nouvelle DI
-AddDI=Cr&eacute;er demande  d'interventions
+AddDI=Créer demande  d'interventions
 ListOfDIs=Liste des demandes d'interventions
-LastInterventions=Les %s derni&egrave;res demandes
+LastInterventions=Les %s dernières demandes
 AllDI=Toutes les DI
-ConfirmModifDI=&Ecirc;tes vous sur de vouloir modifier cette DI ?
+ConfirmModifDI=Êtes vous sur de vouloir modifier cette DI ?
 
-CreateDraftDI=Cr&eacute;er brouillon
-CustomerDoesNotHavePrefix=Le client n'a pas de pr&eacute;fixe de d&eacute;fini
+CreateDraftDI=Créer brouillon
+CustomerDoesNotHavePrefix=Le client n'a pas de préfixe de défini
 DIContact=Contact demande d'intervention
 DeleteDI=Supprimer la demande
 ValidateDI=Valider la demande
 DeleteDILine=Supprimer la ligne de DI
-ConfirmDeleteDI=&Ecirc;tes-vous s&ucirc;r de vouloir effacer cette demande ?
-ConfirmValidateDI=&Ecirc;tes-vous s&ucirc;r de vouloir valider cette DI ?
-ConfirmDeleteDILine=&Ecirc;tes-vous s&ucirc;r de vouloir effacer cette ligne ?
+ConfirmDeleteDI=Êtes-vous sûr de vouloir effacer cette demande ?
+ConfirmValidateDI=Êtes-vous sûr de vouloir valider cette DI ?
+ConfirmDeleteDILine=Êtes-vous sûr de vouloir effacer cette ligne ?
 
-AntarcticNumRefModelDesc1=Mod&egrave;le de num&eacute;rotation g&eacute;n&eacute;rique
+AntarcticNumRefModelDesc1=Modèle de numérotation générique
 AntarcticNumRefModelError=Activation impossible
 DICard=Fiche DI
 ConfirmPrisEnChargeDI=Confirmer la prise en charge de la DI ?
 PrisEnCharge=Prise en charge
-ConfirmClotureDI=Confirmer la cl&ocirc;ture de la demande d'intertvention?
-createFI=Cr&eacute;er une FI
-ConfirmClotureDIJS=Confirmer la cl&ocirc;ture de la demande d\'intertvention?
+ConfirmClotureDI=Confirmer la clôture de la demande d'intertvention?
+createFI=Créer une FI
+ConfirmClotureDIJS=Confirmer la clôture de la demande d\'intertvention?
 
 
 

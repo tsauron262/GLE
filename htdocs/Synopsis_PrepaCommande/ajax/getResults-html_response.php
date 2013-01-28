@@ -223,9 +223,9 @@ while ($resContent = $db->fetch_object($sqlContent)) {
 //                    while ($res2 = $db->fetch_object($sql2)) {
 ////                    die($requete);
                         if ($res1->fk_parent == $resContent->catId) {
-                            $arrLabelSort[$res1->position] = $res1->label;
-                            $arrCat[$res1->position]+= $val->total_ht;
-                            $arrPos[$res1->rowid] = $res1->position;
+                            $arrLabelSort[$res1->rowid] = $res1->label;
+                            $arrCat[$res1->rowid]+= $val->total_ht;
+                            $arrPos[$res1->rowid] = $res1->rowid;
                         }
 //                    }
                     //var_dump($arrLabelSort);

@@ -150,16 +150,14 @@ class Synopsis_Commande extends Commande {
 
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
         $lines = array();
-        $i=0;
-        foreach($this->listGroupMember() as $commande){
+        foreach($this->listGroupMember(false) as $commande){
             $commande->fetch_lines();
             foreach($commande->lines as $ligne){
-                $lines[] = $ligne;
+                $lines[$i] = $ligne;
                 $i++;
             }
 //            $this->lines = array_merge($this->lines, $commande->lines);
         }
-        die("ici".$i);
         $this->lines = $lines;
         return true;
 //        return $this->fetch_lines($only_product);

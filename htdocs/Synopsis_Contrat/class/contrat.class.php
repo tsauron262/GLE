@@ -114,14 +114,15 @@ class Synopsis_Contrat extends Contrat {
         $idLigne = $objL->id;
         $db = $this->db;
         $productstatic = new Product($db);
-        print '<tr height="16" ' . $bc[false] . '>';
-        print '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
-//            print $langs->trans("ServiceNb",$cursorline).'</td>';
+        $return = '';
+//        $return .= '<tr height="16" ' . $bc[false] . '>';
+//        $return .= '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
+//            $return .= $langs->trans("ServiceNb",$cursorline).'</td>';
 
-        print '<td class="tab" style="border-right: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';" rowspan="2">';
+//        $return .= '<td class="tab" style="border-right: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';" rowspan="2">';
 
         // Area with common detail of line
-        print '<table class="notopnoleft" width="100%">';
+        $return .= '<table class="notopnoleft" width="100%">';
 
         $sql = "SELECT cd.rowid, cd.statut, cd.label as label_det, cd.fk_product, cd.description, cd.price_ht, cd.qty,";
         $sql.= " cd.tva_tx, cd.remise_percent, cd.info_bits, cd.subprice,";
@@ -137,14 +138,14 @@ class Synopsis_Contrat extends Contrat {
         if ($result) {
             $total = 0;
 
-            print '<tr class="liste_titre">';
-            print '<td>' . $langs->trans("Service") . '</td>';
-            print '<td width="50" align="center">' . $langs->trans("VAT") . '</td>';
-            print '<td width="50" align="right">' . $langs->trans("PriceUHT") . '</td>';
-            print '<td width="30" align="center">' . $langs->trans("Qty") . '</td>';
-            print '<td width="50" align="right">' . $langs->trans("ReductionShort") . '</td>';
-            print '<td width="30">&nbsp;</td>';
-            print "</tr>\n";
+            $return .= '<tr class="liste_titre">';
+            $return .= '<td>' . $langs->trans("Service") . '</td>';
+            $return .= '<td width="50" align="center">' . $langs->trans("VAT") . '</td>';
+            $return .= '<td width="50" align="right">' . $langs->trans("PriceUHT") . '</td>';
+            $return .= '<td width="30" align="center">' . $langs->trans("Qty") . '</td>';
+            $return .= '<td width="50" align="right">' . $langs->trans("ReductionShort") . '</td>';
+            $return .= '<td width="30">&nbsp;</td>';
+            $return .= "</tr>\n";
 
             $var = true;
 
@@ -153,131 +154,131 @@ class Synopsis_Contrat extends Contrat {
             $var = !$var;
 
             if ($action != 'editline' || GETPOST('rowid') != $objp->rowid) {
-                print '<tr ' . $bc[$var] . ' valign="top">';
+                $return .= '<tr ' . $bc[$var] . ' valign="top">';
                 // Libelle
                 if ($objp->fk_product > 0) {
-                    print '<td>';
+                    $return .= '<td>';
                     $productstatic->id = $objp->fk_product;
                     $productstatic->type = $objp->ptype;
                     $productstatic->ref = $objp->pref;
-                    print $productstatic->getNomUrl(1, '', 20);
-                    print $objp->label ? ' - ' . dol_trunc($objp->label, 56) : '';
+                    $return .= $productstatic->getNomUrl(1, '', 20);
+                    $return .= $objp->label ? ' - ' . dol_trunc($objp->label, 56) : '';
                     if ($objp->description)
-                        print '<br>' . dol_nl2br($objp->description);
-                    print '</td>';
+                        $return .= '<br>' . dol_nl2br($objp->description);
+                    $return .= '</td>';
                 }
                 else {
-                    print "<td>" . nl2br($objp->description) . "</td>\n";
+                    $return .= "<td>" . nl2br($objp->description) . "</td>\n";
                 }
                 // TVA
-                print '<td align="center">' . vatrate($objp->tva_tx, '%', $objp->info_bits) . '</td>';
+                $return .= '<td align="center">' . vatrate($objp->tva_tx, '%', $objp->info_bits) . '</td>';
                 // Prix
-                print '<td align="right">' . price($objp->subprice) . "</td>\n";
+                $return .= '<td align="right">' . price($objp->subprice) . "</td>\n";
                 // Quantite
-                print '<td align="center">' . $objp->qty . '</td>';
+                $return .= '<td align="center">' . $objp->qty . '</td>';
                 // Remise
                 if ($objp->remise_percent > 0) {
-                    print '<td align="right">' . $objp->remise_percent . "%</td>\n";
+                    $return .= '<td align="right">' . $objp->remise_percent . "%</td>\n";
                 } else {
-                    print '<td>&nbsp;</td>';
+                    $return .= '<td>&nbsp;</td>';
                 }
                 // Icon move, update et delete (statut contrat 0=brouillon,1=valide,2=ferme)
-                print '<td align="right" nowrap="nowrap">';
+                $return .= '<td align="right" nowrap="nowrap">';
                 if ($user->rights->contrat->creer && count($arrayothercontracts) && ($object->statut >= 0)) {
-                    print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=move&amp;rowid=' . $objp->rowid . '">';
-                    print img_picto($langs->trans("MoveToAnotherContract"), 'uparrow');
-                    print '</a>';
+                    $return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=move&amp;rowid=' . $objp->rowid . '">';
+                    $return .= img_picto($langs->trans("MoveToAnotherContract"), 'uparrow');
+                    $return .= '</a>';
                 } else {
-                    print '&nbsp;';
+                    $return .= '&nbsp;';
                 }
                 if ($user->rights->contrat->creer && ($object->statut >= 0)) {
-                    print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . '">';
-                    print img_edit();
-                    print '</a>';
+                    $return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . '">';
+                    $return .= img_edit();
+                    $return .= '</a>';
                 } else {
-                    print '&nbsp;';
+                    $return .= '&nbsp;';
                 }
                 if ($user->rights->contrat->creer && ($object->statut >= 0)) {
-                    print '&nbsp;';
-                    print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=deleteline&amp;rowid=' . $objp->rowid . '">';
-                    print img_delete();
-                    print '</a>';
+                    $return .= '&nbsp;';
+                    $return .= '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=deleteline&amp;rowid=' . $objp->rowid . '">';
+                    $return .= img_delete();
+                    $return .= '</a>';
                 }
-                print '</td>';
+                $return .= '</td>';
 
-                print "</tr>\n";
+                $return .= "</tr>\n";
 
                 // Dates de en service prevues et effectives
                 if ($objp->subprice >= 0) {
-                    print '<tr ' . $bc[$var] . '>';
-                    print '<td colspan="6">';
+                    $return .= '<tr ' . $bc[$var] . '>';
+                    $return .= '<td colspan="6">';
 
                     // Date planned
-                    print $langs->trans("DateStartPlanned") . ': ';
+                    $return .= $langs->trans("DateStartPlanned") . ': ';
                     if ($objp->date_debut) {
-                        print dol_print_date($db->jdate($objp->date_debut));
+                        $return .= dol_print_date($db->jdate($objp->date_debut));
                         // Warning si date prevu passee et pas en service
                         if ($objp->statut == 0 && $db->jdate($objp->date_debut) < ($now - $conf->contrat->services->inactifs->warning_delay)) {
-                            print " " . img_warning($langs->trans("Late"));
+                            $return .= " " . img_warning($langs->trans("Late"));
                         }
                     }
                     else
-                        print $langs->trans("Unknown");
-                    print ' &nbsp;-&nbsp; ';
-                    print $langs->trans("DateEndPlanned") . ': ';
+                        $return .= $langs->trans("Unknown");
+                    $return .= ' &nbsp;-&nbsp; ';
+                    $return .= $langs->trans("DateEndPlanned") . ': ';
                     if ($objp->date_fin) {
-                        print dol_print_date($db->jdate($objp->date_fin));
+                        $return .= dol_print_date($db->jdate($objp->date_fin));
                         if ($objp->statut == 4 && $db->jdate($objp->date_fin) < ($now - $conf->contrat->services->expires->warning_delay)) {
-                            print " " . img_warning($langs->trans("Late"));
+                            $return .= " " . img_warning($langs->trans("Late"));
                         }
                     }
                     else
-                        print $langs->trans("Unknown");
+                        $return .= $langs->trans("Unknown");
 
-                    print '</td>';
-                    print '</tr>';
+                    $return .= '</td>';
+                    $return .= '</tr>';
                 }
             }
             // Ligne en mode update
             else {
-                print '<form name="update" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '" method="post">';
-                print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
-                print '<input type="hidden" name="action" value="updateligne">';
-                print '<input type="hidden" name="elrowid" value="' . GETPOST('rowid') . '">';
+                $return .= '<form name="update" action="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '" method="post">';
+                $return .= '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
+                $return .= '<input type="hidden" name="action" value="updateligne">';
+                $return .= '<input type="hidden" name="elrowid" value="' . GETPOST('rowid') . '">';
                 // Ligne carac
-                print "<tr $bc[$var]>";
-                print '<td>';
+                $return .= "<tr $bc[$var]>";
+                $return .= '<td>';
                 if ($objp->fk_product) {
                     $productstatic->id = $objp->fk_product;
                     $productstatic->type = $objp->ptype;
                     $productstatic->ref = $objp->pref;
-                    print $productstatic->getNomUrl(1, '', 20);
-                    print $objp->label ? ' - ' . dol_trunc($objp->label, 56) : '';
-                    print '<br>';
+                    $return .= $productstatic->getNomUrl(1, '', 20);
+                    $return .= $objp->label ? ' - ' . dol_trunc($objp->label, 56) : '';
+                    $return .= '<br>';
                 } else {
-                    print $objp->label ? $objp->label . '<br>' : '';
+                    $return .= $objp->label ? $objp->label . '<br>' : '';
                 }
-                print '<textarea name="eldesc" cols="70" rows="1">' . $objp->description . '</textarea></td>';
-                print '<td align="right">';
-                print $form->load_tva("eltva_tx", $objp->tva_tx, $mysoc, $object->thirdparty);
-                print '</td>';
-                print '<td align="right"><input size="5" type="text" name="elprice" value="' . price($objp->subprice) . '"></td>';
-                print '<td align="center"><input size="2" type="text" name="elqty" value="' . $objp->qty . '"></td>';
-                print '<td align="right" nowrap="nowrap"><input size="1" type="text" name="elremise_percent" value="' . $objp->remise_percent . '">%</td>';
-                print '<td align="center" rowspan="2" valign="middle"><input type="submit" class="button" name="save" value="' . $langs->trans("Modify") . '">';
-                print '<br><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
-                print '</td>';
+                $return .= '<textarea name="eldesc" cols="70" rows="1">' . $objp->description . '</textarea></td>';
+                $return .= '<td align="right">';
+                $return .= $form->load_tva("eltva_tx", $objp->tva_tx, $mysoc, $object->thirdparty);
+                $return .= '</td>';
+                $return .= '<td align="right"><input size="5" type="text" name="elprice" value="' . price($objp->subprice) . '"></td>';
+                $return .= '<td align="center"><input size="2" type="text" name="elqty" value="' . $objp->qty . '"></td>';
+                $return .= '<td align="right" nowrap="nowrap"><input size="1" type="text" name="elremise_percent" value="' . $objp->remise_percent . '">%</td>';
+                $return .= '<td align="center" rowspan="2" valign="middle"><input type="submit" class="button" name="save" value="' . $langs->trans("Modify") . '">';
+                $return .= '<br><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
+                $return .= '</td>';
                 // Ligne dates prevues
-                print "<tr $bc[$var]>";
-                print '<td colspan="5">';
-                print $langs->trans("DateStartPlanned") . ' ';
+                $return .= "<tr $bc[$var]>";
+                $return .= '<td colspan="5">';
+                $return .= $langs->trans("DateStartPlanned") . ' ';
                 $form->select_date($db->jdate($objp->date_debut), "date_start_update", $usehm, $usehm, ($db->jdate($objp->date_debut) > 0 ? 0 : 1), "update");
-                print '<br>' . $langs->trans("DateEndPlanned") . ' ';
+                $return .= '<br>' . $langs->trans("DateEndPlanned") . ' ';
                 $form->select_date($db->jdate($objp->date_fin), "date_end_update", $usehm, $usehm, ($db->jdate($objp->date_fin) > 0 ? 0 : 1), "update");
-                print '</td>';
-                print '</tr>';
+                $return .= '</td>';
+                $return .= '</tr>';
 
-                print "</form>\n";
+                $return .= "</form>\n";
             }
 
             $db->free($result);
@@ -286,12 +287,12 @@ class Synopsis_Contrat extends Contrat {
         }
 
         if ($object->statut > 0) {
-            print '<tr ' . $bc[false] . '>';
-            print '<td colspan="6"><hr></td>';
-            print "</tr>\n";
+            $return .= '<tr ' . $bc[false] . '>';
+            $return .= '<td colspan="6"><hr></td>';
+            $return .= "</tr>\n";
         }
 
-        print "</table>";
+        $return .= "</table>";
 
 
         /*
@@ -300,7 +301,7 @@ class Synopsis_Contrat extends Contrat {
         if ($action == 'deleteline' && !$_REQUEST["cancel"] && $user->rights->contrat->creer && $idLigne == GETPOST('rowid')) {
             $ret = $form->form_confirm($_SERVER["PHP_SELF"] . "?id=" . $object->id . "&lineid=" . GETPOST('rowid'), $langs->trans("DeleteContractLine"), $langs->trans("ConfirmDeleteContractLine"), "confirm_deleteline", '', 0, 1);
             if ($ret == 'html')
-                print '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
+                $return .= '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
         }
 
         /*
@@ -318,7 +319,7 @@ class Synopsis_Contrat extends Contrat {
                 array('type' => 'select', 'name' => 'newcid', 'values' => $arraycontractid));
 
             $form->form_confirm($_SERVER["PHP_SELF"] . "?id=" . $object->id . "&lineid=" . GETPOST('rowid'), $langs->trans("MoveToAnotherContract"), $langs->trans("ConfirmMoveToAnotherContract"), "confirm_move", $formquestion);
-            print '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
+            $return .= '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
         }
 
         /*
@@ -329,7 +330,7 @@ class Synopsis_Contrat extends Contrat {
             $dateactend = dol_mktime(12, 0, 0, GETPOST('endmonth'), GETPOST('endday'), GETPOST('endyear'));
             $comment = GETPOST('comment');
             $form->form_confirm($_SERVER["PHP_SELF"] . "?id=" . $object->id . "&ligne=" . GETPOST('ligne') . "&date=" . $dateactstart . "&dateend=" . $dateactend . "&comment=" . urlencode($comment), $langs->trans("ActivateService"), $langs->trans("ConfirmActivateService", dol_print_date($dateactstart, "%A %d %B %Y")), "confirm_active", '', 0, 1);
-            print '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
+            $return .= '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
         }
 
         /*
@@ -340,73 +341,73 @@ class Synopsis_Contrat extends Contrat {
             $dateactend = dol_mktime(12, 0, 0, GETPOST('endmonth'), GETPOST('endday'), GETPOST('endyear'));
             $comment = GETPOST('comment');
             $form->form_confirm($_SERVER["PHP_SELF"] . "?id=" . $object->id . "&ligne=" . GETPOST('ligne') . "&date=" . $dateactstart . "&dateend=" . $dateactend . "&comment=" . urlencode($comment), $langs->trans("CloseService"), $langs->trans("ConfirmCloseService", dol_print_date($dateactend, "%A %d %B %Y")), "confirm_closeline", '', 0, 1);
-            print '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
+            $return .= '<table class="notopnoleftnoright" width="100%"><tr ' . $bc[false] . ' height="6"><td></td></tr></table>';
         }
 
 
         // Area with status and activation info of line
         if ($object->statut > 0) {
-            print '<table class="notopnoleft" width="100%">';
+            $return .= '<table class="notopnoleft" width="100%">';
 
-            print '<tr ' . $bc[false] . '>';
-            print '<td>' . $langs->trans("ServiceStatus") . ': ' . $objL->getLibStatut(4) . '</td>';
-            print '<td width="30" align="right">';
+            $return .= '<tr ' . $bc[false] . '>';
+            $return .= '<td>' . $langs->trans("ServiceStatus") . ': ' . $objL->getLibStatut(4) . '</td>';
+            $return .= '<td width="30" align="right">';
             if ($user->societe_id == 0) {
                 if ($object->statut > 0 && $action != 'activateline' && $action != 'unactivateline') {
                     $tmpaction = 'activateline';
                     if ($objp->statut == 4)
                         $tmpaction = 'unactivateline';
-                    print '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . $idLigne . '&amp;action=' . $tmpaction . '">';
-                    print img_edit();
-                    print '</a>';
+                    $return .= '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . $idLigne . '&amp;action=' . $tmpaction . '">';
+                    $return .= img_edit();
+                    $return .= '</a>';
                 }
             }
-            print '</td>';
-            print "</tr>\n";
+            $return .= '</td>';
+            $return .= "</tr>\n";
 
-            print '<tr ' . $bc[false] . '>';
+            $return .= '<tr ' . $bc[false] . '>';
 
-            print '<td>';
+            $return .= '<td>';
             // Si pas encore active
             if (!$objp->date_debut_reelle) {
-                print $langs->trans("DateStartReal") . ': ';
+                $return .= $langs->trans("DateStartReal") . ': ';
                 if ($objp->date_debut_reelle)
-                    print dol_print_date($objp->date_debut_reelle);
+                    $return .= dol_print_date($objp->date_debut_reelle);
                 else
-                    print $langs->trans("ContractStatusNotRunning");
+                    $return .= $langs->trans("ContractStatusNotRunning");
             }
             // Si active et en cours
             if ($objp->date_debut_reelle && !$objp->date_fin_reelle) {
-                print $langs->trans("DateStartReal") . ': ';
-                print dol_print_date($objp->date_debut_reelle);
+                $return .= $langs->trans("DateStartReal") . ': ';
+                $return .= dol_print_date($objp->date_debut_reelle);
             }
             // Si desactive
             if ($objp->date_debut_reelle && $objp->date_fin_reelle) {
-                print $langs->trans("DateStartReal") . ': ';
-                print dol_print_date($objp->date_debut_reelle);
-                print ' &nbsp;-&nbsp; ';
-                print $langs->trans("DateEndReal") . ': ';
-                print dol_print_date($objp->date_fin_reelle);
+                $return .= $langs->trans("DateStartReal") . ': ';
+                $return .= dol_print_date($objp->date_debut_reelle);
+                $return .= ' &nbsp;-&nbsp; ';
+                $return .= $langs->trans("DateEndReal") . ': ';
+                $return .= dol_print_date($objp->date_fin_reelle);
             }
             if (!empty($objp->comment))
-                print "<br>" . $objp->comment;
-            print '</td>';
+                $return .= "<br>" . $objp->comment;
+            $return .= '</td>';
 
-            print '<td align="center">&nbsp;</td>';
+            $return .= '<td align="center">&nbsp;</td>';
 
-            print '</tr>';
-            print '</table>';
+            $return .= '</tr>';
+            $return .= '</table>';
         }
 
         if ($user->rights->contrat->activer && $action == 'activateline' && $idLigne == GETPOST('ligne')) {
             /**
              * Activer la ligne de contrat
              */
-            print '<form name="active" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . GETPOST('ligne') . '&amp;action=active" method="post">';
-            print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
+            $return .= '<form name="active" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . GETPOST('ligne') . '&amp;action=active" method="post">';
+            $return .= '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
 
-            print '<table class="noborder" width="100%">';
-            //print '<tr class="liste_titre"><td colspan="5">'.$langs->trans("Status").'</td></tr>';
+            $return .= '<table class="noborder" width="100%">';
+            //$return .= '<tr class="liste_titre"><td colspan="5">'.$langs->trans("Status").'</td></tr>';
             // Definie date debut et fin par defaut
             $dateactstart = $objp->date_debut;
             if (GETPOST('remonth'))
@@ -425,36 +426,36 @@ class Synopsis_Contrat extends Contrat {
                 }
             }
 
-            print '<tr ' . $bc[$var] . '><td>' . $langs->trans("DateServiceActivate") . '</td><td>';
-            print $form->select_date($dateactstart, '', $usehm, $usehm, '', "active");
-            print '</td>';
+            $return .= '<tr ' . $bc[$var] . '><td>' . $langs->trans("DateServiceActivate") . '</td><td>';
+            $return .= $form->select_date($dateactstart, '', $usehm, $usehm, '', "active");
+            $return .= '</td>';
 
-            print '<td>' . $langs->trans("DateEndPlanned") . '</td><td>';
-            print $form->select_date($dateactend, "end", $usehm, $usehm, '', "active");
-            print '</td>';
+            $return .= '<td>' . $langs->trans("DateEndPlanned") . '</td><td>';
+            $return .= $form->select_date($dateactend, "end", $usehm, $usehm, '', "active");
+            $return .= '</td>';
 
-            print '<td align="center" rowspan="2" valign="middle">';
-            print '<input type="submit" class="button" name="activate" value="' . $langs->trans("Activate") . '"><br>';
-            print '<input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
-            print '</td>';
+            $return .= '<td align="center" rowspan="2" valign="middle">';
+            $return .= '<input type="submit" class="button" name="activate" value="' . $langs->trans("Activate") . '"><br>';
+            $return .= '<input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
+            $return .= '</td>';
 
-            print '</tr>';
+            $return .= '</tr>';
 
-            print '<tr ' . $bc[$var] . '><td>' . $langs->trans("Comment") . '</td><td colspan="3"><input size="80" type="text" name="comment" value="' . GETPOST('comment') . '"></td></tr>';
+            $return .= '<tr ' . $bc[$var] . '><td>' . $langs->trans("Comment") . '</td><td colspan="3"><input size="80" type="text" name="comment" value="' . GETPOST('comment') . '"></td></tr>';
 
-            print '</table>';
+            $return .= '</table>';
 
-            print '</form>';
+            $return .= '</form>';
         }
 
         if ($user->rights->contrat->activer && $action == 'unactivateline' && $idLigne == GETPOST('ligne')) {
             /**
              * Desactiver la ligne de contrat
              */
-            print '<form name="closeline" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . $idLigne . '&amp;action=closeline" method="post">';
-            print '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
+            $return .= '<form name="closeline" action="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;ligne=' . $idLigne . '&amp;action=closeline" method="post">';
+            $return .= '<input type="hidden" name="token" value="' . $_SESSION['newtoken'] . '">';
 
-            print '<table class="noborder" width="100%">';
+            $return .= '<table class="noborder" width="100%">';
 
             // Definie date debut et fin par defaut
             $dateactstart = $objp->date_debut_reelle;
@@ -477,29 +478,30 @@ class Synopsis_Contrat extends Contrat {
             if ($dateactend > $now)
                 $dateactend = $now;
 
-            print '<tr ' . $bc[$var] . '><td colspan="2">';
+            $return .= '<tr ' . $bc[$var] . '><td colspan="2">';
             if ($objp->statut >= 4) {
                 if ($objp->statut == 4) {
-                    print $langs->trans("DateEndReal") . ' ';
+                    $return .= $langs->trans("DateEndReal") . ' ';
                     $form->select_date($dateactend, "end", $usehm, $usehm, ($objp->date_fin_reelle > 0 ? 0 : 1), "closeline");
                 }
             }
-            print '</td>';
+            $return .= '</td>';
 
-            print '<td align="right" rowspan="2"><input type="submit" class="button" name="close" value="' . $langs->trans("Close") . '"><br>';
-            print '<input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
-            print '</td></tr>';
+            $return .= '<td align="right" rowspan="2"><input type="submit" class="button" name="close" value="' . $langs->trans("Close") . '"><br>';
+            $return .= '<input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '">';
+            $return .= '</td></tr>';
 
-            print '<tr ' . $bc[$var] . '><td>' . $langs->trans("Comment") . '</td><td><input size="70" type="text" class="flat" name="comment" value="' . GETPOST('comment') . '"></td></tr>';
-            print '</table>';
+            $return .= '<tr ' . $bc[$var] . '><td>' . $langs->trans("Comment") . '</td><td><input size="70" type="text" class="flat" name="comment" value="' . GETPOST('comment') . '"></td></tr>';
+            $return .= '</table>';
 
-            print '</form>';
+            $return .= '</form>';
         }
 
-        print '</td>'; // End td if line is 1
+//        $return .= '</td>'; // End td if line is 1
 
-        print '</tr>';
-        print '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;</td></tr>';
+//        $return .= '</tr>';
+//        $return .= '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;';
+        return $return;
     }
 
 }

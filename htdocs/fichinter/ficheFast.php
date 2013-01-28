@@ -332,11 +332,11 @@ if ($_REQUEST["id"] > 0) {
 
                 $htmlStr .= "<table width=100%>";
                 $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet' value='0' checked=\"checked\"><td>";
-                foreach ($contrat->lignes as $key => $val) {
+                foreach ($contrat->lines as $key => $val) {
                     $selected = ($prestation->fk_contratdet == $val->id);
                     $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet contradet" . $val->id . "' value='" . $val->id . "' " . ($selected ? 'checked="checked"' : '') . "><td>";
                     $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                    $htmlStr .= $contrat->display1Line($val);
+                    $htmlStr .= $contrat->display1Line($contrat,$val);
                     $htmlStr .= "</ul>";
                 }
                 $htmlStr .= "</table>";
@@ -482,11 +482,11 @@ if ($fichinter->fk_contrat > 0) {
 
         $htmlStr .= "<table width=100%>";
         $htmlStr .= '<tr><td><input type=radio name="\'+prefId+\'contradet" class="radioContradet" value="0" checked="checked"><td>';
-        foreach ($contrat->lignes as $key => $val) {
+        foreach ($contrat->lines as $key => $val) {
             $selected = false;
             $htmlStr .= '<tr><td><input type="radio" name="\'+prefId+\'contradet" class="radioContradet contradet' . $val->id . '" value="' . $val->id . '" ' . ($selected ? 'checked="checked"' : '') . "><td>";
             $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-            $htmlStr .= $contrat->display1Line($val);
+            $htmlStr .= $contrat->display1Line($contrat, $val);
             $htmlStr .= "</ul>";
         }
         $htmlStr .= "</table>";

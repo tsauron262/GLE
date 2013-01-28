@@ -152,11 +152,11 @@ class modSynopsisDemandeInterv  extends DolibarrModules
     $this->rights[7][3] = 0;
     $this->rights[7][4] = 'rapportTous';
 
-    $this->rights[7][0] = $this->numero."69";
-    $this->rights[7][1] = 'Editer une DI apr&egrave;s la validation';
-    $this->rights[7][2] = 'w';
-    $this->rights[7][3] = 0;
-    $this->rights[7][4] = 'edit_after_validation';
+    $this->rights[8][0] = $this->numero."69";
+    $this->rights[8][1] = 'Editer une DI apr&egrave;s la validation';
+    $this->rights[8][2] = 'w';
+    $this->rights[8][3] = 0;
+    $this->rights[8][4] = 'edit_after_validation';
 
 
   }

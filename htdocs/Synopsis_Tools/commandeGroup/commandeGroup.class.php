@@ -75,11 +75,11 @@ class CommandeGroup extends CommonObject{
         $result='';
         $urlOption='';
 
-        $lien = '<a href="'.DOL_URL_ROOT.$urlOption.'/commande/group/fiche.php?id='.$this->id.'">';
+        $lien = '<a href="'.DOL_URL_ROOT.$urlOption.'/Synopsis_Tools/commandeGroup/fiche.php?id='.$this->id.'">';
         $lienfin='</a>';
 
-        if ($option == 6) $lien = '<a href="'.GLE_FULL_ROOT.'/commande/group/fiche.php?id='.$this->id.'">';
-        $picto='orderGroup';
+        if ($option == 6) $lien = '<a href="'.GLE_FULL_ROOT.'/Synopsis_Tools/commandeGroup/fiche.php?id='.$this->id.'">';
+        $picto='orderGroup@Synopsis_Tools';
         $label=$langs->trans("ShowOrderGroup").': '.$this->nom;
 
         //function img_object($alt, $object,$width = false, $height=false,$align=false,$fullWebPath=false)

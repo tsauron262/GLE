@@ -7,7 +7,7 @@
  */
 require_once("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/commande/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT.'/commande/group/commandeGroup.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/commandeGroup/commandeGroup.class.php');
 require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
 
 // The get widget handler.

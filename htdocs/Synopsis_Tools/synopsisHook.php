@@ -1,4 +1,5 @@
 <?php
+
 date_default_timezone_set('Europe/Paris');
 
 ini_set('display_errors', 1);
@@ -37,8 +38,8 @@ $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 $conf->global->devMailTo = 'tommy@drsi.fr';
 
 
-
-  $tabProductType = array(0=>$langs->trans("Product"),1=>$langs->trans("Service"),2=>$langs->trans("Produit de contrat"), 3=>$langs->trans("Déplacement"));
+if (is_object($langs))
+    $tabProductType = array(0 => $langs->trans("Product"), 1 => $langs->trans("Service"), 2 => $langs->trans("Produit de contrat"), 3 => $langs->trans("Déplacement"));
 
 
 

@@ -131,13 +131,11 @@ jQuery(document).ready(function(){
                        var val = $(this).text();
                         jQuery(this).text('');
                         jQuery(this).progressbar( {
-                           value: val,
+                           value: parseInt(val),
                            orientation: "horizontal",
                        });
-                        jQuery(this).css('height',"10px");
-                        $(this).find('.ui-progressbar-value').css('height','8px');
-            		});
-        			   },
+                });
+            },
             subGrid : true,
             subGridRowExpanded: function(subgrid_id, row_id) {
                  // we pass two parameters

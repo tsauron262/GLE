@@ -81,7 +81,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
     function footer($pdf) {
         if ($pdf->PageNo() > 0) {
             $pdf->SetXY(-5, -10);
-            $pdf->Cell(0, 10, $pdf->PageNo() . '/{nb}', 0, 0, 'C');
+            $pdf->Cell(0, 10, $pdf->PageNo() . '/{:ptp:}', 0, 0, 'C');
         }
     }
 
@@ -745,7 +745,8 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 
 
                 $this->footer($pdf);
-                $pdf->AliasNbPages();
+//                $pdf->AliasNbPages();
+//                die($pdf->getAliasNbPages());
 
                 $pdf->Close();
 

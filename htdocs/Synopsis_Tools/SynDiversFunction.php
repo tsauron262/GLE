@@ -486,7 +486,7 @@ function mailSyn($to, $sujet, $text, $headers = null) {
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        $headers .= 'From: Application GLE '.MAIN_INFO_SOCIETE_NOM.' <no-replay@synopsis-erp.com>' . "\r\n";
+        $headers .= 'From: Application GLE '.MAIN_INFO_SOCIETE_NOM.' <no-replay-'.str_replace(" ", "", MAIN_INFO_SOCIETE_NOM).'@synopsis-erp.com>' . "\r\n";
         $headers .= 'Cc: ' . $ccAdmin . "\r\n";
         $headers .= 'Reply-To: ' . $toReplay . "\r\n";
         $text = str_replace("\n", "<br/>", $text);

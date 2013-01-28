@@ -102,13 +102,13 @@ function getContratObj($id) {
     return ($contrat);
 }
 
-//function getTypeContrat_noLoad($id) {
-//    global $db;
-//    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE rowid = " . $id;
-//    $sql = $db->query($requete);
-//    $res = $db->fetch_object($sql);
-//    return($res->extraparams);
-//}
+function getTypeContrat_noLoad($id) {
+    global $db;
+    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE rowid = " . $id;
+    $sql = $db->query($requete);
+    $res = $db->fetch_object($sql);
+    return($res->extraparams);
+}
 
 function launchRunningProcess($db, $type_str, $element_id) {
     global $conf;

@@ -4,7 +4,7 @@ date_default_timezone_set('Europe/Paris');
 
 ini_set('display_errors', 1);
 
-$builddoc = 1;//(isset($_REQUEST['action']));
+$builddoc = (isset($_REQUEST['action']));
 if ($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
     error_reporting(E_ALL ^ (E_STRICT));
 elseif ($builddoc)

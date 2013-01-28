@@ -26,10 +26,13 @@
  * 
  * It'll be loaded and extended by FPDF_TPL.
  */
+
+error_reporting(0);
+
 class FPDF extends TCPDF {
     
-	function _putstream($s) {
-		$this->_out($this->_getstream($s));
+	function _putstream($s, $n=0) {
+		$this->_out($this->_getstream($s, $n));
 	}
 	
 	function _getxobjectdict() {

@@ -134,13 +134,13 @@ $sql .= " ORDER BY $sortfield $sortorder ";
 
 $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
 $requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as f ";
-$requete .= " WHERE f.fk_soc = s.rowid";
+$requete .= " WHERE (f.fk_soc = s.rowid";
 
 $requete .= " AND datei >= '$start' AND datei < '$end'";
 if ($filterUser) {
     $requete .= " AND (fk_user_prisencharge = " . $filterUser . " OR fk_user_target =" . $filterUser . ")";
 }
-
+$requete .= " ) OR s.rowid = '".$socid."'";
 
 $requete .= " ORDER BY $sortfield $sortorder ";
 //die($requete);
@@ -161,7 +161,7 @@ $selSoc .= "</select>";
 $resql = $db->query($sql);
 if ($resql) {
     $num = $db->num_rows($resql);
-    $title = utf8_decode("Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start)));
+    $title = "Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start));
     print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $num);
     print "<br/><br/>";
     echo "<div style='float: right;  margin-top:-18px; margin-right: 20%; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
@@ -196,15 +196,6 @@ if ($resql) {
     echo "</div><br/><br/><br/>";
     $i = 0;
     print '<table class="noborder" width="100%" cellspacing="0" cellpadding="3">';
-    print "<tr class=\"liste_titre\">";
-    print '<td>Ref.</td>';
-    if (empty($socid))
-        print '<td>Soci&eacute;t&eacute;</td>';
-    print '<td align="center">' . $langs->trans("Description") . '</td>';
-
-    print '<td align="center">Date</td>';
-    print '<td align="center">' . $langs->trans("Duration") . '</td>';
-    print "</tr>\n";
     $var = true;
     $DureeTotal = 0;
     while ($objp = $db->fetch_object($resql)) {
@@ -226,7 +217,7 @@ if ($resql) {
             $htmlTab .= $tmpSoc->getNomUrl(1) . "</TD>\n";
         }
         $htmlTab .= '<td>' . nl2br($objp->description) . '</td>';
-        $htmlTab .= "<td>" . utf8_decode(strftime("%d %B %Y", $objp->dp)) . "</td>\n";
+        $htmlTab .= "<td>" . strftime("%d %B %Y", strtotime($objp->dp)). "</td>\n";
         $durStr = convDur($objp->duree);
         $htmlTab .= '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm</td>';
 
@@ -331,7 +322,20 @@ if ($resql) {
     }
     $arr1 = convDur($totTPrev);
     $arr2 = convDur($totTReel);
-    $htmlTot = '<tr class="liste_titre"><td align="center">Total</td><td></td><td></td><td></td><td></td>';
+    $htmlTot = "<tr class=\"liste_titre\">";
+    $htmlTot .= '<td>Ref.</td>';
+    if (empty($socid))
+        $htmlTot .= '<td>Soci&eacute;t&eacute;</td>';
+    $htmlTot .= '<td align="center">' . $langs->trans("Description") . '</td>';
+
+    $htmlTot .= '<td align="center">Date</td>';
+    $htmlTot .= '<td align="center">' . $langs->trans("Duration") . '</td>';
+    $htmlTot .= '<td align="center">Total prevue</td>';
+    $htmlTot .= '<td align="center">Total vendue</td>';
+    $htmlTot .= '<td align="center">Total réalisé</td>';
+    $htmlTot .= '<td align="center">Dif réalisé prévue</td>';
+    $htmlTot .= '<td align="center">Dif réalisé vendue</td>';
+    $htmlTot .= "</tr><tr class=\"liste_titre\"><td></td><td></td><td></td><td></td><td></td>";
     $htmlTot .= '<td align="center">' . price($totPrev) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
     $htmlTot .= '<td align="center">' . price($totVendu) . '</td>';
     $htmlTot .= '<td align="center">' . price($totReel) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';

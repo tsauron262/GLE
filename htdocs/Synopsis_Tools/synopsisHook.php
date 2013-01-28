@@ -17,6 +17,8 @@ else
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 
+setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
+
 
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");

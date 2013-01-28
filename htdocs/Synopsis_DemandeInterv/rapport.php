@@ -63,13 +63,13 @@ if ($user->rights->synopsisdemandeinterv->rapportTous) {
         $filterUser = $_SESSION['filterUser'];
     }
 
-    if (isset($_REQUEST['filterUser'])) {
-        if ($_REQUEST['filterUser'] == -1)
-            $filterUser = false;
-        else
-            $filterUser = $_REQUEST['filterUser'];
-        $_SESSION['filterUser'] = $filterUser;
+    if ($_REQUEST['filterUser'] == -1)
+        $filterUser = false;
+    elseif (isset($_REQUEST['filterUser'])) {
+
+        $filterUser = $_REQUEST['filterUser'];
     }
+    $_SESSION['filterUser'] = $filterUser;
 }
 
 if ($sortorder == "") {
@@ -189,7 +189,7 @@ if ($resql) {
     print $selSoc;
     if ($user->rights->synopsisdemandeinterv->rapportTous) {
         echo "<td align=center>Intervenant";
-        $html->select_users($filterUser, 'filterUser', 1, '', 0, 1);
+        $html->select_users(($filterUser > 0 ? $filterUser : 0), 'filterUser', 1, '', 0, 1);
     }
     echo "<tr><td colspan=6 align=center><input class='button ui-state-default' style='padding: 3px;' type='submit' name='g' value='Afficher le rapport'></td>";
     echo "</table><form>";
@@ -266,7 +266,7 @@ if ($resql) {
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             if (!$res)
-                die($requete."|".$objp->fichid);
+                die($requete . "|" . $objp->fichid);
             $vendu = $res->tht;
             $totVendu += $vendu;
 

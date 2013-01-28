@@ -119,7 +119,7 @@ if ($_REQUEST["id"] > 0) {
     if (isset($_POST['update']))
         saveForm();
 
-//    $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
+    $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
     if ($genererDoc) {
         genererDoc($db);
         affLienDoc($fichinter, $formfile, $conf);
@@ -631,12 +631,13 @@ function cacherDecacherPRDV(){
 
 function affLienDoc($fichinter, $formfile, $conf) {
     $filename = sanitize_string($fichinter->ref);
-    $filedir = $conf->fichinter->dir_output . "/" . $fichinter->ref;
+    $filedir = $conf->synopsisficheinter->dir_output . "/" . $fichinter->ref;
     $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $fichinter->id;
-    $somethingshown = $formfile->show_documents('ficheinter', $filename, $filedir, $urlsource, 0, 0);
+    $somethingshown = $formfile->show_documents('synopsisficheinter', $filename, $filedir, $urlsource, 0, 0);
 }
 
 function genererDoc($db) {
+    global $user, $langs, $conf;
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->fetch_lines();
@@ -657,7 +658,7 @@ function genererDoc($db) {
         $result = $interface->run_triggers('ECM_GENFICHEINTER', $fichinter, $user, $langs, $conf);
         if ($result < 0) {
             $error++;
-            $this->errors = $interface->errors;
+            print_r($interface->errors);
         }
         // Fin appel triggers
     }

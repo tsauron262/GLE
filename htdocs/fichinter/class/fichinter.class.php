@@ -887,7 +887,7 @@ class Fichinter extends CommonObject
     function fetch_lines()
     {
         $sql = 'SELECT rowid';
-        $sql.= ' FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet';
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet";
         $sql.= ' where fk_fichinter = '.$this->id;
 
         dol_syslog("Fichinter::fetch_lines sql=".$sql);

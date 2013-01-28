@@ -214,7 +214,7 @@ if ($resql) {
             $tmpSoc = new Societe($db);
             $tmpSoc->fetch($objp->socid);
             $htmlTab .= '<td align="center"><a href="rapport.php?socid=' . $objp->socid . $filter . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/filter.png" border="0"></a>&nbsp;';
-            $htmlTab .= $tmpSoc->getNomUrl(1) . "</TD>\n";
+            $htmlTab .= $tmpSoc->getNomUrl(1) . "</td>\n";
         }
         $htmlTab .= '<td align="center">' . nl2br($objp->description) . '</td>';
         $htmlTab .= '<td align="center">' . strftime("%d %B %Y", strtotime($objp->dp)). "</td>\n";
@@ -335,7 +335,9 @@ if ($resql) {
     $htmlTot .= '<td align="center">Total réalisé</td>';
     $htmlTot .= '<td align="center">Dif réalisé prévue</td>';
     $htmlTot .= '<td align="center">Dif réalisé vendue</td>';
-    $htmlTot .= "</tr><tr class=\"liste_titre\"><td></td><td></td><td></td><td></td><td></td>";
+    $htmlTot .= "</tr><tr class=\"liste_titre\"><td></td><td></td><td></td><td></td>";
+    if (empty($socid))
+    $htmlTot .= "<td></td>";
     $htmlTot .= '<td align="center">' . price($totPrev) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
     $htmlTot .= '<td align="center">' . price($totVendu) . '</td>';
     $htmlTot .= '<td align="center">' . price($totReel) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';

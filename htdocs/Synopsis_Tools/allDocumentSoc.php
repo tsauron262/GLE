@@ -238,7 +238,7 @@ if ($object->id) {
                 if ($typeElem == "facture")
                     $result->ref = $result->facnumber;
 
-                $upload_dir2 = "/var/www/documents/gle4/" . $nomDossier . "/" . $result->ref;
+                $upload_dir2 = $dolibarr_main_data_root ."/". $nomDossier . "/" . $result->ref;
                 $filearray = dol_dir_list($upload_dir2, "all", 0, '', '', 'name', null, 1);
 
                 if (count($filearray) > 0) {

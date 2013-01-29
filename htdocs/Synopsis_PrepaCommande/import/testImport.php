@@ -445,7 +445,7 @@ if (is_dir($dir)) {
                             $res = $db->fetch_object($sql);
                             $secteurActiv = $res->id;
                         } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "c_secteur (id,code,libelle,active) VALUES (max(id)+1, '" . SynSanitize($val['CliActivEnu']) . "','" . addslashes($val['CliActivEnu']) . "',1)";
+                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "c_secteur (code,libelle,active) VALUES ('" . SynSanitize($val['CliActivEnu']) . "','" . addslashes($val['CliActivEnu']) . "',1)";
                             $sql = $db->query($requete);
                             $secteurActiv = $db->last_insert_id('".MAIN_DB_PREFIX."c_secteur');
                         }

@@ -23,7 +23,7 @@ UpdateType
 
 
 CREATE TABLE IF NOT EXISTS `llx_c_secteur` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL auto_increment,
   `code` varchar(12) NOT NULL,
   `libelle` varchar(30) default NULL,
   `active` tinyint(4) NOT NULL default '1',

@@ -222,29 +222,32 @@ if ($object->id) {
             $nomDossier = $typeElemOrTab[2];
         if (isset($typeElemOrTab[3]))
             $nomPublic = $typeElemOrTab[3];
-        $sql2 = 'SELECT c.*';
-        $sql2.= ' FROM ' . MAIN_DB_PREFIX . 'societe as s';
-        $sql2.= ', ' . MAIN_DB_PREFIX . $nomTab . ' as c';
-        $sql2.= ' WHERE c.fk_soc = s.rowid';
-        $sql2.= ' AND s.rowid = ' . $object->id;
 
-        $resql2 = $db->query($sql2);
-        if (!$resql2 || $typeElem == 'projet')
-            die($sql2);
-        $filearray = array();
-        while ($result = $db->fetch_object($resql2)) {
-            if ($typeElem == "facture")
-                $result->ref = $result->facnumber;
+        if (isset($user->rights->$typeElem)) {
+            $sql2 = 'SELECT c.*';
+            $sql2.= ' FROM ' . MAIN_DB_PREFIX . 'societe as s';
+            $sql2.= ', ' . MAIN_DB_PREFIX . $nomTab . ' as c';
+            $sql2.= ' WHERE c.fk_soc = s.rowid';
+            $sql2.= ' AND s.rowid = ' . $object->id;
 
-            $upload_dir2 = "/var/www/documents/gle4/" . $nomDossier . "/" . $result->ref;
-            $filearray = dol_dir_list($upload_dir2, "all", 0, '', '', 'name', null, 1);
+            $resql2 = $db->query($sql2);
+            if (!$resql2 || $typeElem == 'projet')
+                die($sql2);
+            $filearray = array();
+            while ($result = $db->fetch_object($resql2)) {
+                if ($typeElem == "facture")
+                    $result->ref = $result->facnumber;
 
-            if (count($filearray) > 0) {
-                $nom = (method_exists($result, "getNomUrl") ? $result->getNomUrl() : $result->ref);
-                $nomPublicT = ((stripos($nomPublic, "au") === false) ? "a la " : '') . $nomPublic;
-                ;
-                $formfile->list_of_documents($filearray, $result, $typeElem, '', 0, '', 0, 0, '', 0, 'Fichier joint ' . $nomPublicT . ' ' . $nom);
-                print "<br><br>";
+                $upload_dir2 = "/var/www/documents/gle4/" . $nomDossier . "/" . $result->ref;
+                $filearray = dol_dir_list($upload_dir2, "all", 0, '', '', 'name', null, 1);
+
+                if (count($filearray) > 0) {
+                    $nom = (method_exists($result, "getNomUrl") ? $result->getNomUrl() : $result->ref);
+                    $nomPublicT = ((stripos($nomPublic, "au") === false) ? "a la " : '') . $nomPublic;
+                    ;
+                    $formfile->list_of_documents($filearray, $result, $typeElem, '', 0, '', 0, 0, '', 0, 'Fichier joint ' . $nomPublicT . ' ' . $nom);
+                    print "<br><br>";
+                }
             }
         }
     }

@@ -180,6 +180,10 @@ class modSynopsisTools extends DolibarrModules
                             'user'=>0);
         $s = $r;
         $r++;
+        
+        
+        $this->tabs = array('thirdparty:-document',
+            'thirdparty:+allDoc:Tous les fichier joint:@Synopsis_Tools:/Synopsis_Tools/allDocumentSoc.php?id=__ID__');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

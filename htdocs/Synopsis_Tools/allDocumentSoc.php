@@ -199,13 +199,16 @@ if ($object->id) {
 
     /* Modif drsi */
 
-    $tabElement = array('facture',
+    $tabElement = array(
+        'facture',
         'commande',
         array('contract', 'contrat', 'contracts'),
         array('synopsisdemandeinterv', 'Synopsis_demandeInterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
         array('synopsisficheinter', 'Synopsis_fichinter', 'synopsisficheinter', 'Fiche Inter'),
-        array('synopsisprojet', 'Synopsis_projet', 'synopsisprojet', 'au Projet')
+        array('synopsisprojet', 'Synopsis_projet', 'synopsisprojet', 'au Projet'),
+        array('propal', 'propal', 'propale'),
+        array('expedition', 'expedition', 'expedition/sending')
     );
 
 
@@ -225,13 +228,11 @@ if ($object->id) {
 
         if (isset($user->rights->$typeElem)) {
             $sql2 = 'SELECT c.*';
-            $sql2.= ' FROM ' . MAIN_DB_PREFIX . 'societe as s';
-            $sql2.= ', ' . MAIN_DB_PREFIX . $nomTab . ' as c';
-            $sql2.= ' WHERE c.fk_soc = s.rowid';
-            $sql2.= ' AND s.rowid = ' . $object->id;
+            $sql2.= ' FROM ' . MAIN_DB_PREFIX . $nomTab . ' as c';
+            $sql2.= ' WHERE c.fk_soc = ' . $object->id;
 
             $resql2 = $db->query($sql2);
-            if (!$resql2 || $typeElem == 'projet')
+            if (!$resql2)
                 die($sql2);
             $filearray = array();
             while ($result = $db->fetch_object($resql2)) {
@@ -239,7 +240,7 @@ if ($object->id) {
                     $result->ref = $result->facnumber;
 
                 $upload_dir2 = $dolibarr_main_data_root ."/". $nomDossier . "/" . $result->ref;
-                $filearray = dol_dir_list($upload_dir2, "all", 0, '', '', 'name', null, 1);
+                $filearray = dol_dir_list($upload_dir2, "all", 1, '', '', 'name', null, 1);
 
                 if (count($filearray) > 0) {
                     $nom = (method_exists($result, "getNomUrl") ? $result->getNomUrl() : $result->ref);

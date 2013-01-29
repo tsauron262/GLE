@@ -1270,10 +1270,10 @@ if (is_dir($dir)) {
                             $requete = "DELETE FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
                             $sql = $db->query($requete);
                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
-                                   VALUES (" . $socContact . ",100," . $comid . ",4,now() )";
+                                   VALUES (" . $socContact . ",100," . $comId . ",4,now() )";
                             $sql = $db->query($requete);
                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
-                                   VALUES (" . $socContact . ",101," . $comid . ",4,now() )";
+                                   VALUES (" . $socContact . ",101," . $comId . ",4,now() )";
 //print $requete;
                             $sql = $db->query($requete);
                         }
@@ -1414,6 +1414,7 @@ if (is_dir($dir)) {
                             $com = new Synopsis_Commande($db);
                             $com->fetch($comId);
                             $com->update_price();
+                            $com->setStatut(0);
                             $com->valid($user);
                             if ($mode . "x" != "x") {
                                 $interface = new Interfaces($db);
@@ -1872,11 +1873,11 @@ if ($conf->global->BIMP_MAIL_TO . "x" == 'x' || $conf->global->BIMP_MAIL_FROM . 
   +--------------------------------------------------------------------------------------------------------------+
  */
 
-foreach ($fileArray as $key => $val) {
-    $requete = "INSERT INTO BIMP_import_history (webContent, mailContent,datec,filename)
-                     VALUES ('" . addslashes($webContent) . "','" . addslashes($mailContent) . "',now(),'" . $val . "')";
-    $sql = $db->query($requete);
-}
+//foreach ($fileArray as $key => $val) {
+//    $requete = "INSERT INTO BIMP_import_history (webContent, mailContent,datec,filename)
+//                     VALUES ('" . addslashes($webContent) . "','" . addslashes($mailContent) . "',now(),'" . $val . "')";
+//    $sql = $db->query($requete);
+//}
 /*
   +--------------------------------------------------------------------------------------------------------------+
   |                                                                                                              |

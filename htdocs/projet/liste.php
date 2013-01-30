@@ -114,7 +114,7 @@ jQuery(document).ready(function(){
                         {name:'cntMyTask',index:'cntMyTask', width:50, align:"center"},
                         {name:'fk_user_resp',index:'fk_user_resp', width:90, align:"center"},
                       ],
-            rowNum:10,
+            rowNum:30,
             rowList:[30,50,100],
             imgpath: gridimgpath,
             pager: jQuery('#gridListProjPager'),

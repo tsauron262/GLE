@@ -1290,7 +1290,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($demandeInterv->date, 'day');
+        print dol_print_date($db->jdate($demandeInterv->date), 'day');
     }
     print '</td>';
     print '</tr>';

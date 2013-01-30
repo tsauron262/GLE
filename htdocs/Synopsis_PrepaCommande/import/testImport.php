@@ -517,10 +517,10 @@ if (is_dir($dir)) {
                             $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
                         if ($res->tva_assuj != $assujTVA)
                             $sqlUpt[] = " tva_assuj = " . $assujTVA;
-//            if ($secteurActiv && $secteurActiv != $res->fk_secteur)
-//                $sqlUpt[] = " fk_secteur = " . $secteurActiv;
-                        if ($typeEnt != $res->fk_typent)
-                            $sqlUpt[] = " fk_typent = " . $typeEnt;
+            if ($secteurActiv && $secteurActiv != $res->ref_int)
+                $sqlUpt[] = " ref_int = " . $secteurActiv;
+//                        if ($typeEnt != $res->fk_typent)
+//                            $sqlUpt[] = " fk_typent = " . $typeEnt;
 //            if ($res->titre != $val['CliTitleEnu'] )
 //                $sqlUpt[] = " titre = '".$val['CliTitleEnu'] ."'";
 
@@ -576,7 +576,7 @@ if (is_dir($dir)) {
 " . //                                     titre,
                                 "                                    import_key,
                                     tva_assuj,
-                                    " . ($secteurActiv ? "fk_secteur," : "") . "
+                                    " . ($secteurActiv ? "ref_int," : "") . "
                                     fk_typent
                                     )
                              VALUES ('" . $nomSoc . "',

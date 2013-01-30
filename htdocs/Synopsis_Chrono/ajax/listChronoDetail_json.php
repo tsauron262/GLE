@@ -342,7 +342,7 @@ switch ($action) {
                     $chrono = new Chrono($db);
                     $chrono->fetch($res->chrono_id);
 
-                    $arr[] = utf8_encode($chrono->getNomUrl(1));
+                    $arr[] = $chrono->getNomUrl(1);
 
                     //hasRev => 1 si oui, rien sinon
                     if (!$withRev) {

@@ -1150,7 +1150,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($fichinter->date, 'day');
+        print dol_print_date($db->jdate($fichinter->date), 'day');
     }
     $fichinter->info($fichinter->id);
     print '    </td>';
@@ -1504,7 +1504,7 @@ EOF;
                     print "&nbsp;&nbsp;" . $tmpProdDep->getNomUrl(1);
                 }
                 print '</td>';
-                print '<td width="150">' . dol_print_date($objp->date_intervention, 'day') . '</td>';
+                print '<td width="150">' . dol_print_date($db->jdate($objp->date_intervention), 'day') . '</td>';
                 print '<td width="150">' . ConvertSecondToTime($objp->duree) . '</td>';
 
                 print "</td>\n";

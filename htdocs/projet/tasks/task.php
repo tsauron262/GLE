@@ -460,7 +460,7 @@ $task->user_creat->fetch($task->user_creat->id);
                 foreach($tasks as $date => $task_time)
                 {
                     $html .= "<tr>";
-                    $html .= '<td class="ui-widget-content" align=center>'.dol_print_date($task_time['date'],'day').'</td>';
+                    $html .= '<td class="ui-widget-content" align=center>'.dol_print_date($db->jdate($task_time['date']),'day').'</td>';
                     $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["dur"]).'</td>';
                     $tot += $task_time["dur"];
                     $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["durEff"]).'</td>';

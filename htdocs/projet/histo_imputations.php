@@ -232,6 +232,8 @@ if ($_REQUEST['action'] == 'save') {
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $tot = $res->durEff;
+            if($tot <= 0)
+                $tot = "0";
             $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId;
             $sql = $db->query($requete);
             $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET progress = 100-((duration - duration_effective) *100)/duration WHERE rowid = " . $taskId;

@@ -208,15 +208,19 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $responce->rows[$i]['id']=$row[id];
     $localUser = new User($db);
     $localUser->fetch($row[fk_user_resp]);
+    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+    $proj = new Projet($db);
+    $proj->fetch($row[id]);
     $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
     $responce->rows[$i]['cell']=array($row[id],
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['nom']."</a>",
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['ref']."</a>",
                                       $row[dateo],
+                                      $proj->getLibStatut(4),
                                       $overallprogress,
-                                      utf8_encode($soc->getNomUrl(1)),
+                                      $soc->getNomUrl(1),
                                       $row[cntMyTask],
-                                      utf8_encode($localUser->getNomUrl(1)));
+                                      $localUser->getNomUrl(1));
     $i++;
 }
 echo json_encode($responce);

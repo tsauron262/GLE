@@ -9,10 +9,12 @@ class SynopsisRevisionPropal {
         $obj = $db->fetch_object($result);
 
         $this->propalPre = new propal($db);
-        $this->propalPre->fetch($obj->pre);
+        if ($obj->pre > 0)
+            $this->propalPre->fetch($obj->pre);
 
         $this->propalSui = new propal($db);
-        $this->propalSui->fetch($obj->sui);
+        if ($obj->sui > 0)
+            $this->propalSui->fetch($obj->sui);
     }
 
     function reviserPropal() {

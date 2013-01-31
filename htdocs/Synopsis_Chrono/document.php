@@ -145,8 +145,8 @@ if ( $_POST["sendit"])
         $interface=new Interfaces($db);
         $interface->texte=$tmpName;
 //TODO
-        $result=$interface->run_triggers('ECM_UL_CHRONO',$chrono,$user,$langs,$conf);
-        if ($result < 0) { $error++; /*$this->errors=$interface->errors;*/ }
+//        $result=$interface->run_triggers('ECM_UL_CHRONO',$chrono,$user,$langs,$conf);
+//        if ($result < 0) { $error++; /*$this->errors=$interface->errors;*/ }
         // Fin appel triggers
         $mesg = '<div class="ok">'.$langs->trans("FileTransferComplete").'</div>';
         //print_r($_FILES);
@@ -173,7 +173,7 @@ if ($_POST['action'] == 'confirm_deletefile' && $_POST['confirm'] == 'yes')
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
         $interface=new Interfaces($db);
         $interface->texte=$tmpName;
-        $result=$interface->run_triggers('ECM_UL_DEL_CHRONO',$chrono,$user,$langs,$conf);
+//        $result=$interface->run_triggers('ECM_UL_DEL_CHRONO',$chrono,$user,$langs,$conf);
         if ($result < 0) { $error++; /*$this->errors=$interface->errors;*/ }
         // Fin appel triggers
 

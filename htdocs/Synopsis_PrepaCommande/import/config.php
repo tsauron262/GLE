@@ -96,6 +96,7 @@ if ($_REQUEST['action'] == "setNewPattern")
 }
 if ($_REQUEST['action'] == 'modPattern')
 {
+    $rang = $_REQUEST['rang'];
     $id = $_REQUEST['id'];
     $pattern = $_REQUEST['pattern'];
     $type = $_REQUEST['type'];
@@ -104,7 +105,7 @@ if ($_REQUEST['action'] == 'modPattern')
         $requete = "DELETE FROM BIMP_import_product_type WHERE id=".$id;
         $sql = $db->query($requete);
     } else {
-        $requete = "UPDATE BIMP_import_product_type SET pattern='".$pattern."', product_type=".$type." WHERE id = ".$id;
+        $requete = "UPDATE BIMP_import_product_type SET pattern='".$pattern."', product_type=".$type.", rang=".$rang." WHERE id = ".$id;
         $sql = $db->query($requete);
     }
 }

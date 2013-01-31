@@ -112,9 +112,13 @@ else
 		{
 			$texte = $langs->trans("Services");
 		}
-		else
+		elseif ($type==0)
 		{
 			$texte = $langs->trans("Products");
+		}
+		else
+		{
+			$texte = $tabProductType[$type];
 		}
 	}
 	else
@@ -142,8 +146,8 @@ else
     // if the type is not 1, we show all products (type = 0,2,3)
     if (dol_strlen($type))
     {
-    	if ($type == 1) $sql.= " AND p.fk_product_type = '1'";
-    	else $sql.= " AND p.fk_product_type <> '1'";
+    	$sql.= " AND p.fk_product_type = '".$type."'";
+//    	else $sql.= " AND p.fk_product_type <> '1'";
     }
     if ($sref)     $sql.= " AND p.ref LIKE '%".$sref."%'";
     if ($sbarcode) $sql.= " AND p.barcode LIKE '%".$sbarcode."%'";

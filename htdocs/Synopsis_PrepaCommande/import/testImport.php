@@ -1811,10 +1811,10 @@ function getProdType($ref) {
             $requete = "SELECT * FROM BIMP_import_product_type ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
-                $remTypeGlob[$res->id] = array('pattern' => $res->pattern, 'product_type' => $res->product_type, "rang" => $res->rang);
+                $remTypeGlob[$res->rang] = array('pattern' => $res->pattern, 'product_type' => $res->product_type, "rang" => $res->rang);
             }
         }
-        foreach ($remTypeGlob as $id => $arrReco) {
+        foreach ($remTypeGlob as $arrReco) {
             if (preg_match('/' . str_replace('/', '\/', $arrReco['pattern']) . '/', $ref)) {
                 return $arrReco['product_type'];
             }

@@ -41,7 +41,7 @@
             $requete = "SELECT *
                           FROM ".MAIN_DB_PREFIX."product p,
                                ".MAIN_DB_PREFIX."commandedet cdet
-                         WHERE ".MAIN_DB_PREFIX."product.fk_product_type=3
+                         WHERE p.fk_product_type=3
                            AND cdet.rowid = ".$res->fk_commandedet."
                            AND cdet.fk_product = p.rowid";
             $sql1 = $db->query($requete);

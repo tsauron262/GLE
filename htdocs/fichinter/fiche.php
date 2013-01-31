@@ -1073,7 +1073,7 @@ EOF;
     $fichinter = new Fichinter($db);
     $result = $fichinter->fetch($_REQUEST["id"]);
     if (!$result > 0) {
-        dol_print_error($db);
+//        dol_print_error($db);
         exit;
     }
     $fichinter->fetch_client();
@@ -1279,13 +1279,15 @@ EOF;
         print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
         print '<td colspan=1 class="ui-widget-content">';
         $tabDI = $fichinter->getDI();
-        $requete = "SELECT *
+        if (count($tabDI) > 0) {
+            $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
                  WHERE rowid IN (" . implode(",", $tabDI) . ")";
-        print "<table class='nobordernopadding' width=100%>";
-        if ($resql = $db->query($requete)) {
-            while ($res = $db->fetch_object($resql)) {
-                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
+            print "<table class='nobordernopadding' width=100%>";
+            if ($resql = $db->query($requete)) {
+                while ($res = $db->fetch_object($resql)) {
+                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
+                }
             }
         }
         print "</table>";

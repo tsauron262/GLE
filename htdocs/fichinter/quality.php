@@ -171,7 +171,7 @@ if ($_REQUEST["id"] > 0) {
         print '<input type="submit" class="button" value="'.$langs->trans('Modify').'">';
         print '</form>';
     } else {
-        print dol_print_date($fichinter->date,'day');
+        print dol_print_date($db->jdate($fichinter->date),'day');
     }
     print '</td>';
     print '</tr></table><br><br/>';

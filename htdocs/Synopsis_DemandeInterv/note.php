@@ -127,7 +127,7 @@ if ($_GET['id'])
             // Date
             print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Date').'</td>
                        <td colspan="3" class="ui-widget-content">';
-            print dol_print_date($demandeInterv->date,'day');
+            print dol_print_date($db->jdate($demandeInterv->date),'day');
             print '</td>';
             print '</tr>';
 

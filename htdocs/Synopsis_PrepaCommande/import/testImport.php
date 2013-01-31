@@ -17,7 +17,7 @@
  * Name : testImport.php
  * GLE-1.2
  */
-$maxFileImport = 2000;
+$maxFileImport = 200;
 
 
 ini_set('max_execution_time', 0);
@@ -1777,7 +1777,7 @@ function updateCategorie($ref, $prodId, $val) {
 
         if (!is_array($remCatGlob)) {
             $remCatGlob = array();
-            $requete = "SELECT * FROM BIMP_import_product_cat ORDER BY rang";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
                 $remCatGlob[$res->id] = array('pattern' => $res->pattern, 'categorie_refid' => $res->categorie_refid, "rang" => $res->rang);
@@ -1808,7 +1808,7 @@ function getProdType($ref) {
         global $remTypeGlob, $db;
         if (!is_array($remTypeGlob)) {
             $remTypeGlob = array();
-            $requete = "SELECT * FROM BIMP_import_product_type ORDER BY rang";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
                 $remTypeGlob[$res->rang] = array('pattern' => $res->pattern, 'product_type' => $res->product_type, "rang" => $res->rang);

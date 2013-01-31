@@ -176,9 +176,9 @@ class maj {
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;
-                if (($newCle == "fk_product_type") &&
-                        $tableDest == MAIN_DB_PREFIX . "product" && $val == 3)//Deplacement = service
-                    $val = 1;
+                if (($newCle == "fk_product_type" && preg_match('/' . str_replace('/', '\/', '^YOFD') . '/', $ligne['ref'])) &&
+                        $tableDest == MAIN_DB_PREFIX . "product")//Deplacement = service
+                    $val = 4;
 
 
                 if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX . "propal" && $val == "99")//On vire les statue 99 sur les propal

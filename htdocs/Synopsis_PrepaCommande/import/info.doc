@@ -73,7 +73,7 @@ INSERT INTO `llx_c_secteur` (`id`, `code`, `libelle`, `active`) VALUES
 
 
 
-CREATE TABLE IF NOT EXISTS `BIMP_import_product_type` (
+CREATE TABLE IF NOT EXISTS `llx_Synopsis_PrepaCom_import_product_type` (
   `id` int(11) NOT NULL auto_increment,
   `pattern` varchar(150) default NULL,
   `product_type` int(11) default NULL,
@@ -83,10 +83,10 @@ CREATE TABLE IF NOT EXISTS `BIMP_import_product_type` (
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=44 ;
 
 --
--- Contenu de la table `BIMP_import_product_type`
+-- Contenu de la table `llx_Synopsis_PrepaCom_import_product_type`
 --
 
-INSERT INTO `BIMP_import_product_type` (`id`, `pattern`, `product_type`, `rang`) VALUES
+INSERT INTO `llx_Synopsis_PrepaCom_import_product_type` (`id`, `pattern`, `product_type`, `rang`) VALUES
 (1, '^FD', 3, 1),
 (4, '^FC', 2, 2),
 (5, '^BTOY', 2, 3),
@@ -125,13 +125,14 @@ INSERT INTO `BIMP_import_product_type` (`id`, `pattern`, `product_type`, `rang`)
 (40, '^SE002', 2, 36),
 (41, '^U8098E', 2, 37),
 (42, '^01-SSC-8669', 2, 38),
-(43, '^fre3', 2, 39);
+(43, '^fre3', 2, 39),
+(44, '^YOFD', 4, 40);
 
 
 
 
 
-CREATE TABLE IF NOT EXISTS `BIMP_import_product_cat` (
+CREATE TABLE IF NOT EXISTS `llx_Synopsis_PrepaCom_import_product_cat` (
   `id` int(11) NOT NULL auto_increment,
   `pattern` varchar(150) default NULL,
   `categorie_refid` int(11) default NULL,

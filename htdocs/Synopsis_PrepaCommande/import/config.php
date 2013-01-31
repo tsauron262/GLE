@@ -86,12 +86,12 @@ if ($_REQUEST['action'] == "setNewPattern")
     $rang = $_REQUEST['rang'];
     if (!$rang>0)
     {
-        $requete = "SELECT max(rang) + 1 as mi FROM BIMP_import_product_type";
+        $requete = "SELECT max(rang) + 1 as mi FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type";
         $sql = $db->query($requete);
         $res=$db->fetch_object($sql);
         $rang = ($res->mi>0?$res->mi:1);
     }
-    $requete = "INSERT INTO BIMP_import_product_type (pattern, product_type,rang) VALUES ('".$_REQUEST['NewPattern']."',".$_REQUEST['type'].",".$rang.")";
+    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type (pattern, product_type,rang) VALUES ('".$_REQUEST['NewPattern']."',".$_REQUEST['type'].",".$rang.")";
     $sql = $db->query($requete);
 }
 if ($_REQUEST['action'] == 'modPattern')
@@ -102,10 +102,10 @@ if ($_REQUEST['action'] == 'modPattern')
     $type = $_REQUEST['type'];
     if ($_REQUEST['suppr'] == 'supprimer')
     {
-        $requete = "DELETE FROM BIMP_import_product_type WHERE id=".$id;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type WHERE id=".$id;
         $sql = $db->query($requete);
     } else {
-        $requete = "UPDATE BIMP_import_product_type SET pattern='".$pattern."', product_type=".$type.", rang=".$rang." WHERE id = ".$id;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type SET pattern='".$pattern."', product_type=".$type.", rang=".$rang." WHERE id = ".$id;
         $sql = $db->query($requete);
     }
 }
@@ -116,10 +116,10 @@ if ($_REQUEST['action'] == 'modCat')
     $type = $_REQUEST['catId'];
     if ($_REQUEST['suppr'] == 'supprimer')
     {
-        $requete = "DELETE FROM BIMP_import_product_cat WHERE id=".$id;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat WHERE id=".$id;
         $sql = $db->query($requete);
     } else {
-        $requete = "UPDATE BIMP_import_product_cat SET pattern='".$pattern."', categorie_refid=".$type." WHERE id = ".$id;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat SET pattern='".$pattern."', categorie_refid=".$type." WHERE id = ".$id;
         $sql = $db->query($requete);
     }
 }
@@ -130,12 +130,12 @@ if($_REQUEST['action'] == 'setNewPatternCat')
     $rang = $_REQUEST['rang'];
     if (!$rang>0)
     {
-        $requete = "SELECT max(rang) + 1 as mi FROM BIMP_import_product_cat";
+        $requete = "SELECT max(rang) + 1 as mi FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat";
         $sql = $db->query($requete);
         $res=$db->fetch_object($sql);
         $rang = ($res->mi>0?$res->mi:1);
     }
-    $requete = "INSERT INTO BIMP_import_product_cat (pattern, categorie_refid,rang) VALUES ('".$_REQUEST['NewPattern']."',".$_REQUEST['catId'].",".$rang.")";
+    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat (pattern, categorie_refid,rang) VALUES ('".$_REQUEST['NewPattern']."',".$_REQUEST['catId'].",".$rang.")";
     $sql = $db->query($requete);
 }
 if (strlen($msg)>0) print "<div class='error ui-error'>".$msg."</div>";
@@ -170,7 +170,7 @@ print '</ul>';
   print "    <th class='ui-widget-header ui-state-default' style='width:50px; border:1px solid;'>Rang";
   print "    <th colspan=2 class='ui-widget-header ui-state-default' style='width:292px; border:1px solid;' width=292>Action";
   print "</table>";
-  $requete = "SELECT id,pattern, product_type as type ,rang FROM BIMP_import_product_type ORDER BY rang";
+  $requete = "SELECT id,pattern, product_type as type ,rang FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type ORDER BY rang";
   $sql = $db->query($requete);
   while ($res = $db->fetch_object($sql)){
     print "<form method='POST' action='".$_SERVER['PHP_SELF']."#fragment-2'>";
@@ -244,7 +244,7 @@ print "</div>";
 print "<div id='fragment-3'>";
   //list les ref liant l'import à un type
 
-  $requete = "SELECT id,pattern, categorie_refid,rang  FROM BIMP_import_product_cat ORDER BY rang";
+  $requete = "SELECT id,pattern, categorie_refid,rang  FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat ORDER BY rang";
   $sql = $db->query($requete);
   $i=0;
   while ($res = $db->fetch_object($sql)){

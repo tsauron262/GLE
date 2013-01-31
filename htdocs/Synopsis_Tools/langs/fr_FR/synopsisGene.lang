@@ -306,5 +306,6 @@ PrisEnCharge = Prise en charge inter
 ConfirmPrisEnChargeDI = Prendre en charge l\'intervention ?
 
 
-CardProduct3 = Déplacement
 CardProduct2 = Produit de contrat
+CardProduct3 = Déplacement
+CardProduct4 = Déplacement contrat

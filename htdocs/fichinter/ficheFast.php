@@ -238,6 +238,10 @@ if ($_REQUEST["id"] > 0) {
         </tr>
 ';
     echo '<tr>
+            <th width="25%" class="ui-widget-header ui-state-default">Titre</th>
+            <td class="ui-widget-content" colspan="3"><textarea name="desc">' . $resultG->description . '</textarea></td>
+        </tr>';
+    echo '<tr>
             <th>Intervention</th>
         </tr>
 ';
@@ -355,10 +359,6 @@ if ($_REQUEST["id"] > 0) {
             <td class="ui-widget-content" colspan="3"><textarea name="desc2">' . extra(28) . '</textarea></td>
         </tr>
 ';
-    echo '<tr>
-            <th width="25%" class="ui-widget-header ui-state-default">Titre</th>
-            <td class="ui-widget-content" colspan="3"><textarea name="desc">' . $resultG->description . '</textarea></td>
-        </tr>';
 
 
     echo '<tr>

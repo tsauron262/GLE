@@ -839,8 +839,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print '<tr>';
         print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DefaultModel") . '</th>';
         print '<td colspan="3" class="ui-widget-content">';
-        $model = new ModelePDFFicheinter();
-        $liste = $model->liste_modeles($db);
+        $liste = ModelePDFFicheinter::liste_modeles($db);
         $html->select_array('model', $liste, $conf->global->FICHEINTER_ADDON_PDF);
         print "</td></tr>";
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Description") . '</th>';

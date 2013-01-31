@@ -42,7 +42,7 @@ $conf->global->devMailTo = 'tommy@drsi.fr';
 
 if (is_object($langs))
     $tabProductType = array(0 => $langs->trans("Product"), 1 => $langs->trans("Service"), 2 => $langs->trans("Produit de contrat"), 3 => $langs->trans("Déplacement"), 4 => $langs->trans("Déplacement contrat"));
-
+global $tabProductType;
 
 
 

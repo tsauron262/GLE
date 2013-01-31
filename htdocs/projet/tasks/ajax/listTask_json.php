@@ -183,17 +183,17 @@ if ($lightMode.'x' !="x")
 {
     while($row = $db->fetch_array($result,MYSQL_ASSOC))
     {
-        $responce->rows[$i]['id']=$row[rowid];
+        $responce->rows[$i]['id']=$row['rowid'];
         $tmpuser = new User($db);
-        $tmpuser->fetch($row[fk_user]);
+        $tmpuser->fetch($row['fk_user']);
         $task = new ProjectTask($db);
         $task->fetch($row['rowid']);
-        $responce->rows[$i]['cell']=array($row[rowid],
-                                          traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),
-                                          $row[task_date],
-                                          $row[progress]."%",
-                                          sec2hour(abs($row[task_duration])),
-                                          sec2hour(abs($row[task_duration_effective])),
+        $responce->rows[$i]['cell']=array($row['rowid'],
+                                          traiteStr("<a href='task.php?id=".$row['rowid']."'>".$row['title']."</a>"),
+                                          $row['task_date'],
+                                          $row['progress']."%",
+                                          sec2hour(abs($row['task_duration'])),
+                                          sec2hour(abs($row['task_duration_effective'])),
                                           traiteStr($task->getLibStatut(5))
                                           );
         $i++;
@@ -203,10 +203,10 @@ if ($lightMode.'x' !="x")
 {
     while($row = $db->fetch_array($result,MYSQL_ASSOC))
     {
-        $responce->rows[$i]['id']=$row[rowid];
+        $responce->rows[$i]['id']=$row['rowid'];
         $tmpuser = new User($db);
-        $tmpuser->fetch($row[fk_user]);
-        $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),traiteStr($row[role]),($tmpuser->id >0?$tmpuser->getNomUrl(1):""),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])));
+        $tmpuser->fetch($row['fk_user']);
+        $responce->rows[$i]['cell']=array($row['rowid'],traiteStr("<a href='task.php?id=".$row['rowid']."'>".$row['title']."</a>"),traiteStr($row['role']),($tmpuser->id >0?$tmpuser->getNomUrl(1):""),$row['task_date'],sec2hour(abs($row['task_duration'])),sec2hour(abs($row['task_duration_effective'])));
         $i++;
     }
 
@@ -214,20 +214,20 @@ if ($lightMode.'x' !="x")
 {
     while($row = $db->fetch_array($result,MYSQL_ASSOC))
     {
-        $responce->rows[$i]['id']=$row[rowid];
+        $responce->rows[$i]['id']=$row['rowid'];
         $tmpuser = new User($db);
-        $tmpuser->fetch($row[fk_user]);
-        $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),traiteStr($row[role]),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])));
+        $tmpuser->fetch($row['fk_user']);
+        $responce->rows[$i]['cell']=array($row['rowid'],traiteStr("<a href='task.php?id=".$row['rowid']."'>".$row['title']."</a>"),traiteStr($row['role']),$row['task_date'],sec2hour(abs($row['task_duration'])),sec2hour(abs($row['task_duration_effective'])));
         $i++;
     }
 
 } else {
     while($row = $db->fetch_array($result,MYSQL_ASSOC))
     {
-        $responce->rows[$i]['id']=$row[rowid];
+        $responce->rows[$i]['id']=$row['rowid'];
         $tmpuser = new User($db);
-        $tmpuser->fetch($row[fk_user]);
-        $responce->rows[$i]['cell']=array($row[rowid],traiteStr("<a href='task.php?id=".$row[rowid]."'>".$row['title']."</a>"),$row[task_date],sec2hour(abs($row[task_duration])),sec2hour(abs($row[task_duration_effective])),traiteStr(($tmpuser->id>0?$tmpuser->getNomUrl(1):"")));
+        $tmpuser->fetch($row['fk_user']);
+        $responce->rows[$i]['cell']=array($row['rowid'],traiteStr("<a href='task.php?id=".$row['rowid']."'>".$row['title']."</a>"),$row['task_date'],sec2hour(abs($row['task_duration'])),sec2hour(abs($row['task_duration_effective'])),traiteStr(($tmpuser->id>0?$tmpuser->getNomUrl(1):"")));
         $i++;
     }
 }

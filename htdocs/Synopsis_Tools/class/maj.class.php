@@ -53,20 +53,20 @@ class maj {
         if (!$update) {
             $this->netoyerTables($tab);
 
-            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
-                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-            $this->queryD($requete);
-            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "propal DROP FOREIGN KEY fk_propal_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
-                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-            $this->queryD($requete);
-            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "facture DROP FOREIGN KEY fk_facture_fk_projet ,
-                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
-                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
-            $this->queryD($requete);
-            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "categorie DROP KEY uk_categorie_ref;";
-            $this->queryD($requete);
+//            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
+//            $this->queryD($requete);
+//            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "propal DROP FOREIGN KEY fk_propal_fk_projet ,
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
+//            $this->queryD($requete);
+//            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "facture DROP FOREIGN KEY fk_facture_fk_projet ,
+//                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 
+//                ON DELETE RESTRICT ON UPDATE RESTRICT ;";
+//            $this->queryD($requete);
+//            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "categorie DROP KEY uk_categorie_ref;";
+//            $this->queryD($requete);
         }
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("commande");
@@ -266,7 +266,7 @@ class maj {
             if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
                 $where = "fk_user != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
-                $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
+//                $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau
             }
             $requete = "DELETE FROM " . $ligne[1] . " WHERE " . $where;

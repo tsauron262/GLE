@@ -1709,7 +1709,8 @@ function updateCategorie($ref, $prodId, $val) {
             global $gammeCatId;
             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie (visible,label,type,level, fk_parent) VALUES (1,'" . $val["ArtGammeEnu"] . "',0,3, " . $gammeCatId . ")";
             $sql = $db->query($requete);
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $res->rowid . "," . $prodId . ")";
+            $catId = $db->last_insert_id($sql);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $prodId . ")";
             $sql1 = $db->query($requete);
         }
         //
@@ -1724,7 +1725,8 @@ function updateCategorie($ref, $prodId, $val) {
 //                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
 //                             VALUES (".$familleCatId.",".$newId.")";
 //            $sql1 = $db->query($requete);
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $res->rowid . "," . $prodId . ")";
+            $catId = $db->last_insert_id($sql);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $prodId . ")";
             $sql1 = $db->query($requete);
         }
         //
@@ -1739,7 +1741,8 @@ function updateCategorie($ref, $prodId, $val) {
 //                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
 //                             VALUES (".$natureCatId.",".$newId.")";
 //            $sql1 = $db->query($requete);
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $res->rowid . "," . $prodId . ")";
+            $catId = $db->last_insert_id($sql);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $prodId . ")";
             $sql1 = $db->query($requete);
         }
         //
@@ -1754,7 +1757,8 @@ function updateCategorie($ref, $prodId, $val) {
 //                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
 //                             VALUES (".$selectBIMPCatId.",".$newId.")";
 //            $sql1 = $db->query($requete);
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $res->rowid . "," . $prodId . ")";
+            $catId = $db->last_insert_id($sql);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $prodId . ")";
             $sql1 = $db->query($requete);
         }
 
@@ -1771,7 +1775,8 @@ function updateCategorie($ref, $prodId, $val) {
 //                                    (fk_categorie_mere_babel,fk_categorie_fille_babel)
 //                             VALUES (".$collectionCatId.",".$newId.")";
 //            $sql1 = $db->query($requete);
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $res->rowid . "," . $prodId . ")";
+            $catId = $db->last_insert_id($sql);
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "categorie_product (fk_categorie, fk_product) VALUES (" . $catId . "," . $prodId . ")";
             $sql1 = $db->query($requete);
         }
 

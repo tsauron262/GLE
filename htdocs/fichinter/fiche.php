@@ -358,12 +358,12 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
 if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->creer && $_POST["save"] == $langs->trans("Save")) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_POST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FIdet update");
         exit;
     }
     $fichinter = new Fichinter($db);
     if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FI update");
         exit;
     }
     $fichinter->info($fichinterline->fk_fichinter);
@@ -412,12 +412,24 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
         $fichinterline->isForfait = 0;
     }
 
+    
     $fichinterline->fk_contratdet = $_REQUEST['fk_contratdet'];
 
-    $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+//    $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+    
+    if (isset($_REQUEST['comLigneId']) && $_REQUEST['comLigneId'] != $fichinterline->comLigneId) {
+        $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+        $ligneCommande = new OrderLine($db);
+        $ligneCommande->fetch($fichinterline->comLigneId);
+//        die($ligneCommande->fk_product);
+        if($ligneCommande->fk_product)
+            $fichinterline->typeIntervProd = $ligneCommande->fk_product;
+    }
 
 
     $result = $fichinterline->update();
+    $fichinter->majPrixDi();
+    
 
     if ($_REQUEST['lang_id']) {
         $outputlangs = new Translate("", $conf);
@@ -432,13 +444,13 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FIdet delete");
         exit;
     }
     $result = $fichinterline->delete_line();
     $fichinter = new Fichinter($db);
     if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FI delete");
         exit;
     }
     if ($_REQUEST['lang_id']) {
@@ -455,13 +467,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_deleteline' &&
     if ($user->rights->synopsisficheinter->creer) {
         $fichinterline = new FichinterLigne($db);
         if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
-            dol_print_error($db);
+            dol_print_error($db, "Erreur FIdet delete confirm");
             exit;
         }
         $result = $fichinterline->delete_line();
         $fichinter = new Fichinter($db);
         if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-            dol_print_error($db);
+            dol_print_error($db, "Erreur FI deleteconfirm");
             exit;
         }
         if ($_REQUEST['lang_id']) {
@@ -563,7 +575,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         print "<tr><th class='ui-widget-header ui-state-default'>" . $langs->trans("Date") . "</th>
                    <td colspan=3 class='ui-widget-content'>";
-        $html->select_date(time(), "p", '', '', '', 'fichinter');
+        $html->select_date($db->jdate(time()), "p", '', '', '', 'fichinter');
         print "</td></tr>";
 
         print "<input type=\"hidden\" name=\"action\" value=\"add\">";
@@ -804,7 +816,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         if ($_REQUEST['datei'] && preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", $_REQUEST['datei'], $arr)) {
             $tmpDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]);
         }
-        $html->select_date($tmpDate, "p", '', '', '', 'demandeInterv');
+        $html->select_date($db->jdate($tmpDate), "p", '', '', '', 'demandeInterv');
         print "</td></tr>";
 
 
@@ -1017,7 +1029,7 @@ EOF;
         print "</SELECT></td>";
         // Date d'DI
         print '<td>';
-        $html->select_date(time(), 'di', 0, 0, 0, "addinter");
+        $html->select_date($db->jdate(time()), 'di', 0, 0, 0, "addinter");
         print '</td>';
 
         // Duree
@@ -1092,6 +1104,9 @@ EOF;
         $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $fichinter->id, $langs->trans('DeleteIntervention'), $langs->trans('ConfirmDeleteIntervention'), 'confirm_delete');
         print '<br>';
     }
+    if ($_REQUEST['action'] == 'rafraichePrixFI') {
+        $fichinter->majPrixDi();
+    }
 
     /*
      * Confirmation de la validation de la fiche d'intervention
@@ -1145,7 +1160,7 @@ EOF;
     if ($_REQUEST['action'] == 'editdate_delivery') {
         print '<form name="editdate_delivery" action="' . $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '" method="post">';
         print '<input type="hidden" name="action" value="setdate_delivery">';
-        $html->select_date($fichinter->date, 'liv_', '', '', '', "editdate_delivery");
+        $html->select_date($db->jdate($fichinter->date), 'liv_', '', '', '', "editdate_delivery");
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
@@ -1642,7 +1657,7 @@ EOF;
 
                 // Date d'intervention
                 print '<td>';
-                $html->select_date($objp->date_intervention, 'di', 0, 0, 0, "date_intervention");
+                $html->select_date($db->jdate($objp->date_intervention), 'di', 0, 0, 0, "date_intervention");
                 print '</td>';
 
                 // Duration
@@ -1660,12 +1675,16 @@ EOF;
                     print "<option value='0'>S&eacute;lectionner-></option>";
 
                     foreach ($com->lines as $key => $val) {
-                        $prod = new Product($db);
-                        $prod->fetch($val->fk_product);
+                        $text = $val->description;
+                        if ($val->fk_product) {
+                            $prod = new Product($db);
+                            $prod->fetch($val->fk_product);
+                            $text = $prod->ref . " " . $text;
+                        }
                         if ($val->id == $objp->fk_commandedet) {
-                            print "<option SELECTED value='" . $val->id . "'>" . $prod->ref . " " . $val->description . " </option>";
-                        } else {
-                            print "<option value='" . $val->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                            print "<option SELECTED value='" . $val->id . "'>" . $text . " </option>";
+                        } elseif ($text != '') {
+                            print "<option value='" . $val->id . "'>" . $text . "</option>";
                         }
                     }
                     print "</select>";
@@ -1725,7 +1744,7 @@ EOF;
 
         $db->free($resql);
     } else {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur sql : " . $sql);
     }
 
     /*
@@ -1802,7 +1821,7 @@ EOF;
         print "</SELECT>";
         // Date d'intervention
         print '<td>';
-        $html->select_date(time(), 'di', 0, 0, 0, "addinter");
+        $html->select_date($db->jdate(time()), 'di', 0, 0, 0, "addinter");
         print '</td>';
 
         // Duree

@@ -266,7 +266,7 @@ class Fichinter extends CommonObject
         else
         {
             $this->error=$this->db->error();
-//            dol_syslog("Fichinter::update error ".$this->error,LOG_ERR);
+            dol_syslog("Fichinter::update error ".$this->error,LOG_ERR);
             return -1;
         }
     }
@@ -537,6 +537,24 @@ class Fichinter extends CommonObject
             {
 
                 dol_syslog("Fichinter::set_project Erreur SQL");
+            }
+        }
+    }
+    
+    
+    
+    function majPrixDi(){
+        $this->fetch_lines();
+        foreach ($this->lignes as $lignes) {
+            if ($lignes->fk_commandedet) {
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE fk_commandedet =" . $lignes->fk_commandedet;
+                $resql = $this->db->query($requete);
+                while ($res = $this->db->fetch_object($resql)) {
+                    if($lignes->pu_ht != $res->pu_ht){
+                        $lignes->pu_ht = $res->pu_ht;
+                        $lignes->update();
+                    }
+                }
             }
         }
     }
@@ -1199,11 +1217,12 @@ class FichinterLigne
             return -1;
         }
     }
-
+  
     /**
     *      \brief         Mise a jour duree total dans table ".MAIN_DB_PREFIX."Synopsis_fichinter
     *        \return        int        <0 si ko, >0 si ok
     */
+    
     function update_total()
     {
         global $user,$langs,$conf;

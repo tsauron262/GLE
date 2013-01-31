@@ -529,12 +529,12 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
 if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer && $_POST["save"] == $langs->trans("Save")) {
     $demandeIntervline = new demandeIntervLigne($db);
     if ($demandeIntervline->fetch($_POST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "fetch demandeintervdet");
         exit;
     }
     $demandeInterv = new demandeInterv($db);
     if ($demandeInterv->fetch($demandeIntervline->fk_demandeInterv) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "fetch demandeinterv");
         exit;
     }
     $desc = $_POST['desc'];
@@ -568,13 +568,13 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'deleteline' && $user->rights->synopsisdemandeinterv->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     $demandeIntervline = new demandeIntervLigne($db);
     if ($demandeIntervline->fetch($_REQUEST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "fetch demandeintervdet");
         exit;
     }
     $result = $demandeIntervline->delete_line();
     $demandeInterv = new demandeInterv($db);
     if ($demandeInterv->fetch($demandeIntervline->fk_demandeInterv) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "fetch demandeinterv");
         exit;
     }
     if ($_REQUEST['lang_id']) {
@@ -591,13 +591,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_deleteline' &&
     if ($user->rights->synopsisdemandeinterv->creer) {
         $demandeIntervline = new demandeIntervLigne($db);
         if ($demandeIntervline->fetch($_REQUEST['ligne']) <= 0) {
-            dol_print_error($db);
+        dol_print_error($db, "fetch demandeintervdet");
             exit;
         }
         $result = $demandeIntervline->delete_line();
         $demandeInterv = new demandeInterv($db);
         if ($demandeInterv->fetch($demandeIntervline->fk_demandeInterv) <= 0) {
-            dol_print_error($db);
+        dol_print_error($db, "fetch demandeinterv");
             exit;
         }
         if ($_REQUEST['lang_id']) {
@@ -1214,7 +1214,7 @@ EOF;
     $demandeInterv = new demandeInterv($db);
     $result = $demandeInterv->fetch($_REQUEST["id"]);
     if (!$result > 0) {
-        dol_print_error($db);
+        dol_print_error($db, "fetch demandeinterv");
         exit;
     }
     $demandeInterv->fetch_client();
@@ -1629,7 +1629,7 @@ EOF;
                 print "<td width='150'>" . $objp->typeinterv . "</td>";
                 print '<td width="150">' . dol_print_date($db->jdate($objp->date_intervention), 'day') . '</td>';
                 print '<td width="150">' . ConvertSecondToTime($objp->duree) . '</td>';
-                if ($demandeInterv->fk_commande > 0) {
+                if ($objp->fk_commandedet > 0) {
                     $requete = "SELECT fk_product FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $objp->fk_commandedet;
                     $sql4 = $db->query($requete);
                     $res4 = $db->fetch_object($sql4);
@@ -1640,6 +1640,8 @@ EOF;
                     } else {
                         print "<td width='150'>&nbsp;";
                     }
+                } else {
+                    print "<td width='150'>&nbsp;";
                 }
 
                 print '<td width="150">' . $arrYesNo[$objp->isForfait] . '</td>';
@@ -1832,7 +1834,7 @@ EOF;
 
         $db->free($resql);
     } else {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur Inconnue ".$sql);
     }
 
     /*

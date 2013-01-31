@@ -209,15 +209,15 @@ function cloneDi(id){
                 //reload
                 reloadResult();
                 if (jQuery('.cntAddDIDial').length>1){
-                    jQuery('#addDIDial').dialog( "destroy" );
+//                    jQuery('#addDIDial').dialog( "destroy" );
                     jQuery('#addDIDial').remove();
                 }
                 if (jQuery('.cntAttrDIDial').length>1){
-                    jQuery('#attrDIDial').dialog( "destroy" );
+//                    jQuery('#attrDIDial').dialog( "destroy" );
                     jQuery('#attrDIDial').remove();
                 }
                 if (jQuery('.cntRempDIDial').length>1){
-                    jQuery('#rempDIDial').dialog( "destroy" );
+//                    jQuery('#rempDIDial').dialog( "destroy" );
                     jQuery('#rempDIDial').remove();
                 }
 
@@ -240,15 +240,15 @@ function cloneDi(id){
 }
     jQuery(document).ready(function(){
         if (jQuery('.cntAddDIDial').length>1){
-            jQuery('#addDIDial').dialog( "destroy" );
+//            jQuery('#addDIDial').dialog( "destroy" );
             jQuery('#addDIDial').remove();
         }
         if (jQuery('.cntAttrDIDial').length>1){
-            jQuery('#attrDIDial').dialog( "destroy" );
+//            jQuery('#attrDIDial').dialog( "destroy" );
             jQuery('#attrDIDial').remove();
         }
         if (jQuery('.cntRempDIDial').length>1){
-            jQuery('#rempDIDial').dialog( "destroy" );
+//            jQuery('#rempDIDial').dialog( "destroy" );
             jQuery('#rempDIDial').remove();
         }
 
@@ -370,7 +370,7 @@ function cloneDi(id){
                                     jQuery(self).dialog('close');
 //reload
                                     jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
-                                    jQuery('#attrDIDial').dialog( "destroy" );
+//                                    jQuery('#attrDIDial').dialog( "destroy" );
                                     jQuery('#attrDIDial').remove();
                                     jQuery.ajax({
                                         url: "ajax/demandeInterv-html_response.php",

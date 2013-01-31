@@ -35,7 +35,7 @@
         $xmlStr .= "<DI id='".$res->rowid."'>";
         $xmlStr .= "<rowid>".$res->rowid."</rowid>";
         $xmlStr .= "<date>".date('d/m/Y',strtotime($res->date))."</date>";
-        $xmlStr .= "<description><![CDATA[".htmlentities($res->description)."]]></description>";
+        $xmlStr .= "<description><![CDATA[".traiteStr($res->description)."]]></description>";
         if ($res->isDeplacement == 1)
         {
             $requete = "SELECT *
@@ -50,12 +50,12 @@
             {
                 $tmpProd = new Product($db);
                 $tmpProd->fetch($res1->fk_product);
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
             } else {
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
             }
         } else {
-            $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+            $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
         }
         $tmpDur = convDur($res->duree);
         $xmlStr .= "<total_ht><![CDATA[".price($res->total_ht)."]]></total_ht>";
@@ -119,4 +119,6 @@ function convDur($duration)
     // Affichage
     return( $converted_duration);
 }
+
+function traiteStr($str){ return str_replace("\n", "<br/>", $str); }
 ?>

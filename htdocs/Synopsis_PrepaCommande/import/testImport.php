@@ -17,7 +17,7 @@
  * Name : testImport.php
  * GLE-1.2
  */
-$maxFileImport = 200;
+$maxFileImport = 100;
 
 
 ini_set('max_execution_time', 0);

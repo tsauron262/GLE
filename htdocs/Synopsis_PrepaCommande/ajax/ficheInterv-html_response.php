@@ -127,6 +127,8 @@
             print "<button id='validFI-".$res->rowid."' class='validFI butAction ui-widget-header ui-state-default'>Valid. Interv.</button>";
 
             print "<button id='modFI-".$res->rowid."' class='modFI butAction ui-widget-header ui-state-default'>Modifier</button>";
+
+            print "<button id='rafraichePrixFI-".$res->rowid."' class='rafraichePrixFI butAction ui-widget-header ui-state-default'>Rafraichir prix</button>";
         }
         print "</table>";
         print "<table width=800>";
@@ -244,6 +246,10 @@
         jQuery('.modFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^modFI-/,"");
             location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id;
+        });
+        jQuery('.rafraichePrixFI').click(function(){
+            var id = jQuery(this).attr('id').replace(/^rafraichePrixFI-/,"");
+            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?action=rafraichePrixFI&id='+id;
         });
 
 

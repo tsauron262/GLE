@@ -31,8 +31,13 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 if (isset($_GET['action']) && $_GET['action'] == "import") {
     $dbD = $db;
 //$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "roland2007", "gle1main", $Hconf->dbport);
-$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "x", "synopsis_oldBimp3", $Hconf->dbport);
-//    $dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "freeparty", "oldCapsim2", $Hconf->dbport);
+//$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "x", "synopsis_oldBimp3", $Hconf->dbport);
+
+
+if(defined('IMPORT_BDD_HOST') && defined('IMPORT_BDD_USER') && defined('IMPORT_BDD_PASSE') && defined('IMPORT_BDD_NAME'))
+    $dbS = getDoliDBInstance($conf->db->type, IMPORT_BDD_HOST, IMPORT_BDD_USER, IMPORT_BDD_PASSE, IMPORT_BDD_NAME, $Hconf->dbport);
+else
+    die("Les info de la base a importé sont incorrecte");
 
     include_once("./class/maj.class.php");
     $maj = new maj($dbS, $dbD);

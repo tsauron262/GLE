@@ -195,7 +195,7 @@ class maj {
                     $val = NULL;
                 if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
-                if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights")) {//Nouveau num des droit
+                if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights") && (!isset($_REQUEST['type']) || $_REQUEST['type'] == 1)) {//Nouveau num des droit
                     if ($val > 59 && $val < 70){
                         $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
                     }

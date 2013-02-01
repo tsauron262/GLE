@@ -152,6 +152,7 @@ if ("x".$lightMode != "x")
     $SQL = "SELECT DISTINCT t.rowid,
                t.title,
                t.progress,
+               a.fk_user,
                ifnull(date_format(t.dateDeb,'%d/%m/%Y'),(SELECT date_format(MIN(task_date),'%d/%m/%Y') FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt WHERE tt.fk_task = t.rowid )) as task_date,
                (SELECT SUM(task_duration) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time as tt WHERE t.rowid = tt.fk_task) as task_duration,
                (SELECT SUM(task_duration_effective) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective as te WHERE t.rowid = te.fk_task) as task_duration_effective
@@ -173,6 +174,7 @@ if ('x'.$user_id != "x")
 }
 $SQL .= $wh;
 //print $SQL;
+$SQL .= "      GROUP BY t.rowid";
 $SQL .= "      ORDER BY $sidx $sord";
 $SQL .= "         LIMIT $start , $limit";
 //print $SQL;

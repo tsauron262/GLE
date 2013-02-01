@@ -1667,8 +1667,8 @@ if ($action == 'send' && ! GETPOST('addfile') && ! GETPOST('removedfile') && ! G
 			$soc = new Societe($db);
 			$soc->fetch($object->socid);
 
-			$author = new User($db);
-			$author->fetch($object->user_author_id);
+//			$author = new User($db);
+//			$author->fetch($object->user_author_id);
 
 			$head = commande_prepare_head($object);
 			dol_fiche_head($head, 'order', $langs->trans("CustomerOrder"), 0, 'order');

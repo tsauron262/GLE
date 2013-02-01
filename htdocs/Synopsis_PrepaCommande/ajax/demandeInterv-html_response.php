@@ -1,78 +1,72 @@
 <?php
+
 /*
-  ** GLE by Synopsis et DRSI
-  *
-  * Author: Tommy SAURON <tommy@drsi.fr>
-  * Licence : Artistic Licence v2.0
-  *
-  * Version 1.2
-  * Created on : 28 sept. 2010
-  *
-  * Infos on http://www.finapro.fr
-  *
-  */
- /**
-  *
-  * Name : demandeInterv-html_response.php
-  * GLE-1.2
-  */
-
-  //liste les demandes d'interv et le statut
-
-
-    require_once('../../main.inc.php');
-
-  $id = $_REQUEST['id'];
-  $DiId = $_REQUEST['diId'];
-  require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
-  $com = new Synopsis_Commande($db);
-  $html = new Form($db);
-  $res=$com->fetch($id);
-
-  $arrGrpCom = array($id=>$id);
-  $arrGrp = $com->listGroupMember(true);
-  if($arrGrp && count($arrGrp) > 0)
-  foreach($arrGrp as $key=>$commandeMember)
-  {
-        $arrGrpCom[$commandeMember->id]=$commandeMember->id;
-  }
+ * * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.2
+ * Created on : 28 sept. 2010
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+/**
+ *
+ * Name : demandeInterv-html_response.php
+ * GLE-1.2
+ */
+//liste les demandes d'interv et le statut
 
 
-  if ($res>0)
-  {
-    $com->fetch_group_lines(0,0,0,0,1);
+require_once('../../main.inc.php');
 
-    $requete="SELECT fk_user_target, fk_user_prisencharge , datei, duree, description, fk_statut, note_private, note_public, rowid
-                FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
-               WHERE fk_commande IN (".join(',',$arrGrpCom).")";
-    if ($DiId>0)
-    {
-        $requete .= " AND ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid = ".$DiId;
+$id = $_REQUEST['id'];
+$DiId = $_REQUEST['diId'];
+require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+$com = new Synopsis_Commande($db);
+$html = new Form($db);
+$res = $com->fetch($id);
+
+$arrGrpCom = array($id => $id);
+$arrGrp = $com->listGroupMember(true);
+if ($arrGrp && count($arrGrp) > 0)
+    foreach ($arrGrp as $key => $commandeMember) {
+        $arrGrpCom[$commandeMember->id] = $commandeMember->id;
+    }
+
+
+if ($res > 0) {
+    $com->fetch_group_lines(0, 0, 0, 0, 1);
+
+    $requete = "SELECT fk_user_target, fk_user_prisencharge , datei, duree, description, fk_statut, note_private, note_public, rowid
+                FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+               WHERE fk_commande IN (" . join(',', $arrGrpCom) . ")";
+    if ($DiId > 0) {
+        $requete .= " AND " . MAIN_DB_PREFIX . "Synopsis_demandeInterv.rowid = " . $DiId;
     }
     $requete .= "
             ORDER BY fk_user_prisencharge, fk_user_target, datei DESC";
 //            print $requete;
-    $sql=$db->query($requete);
+    $sql = $db->query($requete);
     $rem = -10;
     $num = $db->num_rows($sql);
-    while($res=$db->fetch_object($sql))
-    {
+    while ($res = $db->fetch_object($sql)) {
         $di = new DemandeInterv($db);
         $di->fetch($res->rowid);
 //        $rem = $res->fk_user_prisencharge;
         $tmpUser = new User($db);
-        print "<table width=900>";
-        if ($res->fk_user_prisencharge > 0)
-        {
+        print "<table width='100%'>";
+        if ($res->fk_user_prisencharge > 0) {
             $tmpUser->fetch($res->fk_user_prisencharge);
-            if ($rem!=$res->fk_user_prisencharge)
-            {
+            if ($rem != $res->fk_user_prisencharge) {
                 print "<tr><td colspan=8>&nbsp;";
-                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Attribu&eacute; &agrave; ".utf8_encodeRien($tmpUser->getNomUrl(1));
+                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Attribu&eacute; &agrave; " . utf8_encodeRien($tmpUser->getNomUrl(1));
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
                            <th class='ui-widget-header ui-state-default'>Effectu&eacute; par
@@ -80,15 +74,13 @@
                            <th class='ui-widget-header ui-state-default'>Dur&eacute;e totale
                            <th class='ui-widget-header ui-state-default'>Statut
                            <th class='ui-widget-header ui-state-default'>F. Interv.";
-                if ($user->rights->SynopsisPrepaCom->interventions->Modifier)
-                {
+                if ($user->rights->SynopsisPrepaCom->interventions->Modifier) {
                     print "    <th class='ui-widget-header ui-state-default'>Action";
                 }
             }
-            $rem=$res->fk_user_prisencharge;
+            $rem = $res->fk_user_prisencharge;
         } else {
-            if ($rem != -1)
-            {
+            if ($rem != -1) {
                 print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%; line-height: 2em'>Non Attribu&eacute;";
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
@@ -97,32 +89,33 @@
                            <th class='ui-widget-header ui-state-default'>Dur&eacute;e totale
                            <th class='ui-widget-header ui-state-default'>Statut
                            <th class='ui-widget-header ui-state-default'>F. Interv.";
-                if ($user->rights->SynopsisPrepaCom->interventions->Modifier)
-                {
+                if ($user->rights->SynopsisPrepaCom->interventions->Modifier) {
                     print "    <th class='ui-widget-header ui-state-default'>Action";
                 }
             }
-            $rem=-1;
+            $rem = -1;
         }
-        print "<tr><td valign=top width=30 class='ui-widget-content'><span class='ui-widget-header'><span id='displayDIDet-".$res->rowid."' class='displayDIDet ui-icon ui-icon-circle-triangle-e'></span></span>";
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=130 class='ui-widget-content' >".$di->getNomUrl(1);
-        if ($res->fk_user_target > 0)
-        {
+        print "<tr><td valign=top width=30 class='ui-widget-content'><span class='ui-widget-header'><span id='displayDIDet-" . $res->rowid . "' class='displayDIDet ui-icon ui-icon-circle-triangle-e'></span></span>";
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=130 class='ui-widget-content' >" . $di->getNomUrl(1);
+        if ($res->fk_user_target > 0) {
             $tmpUser->fetch($res->fk_user_target);
-            print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>".utf8_encodeRien($tmpUser->getNomUrl(1));
+            print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>" . utf8_encodeRien($tmpUser->getNomUrl(1));
+        } elseif ($res->fk_user_prisencharge > 0) {
+            $tmpUser->fetch($res->fk_user_prisencharge);
+            print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>" . utf8_encodeRien($tmpUser->getNomUrl(1));
         } else {
             print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'> - ";
         }
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=70 class='ui-widget-content'>".($res->datei>0?date('d/m/Y',strtotime($res->datei)):"");
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=70 class='ui-widget-content'>" . ($res->datei > 0 ? date('d/m/Y', strtotime($res->datei)) : "");
         $tmpDur = convDur($res->duree);
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'>".$tmpDur['hours']['abs']."h".$tmpDur['minutes']['rel'];
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'> ".utf8_decode($di->getLibStatut(4));
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'>" . $tmpDur['hours']['abs'] . "h" . $tmpDur['minutes']['rel'];
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'> " . utf8_decode($di->getLibStatut(4));
         $fiStr = "";
         $tabFI = $di->getFI();
-        foreach($tabFI as $idFI){
+        foreach ($tabFI as $idFI) {
             $fi = new Fichinter($db);
             $fi->fetch($idFI);
-            $fiStr .= $fi->getNomUrl(1)."<br/>";            
+            $fiStr .= $fi->getNomUrl(1) . "<br/>";
         }
 //        $requete1 = "SELECT * FROM Babel_li_interv WHERE di_refid = ".$res->rowid;
 //        $sql1 = $db->query($requete1);
@@ -133,65 +126,63 @@
 //            $fiStr .= $fi->getNomUrl(1)."<br/>";
 //
 //        }
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'> ".$fiStr;
-        if ($user->rights->SynopsisPrepaCom->interventions->Modifier)
-        {
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'> " . $fiStr;
+        if ($user->rights->SynopsisPrepaCom->interventions->Modifier) {
 
             print "    <td style='padding:15px 10px 10px 10px;' align=center valign=top width=230 class='ui-widget-content'> ";
-            if ($res->fk_user_target > 0)
-            {
-                print "<button id='rempIDI-".$res->rowid."' class='rempIDI butAction ui-widget-header ui-state-default'>Remp. Interv.</button>";
+            if ($res->fk_user_target > 0) {
+                print "<button id='rempIDI-" . $res->rowid . "' class='rempIDI butAction ui-widget-header ui-state-default'>Remp. Interv.</button>";
             } else {
-                print "<button id='attribDI-".$res->rowid."' class='attribDI butAction ui-widget-header ui-state-default'>Attr &agrave;</button>";
+                print "<button id='attribDI-" . $res->rowid . "' class='attribDI butAction ui-widget-header ui-state-default'>Attr &agrave;</button>";
             }
-            print "<button id='modDI-".$res->rowid."' class='modDI butAction ui-widget-header ui-state-default'>Modifier</button>";
-            print "<button id='cloneDI-".$res->rowid."' class='cloneDI butAction ui-widget-header ui-state-default'>Cloner</button>";
+            print "<button id='modDI-" . $res->rowid . "' class='modDI butAction ui-widget-header ui-state-default'>Modifier</button>";
+            print "<button id='cloneDI-" . $res->rowid . "' class='cloneDI butAction ui-widget-header ui-state-default'>Cloner</button>";
         }
         print "</table>";
         print "<table width=900>";
     }
-    if ($user->rights->SynopsisPrepaCom->interventions->Modifier)
-    {
-        if ($num==0){ print "<table cellpadding=10>"; }
-    }
-        print "</table>";
-        print "<div id='addDIDial' class='cntAddDIDial'>";
-        print "<form id='formAddDI'>";
-        print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
-        utf8_encodeRien($html->select_users(0,'userid',1));
-        print "       <tr><th class='ui-widget-header ui-state-default'>Date<td class='ui-widget-content'><input class='datei' name='datei' id='datei'>";
-        print "       <tr><th class='ui-widget-header ui-state-default'>Lier &agrave;<td class='ui-widget-content'><select name='comLigneId' id='comLigneId'>";
-        print "<option SELECTED value='-1'>S&eacute;lection -></option>";
-        foreach($com->lines as $key=>$val)
-        {
-            print "<option value='".$val->id."'>".utf8_encodeRien($val->ref." ".$val->libelle." (". price($val->total_ht)) ."&euro;)"."</option>";
+    if ($user->rights->SynopsisPrepaCom->interventions->Modifier) {
+        if ($num == 0) {
+            print "<table cellpadding=10>";
         }
-        print "</select>";
-        print "</table>";
-        print "</form>";
-        print "</div>";
+    }
+    print "</table>";
+    print "<div id='addDIDial' class='cntAddDIDial'>";
+    print "<form id='formAddDI'>";
+    print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
+    utf8_encodeRien($html->select_users(0, 'userid', 1));
+    print "       <tr><th class='ui-widget-header ui-state-default'>Date<td class='ui-widget-content'><input class='datei' name='datei' id='datei'>";
+    print "       <tr><th class='ui-widget-header ui-state-default'>Lier &agrave;<td class='ui-widget-content'><select name='comLigneId' id='comLigneId'>";
+    print "<option SELECTED value='-1'>S&eacute;lection -></option>";
+    foreach ($com->lines as $key => $val) {
+        print "<option value='" . $val->id . "'>" . utf8_encodeRien($val->ref . " " . $val->libelle . " (" . price($val->total_ht)) . "&euro;)" . "</option>";
+    }
+    print "</select>";
+    print "</table>";
+    print "</form>";
+    print "</div>";
 
-        print "<div id='attrDIDial' class='cntAttrDIDial'>";
-        print "<form id='formAttrDI'>";
-        print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
-        $html->select_users(0,'attruserid',1,'',0,false);
-        print utf8_encodeRien($html->tmpReturn);
-        print "</table>";
-        print "</form>";
-        print "</div>";
+    print "<div id='attrDIDial' class='cntAttrDIDial'>";
+    print "<form id='formAttrDI'>";
+    print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
+    $html->select_users(0, 'attruserid', 1, '', 0, false);
+    print utf8_encodeRien($html->tmpReturn);
+    print "</table>";
+    print "</form>";
+    print "</div>";
 
-        print "<div id='rempDIDial' class='cntRempDIDial'>";
-        print "<form id='formRempDI'>";
-        print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
-        $html->select_users(0,'rempuserid',1,'',0,false);
-        print utf8_encodeRien($html->tmpReturn);
-        print "</table>";
-        print "</form>";
-        print "</div>";
-  }
+    print "<div id='rempDIDial' class='cntRempDIDial'>";
+    print "<form id='formRempDI'>";
+    print "<table cellpadding=10 width=100%><tr><th class='ui-wiget-header ui-state-default'>Intervenant<td class='ui-widget-content'>";
+    $html->select_users(0, 'rempuserid', 1, '', 0, false);
+    print utf8_encodeRien($html->tmpReturn);
+    print "</table>";
+    print "</form>";
+    print "</div>";
+}
 
 
-  print <<<EOF
+print <<<EOF
   <style>#ui-datepicker-div{ z-index: 10000; }</style>
   <script>
     var RemDI = false;
@@ -527,33 +518,35 @@ function cloneDi(id){
 
 EOF;
 
-
-function convDur($duration)
-{
+function convDur($duration) {
 
     // Initialisation
     $duration = abs($duration);
     $converted_duration = array();
 
     // Conversion en semaines
-    $converted_duration['weeks']['abs'] = floor($duration / (60*60*24*7));
-    $modulus = $duration % (60*60*24*7);
+    $converted_duration['weeks']['abs'] = floor($duration / (60 * 60 * 24 * 7));
+    $modulus = $duration % (60 * 60 * 24 * 7);
 
     // Conversion en jours
-    $converted_duration['days']['abs'] = floor($duration / (60*60*24));
-    $converted_duration['days']['rel'] = floor($modulus / (60*60*24));
-    $modulus = $modulus % (60*60*24);
+    $converted_duration['days']['abs'] = floor($duration / (60 * 60 * 24));
+    $converted_duration['days']['rel'] = floor($modulus / (60 * 60 * 24));
+    $modulus = $modulus % (60 * 60 * 24);
 
     // Conversion en heures
-    $converted_duration['hours']['abs'] = floor($duration / (60*60));
-    $converted_duration['hours']['rel'] = floor($modulus / (60*60));
-    if ($converted_duration['hours']['rel'] <10){$converted_duration['hours']['rel'] ="0".$converted_duration['hours']['rel']; } ;
-    $modulus = $modulus % (60*60);
+    $converted_duration['hours']['abs'] = floor($duration / (60 * 60));
+    $converted_duration['hours']['rel'] = floor($modulus / (60 * 60));
+    if ($converted_duration['hours']['rel'] < 10) {
+        $converted_duration['hours']['rel'] = "0" . $converted_duration['hours']['rel'];
+    };
+    $modulus = $modulus % (60 * 60);
 
     // Conversion en minutes
     $converted_duration['minutes']['abs'] = floor($duration / 60);
     $converted_duration['minutes']['rel'] = floor($modulus / 60);
-    if ($converted_duration['minutes']['rel'] <10){$converted_duration['minutes']['rel'] ="0".$converted_duration['minutes']['rel']; } ;
+    if ($converted_duration['minutes']['rel'] < 10) {
+        $converted_duration['minutes']['rel'] = "0" . $converted_duration['minutes']['rel'];
+    };
     $modulus = $modulus % 60;
 
     // Conversion en secondes

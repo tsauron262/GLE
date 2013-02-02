@@ -412,24 +412,24 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
         $fichinterline->isForfait = 0;
     }
 
-    
+
     $fichinterline->fk_contratdet = $_REQUEST['fk_contratdet'];
 
 //    $fichinterline->comLigneId = $_REQUEST['comLigneId'];
-    
+
     if (isset($_REQUEST['comLigneId']) && $_REQUEST['comLigneId'] != $fichinterline->comLigneId) {
         $fichinterline->comLigneId = $_REQUEST['comLigneId'];
         $ligneCommande = new OrderLine($db);
         $ligneCommande->fetch($fichinterline->comLigneId);
 //        die($ligneCommande->fk_product);
-        if($ligneCommande->fk_product)
+        if ($ligneCommande->fk_product)
             $fichinterline->typeIntervProd = $ligneCommande->fk_product;
     }
 
 
     $result = $fichinterline->update();
     $fichinter->majPrixDi();
-    
+
 
     if ($_REQUEST['lang_id']) {
         $outputlangs = new Translate("", $conf);
@@ -1303,8 +1303,8 @@ EOF;
                     print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
                 }
             }
+            print "</table>";
         }
-        print "</table>";
         print '</td></tr>';
     }
 

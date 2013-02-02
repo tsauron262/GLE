@@ -1290,7 +1290,7 @@ EOF;
 
     // di
     if (isset($user->rights->synopsisdemandeinterv)) {
-        print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
+        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
         print '<td colspan=1 class="ui-widget-content">';
         $tabDI = $fichinter->getDI();
         if (count($tabDI) > 0) {

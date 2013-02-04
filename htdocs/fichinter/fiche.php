@@ -1683,7 +1683,7 @@ EOF;
                         }
                         if ($val->id == $objp->fk_commandedet) {
                             print "<option SELECTED value='" . $val->id . "'>" . $text . " </option>";
-                        } elseif ($text != '') {
+                        } elseif ($text != '' && $text != ' ') {
                             print "<option value='" . $val->id . "'>" . $text . "</option>";
                         }
                     }

@@ -418,6 +418,7 @@ class Fichinter extends CommonObject
     function addDI($idDI){
         $requete = "INSERT INTO ".MAIN_DB_PREFIX."element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('DI', ".$idDI.", 'FI', ".$this->id.")";
         $res = $this->db->query($requete);
+        $this->majPrixDi();
     }
     
     

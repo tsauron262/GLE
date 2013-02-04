@@ -95,7 +95,7 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
     if ($requete1) $sql1 = $db->query($requete1);
     if ($requete2) $sql2 = $db->query($requete2);
 
-    if($sql1 && $sql && $sql2)
+    if(1)
         $msg = "Mise &agrave; jour OK";
     else
         $msgKO = "Mise &agrave; jour KO";

@@ -1711,28 +1711,30 @@ EOF;
                 print '<br /><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '"></td>';
                 print '</tr>' . "\n";
 
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
-                $contrat = getContratObj($fichinter->fk_contrat);
-                $type = getTypeContrat_noLoad($fichinter->fk_contrat);
-                if ($type == 7) {
-                    $contrat->fetch($fichinter->fk_contrat);
-                    $contrat->fetch_lines(true);
-                    print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
-                    foreach ($contrat->lines as $key => $val) {
+                if ($fichinter->fk_contrat > 0) {
+                    require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+                    $contrat = getContratObj($fichinter->fk_contrat);
+                    $type = getTypeContrat_noLoad($fichinter->fk_contrat);
+                    if ($type == 7) {
+                        $contrat->fetch($fichinter->fk_contrat);
+                        $contrat->fetch_lines(true);
+                        print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
+                        foreach ($contrat->lines as $key => $val) {
 //TODO ajouter filtre
-                        if ($val->statut >= 0 && $val->statut < 5) {
-                            $extra = "";
+                            if ($val->statut >= 0 && $val->statut < 5) {
+                                $extra = "";
 //                            if ($val->id == $objp->fk_contratdet) $extra="checked";
 //                            print "<tr><td><input ".$extra." type=checkbox name='fk_contratdet-".$val->id."' value='".$val->id."'><td>";
-                            if ($val->id == $objp->fk_contratdet) {
-                                print "<tr><td>";
-                                print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                                print $contrat->display1Line($contrat, $val);
-                                print "</ul>";
+                                if ($val->id == $objp->fk_contratdet) {
+                                    print "<tr><td>";
+                                    print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
+                                    print $contrat->display1Line($contrat, $val);
+                                    print "</ul>";
+                                }
                             }
                         }
+                        print "</table>";
                     }
-                    print "</table>";
                 }
 
 

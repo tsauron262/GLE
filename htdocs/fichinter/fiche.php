@@ -1681,8 +1681,8 @@ EOF;
                             $prod->fetch($val->fk_product);
                             $text = $prod->ref . " " . $text;
                         }
-                        if ($val->id == $objp->fk_commandedet) {
-                            print "<option SELECTED value='" . $val->id . "'>" . $text . " </option>";
+                        if ($val->id == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
+                            print "<option selected='selected' value='" . $val->id . "'>" . $text . " </option>";
                         } elseif ($text != '' && $text != ' ') {
                             print "<option value='" . $val->id . "'>" . $text . "</option>";
                         }

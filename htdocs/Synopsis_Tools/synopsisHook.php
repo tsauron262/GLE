@@ -49,7 +49,8 @@ global $tabProductType;
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
 global $tabTypeLigne;
-$tabTypeLigne = array("Product", "Service", "Product", "Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+$tabTypeLigne = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+$tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     @$conf->projet->enabled = true;

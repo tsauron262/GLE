@@ -1332,7 +1332,7 @@ if (is_dir($dir)) {
                                 if ($val['PlvCode'])
                                     $prodType = getProdType($val['PlvCode']);
                                 else
-                                    $prodType = 3;
+                                    $prodType = 5;
                                     if ($res1->product_type != $prodType)
                                         $sqlUpt[] = " product_type = '" . $prodType . "'";
                                 

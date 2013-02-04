@@ -1680,11 +1680,12 @@ EOF;
                             $prod = new Product($db);
                             $prod->fetch($val->fk_product);
                             $text = $prod->ref . " " . $text;
-                        }
-                        if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
-                            print "<option selected='selected' value='" . $val->rowid . "'>" . $text . " </option>";
-                        } elseif ($text != '' && $text != ' ') {
-                            print "<option value='" . $val->rowid . "'>" . $text . "</option>";
+
+                            if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
+                                print "<option selected='selected' value='" . $val->rowid . "'>" . $text . " </option>";
+                            } elseif ($text != '' && $text != ' ' && $prod->type != 0) {
+                                print "<option value='" . $val->rowid . "'>" . $text . "</option>";
+                            }
                         }
                     }
                     print "</select>";

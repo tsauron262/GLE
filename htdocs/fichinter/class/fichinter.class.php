@@ -554,8 +554,9 @@ class Fichinter extends CommonObject
                 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE fk_commandedet =" . $lignes->fk_commandedet;
                 $resql = $this->db->query($requete);
                 while ($res = $this->db->fetch_object($resql)) {
-                    if($lignes->pu_ht != $res->pu_ht){
+                    if($lignes->pu_ht != $res->pu_ht || $lignes->isForfait != $res->isForfait){
                         $lignes->pu_ht = $res->pu_ht;
+                        $lignes->isForfait = $res->isForfait;
                         $lignes->update();
                     }
                 }

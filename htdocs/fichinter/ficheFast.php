@@ -280,7 +280,7 @@ if ($_REQUEST["id"] > 0) {
                     $prod->fetch($val->fk_product);
                     if ($prod->id == $prestation->fk_depProduct) {//$objp->fk_commandedet){
                         $htmlSelect2 .= "<option SELECTED value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . " </option>";
-                    } else {
+                    } elseif($prod->type != 0) {
                         $htmlSelect2 .= "<option value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . "</option>";
                     }
                 }
@@ -432,7 +432,8 @@ if ($fichinter->fk_commande > 0) {
         if (isset($val->fk_product) && $val->fk_product != '') {
             $prod = new Product($db);
             $prod->fetch($val->fk_product);
-            $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
+            if($prod->type != 0)
+                $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
         }
     }
     $htmlSelect2 .= "</select>";

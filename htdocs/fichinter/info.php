@@ -184,7 +184,7 @@ $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_soc 
     print "<td class='ui-widget-content'><SELECT name='fk_ref' id='fk_ref'>";
     print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
     while($res=$db->fetch_object($sql)){
-        if ($res->rowid == $fichinter->fk_ref)
+        if ($res->rowid == $fichinter->di)
         {
             print "<option SELECTED value='".$res->rowid."'>".$res->ref ."</option>";
         } else {

@@ -1225,6 +1225,7 @@ class demandeIntervLigne
                             ft.duree,
                             ft.rang,
                             ft.qte,
+                            ft.fk_commandedet as comLigneId,
                             ft.total_ht,
                             ft.total_ttc,
                             ft.total_tva,
@@ -1262,6 +1263,7 @@ class demandeIntervLigne
             $this->fk_contratdet      = $objp->fk_contratdet;
             $this->pu_ht              = $objp->pu_ht;
             $this->tx_tva             = $objp->tx_tva;
+            $this->comLigneId             = $objp->comLigneId;
 
 
             $this->db->free($result);

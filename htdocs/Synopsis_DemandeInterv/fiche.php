@@ -591,13 +591,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_deleteline' &&
     if ($user->rights->synopsisdemandeinterv->creer) {
         $demandeIntervline = new demandeIntervLigne($db);
         if ($demandeIntervline->fetch($_REQUEST['ligne']) <= 0) {
-        dol_print_error($db, "fetch demandeintervdet");
+            dol_print_error($db, "fetch demandeintervdet");
             exit;
         }
         $result = $demandeIntervline->delete_line();
         $demandeInterv = new demandeInterv($db);
         if ($demandeInterv->fetch($demandeIntervline->fk_demandeInterv) <= 0) {
-        dol_print_error($db, "fetch demandeinterv");
+            dol_print_error($db, "fetch demandeinterv");
             exit;
         }
         if ($_REQUEST['lang_id']) {
@@ -754,9 +754,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print "<SELECT id='fk_contrat' name='fk_contrat'>";
             print "<option value='-1'>S&eacute;lectionner -></option>";
             while ($res = $db->fetch_object($sql)) {
-                if ($_REQUEST['fk_contrat'] == $res->rowid) {
-                    print "<option SELECTED value='" . $res->rowid . "'>" . $res->ref . "</option>";
-                } else {
+                if ($_REQUEST['fk_contrat'] == $res->rowid && $_REQUEST['fk_contrat'] > 0) {
+                    print "<option selected='selected' value='" . $res->rowid . "'>" . $res->ref . "</option>";
+                } elseif ($res->ref != '') {
                     print "<option value='" . $res->rowid . "'>" . $res->ref . "</option>";
                 }
             }
@@ -771,9 +771,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print "<SELECT id='fk_commande' name='fk_commande'>";
             print "<option value='-1'>S&eacute;lectionner -></option>";
             while ($res = $db->fetch_object($sql)) {
-                if ($_REQUEST['fk_commande'] == $res->rowid) {
+                if ($_REQUEST['fk_commande'] == $res->rowid && $_REQUEST['fk_commande'] > 0) {
                     print "<option SELECTED value='" . $res->rowid . "'>" . $res->ref . "</option>";
-                } else {
+                } elseif ($res->ref != '') {
                     print "<option value='" . $res->rowid . "'>" . $res->ref . "</option>";
                 }
             }
@@ -1771,12 +1771,14 @@ EOF;
                     print "<td><select name='comLigneId'>";
                     print "<option value='0'>S&eacute;lectionner-></option>";
                     foreach ($com->lines as $key => $val) {
-                        $prod = new Product($db);
-                        $prod->fetch($val->fk_product);
-                        if ($val->id == $objp->fk_commandedet) {
-                            print "<option SELECTED value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . " </option>";
-                        } else {
-                            print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . "</option>";
+                        if ($val->fk_product > 0) {
+                            $prod = new Product($db);
+                            $prod->fetch($val->fk_product);
+                            if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
+                                print "<option selected='selected' value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . " </option>";
+                            } elseif ($prod->ref != '') {
+                                print "<option value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . "</option>";
+                            }
                         }
                     }
                     print "</select>";
@@ -1834,7 +1836,7 @@ EOF;
 
         $db->free($resql);
     } else {
-        dol_print_error($db, "Erreur Inconnue ".$sql);
+        dol_print_error($db, "Erreur Inconnue " . $sql);
     }
 
     /*
@@ -1920,9 +1922,11 @@ EOF;
             $com->fetch_group_lines(0, 0, 0, 0, 1);
             print "<td><select name='comLigneId'>";
             foreach ($com->lines as $key => $val) {
+                if($val->fk_product > 0){
                 $prod = new Product($db);
                 $prod->fetch($val->fk_product);
                 print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro;</option>";
+                }
             }
             print "</select>";
         }

@@ -256,6 +256,9 @@ class Fichinter extends CommonObject
                 $this->total_tva     = $obj->total_tva;
                 $this->total_ttc     = $obj->total_ttc;
                 $this->natureInter  = $obj->natureInter;
+                
+                $tabDi = $this->getDI();
+                $this->fk_ref = ((isset($tabDi[0])) ? $tabDi[0] : 0);
 
                 if ($this->statut == 0) $this->brouillon = 1;
 

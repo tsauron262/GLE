@@ -12,6 +12,10 @@ $(window).load(function(){
     
     ajNoteAjax();   
     
+    
+    datas = 'type=consigne';
+    editAjax(jQuery('.consigne.editable'), datas);
+    
     //    $(".ui-search-toolbar input").keypress(function(e) {
     //	//alert(e.keyCode);
     //	if(e.keyCode == 13) {
@@ -83,7 +87,8 @@ function traiteScroll(heightDif){
 
 function ajNoteAjax(){
     fermable = true;
-    datas = 'url='+window.location;
+    var datas = 'url='+window.location;
+    datas = datas+'&type=note';
     jQuery.ajax({
         url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
         data:datas,
@@ -117,37 +122,13 @@ function ajNoteAjax(){
                 //                    shownHideNote();   
                 //                })
                 
-                jQuery('.editable').click(function(){
-                    if(fermable){
-                        fermable = false;
-                        $(this).parent().find('.editable').html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+jQuery(this).html().split('<br>').join('\n')+"</textarea>");
-                        jQuery(this).removeClass('editable');
-                        $(".editableTextarea").focus();
-                        $(".editableTextarea").val($(".editableTextarea").val()+"\n");
-                        $(".editableTextarea").focusout(function(){
-                            fermable = true;
-                            hideNote();
-                            datas = datas+'&note='+$(".editableTextarea").val();
-                            jQuery.ajax({
-                                url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
-                                data:datas,
-                                datatype:"xml",
-                                type:"POST",
-                                cache: false,
-                                success:function(msg){
-                                    if(msg.indexOf("[1]") > -1){
-                                        msg = msg.replace("[1]", "");
-                                    }
-                                    $("#notePublicEdit").html(msg);
-                                    $("#notePublicEdit").addClass("editable");
-                                }
-                            });
-                        });
-                    }
-                });
+                editAjax(jQuery('#notePublicEdit'), datas, function(){hideNote()});
+                
             }
         }
     });
+    
+    
     
     function shownHideNote(){
         $(".noteAjax .note").animate({
@@ -172,3 +153,36 @@ function ajNoteAjax(){
         }
     }
 }
+
+
+    function editAjax(elem, datas, callOut){
+        elem.click(function(){
+                    if(fermable){
+                        fermable = false;
+                        $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+jQuery(elem).html().split('<br>').join('\n')+"</textarea>");
+                        $(elem).removeClass('editable');
+                        $(elem).find(".editableTextarea").focus();
+                        $(elem).find(".editableTextarea").val($(".editableTextarea").val()+"\n");
+                        $(elem).find(".editableTextarea").focusout(function(){
+                            fermable = true;
+                            if(callOut)
+                                callOut();
+                            datas = datas+'&note='+$(".editableTextarea").val();
+                            jQuery.ajax({
+                                url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
+                                data:datas,
+                                datatype:"xml",
+                                type:"POST",
+                                cache: false,
+                                success:function(msg){
+                                    if(msg.indexOf("[1]") > -1){
+                                        msg = msg.replace("[1]", "");
+                                    }
+                                    $(elem).html(msg);
+                                    $(elem).addClass("editable");
+                                }
+                            });
+                        });
+                    }
+                });
+    }

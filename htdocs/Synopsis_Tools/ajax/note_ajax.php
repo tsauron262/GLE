@@ -5,7 +5,7 @@ $return = 0;
 
 $forceRightEdit = false;
 
-if (isset($_POST['url'])) {
+if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
     $url = $_POST['url'];
     $tabUrl = explode("?", $url);
     $tabUrl = explode("&", $tabUrl[1]);

@@ -23,11 +23,90 @@ class synopsisHook {
     static function getMenu() {
         global $conf;
         $return = '';
+        $tabElem = getTypeAndId();
+        $element_type = $tabElem[0];
+        $element_id = $tabElem[1];
         if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
-            histoNavigation::saveHisto();
+            histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto();
         }
+        if ($element_id > 0 && $element_type == "commande" || $element_type == "DI" || $element_type == "FI") {
+            $return = '<div class="blockvmenupair rouge">';
+            $return .= '<div class="menu_titre">';
+            $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
+            $return .= "</div>";
+            $return .= '<div class="editable consigne">';
+            $return .= self::getConsigne($element_type, $element_id);
+            $return .= "</div>";
+            $return .= "</div>";
+        }
+
         return $return;
+    }
+
+    static function setConsigne($element_type, $element_id) {
+        global $db;
+        if($element_id > 0){
+        $obj = self::getObj($element_type);
+        $obj->fetch($element_id);
+        if ($element_type == "commande") {
+            $id_comm = $element_id;
+        } elseif ($element_type == "FI" || $element_type == "DI") {
+            $id_comm = $obj->fk_commande;
+        }
+
+        if (isset($id_comm) && $id_comm > 0) {
+            $comm = self::getObj("commande");
+            $comm->fetch($id_comm);
+
+            $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
+
+            if ($comm->isGroupMember())
+                $sql .= " fk_group = " . $comm->OrderGroup->id;
+            else
+                $sql .= " fk_comm = " . $id_comm;
+            $result = $db->query($sql);
+            if ($db->num_rows($result) > 0) {
+                $ligne = $db->fetch_object($result);
+                if ($ligne->note != "") {
+                    return $ligne->note;
+                }
+            }
+        }
+        }
+        
+    }
+
+    static function getConsigne($element_type, $element_id) {
+        global $db;
+        if($element_id > 0){
+        $obj = self::getObj($element_type);
+        $obj->fetch($element_id);
+        if ($element_type == "commande") {
+            $id_comm = $element_id;
+        } elseif ($element_type == "FI" || $element_type == "DI") {
+            $id_comm = $obj->fk_commande;
+        }
+
+        if (isset($id_comm) && $id_comm > 0) {
+            $comm = self::getObj("commande");
+            $comm->fetch($id_comm);
+
+            $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
+
+            if ($comm->isGroupMember())
+                $sql .= " fk_group = " . $comm->OrderGroup->id;
+            else
+                $sql .= " fk_comm = " . $id_comm;
+            $result = $db->query($sql);
+            if ($db->num_rows($result) > 0) {
+                $ligne = $db->fetch_object($result);
+                if ($ligne->note != "") {
+                    return $ligne->note;
+                }
+            }
+        }
+        }
     }
 
     static function getHeader() {
@@ -53,170 +132,12 @@ class synopsisHook {
         }
     }
 
-}
-
-class Synopsis_Commande extends Commande {
-
-    function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
-        $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
-        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $id);
-        $result = $this->db->fetch_object($sql);
-        $this->logistique_ok = $result->logistique_ok;
-        $this->logistique_statut = $result->logistique_statut;
-        $this->finance_ok = $result->finance_ok;
-        $this->finance_statut = $result->finance_statut;
-        $this->logistique_date_dispo = $result->logistique_date_dispo;
-        return $return;
-    }
-
-    function fetch_lines($only_product = 0) {
-        parent::fetch_lines($only_product);
-//        $this->lines=array();
-
-        foreach ($this->lines as $id => $line) {
-            $newLine = new Synopsis_OrderLine($this->db);
-            $newLine->fetch($this->lines[$id]->id);
-            $this->lines[$id] = $newLine;
-        }
-        return;
-        $sql = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
-        $sql.= ' WHERE l.fk_commande = ' . $this->id;
-        if ($only_product)
-            $sql .= ' AND p.fk_product_type = 0';
-        $sql .= ' ORDER BY l.rang';
-
-        dol_syslog("Commande::fetch_lines sql=" . $sql, LOG_DEBUG);
-        $result = $this->db->query($sql);
-        if ($result) {
-            $num = $this->db->num_rows($result);
-
-            $i = 0;
-            while ($i < $num) {
-                $objp = $this->db->fetch_object($result);
-
-                $line = new OrderLine($this->db);
-
-                $line->fetch($objp->rowid);
-
-                $this->lines[$i] = $line;
-
-                $i++;
-            }
-            $this->db->free($result);
-            parent::fetch_lines($only_product);
-            return 1;
-        } else {
-            $this->error = $this->db->error();
-            dol_syslog('Commande::fetch_lines: Error ' . $this->error, LOG_ERR);
-            return -3;
-        }
-    }
-
-    //La commande est elle membre d'un groupe
-    public function isGroupMember() {
-//        return false;
-        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_commande_grp.id as gid
-                      FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet,
-                           ".MAIN_DB_PREFIX."Synopsis_commande_grp
-                     WHERE ".MAIN_DB_PREFIX."Synopsis_commande_grp.id=".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid
-                       AND command_refid = " . $this->id;
-        $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql) > 0) {
-            $res = $this->db->fetch_object($sql);
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/commandeGroup/commandeGroup.class.php");
-            $comGrp = new CommandeGroup($this->db);
-            $comGrp->fetch($res->gid);
-            $this->OrderGroup = $comGrp;
-            return ($comGrp);
-        }
-        return false;
-    }
-
-    public function listGroupMember($excludeMyself = true) {
-        $ret = $this->isGroupMember();
-        if ($ret) {
-            $this->OrderGroup = $ret;
-            $arr = array();
-            foreach ($ret->commandes as $key => $commande) {
-                if ($excludeMyself && $commande->id == $this->id) {
-                    continue;
-                }
-                $arr[$key] = $commande;
-            }
-            return($arr);
-        }
-        return array();
-    }
-
-    function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
-        $lines = array();
-        $comms = $this->listGroupMember(false);
-        if(isset($comms[0])){
-        foreach($comms as $commande){
-            $commande->fetch_lines();
-            foreach($commande->lines as $ligne){
-                $lines[$i] = $ligne;
-                $i++;
-            }
-//            $this->lines = array_merge($this->lines, $commande->lines);
-        }
-        $this->lines = $lines;
-        }
-        else
-            $this->fetch_lines($only_product);
-        return true;
-//        return $this->fetch_lines($only_product);
-    }
-
-}
-
-class Synopsis_OrderLine extends OrderLine {
-
-    function fetch($id) {
-        $return = parent::fetch($id);
-        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commandedet WHERE rowid = " . $id);
-        $result = $this->db->fetch_object($sql);
-        $this->logistique_ok = $result->logistique_ok;
-        $this->finance_ok = $result->finance_ok;
-        $this->coef = $result->coef;
-        $this->logistique_date_dispo = $result->logistique_date_dispo;
-        return $return;
-    }
-
-}
-
-class histoNavigation {
-
-    static function getBlocHisto() {
-        global $db, $user, $conf;
-//        if ($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher) {
-        $return =  '<div class="blockvmenupair">';
-        $return .= '<div class="menu_titre">';
-        $return .= '<a href="#" class="vmenu">Historique navigation</a>';
-        $return .= "</div>";
-        $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
-                     WHERE user_refid = " . $user->id .
-                " AND ref != '' AND element_type != '' ORDER BY tms DESC" .
-                (isset($conf->global->BABEL_MINIHISTO_LENGTH) && $conf->global->BABEL_MINIHISTO_LENGTH > 0 ? " LIMIT " . $conf->global->BABEL_MINIHISTO_LENGTH : " LIMIT 5");
-
-        $sql = $db->query($requete);
-        while ($res = $db->fetch_object($sql)) {
-            //print '<a href="#" class="vsmenu">'..'</a>';
-            $ret = self::histoUser($res);
-            if ($ret)
-                $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
-        }
-        $return .= "</div>";
-        return $return;
-    }
-
-    private static function getObj($type) {
+    public static function getObj($type) {
         $tabResult = self::getObjAndMenu($type);
         return $tabResult[0];
     }
 
-    private static function getObjAndMenu($type) {
+    public static function getObjAndMenu($type) {
         global $db;
         $tabMenu = array(false, false);
         switch ($type) {
@@ -234,8 +155,8 @@ class histoNavigation {
                 }
                 break;
             case 'commande': {
-                    require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-                    $obj = new Commande($db);
+//                    require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+                    $obj = new Synopsis_Commande($db);
                     $tabMenu[0] = "commercial";
                     $tabMenu[1] = "orders";
                 }
@@ -351,8 +272,166 @@ class histoNavigation {
         return array($obj, $tabMenu);
     }
 
+}
+
+class Synopsis_Commande extends Commande {
+
+    function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
+        $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
+        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $id);
+        $result = $this->db->fetch_object($sql);
+        $this->logistique_ok = $result->logistique_ok;
+        $this->logistique_statut = $result->logistique_statut;
+        $this->finance_ok = $result->finance_ok;
+        $this->finance_statut = $result->finance_statut;
+        $this->logistique_date_dispo = $result->logistique_date_dispo;
+        return $return;
+    }
+
+    function fetch_lines($only_product = 0) {
+        parent::fetch_lines($only_product);
+//        $this->lines=array();
+
+        foreach ($this->lines as $id => $line) {
+            $newLine = new Synopsis_OrderLine($this->db);
+            $newLine->fetch($this->lines[$id]->id);
+            $this->lines[$id] = $newLine;
+        }
+        return;
+        $sql = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
+        $sql.= ' WHERE l.fk_commande = ' . $this->id;
+        if ($only_product)
+            $sql .= ' AND p.fk_product_type = 0';
+        $sql .= ' ORDER BY l.rang';
+
+        dol_syslog("Commande::fetch_lines sql=" . $sql, LOG_DEBUG);
+        $result = $this->db->query($sql);
+        if ($result) {
+            $num = $this->db->num_rows($result);
+
+            $i = 0;
+            while ($i < $num) {
+                $objp = $this->db->fetch_object($result);
+
+                $line = new OrderLine($this->db);
+
+                $line->fetch($objp->rowid);
+
+                $this->lines[$i] = $line;
+
+                $i++;
+            }
+            $this->db->free($result);
+            parent::fetch_lines($only_product);
+            return 1;
+        } else {
+            $this->error = $this->db->error();
+            dol_syslog('Commande::fetch_lines: Error ' . $this->error, LOG_ERR);
+            return -3;
+        }
+    }
+
+    //La commande est elle membre d'un groupe
+    public function isGroupMember() {
+//        return false;
+        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id as gid
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet,
+                           " . MAIN_DB_PREFIX . "Synopsis_commande_grp
+                     WHERE " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id=" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet.commande_group_refid
+                       AND command_refid = " . $this->id;
+        $sql = $this->db->query($requete);
+        if ($this->db->num_rows($sql) > 0) {
+            $res = $this->db->fetch_object($sql);
+            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/commandeGroup/commandeGroup.class.php");
+            $comGrp = new CommandeGroup($this->db);
+            $comGrp->fetch($res->gid);
+            $this->OrderGroup = $comGrp;
+            return ($comGrp);
+        }
+        return false;
+    }
+
+    public function listGroupMember($excludeMyself = true) {
+        $ret = $this->isGroupMember();
+        if ($ret) {
+            $this->OrderGroup = $ret;
+            $arr = array();
+            foreach ($ret->commandes as $key => $commande) {
+                if ($excludeMyself && $commande->id == $this->id) {
+                    continue;
+                }
+                $arr[$key] = $commande;
+            }
+            return($arr);
+        }
+        return array();
+    }
+
+    function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
+        $lines = array();
+        $comms = $this->listGroupMember(false);
+        if (isset($comms[0])) {
+            foreach ($comms as $commande) {
+                $commande->fetch_lines();
+                foreach ($commande->lines as $ligne) {
+                    $lines[$i] = $ligne;
+                    $i++;
+                }
+//            $this->lines = array_merge($this->lines, $commande->lines);
+            }
+            $this->lines = $lines;
+        }
+        else
+            $this->fetch_lines($only_product);
+        return true;
+//        return $this->fetch_lines($only_product);
+    }
+
+}
+
+class Synopsis_OrderLine extends OrderLine {
+
+    function fetch($id) {
+        $return = parent::fetch($id);
+        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commandedet WHERE rowid = " . $id);
+        $result = $this->db->fetch_object($sql);
+        $this->logistique_ok = $result->logistique_ok;
+        $this->finance_ok = $result->finance_ok;
+        $this->coef = $result->coef;
+        $this->logistique_date_dispo = $result->logistique_date_dispo;
+        return $return;
+    }
+
+}
+
+class histoNavigation {
+
+    static function getBlocHisto() {
+        global $db, $user, $conf;
+//        if ($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher) {
+        $return = '<div class="blockvmenupair">';
+        $return .= '<div class="menu_titre">';
+        $return .= '<a href="#" class="vmenu">Historique navigation</a>';
+        $return .= "</div>";
+        $requete = "SELECT *
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
+                     WHERE user_refid = " . $user->id .
+                " AND ref != '' AND element_type != '' ORDER BY tms DESC" .
+                (isset($conf->global->BABEL_MINIHISTO_LENGTH) && $conf->global->BABEL_MINIHISTO_LENGTH > 0 ? " LIMIT " . $conf->global->BABEL_MINIHISTO_LENGTH : " LIMIT 5");
+
+        $sql = $db->query($requete);
+        while ($res = $db->fetch_object($sql)) {
+            //print '<a href="#" class="vsmenu">'..'</a>';
+            $ret = self::histoUser($res);
+            if ($ret)
+                $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
+        }
+        $return .= "</div>";
+        return $return;
+    }
+
     private static function histoUser($res) {
-        $tabResult = self::getObjAndMenu($res->element_type);
+        $tabResult = synopsisHook::getObjAndMenu($res->element_type);
         $obj = $tabResult[0];
         $tabMenu = $tabResult[1];
         if ($obj) {
@@ -373,15 +452,12 @@ class histoNavigation {
         }
     }
 
-    static function saveHisto() {
-        $tabElem = getTypeAndId();
-        $element_type = $tabElem[0];
-        $element_id = $tabElem[1];
+    static function saveHisto($element_type, $element_id) {
 //        //saveHistoUser($fichinter->id, "FI", $fichinter->ref);
 
 
         if (isset($element_id) && isset($element_type) && $element_type != '' && $element_id > 0) {
-            $obj = self::getObj($element_type);
+            $obj = synopsisHook::getObj($element_type);
             if ($obj) {
                 $obj->fetch($element_id);
                 $ref = $obj->ref;

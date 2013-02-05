@@ -45,12 +45,12 @@ if (is_object($langs))
 global $tabProductType;
 
 
-
-$conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
-
 global $tabTypeLigne;
 $tabTypeLigne = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 $tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
+
+$conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
+
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     @$conf->projet->enabled = true;

@@ -47,7 +47,6 @@ class synopsisHook {
         return $return;
     }
 
-
     static function getHeader() {
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
         $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
@@ -77,7 +76,7 @@ class synopsisHook {
     }
 
     public static function getObjAndMenu($type) {
-        global $db;
+        global $db, $conf;
         $tabMenu = array(false, false);
         switch ($type) {
             case 'chrono': {
@@ -94,8 +93,12 @@ class synopsisHook {
                 }
                 break;
             case 'commande': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-                    $obj = new Synopsis_Commande($db);
+                    if (isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE))
+                        $obj = new Synopsis_Commande($db);
+                    else {
+                        require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+                        $obj = new Commande($db);
+                    }
                     $tabMenu[0] = "commercial";
                     $tabMenu[1] = "orders";
                 }
@@ -214,16 +217,17 @@ class synopsisHook {
 }
 
 class consigneCommande {
+
     var $note = '';
     var $rowid = 0;
-    
-    public function consigneCommande($db){
+
+    public function consigneCommande($db) {
         $this->db = $db;
     }
-    
+
     public function fetch($element_type, $element_id) {
         $db = $this->db;
-        if($element_id > 0){
+        if ($element_id > 0) {
             $obj = synopsisHook::getObj($element_type);
             $obj->fetch($element_id);
             if ($element_type == "commande") {
@@ -236,52 +240,52 @@ class consigneCommande {
                 $comm = synopsisHook::getObj("commande");
                 $comm->fetch($id_comm);
 
-                if ($comm->isGroupMember())
+                if (isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE) && $comm->isGroupMember())
                     $this->fk_group = $comm->OrderGroup->id;
                 else
                     $this->fk_comm = $id_comm;
                 $this->init();
             }
         }
-        
     }
-    
-    public function init(){
-        
 
-                $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
-                if ($this->fk_group)
-                    $sql .= " fk_group = " . $this->fk_group;
-                else
-                    $sql .= " fk_comm = " . $this->fk_comm;
-                $result = $this->db->query($sql);
-                if ($this->db->num_rows($result) > 0) {
-                    $ligne = $this->db->fetch_object($result);
-                    $this->note = $ligne->note;
-                    $this->rowid = $ligne->rowid;
-                }
-                    if ($this->note == "") {
-                        $this->note = "Cliquez pour éditer";
-                    }
-    }
-        public function setNote($note, $fk_comm, $fk_group = null){
-            $this->note = $note;
-            if($this->rowid == 0){
-                if($fk_group){
-                    $champ = "fk_group";
-                    $val = $fk_group;
-                }
-                else{
-                    $champ = "fk_comm";
-                    $val = $fk_comm;                    
-                }
-                $sql = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_consigne (".$champ.") VALUES (".$val.")";
-                $result = $this->db->query($sql);
-                $this->rowid = $this->db->last_insert_id($result);
-            }
-            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande_consigne SET note ='".$this->note."' WHERE rowid = ".$this->rowid;
-                $result = $this->db->query($sql);
+    public function init() {
+
+
+        $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
+        if ($this->fk_group)
+            $sql .= " fk_group = " . $this->fk_group;
+        else
+            $sql .= " fk_comm = " . $this->fk_comm;
+        $result = $this->db->query($sql);
+        if ($this->db->num_rows($result) > 0) {
+            $ligne = $this->db->fetch_object($result);
+            $this->note = $ligne->note;
+            $this->rowid = $ligne->rowid;
         }
+        if ($this->note == "") {
+            $this->note = "Cliquez pour éditer";
+        }
+    }
+
+    public function setNote($note, $fk_comm, $fk_group = null) {
+        $this->note = $note;
+        if ($this->rowid == 0) {
+            if ($fk_group) {
+                $champ = "fk_group";
+                $val = $fk_group;
+            } else {
+                $champ = "fk_comm";
+                $val = $fk_comm;
+            }
+            $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_consigne (" . $champ . ") VALUES (" . $val . ")";
+            $result = $this->db->query($sql);
+            $this->rowid = $this->db->last_insert_id($result);
+        }
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commande_consigne SET note ='" . $this->note . "' WHERE rowid = " . $this->rowid;
+        $result = $this->db->query($sql);
+    }
+
 }
 
 class Synopsis_Commande extends Commande {

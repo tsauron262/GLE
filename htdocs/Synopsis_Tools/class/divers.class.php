@@ -226,6 +226,7 @@ class consigneCommande {
     }
 
     public function fetch($element_type, $element_id) {
+        global $conf;
         $db = $this->db;
         if ($element_id > 0) {
             $obj = synopsisHook::getObj($element_type);
@@ -239,7 +240,6 @@ class consigneCommande {
             if (isset($id_comm) && $id_comm > 0) {
                 $comm = synopsisHook::getObj("commande");
                 $comm->fetch($id_comm);
-
                 if (isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE) && $comm->isGroupMember())
                     $this->fk_group = $comm->OrderGroup->id;
                 else
@@ -268,19 +268,20 @@ class consigneCommande {
         }
     }
 
-    public function setNote($note, $fk_comm, $fk_group = null) {
+    public function setNote($note) {
         $this->note = $note;
         if ($this->rowid == 0) {
-            if ($fk_group) {
+            if ($this->fk_group) {
                 $champ = "fk_group";
-                $val = $fk_group;
+                $val = $this->fk_group;
             } else {
                 $champ = "fk_comm";
-                $val = $fk_comm;
+                $val = $this->fk_comm;
             }
             $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_consigne (" . $champ . ") VALUES (" . $val . ")";
             $result = $this->db->query($sql);
             $this->rowid = $this->db->last_insert_id($result);
+            echo $sql;
         }
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commande_consigne SET note ='" . $this->note . "' WHERE rowid = " . $this->rowid;
         $result = $this->db->query($sql);

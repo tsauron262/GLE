@@ -49,9 +49,9 @@ class demandeInterv extends CommonObject
 {
     public $db;
     public $element='demandeInterv';
-    public $table_element='demandeInterv';
+    public $table_element='Synopsis_demandeInterv';
     public $fk_element='fk_demandeInterv';
-    public $table_element_line='demandeIntervdet';
+    public $table_element_line='Synopsis_demandeIntervdet';
 
     public $id;
 

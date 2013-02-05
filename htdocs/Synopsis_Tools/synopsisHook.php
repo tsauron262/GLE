@@ -40,14 +40,16 @@ $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 $conf->global->devMailTo = 'tommy@drsi.fr';
 
 
-if (is_object($langs))
-    $tabProductType = array(0 => $langs->trans("Product"), 1 => $langs->trans("Service"), 2 => $langs->trans("Produit de contrat"), 3 => $langs->trans("Déplacement"), 4 => $langs->trans("Déplacement contrat"));
-global $tabProductType;
-
-
-global $tabTypeLigne;
+$tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
 $tabTypeLigne = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+if (is_object($langs)) {
+    foreach ($tabProductType as $id => $val)
+        $tabProductType[$id] = $langs->trans($val);
+    foreach ($tabTypeLigne as $id => $val)
+        $tabTypeLigne[$id] = $langs->trans($val);
+}
 $tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
+global $tabProductType, $tabTypeLigne;
 
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
@@ -68,6 +70,6 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
 $synopsisHook = new synopsisHook();
 global $synopsisHook;
 
-if (stripos($_SERVER['REQUEST_URI'], "viewimage") === false)
-    $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
+
+$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
 ?>

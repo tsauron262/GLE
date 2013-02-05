@@ -30,13 +30,17 @@ class synopsisHook {
             histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto();
         }
-        if ($element_id > 0 && $element_type == "commande" || $element_type == "DI" || $element_type == "FI") {
-            $return = '<div class="blockvmenupair rouge">';
+        if ($element_id > 0 && ($element_type == "commande" || $element_type == "DI" || $element_type == "FI")) {
+            $return .= '<div class="blockvmenupair rouge">';
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
             $return .= "</div>";
             $return .= '<div class="editable consigne">';
-            $return .= self::getConsigne($element_type, $element_id);
+            global $db;
+            $consigne = new consigneCommande($db);
+            $consigne->fetch($element_type, $element_id);
+            $consigne->setNote($element_type, $element_id);
+            $return .= $consigne->note;
             $return .= "</div>";
             $return .= "</div>";
         }
@@ -65,6 +69,7 @@ class synopsisHook {
                 $sql .= " fk_group = " . $comm->OrderGroup->id;
             else
                 $sql .= " fk_comm = " . $id_comm;
+            echo ($sql);
             $result = $db->query($sql);
             if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
@@ -77,37 +82,6 @@ class synopsisHook {
         
     }
 
-    static function getConsigne($element_type, $element_id) {
-        global $db;
-        if($element_id > 0){
-        $obj = self::getObj($element_type);
-        $obj->fetch($element_id);
-        if ($element_type == "commande") {
-            $id_comm = $element_id;
-        } elseif ($element_type == "FI" || $element_type == "DI") {
-            $id_comm = $obj->fk_commande;
-        }
-
-        if (isset($id_comm) && $id_comm > 0) {
-            $comm = self::getObj("commande");
-            $comm->fetch($id_comm);
-
-            $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
-
-            if ($comm->isGroupMember())
-                $sql .= " fk_group = " . $comm->OrderGroup->id;
-            else
-                $sql .= " fk_comm = " . $id_comm;
-            $result = $db->query($sql);
-            if ($db->num_rows($result) > 0) {
-                $ligne = $db->fetch_object($result);
-                if ($ligne->note != "") {
-                    return $ligne->note;
-                }
-            }
-        }
-        }
-    }
 
     static function getHeader() {
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
@@ -272,6 +246,65 @@ class synopsisHook {
         return array($obj, $tabMenu);
     }
 
+}
+
+class consigneCommande {
+    var $note = '';
+    var $rowid = 0;
+    
+    public function consigneCommande($db){
+        $this->db = $db;
+    }
+    
+    public function fetch($element_type, $element_id) {
+        $db = $this->db;
+        if($element_id > 0){
+            $obj = synopsisHook::getObj($element_type);
+            $obj->fetch($element_id);
+            if ($element_type == "commande") {
+                $id_comm = $element_id;
+            } elseif ($element_type == "FI" || $element_type == "DI") {
+                $id_comm = $obj->fk_commande;
+            }
+
+            if (isset($id_comm) && $id_comm > 0) {
+                $comm = synopsisHook::getObj("commande");
+                $comm->fetch($id_comm);
+
+                $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
+
+                if ($comm->isGroupMember())
+                    $sql .= " fk_group = " . $comm->OrderGroup->id;
+                else
+                    $sql .= " fk_comm = " . $id_comm;
+                $result = $db->query($sql);
+                if ($db->num_rows($result) > 0) {
+                    $ligne = $db->fetch_object($result);
+                    $this->note = $ligne->note;
+                    $this->rowid = $ligne->rowid;
+                    if ($ligne->note != "") {
+                        return $ligne->note;
+                    }
+                }
+            }
+        }
+        
+    }
+        public function setNote($note, $fk_comm, $fk_group = null){
+            if($this->rowid == 0){
+                if($fk_group){
+                    $champ = "fk_group";
+                    $val = $fk_group;
+                }
+                else{
+                    $champ = "fk_comm";
+                    $val = $fk_comm;                    
+                }
+                $sql = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_consigne (".$champ.") VALUES (".$val.")";
+                $result = $this->db->query($sql);
+                $this->rowid = $this->db->last_insert_id($result);
+            }
+        }
 }
 
 class Synopsis_Commande extends Commande {

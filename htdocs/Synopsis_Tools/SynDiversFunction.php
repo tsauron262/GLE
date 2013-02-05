@@ -352,6 +352,17 @@ function debug($arr) {
     echo $i;
 }
 
+function getIdInUrl($url, $nomId = "id"){
+    $tabUrl = explode("?", $url);
+    $tabUrl = explode("#", $tabUrl[1]);
+    $tabUrl = explode("&", $tabUrl[0]);
+    foreach ($tabUrl as $val) {
+        if (stripos($val, $nomId) !== false)
+            return str_replace($nomId . "=", "", $val);
+    }
+    return false;
+}
+
 function getTypeAndId($url = null, $request = null) {
     if($url == NULL)
         $url = $_SERVER['REQUEST_URI'];

@@ -7,8 +7,6 @@ $forceRightEdit = false;
 
 if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
     $url = $_POST['url'];
-    $tabUrl = explode("?", $url);
-    $tabUrl = explode("&", $tabUrl[1]);
 
     $nomId = "id";
     $nomChampNote = "note_public";
@@ -57,18 +55,12 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->propal->creer;
     }
 
-    foreach ($tabUrl as $val) {
-        if (stripos($val, $nomId) !== false)
-            $id = str_replace($nomId . "=", "", $val);
-    }
+    $id = getIdInUrl($url, $nomId);
 
     if (!isset($id) && $nomId != "id") {
         //On reesseille avec id standard
         $nomId = "id";
-        foreach ($tabUrl as $val) {
-            if (stripos($val, $nomId) !== false)
-                $id = str_replace($nomId . "=", "", $val);
-        }
+        $id = getIdInUrl($url, $nomId);
     }
 
     if ($forceRightEdit)
@@ -90,13 +82,9 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 } elseif ($_POST['type'] == 'consigne') {
     $url = $_POST['url'];
     $tabElem = getTypeAndId($url);
-    $tabUrl = explode("?", $url);
-    $tabUrl = explode("&", $tabUrl[1]);
-    foreach ($tabUrl as $val)
-        if (stripos($val, "id") !== false)
-            $id = str_replace("id" . "=", "", $val);
+
     $element_type = $tabElem[0];
-    $element_id = $id;
+    $element_id = getIdInUrl($url, "id");
     global $db;
     $consigne = new consigneCommande($db);
     $consigne->fetch($element_type, $element_id);

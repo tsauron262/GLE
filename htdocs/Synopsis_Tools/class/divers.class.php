@@ -250,8 +250,6 @@ class consigneCommande {
     }
 
     public function init() {
-
-
         $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
         if ($this->fk_group)
             $sql .= " fk_group = " . $this->fk_group;

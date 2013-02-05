@@ -17,7 +17,7 @@ else
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 
-setlocale (LC_TIME, 'fr_FR.utf8','fra'); 
+setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
 
 
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
@@ -68,5 +68,6 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
 $synopsisHook = new synopsisHook();
 global $synopsisHook;
 
-$conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
+if (stripos($_SERVER['REQUEST_URI'], "viewimage") === false)
+    $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
 ?>

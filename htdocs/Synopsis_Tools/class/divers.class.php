@@ -281,7 +281,6 @@ class consigneCommande {
             $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_consigne (" . $champ . ") VALUES (" . $val . ")";
             $result = $this->db->query($sql);
             $this->rowid = $this->db->last_insert_id($result);
-            echo $sql;
         }
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commande_consigne SET note ='" . $this->note . "' WHERE rowid = " . $this->rowid;
         $result = $this->db->query($sql);

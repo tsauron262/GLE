@@ -246,7 +246,7 @@ class Chrono extends CommonObject {
                                       value,
                                       key_id)
                              VALUES ( " . $newId . " ,
-                                      '" . $res->value . "' ,
+                                      '" . addslashes($res->value) . "' ,
                                       " . $res->key_id . " )";
             $sql1 = $this->db->query($requete);
         }
@@ -656,6 +656,7 @@ $langs->load("chrono@Synopsis_Chrono");
         $retVal = false;
         foreach ($dataArr as $keyId => $value) {
             //Set Value
+            $value = addslashes($value);
             $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value
                          WHERE key_id = " . $keyId . "

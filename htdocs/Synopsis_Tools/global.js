@@ -13,7 +13,8 @@ $(window).load(function(){
     ajNoteAjax();   
     
     
-    datas = 'type=consigne';
+    var datas = 'url='+window.location;
+    datas += '&type=consigne';
     editAjax(jQuery('.consigne.editable'), datas);
     
     //    $(".ui-search-toolbar input").keypress(function(e) {
@@ -122,7 +123,9 @@ function ajNoteAjax(){
                 //                    shownHideNote();   
                 //                })
                 
-                editAjax(jQuery('#notePublicEdit'), datas, function(){hideNote()});
+                editAjax(jQuery('#notePublicEdit'), datas, function(){
+                    hideNote()
+                    });
                 
             }
         }
@@ -155,34 +158,37 @@ function ajNoteAjax(){
 }
 
 
-    function editAjax(elem, datas, callOut){
-        elem.click(function(){
-                    if(fermable){
-                        fermable = false;
-                        $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+jQuery(elem).html().split('<br>').join('\n')+"</textarea>");
-                        $(elem).removeClass('editable');
-                        $(elem).find(".editableTextarea").focus();
-                        $(elem).find(".editableTextarea").val($(".editableTextarea").val()+"\n");
-                        $(elem).find(".editableTextarea").focusout(function(){
-                            fermable = true;
-                            if(callOut)
-                                callOut();
-                            datas = datas+'&note='+$(".editableTextarea").val();
-                            jQuery.ajax({
-                                url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
-                                data:datas,
-                                datatype:"xml",
-                                type:"POST",
-                                cache: false,
-                                success:function(msg){
-                                    if(msg.indexOf("[1]") > -1){
-                                        msg = msg.replace("[1]", "");
-                                    }
-                                    $(elem).html(msg);
-                                    $(elem).addClass("editable");
-                                }
-                            });
-                        });
+function editAjax(elem, datas, callOut){
+    elem.click(function(){
+        if(fermable){
+            fermable = false;
+            var text = jQuery(elem).html().split('<br>').join('\n');
+            if(text == "Cliquez pour éditer")
+                text = '';
+            $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+text+"</textarea>");
+            $(elem).removeClass('editable');
+            $(elem).find(".editableTextarea").focus();
+            $(elem).find(".editableTextarea").val($(".editableTextarea").val()+"\n");
+            $(elem).find(".editableTextarea").focusout(function(){
+                fermable = true;
+                if(callOut)
+                    callOut();
+                datas = datas+'&note='+$(".editableTextarea").val();
+                jQuery.ajax({
+                    url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
+                    data:datas,
+                    datatype:"xml",
+                    type:"POST",
+                    cache: false,
+                    success:function(msg){
+                        if(msg.indexOf("[1]") > -1){
+                            msg = msg.replace("[1]", "");
+                        }
+                        $(elem).html(msg);
+                        $(elem).addClass("editable");
                     }
                 });
-    }
+            });
+        }
+    });
+}

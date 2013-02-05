@@ -39,47 +39,12 @@ class synopsisHook {
             global $db;
             $consigne = new consigneCommande($db);
             $consigne->fetch($element_type, $element_id);
-            $consigne->setNote($element_type, $element_id);
             $return .= $consigne->note;
             $return .= "</div>";
             $return .= "</div>";
         }
 
         return $return;
-    }
-
-    static function setConsigne($element_type, $element_id) {
-        global $db;
-        if($element_id > 0){
-        $obj = self::getObj($element_type);
-        $obj->fetch($element_id);
-        if ($element_type == "commande") {
-            $id_comm = $element_id;
-        } elseif ($element_type == "FI" || $element_type == "DI") {
-            $id_comm = $obj->fk_commande;
-        }
-
-        if (isset($id_comm) && $id_comm > 0) {
-            $comm = self::getObj("commande");
-            $comm->fetch($id_comm);
-
-            $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
-
-            if ($comm->isGroupMember())
-                $sql .= " fk_group = " . $comm->OrderGroup->id;
-            else
-                $sql .= " fk_comm = " . $id_comm;
-            echo ($sql);
-            $result = $db->query($sql);
-            if ($db->num_rows($result) > 0) {
-                $ligne = $db->fetch_object($result);
-                if ($ligne->note != "") {
-                    return $ligne->note;
-                }
-            }
-        }
-        }
-        
     }
 
 
@@ -271,26 +236,36 @@ class consigneCommande {
                 $comm = synopsisHook::getObj("commande");
                 $comm->fetch($id_comm);
 
-                $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
-
                 if ($comm->isGroupMember())
-                    $sql .= " fk_group = " . $comm->OrderGroup->id;
+                    $this->fk_group = $comm->OrderGroup->id;
                 else
-                    $sql .= " fk_comm = " . $id_comm;
-                $result = $db->query($sql);
-                if ($db->num_rows($result) > 0) {
-                    $ligne = $db->fetch_object($result);
-                    $this->note = $ligne->note;
-                    $this->rowid = $ligne->rowid;
-                    if ($ligne->note != "") {
-                        return $ligne->note;
-                    }
-                }
+                    $this->fk_comm = $id_comm;
+                $this->init();
             }
         }
         
     }
+    
+    public function init(){
+        
+
+                $sql = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande_consigne WHERE ";
+                if ($this->fk_group)
+                    $sql .= " fk_group = " . $this->fk_group;
+                else
+                    $sql .= " fk_comm = " . $this->fk_comm;
+                $result = $this->db->query($sql);
+                if ($this->db->num_rows($result) > 0) {
+                    $ligne = $this->db->fetch_object($result);
+                    $this->note = $ligne->note;
+                    $this->rowid = $ligne->rowid;
+                }
+                    if ($this->note == "") {
+                        $this->note = "Cliquez pour éditer";
+                    }
+    }
         public function setNote($note, $fk_comm, $fk_group = null){
+            $this->note = $note;
             if($this->rowid == 0){
                 if($fk_group){
                     $champ = "fk_group";
@@ -304,6 +279,8 @@ class consigneCommande {
                 $result = $this->db->query($sql);
                 $this->rowid = $this->db->last_insert_id($result);
             }
+            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande_consigne SET note ='".$this->note."' WHERE rowid = ".$this->rowid;
+                $result = $this->db->query($sql);
         }
 }
 

@@ -88,7 +88,24 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $return = ($droit2 ? "[1]" : "") . $return;
     }
 }
-
+elseif($_POST['type'] == 'consigne'){
+        $url = $_POST['url'];
+        $tabElem = getTypeAndId($url);
+    $tabUrl = explode("?", $url);
+    $tabUrl = explode("&", $tabUrl[1]);
+    foreach ($tabUrl as $val)
+        if (stripos($val, "id") !== false)
+            $id = str_replace("id" . "=", "", $val);
+        $element_type = $tabElem[0];
+        $element_id = $id;
+            global $db;
+            $consigne = new consigneCommande($db);
+            $consigne->fetch($element_type, $element_id);
+//            die($element_id);
+            $consigne->setNote(str_replace("\n", "<br/>", trim($_POST['note'])), $element_type, $element_id);
+            $consigne->fetch($element_type, $element_id);
+            $return = $consigne->note;
+}
 
 echo $return;
 ?>

@@ -352,57 +352,61 @@ function debug($arr) {
     echo $i;
 }
 
-function getTypeAndId() {
-    if (stripos($_SERVER['REQUEST_URI'], "compta/facture") != false) {
+function getTypeAndId($url = null, $request = null) {
+    if($url == NULL)
+        $url = $_SERVER['REQUEST_URI'];
+    if($request == NULL)
+        $request = $_REQUEST;
+    if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
-        @$element_id = $_REQUEST['facid'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "societe/soc.php")
-            || stripos($_SERVER['REQUEST_URI'], "comm/fiche.php?socid=")
-            || stripos($_SERVER['REQUEST_URI'], "comm/prospect/fiche.php?socid=")) {
+        @$element_id = $request['facid'];
+    } elseif (stripos($url, "societe/soc.php")
+            || stripos($url, "comm/fiche.php?socid=")
+            || stripos($url, "comm/prospect/fiche.php?socid=")) {
         $element_type = 'societe';
-        @$element_id = $_REQUEST['socid'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "product/fiche.php") != false) {
+        @$element_id = $request['socid'];
+    } elseif (stripos($url, "product/fiche.php") != false) {
         $element_type = 'product';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "projet/tasks/task.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "projet/tasks/task.php") != false) {
         $element_type = 'tache';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "projet/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "projet/") != false) {
         $element_type = 'projet';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "commande/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "commande/") != false) {
         $element_type = 'commande';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "compta/bank/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "compta/bank/") != false) {
         $element_type = 'banque';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "fichinter/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "fichinter/") != false) {
         $element_type = 'FI';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_DemandeInterv/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_DemandeInterv/") != false) {
         $element_type = 'DI';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "contrat/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "contrat/") != false) {
         $element_type = 'contrat';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "user/fiche.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "user/fiche.php") != false) {
         $element_type = 'user';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "comm/propal.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "comm/propal.php") != false) {
         $element_type = 'propal';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "admin/Synopsis_Chrono") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "admin/Synopsis_Chrono") != false) {
         $element_type = 'configChrono';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_Chrono") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_Chrono") != false) {
         $element_type = 'chrono';
-        @$element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_Process") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_Process") != false) {
         $element_type = 'process';
-        @$element_id = $_REQUEST['process_id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "ndfp") != false) {
+        @$element_id = $request['process_id'];
+    } elseif (stripos($url, "ndfp") != false) {
         $element_type = 'ndfp';
-        @$element_id = $_REQUEST['id'];
+        @$element_id = $request['id'];
     } else {
         return null;
     }

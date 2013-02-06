@@ -16,7 +16,7 @@
   * Name : Babel_GA.php
   */
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 
 $langs->load("admin");
 $langs->load("bills");

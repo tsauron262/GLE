@@ -7,7 +7,7 @@
  */
 require_once("../../main.inc.php");
 ini_set('browscap',"/opt/GLE/tools/etc/browscap.ini");
-$browser = get_browser();
+//$browser = get_browser();
 
 // The get widget handler.
 function widget_treeCategoriesFourn() {

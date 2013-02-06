@@ -17,8 +17,8 @@
   * dolibarr-24dev
   */
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
 
 $langs->load("admin");

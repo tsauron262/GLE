@@ -17,7 +17,7 @@
   */
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT.'/Babel_GMAO/SAV.class.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 
 if (!$user->admin)
   accessforbidden();

@@ -13,7 +13,7 @@
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT.'/propal.class.php');
 require_once(DOL_DOCUMENT_ROOT.'/product.class.php');
-require_once(DOL_DOCUMENT_ROOT.'/contrat/contrat.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
 
 
 $langs->load('companies');

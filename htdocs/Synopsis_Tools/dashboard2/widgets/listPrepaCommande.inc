@@ -6,8 +6,8 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/commande/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listPrepaCommande() {
@@ -97,7 +97,7 @@ function widget_listPrepaCommande() {
                             $table .= $commandestatic->getNomUrl(1,5);
                             $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dolibarr_trunc($res->nom,18).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
                             $table .=  '<td>'.$res->Blabel.'</td>';
                     }
                     $var=!$var;
@@ -105,7 +105,7 @@ function widget_listPrepaCommande() {
                             <td  nowrap="nowrap">';
                     $table2 .= $commandestatic->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td>'.$res->Blabel.'</td>';
                     $iter++;
                 }

@@ -14,11 +14,11 @@
 global $langs;
 require_once('../../master.inc.php');
 
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/propal.class.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/propal.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/propal.lib.php");
 
-require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 require_once(DOL_DOCUMENT_ROOT .'/commande/class/commande.class.php');
 
 
@@ -253,7 +253,7 @@ if ($_REQUEST['level'] == 1)
 //                    print "<td align='center'>".$res->date_contrat;
 //                    print "<td>".$res->title;
 //                    print "<td width= 100px><table width=100%  class='nobordernopadding' width='100%'>";
-//                    require_once(DOL_DOCUMENT_ROOT.'/contrat/contrat.class.php');
+//                    require_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
 //                    $contrat = new Contrat($db);
 //                    $contrat->fetch($res->cid);
 //                    if ($contrat->linkedTo)
@@ -276,7 +276,7 @@ if ($_REQUEST['level'] == 1)
 //                                case 'f':
 //                                    print '';
 //                                    print '<td align="right" style="width:20px"><a href="'.$_SERVER["PHP_SELF"].'?action=chSrc&amp;id='.$id.'">'.img_edit($langs->trans("Change la source")).'</a>';
-//                                    require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+//                                    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 //                                    $fact = new Facture($db);
 //                                    $fact->fetch($val1);
 //                                    print "</table><td><a href='".DOL_URL_ROOT."/compta/facture.php?facid=".$fact->id."'>".$fact->ref."</a>";
@@ -313,7 +313,7 @@ if ($_REQUEST['level'] == 1)
 //                        {
 //                                print '<tr><td>';
 //                                print 'Factures associ&eacute;es<td>';
-//                                require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+//                                require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 //                                $fac = new Facture($db);
 //                                $fac->fetch($val1);
 //                                print "<a href='".DOL_URL_ROOT."/compta/facture.php?facid=".$fac->id."'>".$fac->ref."</a>";

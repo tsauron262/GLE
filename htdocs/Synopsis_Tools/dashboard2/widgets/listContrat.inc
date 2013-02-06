@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 // The get widget handler.
 function widget_listContrat() {

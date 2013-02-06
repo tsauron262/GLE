@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.commande.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
 
 // The get widget handler.
 function widget_listStock() {
@@ -20,8 +20,8 @@ function widget_listStock() {
 
     $table ="<p>";
     $table2 ="<p>";
-    require_once(DOL_DOCUMENT_ROOT.'/product.class.php');
-    require_once(DOL_DOCUMENT_ROOT."/product/stock/entrepot.class.php");
+    require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
+    require_once(DOL_DOCUMENT_ROOT."/product/stock/class/entrepot.class.php");
 
     $staticproduct=new Product($db);
 

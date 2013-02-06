@@ -1,0 +1,47 @@
+/**
+ * @file
+ *    CSS for Demo implementation of jQuery.dashboard() plugin.
+ *
+ * Released under the GNU General Public License.  See LICENSE.txt.
+ */
+
+#dashboard {
+  font-family: Arial, "MS Trebuchet", sans-serif;
+  font-size:10px;
+  min-width: 1100px;
+}
+
+/* Links don't always have href="" attributes.  Make them look and behave like links anyway. */
+
+/* Widgets can have different 'categories'. */
+li.search { border-color: orange; }
+li.search .widget-header { color: orange; }
+
+li.social { border-color: purple; }
+li.social .widget-header { color: purple; }
+
+/* Demonstrates the usage of multiple classes on one widget. */
+li.highlight { background: #ffe; }
+
+ul.list{
+    list-style-type:none;
+    padding: 0px 10px;
+}
+
+ul.list li{
+    padding: 3px;
+    margin:1px;
+    cursor: pointer;
+}
+li.widget{
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+li.widget, .box_shadow, .widget-wrapper {
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+}
+.boxhandle{
+    display: none;
+}
+

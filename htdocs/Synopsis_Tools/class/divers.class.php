@@ -504,129 +504,154 @@ class histoNavigation {
 class dashboard {
 
     static function getDashboard() {
-        echo <<<EOF
-        <script type="text/javascript" src="/Synopsis_Tools/dashboard2/js/lib/jquery.dashboard.min.js"></script>
-    <script type="text/javascript" src="/Synopsis_Tools/dashboard2/js/lib/themeroller.js"></script>
+//        echo <<<EOF
+//        <script type="text/javascript" src="/Synopsis_Tools/dashboard2/js/lib/jquery.dashboard.min.js"></script>
+//    <script type="text/javascript" src="/Synopsis_Tools/dashboard2/js/lib/themeroller.js"></script>
+//
+//    <script type="text/javascript">
+//      // This is the code for definining the dashboard
+//      $(document).ready(function() {
+//
+//        // load the templates
+//        $('body').append('<div id="templates"></div>');
+//        $("#templates").hide();
+//        $("#templates").load("/Synopsis_Tools/dashboard2/demo/templates.html", initDashboard);
+//
+//        // call for the themeswitcher
+//        $('#switcher').themeswitcher();
+//
+//        function initDashboard() {
+//
+//          // to make it possible to add widgets more than once, we create clientside unique id's
+//          // this is for demo purposes: normally this would be an id generated serverside
+//          var startId = 100;
+//
+//          var dashboard = $('#dashboard').dashboard({
+//            // layout class is used to make it possible to switch layouts
+//            layoutClass:'layout',
+//            // feed for the widgets which are on the dashboard when opened
+//            json_data : {
+//              url: "/Synopsis_Tools/dashboard2/ajaxData.php?op=get_widgets_by_column"
+//            },
+//            // json feed; the widgets whcih you can add to your dashboard
+//            addWidgetSettings: {
+//              widgetDirectoryUrl:"/Synopsis_Tools/dashboard2/ajax/listWidget-xml_response"
+//            },
+//
+//            // Definition of the layout
+//            // When using the layoutClass, it is possible to change layout using only another class. In this case
+//            // you don't need the html property in the layout
+//
+//            layouts :
+//              [
+//                { title: "Layout1",
+//                  id: "layout1",
+//                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout1.png",
+//                  html: '<div class="layout layout-a"><div class="column first column-first"></div></div>',
+//                  classname: 'layout-a'
+//                },
+//                { title: "Layout2",
+//                  id: "layout2",
+//                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout2.png",
+//                  html: '<div class="layout layout-aa"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
+//                  classname: 'layout-aa'
+//                },
+//                { title: "Layout3",
+//                  id: "layout3",
+//                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout3.png",
+//                  html: '<div class="layout layout-ba"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
+//                  classname: 'layout-ba'
+//                },
+//                { title: "Layout4",
+//                  id: "layout4",
+//                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout4.png",
+//                  html: '<div class="layout layout-ab"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
+//                  classname: 'layout-ab'
+//                },
+//                { title: "Layout5",
+//                  id: "layout5",
+//                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout5.png",
+//                  html: '<div class="layout layout-aaa"><div class="column first column-first"></div><div class="column second column-second"></div><div class="column third column-third"></div></div>',
+//                  classname: 'layout-aaa'
+//                }
+//              ]
+//
+//          }); // end dashboard call
+//
+//          // binding for a widgets is added to the dashboard
+//          dashboard.element.live('dashboardAddWidget',function(e, obj){
+//            var widget = obj.widget;
+//
+//            dashboard.addWidget({
+//              "id":startId++,
+//              "title":widget.title,
+//              "url":widget.url,
+//              "metadata":widget.metadata
+//              }, dashboard.element.find('.column:first'));
+//          });
+//
+//          // the init builds the dashboard. This makes it possible to first unbind events before the dashboars is built.
+//          dashboard.init();
+//        }
+//      });
+//      
+//
+//    </script>
+//
+//    <link rel="stylesheet" type="text/css" href="/Synopsis_Tools/dashboard2/themes/default/dashboardui.css" />
+//    <link rel="stylesheet" type="text/css" href="/Synopsis_Tools/dashboard2/themes/default/jquery-ui-1.8.2.custom.css" />
+//
+//  </head>
+//
+//  <body>
+//
+//<!--  <div class="header_tile_image">
+//    <div class="headerbox">
+//      <div id="switcher"></div>
+//    </div>
+//    <div class="headerlinks">
+//      <a class="openaddwidgetdialog headerlink" href="#">Add Widget</a>&nbsp;<span class="headerlink">|</span>&nbsp;
+//      <a class="editlayout headerlink" href="#">Edit layout</a>
+//    </div>
+//  </div>-->
+//      
+//      <div class="butAction ui-widget-header ui-corner-all ui-state-default" style="padding: 5px 10px; width: 290px;"><em><span class="ui-icon ui-icon-info" style="float: left; margin: -1px 3px 0px 0px"></span><a class="openaddwidgetdialog" href="#">Ajouter des widgets à votre tableau de bord.</a></em></div>
+//
+//
+//  <div id="dashboard" class="dashboard">
+//    <!-- this HTML covers all layouts. The 5 different layouts are handled by setting another layout classname -->
+//    <div class="layout">
+//      <div class="column first column-first"></div>
+//      <div class="column second column-second"></div>
+//      <div class="column third column-third"></div>
+//    </div>
+//  </div>
+//EOF;
+        
+$jQueryDashBoardPath = DOL_URL_ROOT.'/Synopsis_Tools/dashboard/';
+global $user;
+$js = '
+    <script>var DOL_URL_ROOT="'.DOL_URL_ROOT.'";</script>
+    <script>var DOL_DOCUMENT_ROOT="'.DOL_DOCUMENT_ROOT.'";</script>
+    <script type="text/javascript" src="'.$jQueryDashBoardPath.'jquery.dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'dashboard.css" />
 
-    <script type="text/javascript">
-      // This is the code for definining the dashboard
-      $(document).ready(function() {
+    <script type="text/javascript" src="'.$jQueryDashBoardPath.'dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'demo.css" />
+    <script type="text/javascript">var userid='.$user->id.';</script>
+    <script type="text/javascript">var dashtype="4";</script>
 
-        // load the templates
-        $('body').append('<div id="templates"></div>');
-        $("#templates").hide();
-        $("#templates").load("/Synopsis_Tools/dashboard2/demo/templates.html", initDashboard);
-
-        // call for the themeswitcher
-        $('#switcher').themeswitcher();
-
-        function initDashboard() {
-
-          // to make it possible to add widgets more than once, we create clientside unique id's
-          // this is for demo purposes: normally this would be an id generated serverside
-          var startId = 100;
-
-          var dashboard = $('#dashboard').dashboard({
-            // layout class is used to make it possible to switch layouts
-            layoutClass:'layout',
-            // feed for the widgets which are on the dashboard when opened
-            json_data : {
-              url: "/Synopsis_Tools/dashboard2/ajaxData.php?op=get_widgets_by_column"
-            },
-            // json feed; the widgets whcih you can add to your dashboard
-            addWidgetSettings: {
-              widgetDirectoryUrl:"/Synopsis_Tools/dashboard2/ajax/listWidget-xml_response"
-            },
-
-            // Definition of the layout
-            // When using the layoutClass, it is possible to change layout using only another class. In this case
-            // you don't need the html property in the layout
-
-            layouts :
-              [
-                { title: "Layout1",
-                  id: "layout1",
-                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout1.png",
-                  html: '<div class="layout layout-a"><div class="column first column-first"></div></div>',
-                  classname: 'layout-a'
-                },
-                { title: "Layout2",
-                  id: "layout2",
-                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout2.png",
-                  html: '<div class="layout layout-aa"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
-                  classname: 'layout-aa'
-                },
-                { title: "Layout3",
-                  id: "layout3",
-                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout3.png",
-                  html: '<div class="layout layout-ba"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
-                  classname: 'layout-ba'
-                },
-                { title: "Layout4",
-                  id: "layout4",
-                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout4.png",
-                  html: '<div class="layout layout-ab"><div class="column first column-first"></div><div class="column second column-second"></div></div>',
-                  classname: 'layout-ab'
-                },
-                { title: "Layout5",
-                  id: "layout5",
-                  image: "/synopsys_dashboard/dashboard2/demo/layouts/layout5.png",
-                  html: '<div class="layout layout-aaa"><div class="column first column-first"></div><div class="column second column-second"></div><div class="column third column-third"></div></div>',
-                  classname: 'layout-aaa'
-                }
-              ]
-
-          }); // end dashboard call
-
-          // binding for a widgets is added to the dashboard
-          dashboard.element.live('dashboardAddWidget',function(e, obj){
-            var widget = obj.widget;
-
-            dashboard.addWidget({
-              "id":startId++,
-              "title":widget.title,
-              "url":widget.url,
-              "metadata":widget.metadata
-              }, dashboard.element.find('.column:first'));
-          });
-
-          // the init builds the dashboard. This makes it possible to first unbind events before the dashboars is built.
-          dashboard.init();
-        }
-      });
-      
-
-    </script>
-
-    <link rel="stylesheet" type="text/css" href="/Synopsis_Tools/dashboard2/themes/default/dashboardui.css" />
-    <link rel="stylesheet" type="text/css" href="/Synopsis_Tools/dashboard2/themes/default/jquery-ui-1.8.2.custom.css" />
-
-  </head>
-
-  <body>
-
-<!--  <div class="header_tile_image">
-    <div class="headerbox">
-      <div id="switcher"></div>
-    </div>
-    <div class="headerlinks">
-      <a class="openaddwidgetdialog headerlink" href="#">Add Widget</a>&nbsp;<span class="headerlink">|</span>&nbsp;
-      <a class="editlayout headerlink" href="#">Edit layout</a>
-    </div>
-  </div>-->
-      
-      <div class="butAction ui-widget-header ui-corner-all ui-state-default" style="padding: 5px 10px; width: 290px;"><em><span class="ui-icon ui-icon-info" style="float: left; margin: -1px 3px 0px 0px"></span><a class="openaddwidgetdialog" href="#">Ajouter des widgets à votre tableau de bord.</a></em></div>
-
-
-  <div id="dashboard" class="dashboard">
-    <!-- this HTML covers all layouts. The 5 different layouts are handled by setting another layout classname -->
-    <div class="layout">
-      <div class="column first column-first"></div>
-      <div class="column second column-second"></div>
-      <div class="column third column-third"></div>
-    </div>
-  </div>
-EOF;
+';
+echo $js;
+print '<div class="titre">Mon tableau de bord - Accueil</div>';
+    print "<br/>";
+    print "<br/>";
+    print "<div style='padding: 5px 10px; width: 270px;' class='ui-button ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
+    print "<br/>";
+    print '<div id="dashboard">';
+    print '  You need javascript to use the dashboard.';
+    print '</div>';
+        
     }
 
 }

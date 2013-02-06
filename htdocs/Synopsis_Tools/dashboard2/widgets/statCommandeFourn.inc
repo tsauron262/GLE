@@ -7,7 +7,7 @@
  */
 require_once("../../main.inc.php");
 // The get widget handler.
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.commande.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
 
 function widget_statCommandeFourn() {
   // A widget object as per jquery.dashboard.js.

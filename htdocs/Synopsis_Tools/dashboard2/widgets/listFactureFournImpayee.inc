@@ -6,8 +6,8 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.facture.class.php');
-require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listFactureFournImpayee() {
@@ -91,7 +91,7 @@ function widget_listFactureFournImpayee() {
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $facturestatic->getNomUrl(1,'');;
-                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowSupplier"),"company").dolibarr_trunc($res->nom,44).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowSupplier"),"company").dol_trunc($res->nom,44).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                             $table .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3).'</td>';
@@ -102,7 +102,7 @@ function widget_listFactureFournImpayee() {
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $facturestatic->getNomUrl(1,'');
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dolibarr_trunc($res->nom,44).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                     $table2 .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3).'</td>';

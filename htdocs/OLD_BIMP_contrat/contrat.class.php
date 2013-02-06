@@ -33,7 +33,7 @@
  */
 
 /**
-        \file       htdocs/contrat/contrat.class.php
+        \file       htdocs/contrat/class/contrat.class.php
         \ingroup    contrat
         \brief      Fichier de la classe des contrats
         \version    $Id: contrat.class.php,v 1.106 2008/07/12 10:31:59 eldy Exp $
@@ -41,7 +41,7 @@
 
 require_once(DOL_DOCUMENT_ROOT."/commonobject.class.php");
 require_once(DOL_DOCUMENT_ROOT."/product.class.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/price.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/price.lib.php");
 
 
 /**

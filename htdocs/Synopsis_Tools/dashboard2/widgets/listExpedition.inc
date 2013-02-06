@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/expedition/expedition.class.php");
+require_once (DOL_DOCUMENT_ROOT."/expedition/class/expedition.class.php");
 
 // The get widget handler.
 function widget_listExpedition() {

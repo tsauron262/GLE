@@ -285,7 +285,7 @@ class pdf_process_pholos extends ModeleNumRefProcess
                     if ($com->lines[$i]->date_start && $com->lines[$i]->date_end)
                     {
                         // Affichage duree si il y en a une
-                        $libelleproduitservice.="<br>".dol_htmlentitiesbr("(".$outputlangs->transnoentities("From")." ".dolibarr_print_date($com->lines[$i]->date_start)." ".$outputlangs->transnoentities("to")." ".dolibarr_print_date($com->lines[$i]->date_end).")",1);
+                        $libelleproduitservice.="<br>".dol_htmlentitiesbr("(".$outputlangs->transnoentities("From")." ".dol_print_date($com->lines[$i]->date_start)." ".$outputlangs->transnoentities("to")." ".dol_print_date($com->lines[$i]->date_end).")",1);
                     }
 
                     $pdf->SetFont(pdf_getPDFFont($outputlangs),'', 9);   // Dans boucle pour gerer multi-page
@@ -843,7 +843,7 @@ class pdf_process_pholos extends ModeleNumRefProcess
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("OrderDate")." : " . dolibarr_print_date($object->date,"%d %b %Y"), '', 'R');
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("OrderDate")." : " . dol_print_date($object->date,"%d %b %Y"), '', 'R');
 
         if ($showadress)
         {

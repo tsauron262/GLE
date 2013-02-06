@@ -80,10 +80,10 @@ llxHeader();
 $sql = "SELECT s.rowid as socid, s.nom, c.rowid as cid, c.ref as cref,";
 $sql.= " cd.rowid, cd.description, cd.statut, p.rowid as pid, p.label as label,";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " sc.fk_soc, sc.fk_user,";
-$sql.= " ".$db->pdate("cd.date_ouverture_prevue")." as date_ouverture_prevue,";
-$sql.= " ".$db->pdate("cd.date_ouverture")." as date_ouverture,";
-$sql.= " ".$db->pdate("cd.date_fin_validite")." as date_fin_validite,";
-$sql.= " ".$db->pdate("cd.date_cloture")." as date_cloture";
+$sql.= " cd.date_ouverture_prevue as date_ouverture_prevue,";
+$sql.= " cd.date_ouverture as date_ouverture,";
+$sql.= " cd.date_fin_validite as date_fin_validite,";
+$sql.= " cd.date_cloture as date_cloture";
 $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c,";
 $sql.= " ".MAIN_DB_PREFIX."societe as s,";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
@@ -175,7 +175,7 @@ if ($resql)
     print "</tr>\n";
     print '</form>';
 
-    $now=mktime();
+    $now=time();
     $var=True;
     while ($i < min($num,$limit))
     {
@@ -199,18 +199,18 @@ if ($resql)
         // Date debut
         if ($mode == "0") {
             print '<td align="center">';
-            print ($obj->date_ouverture_prevue?dolibarr_print_date($obj->date_ouverture_prevue,'day'):'&nbsp;');
+            print ($obj->date_ouverture_prevue?dol_print_date($obj->date_ouverture_prevue,'day'):'&nbsp;');
             if ($obj->date_ouverture_prevue && ($obj->date_ouverture_prevue < (time() - $conf->contrat->services->inactifs->warning_delay)))
             print img_picto($langs->trans("Late"),"warning");
             else print '&nbsp;&nbsp;&nbsp;&nbsp;';
             print '</td>';
         }
-        if ($mode == "" || $mode > 0) print '<td align="center">'.($obj->date_ouverture?dolibarr_print_date($obj->date_ouverture,'day'):'&nbsp;').'</td>';
+        if ($mode == "" || $mode > 0) print '<td align="center">'.($obj->date_ouverture?dol_print_date($obj->date_ouverture,'day'):'&nbsp;').'</td>';
         // Date fin
         if ($mode != "4")
-		 print '<td align="center">'.($obj->date_fin_validite?dolibarr_print_date($obj->date_fin_validite,'day'):'&nbsp;');
+		 print '<td align="center">'.($obj->date_fin_validite?dol_print_date($obj->date_fin_validite,'day'):'&nbsp;');
         else 
-		print '<td align="center">'.dolibarr_print_date($obj->date_cloture,'day');
+		print '<td align="center">'.dol_print_date($obj->date_cloture,'day');
         // Icone warning
         if ($obj->date_fin_validite && $obj->date_fin_validite < (time() - $conf->contrat->services->expires->warning_delay) && $obj->statut < 5) print img_warning($langs->trans("Late"));
         else print '&nbsp;&nbsp;&nbsp;&nbsp;';
@@ -229,7 +229,7 @@ if ($resql)
 }
 else
 {
-    dolibarr_print_error($db);
+    dol_print_error($db);
 }
 
 

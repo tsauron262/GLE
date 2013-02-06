@@ -217,7 +217,7 @@ llxHeader($js,$langs->trans("Projects"),"Projet","1");
 
 //$staticsoc=new Societe($db);
 //
-//$sql = "SELECT p.rowid as projectid, p.ref, p.title, ".$db->pdate("p.dateo")." as do";
+//$sql = "SELECT p.rowid as projectid, p.ref, p.title, p.dateo as do";
 //$sql .= ", s.nom, s.rowid as socid, s.client";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 //$sql .= " FROM ".MAIN_DB_PREFIX."projet as p";

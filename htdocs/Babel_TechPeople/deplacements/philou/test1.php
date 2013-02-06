@@ -22,7 +22,7 @@
                        total ,
                        total_km ,
                        total_ttc ,
-                       ".$this->db->pdate("date_valid")." as date_valid
+                       date_valid as date_valid
                        ";
         $sql.= " FROM Babel_ndf ";
         $sql.= " WHERE id = ".$id  ;

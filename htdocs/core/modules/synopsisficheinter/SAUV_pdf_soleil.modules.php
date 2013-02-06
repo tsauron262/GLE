@@ -261,7 +261,7 @@ class pdf_soleil extends ModelePDFFicheinter
 
                 $pdf->SetTextColor(200,0,0);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'B',14);
-                $pdf->Text(11, 88, "Date : " . dolibarr_print_date($fichinter->date,'day'));
+                $pdf->Text(11, 88, "Date : " . dol_print_date($fichinter->date,'day'));
                 $pdf->Text(11, 94, $langs->trans("InterventionCard")." : ".$fichinter->ref);
 
                 $pdf->SetFillColor(220,220,220);
@@ -296,7 +296,7 @@ class pdf_soleil extends ModelePDFFicheinter
                         if ($valide>0)
                         {
                             $pdf->SetXY (10 +$this->marge_gauche, $y);
-                            $pdf->MultiCell(60, 4, preg_replace('/<br[ ]*\/?>/',"\n",$langs->transnoentities("Date")." : ".dolibarr_print_date($fichinterligne->datei)." - ".$langs->transnoentities("Duration")." : ".ConvertSecondToTime($fichinterligne->duration)), 0, 'J', 0);
+                            $pdf->MultiCell(60, 4, preg_replace('/<br[ ]*\/?>/',"\n",$langs->transnoentities("Date")." : ".dol_print_date($fichinterligne->datei)." - ".$langs->transnoentities("Duration")." : ".ConvertSecondToTime($fichinterligne->duration)), 0, 'J', 0);
                             $pdf->SetXY (70 + $this->marge_gauche, $y);
                             $pdf->MultiCell(30, 4, $fichinterligne->typeinterv, 0, 'L', 0);
                             $pdf->SetXY (100 + $this->marge_gauche, $y);

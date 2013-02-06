@@ -27,8 +27,8 @@ class ContratGA extends contrat{
     public function fetch($id)
     {
 
-        $sql = "SELECT rowid, statut, ref, fk_soc, ".$this->db->pdate("mise_en_service")." as datemise,";
-        $sql.= " fk_user_mise_en_service, ".$this->db->pdate("date_contrat")." as datecontrat,";
+        $sql = "SELECT rowid, statut, ref, fk_soc, mise_en_service as datemise,";
+        $sql.= " fk_user_mise_en_service, date_contrat as datecontrat,";
         $sql.= " fk_user_author, (SELECT max(echu) FROM Babel_GA_contrat WHERE contratdet_refid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = ".$id.")) as echu, ";
         $sql.= " fk_projet, type";
         $sql.= " modelPdf,";

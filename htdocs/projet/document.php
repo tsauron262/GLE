@@ -98,7 +98,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
         $upload_dir = $projetConf->dir_output.'/'.sanitize_string($projet->ref);
         if ($societe->fetch($projet->socid))
         {
-            $finalFileName = "doc_projet_".sanitize_string($projet->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", mktime()).".zip";
+            $finalFileName = "doc_projet_".sanitize_string($projet->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", time()).".zip";
             $filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)
@@ -139,7 +139,7 @@ if ($_REQUEST['SynAction'] == 'dlZipByGrp')
         $upload_dir = $projetConf->dir_output.'/'.sanitize_string($proj->ref);
         if ($societe->fetch($projet->socid))
         {
-            $finalFileName = "doc_projet_".sanitize_string($projet->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", mktime()).".zip";
+            $finalFileName = "doc_projet_".sanitize_string($projet->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", time()).".zip";
             //$filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);
             $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_ecm_document_assoc, ".MAIN_DB_PREFIX."Synopsis_projet_document_li_group WHERE fk_document = ".MAIN_DB_PREFIX."Synopsis_ecm_document_assoc.rowid AND fk_group = ".$_REQUEST['groupId'];
             $sql = $db->query($requete);

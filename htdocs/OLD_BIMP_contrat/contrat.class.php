@@ -330,9 +330,9 @@ class Contrat extends CommonObject
      */
     public function fetch($id)
     {
-        $sql = "SELECT rowid, statut, ref, fk_soc, ".$this->db->pdate("mise_en_service")." as datemise,";
-        $sql.= " fk_user_mise_en_service, ".$this->db->pdate("date_contrat")." as datecontrat,modelPdf,";
-        $sql.= " UNIX_TIMESTAMP(date_valid) as dateValidation,  ".$this->db->pdate("fin_validite")." as datefin,";
+        $sql = "SELECT rowid, statut, ref, fk_soc, mise_en_service as datemise,";
+        $sql.= " fk_user_mise_en_service, date_contrat as datecontrat,modelPdf,";
+        $sql.= " UNIX_TIMESTAMP(date_valid) as dateValidation,  fin_validite as datefin,";
         $sql.= " fk_user_author,";
         $sql.= " fk_projet,";
         $sql.= " linkedTo,";
@@ -1354,8 +1354,8 @@ class Contrat extends CommonObject
     public function info($id=false)
     {
         if(!$id)$id = $this->id;
-        $sql = "SELECT c.rowid, c.ref, ".$this->db->pdate("datec")." as datec, ".$this->db->pdate("date_cloture")." as date_cloture,";
-        $sql.= $this->db->pdate("c.tms")." as date_modification,";
+        $sql = "SELECT c.rowid, c.ref, datec as datec, date_cloture as date_cloture,";
+        $sql.= "c.tms as date_modification,";
         $sql.= " fk_user_author, fk_user_cloture";
         $sql.= " fk_commercial_signature, fk_commercial_suivi";
         $sql.= " fk_user_mise_en_service";
@@ -1410,7 +1410,7 @@ class Contrat extends CommonObject
         }
         else
         {
-            dolibarr_print_error($this->db);
+            dol_print_error($this->db);
         }
     }
 
@@ -1463,7 +1463,7 @@ class Contrat extends CommonObject
         $this->nbtodo=$this->nbtodolate=0;
         if ($mode == 'inactives')
         {
-            $sql = "SELECT cd.rowid,".$this->db->pdate("cd.date_ouverture_prevue")." as datefin";
+            $sql = "SELECT cd.rowid,cd.date_ouverture_prevue as datefin";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", sc.fk_soc, sc.fk_user";
             $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -1472,7 +1472,7 @@ class Contrat extends CommonObject
         }
         if ($mode == 'expired')
         {
-            $sql = "SELECT cd.rowid,".$this->db->pdate("cd.date_fin_validite")." as datefin";
+            $sql = "SELECT cd.rowid,cd.date_fin_validite as datefin";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", sc.fk_soc, sc.fk_user";
             $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -1497,7 +1497,7 @@ class Contrat extends CommonObject
         }
         else
         {
-            dolibarr_print_error($this->db);
+            dol_print_error($this->db);
             $this->error=$this->db->error();
             return -1;
         }
@@ -1708,7 +1708,7 @@ class Contrat extends CommonObject
         }
         else
         {
-            dolibarr_print_error($this->db);
+            dol_print_error($this->db);
         }
     }
     public function verifyNumRef()
@@ -1752,7 +1752,7 @@ class Contrat extends CommonObject
             }
             else
             {
-            dolibarr_print_error($db,"Contrat::getNextNumRef ".$obj->error);
+            dol_print_error($db,"Contrat::getNextNumRef ".$obj->error);
             return "";
             }
          } else {
@@ -2327,13 +2327,13 @@ class ContratLigne
         $sql = "SELECT";
         $sql.= " t.rowid,";
 
-        $sql.= " ".$this->db->pdate('t.tms')." as tms,";
+        $sql.= " t.tms as tms,";
         $sql.= " t.fk_contrat,";
         $sql.= " t.fk_product,";
         $sql.= " t.statut,";
         $sql.= " t.label,";
         $sql.= " t.description,";
-        $sql.= " ".$this->db->pdate('t.date_commande')." as date_commande,";
+        $sql.= " t.date_commande as date_commande,";
         $sql.= " date_format(t.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,";
         $sql.= " date_format(t.date_ouverture,'%d/%m/%Y') as date_ouverture,";
         $sql.= " date_format(t.date_fin_validite,'%d/%m/%Y') as date_fin_validite,";
@@ -2635,7 +2635,7 @@ class ContratLigne
         }
         else
         {
-            dolibarr_print_error($this->db);
+            dol_print_error($this->db);
         }
     }
 

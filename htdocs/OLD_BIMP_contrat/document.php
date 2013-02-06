@@ -92,7 +92,7 @@ if ($_REQUEST['BabelAction'] == 'dlZip' && $contratRes)
 
         if ($societe->fetch($contrat->socid))
         {
-            $finalFileName = "doc_contrat_".sanitize_string($contrat->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", mktime()).".zip";
+            $finalFileName = "doc_contrat_".sanitize_string($contrat->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", time()).".zip";
             $filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)

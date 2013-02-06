@@ -454,7 +454,7 @@ class Zimbra
 
     public function modifyApptBabel($aptArr,$id,$option_string="")
     {
-        $datenow = mktime();
+        $datenow = time();
 
         if ("x".$id == "x")
         {
@@ -637,7 +637,7 @@ class Zimbra
         //                              "desc"     => "test",
         //                              "descHtml" => "test"
         //                 ));
-                $datenow = mktime();
+                $datenow = time();
 
         //        $datestart = "20090226T130000"; //14H
         $datestart="";

@@ -128,7 +128,7 @@ if ($resql)
     //print "</tr>\n";
     //print '</form>';
 
-    $now=mktime();
+    $now=time();
     $var=True;
     while ($i < min($num,$limit))
     {

@@ -12,7 +12,7 @@ class contratSAV extends contrat{
         $this->client_signataire = new User($this->db);
 
     }
-    public function fetch($id)
+    public function fetch($id, $ref='')
     {
 
         $ret = parent::fetch($id);
@@ -332,8 +332,9 @@ class contratSAV extends contrat{
         return ($html);
 
     }
-    public function validate($user,$langs,$conf)
+    public function validate($user)
     {
+        global $langs, $conf;
         $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 1 ,date_valid=now()";
         $sql .= " WHERE rowid = ".$this->id. " AND statut = 0";
         $resql = $this->db->query($sql) ;

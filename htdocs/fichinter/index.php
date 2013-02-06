@@ -104,7 +104,7 @@ $js = '
 //llxHeader();
 //
 //
-//$sql = "SELECT s.nom,s.rowid as socid, f.ref,".$db->pdate("f.datei")." as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
+//$sql = "SELECT s.nom,s.rowid as socid, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 //$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_fichinter as f ";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";

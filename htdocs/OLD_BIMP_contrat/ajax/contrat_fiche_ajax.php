@@ -100,10 +100,10 @@ switch ($action) {
             $date_start = '';
             $date_end = '';
             if ($_REQUEST["date_startmonth"] && $_REQUEST["date_startday"] && $_REQUEST["date_startyear"]) {
-                $date_start = dolibarr_mktime(12, 0, 0, $_REQUEST["date_startmonth"], $_REQUEST["date_startday"], $_REQUEST["date_startyear"]);
+                $date_start = dol_mktime(12, 0, 0, $_REQUEST["date_startmonth"], $_REQUEST["date_startday"], $_REQUEST["date_startyear"]);
             }
             if ($_REQUEST["date_endmonth"] && $_REQUEST["date_endday"] && $_REQUEST["date_endyear"]) {
-                $date_end = dolibarr_mktime(12, 0, 0, $_REQUEST["date_endmonth"], $_REQUEST["date_endday"], $_REQUEST["date_endyear"]);
+                $date_end = dol_mktime(12, 0, 0, $_REQUEST["date_endmonth"], $_REQUEST["date_endday"], $_REQUEST["date_endyear"]);
             }
         }
 
@@ -112,10 +112,10 @@ switch ($action) {
             $date_start_sl = '';
             $date_end_sl = '';
             if ($_REQUEST["date_start_slmonth"] && $_REQUEST["date_start_slday"] && $_REQUEST["date_start_slyear"]) {
-                $date_start_sl = dolibarr_mktime(12, 0, 0, $_REQUEST["date_start_slmonth"], $_REQUEST["date_start_slday"], $_REQUEST["date_start_slyear"]);
+                $date_start_sl = dol_mktime(12, 0, 0, $_REQUEST["date_start_slmonth"], $_REQUEST["date_start_slday"], $_REQUEST["date_start_slyear"]);
             }
             if ($_REQUEST["date_end_slmonth"] && $_REQUEST["date_end_slday"] && $_REQUEST["date_end_slyear"]) {
-                $date_end_sl = dolibarr_mktime(12, 0, 0, $_REQUEST["date_end_slmonth"], $_REQUEST["date_end_slday"], $_REQUEST["date_end_slyear"]);
+                $date_end_sl = dol_mktime(12, 0, 0, $_REQUEST["date_end_slmonth"], $_REQUEST["date_end_slday"], $_REQUEST["date_end_slyear"]);
             }
         }
 
@@ -208,7 +208,7 @@ switch ($action) {
         }
         break;
     case 'add': {
-            $datecontrat = dolibarr_mktime(12, 0, 0, $_REQUEST["remonth"], $_REQUEST["reday"], $_REQUEST["reyear"]);
+            $datecontrat = dol_mktime(12, 0, 0, $_REQUEST["remonth"], $_REQUEST["reday"], $_REQUEST["reyear"]);
 
             $contrat = new Contrat($db);
 
@@ -246,7 +246,7 @@ switch ($action) {
                 if ($ret < 0) {
                     $xml .= '<KO><![CDATA[' . $db->lastqueryerror() . "\n" . $db->lasterror() . '\n' . $db->lasterrno . '\n' . $db->errno . '\n' . $db->error . ']]></KO>';
 
-//                    dolibarr_print_error($db,$commande->error);
+//                    dol_print_error($db,$commande->error);
 //                    exit;
                 }
                 $ret = $contrat->fetch_client();

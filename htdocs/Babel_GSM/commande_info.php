@@ -22,7 +22,7 @@ require_once(DOL_DOCUMENT_ROOT."/societe.class.php");
 require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT."/html.form.class.php");
 if ($conf->commande->enabled) require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
+if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 
 
@@ -70,7 +70,7 @@ if ($_REQUEST['action'] == 'builddoc')  // In get or post
     $result=commande_pdf_create($db, $commande->id, $commande->modelpdf, $outputlangs);
     if ($result <= 0)
     {
-        dolibarr_print_error($db,$result);
+        dol_print_error($db,$result);
         exit;
     }
     else
@@ -165,7 +165,7 @@ if ($_GET["commande_id"] > 0)
 
       // Date
       print '<tr><td>'.$langs->trans('Date').'</td>';
-      print '<td colspan="2">'.dolibarr_print_date($commande->date,'daytext').'</td>';
+      print '<td colspan="2">'.dol_print_date($commande->date,'daytext').'</td>';
       print '</tr>';
 
       // Date de livraison
@@ -174,7 +174,7 @@ if ($_GET["commande_id"] > 0)
       print '</td>';
 
       print '<td colspan="2">';
-        print dolibarr_print_date($commande->date_livraison,'daytext');
+        print dol_print_date($commande->date_livraison,'daytext');
       print '</td></TR>';
 
       print '<TR><td>'.$langs->trans('NotePublic').' :<br></td><td colspan="2">';
@@ -342,7 +342,7 @@ if ($_GET["commande_id"] > 0)
     }
     else
     {
-        dolibarr_print_error($db);
+        dol_print_error($db);
     }
 
 
@@ -406,7 +406,7 @@ if ($_GET["commande_id"] > 0)
                     $var=!$var;
                     print '<tr '.$bc[$var].'><td>';
                     print '<a href="propal_detail.php?propal_id='.$propals[$i]->id.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$propals[$i]->ref."</a></td>\n";
-                    print '<td align="center">'.dolibarr_print_date($propals[$i]->date,'day').'</td>';
+                    print '<td align="center">'.dol_print_date($propals[$i]->date,'day').'</td>';
                     print '<td align="right">'.price($propals[$i]->total_ht).'</td>';
                     print '<td align="right">'.$propals[$i]->getLibStatut(3).'</td>';
                     print "</tr>\n";
@@ -459,7 +459,7 @@ if ($_GET["commande_id"] > 0)
                                     $var=!$var;
                                     print '<tr '.$bc[$var].'><td>';
                                     print '<a href="facture_detail.php?facture_id='.$res->fk_facture.'">'.img_object($langs->trans("ShowBill"),"bill").' '.$fact->ref."</a></td>\n";
-                                    print '<td align="center">'.dolibarr_print_date($fact->date,'day').'</td>';
+                                    print '<td align="center">'.dol_print_date($fact->date,'day').'</td>';
                                     print '<td align="right">'.price($fact->total_ht).'</td>';
                                     print '<td align="right">'.$fact->getLibStatut(3).'</td>';
                                     print "</tr>\n";
@@ -625,7 +625,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
             }
             else
             {
-                dolibarr_print_error($db,'Bad value for modulepart');
+                dol_print_error($db,'Bad value for modulepart');
                 return -1;
             }
 
@@ -689,7 +689,7 @@ print '<BR>';
             // Affiche taille fichier
             if (!$iconPDF) print '<td colspan=1 align="right">'.round(filesize($filedir."/".$file["name"]) / 1024,2) . ' ko';
             // Affiche date fichier
-            if (!$iconPDF) print ' '.dolibarr_print_date(filemtime($filedir."/".$file["name"]),'dayhour').'</td>';
+            if (!$iconPDF) print ' '.dol_print_date(filemtime($filedir."/".$file["name"]),'dayhour').'</td>';
 
             if (!$iconPDF) print '</tr>';
 

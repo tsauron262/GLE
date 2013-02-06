@@ -980,7 +980,7 @@ function dol_mktime($hour, $minute, $second, $month, $day, $year, $gm = false, $
  */
 function dol_now($mode = 'gmt') {
     // Note that gmmktime and mktime return same value (GMT) whithout parameters
-    //if ($mode == 'gmt') $ret=gmmktime(); // Strict Standards: gmmktime(): You should be using the time() function instead
+    //if ($mode == 'gmt') $ret=gmtime(); // Strict Standards: gmtime(): You should be using the time() function instead
     if ($mode == 'gmt')
         $ret = time(); // Time for now at greenwich.
     else if ($mode == 'tzserver') {  // Time for now with PHP server timezone added
@@ -994,7 +994,7 @@ function dol_now($mode = 'gmt') {
       $tzsecond=getParentCompanyTimeZoneInt();    // Contains tz+dayling saving time
       $ret=dol_now('gmt')+($tzsecond*3600);
       } */ else if ($mode == 'tzuser') {    // Time for now with user timezone is added
-        //print 'eeee'.time().'-'.mktime().'-'.gmmktime();
+        //print 'eeee'.time().'-'.time().'-'.gmtime();
         $offsettz = (empty($_SESSION['dol_tz']) ? 0 : $_SESSION['dol_tz']) * 60 * 60;
         $offsetdst = (empty($_SESSION['dol_dst']) ? 0 : $_SESSION['dol_dst']) * 60 * 60;
         $ret = dol_now('gmt') + ($offsettz + $offsetdst);

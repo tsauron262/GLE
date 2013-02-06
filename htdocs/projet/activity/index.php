@@ -159,19 +159,19 @@ $js = '
 //$var=true;
 //
 //// Defini les bornes date debut et fin de semaines, mois et annee pour le jour courant
-//$now=mktime();
-//$info=dolibarr_getdate($now);
+//$now=time();
+//$info=dol_getdate($now);
 //$daystartw=$now-(($info['wday'] - 1)*24*3600);
 //$dayendw  =$now+((7 - $info['wday'])*24*3600);
-//$infostartw=dolibarr_getdate($daystartw);
-//$infoendw  =dolibarr_getdate($dayendw);
+//$infostartw=dol_getdate($daystartw);
+//$infoendw  =dol_getdate($dayendw);
 //$datestartw=dol_mktime(0,0,0,$infostartw["mon"],$infostartw["mday"],$infostartw["year"]);
 //$dateendw=dol_mktime(23,59,59,$infoendw["mon"],$infoendw["mday"],$infoendw["year"]);
 //$datestartm=dol_mktime(0,0,0,$info["mon"],1,$info["year"]);
 //$dateendm=dol_mktime(23,59,59,$info["mon"],30,$info["year"]);
 //$datestarty=dol_mktime(0,0,0,1,1,$info["year"]);
 //$dateendy=dol_mktime(23,59,59,12,31,$info["year"]);
-////print mktime()." - ".gmmktime().'<br>';
+////print time()." - ".gmtime().'<br>';
 ////print dol_print_date(mktime(0,0,0,1,1,1970),'dayhour')." - ".dol_print_date(gmmktime(0,0,0,1,1,1970),'dayhour').'<br>';
 ////print dol_print_date($datestartw,'dayhour')." - ".dol_print_date($now,'dayhour')." - ".dol_print_date($dateendw,'dayhour').'<br>';
 ////print dol_print_date($datestartm,'dayhour')." - ".dol_print_date($now,'dayhour')." - ".dol_print_date($dateendm,'dayhour').'<br>';

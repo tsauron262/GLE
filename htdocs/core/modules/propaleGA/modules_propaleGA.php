@@ -42,7 +42,7 @@
 
 require_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php');
 require_once(DOL_DOCUMENT_ROOT.'/includes/fpdf/fpdfi/fpdi_protection.php');
-require_once(DOL_DOCUMENT_ROOT."/compta/bank/account.class.php");   // Requis car utilise dans les classes qui heritent
+require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");   // Requis car utilise dans les classes qui heritent
 
 
 /**
@@ -222,7 +222,7 @@ function propaleGA_pdf_create($db, $id, $modele='', $outputlangs='')
         else
         {
             dolibarr_syslog("Erreur dans propale_pdf_create");
-            dolibarr_print_error($db,$obj->pdferror());
+            dol_print_error($db,$obj->pdferror());
             return 0;
         }
     }

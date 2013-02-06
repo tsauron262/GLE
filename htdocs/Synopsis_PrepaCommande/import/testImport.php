@@ -834,7 +834,7 @@ if (is_dir($dir)) {
                                     price,
                                    "// PrixAchatHT,
                                     . "price_base_type,
-                                    "/* envente,
+                                    "/* tobuy,
                                       durSav,
                                      */ . "tva_tx,
                                     import_key)

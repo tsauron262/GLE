@@ -28,9 +28,9 @@ class ContratLocProdGA extends contrat{
     public function fetch($id)
     {
 
-        $sql = "SELECT rowid, statut, ref, fk_soc, ".$this->db->pdate("mise_en_service")." as datemise,";
-        $sql.= " fk_user_mise_en_service, ".$this->db->pdate("date_contrat")." as datecontrat,";
-        $sql.= " fk_user_author, ".$this->db->pdate("fin_validite")." as datefin,";
+        $sql = "SELECT rowid, statut, ref, fk_soc, mise_en_service as datemise,";
+        $sql.= " fk_user_mise_en_service, date_contrat as datecontrat,";
+        $sql.= " fk_user_author, fin_validite as datefin,";
         $sql.= " fk_projet, type,prorata,facturation_freq,";
         $sql.= " modelPdf,";
         $sql.= " linkedTo,";

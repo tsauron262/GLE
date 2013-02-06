@@ -54,9 +54,9 @@ if ("x".$_REQUEST['typeId'] != "x")
 {
     $requete .= " AND ".MAIN_DB_PREFIX."product.fk_product_type =  ".$_REQUEST["typeId"];
 }
-if ('x'.$_REQUEST['envente'] != "x")
+if ('x'.$_REQUEST['tobuy'] != "x")
 {
-    $requete .= " AND ".MAIN_DB_PREFIX."product.envente =  ".$_REQUEST["envente"];
+    $requete .= " AND ".MAIN_DB_PREFIX."product.tobuy =  ".$_REQUEST["tobuy"];
 }
 
 

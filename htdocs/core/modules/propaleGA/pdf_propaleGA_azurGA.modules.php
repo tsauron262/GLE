@@ -823,12 +823,12 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dolibarr_print_date($object->date,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Date")." : " . dol_print_date($object->date,"day"), '', 'R');
 
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dolibarr_print_date($object->fin_validite,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("DateEndPropal")." : " . dol_print_date($object->fin_validite,"day"), '', 'R');
 
         $pdf->SetFont('Arial','B',13);
         $pdf->SetXY(100,$posy);
@@ -846,7 +846,7 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
         $posy+=5;
         $pdf->SetXY(100,$posy);
         $pdf->SetTextColor(0,0,60);
-        $pdf->MultiCell(100, 3, "Du : " . dolibarr_print_date($object->date_devis_fourn,"day"), '', 'R');
+        $pdf->MultiCell(100, 3, "Du : " . dol_print_date($object->date_devis_fourn,"day"), '', 'R');
 
 
         if ($showadress)

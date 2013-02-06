@@ -93,7 +93,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
         $upload_dir = $conf->synopsisdemandeinterv->dir_output.'/'.sanitize_string($demandeInterv->ref);
         if ($societe->fetch($demandeInterv->socid))
         {
-            $finalFileName = "doc_demandeInterv_".sanitize_string($demandeInterv->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", mktime()).".zip";
+            $finalFileName = "doc_demandeInterv_".sanitize_string($demandeInterv->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", time()).".zip";
             $filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);
             $zip = new ZipArchive();
             if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)

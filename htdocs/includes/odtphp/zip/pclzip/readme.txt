@@ -69,7 +69,7 @@
       Tested on my win laptop with a 88Mo file :
         Zip "in-memory" : 18sec (max_execution_time=30, memory_limit=180Mo)
         Zip "tmporary-files" : 23sec (max_execution_time=30, memory_limit=30Mo)
-    - Replace use of mktime() by time() to limit the E_STRICT error messages.
+    - Replace use of time() by time() to limit the E_STRICT error messages.
     - Bug correction : When adding files with full windows path (drive letter)
       PclZip is now working. Before, if the drive letter is not the default
       path, PclZip was not able to add the file.

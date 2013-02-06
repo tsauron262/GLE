@@ -199,7 +199,7 @@ jQuery(document).ready(function(){
 EOF;
 llxHeader($js,'Nouveau litige',"","1");
 
-//$sql = "SELECT s.rowid, s.nom, s.ville, ".$db->pdate("s.datec")." as datec, ".$db->pdate("s.datea")." as datea";
+//$sql = "SELECT s.rowid, s.nom, s.ville, s.datec")." as datec, ".$db->pdate("s.datea as datea";
 //$sql.= ", s.client, s.fournisseur ";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 //$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";

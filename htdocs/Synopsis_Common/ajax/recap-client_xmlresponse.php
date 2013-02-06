@@ -284,7 +284,7 @@ if ($_REQUEST['level'] == 1)
 //                                case 'p':
 //                                    print '';
 //                                    print '<td align="right" style="width:20px"><a href="'.$_SERVER["PHP_SELF"].'?action=chSrc&amp;id='.$id.'">'.img_edit($langs->trans("Change la source")).'</a>';
-//                                    require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
+//                                    require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 //                                    $prop = new Propal($db);
 //                                    $prop->fetch($val1);
 //                                    print "</table><td><a href='".DOL_URL_ROOT."/comm/propal.php?propalid=".$prop->id."'>".$prop->ref."</a>";
@@ -323,7 +323,7 @@ if ($_REQUEST['level'] == 1)
 //                        {
 //                                print '<tr><td>';
 //                                print 'Propositions associ&eacute;es<td>';
-//                                require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
+//                                require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 //                                $prop = new Propal($db);
 //        //                        print 'tutu';
 //                                $prop->fetch($val1);

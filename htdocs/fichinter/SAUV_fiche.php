@@ -1524,7 +1524,7 @@ EOF;
     */
     print '<table class="noborder" width="100%">';
     $sql = 'SELECT ft.rowid, ft.description, ft.fk_demandeInterv, ft.duree, ft.rang, t.id as typeId, t.label as typeinterv';
-    $sql.= ', '.$db->pdate('ft.date').' as date_intervention, qte, pu_ht, total_ht, fk_commandedet, fk_contratdet, isForfait';
+    $sql.= ', ft.date as date_intervention, qte, pu_ht, total_ht, fk_commandedet, fk_contratdet, isForfait';
     $sql.= ' FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet as ft';
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv ";
     $sql.= ' WHERE ft.fk_demandeInterv = '.$demandeIntervid;
@@ -1545,7 +1545,7 @@ EOF;
                    fk_commandedet,
                    fk_contratdet,
                    isForfait';
-    $sql.= ', '.$db->pdate('ft.date').' as date_intervention';
+    $sql.= ', ft.date as date_intervention';
     $sql.= ' FROM '.MAIN_DB_PREFIX.'Synopsis_fichinterdet as ft';
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
     $sql.= ' WHERE ft.fk_fichinter = '.$fichinterid;

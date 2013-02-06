@@ -187,7 +187,7 @@ class Deplacement extends CommonObject
                        tva_refid,
                        ".MAIN_DB_PREFIX."c_tva.taux,
                        fk_soc,
-                       ".$this->db->pdate("dated")." as dated";
+                       dated as dated";
         $sql.= "  FROM ".MAIN_DB_PREFIX."deplacement,
                        ".MAIN_DB_PREFIX."c_tva,
                        ".MAIN_DB_PREFIX."c_deplacement";
@@ -278,7 +278,7 @@ class Ndf extends CommonObject
                        fk_user_valid,
                        statut,
                        total ,
-                       ".$this->db->pdate("date_valid")." as date_valid
+                       date_valid as date_valid
                        ";
         $sql.= " FROM Babel_ndf ";
         $sql.= " WHERE rowid = ".$id . " AND fk_user_author =".$user->id;
@@ -374,7 +374,7 @@ class Ndf extends CommonObject
                        fk_user_valid,
                        statut,
                        total ,
-                       ".$this->db->pdate("date_valid")." as date_valid
+                       date_valid as date_valid
                        ";
         $sql.= " FROM Babel_ndf ";
         if ($userid)

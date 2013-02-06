@@ -46,7 +46,7 @@ function include_widget_file() {
   // IDs client-side use hyphen separators.  Server-side they use underscores.
   $id = str_replace('-', '_', $id);
 
-  $filename = DOL_DOCUMENT_ROOT."/Synopsis_Tools/dashboard2/widgets/$id.inc";
+  $filename = DOL_DOCUMENT_ROOT."/Synopsis_Tools/dashboard/widgets/$id.inc";
   if (file_exists($filename)) {
     include $filename;
     return $id;

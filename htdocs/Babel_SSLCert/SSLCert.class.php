@@ -82,7 +82,7 @@ class SSLCert {
         $this->nbtodo=$this->nbtodolate=0;
         $clause = "WHERE";
 
-        $sql = 'SELECT c.rowid,'.$this->db->pdate('c.datef').' as datec';
+        $sql = 'SELECT c.rowid,c.datef as datec';
         $sql.= ' FROM Babel_SSLCert as c';
         $resql=$this->db->query($sql);
         if ($resql)

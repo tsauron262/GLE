@@ -35,7 +35,7 @@
     $offset = $conf->liste_limit * $page ;
     $pageprev = $page - 1;
     $pagenext = $page + 1;
-    $sql = "SELECT s.rowid, s.nom, s.ville, ".$db->pdate("s.datec")." as datec, ".$db->pdate("s.datea")." as datea";
+    $sql = "SELECT s.rowid, s.nom, s.ville, s.datec as datec, s.datea as datea";
     $sql.= ", st.libelle as stcomm, s.prefix_comm, s.client, s.fournisseur,";
     if ($conf->global->MAIN_MODULE_BABELGA)
     {

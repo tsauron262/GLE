@@ -96,12 +96,12 @@ if ($_POST["action"] == 'updateligne' && $user->rights->contrat->creer)
             $db->commit();
         } else
         {
-            dolibarr_print_error($db, "result=$result");
+            dol_print_error($db, "result=$result");
             $db->rollback();
         }
     } else
     {
-        dolibarr_print_error($db);
+        dol_print_error($db);
     }
 }
 
@@ -123,11 +123,11 @@ if ($_GET["action"] == 'swapstatut' && $user->rights->contrat->creer)
         {
             $db->commit();
         } else {
-            dolibarr_print_error($db, "result=$result");
+            dol_print_error($db, "result=$result");
             $db->rollback();
         }
     } else {
-        dolibarr_print_error($db,$contrat->error);
+        dol_print_error($db,$contrat->error);
     }
 }
 

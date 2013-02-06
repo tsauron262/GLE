@@ -95,7 +95,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
     $chrono = new Chrono($db);
     if ($chrono->fetch($id))
     {
-        $finalFileName = "documents_".sanitize_string($Chrono->ref) ."-". date("Ymd-Hi", mktime()).".zip";
+        $finalFileName = "documents_".sanitize_string($Chrono->ref) ."-". date("Ymd-Hi", time()).".zip";
         $filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);
         $zip = new ZipArchive();
         if ( $zip->open($zipFilename,ZIPARCHIVE::CREATE) === TRUE)

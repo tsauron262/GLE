@@ -179,7 +179,7 @@ class Project extends CommonObject {
         $sql.= " VALUES ('" . addslashes($this->ref) . "', '" . addslashes($this->title) . "',";
         $sql.= " " . ($this->socid > 0 ? $this->socid : "null") . ",";
         $sql.= " " . $user->id . ",";
-        $sql.= " " . $this->user_resp_id . ", " . $this->db->idate(mktime()) . ", 0," . ($this->type_id ? $this->type_id : "NULL") . ",now())";
+        $sql.= " " . $this->user_resp_id . ", " . $this->db->idate(time()) . ", 0," . ($this->type_id ? $this->type_id : "NULL") . ",now())";
 
         dol_syslog("Project::create sql=" . $sql, LOG_DEBUG);
         $resql = $this->db->query($sql);

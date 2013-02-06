@@ -229,7 +229,7 @@ $js = '
 //    }
 //    else
 //    {
-//        dolibarr_print_error($db);
+//        dol_print_error($db);
 //    }
 //}
 //
@@ -289,7 +289,7 @@ $js = '
 //        $staticcompany->nom=$obj->nom;
 //        print $staticcompany->getNomUrl(1,'',20);
 //        print '</td>';
-//        print '<td align="center">'.dolibarr_print_date($obj->tms,'dayhour').'</td>';
+//        print '<td align="center">'.dol_print_date($obj->tms,'dayhour').'</td>';
 //        //print '<td align="left">'.$staticcontrat->LibStatut($obj->statut,2).'</td>';
 //        print '<td align="right" width="32">'.($obj->nb_initial>0 ? $obj->nb_initial.$staticcontratligne->LibStatut(0,3):'').'</td>';
 //        print '<td align="right" width="32">'.($obj->nb_running+$obj->nb_late>0 ? ($obj->nb_running+$obj->nb_late).$staticcontratligne->LibStatut(4,3):'').'</td>';
@@ -304,7 +304,7 @@ $js = '
 //}
 //else
 //{
-//    dolibarr_print_error($db);
+//    dol_print_error($db);
 //}
 //
 //print '<br>';
@@ -366,7 +366,7 @@ $js = '
 //}
 //else
 //{
-//    dolibarr_print_error($db);
+//    dol_print_error($db);
 //}
 //
 //print '<br>';
@@ -430,7 +430,7 @@ $js = '
 //}
 //else
 //{
-//    dolibarr_print_error($db);
+//    dol_print_error($db);
 //}
 //
 //print '</td></tr></table>';

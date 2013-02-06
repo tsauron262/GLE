@@ -789,7 +789,7 @@ class Fichinter extends CommonObject {
 
         // Charge tableau des produits prodids
         $prodids = array();
-        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "product WHERE envente=1";
+        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "product WHERE tobuy=1";
         $resql = $this->db->query($sql);
         if ($resql) {
             $num_prods = $this->db->num_rows($resql);

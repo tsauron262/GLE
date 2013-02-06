@@ -8,6 +8,52 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
+
+function boxToWidget($file, $title){
+  // A widget object as per jquery.dashboard.js.
+    global $db,$user,$langs;
+    if ($user->societe_id > 0)
+    {
+      $socid = $user->societe_id;
+    }
+    $langs->load('commercial');
+    $langs->load("boxes");
+
+    
+    require_once(DOL_DOCUMENT_ROOT.'/core/boxes/'.$file);
+    $nameShort =preg_replace('/.php$/','',$file);
+    $box=new $nameShort($db);
+
+    $table = "<p>";
+    ob_start();
+    $box->loadBox(10);
+    $table .= $box->showBox(false);
+    $table .= ob_get_contents();
+    ob_clean();
+    $table .= "</p>";
+
+    $table2 = "<p>";
+    ob_start();
+    $box->loadBox(50);
+    $table2 .= $box->showBox(false);
+    $table2 .= ob_get_contents();
+    ob_clean();
+    $table2 .= "</p>";
+
+
+      return array(
+        'title' => $title,
+        'content' => $table,
+        'initScript' => "",
+        'classes' => 'ui-state-default ui-widget-header',
+        'settings' => false,
+        'fullscreen' => $table2,
+        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
+        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
+      );
+
+}
+
 /**
   \brief      Fonction servant a afficher une duree dans une liste deroulante
   \param        prefix       prefix

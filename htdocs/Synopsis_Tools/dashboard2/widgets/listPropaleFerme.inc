@@ -84,7 +84,7 @@ function widget_listPropaleFerme() {
                           $formfile->show_documents('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
                           $table .= $formfile->html;
 
-                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';
                         $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                         $total += $res->total_ht;
                 }
@@ -98,7 +98,7 @@ function widget_listPropaleFerme() {
                   $formfile->show_documents('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
                   $table2 .= $formfile->html;
 
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                 $total2 += $res->total_ht;
                 $iter++;

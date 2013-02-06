@@ -17,7 +17,7 @@ require_once("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/lib/contract.lib.php');
 if ($conf->projet->enabled)  require_once(DOL_DOCUMENT_ROOT."/project.class.php");
 if ($conf->propal->enabled)  require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
-if ($conf->contrat->enabled) require_once(DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+if ($conf->contrat->enabled) require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 $langs->load("contracts");
 $langs->load("orders");
@@ -1362,7 +1362,7 @@ EOF;
                         case 'f':
                             print 'la facture<td>';
                             print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=chSrc&amp;id='.$id.'">'.img_edit($langs->trans("Change la source")).'</a>';
-                            require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+                            require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
                             $fact = new Facture($db);
                             $fact->fetch($val1);
                             print "</table><td colspan=3 class='ui-widget-content'>".$fact->getNomUrl(1);
@@ -1411,7 +1411,7 @@ EOF;
             } else if ($key=='fa') {
                 foreach($val as $key1=>$val1)
                 {
-                        require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+                        require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
                         $fac = new Facture($db);
                         $result=$fac->fetch($val1);
                         if ($result>0){

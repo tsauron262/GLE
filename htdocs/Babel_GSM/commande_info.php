@@ -23,12 +23,12 @@ require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT."/html.form.class.php");
 if ($conf->commande->enabled) require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
-if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 
 
 require_once(DOL_DOCUMENT_ROOT."/includes/modules/propale/modules_propale.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/order.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/sendings.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/order.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/sendings.lib.php");
 
 
 if ($user->rights->BabelGSM->BabelGSM_com->AfficheCommande !=1)

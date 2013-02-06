@@ -37,7 +37,7 @@
 
 require ("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/lib/contract.lib.php');
-require_once(DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once(DOL_DOCUMENT_ROOT."/contact.class.php");
 
 

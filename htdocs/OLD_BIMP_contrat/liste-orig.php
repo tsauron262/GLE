@@ -39,7 +39,7 @@
 */
 
 require("./pre.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 $langs->load("contracts");
 $langs->load("products");

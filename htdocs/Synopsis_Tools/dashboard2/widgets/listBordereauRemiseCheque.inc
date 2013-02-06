@@ -47,10 +47,10 @@ function widget_listBordereauRemiseCheque() {
         {
             $table .= '<table class="noborder" width="100%">';
             $table .= '<tr class="liste_titre">';
-            $table .= '<td title="'.$langs->trans("CheckReceiptShort").'">'.dolibarr_trunc($langs->trans("CheckReceiptShort"),5).'</td>';
+            $table .= '<td title="'.$langs->trans("CheckReceiptShort").'">'.dol_trunc($langs->trans("CheckReceiptShort"),5).'</td>';
             $table .= '<td>'.$langs->trans("Date")."</td>";
             $table .= '<td>'.$langs->trans("Account").'</td>';
-            $table .= '<td align="right" title="'.$langs->trans("NbOfCheques").'">'.dolibarr_trunc($langs->trans("NbOfCheques"),6).'</td>';
+            $table .= '<td align="right" title="'.$langs->trans("NbOfCheques").'">'.dol_trunc($langs->trans("NbOfCheques"),6).'</td>';
             $table .= '<td align="right">'.$langs->trans("Amount").'</td>';
             $table .= '<td align="right">'.$langs->trans("Status").'</td>';
             $table .= "</tr>\n";

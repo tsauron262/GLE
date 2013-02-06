@@ -62,7 +62,7 @@ class modSynopsisDashboard extends DolibarrModules {
         // Possible values for version are: 'development', 'experimental', 'dolibarr' or version
         $this->version = '1.0';
         // Key used in ".MAIN_DB_PREFIX."const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
-        $this->const_name = 'MAIN_MODULE_' . strtoupper($this->name);
+        $this->const_name = 'MAIN_MODULE_SYNOPSISDASHBOARD';
         // Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
         $this->special = 0;
         // Name of image file used for this module.
@@ -526,7 +526,7 @@ class modSynopsisDashboard extends DolibarrModules {
 (1640, 'a:3:{i:0;a:3:{s:11:\"hello_world\";i:1;s:9:\"boxAction\";i:0;s:16:\"boxDemandeInterv\";i:0;}i:1;a:1:{s:14:\"boxDeplacement\";i:0;}i:2;a:1:{s:14:\"boxFicheInterv\";i:0;}}', 35, 8),
 (1645, 'a:3:{i:0;a:6:{s:11:\"hello_world\";i:0;s:9:\"boxCompte\";i:1;s:11:\"boxCommande\";i:1;s:10:\"boxFacture\";i:0;s:15:\"boxFactureFourn\";i:0;s:16:\"boxDemandeInterv\";i:0;}i:1;a:4:{s:9:\"boxClient\";i:1;s:11:\"boxProspect\";i:0;s:15:\"boxFournisseurs\";i:0;s:11:\"boxProduits\";i:0;}i:2;a:1:{s:14:\"listActionTODO\";i:1;}}', 9, 4);
 ",
-            "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_Dashboard_module` (`id`, `module_refid`, `type_refid`) VALUES
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_Dashboard_module` (`id`, `module_refid`, `type_refid`) VALUES
 (85, 4, 1),
 (86, 8, 1),
 (87, 9, 1),

@@ -6,47 +6,12 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/boxes.php");
+//require_once(DOL_DOCUMENT_ROOT."/boxes.php");
 
 // The get widget handler.
 function widget_boxFicheInterv() {
-  // A widget object as per jquery.dashboard.js.
-    global $db,$user,$langs;
-    if ($user->societe_id > 0)
-    {
-      $socid = $user->societe_id;
-    }
-    $langs->load('commercial');
-    $langs->load("boxes");
-
-    $file ="box_ficheInterv.php";
-//    $infobox=new InfoBox($db);
-//    $boxarray=$infobox->listboxes("0",$user);       // 0=valeur pour la page accueil
-    require_once(DOL_DOCUMENT_ROOT.'/includes/boxes/'.$file);
-    $nameShort =preg_replace('/.php$/','',$file);
-    $box=new $nameShort($db);
-
-    $table = "<p>";
-    $box->loadBox(10);
-    $table .= $box->showBox(false);
-    $table .= "</p>";
-
-    $table2 = "<p>";
-    $box->loadBox(50);
-    $table2 .= $box->showBox(false);
-    $table2 .= "</p>";
-
-
-      return array(
-        'title' => "FI - ".$langs->trans("BoxLastFicheInterv"),
-        'content' => utf8_encode($table),
-        'initScript' => "",
-        'classes' => 'ui-state-default ui-widget-header',
-        'settings' => false,
-        'fullscreen' => utf8_encode($table2),
-        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
-        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
-      );
+    global $langs;
+    return boxToWidget("box_ficheInterv.php", "FI - ".$langs->trans("BoxLastFicheInterv"));
 }
 
 // The widget settings handler.

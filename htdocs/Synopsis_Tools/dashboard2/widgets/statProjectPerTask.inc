@@ -18,7 +18,7 @@
   */
 require_once("../../main.inc.php");
 // The get widget handler.
-require_once(DOL_DOCUMENT_ROOT.'/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
 
 function widget_statProjectPerTask() {
   // A widget object as per jquery.dashboard.js.

@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.commande.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
 
 // The get widget handler.
 function widget_listService() {
@@ -20,7 +20,7 @@ function widget_listService() {
 
     $table ="<p>";
     $table2 ="<p>";
-    require_once(DOL_DOCUMENT_ROOT.'/product.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
 
     $staticproduct=new Product($db);
 
@@ -88,7 +88,7 @@ function widget_listService() {
             $staticproduct->type=$objp->fk_product_type;
             $table .= $staticproduct->getNomUrl(1,'',16);
             $table .= "</td>\n";
-            $table .= '<td>'.dolibarr_trunc($objp->label,32).'</td>';
+            $table .= '<td>'.dol_trunc($objp->label,32).'</td>';
             $table .= "<td>";
             $table .= dolibarr_print_date($objp->datem,'day');
             $table .= "</td>";
@@ -104,7 +104,7 @@ function widget_listService() {
         $staticproduct->type=$objp->fk_product_type;
         $table2 .= $staticproduct->getNomUrl(1,'',16);
         $table2 .= "</td>\n";
-        $table2 .= '<td>'.dolibarr_trunc($objp->label,32).'</td>';
+        $table2 .= '<td>'.dol_trunc($objp->label,32).'</td>';
         $table2 .= "<td>";
         $table2 .= dolibarr_print_date($objp->datem,'day');
         $table2 .= "</td>";

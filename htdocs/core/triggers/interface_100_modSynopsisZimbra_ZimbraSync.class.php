@@ -184,7 +184,7 @@ class InterfaceZimbraSync {
                     //ajout 'un ev => facture payé
                     //Partial ou total ?
                     $facid = $object->id;
-                    require_once(DOL_DOCUMENT_ROOT . '/facture.class.php');
+                    require_once(DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php');
                     $factTmp = new Facture($this->db);
                     $factTmp->fetch($facid);
                     $this->deleteElement($factTmp, MAIN_DB_PREFIX."facture", $zim);

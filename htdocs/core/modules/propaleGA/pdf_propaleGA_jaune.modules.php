@@ -38,7 +38,7 @@
  */
 
 require_once(DOL_DOCUMENT_ROOT ."/includes/modules/propaleGA/modules_propaleGA.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 
 /**

@@ -66,7 +66,7 @@ function widget_listRetard() {
     // Nbre commandes clients e traiter
     if ($conf->commande->enabled && $user->rights->commande->lire)
     {
-      include_once(DOL_DOCUMENT_ROOT."/commande/commande.class.php");
+      include_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
       $board=new Commande($db);
       $board->load_board($user);
 
@@ -143,7 +143,7 @@ function widget_listRetard() {
     {
       $langs->load("contracts");
 
-      include_once(DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+      include_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
       $board=new Contrat($db);
       $board->load_board($user,"inactives");
 
@@ -169,7 +169,7 @@ function widget_listRetard() {
     {
       $langs->load("contracts");
 
-      include_once(DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+      include_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
       $board=new Contrat($db);
       $board->load_board($user,"expired");
 
@@ -195,7 +195,7 @@ function widget_listRetard() {
     {
       $langs->load("bills");
 
-      include_once(DOL_DOCUMENT_ROOT."/fourn/fournisseur.facture.class.php");
+      include_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.facture.class.php");
       $board=new FactureFournisseur($db);
       $board->load_board($user);
 
@@ -221,7 +221,7 @@ function widget_listRetard() {
     {
       $langs->load("bills");
 
-      include_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+      include_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
       $board=new Facture($db);
       $board->load_board($user);
 

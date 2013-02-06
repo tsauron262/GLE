@@ -65,7 +65,7 @@ function widget_listPropaleOuverte() {
                         $table .= '<tr class='.$arrCss[$bool].'>
                                 <td  nowrap="nowrap">'.
                                 "<a href=\"".DOL_URL_ROOT."/comm/propal.php?propalid=".$res->rowid."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$res->ref.'</a></td>';
-                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                         $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                         $total += $res->total_ht;
                 }
@@ -73,7 +73,7 @@ function widget_listPropaleOuverte() {
                 $table2 .= '<tr class='.$arrCss[$bool].'>
                         <td  nowrap="nowrap">'.
                         "<a href=\"".DOL_URL_ROOT."/comm/propal.php?propalid=".$res->rowid."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$res->ref.'</a></td>';
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                 $total2 += $res->total_ht;
                 $iter++;

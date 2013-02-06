@@ -6,8 +6,8 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/commande/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listCommandeEnCours() {
@@ -102,7 +102,7 @@ function widget_listCommandeEnCours() {
                             $formfile->show_documents('commande',$filename,$filedir,$urlsource,'','','','','',1,18,false);
                             $table .= $formfile->html;
 
-                            $table .=  '<a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                            $table .=  '<a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                             $table .=  '<td>'.$commandestatic->LibStatut($res->fk_statut,$res->facture,3).'</td>';
                     }
@@ -110,7 +110,7 @@ function widget_listCommandeEnCours() {
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">'.
                             "<a href=\"".DOL_URL_ROOT."/commande/fiche.php?id=".$res->rowid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$res->ref.'</a></td>';
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                     $table2 .=  '<td>'.$commandestatic->LibStatut($res->fk_statut,$res->facture,3).'</td>';
                     $iter++;

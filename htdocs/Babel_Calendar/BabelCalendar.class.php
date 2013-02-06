@@ -172,7 +172,7 @@ class BabelCalendar {
             $last .= '            body: "'.preg_replace('/\n|\r/',"", $val['descHtml']).' ",'."\n";
             $last .= '            attributes: {'."\n";
             $last .= '                Location: "'.$val['loc'].'",'."\n";
-            $last .= '                Chair: "Jean-Marc LE FEVRE"'."\n";
+            $last .= '                Chair: "Admin GLE"'."\n";
             $last .= '            },'."\n";
             $last .= '            type: ["meeting","appointment"]'."\n";
             $last .= '        },';//close ID

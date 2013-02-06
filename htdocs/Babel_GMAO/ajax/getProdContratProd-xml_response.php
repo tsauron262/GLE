@@ -26,7 +26,7 @@
     $prod = new Product($db);
     $tmpSoc = new Societe($db);
     $tmpSoc->fetch($fk_soc);
-    $requete = "SELECT * FROM llx_product WHERE rowid=".$_REQUEST['prod'];
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE rowid=".$_REQUEST['prod'];
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($res))
     {

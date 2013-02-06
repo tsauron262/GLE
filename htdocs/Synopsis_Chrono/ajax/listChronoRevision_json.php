@@ -29,8 +29,7 @@ $langs->load("chrono@Synopsis_Chrono");
 
  $action = $_REQUEST['action'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -161,6 +160,9 @@ switch ($action)
                 LIMIT $start , $limit";
 
         $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
+        class geneClass{}
+        
+        $responce = new geneClass();
         $responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;

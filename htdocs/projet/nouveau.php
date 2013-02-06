@@ -18,7 +18,7 @@
   */
 
     require_once('pre.inc.php');
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
     llxHeader("","Nouveau projet","",1);
 
     $search_nom=isset($_GET["search_nom"])?$_GET["search_nom"]:$_POST["search_nom"];

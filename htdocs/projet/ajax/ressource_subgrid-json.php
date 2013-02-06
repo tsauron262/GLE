@@ -36,8 +36,7 @@ $langs->load("synopsisGene@Synopsis_Tools");
 
 $ressource_id = $_REQUEST['id'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -186,8 +185,7 @@ switch ($action)
         while($row = $db->fetch_array($result,MYSQL_ASSOC))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $row[fk_user_imputation];
-            $tmpUser->fetch();
+            $tmpUser->fetch($row[fk_user_imputation]);
             if ($row[sizePhoto] > 0)
             {
             $img = "<img style='max-height:200px;' src='ajax/photo_ressource.php?ressource_id=".$row[id]."' />";

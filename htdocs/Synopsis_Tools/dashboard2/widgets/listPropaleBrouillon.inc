@@ -22,8 +22,8 @@ function widget_listPropaleBrouillon() {
 
     $sql = "SELECT p.rowid, p.ref, p.total_ht, s.rowid as socid, s.nom";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-    $sql.= " FROM llx_propal as p, llx_societe as s";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql.= " FROM ".MAIN_DB_PREFIX."propal as p, ".MAIN_DB_PREFIX."societe as s";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql.= " WHERE p.fk_statut = 0 and p.fk_soc = s.rowid";
     if ($socid)
     {
@@ -65,7 +65,7 @@ function widget_listPropaleBrouillon() {
                         $table .= '<tr class='.$arrCss[$bool].'>
                                 <td  nowrap="nowrap">'.
                                 "<a href=\"".DOL_URL_ROOT."/comm/propal.php?propalid=".$res->rowid."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$res->ref.'</a></td>';
-                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                         $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                         $total += $res->total_ht;
                 }
@@ -73,7 +73,7 @@ function widget_listPropaleBrouillon() {
                 $table2 .= '<tr class='.$arrCss[$bool].'>
                         <td  nowrap="nowrap">'.
                         "<a href=\"".DOL_URL_ROOT."/comm/propal.php?propalid=".$res->rowid."\">".img_object($langs->trans("ShowPropal"),"propal")." ".$res->ref.'</a></td>';
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                 $total2 += $res->total_ht;
                 $iter++;

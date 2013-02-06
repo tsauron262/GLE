@@ -22,7 +22,7 @@
   $requete = "SELECT webContent FROM BIMP_import_history WHERE id =  ".$id;
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
-  $xml = "<webContent><![CDATA[" . utf8_encode(($res->webContent."x" != "x"?$res->webContent:"")) ."]]></webContent>";
+  $xml = "<webContent><![CDATA[" . utf8_encodeRien(($res->webContent."x" != "x"?$res->webContent:"")) ."]]></webContent>";
   if ( stristr($_SERVER["HTTP_ACCEPT"],"application/xhtml+xml") ) {
      header("Content-type: application/xhtml+xml;charset=utf-8");
   } else {

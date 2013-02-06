@@ -41,7 +41,7 @@ class modSynopsisChrono extends DolibarrModules
         $this->numero = 8000;
 
         $this->family = "Synopsis";
-        $this->name = "synopsischrono";
+        $this->name = "Chrono";
         $this->description = utf8_decode("R&eacute;f&eacute;renciel Chrono");
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISCHRONO';

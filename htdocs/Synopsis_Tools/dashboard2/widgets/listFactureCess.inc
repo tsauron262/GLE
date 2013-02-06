@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/facture.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
 
 
 
@@ -27,8 +27,8 @@ function widget_listFactureCess() {
     $sql  = "SELECT f.facnumber, f.rowid, f.total as total_ht, f.type, f.fk_statut, ";
     $sql.= " s.nom, s.rowid as socid";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-    $sql .= " FROM llx_facture as f, llx_societe as s";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql .= " WHERE s.rowid = f.fk_soc AND s.cessionnaire = 1 ";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
@@ -75,7 +75,7 @@ function widget_listFactureCess() {
                     $facturestatic->type=$res->type;
                     $facturestatic->statut = $res->fk_statut;
                     $table .= $facturestatic->getNomUrl(1,'');
-                    $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                     $table .=  '<td align="right" nowrap="nowrap">'.$facturestatic->getLibStatut(5).'</td></tr>';
                     $total += $res->total_ht;
@@ -87,7 +87,7 @@ function widget_listFactureCess() {
                 $facturestatic->type=$res->type;
                 $facturestatic->statut = $res->fk_statut;
                 $table2 .= $facturestatic->getNomUrl(1,'');
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,24).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,24).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.$facturestatic->getLibStatut(5).'</td></tr>';
                 $total2 += $res->total_ht;

@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -44,7 +47,7 @@ $demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'demandeInterv', $demandeIntervid, 'demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'demandeInterv');
 
 
 /******************************************************************************/
@@ -124,7 +127,7 @@ if ($_GET['id'])
             // Date
             print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Date').'</td>
                        <td colspan="3" class="ui-widget-content">';
-            print dol_print_date($demandeInterv->date,'day');
+            print dol_print_date($db->jdate($demandeInterv->date),'day');
             print '</td>';
             print '</tr>';
 

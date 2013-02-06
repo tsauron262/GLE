@@ -206,13 +206,14 @@ if (! function_exists('json_decode'))
  * Implement json_decode for PHP that does not support it
  *
  * @param	string	$json		Json encoded to PHP Object or Array
- * @param	bool	$assoc		False return an object, true return an array
+ * @param	bool	$assoc		False return an object, true return an array. Try to always use it with true !
  * @return 	mixed				Object or Array
  */
 function dol_json_decode($json, $assoc=false)
 {
 	$comment = false;
 
+    $out='';
 	$strLength = strlen($json);    // Must stay strlen and not dol_strlen because we want technical length, not visible length
 	for ($i=0; $i<$strLength; $i++)
 	{
@@ -266,7 +267,7 @@ function _unval($val)
 	{
 	    // single, escaped unicode character
 	    $utf16 = chr(hexdec($reg[1])) . chr(hexdec($reg[2]));
-	    $utf8 .= utf162utf8($utf16);
+	    $utf8  = utf162utf8($utf16);
 	    $val=preg_replace('/\\\u'.$reg[1].$reg[2].'/i',$utf8,$val);
 	}
 	return $val;

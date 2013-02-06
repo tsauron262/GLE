@@ -54,8 +54,7 @@ class LocationGA {
         $this->dateFin = $obj->dateFin;
         $this->user_resp_id = $obj->user_resp_refid;
         $tmpUser = new User($this->db);
-        $tmpUser->id = $obj->user_resp_refid;
-        $tmpUser->fetch();
+        $tmpUser->fetch($obj->user_resp_refid);
         $this->user_resp = $tmpUser;
         $this->statut = $obj->statut;
         $this->dateDeSortieDefinitive = $obj->dateDeSortieDefinitive;

@@ -32,7 +32,7 @@
         $contrat=getContratObj($id);
         $result=$contrat->fetch($id);
         //saveHistoUser($contrat->id, "contrat",$contrat->ref);
-        if ($result > 0) $result=$contrat->fetch_lignes();
+        if ($result > 0) $result=$contrat->fetch_lines();
         if ($result < 0)
         {
             dol_print_error($db,$contrat->error);

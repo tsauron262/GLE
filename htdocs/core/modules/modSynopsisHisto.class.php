@@ -58,13 +58,14 @@ class modSynopsisHisto extends DolibarrModules
 		// It is used to group modules in module setup page
 	        $this->family = "Synopsis";
 		// Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
-                $this->name = preg_replace('/^mod/i', '', get_class($this));
+                $this->name = "Histo nav";
+                $this->nameI = "SynopsisHisto";
 		// Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
 		$this->description = "Ajoute un historique de navigation";
 		// Possible values for version are: 'development', 'experimental', 'dolibarr' or version
 		$this->version = '2.0';
 		// Key used in ".MAIN_DB_PREFIX."const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
-		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
+		$this->const_name = 'MAIN_MODULE_'.strtoupper($this->nameI);
 		// Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
 		$this->special = 0;
 		// Name of image file used for this module.
@@ -246,7 +247,7 @@ class modSynopsisHisto extends DolibarrModules
   `element_type` varchar(50) DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1;");
+)");
 
 		return $this->_init($sql);
 	}

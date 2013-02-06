@@ -142,7 +142,7 @@ if ($_REQUEST['dateFinConf'])
         require_once(DOL_DOCUMENT_ROOT.'/Babel_GA/ContratGA.class.php');
         $contrat = new ContratGA($db);
         $contrat->fetch($id);
-        $contrat->fetch_lignes();
+        $contrat->fetch_lines();
 
         $client_signataire_refid = $contrat->client_signataire_refid;
 
@@ -355,7 +355,7 @@ if ($_REQUEST['dateFinConf'])
 
                     $totalSAV = $basicSAV + $durVal;
 
-                    $requete = "INSERT INTO Babel_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
                                      VALUES (".$contrat->newContractLigneId.", '".$_REQUEST['serial']."',now(),date_add('".date('Y-m-d',$date_start)."', INTERVAL ".$totalSAV." MONTH),".$user->id.",'contratSAV')";
                     $result1 = $db->query($requete);
                     $xml .= "<OK>OK</OK>";
@@ -476,7 +476,7 @@ if ($_REQUEST['dateFinConf'])
                                WHERE contratdet_refid=".$_REQUEST['lineid'];
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
-                    $requete = "UPDATE Babel_product_serial_cont
+                    $requete = "UPDATE ".MAIN_DB_PREFIX."product_serial_cont
                                    SET serial_number = '".$_REQUEST['serial']."',
                                        date_fin_SAV = date_add('".date('Y-m-d',$date_start)."', INTERVAL ".$totalSAV." MONTH),
                                        fk_user_author = ".$user->id."
@@ -498,7 +498,7 @@ if ($_REQUEST['dateFinConf'])
         $contrat->id = $_REQUEST["id"];
         if ($contrat->fetch($_REQUEST["id"]))
         {
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
 
             $xml.="<srvPanel>";
             $xml .= "<![CDATA[<div>";
@@ -635,18 +635,18 @@ if ($_REQUEST['dateFinConf'])
             if ($res->fk_product > 0)
             {
                 $requete = "SELECT *
-                              FROM llx_product
+                              FROM ".MAIN_DB_PREFIX."product
                              WHERE rowid = ".$res->fk_product;
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);
                 $xml .= "<libelleProduit>".$res1->label."</libelleProduit>";
                 $xml .= "<descriptionProduit>".$res1->description."</descriptionProduit>";
             }
-            $requete = "SELECT durValid, qte,Babel_product_serial_cont.serial_number,
+            $requete = "SELECT durValid, qte,".MAIN_DB_PREFIX."product_serial_cont.serial_number,
                                date_format(DateDeb,'%d/%m/%Y') as DateDeb,fk_contrat_prod,
                                date_format(date_add(DateDeb,INTERVAL durValid MONTH),'%d/%m/%Y') as DateFin
                           FROM Babel_GMAO_contratdet_prop
-                     LEFT JOIN Babel_product_serial_cont ON Babel_product_serial_cont.element_id = Babel_GMAO_contratdet_prop.contratdet_refid AND Babel_product_serial_cont.element_type='contratSAV'
+                     LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont ON ".MAIN_DB_PREFIX."product_serial_cont.element_id = Babel_GMAO_contratdet_prop.contratdet_refid AND ".MAIN_DB_PREFIX."product_serial_cont.element_type='contratSAV'
                          WHERE contratdet_refid =".$idLigne;
 //print $requete;
             $sql2 = $db->query($requete);
@@ -662,7 +662,7 @@ if ($_REQUEST['dateFinConf'])
             if ($res2->fk_contrat_prod > 0)
             {
                 $requete = "SELECT *
-                              FROM llx_product
+                              FROM ".MAIN_DB_PREFIX."product
                              WHERE rowid = ".$res2->fk_contrat_prod;
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);

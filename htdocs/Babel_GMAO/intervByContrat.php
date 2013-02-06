@@ -45,17 +45,17 @@ $result = restrictedArea($user, 'contrat',$contratid,'');
 * View
 */
 
-llxHeader($js,utf8_decode('Détails interventions'),'1');
+llxHeader($js,'Détails interventions');
 
 $contrat = $contrat=getContratObj($_REQUEST["id"]);
 $contrat->fetch($_GET["id"]);
 $contrat->info($_GET["id"]);
 
 $head = contract_prepare_head($contrat);
-$head = $contrat->getExtraHeadTab($head);
+//$head = $contrat->getExtraHeadTab($head);
 
 
-dol_fiche_head($head, "Interv", $langs->trans("Contract"));
+dol_fiche_head($head, "interv", $langs->trans("Contract"));
 
 
 //jqGrid SAV
@@ -71,7 +71,7 @@ $arrResByStatutTotHT = array();
 $arrRemDate = array();
 
 $requete = "SELECT *
-              FROM ".MAIN_DB_PREFIX."fichinter
+              FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
              WHERE fk_contrat = ".$contratid;
 $sql = $db->query($requete);
 
@@ -140,9 +140,9 @@ print "</table>";
 print '</div>';
 
 $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
-              FROM ".MAIN_DB_PREFIX."fichinterdet as fd,
-                   ".MAIN_DB_PREFIX."fichinter as f,
-                   llx_Synopsis_fichinter_c_typeInterv as b
+              FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
+                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as b
              WHERE fd.fk_fichinter = f.rowid
                AND b.id = fd.fk_typeinterv
                AND f.fk_contrat = ". $contratid."

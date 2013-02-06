@@ -356,8 +356,7 @@ Rico.onLoad( function() {
     print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("Nom").'</td>
                <td class="ui-widget-content">';
     $tuser = new User($db);
-    $tuser->id = $ndf->fk_user_author;
-    $tuser->fetch();
+    $tuser->fetch($ndf->fk_user_author);
     print $tuser->getNomUrl(1);
     print '</td><td  class="black ui-widget-header ui-state-default" colspan="1">'.$langs->trans('Seuil').'</td>
                 <td class="ui-widget-content">';

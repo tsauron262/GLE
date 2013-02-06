@@ -161,7 +161,7 @@ if ($_REQUEST["id"] > 0) {
     print '    <td class="ui-widget-content">' . $fichinter->user_creation->getNomUrl(1) . '</td>';
     print '    <th class="ui-widget-header ui-state-default">Contact</th>';
     print '    <td class="ui-widget-content">';
-    $req = "SELECT *  FROM `llx_element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
+    $req = "SELECT *  FROM `".MAIN_DB_PREFIX."element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
     $sql = $db->query($req);
     $res56 = $db->fetch_object($sql);
     $selected = (isset($res56->fk_socpeople) ? $res56->fk_socpeople : null); //die( "rrrr".$selected);
@@ -187,7 +187,7 @@ if ($_REQUEST["id"] > 0) {
             $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
         }
     }
-    $sql = $db->query("SELECT * FROM llx_Synopsis_fichinter WHERE rowid =" . $fichinter->id);
+    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE rowid =" . $fichinter->id);
     $resultG = $db->fetch_object($sql);
 
 
@@ -224,7 +224,7 @@ if ($_REQUEST["id"] > 0) {
         $nbPrest++;
         $prefId = "presta" . $nbPrest . "_";
         $selectHtml = "<SELECT name='" . $prefId . "fk_typeinterv'>";
-        $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 AND id != 17 ORDER BY rang";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE active = 1 AND id != 17 ORDER BY rang";
         $sql3 = $db->query($requete);
         $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
@@ -246,7 +246,7 @@ if ($_REQUEST["id"] > 0) {
 
 
 
-        /*     $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER by rang";
+        /*     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER by rang";
           $sql1 = $db->query($requete);
           $selectHtml = "<SELECT name='fk_typeinterv'>";
           $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
@@ -255,12 +255,12 @@ if ($_REQUEST["id"] > 0) {
           //Si déplacement OptGroup
           if ($res1->isDeplacement == 1)
           {
-          $requete1="SELECT llx_product.label,
-          llx_product.ref,
-          llx_product.rowid
-          FROM llx_product,
-          llx_Synopsis_fichinter_User_PrixDepInterv
-          WHERE user_refid = ".$fichinter->user_creation->id. " AND llx_product.rowid = fk_product";
+          $requete1="SELECT ".MAIN_DB_PREFIX."product.label,
+          ".MAIN_DB_PREFIX."product.ref,
+          ".MAIN_DB_PREFIX."product.rowid
+          FROM ".MAIN_DB_PREFIX."product,
+          ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv
+          WHERE user_refid = ".$fichinter->user_creation->id. " AND ".MAIN_DB_PREFIX."product.rowid = fk_product";
           $sql2 = $db->query($requete1);
           if ($db->num_rows($sql2) > 0)
           {
@@ -416,7 +416,7 @@ EOF;
 
 //Pour le html repliquer (ligne de prestation)
 $selectHtml = '<SELECT name="\'+prefId+\'fk_typeinterv">';
-$requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
 $sql3 = $db->query($requete);
 $selectHtml .= '<OPTION value="-1">Selectionner-></OPTION>';
 while ($res3 = $db->fetch_object($sql3)) {
@@ -608,10 +608,10 @@ if (get_magic_quotes_gpc ()) { // Si les magic quotes sont activés, on les dés
 function saveForm() {
     global $db, $fichinter;
     $_POST = addslashes_r($_POST);
-//    $req = "SELECT * FROM llx_Synopsis_fichinter where `rowid` =" . $fichinter->id;
+//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
-    $req = "UPDATE  `gle1main`.`llx_Synopsis_fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`description` =  '" . $_POST['desc'] . "', natureInter = '" . $_POST['natureInter'] . "' WHERE  `llx_Synopsis_fichinter`.`rowid` =" . $fichinter->id;
+    $req = "UPDATE  `gle1main`.`".MAIN_DB_PREFIX."Synopsis_fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`description` =  '" . $_POST['desc'] . "', natureInter = '" . $_POST['natureInter'] . "' WHERE  `".MAIN_DB_PREFIX."Synopsis_fichinter`.`rowid` =" . $fichinter->id;
     $sql = $db->query($req);
     extra(24, $_POST['date1']);
     extra(25, $_POST['date2']);
@@ -629,7 +629,7 @@ function saveForm() {
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixDepInterv
+                          FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND fk_product = " . $typeIntervProd;
             $sql = $db->query($requete);
@@ -641,7 +641,7 @@ function saveForm() {
             $isForfait = 1;
         } else {
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixTypeInterv
+                          FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixTypeInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND typeInterv_refid = " . $fk_typeinterv;
             $sql = $db->query($requete);
@@ -680,7 +680,7 @@ function saveForm() {
     }
 
 
-    $req = "SELECT *  FROM `llx_element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
+    $req = "SELECT *  FROM `".MAIN_DB_PREFIX."element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
     $sql = $db->query($req);
     $res = $db->fetch_object($sql);
     if (isset($res->rowid))
@@ -705,7 +705,7 @@ function initObj() {
 function extra($cle, $val = null) {
     global $db, $fichinter;
     if ($val == null) {//On fait un select
-        $sql = $db->query("SELECT extra_value as val FROM llx_Synopsis_fichinter_extra_value WHERE extra_key_refid = " . $cle . " AND interv_refid =" . $fichinter->id);
+        $sql = $db->query("SELECT extra_value as val FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value WHERE extra_key_refid = " . $cle . " AND interv_refid =" . $fichinter->id);
         $result = $db->fetch_object($sql);
         if (!is_object($result))
             return NULL;
@@ -713,10 +713,10 @@ function extra($cle, $val = null) {
     }
     else {
         if (is_null(extra($cle))) {
-            $req = "INSERT INTO `gle1main`.`llx_Synopsis_fichinter_extra_value` (`extra_value`, extra_key_refid, `interv_refid`, typeI) VALUES('" . $val . "', " . $cle . "," . $fichinter->id . ", 'FI')";
+            $req = "INSERT INTO `gle1main`.`".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value` (`extra_value`, extra_key_refid, `interv_refid`, typeI) VALUES('" . $val . "', " . $cle . "," . $fichinter->id . ", 'FI')";
             $sql = $db->query($req);
         } else {
-            $req = "UPDATE  `gle1main`.`llx_Synopsis_fichinter_extra_value` SET  `extra_value` =  '" . $val . "' WHERE extra_key_refid = " . $cle . " AND `babel_interv_extra_value`.`interv_refid` =" . $fichinter->id;
+            $req = "UPDATE  `gle1main`.`".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value` SET  `extra_value` =  '" . $val . "' WHERE extra_key_refid = " . $cle . " AND `babel_interv_extra_value`.`interv_refid` =" . $fichinter->id;
             $sql = $db->query($req);
         }/*
           if (!$sql) {
@@ -732,16 +732,16 @@ function prestations($rowid = null, $desc = null, $type = null, $duree = null) {
     global $db, $fichinter;
     if ($desc) {//Insert ou update
         if ($rowid && $rowid != 0)
-            $req = "UPDATE  `llx_Synopsis_fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
+            $req = "UPDATE  `".MAIN_DB_PREFIX."Synopsis_fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
         else
-            $req = "INSERT INTO `llx_Synopsis_fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
+            $req = "INSERT INTO `".MAIN_DB_PREFIX."Synopsis_fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
         $sql = $db->query($req);
     } else {//Select
         if ($rowid)
-            $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
-//        $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
+            $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
+//        $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
         else
-            $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
+            $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
         $sql = $db->query($req);
 //        return mysqlToArray($sql);
     }

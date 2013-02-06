@@ -444,7 +444,7 @@ if (empty($action) || $action == 'file_manager' || preg_match('/refresh/i',$acti
                         $ecmdir->jqtreePropal('fichinter');
                     }
                 break;
-                case 'llx_Synopsis_demandeInterv':
+                case MAIN_DB_PREFIX.'Synopsis_demandeInterv':
                     if ($conf->global->ECM_SHOWDEMANDEINTERV == "true" && $user->rights->ecm->showdemandeInterv){
                         $ecmdir->currentTable = $sqlTable;
                         $ecmdir->jqtreePropal('demandeInterv');

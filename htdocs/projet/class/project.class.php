@@ -146,7 +146,7 @@ class Project extends CommonObject {
         $this->db = $DB;
         $this->societe = new Societe($DB);
         global $langs;
-        $langs->load("projects@projet");
+        $langs->load("projectsSyn@projet");
         $this->labelstatut[0] = $langs->trans("ProjectStatusDraft");
         $this->labelstatut[5] = $langs->trans("ProjectStatusPlanning");
         $this->labelstatut[10] = $langs->trans("ProjectStatusRunning");
@@ -307,11 +307,9 @@ class Project extends CommonObject {
         $this->fk_user_resp = $res->fk_user_resp;
         $this->fk_user_creat = $res->fk_user_creat;
         $tmpUser = new User($this->db);
-        $tmpUser->id = $this->fk_user_resp;
-        $tmpUser->fetch();
+        $tmpUser->fetch($this->fk_user_resp);
         $this->user_resp = $tmpUser;
-        $tmpUser->id = $this->fk_user_creat;
-        $tmpUser->fetch();
+        $tmpUser->fetch($this->fk_user_creat);
         $this->user_creat = $tmpUser;
     }
 
@@ -459,8 +457,7 @@ class Project extends CommonObject {
                         $iter = 0;
                         while ($res3 = $this->db->fetch_object($resql3)) {
                             $tmpUsr = new User($this->db);
-                            $tmpUsr->id = $res3->userid;
-                            $tmpUsr->fetch();
+                            $tmpUsr->fetch($res3->userid);
 
                             $this->tasks[$res3->tid]['acto'][$res3->role][$iter]['userid'] = $res3->userid;
                             $this->tasks[$res3->tid]['acto'][$res3->role][$iter]['userobj'] = $tmpUsr;
@@ -544,7 +541,7 @@ class Project extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             $nump = $this->db->num_rows($result);
-            if ($nump) {
+//            if ($nump) {
                 $i = 0;
                 while ($i < $nump) {
                     $obj = $this->db->fetch_object($result);
@@ -557,7 +554,7 @@ class Project extends CommonObject {
 
                 /* Return array */
                 return $elements;
-            }
+//            }
         } else {
             dol_print_error($this->db);
         }
@@ -2031,7 +2028,7 @@ class Project extends CommonObject {
      */
     private function LibStatut($statut = 0, $mode = 1) {
         global $langs;
-        $langs->load("projects@projet");
+        $langs->load("projectsSyn@projet");
         if ($mode == 0) {
             return $this->labelstatut[$statut];
         }
@@ -2086,6 +2083,18 @@ class Project extends CommonObject {
             if ($statut == 999)
                 return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValidShort'), 'statut8', 'style="vertical-align:middle;"');
         }
+        if ($mode == 6) {
+            if ($statut == 0)
+                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusDraft'), 'statut0');
+            if ($statut == 5)
+                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusPlanning'), 'statut1');
+            if ($statut == 10)
+                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusRunning'), 'statut3');
+            if ($statut == 50)
+                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusClose'), 'statut5');
+            if ($statut == 999)
+                return $this->labelstatut[$statut] . ' ' . img_picto($langs->trans('ProjectStatusWaitingValid'), 'statut8', 'style="vertical-align:middle;"');
+        }
     }
 
     public function initAsSpecimen() {
@@ -2094,7 +2103,7 @@ class Project extends CommonObject {
 
     public function getNextNumRef($soc) {
         global $db, $langs, $conf;
-        $langs->load("projects@projet");
+        $langs->load("projectsSyn@projet");
 
         $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsis_projet";
 
@@ -2196,7 +2205,7 @@ class ProjectTask extends commonObject {
     public function ProjectTask($db) {
         $this->db = $db;
         global $langs;
-        $langs->load("projects@projet");
+        $langs->load("projectsSyn@projet");
         $this->labelstatut['open'] = $langs->trans("Open");
         $this->labelstatut["closed"] = $langs->trans("Closed");
         $this->labelstatut_short["open"] = $langs->trans("Open");
@@ -2244,8 +2253,7 @@ class ProjectTask extends commonObject {
             $this->duration = $res->duration;
             $this->fk_user_creat = $res->fk_user_creat;
             $tmpUser = new User($this->db);
-            $tmpUser->id = $res->fk_user_creat;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_creat);
             $this->user_creat = $tmpUser;
             $this->statut = $res->statut;
             $this->note = $res->note;
@@ -2334,7 +2342,7 @@ class ProjectTask extends commonObject {
      */
     private function LibStatut($statut = 0, $mode = 1) {
         global $langs;
-        $langs->load("projects@projet");
+        $langs->load("projectsSyn@projet");
         if ($mode == 0) {
             return $this->labelstatut[$statut];
         }

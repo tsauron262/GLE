@@ -20,10 +20,10 @@
   */
 
   require_once('../../../main.inc.php');
-  require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
   $id = $_REQUEST['comId'];
   $xmlStr = "<ajax-response>";
-  $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET finance_statut=0 WHERE rowid = ".$id;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET finance_statut=0 WHERE rowid = ".$id;
   $sql = $db->query($requete);
 
 
@@ -33,7 +33,7 @@
   $arrGrpTmp = $commande->listGroupMember();
   foreach($arrGrpTmp as $key=>$val)
   {
-      $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET finance_statut=0 WHERE rowid = ".$val->id;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET finance_statut=0 WHERE rowid = ".$val->id;
       $sql = $db->query($requete);
   }
 
@@ -43,8 +43,7 @@
         $commande = new Synopsis_Commande($db);
         $commande->fetch($id);
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         //Notification
         //TO commercial author
@@ -68,7 +67,7 @@
         $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject,$to,$from,$msg,array(),array(),array(),$addr_cc,'',0,1,$from);
 
   } else {

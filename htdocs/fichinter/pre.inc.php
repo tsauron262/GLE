@@ -35,21 +35,6 @@ require("../main.inc.php");
 
 $langs->load("interventions");
 
-function llxHeader($head = "", $urlp = "")
-{
-  global $user, $conf, $langs;
-
-  top_menu($head);
-
-  $menu = new Menu();
-
-  $menu->add(DOL_URL_ROOT."/comm/clients.php", $langs->trans("Customers"));
-  $menu->add("index.php", $langs->trans("Interventions"));
-
-  left_menu($menu->liste);
-}
-
-
 function Synopsis_fichinter_prepare_head($fichinter)
 {
   global $langs, $conf, $user, $db;

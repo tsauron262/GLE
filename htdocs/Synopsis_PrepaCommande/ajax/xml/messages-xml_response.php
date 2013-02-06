@@ -28,7 +28,7 @@
     $userId = $_REQUEST['userid'];
     $typeMsg = ($_REQUEST['typeMsg']=='general'?false:$_REQUEST['typeMsg']);
 
-    $requete = "INSERT INTO BIMP_messages
+    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_PrepaCom_messages
                             (message,user_author,commande_refid,type)
                      VALUES ('".$message."',".$userId.",".$id.",".($typeMsg?"'".$typeMsg."'":"NULL").")";
     $sql = $db->query($requete);
@@ -40,20 +40,18 @@
         $commande = new Synopsis_Commande($db);
         $commande->fetch($id);
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         $tmpUser1 = new User($db);
-        $tmpUser1->id = $userId;
-        $tmpUser1->fetch();
+        $tmpUser1->fetch($userId);
 
         $addr_cc .= ", ".$tmpUser1->email;
 
         // Appel des triggers
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-        $interface=new Interfaces($this->db);
+        $interface=new Interfaces($db);
         $result=$interface->run_triggers('PREPACOM_INTERNAL_MESSAGE',$this,$user,$langs,$conf);
-        if ($result < 0) { $error++; $this->errors=$interface->errors; }
+        if ($result < 0) { $error++; $errors=$interface->errors; }
         // Fin appel triggers
 
         //Notification
@@ -95,8 +93,8 @@
         //$addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE.", ".$conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
-    sendMail(utf8_encode($subject),$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
+    sendMail(utf8_encodeRien($subject),$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
 
 
     } else {

@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 22 juil. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**
@@ -51,7 +51,7 @@ function widget_statProject() {
         $sql = "SELECT p.title, p.rowid, ifnull(count(t.rowid),0) as cnt, ifnull(avg(t.progress),0) as prg";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
         $sql.= " FROM";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
         $sql.= " babel_projet as p";
         $sql.= " LEFT JOIN babel_projet_task as t ON p.rowid = t.fk_projet";
         $sql.= " WHERE fk_statut < 50";

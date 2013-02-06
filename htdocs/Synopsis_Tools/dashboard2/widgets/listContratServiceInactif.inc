@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 // The get widget handler.
 function widget_listContratServiceInactif() {
@@ -33,8 +33,8 @@ function widget_listContratServiceInactif() {
 
         $sql = "SELECT cd.rowid as cid, c.ref, cd.statut, cd.label, cd.description as note, cd.fk_contrat, c.fk_soc, s.nom";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-        $sql.= " FROM llx_contratdet as cd, llx_contrat as c, llx_societe as s";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= " WHERE c.statut=1 AND cd.statut = 0";
         $sql.= " AND is_financement = 0 AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -73,8 +73,8 @@ function widget_listContratServiceInactif() {
                     $table .= '</td>';
                     $table .= '<td nowrap="1">';
                     $table .= '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
-                    if ($obj->note) $table .= ' '.dolibarr_trunc(html_entity_decode($obj->note),20).'</a></td>';
-                    else $table .= '</a> '.dolibarr_trunc($obj->label,20).'</td>';
+                    if ($obj->note) $table .= ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
+                    else $table .= '</a> '.dol_trunc($obj->label,20).'</td>';
                     $table .= '<td>';
                     $staticcompany->id=$obj->fk_soc;
                     $staticcompany->fetch($obj->fk_soc);
@@ -95,8 +95,8 @@ function widget_listContratServiceInactif() {
                 $table2 .= '</td>';
                 $table2 .= '<td nowrap="1">';
                 $table2 .= '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
-                if ($obj->note) $table2 .= ' '.dolibarr_trunc(html_entity_decode($obj->note),20).'</a></td>';
-                else $table2 .= '</a> '.dolibarr_trunc($obj->label,20).'</td>';
+                if ($obj->note) $table2 .= ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
+                else $table2 .= '</a> '.dol_trunc($obj->label,20).'</td>';
                 $table2 .= '<td>';
                 $staticcompany->id=$obj->fk_soc;
                 $staticcompany->fetch($obj->fk_soc);

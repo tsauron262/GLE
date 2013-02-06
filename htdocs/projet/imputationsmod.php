@@ -1,6 +1,6 @@
 <?php
-     */
-    /**
+     /*
+/**
      *
      * Name : imputations.php
      * GLE-1.2
@@ -13,8 +13,7 @@
 	$userId = $_REQUEST[ 'userid' ] ;
 
     $curUser = new User( $db ) ;
-    $curUser->id = $userId ;
-    $curUser->fetch() ;
+    $curUser->fetch($userId) ;
 
     $format = 'weekly' ;
     if ( $_REQUEST[ 'format' ] . 'x' != "x" )
@@ -190,7 +189,7 @@ EOF;
     print '              </table>' ;
 
 
-    if ( $user->rights->voirImputations )
+    if ( $user->rights->synopsisprojet->voirImputations )
     {
 	require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php") ;
 	$html = new Form( $db ) ;

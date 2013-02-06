@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
 // The get widget handler.
 function widget_listProjetActivite() {
   // A widget object as per jquery.dashboard.js.
@@ -48,7 +48,7 @@ function widget_listProjetActivite() {
         $sql .= " FROM babel_projet as p";
         $sql .= " , babel_projet_task as t";
         $sql .= " , babel_projet_task_time as tt";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE t.fk_projet = p.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
         $sql .= " AND tt.fk_task = t.rowid";
@@ -88,7 +88,7 @@ function widget_listProjetActivite() {
         $sql .= " FROM babel_projet as p";
         $sql .= " , babel_projet_task as t";
         $sql .= " , babel_projet_task_time as tt";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE t.fk_projet = p.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
         $sql .= " AND tt.fk_task = t.rowid";
@@ -133,7 +133,7 @@ function widget_listProjetActivite() {
         $sql .= " FROM babel_projet as p";
         $sql .= " , babel_projet_task as t";
         $sql .= " , babel_projet_task_time as tt";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE t.fk_projet = p.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
         $sql .= " AND tt.fk_task = t.rowid";

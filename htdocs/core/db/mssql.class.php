@@ -80,7 +80,7 @@ class DoliDBMssql
 	 *	@param	    int		$port		Port of database server
 	 *	@return	    int					1 if OK, 0 if not
      */
-	function DoliDBMssql($type, $host, $user, $pass, $name='', $port=0)
+	function __construct($type, $host, $user, $pass, $name='', $port=0)
 	{
 		global $conf,$langs;
 
@@ -157,7 +157,7 @@ class DoliDBMssql
      *  @param     string	$type	Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
      *  @return    string   		SQL request line converted
      */
-	function convertSQLFromMysql($line,$type='ddl')
+	static function convertSQLFromMysql($line,$type='ddl')
 	{
 		return $line;
 	}
@@ -967,7 +967,9 @@ class DoliDBMssql
 	{
 		$sql = "ALTER TABLE ".$table;
 		$sql .= " MODIFY COLUMN ".$field_name." ".$field_desc['type'];
-		if ($field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') $sql.="(".$field_desc['value'].")";
+		if ($field_desc['type'] == 'tinyint' || $field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') {
+			$sql.="(".$field_desc['value'].")";
+		}
 
 		dol_syslog($sql,LOG_DEBUG);
 		if (! $this->query($sql))

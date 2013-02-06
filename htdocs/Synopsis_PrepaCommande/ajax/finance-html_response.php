@@ -57,11 +57,11 @@
                             print ($val->finance_ok>0?'oui':'non');
                         }
                         print "    <td class='ui-widget-content'>".$prod->getNomUrl(1);
-                        print "    <td class='ui-widget-content'>".utf8_encode($val->libelle);
+                        print "    <td class='ui-widget-content'>".utf8_encodeRien($val->libelle);
                         print "    <td class='ui-widget-content' nowrap align=right>".price($val->subprice)."&euro;";
                         print "    <td class='ui-widget-content' align=center>".$val->qty;
                         print "    <td class='ui-widget-content' nowrap align=right>".price($val->total_ht)."&euro;";
-                        print "    <td width=60% class='ui-widget-content'>".utf8_encode($val->desc);
+                        print "    <td width=60% class='ui-widget-content'>".utf8_encodeRien($val->desc);
                         if ($prod->isservice())
                         {
                             // Duration
@@ -84,8 +84,8 @@
                             print ($val->finance_ok>0?'oui':'non');
                         }
                         print "    <td class='ui-widget-content'> - ";
-                        print "    <td class='ui-widget-content'>".utf8_encode($val->libelle);
-                        print "    <td width=60% class='ui-widget-content'>".utf8_encode($val->desc);
+                        print "    <td class='ui-widget-content'>".utf8_encodeRien($val->libelle);
+                        print "    <td width=60% class='ui-widget-content'>".utf8_encodeRien($val->desc);
                     }
                 }
                 $arrGrpTmp = $com->listGroupMember();
@@ -106,11 +106,11 @@
                                     print ($val->finance_ok>0?'oui':'non');
                                 }
                                 print "    <td class='ui-widget-content'>".$prod->getNomUrl(1);
-                                print "    <td class='ui-widget-content'>".utf8_encode($val->libelle);
+                                print "    <td class='ui-widget-content'>".utf8_encodeRien($val->libelle);
                                 print "    <td class='ui-widget-content' nowrap align=right>".price($val->subprice)."&euro;";
                                 print "    <td class='ui-widget-content' align=center>".$val->qty;
                                 print "    <td class='ui-widget-content' nowrap align=right>".price($val->total_ht)."&euro;";
-                                print "    <td width=60% class='ui-widget-content'>".utf8_encode($val->desc);
+                                print "    <td width=60% class='ui-widget-content'>".utf8_encodeRien($val->desc);
                                 if ($prod->isservice())
                                 {
                                     // Duration
@@ -133,8 +133,8 @@
                                     print ($val->finance_ok>0?'oui':'non');
                                 }
                                 print "    <td class='ui-widget-content'> - ";
-                                print "    <td class='ui-widget-content'>".utf8_encode($val->libelle);
-                                print "    <td width=60% class='ui-widget-content'>".utf8_encode($val->desc);
+                                print "    <td class='ui-widget-content'>".utf8_encodeRien($val->libelle);
+                                print "    <td width=60% class='ui-widget-content'>".utf8_encodeRien($val->desc);
                             }
                         }
                     }
@@ -264,7 +264,7 @@ jQuery(document).ready(function(){
                                 jQuery('#DeValdialogFin').dialog("close");
                                 //reload
                                 jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
-                                jQuery('#DeValdialogFin').dialog( "destroy" );
+//                                jQuery('#DeValdialogFin').dialog( "destroy" );
                                 jQuery('#DeValdialogFin').remove();
                                 jQuery.ajax({
                                     url: "ajax/finance-html_response.php",
@@ -361,12 +361,12 @@ EOF;
     print '<tr><th width="18%" class="ui-state-default ui-widget-header">'.$langs->trans('Ref').'</th>';
     if ($extra."x" != "x")
     {
-        print '<td  width="20%" colspan="1" class="ui-widget-content">'.utf8_encode($commande->getNomUrl(1)).'</td>';
+        print '<td  width="20%" colspan="1" class="ui-widget-content">'.utf8_encodeRien($commande->getNomUrl(1)).'</td>';
         print '<th class="ui-state-default ui-widget-header">Groupe</th>';
         print '<td colspan=2 class="ui-widget-content">'.$ret->getNomUrl(1).'</td>';
 
     } else {
-        print '<td colspan="4" class="ui-widget-content">'.utf8_encode($commande->getNomUrl(1)).'</td>';
+        print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($commande->getNomUrl(1)).'</td>';
     }
     print '</tr>';
 
@@ -378,11 +378,11 @@ EOF;
     {
         print '<form action="fiche.php?id='.$id.'" method="post">';
         print '<input type="hidden" name="action" value="set_ref_client">';
-        print '<input type="text" class="flat" size="20" name="ref_client" value="'.utf8_encode($commande->ref_client).'">';
+        print '<input type="text" class="flat" size="20" name="ref_client" value="'.utf8_encodeRien($commande->ref_client).'">';
         print ' <input type="submit" class="button" value="'.$langs->trans('Modify').'">';
         print '</form>';
     } else {
-        print utf8_encode($commande->ref_client);
+        print utf8_encodeRien($commande->ref_client);
     }
     print '</td>';
     print '</tr>';
@@ -392,22 +392,22 @@ EOF;
     $societe = new Societe($db);
     $societe->fetch($commande->socid);
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Company').'</th>';
-    print '<td colspan="4" class="ui-widget-content">'.utf8_encode($societe->getNomUrl(1)).'</td>';
+    print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($societe->getNomUrl(1)).'</td>';
     print '</tr>';
 
     // Date
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Date').'</th>';
-    print '<td class="ui-widget-content" colspan="4">'.utf8_encode(dol_print_date($commande->date,'day')).'</td>';
+    print '<td class="ui-widget-content" colspan="4">'.utf8_encodeRien(dol_print_date($commande->date,'day')).'</td>';
     print '</tr>';
 
     // Mode de reglement
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Mode de r&eacute;glement').'</th>';
-    print '<td class="ui-widget-content" colspan="4">'.utf8_encode($commande->mode_reglement).'</td>';
+    print '<td class="ui-widget-content" colspan="4">'.utf8_encodeRien($commande->mode_reglement).'</td>';
     print '</tr>';
 
     // Condition de paiement
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Conditions de paiement').'</th>';
-    print '<td class="ui-widget-content" colspan="4">'.utf8_encode($commande->cond_reglement_facture).'</td>';
+    print '<td class="ui-widget-content" colspan="4">'.utf8_encodeRien($commande->cond_reglement_facture).'</td>';
     print '</tr>';
 
 
@@ -519,11 +519,11 @@ print <<<EOF
 jQuery(document).ready(function(){
 
     if(jQuery('.cntValdialogFin').length > 1){
-        jQuery('#valdialogFin').dialog( "destroy" );
+//        jQuery('#valdialogFin').dialog( "destroy" );
         jQuery('#valdialogFin').remove();
     }
     if(jQuery('.cntModdialogFin').length > 1){
-        jQuery('#moddialogFin').dialog( "destroy" );
+//        jQuery('#moddialogFin').dialog( "destroy" );
         jQuery('#moddialogFin').remove();
     }
 

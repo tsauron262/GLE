@@ -6,8 +6,8 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/commande/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listPrepaCommandeEnCours() {
@@ -34,11 +34,11 @@ function widget_listPrepaCommandeEnCours() {
         $sql.= " s.nom, s.rowid as socid,";
         $sql.= " p.rowid, p.ref, p.facture, p.fk_statut, p.total_ht, p.total_ttc, b.statut_refid, bs.label as Blabel";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql.= " FROM llx_societe AS s, BIMP_commande_status as b, BIMP_status as bs";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
-        $sql.= ", llx_commande AS p";
-        $sql.= " LEFT JOIN llx_co_fa AS co_fa ON co_fa.fk_commande = p.rowid";
-        $sql.= " LEFT JOIN llx_facture AS f ON co_fa.fk_facture = f.rowid";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s, BIMP_commande_status as b, BIMP_status as bs";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+        $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."co_fa AS co_fa ON co_fa.fk_commande = p.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture AS f ON co_fa.fk_facture = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid)
@@ -96,7 +96,7 @@ function widget_listPrepaCommandeEnCours() {
                             $table .= $commandestatic->getNomUrl(1,5);
                             $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dolibarr_trunc($res->nom,18).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
                             $table .=  '<td>'.$res->Blabel.'</td>';
                     }
                     $var=!$var;
@@ -104,7 +104,7 @@ function widget_listPrepaCommandeEnCours() {
                             <td  nowrap="nowrap">';
                     $table2 .= $commandestatic->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td>'.$res->Blabel.'</td>';
                     $iter++;
                 }

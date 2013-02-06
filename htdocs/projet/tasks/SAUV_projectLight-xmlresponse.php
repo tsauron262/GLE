@@ -88,7 +88,7 @@ switch ($action)
                            d.fk_product,
                            d.qty
                       FROM ".MAIN_DB_PREFIX."propaldet as d
-                 LEFT JOIN llx_product as p ON p.rowid = d.fk_product AND fk_product_type = 1
+                 LEFT JOIN ".MAIN_DB_PREFIX."product as p ON p.rowid = d.fk_product AND fk_product_type = 1
                      WHERE fk_propal = ".$propalId;
         //2 trouve les groupes
         $sql = $db->query($requete);

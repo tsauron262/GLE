@@ -20,8 +20,7 @@ require_once('../../main.inc.php');
 
  $extra = $_REQUEST['extra'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -158,8 +157,7 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $soc->fetch($row[socid]);
     $responce->rows[$i]['id']=$row[id];
     $localUser = new User($db);
-    $localUser->id = $row[fk_user_resp];
-    $localUser->fetch();
+    $localUser->fetch($row[fk_user_resp]);
     $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
     $responce->rows[$i]['cell']=array($row[id],$convetImp[$row[importance]],$row[source],$row[dateNote],utf8_encode($row[note]));
     $i++;

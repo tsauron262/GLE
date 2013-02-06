@@ -209,11 +209,11 @@ $form =new Form($db);
         //SAV normal + contrat d'extension
         $requete = " SELECT Babel_GMAO_contratdet_prop.durValid, ".MAIN_DB_PREFIX."contratdet.fk_contrat, element_type
                        FROM ".MAIN_DB_PREFIX."contratdet,
-                            Babel_product_serial_cont,
+                            ".MAIN_DB_PREFIX."product_serial_cont,
                             Babel_GMAO_contratdet_prop
                       WHERE serial_number = '".$objsav->serial."'
                         AND element_type like 'contrat%'
-                        AND ".MAIN_DB_PREFIX."contratdet.rowid = Babel_product_serial_cont.element_id
+                        AND ".MAIN_DB_PREFIX."contratdet.rowid = ".MAIN_DB_PREFIX."product_serial_cont.element_id
                         AND Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid ";
 //        print $requete;
         $sql1 = $db->query($requete);
@@ -247,7 +247,7 @@ $form =new Form($db);
     }
 //TODO refaire avec lien par element_id et element_type puis retrouver propriété serial
 //SAV , contrat ...
-    $requete = "SELECT * FROM llx_product_serial_view WHERE serial_number = '".$objsav->serial."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE serial_number = '".$objsav->serial."'";
     $sql = $db->query($requete);
     while($res=$db->fetch_object($sql))
     {
@@ -327,8 +327,7 @@ $form =new Form($db);
 
         print '<td width="10%" align=center colspan="1" class="ui-widget-content">';
         $tmpUser = new User($db);
-        $tmpUser->id = $objsav->histo[$i]['user_author'];
-        $tmpUser->fetch();
+        $tmpUser->fetch($objsav->histo[$i]['user_author']);
         print $tmpUser->getNomUrl(1);
         print '</td></tr>';
 

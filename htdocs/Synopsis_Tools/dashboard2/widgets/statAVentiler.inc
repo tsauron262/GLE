@@ -18,7 +18,7 @@ function widget_statAVentiler() {
 
 
 
-    $sql = "SELECT count(*) FROM llx_facturedet";
+    $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."facturedet";
     $sql .= " WHERE fk_export_compta = 0";
     $result = $db->query($sql);
     if ($result)
@@ -29,7 +29,7 @@ function widget_statAVentiler() {
       $db->free($result);
     }
 
-    $sql = "SELECT count(*) FROM llx_paiement";
+    $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."paiement";
     $sql .= " WHERE fk_export_compta = 0";
 
     $result = $db->query($sql);
@@ -41,7 +41,7 @@ function widget_statAVentiler() {
       $db->free($result);
     }
 
-    $sql = "SELECT count(*) FROM llx_facture_fourn_det";
+    $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."facture_fourn_det";
     $sql .= " WHERE fk_export_compta = 0";
 
     $result = $db->query($sql);
@@ -53,7 +53,7 @@ function widget_statAVentiler() {
       $db->free($result);
     }
 
-    $sql = "SELECT count(*) FROM llx_paiementfourn";
+    $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."paiementfourn";
     $sql .= " WHERE fk_export_compta = 0";
 
     $result = $db->query($sql);

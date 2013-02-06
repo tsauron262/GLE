@@ -102,7 +102,7 @@ function synopsis_project_prepare_head($projet)
     }
     if ($projet->hasImputation == 1)
     {
-        $head[$h][0] = DOL_URL_ROOT.'/projet/imputations.php?fromProjet=1&id='.$projet->id;
+        $head[$h][0] = DOL_URL_ROOT.'/projet/histo_imputations.php?fromProjet=1&id='.$projet->id;
         $head[$h][1] = $langs->trans("Imputations");
         $head[$h][2] = 'Imputations';
         $h++;

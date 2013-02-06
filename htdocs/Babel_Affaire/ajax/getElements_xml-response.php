@@ -298,7 +298,7 @@
         $xml .= "</group>";
     }
     $requete = "SELECT rowid, ref, unix_timestamp(datei) as dateiU
-                  FROM llx_Synopsis_demandeInterv
+                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
                  WHERE fk_soc = ".$id;
     $sql = $db->query($requete);
     if ($sql)

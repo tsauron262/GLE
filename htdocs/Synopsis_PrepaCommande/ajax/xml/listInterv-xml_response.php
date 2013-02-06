@@ -41,20 +41,19 @@
                            ref,
                            ifnull(fk_user_target, fk_user_prisencharge) as fk_interv,
                            UNIX_TIMESTAMP(datei) as dateinterv
-                      FROM llx_Synopsis_demandeInterv
-                     WHERE fk_commande  = ".join(',',$arrGrpCom). "
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv
+                     WHERE fk_commande  IN (".join(',',$arrGrpCom). ")
                   ORDER BY datei DESC ";
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_interv;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_interv);
             $xmlStr .= "<datainterv id='".$res->rowid."'>";
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";
             $xmlStr .= "<date><![CDATA[".date('d/m/Y',$res->dateinterv)."]]></date>";
-            $xmlStr .= "<interv><![CDATA[".utf8_encode($tmpUser->fullname)."]]></interv>";
+            $xmlStr .= "<interv><![CDATA[".utf8_encodeRien($tmpUser->fullname)."]]></interv>";
             $xmlStr .= "</datainterv>";
         }
 
@@ -73,13 +72,12 @@
         while ($res = $db->fetch_object($sql))
         {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_interv;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_interv);
             $xmlStr .= "<datainterv id='".$res->rowid."'>";
             $xmlStr .= "<rowid>".$res->rowid."</rowid>";
             $xmlStr .= "<ref><![CDATA[".$res->ref."]]></ref>";
             $xmlStr .= "<date><![CDATA[".date('d/m/Y',$res->dateinterv)."]]></date>";
-            $xmlStr .= "<interv><![CDATA[".utf8_encode($tmpUser->fullname)."]]></interv>";
+            $xmlStr .= "<interv><![CDATA[".utf8_encodeRien($tmpUser->fullname)."]]></interv>";
             $xmlStr .= "</datainterv>";
         }
 

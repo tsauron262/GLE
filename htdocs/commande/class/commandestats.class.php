@@ -23,9 +23,9 @@
  *       \ingroup    commandes
  *       \brief      Fichier de la classe de gestion des stats des commandes
  */
-include_once DOL_DOCUMENT_ROOT . "/core/class/stats.class.php";
-include_once DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php";
-include_once DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.commande.class.php";
+include_once DOL_DOCUMENT_ROOT . '/core/class/stats.class.php';
+include_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+include_once DOL_DOCUMENT_ROOT . '/fourn/class/fournisseur.commande.class.php';
 
 
 /**
@@ -51,7 +51,7 @@ class CommandeStats extends Stats
 	 * @param 	string	$mode	   Option
 	 * @param   int		$userid    Id user for filter
 	 */
-	function CommandeStats($db, $socid, $mode, $userid=0)
+	function __construct($db, $socid, $mode, $userid=0)
 	{
 		global $user, $conf;
 

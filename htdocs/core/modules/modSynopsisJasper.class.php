@@ -52,7 +52,7 @@ class modSynopsisJasper extends DolibarrModules {
         // It is used to group modules in module setup page
         $this->family = "Synopsis";
         // Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = "Jasper serveur";
         // Module description, used if translation string 'ModuleXXXDesc' not found (where XXX is value of numeric property 'numero' of module)
         $this->description = "Ajout d'un web service avec serveur Jasper";
         // Possible values for version are: 'development', 'experimental', 'dolibarr' or version
@@ -127,8 +127,8 @@ class modSynopsisJasper extends DolibarrModules {
         $this->tabs = array();
 
         // Dictionnaries
-        if (!isset($conf->mymodule->enabled))
-            $conf->mymodule->enabled = 0;
+//        if (!isset($conf->mymodule->enabled))
+//            $conf->mymodule->enabled = 0;
         $this->dictionnaries = array();
         /* Example:
           if (! isset($conf->mymodule->enabled)) $conf->mymodule->enabled=0;	// This is to avoid warnings

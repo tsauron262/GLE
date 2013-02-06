@@ -24,18 +24,19 @@
  *       \brief      Onglet user et permissions de la fiche utilisateur
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php');
-require_once(DOL_DOCUMENT_ROOT."/core/lib/usergroups.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
 $langs->load("users");
 $langs->load("admin");
 
 $id=GETPOST('id','int');
-$action=GETPOST("action");
-$confirm=GETPOST("confirm");
-$module=GETPOST("module");
+$action=GETPOST('action', 'alpha');
+$confirm=GETPOST('confirm', 'alpha');
+$module=GETPOST('module', 'alpha');
+$rights=GETPOST('rights', 'int');
 
 // Defini si peux lire les permissions
 $canreadperms=($user->admin || $user->rights->user->user->lire);
@@ -60,14 +61,14 @@ if ($action == 'addrights' && $caneditperms)
 {
     $editgroup = new Usergroup($db);
     $result=$editgroup->fetch($id);
-    if ($result > 0) $editgroup->addrights($_GET["rights"],$module);
+    if ($result > 0) $editgroup->addrights($rights, $module);
 }
 
 if ($action == 'delrights' && $caneditperms)
 {
     $editgroup = new Usergroup($db);
     $result=$editgroup->fetch($id);
-    if ($result > 0) $editgroup->delrights($_GET["rights"],$module);
+    if ($result > 0) $editgroup->delrights($rights, $module);
 }
 
 
@@ -113,7 +114,7 @@ if ($id)
 
                     if ($modName)
                     {
-                        include_once($dir."/".$file);
+                        include_once $dir."/".$file;
                         $objMod = new $modName($db);
                         // Load all lang files of module
                         if (isset($objMod->langfiles) && is_array($objMod->langfiles))
@@ -160,7 +161,7 @@ if ($id)
     {
     	$sql.= " AND r.entity IN (0,".$conf->entity.")";
     }
-        
+
     $sql.= " AND ugr.fk_usergroup = ".$fgroup->id;
 
     $result=$db->query($sql);
@@ -250,7 +251,7 @@ if ($id)
         $i = 0;
         $var = true;
         $oldmod = '';
-        
+
         $num = $db->num_rows($result);
 
         while ($i < $num)
@@ -258,7 +259,7 @@ if ($id)
             $obj = $db->fetch_object($result);
 
             // Si la ligne correspond a un module qui n'existe plus (absent de includes/module), on l'ignore
-            if (! $modules[$obj->module])
+            if (empty($modules[$obj->module]))
             {
                 $i++;
                 continue;

@@ -40,7 +40,7 @@
         print "<tr id='FI-".$res->rowid."'><td class='ui-widget-content'>".$finter->getNomUrl(1);
         if ($finter->fk_soc >0 )
         {
-            print "<td class='ui-widget-content'>".utf8_encode($finter->societe->getNomUrl(1));
+            print "<td class='ui-widget-content'>".utf8_encodeRien($finter->societe->getNomUrl(1));
         } else {
             print "<td class='ui-widget-content'>-";
         }

@@ -1,103 +1,105 @@
 <?php
+
 /*
-  ** GLE by Synopsis et DRSI
-  *
-  * Author: Tommy SAURON <tommy@drsi.fr>
-  * Licence : Artistic Licence v2.0
-  *
-  * Version 1.2
-  * Created on : 28 sept. 2010
-  *
-  * Infos on http://www.finapro.fr
-  *
-  */
- /**
-  *
-  * Name : interventions-html_response.php
-  * GLE-1.2
-  */
+ * * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.2
+ * Created on : 28 sept. 2010
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+/**
+ *
+ * Name : interventions-html_response.php
+ * GLE-1.2
+ */
+require_once('../../main.inc.php');
 
-  require_once('../../main.inc.php');
+$id = $_REQUEST['id'];
+require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
 
-  $id = $_REQUEST['id'];
-  require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
-  require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+$form = new Form($db);
 
-  $com = new Synopsis_Commande($db);
-  $html = new Form($db);
-  $res=$com->fetch($id);
+$com = new Synopsis_Commande($db);
+$html = new Form($db);
+$res = $com->fetch($id);
 
-  $arrGrpCom = array($id=>$id);
-  $arrGrp = $com->listGroupMember(true);
-  if($arrGrp && count($arrGrp) >0 )
-  foreach($arrGrp as $key=>$commandeMember)
-  {
-        $arrGrpCom[$commandeMember->id]=$commandeMember->id;
-  }
-  $requete = "SELECT *
-                FROM llx_Synopsis_demandeIntervdet
-               WHERE fk_commandedet IN (SELECT rowid FROM ".MAIN_DB_PREFIX."commandedet WHERE fk_commande IN (".join(",",$arrGrpCom)." ))";
-  $sql = $db->query($requete);
-  $arrDi = array();
-  while($res1= $db->fetch_object($sql)){
-    $arrDi[$res1->rowid]=$res1->fk_commandedet;
-  }
+$arrGrpCom = array($id => $id);
+$arrGrp = $com->listGroupMember(true);
+if ($arrGrp && count($arrGrp) > 0)
+    foreach ($arrGrp as $key => $commandeMember) {
+        $arrGrpCom[$commandeMember->id] = $commandeMember->id;
+    }
+$requete = "SELECT *
+                FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet
+               WHERE fk_commandedet IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande IN (" . join(",", $arrGrpCom) . " ))";
+$sql = $db->query($requete);
+$arrDi = array();
+while ($res1 = $db->fetch_object($sql)) {
+    $arrDi[$res1->rowid] = $res1->fk_commandedet;
+}
 
-  print "<table><tr><td valign=top>";
-  if ($res>0)
-  {
-      $com->fetch_group_lines(0,0,0,0,1);
+print "<table><tr><td valign=top>";
+if ($res > 0) {
+    $com->fetch_group_lines(0, 0, 0, 0, 1);
 //    function fetch_lines($only_product=0,$only_service=0,$only_contrat=0,$only_dep=0,$srv_dep=0)
 
-    $cnt=0;
-    if (count($com->lines) > 0)
-    {
+    $cnt = 0;
+    if (count($com->lines) > 0) {
 
         $prod = new Product($db);
         print "<div class='revertDraggable'>";
-        foreach($com->lines as $key=> $val)
-        {
-            if (count($arrDi)> 0 && in_array($val->id,$arrDi)){ continue;}
-            if ($cnt==0)
-            {
-                print "<table  cellpadding=10>";
-                print "<tr><th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Ref.
+        foreach ($com->lines as $key => $val) {
+            $val->id = $val->rowid;
+            if (count($arrDi) > 0 && in_array($val->id, $arrDi)) {
+//                continue;
+            }
+            if (isset($val->fk_product) && $val->fk_product > 0) {
+                $prod->fetch($val->fk_product);
+                if ($prod->type == 1 || $prod->type == 3) {
+                    if ($cnt == 0) {
+                        print "<table  cellpadding=10>";
+                        print "<tr><th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Ref.
                            <th width=95 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Vendu HT
                            <th width=200 valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;' class='ui-widget-header ui-state-default'>Description";
-                print "</table>";
-            }
-            $cnt++;
-            print "<table id='".$val->id."'  cellpadding=10 class='draggable  ui-widget-content ui-draggable '>";
-            if(isset($val->fk_product) && $val->fk_product > 0){
-            $prod->fetch($val->fk_product);
-            $durStr = $prod->duration_value.'&nbsp;';
-            if ($prod->duration_value > 1)
-            {
-                $dur=array("h"=>$langs->trans("Hours"),"d"=>$langs->trans("Days"),"w"=>$langs->trans("Weeks"),"m"=>$langs->trans("Months"),"y"=>$langs->trans("Years"));
-            } else {
-                $dur=array("h"=>$langs->trans("Hour"),"d"=>$langs->trans("Day"),"w"=>$langs->trans("Week"),"m"=>$langs->trans("Month"),"y"=>$langs->trans("Year"));
-            }
-            $durStr.= $langs->trans($dur[$prod->duration_unit])."&nbsp;";
+                        print "</table>";
+                    }
+                    $cnt++;
+                    print "<table id='" . $val->id . "'  cellpadding=10 class='draggable  ui-widget-content ui-draggable '>";
 
-            print "<tr>";
-            print "    <td nowrap width=95 align=center class='ui-widget-content'>".$prod->getNomUrl(1);
-            print "    <td width=95 align=center class='ui-widget-content'>".price($val->total_ht)." &euro;";
-            print "    <td width=200 class='ui-widget-content'>".$val->desc;
-            print "</table>";
+                    $durStr = $prod->duration_value . '&nbsp;';
+                    if ($prod->duration_value > 1) {
+                        $dur = array("h" => $langs->trans("Hours"), "d" => $langs->trans("Days"), "w" => $langs->trans("Weeks"), "m" => $langs->trans("Months"), "y" => $langs->trans("Years"));
+                    } else {
+                        $dur = array("h" => $langs->trans("Hour"), "d" => $langs->trans("Day"), "w" => $langs->trans("Week"), "m" => $langs->trans("Month"), "y" => $langs->trans("Year"));
+                    }
+                    $durStr.= $langs->trans($dur[$prod->duration_unit]) . "&nbsp;";
+
+                    print "<tr>";
+                    print "    <td nowrap width=95 align=center class='ui-widget-content'>" . $prod->getNomUrl(1);
+                    print "    <td width=95 align=center class='ui-widget-content'>" . price($val->total_ht) . " &euro;";
+                    print "    <td width=200 class='ui-widget-content'>" . $val->desc;
+                    print "</table>";
+                }
             }
         }
         print "</div>";
+        print '</td>';
         //print "</table>";
     } else {
         print " Pas de services dans la commande";
         exit;
     }
-
-  }
-   if ($cnt>0){
+}
+if ($cnt > 0) {
     print "<td valign=top align=center>";
     print "<table width=350 cellpadding=10>";
     print "<tr><th width=250 class='ui-widget-header ui-state-default' valign=middle style='line-height:35px; font-size: 12pt; font-weight:100;'>Nouvelle DI.
@@ -107,56 +109,54 @@
     print "";
     print "</table>";
     print "<hr>";
-
-   }
-    print "<div class='titre'>Interventions attribu&eacute;es</div>";
-    $requete = "SELECT *
-                  FROM llx_Synopsis_demandeInterv
-                 WHERE fk_commande IN (".join(",",$arrGrpCom).")";
-    $sql = $db->query($requete);
-    print "<table cellpadding=15 width=100%>";
-    print "<tr><th class='ui-widget-header ui-state-default'>Ref<th class='ui-widget-header ui-state-default'>Intervenant<th class='ui-widget-header ui-state-default'>Date d&eacute;but<th class='ui-widget-header ui-state-default'>Dur&eacute;e<th class='ui-widget-header ui-state-default'>Total HT<th class='ui-widget-header ui-state-default'>Contenu<th class='ui-widget-header ui-state-default'>Action";
-    $tmpUser = new User($db);
-    $tmpProd = new Product($db);
-    while($res=$db->fetch_object($sql))
-    {
-        $di = new DemandeInterv($db);
-        $di->fetch($res->rowid);
-        print "<tr class='droppable2' rel='".$res->fk_user_prisencharge."' id='".$res->rowid."'><td align=left class='ui-widget-content'  nowrap>".$di->getNomUrl(1)."";
-        if ($res->fk_user_prisencharge > 0){
-            $tmpUser->fetch($res->fk_user_prisencharge);
-        }
-        print "    <td class='ui-widget-content' align=left>".($res->fk_user_prisencharge>0?$tmpUser->getNomUrl(1):"");
-        print "    <td class='ui-widget-content' align=center>".(strtotime($res->datei)>0?date('d/m/Y',strtotime($res->datei)):"");
-        print "    <td class='ui-widget-content' align=center>".ConvertSecondToTime($res->duree);
-        print "    <td nowrap class='ui-widget-content' align=right>".price($res->total_ht)." &euro;";
-        print "    <td class='ui-widget-content' align=center>";
-        $requete = " SELECT *
-                       FROM ".MAIN_DB_PREFIX."commandedet
-                      WHERE rowid IN (SELECT fk_commandedet FROM llx_Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$res->rowid.")";
-        $sql1 = $db->query($requete);
-        if ($db->num_rows($sql1)>0){
-            print "<table width=100%>";
-            while ($res1 = $db->fetch_object($sql1))
-            {
-                $tmpProd->fetch($res1->fk_product);
-                print "<tr><td class='ui-widget-content' nowrap>".$tmpProd->getNomUrl(1);
-                print "    <td class='ui-widget-content'>".$res1->description;
-                //print "    <td class='ui-widget-content' align=right nowrap>".price($res1->total_ht);
-            }
-            print "</table>";
-        }
-        print "    <td class='ui-widget-content' align=center>";
-        if ($user->rights->synopsisdemandeinterv->supprimer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
-        print "    <button class='butAction' onClick='delDi(".$res->rowid.")'>Supprimer</button>";
-        if ($user->rights->synopsisdemandeinterv->creer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
-        print "    <button class='butAction' onClick='cloneDi(".$res->rowid.")'>Cloner</button>";
+}
+print "<div class='titre'>Interventions attribu&eacute;es</div>";
+$requete = "SELECT *
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                 WHERE fk_commande IN (" . join(",", $arrGrpCom) . ")";
+$sql = $db->query($requete);
+print "<table cellpadding=15 width=100%>";
+print "<tr><th class='ui-widget-header ui-state-default'>Ref<th class='ui-widget-header ui-state-default'>Intervenant<th class='ui-widget-header ui-state-default'>Date d&eacute;but<th class='ui-widget-header ui-state-default'>Dur&eacute;e<th class='ui-widget-header ui-state-default'>Total HT<th class='ui-widget-header ui-state-default'>Contenu<th class='ui-widget-header ui-state-default'>Action";
+$tmpUser = new User($db);
+$tmpProd = new Product($db);
+while ($res = $db->fetch_object($sql)) {
+    $di = new DemandeInterv($db);
+    $di->fetch($res->rowid);
+    print "<tr class='droppable2' rel='" . $res->fk_user_prisencharge . "' id='" . $res->rowid . "'><td align=left class='ui-widget-content'  nowrap>" . $di->getNomUrl(1) . "";
+    if ($res->fk_user_prisencharge > 0) {
+        $tmpUser->fetch($res->fk_user_prisencharge);
     }
-    print "</table>";
-    print "<br/>";
-    print "<tr><td align=right><button id='addDI'  class='butAction'>Demande manuelle</button>";
+    print "    <td class='ui-widget-content' align=left>" . ($res->fk_user_prisencharge > 0 ? $tmpUser->getNomUrl(1) : "");
+    print "    <td class='ui-widget-content' align=center>" . (strtotime($res->datei) > 0 ? date('d/m/Y', strtotime($res->datei)) : "");
+    print "    <td class='ui-widget-content' align=center>" . ConvertSecondToTime($res->duree);
+    print "    <td nowrap class='ui-widget-content' align=right>" . price($res->total_ht) . " &euro;";
+    print "    <td class='ui-widget-content' align=center>";
+    $requete = " SELECT c.*
+                       FROM " . MAIN_DB_PREFIX . "commandedet c,
+                           " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet d
+                      WHERE c.rowid = d.fk_commandedet AND d.fk_demandeInterv = " . $res->rowid;
+    $sql1 = $db->query($requete);
+    if ($db->num_rows($sql1) > 0) {
+        print "<table width=100%>";
+        while ($res1 = $db->fetch_object($sql1)) {
+            $tmpProd->fetch($res1->fk_product);
+            print "<tr><td class='ui-widget-content' nowrap>" . $tmpProd->getNomUrl(1);
+            print "    <td class='ui-widget-content'>" . $res1->description;
+            //print "    <td class='ui-widget-content' align=right nowrap>".price($res1->total_ht);
+        }
+        print "</table>";
+    }
+    print "    <td class='ui-widget-content' align=center>";
+    if ($user->rights->synopsisdemandeinterv->supprimer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
+        print "    <button class='butAction' onClick='delDi(" . $res->rowid . ")'>Supprimer</button>";
+    if ($user->rights->synopsisdemandeinterv->creer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
+        print "    <button class='butAction' onClick='cloneDi(" . $res->rowid . ")'>Cloner</button>";
+}
+print "</table>";
+print "<br/>";
+print "<tr><td align=right><button id='addDI'  class='butAction'>Demande manuelle</button>";
 
-    //print "<table>";
+//print "<table>";
 
 print <<<EOF
 <script>
@@ -173,108 +173,110 @@ jQuery(document).ready(function(){
 tr.ui-state-hover td { background:url("images/ui-bg_highlight-soft_25_0073ea_1x100.png") repeat-x scroll 50% 50% #0073EA;}
 </style>
 EOF;
-        print "<div id='createDIDialog' class='cntDIDial'>";
-        print "<form>";
-        print "<div id='tabsDialog'>";
-        print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment2'>D&eacute;tails</a></li></ul>";
-        print "<div id='fragment1'>";
-        print "<table cellpadding=10 width=100%><tr><th class='ui-widget-header ui-state-default'>Date Intervention</td>";
-        print "<td class='ui-widget-content' colspan=1><input name='datei' class='datePicker promoteZ'>";
+print "<div id='createDIDialog' class='cntDIDial'>";
+print "<form>";
+print "<div id='tabsDialog'>";
+print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment2'>D&eacute;tails</a></li><li><a href='#fragment3'>Plus</a></li></ul>";
+print "<div id='fragment1'>";
+print "<table cellpadding=10 width=100%><tr><th class='ui-widget-header ui-state-default'>Date Intervention</td>";
+print "<td class='ui-widget-content' colspan=1>";
+print $form->select_date('',"datei");
+print '<input type="button" value="Répliqué" id="repliDate"/>';
 
-        print "<th class='ui-widget-header ui-state-default'>Intervenant</th>";
-        print "<td class='ui-widget-content' colspan=1>";
-        $html->select_users('','userid',1,array(1=>1),0,false);
-        print $html->tmpReturn;
+print "<th class='ui-widget-header ui-state-default'>Intervenant</th>";
+print "<td class='ui-widget-content' colspan=1>";
+$html->select_users('', 'userid', 1, array(1 => 1), 0, false);
+print $html->tmpReturn;
 
-        print "<tr><th class='ui-widget-header ui-state-default'>Description globale</th>";
-        print "<td colspan=3 class='ui-widget-content'><textarea style='width:100%' name='desc'></textarea>";
-        $requete = "SELECT *
-                      FROM llx_Synopsis_fichinter_extra_key
+print "<tr><th class='ui-widget-header ui-state-default'>Description globale</th>";
+print "<td colspan=3 class='ui-widget-content'><textarea style='width:100%' name='desc'></textarea>";
+
+print "</table>";
+print "</div>";
+print "<div id='fragment2'>";
+print "<div id='toReplace'>Chargement en cours</div>";
+print "</div>";
+
+print "<div id='fragment3'>";
+print "<table cellpadding=10 width=100%>";
+$requete = "SELECT *
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key
                      WHERE (isQuality is NULL OR isQuality <> 1)
                        AND isInMainPanel = 1
                        AND active = 1
                   ORDER BY rang, label";
-        $sql = $db->query($requete);
-        $modulo=false;
-        while ($res = $db->fetch_object($sql))
-        {
-            $colspan=1;
-            $modulo=!$modulo;
-            if($res->fullLine==1){$modulo=true;$colspan=3;}
-            if($modulo)print '<tr>';
-            if($res->fullLine==1) $modulo=!$modulo;
-            print "<th valign='top' class='ui-widget-header ui-state-default'>".$res->label;
-            switch ($res->type)
-            {
-                case "date":
-                {
-                    print "<td colspan=".$colspan." valign='middle' class='ui-widget-content'><input type='text' name='extraKey-".$res->id."' class='datePicker'>";
-                    print "<input type='hidden' name='type-".$res->id."' value='date'>";
-                }
-                break;
-                case "textarea":
-                {
-                    print "<td colspan=".$colspan." valign='middle' class='ui-widget-content'><textarea style='width:80%' name='extraKey-".$res->id."'></textarea>";
-                    print "<input type='hidden' name='type-".$res->id."' value='comment'>";
-                }
-                break;
-                default:
-                case "text":
-                {
-                    print "<td colspan=".$colspan." valign='middle' class='ui-widget-content'><input type='text' name='extraKey-".$res->id."'>";
-                    print "<input type='hidden' name='type-".$res->id."' value='text'>";
-                }
-                break;
-                case "datetime":
-                {
-                    print "<td colspan=".$colspan." valign='middle' class='ui-widget-content'><input type='text' name='extraKey-".$res->id."' class='dateTimePicker'>";
-                    print "<input type='hidden' name='type-".$res->id."' value='datetime'>";
-                }
-                break;
-                case "checkbox":
-                {
-                    print "<td colspan=".$colspan." valign='middle' class='ui-widget-content'><input type='checkbox'  name='extraKey-".$res->id."'>";
-                    print "<input type='hidden' name='type-".$res->id."' value='checkbox'>";
-                }
-                break;
-                case "radio":
-                {
-                    print "<td colspan=2 valign='middle' class='ui-widget-content'>";
-                    $requete= "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
-                    $sql1 = $db->query($requete);
-                    if ($db->num_rows($sql1)> 0)
-                    {
-                        print "<table width=100%>";
-                        while ($res1 = $db->fetch_object($sql1))
-                        {
-                            print "<tr><td width=100%>".$res1->label."<td>";
-                            print "<input type='radio' value='".$res1->value."' name='extraKey-".$res->id."'>";
-                        }
-                        print "</table>";
-                    }
-                    print "<input type='hidden' name='type-".$res->id."' value='radio'></td>";
-                }
-                break;
-
+$sql = $db->query($requete);
+$modulo = false;
+while ($res = $db->fetch_object($sql)) {
+    $colspan = 1;
+    $modulo = !$modulo;
+    if ($res->fullLine == 1) {
+        $modulo = true;
+        $colspan = 3;
+    }
+    if ($modulo)
+        print '<tr class="elemSup">';
+    if ($res->fullLine == 1)
+        $modulo = !$modulo;
+    print "<th valign='top' class='ui-widget-header ui-state-default'>" . $res->label;
+    switch ($res->type) {
+        case "date": {
+                print "<td colspan=" . $colspan . " valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='datePicker'>";
+                print "<input type='hidden' name='type-" . $res->id . "' value='date'>";
             }
-        }
+            break;
+        case "textarea": {
+                print "<td colspan=" . $colspan . " valign='middle' class='ui-widget-content'><textarea style='width:80%' name='extraKey-" . $res->id . "'></textarea>";
+                print "<input type='hidden' name='type-" . $res->id . "' value='comment'>";
+            }
+            break;
+        default:
+        case "text": {
+                print "<td colspan=" . $colspan . " valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "'>";
+                print "<input type='hidden' name='type-" . $res->id . "' value='text'>";
+            }
+            break;
+        case "datetime": {
+                print "<td colspan=" . $colspan . " valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
+                print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>";
+            }
+            break;
+        case "checkbox": {
+                print "<td colspan=" . $colspan . " valign='middle' class='ui-widget-content'><input type='checkbox'  name='extraKey-" . $res->id . "'>";
+                print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>";
+            }
+            break;
+        case "radio": {
+                print "<td colspan=2 valign='middle' class='ui-widget-content'>";
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                $sql1 = $db->query($requete);
+                if ($db->num_rows($sql1) > 0) {
+                    print "<table width=100%>";
+                    while ($res1 = $db->fetch_object($sql1)) {
+                        print "<tr><td width=100%>" . $res1->label . "<td>";
+                        print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
+                    }
+                    print "</table>";
+                }
+                print "<input type='hidden' name='type-" . $res->id . "' value='radio'></td>";
+            }
+            break;
+    }
+}
+print "</table>";
+print "</div>";
 
-        print "</table>";
-        print "</div>";
-        print "<div id='fragment2'>";
-        print "<div id='toReplace'>Chargement en cours</div>";
-        print "</div>";
-        print "</div>";
-        print "<div id='errorMsg'></div>";
-        print "</form>";
-        print "</div>";
+print "</div>";
+print "<div id='errorMsg'></div>";
+print "</form>";
+print "</div>";
 
-        print "<div id='modDIDialog' class='cntmodDIDial'>";
-        print "<form>";
-        print "<div id='toReplace2'>Chargement en cours</div>";
-        print "<div id='errorMsg2'></div>";
-        print "</form>";
-        print "</div>";
+print "<div id='modDIDialog' class='cntmodDIDial'>";
+print "<form>";
+print "<div id='toReplace2'>Chargement en cours</div>";
+print "<div id='errorMsg2'></div>";
+print "</form>";
+print "</div>";
 
 
 print <<<EOF
@@ -282,6 +284,34 @@ print <<<EOF
 var DnDArray = new Array();
 var DnDArray2 = new Array();
 jQuery(document).ready(function(){
+        $("#repliDate").click(function(){
+            $("#toReplace .datePicker").val($("#datei").val());
+        });
+        
+        function initSynScript(){
+            $("#toReplace tr").each(function(){
+                id = $(this).attr("id");
+                $(this).find("#qte"+id).val(1);
+                desc = $(this).find("#desci"+id);
+                forfait = $(this).find("#isForfait"+id);
+                i=0;
+                $(this).find("a").each(function(){
+                    i++;
+                    if(i == 2){
+                        if($(this).html() == "FPR50")
+                            desc.html("Installation comprennent : ");
+                        if($(this).html() == "FPR30")
+                            desc.html("Intervention comprennent : ");
+                        if($(this).html().match("FD.*")){
+                            desc.html("Déplacement comprennent : ");
+                            forfait.attr('checked', true);
+                        }
+                    }
+                });
+            });
+        }
+
+
         jQuery.datepicker.setDefaults(jQuery.extend({showMonthAfterYear: false,
                         dateFormat: 'dd/mm/yy',
                         changeMonth: true,
@@ -296,11 +326,11 @@ jQuery(document).ready(function(){
         jQuery('.dateTimePicker').datepicker({showTime:true});
 
     if (jQuery('.cntDIDial').length>1){
-        jQuery('#createDIDialog').dialog( "destroy" );
+//        jQuery('#createDIDialog').dialog( "destroy" );
         jQuery('#createDIDialog').remove();
     }
     if (jQuery('.cntmodDIDial').length>1){
-        jQuery('#modDIDialog').dialog( "destroy" );
+//        jQuery('#modDIDialog').dialog( "destroy" );
         jQuery('#modDIDialog').remove();
     }
     jQuery.validator.addMethod(
@@ -551,6 +581,7 @@ jQuery(document).ready(function(){
                         jQuery('#toReplace').replaceWith('<div id="toReplace">'+longHtml+'</div>');
                         jQuery('.datePicker').datepicker();
                         reinitAutoPrice();
+                        initSynScript();
 //                        jQuery('#toReplace select').selectmenu({style: 'dropdown', maxHeight: 300 });
 
 
@@ -838,16 +869,15 @@ EOF;
 
 print "<div style='display:none;'>";
 print "<select id='templateTypeInterv' class='typeInterv' name='templateTypeInterv'>";
-$requete= " SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+$requete = " SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
 $sql = $db->query($requete);
-while($res=$db->fetch_object($sql)){
-    if ($res->default == 1){
-        print "<option SELECTED value='".$res->id."'>".htmlentities($res->label)."</option>";
+while ($res = $db->fetch_object($sql)) {
+    if ($res->default == 1) {
+        print "<option SELECTED value='" . $res->id . "'>" . htmlentities($res->label) . "</option>";
     } else {
-        print "<option value='".$res->id."'>".htmlentities($res->label)."</option>";
+        print "<option value='" . $res->id . "'>" . htmlentities($res->label) . "</option>";
     }
 }
 print "</select>";
 print "</div>";
-
 ?>

@@ -31,14 +31,14 @@
  * 				This script reads the conf file, init $lang, $db and and empty $user
  */
 
-require_once("filefunc.inc.php");	// May have been already require by main.inc.php. But may not by scripts.
+require_once 'filefunc.inc.php';	// May have been already require by main.inc.php. But may not by scripts.
 
 
 /*
  * Create $conf object
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/class/conf.class.php");
+require_once DOL_DOCUMENT_ROOT.'/core/class/conf.class.php';
 
 $conf = new Conf();
 // Identifiant propres au serveur base de donnee
@@ -74,15 +74,17 @@ if (! empty($dolibarr_main_document_root_alt))
 }
 // Force db type (for test purpose)
 if (defined('TEST_DB_FORCE_TYPE')) $conf->db->type=constant('TEST_DB_FORCE_TYPE');
+// Force php strict mode (for debug)
+$conf->file->strict_mode = empty($dolibarr_strict_mode)?'':$dolibarr_strict_mode;
 // Force Multi-Company transverse mode
 $conf->multicompany->transverse_mode = empty($multicompany_transverse_mode)?'':$multicompany_transverse_mode;
 // Force entity in login page
 $conf->multicompany->force_entity = empty($multicompany_force_entity)?'':(int) $multicompany_force_entity;
 
 // Chargement des includes principaux de librairies communes
-if (! defined('NOREQUIREUSER')) require_once(DOL_DOCUMENT_ROOT ."/user/class/user.class.php");		// Need 500ko memory
-if (! defined('NOREQUIRETRAN')) require_once(DOL_DOCUMENT_ROOT ."/core/class/translate.class.php");
-if (! defined('NOREQUIRESOC'))  require_once(DOL_DOCUMENT_ROOT ."/societe/class/societe.class.php");
+if (! defined('NOREQUIREUSER')) require_once DOL_DOCUMENT_ROOT .'/user/class/user.class.php';		// Need 500ko memory
+if (! defined('NOREQUIRETRAN')) require_once DOL_DOCUMENT_ROOT .'/core/class/translate.class.php';
+if (! defined('NOREQUIRESOC'))  require_once DOL_DOCUMENT_ROOT .'/societe/class/societe.class.php';
 
 /*
  * Creation objet $langs (must be before all other code)
@@ -191,72 +193,10 @@ if (! empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED))
  */
 if (! defined('NOREQUIREDB') && ! defined('NOREQUIRESOC'))
 {
-	require_once(DOL_DOCUMENT_ROOT ."/societe/class/societe.class.php");
+	require_once DOL_DOCUMENT_ROOT .'/societe/class/societe.class.php';
+
 	$mysoc=new Societe($db);
-
-	$mysoc->id=0;
-	$mysoc->nom=$conf->global->MAIN_INFO_SOCIETE_NOM; 			// TODO deprecated
-	$mysoc->name=$conf->global->MAIN_INFO_SOCIETE_NOM;
-	$mysoc->adresse=$conf->global->MAIN_INFO_SOCIETE_ADRESSE; 	// TODO deprecated
-	$mysoc->address=$conf->global->MAIN_INFO_SOCIETE_ADRESSE;
-	$mysoc->cp=$conf->global->MAIN_INFO_SOCIETE_CP; 			// TODO deprecated
-	$mysoc->zip=$conf->global->MAIN_INFO_SOCIETE_CP;
-	$mysoc->ville=$conf->global->MAIN_INFO_SOCIETE_VILLE; 		// TODO deprecated
-	$mysoc->town=$conf->global->MAIN_INFO_SOCIETE_VILLE;
-	$mysoc->state_id=$conf->global->MAIN_INFO_SOCIETE_DEPARTEMENT;
-	$mysoc->note=empty($conf->global->MAIN_INFO_SOCIETE_NOTE)?'':$conf->global->MAIN_INFO_SOCIETE_NOTE;
-
-    // We define country_id, country_code and country
-	$country_id=$country_code=$country_label='';
-    if (! empty($conf->global->MAIN_INFO_SOCIETE_PAYS))
-    {
-    	$tmp=explode(':',$conf->global->MAIN_INFO_SOCIETE_PAYS);
-    	$country_id=$tmp[0];
-    	if (! empty($tmp[1]))   // If $conf->global->MAIN_INFO_SOCIETE_PAYS is "id:code:label"
-    	{
-    		$country_code=$tmp[1];
-    		$country_label=$tmp[2];
-    	}
-    	else                    // For backward compatibility
-    	{
-    		dol_syslog("Your country setup use an old syntax. Reedit it using setup area.", LOG_WARNING);
-    		include_once(DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php');
-    		$country_code=getCountry($country_id,2,$db);  // This need a SQL request, but it's the old feature
-    		$country_label=getCountry($country_id,0,$db);  // This need a SQL request, but it's the old feature
-    	}
-    }
-    $mysoc->pays_id=$country_id;		// TODO deprecated
-    $mysoc->country_id=$country_id;
-    $mysoc->pays_code=$country_code;	// TODO deprecated
-    $mysoc->country_code=$country_code;
-    $mysoc->country=$country_label;
-    if (is_object($langs)) $mysoc->country=($langs->trans('Country'.$country_code)!='Country'.$country_code)?$langs->trans('Country'.$country_code):$country_label;
-    $mysoc->pays=$mysoc->country;    	// TODO deprecated
-
-	$mysoc->tel=empty($conf->global->MAIN_INFO_SOCIETE_TEL)?'':$conf->global->MAIN_INFO_SOCIETE_TEL;   // TODO deprecated
-    $mysoc->phone=empty($conf->global->MAIN_INFO_SOCIETE_TEL)?'':$conf->global->MAIN_INFO_SOCIETE_TEL;
-	$mysoc->fax=empty($conf->global->MAIN_INFO_SOCIETE_FAX)?'':$conf->global->MAIN_INFO_SOCIETE_FAX;
-	$mysoc->url=empty($conf->global->MAIN_INFO_SOCIETE_WEB)?'':$conf->global->MAIN_INFO_SOCIETE_WEB;
-	// Id prof generiques
-	$mysoc->idprof1=empty($conf->global->MAIN_INFO_SIREN)?'':$conf->global->MAIN_INFO_SIREN;
-	$mysoc->idprof2=empty($conf->global->MAIN_INFO_SIRET)?'':$conf->global->MAIN_INFO_SIRET;
-	$mysoc->idprof3=empty($conf->global->MAIN_INFO_APE)?'':$conf->global->MAIN_INFO_APE;
-	$mysoc->idprof4=empty($conf->global->MAIN_INFO_RCS)?'':$conf->global->MAIN_INFO_RCS;
-	$mysoc->tva_intra=$conf->global->MAIN_INFO_TVAINTRA;	// VAT number, not necessarly INTRA.
-	$mysoc->idtrainer=empty($conf->global->MAIN_INFO_TRAINER)?'':$conf->global->MAIN_INFO_TRAINER;
-	$mysoc->capital=$conf->global->MAIN_INFO_CAPITAL;
-	$mysoc->forme_juridique_code=$conf->global->MAIN_INFO_SOCIETE_FORME_JURIDIQUE;
-	$mysoc->email=$conf->global->MAIN_INFO_SOCIETE_MAIL;
-	$mysoc->logo=$conf->global->MAIN_INFO_SOCIETE_LOGO;
-	$mysoc->logo_small=$conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL;
-	$mysoc->logo_mini=$conf->global->MAIN_INFO_SOCIETE_LOGO_MINI;
-
-	// Define if company use vat or not (Do not use conf->global->FACTURE_TVAOPTION anymore)
-	$mysoc->tva_assuj=((isset($conf->global->FACTURE_TVAOPTION) && $conf->global->FACTURE_TVAOPTION=='franchise')?0:1);
-
-	// Define if company use local taxes
-	$mysoc->localtax1_assuj=((isset($conf->global->FACTURE_LOCAL_TAX1_OPTION) && $conf->global->FACTURE_LOCAL_TAX1_OPTION=='localtax1on')?1:0);
-	$mysoc->localtax2_assuj=((isset($conf->global->FACTURE_LOCAL_TAX2_OPTION) && $conf->global->FACTURE_LOCAL_TAX2_OPTION=='localtax2on')?1:0);
+	$mysoc->getMysoc($conf);
 
 	// For some countries, we need to invert our address with customer address
 	if ($mysoc->country_code == 'DE' && ! isset($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $conf->global->MAIN_INVERT_SENDER_RECIPIENT=1;
@@ -266,12 +206,12 @@ if (! defined('NOREQUIREDB') && ! defined('NOREQUIRESOC'))
 // Set default language (must be after the setValues of $conf)
 if (! defined('NOREQUIRETRAN'))
 {
-	$langs->setDefaultLang($conf->global->MAIN_LANG_DEFAULT);
+	$langs->setDefaultLang((! empty($conf->global->MAIN_LANG_DEFAULT)?$conf->global->MAIN_LANG_DEFAULT:''));
 }
 
 if (! defined('MAIN_LABEL_MENTION_NPR') ) define('MAIN_LABEL_MENTION_NPR','NPR');
 
 // We force feature to help debug
-//$conf->global->MAIN_JS_ON_PAYMENT=0;    // We disable this. See bug #402 on doliforge
+//$conf->global->MAIN_JS_ON_PAYMENT=0;
 
 ?>

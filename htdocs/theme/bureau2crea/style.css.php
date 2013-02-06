@@ -35,8 +35,9 @@ if (! defined('NOREQUIREMENU'))   define('NOREQUIREMENU',1);
 if (! defined('NOREQUIREHTML'))   define('NOREQUIREHTML',1);
 if (! defined('NOREQUIREAJAX'))   define('NOREQUIREAJAX','1');
 
+session_cache_limiter(FALSE);
 
-require_once("../../main.inc.php");
+require_once '../../main.inc.php';
 
 // Define css type
 header('Content-type: text/css');
@@ -182,6 +183,13 @@ form {
     padding: 0em 0em 0em 0em;
     margin: 0em 0em 0em 0em;
 }
+.valignmiddle {
+	vertical-align: middle;
+}
+.centpercent {
+	width: 100%;
+}
+
 
 /* ============================================================================== */
 /* Styles to hide objects                                                         */
@@ -296,6 +304,8 @@ div.tmenu {
     margin: 5px 0px 10px 0px;
     font-size: 13px;
     background-image : url(<?php echo DOL_URL_ROOT.'/theme/bureau2crea/img/bg_mainNav.jpg' ?>);
+    background-repeat: no-repeat;
+    background-color: #996644;
     height: 22px;
     border-bottom: 2px solid #842F00;
 <?php } ?>
@@ -381,7 +391,7 @@ $moduletomainmenu=array('user'=>'','syslog'=>'','societe'=>'companies','projet'=
 	'barcode'=>'','fckeditor'=>'','categorie'=>'',
 );
 $mainmenuused='home';
-foreach($conf->modules as $key => $val)
+foreach($conf->modules as $val)
 {
 	$mainmenuused.=','.(isset($moduletomainmenu[$val])?$moduletomainmenu[$val]:$val);
 }
@@ -392,7 +402,7 @@ $mainmenuusedarray=array();	// Disable
 
 $generic=1;
 $divalreadydefined=array('home','companies','products','commercial','accountancy','project','tools','members','shop','agenda','ecm','cashdesk');
-foreach($mainmenuusedarray as $key => $val)
+foreach($mainmenuusedarray as $val)
 {
 	if (empty($val) || in_array($val,$divalreadydefined)) continue;
 	//print "XXX".$val;
@@ -452,14 +462,12 @@ li.tmenu span, li.tmenusel span {
 	margin: 0px 10px 0px 10px;
     }
 
-li.tmenu {
-    }
 .tmenuimage {
-margin: 0 !important;
-padding: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
-li.tmenu a {
+li.tmenu a, li.tmenusel a {
 	position: relative;
 	display: block;
     height: 22px;
@@ -469,53 +477,36 @@ li.tmenu a {
     color: #FFF;
     font-weight: normal;
     float: <?php print $left; ?>;
-    }
+}
 
 li.tmenu a:hover {
 	color: #FFFFFF;
     background-color: #D45416;
-    }
+}
 
-li.tmenu a.tmenusel,
-li.tmenu a.tmenusel:hover {
+li.tmenu a.tmenusel, li.tmenu a.tmenusel:hover, li.tmenusel a.tmenusel, li.tmenusel a.tmenusel:hover {
 	color: #842F00;
     font-weight: bold;
     background-color: #FFF;
-    }
+    font-weight: normal;
+}
 
-li.tmenu .tmenusel {
+li.tmenu .tmenusel, li.tmenusel .tmenusel {
     background: #FFFFFF;
-	}
-
+}
 
 li.tmenusel {
     background-image : url(<?php echo DOL_URL_ROOT.'/theme/bureau2crea/img/bg_tmenusel_btnD.jpg' ?>);
     background-position: right;
-    }
-
-li.tmenusel a.tmenusel {
-	position: relative;
-	display: block;
-    width: 100%;
-    height: 22px;
-    background-image : url(<?php echo DOL_URL_ROOT.'/theme/bureau2crea/img/bg_tmenusel_btnG.jpg' ?>);
-    background-position: left;
-	background-repeat: no-repeat;
-    font-size: 12px;
-    font-family: Geneva, Verdana, sans-serif;
-    line-height: 25px;
-    color: #303030;
-    font-weight: normal;
-    float: left;
-    }
+}
 
 li.tmenusel a:hover {
 	color: #474747;
-    }
+}
 
 li.tmenu a.tmenudisabled {
 	color: #CCC;
-    }
+}
 
 /* --- end nav --- */
 
@@ -523,6 +514,46 @@ li.tmenu a.tmenudisabled {
 
 
 /* Login */
+
+form#login {
+	margin-top: 70px;
+	margin-bottom: 30px;
+	font-size: 13px;
+}
+.login_table_title {
+	width: 540px;
+	color: #888888;
+	text-shadow: 1px 1px 1px #FFF;
+}
+.login_table label {
+	text-shadow: 1px 1px 1px #FFF;
+}
+.login_table {
+	padding:12px;
+	width: 540px;
+	border: 1px solid #C0C0C0;
+	background-color: #E0E0E0;
+
+    -moz-box-shadow: 4px 4px 4px #CCC;
+    -webkit-box-shadow: 4px 4px 4px #CCC;
+    box-shadow: 4px 4px 4px #CCC;
+
+	border-radius: 12px;
+	border:solid 1px rgba(168,168,168,.4);
+	border-top:solid 1px f8f8f8;
+	background-color: #f8f8f8;
+	background-image: -o-linear-gradient(top, rgba(240,240,240,.3) 0%, rgba(192,192,192,.3) 100%);
+	background-image: -moz-linear-gradient(top, rgba(240,240,240,.3) 0%, rgba(192,192,192,.3) 100%);
+	background-image: -webkit-linear-gradient(top, rgba(240,240,240,.3) 0%, rgba(192,192,192,.3) 100%);
+	background-image: -ms-linear-gradient(top, rgba(240,240,240,.3) 0%, rgba(192,192,192,.3) 100%);
+	background-image: linear-gradient(top, rgba(240,240,240,.3) 0%, rgba(192,192,192,.3) 100%);
+}
+#img_securitycode {
+	border: 1px solid #DDDDDD;
+}
+#img_logo {
+	max-width: 200px;
+}
 
 div.login_block {
 	position: absolute;
@@ -1186,7 +1217,7 @@ span.tabspan {
 
 /* Nouvelle syntaxe a utiliser */
 
-.butAction:link, .butAction:visited, .butAction:hover, .butAction:active, .butActionDelete, .butActionDelete:link, .butActionDelete:visited, .butActionDelete:hover, .butActionDelete:active {
+.butAction, .butAction:link, .butAction:visited, .butAction:hover, .butAction:active, .butActionDelete, .butActionDelete:link, .butActionDelete:visited, .butActionDelete:hover, .butActionDelete:active {
 	font-family:"Trebuchet MS",Arial,Helvetica,sans-serif;
 	font-weight: bold;
 	background: url(<?php echo DOL_URL_ROOT.'/theme/bureau2crea/img/bg_btnBlue.jpg' ?>) repeat-x;
@@ -1233,6 +1264,12 @@ span.tabspan {
     margin-bottom: 10px;
 	cursor: not-allowed;
 }
+
+<?php if (! empty($conf->global->MAIN_BUTTON_HIDE_UNAUTHORIZED)) { ?>
+.butActionRefused {
+	display: none;
+}
+<?php } ?>
 
 span.butAction, span.butActionDelete {
 	cursor: pointer;
@@ -1558,7 +1595,7 @@ font-family: <?php print $fontlist ?>;
 
 .ok      { color: #114466; }
 .warning { color: #887711; }
-.error   { color: #550000; font-weight: bold; }
+.error   { color: #550000 !important; font-weight: bold; }
 
 td.highlights { background: #f9c5c6; }
 
@@ -1619,6 +1656,9 @@ a.impayee:hover { font-weight: bold; color: #550000; }
 /*
  *  Other
  */
+
+.product_line_stock_ok { color: #002200; }
+.product_line_stock_too_low { color: #664400; }
 
 .fieldrequired { font-weight: bold; color: #000055; }
 
@@ -2423,7 +2463,7 @@ div.ecmjqft {
 
 .jnotify-container {
 	position: fixed !important;
-<?php if ($conf->global->MAIN_JQUERY_JNOTIFY_BOTTOM) { ?>
+<?php if (! empty($conf->global->MAIN_JQUERY_JNOTIFY_BOTTOM)) { ?>
 	top: auto !important;
 	bottom: 4px !important;
 <?php } ?>

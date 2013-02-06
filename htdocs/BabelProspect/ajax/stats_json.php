@@ -60,8 +60,7 @@ switch ($action)
         while ($res = $db->fetch_object($sql))
         {
             $tmpUser= new User($db);
-            $tmpUser->id = $res->user_id;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->user_id);
             $fullname = $tmpUser->fullname;
             if ($tmpUser->fullname . "x" == "x")
             {
@@ -488,9 +487,8 @@ switch ($action)
             if ('x'.$res->count != 'x') $count = $res->count;
             $arr[$res->user_id][$date][$res->closeStatut] = $count ;
 
-            $fuser = new User($db);
-            $fuser->id = $res->user_id;
-            $fuser->fetch();
+            $fuser = new User($db); 
+            $fuser->fetch($res->user_id);
             $arrFullname[$res->user_id]=$fuser->fullname;
             if (!in_array($res->user_id,$remColor))
             {
@@ -670,8 +668,7 @@ switch ($action)
                         {
                             $userid = $key1;
                             $fuser = new User($db);
-                            $fuser->id = $userid;
-                            $fuser->fetch();
+                            $fuser->fetch($userid);
 
                             array_push($arrRes,new OFC_Charts_Bar_Stack_Value($val1 * 1, $color[$key1],$fuser->fullname.'<br>  Nb action le #x_label# :<br>  #val#<br>  Total journalier: #total#' ) );
                             $totDay += $val1;
@@ -693,8 +690,7 @@ switch ($action)
         foreach ($color as $key=>$val)
         {
             $tmpUsr = new User($db);
-            $tmpUsr->id = $key;
-            $tmpUsr->fetch();
+            $tmpUsr->fetch($key);
             array_push($keyArr, new OFC_Charts_Bar_Stack_Key($val,$tmpUsr->fullname,12));
         }
 

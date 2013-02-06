@@ -65,22 +65,19 @@
                     $contrat->fetch($res1->rowid);
                     $subject = "[GLE] Avertissement de fin du contrat ".$contrat->ref;
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $contrat->fk_user_author;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($contrat->fk_user_author);
                     $to = $tmpUser->email;
 
                     $ccArr = array();
                     if ($contrat->commercial_signature_id . "x" != "x" && $contrat->commercial_signature_id != $contrat->fk_user_author)
                     {
-                        $tmpUser->id = $contrat->commercial_signature_id;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($contrat->commercial_signature_id);
                         $cc = $tmpUser->email;
                         $ccArr[]=$cc;
                     }
                     if ($contrat->commercial_suivi_id . "x" != "x" && ($contrat->commercial_suivi_id != $contrat->commercial_signature_id) ||($contrat->fk_user_author != $contrat->commercial_suivi_id))
                     {
-                        $tmpUser->id = $contrat->commercial_suivi_id;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($contrat->commercial_suivi_id);
                         $cc = $tmpUser->email;
                         $ccArr[]=$cc;
                     }
@@ -93,7 +90,7 @@
                     $message = "Bonjour,<br/>\n<br/>\n    Le contrat de financement ".$contrat->ref.' arrive bient&ocirc;t &agrave; terme<br/>\n<br/>\nCordialement,';
 
                     $sql1 = false;
-                    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+                    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
                     $mailfile = new CMailFile($subject,$to,$from,$message,$filepath,$mimetype,$filename,$sendtocc,'',$deliveryreceipt=false);
                     if ($mailfile->error)
                     {

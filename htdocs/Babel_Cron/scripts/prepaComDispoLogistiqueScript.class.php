@@ -122,7 +122,7 @@
 //                    var_dump("deliveryreceipt");
 //                    var_dump($deliveryreceipt);
                     $sql1 = false;
-                    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+                    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
                     $mailfile = new CMailFile($subject,$sendto,$from,$message,$filepath,$mimetype,$filename,$sendtocc,"",$deliveryreceipt,1);
                     if ($mailfile->error)
                     {

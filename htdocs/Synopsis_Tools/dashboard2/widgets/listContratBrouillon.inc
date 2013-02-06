@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/contrat.class.php");
+require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 
 // The get widget handler.
 function widget_listContratBrouillon() {
@@ -31,8 +31,8 @@ function widget_listContratBrouillon() {
         $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.type, ";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql .= " FROM llx_contrat as c, llx_contratdet as cd, llx_societe as s";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql .= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."societe as s";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE s.rowid = c.fk_soc
                     AND c.statut = 0
                     AND cd.fk_contrat = c.rowid ";

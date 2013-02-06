@@ -48,11 +48,11 @@ function widget_statOfcProduits() {
 
 
     $sql  = "SELECT p.rowid, p.label, p.ref, fk_product_type, count(*) as c";
-    $sql .= " FROM llx_propaldet as pd, llx_propal as pl, babel_product as p";
+    $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pd, ".MAIN_DB_PREFIX."propal as pl, ".MAIN_DB_PREFIX."product as p";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir)
     {
-      $sql.= " LEFT JOIN llx_categorie_product as cp ON cp.fk_product = p.rowid";
-      $sql.= " LEFT JOIN llx_categorie as c ON cp.fk_categorie = c.rowid";
+      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
+      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cp.fk_categorie = c.rowid";
     }
     $sql .= " WHERE p.rowid = pd.fk_product";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir)

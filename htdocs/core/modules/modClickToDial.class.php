@@ -24,14 +24,12 @@
  *	\brief      Fichier de description et activation du module de click to Dial
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *	\class      modClickToDial
- *	\brief      Classe de description et activation du module de Click to Dial
+ *	Classe de description et activation du module de Click to Dial
  */
-
 class modClickToDial extends DolibarrModules
 {
 
@@ -40,7 +38,7 @@ class modClickToDial extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modClickToDial($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 58;

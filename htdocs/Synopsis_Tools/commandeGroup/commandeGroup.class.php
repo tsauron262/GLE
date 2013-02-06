@@ -17,10 +17,10 @@ class CommandeGroup extends CommonObject{
     public function fetch($id)
     {
         $this->id = $id;
-        $requete = "SELECT Babel_commande_grp.nom, Babel_commande_grpdet.command_refid
-                      FROM Babel_commande_grp
-                 LEFT JOIN Babel_commande_grpdet ON Babel_commande_grp.id = Babel_commande_grpdet.commande_group_refid
-                     WHERE Babel_commande_grp.id = ".$this->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_commande_grp.nom, ".MAIN_DB_PREFIX."Synopsis_commande_grpdet.command_refid
+                      FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp
+                 LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_commande_grpdet ON ".MAIN_DB_PREFIX."Synopsis_commande_grp.id = ".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid
+                     WHERE ".MAIN_DB_PREFIX."Synopsis_commande_grp.id = ".$this->id;
         $sql = $this->db->query($requete);
         if ($sql && $this->db->num_rows($sql)>0)
         {
@@ -44,7 +44,7 @@ class CommandeGroup extends CommonObject{
     }
     public function delete()
     {
-        $requete = "DELETE FROM Babel_commande_grp WHERE id = ".$this->id;
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp WHERE id = ".$this->id;
         $sql = $this->db->query($requete);
         if ($sql)
         {
@@ -58,9 +58,9 @@ class CommandeGroup extends CommonObject{
     public function add($name)
     {
         $name = addslashes($name);
-        $requete = "INSERT INTO Babel_commande_grp (datec,nom) VALUES (now(),'".$name."')";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grp (datec,nom) VALUES (now(),'".$name."')";
         $sql = $this->db->query($requete);
-        $this->id = $this->db->last_insert_id('Babel_commande_grp');
+        $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX.'Synopsis_commande_grp');
         if ($this->id > 0)
         {
             return ($this->id);
@@ -75,11 +75,11 @@ class CommandeGroup extends CommonObject{
         $result='';
         $urlOption='';
 
-        $lien = '<a href="'.DOL_URL_ROOT.$urlOption.'/commande/group/fiche.php?id='.$this->id.'">';
+        $lien = '<a href="'.DOL_URL_ROOT.$urlOption.'/Synopsis_Tools/commandeGroup/fiche.php?id='.$this->id.'">';
         $lienfin='</a>';
 
-        if ($option == 6) $lien = '<a href="'.GLE_FULL_ROOT.'/commande/group/fiche.php?id='.$this->id.'">';
-        $picto='orderGroup';
+        if ($option == 6) $lien = '<a href="'.GLE_FULL_ROOT.'/Synopsis_Tools/commandeGroup/fiche.php?id='.$this->id.'">';
+        $picto='orderGroup@Synopsis_Tools';
         $label=$langs->trans("ShowOrderGroup").': '.$this->nom;
 
         //function img_object($alt, $object,$width = false, $height=false,$align=false,$fullWebPath=false)
@@ -97,7 +97,7 @@ class CommandeGroup extends CommonObject{
         if ($this->nom."x" != "x")
         {
             $this->nom = addslashes($this->nom);
-            $requete = "UPDATE Babel_commande_grp SET nom = '".$this->nom."' WHERE id = ".$this->id;
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande_grp SET nom = '".$this->nom."' WHERE id = ".$this->id;
             $sql = $this->db->query($requete);
             if ($sql)
             {
@@ -108,12 +108,12 @@ class CommandeGroup extends CommonObject{
         }
     }
     public function addCom($comId){
-        if ($this->nom."x"=="x") $this->fetch();
+        if ($this->nom."x"=="x") $this->fetch($comId);
         $com = new Commande($this->db);
         $com->fetch($comId);
-        $requete1 = "DELETE FROM Babel_commande_grpdet WHERE command_refid = ".$com->id;
+        $requete1 = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE command_refid = ".$com->id;
         $sql = $this->db->query($requete1);
-        $requete = "INSERT INTO Babel_commande_grpdet
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grpdet
                                 (commande_group_refid,command_refid, refCommande)
                          VALUES (".$this->id.",".$com->id.",'".$com->ref."')";
         $sql = $this->db->query($requete);
@@ -125,7 +125,7 @@ class CommandeGroup extends CommonObject{
     }
     public function delCom($comId)
     {
-        $requete1 = "DELETE FROM Babel_commande_grpdet WHERE command_refid = ".$comId;
+        $requete1 = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE command_refid = ".$comId;
         $sql = $this->db->query($requete1);
         if ($sql){
             return 1;

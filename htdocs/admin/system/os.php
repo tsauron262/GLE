@@ -21,8 +21,8 @@
  *		\brief      Page des infos systeme de l'OS
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
 $langs->load("admin");
 
@@ -35,7 +35,7 @@ if (!$user->admin)
 
 llxHeader();
 
-print_fiche_titre("OS",'','setup');
+print_fiche_titre($langs->trans("InfoOS"),'','setup');
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';

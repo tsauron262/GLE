@@ -21,7 +21,7 @@
    require_once('../../main.inc.php');
 
    $serial = $_REQUEST['serial'];
-   $requete = "SELECT * FROM llx_product_serial_view WHERE serial_number ='". $serial."'";
+   $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE serial_number ='". $serial."'";
    $sql = $db->query($requete);
    $xml="";
    while ($res=$db->fetch_object($sql))

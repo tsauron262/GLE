@@ -27,7 +27,7 @@
     $xmlStr = "<ajax-response>";
     //1 create DI principale
     $di = new demandeInterv($db);
-    $di->socid = $com->societe->id;
+    $di->socid = $com->socid;
     $di->fk_commande = $id;
     $di->date = convertDate($_REQUEST['datei']);
     $di->ref=$di->getNextNumRef($com->societe);
@@ -55,7 +55,7 @@
                         $valExtraKey = 0;
                     }
                 }
-                $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                         ( interv_refid,extra_key_refid,extra_value,typeI)
                                  VALUES ( ".$demandeIntervid.",'".$idExtraKey."','".addslashes(utf8_decode($val))."','DI')";
                 $sql = $db->query($requete);

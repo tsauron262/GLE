@@ -24,11 +24,11 @@
  *  \ingroup    paypal
  *  \brief      Description and activation file for module Paypal
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
-/**     \class      modPaypal
- *      \brief      Description and activation class for module Paypal
+/**
+ * 	Description and activation class for module Paypal
  */
 class modPaypal extends DolibarrModules
 {
@@ -37,7 +37,7 @@ class modPaypal extends DolibarrModules
      *
      *   @param      DoliDB		$db      Database handler
      */
-    function modPaypal($db)
+    function __construct($db)
     {
         $this->db = $db;
 

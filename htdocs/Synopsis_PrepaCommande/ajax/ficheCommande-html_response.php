@@ -139,15 +139,14 @@ EOF;
             $soc->fetch($commande->socid);
 
             $author = new User($db);
-            $author->id = $commande->user_author_id;
-            $author->fetch();
+            $author->fetch($commande->user_author_id);
             $nbrow=6;
 
             print '<table cellpadding=10 class="border" width="700">';
 
             // Ref
 //            print '<tr><th width="18%" class="ui-state-default ui-widget-header">'.$langs->trans('Ref').'</th>';
-//            print '<td colspan="4" class="ui-widget-content">'.utf8_encode($commande->getNomUrl(1)).'</td>';
+//            print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($commande->getNomUrl(1)).'</td>';
 //            print '</tr>';
 
             // Ref
@@ -159,12 +158,12 @@ EOF;
             print '<tr><th width="18%" class="ui-state-default ui-widget-header">'.$langs->trans('Ref').'</th>';
             if ($extra."x" != "x")
             {
-                print '<td  width="20%" colspan="1" class="ui-widget-content">'.utf8_encode($commande->getNomUrl(1)).'</td>';
+                print '<td  width="20%" colspan="1" class="ui-widget-content">'.utf8_encodeRien($commande->getNomUrl(1)).'</td>';
                 print '<th class="ui-state-default ui-widget-header">Groupe</th>';
                 print '<td colspan=2 class="ui-widget-content">'.$ret->getNomUrl(1).'</td>';
 
             } else {
-                print '<td colspan="4" class="ui-widget-content">'.utf8_encode($commande->getNomUrl(1)).'</td>';
+                print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($commande->getNomUrl(1)).'</td>';
             }
             print '</tr>';
 
@@ -173,14 +172,14 @@ EOF;
             print '<tr><th nowrap="nowrap" class="ui-state-default ui-widget-header">';
             print $langs->trans('RefCustomer');
             print '</th><td colspan="4" class="ui-widget-content">';
-            print utf8_encode($commande->ref_client);
+            print utf8_encodeRien($commande->ref_client);
             print '</td>';
             print '</tr>';
 
 
             // Societe
             print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Company').'</th>';
-            print '<td colspan="4" class="ui-widget-content">'.utf8_encode($soc->getNomUrl(1)).'</td>';
+            print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($soc->getNomUrl(1)).'</td>';
             print '</tr>';
 
             // Ligne info remises tiers
@@ -212,7 +211,7 @@ EOF;
 
             // Date
             print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Date').'</th>';
-            print '<td class="ui-widget-content" colspan="2">'.utf8_encode(dol_print_date($commande->date,'day')).'</td>';
+            print '<td class="ui-widget-content" colspan="2">'.utf8_encodeRien(dol_print_date($commande->date,'day')).'</td>';
             print '<td class="ui-widget-content" colspan=2 width="50%">'.$langs->trans('Source').' : '.$commande->getLabelSource();
             if ($commande->source == 0 && $conf->propal->enabled && $commande->propale_id)
             {
@@ -241,7 +240,7 @@ EOF;
 
             //Note public
             print '<td class="ui-widget-content" rowspan="'.$nbrow.'" valign="top">'.$langs->trans('NotePublic').' :<br><div id="notePublicEdit" style="width: 290px; min-height: 19em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;">';
-            print utf8_encode(nl2br($commande->note_public));
+            print utf8_encodeRien(nl2br($commande->note_public));
             print '</div></td>';
 
             print '</tr>';
@@ -254,12 +253,12 @@ EOF;
 
             // Adresse de livraison
             print '<tr><th height="10" class="ui-state-default ui-widget-header">';
-            print utf8_encode($langs->trans('DeliveryAddress'));
+            print utf8_encodeRien($langs->trans('DeliveryAddress'));
 
             print '</th><td colspan="3" class="ui-widget-content">';
 
             print getAdresseLivraisonComm($commande->id);
-//            print utf8_encode( $html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'none','commande',$commande->id,false));
+//            print utf8_encodeRien( $html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'none','commande',$commande->id,false));
             print '</td></tr>';
 
 
@@ -328,7 +327,7 @@ EOF;
 
             // Statut
             print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Status').'</th>';
-            print '<td class="ui-widget-content" colspan="3">'.utf8_encode($commande->getLibStatut(4)).'</td>';
+            print '<td class="ui-widget-content" colspan="3">'.utf8_encodeRien($commande->getLibStatut(4)).'</td>';
             print '</tr>';
 
             print '</table><br>';
@@ -367,9 +366,9 @@ EOF;
                     {
                         $tmpProd = new Product($db);
                         $tmpProd->fetch($val->fk_product);
-                        $libelle = utf8_encode($tmpProd->getNomUrl(1));
+                        $libelle = utf8_encodeRien($tmpProd->getNomUrl(1));
                     }
-                    print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encode($val->desc);
+                    print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encodeRien($val->desc);
                     if ($user->rights->SynopsisPrepaCom->all->AfficherPrix)
                     {
                         print "    <td class='ui-widget-content' align=right nowrap>".price($val->subprice);
@@ -393,9 +392,9 @@ EOF;
                         {
                             $tmpProd = new Product($db);
                             $tmpProd->fetch($val->fk_product);
-                            $libelle = utf8_encode($tmpProd->getNomUrl(1));
+                            $libelle = utf8_encodeRien($tmpProd->getNomUrl(1));
                         }
-                        print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encode($val->desc);
+                        print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encodeRien($val->desc);
                         if ($user->rights->SynopsisPrepaCom->all->AfficherPrix)
                         {
                             print "    <td class='ui-widget-content' align=right nowrap>".price($val->subprice);
@@ -419,15 +418,15 @@ EOF;
                         $colspan=3;
                         if (!$user->rights->SynopsisPrepaCom->all->AfficherPrix) $colspan=1;
 
-                        print "<tr><td class='ui-widget-content' nowrap>&nbsp;<td class='ui-widget-content' colspan=1>".utf8_encode($val->desc)."<td colspan='".$colspan."' class='ui-widget-content'>";
+                        print "<tr><td class='ui-widget-content' nowrap>&nbsp;<td class='ui-widget-content' colspan=1>".utf8_encodeRien($val->desc)."<td colspan='".$colspan."' class='ui-widget-content'>";
                     } else {
                         if ($val->fk_product > 0)
                         {
                             $tmpProd = new Product($db);
                             $tmpProd->fetch($val->fk_product);
-                            $libelle = utf8_encode($tmpProd->getNomUrl(1));
+                            $libelle = utf8_encodeRien($tmpProd->getNomUrl(1));
                         }
-                        print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encode($val->desc);
+                        print "<tr><td class='ui-widget-content' nowrap>".$libelle."<td class='ui-widget-content'>".utf8_encodeRien($val->desc);
                         if ($user->rights->SynopsisPrepaCom->all->AfficherPrix)
                         {
                             print "    <td class='ui-widget-content' align=right nowrap>".price($val->subprice);

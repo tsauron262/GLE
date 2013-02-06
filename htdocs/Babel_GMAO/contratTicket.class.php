@@ -126,7 +126,7 @@ class contratTicket extends contrat{
             $qty = $res->qty;
             if ($res->fk_product > 0)
             {
-                $requete = "SELECT * FROM llx_product WHERE rowid = ".$res->fk_product;
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE rowid = ".$res->fk_product;
                 $sql1 = $this->db->query($requete);
                 $res1 = $this->db->fetch_object($sql1);
                 $qty = $res->qty * $res1->qte;
@@ -487,7 +487,7 @@ EOF;
 
 //        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
         $html .=  '<table class="ui-state-default" style="width: 600px; border: 0px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
-        $requete = "SELECT * FROM Babel_Product WHERE qte > 0 AND fk_product_type = 2";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE qte > 0 AND fk_product_type = 2";
         $sql = $this->db->query($requete);
         $optProdContrat = "<OPTION value='-1'>S&eacute;lectionner-></OPTION>";
         while ($res = $this->db->fetch_object($sql))

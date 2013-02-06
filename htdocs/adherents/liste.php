@@ -23,23 +23,13 @@
  *		\brief      Page to list all members of foundation
  */
 
-require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
-require_once(DOL_DOCUMENT_ROOT."/adherents/class/adherent.class.php");
-require_once(DOL_DOCUMENT_ROOT."/adherents/class/adherent_type.class.php");
+require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
+require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent_type.class.php';
 
 $langs->load("members");
 $langs->load("companies");
-
-$sortfield = GETPOST("sortfield",'alpha');
-$sortorder = GETPOST("sortorder",'alpha');
-$page = GETPOST("page",'int');
-if ($page == -1) { $page = 0 ; }
-$offset = $conf->liste_limit * $page ;
-$pageprev = $page - 1;
-$pagenext = $page + 1;
-if (! $sortorder) {  $sortorder="ASC"; }
-if (! $sortfield) {  $sortfield="d.nom"; }
 
 $action=GETPOST("action");
 $filter=GETPOST("filter");
@@ -51,8 +41,19 @@ $search_prenom=GETPOST("search_prenom");
 $search_login=GETPOST("search_login");
 $type=GETPOST("type");
 $search_email=GETPOST("search_email");
-$search_categ=GETPOST("search_categ");
+$search_categ = GETPOST("search_categ",'int');
+$catid        = GETPOST("catid",'int');
 $sall=GETPOST("sall");
+
+$sortfield = GETPOST("sortfield",'alpha');
+$sortorder = GETPOST("sortorder",'alpha');
+$page = GETPOST("page",'int');
+if ($page == -1) { $page = 0; }
+$offset = $conf->liste_limit * $page ;
+$pageprev = $page - 1;
+$pagenext = $page + 1;
+if (! $sortorder) { $sortorder=($filter=='outofdate'?"ASC":"DESC"); }
+if (! $sortfield) { $sortfield=($filter=='outofdate'?"d.datefin":"d.nom"); }
 
 if (GETPOST("button_removefilter"))
 {
@@ -64,6 +65,7 @@ if (GETPOST("button_removefilter"))
 	$type="";
 	$search_email="";
 	$search_categ="";
+	$catid="";
 	$sall="";
 }
 
@@ -82,14 +84,18 @@ llxHeader('',$langs->trans("Member"),'EN:Module_Foundations|FR:Module_Adh&eacute
 
 $now=dol_now();
 
-$sql = "SELECT d.rowid, d.login, d.nom as lastname, d.prenom as firstname, d.societe, ";
+$sql = "SELECT d.rowid, d.login, d.nom as lastname, d.prenom as firstname, d.societe as company, d.fk_soc,";
 $sql.= " d.datefin,";
 $sql.= " d.email, d.fk_adherent_type as type_id, d.morphy, d.statut,";
 $sql.= " t.libelle as type, t.cotisation";
-$sql.= " FROM ".MAIN_DB_PREFIX."adherent as d, ".MAIN_DB_PREFIX."adherent_type as t";
-if ($search_categ) $sql.= ", ".MAIN_DB_PREFIX."categorie_member as cf";
+$sql.= " FROM ".MAIN_DB_PREFIX."adherent as d";
+if (! empty($search_categ) || ! empty($catid)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_member as cm ON d.rowid = cm.fk_member"; // We need this table joined to the select in order to filter by categ
+$sql.= ", ".MAIN_DB_PREFIX."adherent_type as t";
 $sql.= " WHERE d.fk_adherent_type = t.rowid ";
-if ($search_categ) $sql.= " AND d.rowid = cf.fk_member";	// Join for the needed table to filter by categ
+if ($catid > 0)    $sql.= " AND cm.fk_categorie = ".$catid;
+if ($catid == -2)  $sql.= " AND cm.fk_categorie IS NULL";
+if ($search_categ > 0)   $sql.= " AND cm.fk_categorie = ".$search_categ;
+if ($search_categ == -2) $sql.= " AND cm.fk_categorie IS NULL";
 $sql.= " AND d.entity = ".$conf->entity;
 if ($sall)
 {
@@ -130,12 +136,7 @@ if ($filter == 'uptodate')
 }
 if ($filter == 'outofdate')
 {
-	$sql.=" AND datefin < '".$db->idate($now)."'";
-}
-// Insert categ filter
-if ($search_categ)
-{
-	$sql.= " AND cf.fk_categorie = ".$db->escape($search_categ);
+	$sql.=" AND (datefin IS NULL OR datefin < '".$db->idate($now)."')";
 }
 
 // Count total nb of records with no order and no limits
@@ -197,10 +198,10 @@ if ($resql)
 
 	// Filter on categories
 	$moreforfilter='';
-	if ($conf->categorie->enabled)
+	if (! empty($conf->categorie->enabled))
 	{
 		$moreforfilter.=$langs->trans('Categories'). ': ';
-		$moreforfilter.=$formother->select_categories(3,$search_categ,'search_categ');
+		$moreforfilter.=$formother->select_categories(3,$search_categ,'search_categ',1);
 		$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
 	}
 	if ($moreforfilter)
@@ -237,7 +238,7 @@ if ($resql)
 
 	print '<td class="liste_titre">';
 	$listetype=$membertypestatic->liste_array();
-	print $form->selectarray("type", $listetype, $type, 1, 0, 0, '', 0, 12);
+	print $form->selectarray("type", $listetype, $type, 1, 0, 0, '', 0, 32);
 	print '</td>';
 
 	print '<td class="liste_titre">&nbsp;</td>';
@@ -267,6 +268,14 @@ if ($resql)
 		$memberstatic->lastname=$objp->lastname;
 		$memberstatic->firstname=$objp->firstname;
 
+		if (! empty($objp->fk_soc)) {
+			$memberstatic->socid = $objp->fk_soc;
+			$memberstatic->fetch_thirdparty();
+			$companyname=$memberstatic->thirdparty->name;
+		} else {
+			$companyname=$objp->company;
+		}
+
 		$var=!$var;
 		print "<tr ".$bc[$var].">";
 
@@ -276,14 +285,11 @@ if ($resql)
 		print "</td>\n";
 
 		// Lastname
-		if ($objp->societe != '')
-		{
-			print "<td><a href=\"fiche.php?rowid=$objp->rowid\">".dol_trunc($memberstatic->getFullName($langs))." / ".dol_trunc($objp->societe,12)."</a></td>\n";
-		}
-		else
-		{
-			print "<td><a href=\"fiche.php?rowid=$objp->rowid\">".dol_trunc($memberstatic->getFullName($langs))."</a></td>\n";
-		}
+		print "<td><a href=\"fiche.php?rowid=$objp->rowid\">";
+		print ((! empty($objp->lastname) || ! empty($objp->firstname)) ? dol_trunc($memberstatic->getFullName($langs)) : '');
+		print (((! empty($objp->lastname) || ! empty($objp->firstname)) && ! empty($companyname)) ? ' / ' : '');
+		print (! empty($companyname) ? dol_trunc($companyname, 32) : '');
+		print "</a></td>\n";
 
 		// Login
 		print "<td>".$objp->login."</td>\n";
@@ -292,7 +298,7 @@ if ($resql)
 		$membertypestatic->id=$objp->type_id;
 		$membertypestatic->libelle=$objp->type;
 		print '<td nowrap="nowrap">';
-		print $membertypestatic->getNomUrl(1,12);
+		print $membertypestatic->getNomUrl(1,32);
 		print '</td>';
 
 		// Moral/Physique
@@ -333,12 +339,16 @@ if ($resql)
 		print '<td align="center">';
 		if ($user->rights->adherent->creer)
 		{
-			print "<a href=\"fiche.php?rowid=$objp->rowid&action=edit&return=liste.php\">".img_edit()."</a>";
+			print "<a href=\"fiche.php?rowid=".$objp->rowid."&action=edit&backtopage=1\">".img_edit()."</a>";
 		}
 		print '&nbsp;';
-		if ($user->rights->adherent->supprimer)
+		if ($user->rights->adherent->supprimer && $objp->statut == -1)
 		{
-			print "<a href=\"fiche.php?rowid=$objp->rowid&action=resign&return=liste.php\">".img_picto($langs->trans("Resiliate"),'disable.png')."</a>";
+			print "<a href=\"fiche.php?rowid=".$objp->rowid."&action=delete&backtopage=1\">".img_picto($langs->trans("Delete"),'disable.png')."</a>";
+		}
+		if ($user->rights->adherent->supprimer && $objp->statut == 1)
+		{
+			print "<a href=\"fiche.php?rowid=".$objp->rowid."&action=resign&backtopage=1\">".img_picto($langs->trans("Resiliate"),'disable.png')."</a>";
 		}
 		print "</td>";
 

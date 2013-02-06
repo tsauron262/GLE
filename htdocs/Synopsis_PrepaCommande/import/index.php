@@ -33,6 +33,6 @@
   print" <a href='history.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Historique</span></a>";
   print "<br/>";
 
-
+  llxFooter();
 
 ?>

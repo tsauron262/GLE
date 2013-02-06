@@ -527,9 +527,9 @@ if ($actionPhase2 ."x" != "x")
                     } if ($arr[1] == "e")
                     {
                         print "DELETE FROM babel_categorie ". $magid."<br>";
-                        $requete = "DELETE FROM llx_categorie_association WHERE fk_categorie = ".$magid ." OR fk_categorie = ".$magid ;
+                        $requete = "DELETE FROM ".MAIN_DB_PREFIX."categorie_association WHERE fk_categorie = ".$magid ." OR fk_categorie = ".$magid ;
                         $db->query($requete);
-                        $requete = "DELETE FROM llx_categorie
+                        $requete = "DELETE FROM ".MAIN_DB_PREFIX."categorie
                                            WHERE magento_id = ".$magid;
                         $db->query($requete);
                     }
@@ -557,10 +557,10 @@ if ($actionPhase2 ."x" != "x")
                     $gleParentId = $res->gleParentId;
                     if ($res->gleParentId > 0)
                     {
-                        $requete = "DELETE FROM llx_categorie_association
+                        $requete = "DELETE FROM ".MAIN_DB_PREFIX."categorie_association
                                           WHERE fk_categorie_fille = ".$gleId;
                         $db->query($requete);
-                        $requete = "INSERT INTO llx_categorie_association
+                        $requete = "INSERT INTO ".MAIN_DB_PREFIX."categorie_association
                                                 (fk_categorie_mere, fk_categorie_fille)
                                          VALUES ($gleParentId,$gleId)";
                         $sql = $db->query($requete);
@@ -586,7 +586,7 @@ if ($actionPhase2 ."x" != "x")
                         case "u":
                             require_once (DOL_DOCUMENT_ROOT."/product/class/product.class.php");
                             $prod = new Product($db);
-                            $requete = "SELECT  * FROM llx_product WHERE magento_id =". $magProdid;
+                            $requete = "SELECT  * FROM ".MAIN_DB_PREFIX."product WHERE magento_id =". $magProdid;
                             $sql = $db->query($requete);
                             $res = $db->fetch_object($sql);
                             $gleId = $res->rowid;
@@ -664,7 +664,7 @@ if ($actionPhase2 ."x" != "x")
                         break;
                         case "e":
                             $requete = "SELECT  *
-                                          FROM llx_product
+                                          FROM ".MAIN_DB_PREFIX."product
                                          WHERE magento_id =". $magProdid;
                             $sql = $db->query($requete);
                             $res = $db->fetch_object($sql);

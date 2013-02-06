@@ -11,8 +11,6 @@ require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 
-$langs->load("Chrono");
-
 // Security check
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : '';
 if ($user->societe_id)
@@ -31,10 +29,13 @@ $css = DOL_URL_ROOT . "/Synopsis_Common/css";
 $imgPath = DOL_URL_ROOT . "/Synopsis_Common/images";
 $js = "";
 $js .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
+$js .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/jnotify/jquery.jnotify-alt.min.css" />' . "\n";
 
 $js .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-latest.min.js"></script>' . "\n";
 $js .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/includes/jquery/js/jquery-ui-latest.custom.min.js"></script>' . "\n";
 $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/tiptip/jquery.tipTip.min.js" type="text/javascript"></script>';
+$js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jnotify/jquery.jnotify.min.js" type="text/javascript"></script>';
+$js .= ' <script src="' . DOL_URL_ROOT . '/core/js/jnotify.js" type="text/javascript"></script>';
 
 
 
@@ -79,7 +80,8 @@ if ($id > 0) {
         $res1 = $db->fetch_object($sql1);
         $align = "left";
         $colModelArr[$i] = array(
-            "name" => str_replace("'", "`", $res->nom),
+//            "name" => str_replace("'", "`", $res->nom),
+            "name" => sanitize_string($res->nom),
             "index" => sanitize_string($res->nom),
             "width" => 150,
             'hidden' => false,
@@ -95,7 +97,7 @@ if ($id > 0) {
             $colModelArr[$i]['formatoptions'] = '{srcformat:"Y-m-d",newformat:"d/m/Y"}';
             $colModelArr[$i]['align'] = 'center';
             $colModelArr[$i]['editable'] = false;
-            $colModelArr[$i]['searchoptions'] = '{    dataInit:function(el){  jQuery(el).datepicker({ showTime: false, }); jQuery("#ui-datepicker-div").addClass("promoteZ"); }, sopt:["eq","ne","le","lt","ge","gt"], }';
+            $colModelArr[$i]['searchoptions'] = '{    dataInit:function(el){  jQuery(el).datepicker({ showTime: false, }); jQuery("#ui-datepicker-div").addClass("promoteZ"); jQuery(el).datepicker("change", {dateFormat: "dd/mm/yyyy", firstDay:1 }).attr("readonly","readonly");}, sopt:["eq","ne","le","lt","ge","gt"], }';
         } else if ($res1->cssClass == "datetimepicker") {
             $colModelArr[$i]['sorttype'] = "date";
             $colModelArr[$i]['formatter'] = "date";
@@ -119,9 +121,9 @@ if ($id > 0) {
 
         $i++;
     }
-    $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right");
+    $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right", "stype" => 'select', 'searchoptionspp' => "{sopt:['eq','ne']}", 'searchoptions' => "{value: statutRess}", 'formoptions' => '{ elmprefix:"*  " }');
     $i++;
-    $colModelArr[$i] = array('name' => "Nb Doc", "index" => "nb_doc", "width" => 60, "align" => "right");
+    $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false);
 
 
     $arr2 = array(
@@ -176,11 +178,34 @@ if ($id > 0) {
             ' . $subGrid . ' });
             }',
     );
+    
 
-    $js .= $htmlOld->listjqGrid($arr, 'gridChronoDet', true, false, array(view => false, add => false, edit => false, search => true, position => "left"));
+    $js .= $htmlOld->listjqGrid($arr, 'gridChronoDet', true, false, array(view => false, add => false, edit => false, search => false, position => "left"));
 
-    EOF;
+$js .= "  setTimeout(function(){   jQuery('#gridChronoDet').filterToolbar('');},500);";
+
 }
+
+
+$requete = "SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono ORDER BY fk_statut ASC";
+$sql = $db->query($requete);
+$js .= 'var statutRess = "';
+$js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";
+
+while ($res = $db->fetch_object($sql)) {
+    $fakeChrono = new Chrono($db);
+    $fakeChrono->statut = $res->fk_statut;
+    
+    $js .= $res->fk_statut . ":" . html_entity_decode(str_replace("&eacute;", "e", $fakeChrono->getLibStatut(0))) . ";";
+}
+
+$js = preg_replace('/;$/', '', $js);
+$js .= '";';
+
+
+
+
+
 
 $js .= "</script>";
 if ($id > 0) {

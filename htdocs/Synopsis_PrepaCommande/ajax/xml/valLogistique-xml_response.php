@@ -24,7 +24,7 @@
   require_once('../../../main.inc.php');
   $id = $_REQUEST['comId'];
   $xmlStr = "<ajax-response>";
-  $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET logistique_statut=1 WHERE rowid = ".$id;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET logistique_statut=1 WHERE rowid = ".$id;
   $sql1 = $db->query($requete);
 //print $requete;
   require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
@@ -36,7 +36,7 @@
   {
     if ($sql)
     {
-      $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET logistique_statut=1 WHERE rowid = ".$val->id;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET logistique_statut=1 WHERE rowid = ".$val->id;
       $sql = $db->query($requete);
     }
   }
@@ -48,8 +48,7 @@
       $commande = new Synopsis_Commande($db);
       $commande->fetch($_REQUEST['comId']);
       $tmpUser = new User($db);
-      $tmpUser->id = $commande->user_author_id;
-      $tmpUser->fetch();
+      $tmpUser->fetch($commande->user_author_id);
 
       //Notification
       //TO commercial author
@@ -77,17 +76,17 @@
       {
           // Appel des triggers
           include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-          $interface=new Interfaces($this->db);
+          $interface=new Interfaces($db);
           $result=$interface->run_triggers('PREPACOM_INDISPO_PROD',$this,$user,$langs,$conf);
-          if ($result < 0) { $error++; $this->errors=$interface->errors; }
+          if ($result < 0) { $error++; $errors=$interface->errors; }
           // Fin appel triggers
           $subject="[Non Dispo Produit] Nouveau message concernant la logistique de la commande ".$commande->ref;
       } else {
           // Appel des triggers
           include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-          $interface=new Interfaces($this->db);
+          $interface=new Interfaces($db);
           $result=$interface->run_triggers('PREPACOM_DISPO_PROD',$this,$user,$langs,$conf);
-          if ($result < 0) { $error++; $this->errors=$interface->errors; }
+          if ($result < 0) { $error++; $errors=$interface->errors; }
           // Fin appel triggers
       }
 //PREPACOM_DISPO_PROD
@@ -104,8 +103,8 @@
       $addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-      require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
-      sendMail($subject,$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
+      require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
+      sendMail($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
   } else {
       $xmlStr .= "<KO>KO</KO>";
   }

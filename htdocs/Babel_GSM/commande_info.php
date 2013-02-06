@@ -1,14 +1,14 @@
 <?php
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.1
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
     include_once ("../master.inc.php");
@@ -23,12 +23,12 @@ require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT."/html.form.class.php");
 if ($conf->commande->enabled) require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/propal.class.php");
-if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 
 
 require_once(DOL_DOCUMENT_ROOT."/includes/modules/propale/modules_propale.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/order.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/sendings.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/order.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/sendings.lib.php");
 
 
 if ($user->rights->BabelGSM->BabelGSM_com->AfficheCommande !=1)
@@ -133,8 +133,7 @@ if ($_GET["commande_id"] > 0)
     $soc->fetch($commande->socid);
 
     $author = new User($db);
-    $author->id = $commande->user_author_id;
-    $author->fetch();
+    $author->fetch($commande->user_author_id);
 
 //        $head = commande_prepare_head($commande);
 //    dolibarr_fiche_head($head, 'shipping', $langs->trans("CustomerOrder"));
@@ -251,7 +250,7 @@ if ($_GET["commande_id"] > 0)
 
     $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty, cd.rowid, cd.tva_tx, cd.subprice";
     $sql.= " FROM ".MAIN_DB_PREFIX."commandedet as cd ";
-    $sql.= " LEFT JOIN babel_product as p ON cd.fk_product = p.rowid";
+    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
     $sql.= " WHERE cd.fk_commande = ".$commande->id;
     $sql.= " AND p.fk_product_type <> 1";
     $sql.= " ORDER BY cd.rowid";
@@ -372,7 +371,7 @@ if ($_GET["commande_id"] > 0)
 //            $propals = $commande->propals;
             $propals=array();
             $requete="SELECT * " .
-                    "   FROM llx_co_pr " .
+                    "   FROM ".MAIN_DB_PREFIX."co_pr " .
                     "  WHERE fk_commande = ".$commandeid;
             $resql=$db->query($requete);
             if ($resql)
@@ -420,7 +419,7 @@ if ($_GET["commande_id"] > 0)
                 {
                     //Est ce qu'il y a des factures rattachees e� la commande
                     $requete = "SELECT count(*) as cnt " .
-                            "     FROM llx_co_fa " .
+                            "     FROM ".MAIN_DB_PREFIX."co_fa " .
                             "    WHERE fk_commande  = ".$commandeid."";
 //                     print $requete;
                      $resql = $db->query($requete);
@@ -448,7 +447,7 @@ if ($_GET["commande_id"] > 0)
                         $var=true;
 
                             $requete = "SELECT fk_facture " .
-                                    "     FROM llx_co_fa " .
+                                    "     FROM ".MAIN_DB_PREFIX."co_fa " .
                                     "    WHERE fk_commande = " . $commandeid;
                             $resql = $db->query($requete);
                             if ($resql)

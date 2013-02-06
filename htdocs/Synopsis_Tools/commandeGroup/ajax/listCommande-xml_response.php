@@ -1,14 +1,14 @@
 <?php
 /*
-  * GLE by Babel-Services
+  * GLE by Synopsis & DRSI
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.2
   * Created on : 24 oct. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**
@@ -25,9 +25,9 @@
     $comGrpId = $_REQUEST['comGrpId'];
     $requete = "SELECT ref,
                        rowid
-                  FROM llx_commande
+                  FROM ".MAIN_DB_PREFIX."commande
                  WHERE fk_soc = ".$id ."
-                   AND rowid not in (SELECT command_refid FROM Babel_commande_grp,Babel_commande_grpdet WHERE Babel_commande_grpdet.commande_group_refid = Babel_commande_grp.id AND Babel_commande_grp.id =".$comGrpId.")";
+                   AND rowid not in (SELECT command_refid FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp,".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE ".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid = ".MAIN_DB_PREFIX."Synopsis_commande_grp.id AND ".MAIN_DB_PREFIX."Synopsis_commande_grp.id =".$comGrpId.")";
     $sql = $db->query($requete);
     $xml= "";
     while ($res=$db->fetch_object($sql))

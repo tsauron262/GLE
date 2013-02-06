@@ -21,7 +21,7 @@
   //TODO : tooltip pour l'affichage des résumés
 
 require_once('../../main.inc.php');
-  //require_once(DOL_DOCUMENT_ROOT."/lib/ressource.lib.php");
+  //require_once(DOL_DOCUMENT_ROOT."/core/lib/ressource.lib.php");
 
 
 $langs->load("companies");

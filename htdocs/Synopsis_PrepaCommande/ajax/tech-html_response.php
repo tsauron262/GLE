@@ -53,20 +53,20 @@ if ($socid>0)
     */
 
     print '<table cellpadding=15 class="border" width="100%">';
-    print '<tr><th class="ui-widget-header ui-state-default" width="20%">'.$langs->trans('Name').'</td><td class="ui-widget-content" colspan="3">'.utf8_encode($soc->getNomUrl(1)).'</td></tr>';
+    print '<tr><th class="ui-widget-header ui-state-default" width="20%">'.$langs->trans('Name').'</td><td class="ui-widget-content" colspan="3">'.utf8_encodeRien($soc->getNomUrl(1)).'</td></tr>';
 
   print '<tr><th class="ui-widget-header ui-state-default">';
   print $langs->trans('CustomerCode').'</td><td  class="ui-widget-content" width="20%">';
-  print utf8_encode($soc->code_client);
+  print utf8_encodeRien($soc->code_client);
   if ($soc->check_codeclient() <> 0) print ' '.$langs->trans("WrongCustomerCode");
-  print '</td><th  class="ui-widget-header ui-state-default">'.$langs->trans('Prefix').'</td><td class="ui-widget-content">'.utf8_encode($soc->prefix_comm).'</td></tr>';
+  print '</td><th  class="ui-widget-header ui-state-default">'.$langs->trans('Prefix').'</td><td class="ui-widget-content">'.utf8_encodeRien($soc->prefix_comm).'</td></tr>';
 
-    print "<tr><th class='ui-widget-header ui-state-default' valign=\"top\">".$langs->trans('Address')."</td><td class='ui-widget-content' colspan=\"3\">".utf8_encode(nl2br($soc->adresse))."</td></tr>";
+    print "<tr><th class='ui-widget-header ui-state-default' valign=\"top\">".$langs->trans('Address')."</td><td class='ui-widget-content' colspan=\"3\">".utf8_encodeRien(nl2br($soc->adresse))."</td></tr>";
 
     print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans('Zip').'</td><td class="ui-widget-content">'.$soc->cp."</td>";
-    print '<th class="ui-widget-header ui-state-default">'.$langs->trans('Town').'</td><td class="ui-widget-content">'.utf8_encode($soc->ville)."</td></tr>";
+    print '<th class="ui-widget-header ui-state-default">'.$langs->trans('Town').'</td><td class="ui-widget-content">'.utf8_encodeRien($soc->ville)."</td></tr>";
 
-    print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Country').'</td><td colspan="3" class="ui-widget-content">'.utf8_encode($soc->pays).'</td>';
+    print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Country').'</td><td colspan="3" class="ui-widget-content">'.utf8_encodeRien($soc->pays).'</td>';
 
     print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Phone').'</td><td class="ui-widget-content">'.dol_print_phone($soc->tel).'</td>';
     print '<th  class="ui-widget-header ui-state-default">'.$langs->trans('Fax').'</td><td class="ui-widget-content">'.dol_print_phone($soc->fax).'</td></tr>';
@@ -82,7 +82,7 @@ if ($socid>0)
 
     $sql = "SELECT u.rowid, u.name, u.firstname";
     $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
-    $sql .= " , llx_element_element as elel";
+    $sql .= " , ".MAIN_DB_PREFIX."element_element as elel";
     $sql .= " WHERE elel.fk_source =".$soc->id;
     $sql .= " AND elel.fk_target = u.rowid";
     $sql .= " AND elel.targettype = 'userTech'";
@@ -103,7 +103,7 @@ if ($socid>0)
           {
             print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
-            print utf8_encode(stripslashes($obj->firstname)." " .stripslashes($obj->name)."\n");
+            print utf8_encodeRien(stripslashes($obj->firstname)." " .stripslashes($obj->name)."\n");
             print '</a><br>';
             $i++;
           }
@@ -111,7 +111,7 @@ if ($socid>0)
           {
             print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
-            print utf8_encode($obj->firstname." " .$obj->name."\n");
+            print utf8_encodeRien($obj->firstname." " .$obj->name."\n");
             print '</a>&nbsp;';
             if ($user->rights->SynopsisPrepaCom->all->AssocierTech)
             {
@@ -182,7 +182,7 @@ if ($socid>0)
                 print img_object($langs->trans("ShowUser"),"user").' ';
                 print stripslashes($obj->firstname)." " .stripslashes($obj->name)."\n";
                 print '</a>';
-                print '</td><td>'.utf8_encode($obj->login).'</td>';
+                print '</td><td>'.utf8_encodeRien($obj->login).'</td>';
 //                print '<td><a href="'.DOL_URL_ROOT.'/societe/tech.php?socid='.$socid.'&amp;commid='.$obj->rowid.'">'.$langs->trans("Add").'</a></td>';
                 print '<td><a href="?action=addTech&amp;socid='.$socid.'&amp;userid='.$obj->rowid.'&id='.$_REQUEST['id'].'">'.$langs->trans("Add").'</a></td>';
 

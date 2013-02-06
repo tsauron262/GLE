@@ -1,6 +1,7 @@
 <?php
-/* Copyright (C) 2003      Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2005-2006 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2003		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
+ * Copyright (C) 2005-2006	Laurent Destailleur		<eldy@users.sourceforge.net>
+ * Copyright (C) 2012		Regis Houssin			<regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +22,9 @@
  * \ingroup    don
  * \brief      Formulaire de don
  */
-require_once(DOL_DOCUMENT_ROOT."/core/modules/dons/modules_don.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/dons/class/don.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once DOL_DOCUMENT_ROOT.'/core/modules/dons/modules_don.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/dons/class/don.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 
 
 /**
@@ -36,7 +37,7 @@ class html_cerfafr extends ModeleDon
      *
      *  @param      DoliDb		$db      Database handler
      */
-    function html_cerfafr($db)
+    function __construct($db)
     {
         global $conf,$langs;
 
@@ -51,7 +52,7 @@ class html_cerfafr extends ModeleDon
 
 	/**
 	 * 	Return if a module can be used or not
-	 *   
+	 *
 	 *  @return	boolean     true if module can be used
 	 */
 	function isEnabled()
@@ -62,7 +63,7 @@ class html_cerfafr extends ModeleDon
 
     /**
      *  Write the object to document file to disk
-     * 
+     *
      *	@param	Don			$don	        Donation object
      *  @param  Translate	$outputlangs    Lang object for output language
      *	@return	int             			>0 if OK, <0 if KO
@@ -72,6 +73,7 @@ class html_cerfafr extends ModeleDon
 		global $user,$conf,$langs,$mysoc;
 
 		$now=dol_now();
+		$id = (! is_object($don)?$don:'');
 
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 
@@ -80,19 +82,20 @@ class html_cerfafr extends ModeleDon
 		$outputlangs->load("companies");
 		$outputlangs->load("bills");
 		$outputlangs->load("products");
+		$outputlangs->load("donations");
 
-        if ($conf->don->dir_output)
+        if (! empty($conf->don->dir_output))
         {
 			// Definition de l'objet $don (pour compatibilite ascendante)
         	if (! is_object($don))
         	{
-	            $id = $don;
 	            $don = new Don($this->db);
 	            $ret=$don->fetch($id);
+	            $id=$don->id;
 			}
 
 			// Definition de $dir et $file
-			if ($don->specimen)
+			if (! empty($don->specimen))
 			{
 				$dir = $conf->don->dir_output;
 				$file = $dir . "/SPECIMEN.html";
@@ -118,9 +121,9 @@ class html_cerfafr extends ModeleDon
 		        // Defini contenu
 		        $donmodel=DOL_DOCUMENT_ROOT ."/core/modules/dons/html_cerfafr.html";
 		        $form = implode('', file($donmodel));
-		        $form = str_replace('__REF__',$id,$form);
+		        $form = str_replace('__REF__',$don->id,$form);
 		        $form = str_replace('__DATE__',dol_print_date($don->date,'day',false,$outputlangs),$form);
-		        $form = str_replace('__IP__',$user->ip,$form);
+		        //$form = str_replace('__IP__',$user->ip,$form); // TODO $user->ip not exist
 		        $form = str_replace('__AMOUNT__',$don->amount,$form);
 		        $form = str_replace('__CURRENCY__',$outputlangs->transnoentitiesnoconv("Currency".$conf->currency),$form);
 		        $form = str_replace('__CURRENCYCODE__',$conf->currency,$form);
@@ -134,6 +137,23 @@ class html_cerfafr extends ModeleDon
 		        $form = str_replace('__DONATOR_TOWN__',$don->ville,$form);
 		        $form = str_replace('__PAYMENTMODE_LIB__ ',$don->modepaiement,$form);
 		        $form = str_replace('__NOW__',dol_print_date($now,'',false,$outputlangs),$form);
+		        $form = str_replace('__DonationRef__',$outputlangs->trans("DonationRef"),$form);
+		        $form = str_replace('__DonationReceipt__',$outputlangs->trans("DonationReceipt"),$form);
+		        $form = str_replace('__DonationRecipient__',$outputlangs->trans("DonationRecipient"),$form);
+		        $form = str_replace('__DatePayment__',$outputlangs->trans("DatePayment"),$form);
+		        $form = str_replace('__PaymentMode__',$outputlangs->trans("PaymentMode"),$form);
+		        $form = str_replace('__Name__',$outputlangs->trans("Name"),$form);
+		        $form = str_replace('__Address__',$outputlangs->trans("Address"),$form);
+		        $form = str_replace('__Zip__',$outputlangs->trans("Zip"),$form);
+		        $form = str_replace('__Town__',$outputlangs->trans("Town"),$form);
+		        $form = str_replace('__Donor__',$outputlangs->trans("Donor"),$form);
+		        $form = str_replace('__Date__',$outputlangs->trans("Date"),$form);
+		        $form = str_replace('__Signature__',$outputlangs->trans("Signature"),$form);
+		        $form = str_replace('__ThankYou__',$outputlangs->trans("ThankYou"),$form);
+		        $form = str_replace('__IConfirmDonationReception__',$outputlangs->trans("IConfirmDonationReception"),$form);
+		        $frencharticle='';
+		        if (preg_match('/fr/i',$outputlangs->defaultlang)) $frencharticle='<font size="+1"><b>(Article 200-5 du Code Général des Impôts)</b></font><br>+ article 238 bis';
+				$form = str_replace('__FrenchArticle__',$frencharticle,$form);
 
 		        // Sauve fichier sur disque
 		        dol_syslog("html_cerfafr::write_file $file");

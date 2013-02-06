@@ -59,7 +59,7 @@ function demandeInterv_prepare_head($demandeInterv)
     $head[$h][2] = 'contact';
     $h++;
 
-    if ($conf->use_preview_tabs)
+    if (isset($conf->use_preview_tabs) && $conf->use_preview_tabs)
     {
         $head[$h][0] = DOL_URL_ROOT.'/Synopsis_DemandeInterv/apercu.php?id='.$demandeInterv->id;
         $head[$h][1] = $langs->trans('Preview');

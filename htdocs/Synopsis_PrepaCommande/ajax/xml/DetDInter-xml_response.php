@@ -25,8 +25,8 @@
   if ($id > 0)
   {
     $requete = "SELECT *
-                  FROM llx_Synopsis_demandeIntervdet as ft
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
+                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as ft
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
                  WHERE fk_demandeInterv = ".$id. "
               ORDER BY ft.rang ";
     $sql = $db->query($requete);
@@ -35,13 +35,13 @@
         $xmlStr .= "<DI id='".$res->rowid."'>";
         $xmlStr .= "<rowid>".$res->rowid."</rowid>";
         $xmlStr .= "<date>".date('d/m/Y',strtotime($res->date))."</date>";
-        $xmlStr .= "<description><![CDATA[".htmlentities($res->description)."]]></description>";
+        $xmlStr .= "<description><![CDATA[".traiteStr($res->description)."]]></description>";
         if ($res->isDeplacement == 1)
         {
             $requete = "SELECT *
                           FROM ".MAIN_DB_PREFIX."product p,
                                ".MAIN_DB_PREFIX."commandedet cdet
-                         WHERE llx_product.fk_product_type=3
+                         WHERE p.fk_product_type=3
                            AND cdet.rowid = ".$res->fk_commandedet."
                            AND cdet.fk_product = p.rowid";
             $sql1 = $db->query($requete);
@@ -50,12 +50,12 @@
             {
                 $tmpProd = new Product($db);
                 $tmpProd->fetch($res1->fk_product);
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
             } else {
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
             }
         } else {
-            $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+            $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
         }
         $tmpDur = convDur($res->duree);
         $xmlStr .= "<total_ht><![CDATA[".price($res->total_ht)."]]></total_ht>";
@@ -119,4 +119,6 @@ function convDur($duration)
     // Affichage
     return( $converted_duration);
 }
+
+function traiteStr($str){ return str_replace("\n", "<br/>", $str); }
 ?>

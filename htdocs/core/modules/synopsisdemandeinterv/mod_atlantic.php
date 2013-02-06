@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,12 +27,13 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
 /**
-    \file       htdocs/core/modules/synopsis_demandeinterv/mod_atlantic.php
+    \file       htdocs/core/modules/synopsisdemandeinterv/mod_atlantic.php
     \ingroup    fiche intervention
     \brief      Fichier contenant la classe du modele de numerotation de reference de fiche intervention atlantic
     \version    $Id: mod_atlantic.php,v 1.5 2008/07/08 23:02:17 eldy Exp $
@@ -90,7 +93,7 @@ class mod_atlantic extends ModeleNumRefdemandeInterv
         $fayymm='';
 
         $sql = "SELECT MAX(ref)";
-        $sql.= " FROM llx_Synopsis_demandeInterv";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $resql=$db->query($sql);
         if ($resql)
         {
@@ -120,7 +123,7 @@ class mod_atlantic extends ModeleNumRefdemandeInterv
         // D'abord on recupere la valeur max (reponse immediate car champ indexe)
         $posindice=8;
         $sql = "SELECT MAX(0+SUBSTRING(ref,".$posindice.")) as max";
-        $sql.= " FROM llx_Synopsis_demandeInterv";
+        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " WHERE ref like '".$this->prefix."%'";
 
         $resql=$db->query($sql);

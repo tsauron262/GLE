@@ -29,12 +29,11 @@ if ($sql)
     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
     $commande = new Synopsis_Commande($db);
     $commande->fetch($id);
-    $requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status WHERE id = ".$statut;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status WHERE id = ".$statut;
     $sql = $db->query($requete);
     $res =$db->fetch_object($sql);
     $tmpUser = new User($db);
-    $tmpUser->id = $commande->user_author_id;
-    $tmpUser->fetch();
+    $tmpUser->fetch($commande->user_author_id);
 
     // Appel des triggers
     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -47,7 +46,7 @@ if ($sql)
     //Notification
     //TO commercial author
     //CC Resp Tech et Resp logistique et financier
-    $subject=utf8_encode("[Statut Commande] La commande ".$commande->ref." est maintenant au statut \"".$res->label."\"");
+    $subject=utf8_encodeRien("[Statut Commande] La commande ".$commande->ref." est maintenant au statut \"".$res->label."\"");
     $to = $tmpUser->email;
 
     $msg = "Bonjour ".$tmpUser->fullname.",<br/><br/>";
@@ -56,8 +55,8 @@ if ($sql)
     $from = $conf->global->BIMP_MAIL_FROM;
     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
-    sendMail($subject,$to,$from,utf8_encode($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
+    sendMail($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
 
 }
     if ( stristr($_SERVER["HTTP_ACCEPT"],"application/xhtml+xml") ) {

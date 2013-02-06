@@ -555,8 +555,7 @@ EOF;
                 print "<tr><td align=left  width=20%>" . $res3->label;
                 print "    <td align=left>";
                 $tmpUser = new User($db);
-                $tmpUser->id = $res3->user_refid;
-                $tmpUser->fetch();
+                $tmpUser->fetch($res3->user_refid);
                 if ($res3->validation == 1) {
                     print img_tick("Valider");
                     print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
@@ -602,7 +601,7 @@ EOF;
         } else {
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
-                    print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?propalid=" . $res->rowid . "'>" . $res->ref . "</a></td>";
+                    print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a></td>";
                 }
             }
         }
@@ -843,8 +842,7 @@ EOF;
                             print "<tr><td align=left  width=20%>" . $res4->label;
                             print "<td align=right>";
                             $tmpUser = new User($db);
-                            $tmpUser->id = $res4->user_refid;
-                            $tmpUser->fetch();
+                            $tmpUser->fetch($res4->user_refid);
                             if ($res4->validation == 1) {
                                 print img_tick("Valider");
                                 print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res4->tms));
@@ -881,8 +879,7 @@ EOF;
                             print "<td align=right class='black' style='font-weight: normal;'>" . nl2br($res3->note);
                             print "<td align=right>";
                             $tmpUser = new User($db);
-                            $tmpUser->id = $res3->user_refid;
-                            $tmpUser->fetch();
+                            $tmpUser->fetch($res3->user_refid);
                             if ($res3->validation == 1) {
                                 print img_tick("Valider");
                                 print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
@@ -911,8 +908,7 @@ EOF;
                             print "<td align=right>" . nl2br($res3->note);
                             print "<td align=right>";
                             $tmpUser = new User($db);
-                            $tmpUser->id = $res3->user_refid;
-                            $tmpUser->fetch();
+                            $tmpUser->fetch($res3->user_refid);
                             if ($res3->validation == 1) {
                                 print img_tick("Valider");
                                 print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));

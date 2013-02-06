@@ -24,14 +24,12 @@
  *	\brief      Fichier de description et activation du module Label
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *	\class      modLabel
- *	\brief      Classe de description et activation du module Label
+ *	Classe de description et activation du module Label
  */
-
 class modLabel extends DolibarrModules
 {
 
@@ -40,7 +38,7 @@ class modLabel extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modLabel($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 60;

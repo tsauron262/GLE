@@ -45,7 +45,7 @@
 
 require("./pre.inc.php");
 
-$langs->load("projects@projet");    
+$langs->load("projectsSyn@projet");    
 if (!$user->rights->synopsisprojet->lire) accessforbidden();
 
 $socid = ( is_numeric($_REQUEST["socid"]) ? $_REQUEST["socid"] : 0 );
@@ -103,18 +103,19 @@ jQuery(document).ready(function(){
     jQuery("#gridListProj").jqGrid({
             datatype: "json",
             url: "tasks/ajax/listProj_json.php?userId="+userId+get,
-            colNames:['id', 'D&eacute;signation','ref','Date de d&eacute;but', 'Statut','Client','Taille &eacute;quipe',"Responsable"],
+            colNames:['id', 'D&eacute;signation','Ref','Date de d&eacute;but', 'Statut', 'Avancement','Client','Taille &eacute;quipe',"Responsable"],
             colModel:[  {name:'id',index:'id', width:5, hidden:true,key:true,hidedlg:true,search:false},
                         {name:'title',index:'title', width:300},
                         {name:'ref',index:'ref', width:30},
-                        {name:'dateo',index:'dateo', width:60, },
+                        {name:'dateo',index:'dateo', width:60, align:"center"},
+                        {name:'avanc',index:'avanc', width:60, align:"center"},
                         {name:'statut',index:'statut', width:60, align:"right"},
                         {name:'socname',index:'socname', width:150, align:"center"},
                         {name:'cntMyTask',index:'cntMyTask', width:50, align:"center"},
                         {name:'fk_user_resp',index:'fk_user_resp', width:90, align:"center"},
                       ],
-            rowNum:10,
-            rowList:[10,20,30],
+            rowNum:30,
+            rowList:[30,50,100],
             imgpath: gridimgpath,
             pager: jQuery('#gridListProjPager'),
             sortname: 'id',
@@ -131,13 +132,11 @@ jQuery(document).ready(function(){
                        var val = $(this).text();
                         jQuery(this).text('');
                         jQuery(this).progressbar( {
-                           value: val,
+                           value: parseInt(val),
                            orientation: "horizontal",
                        });
-                        jQuery(this).css('height',"10px");
-                        $(this).find('.ui-progressbar-value').css('height','8px');
-            		});
-        			   },
+                });
+            },
             subGrid : true,
             subGridRowExpanded: function(subgrid_id, row_id) {
                  // we pass two parameters

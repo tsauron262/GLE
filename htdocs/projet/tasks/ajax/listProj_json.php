@@ -11,8 +11,7 @@ require_once('../../../main.inc.php');
 
  $extra = $_REQUEST['extra'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -198,7 +197,7 @@ $SQL .= " ".$wh."
          LIMIT $start , $limit";
 //print $SQL;
 $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error());
-$responce->page = $page;
+@$responce->page = $page;
 $responce->total = $total_pages;
 $responce->records = $count;
 $i=0;
@@ -208,17 +207,20 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $soc->fetch($row[socid]);
     $responce->rows[$i]['id']=$row[id];
     $localUser = new User($db);
-    $localUser->id = $row[fk_user_resp];
-    $localUser->fetch();
+    $localUser->fetch($row[fk_user_resp]);
+    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
+    $proj = new Projet($db);
+    $proj->fetch($row[id]);
     $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
     $responce->rows[$i]['cell']=array($row[id],
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['nom']."</a>",
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['ref']."</a>",
                                       $row[dateo],
+                                      $proj->getLibStatut(4),
                                       $overallprogress,
-                                      utf8_encode($soc->getNomUrl(1)),
+                                      $soc->getNomUrl(1),
                                       $row[cntMyTask],
-                                      utf8_encode($localUser->getNomUrl(1)));
+                                      $localUser->getNomUrl(1));
     $i++;
 }
 echo json_encode($responce);

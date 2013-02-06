@@ -24,12 +24,11 @@
  *	\ingroup    ldap
  *	\brief		File to describe and activate Ldap module
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *  \class 		modLdap
- *	\brief      Classe de description et activation du module Ldap
+ *	Classe de description et activation du module Ldap
  */
 class modLdap extends DolibarrModules
 {
@@ -38,7 +37,7 @@ class modLdap extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modLdap($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 200;
@@ -71,9 +70,9 @@ class modLdap extends DolibarrModules
 		0=>array('LDAP_SERVER_TYPE','chaine','openldap','',0),
 		1=>array('LDAP_SERVER_PROTOCOLVERSION','chaine','3','',0),
 		2=>array('LDAP_SERVER_HOST','chaine','localhost','',0),
-		3=>array('LDAP_USER_DN','chaine','ou=users,dc=my-domain,dc=com','',0),
-		4=>array('LDAP_GROUP_DN','chaine','ou=groups,dc=my-domain,dc=com','',0),
-		5=>array('LDAP_FILTER_CONNECTION','chaine','&(objectClass=user)(objectCategory=person)','',0),
+		3=>array('LDAP_USER_DN','chaine','ou=users,dc=example,dc=com','',0),
+		4=>array('LDAP_GROUP_DN','chaine','ou=groups,dc=example,dc=com','',0),
+		5=>array('LDAP_FILTER_CONNECTION','chaine','&(objectClass=inetOrgPerson)','',0),
 		6=>array('LDAP_FIELD_LOGIN','chaine','uid','',0),
 		7=>array('LDAP_FIELD_FULLNAME','chaine','cn','',0),
 		8=>array('LDAP_FIELD_NAME','chaine','sn','',0),

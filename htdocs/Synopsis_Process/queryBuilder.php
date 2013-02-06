@@ -164,8 +164,10 @@ if ($_REQUEST['action'] == "Create" || $forceCreate) {
             $td = array();
             while ($res = $db->fetch_array($sql, MYSQL_ASSOC)) {
                 foreach ($res as $key => $val) {
-                    $th[$key] = $key;
-                    $td[$key][] = "<td class='ui-widget-content'>" . $val;
+                    if (!is_int($key)) {
+                        $th[$key] = $key;
+                        $td[$key][] = "<td class='ui-widget-content'>" . $val;
+                    }
                 }
             }
             print "<tr><th class='ui-widget-header ui-state-focus'>";
@@ -230,6 +232,7 @@ if ($_REQUEST['action'] == "Create" || $forceCreate) {
     print '  <tr>';
     print "      <th class='ui-widget-header ui-state-default'>Opt Groupe</em>";
     print "      <td class='ui-widget-content'><select name='OptGroup'>";
+    print "<option value=''></option>";
     $arr = $requeteObj->OptGroup;
     foreach ($th as $key => $val) {
         if ($val == $arr) {
@@ -244,6 +247,7 @@ if ($_REQUEST['action'] == "Create" || $forceCreate) {
     print '  <tr>';
     print "      <th class='ui-widget-header ui-state-default'>Opt Groupe Label</em>";
     print "      <td class='ui-widget-content'><select name='OptGroupLabel'>";
+    print "<option value=''></option>";
     $arr = $requeteObj->OptGroupLabel;
     foreach ($th as $key => $val) {
         if ($val == $arr) {
@@ -353,8 +357,10 @@ EOF;
             $td = array();
             while ($res = $db->fetch_array($sql, MYSQL_ASSOC)) {
                 foreach ($res as $key => $val) {
-                    $th[$key] = $key;
-                    $td[$key][] = "<td class='ui-widget-content'>" . $val;
+                    if (!is_int($key)) {
+                        $th[$key] = $key;
+                        $td[$key][] = "<td class='ui-widget-content'>" . $val;
+                    }
                 }
             }
             print "<tr><th class='ui-widget-header ui-state-focus'>";

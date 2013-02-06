@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.facture.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
 
 
 
@@ -27,8 +27,8 @@ function widget_listFactureFournBrouillon() {
     $sql  = "SELECT f.facnumber, f.rowid, f.total_ttc, f.type,";
     $sql.= " s.nom, s.rowid as socid";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-    $sql .= " FROM llx_facture_fourn as f, llx_societe as s";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql .= " FROM ".MAIN_DB_PREFIX."facture_fourn as f, ".MAIN_DB_PREFIX."societe as s";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql .= " WHERE s.rowid = f.fk_soc AND f.fk_statut = 0";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
@@ -76,7 +76,7 @@ function widget_listFactureFournBrouillon() {
                         $facturestatic->id=$res->rowid;
                         $facturestatic->type=$res->type;
                         $table .= $facturestatic->getNomUrl(1,'');
-                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                         $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                         $total += $res->total_ttc;
                     }
@@ -86,7 +86,7 @@ function widget_listFactureFournBrouillon() {
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $table2 .= $facturestatic->getNomUrl(1,'');
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                     $total2 += $res->total_ttc;
                     $iter++;

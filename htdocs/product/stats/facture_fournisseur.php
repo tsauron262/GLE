@@ -23,10 +23,10 @@
  *       \brief      Page des stats des factures fournisseurs pour un produit
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/product.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.facture.class.php");
-require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/product.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 $langs->load("companies");
 $langs->load("bills");
@@ -165,8 +165,7 @@ if ($id > 0 || ! empty($ref))
                     print "<td align=\"center\">";
                     print dol_print_date($db->jdate($objp->datef))."</td>";
                     print "<td align=\"right\">".price($objp->total_ht)."</td>\n";
-                    $fac=new Facture($db);
-                    print '<td align="right">'.$fac->LibStatut($objp->paye,$objp->statut,5).'</td>';
+                    print '<td align="right">'.$supplierinvoicestatic->LibStatut($objp->paye,$objp->statut,5).'</td>';
                     print "</tr>\n";
                     $i++;
                 }

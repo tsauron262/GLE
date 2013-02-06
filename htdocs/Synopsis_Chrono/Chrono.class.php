@@ -59,15 +59,13 @@ class Chrono extends CommonObject {
                 $this->user_author_id = $res->fk_user_author;
                 if ($this->user_author_id > 0) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $this->user_author_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($this->user_author_id);
                     $this->user_author = $tmpUser;
                 }
                 $this->user_modif_id = $res->fk_user_modif;
                 if ($this->user_modif_id > 0) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $this->user_modif_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($this->user_modif_id);
                     $this->user_modif = $tmpUser;
                 }
 
@@ -248,7 +246,7 @@ class Chrono extends CommonObject {
                                       value,
                                       key_id)
                              VALUES ( " . $newId . " ,
-                                      '" . $res->value . "' ,
+                                      '" . addslashes($res->value) . "' ,
                                       " . $res->key_id . " )";
             $sql1 = $this->db->query($requete);
         }
@@ -298,12 +296,12 @@ class Chrono extends CommonObject {
      */
     private function traiteLib($lib) {
         global $langs;
-        return htmlspecialchars_decode($langs->trans($lib));
+        return $langs->trans($lib);
     }
 
     private function LibStatut($statut, $mode) {
         global $langs;
-        $langs->load("chrono");
+$langs->load("chrono@Synopsis_Chrono");
 
         if ($mode == 0) {
             if ($statut == 0)
@@ -424,9 +422,9 @@ class Chrono extends CommonObject {
             $chrono = $res->p;
             $module = $res->pr;
             if ($val == 1)
-                $userObj->rights->$module->$chrono->$code = 1;
+                @$userObj->rights->$module->$chrono->$code = 1;
             else
-                $userObj->rights->$module->$chrono->$code = false;
+                @$userObj->rights->$module->$chrono->$code = false;
         }
 //        $groups = $userObj->listGroupIn();
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
@@ -464,9 +462,9 @@ class Chrono extends CommonObject {
             $chrono = $res->p;
             $module = $res->pr;
             if ($val == 1)
-                $grpObj->rights->$module->$chrono->$code = 1;
+                @$grpObj->rights->$module->$chrono->$code = 1;
             else
-                $grpObj->rights->$module->$chrono->$code = false;
+                @$grpObj->rights->$module->$chrono->$code = false;
         }
         return $grpObj;
     }
@@ -658,6 +656,7 @@ class Chrono extends CommonObject {
         $retVal = false;
         foreach ($dataArr as $keyId => $value) {
             //Set Value
+            $value = addslashes($value);
             $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value
                          WHERE key_id = " . $keyId . "

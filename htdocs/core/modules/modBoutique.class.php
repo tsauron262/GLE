@@ -26,12 +26,11 @@
  *  \brief      Fichier de description et activation du module OSCommerce
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *		\class 		modBoutique
- *		\brief      Classe de description et activation du module OSCommerce
+ *	Classe de description et activation du module OSCommerce
  */
 class modBoutique extends DolibarrModules
 {
@@ -41,7 +40,7 @@ class modBoutique extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modBoutique($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 800;

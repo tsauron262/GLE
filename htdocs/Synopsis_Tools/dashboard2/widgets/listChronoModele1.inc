@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 2 mars 2011
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**
@@ -44,9 +44,9 @@ function widget_listChronoModele1() {
     if ($conf->global->MAIN_MODULE_BABELCHRONO && ($user->rights->Chrono->Global->Afficher || $user->rights->chrono_user->chrono1->voir))
     {
         $requete = "SELECT value
-                      FROM llx_Synopsis_dashboard_settings,llx_Synopsis_dashboard_widget
-                     WHERE module_id = llx_Synopsis_dashboard_widget.id
-                       AND llx_Synopsis_dashboard_widget.module = 'listChronoModele1'
+                      FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings,".MAIN_DB_PREFIX."Synopsis_dashboard_widget
+                     WHERE module_id = ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.id
+                       AND ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.module = 'listChronoModele1'
                        AND user_id = ".$user->id;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
@@ -111,7 +111,7 @@ function widget_listChronoModele1() {
                             <td  nowrap="nowrap">';
                     $table2 .= $chrono->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td>'.$res->Blabel.'</td>';
                     $iter++;
                 }
@@ -150,14 +150,14 @@ function widget_listChronoModele1_settings() {
   global $user,$db;
   $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
   $type = "listChronoModele1";
-  $requete = "SELECT * FROM llx_Synopsis_dashboard_widget WHERE module = '".$type."'";
+  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = '".$type."'";
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
   $typeId = $res->id;
 
   if ($c)
   {
-      $requete= "DELETE FROM llx_Synopsis_dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
+      $requete= "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
       $sql = $db->query($requete);
       $c = explode(',',$c);
       $c1 = array();
@@ -167,13 +167,13 @@ function widget_listChronoModele1_settings() {
         $c1[] = $val;
       }
       $c = join(',',$c1);
-      $requete = "INSERT INTO llx_Synopsis_dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
+      $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
       $sql = $db->query($requete);
       $c = explode(',',$c);
 
   } else {
     $c = array();
-    $requete = "SELECT * FROM  llx_Synopsis_dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
+    $requete = "SELECT * FROM  ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
     $sql = $db->query($requete);
     if ($sql)
     {

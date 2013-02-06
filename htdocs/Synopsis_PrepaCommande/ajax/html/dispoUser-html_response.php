@@ -37,7 +37,7 @@ foreach($userArr as $key=> $userId)
 {
     if ($userId > 0)
     {
-        $requete = "SELECT UNIX_TIMESTAMP(datei) as udatei, duree FROM llx_Synopsis_demandeInterv WHERE ifnull(fk_user_target,fk_user_prisencharge) = $userId";
+        $requete = "SELECT UNIX_TIMESTAMP(datei) as udatei, duree FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE ifnull(fk_user_target,fk_user_prisencharge) = $userId";
         $sql=$db->query($requete);
         while ( $res=$db->fetch_object($sql) ) {
             $arrDate[$res->udatei]=$res->duree + $arrDate[$res->udatei];

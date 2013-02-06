@@ -119,7 +119,7 @@ if ($_REQUEST["id"] > 0) {
     if (isset($_POST['update']))
         saveForm();
 
-//    $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
+    $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
     if ($genererDoc) {
         genererDoc($db);
         affLienDoc($fichinter, $formfile, $conf);
@@ -149,7 +149,7 @@ if ($_REQUEST["id"] > 0) {
     if ($fichinter->fk_commande > 0) {
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-        $com = new Commande($db);
+        $com = new Synopsis_Commande($db);
         $com->fetch($fichinter->fk_commande);
         print "<td class='ui-widget-content'>" . $com->getNomUrl(1);
         /* print "<th class='ui-widget-header ui-state-default' width=20%>Pr&eacute;paration de commande";
@@ -162,7 +162,7 @@ if ($_REQUEST["id"] > 0) {
     print '    <td class="ui-widget-content">' . $fichinter->user_creation->getNomUrl(1) . '</td>';
     print '    <th class="ui-widget-header ui-state-default">Contact</th>';
     print '    <td class="ui-widget-content">';
-    $req = "SELECT *  FROM `llx_element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
+    $req = "SELECT *  FROM `" . MAIN_DB_PREFIX . "element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
     $sql = $db->query($req);
     $res56 = $db->fetch_object($sql);
     $selected = (isset($res56->fk_socpeople) ? $res56->fk_socpeople : null); //die( "rrrr".$selected);
@@ -188,7 +188,7 @@ if ($_REQUEST["id"] > 0) {
             $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
         }
     }
-    $sql = $db->query("SELECT * FROM llx_Synopsis_fichinter WHERE rowid =" . $fichinter->id);
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter WHERE rowid =" . $fichinter->id);
     $resultG = $db->fetch_object($sql);
 
 
@@ -200,13 +200,15 @@ if ($_REQUEST["id"] > 0) {
     print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
     print '<td colspan=1 class="ui-widget-content">';
     $tabDI = $fichinter->getDI();
-    $requete = "SELECT *
-                  FROM llx_Synopsis_demandeInterv
-                 WHERE rowid IN (" . implode(",", $tabDI).")";
-    print "<table class='nobordernopadding' width=100%>";
-    if ($resql = $db->query($requete)) {
-        while ($res = $db->fetch_object($resql)) {
-            print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->di_refid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
+    if (count($tabDI) > 0) {
+        $requete = "SELECT *
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                 WHERE rowid IN (" . implode(",", $tabDI) . ")";
+        print "<table class='nobordernopadding' width=100%>";
+        if ($resql = $db->query($requete)) {
+            while ($res = $db->fetch_object($resql)) {
+                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->di_refid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
+            }
         }
     }
     print "</table>";
@@ -219,7 +221,7 @@ if ($_REQUEST["id"] > 0) {
     print '    <th width="25%" class="ui-widget-header ui-state-default">Type de prestation</th>
                <td class="ui-widget-content" colspan="1"><select name="typeInter">' . $selectHtml . '</select></td>';
     print '    <th width="25%" class="ui-widget-header ui-state-default">Nature de la prestation</th>
-               <td class="ui-widget-content" colspan="1"><select name="natureInter">' . utf8_decode($selectHtml2) . '</select></td>';
+               <td class="ui-widget-content" colspan="1"><select name="natureInter">' . $selectHtml2 . '</select></td>';
     print '</tr>';
 
 
@@ -238,6 +240,10 @@ if ($_REQUEST["id"] > 0) {
         </tr>
 ';
     echo '<tr>
+            <th width="25%" class="ui-widget-header ui-state-default">Titre</th>
+            <td class="ui-widget-content" colspan="3"><textarea name="desc">' . $resultG->description . '</textarea></td>
+        </tr>';
+    echo '<tr>
             <th>Intervention</th>
         </tr>
 ';
@@ -246,37 +252,39 @@ if ($_REQUEST["id"] > 0) {
         $nbPrest++;
         $prefId = "presta" . $nbPrest . "_";
         $selectHtml = "<SELECT name='" . $prefId . "fk_typeinterv'>";
-        $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 AND id != 17 ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 AND id != 17 ORDER BY rang";
         $sql3 = $db->query($requete);
         $selectHtml .= "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
         while ($res3 = $db->fetch_object($sql3)) {
-            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id ==  20 || $res3->id == 21) {
-		    if ($res3->id == $prestation->fk_typeinterv) {
-		        $selectHtml .= "<OPTION SELECTED value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
-		    } else {
-		        $selectHtml .= "<OPTION value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
-		    }
-	    }
+            if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21) {
+                if ($res3->id == $prestation->fk_typeinterv) {
+                    $selectHtml .= "<OPTION SELECTED value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
+                } else {
+                    $selectHtml .= "<OPTION value='" . $res3->id . "'>" . $res3->label . "</OPTION>";
+                }
+            }
         }
         $selectHtml .= "</SELECT></td>";
 
 
         $htmlSelect2 = "";
         if ($fichinter->fk_commande > 0) {
-            $com = new Commande($db);
+            $com = new Synopsis_Commande($db);
             $com->fetch($fichinter->fk_commande);
             $com->fetch_group_lines(0, 0, 0, 0, 1);
             $htmlSelect2 .= "<select name='" . $prefId . "fk_prod'>";
             $htmlSelect2 .= "<option value='0'>S&eacute;lectionner-></option>";
 
             foreach ($com->lines as $key => $val) {
-                $prod = new Product($db);
-                $prod->fetch($val->fk_product);
-                if ($prod->id == $prestation->fk_depProduct) {//$objp->fk_commandedet){
-                    $htmlSelect2 .= "<option SELECTED value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . " </option>";
-                } else {
-                    $htmlSelect2 .= "<option value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                if (isset($val->fk_product) && $val->fk_product != '') {
+                    $prod = new Product($db);
+                    $prod->fetch($val->fk_product);
+                    if ($prod->id == $prestation->fk_depProduct) {//$objp->fk_commandedet){
+                        $htmlSelect2 .= "<option SELECTED value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . " </option>";
+                    } elseif ($prod->type != 0) {
+                        $htmlSelect2 .= "<option value='" . $prod->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                    }
                 }
             }
             $htmlSelect2 .= "</select>";
@@ -312,7 +320,7 @@ if ($_REQUEST["id"] > 0) {
         require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
         $htmlStr = '';
         if ($fichinter->fk_contrat > 0) {
-            $requete = "SELECT fk_contratdet FROM llx_Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
             $sql = $db->query($requete);
             $arrTmp = array();
             while ($res = $db->fetch_object($sql)) {
@@ -323,18 +331,18 @@ if ($_REQUEST["id"] > 0) {
             $type = getTypeContrat_noLoad($fichinter->fk_contrat);
             if ($type == 7) {
                 $contrat->fetch($fichinter->fk_contrat);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
                 $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
             <td class="ui-widget-content" colspan="3">';
 
                 $htmlStr .= "<table width=100%>";
                 $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet' value='0' checked=\"checked\"><td>";
-                foreach ($contrat->lignes as $key => $val) {
+                foreach ($contrat->lines as $key => $val) {
                     $selected = ($prestation->fk_contratdet == $val->id);
                     $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet contradet" . $val->id . "' value='" . $val->id . "' " . ($selected ? 'checked="checked"' : '') . "><td>";
                     $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                    $htmlStr .= $contrat->display1Line($val);
+                    $htmlStr .= $contrat->display1Line($contrat, $val);
                     $htmlStr .= "</ul>";
                 }
                 $htmlStr .= "</table>";
@@ -353,10 +361,6 @@ if ($_REQUEST["id"] > 0) {
             <td class="ui-widget-content" colspan="3"><textarea name="desc2">' . extra(28) . '</textarea></td>
         </tr>
 ';
-    echo '<tr>
-            <th width="25%" class="ui-widget-header ui-state-default">Titre</th>
-            <td class="ui-widget-content" colspan="3"><textarea name="desc">' . $resultG->description . '</textarea></td>
-        </tr>';
 
 
     echo '<tr>
@@ -408,28 +412,31 @@ EOF;
 
 //Pour le html repliquer (ligne de prestation)
 $selectHtml = '<SELECT-supprjs name="\'+prefId+\'fk_typeinterv">';
-$requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
 $sql3 = $db->query($requete);
 $selectHtml .= '<OPTION value="-1">Selectionner-></OPTION>';
 while ($res3 = $db->fetch_object($sql3)) {
-    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id ==  20 || $res3->id == 21) 
-    	$selectHtml .= '<OPTION value="' . $res3->id . '">' . $res3->label . '</OPTION>';
+    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21)
+        $selectHtml .= '<OPTION value="' . $res3->id . '">' . $res3->label . '</OPTION>';
 }
 $selectHtml .= "</SELECT>";
 
 
 $htmlSelect2 = "";
 if ($fichinter->fk_commande > 0) {
-    $com = new Commande($db);
+    $com = new Synopsis_Commande($db);
     $com->fetch($fichinter->fk_commande);
     $com->fetch_group_lines(0, 0, 0, 0, 1);
     $htmlSelect2 .= '<select-supprjs name="\'+prefId+\'fk_prod">';
     $htmlSelect2 .= '<option value="0">S&eacute;lectionner-></option>';
 
     foreach ($com->lines as $key => $val) {
-        $prod = new Product($db);
-        $prod->fetch($val->fk_product);
-        $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
+        if (isset($val->fk_product) && $val->fk_product != '') {
+            $prod = new Product($db);
+            $prod->fetch($val->fk_product);
+            if ($prod->type != 0)
+                $htmlSelect2 .= '<option value="' . $prod->id . '">' . $prod->ref . ' ' . $val->description . "</option>";
+        }
     }
     $htmlSelect2 .= "</select>";
 }
@@ -460,7 +467,7 @@ $htmlStr .= '<tr>
 require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
 if ($fichinter->fk_contrat > 0) {
-    $requete = "SELECT fk_contratdet FROM llx_Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+    $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
     $sql = $db->query($requete);
     $arrTmp = array();
     while ($res = $db->fetch_object($sql)) {
@@ -471,18 +478,18 @@ if ($fichinter->fk_contrat > 0) {
     $type = getTypeContrat_noLoad($fichinter->fk_contrat);
     if ($type == 7) {
         $contrat->fetch($fichinter->fk_contrat);
-        $contrat->fetch_lignes(true);
+        $contrat->fetch_lines(true);
         $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
             <td class="ui-widget-content" colspan="3">';
 
         $htmlStr .= "<table width=100%>";
         $htmlStr .= '<tr><td><input type=radio name="\'+prefId+\'contradet" class="radioContradet" value="0" checked="checked"><td>';
-        foreach ($contrat->lignes as $key => $val) {
+        foreach ($contrat->lines as $key => $val) {
             $selected = false;
             $htmlStr .= '<tr><td><input type="radio" name="\'+prefId+\'contradet" class="radioContradet contradet' . $val->id . '" value="' . $val->id . '" ' . ($selected ? 'checked="checked"' : '') . "><td>";
             $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-            $htmlStr .= $contrat->display1Line($val);
+            $htmlStr .= $contrat->display1Line($contrat, $val);
             $htmlStr .= "</ul>";
         }
         $htmlStr .= "</table>";
@@ -627,12 +634,13 @@ function cacherDecacherPRDV(){
 
 function affLienDoc($fichinter, $formfile, $conf) {
     $filename = sanitize_string($fichinter->ref);
-    $filedir = $conf->fichinter->dir_output . "/" . $fichinter->ref;
+    $filedir = $conf->synopsisficheinter->dir_output . "/" . $fichinter->ref;
     $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $fichinter->id;
-    $somethingshown = $formfile->show_documents('ficheinter', $filename, $filedir, $urlsource, 0, 0);
+    $somethingshown = $formfile->show_documents('synopsisficheinter', $filename, $filedir, $urlsource, 0, 0);
 }
 
 function genererDoc($db) {
+    global $user, $langs, $conf;
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->fetch_lines();
@@ -653,7 +661,7 @@ function genererDoc($db) {
         $result = $interface->run_triggers('ECM_GENFICHEINTER', $fichinter, $user, $langs, $conf);
         if ($result < 0) {
             $error++;
-            $this->errors = $interface->errors;
+            print_r($interface->errors);
         }
         // Fin appel triggers
     }
@@ -682,10 +690,10 @@ if (get_magic_quotes_gpc()) { // Si les magic quotes sont activés, on les désa
 function saveForm() {
     global $db, $fichinter;
     $_POST = addslashes_r($_POST);
-//    $req = "SELECT * FROM llx_Synopsis_fichinter where `rowid` =" . $fichinter->id;
+//    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
-    $req = "UPDATE `llx_Synopsis_fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "', natureInter = '" . $_POST['natureInter'] . "' WHERE  `llx_Synopsis_fichinter`.`rowid` =" . $fichinter->id;
+    $req = "UPDATE `" . MAIN_DB_PREFIX . "Synopsis_fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "', natureInter = '" . $_POST['natureInter'] . "' WHERE  `" . MAIN_DB_PREFIX . "Synopsis_fichinter`.`rowid` =" . $fichinter->id;
     $sql = $db->query($req);
     extra(24, $_POST['date1']);
     extra(19, $_POST['attentes']);
@@ -705,7 +713,7 @@ function saveForm() {
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixDepInterv
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND fk_product = " . $typeIntervProd;
             $sql = $db->query($requete);
@@ -717,7 +725,7 @@ function saveForm() {
             $isForfait = 1;
         } else {
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixTypeInterv
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND typeInterv_refid = " . $fk_typeinterv;
             $sql = $db->query($requete);
@@ -746,12 +754,12 @@ function saveForm() {
                 $result = $fichinterline->update();
             }
             else
-                $fichinterline->delete_line ();
+                $fichinterline->delete_line();
         }
     }
 
 
-    $req = "SELECT *  FROM `llx_element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
+    $req = "SELECT *  FROM `" . MAIN_DB_PREFIX . "element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";
     $sql = $db->query($req);
     $res = $db->fetch_object($sql);
     if (isset($res->rowid))
@@ -776,7 +784,7 @@ function initObj() {
 function extra($cle, $val = null) {
     global $db, $fichinter;
     if (is_null($val)) {//On fait un select
-        $sql = $db->query("SELECT extra_value as val FROM llx_Synopsis_fichinter_extra_value WHERE extra_key_refid = " . $cle . " AND interv_refid =" . $fichinter->id);
+        $sql = $db->query("SELECT extra_value as val FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value WHERE extra_key_refid = " . $cle . " AND interv_refid =" . $fichinter->id);
         $result = $db->fetch_object($sql);
         if (!is_object($result))
             return NULL;
@@ -784,9 +792,9 @@ function extra($cle, $val = null) {
     }
     else {
         if (is_null(extra($cle)))
-            $req = "INSERT INTO `llx_Synopsis_fichinter_extra_value` (`extra_value`, extra_key_refid, `interv_refid`, typeI) VALUES('" . $val . "', " . $cle . "," . $fichinter->id . ", 'FI')";
-        else 
-            $req = "UPDATE  `llx_Synopsis_fichinter_extra_value` SET  `extra_value` =  '" . $val . "' WHERE extra_key_refid = " . $cle . " AND `interv_refid` =" . $fichinter->id;
+            $req = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value` (`extra_value`, extra_key_refid, `interv_refid`, typeI) VALUES('" . $val . "', " . $cle . "," . $fichinter->id . ", 'FI')";
+        else
+            $req = "UPDATE  `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value` SET  `extra_value` =  '" . $val . "' WHERE extra_key_refid = " . $cle . " AND `interv_refid` =" . $fichinter->id;
         $sql = $db->query($req);
         return true;
     }
@@ -796,16 +804,16 @@ function prestations($rowid = null, $desc = null, $type = null, $duree = null) {
     global $db, $fichinter;
     if ($desc) {//Insert ou update
         if ($rowid && $rowid != 0)
-            $req = "UPDATE  `llx_Synopsis_fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
+            $req = "UPDATE  `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
         else
-            $req = "INSERT INTO `llx_Synopsis_fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
+            $req = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
         $sql = $db->query($req);
     } else {//Select
         if ($rowid)
-            $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
-//        $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
+            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . " AND rowid =" . $rowid;
+//        $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE rowid = (SELECT min(rowid) FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id . ")";
         else
-            $req = "SELECT * FROM `llx_Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
+            $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` WHERE fk_fichinter= " . $fichinter->id;
         $sql = $db->query($req);
         return mysqlToArray($sql, $db);
     }
@@ -844,4 +852,5 @@ function convertirDate($date, $enFr = true, $nowSiNull = false) {
     }
 }
 
+llxfooter();
 ?>

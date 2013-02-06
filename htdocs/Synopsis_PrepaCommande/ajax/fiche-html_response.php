@@ -141,9 +141,8 @@ EOF;
         $soc = new Societe($db);
         $soc->fetch($commande->socid);
 
-        $author = new User($db);
-        $author->id = $commande->user_author_id;
-        $author->fetch();
+//        $author = new User($db);
+//        $author->fetch($commande->user_author_id);
         $nbrow = 8;
         if ($conf->projet->enabled)
             $nbrow++;
@@ -169,11 +168,12 @@ EOF;
         print '<tr><th nowrap="nowrap" class="ui-state-default ui-widget-header">';
         print $langs->trans('Commercial cde');
         print '</th><td colspan="2" class="ui-widget-content">';
-        $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        if ($commande->user_author_id > 0) {
+            $tmpUser = new User($db);
+            $tmpUser->fetch($commande->user_author_id);
 
-        print traiteStr($tmpUser->getNomUrl(1));
+            print traiteStr($tmpUser->getNomUrl(1));
+        }
         print '</td>';
 
         // Ref commande client
@@ -395,7 +395,7 @@ EOF;
             print '<td class="ui-widget-content" colspan="4" style="padding: 0px; border:0px Solid;">';
             print "<table width=100% cellpadding=5>";
 //                while($res = $db->fetch_object($sql))
-            for ($iter = 0; $iter < count($tabExpe) - 1; $iter++) {
+            for ($iter = 0; $iter < count($tabExpe); $iter++) {
                 $exp = new expedition($db);
                 $exp->fetch($tabExpe[$iter]['d']);
                 if ($iter % 2 != 1)
@@ -430,7 +430,7 @@ EOF;
 //            $sql = $db->query($requete);
 //            $statusBIMP = 1;
 //        }
-        $requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status WHERE id =  " . $statusBIMP;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_commande_status WHERE id =  " . $statusBIMP;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . ' BIMP</th>';
@@ -446,7 +446,7 @@ EOF;
     }
 }
 print '<div id="bimpStatusDial">';
-$requete = "SELECT * FROM llx_Synopsis_PrepaCom_c_commande_status";
+$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_commande_status";
 $sql = $db->query($requete);
 print "<select id='newStatus'>";
 while ($res = $db->fetch_object($sql)) {
@@ -492,6 +492,8 @@ print <<<EOF
 </script>
 EOF;
 
+function traiteStr($str) {
+    return $str;
+}
 
-function traiteStr($str){return $str;}
 ?>

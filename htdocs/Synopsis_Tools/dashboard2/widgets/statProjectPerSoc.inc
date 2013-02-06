@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 22 juil. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**
@@ -18,7 +18,7 @@
   */
 require_once("../../main.inc.php");
 // The get widget handler.
-require_once(DOL_DOCUMENT_ROOT.'/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
 
 function widget_statProjectPerSoc() {
   // A widget object as per jquery.dashboard.js.
@@ -45,8 +45,8 @@ function widget_statProjectPerSoc() {
 
         $sql = "SELECT s.nom, s.rowid as socid, count(p.rowid)";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-        $sql .= " FROM llx_societe as s, babel_projet as p";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql .= " FROM ".MAIN_DB_PREFIX."societe as s, babel_projet as p";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql .= " WHERE p.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid)

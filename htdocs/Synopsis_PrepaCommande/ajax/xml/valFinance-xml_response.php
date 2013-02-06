@@ -22,7 +22,7 @@
   require_once('../../../main.inc.php');
   $id = $_REQUEST['comId'];
   $xmlStr = "<ajax-response>";
-  $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET finance_statut=1 WHERE rowid = ".$id;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET finance_statut=1 WHERE rowid = ".$id;
   $sql = $db->query($requete);
 
 
@@ -32,7 +32,7 @@
   $arrGrpTmp = $commande->listGroupMember();
   foreach($arrGrpTmp as $key=>$val)
   {
-      $requete = "UPDATE ".MAIN_DB_PREFIX."commande SET finance_statut=1 WHERE rowid = ".$val->id;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET finance_statut=1 WHERE rowid = ".$val->id;
       $sql = $db->query($requete);
   }
   if ($sql){
@@ -41,8 +41,7 @@
         $commande = new Synopsis_Commande($db);
         $commande->fetch($id);
         $tmpUser = new User($db);
-        $tmpUser->id = $commande->user_author_id;
-        $tmpUser->fetch();
+        $tmpUser->fetch($commande->user_author_id);
 
         //Notification
         //TO commercial author
@@ -54,25 +53,25 @@
             $statusFin = 'OK';
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-            $interface=new Interfaces($this->db);
+            $interface=new Interfaces($db);
             $result=$interface->run_triggers('PREPACOM_OK_FINANCE',$this,$user,$langs,$conf);
-            if ($result < 0) { $error++; $this->errors=$interface->errors; }
+            if ($result < 0) { $error++; $errors=$interface->errors; }
             // Fin appel triggers
         }else if($commande->finance_ok == 0){
             $statusFin = 'Non';
             $subject="[Non Finance] pour le client ".$commande->societe->nom." commande ".$commande->ref." du ".date('d/m/Y',$commande->date);
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-            $interface=new Interfaces($this->db);
+            $interface=new Interfaces($db);
             $result=$interface->run_triggers('PREPACOM_KO_FINANCE',$this,$user,$langs,$conf);
-            if ($result < 0) { $error++; $this->errors=$interface->errors; }
+            if ($result < 0) { $error++; $errors=$interface->errors; }
             // Fin appel triggers
         }else if($commande->finance_ok == 2){
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-            $interface=new Interfaces($this->db);
+            $interface=new Interfaces($db);
             $result=$interface->run_triggers('PREPACOM_PARTIAL_FINANCE',$this,$user,$langs,$conf);
-            if ($result < 0) { $error++; $this->errors=$interface->errors; }
+            if ($result < 0) { $error++; $errors=$interface->errors; }
             // Fin appel triggers
             $statusFin = 'Partiel';
             $subject="[Non Finance] pour le client ".$commande->societe->nom." commande ".$commande->ref." du ".date('d/m/Y',$commande->date);
@@ -99,7 +98,7 @@
         $addr_cc = $conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-    require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject,$to,$from,$msg,array(),array(),array(),$addr_cc,'',0,1,$from);
 
 

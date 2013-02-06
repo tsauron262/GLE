@@ -25,10 +25,10 @@
  *	\brief      Page to create a payment
  */
 
-require('../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php');
-require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
-require_once(DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php');
+require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 $langs->load('companies');
 $langs->load('bills');
@@ -42,9 +42,9 @@ $socname	= GETPOST('socname');
 $accountid	= GETPOST('accountid');
 $paymentnum	= GETPOST('num_paiement');
 
-$sortfield	= GETPOST('sortfield');
-$sortorder	= GETPOST('sortorder');
-$page		= GETPOST('page');
+$sortfield	= GETPOST('sortfield','alpha');
+$sortorder	= GETPOST('sortorder','alpha');
+$page		= GETPOST('page','int');
 
 $amounts=array();
 $amountsresttopay=array();
@@ -68,6 +68,8 @@ if ($action == 'add_paiement' || ($action == 'confirm_paiement' && $confirm=='ye
 
     $datepaye = dol_mktime(12, 0, 0, $_POST['remonth'], $_POST['reday'], $_POST['reyear']);
     $paiement_id = 0;
+    $totalpaiement = 0;
+    $atleastonepaymentnotnull = 0;
 
     // Verifie si des paiements sont superieurs au montant facture
     foreach ($_POST as $key => $value)
@@ -77,6 +79,7 @@ if ($action == 'add_paiement' || ($action == 'confirm_paiement' && $confirm=='ye
             $cursorfacid = substr($key,7);
             $amounts[$cursorfacid] = price2num(trim($_POST[$key]));
             $totalpaiement = $totalpaiement + $amounts[$cursorfacid];
+            if (! empty($amounts[$cursorfacid])) $atleastonepaymentnotnull++;
             $tmpfacture=new Facture($db);
             $tmpfacture->fetch($cursorfacid);
             $amountsresttopay[$cursorfacid]=price2num($tmpfacture->total_ttc-$tmpfacture->getSommePaiement());
@@ -97,7 +100,7 @@ if ($action == 'add_paiement' || ($action == 'confirm_paiement' && $confirm=='ye
         $error++;
     }
 
-    if ($conf->banque->enabled)
+    if (! empty($conf->banque->enabled))
     {
         // Si module bank actif, un compte est obligatoire lors de la saisie
         // d'un paiement
@@ -108,7 +111,7 @@ if ($action == 'add_paiement' || ($action == 'confirm_paiement' && $confirm=='ye
         }
     }
 
-    if ($totalpaiement == 0)
+    if (empty($totalpaiement) && empty($atleastonepaymentnotnull))
     {
         $fiche_erreur_message = '<div class="error">'.$langs->transnoentities('ErrorFieldRequired',$langs->trans('PaymentAmount')).'</div>';
         $error++;
@@ -154,8 +157,8 @@ if ($action == 'confirm_paiement' && $confirm == 'yes')
 
     if (! $error)
     {
-        $paiement_id = $paiement->create($user,(GETPOST('closepaidinvoices')=='on'?1:0));
-        if ($paiement_id < 0)
+    	$paiement_id = $paiement->create($user,(GETPOST('closepaidinvoices')=='on'?1:0));
+    	if ($paiement_id < 0)
         {
             $errmsg=$paiement->error;
             $error++;
@@ -189,7 +192,7 @@ if ($action == 'confirm_paiement' && $confirm == 'yes')
         }
         if ($invoiceid > 0) $loc = DOL_URL_ROOT.'/compta/facture.php?facid='.$invoiceid;
         else $loc = DOL_URL_ROOT.'/compta/paiement/fiche.php?id='.$paiement_id;
-        Header('Location: '.$loc);
+        header('Location: '.$loc);
         exit;
     }
     else
@@ -227,6 +230,7 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 		// Bouchon
 		if ($facture->type == 2)
 		{
+            $langs->load('other');
 			print $langs->trans("FeatureNotYetAvailable");
 			llxFooter();
 			exit;
@@ -244,7 +248,7 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 
 		// Invoice with Paypal transaction
 		// TODO add hook possibility (regis)
-		if ($conf->paypalplus->enabled && $conf->global->PAYPAL_ENABLE_TRANSACTION_MANAGEMENT && ! empty($facture->ref_int))
+		if (! empty($conf->paypalplus->enabled) && $conf->global->PAYPAL_ENABLE_TRANSACTION_MANAGEMENT && ! empty($facture->ref_int))
 		{
 			if (! empty($conf->global->PAYPAL_BANK_ACCOUNT)) $accountid=$conf->global->PAYPAL_BANK_ACCOUNT;
 			$paymentnum=$facture->ref_int;
@@ -276,12 +280,9 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
             					$(\'.fieldrequireddyn\').removeClass(\'fieldrequired\');
             					$(\'#fieldchqemetteur\').val(\'\');
             				}
-            			}';
-			// For paiement auto-completion
-			if (! empty($conf->global->MAIN_JS_ON_PAYMENT))
-			{
-				print "\n".'
-						function elemToJson(selector)
+            			}
+
+						function _elemToJson(selector)
 						{
 							var subJson = {};
 							$.map(selector.serializeArray(), function(n,i)
@@ -296,14 +297,14 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 							var form = $("#payment_form");
 
 							json["amountPayment"] = $("#amountpayment").attr("value");
-							json["amounts"] = elemToJson(form.find("input[name*=\"amount_\"]"));
-							json["remains"] = elemToJson(form.find("input[name*=\"remain_\"]"));
+							json["amounts"] = _elemToJson(form.find("input[name*=\"amount_\"]"));
+							json["remains"] = _elemToJson(form.find("input[name*=\"remain_\"]"));
 
 							if (imgId != null) {
 								json["imgClicked"] = imgId;
 							}
 
-							$.post("ajaxpayment.php", json, function(data)
+							$.post("'.DOL_URL_ROOT.'/compta/ajaxpayment.php", json, function(data)
 							{
 								json = $.parseJSON(data);
 
@@ -313,9 +314,9 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 								{
 									if (key == "result")	{
 										if (json["makeRed"]) {
-											$("#"+key).css("color", "red");
+											$("#"+key).addClass("error");
 										} else {
-											$("#"+key).removeAttr("style");
+											$("#"+key).removeClass("error");
 										}
 										json[key]=json["label"]+" "+json[key];
 										$("#"+key).text(json[key]);
@@ -327,27 +328,27 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 								}
 							});
 						}
-						function callToBreakdown(imgSelector) {
-							var form = $("#payment_form"), imgId;
-
-							imgId =  imgSelector.attr("id");
-							callForResult(imgId);
-						}
-
-						$("#payment_form").find("img").click(function() {
-							callToBreakdown(jQuery(this));
-						});
-
 						$("#payment_form").find("input[name*=\"amount_\"]").change(function() {
 							callForResult();
+						});
+						$("#payment_form").find("input[name*=\"amount_\"]").keyup(function() {
+							callForResult();
+						});
+			';
+
+			if (! empty($conf->global->MAIN_JS_ON_PAYMENT))
+			{
+				print '	$("#payment_form").find("img").click(function() {
+							callForResult(jQuery(this).attr("id"));
 						});
 
 						$("#amountpayment").change(function() {
 							callForResult();
 						});';
 			}
-			print '});
-			</script>'."\n";
+
+			print '	});'."\n";
+			print '	</script>'."\n";
 		}
 
 		print '<form id="payment_form" name="add_paiement" action="'.$_SERVER["PHP_SELF"].'" method="POST">';
@@ -384,7 +385,7 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
 
         // Bank account
         print '<tr>';
-        if ($conf->banque->enabled)
+        if (! empty($conf->banque->enabled))
         {
             if ($facture->type != 2) print '<td><span class="fieldrequired">'.$langs->trans('AccountToCredit').'</span></td>';
             if ($facture->type == 2) print '<td><span class="fieldrequired">'.$langs->trans('AccountToDebit').'</span></td>';
@@ -442,12 +443,13 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
         $sql = 'SELECT f.rowid as facid, f.facnumber, f.total_ttc, f.type, ';
         $sql.= ' f.datef as df';
         $sql.= ' FROM '.MAIN_DB_PREFIX.'facture as f';
-        $sql.= ' WHERE f.fk_soc = '.$facture->socid;
+        $sql.= ' WHERE f.entity = '.$conf->entity;
+        $sql.= ' AND f.fk_soc = '.$facture->socid;
         $sql.= ' AND f.paye = 0';
         $sql.= ' AND f.fk_statut = 1'; // Statut=0 => not validated, Statut=2 => canceled
         if ($facture->type != 2)
         {
-            $sql .= ' AND type in (0,1,3)';	// Standard invoice, replacement, deposit
+            $sql .= ' AND type IN (0,1,3)';	// Standard invoice, replacement, deposit
         }
         else
         {
@@ -568,7 +570,7 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
                     if ($totalrecudeposits) print '+'.price($totalrecudeposits);
                     print '</b></td>';
                     print '<td align="right"><b>'.price(price2num($total_ttc - $totalrecu - $totalrecucreditnote - $totalrecudeposits,'MT')).'</b></td>';
-                    print '<td align="right" id="result" style="font-weight:bold;"></td>';
+                    print '<td align="right" id="result" style="font-weight: bold;"></td>';
                     print '<td align="center">&nbsp;</td>';
                     print "</tr>\n";
                 }
@@ -588,10 +590,10 @@ if ($action == 'create' || $action == 'confirm_paiement' || $action == 'add_paie
         {
             //			print '<tr><td colspan="3" align="center">';
             print '<center><br><input type="checkbox" checked="checked" name="closepaidinvoices"> '.$langs->trans("ClosePaidInvoicesAutomatically");
-            /*if ($conf->prelevement->enabled)
+            /*if (! empty($conf->prelevement->enabled))
             {
                 $langs->load("withdrawals");
-                if ($conf->global->WITHDRAW_DISABLE_AUTOCREATE_ONPAYMENTS) print '<br>'.$langs->trans("IfInvoiceNeedOnWithdrawPaymentWontBeClosed");
+                if (! empty($conf->global->WITHDRAW_DISABLE_AUTOCREATE_ONPAYMENTS)) print '<br>'.$langs->trans("IfInvoiceNeedOnWithdrawPaymentWontBeClosed");
             }*/
             print '<br><input type="submit" class="button" value="'.$langs->trans('Save').'"><br><br></center>';
             //			print '</td></tr>';
@@ -672,7 +674,7 @@ if (! GETPOST('action'))
             $objp = $db->fetch_object($resql);
             $var=!$var;
             print '<tr '.$bc[$var].'>';
-            print '<td><a href="facture.php?facid='.$objp->facid.'">'.$objp->facnumber."</a></td>\n";
+            print '<td><a href="'.DOL_URL_ROOT.'/compta/facture.php?facid='.$objp->facid.'">'.$objp->facnumber."</a></td>\n";
             print '<td>'.dol_print_date($db->jdate($objp->dp))."</td>\n";
             print '<td>'.$objp->paiement_type.' '.$objp->num_paiement."</td>\n";
             print '<td align="right">'.price($objp->amount).'</td><td>&nbsp;</td>';

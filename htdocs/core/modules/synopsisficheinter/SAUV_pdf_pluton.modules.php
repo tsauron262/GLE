@@ -209,11 +209,11 @@ class pdf_pluton extends ModelePDFFicheinter {
                     $total_ttc += $val->total_ttc;
                     $total_duree += $val->duration;
                     if ($val->fk_commandedet > 0) {
-                        $requete = "SELECT llx_product.ref
-                                      FROM llx_commandedet,
-                                           llx_product
-                                     WHERE llx_product.rowid = llx_commandedet.fk_product
-                                       AND llx_commandedet.rowid =" . $val->fk_commandedet;
+                        $requete = "SELECT ".MAIN_DB_PREFIX."product.ref
+                                      FROM ".MAIN_DB_PREFIX."commandedet,
+                                           ".MAIN_DB_PREFIX."product
+                                     WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product
+                                       AND ".MAIN_DB_PREFIX."commandedet.rowid =" . $val->fk_commandedet;
                         $sql1 = $this->db->query($requete);
                         $res1 = $this->db->fetch_object($sql1);
                         if ($res1->ref == 'FPR40') {
@@ -303,7 +303,7 @@ class pdf_pluton extends ModelePDFFicheinter {
 //CUSTOMER / BILLING sinon
 //Contact de la commande
                 $requete = "SELECT *
-                              FROM llx_element_contact
+                              FROM ".MAIN_DB_PREFIX."element_contact
                              WHERE fk_c_type_contact IN (130,131) AND element_id =  " . $fichinter->id;
                 $sql1 = $this->db->query($requete);
                 $arrContact = array();
@@ -311,7 +311,7 @@ class pdf_pluton extends ModelePDFFicheinter {
                     $arrContact[$res1->fk_c_type_contact][] = $res1->fk_socpeople;
                 }
                 $requete = "SELECT *
-                              FROM llx_element_contact
+                              FROM ".MAIN_DB_PREFIX."element_contact
                              WHERE fk_c_type_contact IN (101) AND element_id =  " . $fichinter->fk_commande;
                 $sql1 = $this->db->query($requete);
                 while ($res1 = $this->db->fetch_object($sql1)) {
@@ -413,7 +413,7 @@ class pdf_pluton extends ModelePDFFicheinter {
                 $pdf->MultiCell(35.5, 5.8, $fichinter->ref, 1, 'C', 0);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
 
-                $req = "SELECT * FROM llx_commande where ROWID = " . $fichinter->fk_commande;
+                $req = "SELECT * FROM ".MAIN_DB_PREFIX."commande where ROWID = " . $fichinter->fk_commande;
                 $sql = $this->db->query($req);
                 $res99 = $this->db->fetch_object($sql);
 
@@ -460,7 +460,7 @@ class pdf_pluton extends ModelePDFFicheinter {
 //                     $tmpArr[]=$this->sec2time($val->duration)." - ".$val->desc;
 
                     if ($val->fk_contratdet > 0) {
-                        $requete = "SELECT description FROM llx_contratdet WHERE rowid = " . $val->fk_contratdet;
+                        $requete = "SELECT description FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $val->fk_contratdet;
                         $sql = $this->db->query($requete);
                         $res = $this->db->fetch_object($sql);
                         $tmpdesc = ($res->description . "x" != "x" ? $res->description . " :\n" . $val->desc : $val->desc);

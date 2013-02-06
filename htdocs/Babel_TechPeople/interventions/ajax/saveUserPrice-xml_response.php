@@ -30,14 +30,14 @@
   }
   if ($userId > 0)
   {
-    $requete = "DELETE FROM llx_Synopsis_fichinter_User_PrixTypeInterv WHERE user_refid = ".$userId;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixTypeInterv WHERE user_refid = ".$userId;
     $sql = $db->query($requete);
     $error = 0;
     if (!$sql) $error++;
 
     foreach($priceArr as $key=>$val)
     {
-        $requete = "INSERT INTO llx_Synopsis_fichinter_User_PrixTypeInterv
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixTypeInterv
                                 (typeInterv_refid, user_refid, prix_ht)
                          VALUES (".$key.",".$userId.",".$val.")";
         $sql = $db->query($requete);
@@ -58,14 +58,14 @@
             $priceArr[$arr[1]]=preg_replace('/,/','.',$val);
         }
       }
-    $requete = "DELETE FROM llx_Synopsis_fichinter_User_PrixDepInterv WHERE user_refid = ".$userId;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv WHERE user_refid = ".$userId;
     $sql = $db->query($requete);
     $error = 0;
     if (!$sql) $error++;
 
     foreach($priceArr as $key=>$val)
     {
-        $requete = "INSERT INTO llx_Synopsis_fichinter_User_PrixDepInterv
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv
                                 (fk_product, user_refid, prix_ht)
                          VALUES (".$key.",".$userId.",".$val.")";
         $sql = $db->query($requete);

@@ -35,7 +35,7 @@ if ($_REQUEST['doliauth'] == 1 || !isset($_SESSION['fname'])) {
         $_REQUEST['txtPassword'] = $conf->global->ORANGE_PASS;
     } else {
         $_REQUEST['txtUserName'] = $_SESSION['dol_login'];
-        $requete = "SELECT pass FROM llx_user WHERE login='" . $_SESSION['dol_login'] . "'";
+        $requete = "SELECT pass FROM ".MAIN_DB_PREFIX."user WHERE login='" . $_SESSION['dol_login'] . "'";
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $_REQUEST['txtPassword'] = $res->pass;

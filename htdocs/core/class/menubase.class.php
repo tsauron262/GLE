@@ -61,7 +61,7 @@ class Menubase
      *  @param     	string		$menu_handler	Menu handler
      *  @param     	string		$type			Type
      */
-    function Menubase($db,$menu_handler='',$type='')
+    function __construct($db,$menu_handler='',$type='')
     {
         $this->db = $db;
         $this->menu_handler = $menu_handler;
@@ -107,18 +107,22 @@ class Menubase
         // an insert with a forced id.
         if (in_array($this->db->type,array('pgsql')))
         {
-			$sql = "SELECT MAX(rowid) as maxrowid FROM ".MAIN_DB_PREFIX."menu";
-        	$resqlrowid=$this->db->query($sql);
-        	if ($resqlrowid)
-        	{
-        		$obj=$this->db->fetch_object($resqlrowid);
-        		$maxrowid=$obj->maxrowid;
+          $sql = "SELECT MAX(rowid) as maxrowid FROM ".MAIN_DB_PREFIX."menu";
+          $resqlrowid=$this->db->query($sql);
+          if ($resqlrowid)
+          {
+               $obj=$this->db->fetch_object($resqlrowid);
+               $maxrowid=$obj->maxrowid;
 
-        		$sql = "SELECT setval('".MAIN_DB_PREFIX."menu_rowid_seq', ".($maxrowid).")";
-	        	$resqlrowidset=$this->db->query($sql);
-	     		if (! $resqlrowidset) dol_print_error($this->db);
-        	}
-        	else dol_print_error($this->db);
+               // Max rowid can be empty if there is no record yet
+               if(empty($maxrowid)) $maxrowid=1;
+
+               $sql = "SELECT setval('".MAIN_DB_PREFIX."menu_rowid_seq', ".($maxrowid).")";
+               //print $sql; exit;
+               $resqlrowidset=$this->db->query($sql);
+               if (! $resqlrowidset) dol_print_error($this->db);
+          }
+          else dol_print_error($this->db);
         }
 
         // Insert request
@@ -524,7 +528,7 @@ class Menubase
 
         $sql = "SELECT m.rowid, m.type, m.fk_menu, m.fk_mainmenu, m.fk_leftmenu, m.url, m.titre, m.langs, m.perms, m.enabled, m.target, m.mainmenu, m.leftmenu";
         $sql.= " FROM ".MAIN_DB_PREFIX."menu as m";
-        $sql.= " WHERE m.entity = ".$conf->entity;
+        $sql.= " WHERE m.entity IN (0,".(! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)?"1,":"").$conf->entity.")";
         $sql.= " AND m.menu_handler IN ('".$menu_handler."','all')";
         if ($type_user == 0) $sql.= " AND m.usertype IN (0,2)";
         if ($type_user == 1) $sql.= " AND m.usertype IN (1,2)";
@@ -558,7 +562,7 @@ class Menubase
                 if ($menu['enabled'])
                 {
                     $enabled = verifCond($menu['enabled']);
-                    if ($conf->use_javascript_ajax && $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION && preg_match('/^\$leftmenu/',$menu['enabled'])) $enabled=1;
+                    if ($conf->use_javascript_ajax && ! empty($conf->global->MAIN_MENU_USE_JQUERY_ACCORDION) && preg_match('/^\$leftmenu/',$menu['enabled'])) $enabled=1;
                     //print "verifCond rowid=".$menu['rowid']." ".$menu['enabled'].":".$enabled."<br>\n";
                 }
 

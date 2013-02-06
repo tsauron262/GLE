@@ -58,7 +58,7 @@ $id = $_REQUEST['id'];
     $res = file_put_contents($newFilet,$widgetTxt);
     $res = file_put_contents($newFile,$widgetTxt);
     //2 active le widget
-    $requete = "SELECT * FROM llx_Synopsis_dashboard_widget WHERE module = 'listChronoModele".$id."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = 'listChronoModele".$id."'";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0)
     {
@@ -66,17 +66,17 @@ $id = $_REQUEST['id'];
         $sql2 = true;
         $sql3 = true;
     } else {
-        $requete = "INSERT INTO llx_Synopsis_dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
         $sql1 = $db->query($requete);
-        $newId = $db->last_insert_id("llx_Synopsis_dashboard_widget");
+        $newId = $db->last_insert_id("".MAIN_DB_PREFIX."Synopsis_dashboard_widget");
         $sql2 = false;
         $sql3 = false;
         //3 page chrono (46) et page principale (4)
         if ($newId > 0)
         {
-            $requete = "INSERT INTO llx_Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
             $sql2 = $db->query($requete);
-            $requete = "INSERT INTO llx_Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
             $sql3 = $db->query($requete);
         }
     }
@@ -361,11 +361,10 @@ print '<br>';
     while ($res = $db->fetch_object($sql))
     {
         $tmpuser = new User($db);
-        $tmpuser->id = $res->rowid;
-        $tmpuser->fetch();
+        $tmpuser->fetch($res->rowid);
         $chr->getRights($tmpuser);
 
-        print "<tr><td class='ui-widget-content'>".$tmpuser->fullname;
+        print "<tr><td class='ui-widget-content'>".$tmpuser->getNomUrl(1);
         $chrono_right_ref = "chrono".$chr->model_refid;
 
         $requete1 = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_rights_def WHERE active=1 ORDER BY rang ";
@@ -376,8 +375,11 @@ print '<br>';
         {
             $col++;
             $type = $res1->code;
-            print "    <td class='ui-widget-content' align=center><input type='checkbox' name='u".$tmpuser->id."-".$res1->id."' ".($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?"Checked >":">");
-            print ($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?($tmpuser->rights->chrono_user->$chrono_right_ref->$type=='g'?img_tick_group('H&eacute;rit&eacute;'):img_tick('Oui')):"");
+            print "    <td class='ui-widget-content' align=center>";
+            if($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type && $tmpuser->rights->chrono_user->$chrono_right_ref->$type=='g')
+                    print img_picto($langs->trans("H&eacute;rit&eacute;"), 'tick');//$form->textwithtooltip($langs->trans("Inherited"), $langs->trans("PermissionInheritedFromAGroup"));//img_tick_group('H&eacute;rit&eacute;'):img_tick('Oui')):"");
+                else
+            print "<input type='checkbox' name='u".$tmpuser->id."-".$res1->id."' ".($tmpuser->rights->chrono_user->$chrono_right_ref && $tmpuser->rights->chrono_user->$chrono_right_ref->$type?"Checked >":">");
         }
     }
     print "    <tr><th class='ui-widget-header' align=center colspan='".$col."'><button class='butAction'>Modifier</button></th>";
@@ -399,7 +401,6 @@ print '<br>';
     while ($res = $db->fetch_object($sql))
     {
         $tmpgrp = new UserGroup($db);
-        $tmpgrp->id = $res->rowid;
         $tmpgrp->fetch($res->rowid);
         $tmpgrp = $chr->getGrpRights($tmpgrp);
 //var_dump($tmpgrp->rights);
@@ -415,7 +416,7 @@ print '<br>';
             $type = $res1->code;
 //                    print "    <td class='ui-widget-content' align=center>".($tmpgrp->rights->chrono->$chrono_right_ref && $tmpgrp->rights->chrono->$chrono_right_ref->$type?"Oui":"Non");
             print "    <td class='ui-widget-content' align=center><input type='checkbox' name='g".$tmpgrp->id."-".$res1->id."' ".($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?"Checked >":">");
-            print ($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?img_tick("Oui"):"");
+//            print ($tmpgrp->rights->chrono_group->$chrono_right_ref && $tmpgrp->rights->chrono_group->$chrono_right_ref->$type?img_tick("Oui"):"");
         }
     }
     print "    <tr><th class='ui-widget-header' align=center colspan='".$col."'><button class='butAction'>Modifier</button></th>";

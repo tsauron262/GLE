@@ -37,7 +37,7 @@ $qty = $res->qty;
 $sql = false;
 for($i=0;$i<$qty;$i++)
 {
-    $line0 = 0;
+    /*$line0 = 0;
     $requete = "SELECT max(line_order) + 1 as mx
                   FROM ".MAIN_DB_PREFIX."contratdet
                  WHERE fk_contrat = ".$contratId;
@@ -66,19 +66,22 @@ for($i=0;$i<$qty;$i++)
         $sql3 = $db->query($requete);
         $res3 = $db->fetch_object($sql3);
         $avenant= $res3->mx;
-    }
+    }*/
 
     $requete = "INSERT INTO ".MAIN_DB_PREFIX."contratdet
                             (fk_contrat,fk_product,statut,description,
                              tva_tx,qty,subprice,price_ht,
                              total_ht, total_tva, total_ttc,fk_user_author,
-                             line_order,fk_commande_ligne,avenant,date_ouverture_prevue,date_ouverture, date_fin_validite)
-                     VALUES (". $contratId .",NULL,0,'Import depuis la commande ".$com->ref."',
+                             "/*line_order,fk_commande_ligne,avenant,*/."date_ouverture_prevue,date_ouverture, date_fin_validite)
+                     VALUES (". $contratId .",'".$res->fk_product."',0,'".addslashes($res->description)."',
                              19.6,1,".$res->subprice.",".$res->subprice.",
-                             ".$res->subprice.",".$total_tva.",".$total_ttc.",".$user->id.",
-                             ".$lineO.",".$comLigneId.",".$avenant.",now(),now(), date_add(now(),INTERVAL ".($tmpProd->durVal>0?$tmpProd->durVal:0)." MONTH))";
+                             ".$res->subprice.",".$total_tva.",".$total_ttc.",".$user->id."
+                             "./*$lineO.",".$comLigneId.",".$avenant.*/",now(),now(), date_add(now(),INTERVAL ".($tmpProd->durVal>0?$tmpProd->durVal:0)." MONTH))";
     $sql = $db->query($requete);
-    $cdid = $db->last_insert_id('".MAIN_DB_PREFIX."contratdet');
+//    die($requete);
+    $cdid = $db->last_insert_id(MAIN_DB_PREFIX."contratdet");
+    
+    setElementElement("commandedet", "contratdet", $comLigneId, $cdid);
 
     //Mode de reglement et condition de reglement
     if ($res2->condReg_refid != $com->cond_reglement_id || $res2->modeReg_refid != $com->mode_reglement_id )
@@ -111,7 +114,7 @@ if ($tmpProd->Hotline>0 || $tmpProd->TeleMaintenance > 0 || $tmpProd->Maintenanc
 
     //Lier a contratdetprop
     //Babel_GMAO_contratdet_prop
-    $requete = "INSERT INTO Babel_GMAO_contratdet_prop
+    $requete2 = "INSERT INTO Babel_GMAO_contratdet_prop
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
@@ -120,7 +123,7 @@ if ($tmpProd->Hotline>0 || $tmpProd->TeleMaintenance > 0 || $tmpProd->Maintenanc
                             ".($tmpProd->isSAV>0?$tmpProd->isSAV:0).",'".addslashes($tmpProd->SLA)."',".($tmpProd->durValid>0?$tmpProd->durValid:0).",
                             ".($tmpProd->Hotline>0?$tmpProd->Hotline:0).",".($tmpProd->TeleMaintenance>0?$tmpProd->TeleMaintenance:0).",".($tmpProd->Maintenance>0?$tmpProd->Maintenance:0).",
                             ".($isMnt?3:($isSAV?4:($isTkt?2:0))).")";
-    $sql1 = $db->query($requete);
+    $sql1 = $db->query($requete2);
 //print $requete;
 
     //lier a contratProp normalement OK??

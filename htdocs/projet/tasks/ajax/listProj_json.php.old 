@@ -20,8 +20,7 @@ require_once('../../../main.inc.php');
 
  $extra = $_REQUEST['extra'];
 
-$user->id = $user_id;
-$user->fetch();
+$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -65,14 +64,14 @@ if($searchOn=='true')
         $searchField = "p.title";
     }
     if ($searchField == "socname"){
-        $searchField = "llx_societe.nom";
+        $searchField = MAIN_DB_PREFIX . "societe.nom";
     }
 //    if ($searchField == "fk_user_resp"){
 //        $userseek = $_REQUEST['searchString'];
-//        $userReq = "SELECT DISTINCT rowid FROM llx_user WHERE name LIKE '%$userseek%' OR firstname  LIKE '%$userseek%' OR concat(name, ' ', firstname) LIKE '%$userseek%' OR concat(firstname, ' ', name) LIKE '%$userseek%'";
+//        $userReq = "SELECT DISTINCT rowid FROM ".MAIN_DB_PREFIX."user WHERE name LIKE '%$userseek%' OR firstname  LIKE '%$userseek%' OR concat(name, ' ', firstname) LIKE '%$userseek%' OR concat(firstname, ' ', name) LIKE '%$userseek%'";
 //        $db->query($userReq);
 //
-//        $searchField = "llx_societe.nom";
+//        $searchField = MAIN_DB_PREFIX . "societe.nom";
 //    }
     if ($_REQUEST['searchOper'] == 'eq')
     {
@@ -128,8 +127,8 @@ if($searchOn=='true')
 
 $SQL = "SELECT count(*) as cnt
           FROM " . MAIN_DB_PREFIX . "Synopsis__projet as p
-     LEFT JOIN llx_societe as s on s.rowid = p.fk_soc";
-    if (!$user->rights->societe->client->voir && !$socid) $SQL .= ", llx_societe_commerciaux as sc";
+     LEFT JOIN " . MAIN_DB_PREFIX . "societe as s on s.rowid = p.fk_soc";
+    if (!$user->rights->societe->client->voir && !$socid) $SQL .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $SQL .= "
          WHERE 1 = 1";
 if (!$user->rights->societe->client->voir && !$socid) $SQL .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -141,7 +140,7 @@ if ($extra == "viewmine")
 {
     $SQL .= " AND p.fk_user_resp =  ".$user_id . " ";
 }
-//$SQL .= "   AND llx_societe.rowid = p.fk_soc ".$wh;
+//$SQL .= "   AND ".MAIN_DB_PREFIX."societe.rowid = p.fk_soc ".$wh;
 $SQL .= $wh;
 
 $result = $db->query($SQL);
@@ -182,9 +181,9 @@ $SQL .= "
                    AND fk_projet = p.rowid ) as cntMyTask,
                p.fk_user_resp
           FROM ";
-    if (!$user->rights->societe->client->voir && !$socid) $SQL .= " llx_societe_commerciaux as sc,";
+    if (!$user->rights->societe->client->voir && !$socid) $SQL .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
 $SQL .= " " . MAIN_DB_PREFIX . "Synopsis__projet as p ";
-$SQL .= " LEFT JOIN llx_societe as s on s.rowid = p.fk_soc";
+$SQL .= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on s.rowid = p.fk_soc";
 $SQL .= "
          WHERE 1 = 1";
 if (!$user->rights->societe->client->voir && !$socid) $SQL .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
@@ -197,7 +196,7 @@ if ($extra == "viewmine")
     $SQL .= " AND p.fk_user_resp =  ".$user_id . " ";
 }
 
-//$SQL .= "   AND llx_societe.rowid = p.fk_soc
+//$SQL .= "   AND ".MAIN_DB_PREFIX."societe.rowid = p.fk_soc
 $SQL .= " ".$wh."
       ORDER BY $sidx $sord
          LIMIT $start , $limit";
@@ -213,8 +212,7 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     $soc->fetch($row[socid]);
     $responce->rows[$i]['id']=$row[id];
     $localUser = new User($db);
-    $localUser->id = $row[fk_user_resp];
-    $localUser->fetch();
+    $localUser->fetch($row[fk_user_resp]);
     $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
     $responce->rows[$i]['cell']=array($row[id],
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".utf8_encode($row['nom'])."</a>",

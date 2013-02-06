@@ -1,8 +1,5 @@
 <?php
 
-//ini_set('display_errors', 1);
-//error_reporting(E_ALL);
-
 /* Copyright (C) 2002-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2007 Regis Houssin        <regis@dolibarr.fr>
@@ -62,7 +59,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 
-if ($conf->projet->enabled) {
+if (isset($conf->projet->enabled)) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 }
@@ -87,12 +84,12 @@ $result = restrictedArea($user, 'synopsisficheinter', $fichinterid, 'fichinter')
 /*
  * Traitements des actions
  */
-if ($_REQUEST["action"] != 'create' && $_REQUEST["action"] != 'add' && !$_REQUEST["id"] > 0) {
+if ((isset($_REQUEST["action"]) && $_REQUEST["action"] != 'create' && $_REQUEST["action"] != 'add') && !$_REQUEST["id"] > 0) {
     Header("Location: index.php");
     return;
 }
 
-if ($_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
     $fichinter = new Fichinter($db);
     $fichinter->id = $_REQUEST["id"];
     $fichinter->fetch($_REQUEST["id"]);
@@ -108,7 +105,7 @@ if ($_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') 
         $mesg = '<div class="error ui-state-error">' . $fichinter->error . '</div>';
     }
 }
-if ($_REQUEST['action'] == 'editExtra') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
     $remId = array();
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^extraKey-([0-9]*)/', $key, $arr) || preg_match('/^type-([0-9]*)/', $key, $arr)) {
@@ -122,25 +119,25 @@ if ($_REQUEST['action'] == 'editExtra') {
 
             //Y'a quelque chose ?
             $requete = "DELETE
-                          FROM llx_Synopsis_fichinter_extra_value
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
                          WHERE interv_refid = " . $_REQUEST['id'] . "
                            AND typeI = 'FI'
                            AND extra_key_refid= " . $idExtraKey;
             $sql = $db->query($requete);
             if ($type == 'checkbox') {
                 if ($val == 'On' || $val == 'on' || $val == 'ON') {
-                    $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",1,'FI')";
                     $sql = $db->query($requete);
                 } else {
-                    $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",0,'FI')";
                     $sql = $db->query($requete);
                 }
             } else {
-                $requete = "INSERT INTO llx_Synopsis_fichinter_extra_value
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
                                          (interv_refid,extra_key_refid,extra_value,typeI)
                                   VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",'" . addslashes($val) . "','FI')";
                 $sql = $db->query($requete);
@@ -149,7 +146,7 @@ if ($_REQUEST['action'] == 'editExtra') {
     }
 }
 
-if ($_REQUEST["action"] == 'add') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 
     $fichinter = new Fichinter($db);
 
@@ -192,7 +189,7 @@ if (!($user->admin || isset($groups[11])) && !(isset($_REQUEST['action']) && $_R
         header('Location: ' . str_replace("fiche.php", "ficheFast.php", "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
 
 
-if ($_POST["action"] == 'update') {
+if (isset($_POST["action"]) && $_POST["action"] == 'update') {
     $fichinter = new Fichinter($db);
 
     $fichinter->date = dol_mktime($_POST["phour"], $_POST["pmin"], $_POST["psec"], $_POST["remonth"], $_POST["reday"], $_POST["reyear"]);
@@ -208,7 +205,7 @@ if ($_POST["action"] == 'update') {
 /*
  * Generer ou regenerer le document PDF
  */
-if ($_REQUEST['action'] == 'builddoc') {    // En get ou en post
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'builddoc') {    // En get ou en post
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->fetch_lines();
@@ -238,13 +235,13 @@ if ($_REQUEST['action'] == 'builddoc') {    // En get ou en post
 /*
  * Classer dans un projet
  */
-if ($_POST['action'] == 'classin') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'classin') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->set_project($user, $_POST['projetidp']);
 }
 
-if ($_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
     if ($user->rights->synopsisficheinter->supprimer) {
         $fichinter = new Fichinter($db);
         $fichinter->fetch($_REQUEST['id']);
@@ -254,7 +251,7 @@ if ($_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes') {
     exit;
 }
 
-if ($_POST['action'] == 'setdate_delivery') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdate_delivery') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_date_delivery($user, dol_mktime(12, 0, 0, $_POST['liv_month'], $_POST['liv_day'], $_POST['liv_year']));
@@ -262,7 +259,7 @@ if ($_POST['action'] == 'setdate_delivery') {
         dol_print_error($db, $fichinter->error);
 }
 
-if ($_POST['action'] == 'setdescription') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_description($user, $_POST['description']);
@@ -271,7 +268,7 @@ if ($_POST['action'] == 'setdescription') {
 }
 
 
-if ($_POST['action'] == 'setdescription2') {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription2') {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $result = $fichinter->set_note_private($user, $_POST['description2']);
@@ -285,7 +282,7 @@ if ($_POST['action'] == 'setdescription2') {
 //    var_dump($_REQUEST);
 //    exit;
 
-if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) {
     if ($_POST['np_desc'] && ($_POST['durationhour'] || $_POST['durationmin'])) {
         $fichinter = new Fichinter($db);
         $ret = $fichinter->fetch($_POST['fichinterid']);
@@ -302,7 +299,7 @@ if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) 
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixDepInterv
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND fk_product = " . $typeIntervProd;
             $sql = $db->query($requete);
@@ -314,7 +311,7 @@ if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) 
             $isForfait = 1;
         } else {
             $requete = "SELECT prix_ht
-                          FROM llx_Synopsis_fichinter_User_PrixTypeInterv
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND typeInterv_refid = " . $fk_typeinterv;
             $sql = $db->query($requete);
@@ -358,15 +355,15 @@ if ($_POST['action'] == "addligne" && $user->rights->synopsisficheinter->creer) 
 /*
  *  Mise a jour d'une ligne d'intervention
  */
-if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->creer && $_POST["save"] == $langs->trans("Save")) {
+if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->creer && $_POST["save"] == $langs->trans("Save")) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_POST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FIdet update");
         exit;
     }
     $fichinter = new Fichinter($db);
     if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FI update");
         exit;
     }
     $fichinter->info($fichinterline->fk_fichinter);
@@ -389,7 +386,7 @@ if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->cree
         $fichinterline->fk_typeinterv = 4;
         $fichinterline->typeIntervProd = $arr[1];
         $requete = "SELECT prix_ht
-                      FROM llx_Synopsis_fichinter_User_PrixDepInterv
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
                      WHERE user_refid = " . $fichinter->user_creation->id . "
                        AND fk_product = " . $fichinterline->typeIntervProd;
         $sql = $db->query($requete);
@@ -402,7 +399,7 @@ if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->cree
         $fichinterline->isForfait = 1;
     } else {
         $requete = "SELECT prix_ht
-                      FROM llx_Synopsis_fichinter_User_PrixTypeInterv
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
                      WHERE user_refid = " . $fichinter->user_creation->id . "
                        AND typeInterv_refid = " . $fichinterline->fk_typeinterv;
         $sql = $db->query($requete);
@@ -415,12 +412,24 @@ if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->cree
         $fichinterline->isForfait = 0;
     }
 
+
     $fichinterline->fk_contratdet = $_REQUEST['fk_contratdet'];
 
-    $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+//    $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+
+    if (isset($_REQUEST['comLigneId']) && $_REQUEST['comLigneId'] != $fichinterline->comLigneId) {
+        $fichinterline->comLigneId = $_REQUEST['comLigneId'];
+        $ligneCommande = new OrderLine($db);
+        $ligneCommande->fetch($fichinterline->comLigneId);
+//        die($ligneCommande->fk_product);
+        if ($ligneCommande->fk_product)
+            $fichinterline->typeIntervProd = $ligneCommande->fk_product;
+    }
 
 
     $result = $fichinterline->update();
+    $fichinter->majPrixDi();
+
 
     if ($_REQUEST['lang_id']) {
         $outputlangs = new Translate("", $conf);
@@ -432,16 +441,16 @@ if ($_POST['action'] == 'updateligne' && $user->rights->synopsisficheinter->cree
 /*
  *  Supprime une ligne d'intervention SANS confirmation
  */
-if ($_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->creer && !$conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     $fichinterline = new FichinterLigne($db);
     if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FIdet delete");
         exit;
     }
     $result = $fichinterline->delete_line();
     $fichinter = new Fichinter($db);
     if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur FI delete");
         exit;
     }
     if ($_REQUEST['lang_id']) {
@@ -454,17 +463,17 @@ if ($_REQUEST['action'] == 'deleteline' && $user->rights->synopsisficheinter->cr
 /*
  *  Supprime une ligne d'intervention AVEC confirmation
  */
-if ($_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes' && $conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes' && $conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
     if ($user->rights->synopsisficheinter->creer) {
         $fichinterline = new FichinterLigne($db);
         if ($fichinterline->fetch($_REQUEST['ligne']) <= 0) {
-            dol_print_error($db);
+            dol_print_error($db, "Erreur FIdet delete confirm");
             exit;
         }
         $result = $fichinterline->delete_line();
         $fichinter = new Fichinter($db);
         if ($fichinter->fetch($fichinterline->fk_fichinter) <= 0) {
-            dol_print_error($db);
+            dol_print_error($db, "Erreur FI deleteconfirm");
             exit;
         }
         if ($_REQUEST['lang_id']) {
@@ -481,7 +490,7 @@ if ($_REQUEST['action'] == 'confirm_deleteline' && $_REQUEST['confirm'] == 'yes'
  * Ordonnancement des lignes
  */
 
-if ($_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->line_up($_REQUEST['rowid']);
@@ -494,7 +503,7 @@ if ($_REQUEST['action'] == 'up' && $user->rights->synopsisficheinter->creer) {
     exit;
 }
 
-if ($_REQUEST['action'] == 'down' && $user->rights->synopsisficheinter->creer) {
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'down' && $user->rights->synopsisficheinter->creer) {
     $fichinter = new Fichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->line_down($_REQUEST['rowid']);
@@ -523,7 +532,7 @@ launchRunningProcess($db, 'Fichinter', $_GET['id']);
 
 llxHeader($js, "Fiche intervention");
 
-if ($_REQUEST["action"] == 'create') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     /*
      * Mode creation
      * Creation d'une nouvelle fiche d'intervention
@@ -566,7 +575,7 @@ if ($_REQUEST["action"] == 'create') {
 
         print "<tr><th class='ui-widget-header ui-state-default'>" . $langs->trans("Date") . "</th>
                    <td colspan=3 class='ui-widget-content'>";
-        $html->select_date(time(), "p", '', '', '', 'fichinter');
+        $html->select_date($db->jdate(time()), "p", '', '', '', 'fichinter');
         print "</td></tr>";
 
         print "<input type=\"hidden\" name=\"action\" value=\"add\">";
@@ -598,7 +607,7 @@ if ($_REQUEST["action"] == 'create') {
             print '</td></tr>';
         }
 //lié a un contrat de maintenance ou mixte
-        $requete = "SELECT * FROM llx_contrat WHERE extraparams in (3,7) AND fk_soc =" . $societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE extraparams in (3,7) AND fk_soc =" . $societe->id;
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';
@@ -615,7 +624,7 @@ if ($_REQUEST["action"] == 'create') {
             print "</SELECT>";
         }
 
-        $requete = "SELECT * FROM llx_commande WHERE fk_soc =" . $societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc =" . $societe->id;
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Commande") . '</th>';
@@ -660,7 +669,7 @@ if ($_REQUEST["action"] == 'create') {
 
           //Extra Field
           $requete = "SELECT *
-          FROM llx_Synopsis_fichinter_extra_key
+          FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
           WHERE active = 1
           AND (isQuality is NULL or isQuality <> 1)
           AND isInMainPanel = 1
@@ -722,7 +731,7 @@ if ($_REQUEST["action"] == 'create') {
           break;
           case "radio": {
           print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-          $requete = "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+          $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
           $sql1 = $db->query($requete);
           if ($db->num_rows($sql1) > 0) {
           print "<table width=100%>";
@@ -761,15 +770,15 @@ if ($_REQUEST["action"] == 'create') {
 
         print '</table>';
         print '</form>';
-    } else if ($_REQUEST['action'] == "create" && $_REQUEST['comLigneId'] > 0) {
+    } else if (isset($_REQUEST["action"]) && $_REQUEST['action'] == "create" && $_REQUEST['comLigneId'] > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
         $socid = false;
         $requete = "SELECT fk_soc,
-                           llx_commande.rowid
-                      FROM llx_commandedet,
-                           llx_commande
-                     WHERE llx_commandedet.fk_commande = llx_commande.rowid
-                       AND llx_commandedet.rowid = " . $_REQUEST['comLigneId'];
+                           " . MAIN_DB_PREFIX . "commande.rowid
+                      FROM " . MAIN_DB_PREFIX . "commandedet,
+                           " . MAIN_DB_PREFIX . "commande
+                     WHERE " . MAIN_DB_PREFIX . "commandedet.fk_commande = " . MAIN_DB_PREFIX . "commande.rowid
+                       AND " . MAIN_DB_PREFIX . "commandedet.rowid = " . $_REQUEST['comLigneId'];
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         $socid = $res->fk_soc;
@@ -807,7 +816,7 @@ if ($_REQUEST["action"] == 'create') {
         if ($_REQUEST['datei'] && preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", $_REQUEST['datei'], $arr)) {
             $tmpDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]);
         }
-        $html->select_date($tmpDate, "p", '', '', '', 'demandeInterv');
+        $html->select_date($db->jdate($tmpDate), "p", '', '', '', 'demandeInterv');
         print "</td></tr>";
 
 
@@ -842,8 +851,7 @@ if ($_REQUEST["action"] == 'create') {
         print '<tr>';
         print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DefaultModel") . '</th>';
         print '<td colspan="3" class="ui-widget-content">';
-        $model = new ModelePDFFicheinter();
-        $liste = $model->liste_modeles($db);
+        $liste = ModelePDFFicheinter::liste_modeles($db);
         $html->select_array('model', $liste, $conf->global->FICHEINTER_ADDON_PDF);
         print "</td></tr>";
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Description") . '</th>';
@@ -861,7 +869,7 @@ if ($_REQUEST["action"] == 'create') {
         print '</td></tr>';
 //Extra Field
         $requete = "SELECT *
-                      FROM llx_Synopsis_fichinter_extra_key
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key
                      WHERE active = 1
                        AND (isQuality is NULL OR isQuality <> 1)
                        AND isInMainPanel = 1
@@ -926,7 +934,7 @@ if ($_REQUEST["action"] == 'create') {
                     break;
                 case "radio": {
                         print "<td colspan='" . $colspan . "'  valign='middle' class='ui-widget-content'>";
-                        $requete = "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
                         $sql1 = $db->query($requete);
                         if ($db->num_rows($sql1) > 0) {
                             print "<table width=100%>";
@@ -983,7 +991,7 @@ EOF;
 
         require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
         $var = true;
-        $requete = "SELECT * FROM llx_commandedet WHERE rowid = " . $_REQUEST['comLigneId'];
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $_REQUEST['comLigneId'];
         $sql2 = $db->query($requete);
         $res2 = $db->fetch_object($sql2);
 
@@ -1007,7 +1015,7 @@ EOF;
         }
         print '</td>';
         print "<td><SELECT name='fk_typeinterv'>";
-        $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
         $sql3 = $db->query($requete);
         print "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
@@ -1021,7 +1029,7 @@ EOF;
         print "</SELECT></td>";
         // Date d'DI
         print '<td>';
-        $html->select_date(time(), 'di', 0, 0, 0, "addinter");
+        $html->select_date($db->jdate(time()), 'di', 0, 0, 0, "addinter");
         print '</td>';
 
         // Duree
@@ -1076,7 +1084,7 @@ EOF;
     $fichinter = new Fichinter($db);
     $result = $fichinter->fetch($_REQUEST["id"]);
     if (!$result > 0) {
-        dol_print_error($db);
+//        dol_print_error($db);
         exit;
     }
     $fichinter->fetch_client();
@@ -1095,6 +1103,9 @@ EOF;
     if ($_REQUEST['action'] == 'delete') {
         $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $fichinter->id, $langs->trans('DeleteIntervention'), $langs->trans('ConfirmDeleteIntervention'), 'confirm_delete');
         print '<br>';
+    }
+    if ($_REQUEST['action'] == 'rafraichePrixFI') {
+        $fichinter->majPrixDi();
     }
 
     /*
@@ -1149,11 +1160,11 @@ EOF;
     if ($_REQUEST['action'] == 'editdate_delivery') {
         print '<form name="editdate_delivery" action="' . $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '" method="post">';
         print '<input type="hidden" name="action" value="setdate_delivery">';
-        $html->select_date($fichinter->date, 'liv_', '', '', '', "editdate_delivery");
+        $html->select_date($db->jdate($fichinter->date), 'liv_', '', '', '', "editdate_delivery");
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($fichinter->date, 'day');
+        print dol_print_date($db->jdate($fichinter->date), 'day');
     }
     $fichinter->info($fichinter->id);
     print '    </td>';
@@ -1279,19 +1290,21 @@ EOF;
 
     // di
     if (isset($user->rights->synopsisdemandeinterv)) {
-        print '<th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
+        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("DI") . '</th>';
         print '<td colspan=1 class="ui-widget-content">';
         $tabDI = $fichinter->getDI();
-        $requete = "SELECT *
-                  FROM llx_Synopsis_demandeInterv
-                 WHERE rowid IN (".implode(",", $tabDI).")";
-        print "<table class='nobordernopadding' width=100%>";
-        if ($resql = $db->query($requete)) {
-            while ($res = $db->fetch_object($resql)) {
-                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
+        if (count($tabDI) > 0) {
+            $requete = "SELECT *
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                 WHERE rowid IN (" . implode(",", $tabDI) . ")";
+            print "<table class='nobordernopadding' width=100%>";
+            if ($resql = $db->query($requete)) {
+                while ($res = $db->fetch_object($resql)) {
+                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
+                }
             }
+            print "</table>";
         }
-        print "</table>";
         print '</td></tr>';
     }
 
@@ -1302,11 +1315,12 @@ EOF;
                        k.id,
                        v.extra_value,
                        k.fullLine
-                  FROM llx_Synopsis_fichinter_extra_key as k
-             LEFT JOIN llx_Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $fichinter->id . " AND typeI = 'FI'
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key as k
+             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $fichinter->id . " AND typeI = 'FI'
                  WHERE k.active = 1
                    AND isInMainPanel = 1
-                   AND (isQuality <> 1 OR isQuality is NULL)";
+                   AND (isQuality <> 1 OR isQuality is NULL)
+                  ORDER BY rang, label";
     $sql = $db->query($requete);
     $modulo = false;
     while ($res = $db->fetch_object($sql)) {
@@ -1379,9 +1393,9 @@ EOF;
                 case "radio": {
                         print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
-//                    print "<form action='fiche.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
+//                    print "<form action='fiche.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
                         $requete = "SELECT *
-                          FROM llx_Synopsis_fichinter_extra_values_choice
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice
                          WHERE key_refid = " . $res->id;
 
                         $sql1 = $db->query($requete);
@@ -1407,7 +1421,7 @@ EOF;
                 print '<a name="anchor' . $res->id . '"></a>'; // ancre
                 print ($res->extra_value == 1 ? 'Oui' : 'Non');
             } else if ($res->type == 'radio') {
-                $requete = "SELECT * FROM llx_Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);
                 print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
@@ -1446,8 +1460,8 @@ EOF;
     print '<table class="noborder" width="100%">';
 //    $sql = 'SELECT ft.rowid, ft.description, ft.fk_demandeInterv, ft.duree, ft.rang, t.id as typeId, t.label as typeinterv';
 //    $sql.= ', ft.date as date_intervention, qte, pu_ht, total_ht, fk_commandedet, fk_contratdet, isForfait';
-//    $sql.= ' FROM llx_Synopsis_demandeIntervdet as ft';
-//    $sql.= " LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv ";
+//    $sql.= ' FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet as ft';
+//    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv ";
 //    $sql.= ' WHERE ft.fk_demandeInterv = ' . $demandeIntervid;
 //    $sql.= ' ORDER BY ft.rang ASC, ft.rowid';
 
@@ -1467,8 +1481,8 @@ EOF;
                    fk_contratdet,
                    isForfait';
     $sql.= ', ft.date as date_intervention';
-    $sql.= ' FROM llx_Synopsis_fichinterdet as ft';
-    $sql.= " LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
+    $sql.= ' FROM ' . MAIN_DB_PREFIX . 'Synopsis_fichinterdet as ft';
+    $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
     $sql.= ' WHERE ft.fk_fichinter = ' . $fichinterid;
     $sql.= ' ORDER BY ft.rang ASC, ft.rowid';
     $resql = $db->query($sql);
@@ -1479,6 +1493,7 @@ EOF;
         if ($num) {
             print '<tr class="liste_titre">';
             print '<td>' . $langs->trans('Description') . '</td>';
+            print '<td></td>';
             print '<td>' . $langs->trans('Type') . '</td>';
             print '<td>' . $langs->trans('Date') . '</td>';
             print '<td>' . $langs->trans('Duration') . '</td>';
@@ -1493,7 +1508,7 @@ EOF;
             // Ligne en mode visu
             if ($_REQUEST['action'] != 'editline' || $_REQUEST['ligne'] != $objp->rowid) {
                 print '<tr ' . $bc[$var] . '>';
-                print '<td>';
+                print '<td colspan="2">';
                 print '<a name="' . $objp->rowid . '"></a>'; // ancre pour retourner sur la ligne
                 print nl2br($objp->description);
 
@@ -1505,7 +1520,7 @@ EOF;
                     print "&nbsp;&nbsp;" . $tmpProdDep->getNomUrl(1);
                 }
                 print '</td>';
-                print '<td width="150">' . dol_print_date($objp->date_intervention, 'day') . '</td>';
+                print '<td width="150">' . dol_print_date($db->jdate($objp->date_intervention), 'day') . '</td>';
                 print '<td width="150">' . ConvertSecondToTime($objp->duree) . '</td>';
 
                 print "</td>\n";
@@ -1552,24 +1567,26 @@ EOF;
                 }
 
                 print '</tr>';
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
-                $contrat = getContratObj($fichinter->fk_contrat);
-                $type = getTypeContrat_noLoad($fichinter->fk_contrat);
-                if ($type == 7) {
-                    $contrat->fetch($fichinter->fk_contrat);
-                    $contrat->fetch_lignes(true);
-                    print "<tr id='contratLigne" . $val->id . "' " . $bc[$var] . ">";
-                    print "<td id='showDetail' class='showDetail'><span style='float: left;' class='ui-icon ui-icon-search'></span>D&eacute;tail<td colspan=10><table style='display: none;'>";
-                    foreach ($contrat->lignes as $key => $val) {
-                        if ($val->id == $objp->fk_contratdet) {
-                            print "<tr><td>";
-                            print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                            $tmp = preg_replace('/tt' . $objp->fk_contratdet . '/', "ttedit" . $objp->fk_contratdet . "", $contrat->display1Line($val));
-                            print $tmp;
-                            print "</ul>";
+                if ($fichinter->fk_contrat) {
+                    require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+                    $contrat = getContratObj($fichinter->fk_contrat);
+                    $type = $contrat->getTypeContrat_noLoad($fichinter->fk_contrat);
+                    if ($type == 7) {
+                        $contrat->fetch($fichinter->fk_contrat);
+                        $contrat->fetch_lines(true);
+                        print "<tr id='contratLigne" . $val->id . "' " . $bc[$var] . ">";
+                        print "<td id='showDetail' class='showDetail'><span style='float: left;' class='ui-icon ui-icon-search'></span>D&eacute;tail<td colspan=10><table style='display: none;'>";
+                        foreach ($contrat->lines as $key => $val) {
+                            if ($val->id == $objp->fk_contratdet) {
+                                print "<tr><td>";
+                                print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
+                                $tmp = preg_replace('/tt' . $objp->fk_contratdet . '/', "ttedit" . $objp->fk_contratdet . "", $contrat->display1Line($contrat, $val));
+                                print $tmp;
+                                print "</ul>";
+                            }
                         }
+                        print "</table>";
                     }
-                    print "</table>";
                 }
             }
             $fichinter->info($fichinter->id);
@@ -1595,7 +1612,7 @@ EOF;
                     print '<textarea name="desc" cols="70" class="flat" rows="' . ROWS_2 . '">' . preg_replace('/<br[ ]*\/?>/i', '', $objp->description) . '</textarea>';
                 }
                 print '</td>';
-                $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER by rang";
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER by rang";
                 $sql1 = $db->query($requete);
                 print "<td><SELECT name='fk_typeinterv'>";
                 print "<OPTION value='-1'>Selectionner-></OPTION>";
@@ -1603,12 +1620,12 @@ EOF;
                     if (!$fichinter->fk_contrat || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
                         //Si déplacement OptGroup
                         if ($res1->isDeplacement == 1) {
-                            $requete1 = "SELECT llx_product.label,
-					  llx_product.ref,
-					  llx_product.rowid
-				     FROM llx_product,
-					  llx_Synopsis_fichinter_User_PrixDepInterv
-				    WHERE user_refid = " . $fichinter->user_creation->id . " AND llx_product.rowid = fk_product";
+                            $requete1 = "SELECT " . MAIN_DB_PREFIX . "product.label,
+					  " . MAIN_DB_PREFIX . "product.ref,
+					  " . MAIN_DB_PREFIX . "product.rowid
+				     FROM " . MAIN_DB_PREFIX . "product,
+					  " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+				    WHERE user_refid = " . $fichinter->user_creation->id . " AND " . MAIN_DB_PREFIX . "product.rowid = fk_product";
                             $sql2 = $db->query($requete1);
                             if ($db->num_rows($sql2) > 0) {
                                 print "<OPTGROUP label='" . $res1->label . "'>";
@@ -1640,7 +1657,7 @@ EOF;
 
                 // Date d'intervention
                 print '<td>';
-                $html->select_date($objp->date_intervention, 'di', 0, 0, 0, "date_intervention");
+                $html->select_date($db->jdate($objp->date_intervention), 'di', 0, 0, 0, "date_intervention");
                 print '</td>';
 
                 // Duration
@@ -1648,22 +1665,27 @@ EOF;
                 $html->select_duration('duration', $objp->duree);
                 print '</td>';
 
-                require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
+                require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/divers.class.php');
                 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
                 if ($fichinter->fk_commande > 0) {
-                    $com = new Commande($db);
+                    $com = new Synopsis_Commande($db);
                     $com->fetch($fichinter->fk_commande);
                     $com->fetch_group_lines(0, 0, 0, 0, 1);
                     print "<td><select name='comLigneId'>";
                     print "<option value='0'>S&eacute;lectionner-></option>";
 
                     foreach ($com->lines as $key => $val) {
-                        $prod = new Product($db);
-                        $prod->fetch($val->fk_product);
-                        if ($val->id == $objp->fk_commandedet) {
-                            print "<option SELECTED value='" . $val->id . "'>" . $prod->ref . " " . $val->description . " </option>";
-                        } else {
-                            print "<option value='" . $val->id . "'>" . $prod->ref . " " . $val->description . "</option>";
+                        $text = $val->description;
+                        if ($val->fk_product) {
+                            $prod = new Product($db);
+                            $prod->fetch($val->fk_product);
+                            $text = $prod->ref . " " . $text;
+
+                            if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
+                                print "<option selected='selected' value='" . $val->rowid . "'>" . $text . " </option>";
+                            } elseif ($text != '' && $text != ' ' && $prod->type != 0) {
+                                print "<option value='" . $val->rowid . "'>" . $text . "</option>";
+                            }
                         }
                     }
                     print "</select>";
@@ -1690,28 +1712,30 @@ EOF;
                 print '<br /><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '"></td>';
                 print '</tr>' . "\n";
 
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
-                $contrat = getContratObj($fichinter->fk_contrat);
-                $type = getTypeContrat_noLoad($fichinter->fk_contrat);
-                if ($type == 7) {
-                    $contrat->fetch($fichinter->fk_contrat);
-                    $contrat->fetch_lignes(true);
-                    print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
-                    foreach ($contrat->lignes as $key => $val) {
+                if ($fichinter->fk_contrat > 0) {
+                    require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+                    $contrat = getContratObj($fichinter->fk_contrat);
+                    $type = getTypeContrat_noLoad($fichinter->fk_contrat);
+                    if ($type == 7) {
+                        $contrat->fetch($fichinter->fk_contrat);
+                        $contrat->fetch_lines(true);
+                        print "<tr " . $bc[$var] . "><td colspan=8 style='border:1px Solid;'><table>";
+                        foreach ($contrat->lines as $key => $val) {
 //TODO ajouter filtre
-                        if ($val->statut >= 0 && $val->statut < 5) {
-                            $extra = "";
+                            if ($val->statut >= 0 && $val->statut < 5) {
+                                $extra = "";
 //                            if ($val->id == $objp->fk_contratdet) $extra="checked";
 //                            print "<tr><td><input ".$extra." type=checkbox name='fk_contratdet-".$val->id."' value='".$val->id."'><td>";
-                            if ($val->id == $objp->fk_contratdet) {
-                                print "<tr><td>";
-                                print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                                print $contrat->display1Line($val);
-                                print "</ul>";
+                                if ($val->id == $objp->fk_contratdet) {
+                                    print "<tr><td>";
+                                    print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
+                                    print $contrat->display1Line($contrat, $val);
+                                    print "</ul>";
+                                }
                             }
                         }
+                        print "</table>";
                     }
-                    print "</table>";
                 }
 
 
@@ -1723,7 +1747,7 @@ EOF;
 
         $db->free($resql);
     } else {
-        dol_print_error($db);
+        dol_print_error($db, "Erreur sql : " . $sql);
     }
 
     /*
@@ -1760,7 +1784,7 @@ EOF;
             print '<textarea style="width: 100%!important; height: 2em!important;" class="flat" cols="70" name="np_desc" rows="' . ROWS_2 . '"></textarea>';
         }
         print '</td>';
-        $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
         $sql1 = $db->query($requete);
         print "<td><SELECT id='addfk_typeinterv' name='fk_typeinterv'>";
         print "<OPTION value='-1'>Selectionner-></OPTION>";
@@ -1768,12 +1792,12 @@ EOF;
             if (!$fichinter->fk_contrat || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
                 //Si déplacement OptGroup
                 if ($res1->isDeplacement == 1) {
-                    $requete1 = "SELECT llx_product.label,
-				  llx_product.ref,
-				  llx_product.rowid
-			     FROM llx_product,
-				  llx_Synopsis_fichinter_User_PrixDepInterv
-			    WHERE user_refid = " . $fichinter->user_creation->id . " AND llx_product.rowid = fk_product";
+                    $requete1 = "SELECT " . MAIN_DB_PREFIX . "product.label,
+				  " . MAIN_DB_PREFIX . "product.ref,
+				  " . MAIN_DB_PREFIX . "product.rowid
+			     FROM " . MAIN_DB_PREFIX . "product,
+				  " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+			    WHERE user_refid = " . $fichinter->user_creation->id . " AND " . MAIN_DB_PREFIX . "product.rowid = fk_product";
                     $sql2 = $db->query($requete1);
                     if ($db->num_rows($sql2) > 0) {
                         print "<OPTGROUP label='" . $res1->label . "'>";
@@ -1800,7 +1824,7 @@ EOF;
         print "</SELECT>";
         // Date d'intervention
         print '<td>';
-        $html->select_date(time(), 'di', 0, 0, 0, "addinter");
+        $html->select_date($db->jdate(time()), 'di', 0, 0, 0, "addinter");
         print '</td>';
 
         // Duree
@@ -1815,7 +1839,7 @@ EOF;
         print '<td align="center" valign="middle" colspan="4"><input type="submit" class="button" value="' . $langs->trans('Add') . '" name="addligne"></td>';
         print '</tr>';
         if ($fichinter->fk_contrat > 0) {
-            $requete = "SELECT fk_contratdet FROM llx_Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
             $sql = $db->query($requete);
             $arrTmp = array();
             while ($res = $db->fetch_object($sql)) {
@@ -1826,13 +1850,13 @@ EOF;
             $type = getTypeContrat_noLoad($fichinter->fk_contrat);
             if ($type == 7) {
                 $contrat->fetch($fichinter->fk_contrat);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
                 print "<tr><td colspan=11 style='border:1px Solid; border-top: 0px;'><table width=100%>";
-                foreach ($contrat->lignes as $key => $val) {
+                foreach ($contrat->lines as $key => $val) {
                     if ($val->statut >= 0 && $val->statut < 5 && !in_array($val->id, $arrTmp)) {
                         print "<tr><td><input type=checkbox name='fk_contratdet-" . $val->id . "' value='" . $val->id . "'><td>";
                         print "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                        print $contrat->display1Line($val);
+                        print $contrat->display1Line($contrat, $val);
                         print "</ul>";
                     }
                 }
@@ -1998,7 +2022,7 @@ print <<<EOF
         });
         jQuery("#jsContrat li").dblclick(function(){
             var id = jQuery(this).attr('id');
-            location.href=DOL_URL_ROOT+'/Babel_GMAO/contratDetail.php?id='+id;
+            location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
         });
     });
 EOF;

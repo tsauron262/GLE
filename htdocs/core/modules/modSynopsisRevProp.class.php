@@ -41,7 +41,7 @@ class modSynopsisRevProp extends DolibarrModules
         $this->numero = 23000;
 
         $this->family = "Synopsis";
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = "Revision prop";
         $this->description = "Permet de reviser les proposition commerciale et d'afficher le doc indicable";
         $this->version = '1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISREVPROP';

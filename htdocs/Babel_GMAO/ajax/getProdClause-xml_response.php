@@ -24,7 +24,7 @@
 
     $tmpSoc = new Societe($db);
     $tmpSoc->fetch($fk_soc);
-    $requete = "SELECT clause FROM Babel_Product WHERE rowid=".$_REQUEST['prod'];
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE rowid=".$_REQUEST['prod'];
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($res))
     {

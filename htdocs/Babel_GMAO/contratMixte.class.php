@@ -72,8 +72,8 @@ class contratMixte extends contrat {
             $this->SLA = $res->SLA;
             $this->isSAV = $res->isSAV;
 
-            $requete = "SELECT unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(llx_product.durSav,0) MONTH)) as dfinprev,
-                               unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(llx_product.durSav,0) MONTH)) as dfin,
+            $requete = "SELECT unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfinprev,
+                               unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfin,
                                unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddeb,
                                unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddebprev,
                                ".MAIN_DB_PREFIX."contratdet.qty,
@@ -81,10 +81,10 @@ class contratMixte extends contrat {
                                ".MAIN_DB_PREFIX."contratdet.subprice as pu,
                                Babel_GMAO_contratdet_prop.durValid as durVal,
                                Babel_GMAO_contratdet_prop.fk_contrat_prod,
-                               Babel_product_serial_cont.serial_number
+                               ".MAIN_DB_PREFIX."product_serial_cont.serial_number
                           FROM Babel_GMAO_contratdet_prop, ".MAIN_DB_PREFIX."contratdet
-                     LEFT JOIN llx_product ON llx_product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
-                     LEFT JOIN Babel_product_serial_cont ON Babel_product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND Babel_product_serial_cont.element_type LIKE 'contrat%'
+                     LEFT JOIN ".MAIN_DB_PREFIX."product ON ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
+                     LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont ON ".MAIN_DB_PREFIX."product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND ".MAIN_DB_PREFIX."product_serial_cont.element_type LIKE 'contrat%'
                          WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
                            AND fk_contrat =".$id;
             $sql = $this->db->query($requete);
@@ -556,9 +556,9 @@ EOF;
 
 
         $requete = "SELECT fd.rowid, fd.duree
-                      FROM ".MAIN_DB_PREFIX."fichinter as f,
-                           ".MAIN_DB_PREFIX."fichinterdet as fd,
-                           llx_Synopsis_fichinter_c_typeInterv as b
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
+                           ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
+                           ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as b
                      WHERE b.id = fd.fk_typeinterv
                        AND fd.fk_fichinter = f.rowid
                        AND b.decountTkt = 1
@@ -774,9 +774,9 @@ EOF;
                        UNIX_TIMESTAMP(d.date_valid) as dateCompare,
                        ifnull(d.avenant,9999999999) as avenant
                   FROM ".MAIN_DB_PREFIX."contratdet as d
-             LEFT JOIN llx_product as p ON  d.fk_product = p.rowid
+             LEFT JOIN ".MAIN_DB_PREFIX."product as p ON  d.fk_product = p.rowid
              LEFT JOIN Babel_GMAO_contratdet_prop as g ON g.contratdet_refid = d.rowid
-             LEFT JOIN Babel_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+             LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
                  WHERE d.fk_contrat = ".$this->id ."
               ORDER BY avenant, line_order";
 //date_debut_prevue = $objp->date_ouverture_prevue;
@@ -940,9 +940,9 @@ EOF;
                        UNIX_TIMESTAMP(d.date_valid) as dateCompare,
                        ifnull(d.avenant,9999999999) as avenant
                   FROM ".MAIN_DB_PREFIX."contratdet as d
-             LEFT JOIN llx_product as p ON  d.fk_product = p.rowid
+             LEFT JOIN ".MAIN_DB_PREFIX."product as p ON  d.fk_product = p.rowid
              LEFT JOIN Babel_GMAO_contratdet_prop as g ON g.contratdet_refid = d.rowid
-             LEFT JOIN Babel_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+             LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
                  WHERE d.fk_contrat = ".$this->id ."
                    AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 garde pour compatibilite
 
@@ -1914,7 +1914,7 @@ EOF;
             jQuery(document).ready(function(){
                 jQuery("#jsContrat li").dblclick(function(){
                     var id = jQuery(this).attr('id');
-                    location.href=DOL_URL_ROOT+'/Babel_GMAO/contratDetail.php?id='+id;
+                    location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
                 });
             });
 
@@ -1928,11 +1928,11 @@ EOF;
         print "<div class='titre'>R&eacute;sum&eacute;</div>";
         print '<div id="tabs">';
         print "<table cellpadding=15 width=600>";
-        $requete = "SELECT count(rowid) as sDI FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id;
+        $requete = "SELECT count(rowid) as sDI FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumDI = ($res->sDI>0?$res->sDI:0);
-        $requete = "SELECT count(rowid) as sFI FROM ".MAIN_DB_PREFIX."fichinter WHERE fk_contrat = ".$this->id;
+        $requete = "SELECT count(rowid) as sFI FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_contrat = ".$this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumFI = ($res->sFI>0?$res->sFI:0);
@@ -2005,20 +2005,20 @@ EOF;
 
         //Par statut d'intervention
 
-        $requete = " SELECT DISTINCT fk_statut FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
+        $requete = " SELECT DISTINCT fk_statut FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while($res=$this->db->fetch_object($sql))
         {
             $this->sumDInterByStatut[$res->fk_statut]=0;
         }
 
-        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
+        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while($res=$this->db->fetch_object($sql))
         {
             $this->sumDInterByUser[$res->fk_user]=0;
         }
-        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." GROUP BY fk_contrat";
+        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id." GROUP BY fk_contrat";
         $sql = $this->db->query($requete);
         $res=$this->db->fetch_object($sql);
         $mini = strtotime($res->mini);
@@ -2038,7 +2038,7 @@ EOF;
             $this->sumDInterCal[$i]=0;
         }
 
-        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM llx_Synopsis_demandeInterv WHERE fk_contrat = ".$this->id.' ORDER BY datei DESC';
+        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_contrat = ".$this->id.' ORDER BY datei DESC';
         $sql = $this->db->query($requete);
         $this->totalDInter = 0;
         while ($res = $this->db->fetch_object($sql))
@@ -2160,7 +2160,7 @@ EOF;
             $qty = $res->qty;
             if ($res->fk_product > 0)
             {
-                $requete = "SELECT * FROM llx_product WHERE rowid = ".$res->fk_product;
+                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product WHERE rowid = ".$res->fk_product;
                 $sql1 = $this->db->query($requete);
                 $res1 = $this->db->fetch_object($sql1);
                 $qty = $res->qty * $res1->qte;

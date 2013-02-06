@@ -44,8 +44,7 @@ $page_size = ($_REQUEST['page_size']?$_REQUEST['page_size']:-1);
         $tmpusr=new User($db);
         foreach($ndf->allArray as $key=>$val)
         {//1996-07-04
-            $tmpusr->id=$val['fk_user_author'];
-            $tmpusr->fetch();
+            $tmpusr->fetch($val['fk_user_author']);
             $ndf->statut=$val['statut'];
 
 

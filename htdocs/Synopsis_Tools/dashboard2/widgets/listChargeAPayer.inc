@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/chargesociales.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php');
 
 
 
@@ -26,7 +26,7 @@ function widget_listChargeAPayer() {
     {
         $sql = "SELECT c.rowid, c.amount, ".$db->pdate("c.date_ech")." as date_ech,";
             $sql.= " cc.libelle";
-            $sql.= " FROM llx_chargesociales as c, llx_c_chargesociales as cc";
+            $sql.= " FROM ".MAIN_DB_PREFIX."chargesociales as c, ".MAIN_DB_PREFIX."c_chargesociales as cc";
             $sql.= " WHERE c.fk_type = cc.id AND c.paye=0";
 
         $sql .= " ORDER BY c.date_ech DESC LIMIT 50";
@@ -76,7 +76,7 @@ function widget_listChargeAPayer() {
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
                     $table2 .= $facturestatic->getNomUrl(1,'');
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                     $total2 += $res->total_ttc;
                     $iter++;

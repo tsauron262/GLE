@@ -52,8 +52,8 @@ if(!$sidx) $sidx =1;
                        date_format(date_add(g.DateDeb,INTERVAL g.durValid MONTH),'%Y-%m-%d') as DateFin,
                        s.serial_number,
                        ifnull(p.ref,c.description) as description
-                  FROM ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN llx_product as p ON c.fk_product = p.rowid,
-                       Babel_GMAO_contratdet_prop as g LEFT JOIN Babel_product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
+                  FROM ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN ".MAIN_DB_PREFIX."product as p ON c.fk_product = p.rowid,
+                       Babel_GMAO_contratdet_prop as g LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
                  WHERE c.fk_contrat=".$id."
                    AND c.rowid = g.contratdet_refid
               ORDER BY $sidx $sord

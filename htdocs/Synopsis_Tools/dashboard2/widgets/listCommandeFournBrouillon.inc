@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/fourn/fournisseur.commande.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
 
 // The get widget handler.
 function widget_listCommandeFournBrouillon() {
@@ -27,7 +27,7 @@ function widget_listCommandeFournBrouillon() {
     if ($user->rights->fournisseur->commande->lire)
     {
         $sql = "SELECT c.rowid, c.ref, c.total_ttc, s.nom, s.rowid as socid";
-        $sql.= " FROM llx_commande_fournisseur as c, llx_societe as s";
+        $sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseur as c, ".MAIN_DB_PREFIX."societe as s";
         $sql.= " WHERE c.fk_soc = s.rowid AND c.fk_statut = 0";
         if ($socid)
         {
@@ -69,7 +69,7 @@ function widget_listCommandeFournBrouillon() {
                             $commandestatic->id=$res->rowid;
                             $commandestatic->ref=$res->ref;
                             $table .= $commandestatic->getNomUrl(1,'',16);
-                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                             $total += $res->total_ttc;
                     }
@@ -79,7 +79,7 @@ function widget_listCommandeFournBrouillon() {
                     $commandestatic->id=$res->rowid;
                     $commandestatic->ref=$res->ref;
                     $table2 .= $commandestatic->getNomUrl(1,'',16);
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                     $total2 += $res->total_ttc;
                     $iter++;

@@ -1,13 +1,13 @@
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.0
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.Synopsis-erp.com
  *
  */
  var imgLoadRem = "";
@@ -292,7 +292,7 @@ function contactFiche_updatepage(xmlDoc)
                     {
     //                    alert (TmpArrDol[i] + " " + TmpRes[TmpArr[i]]);
                         InputToSelect(TmpArrDol[i],TmpRes[TmpArr[i]])
-                    } else if (countRes[TmpArr[i]] == 1){ //1 elem logiquement trié par importance
+                    } else if (countRes[TmpArr[i]] == 1){ //1 elem logiquement triï¿½ par importance
                         document.getElementsByName(TmpArrDol[i])[0].value = TmpRes[TmpArr[i]][0];
                     }
 
@@ -306,7 +306,7 @@ function contactFiche_updatepage(xmlDoc)
               arrTel['grp2']=new Array();
           var arrTelCat = new Array();
               arrTelCat['grp0']="Courants";
-              arrTelCat['grp1']="Société";
+              arrTelCat['grp1']="Sociï¿½tï¿½";
               arrTelCat['grp2']="Autres";
 
           var iter = 0;
@@ -321,28 +321,28 @@ function contactFiche_updatepage(xmlDoc)
           {
               arrTel['grp0'][iter] = new Array();
               arrTel['grp0'][iter]["value"]=iter;
-              arrTel['grp0'][iter]["text"]="Tél perso : " + ArrRes['homePhone'];
+              arrTel['grp0'][iter]["text"]="Tï¿½l perso : " + ArrRes['homePhone'];
               iter ++;
           }
           if ( ArrRes['homePhone2'] && ArrRes['homePhone2']+"x" != "x")
           {
               arrTel['grp0'][iter] = new Array();
               arrTel['grp0'][iter]["value"]=iter;
-              arrTel['grp0'][iter]["text"]="Tél perso : " + ArrRes['homePhone2'];
+              arrTel['grp0'][iter]["text"]="Tï¿½l perso : " + ArrRes['homePhone2'];
               iter ++;
           }
           if ( ArrRes['workPhone'] && ArrRes['workPhone']+"x" != "x")
           {
               arrTel['grp0'][iter] = new Array();
               arrTel['grp0'][iter]["value"]=iter;
-              arrTel['grp0'][iter]["text"]="Tél pro : " + ArrRes['workPhone'];
+              arrTel['grp0'][iter]["text"]="Tï¿½l pro : " + ArrRes['workPhone'];
               iter ++;
           }
           if ( ArrRes['workPhone2'] && ArrRes['workPhone2']+"x" != "x")
           {
               arrTel['grp0'][iter] = new Array();
               arrTel['grp0'][iter]["value"]=iter;
-              arrTel['grp0'][iter]["text"]="Tél pro : " + ArrRes['workPhone2'];
+              arrTel['grp0'][iter]["text"]="Tï¿½l pro : " + ArrRes['workPhone2'];
               iter ++;
           }
           var iter1 = 0;
@@ -350,7 +350,7 @@ function contactFiche_updatepage(xmlDoc)
           {
               arrTel['grp1'][iter1] = new Array();
               arrTel['grp1'][iter1]["value"]=iter;
-              arrTel['grp1'][iter1]["text"]="Tél société : " + ArrRes['companyPhone'];
+              arrTel['grp1'][iter1]["text"]="Tï¿½l sociï¿½tï¿½ : " + ArrRes['companyPhone'];
               iter ++;
               iter1++;
           }
@@ -367,7 +367,7 @@ function contactFiche_updatepage(xmlDoc)
           {
               arrTel['grp2'][iter2] = new Array();
               arrTel['grp2'][iter2]["value"]=iter;
-              arrTel['grp2'][iter2]["text"]="Tél rappel : " + ArrRes['callbackPhone'];
+              arrTel['grp2'][iter2]["text"]="Tï¿½l rappel : " + ArrRes['callbackPhone'];
               iter ++;
               iter2++;
           }
@@ -375,7 +375,7 @@ function contactFiche_updatepage(xmlDoc)
           {
               arrTel['grp2'][iter2] = new Array();
               arrTel['grp2'][iter2]["value"]=iter;
-              arrTel['grp2'][iter2]["text"]="Tél assitant(e) : " + ArrRes['assistantPhone'];
+              arrTel['grp2'][iter2]["text"]="Tï¿½l assitant(e) : " + ArrRes['assistantPhone'];
               iter ++;
               iter2++;
           }
@@ -391,7 +391,7 @@ function contactFiche_updatepage(xmlDoc)
           {
               arrTel['grp2'][iter2] = new Array();
               arrTel['grp2'][iter2]["value"]=iter;
-              arrTel['grp2'][iter2]["text"]="Tél voiture : " + ArrRes['carPhone'];
+              arrTel['grp2'][iter2]["text"]="Tï¿½l voiture : " + ArrRes['carPhone'];
               iter ++;
               iter2++;
           }
@@ -454,7 +454,7 @@ function contactFiche_updatepage(xmlDoc)
  * fax
  * email
  * jabberid
- * visibilité
+ * visibilitï¿½
  * note
  */
 

@@ -26,27 +26,27 @@
 
   if ($_REQUEST['action'] == "moveUp")
   {
-      $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE id = ".$_REQUEST['id'];
+      $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE id = ".$_REQUEST['id'];
       $sql = $db->query($requete);
       $res = $db->fetch_object($sql);
       $oldRang = $res->rang;
       $newRang = $oldRang - 1;
-      $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET rang = ".$oldRang . " WHERE rang = ".$newRang;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET rang = ".$oldRang . " WHERE rang = ".$newRang;
       $sql = $db->query($requete);
-      $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET rang = ".$newRang . " WHERE id = ".$_REQUEST['id'];
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET rang = ".$newRang . " WHERE id = ".$_REQUEST['id'];
       $sql = $db->query($requete);
       header('location:configType.php');
   }
   if ($_REQUEST['action'] == "moveDown")
   {
-      $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv WHERE id = ".$_REQUEST['id'];
+      $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv WHERE id = ".$_REQUEST['id'];
       $sql = $db->query($requete);
       $res = $db->fetch_object($sql);
       $oldRang = $res->rang;
       $newRang = $oldRang + 1;
-      $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET rang = ".$oldRang . " WHERE rang = ".$newRang;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET rang = ".$oldRang . " WHERE rang = ".$newRang;
       $sql = $db->query($requete);
-      $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET rang = ".$newRang . " WHERE id = ".$_REQUEST['id'];
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET rang = ".$newRang . " WHERE id = ".$_REQUEST['id'];
       $sql = $db->query($requete);
       header('location:configType.php');
   }
@@ -58,17 +58,17 @@
       $recap=$_REQUEST['recap'];
       $decountTkt=$_REQUEST['decountTkt'];
       $actif=$_REQUEST['actif'];
-      $requete = "SELECT max(rang) + 1 as rg FROM llx_Synopsis_fichinter_c_typeInterv";
+      $requete = "SELECT max(rang) + 1 as rg FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv";
       $sql = $db->query($requete);
       $res = $db->fetch_object($sql);
       $max = $res->rg;
-      $requete = "INSERT INTO llx_Synopsis_fichinter_c_typeInterv
+      $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv
                               (label,active,rang,isDeplacement,inTotalRecap,decountTkt,`default`)
                        VALUES ('".$label."',".($actif==1?1:0).",".$max.",".($deplacement==1?1:'NULL').",".($recap==1?1:0).",".($decountTkt==1?1:'NULL').",".($default."x"=="x"?'NULL':1).")";
       $sql = $db->query($requete);
       $newId = $db->last_insert_id($sql);
       if ($default."x" != "x"){
-            $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET `default` = NULL WHERE id !=".$newId;
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET `default` = NULL WHERE id !=".$newId;
             $sql=$db->query($requete);
       }
 
@@ -88,12 +88,12 @@
                 $isdecountTkt = $_REQUEST['decountTkt-'.$id];
                 $actif = $_REQUEST['actif-'.$id];
                 $rang = 1;
-                $requete = " SELECT max(rang) + 1 as mx FROM llx_Synopsis_fichinter_c_typeInterv ";
+                $requete = " SELECT max(rang) + 1 as mx FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv ";
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 $newRang = ($res->mx > 0?$res->mx:$rang);
                 //`default` =
-                $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv
+                $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv
                                SET inTotalRecap = ".($inRecap>0?1:'NULL')." ,
                                    isDeplacement = ".($isDeplacement>0?1:'NULL').",
                                    active = ".$actif.",
@@ -106,7 +106,7 @@
             }
         }
         if ($default > 0){
-            $requete = "UPDATE llx_Synopsis_fichinter_c_typeInterv SET `default` = 1 WHERE id =".$default;
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv SET `default` = 1 WHERE id =".$default;
             $sql=$db->query($requete);
   //          print $requete.";<br/>";
         }
@@ -136,7 +136,7 @@ function moveDown(id){
 EOF;
 
   llxHeader($js,'Configuration des types');
-  $requete = "SELECT * FROM llx_Synopsis_fichinter_c_typeInterv ORDER by rang ";
+  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv ORDER by rang ";
   $sql = $db->query($requete);
   print "<form action='configType.php?action=config' method='post'>";
   print "<ul>";
@@ -182,4 +182,6 @@ EOF;
 
   print "</table></ul></form>";
 
+  
+  llxFooter();
 ?>

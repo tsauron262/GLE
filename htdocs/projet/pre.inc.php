@@ -45,7 +45,7 @@ require ("../main.inc.php");
 /*
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 $langs->load("companies");
 $langs->load("bills");
 $langs->load("orders");

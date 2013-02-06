@@ -38,6 +38,7 @@ else print_titre($langs->trans("RelatedBill"));
 </tr>
 <?php
 $var=true;
+$total = 0;
 foreach($linkedObjectBlock as $object)
 {
 	$var=!$var;

@@ -35,8 +35,8 @@ function widget_listBordereauRemiseCheque() {
         $sql = "SELECT bc.rowid,".$db->pdate("bc.date_bordereau")." as db, bc.amount, bc.number,";
         $sql.= " bc.statut, bc.nbcheque,";
         $sql.= " ba.label, ba.rowid as bid";
-        $sql.= " FROM llx_bordereau_cheque as bc,";
-        $sql.= " llx_bank_account as ba";
+        $sql.= " FROM ".MAIN_DB_PREFIX."bordereau_cheque as bc,";
+        $sql.= " ".MAIN_DB_PREFIX."bank_account as ba";
         $sql.= " WHERE ba.rowid=bc.fk_bank_account";
         $sql.= " ORDER BY bc.rowid";
         $sql.= " DESC LIMIT 50";
@@ -47,10 +47,10 @@ function widget_listBordereauRemiseCheque() {
         {
             $table .= '<table class="noborder" width="100%">';
             $table .= '<tr class="liste_titre">';
-            $table .= '<td title="'.$langs->trans("CheckReceiptShort").'">'.dolibarr_trunc($langs->trans("CheckReceiptShort"),5).'</td>';
+            $table .= '<td title="'.$langs->trans("CheckReceiptShort").'">'.dol_trunc($langs->trans("CheckReceiptShort"),5).'</td>';
             $table .= '<td>'.$langs->trans("Date")."</td>";
             $table .= '<td>'.$langs->trans("Account").'</td>';
-            $table .= '<td align="right" title="'.$langs->trans("NbOfCheques").'">'.dolibarr_trunc($langs->trans("NbOfCheques"),6).'</td>';
+            $table .= '<td align="right" title="'.$langs->trans("NbOfCheques").'">'.dol_trunc($langs->trans("NbOfCheques"),6).'</td>';
             $table .= '<td align="right">'.$langs->trans("Amount").'</td>';
             $table .= '<td align="right">'.$langs->trans("Status").'</td>';
             $table .= "</tr>\n";

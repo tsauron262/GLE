@@ -34,7 +34,7 @@
  */
 
 /**
- \file       htdocs/core/modules/synopsis_demandeinterv/pdf_soleil.modules.php
+ \file       htdocs/core/modules/synopsisdemandeinterv/pdf_soleil.modules.php
  \ingroup    demandeInterv
  \brief      Fichier de la classe permettant de generer les fiches d'intervention au modele Soleil
  \version    $Id: pdf_soleil.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $

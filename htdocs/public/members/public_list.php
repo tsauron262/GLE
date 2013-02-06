@@ -34,7 +34,14 @@ if (is_int($entity))
 	define("DOLENTITY", $entity);
 }
 
-require("../../main.inc.php");
+// For MultiCompany module
+$entity=(! empty($_GET['entity']) ? (int) $_GET['entity'] : 1);
+if (is_int($entity))
+{
+	define("DOLENTITY", $entity);
+}
+
+require '../../main.inc.php';
 
 // Security check
 if (empty($conf->adherent->enabled)) accessforbidden('',1,1,1);

@@ -30,8 +30,8 @@ function widget_listPropaleFerme() {
 
     $sql = "SELECT s.nom, s.rowid, p.rowid as propalid, p.total_ht, p.ref, p.fk_statut, p.datep as dp";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-    $sql .= " FROM llx_societe as s, llx_propal as p";
-    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+    $sql .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."propal as p";
+    if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql .= " WHERE p.fk_soc = s.rowid AND p.fk_statut > 1";
     if ($socid)
     {
@@ -84,7 +84,7 @@ function widget_listPropaleFerme() {
                           $formfile->show_documents('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
                           $table .= $formfile->html;
 
-                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                        $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';
                         $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                         $total += $res->total_ht;
                 }
@@ -98,7 +98,7 @@ function widget_listPropaleFerme() {
                   $formfile->show_documents('propal',$filename,$filedir,$urlsource,'','','','','',1,28,false);
                   $table2 .= $formfile->html;
 
-                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dolibarr_trunc($res->nom,18).'</a></td>';
+                $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->rowid.'">'.dol_trunc($res->nom,18).'</a></td>';
                 $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ht).'</td></tr>';
                 $total2 += $res->total_ht;
                 $iter++;

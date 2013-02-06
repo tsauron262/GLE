@@ -22,13 +22,28 @@ if (isset($_POST['action']) && $_POST['action'] == "send") {
     bug($user, $_POST['text'], $_POST['oldUrl']);
 }
 if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
-    $requete = "UPDATE llx_Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
+    
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['resolu'];
+    $sql = $db->query($requete);
+    $obj = $db->fetch_object($sql);
+    
+    
+    $message = 'Bonjour votre bug signalé sur GLE est passé au statut résolut. '."\n\n"
+            .'Si le bug réapparaît ou est toujours présent, merci de le resignaler : '."\n\n"
+            .'Message : '.$obj->text;
+
+    $userT = new User($db);
+    $userT->fetch($obj->fk_user);
+    mailSyn($userT->email, "Bug Gle résolu", $message);
+    
+    
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
     $db->query($requete);
 }
 
 function getBug($user) {
     global $db, $langs;
-    $requete = "SELECT * FROM llx_Synopsis_Tools_bug";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug";
     if (!$user->rights->SynopsisTools->Global->adminBug)
         $requete .= " WHERE fk_user = " . $user->id;
     if ($user->rights->SynopsisTools->Global->adminBug)
@@ -82,17 +97,14 @@ function getBug($user) {
 
 function bug($user, $text, $adresse) {
     global $db;
-    $headers = 'From: no-replay@synopsis-erp.com' . "\r\n" .
-            'Reply-To: tommy@drsi.fr' . "\r\n" .
-            'X-Mailer: PHP/' . phpversion();
     $message = "<a href='" . $adresse . "'>Adresse : " . $adresse . "</a>
         \n Utlisateur : " . $user->getNomUrl() . "
         \n Message : " . $text;
 
-    $requete = "INSERT into llx_Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
+    $requete = "INSERT into ".MAIN_DB_PREFIX."Synopsis_Tools_bug (fk_user, text) VALUES (" . $user->id . ", '" . addslashes($message) . "');";
     $db->query($requete);
 
-    mail("tommy@drsi.fr", "Bug Gle", $message, $headers);
+    mailSyn("tommy@drsi.fr", "Bug Gle", $message);
     dol_htmloutput_mesg("Merci", $mesgs);
 }
 

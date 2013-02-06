@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2008-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2008-2012	Laurent Destailleur	<eldy@users.sourceforge.net>
+ * Copyright (C) 2008-2012	Regis Houssin		<regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +39,7 @@ class FormCompany
 	 *
 	 *	@param	DoliDB	$db		Database handler
 	 */
-	function FormCompany($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 
@@ -271,9 +272,8 @@ class FormCompany
 					$i++;
 				}
 			}
-			$noselect.=$out;
-			if (!empty($htmlname)) $out.= '</select>';
-			if (!empty($htmlname) && $user->admin) $out.= info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
+			if (! empty($htmlname)) $out.= '</select>';
+			if (! empty($htmlname) && $user->admin) $out.= info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
 		}
 		else
 		{
@@ -521,7 +521,7 @@ class FormCompany
 		$sql = "SELECT s.rowid, s.nom FROM";
 		$sql.= " ".MAIN_DB_PREFIX."societe as s";
 		$sql.= " WHERE s.entity IN (".getEntity('societe', 1).")";
-		if ($selected && $conf->use_javascript_ajax && $conf->global->COMPANY_USE_SEARCH_TO_SELECT) $sql.= " AND rowid = ".$selected;
+		if ($selected && $conf->use_javascript_ajax && ! empty($conf->global->COMPANY_USE_SEARCH_TO_SELECT)) $sql.= " AND rowid = ".$selected;
 		else
 		{
 			// For ajax search we limit here. For combo list, we limit later
@@ -536,7 +536,7 @@ class FormCompany
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
-			if ($conf->use_javascript_ajax && $conf->global->COMPANY_USE_SEARCH_TO_SELECT)
+			if ($conf->use_javascript_ajax && ! empty($conf->global->COMPANY_USE_SEARCH_TO_SELECT))
 			{
 				$minLength = (is_numeric($conf->global->COMPANY_USE_SEARCH_TO_SELECT)?$conf->global->COMPANY_USE_SEARCH_TO_SELECT:2);
 
@@ -625,14 +625,20 @@ class FormCompany
      */
 	function selectTypeContact($object, $selected, $htmlname = 'type', $source='internal', $order='code', $showempty=0)
 	{
-		$lesTypes = $object->liste_type_contact($source, $order);
-		print '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'">';
-		if ($showempty) print print '<option value="0"></option>';
-		foreach($lesTypes as $key=>$value)
+		if (is_object($object) && method_exists($object, 'liste_type_contact'))
 		{
-			print '<option value="'.$key.'">'.$value.'</option>';
+			$lesTypes = $object->liste_type_contact($source, $order);
+			print '<select class="flat" name="'.$htmlname.'" id="'.$htmlname.'">';
+			if ($showempty) print '<option value="0"></option>';
+			foreach($lesTypes as $key=>$value)
+			{
+				print '<option value="'.$key.'"';
+				if ($key == $selected)
+					print ' selected';
+				print '>'.$value.'</option>';
+			}
+			print "</select>\n";
 		}
-		print "</select>\n";
 	}
 
 	/**
@@ -674,26 +680,32 @@ class FormCompany
         global $conf,$langs;
 
         $formlength=0;
-        if ($country_code == 'FR' && empty($conf->global->MAIN_DISABLEPROFIDRULES))
-        {
-            if ($idprof==1) $formlength=9;
-            if ($idprof==2) $formlength=14;
-            if ($idprof==3) $formlength=5;      // 4 chiffres et 1 lettre depuis janvier
-            if ($idprof==4) $formlength=32;     // No maximum as we need to include a town name in this id
-        }
-        if ($country_code == 'ES' && empty($conf->global->MAIN_DISABLEPROFIDRULES))
-        {
-            if ($idprof==1) $formlength=9;  //CIF/NIF/NIE 9 digits
-            if ($idprof==2) $formlength=12; //NASS 12 digits without /
-            if ($idprof==3) $formlength=5;  //CNAE 5 digits
-            if ($idprof==4) $formlength=32; //depend of college
+        if (empty($conf->global->MAIN_DISABLEPROFIDRULES)) {
+        	if ($country_code == 'FR')
+        	{
+        		if (isset($idprof)) {
+        			if ($idprof==1) $formlength=9;
+        			else if ($idprof==2) $formlength=14;
+        			else if ($idprof==3) $formlength=5;      // 4 chiffres et 1 lettre depuis janvier
+        			else if ($idprof==4) $formlength=32;     // No maximum as we need to include a town name in this id
+        		}
+        	}
+        	else if ($country_code == 'ES')
+        	{
+        		if ($idprof==1) $formlength=9;  //CIF/NIF/NIE 9 digits
+        		if ($idprof==2) $formlength=12; //NASS 12 digits without /
+        		if ($idprof==3) $formlength=5;  //CNAE 5 digits
+        		if ($idprof==4) $formlength=32; //depend of college
+        	}
         }
 
         $selected=$preselected;
-        if (! $selected && $idprof==1) $selected=$this->idprof1;
-        if (! $selected && $idprof==2) $selected=$this->idprof2;
-        if (! $selected && $idprof==3) $selected=$this->idprof3;
-        if (! $selected && $idprof==4) $selected=$this->idprof4;
+        if (! $selected && isset($idprof)) {
+        	if ($idprof==1 && ! empty($this->idprof1)) $selected=$this->idprof1;
+        	else if ($idprof==2 && ! empty($this->idprof2)) $selected=$this->idprof2;
+        	else if ($idprof==3 && ! empty($this->idprof3)) $selected=$this->idprof3;
+        	else if ($idprof==4 && ! empty($this->idprof4)) $selected=$this->idprof4;
+        }
 
         $maxlength=$formlength;
         if (empty($formlength)) { $formlength=24; $maxlength=128; }

@@ -85,7 +85,7 @@ print $js;
 
             // Societe
             print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Company').'</th>';
-            print '<td colspan="4" class="ui-widget-content">'.utf8_encode($soc->getNomUrl(1)).'</td>';
+            print '<td colspan="4" class="ui-widget-content">'.utf8_encodeRien($soc->getNomUrl(1)).'</td>';
             print '</tr>';
 
 //Date anniversaire des contrats

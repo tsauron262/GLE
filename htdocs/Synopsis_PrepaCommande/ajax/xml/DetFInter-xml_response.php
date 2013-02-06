@@ -24,7 +24,7 @@
   {
     $requete = "SELECT *
                   FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
                  WHERE fk_fichinter = ".$id. "
               ORDER BY ft.rang ";
     $sql = $db->query($requete);
@@ -33,7 +33,7 @@
         $xmlStr .= "<FI id='".$res->rowid."'>";
         $xmlStr .= "<rowid>".$res->rowid."</rowid>";
         $xmlStr .= "<date>".date('d/m/Y',strtotime($res->date))."</date>";
-        $xmlStr .= "<description><![CDATA[".htmlentities($res->description)."]]></description>";
+        $xmlStr .= "<description><![CDATA[".traiteStr($res->description)."]]></description>";
         if ($res->isDeplacement == 1)
         {
             if ($res->fk_depProduct > 0)
@@ -41,12 +41,12 @@
                 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
                 $tmpProd = new Product($db);
                 $tmpProd->fetch($res->fk_depProduct);
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."<br/>".$tmpProd->getNomUrl(1)."]]></type>";
             } else {
-                $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+                $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
             }
         } else {
-            $xmlStr .= "<type><![CDATA[".htmlentities($res->label)."]]></type>";
+            $xmlStr .= "<type><![CDATA[".traiteStr($res->label)."]]></type>";
         }
         $tmpDur = convDur($res->duree);
         $xmlStr .= "<total_ht><![CDATA[".price($res->total_ht)."]]></total_ht>";
@@ -109,5 +109,11 @@ function convDur($duration)
 
     // Affichage
     return( $converted_duration);
+}
+
+
+
+function traiteStr($str){
+    return str_replace("\n", "<br>", stripslashes($str));
 }
 ?>

@@ -462,7 +462,7 @@ $xmpMode = 0;
                                                 }
                                                 return mytab;
                                          },
-                                        babelReturnSelId: function(selected)
+                                        modifAutocompleteSynopsisReturnSelId: function(selected)
                                         {
                                             var selId = selected.data['id'];
 EOF;

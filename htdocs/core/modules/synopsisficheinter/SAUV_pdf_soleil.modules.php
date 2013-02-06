@@ -38,7 +38,7 @@
  */
 
 require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 
 /**

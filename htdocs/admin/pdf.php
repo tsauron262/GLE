@@ -2,6 +2,7 @@
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (C) 2012	   Juanjo Menent		<jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +23,12 @@
  *       \brief      Page to setup PDF options
  */
 
-require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/usergroups.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formother.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formadmin.class.php");
+require '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formadmin.class.php';
 
 $langs->load("admin");
 $langs->load("languages");
@@ -54,8 +55,15 @@ if ($action == 'update')
 	dolibarr_set_const($db, "MAIN_PROFID3_IN_ADDRESS",    $_POST["MAIN_PROFID3_IN_ADDRESS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_PROFID4_IN_ADDRESS",    $_POST["MAIN_PROFID4_IN_ADDRESS"],'chaine',0,'',$conf->entity);
 	dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT",    $_POST["MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT"],'chaine',0,'',$conf->entity);
-
-	Header("Location: ".$_SERVER["PHP_SELF"]."?mainmenu=home&leftmenu=setup");
+	
+	if ($conf->global->MAIN_FEATURES_LEVEL > 1)
+	{
+		dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS", $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS"],'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_DESC",    $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_DESC"],'chaine',0,'',$conf->entity);
+		dolibarr_set_const($db, "MAIN_GENERATE_DOCUMENTS_HIDE_REF",     $_POST["MAIN_GENERATE_DOCUMENTS_HIDE_REF"],'chaine',0,'',$conf->entity);
+	}
+	
+	header("Location: ".$_SERVER["PHP_SELF"]."?mainmenu=home&leftmenu=setup");
 	exit;
 }
 
@@ -200,6 +208,27 @@ if ($action == 'edit')	// Edit
     print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td>';
 	print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT))?$conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT:0,1);
     print '</td></tr>';
+    
+    if ($conf->global->MAIN_FEATURES_LEVEL > 1)
+    {
+    	//Desc
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDescOnPDF").'</td><td>';
+    	print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_HIDE_DESC',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC))?$conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC:0,1);
+    	print '</td></tr>';
+    	
+    	//Ref
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideRefOnPDF").'</td><td>';
+    	print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_HIDE_REF',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF))?$conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF:0,1);
+    	print '</td></tr>';
+    	
+    	//Details
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDetailsOnPDF").'</td><td>';
+    	print $form->selectyesno('MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS',(! empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS))?$conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS:0,1);
+    	print '</td></tr>';
+    }
 
 	print '</table>';
 
@@ -227,7 +256,7 @@ else	// Show
     $pdfformatlabel='';
     if (empty($conf->global->MAIN_PDF_FORMAT))
     {
-        include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php');
+        include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
         $pdfformatlabel=dol_getDefaultFormat();
     }
     else $pdfformatlabel=$conf->global->MAIN_PDF_FORMAT;
@@ -240,7 +269,9 @@ else	// Show
         if ($resql)
         {
             $obj=$db->fetch_object($resql);
-            $pdfformatlabel=$obj->label.' - '.round($obj->width).'x'.round($obj->height).' '.$obj->unit;
+            $paperKey = $langs->trans('PaperFormat'.$obj->code);
+            $unitKey = $langs->trans('SizeUnit'.$obj->unit);
+            $pdfformatlabel = ($paperKey == 'PaperFormat'.$obj->code ? $obj->label : $paperKey).' - '.round($obj->width).'x'.round($obj->height).' '.($unitKey == 'SizeUnit'.$obj->unit ? $obj->unit : $unitKey);
         }
     }
     print $pdfformatlabel;
@@ -341,6 +372,27 @@ else	// Show
     print '<tr '.$bc[$var].'><td>'.$langs->trans("HideAnyVATInformationOnPDF").'</td><td>';
     print yn($conf->global->MAIN_GENERATE_DOCUMENTS_WITHOUT_VAT,1);
     print '</td></tr>';
+       
+    if ($conf->global->MAIN_FEATURES_LEVEL > 1)
+    {
+    	//Desc
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDescOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC,1);
+    	print '</td></tr>';
+    	 
+    	//Ref
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideRefOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF,1);
+    	print '</td></tr>';
+    	 
+    	//Details
+    	$var=!$var;
+    	print '<tr '.$bc[$var].'><td>'.$langs->trans("HideDetailsOnPDF").'</td><td>';
+    	print yn($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS,1);
+    	print '</td></tr>';
+    }
 
 	print '</table>';
 

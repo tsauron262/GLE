@@ -262,8 +262,7 @@ switch($action)
     case "edit":
     {
         $fuser = new User($db);
-        $fuser->id = $userImputation;
-        $fuser->fetch();
+        $fuser->fetch($userImputation);
         $aptArr=array("start"    => array( "year"=> $dateDebDet['year'] , "month" => $dateDebDet['month'] , "day" => $dateDebDet['day'], "hour"=>$dateDebDet['hour'] , "min" => $dateDebDet['min'] ),
                       "end"      => array( "year"=> $dateFinDet['year'] , "month" => $dateFinDet['month'] , "day" => $dateFinDet['day'], "hour"=>$dateFinDet['hour'] , "min" => $dateFinDet['min'] ),
                       "fb"       => "B",

@@ -8,6 +8,52 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
+
+function boxToWidget($file, $title){
+  // A widget object as per jquery.dashboard.js.
+    global $db,$user,$langs;
+    if ($user->societe_id > 0)
+    {
+      $socid = $user->societe_id;
+    }
+    $langs->load('commercial');
+    $langs->load("boxes");
+
+    
+    require_once(DOL_DOCUMENT_ROOT.'/core/boxes/'.$file);
+    $nameShort =preg_replace('/.php$/','',$file);
+    $box=new $nameShort($db);
+
+    $table = "<p>";
+    ob_start();
+    $box->loadBox(10);
+    $table .= $box->showBox(false);
+    $table .= ob_get_contents();
+    ob_clean();
+    $table .= "</p>";
+
+    $table2 = "<p>";
+    ob_start();
+    $box->loadBox(50);
+    $table2 .= $box->showBox(false);
+    $table2 .= ob_get_contents();
+    ob_clean();
+    $table2 .= "</p>";
+
+
+      return array(
+        'title' => $title,
+        'content' => $table,
+        'initScript' => "",
+        'classes' => 'ui-state-default ui-widget-header',
+        'settings' => false,
+        'fullscreen' => $table2,
+        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
+        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
+      );
+
+}
+
 /**
   \brief      Fonction servant a afficher une duree dans une liste deroulante
   \param        prefix       prefix
@@ -46,9 +92,10 @@ function select_duration($prefix, $iSecond = '') {
 function getContratObj($id) {
     global $db, $conf;
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
-    if ($conf->global->MAIN_MODULE_BABELGA == 1 || $conf->global->MAIN_MODULE_BABELGMAO) {
-        $contrat = new Contrat($db);
-        $contratTmp = new Contrat($db);
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
+    if (isset($conf->global->MAIN_MODULE_BABELGA) || isset($conf->global->MAIN_MODULE_BABELGMAO)) {
+        $contrat = new Synopsis_Contrat($db);
+        $contratTmp = new Synopsis_Contrat($db);
         $type = $contratTmp->getTypeContrat_noLoad($id);
         //if ($contrat->isGA($id))
         switch ($type) {
@@ -92,18 +139,18 @@ function getContratObj($id) {
                 break;
 
             default:
-                $contrat = new Contrat($db);
+                $contrat = new Synopsis_Contrat($db);
                 break;
         }
     } else {
-        $contrat = new Contrat($db);
+        $contrat = new Synopsis_Contrat($db);
     }
     return ($contrat);
 }
 
 function getTypeContrat_noLoad($id) {
     global $db;
-    $requete = "SELECT * FROM llx_contrat WHERE rowid = " . $id;
+    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE rowid = " . $id;
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
     return($res->extraparams);
@@ -170,7 +217,7 @@ function getIdleProcess($db, $type_str, $element_id) {
 
 function DoesElementhasProcess($db, $element_type) {
     global $conf, $user;
-    if ($conf->global->MAIN_MODULE_PROCESS) {
+    if (isset($conf->global->MAIN_MODULE_PROCESS)) {
         $requete = "SELECT p.id
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Process as p,
                            " . MAIN_DB_PREFIX . "Synopsis_Process_type_element as e
@@ -191,6 +238,26 @@ function SynSanitize($str) {
     $str = sanitize_string($str);
     $str = remove_accents($str);
     return($str);
+}
+
+
+function seems_utf8($str) {
+	$length = strlen($str);
+	for ($i=0; $i < $length; $i++) {
+		$c = ord($str[$i]);
+		if ($c < 0x80) $n = 0; # 0bbbbbbb
+		elseif (($c & 0xE0) == 0xC0) $n=1; # 110bbbbb
+		elseif (($c & 0xF0) == 0xE0) $n=2; # 1110bbbb
+		elseif (($c & 0xF8) == 0xF0) $n=3; # 11110bbb
+		elseif (($c & 0xFC) == 0xF8) $n=4; # 111110bb
+		elseif (($c & 0xFE) == 0xFC) $n=5; # 1111110b
+		else return false; # Does not match any model
+		for ($j=0; $j<$n; $j++) { # n bytes matching 10bbbbbb follow ?
+			if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
+				return false;
+		}
+	}
+	return true;
 }
 
 function remove_accents($string) {
@@ -331,57 +398,74 @@ function debug($arr) {
     echo $i;
 }
 
-function getTypeAndId() {
-    if (stripos($_SERVER['REQUEST_URI'], "compta/facture") != false) {
+function getIdInUrl($url, $nomId = "id"){
+    $tabUrl = explode("?", $url);
+    $tabUrl = explode("#", $tabUrl[1]);
+    $tabUrl = explode("&", $tabUrl[0]);
+    foreach ($tabUrl as $val) {
+        if (stripos($val, $nomId) !== false)
+            return str_replace($nomId . "=", "", $val);
+    }
+    return false;
+}
+
+function getTypeAndId($url = null, $request = null) {
+    if($url == NULL)
+        $url = $_SERVER['REQUEST_URI'];
+    if($request == NULL)
+        $request = $_REQUEST;
+    if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
-        $element_id = $_REQUEST['facid'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "societe/soc.php")
-            || stripos($_SERVER['REQUEST_URI'], "comm/fiche.php?socid=")
-            || stripos($_SERVER['REQUEST_URI'], "comm/prospect/fiche.php?socid=")) {
+        @$element_id = $request['facid'];
+    } elseif (stripos($url, "societe/soc.php")
+            || stripos($url, "comm/fiche.php?socid=")
+            || stripos($url, "comm/prospect/fiche.php?socid=")) {
         $element_type = 'societe';
-        $element_id = $_REQUEST['socid'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "product/fiche.php") != false) {
+        @$element_id = $request['socid'];
+    } elseif (stripos($url, "product/fiche.php") != false) {
         $element_type = 'product';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "projet/tasks/task.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "projet/tasks/task.php") != false) {
         $element_type = 'tache';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "projet/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "projet/") != false) {
         $element_type = 'projet';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "commande/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "commande/") != false) {
         $element_type = 'commande';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "compta/bank/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "compta/bank/") != false) {
         $element_type = 'banque';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "fichinter/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "fichinter/") != false) {
         $element_type = 'FI';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_DemandeInterv/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_DemandeInterv/") != false) {
         $element_type = 'DI';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "contrat/") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "contrat/") != false) {
         $element_type = 'contrat';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "user/fiche.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "user/fiche.php") != false) {
         $element_type = 'user';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "comm/propal.php") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "comm/propal.php") != false) {
         $element_type = 'propal';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "admin/Synopsis_Chrono") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "admin/Synopsis_Chrono") != false) {
         $element_type = 'configChrono';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_Chrono") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_Chrono") != false) {
         $element_type = 'chrono';
-        $element_id = $_REQUEST['id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "Synopsis_Process") != false) {
+        @$element_id = $request['id'];
+    } elseif (stripos($url, "Synopsis_Process") != false) {
         $element_type = 'process';
-        $element_id = $_REQUEST['process_id'];
-    } elseif (stripos($_SERVER['REQUEST_URI'], "ndfp") != false) {
+        @$element_id = $request['process_id'];
+    } elseif (stripos($url, "ndfp") != false) {
         $element_type = 'ndfp';
-        $element_id = $_REQUEST['id'];
+        @$element_id = $request['id'];
+    } else {
+        return null;
     }
     return array($element_type, $element_id);
 }
@@ -389,7 +473,7 @@ function getTypeAndId() {
 function getAdresseLivraisonComm($commId) {
     global $db, $langs;
     $return = '';
-    $sql = "SELECT a.* FROM `llx_element_contact` c, llx_c_type_contact t, llx_socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
+    $sql = "SELECT a.* FROM `" . MAIN_DB_PREFIX . "element_contact` c, " . MAIN_DB_PREFIX . "c_type_contact t, " . MAIN_DB_PREFIX . "socpeople a WHERE `fk_c_type_contact` = t.rowid AND t.code = 'SHIPPING' AND a.rowid = c.fk_socpeople AND c.`element_id` = " . $commId;
 
     $resql = $db->query($sql);
 //        if ($resql) {
@@ -407,13 +491,13 @@ function getAdresseLivraisonComm($commId) {
 
 function addElementElement($typeS, $typeD, $idS, $idD) {
     global $db;
-    $req = "INSERT INTO llx_element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
+    $req = "INSERT INTO " . MAIN_DB_PREFIX . "element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
     return $db->query($req);
 }
 
 function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "DELETE FROM llx_element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -423,7 +507,7 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
 
 function getElementElement($typeS, $typeD, $idS = null, $idD = null) {
     global $db;
-    $req = "SELECT * FROM llx_element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -447,6 +531,52 @@ function asPosition($str) {
     if (is_int($tab[0]) && $tab[0] > 0)
         return array(0 => $tab[0], 1 => str_replace($tab[0] . " ", "", $str));
     return false;
+}
+
+function mailSyn($to, $sujet, $text, $headers = null) {
+    $toReplay = "Tommy SAURON <tommy@drsi.fr>";
+    $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
+    if (defined('MOD_DEV_SYN_MAIL')) {
+        $text = "OrigineTo = " . $to . "\n\n" . $text;
+        $to = MOD_DEV_SYN_MAIL;
+    }
+    if (!isset($to) || $to == '') {
+        $text = "Pas de mail expediteur definit." . "\n\n" . $text;
+        $to = $toReplay;
+    }
+    if (!$headers) {
+        $headers = 'MIME-Version: 1.0' . "\r\n";
+        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+        $headers .= 'From: Application GLE '.MAIN_INFO_SOCIETE_NOM.' <no-replay-'.str_replace(" ", "", MAIN_INFO_SOCIETE_NOM).'@synopsis-erp.com>' . "\r\n";
+        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
+        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
+        $text = str_replace("\n", "<br/>", $text);
+    }
+    if (isset($to) && $to != '')
+        mail($to, $sujet, $text, $headers);
+}
+
+function utf8_encodeRien($str) {
+    return $str;
+}
+
+function php2js($var) {
+    if (is_array($var)) {
+        $res = "[";
+        $array = array();
+        foreach ($var as $a_var) {
+            $array[] = php2js($a_var);
+        }
+        return "[" . join(",", $array) . "]";
+    } elseif (is_bool($var)) {
+        return $var ? "true" : "false";
+    } elseif (is_int($var) || is_integer($var) || is_double($var) || is_float($var)) {
+        return $var;
+    } elseif (is_string($var)) {
+        return "\"" . addslashes(stripslashes($var)) . "\"";
+    }
+    // autres cas: objets, on ne les gère pas
+    return FALSE;
 }
 
 ?>

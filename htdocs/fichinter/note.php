@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -124,7 +127,7 @@ if ($_GET['id'])
                 // Date
             print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans('Date').'</th>
                        <td colspan="3" class="ui-widget-content">';
-            print dol_print_date($fichinter->date,'day');
+            print dol_print_date($db->jdate($fichinter->date),'day');
             print '</td>';
             print '</tr>';
 

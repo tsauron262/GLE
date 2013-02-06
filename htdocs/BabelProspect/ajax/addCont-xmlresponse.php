@@ -35,8 +35,7 @@
     if ($userid)
     {
         $user = new User($db);
-        $user->id = $userid;
-        $user->fetch();
+        $user->fetch($userid);
         $contact = new Contact($db);
         $contact->socid = $socid;
         $contact->name = $Nom;

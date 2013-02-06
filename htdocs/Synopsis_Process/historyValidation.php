@@ -135,8 +135,7 @@
                     {
                         print "        <tr><td nowrap>".$res2->label."<td nowrap colspan=3><table><tr><td><span class='ui-icon ui-icon-help'></span><td>&nbsp;&nbsp;En attente de validation</table>";
                     } else {
-                        $tmpUser->id = $res2->user_refid;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res2->user_refid);
                         print "        <tr><td nowrap>".$res2->label."<td nowrap>".($res2->valeur==1?img_tick()." Valider par ":img_error(). " Refuser par ")."".$tmpUser->getNomUrl(1)."<td width=600>".$res2->note;
                     }
                 }

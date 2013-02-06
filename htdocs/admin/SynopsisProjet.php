@@ -131,6 +131,7 @@ if ($handle) {
 
             print '<td align="center">';
             //print $html->textwithtooltip('',$htmltooltip,1,0);
+						print $html->textwithpicto('',$htmltooltip,1,0);
             print '</td>';
 
             print '</tr>';

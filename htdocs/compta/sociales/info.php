@@ -21,10 +21,10 @@
  *	\brief      Page with info about social contribution
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/sociales/class/chargesociales.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/tax.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/tax.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 
 $langs->load("compta");
 $langs->load("bills");
@@ -35,7 +35,7 @@ $action=GETPOST("action");
 // Security check
 $socid = GETPOST('socid','int');
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'tax', $langs->trans("SocialContribution"), '', 'charges');
+$result = restrictedArea($user, 'tax', $id, 'chargesociales','charges');
 
 
 /*

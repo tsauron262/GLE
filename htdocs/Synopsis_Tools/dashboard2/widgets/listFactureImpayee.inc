@@ -6,8 +6,8 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/facture.class.php');
-require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listFactureImpayee() {
@@ -35,9 +35,9 @@ function widget_listFactureImpayee() {
         $sql.= " sum(pf.amount) as am,";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql.= " FROM llx_societe as s,llx_facture as f";
-        $sql.= " LEFT JOIN llx_paiement_facture as pf on f.rowid=pf.fk_facture";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture as f";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."paiement_facture as pf on f.rowid=pf.fk_facture";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= " WHERE s.rowid = f.fk_soc AND f.paye = 0 AND f.fk_statut = 1";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid) $sql .= " AND f.fk_soc = ".$socid;
@@ -101,7 +101,7 @@ function widget_listFactureImpayee() {
 
                             $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dolibarr_trunc($res->nom,44).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                             $table .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3,$res->am).'</td>';
@@ -119,7 +119,7 @@ function widget_listFactureImpayee() {
                     $formfile->show_documents('facture',$filename,$filedir,$urlsource,'','','','','',1,42,false);
                     $table2 .= $formfile->html;
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dolibarr_trunc($res->nom,44).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.img_object($langs->trans("ShowCustomer"),"company").dol_trunc($res->nom,44).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->am).'</td>';
                     $table2 .=  '<td>'.$facturestatic->LibStatut($res->paye,$res->fk_statut,3,$res->am).'</td>';

@@ -18,7 +18,7 @@ function widget_statRemiseCheque() {
         $table = '<p>';
 
         $sql = "SELECT count(b.rowid)";
-        $sql.= " FROM llx_bank as b";
+        $sql.= " FROM ".MAIN_DB_PREFIX."bank as b";
         $sql.= " WHERE b.fk_type = 'CHQ' AND b.fk_bordereau = 0";
         $sql.= " AND b.amount > 0";
 

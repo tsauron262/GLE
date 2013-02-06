@@ -41,7 +41,7 @@ class modSynopsisTools extends DolibarrModules
         $this->numero = 8088;
 
         $this->family = "Synopsis";
-        $this->name = "SynopsisTools";
+        $this->name = "Synopsis Tools";
         $this->description = utf8_decode("Outil de gestion");
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISTOOLS';
@@ -180,6 +180,10 @@ class modSynopsisTools extends DolibarrModules
                             'user'=>0);
         $s = $r;
         $r++;
+        
+        
+        $this->tabs = array('thirdparty:-document',
+            'thirdparty:+allDoc:Tous les fichier joint:@Synopsis_Tools:/Synopsis_Tools/allDocumentSoc.php?id=__ID__');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
@@ -191,13 +195,19 @@ class modSynopsisTools extends DolibarrModules
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `file` varchar(50) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`rowid`)
-)",
+  PRIMARY KEY (`rowid`))",
             "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Tools_bug` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_user` int(11) NOT NULL,
   `text` varchar(1000) NOT NULL,
   `resolu` tinyint(1) NOT NULL,
+  PRIMARY KEY (`rowid`))",
+        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_commande_consigne` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_group` int(11) DEFAULT NULL,
+  `fk_comm` int(11) DEFAULT NULL,
+  `note` varchar(500) NOT NULL,
+  `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`rowid`))");
     return $this->_init($sql);
   }

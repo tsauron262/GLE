@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 22 juil. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**
@@ -18,7 +18,7 @@
   */
 require_once("../../main.inc.php");
 // The get widget handler.
-require_once(DOL_DOCUMENT_ROOT.'/project.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
 
 function widget_statProjectPerTask() {
   // A widget object as per jquery.dashboard.js.

@@ -86,7 +86,7 @@ class magento_tools {
     {
         if (!$force || count($this->prodGLEArr) == 0)
         {
-            $requete = "SELECT * FROM llx_product";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product";
             $sql = $this->db->query($requete);
             while ($res = $this->db->fetch_object($sql))
             {
@@ -110,7 +110,7 @@ class magento_tools {
             $id = $prodArr['id'];
             $type = $prodArr['type'];
             $requete = "SELECT count(*) as cnt
-                          FROM llx_product
+                          FROM ".MAIN_DB_PREFIX."product
                          WHERE label = '".preg_replace("/'/","\\'",$name). "'
                            AND magento_sku = '".$sku. "'
                            AND magento_type = '".$type. "'
@@ -128,7 +128,7 @@ class magento_tools {
                 $this->modeProd[$id]['id']=$id;
             } else {
                 $requete = "SELECT count(*) as cnt
-                              FROM llx_product
+                              FROM ".MAIN_DB_PREFIX."product
                              WHERE label = '".preg_replace("/'/","\\'",$name). "'
                                 OR magento_sku = '".$sku. "'
                                 OR (magento_id = '".$id. "' AND magento_type = '".$type. "')

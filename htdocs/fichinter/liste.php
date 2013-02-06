@@ -47,10 +47,10 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 $langs->load("companies");
 $langs->load("interventions");
 
-$sortorder=$_GET["sortorder"]?$_GET["sortorder"]:$_POST["sortorder"];
-$sortfield=$_GET["sortfield"]?$_GET["sortfield"]:$_POST["sortfield"];
-$socid=$_GET["socid"]?$_GET["socid"]:$_POST["socid"];
-$page=$_GET["page"]?$_GET["page"]:$_POST["page"];
+$sortorder= isset($_GET["sortorder"])?$_GET["sortorder"]:(isset($_POST["sortorder"])? $_POST["sortorder"] : "");
+$sortfield= isset($_GET["sortfield"])?$_GET["sortfield"]:(isset($_POST["sortfield"])? $_POST["sortfield"] : "");
+$socid= isset($_GET["socid"])?$_GET["socid"]:(isset($_POST["socid"])? $_POST["socid"] : "");
+$page= isset($_GET["page"])?$_GET["page"]:(isset($_POST["page"])? $_POST["page"] : "");
 
 // Security check
 $fichinterid = isset($_GET["id"])?$_GET["id"]:'';
@@ -75,8 +75,8 @@ llxHeader("","Liste des FI");
 
 $sql = "SELECT s.nom,s.rowid as socid, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM llx_societe as s, llx_Synopsis_fichinter as f ";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= ", llx_societe_commerciaux as sc";
+$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_fichinter as f ";
+if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE f.fk_soc = s.rowid ";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($socid > 0)
@@ -120,12 +120,12 @@ if ($result)
         print "<td><a href=\"fiche.php?id=".$objp->fichid."\">".img_object($langs->trans("Show"),"intervention").' '.$objp->ref."</a></td>\n";
         print '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$objp->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($objp->nom,44)."</a></td>\n";
         print '<td>'.nl2br($objp->description).'</td>';
-        print '<td align="center">'.dol_print_date($objp->dp,'day')."</td>\n";
+        print '<td align="center">'.dol_print_date($db->jdate($objp->dp),'day')."</td>\n";
         print '<td align="right">'.ConvertSecondToTime($objp->duree).'</td>';
         $requete = "SELECT fk_contrat, fk_commande
-                      FROM llx_Synopsis_fichinter as f
-                 LEFT JOIN llx_commande as c ON c.rowid = f.fk_commande
-                 LEFT JOIN llx_contrat as o  ON o.rowid = f.fk_contrat
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f
+                 LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON c.rowid = f.fk_commande
+                 LEFT JOIN ".MAIN_DB_PREFIX."contrat as o  ON o.rowid = f.fk_contrat
                      WHERE (fk_contrat >0 OR fk_commande >0)
                        AND f.rowid = ".$objp->fichid;
         $sql1=$db->query($requete);

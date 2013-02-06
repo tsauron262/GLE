@@ -171,8 +171,7 @@ $requetea = "SELECT ".MAIN_DB_PREFIX."deplacement.fk_soc as soc_refid," .
 //Charge l'utilisateur de la ndf
 
 $fuser = new User($db);
-$fuser->id = $deplacement->fk_user_author;
-$fuser->fetch();
+$fuser->fetch($deplacement->fk_user_author);
 
 require_once("PHPExcel.php");
 require_once("PHPExcel/Writer/Excel2007.php");

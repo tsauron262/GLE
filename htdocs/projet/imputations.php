@@ -10,7 +10,7 @@
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 $userId = $user->id;
 if ($_REQUEST['userid'] > 0)
     $userId = $_REQUEST['userid'];
@@ -20,8 +20,7 @@ $comref = sanitize_string("Imputations-" . date('Y') . '-' . $user->login);
 $filedir = $conf->imputations->dir_output;
 
 $curUser = new User($db);
-$curUser->id = $userId;
-$curUser->fetch();
+$curUser->fetch($userId);
 
 $format = 'weekly';
 if ($_REQUEST['format'] . 'x' != "x")
@@ -98,50 +97,35 @@ if ($_REQUEST['action'] == 'save') {
             foreach ($val as $key1 => $val1) {
                 $requete2 = "SELECT sum(task_duration_effective) as sommeheure
                                    FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-                                 WHERE task_date_effective = '" . date('Y-m-d H:i', $key1) . "'
+                                 WHERE task_date_effective = '" . date('Y-m-d H:i:s', $key1) . "'
                                    AND fk_user = " . $userId;
                 //AND fk_task = " . $key ;                     
                 $sql2 = $db->query($requete2);
+                $res2 = $db->fetch_object($sql2);
 
                 $requete3 = "SELECT *
                                    FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-                                 WHERE task_date_effective = '" . date('Y-m-d H:i', $key1) . "'
+                                 WHERE task_date_effective = '" . date('Y-m-d H:i:s', $key1) . "'
                                    AND fk_user = " . $userId . "
                                    AND fk_task = " . $key;
                 $sql3 = $db->query($requete3);
                 $res3 = $db->fetch_object($sql3);
-                $res2 = $db->fetch_object($sql2);
+                $existant = false;
+                if($res3)
+                    $existant = true;
                 $x = $_REQUEST['activity'][$key][$key1];
-                $somh = ($res2->sommeheure) - ($res3->task_duration_effective);
-                if ($_REQUEST['activity'][$key][$key1] != $val1 && $_REQUEST['activity'][$key][$key1] < 9 && (($somh / 3600) + $x) < 9) {
-                    //Insert or updateMode
-                    $requete = "SELECT *
-                                  FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-                                 WHERE task_date_effective = '" . date('Y-m-d H:i', $key1) . "'
-                                   AND fk_user = " . $userId . "
-                                   AND fk_task = " . $key;
-                    $sql = $db->query($requete);
-                    /* $requete2 = "SELECT sum(task_duration_effective) as sommeheure
-                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective
-                      WHERE task_date_effective = '" . date( 'Y-m-d H:i', $key1 ) . "'
-                      AND fk_user = " . $userId . "
-                      AND fk_task = " . $key ;
-
-                      $sql2 = $db->query( $requete2 ) ;
-                      $res2 = $db->fetch_object( $sql2 ) ;
-                      $x = $_REQUEST[ 'activity' ][ $key ][ $key1 ] ;
-                      $somh = $res2->sommeheure;
-                      if ( (($somh/3600) + $x) < 7)
-                      { */
-                    if ($db->num_rows($sql) > 0) {
-                        $res = $db->fetch_object($sql);
+                $somh = $res2->sommeheure;
+                if($existant)
+                    $somh = $somh - $res3->task_duration_effective;
+                if ($_REQUEST['activity'][$key][$key1] != $val1 && $_REQUEST['activity'][$key][$key1] < 9 && (($somh / 3600) + $x) < 9) {//verif que on respecte le max d'heure par jour et par tache
+                    if ($existant) {
                         $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
                                        SET task_duration_effective = " . intval($_REQUEST['activity'][$key][$key1] * 3600) . "
-                                     WHERE rowid = " . $res->rowid;
+                                     WHERE rowid = " . $res3->rowid;
                         $sql1 = $db->query($requete);
                     } else {
                         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective (task_duration_effective, task_date_effective, fk_task, fk_user)
-                                         VALUES (" . intval($_REQUEST['activity'][$key][$key1] * 3600) . ",'" . date('Y-m-d H:i', $key1) . "'," . $key . "," . $userId . ")";
+                                         VALUES (" . intval($_REQUEST['activity'][$key][$key1] * 3600) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
                         $sql1 = $db->query($requete);
                     }
                 }
@@ -218,7 +202,7 @@ if ($format != 'weekly')
 print '              </table>';
 
 
-if ($user->rights->voirImputations) {
+if ($user->rights->synopsisprojet->voirImputations) {
     require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
     $html = new Form($db);
     print "<td><form action='?" . ($fromProj ? 'fromProjet=1&id=' . $_REQUEST['id'] . '&' : '') . "format=" . $format . "&date=" . $date . "' method=GET>";
@@ -260,13 +244,13 @@ print '                     <span class="ui-icon ui-icon-arrowthickstop-1-e" tit
 print '                 </a>';
 $arrMonthFR = array('1' => 'Jan', "2" => "Fev", "3" => "Mar", "4" => "Avr", "5" => "Mai", "6" => "Jun", "7" => "Jui", "8" => "Aou", "9" => "Sep", "10" => "Oct", "11" => "Nov", "12" => "Dec");
 if ($format == 'weekly') {
-    print '                 Activit&eacute;s de la semaine' . date('W', $date) . ' </th>';
+    print '                 Activit&eacute;s de la semaine ' . date('W', $date);
 } else if ($format == 'biweekly') {
-    print '                 Activit&eacute;s des semaines ' . date('W', $date) . ' - ' . intval(date('W', $date) + 1) . ' </th>';
+    print '                 Activit&eacute;s des semaines ' . date('W', $date) . ' / ' . intval(date('W', $date) + 1);
 } else if ($format == 'monthly') {
-    print '                 Activit&eacute;s du mois de ' . $arrMonthFR[date('n', $date)] . ' </th>';
+    print '                 Activit&eacute;s du mois de ' . $arrMonthFR[date('n', $date)];
 }
-print '             <th class="ui-state-hover ui-widget-header" colspan="1"></th>';
+print ' - ' . date('Y', $date) . '</th>             <th class="ui-state-hover ui-widget-header" colspan="1"></th>';
 print '             <th class="ui-state-hover ui-widget-header" colspan="2">Total</th>';
 
 $arrNbJour = array('monthly' => $monthDur, 'weekly' => 7, "biweekly" => 14);
@@ -307,18 +291,15 @@ print '<tbody class="div_scrollable_medium">';
 $requete = "SELECT DISTINCT t.rowid as tid,
                   p.rowid as pid,
                   p.ref as pref,
-                  t.title
+                  t.title,
+                  t.statut,
+                  p.fk_statut
              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors AS a,
                   " . MAIN_DB_PREFIX . "Synopsis_projet AS p,
                   " . MAIN_DB_PREFIX . "Synopsis_projet_task AS t
             WHERE p.rowid = t.fk_projet
               AND t.rowid = a.fk_projet_task
               AND a.type = 'user'
-              AND t.statut = 'open'
-              AND p.fk_statut <> 0
-              AND p.fk_statut <> 5
-              AND p.fk_statut <> 50
-              AND p.fk_statut <> 999
 		AND a.fk_user = $userId 
 	    ORDER BY p.rowid";
 
@@ -332,18 +313,20 @@ $proj = new Project($db);
 $arrTaskId = array();
 $grandTotalLigne = 0;
 while ($res = $db->fetch_object($sql)) {
+    $tousVide = true;
+    $html = '';
     $bool = !$bool;
     $arrTaskId[$res->tid] = $res->tid;
-    print '<tr class="' . $arrPairImpair[$bool] . '">';
-    print '  <td class="nowrap" colspan="1">';
+    $html .= '<tr class="' . $arrPairImpair[$bool] . '">';
+    $html .= '  <td class="nowrap" colspan="1">';
     if (!$remProjId || $remProjId != $res->pid) {
         $proj->fetch($res->pid);
-        print "<label title='".$proj->title."'/>".$proj->ref." - " . $proj->getNomUrl(1, '', 25)."</label>";
+        $html .= "<label title='" . $proj->title . "'/>" . $proj->ref . " - " . $proj->getNomUrl(1, '', 25) . "</label>";
         $remProjId = $res->pid;
     }
-    print '  <td class="nowrap" colspan="1">';
-    print $res->title;
-    print '     </td>';
+    $html .= '  <td class="nowrap" colspan="1">';
+    $html .= $res->title;
+    $html .= '     </td>';
 
     $requete1 = "SELECT sum(task_duration) as sumTps
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
@@ -360,22 +343,22 @@ while ($res = $db->fetch_object($sql)) {
     $res2 = $db->fetch_object($sql2);
     $restant = round(intval($res1->sumTps - $res2->sumTps) / 36) / 100;
     $totalLigne = round(intval($res2->sumTps) / 36) / 100;
-    $grandTotalLigne += intval($res2->sumTps) / 3600;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
     $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 
     //Restant
     if ($restant < 0)
-        print '     <td nowrap class="display_value error">' . $restant . '</td>';
+        $html .= '     <td nowrap class="display_value error">' . $restant . '</td>';
     else
-        print '     <td nowrap class="display_value">' . $restant . '</td>';
+        $html .= '     <td nowrap class="display_value">' . $restant . '</td>';
     //Total h
-    print '     <td nowrap class="display_value">' . $totalLigne . '</td>';
+    $html .= '     <td nowrap class="display_value">' . $totalLigne . '</td>';
     //Total jh
-    print '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
+    $html .= '     <td nowrap class="display_value">' . $totalLignePerDay . '</td>';
 
 
     $tmpDate = $date;
+    $html2 = $html3 = '';
     for ($i = 0; $i < $arrNbJour[$format]; $i++) {
         $nbHeure = 0;
         $requete = "SELECT (task_duration_effective / 3600) as task_duration_effective
@@ -386,15 +369,31 @@ while ($res = $db->fetch_object($sql)) {
         $sql1 = $db->query($requete);
         $res1 = $db->fetch_object($sql1);
         $nbHeure = ($res1->task_duration_effective > 0 ? (round($res1->task_duration_effective * 100) / 100) : 0);
-        $totalDay[$tmpDate] += $res1->task_duration_effective;
-        print '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
-        print '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        print '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
-        print '     </td>';
+        $totalDay2[$tmpDate] = $res1->task_duration_effective;
+        $html2 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html3 .= '     <td class="day_' . date('w', $tmpDate) . '" style="text-align:center;overflow:auto;">';
+        $html2 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+//        $html3 .= '             <input type="hidden" name="activity_hidden[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html2 .= '             <input type="text" name="activity[' . $res->tid . '][' . $tmpDate . ']" value="' . $nbHeure . '" size="1" maxlength="1" />';
+        $html3 .= $nbHeure;
+        $html2 .= '     </td>';
+        $html3 .= '     </td>';
         $tmpDate += 3600 * 24;
+        if ($nbHeure > 0)
+            $tousVide = false;
     }
 
-    print '    </tr>';
+    $html2 .= '    </tr>';
+    $html3 .= '    </tr>';
+
+    $grandTotalLigne += intval($res2->sumTps) / 3600;
+    foreach ($totalDay2 as $cle => $val)
+        $totalDay[$cle] += $totalDay2[$cle];
+    $stat = $res->fk_statut;
+    if ($res->statut == 'open' && $stat != 0 && $stat != 5 && $stat != 50 && $stat != 999)
+        echo $html . $html2;
+    elseif (!$tousVide)
+        echo $html . $html3;
 }
 print '    </tbody>';
 
@@ -437,6 +436,25 @@ if ($sql) {
     $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
     print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
     print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='5'>Total mensuel&nbsp;</td>";
+    print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='5'>" . round($res->durEff * 100) / 100 . " h</td>";
+    print "</tr>";
+}
+
+//Total Annee
+$requete = "SELECT sum(task_duration_effective) / 3600 as durEff
+              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
+             WHERE fk_user = " . $userId . "
+               AND year(task_date_effective) = " . date('Y', $date) . "
+               AND fk_task in (" . join(',', $arrTaskId) . ")";
+
+$sql = $db->query($requete);
+
+if ($sql) {
+    $res = $db->fetch_object($sql);
+
+    $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
+    print "<tr><td style='padding:10px;' colspan=" . $colspan . "</td>";
+    print "    <th style='padding:10px;' align='right' class='ui-widget-header ui-state-default' colspan='5'>Total annuel&nbsp;</td>";
     print "    <td align=center style='padding:10px;' class='ui-widget-content' colspan='5'>" . round($res->durEff * 100) / 100 . " h</td>";
     print "</tr>";
 }

@@ -66,21 +66,18 @@
                     $contrat->fetch($res1->rowid);
                     $subject = "[GLE] Avertissement de fin du contrat ".$contrat->ref;
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $contrat->user_author_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($contrat->user_author_id);
                     $to = $tmpUser->email;
                     $ccArr = array();
                     if ($contrat->commercial_signature_id . "x" != "x" && $contrat->commercial_signature_id != $contrat->fk_user_author)
                     {
-                        $tmpUser->id = $contrat->commercial_signature_id;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($contrat->commercial_signature_id);
                         $cc = $tmpUser->email;
                         $ccArr[]=$cc;
                     }
                     if ($contrat->commercial_suivi_id . "x" != "x" && ($contrat->commercial_suivi_id != $contrat->commercial_signature_id) ||($contrat->fk_user_author != $contrat->commercial_suivi_id))
                     {
-                        $tmpUser->id = $contrat->commercial_suivi_id;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($contrat->commercial_suivi_id);
                         $cc = $tmpUser->email;
                         $ccArr[]=$cc;
                     }
@@ -167,7 +164,7 @@
         {
             global $mysoc;
             global $langs;
-            require_once(DOL_DOCUMENT_ROOT.'/core/lib/CMailFile.class.php');
+            require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
             $mail = new CMailFile($subject,$to,$from,$msg,$filename_list,$mimetype_list,$mimefilename_list,$addr_cc,$addr_bcc,$deliveryreceipt,$msgishtml,$errors_to);
             $res = $mail->sendfile();
             if ($res)

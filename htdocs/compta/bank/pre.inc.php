@@ -24,8 +24,8 @@
  *		\brief  	Fichier gestionnaire du menu compta banque
  */
 
-require_once(realpath(dirname(__FILE__)) . "/../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");
+require_once realpath(dirname(__FILE__)) . '/../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 $langs->load("banks");
 $langs->load("categories");
@@ -74,7 +74,7 @@ function llxHeader($head = '', $title='', $help_url='', $target='', $disablejs=0
 			{
 				$objp = $db->fetch_object($resql);
 				$menu->add('/compta/bank/fiche.php?id='.$objp->rowid,$objp->label,1,$user->rights->banque->lire);
-                if ($objp->rappro && $objp->courant != 2 && ! $objp->clos)  // If not cash account and not closed and can be reconciliate
+                if ($objp->rappro && $objp->courant != 2 && empty($objp->clos))  // If not cash account and not closed and can be reconciliate
                 {
 				    $menu->add('/compta/bank/rappro.php?account='.$objp->rowid,$langs->trans("Conciliate"),2,$user->rights->banque->consolidate);
                 }

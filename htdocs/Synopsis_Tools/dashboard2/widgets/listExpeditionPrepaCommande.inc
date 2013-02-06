@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/expedition/expedition.class.php");
+require_once (DOL_DOCUMENT_ROOT."/expedition/class/expedition.class.php");
 
 // The get widget handler.
 function widget_listExpeditionPrepaCommande() {
@@ -25,15 +25,15 @@ function widget_listExpeditionPrepaCommande() {
     {
         $clause = " WHERE ";
         $sql = "  SELECT c.rowid as comId, c.date_livraison, bs.label, e.rowid as expId
-                    FROM llx_commande AS c
+                    FROM ".MAIN_DB_PREFIX."commande AS c
                LEFT JOIN BIMP_site_commande AS b ON c.rowid = b.fk_commande
                LEFT JOIN BIMP_site AS bs ON b.site_id = bs.id
-               LEFT JOIN llx_societe AS s ON s.rowid  = c.fk_soc
-               LEFT JOIN llx_co_exp AS ce ON c.rowid = ce.fk_commande
-               LEFT JOIN llx_expedition AS e ON e.rowid = ce.fk_expedition ";
+               LEFT JOIN ".MAIN_DB_PREFIX."societe AS s ON s.rowid  = c.fk_soc
+               LEFT JOIN ".MAIN_DB_PREFIX."co_exp AS ce ON c.rowid = ce.fk_commande
+               LEFT JOIN ".MAIN_DB_PREFIX."expedition AS e ON e.rowid = ce.fk_expedition ";
     if (!$user->rights->societe->client->voir && !$socid)
     {
-        $sql.= " LEFT JOIN llx_societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
         $sql.= $clause." sc.fk_user = " .$user->id;
         $clause = " AND ";
     }
@@ -64,8 +64,8 @@ function widget_listExpeditionPrepaCommande() {
 
 
             $var=true;
-            require_once(DOL_DOCUMENT_ROOT."/commande/commande.class.php");
-            require_once(DOL_DOCUMENT_ROOT."/expedition/expedition.class.php");
+            require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
+            require_once(DOL_DOCUMENT_ROOT."/expedition/class/expedition.class.php");
             $com = new Commande($db);
             $exp = new Expedition($db);
 

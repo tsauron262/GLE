@@ -32,7 +32,7 @@
  */
 
 /**
-    \file       htdocs/core/modules/synopsis_demandeinterv/mod_arctic.php
+    \file       htdocs/core/modules/synopsisdemandeinterv/mod_arctic.php
     \ingroup    fiche intervention
     \brief      Fichier contenant la classe du modele de numerotation de reference de fiche intervention Arctic
     \version    $Id: mod_arctic.php,v 1.10 2008/07/05 14:20:09 eldy Exp $

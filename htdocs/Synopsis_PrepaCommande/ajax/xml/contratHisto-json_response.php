@@ -24,8 +24,7 @@
    require_once('../../../main.inc.php');
    $userId = $_REQUEST['userId'];
    $fuser = new User($db);
-   $fuser->id = $userId;
-   $fuser->fetch();
+   $fuser->fetch($userId);
    $fuser->getrights();
 
    require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
@@ -63,12 +62,12 @@
         if ($fuser->rights->SynopsisPrepaCom->all->AfficherPrix)
         {
             $responce->rows[$i]['cell']=array($row->rowid,
-                                               utf8_encode($commande->getNomUrl(1)),
+                                               utf8_encodeRien($commande->getNomUrl(1)),
                                                $row->date_contrat,
                                                $commande->getLibStatut(4));
         } else {
             $responce->rows[$i]['cell']=array($row->rowid,
-                                               utf8_encode($commande->getNomUrl(1)),
+                                               utf8_encodeRien($commande->getNomUrl(1)),
                                                $row->date_contrat,
                                                $commande->getLibStatut(4));
         }

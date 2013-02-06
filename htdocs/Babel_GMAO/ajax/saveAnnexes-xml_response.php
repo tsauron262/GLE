@@ -25,7 +25,7 @@
     $modele = $_REQUEST['modele'];
     $id = $_REQUEST['id'];
     $db->begin();
-    $requete = "DELETE FROM Babel_contrat_annexe WHERE contrat_refid = ".$id;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexe WHERE contrat_refid = ".$id;
     $sql1 = $db->query($requete);
     $rang = 0;
     $ok = false;
@@ -33,7 +33,7 @@
     foreach($modele as $key => $val)
     {
         $rang ++;
-        $requete = "INSERT INTO Babel_contrat_annexe
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_annexe
                                 (annexe_refid, contrat_refid, rang )
                          VALUES (".$val.",".$id.",".$rang.")";
         $sql = $db->query($requete);

@@ -138,8 +138,7 @@ if (count($inProjetArr) > 0)
         $class="";
         if ($iter ==  0 ){ $class="ActorActive"; }
         $fuser = new User($db);
-        $fuser->id = $key;
-        $fuser->fetch();
+        $fuser->fetch($key);
         print "<TR><TD style='min-width:195px; height: 60px;' class='Actorlist $class' id='Actor-$key'>";
         print $fuser->getNomUrl(1);
         print "</TD>";

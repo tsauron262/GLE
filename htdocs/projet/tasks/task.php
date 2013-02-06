@@ -402,13 +402,12 @@ $task->user_creat->fetch($task->user_creat->id);
                     if ($res->fk_user > 0)
                     {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user);
                     }
                     $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date))] = array('date' => $res->task_date, 'dur' => $res->task_duration, 'user' => $tmpUser);
                     $i++;
                 }
-                $db->free();
+                $db->free($resql);
             } else {
                 dol_print_error($db);
             }
@@ -422,8 +421,7 @@ $task->user_creat->fetch($task->user_creat->id);
                     if ($res->fk_user > 0)
                     {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user);
                     }
                     if(is_array($tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))]))
                         $tasks[$res->fk_user][date('Y-m-d',strtotime($res->task_date_effective))] = array('dateEff' => $res->task_date_effective,
@@ -438,7 +436,7 @@ $task->user_creat->fetch($task->user_creat->id);
                                                                                  'dur'     => 0,
                                                                                  'user'    =>$tmpUser);
                 }
-                $db->free();
+                $db->free($resql);
             } else {
                 dol_print_error($db);
             }
@@ -462,7 +460,7 @@ $task->user_creat->fetch($task->user_creat->id);
                 foreach($tasks as $date => $task_time)
                 {
                     $html .= "<tr>";
-                    $html .= '<td class="ui-widget-content" align=center>'.dol_print_date($task_time['date'],'day').'</td>';
+                    $html .= '<td class="ui-widget-content" align=center>'.dol_print_date($db->jdate($task_time['date']),'day').'</td>';
                     $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["dur"]).'</td>';
                     $tot += $task_time["dur"];
                     $html .= '<td class="ui-widget-content" align=center>'.$projet->sec2hour($task_time["durEff"]).'</td>';

@@ -31,7 +31,7 @@ if(!$sidx) $sidx =1;
   {
     default:
        require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-        $result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."fichinter WHERE fk_contrat=".$id);
+        $result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_contrat=".$id);
         $row = $db->fetch_object($result);
         $count = $row->count;
         if( $count >0 )
@@ -47,7 +47,7 @@ if(!$sidx) $sidx =1;
         if ($start < 0) $start=0;
 
         $SQL = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."fichinter as c
+                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as c
                  WHERE c.fk_contrat=".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
@@ -65,7 +65,7 @@ if(!$sidx) $sidx =1;
             $fi->fetch($row->rowid);
             $responce->rows[$i]['id']=$row->rowid;
             $responce->rows[$i]['cell']=array($row->rowid,
-                                               utf8_encode("&nbsp;&nbsp;".$desc),
+                                               traite_str("&nbsp;&nbsp;".$desc),
                                                $row->datei,
                                                price($row->total_ht)."&nbsp;&nbsp;",
                                                $arr['hours']["abs"].":".$arr['minutes']['rel'],
@@ -82,7 +82,7 @@ if(!$sidx) $sidx =1;
        require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
        require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/SAV.class.php");
         $result = $db->query("SELECT count(*) as count
-                                FROM ".MAIN_DB_PREFIX."fichinterdet
+                                FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet
                                WHERE fk_fichinter = ".$id);
         $row = $db->fetch_object($result);
         $count = $row->count;
@@ -99,8 +99,8 @@ if(!$sidx) $sidx =1;
         if ($start < 0) $start=0;
 
         $SQL = "SELECT t.label as type, t.isDeplacement, fd.date, fd.description, fd.total_ht, fk_depProduct, fd.fk_typeinterv, fd.duree
-                  FROM ".MAIN_DB_PREFIX."fichinterdet as fd
-             LEFT JOIN llx_Synopsis_fichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
+                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd
+             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
                  WHERE fd.fk_fichinter = ".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
@@ -122,10 +122,10 @@ if(!$sidx) $sidx =1;
             $arr = convDur($row->duree);
             $responce->rows[$i]['id']=$row->id;
             $responce->rows[$i]['cell']=array($row->id,
-                                               utf8_encode("&nbsp;&nbsp;".$row->description),
+                                               traite_str("&nbsp;&nbsp;".$row->description),
                                                $row->date,
                                                $arr['hours']["abs"].":".$arr['minutes']['rel'],
-                                               utf8_encode($type),
+                                               traite_str($type),
                                                price($row->total_ht)." &euro;&nbsp;&nbsp;"
                                              );
             $i++;
@@ -171,5 +171,9 @@ function convDur($duration)
 
     // Affichage
     return( $converted_duration);
+}
+
+function traite_str($str){
+    return $str;
 }
 ?>

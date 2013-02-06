@@ -61,8 +61,8 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->numero = 8745;
 
         $this->family = "Synopsis";
-        $this->name = "synopsisficheinter";
-        $this->description = "Gestion des fiches d'intervention";
+        $this->name = "Fiche inter +";
+        $this->description = "Gestion des fiches d'intervention amélioré";
 
         $this->revision = explode(" ", "$Revision: 1.33 $");
         $this->version = $this->revision[1];
@@ -553,6 +553,16 @@ class modSynopsisFicheinter extends DolibarrModules {
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1752 ;";
+        
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
+        
+        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
+        
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
+        
+        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
+        
+        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."Synopsis_fichinter` WHERE 1);";
 
         return $this->_init($sql);
     }

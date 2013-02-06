@@ -155,10 +155,10 @@ class InterfaceZimbraSync {
                     break;
                 case 'ACTION_DELETE':
                     //on efface l'action du cal
-                    $this->deleteElement($object, 'llx_actioncomm', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'actioncomm', $zim);
                     break;
                 case 'ACTION_UPDATE':
-                    $this->deleteElement($object, 'llx_actioncomm', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'actioncomm', $zim);
                     $this->ActionAction($object, $zim, $user);
                     //on efface l'action du cal
                     break;
@@ -166,28 +166,28 @@ class InterfaceZimbraSync {
                     $this->AffaireAction($object, $zim, $user);
                     break;
                 case 'BILL_CANCEL':
-                    $this->deleteElement($object, "llx_facture", $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX."facture", $zim);
                     $this->BillActionCancel($object, $zim);
                     break;
                 case 'BILL_UNPAYED':
                     //reouvert
-                    $this->deleteElement($object, "llx_facture", $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX."facture", $zim);
                     $this->BillAction($object, $zim);
                     break;
                 case 'BILL_CREATE':
                     $this->BillAction($object, $zim);
                     break;
                 case 'BILL_DELETE':
-                    $this->deleteElement($object, "llx_facture", $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX."facture", $zim);
                     break;
                 case 'BILL_PAYED':
                     //ajout 'un ev => facture payé
                     //Partial ou total ?
                     $facid = $object->id;
-                    require_once(DOL_DOCUMENT_ROOT . '/facture.class.php');
+                    require_once(DOL_DOCUMENT_ROOT . '/compta/facture/class/facture.class.php');
                     $factTmp = new Facture($this->db);
                     $factTmp->fetch($facid);
-                    $this->deleteElement($factTmp, "llx_facture", $zim);
+                    $this->deleteElement($factTmp, MAIN_DB_PREFIX."facture", $zim);
                     if ($factTmp->paye == 1) {
                         //payement total
                         $this->BillAction($factTmp, $zim, 2);
@@ -202,11 +202,11 @@ class InterfaceZimbraSync {
                     break;
                 case 'BILL_MODIFY':
                 case 'BILL_VALIDATE':
-                    $this->deleteElement($object, "llx_facture", $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX."facture", $zim);
                     $this->BillAction($object, $zim);
                     break;
                 case 'BILL_SUPPLIER_VALIDATE':
-                    $this->deleteElement($object, "llx_facture_fourn", $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX."facture_fourn", $zim);
                     $this->BillSupAction($object, $zim);
                     break;
                 case 'COMPANY_CREATE':
@@ -268,7 +268,7 @@ class InterfaceZimbraSync {
                         $zimId = $ret["id"];
                         $arr = array();
                         $arr['l'] = $where;
-                        $arr['cat'] = "llx_societe";
+                        $arr['cat'] = MAIN_DB_PREFIX."societe";
                         $arr['obj'] = $object;
                         $zim->Babel_AddEventFromTrigger($typeId, $arr, $zimId);
                     }
@@ -333,7 +333,7 @@ class InterfaceZimbraSync {
                         $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder WHERE  folder_parent =" . $res1->folder_uid . " OR folder_uid = " . $res->folder_uid;
                         $db->query($requete);
                     }
-                    $this->deleteElement($object, 'llx_societe', $zim, "contact");
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'societe', $zim, "contact");
                     //TODO Add création dans le cal de l'utilisateur
                     break;
                 case 'COMPANY_MODIFY':
@@ -349,7 +349,7 @@ class InterfaceZimbraSync {
                     }
 
                     //On efface la fiche de contact et la fiche des contacts e la société si any puis on les recrée
-                    $this->deleteElement($object, 'llx_societe', $zim, "contact");
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'societe', $zim, "contact");
                     $requete = "SELECT folder_uid, " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.id as ttid
                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder," . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                 WHERE " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type.val ='contact'
@@ -403,7 +403,7 @@ class InterfaceZimbraSync {
                         $zimId = $ret["id"];
                         $arr = array();
                         $arr['l'] = $where;
-                        $arr['cat'] = "llx_societe";
+                        $arr['cat'] = MAIN_DB_PREFIX."societe";
                         $arr['obj'] = $object;
                         $zim->Babel_AddEventFromTrigger($typeId, $arr, $zimId);
                     }
@@ -412,7 +412,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'CONTACT_MODIFY':
                     //on efface dans zimbra et SQL et on recré
-                    $this->deleteElement($object, 'llx_socpeople', $zim, "contact");
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'socpeople', $zim, "contact");
                 //TODO del cont dans le cal de l'utilisateur a checker
                 case 'CONTACT_CREATE':
                     //on ajoute ans zimbra et SQL
@@ -492,8 +492,8 @@ class InterfaceZimbraSync {
                             $contArr['contactDet']["company"] = iconv("ISO-8859-1", "UTF-8", $cont->socname);
                         }
                         //get Company phone if exist
-                        $requeteTel = "SELECT llx_societe.tel
-                                      FROM llx_societe
+                        $requeteTel = "SELECT ".MAIN_DB_PREFIX."societe.tel
+                                      FROM ".MAIN_DB_PREFIX."societe
                                      WHERE rowid = " . $cont->fk_soc;
                         if ($resqlTel = $db->query($requeteTel)) {
                             $resTel = $db->fetch_object($resqlTel);
@@ -506,7 +506,7 @@ class InterfaceZimbraSync {
                         $zimId = $ret["id"];
                         $arr = array();
                         $arr['l'] = $where;
-                        $arr['cat'] = "llx_socpeople";
+                        $arr['cat'] = MAIN_DB_PREFIX."socpeople";
                         $arr['obj'] = $cont;
                         $zim->Babel_AddEventFromTrigger($typeId, $arr, $zimId);
                     }
@@ -516,41 +516,41 @@ class InterfaceZimbraSync {
                     break;
                 case 'CONTACT_DELETE':
                     //on efface dans zimbra et SQL
-                    $this->deleteElement($object, 'llx_socpeople', $zim, "contact");
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'socpeople', $zim, "contact");
                     //TODO del cont dans le cal de l'utilisateur a checker
                     break;
                 case 'CONTRAT_LIGNE_MODIFY':
                 case 'CONTRACT_SERVICE_ACTIVATE':
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
-                    $this->deleteElement($object, 'llx_contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_SERVICE_CLOSE':
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
-                    $this->deleteElement($object, 'llx_contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_CANCEL':
-                    $this->deleteElement($object, 'llx_contrat', $zim);
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_CLOSE':
-                    $this->deleteElement($object, 'llx_contrat', $zim);
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_CREATE':
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_DELETE':
-                    $this->deleteElement($object, 'llx_contrat', $zim);
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
                     $this->ContratAction($object, $zim);
                     break;
                 case 'CONTRACT_VALIDATE':
-                    $this->deleteElement($object, 'llx_contrat', $zim);
-                    $this->deleteElement($object, 'llx_contratdet', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contrat', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'contratdet', $zim);
                     $this->ContratAction($object, $zim);
                     break;
 
@@ -559,7 +559,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'ORDER_DELETE':
                     //on efface dans le bon calendrier
-                    $this->deleteElement($object, 'llx_commande', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'commande', $zim);
                     break;
                 case 'ORDER_SENTBYMAIL':
                     // on ajoute une action com dans le calendrier
@@ -568,16 +568,16 @@ class InterfaceZimbraSync {
                 case 'ORDER_VALIDATE':
                     // on ajoute une validation de commande dans le calendrier
                     //=> faire requete delete appointment by id
-                    $this->deleteElement($object, 'llx_commande', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'commande', $zim);
                     $this->OrderAction($object, $zim);
                     break;
                 case 'ORDER_SUPPLIER_CREATE':
                     // on ajoute une commande fournisseur dans le calendrier
-                    $this->deleteElement($object, 'llx_commande_fournisseur', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'commande_fournisseur', $zim);
                     $this->OrderSupAction($object, $zim);
                     break;
                 case 'ORDER_SUPPLIER_VALIDATE':
-                    $this->deleteElement($object, 'llx_commande_fournisseur', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'commande_fournisseur', $zim);
                     $this->OrderSupAction($object, $zim);
                     // on ajoute une validation de commande fournisseur dans le calendrier
                     break;
@@ -600,20 +600,20 @@ class InterfaceZimbraSync {
                 case 'PROPAL_CLOSE_REFUSED':
                     // on ajoute unun evenement dans le calendrier propal
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_propal', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'propal', $zim);
                         $this->PropalAction($object, $zim);
                     }
                     break;
                 case 'PROPAL_CLOSE_SIGNED':
                     // on ajoute unun evenement dans le calendrier propal
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_propal', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'propal', $zim);
                         $this->PropalAction($object, $zim);
                     }
                     break;
                 case 'PROPAL_DELETE':
                     if ($zim->connected())
-                        $this->deleteElement($object, 'llx_propal', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'propal', $zim);
                     break;
                 case 'PROPAL_CREATE':
                     // on ajoute unun evenement dans le calendrier propal
@@ -623,7 +623,7 @@ class InterfaceZimbraSync {
                 case 'PROPAL_MODIFY':
                     // on modifie l'evenement dans le calendrier si nécéssaire
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_propal', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'propal', $zim);
                         $this->PropalAction($object, $zim);
                     }
                     break;
@@ -635,7 +635,7 @@ class InterfaceZimbraSync {
                     // on ajoute l'evenement dans le calendrier propal
                     // on modifie l'evenement dans le calendrier si nécéssaire
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_propal', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'propal', $zim);
                         $this->PropalAction($object, $zim);
                     }
                     break;
@@ -646,11 +646,11 @@ class InterfaceZimbraSync {
                     break;
                 case 'EXPEDITION_DELETE':
                     if ($zim->connected())
-                        $this->deleteElement($object, 'llx_expedition', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'expedition', $zim);
                     break;
                 case 'EXPEDITION_VALIDATE':
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_expedition', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'expedition', $zim);
                         $this->ExpedAction($object, $zim);
                     }
                     break;
@@ -662,19 +662,19 @@ class InterfaceZimbraSync {
                 case 'EXPEDITION_VALID_FROM_DELIVERY':
                 case 'EXPEDITION_CREATE_FROM_DELIVERY':
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_livraison', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'livraison', $zim);
                         $this->LivraisonAction($object, $zim);
                     }
                     break;
                 case 'LIVRAISON_VALID':
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_livraison', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'livraison', $zim);
                         $this->LivraisonAction($object, $zim);
                     }
                     break;
                 case 'LIVRAISON_DELETE':
                     if ($zim->connected()) {
-                        $this->deleteElement($object, 'llx_livraison', $zim);
+                        $this->deleteElement($object, MAIN_DB_PREFIX.'livraison', $zim);
                     }
                     break;
                 case 'PROJECT_CREATE':
@@ -708,43 +708,43 @@ class InterfaceZimbraSync {
                     //Maj dans le cal de l'utilisateur et du projet et de la societe
                     break;
                 case 'FICHEINTER_VALIDATE':
-                    $this->deleteElement($object, 'llx_fichinter', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'fichinter', $zim);
                     $this->IntervAction($object, $zim);
                     break;
                 case 'FICHEINTER_CREATE':
                     $this->IntervAction($object, $zim);
                     break;
                 case 'FICHEINTER_UPDATE':
-                    $this->deleteElement($object, 'llx_fichinter', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'fichinter', $zim);
                     $this->IntervAction($object, $zim);
                     break;
                 case 'FICHEINTER_DELETE':
-                    $this->deleteElement($object, 'llx_fichinter', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'fichinter', $zim);
                     break;
                 case 'DEMANDEINTERV_CREATE':
                     $this->DIAction($object, $zim);
                     break;
                 case 'DEMANDEINTERV_UPDATE':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 case 'DEMANDEINTERV_VALIDATE':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 case 'DEMANDEINTERV_PRISENCHARGE':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 case 'DEMANDEINTERV_CLOTURE':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 case 'DEMANDEINTERV_DELETE':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     break;
                 case 'DEMANDEINTERV_SETDELIVERY':
-                    $this->deleteElement($object, 'llx_Synopsis_demandeInterv', $zim);
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 //new
@@ -791,8 +791,7 @@ class InterfaceZimbraSync {
                     $zimpass = "";
                     $zimuser1 = "";
                     $zimpass1 = "";
-                    $object->id = $object->id;
-                    $object->fetch();
+                    $object->fetch($object->id);
                     $userAdminZim = $conf->global->ZIMBRA_ADMINUSER;
                     $passAdminZim = $conf->global->ZIMBRA_ADMINPASS;
                     $zim1 = new Zimbra($userAdminZim);
@@ -915,7 +914,7 @@ class InterfaceZimbraSync {
                         //$zim->debug=1;
                         $userCalid = $zim1->BabelCreateFolder($createArray);
                         $zim1->BabelInsertTriggerFolder($userCalid['id'], $object->prenom . ' ' . $object->nom, $where, "appointment", 1);
-                        $requeteUpdtUser = "UPDATE llx_Synopsis_Zimbra_li_User " .
+                        $requeteUpdtUser = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User " .
                                 "               SET calFolderZimId ='" . $userCalid['id'] . "' " .
                                 "     WHERE ZimbraId = '" . $id . "'";
                         $db->query($requeteUpdtUser);
@@ -930,12 +929,12 @@ class InterfaceZimbraSync {
                 case 'USER_DELETE':
                     // place l'utilisateur en mode desactived dans zimbra
                     //faire requete => chope l'id dans la base
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     $db->begin();
                     if ($resql = $db->query($requete)) {
                         $res = $db->fetch_object($resql);
                         $zimId = $res->ZimbraId;
-                        $requete = "DELETE FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                         $delOk = $db->query($requete);
                         $userAdminZim = $conf->global->ZIMBRA_ADMINUSER;
                         $passAdminZim = $conf->global->ZIMBRA_ADMINPASS;
@@ -953,7 +952,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'USER_DISABLE':
                     // place l'utilisateur en mode desactived dans zimbra
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     if ($resql = $db->query($requete)) {
                         if ($object->statut >= 0) {
                             $res = $db->fetch_object($resql);
@@ -974,7 +973,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'USER_ENABLE':
                     // place l'utilisateur en mode active dans zimbra
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     if ($resql = $db->query($requete)) {
                         if ($object->statut >= 0) {
                             $res = $db->fetch_object($resql);
@@ -993,7 +992,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'USER_MODIFY':
                     // on modifie l'evenement dans le calendrier si nécéssaire et dans contact + fiche user
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     if ($resql = $db->query($requete)) {
                         $res = $db->fetch_object($resql);
                         $zimId = $res->ZimbraId;
@@ -1026,7 +1025,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'USER_ENABLEDISABLE':
                     // si utilisateur enable => enbale sinon disabled
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     if ($resql = $db->query($requete)) {
                         if ($object->statut >= 0) {
                             $res = $db->fetch_object($resql);
@@ -1072,7 +1071,7 @@ class InterfaceZimbraSync {
                     break;
                 case 'USER_NEW_PASSWORD':
                     // on modifie le password zimbra
-                    $requete = "SELECT * FROM llx_Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
+                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User WHERE User_refid=" . $object->id;
                     if ($resql = $db->query($requete)) {
                         $res = $db->fetch_object($resql);
                         $zimId = $res->ZimbraId;
@@ -1136,21 +1135,21 @@ class InterfaceZimbraSync {
 
     function IntervAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT llx_fichinter.rowid,
-                           llx_fichinter.ref,
-                           llx_fichinter.datec,
-                           llx_fichinter.date_valid,
-                           llx_fichinter.datei,
-                           llx_fichinter.fk_user_author,
-                           llx_fichinter.fk_user_valid,
-                           llx_fichinter.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_fichinter.note_public,
-                           llx_fichinter.description as note
-                      FROM llx_fichinter, llx_societe
-                     WHERE llx_societe.rowid = llx_fichinter.fk_soc
-                       AND llx_fichinter.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."fichinter.rowid,
+                           ".MAIN_DB_PREFIX."fichinter.ref,
+                           ".MAIN_DB_PREFIX."fichinter.datec,
+                           ".MAIN_DB_PREFIX."fichinter.date_valid,
+                           ".MAIN_DB_PREFIX."fichinter.datei,
+                           ".MAIN_DB_PREFIX."fichinter.fk_user_author,
+                           ".MAIN_DB_PREFIX."fichinter.fk_user_valid,
+                           ".MAIN_DB_PREFIX."fichinter.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."fichinter.note_public,
+                           ".MAIN_DB_PREFIX."fichinter.description as note
+                      FROM ".MAIN_DB_PREFIX."fichinter, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."fichinter.fk_soc
+                       AND ".MAIN_DB_PREFIX."fichinter.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -1177,7 +1176,7 @@ class InterfaceZimbraSync {
 
                         if ($res->datec) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->datec, "Cr&eacute;ation de la FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_fichinter", 1, //all day
+                                    $res->datec, "Cr&eacute;ation de la FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."fichinter", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1186,7 +1185,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->date_valid) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_valid, "Validation de FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_fichinter", 1, //all day
+                                    $res->date_valid, "Validation de FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."fichinter", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1195,7 +1194,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->datei) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->datei, "FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_fichinter", 1, //all day
+                                    $res->datei, "FI " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fiche d'intervention " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."fichinter", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1231,31 +1230,31 @@ class InterfaceZimbraSync {
     function PaymentAction($object, $zim) {
         $db = $this->db;
         $paymentid = $object->id;
-        $requetePre = " SELECT llx_paiement_facture.fk_facture,
-                               llx_paiement.datep
-                          FROM llx_paiement,
-                               llx_paiement_facture
-                         WHERE llx_paiement_facture.fk_paiement = llx_paiement.rowid
-                           AND llx_paiement_facture.fk_paiement=  " . $paymentid;
+        $requetePre = " SELECT ".MAIN_DB_PREFIX."paiement_facture.fk_facture,
+                               ".MAIN_DB_PREFIX."paiement.datep
+                          FROM ".MAIN_DB_PREFIX."paiement,
+                               ".MAIN_DB_PREFIX."paiement_facture
+                         WHERE ".MAIN_DB_PREFIX."paiement_facture.fk_paiement = ".MAIN_DB_PREFIX."paiement.rowid
+                           AND ".MAIN_DB_PREFIX."paiement_facture.fk_paiement=  " . $paymentid;
         if ($resqlPre = $this->db->query($requetePre)) {
             $objPai = $db->fetch_object($resqlPre);
-            $requete = "SELECT llx_facture.rowid,
-                               llx_facture.facnumber as ref,
-                               llx_facture.datec,
-                               llx_facture.paye,
-                               llx_facture.datef,
-                               llx_facture.date_lim_reglement,
-                               llx_facture.date_valid,
-                               llx_facture.fk_user_author,
-                               llx_facture.fk_user_valid,
-                               llx_facture.fk_statut,
-                               llx_societe.nom as socname,
-                               llx_societe.rowid as socid,
-                               llx_facture.note,
-                               llx_facture.note_public
-                          FROM llx_facture, llx_societe
-                         WHERE llx_societe.rowid = llx_facture.fk_soc
-                           AND llx_facture.rowid = " . $objPai->fk_facture;
+            $requete = "SELECT ".MAIN_DB_PREFIX."facture.rowid,
+                               ".MAIN_DB_PREFIX."facture.facnumber as ref,
+                               ".MAIN_DB_PREFIX."facture.datec,
+                               ".MAIN_DB_PREFIX."facture.paye,
+                               ".MAIN_DB_PREFIX."facture.datef,
+                               ".MAIN_DB_PREFIX."facture.date_lim_reglement,
+                               ".MAIN_DB_PREFIX."facture.date_valid,
+                               ".MAIN_DB_PREFIX."facture.fk_user_author,
+                               ".MAIN_DB_PREFIX."facture.fk_user_valid,
+                               ".MAIN_DB_PREFIX."facture.fk_statut,
+                               ".MAIN_DB_PREFIX."societe.nom as socname,
+                               ".MAIN_DB_PREFIX."societe.rowid as socid,
+                               ".MAIN_DB_PREFIX."facture.note,
+                               ".MAIN_DB_PREFIX."facture.note_public
+                          FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
+                         WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
+                           AND ".MAIN_DB_PREFIX."facture.rowid = " . $objPai->fk_facture;
             $resql = $db->query($requete);
             $id = 0;
             $typeId = false;
@@ -1278,7 +1277,7 @@ class InterfaceZimbraSync {
                     $zimLoc = $zimRes->fid;
                     $typeId = $zimRes->ftid;
                     $arrRes = $zim->Babel_pushDateArr(
-                            $objPai->datep, "Regl de " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&egrave;glement de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_paiement", 1, //all day
+                            $objPai->datep, "Regl de " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&egrave;glement de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."paiement", 1, //all day
                             "", //loc géo
                             1, //is org
                             $zimLoc, //loc zimbra
@@ -1312,31 +1311,31 @@ class InterfaceZimbraSync {
     function PaymentSupAction($object, $zim) {
         $db = $this->db;
         $paymentid = $object->id;
-        $requetePre = " SELECT llx_paiementfourn_facturefourn.fk_facturefourn,
-                               llx_paiementfourn.datep
-                          FROM llx_paiementfourn,
-                               llx_paiementfourn_facturefourn
-                         WHERE llx_paiementfourn_facturefourn.fk_paiementfourn = llx_paiementfourn.rowid
-                           AND llx_paiementfourn_facturefourn.fk_paiementfourn=  " . $paymentid;
+        $requetePre = " SELECT ".MAIN_DB_PREFIX."paiementfourn_facturefourn.fk_facturefourn,
+                               ".MAIN_DB_PREFIX."paiementfourn.datep
+                          FROM ".MAIN_DB_PREFIX."paiementfourn,
+                               ".MAIN_DB_PREFIX."paiementfourn_facturefourn
+                         WHERE ".MAIN_DB_PREFIX."paiementfourn_facturefourn.fk_paiementfourn = ".MAIN_DB_PREFIX."paiementfourn.rowid
+                           AND ".MAIN_DB_PREFIX."paiementfourn_facturefourn.fk_paiementfourn=  " . $paymentid;
         if ($resqlPre = $this->db->query($requetePre)) {
             $objPai = $db->fetch_object($resqlPre);
-            $requete = "SELECT llx_facture_fourn.rowid,
-                               llx_facture_fourn.facnumber as ref,
-                               llx_facture_fourn.datec,
-                               llx_facture_fourn.paye,
-                               llx_facture_fourn.datef,
-                               llx_facture_fourn.date_lim_reglement,
-                               llx_facture_fourn.date_valid,
-                               llx_facture_fourn.fk_user_author,
-                               llx_facture_fourn.fk_user_valid,
-                               llx_facture_fourn.fk_statut,
-                               llx_societe.nom as socname,
-                               llx_societe.rowid as socid,
-                               llx_facture_fourn.note,
-                               llx_facture_fourn.note_public
-                          FROM llx_facture_fourn, llx_societe
-                         WHERE llx_societe.rowid = llx_facture_fourn.fk_soc
-                           AND llx_facture_fourn.rowid = " . $objPai->fk_facturefourn;
+            $requete = "SELECT ".MAIN_DB_PREFIX."facture_fourn.rowid,
+                               ".MAIN_DB_PREFIX."facture_fourn.facnumber as ref,
+                               ".MAIN_DB_PREFIX."facture_fourn.datec,
+                               ".MAIN_DB_PREFIX."facture_fourn.paye,
+                               ".MAIN_DB_PREFIX."facture_fourn.datef,
+                               ".MAIN_DB_PREFIX."facture_fourn.date_lim_reglement,
+                               ".MAIN_DB_PREFIX."facture_fourn.date_valid,
+                               ".MAIN_DB_PREFIX."facture_fourn.fk_user_author,
+                               ".MAIN_DB_PREFIX."facture_fourn.fk_user_valid,
+                               ".MAIN_DB_PREFIX."facture_fourn.fk_statut,
+                               ".MAIN_DB_PREFIX."societe.nom as socname,
+                               ".MAIN_DB_PREFIX."societe.rowid as socid,
+                               ".MAIN_DB_PREFIX."facture_fourn.note,
+                               ".MAIN_DB_PREFIX."facture_fourn.note_public
+                          FROM ".MAIN_DB_PREFIX."facture_fourn, ".MAIN_DB_PREFIX."societe
+                         WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_soc
+                           AND ".MAIN_DB_PREFIX."facture_fourn.rowid = " . $objPai->fk_facturefourn;
             $resql = $db->query($requete);
             $id = 0;
             $typeId = false;
@@ -1359,7 +1358,7 @@ class InterfaceZimbraSync {
                     $zimLoc = $zimRes->fid;
                     $typeId = $zimRes->ftid;
                     $arrRes = $zim->Babel_pushDateArr(
-                            $objPai->datep, "Regl de " . $res->ref . "" . " (" . $res->socname . ")", "R&egrave;glement de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_paiementfourn", 1, //all day
+                            $objPai->datep, "Regl de " . $res->ref . "" . " (" . $res->socname . ")", "R&egrave;glement de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."paiementfourn", 1, //all day
                             "", //loc géo
                             1, //is org
                             $zimLoc, //loc zimbra
@@ -1392,23 +1391,23 @@ class InterfaceZimbraSync {
 
     function BillAction($object, $zim, $payed = 0) {
         $db = $this->db;
-        $requete = "SELECT llx_facture.rowid,
-                           llx_facture.facnumber as ref,
-                           llx_facture.datec,
-                           llx_facture.paye,
-                           llx_facture.datef,
-                           llx_facture.date_lim_reglement,
-                           llx_facture.date_valid,
-                           llx_facture.fk_user_author,
-                           llx_facture.fk_user_valid,
-                           llx_facture.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_facture.note,
-                           llx_facture.note_public
-                      FROM llx_facture, llx_societe
-                     WHERE llx_societe.rowid = llx_facture.fk_soc
-                       AND llx_facture.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."facture.rowid,
+                           ".MAIN_DB_PREFIX."facture.facnumber as ref,
+                           ".MAIN_DB_PREFIX."facture.datec,
+                           ".MAIN_DB_PREFIX."facture.paye,
+                           ".MAIN_DB_PREFIX."facture.datef,
+                           ".MAIN_DB_PREFIX."facture.date_lim_reglement,
+                           ".MAIN_DB_PREFIX."facture.date_valid,
+                           ".MAIN_DB_PREFIX."facture.fk_user_author,
+                           ".MAIN_DB_PREFIX."facture.fk_user_valid,
+                           ".MAIN_DB_PREFIX."facture.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."facture.note,
+                           ".MAIN_DB_PREFIX."facture.note_public
+                      FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
+                       AND ".MAIN_DB_PREFIX."facture.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -1431,8 +1430,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim1 = false;
                     if ($res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim1 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1447,8 +1445,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ($res->fk_user_valid != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_valid;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_valid);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1490,7 +1487,7 @@ class InterfaceZimbraSync {
 
                         if ($res->date_lim_reglement && $res->datef) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1498,7 +1495,7 @@ class InterfaceZimbraSync {
                             $id++;
                             if ($zimLoc1) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc1, //loc zimbra
@@ -1507,7 +1504,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc2) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc2, //loc zimbra
@@ -1516,7 +1513,7 @@ class InterfaceZimbraSync {
                             }
                         } else if ($res->datef) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1524,7 +1521,7 @@ class InterfaceZimbraSync {
                             $id++;
                             if ($zimLoc1) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc1, //loc zimbra
@@ -1533,7 +1530,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc2) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc2, //loc zimbra
@@ -1543,7 +1540,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->date_valid) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1551,7 +1548,7 @@ class InterfaceZimbraSync {
                             $id++;
                             if ($zimLoc1) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc1, //loc zimbra
@@ -1560,7 +1557,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc2) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                        $res->date_valid, "Validation de Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture " . $res->ref . "<BR>" . $infoPaie . "<P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                         "", //loc géo
                                         1, //is org
                                         $zimLoc2, //loc zimbra
@@ -1596,23 +1593,23 @@ class InterfaceZimbraSync {
     function BillActionCancel($object, $zim) {
         //on ajoute cancel sur tout les ev + on ajoute l'annulation de la commande
         $db = $this->db;
-        $requete = "SELECT llx_facture.rowid,
-                           llx_facture.facnumber as ref,
-                           llx_facture.datec,
-                           llx_facture.paye,
-                           llx_facture.datef,
-                           llx_facture.date_lim_reglement,
-                           llx_facture.date_valid,
-                           llx_facture.fk_user_author,
-                           llx_facture.fk_user_valid,
-                           llx_facture.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_facture.note,
-                           llx_facture.note_public
-                      FROM llx_facture, llx_societe
-                     WHERE llx_societe.rowid = llx_facture.fk_soc
-                       AND llx_facture.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."facture.rowid,
+                           ".MAIN_DB_PREFIX."facture.facnumber as ref,
+                           ".MAIN_DB_PREFIX."facture.datec,
+                           ".MAIN_DB_PREFIX."facture.paye,
+                           ".MAIN_DB_PREFIX."facture.datef,
+                           ".MAIN_DB_PREFIX."facture.date_lim_reglement,
+                           ".MAIN_DB_PREFIX."facture.date_valid,
+                           ".MAIN_DB_PREFIX."facture.fk_user_author,
+                           ".MAIN_DB_PREFIX."facture.fk_user_valid,
+                           ".MAIN_DB_PREFIX."facture.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."facture.note,
+                           ".MAIN_DB_PREFIX."facture.note_public
+                      FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
+                       AND ".MAIN_DB_PREFIX."facture.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -1636,8 +1633,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim1 = false;
                     if ($res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim1 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1652,8 +1648,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ($res->fk_user_valid != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_valid;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_valid);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -1687,7 +1682,7 @@ class InterfaceZimbraSync {
 
                         if ($res->date_lim_reglement && $res->datef) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1697,7 +1692,7 @@ class InterfaceZimbraSync {
 
                         if ($zimLoc1) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc1, //loc zimbra
@@ -1706,7 +1701,7 @@ class InterfaceZimbraSync {
                         }
                         if ($zimLoc2) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture annul&eacute;e" . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Facture (annul&eacute;e)" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc2, //loc zimbra
@@ -1714,7 +1709,7 @@ class InterfaceZimbraSync {
                             $id++;
                         }
                         $arrRes = $zim->Babel_pushDateArr(
-                                $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -1722,7 +1717,7 @@ class InterfaceZimbraSync {
                         $id++;
                         if ($zimLoc1) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc1, //loc zimbra
@@ -1731,7 +1726,7 @@ class InterfaceZimbraSync {
                         }
                         if ($zimLoc2) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture", 1, //all day
+                                    $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00", "Ann. facture " . "" . $res->ref . "" . " (" . htmlentities($res->socname) . ")", "Annulation de la facture " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc2, //loc zimbra
@@ -1743,7 +1738,7 @@ class InterfaceZimbraSync {
             }
             while (count($zim->ApptArray) > 0) {
                 $arr = array_pop($zim->ApptArray);
-                if ($arr['cat'] == "llx_facture") {
+                if ($arr['cat'] == MAIN_DB_PREFIX."facture") {
                     $arr1 = $arr;
                     //extract socid
                     //Store to Db, Store to Zimbra
@@ -1760,7 +1755,7 @@ class InterfaceZimbraSync {
                     $ret1 = $zim->createApptBabel($arr1);
                     $zimId1 = $ret1["CreateAppointmentResponse_attribute_invId"][0];
                     $zim->Babel_AddEventFromTrigger($typeId, $arr1, $zimId1);
-                } else if ($arr['cat'] == "llx_actioncom_rep") {
+                } else if ($arr['cat'] == MAIN_DB_PREFIX."actioncom_rep") {
 
                     $requeteRepAct = "SELECT folder_type_refid as ftid,
                                          folder_uid as fid
@@ -1770,7 +1765,7 @@ class InterfaceZimbraSync {
                     if ($resqlRepAct = $this->db->query($requeteRepAct)) {
                         $foldId = $this->db->fetch_object($resqlRepAct)->fid;
                         $arr2 = $arr;
-                        $arr2['cat'] == "llx_facture";
+                        $arr2['cat'] == MAIN_DB_PREFIX."facture";
                         $arr2['l'] = $foldId;
                         $ret1 = $zim->createApptBabel($arr2);
                         $zimId1 = $ret1["CreateAppointmentResponse_attribute_invId"][0];
@@ -1784,23 +1779,23 @@ class InterfaceZimbraSync {
 
     function BillSupAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT llx_facture_fourn.rowid,
-                           llx_facture_fourn.facnumber as ref,
-                           llx_facture_fourn.datec,
-                           llx_facture_fourn.paye,
-                           llx_facture_fourn.datef,
-                           llx_facture_fourn.date_lim_reglement,
-                           llx_facture_fourn.date_valid,
-                           llx_facture_fourn.fk_user_author,
-                           llx_facture_fourn.fk_user_valid,
-                           llx_facture_fourn.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_facture_fourn.note,
-                           llx_facture_fourn.note_public
-                      FROM llx_facture_fourn, llx_societe
-                     WHERE llx_societe.rowid = llx_facture_fourn.fk_soc
-                       AND llx_facture_fourn.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."facture_fourn.rowid,
+                           ".MAIN_DB_PREFIX."facture_fourn.facnumber as ref,
+                           ".MAIN_DB_PREFIX."facture_fourn.datec,
+                           ".MAIN_DB_PREFIX."facture_fourn.paye,
+                           ".MAIN_DB_PREFIX."facture_fourn.datef,
+                           ".MAIN_DB_PREFIX."facture_fourn.date_lim_reglement,
+                           ".MAIN_DB_PREFIX."facture_fourn.date_valid,
+                           ".MAIN_DB_PREFIX."facture_fourn.fk_user_author,
+                           ".MAIN_DB_PREFIX."facture_fourn.fk_user_valid,
+                           ".MAIN_DB_PREFIX."facture_fourn.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."facture_fourn.note,
+                           ".MAIN_DB_PREFIX."facture_fourn.note_public
+                      FROM ".MAIN_DB_PREFIX."facture_fourn, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture_fourn.fk_soc
+                       AND ".MAIN_DB_PREFIX."facture_fourn.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -1827,7 +1822,7 @@ class InterfaceZimbraSync {
 
                         if ($res->date_lim_reglement && $res->datef) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture_fourn", 1, //all day
+                                    array('debut' => $res->datef, "fin" => $res->date_lim_reglement), "Facture " . "" . $res->ref . "" . " (" . $res->socname . ")", "R&eacute;glement de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture_fourn", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1835,7 +1830,7 @@ class InterfaceZimbraSync {
                             $id++;
                         } else if ($res->datef) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture_fourn", 1, //all day
+                                    $res->datef, "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la facture fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture_fourn", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1844,7 +1839,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->date_valid) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_valid, "Validation de Facture  fournisseur" . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture  fournisseur" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_facture_fourn", 1, //all day
+                                    $res->date_valid, "Validation de Facture  fournisseur" . "" . $res->ref . "" . " (" . $res->socname . ")", "Validation de la facture  fournisseur" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."facture_fourn", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -1879,23 +1874,23 @@ class InterfaceZimbraSync {
     function OrderAction($object, $zim) {
         //on ajoute dans le bon calendrier
         $db = $this->db;
-        $requete = "SELECT llx_commande.rowid,
-                           llx_commande.ref,
-                           llx_commande.date_creation,
-                           llx_commande.date_commande,
-                           llx_commande.date_valid,
-                           llx_commande.date_cloture,
-                           llx_commande.fk_user_author,
-                           llx_commande.fk_user_valid,
-                           llx_commande.fk_user_cloture,
-                           llx_commande.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_commande.note,
-                           llx_commande.note_public,
-                           llx_commande.date_livraison
-                      FROM llx_commande, llx_societe
-                     WHERE llx_societe.rowid = llx_commande.fk_soc AND llx_commande.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."commande.rowid,
+                           ".MAIN_DB_PREFIX."commande.ref,
+                           ".MAIN_DB_PREFIX."commande.date_creation,
+                           ".MAIN_DB_PREFIX."commande.date_commande,
+                           ".MAIN_DB_PREFIX."commande.date_valid,
+                           ".MAIN_DB_PREFIX."commande.date_cloture,
+                           ".MAIN_DB_PREFIX."commande.fk_user_author,
+                           ".MAIN_DB_PREFIX."commande.fk_user_valid,
+                           ".MAIN_DB_PREFIX."commande.fk_user_cloture,
+                           ".MAIN_DB_PREFIX."commande.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."commande.note,
+                           ".MAIN_DB_PREFIX."commande.note_public,
+                           ".MAIN_DB_PREFIX."commande.date_livraison
+                      FROM ".MAIN_DB_PREFIX."commande, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."commande.fk_soc AND ".MAIN_DB_PREFIX."commande.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -1919,7 +1914,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_creation, "Créat. de la com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande", 1, //all day
+                                $res->date_creation, "Créat. de la com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -1927,7 +1922,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_commande) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datec, "Date commande " . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande", 1, //all day
+                                $res->datec, "Date commande " . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -1936,7 +1931,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_valid && $res->date_cloture . "x" == "x") {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Valid de la com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande", 1, //all day
+                                $res->date_valid, "Valid de la com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -1944,7 +1939,7 @@ class InterfaceZimbraSync {
                         $id++;
                     } else if ($res->date_cloture) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                array('debut' => $res->date_valid, 'fin' => $res->date_cloture), "Clot de le com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande", 1, //all day
+                                array('debut' => $res->date_valid, 'fin' => $res->date_cloture), "Clot de le com " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture de la commande " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -1977,22 +1972,22 @@ class InterfaceZimbraSync {
     function OrderSupAction($object, $zim) {
         //on ajoute dans le bon calendrier
         $db = $this->db;
-        $requete = "SELECT llx_commande_fournisseur.rowid,
-                           llx_commande_fournisseur.ref,
-                           llx_commande_fournisseur.date_creation,
-                           llx_commande_fournisseur.date_commande,
-                           llx_commande_fournisseur.date_valid,
-                           llx_commande_fournisseur.date_cloture,
-                           llx_commande_fournisseur.fk_user_author,
-                           llx_commande_fournisseur.fk_user_valid,
-                           llx_commande_fournisseur.fk_user_cloture,
-                           llx_commande_fournisseur.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_commande_fournisseur.note,
-                           llx_commande_fournisseur.note_public
-                      FROM llx_commande_fournisseur, llx_societe
-                     WHERE llx_societe.rowid = llx_commande_fournisseur.fk_soc AND llx_commande_fournisseur.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."commande_fournisseur.rowid,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.ref,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.date_creation,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.date_commande,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.date_valid,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.date_cloture,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.fk_user_author,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.fk_user_valid,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.fk_user_cloture,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.note,
+                           ".MAIN_DB_PREFIX."commande_fournisseur.note_public
+                      FROM ".MAIN_DB_PREFIX."commande_fournisseur, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."commande_fournisseur.fk_soc AND ".MAIN_DB_PREFIX."commande_fournisseur.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -2016,7 +2011,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_creation, "Créat. de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la commande fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande_fournisseur", 1, //all day
+                                $res->date_creation, "Créat. de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la commande fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande_fournisseur", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -2024,7 +2019,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_commande) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datec, "Date commande fourniseur" . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande  fournisseur" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande_fournisseur", 1, //all day
+                                $res->datec, "Date commande fourniseur" . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande  fournisseur" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande_fournisseur", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -2033,7 +2028,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_valid && $res->date_cloture . "x" == "x") {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Valid de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la commande fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande_fournisseur", 1, //all day
+                                $res->date_valid, "Valid de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la commande fournisseur " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande_fournisseur", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -2041,7 +2036,7 @@ class InterfaceZimbraSync {
                         $id++;
                     } else if ($res->date_cloture) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                array('debut' => $res->date_valid, 'fin' => $res->date_cloture), "Clot de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture de la commande fourn " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_commande_fournisseur", 1, //all day
+                                array('debut' => $res->date_valid, 'fin' => $res->date_cloture), "Clot de la com fourn " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture de la commande fourn " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."commande_fournisseur", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -2231,25 +2226,25 @@ class InterfaceZimbraSync {
 
     function PropalAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT llx_propal.rowid,
-                           llx_propal.ref,
-                           llx_propal.datec,
-                           llx_propal.datep,
-                           llx_propal.fin_validite,
-                           llx_propal.date_valid,
-                           llx_propal.date_cloture,
-                           llx_propal.fk_user_author,
-                           llx_propal.fk_user_valid,
-                           llx_propal.fk_user_cloture,
-                           llx_propal.fk_statut,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid,
-                           llx_propal.note,
-                           llx_propal.note_public,
-                           llx_propal.date_livraison
-                      FROM llx_propal, llx_societe
-                     WHERE llx_societe.rowid = llx_propal.fk_soc
-                       AND llx_propal.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."propal.rowid,
+                           ".MAIN_DB_PREFIX."propal.ref,
+                           ".MAIN_DB_PREFIX."propal.datec,
+                           ".MAIN_DB_PREFIX."propal.datep,
+                           ".MAIN_DB_PREFIX."propal.fin_validite,
+                           ".MAIN_DB_PREFIX."propal.date_valid,
+                           ".MAIN_DB_PREFIX."propal.date_cloture,
+                           ".MAIN_DB_PREFIX."propal.fk_user_author,
+                           ".MAIN_DB_PREFIX."propal.fk_user_valid,
+                           ".MAIN_DB_PREFIX."propal.fk_user_cloture,
+                           ".MAIN_DB_PREFIX."propal.fk_statut,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."propal.note,
+                           ".MAIN_DB_PREFIX."propal.note_public,
+                           ".MAIN_DB_PREFIX."propal.date_livraison
+                      FROM ".MAIN_DB_PREFIX."propal, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."propal.fk_soc
+                       AND ".MAIN_DB_PREFIX."propal.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -2273,7 +2268,7 @@ class InterfaceZimbraSync {
                     $zimLoc = $zimRes->fid;
                     $typeId = $zimRes->ftid;
                     $arrRes = $zim->Babel_pushDateArr(
-                            $res->datec, "Créat. de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_propal", 1, //all day
+                            $res->datec, "Créat. de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."propal", 1, //all day
                             "", 1, //loc géo
                             $zimLoc, //loc zimbra
                             $url, $soc->id, $res);
@@ -2281,7 +2276,7 @@ class InterfaceZimbraSync {
                 }
                 if ($res->datep) {
                     $arrRes = $zim->Babel_pushDateArr(
-                            $res->datep, "Date Prop " . "" . $res->ref . "" . " (" . $res->socname . ")", "Proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_propal", 1, //all day
+                            $res->datep, "Date Prop " . "" . $res->ref . "" . " (" . $res->socname . ")", "Proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."propal", 1, //all day
                             "", //loc géo
                             1, //is org
                             $zimLoc, //loc zimbra
@@ -2290,7 +2285,7 @@ class InterfaceZimbraSync {
                 }
                 if ($res->fin_validite && $res->datep) {
                     $arrRes = $zim->Babel_pushDateArr(
-                            array('debut' => $res->datep, "fin" => $res->fin_validite), "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_propal", 1, //all day
+                            array('debut' => $res->datep, "fin" => $res->fin_validite), "Valid de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validit&eacute; de la proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."propal", 1, //all day
                             "", //loc géo
                             1, //is org
                             $zimLoc, //loc zimbra
@@ -2299,7 +2294,7 @@ class InterfaceZimbraSync {
                 }
                 if ($res->date_cloture) {
                     $arrRes = $zim->Babel_pushDateArr(
-                            $res->date_cloture, "Clot de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture Proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_propal", 1, //all day
+                            $res->date_cloture, "Clot de " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cloture Proposition commerciale " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."propal", 1, //all day
                             "", //loc géo
                             1, //is org
                             $zimLoc, //loc zimbra
@@ -2330,27 +2325,27 @@ class InterfaceZimbraSync {
 
     function ActionAction($object, $zim, $user) {
         $db = $zim->db;
-        $requete = "SELECT  llx_actioncomm.datec,
-                            llx_actioncomm.datep,
-                            llx_actioncomm.datep2,
-                            llx_actioncomm.label,
-                            llx_actioncomm.fk_user_action,
-                            llx_actioncomm.fk_user_done,
-                            llx_actioncomm.fk_user_author,
-                            llx_actioncomm.fk_user_mod,
-                            llx_actioncomm.id,
-                            llx_c_actioncomm.libelle,
-                            llx_projet.title,
-                            llx_projet.ref,
-                            llx_actioncomm.durationp,
-                            llx_actioncomm.note,
-                            llx_societe.nom as socname,
-                            llx_societe.rowid as socid
-                      FROM  llx_societe, llx_actioncomm llx_actioncomm
-                 LEFT JOIN llx_projet on llx_actioncomm.fk_projet = llx_projet.rowid
-                 LEFT JOIN llx_c_actioncomm on llx_c_actioncomm.id = llx_actioncomm.fk_action
-                 LEFT JOIN llx_socpeople on llx_socpeople.rowid = llx_actioncomm.fk_contact
-                    WHERE llx_societe.rowid = llx_actioncomm.fk_soc AND llx_actioncomm.id =" . $object->id;
+        $requete = "SELECT  ".MAIN_DB_PREFIX."actioncomm.datec,
+                            ".MAIN_DB_PREFIX."actioncomm.datep,
+                            ".MAIN_DB_PREFIX."actioncomm.datep2,
+                            ".MAIN_DB_PREFIX."actioncomm.label,
+                            ".MAIN_DB_PREFIX."actioncomm.fk_user_action,
+                            ".MAIN_DB_PREFIX."actioncomm.fk_user_done,
+                            ".MAIN_DB_PREFIX."actioncomm.fk_user_author,
+                            ".MAIN_DB_PREFIX."actioncomm.fk_user_mod,
+                            ".MAIN_DB_PREFIX."actioncomm.id,
+                            ".MAIN_DB_PREFIX."c_actioncomm.libelle,
+                            ".MAIN_DB_PREFIX."projet.title,
+                            ".MAIN_DB_PREFIX."projet.ref,
+                            ".MAIN_DB_PREFIX."actioncomm.durationp,
+                            ".MAIN_DB_PREFIX."actioncomm.note,
+                            ".MAIN_DB_PREFIX."societe.nom as socname,
+                            ".MAIN_DB_PREFIX."societe.rowid as socid
+                      FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."actioncomm ".MAIN_DB_PREFIX."actioncomm
+                 LEFT JOIN ".MAIN_DB_PREFIX."projet on ".MAIN_DB_PREFIX."actioncomm.fk_projet = ".MAIN_DB_PREFIX."projet.rowid
+                 LEFT JOIN ".MAIN_DB_PREFIX."c_actioncomm on ".MAIN_DB_PREFIX."c_actioncomm.id = ".MAIN_DB_PREFIX."actioncomm.fk_action
+                 LEFT JOIN ".MAIN_DB_PREFIX."socpeople on ".MAIN_DB_PREFIX."socpeople.rowid = ".MAIN_DB_PREFIX."actioncomm.fk_contact
+                    WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."actioncomm.fk_soc AND ".MAIN_DB_PREFIX."actioncomm.id =" . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -2383,8 +2378,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim2 = false;
                     if ("x" . $res->fk_user_author != "x" && $res->fk_user_author != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_author;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_author);
                         $requeteLocZim2 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2399,8 +2393,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim3 = false;
                     if ("x" . $res->fk_user_action != "x" && $res->fk_user_action != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_action;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_action);
                         $requeteLocZim3 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2415,8 +2408,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim4 = false;
                     if ("x" . $res->fk_user_done != "x" && $res->fk_user_done != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_done;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_done);
                         $requeteLocZim4 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2431,8 +2423,7 @@ class InterfaceZimbraSync {
                     $requeteLocZim5 = false;
                     if ("x" . $res->fk_user_mod != "x" && $res->fk_user_mod != $user->id) {
                         $tmpUser = new User($db);
-                        $tmpUser->id = $res->fk_user_mod;
-                        $tmpUser->fetch();
+                        $tmpUser->fetch($res->fk_user_mod);
                         $requeteLocZim5 = "SELECT folder_type_refid as ftid,
                                                  folder_uid as fid
                                             FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2489,20 +2480,20 @@ class InterfaceZimbraSync {
                                 $date = array('debut' => $res->datep, 'fin' => $res->datep2);
                             }
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . htmlentities($res->ref) . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                    $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . htmlentities($res->ref) . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                     "", 1, //loc géo
                                     $zimLoc, //loc zimbra
                                     $url, $soc->id, $res);
                             $id++;
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                    $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                     "", 1, //loc géo
                                     $zimLoc1, //loc zimbra
                                     $url, $soc->id, $res);
                             $id++;
                             if ($zimLoc2) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                         "", 1, //loc géo
                                         $zimLoc2, //loc zimbra
                                         $url, $soc->id, $res);
@@ -2510,7 +2501,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc3) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                         "", 1, //loc géo
                                         $zimLoc3, //loc zimbra
                                         $url, $soc->id, $res);
@@ -2518,7 +2509,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc4) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                         "", 1, //loc géo
                                         $zimLoc4, //loc zimbra
                                         $url, $soc->id, $res);
@@ -2526,7 +2517,7 @@ class InterfaceZimbraSync {
                             }
                             if ($zimLoc5) {
                                 $arrRes = $zim->Babel_pushDateArr(
-                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, "llx_actioncomm", $allDay, //all day
+                                        $date, htmlentities($res->libelle . " (" . $res->socname . ")"), "Action commerciale " . htmlentities($res->libelle) . "<HR><P>" . htmlentities($res->label) . "<BR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $res->ref, $id, MAIN_DB_PREFIX."actioncomm", $allDay, //all day
                                         "", 1, //loc géo
                                         $zimLoc5, //loc zimbra
                                         $url, $soc->id, $res);
@@ -2604,8 +2595,7 @@ class InterfaceZimbraSync {
         $requeteLocZim3 = false;
         if ($res->user_validation->id . "x" != "x" && $res->user_validation->id != $user->id) {
             $tmpUser = new User($db);
-            $tmpUser->id = $res->fk_user_valid;
-            $tmpUser->fetch();
+            $tmpUser->fetch($res->fk_user_valid);
             $requeteLocZim3 = "SELECT folder_type_refid as ftid,
                                      folder_uid as fid
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
@@ -2721,14 +2711,14 @@ class InterfaceZimbraSync {
             $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00"; //2007-08-31 12:01:01
             //replace $date par now()
             $arrRes = $zim->Babel_pushDateArr(
-                    $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                    $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                     "", 1, //loc géo
                     $zimLoc, //loc zimbra
                     $url, $soc->id, $res);
             $id++;
             if ($zimLoc1 && $zimLoc1 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc1, //loc zimbra
                         $url, $soc->id, $res);
@@ -2736,7 +2726,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc2 && $zimLoc2 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc2, //loc zimbra
                         $url, $soc->id, $res);
@@ -2744,7 +2734,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc3 && $zimLoc3 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc3, //loc zimbra
                         $url, $soc->id, $res);
@@ -2752,7 +2742,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc4 && $zimLoc4 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc4, //loc zimbra
                         $url, $soc->id, $res);
@@ -2760,7 +2750,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc5 && $zimLoc5 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc5, //loc zimbra
                         $url, $soc->id, $res);
@@ -2768,7 +2758,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc6 && $zimLoc6 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc6, //loc zimbra
                         $url, $soc->id, $res);
@@ -2776,7 +2766,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc7 && $zimLoc7 . "x" != "x") {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env fact " . $object->ref . " (" . $object->client->nom . ")", "Envoie de facture par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc7, //loc zimbra
                         $url, $soc->id, $res);
@@ -3010,14 +3000,14 @@ class InterfaceZimbraSync {
             $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00"; //2007-08-31 12:01:01
             //replace $date par now()
             $arrRes = $zim->Babel_pushDateArr(
-                    $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                    $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                     "", 1, //loc géo
                     $zimLoc, //loc zimbra
                     $url, $soc->id, $res);
             $id++;
             if ($zimLoc1) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc1, //loc zimbra
                         $url, $soc->id, $res);
@@ -3025,7 +3015,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc2) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc2, //loc zimbra
                         $url, $soc->id, $res);
@@ -3033,7 +3023,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc3) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc3, //loc zimbra
                         $url, $soc->id, $res);
@@ -3041,7 +3031,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc4) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc4, //loc zimbra
                         $url, $soc->id, $res);
@@ -3049,7 +3039,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc5) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc5, //loc zimbra
                         $url, $soc->id, $res);
@@ -3057,7 +3047,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc6) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc6, //loc zimbra
                         $url, $soc->id, $res);
@@ -3065,7 +3055,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc7) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc7, //loc zimbra
                         $url, $soc->id, $res);
@@ -3073,7 +3063,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc8) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc8, //loc zimbra
                         $url, $soc->id, $res);
@@ -3081,7 +3071,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc9) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env commande " . $object->ref . " (" . $object->client->nom . ")", "Envoie de commande par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc9, //loc zimbra
                         $url, $soc->id, $res);
@@ -3324,14 +3314,14 @@ class InterfaceZimbraSync {
             $date = date('Y') . "-" . date('m') . "-" . date('d') . " " . date('G') . ":" . date('i') . ":00"; //2007-08-31 12:01:01
             //replace $date par now()
             $arrRes = $zim->Babel_pushDateArr(
-                    $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                    $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                     "", 1, //loc géo
                     $zimLoc, //loc zimbra
                     $url, $soc->id, $res);
             $id++;
             if ($zimLoc1) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc1, //loc zimbra
                         $url, $soc->id, $res);
@@ -3339,7 +3329,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc2) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc2, //loc zimbra
                         $url, $soc->id, $res);
@@ -3347,7 +3337,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc3) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc3, //loc zimbra
                         $url, $soc->id, $res);
@@ -3355,7 +3345,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc4) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc4, //loc zimbra
                         $url, $soc->id, $res);
@@ -3363,7 +3353,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc5) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc5, //loc zimbra
                         $url, $soc->id, $res);
@@ -3371,7 +3361,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc6) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc6, //loc zimbra
                         $url, $soc->id, $res);
@@ -3379,7 +3369,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc7) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc7, //loc zimbra
                         $url, $soc->id, $res);
@@ -3387,7 +3377,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc8) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc8, //loc zimbra
                         $url, $soc->id, $res);
@@ -3395,7 +3385,7 @@ class InterfaceZimbraSync {
             }
             if ($zimLoc9) {
                 $arrRes = $zim->Babel_pushDateArr(
-                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, "llx_actioncomm_fake", $allDay, //all day
+                        $date, "Env. propale " . $object->ref . " (" . $object->client->nom . ")", "Envoie de proposition commerciale par mail " . $object->ref . "<HR>Ref :" . $res->ref . "<HR><P>" . $res->note . "<BR><P>", $object->ref, $id, MAIN_DB_PREFIX."actioncomm_fake", $allDay, //all day
                         "", 1, //loc géo
                         $zimLoc9, //loc zimbra
                         $url, $soc->id, $res);
@@ -3436,28 +3426,28 @@ class InterfaceZimbraSync {
 
 
         $db = $this->db;
-        $requete = "SELECT  llx_expedition.rowid as id,
-                            llx_expedition.ref,
-                            llx_expedition.fk_soc,
-                            llx_expedition.date_creation,
-                            llx_expedition.date_valid,
-                            llx_expedition.date_expedition,
-                            llx_expedition.fk_user_author,
-                            llx_expedition.fk_user_valid,
-                            llx_expedition.fk_expedition_methode,
-                            llx_expedition.fk_statut,
-                            llx_expedition.note,
-                            llx_expedition_methode.rowid,
-                            llx_expedition_methode.code,
-                            llx_expedition_methode.libelle,
-                            llx_expedition_methode.description,
-                            llx_societe.nom as socname,
-                            llx_societe.rowid as socid,
-                            llx_expedition_methode.statut
-                      FROM  llx_societe, llx_expedition
-                 LEFT JOIN  llx_expedition_methode llx_expedition_methode
-                        ON  llx_expedition.fk_expedition_methode = llx_expedition_methode.rowid
-                    WHERE llx_societe.rowid = llx_expedition.fk_soc AND llx_expedition.rowid = $object->id";
+        $requete = "SELECT  ".MAIN_DB_PREFIX."expedition.rowid as id,
+                            ".MAIN_DB_PREFIX."expedition.ref,
+                            ".MAIN_DB_PREFIX."expedition.fk_soc,
+                            ".MAIN_DB_PREFIX."expedition.date_creation,
+                            ".MAIN_DB_PREFIX."expedition.date_valid,
+                            ".MAIN_DB_PREFIX."expedition.date_expedition,
+                            ".MAIN_DB_PREFIX."expedition.fk_user_author,
+                            ".MAIN_DB_PREFIX."expedition.fk_user_valid,
+                            ".MAIN_DB_PREFIX."expedition.fk_expedition_methode,
+                            ".MAIN_DB_PREFIX."expedition.fk_statut,
+                            ".MAIN_DB_PREFIX."expedition.note,
+                            ".MAIN_DB_PREFIX."expedition_methode.rowid,
+                            ".MAIN_DB_PREFIX."expedition_methode.code,
+                            ".MAIN_DB_PREFIX."expedition_methode.libelle,
+                            ".MAIN_DB_PREFIX."expedition_methode.description,
+                            ".MAIN_DB_PREFIX."societe.nom as socname,
+                            ".MAIN_DB_PREFIX."societe.rowid as socid,
+                            ".MAIN_DB_PREFIX."expedition_methode.statut
+                      FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."expedition
+                 LEFT JOIN  ".MAIN_DB_PREFIX."expedition_methode ".MAIN_DB_PREFIX."expedition_methode
+                        ON  ".MAIN_DB_PREFIX."expedition.fk_expedition_methode = ".MAIN_DB_PREFIX."expedition_methode.rowid
+                    WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."expedition.fk_soc AND ".MAIN_DB_PREFIX."expedition.rowid = $object->id";
 
         $resql = $db->query($requete);
         $id = 0;
@@ -3483,7 +3473,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_creation, "Prise en compte de l'expedition " . "" . $res->ref . "" . " (" . $res->socname . ")", "Prise en compte de l'expedition " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_expedition", 1, //all day
+                                $res->date_creation, "Prise en compte de l'expedition " . "" . $res->ref . "" . " (" . $res->socname . ")", "Prise en compte de l'expedition " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."expedition", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3492,7 +3482,7 @@ class InterfaceZimbraSync {
 
                     if ($res->date_expedition) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_expedition, "Expedition " . "" . $res->ref . "" . " (" . $res->socname . ")", "Expedition de " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_expedition", 1, //all day
+                                $res->date_expedition, "Expedition " . "" . $res->ref . "" . " (" . $res->socname . ")", "Expedition de " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."expedition", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3502,7 +3492,7 @@ class InterfaceZimbraSync {
 
                     if ($res->date_valid) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Validation de l'expedition " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de l'expedition " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_expedition", 1, //all day
+                                $res->date_valid, "Validation de l'expedition " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de l'expedition " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."expedition", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3537,23 +3527,23 @@ class InterfaceZimbraSync {
 
     function DIAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT llx_Synopsis_demandeInterv.rowid,
-                           llx_Synopsis_demandeInterv.fk_soc,
-                           llx_Synopsis_demandeInterv.fk_contrat,
-                           llx_Synopsis_demandeInterv.datec,
-                           llx_Synopsis_demandeInterv.date_valid,
-                           llx_Synopsis_demandeInterv.datei,
-                           llx_Synopsis_demandeInterv.fk_user_author,
-                           llx_Synopsis_demandeInterv.fk_user_valid,
-                           llx_Synopsis_demandeInterv.fk_statut,
-                           llx_Synopsis_demandeInterv.description,
-                           llx_Synopsis_demandeInterv.note_private,
-                           llx_Synopsis_demandeInterv.note_public,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid
-                      FROM llx_Synopsis_demandeInterv, llx_societe
-                     WHERE llx_societe.rowid = llx_Synopsis_demandeInterv.fk_soc
-                       AND llx_Synopsis_demandeInterv.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_contrat,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datec,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.date_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_statut,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.description,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_private,
+                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_public,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid
+                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc
+                       AND ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -3578,7 +3568,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datec, "Créat. la DI  " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datec, "Créat. la DI  " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3586,7 +3576,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->datei) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3595,7 +3585,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_valid) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_Synopsis_demandeInterv", 1, //all day
+                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3634,20 +3624,20 @@ class InterfaceZimbraSync {
 
     function LivraisonAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT  llx_livraison.rowid as id,
-                            llx_livraison.ref,
-                            llx_livraison.fk_soc,
-                            llx_livraison.date_creation,
-                            llx_livraison.date_valid,
-                            llx_livraison.date_livraison,
-                            llx_livraison.fk_user_author,
-                            llx_livraison.fk_user_valid,
-                            llx_livraison.fk_statut,
-                            llx_livraison.note,
-                            llx_societe.nom as socname,
-                            llx_societe.rowid as socid
-                      FROM  llx_societe, llx_livraison
-                     WHERE llx_societe.rowid = llx_livraison.fk_soc AND llx_livraison.rowid = $object->id";
+        $requete = "SELECT  ".MAIN_DB_PREFIX."livraison.rowid as id,
+                            ".MAIN_DB_PREFIX."livraison.ref,
+                            ".MAIN_DB_PREFIX."livraison.fk_soc,
+                            ".MAIN_DB_PREFIX."livraison.date_creation,
+                            ".MAIN_DB_PREFIX."livraison.date_valid,
+                            ".MAIN_DB_PREFIX."livraison.date_livraison,
+                            ".MAIN_DB_PREFIX."livraison.fk_user_author,
+                            ".MAIN_DB_PREFIX."livraison.fk_user_valid,
+                            ".MAIN_DB_PREFIX."livraison.fk_statut,
+                            ".MAIN_DB_PREFIX."livraison.note,
+                            ".MAIN_DB_PREFIX."societe.nom as socname,
+                            ".MAIN_DB_PREFIX."societe.rowid as socid
+                      FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."livraison
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."livraison.fk_soc AND ".MAIN_DB_PREFIX."livraison.rowid = $object->id";
 
         $resql = $db->query($requete);
         $id = 0;
@@ -3672,7 +3662,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_creation, "Prise en compte de la livraison " . "" . $res->ref . "" . " (" . $res->socname . ")", "Prise en compte de la livraison " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_livraison", 1, //all day
+                                $res->date_creation, "Prise en compte de la livraison " . "" . $res->ref . "" . " (" . $res->socname . ")", "Prise en compte de la livraison " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."livraison", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3680,7 +3670,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_livraison) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_livraison, "livraison " . "" . $res->ref . "" . " (" . $res->socname . ")", "livraison de " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_livraison", 1, //all day
+                                $res->date_livraison, "livraison " . "" . $res->ref . "" . " (" . $res->socname . ")", "livraison de " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."livraison", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3690,7 +3680,7 @@ class InterfaceZimbraSync {
 
                     if ($res->date_valid) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Validation de la livraison " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la livraison " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, "llx_livraison", 1, //all day
+                                $res->date_valid, "Validation de la livraison " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la livraison " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->ref, $id, MAIN_DB_PREFIX."livraison", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3724,20 +3714,20 @@ class InterfaceZimbraSync {
     function ContratAction($object, $zim) {
         $db = $this->db;
 
-        $requete = "SELECT llx_contrat.rowid,
-                           llx_contrat.fk_soc,
-                           llx_contrat.ref,
-                           llx_contrat.datec,
-                           llx_contrat.date_contrat,
-                           llx_contrat.date_valid,
-                           llx_contrat.mise_en_service,
-                           llx_contrat.fin_validite,
-                           llx_contrat.date_cloture,
-                           llx_societe.nom as socname,
-                           llx_societe.rowid as socid
-                      FROM llx_contrat,
-                           llx_societe
-                     WHERE llx_societe.rowid = llx_contrat.fk_soc AND llx_contrat.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."contrat.rowid,
+                           ".MAIN_DB_PREFIX."contrat.fk_soc,
+                           ".MAIN_DB_PREFIX."contrat.ref,
+                           ".MAIN_DB_PREFIX."contrat.datec,
+                           ".MAIN_DB_PREFIX."contrat.date_contrat,
+                           ".MAIN_DB_PREFIX."contrat.date_valid,
+                           ".MAIN_DB_PREFIX."contrat.mise_en_service,
+                           ".MAIN_DB_PREFIX."contrat.fin_validite,
+                           ".MAIN_DB_PREFIX."contrat.date_cloture,
+                           ".MAIN_DB_PREFIX."societe.nom as socname,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid
+                      FROM ".MAIN_DB_PREFIX."contrat,
+                           ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."contrat.fk_soc AND ".MAIN_DB_PREFIX."contrat.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -3762,7 +3752,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datec, "Créat. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->datec, "Créat. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cr&eacute;ation du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3771,7 +3761,7 @@ class InterfaceZimbraSync {
 
                     if ($res->date_contrat) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_contrat, "Contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->date_contrat, "Contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3781,7 +3771,7 @@ class InterfaceZimbraSync {
 
                     if ($res->mise_en_service) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->mise_en_service, "Mise en serv. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Mise en service du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->mise_en_service, "Mise en serv. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Mise en service du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3790,7 +3780,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->fin_validite) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->fin_validite, "Fin de val. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fin de validit&eacute; du contrat  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->fin_validite, "Fin de val. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fin de validit&eacute; du contrat  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3799,7 +3789,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_valid) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Valid. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validitation du contrat  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->date_valid, "Valid. du contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Validitation du contrat  " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3808,7 +3798,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_cloture) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_cloture, "Cl&ocirc;ture contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cl&ocirc;ture du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contrat", 1, //all day
+                                $res->date_cloture, "Cl&ocirc;ture contrat " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cl&ocirc;ture du contrat " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contrat", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3846,19 +3836,19 @@ class InterfaceZimbraSync {
     function ContratDetAction($object, $zim) { //obj is contrat obj
         $db = $this->db;
 
-        $requete = "SELECT llx_contrat.rowid,
-                           llx_contratdet.date_commande,
-                           llx_contratdet.label as ref,
-                           llx_contratdet.date_ouverture_prevue,
-                           llx_contratdet.date_ouverture,
-                           llx_contratdet.date_fin_validite as date_detfinvalid,
-                           llx_contratdet.date_cloture as date_detcloture
-                      FROM llx_contrat,
-                           llx_contratdet,
-                           llx_societe
-                     WHERE llx_contratdet.fk_contrat = llx_contrat.rowid
-                       AND llx_societe.rowid = llx_contrat.fk_soc
-                       AND llx_contrat.rowid = " . $object->id;
+        $requete = "SELECT ".MAIN_DB_PREFIX."contrat.rowid,
+                           ".MAIN_DB_PREFIX."contratdet.date_commande,
+                           ".MAIN_DB_PREFIX."contratdet.label as ref,
+                           ".MAIN_DB_PREFIX."contratdet.date_ouverture_prevue,
+                           ".MAIN_DB_PREFIX."contratdet.date_ouverture,
+                           ".MAIN_DB_PREFIX."contratdet.date_fin_validite as date_detfinvalid,
+                           ".MAIN_DB_PREFIX."contratdet.date_cloture as date_detcloture
+                      FROM ".MAIN_DB_PREFIX."contrat,
+                           ".MAIN_DB_PREFIX."contratdet,
+                           ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."contratdet.fk_contrat = ".MAIN_DB_PREFIX."contrat.rowid
+                       AND ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."contrat.fk_soc
+                       AND ".MAIN_DB_PREFIX."contrat.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
@@ -3885,7 +3875,7 @@ class InterfaceZimbraSync {
 
                         if ($res->date_ouverture) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_ouverture, "Ouv du serv " . "" . $res->ref . "" . " (" . $res->socname . ")", "Ouverture du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contratdet", 1, //all day
+                                    $res->date_ouverture, "Ouv du serv " . "" . $res->ref . "" . " (" . $res->socname . ")", "Ouverture du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contratdet", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -3893,7 +3883,7 @@ class InterfaceZimbraSync {
                             $id++;
                         } else {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_ouverture_prevue, "Ouv du serv. prev" . "" . $res->ref . "" . " (" . $res->socname . ")", "Ouverture pr&eacute;visonnelle du service" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contratdet", 1, //all day
+                                    $res->date_ouverture_prevue, "Ouv du serv. prev" . "" . $res->ref . "" . " (" . $res->socname . ")", "Ouverture pr&eacute;visonnelle du service" . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contratdet", 1, //all day
                                     "", 1, //loc géo
                                     $zimLoc, //loc zimbra
                                     $url, $soc->id, $res);
@@ -3901,7 +3891,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->date_commande) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_commande, "Com. du serv " . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contratdet", 1, //all day
+                                    $res->date_commande, "Com. du serv " . "" . $res->ref . "" . " (" . $res->socname . ")", "Commande du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contratdet", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -3911,7 +3901,7 @@ class InterfaceZimbraSync {
 
                         if ($res->date_detfinvalid) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_detfinvalid, "Fin de val. du serv. " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fin de validat&eacute; du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contratdet", 1, //all day
+                                    $res->date_detfinvalid, "Fin de val. du serv. " . "" . $res->ref . "" . " (" . $res->socname . ")", "Fin de validat&eacute; du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contratdet", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra
@@ -3920,7 +3910,7 @@ class InterfaceZimbraSync {
                         }
                         if ($res->date_detcloture) {
                             $arrRes = $zim->Babel_pushDateArr(
-                                    $res->date_detcloture, "Cl&ocirc;t. du  serv. " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cl&ocirc;ture du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, "llx_contratdet", 1, //all day
+                                    $res->date_detcloture, "Cl&ocirc;t. du  serv. " . "" . $res->ref . "" . " (" . $res->socname . ")", "Cl&ocirc;ture du service " . $res->ref . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."contratdet", 1, //all day
                                     "", //loc géo
                                     1, //is org
                                     $zimLoc, //loc zimbra

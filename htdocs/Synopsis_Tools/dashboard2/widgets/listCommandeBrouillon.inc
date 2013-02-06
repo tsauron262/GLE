@@ -66,7 +66,7 @@ function widget_listCommandeBrouillon() {
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">'.
                                     "<a href=\"".DOL_URL_ROOT."/commande/fiche.php?id=".$res->rowid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$res->ref.'</a></td>';
-                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                             $total += $res->total_ttc;
                     }
@@ -74,7 +74,7 @@ function widget_listCommandeBrouillon() {
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">'.
                             "<a href=\"".DOL_URL_ROOT."/commande/fiche.php?id=".$res->rowid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$res->ref.'</a></td>';
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dolibarr_trunc($res->nom,18)).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td></tr>';
                     $total2 += $res->total_ttc;
                     $iter++;

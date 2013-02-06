@@ -99,11 +99,11 @@ class pdf_contratGMAO_courrierBIMPsignature extends ModelePDFContrat
                 require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/contratMixte.class.php");
                 $contrat=getContratObj($id);
                 $contrat->fetch($id);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
 //                $contrat = new ContratMixte($this->db);
 //                $ret=$contrat->fetch($id);
             } else {
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
             }
 
             // Definition de $dir et $file

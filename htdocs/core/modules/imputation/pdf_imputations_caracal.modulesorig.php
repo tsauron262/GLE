@@ -438,8 +438,7 @@ class pdf_imputations_caracal extends ModelePDFImputations
                     $societe = $proj->societe->nom;
                     $statut = $proj->getLibStatut('1');
                     $tmpUser = new User($this->db);
-                    $tmpUser->id = $proj->user_resp_id;
-                    $tmpUser->fetch();
+                    $tmpUser->fetch($proj->user_resp_id);
                     $resp = $tmpUser->fullname ." <".$tmpUser->email.">";
 
                     $ligne ++;

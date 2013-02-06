@@ -23,11 +23,11 @@
  *  \ingroup    paybox
  *  \brief      Description and activation file for module Paybox
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
-/**     \class      modPayBox
- *      \brief      Description and activation class for module Paybox
+/**
+ * 	Description and activation class for module Paybox
  */
 class modPayBox extends DolibarrModules
 {
@@ -36,7 +36,7 @@ class modPayBox extends DolibarrModules
      *
      *   @param      DoliDB		$db      Database handler
      */
-    function modPayBox($db)
+    function __construct($db)
     {
         $this->db = $db;
 

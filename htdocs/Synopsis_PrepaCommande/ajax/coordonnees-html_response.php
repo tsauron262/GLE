@@ -56,24 +56,24 @@ if ($socid > 0) {
     print '<table class="border" width="100%" cellpadding=10>';
 
     print '<tr><th width="30%" class="ui-state-default ui-widget-header">' . $langs->trans("Name") . '</td><td width="70%" colspan="3" class="ui-widget-content">';
-    print utf8_encode($objsoc->getNomUrl(1));
+    print utf8_encodeRien($objsoc->getNomUrl(1));
     print '</td></tr>';
 
-    print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Prefix') . '</td><td colspan="3" class="ui-widget-content">' . utf8_encode($objsoc->prefix_comm) . '</td></tr>';
+    print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Prefix') . '</td><td colspan="3" class="ui-widget-content">' . utf8_encodeRien($objsoc->prefix_comm) . '</td></tr>';
 
     if ($objsoc->client) {
         print '<tr><th nowrap class="ui-state-default ui-widget-header">';
         print $langs->trans('CustomerCode') . '</td><td colspan="3"  class="ui-widget-content">';
-        print utf8_encode($objsoc->code_client);
+        print utf8_encodeRien($objsoc->code_client);
         if ($objsoc->check_codeclient() <> 0)
             print '  <font class="error">(' . $langs->trans("WrongCustomerCode") . ')</font>';
         print '</td></tr>';
     }
 
-    print "<tr><th class='ui-state-default ui-widget-header' valign=\"top\">" . $langs->trans('Address') . "</td><td  class='ui-widget-content' colspan=\"3\">" . utf8_encode(nl2br($objsoc->adresse)) . "</td></tr>";
+    print "<tr><th class='ui-state-default ui-widget-header' valign=\"top\">" . $langs->trans('Address') . "</td><td  class='ui-widget-content' colspan=\"3\">" . utf8_encodeRien(nl2br($objsoc->adresse)) . "</td></tr>";
 
     print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Zip') . '</td><td class="ui-widget-content">' . $objsoc->cp . "</td>";
-    print '<th class="ui-state-default ui-widget-header" >' . $langs->trans('Town') . '</td><td class="ui-widget-content">' . utf8_encode($objsoc->ville) . "</td></tr>";
+    print '<th class="ui-state-default ui-widget-header" >' . $langs->trans('Town') . '</td><td class="ui-widget-content">' . utf8_encodeRien($objsoc->ville) . "</td></tr>";
 
     // Country
     print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Country") . '</td><td colspan="3"  class="ui-widget-content">';

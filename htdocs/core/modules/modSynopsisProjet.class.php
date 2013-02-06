@@ -60,7 +60,8 @@ class modSynopsisProjet extends DolibarrModules {
         $this->numero = 4000;
 
         $this->family = "Synopsis";
-        $this->name = strtolower(preg_replace('/^mod/i', '', get_class($this)));
+        $this->name = "Projet +";
+        $this->nameI = "synopsisprojet";
         $this->description = "Gestion des projets avancé";
         $this->version = 2;
         $this->const_name = 'MAIN_MODULE_SYNOPSISPROJET';
@@ -102,7 +103,7 @@ class modSynopsisProjet extends DolibarrModules {
 
         // Permissions
         $this->rights = array();
-        $this->rights_class = $this->name;
+        $this->rights_class = 'synopsisprojet';
 
         $this->rights[1][0] = 41; // id de la permission
         $this->rights[1][1] = 'Lire les projets/t&acirc;ches'; // libelle de la permission
@@ -134,6 +135,18 @@ class modSynopsisProjet extends DolibarrModules {
         $this->rights[5][3] = 1; // La permission est-elle une permission par defaut
         $this->rights[5][4] = 'voirImputations';
 
+        $this->rights[6][0] = 47; // id de la permission
+        $this->rights[6][1] = 'Attribution/modification de budgets d’heures associées aux tâches et attribués aux utilisateurs'; // libelle de la permission
+        $this->rights[6][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[6][3] = 1; // La permission est-elle une permission par defaut
+        $this->rights[6][4] = 'attribution';
+
+        $this->rights[7][0] = 48; // id de la permission
+        $this->rights[7][1] = 'Voir les CA dans les imputations'; // libelle de la permission
+        $this->rights[7][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[7][3] = 1; // La permission est-elle une permission par defaut
+        $this->rights[7][4] = 'caImput';
+
 
 
 
@@ -141,12 +154,12 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 0,
             'type' => 'top',
             'titre' => 'Projet',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'leftmenu' => '0',
             'url' => '/projet/liste.php',
             'langs' => 'project@projet',
             'position' => 7,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -155,12 +168,12 @@ class modSynopsisProjet extends DolibarrModules {
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
-            'titre' => $this->name,
-            'mainmenu' => $this->name,
+            'titre' => $this->nameI,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/index.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 0,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -168,25 +181,38 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'Imputations',
-            'mainmenu' => $this->name,
-            'url' => '/projet/imputations.php?leftmenu=projects',
+            'mainmenu' => $this->nameI,
+            'url' => '/projet/histo_imputations.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 0,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
         $r++;
+        
+       /* $this->menu[$r] = array('fk_menu' => 'r=' . $s,
+            'type' => 'left',
+            'titre' => 'Test NEW Imputations',
+            'mainmenu' => $this->nameI,
+            'url' => '/projet/histo_imputations.php?leftmenu=projects',
+            'langs' => 'project@projet',
+            'position' => 0,
+            'perms' => '$user->rights->' . $this->nameI . '->voirImputations',
+            'target' => '',
+            'user' => 0,
+            'constraints' => array(0 => '$leftmenu==projects'));
+        $r++;*/
 
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'NewProject',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/nouveau.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->creer',
+            'perms' => '$user->rights->' . $this->nameI . '->creer',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
@@ -195,11 +221,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'List',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/liste.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 101,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==projects'));
@@ -208,11 +234,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'MenuConfig',
-            'mainmenu' => $this->name,
+            'mainmenu' => $this->nameI,
             'url' => '/projet/config.php?leftmenu=projects',
             'langs' => 'project@projet',
             'position' => 101,
-            'perms' => '$user->rights->' . $this->name . '->configure',
+            'perms' => '$user->rights->' . $this->nameI . '->configure',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects'));
         $s = $r;
@@ -227,7 +253,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/tasks/index.php?leftmenu=projects_task',
             'langs' => 'project@projet',
             'position' => 1,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -242,7 +268,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/tasks/mytasks.php?leftmenu=projects_task',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects_task'));
         $r++;
@@ -255,7 +281,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/activity/index.php?leftmenu=projects_activity',
             'langs' => 'project@projet',
             'position' => 2,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0);
         $s = $r;
@@ -268,7 +294,7 @@ class modSynopsisProjet extends DolibarrModules {
             'url' => '/projet/activity/myactivity.php?leftmenu=projects_activity',
             'langs' => 'project@projet',
             'position' => 100,
-            'perms' => '$user->rights->' . $this->name . '->lire',
+            'perms' => '$user->rights->' . $this->nameI . '->lire',
             'target' => '',
             'user' => 0, 'constraints' => array(0 => '$leftmenu==projects_activity'));
         $r++;
@@ -354,7 +380,8 @@ class modSynopsisProjet extends DolibarrModules {
   `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`, `code`, `label`, `active`) VALUES
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;", 
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`, `code`, `label`, `active`) VALUES
 (0, 'PROJDRAFT', 'Brouillon', 1),
 (5, 'PROJPLANNING', 'Planification', 1),
 (10, 'PROJRUNNING', 'En cours', 1),
@@ -677,38 +704,46 @@ class modSynopsisProjet extends DolibarrModules {
             "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "CREATE VIEW ". MAIN_DB_PREFIX ."projet as (SELECT rowid, fk_soc, date_create as datec, tms, dateo, date_cloture as datee, ref, entity, title, note as description, fk_user_creat, '' as public, fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM ". MAIN_DB_PREFIX ."Synopsis_projet);",
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_AQ` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_task` int(11) NOT NULL,
+  `fk_user` int(11) NOT NULL,
+  `date` date NOT NULL,
+  `val` int(11) NOT NULL,
+  PRIMARY KEY (`rowid`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;",
             
             
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element`
   ADD CONSTRAINT `liaison_fk` FOREIGN KEY (`ecm_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_auto` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element_assoc`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element_assoc`
   ADD CONSTRAINT `liaison_ecm_assoc` FOREIGN KEY (`ecm_assoc_refid`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_assoc` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources`
   ADD CONSTRAINT `fk_parent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `fk_ressource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa`
+  ADD CONSTRAINT `fk_ressource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa`
   ADD CONSTRAINT `resa_ressource_key ` FOREIGN KEY (`fk_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE NO ACTION,
   ADD CONSTRAINT `user_author_resa_ressource_key` FOREIGN KEY (`fk_user_author`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_imputation_resa_ressource_key ` FOREIGN KEY (`fk_user_imputation`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;", 
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet`
   ADD CONSTRAINT `" . MAIN_DB_PREFIX . "Synopsis_projet_ibfk_1` FOREIGN KEY (`fk_statut`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources`
   ADD CONSTRAINT `fk_global_ressource_key` FOREIGN KEY (`fk_global_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_user_resa_key` FOREIGN KEY (`fk_user_resa`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources`
   ADD CONSTRAINT `fk_projessource_resp` FOREIGN KEY (`fk_user_resp`) REFERENCES `" . MAIN_DB_PREFIX . "user` (`rowid`) ON DELETE NO ACTION,
   ADD CONSTRAINT `fk_projparent_ressource_key` FOREIGN KEY (`fk_parent_ressource`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_global_ressources` (`id`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_risk`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_risk`
   ADD CONSTRAINT `fk_projet_risk` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_projet_task_risk` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task`
   ADD CONSTRAINT `fk_parent_task_sql` FOREIGN KEY (`fk_task_parent`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_projet_task` FOREIGN KEY (`fk_projet`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors`
   ADD CONSTRAINT `fk_parent_task_actor_sql` FOREIGN KEY (`fk_projet_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends`
   ADD CONSTRAINT `fk_parent_task_depends_1_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE,
   ADD CONSTRAINT `fk_parent_task_depends_2_sql` FOREIGN KEY (`fk_depends`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;",
-            "ALTER TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
+            "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time`
   ADD CONSTRAINT `fk_parent_task_time_sql` FOREIGN KEY (`fk_task`) REFERENCES `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (`rowid`) ON DELETE CASCADE;"
             );
 
@@ -721,7 +756,7 @@ class modSynopsisProjet extends DolibarrModules {
      */
     function remove($option = '') {
         $sql = array("DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;");
-//    $requete = "DELETE FROM ".MAIN_DB_PREFIX."menu WHERE mainmenu='".$this->name."'";
+//    $requete = "DELETE FROM ".MAIN_DB_PREFIX."menu WHERE mainmenu='".$this->nameI."'";
 //    $sql = $this->db->query($requete);
 
         return $this->_remove($sql, $option);

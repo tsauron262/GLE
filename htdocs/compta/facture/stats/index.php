@@ -23,9 +23,9 @@
  *  \brief      Page des stats factures
  */
 
-require("../../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/class/dolgraph.class.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facturestats.class.php");
+require '../../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/dolgraph.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facturestats.class.php';
 
 $WIDTH=500;
 $HEIGHT=200;
@@ -219,6 +219,8 @@ if (empty($socid))
 	print '<table class="notopnoleftnopadd" width="100%"><tr>';
 	print '<td align="center" valign="top">';
 
+//if (empty($socid))
+//{
 	// Show filter box
 	print '<form name="stats" method="POST" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="mode" value="'.$mode.'">';
@@ -244,7 +246,7 @@ if (empty($socid))
 	print '</table>';
 	print '</form>';
 	print '<br><br>';
-}
+//}
 
 print '<table class="border" width="100%">';
 print '<tr height="24">';

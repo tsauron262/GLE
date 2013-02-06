@@ -27,11 +27,10 @@
  *      \ingroup    agenda
  *      \brief      Fichier de description et activation du module agenda
  */
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 /**
- *      \class      modAgenda
- *      \brief      Classe de description et activation du module Adherent
+ *	Classe de description et activation du module Adherent
  */
 class modAgenda extends DolibarrModules
 {
@@ -41,7 +40,7 @@ class modAgenda extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
 	 */
-	function modAgenda($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 		$this->numero = 2400;

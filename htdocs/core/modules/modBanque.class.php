@@ -27,14 +27,12 @@
  *	\brief      Fichier de description et activation du module Banque
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
 /**
- *	\class      modBanque
- *	\brief      Classe de description et activation du module Banque
+ *	Classe de description et activation du module Banque
  */
-
 class modBanque extends DolibarrModules
 {
 
@@ -43,7 +41,7 @@ class modBanque extends DolibarrModules
 	 *
 	 *	@param	DoliDB	$db		Database handler
 	 */
-	function modBanque($db)
+	function __construct($db)
 	{
 		global $conf;
 
@@ -147,6 +145,7 @@ class modBanque extends DolibarrModules
 		$this->export_label[$r]='Ecritures bancaires et releves';
 		$this->export_permission[$r]=array(array("banque","export"));
 		$this->export_fields_array[$r]=array('b.rowid'=>'IdTransaction','ba.ref'=>'AccountRef','ba.label'=>'AccountLabel','b.datev'=>'DateValue','b.dateo'=>'DateOperation','b.label'=>'Label','b.num_chq'=>'ChequeOrTransferNumber','-b.amount'=>'Debit','b.amount'=>'Credit','b.num_releve'=>'AccountStatement','b.datec'=>"DateCreation","bu.url_id"=>"IdThirdParty","s.nom"=>"ThirdParty","s.code_compta"=>"CustomerAccountancyCode","s.code_compta_fournisseur"=>"SupplierAccountancyCode");
+		$this->export_TypeFields_array[$r]=array('ba.ref'=>'Text','ba.label'=>'Text','b.datev'=>'Date','b.dateo'=>'Date','b.label'=>'Text','b.num_chq'=>'Text','-b.amount'=>'Number','b.amount'=>'Number','b.num_releve'=>'Text','b.datec'=>"Date","bu.url_id"=>"Text","s.nom"=>"Text","s.code_compta"=>"Text","s.code_compta_fournisseur"=>"Text");
 		$this->export_entities_array[$r]=array('b.rowid'=>'account','ba.ref'=>'account','ba.label'=>'account','b.datev'=>'account','b.dateo'=>'account','b.label'=>'account','b.num_chq'=>'account','-b.amount'=>'account','b.amount'=>'account','b.num_releve'=>'account','b.datec'=>"account","bu.url_id"=>"company","s.nom"=>"company","s.code_compta"=>"company","s.code_compta_fournisseur"=>"company");
 		$this->export_special_array[$r]=array('-b.amount'=>'NULLIFNEG','b.amount'=>'NULLIFNEG');
 	    if (empty($conf->fournisseur->enabled))

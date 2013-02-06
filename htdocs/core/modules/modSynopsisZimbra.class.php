@@ -41,7 +41,7 @@ class modSynopsisZimbra extends DolibarrModules
         $this->numero = 22231;
 
         $this->family = "Synopsis";
-        $this->name = preg_replace('/^mod/i', '', get_class($this));
+        $this->name = "Zimbra";
         $this->description = "Zimbra Synopsis et DRSI";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISZIMBRA';

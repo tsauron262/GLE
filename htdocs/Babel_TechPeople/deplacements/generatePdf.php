@@ -170,7 +170,7 @@ while ($res=$db->objetSuivant($sql))
     $socname = '';
     if ($socid < 1)
     {
-        $socname = "Babel Services";
+        $socname = "Synopsis";
     } else {
         $socname = $res->sname;
     }

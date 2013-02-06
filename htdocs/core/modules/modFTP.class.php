@@ -24,11 +24,11 @@
  *      \brief      Description and activation file for module FTP
  */
 
-include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
+include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
 
-/**     \class      modFTP
- *      \brief      Description and activation class for module FTP
+/**
+ * 	Description and activation class for module FTP
  */
 class modFTP extends DolibarrModules
 {
@@ -38,7 +38,7 @@ class modFTP extends DolibarrModules
 	 *
 	 *   @param      DoliDB		$db      Database handler
     */
-	function modFTP($db)
+	function __construct($db)
 	{
 		$this->db = $db;
 

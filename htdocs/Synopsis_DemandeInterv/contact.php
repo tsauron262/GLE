@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -39,6 +42,7 @@ require ("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
 require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
 
 $langs->load("interventions");
 $langs->load("sendings");
@@ -48,14 +52,15 @@ $demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'demandeInterv', $demandeIntervid, 'demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'demandeInterv');
 
+$formcompany = new FormCompany($db);
 
 /*
  * Ajout d'un nouveau contact
  */
 
-if ($_POST["action"] == 'addcontact' && $user->rights->synopsisdemandeinterv->creer)
+if (isset($_POST["action"]) && $_POST["action"] == 'addcontact' && $user->rights->synopsisdemandeinterv->creer)
 {
 
     $result = 0;
@@ -86,7 +91,7 @@ if ($_POST["action"] == 'addcontact' && $user->rights->synopsisdemandeinterv->cr
     }
 }
 // modification d'un contact. On enregistre le type
-if ($_POST["action"] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer)
+if (isset($_POST["action"]) && $_POST["action"] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer)
 {
     $demandeInterv = new demandeInterv($db);
     if ($demandeInterv->fetch($_GET["id"]))
@@ -111,7 +116,7 @@ if ($_POST["action"] == 'updateligne' && $user->rights->synopsisdemandeinterv->c
 }
 
 // bascule du statut d'un contact
-if ($_GET["action"] == 'swapstatut' && $user->rights->synopsisdemandeinterv->creer)
+if (isset($_GET["action"]) && $_GET["action"] == 'swapstatut' && $user->rights->synopsisdemandeinterv->creer)
 {
     $demandeInterv = new demandeInterv($db);
     if ($demandeInterv->fetch($_GET["id"]))
@@ -136,7 +141,7 @@ if ($_GET["action"] == 'swapstatut' && $user->rights->synopsisdemandeinterv->cre
 }
 
 // Efface un contact
-if ($_GET["action"] == 'deleteline' && $user->rights->synopsisdemandeinterv->creer)
+if (isset($_GET["action"]) && $_GET["action"] == 'deleteline' && $user->rights->synopsisdemandeinterv->creer)
 {
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->fetch($_GET["id"]);
@@ -210,7 +215,7 @@ if ($id > 0)
         * Ajouter une ligne de contact
         * Non affiche en mode modification de ligne
         */
-        if ($_GET["action"] != 'editline' && $user->rights->synopsisdemandeinterv->creer)
+        if ((!isset($_GET["action"]) || $_GET["action"] != 'editline') && $user->rights->synopsisdemandeinterv->creer)
         {
             print '<tr class="liste_titre">';
             print '<td>'.$langs->trans("Source").'</td>';
@@ -241,11 +246,11 @@ if ($id > 0)
             print '<td colspan="1">';
             // On recupere les id des users deja selectionnes
             //$userAlreadySelected = $demandeInterv->getListContactId('internal');     // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
-            $html->select_users($user->id,'contactid',0,$userAlreadySelected);
+            $html->select_users($user->id,'contactid',0/*,$userAlreadySelected*/);
             //var_dump($html);
             print '</td>';
             print '<td>';
-            $demandeInterv->selectTypeContact($demandeInterv, '', 'type','internal');
+            $formcompany->selectTypeContact($demandeInterv, '', 'type','internal');
             print '</td>';
             print '<td align="right" colspan="3" ><input type="submit" class="button" value="'.$langs->trans("Add").'"></td>';
             print '</tr>';
@@ -267,17 +272,17 @@ if ($id > 0)
 
             print '<td colspan="1">';
             $selectedCompany = isset($_GET["newcompany"])?$_GET["newcompany"]:$demandeInterv->client->id;
-            $selectedCompany = $demandeInterv->selectCompaniesForNewContact($demandeInterv, 'id', $selectedCompany, $htmlname = 'newcompany');
+            $selectedCompany = $formcompany->selectCompaniesForNewContact($demandeInterv, 'id', $selectedCompany, $htmlname = 'newcompany');
             print '</td>';
 
             print '<td colspan="1">';
             // On recupere les id des contacts deja selectionnes
             //$contactAlreadySelected = $demandeInterv->getListContactId('external');    // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
-            $nbofcontacts=$html->select_contacts($selectedCompany, $selected = '', $htmlname = 'contactid',0,$contactAlreadySelected);
+            $nbofcontacts=$html->select_contacts($selectedCompany, $selected = '', $htmlname = 'contactid',0/*,$contactAlreadySelected*/);
             if ($nbofcontacts == 0) print $langs->trans("NoContactDefined");
             print '</td>';
             print '<td>';
-            $demandeInterv->selectTypeContact($demandeInterv, '', 'type','external');
+            $formcompany->selectTypeContact($demandeInterv, '', 'type','external');
             print '</td>';
             print '<td align="right" colspan="3" ><input type="submit" class="button" value="'.$langs->trans("Add").'"';
             if (! $nbofcontacts) print ' disabled="true"';

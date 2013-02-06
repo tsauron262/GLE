@@ -116,7 +116,7 @@ class SAV {
         {
             $elementType = $arrTmp[1];
             $elementId = $arrTmp[2];
-            $requete = "SELECT * FROM llx_product_serial_view WHERE element_id = ".$arrTmp[1]. " AND element_type like '".$arrTmp[2]."%' ORDER BY tms DESC LIMIT 1";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_view WHERE element_id = ".$arrTmp[1]. " AND element_type like '".$arrTmp[2]."%' ORDER BY tms DESC LIMIT 1";
             $sql1 = $this->db->query($requete);
             $res1 = $this->db->fetch_object($sql1);
             $serialnumber = $res1->serial_number;

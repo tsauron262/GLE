@@ -93,8 +93,8 @@ $sql = "SELECT s.nom,
             f.fk_statut,
             f.duree,
 	    f.total_ht";
-$sql .= " FROM llx_societe as s,
-            llx_Synopsis_fichinter as f ";
+$sql .= " FROM ".MAIN_DB_PREFIX."societe as s,
+            ".MAIN_DB_PREFIX."Synopsis_fichinter as f ";
 $sql .= " WHERE f.fk_soc = s.rowid";
 
 if($filterUser){
@@ -159,7 +159,7 @@ if ($socid > 0)
 $sql .= " ORDER BY $sortfield $sortorder ";
 
     $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-    $requete .= " FROM llx_societe as s, llx_Synopsis_fichinter as f ";
+    $requete .= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_fichinter as f ";
     $requete .= " WHERE f.fk_soc = s.rowid";
 
     $requete .= " AND datei >= '$start' AND datei < '$end'" ;
@@ -185,7 +185,7 @@ $sql .= " ORDER BY $sortfield $sortorder ";
     }
     $selSoc .=  "</select>";
 
-    $req = "SELECT * FROM `llx_Synopsis_fichinter_c_typeInterv` WHERE `active` = 1";
+    $req = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv` WHERE `active` = 1";
     $sqlpre11 = $db->query($req);
     $selectHtml2 = '<select name="typeInter">';
     $selectHtml2 .=  "<option value=''>S&eacute;lectioner -></option>";

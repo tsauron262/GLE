@@ -84,7 +84,7 @@ if ($_REQUEST['action'] == 'validationForm') {
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
     $process = new process($db);
     $res1 = $process->fetch($process_id);
-    $process->validate($element_id, $type);
+    $process->validateDet($element_id, $type);
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
     $eval = $process->validAction;
@@ -321,7 +321,7 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
         }
 
 
-        if ($hasDoubleSel) {
+        if (0 && $hasDoubleSel) {
             $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
             $js .= <<<EOF
                 <script>
@@ -473,10 +473,7 @@ EOF;
     }
 //    print "<xmp>".$js."</xmp>";
     if (!$_REQUEST['fromIframe'] == 1) {
-        llxHeader($js, $process->label);
-        $tabType = getTypeAndId();
-        dol_fiche_head($head, $tabType[0], $langs->trans($tabType[0]));
-        //saveHistoUser($processDetId, "process",$process->detail[$processDetId]->ref);
+        printHead($process->typeElement->type, $process->typeElement->element->id, $js);
     } else {
         top_htmlhead($js);
         $displayHead = false;
@@ -776,7 +773,7 @@ EOF;
                                                     if ($processDetId > 0) {
                                                         $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
                                                     }
-                                                    if ($valCompare == $key) {
+                                                    if ($valCompare == $key1OptGrp) {
                                                         print "<OPTION SELECTED value='" . $key1OptGrp . "'>" . $val1OptGrp . "</OPTION>";
                                                     } else {
                                                         print "<OPTION value='" . $key1OptGrp . "'>" . $val1OptGrp . "</OPTION>";
@@ -904,7 +901,7 @@ EOF;
                                                     }
                                                     return mytab;
                                              },
-                                            babelReturnSelId: function(selected)
+                                            modifAutocompleteSynopsisReturnSelId: function(selected)
                                             {
                                                 var selId = selected.data['id'];
 EOF;
@@ -1003,8 +1000,7 @@ EOF;
                             if ($resValue) {
                                 print "<tr style='line-height:40px;'><th class='ui-widget-header ui-state-default'>" . $resValue->label;
                                 $tmpUser = new User($db);
-                                $tmpUser->id = $resValue->user_refid;
-                                $tmpUser->fetch();
+                                $tmpUser->fetch($resValue->user_refid);
                                 print "<td align=right class='ui-widget-content'>" . $resValue->note;
                                 print "<td align=center class='ui-widget-content' colspan=2>";
                                 if ($resValue->valeur == 1) {
@@ -1056,8 +1052,7 @@ EOF;
                         if ($resValue) {
                             print "<tr style='line-height:40px;'><th class='ui-widget-header ui-state-default'>" . $res->label;
                             $tmpUser = new User($db);
-                            $tmpUser->id = $resValue->user_refid;
-                            $tmpUser->fetch();
+                            $tmpUser->fetch($resValue->user_refid);
                             print "<td align=right class='ui-widget-content'>" . $resValue->note;
                             print "<td align=center class='ui-widget-content' colspan=2>";
                             if ($resValue->valeur == 1) {

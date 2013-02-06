@@ -363,7 +363,7 @@ function addAffaireElement($type,$obj)
         {
             //Si une propal liee a une commande est dans une affaire, on insert dans la meme affaire
             $requete ="SELECT affaire_refid
-                         FROM llx_co_pr, Babel_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_pr, Babel_Affaire_Element
                         WHERE fk_commande = ".$obj->id ."
                           AND fk_propale = element_id
                           AND type='propale'";
@@ -377,7 +377,7 @@ function addAffaireElement($type,$obj)
         case "facture":
         {
             $requete ="SELECT affaire_refid
-                         FROM llx_co_fa, Babel_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_fa, Babel_Affaire_Element
                         WHERE fk_facture = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -391,7 +391,7 @@ function addAffaireElement($type,$obj)
         case "livraison":
         {
             $requete ="SELECT affaire_refid
-                         FROM llx_co_liv, Babel_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_liv, Babel_Affaire_Element
                         WHERE fk_livraison = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -401,7 +401,7 @@ function addAffaireElement($type,$obj)
                 addSqlAffaireElement($type,$obj->id,$res->affaire_refid);
             }
             $requete ="SELECT affaire_refid
-                         FROM llx_co_exp, Babel_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_exp, Babel_Affaire_Element
                         WHERE fk_livraison = ".$obj->id ."
                           AND fk_expedition = element_id
                           AND type='expedition'";
@@ -415,7 +415,7 @@ function addAffaireElement($type,$obj)
         case "expedition":
         {
             $requete ="SELECT affaire_refid
-                         FROM llx_co_exp, Babel_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_exp, Babel_Affaire_Element
                         WHERE fk_expedition = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";

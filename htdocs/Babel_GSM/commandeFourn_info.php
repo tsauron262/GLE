@@ -134,8 +134,7 @@ if ($_GET["commande_id"] > 0)
     $soc->fetch($commande->socid);
 
     $author = new User($db);
-    $author->id = $commande->user_author_id;
-    $author->fetch();
+    $author->fetch($commande->user_author_id);
 
 //        $head = commande_prepare_head($commande);
 //    dol_fiche_head($head, 'shipping', $langs->trans("CustomerOrder"));
@@ -252,7 +251,7 @@ if ($_GET["commande_id"] > 0)
 
     $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty, cd.rowid, cd.tva_tx, cd.subprice";
     $sql.= " FROM ".MAIN_DB_PREFIX."commandedet as cd ";
-    $sql.= " LEFT JOIN llx_product as p ON cd.fk_product = p.rowid";
+    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
     $sql.= " WHERE cd.fk_commande = ".$commande->id;
     $sql.= " AND p.fk_product_type <> 1";
     $sql.= " ORDER BY cd.rowid";

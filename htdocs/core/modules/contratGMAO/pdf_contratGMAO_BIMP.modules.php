@@ -10,7 +10,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -18,7 +19,7 @@
  \file       htdocs/core/modules/contrat/pdf_contrat_babel.modules.php
  \ingroup    contrat
  \brief      Fichier de la classe permettant de generer les contrats au modele babel
- \author     Jean-Marc LE FEVRE
+ \author     Tommy SAURON
  \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
@@ -111,11 +112,11 @@ class pdf_contratGMAO_BIMP extends ModelePDFContrat
                 require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/contratMixte.class.php");
                 $contrat=getContratObj($id);
                 $contrat->fetch($id);
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
 //                $contrat = new ContratMixte($this->db);
 //                $ret=$contrat->fetch($id);
             } else {
-                $contrat->fetch_lignes(true);
+                $contrat->fetch_lines(true);
             }
 
             // Definition de $dir et $file
@@ -158,8 +159,8 @@ class pdf_contratGMAO_BIMP extends ModelePDFContrat
                 $pdf1=new FPDI('P','mm',$this->format);
 
                 $requete = "SELECT *
-                              FROM Babel_contrat_annexePdf as p,
-                                   Babel_contrat_annexe as a
+                              FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p,
+                                   ".MAIN_DB_PREFIX."Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id."
                           ORDER BY a.rang";
@@ -913,8 +914,8 @@ au ".$val->date_fin_prevue),0,'C',1);
 //                $pdf->SetAutoPageBreak(0,1);
 
                 $requete = "SELECT *
-                              FROM Babel_contrat_annexePdf as p,
-                                   Babel_contrat_annexe as a
+                              FROM ".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf as p,
+                                   ".MAIN_DB_PREFIX."Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = ".$contrat->id. "
                           ORDER BY a.rang";
@@ -1010,55 +1011,6 @@ au ".$val->date_fin_prevue),0,'C',1);
                 $annexe = preg_replace('/'.$code."/",$val['obj']->$val0,$annexe);
             }
         }
-
-
-
-/*
-
-
-Contact-external-SALESREPSIGN-fullname  Nom complet     M. PIROCHE
-Contact-external-SALESREPSIGN-civilite  Civilité
-Contact-external-SALESREPSIGN-nom   Nom     PIROCHE
-Contact-external-SALESREPSIGN-prenom    Préom
-Contact-external-SALESREPSIGN-cp    Code postal
-Contact-external-SALESREPSIGN-ville     Ville
-Contact-external-SALESREPSIGN-email     Email
-Contact-external-SALESREPSIGN-tel   N° tel
-Contact-external-SALESREPSIGN-fax   N° fax
-
-Contact-internal-SALESREPFOLL-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-SALESREPFOLL-civilite  Civilité
-Contact-internal-SALESREPFOLL-nom   Nom     LE FEVRE
-Contact-internal-SALESREPFOLL-prenom    Préom   Jean-Marcéé
-Contact-internal-SALESREPFOLL-cp    Code postal
-Contact-internal-SALESREPFOLL-ville     Ville
-Contact-internal-SALESREPFOLL-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-SALESREPFOLL-tel   N° tel
-Contact-internal-SALESREPFOLL-fax   N° fax
-
-Contact-internal-TECHRESP-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-TECHRESP-civilite  Civilité
-Contact-internal-TECHRESP-nom   Nom     LE FEVRE
-Contact-internal-TECHRESP-prenom    Préom   Jean-Marcéé
-Contact-internal-TECHRESP-cp    Code postal
-Contact-internal-TECHRESP-ville     Ville
-Contact-internal-TECHRESP-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-TECHRESP-tel   N° tel
-Contact-internal-TECHRESP-fax   N° fax
-
-Contact-internal-SALESREPSIGN-fullname  Nom complet     Jean-Marcéé LE FEVRE
-Contact-internal-SALESREPSIGN-civilite  Civilité
-Contact-internal-SALESREPSIGN-nom   Nom     LE FEVRE
-Contact-internal-SALESREPSIGN-prenom    Préom   Jean-Marcéé
-Contact-internal-SALESREPSIGN-cp    Code postal
-Contact-internal-SALESREPSIGN-ville     Ville
-Contact-internal-SALESREPSIGN-email     Email   jm.lefevre@synopsis-erp.com
-Contact-internal-SALESREPSIGN-tel   N° tel
-Contact-internal-SALESREPSIGN-fax   N° fax
-
-
- */
-
 
                     $pdf->multicell(155,5,utf8_decode(utf8_encode($annexe)));
 

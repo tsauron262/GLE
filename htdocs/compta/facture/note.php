@@ -23,10 +23,10 @@
  *      \brief      Fiche de notes sur une facture
  */
 
-require("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/class/discount.class.php');
-require_once(DOL_DOCUMENT_ROOT.'/core/lib/invoice.lib.php');
+require '../../main.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/discount.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/invoice.lib.php';
 
 $langs->load("companies");
 $langs->load("bills");
@@ -86,6 +86,8 @@ if ($id > 0 || ! empty($ref))
 
     print '<table class="border" width="100%">';
 
+    $linkback = '<a href="'.DOL_URL_ROOT.'/compta/facture/list.php'.(! empty($socid)?'?socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
+
 	// Ref
 	print '<tr><td width="25%">'.$langs->trans('Ref').'</td>';
 	print '<td colspan="3">';
@@ -100,7 +102,18 @@ if ($id > 0 || ! empty($ref))
 	{
 		dol_print_error('',$discount->error);
 	}
-	print $form->showrefnav($object,'ref','',1,'facnumber','ref',$morehtmlref);
+	print $form->showrefnav($object, 'ref', $linkback, 1, 'facnumber', 'ref', $morehtmlref);
+	print '</td></tr>';
+
+	// Ref customer
+	print '<tr><td width="20%">';
+	print '<table class="nobordernopadding" width="100%"><tr><td>';
+	print $langs->trans('RefCustomer');
+	print '</td>';
+	print '</tr></table>';
+	print '</td>';
+	print '<td colspan="5">';
+	print $object->ref_client;
 	print '</td></tr>';
 
     // Company
@@ -111,7 +124,7 @@ if ($id > 0 || ! empty($ref))
 
     print '<br>';
 
-	include(DOL_DOCUMENT_ROOT.'/core/tpl/notes.tpl.php');
+	include DOL_DOCUMENT_ROOT.'/core/tpl/notes.tpl.php';
 
 	dol_fiche_end();
 }

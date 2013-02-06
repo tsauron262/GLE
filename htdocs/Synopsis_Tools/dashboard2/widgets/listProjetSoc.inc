@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/project.class.php");
+require_once (DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
 // The get widget handler.
 function widget_listProjetSoc() {
@@ -37,7 +37,7 @@ function widget_listProjetSoc() {
         $sql = "SELECT p.title, p.rowid, count(t.rowid), avg(t.progress) as prg";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
         $sql.= " FROM";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= " llx_societe_commerciaux as sc,";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
         $sql.= " babel_projet as p";
         $sql.= " LEFT JOIN babel_projet_task as t ON p.rowid = t.fk_projet";
         $sql.= " WHERE 1 = 1";

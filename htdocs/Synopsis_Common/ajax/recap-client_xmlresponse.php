@@ -1,24 +1,24 @@
 <?php
 /*
- * GLE by Babel-Services
+ * GLE by Synopsis & DRSI
  *
- * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+ * Author: Tommy SAURON <tommy@drsi.fr>
  * Licence : Artistic Licence v2.0
  *
  * Version 1.1
  * Create on : 4-1-2009
  *
- * Infos on http://www.babel-services.com
+ * Infos on http://www.synopsis-erp.com
  *
  */
 global $langs;
 require_once('../../master.inc.php');
 
-require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/propal.class.php');
-require_once(DOL_DOCUMENT_ROOT."/lib/propal.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/propal.lib.php");
 
-require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 require_once(DOL_DOCUMENT_ROOT .'/commande/class/commande.class.php');
 
 
@@ -39,24 +39,24 @@ if ($_REQUEST['level'] == 1)
     //require_once('../../master.inc.php');
     $durMonth = ($_REQUEST['duree']."x" != "x"?$_REQUEST['duree']:false);
     $xml = "";
-    $requete = "SELECT concat(day(llx_propal.date_valid),'/',month(llx_propal.date_valid), '/',year(llx_propal.date_valid)) as date_valid," .
-            "          llx_propal.remise_percent," .
-            "          llx_propal.remise_absolue," .
-            "          llx_propal.remise," .
-            "          ifnull(year(llx_propal.date_valid),year(now()) + 1) as yearValid," .
-            "          llx_propal.ref," .
-            "          llx_propal.rowid as pid," .
-            "          llx_propal.total_ht," .
-            "          llx_projet.title," .
-            "          llx_propal.fk_statut" .
-            "     FROM llx_propal
-                       llx_propal LEFT JOIN llx_projet on  llx_projet.rowid = llx_propal.fk_projet
-                 WHERE llx_propal.fk_soc=".$_REQUEST['socid'];
+    $requete = "SELECT concat(day(".MAIN_DB_PREFIX."propal.date_valid),'/',month(".MAIN_DB_PREFIX."propal.date_valid), '/',year(".MAIN_DB_PREFIX."propal.date_valid)) as date_valid," .
+            "          ".MAIN_DB_PREFIX."propal.remise_percent," .
+            "          ".MAIN_DB_PREFIX."propal.remise_absolue," .
+            "          ".MAIN_DB_PREFIX."propal.remise," .
+            "          ifnull(year(".MAIN_DB_PREFIX."propal.date_valid),year(now()) + 1) as yearValid," .
+            "          ".MAIN_DB_PREFIX."propal.ref," .
+            "          ".MAIN_DB_PREFIX."propal.rowid as pid," .
+            "          ".MAIN_DB_PREFIX."propal.total_ht," .
+            "          ".MAIN_DB_PREFIX."projet.title," .
+            "          ".MAIN_DB_PREFIX."propal.fk_statut" .
+            "     FROM ".MAIN_DB_PREFIX."propal
+                       ".MAIN_DB_PREFIX."propal LEFT JOIN ".MAIN_DB_PREFIX."projet on  ".MAIN_DB_PREFIX."projet.rowid = ".MAIN_DB_PREFIX."propal.fk_projet
+                 WHERE ".MAIN_DB_PREFIX."propal.fk_soc=".$_REQUEST['socid'];
     if ($durMonth."x" != "x")
     {
-        $requete  .=  " AND llx_propal.datec > DATE_SUB(NOW(),INTERVAL ".$durMonth." MONTH)";
+        $requete  .=  " AND ".MAIN_DB_PREFIX."propal.datec > DATE_SUB(NOW(),INTERVAL ".$durMonth." MONTH)";
     }
-    $requete .= "   ORDER BY  yearValid desc, year(llx_propal.date_valid) desc , month(llx_propal.date_valid) desc, day(llx_propal.date_valid) desc";
+    $requete .= "   ORDER BY  yearValid desc, year(".MAIN_DB_PREFIX."propal.date_valid) desc , month(".MAIN_DB_PREFIX."propal.date_valid) desc, day(".MAIN_DB_PREFIX."propal.date_valid) desc";
     $resql=$db->query($requete);
 
     $remPropal = array();
@@ -76,7 +76,7 @@ if ($_REQUEST['level'] == 1)
                     $factureStatutHTMLArr = array();
                     $statutPayeArr = array();
                     $requeteCom = "SELECT *
-                                     FROM llx_co_pr
+                                     FROM ".MAIN_DB_PREFIX."co_pr
                                     WHERE fk_propale = ".$res->pid;
                     $resqlCom=$db->query($requeteCom);
                     if ($resqlCom)
@@ -90,10 +90,10 @@ if ($_REQUEST['level'] == 1)
 
 
                             $requeteFact1 = "SELECT *
-                                               FROM llx_co_fa
+                                               FROM ".MAIN_DB_PREFIX."co_fa
                                               WHERE fk_facture NOT IN (SELECT fk_facture
-                                                                         FROM llx_fa_pr )
-                                                AND llx_co_fa.fk_commande = ".$com->id;
+                                                                         FROM ".MAIN_DB_PREFIX."fa_pr )
+                                                AND ".MAIN_DB_PREFIX."co_fa.fk_commande = ".$com->id;
                             $resqlFac=$db->query($requeteFact1);
                             $statutPayeArr = array();
                             if ($resqlFac)
@@ -122,7 +122,7 @@ if ($_REQUEST['level'] == 1)
                     if (strlen($commandeHTML) < 1) { $commandeHTML = "&nbsp;";}
 
                     $requeteFact = "SELECT *
-                                      FROM llx_fa_pr
+                                      FROM ".MAIN_DB_PREFIX."fa_pr
                                      WHERE fk_propal = ".$res->pid;
                     $resqlFac=$db->query($requeteFact);
                     if ($resqlFac)
@@ -180,15 +180,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(babel_product.rowid) as cnt," .
-            "          babel_product.description" .
-            "     FROM llx_propaldet," .
-            "          babel_product" .
-            "    WHERE babel_product.rowid = llx_propaldet.fk_product " .
+    $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+            "          ".MAIN_DB_PREFIX."product.description" .
+            "     FROM ".MAIN_DB_PREFIX."propaldet," .
+            "          ".MAIN_DB_PREFIX."product" .
+            "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND llx_propaldet.fk_product <> 0  AND babel_product.fk_product_type = 0 " .
-            " GROUP BY babel_product.rowid" .
-            " ORDER BY count(babel_product.rowid) DESC LIMIT 25";
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND ".MAIN_DB_PREFIX."product.fk_product_type = 0 " .
+            " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
+            " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
     $resql=$db->query($requete);
     if ($resql)
     {
@@ -207,15 +207,15 @@ if ($_REQUEST['level'] == 1)
     }
 
     $sqlJoin = join($remPropal,",");
-    $requete = "SELECT count(babel_product.rowid) as cnt," .
-            "          babel_product.description" .
-            "     FROM llx_propaldet," .
-            "          babel_product" .
-            "    WHERE babel_product.rowid = llx_propaldet.fk_product " .
+    $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+            "          ".MAIN_DB_PREFIX."product.description" .
+            "     FROM ".MAIN_DB_PREFIX."propaldet," .
+            "          ".MAIN_DB_PREFIX."product" .
+            "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
             "      AND fk_propal in ($sqlJoin)" .
-            "      AND llx_propaldet.fk_product <> 0  AND babel_product.fk_product_type = 1 " .
-            " GROUP BY llx_product.rowid" .
-            " ORDER BY count(babel_product.rowid) DESC LIMIT 25";
+            "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND ".MAIN_DB_PREFIX."product.fk_product_type = 1 " .
+            " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
+            " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
 
     $resql=$db->query($requete);
     if ($resql)
@@ -236,14 +236,14 @@ if ($_REQUEST['level'] == 1)
     }
 
 
-//            $requete = "SELECT llx_contrat.ref,
-//                               date_format(llx_contrat.date_contrat,'%d/%m/%Y') as date_contrat,
-//                               llx_contrat.rowid as cid,
-//                               llx_projet.title,
-//                               llx_contrat.linkedTo,
-//                               llx_contrat.statut
-//                          FROM llx_contrat LEFT JOIN llx_projet on llx_contrat.fk_projet = llx_projet.rowid
-//                         WHERE  llx_contrat.fk_soc = ".$societe->id;
+//            $requete = "SELECT ".MAIN_DB_PREFIX."contrat.ref,
+//                               date_format(".MAIN_DB_PREFIX."contrat.date_contrat,'%d/%m/%Y') as date_contrat,
+//                               ".MAIN_DB_PREFIX."contrat.rowid as cid,
+//                               ".MAIN_DB_PREFIX."projet.title,
+//                               ".MAIN_DB_PREFIX."contrat.linkedTo,
+//                               ".MAIN_DB_PREFIX."contrat.statut
+//                          FROM ".MAIN_DB_PREFIX."contrat LEFT JOIN ".MAIN_DB_PREFIX."projet on ".MAIN_DB_PREFIX."contrat.fk_projet = ".MAIN_DB_PREFIX."projet.rowid
+//                         WHERE  ".MAIN_DB_PREFIX."contrat.fk_soc = ".$societe->id;
 //        //                 print $requete;
 //            if ($resql = $db->query($requete))
 //            {
@@ -253,7 +253,7 @@ if ($_REQUEST['level'] == 1)
 //                    print "<td align='center'>".$res->date_contrat;
 //                    print "<td>".$res->title;
 //                    print "<td width= 100px><table width=100%  class='nobordernopadding' width='100%'>";
-//                    require_once(DOL_DOCUMENT_ROOT.'/contrat/contrat.class.php');
+//                    require_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
 //                    $contrat = new Contrat($db);
 //                    $contrat->fetch($res->cid);
 //                    if ($contrat->linkedTo)
@@ -276,7 +276,7 @@ if ($_REQUEST['level'] == 1)
 //                                case 'f':
 //                                    print '';
 //                                    print '<td align="right" style="width:20px"><a href="'.$_SERVER["PHP_SELF"].'?action=chSrc&amp;id='.$id.'">'.img_edit($langs->trans("Change la source")).'</a>';
-//                                    require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+//                                    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 //                                    $fact = new Facture($db);
 //                                    $fact->fetch($val1);
 //                                    print "</table><td><a href='".DOL_URL_ROOT."/compta/facture.php?facid=".$fact->id."'>".$fact->ref."</a>";
@@ -313,7 +313,7 @@ if ($_REQUEST['level'] == 1)
 //                        {
 //                                print '<tr><td>';
 //                                print 'Factures associ&eacute;es<td>';
-//                                require_once(DOL_DOCUMENT_ROOT."/facture.class.php");
+//                                require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 //                                $fac = new Facture($db);
 //                                $fac->fetch($val1);
 //                                print "<a href='".DOL_URL_ROOT."/compta/facture.php?facid=".$fac->id."'>".$fac->ref."</a>";
@@ -352,13 +352,13 @@ if ($_REQUEST['level'] == 1)
         $societe->fetch($socid, $to);  // si $to='next' ajouter " AND s.rowid > $socid ORDER BY idp ASC LIMIT 1";
 
         /*contact societe*/
-        $requete = "SELECT * FROM llx_societe_commerciaux WHERE fk_soc = " .$socid;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."societe_commerciaux WHERE fk_soc = " .$socid;
         $resqlPre = $societe->db->query($requete);
         if ($resqlPre){
             while ($res = $societe->db->fetch_object($resqlPre))
             {
-                $tmpUser = new User($db,$res->fk_user);
-                $tmpUser->fetch();
+                $tmpUser = new User($db);
+                $tmpUser->fetch($res->fk_user);
                 array_push($contactArr,array('source' => 'internal',
                                              'socid' => '-1',
                                              'id' => $tmpUser->id,
@@ -374,24 +374,24 @@ if ($_REQUEST['level'] == 1)
         $propal->fetch($_REQUEST["propalid"], $socid);
 
 
-        $requete = "SELECT concat(day(llx_propal.date_valid),'/',month(llx_propal.date_valid), '/',year(llx_propal.date_valid)) as date_valid," .
-                "          llx_propal.remise_percent," .
-                "          llx_propal.remise_absolue," .
-                "          llx_propal.remise," .
-                "          ifnull(year(llx_propal.date_valid),year(now()) + 1) as yearValid," .
-                "          llx_propal.fk_user_author," .
-                "          llx_propal.fk_user_valid," .
-                "          llx_propal.fk_user_cloture," .
-                "          llx_propal.ref," .
-                "          llx_propal.rowid as pid," .
-                "          llx_propal.total_ht," .
-                "          llx_projet.title," .
-                "          llx_propal.fk_statut " .
-                "     FROM llx_propal
-                           llx_propal LEFT JOIN llx_projet on  llx_projet.rowid = llx_propal.fk_projet
-                     WHERE llx_propal.fk_soc=".$societe->id."
-                       AND llx_propal.rowid = ".$_REQUEST['propalid']."
-                   ORDER BY  yearValid desc, year(llx_propal.date_valid) desc , month(llx_propal.date_valid) desc, day(llx_propal.date_valid) desc";
+        $requete = "SELECT concat(day(".MAIN_DB_PREFIX."propal.date_valid),'/',month(".MAIN_DB_PREFIX."propal.date_valid), '/',year(".MAIN_DB_PREFIX."propal.date_valid)) as date_valid," .
+                "          ".MAIN_DB_PREFIX."propal.remise_percent," .
+                "          ".MAIN_DB_PREFIX."propal.remise_absolue," .
+                "          ".MAIN_DB_PREFIX."propal.remise," .
+                "          ifnull(year(".MAIN_DB_PREFIX."propal.date_valid),year(now()) + 1) as yearValid," .
+                "          ".MAIN_DB_PREFIX."propal.fk_user_author," .
+                "          ".MAIN_DB_PREFIX."propal.fk_user_valid," .
+                "          ".MAIN_DB_PREFIX."propal.fk_user_cloture," .
+                "          ".MAIN_DB_PREFIX."propal.ref," .
+                "          ".MAIN_DB_PREFIX."propal.rowid as pid," .
+                "          ".MAIN_DB_PREFIX."propal.total_ht," .
+                "          ".MAIN_DB_PREFIX."projet.title," .
+                "          ".MAIN_DB_PREFIX."propal.fk_statut " .
+                "     FROM ".MAIN_DB_PREFIX."propal
+                           ".MAIN_DB_PREFIX."propal LEFT JOIN ".MAIN_DB_PREFIX."projet on  ".MAIN_DB_PREFIX."projet.rowid = ".MAIN_DB_PREFIX."propal.fk_projet
+                     WHERE ".MAIN_DB_PREFIX."propal.fk_soc=".$societe->id."
+                       AND ".MAIN_DB_PREFIX."propal.rowid = ".$_REQUEST['propalid']."
+                   ORDER BY  yearValid desc, year(".MAIN_DB_PREFIX."propal.date_valid) desc , month(".MAIN_DB_PREFIX."propal.date_valid) desc, day(".MAIN_DB_PREFIX."propal.date_valid) desc";
 
         $resql=$societe->db->query($requete);
 //        print $requete."<BR>";
@@ -406,7 +406,7 @@ if ($_REQUEST['level'] == 1)
                     array_push($remPropal,$res->pid);
                     //commande et facture associee
                     $requeteCom = "SELECT *
-                                     FROM llx_co_pr
+                                     FROM ".MAIN_DB_PREFIX."co_pr
                                     WHERE fk_propale = ".$res->pid;
                     $resqlCom=$societe->db->query($requeteCom);
                     if ($resqlCom)
@@ -448,10 +448,10 @@ if ($_REQUEST['level'] == 1)
 
 
                             $requeteFact1 = "SELECT *
-                                               FROM llx_co_fa
+                                               FROM ".MAIN_DB_PREFIX."co_fa
                                               WHERE fk_facture NOT IN (SELECT fk_facture
-                                                                         FROM llx_fa_pr )
-                                                AND llx_co_fa.fk_commande = ".$com->id;
+                                                                         FROM ".MAIN_DB_PREFIX."fa_pr )
+                                                AND ".MAIN_DB_PREFIX."co_fa.fk_commande = ".$com->id;
                             $resqlFac=$societe->db->query($requeteFact1);
                             if ($resqlFac)
                             {
@@ -491,7 +491,7 @@ if ($_REQUEST['level'] == 1)
                         }
                     }
                     $requeteFact = "SELECT *
-                                      FROM llx_fa_pr
+                                      FROM ".MAIN_DB_PREFIX."fa_pr
                                      WHERE fk_propal = ".$res->pid;
                     $resqlFac=$societe->db->query($requeteFact);
                     if ($resqlFac)
@@ -582,8 +582,7 @@ if ($_REQUEST['level'] == 1)
                     if ($res->{$val})
                     {
                         $tmpUserCreate = new User($db);
-                        $tmpUserCreate->id =$res->{$val};
-                        $tmpUserCreate->fetch();
+                        $tmpUserCreate->fetch($res->{$val});
 //                        var_dump($tmpUserCreate);
                         array_push($contactArr,
                                         array('source' => 'internal',

@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2003-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2009 Regis Houssin        <regis@dolibarr.fr>
+ * Copyright (C) 2005-2012 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
  *	\brief      Module de generation de l'affichage de la box clients
  */
 
-include_once(DOL_DOCUMENT_ROOT."/core/boxes/modules_boxes.php");
+include_once DOL_DOCUMENT_ROOT.'/core/boxes/modules_boxes.php';
 
 
 /**
@@ -45,7 +45,7 @@ class box_members extends ModeleBoxes
 	/**
      *  Constructor
 	 */
-	function box_members()
+	function __construct()
 	{
 		global $langs;
 		$langs->load("boxes");
@@ -66,14 +66,15 @@ class box_members extends ModeleBoxes
 
 		$this->max=$max;
 
-        include_once(DOL_DOCUMENT_ROOT."/adherents/class/adherent.class.php");
+        include_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
         $memberstatic=new Adherent($db);
 
 		$this->info_box_head = array('text' => $langs->trans("BoxTitleLastModifiedMembers",$max));
 
 		if ($user->rights->societe->lire)
 		{
-			$sql = "SELECT a.rowid, a.nom as lastname, a.prenom as firstname, a.datec, a.tms, a.statut as status, a.datefin as date_end_subscription,";
+			$sql = "SELECT a.rowid, a.nom as lastname, a.prenom as firstname, a.societe as company, a.fk_soc,";
+			$sql.= " a.datec, a.tms, a.statut as status, a.datefin as date_end_subscription,";
 			$sql.= " t.cotisation";
 			$sql.= " FROM ".MAIN_DB_PREFIX."adherent as a, ".MAIN_DB_PREFIX."adherent_type as t";
 			$sql.= " WHERE a.entity = ".$conf->entity;
@@ -96,6 +97,14 @@ class box_members extends ModeleBoxes
 
 					$memberstatic->lastname=$objp->lastname;
 					$memberstatic->firstname=$objp->firstname;
+
+					if (! empty($objp->fk_soc)) {
+						$memberstatic->socid = $objp->fk_soc;
+						$memberstatic->fetch_thirdparty();
+						$memberstatic->name=$memberstatic->thirdparty->name;
+					} else {
+						$memberstatic->name=$objp->company;
+					}
 
 					$this->info_box_contents[$i][0] = array('td' => 'align="left" width="16"',
                     'logo' => $this->boximg,

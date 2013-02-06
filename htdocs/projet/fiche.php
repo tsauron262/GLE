@@ -47,7 +47,7 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 //require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 
-$langs->load("projects@projet");
+$langs->load("projectsSyn@projet");
 
 $projetid = '';
 if ($_GET["id"]) {
@@ -445,8 +445,8 @@ if ($_GET["action"] == 'create' && $user->rights->synopsisprojet->creer) {
                              <td style="border-top:0px;border-right:0px;" class="ui-widget-content"><div style="float: left; background-color: #FFFFFF; margin-left: 50%; margin-top: -1px; padding: 2px; padding-left: 5px; padding-right: 5px; opacity: 0.95; " class="ui-corner-all">' . $projet->statAvgProgByGroup[0] . '%</div>';
         //Avancement Horaire
         print '<div id="progressBarQual"></div>';
-        print '<tr><th style="border-top:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsPrevu') . '</th><td style="border-top:0px; border-right:0px;" class="ui-widget-content">' . sec2time($projet->totDuration) . '</td></tr>';
-        print '<tr><th style="border-top:0px;border-bottom:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsEffectue') . '</th><td style="border-right:0px; border-top:0px" class="ui-widget-content">' . sec2time($projet->workedDuration) . '</td></tr>';
+        print '<tr><th style="border-top:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsPrevu') . '</th><td style="border-top:0px; border-right:0px;" class="ui-widget-content">' . $projet->totDuration/3600 . "h" .($projet->totDuration > (3600*24) ? " (".sec2time($projet->totDuration). ")" : ''). '</td></tr>';
+        print '<tr><th style="border-top:0px;border-bottom:0px" class="ui-widget-header ui-state-default" width=25%>' . $langs->trans('TempsEffectue') . '</th><td style="border-right:0px; border-top:0px" class="ui-widget-content">' . $projet->workedDuration/3600 ."h" .($projet->workedDuration > (3600*24) ? " (". sec2time($projet->workedDuration) . ")" : ''). '</td></tr>';
 
         print '</td></tr>';
         print "</tbody></table>";

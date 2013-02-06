@@ -70,7 +70,7 @@ class modBabelGMAO extends DolibarrModules
 $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Babel_GMAO/annexes.php?id=__ID__',
 			'contract:+interv:Interventions:@monmodule:/Babel_GMAO/intervByContrat.php?id=__ID__',
 			'contract:+tickets:Tickets:@monmodule:/Babel_GMAO/annexes.php?id=__ID__',
-			'contract:+annexe:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__'); 
+			'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__'); 
 
         $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
         $this->rights[$r][1] = 'Acc&egrave;s aux menus GMAO';

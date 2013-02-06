@@ -1,14 +1,39 @@
 $(window).load(function(){
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
-    $(window).resize(function(){
+    if($("div.tmenudiv").is(':visible')){
+        $(window).resize(function(){
+            traiteScroll(heightDif);
+        });
         traiteScroll(heightDif);
+    }
+    
+    $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
+    
+    
+    ajNoteAjax();   
+    
+    
+    var datas = 'url='+window.location;
+    datas += '&type=consigne';
+    editAjax(jQuery('.consigne.editable'), datas);
+    
+    //    $(".ui-search-toolbar input").keypress(function(e) {
+    //	//alert(e.keyCode);
+    //	if(e.keyCode == 13) {
+    //		alert('Enter key was pressed.');
+    //	}
+    //        else
+    //		alert('Enter oser    was pressed.'+e.keyCode );
+    //    });
+    
+    $(".ui-search-toolbar input").focusout(function(){
+        setTimeout(function(){
+            var e = jQuery.Event("keypress", {
+                keyCode: 13
+            });
+            $(".ui-search-toolbar input").trigger(e);   
+        }, 500);
     });
-    traiteScroll(heightDif);
-    
-    
-    $("#mainmenua_SynopsisTools.tmenudisabled").parent().hide();
-    
-//    $(".s-ico").show();
 });
 
 function dialogConfirm(url, titre, yes, no, id){
@@ -26,12 +51,17 @@ function traiteScroll(heightDif){
         scrollY  = $(".tabBar").scrollTop();
     height =parseInt(window.innerHeight);
     var i = 0;
+    var j = 0;
+    var h = 0;
     $(".fiche").parent().parent().children("td").each(function(){
-        i = i+1;
+        i = i+1;//Nb d'element dans parent dans div principale'
+    });
+    $(".fiche").parent().children("div").each(function(){
+        h = h+1;
     });
     //    if(height > 560 && i < 3)
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight())+30;
-    if(height > hauteurMenu && i < 3){//On active le scroll 2
+    if(height > hauteurMenu && i < 3 && h == 1){//On active le scroll 2
         $(".fiche").addClass("reglabe");
         heightNew = ($(".fiche").innerHeight() - heightDif) - 20;
         if(heightNew > 300){//On active le scroll 3 (le scroll 2 ne doit plus étre utile
@@ -53,4 +83,112 @@ function traiteScroll(heightDif){
         $(window).scrollTop(scrollY);
     }
 //    document.body.scrollTop = scrollY;
+}
+
+
+function ajNoteAjax(){
+    fermable = true;
+    var datas = 'url='+window.location;
+    datas = datas+'&type=note';
+    jQuery.ajax({
+        url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
+        data:datas,
+        datatype:"xml",
+        type:"POST",
+        cache: false,
+        success:function(msg){
+            if(msg != "0"){
+                //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                //                $('.tabBar').append(htmlDiv);
+                classEdit = "";
+                if(msg.indexOf("[1]") > -1){
+                    classEdit = "editable";
+                    msg = msg.replace("[1]", "");
+                }
+                var htmlDiv  = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="'+classEdit+'" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                $('.fiche').append(htmlDiv);
+                //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
+                //                $('a#note').append(htmlDiv);
+                //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
+                $('a#note, .noteAjax').hover(shownNote, hideNote);
+                $('a#note').addClass("lienNote");
+                
+                //                $(".controlBut").click(function(){
+                //                    if($(this).val() == "<"){
+                //                        $(this).val(">");
+                //                    }
+                //                    else{
+                //                        $(this).val("<");
+                //                    }     
+                //                    shownHideNote();   
+                //                })
+                
+                editAjax(jQuery('#notePublicEdit'), datas, function(){
+                    hideNote()
+                    });
+                
+            }
+        }
+    });
+    
+    
+    
+    function shownHideNote(){
+        $(".noteAjax .note").animate({
+            width: 'toggle'
+        });
+    }
+    function shownNote(){
+        $(".noteAjax .note").slideDown({
+            width: 'toggle'
+        });
+        fermer = false;
+    }
+    function hideNote(){
+        if(fermable){
+            fermer = true;
+            setTimeout(function(){
+                if(fermer)
+                    $(".noteAjax .note").slideUp({
+                        width: 'toggle'
+                    });
+            }, 500);
+        }
+    }
+}
+
+
+function editAjax(elem, datas, callOut){
+    elem.click(function(){
+        if(fermable){
+            fermable = false;
+            var text = jQuery(elem).html().split('<br>').join('\n');
+            if(text == "Cliquez pour éditer")
+                text = '';
+            $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+text+"</textarea>");
+            $(elem).removeClass('editable');
+            $(elem).find(".editableTextarea").focus();
+            $(elem).find(".editableTextarea").val($(".editableTextarea").val()+"\n");
+            $(elem).find(".editableTextarea").focusout(function(){
+                fermable = true;
+                if(callOut)
+                    callOut();
+                datas = datas+'&note='+$(".editableTextarea").val();
+                jQuery.ajax({
+                    url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
+                    data:datas,
+                    datatype:"xml",
+                    type:"POST",
+                    cache: false,
+                    success:function(msg){
+                        if(msg.indexOf("[1]") > -1){
+                            msg = msg.replace("[1]", "");
+                        }
+                        $(elem).html(msg);
+                        $(elem).addClass("editable");
+                    }
+                });
+            });
+        }
+    });
 }

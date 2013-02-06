@@ -37,7 +37,7 @@ class modSynopsisHrm extends DolibarrModules {
         $this->numero = 22230;
 
         $this->family = "Synopsis";
-        $this->name = "SynopsisHrm";
+        $this->name = "Hrm";
         $this->description = "Gestion des ressources humaines";
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISHRM';

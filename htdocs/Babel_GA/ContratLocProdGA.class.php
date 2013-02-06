@@ -146,7 +146,7 @@ class ContratLocProdGA extends contrat{
                        date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
                        date_format(d.date_cloture,'%d/%m/%Y') as date_cloture
                   FROM ".MAIN_DB_PREFIX."contratdet as d,
-                       llx_product as p
+                       ".MAIN_DB_PREFIX."product as p
                  WHERE d.fk_contrat = ".$this->id ." AND d.fk_product = p.rowid
               ORDER BY d.line_order, d.rowid ASC";
 
@@ -452,7 +452,7 @@ EOF;
         $prodTmp->id = $res->fk_product;
         $prodTmp->fetch($prodTmp->id);
         $serial = false;
-        $requete = "SELECT * FROM Babel_product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
         $sql = $this->db->query($requete);
         $res1 = $this->db->fetch_object($sql);
         $serial = ($res1->serial_number."x" != "x"?$res1->serial_number:false);

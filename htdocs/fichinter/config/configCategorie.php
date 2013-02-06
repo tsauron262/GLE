@@ -23,14 +23,14 @@
 
     if($_REQUEST['action'] == "moveDown"){
         $id = $_REQUEST['id'];
-        $requete = "UPDATE llx_Synopsis_fichinter_extra_key
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                        SET rang = ifnull(rang+1,1)
                      WHERE id =".$id;
         $db->query($requete);
     }
     if($_REQUEST['action'] == "moveUp"){
         $id = $_REQUEST['id'];
-        $requete = "UPDATE llx_Synopsis_fichinter_extra_key
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                        SET rang = ifnull(rang-1,1)
                      WHERE id =".$id;
         $db->query($requete);
@@ -38,28 +38,28 @@
 
     if($_REQUEST['action']=="addChoice")
     {
-        $requete = "INSERT INTO llx_Synopsis_fichinter_extra_values_choice
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice
                                 (label,value,key_refid)
                          VALUES ('".$_REQUEST['label']."','".$_REQUEST['value']."',".$_REQUEST['keyId'].")";
         $sql = $db->query($requete);
     }
     if(preg_match('/^delChoice-([0-9]*)/',$_REQUEST['action'],$arr))
     {
-        $requete = "DELETE FROM llx_Synopsis_fichinter_extra_values_choice
+        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice
                           WHERE id=".$arr[1];
 //print $requete;
         $sql = $db->query($requete);
     }
     if($_REQUEST['action']=="addField")
     {
-        $requete="INSERT INTO llx_Synopsis_fichinter_extra_key
+        $requete="INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                               (label,type)
                        VALUES ('".$_REQUEST['label']."','".$_REQUEST['typeField']."')";
         $sql = $db->query($requete);
     }
     if($_REQUEST['action']=="delField")
     {
-        $requete="DELETE FROM llx_Synopsis_fichinter_extra_key
+        $requete="DELETE FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                         WHERE id = ".$_REQUEST['line'];
         $sql = $db->query($requete);
     }
@@ -68,7 +68,7 @@
 
     llxHeader($js,"Configuration des interventions");
     $requete = "SELECT *
-                  FROM llx_Synopsis_fichinter_extra_key
+                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
                  WHERE active = 1
               ORDER BY rang,
                        label";
@@ -92,7 +92,7 @@
             print "<input type='hidden' name='keyId' value='".$res->id."'>";
             print "<table cellpadding=3 width=100%>";
             $requete = "SELECT *
-                          FROM llx_Synopsis_fichinter_extra_values_choice
+                          FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice
                          WHERE key_refid = ".$res->id;
             $sql1 = $db->query($requete);
             print "<tr><th class='ui-widget-header ui-state-default'>Valeur<th class='ui-widget-header ui-state-default'>Label<th class='ui-widget-header ui-state-default'>&nbsp;";
@@ -150,7 +150,7 @@ EOF;
     print "<td class='ui-widget-content' align=center><textarea name'description'></textarea>";
     print "<td class='ui-widget-content' align=center><input name='isQuality' type='checkbox'>";
     $requete = "SELECT max(rang) +1 as Mxrang
-                  FROM llx_Synopsis_fichinter_extra_key;";
+                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key;";
     $sql1 = $db->query($requete);
     $res1 = $db->fetch_object($sql1);
     print "<td class='ui-widget-content'><input name='rang' type='text' size=3 value='".($res1->Mxrang)."'>";

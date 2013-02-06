@@ -56,8 +56,7 @@
         $xml .= "\t<actorDetail>\n";
         $xml .=   "\t\t<id><![CDATA[".$res->fk_user."]]></id>\n";
         $fuser=new User($db);
-        $fuser->id = $res->fk_user;
-        $fuser->fetch();
+        $fuser->fetch($res->fk_user);
         $requete = "SELECT couthoraire
                               FROM ".MAIN_DB_PREFIX."Synopsis_hrm_user
                              WHERE user_id = $res->fk_user

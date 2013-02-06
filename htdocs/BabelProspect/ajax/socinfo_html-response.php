@@ -40,9 +40,8 @@ $langs->load('main');
 
 $campagne = new Campagne($db);
 $campagne->fetch($campagne_id);
-$user=new User($db,$userId);
-$user->id=$userId;
-$user->fetch();
+$user=new User($db);
+$user->fetch($userId);
 $user->getrights();
 
 //duree par default
@@ -483,8 +482,7 @@ EOF;
                             if ($res->{$val})
                             {
                                 $tmpUserCreate = new User($db);
-                                $tmpUserCreate->id =$res->{$val};
-                                $tmpUserCreate->fetch();
+                                $tmpUserCreate->fetch($res->{$val});
         //                        var_dump($tmpUserCreate);
                                 array_push($contactArr,array('source' => 'internal',
                                                       'socid' => '-1',
@@ -517,15 +515,15 @@ EOF;
             print " <TH>D&eacute;signation</TH></thead><tbody id='recapProd'>";
 
             $sqlJoin = join($remPropal,",");
-            $requete = "SELECT count(llx_product.rowid) as cnt," .
-                    "          llx_product.description" .
+            $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+                    "          ".MAIN_DB_PREFIX."product.description" .
                     "     FROM ".MAIN_DB_PREFIX."propaldet," .
-                    "          llx_product" .
-                    "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+                    "          ".MAIN_DB_PREFIX."product" .
+                    "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
                     "      AND fk_propal in ($sqlJoin)" .
-                    "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND llx_product.fk_product_type = 0 " .
-                    " GROUP BY llx_product.rowid" .
-                    " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
+                    "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0  AND ".MAIN_DB_PREFIX."product.fk_product_type = 0 " .
+                    " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
+                    " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
             $resql=$societe->db->query($requete);
             if ($resql)
             {
@@ -551,16 +549,16 @@ EOF;
             print "</thead><tbody id='recapServ'>";
 
             $sqlJoin = join($remPropal,",");
-            $requete = "SELECT count(llx_product.rowid) as cnt," .
-                    "          llx_product.description" .
+            $requete = "SELECT count(".MAIN_DB_PREFIX."product.rowid) as cnt," .
+                    "          ".MAIN_DB_PREFIX."product.description" .
                     "     FROM ".MAIN_DB_PREFIX."propaldet," .
-                    "          llx_product" .
-                    "    WHERE llx_product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
+                    "          ".MAIN_DB_PREFIX."product" .
+                    "    WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."propaldet.fk_product " .
                     "      AND fk_propal in ($sqlJoin)" .
                     "      AND ".MAIN_DB_PREFIX."propaldet.fk_product <> 0
-                           AND llx_product.fk_product_type = 1 " .
-                    " GROUP BY llx_product.rowid" .
-                    " ORDER BY count(llx_product.rowid) DESC LIMIT 25";
+                           AND ".MAIN_DB_PREFIX."product.fk_product_type = 1 " .
+                    " GROUP BY ".MAIN_DB_PREFIX."product.rowid" .
+                    " ORDER BY count(".MAIN_DB_PREFIX."product.rowid) DESC LIMIT 25";
             $resql=$societe->db->query($requete);
             if ($resql)
             {

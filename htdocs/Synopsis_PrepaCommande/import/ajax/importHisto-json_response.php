@@ -115,7 +115,7 @@
     {
         $responce->rows[$i]['id']=$row->rowid;
         $responce->rows[$i]['cell']=array($row->id,
-                                           utf8_encode($row->filename),
+                                           utf8_encodeRien($row->filename),
                                            $row->datec,
                                            "<button class='butAction' onClick='sendMail(".$row->id.");'>(R)envoyer Mail</button>",
                                            "<button class='butAction' onClick='displayReport(".$row->id.");'>Afficher</button>");

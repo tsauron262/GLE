@@ -31,7 +31,7 @@
             require_once(DOL_DOCUMENT_ROOT."/Babel_GA/ContratGA.class.php");
             $contrat = new ContratGA($db);
             $contrat->fetch($id);
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
             $data = array();
             foreach($_REQUEST as $key=>$val)
             {
@@ -59,7 +59,7 @@
             require_once(DOL_DOCUMENT_ROOT."/Babel_GA/ContratGA.class.php");
             $contrat = new ContratGA($db);
             $contrat->fetch($id);
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
             $contrat->create();
         }
         default:

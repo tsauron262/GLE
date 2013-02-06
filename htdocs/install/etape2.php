@@ -22,9 +22,9 @@
  *      \brief      Create tables, primary keys, foreign keys, indexes and functions into database and then load reference data
  */
 
-include("./inc.php");
-require_once($dolibarr_main_document_root."/core/class/conf.class.php");
-require_once($dolibarr_main_document_root."/core/lib/admin.lib.php");
+include 'inc.php';
+require_once $dolibarr_main_document_root.'/core/class/conf.class.php';
+require_once $dolibarr_main_document_root.'/core/lib/admin.lib.php';
 
 $etape = 2;
 $ok = 0;
@@ -39,7 +39,7 @@ error_reporting(0);		// Disable all errors
 error_reporting($err);
 
 $action=GETPOST('action');
-$setuplang=isset($_POST["selectlang"])?$_POST["selectlang"]:(isset($_GET["selectlang"])?$_GET["selectlang"]:'auto');
+$setuplang=(GETPOST('selectlang','',3)?GETPOST('selectlang','',3):'auto');
 $langs->setDefaultLang($setuplang);
 
 $langs->load("admin");
@@ -56,7 +56,7 @@ if ($dolibarr_main_db_type == "mssql")  $choix=3;
 $useforcedwizard=false;
 $forcedfile="./install.forced.php";
 if ($conffile == "/etc/dolibarr/conf.php") $forcedfile="/etc/dolibarr/install.forced.php";
-if (@file_exists($forcedfile)) { $useforcedwizard=true; include_once($forcedfile); }
+if (@file_exists($forcedfile)) { $useforcedwizard=true; include_once $forcedfile; }
 
 dolibarr_install_syslog("--- etape2: Entering etape2.php page");
 
@@ -188,7 +188,7 @@ if ($action == "set")
                 fclose($fp);
 
                 $buffer=trim($buffer);
-                if ($conf->db->type == 'mysql' || $conf->db->type == 'mysqli')	// For Mysql 5.5+, we must replace type=innodb
+                if ($conf->db->type == 'mysql' || $conf->db->type == 'mysqli')	// For Mysql 5.5+, we must replace type=innodb with ENGINE=innodb
                 {
                     $buffer=preg_replace('/type=innodb/i','ENGINE=innodb',$buffer);
                 }

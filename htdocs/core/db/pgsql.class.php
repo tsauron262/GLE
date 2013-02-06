@@ -77,7 +77,7 @@ class DoliDBPgsql
 	 *	@param	    int		$port		Port of database server
 	 *	@return	    int					1 if OK, 0 if not
 	 */
-	function DoliDBPgsql($type, $host, $user, $pass, $name='', $port=0)
+	function __construct($type, $host, $user, $pass, $name='', $port=0)
 	{
 		global $conf,$langs;
 
@@ -157,11 +157,12 @@ class DoliDBPgsql
     /**
      *  Convert a SQL request in Mysql syntax to native syntax
      *
-     *  @param     string	$line   SQL request line to convert
-     *  @param     string	$type	Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
-     *  @return    string   		SQL request line converted
+     *  @param  string	$line   			SQL request line to convert
+     *  @param  string	$type				Type of SQL order ('ddl' for insert, update, select, delete or 'dml' for create, alter...)
+     *  @param	string	$unescapeslashquot	Unescape slash quote with quote quote
+     *  @return string   					SQL request line converted
      */
-	function convertSQLFromMysql($line,$type='auto')
+	static function convertSQLFromMysql($line,$type='auto',$unescapeslashquot=0)
 	{
 		// Removed empty line if this is a comment line for SVN tagging
 		if (preg_match('/^--\s\$Id/i',$line)) {
@@ -295,6 +296,7 @@ class DoliDBPgsql
 
             // To have postgresql case sensitive
             $line=str_replace(' LIKE \'',' ILIKE \'',$line);
+            $line=str_replace(' LIKE BINARY \'',' LIKE \'',$line);
 
 			// Delete using criteria on other table must not declare twice the deleted table
 			// DELETE FROM tabletodelete USING tabletodelete, othertable -> DELETE FROM tabletodelete USING othertable
@@ -327,17 +329,10 @@ class DoliDBPgsql
 			//print $line."\n";
 
 			// Replace espacing \' by ''.
-			// By default we do not (should be already done by db->escape function if required)
-			if (! empty($this->unescapeslashquot))
-			{
-                // Except for sql insert in data file that
-                // are mysql escaped so we removed them to be compatible with standard_conforming_strings=on
-                // that considers \ as ordinary character).
-                if ($this->standard_conforming_strings)
-                {
-				    $line=preg_replace("/\\\'/","''",$line);
-                }
-			}
+			// By default we do not (should be already done by db->escape function if required
+			// except for sql insert in data file that are mysql escaped so we removed them to
+			// be compatible with standard_conforming_strings=on that considers \ as ordinary character).
+			if ($unescapeslashquot) $line=preg_replace("/\\\'/","''",$line);
 
 			//print "type=".$type." newline=".$line."<br>\n";
 		}
@@ -479,12 +474,14 @@ class DoliDBPgsql
 			{
 				$this->transaction_opened++;
 				dol_syslog("BEGIN Transaction",LOG_DEBUG);
+				dol_syslog('',0,1);
 			}
 			return $ret;
 		}
 		else
 		{
 			$this->transaction_opened++;
+			dol_syslog('',0,1);
 			return 1;
 		}
 	}
@@ -497,6 +494,7 @@ class DoliDBPgsql
 	 */
 	function commit($log='')
 	{
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("COMMIT;");
@@ -521,6 +519,7 @@ class DoliDBPgsql
 	 */
 	function rollback()
 	{
+		dol_syslog('',0,-1);
 		if ($this->transaction_opened<=1)
 		{
 			$ret=$this->query("ROLLBACK;");
@@ -549,7 +548,7 @@ class DoliDBPgsql
 		$query = trim($query);
 
 		// Convert MySQL syntax to PostgresSQL syntax
-		$query=$this->convertSQLFromMysql($query,$type);
+		$query=$this->convertSQLFromMysql($query,$type,($this->unescapeslashquot && $this->standard_conforming_strings));
 		//print "After convertSQLFromMysql:\n".$query."<br>\n";
 
 		// Fix bad formed requests. If request contains a date without quotes, we fix this but this should not occurs.
@@ -1025,23 +1024,35 @@ class DoliDBPgsql
 	 *
 	 *	@param	string	$table		Name of table
 	 *	@return	array				Tableau des informations des champs de la table
-	 *	TODO modify for postgresql
+	 *
 	 */
 	function DDLInfoTable($table)
 	{
-		/*
 		 $infotables=array();
 
-		 $sql="SHOW FULL COLUMNS FROM ".$table.";";
+		 $sql="SELECT ";
+		 $sql.="	infcol.column_name as \"Column\",";
+		 $sql.="	CASE WHEN infcol.character_maximum_length IS NOT NULL THEN infcol.udt_name || '('||infcol.character_maximum_length||')'";
+		 $sql.="		ELSE infcol.udt_name";
+		 $sql.="	END as \"Type\",";
+		 $sql.="	infcol.collation_name as \"Collation\",";
+		 $sql.="	infcol.is_nullable as \"Null\",";
+		 $sql.="	'' as \"Key\",";
+		 $sql.="	infcol.column_default as \"Default\",";
+		 $sql.="	'' as \"Extra\",";
+		 $sql.="	'' as \"Privileges\"";
+		 $sql.="	FROM information_schema.columns infcol";
+		 $sql.="	WHERE table_schema='public' ";
+		 $sql.="	AND table_name='".$table."'";
+		 $sql.="	ORDER BY ordinal_position;";
 
 		 dol_syslog($sql,LOG_DEBUG);
-		 $result = $this->pg_query($this->db,$sql);
+		 $result = $this->query($sql);
 		 while($row = $this->fetch_row($result))
 		 {
 			$infotables[] = $row;
-			}
-			return $infotables;
-			*/
+		 }
+		return $infotables;
 	}
 
 
@@ -1212,7 +1223,12 @@ class DoliDBPgsql
 	{
 		$sql = "ALTER TABLE ".$table;
 		$sql .= " MODIFY COLUMN ".$field_name." ".$field_desc['type'];
-		if ($field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') $sql.="(".$field_desc['value'].")";
+		if ($field_desc['type'] == 'tinyint' || $field_desc['type'] == 'int' || $field_desc['type'] == 'varchar') {
+			$sql.="(".$field_desc['value'].")";
+		}
+
+		// FIXME May not work with pgsql. May need to run a second request. If it works, just remove the FIXME tag
+		if ($field_desc['null'] == 'not null' || $field_desc['null'] == 'NOT NULL') $sql.=" NOT NULL";
 
 		dol_syslog($sql,LOG_DEBUG);
 		if (! $this->query($sql))

@@ -44,7 +44,7 @@ class MenuTop
      *
      *  @param      DoliDb		$db      Database handler
 	 */
-	function MenuTop($db)
+	function __construct($db)
 	{
 		$this->db=$db;
 	}
@@ -58,7 +58,7 @@ class MenuTop
 	 */
 	function showmenu()
 	{
-		require_once(DOL_DOCUMENT_ROOT.'/core/menus/standard/auguria.lib.php');
+		require_once DOL_DOCUMENT_ROOT.'/core/menus/standard/auguria.lib.php';
 
 		print_auguria_menu($this->db,$this->atarget,$this->hideifnotallowed);
 	}
@@ -83,7 +83,7 @@ class MenuLeft
      *  @param  array		&$menu_array    	Table of menu entries to show before entries of menu handler
      *  @param  array		&$menu_array_after  Table of menu entries to show after entries of menu handler
      */
-    function MenuLeft($db,&$menu_array,&$menu_array_after)
+    function __construct($db,&$menu_array,&$menu_array_after)
     {
         $this->db=$db;
         $this->menu_array=$menu_array;
@@ -98,7 +98,7 @@ class MenuLeft
      */
     function showmenu()
     {
-        require_once(DOL_DOCUMENT_ROOT.'/core/menus/standard/auguria.lib.php');
+        require_once DOL_DOCUMENT_ROOT.'/core/menus/standard/auguria.lib.php';
 
         $res=print_left_auguria_menu($this->db,$this->menu_array,$this->menu_array_after);
 

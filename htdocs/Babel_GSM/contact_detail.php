@@ -185,8 +185,7 @@ $contact->fetch($_GET['contact_id']);
     if ($contact->user_id)
     {
         $dolibarr_user=new User($db);
-        $dolibarr_user->id=$contact->user_id;
-        $result=$dolibarr_user->fetch();
+        $result=$dolibarr_user->fetch($contact->user_id);
         print $dolibarr_user->getLoginUrl(1);
     }
     else print $langs->trans("NoDolibarrAccess");

@@ -57,22 +57,7 @@ if ($res > 0) {
             }
         }
         print "<table cellpadding=15 width=700><tr><th class='ui-widget-header ui-state-default'>Produit<th class='ui-widget-header ui-state-default'>Qte<th class='ui-widget-header ui-state-default'>commande / dispo";
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique41' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            }
-        }
+        displayLigneBouton($user, $com, '');
 
         foreach ($arrProd as $key => $val) {
             if ($val == 0)
@@ -105,22 +90,7 @@ if ($res > 0) {
             }
             print "</table></td></tr>";
         }
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique41bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            }
-        }
+        displayLigneBouton($user, $com, 'bis');
         print "</table>";
         print "</div>";
 
@@ -128,27 +98,8 @@ if ($res > 0) {
 
         print "<div id='fragment2'>";
         print "<table cellpadding=10 width=900>";
-        print "<tr><th class='ui-widget-header ui-state-default'>Dispo?.
-                   <th class='ui-widget-header ui-state-default'>Ref.
-                   <th class='ui-widget-header ui-state-default'>Qt&eacute;
-                   <th class='ui-widget-header ui-state-default'>Label
-                   <th class='ui-widget-header ui-state-default'>Description";
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1a' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2a' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3a' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4a' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique4a1' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            }
-        }
+        displayLigneHeader();
+        displayLigneBouton($user, $com, 'a');
 
         displayLogistique($com, false);
         $tot = count($arrGrpTmp) - 1;
@@ -164,76 +115,23 @@ if ($res > 0) {
             }
             $i++;
         }
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1abis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2abis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3abis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4abis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      ";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique4a1bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      ";
-            }
-        }
+        displayLigneBouton($user, $com, 'abis');
 
         print "</table>";
         print "</div>";
         print "</div>";
-
-        print "<div id='valDialog'>&Ecirc;tes vous sur de vouloir valider cette commande ?</div>";
-        print "<div id='modDialog'>&Ecirc;tes vous sur de vouloir modifier cette commande ?</div>";
-        print "<div id='modDevalidationDialog' class='cntDeValDialog'>&Ecirc;tes vous sur de vouloir invalider cette commande ?</div>";
     } else {
         print "<table cellpadding=10 width=900>";
-        print "<tr><th class='ui-widget-header ui-state-default'>Dispo?.
-                   <th class='ui-widget-header ui-state-default'>Ref.
-                   <th class='ui-widget-header ui-state-default'>Qt&eacute;
-                   <th class='ui-widget-header ui-state-default'>Label
-                   <th class='ui-widget-header ui-state-default'>Description";
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1bbis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2bbis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3bbis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4bbis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique41bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      </td></tr>";
-            }
-        }
+        displayLigneHeader();
+        displayLigneBouton($user, $com, 'b');
 
         displayLogistique($com, true, true);
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            if ($com->logistique_statut < 1) {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique1b' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
-                        <button id='logistique2b' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3b' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
-                        <button id='logistique4b' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      ";
-            } else {
-                print "<tr class='ui-widget-header'>
-                        <td colspan=5 align=center>
-                        <button id='logistique4b1bis' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
-                      ";
-            }
-        }
+        displayLigneBouton($user, $com, 'bbis');
         print "</table>";
-        print "<div id='valDialog' class='cntValDialog'>&Ecirc;tes vous sur de vouloir valider cette commande ?</div>";
-        print "<div id='modDialog' class='cntModDialog'>&Ecirc;tes vous sur de vouloir modifier cette commande ?</div>";
-        print "<div id='modDevalidationDialog' class='cntDeValDialog'>&Ecirc;tes vous sur de vouloir invalider cette commande ?</div>";
     }
+    print "<div id='valDialog' class='cntValDialog'>&Ecirc;tes vous sur de vouloir valider cette commande ?</div>";
+    print "<div id='modDialog' class='cntModDialog'>&Ecirc;tes vous sur de vouloir modifier cette commande ?</div>";
+    print "<div id='modDevalidationDialog' class='cntDeValDialog'>&Ecirc;tes vous sur de vouloir invalider cette commande ?</div>";
 } else {
     print "Pas de commande trouv&eacute;e";
 }
@@ -250,15 +148,15 @@ print <<<EOF
           spinner: 'Chargement ...',
         });
     if(jQuery('.cntValDialog').length > 1){
-        jQuery('#valDialog').dialog( "destroy" );
+//        jQuery('#valDialog').dialog( "destroy" );
         jQuery('#valDialog').remove();
     }
     if(jQuery('.cntModDialog').length > 1){
-        jQuery('#modDialog').dialog( "destroy" );
+//        jQuery('#modDialog').dialog( "destroy" );
         jQuery('#modDialog').remove();
     }
     if(jQuery('.cntDeValDialog').length > 1){
-        jQuery('#modDevalidationDialog').dialog( "destroy" );
+//        jQuery('#modDevalidationDialog').dialog( "destroy" );
         jQuery('#modDevalidationDialog').remove();
     }
 
@@ -394,204 +292,33 @@ print <<<EOF
             }
         });
 
-        jQuery('#logistique1bis').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2bis').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3bis').click(function(){
-            caseLogistique=false;
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4bis').click(function(){
-            caseLogistique=false;
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique41bis').click(function(){
-            caseLogistique='#fragment1';
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
+EOF;
+getScript('b');
+getScript('a', '#fragment2', '#fragment1');
+getScript('', '#fragment1', '#fragment1');
+getScript('bbis');
+getScript('abis', '#fragment2', '#fragment1');
+getScript('bis', '#fragment1', '#fragment1');
 
 
-        jQuery('#logistique1bbis').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2bbis').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3bbis').click(function(){
-            caseLogistique=false;
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4bbis').click(function(){
-            caseLogistique=false;
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique4b1bis').click(function(){
-            caseLogistique=false;
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
+print <<<EOF
 
-
-        jQuery('#logistique1b').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2b').click(function(){
-            jQuery('.logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3b').click(function(){
-            caseLogistique=false;
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4b').click(function(){
-            caseLogistique=false;
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique4b1').click(function(){
-            caseLogistique=false;
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
-
-        jQuery('#logistique1a').click(function(){
-            jQuery('#fragment2 .logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2a').click(function(){
-            jQuery('#fragment2 .logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3a').click(function(){
-            caseLogistique='#fragment2';
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4a').click(function(){
-            caseLogistique='#fragment2';
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique4a1').click(function(){
-            caseLogistique='#fragment1';
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
-
-        jQuery('#logistique1abis').click(function(){
-            jQuery('#fragment2 .logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2abis').click(function(){
-            jQuery('#fragment2 .logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3abis').click(function(){
-            caseLogistique='#fragment2';
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4abis').click(function(){
-            caseLogistique='#fragment2';
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique4a1bis').click(function(){
-//console.log('toto logistique4a1bis');
-            caseLogistique='#fragment1';
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
-
-        jQuery('#logistique1').click(function(){
-            jQuery('#fragment1 .logistique').each(function(){
-                jQuery(this).attr("value", "yes");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment1 #pasdispo-'+tmp).css('display','none');
-            });
-        });
-        jQuery('#logistique2').click(function(){
-            jQuery('#fragment1 .logistique').each(function(){
-                jQuery(this).attr("value", "no");
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment1 #pasdispo-'+tmp).css('display','block');
-            });
-        });
-        jQuery('#logistique3').click(function(){
-            caseLogistique='#fragment1';
-            jQuery('#valDialog').dialog('open');
-        });
-        jQuery('#logistique4').click(function(){
-            caseLogistique='#fragment1';
-            jQuery('#modDialog').dialog('open');
-        });
-        jQuery('#logistique41').click(function(){
-            caseLogistique='#fragment1';
-            jQuery('#modDevalidationDialog').dialog('open');
-        });
-        if (!jQuery('#fragment2 .logistique').length>0 && !jQuery('#fragment1 .logistique').length>0){
-            jQuery('.logistique').change(function(){
-                if (jQuery(this).val() == "no")
-                {
-                    var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                    jQuery('#pasdispo-'+tmp).css('display','block');
-                } else {
-                    var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                    jQuery('#pasdispo-'+tmp).css('display','none');
-                }
-            });
+    function changeDispo(elem, val, suff, oblige){
+        if($(elem).attr('value') != val || oblige){
+            var tmp=jQuery(elem).attr('id').replace(/^logistiqueOK-/,'');
+            jQuery(elem).attr('value', val);
+            if(val == 'yes')
+                jQuery(suff+'#pasdispo-'+tmp).show();
+            else
+                jQuery(suff+'#pasdispo-'+tmp).show();
 
         }
+    }
+   
+            jQuery('.logistique').change(function(){
+                changeDispo(this, jQuery(this).val(), '', true);
+            });
 
-        jQuery('#fragment2 .logistique').change(function(){
-            if (jQuery(this).val() == 1)
-            {
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','block');
-            } else {
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment2 #pasdispo-'+tmp).css('display','none');
-            }
-        });
-        jQuery('#fragment1 .logistique').change(function(){
-            if (jQuery(this).val() == 1)
-            {
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment1 #pasdispo-'+tmp).css('display','block');
-            } else {
-                var tmp=jQuery(this).attr('id').replace(/^logistiqueOK-/,'');
-                jQuery('#fragment1 #pasdispo-'+tmp).css('display','none');
-            }
-        });
         jQuery.datepicker.setDefaults(jQuery.extend({
             showMonthAfterYear: false,
             dateFormat: 'dd/mm/yy',
@@ -636,22 +363,79 @@ function displayLogistique($com) {
                     print "<tr><td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
                 }
                 if ($val->logistique_ok == '1') {
-                    print "   <div id='pasdispo-" . $val->id . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->id . "' class='datepicker'></div>";
+                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
                 } else {
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                        print "   <div id='pasdispo-" . $val->id . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->id . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
                     } else {
                         print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                     }
                 }
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encode($prod->getNomUrl(1));
-                print "    <td width=20 class='ui-widget-content'>" . utf8_encode($val->qty);
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encode($val->libelle);
-                print "    <td class='ui-widget-content'>" . utf8_encode($val->desc);
+                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
+                print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);
+                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($val->libelle);
+                print "    <td class='ui-widget-content'>" . utf8_encodeRien($val->desc);
             }
         }
     } else {
         print " Pas de produits dans la commande";
+    }
+}
+
+function displayLigneHeader() {
+    print "<tr><th class='ui-widget-header ui-state-default'>Dispo?.
+                   <th class='ui-widget-header ui-state-default'>Ref.
+                   <th class='ui-widget-header ui-state-default'>Qt&eacute;
+                   <th class='ui-widget-header ui-state-default'>Label
+                   <th class='ui-widget-header ui-state-default'>Description";
+}
+
+function getScript($id, $suff = false, $suffB = false) {
+    $suff1 = ($suff) ? $suff . " " : "";
+    $suff2 = ($suff) ? "'" . $suff . "'" : "false";
+    $suff3 = ($suffB) ? "'" . $suffB . "'" : "false";
+
+    echo "
+       jQuery('#logistique1" . $id . "').click(function(){
+            jQuery('" . $suff1 . ".logistique').each(function(){
+                changeDispo(this, 'yes', '" . $suff1 . "');
+            });
+        });
+        jQuery('#logistique2" . $id . "').click(function(){
+            jQuery('" . $suff1 . ".logistique').each(function(){
+                changeDispo(this, 'no', '" . $suff1 . "');
+            });
+        });
+        jQuery('#logistique3" . $id . "').click(function(){
+            caseLogistique=" . $suff2 . ";
+            jQuery('#valDialog').dialog('open');
+        });
+        jQuery('#logistique4" . $id . "').click(function(){
+            caseLogistique=" . $suff2 . ";
+            jQuery('#modDialog').dialog('open');
+        });
+        jQuery('#logistique41" . $id . "').click(function(){
+            caseLogistique=" . $suff3 . ";
+            jQuery('#modDevalidationDialog').dialog('open');
+        });";
+}
+
+function displayLigneBouton($user, $com, $id = '') {
+    if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
+        if ($com->logistique_statut < 1) {
+            print "<tr class='ui-widget-header'>
+                        <td colspan=5 align=center>
+                        <button id='logistique1" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
+                        <button id='logistique2" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
+                        <button id='logistique3" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
+                        <button id='logistique4" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
+                      </td></tr>";
+        } else {
+            print "<tr class='ui-widget-header'>
+                        <td colspan=5 align=center>
+                        <button id='logistique41" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
+                      </td></tr>";
+        }
     }
 }
 

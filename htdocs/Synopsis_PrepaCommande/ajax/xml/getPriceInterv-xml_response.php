@@ -22,13 +22,13 @@
     $xmlStr = "<ajax-response>";
 
 
-    $requete= "SELECT * FROM llx_Synopsis_fichinter_User_PrixTypeInterv WHERE user_refid = " .$userid;
+    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixTypeInterv WHERE user_refid = " .$userid;
     $sql = $db->query($requete);
     while($res=$db->fetch_object($requete))
     {
         $xmlStr .= "<typeInterv id='".$res->typeInterv_refid."'><![CDATA[".price($res->prix_ht)." &euro;]]></typeInterv>";
     }
-    $requete= "SELECT * FROM llx_Synopsis_fichinter_User_PrixDepInterv WHERE user_refid = " .$userid;
+    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_User_PrixDepInterv WHERE user_refid = " .$userid;
     $sql = $db->query($requete);
     while($res=$db->fetch_object($requete))
     {

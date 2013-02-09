@@ -180,6 +180,10 @@ if ($filtera > 0 || $filtert > 0 || $filterd > 0)
 	if ($filterd > 0) $sql.= ($filtera>0||$filtert>0?" OR ":"")." a.fk_user_done = ".$filterd;
 	$sql.= ")";
 }
+/* Mod drsi */
+if(isset($_POST['sf_ref']))
+    $sql .= " AND (a.label LIKE '%".$_POST['sf_ref']."%' || a.label LIKE '%".$_POST['sf_ref']."%')";
+/* fin mod drsi */
 $sql.= $db->order($sortfield,$sortorder);
 $sql.= $db->plimit($limit + 1, $offset);
 //print $sql;

@@ -80,7 +80,9 @@ $sql.= " AND c.entity = ".$conf->entity;
 if ($socid) $sql.= " AND s.rowid = ".$socid;
 if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($search_nom)      $sql.= " AND s.nom LIKE '%".$db->escape($search_nom)."%'";
-if ($search_contract) $sql.= " AND c.rowid = '".$db->escape($search_contract)."'";
+/* mod drsi */
+if ($search_contract) $sql.= " AND (c.rowid LIKE '%".$db->escape($search_contract)."%' || c.ref LIKE '%".$db->escape($search_contract)."%')";
+/* fin mod drsi */
 if ($sall)            $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR cd.label LIKE '%".$db->escape($sall)."%' OR cd.description LIKE '%".$db->escape($sall)."%')";
 $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut,";
 $sql.= " s.nom, s.rowid";

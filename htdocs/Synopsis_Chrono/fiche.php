@@ -177,7 +177,10 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
     $interface = new Interfaces($db);
     $interface->texte = $tmpName;
-    $result = $interface->run_triggers('ECM_UL_DEL_CHRONO', $chrono, $user, $langs, $conf);
+    
+    $chr = new Chrono($db);
+    $chr->fetch($_REQUEST['id']);
+    $result = $interface->run_triggers('ECM_UL_DEL_CHRONO', $chr, $user, $langs, $conf);
     if ($result < 0) {
         $error++;
         $errors = $interface->errors;

@@ -187,15 +187,15 @@ if ($resql)
 		print '<td>';
 		if ($obj->pid)
 		{
-		    print '<a href="../product/fiche.php?id='.$obj->pid.'">'.img_object($langs->trans("ShowService"),"service").' '.dolibarr_trunc($obj->label,20).'</a>';
+		    print '<a href="../product/fiche.php?id='.$obj->pid.'">'.img_object($langs->trans("ShowService"),"service").' '.dol_trunc($obj->label,20).'</a>';
 		}
 		else
 		{
-		    print dolibarr_trunc($obj->description,20);
+		    print dol_trunc($obj->description,20);
 		}
 		print '</td>';
 	}
-        print '<td><a href="../comm/fiche.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dolibarr_trunc($obj->nom,44).'</a></td>';
+        print '<td><a href="../comm/fiche.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.dol_trunc($obj->nom,44).'</a></td>';
         // Date debut
         if ($mode == "0") {
             print '<td align="center">';

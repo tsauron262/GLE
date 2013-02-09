@@ -345,8 +345,8 @@ $js = '
 //        print '</td>';
 //        print '<td nowrap="1">';
 //        print '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
-//        if ($obj->note) print ' '.dolibarr_trunc(html_entity_decode($obj->note),20).'</a></td>';
-//        else print '</a> '.dolibarr_trunc($obj->label,20).'</td>';
+//        if ($obj->note) print ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
+//        else print '</a> '.dol_trunc($obj->label,20).'</td>';
 //        print '<td>';
 //        $staticcompany->id=$obj->fk_soc;
 //        $staticcompany->fetch($obj->fk_soc);
@@ -409,8 +409,8 @@ $js = '
 //        if ($obj->nb_late) print img_warning($langs->trans("Late"));
 //        print '</td>';
 //        print '<td><a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->fk_contrat.'">'.img_object($langs->trans("ShowService"),"service");
-//        if ($obj->note) print ' '.dolibarr_trunc(html_entity_decode($obj->note),20).'</a></td>';
-//        else print '</a> '.dolibarr_trunc($obj->label,20).'</td>';
+//        if ($obj->note) print ' '.dol_trunc(html_entity_decode($obj->note),20).'</a></td>';
+//        else print '</a> '.dol_trunc($obj->label,20).'</td>';
 //        print '<td>';
 //        $staticcompany->id=$obj->fk_soc;
 //        $staticcompany->fetch($obj->fk_soc);

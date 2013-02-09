@@ -1343,7 +1343,7 @@ class Contrat extends CommonObject
         }
 
         if ($withpicto && $withpicto != 2) $result.=' ';
-        if ($withpicto != 2) $result.=$lien.($maxlength?dolibarr_trunc($this->ref,$maxlength):$this->ref).$lienfin;
+        if ($withpicto != 2) $result.=$lien.($maxlength?dol_trunc($this->ref,$maxlength):$this->ref).$lienfin;
         return $result;
     }
 

@@ -678,7 +678,7 @@ print '<BR>';
             print '<a href="'.DOL_URL_ROOT . '/document.php?modulepart='.$modulepart.'&amp;file='.urlencode($relativepath).'">';
             if (!$iconPDF)
             {
-                print img_mime($file["name"],$langs->trans("File").': '.$file["name"]).' '.dolibarr_trunc($file["name"],$maxfilenamelength);
+                print img_mime($file["name"],$langs->trans("File").': '.$file["name"]).' '.dol_trunc($file["name"],$maxfilenamelength);
             }
             else
             {

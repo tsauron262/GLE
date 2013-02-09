@@ -17,41 +17,25 @@
   * GLE-1.0
   */
 
-$userid = $_REQUEST['userId'];
 require_once('../../main.inc.php');
 
-$userid=59;
+global $user;
+$userid = $user->id;
 
-$requete = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration),0) as td,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet.title
-              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                   ".MAIN_DB_PREFIX."Synopsis_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = $userid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
-          GROUP BY ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet";
+$requete = "SELECT ifnull(sum(tt.task_duration".(($_REQUEST['dur']=="effective")? "_effective" : "")."),0) as td,
+                   t.fk_projet,
+                   p.title
+              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors as a,
+                   ".MAIN_DB_PREFIX."Synopsis_projet as p,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_task as t
+         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time".(($_REQUEST['dur']=="effective")? "_effective" : "")." as tt ON tt.fk_task = t.rowid
+             WHERE a.fk_projet_task = t.rowid
+               AND a.fk_user = ".$userid."
+               AND p.rowid = t.fk_projet
+          GROUP BY t.fk_projet";
 
-if ($_REQUEST['dur']=="effective")
-{
-$requete = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_duration_effective),0) as td,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet.title
-              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
-                   ".MAIN_DB_PREFIX."Synopsis_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet_task
-         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_user = $userid
-               AND ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
-          GROUP BY ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet";
-
-}
 
 $sql = $db->query($requete);
-
 
 print <<<EOF
 

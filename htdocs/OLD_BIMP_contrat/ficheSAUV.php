@@ -284,7 +284,7 @@ if ($_REQUEST['typeContrat'] =='LocationFinanciere' && $_REQUEST["action"] == 'a
         }
         if ($_REQUEST['returnPrepacom'] > 0 )
         {
-            header("Location: ".DOL_URL_ROOT."/Babel_prepaCommande/prepacommande.php?id=".$_REQUEST['returnPrepacom']);
+            header("Location: ".DOL_URL_ROOT."/Synopsis_PrepaCommande/prepacommande.php?id=".$_REQUEST['returnPrepacom']);
         } else {
             header("Location: fiche.php?id=".$contrat->id);
         }

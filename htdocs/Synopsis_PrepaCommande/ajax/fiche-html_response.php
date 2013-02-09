@@ -376,8 +376,6 @@ EOF;
         print '<td class="ui-widget-content" colspan="3">' . $statusFin . '</td>';
         print '</tr>';
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . ' Exp&eacute;dition</th>';
-//            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_exp WHERE fk_commande = ".$id;
-//            $sql = $db->query($requete);
         require_once(DOL_DOCUMENT_ROOT . "/expedition/class/expedition.class.php");
         $tabExpe = getElementElement("commande", "shipping", $id);
 

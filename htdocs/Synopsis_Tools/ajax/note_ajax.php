@@ -57,7 +57,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 
     $id = getIdInUrl($url, $nomId);
 
-    if (!isset($id) && $nomId != "id") {
+    if (!isset($id) && is_int($id) && $nomId != "id") {
         //On reesseille avec id standard
         $nomId = "id";
         $id = getIdInUrl($url, $nomId);
@@ -67,7 +67,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $droit1;
 
 
-    if (isset($table) && isset($id) && $droit1) {
+    if (isset($table) && isset($id) && is_int($id) && $droit1) {
         if (isset($_POST['note']) && $droit2) {//Onupload
             $requete = "UPDATE " . $table . " SET " . $nomChampNote . " = '" . trim($_POST['note']) . "' WHERE rowid = " . $id;
             $db->query($requete);

@@ -86,7 +86,10 @@ if ($_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
     require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
     $msg = "Le mail a &eacute;t&eacute; envoy&eacute;";
-    $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (SELECT ce.fk_expedition FROM " . MAIN_DB_PREFIX . "co_exp as ce WHERE fk_commande=" . $commande->id . ") ";
+        $tabExpe = getElementElement("commande", "shipping", $commande->id);
+        foreach($elem as $tabExpe)
+            $tabExp[] = $elem['d'];
+    $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (".  implode(", ", $tabExp).")";
     $sql = $db->query($requete);
 }
 

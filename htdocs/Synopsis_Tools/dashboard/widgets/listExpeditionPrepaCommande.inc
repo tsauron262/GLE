@@ -26,19 +26,20 @@ function widget_listExpeditionPrepaCommande() {
         $clause = " WHERE ";
         $sql = "  SELECT c.rowid as comId, c.date_livraison, bs.label, e.rowid as expId
                     FROM ".MAIN_DB_PREFIX."commande AS c
-               LEFT JOIN BIMP_site_commande AS b ON c.rowid = b.fk_commande
-               LEFT JOIN BIMP_site AS bs ON b.site_id = bs.id
+               LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_commande AS b ON c.rowid = b.rowid
+               LEFT JOIN ".MAIN_DB_PREFIX."entrepot AS bs ON b.fk_entrepot = bs.rowid
                LEFT JOIN ".MAIN_DB_PREFIX."societe AS s ON s.rowid  = c.fk_soc
-               LEFT JOIN ".MAIN_DB_PREFIX."co_exp AS ce ON c.rowid = ce.fk_commande
-               LEFT JOIN ".MAIN_DB_PREFIX."expedition AS e ON e.rowid = ce.fk_expedition ";
+        LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON c.rowid = ce.fk_source
+               LEFT JOIN ".MAIN_DB_PREFIX."expedition AS e ON e.rowid = ce.fk_target ";
     if (!$user->rights->societe->client->voir && !$socid)
     {
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
         $sql.= $clause." sc.fk_user = " .$user->id;
         $clause = " AND ";
     }
-         $sql .= " WHERE c.date_livraison IS NOT NULL
-                     AND b.site_id IS NOT NULL
+         $sql .= " WHERE c.date_livraison IS NOT NULL";
+        $sql .= " AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
+        $sql .= " AND b.fk_entrepot IS NOT NULL
                    LIMIT 50";
         $result=$db->query($sql);
         if ($result)
@@ -101,6 +102,8 @@ function widget_listExpeditionPrepaCommande() {
             $table .=  "</table>";
             $table2 .=  "</table>";
         }
+        else
+            die($sql);
 
         $table .="</p>";
         $table2 .="</p>";

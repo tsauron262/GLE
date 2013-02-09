@@ -68,6 +68,10 @@ for($i=0;$i<$qty;$i++)
         $avenant= $res3->mx;
     }*/
 
+    
+    $tmpProd = new Product($db);
+    $tmpProd->fetch($res->fk_product);
+    
     $requete = "INSERT INTO ".MAIN_DB_PREFIX."contratdet
                             (fk_contrat,fk_product,statut,description,
                              tva_tx,qty,subprice,price_ht,

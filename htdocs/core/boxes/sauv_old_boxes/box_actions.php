@@ -116,12 +116,12 @@ class box_actions extends ModeleBoxes {
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'nowrap' => 1,
                     'logo' => ("task"),
-                    'text' => dolibarr_trunc($label,12),
+                    'text' => dol_trunc($label,12),
                     'text2'=> $late,
                     'url' => DOL_URL_ROOT."/comm/action/fiche.php?id=".$objp->id);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
-                    'text' => dolibarr_trunc($objp->nom,20),
+                    'text' => dol_trunc($objp->nom,20),
                     'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',

@@ -105,6 +105,7 @@ class box_services_vendus extends ModeleBoxes {
             {
                 $sql.= " AND s.rowid = ".$user->societe_id;
             }
+            $sql.= " GROUP BY cd.rowid ";
             $sql.= " ORDER BY c.tms DESC ";
             $sql.= $db->plimit($max, 0);
 

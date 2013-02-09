@@ -142,7 +142,7 @@ class ModeleBoxes
             if (! empty($head['text']))
             {
                 $th = $head['text'];
-                $s=dolibarr_trunc(html_entity_decode($th),isset($head['limit'])?$head['limit']:$this->MAXLENGTHBOX);
+                $s=dol_trunc(html_entity_decode($th),isset($head['limit'])?$head['limit']:$this->MAXLENGTHBOX);
                 $so = $s;
 //                if ($this->textnohtmlencoded) $html .=  htmlentities($s);
 //                else $html .=  $s;

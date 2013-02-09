@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  *
  * $Id: box_services_vendus.php,v 1.32 2008/03/01 01:26:49 eldy Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_services_vendus.php,v $

@@ -46,7 +46,7 @@ function widget_statCommandeFourn() {
                 $var=!$var;
 
                 $table .= "<tr $bc[$var]>";
-                $table .= '<td>'.$commande->statuts[$row[1]].'</td>';
+                $table .= '<td>'.$langs->trans($commande->statuts[$row[1]]).'</td>';
                 $table .= '<td align="center">'.$row[0].'</td>';
                 $table .= '<td align="center"><a href="'.DOL_URL_ROOT.'/fourn/commande/liste.php?statut='.$row[1].'">'.$commande->LibStatut($row[1],3).'</a></td>';
 

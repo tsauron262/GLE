@@ -21,17 +21,29 @@
 
   $type=$_REQUEST['type'];
 
+//$sql  = "SELECT p.rowid,
+//                p.label,
+//                p.ref,
+//                fk_product_type,
+//                count(*) as c
+//           FROM llx_propaldet as pd,
+//                llx_product as p,
+//                llx_propal as pl
+//          WHERE p.rowid = pd.fk_product
+//            AND pl.rowid = pd.fk_propal
+//            AND pl.datep > date_sub(now(), interval 12 month)
+//            AND pl.fk_statut in (2,4)";
 $sql  = "SELECT p.rowid,
                 p.label,
                 p.ref,
                 fk_product_type,
-                count(*) as c
-           FROM llx_propaldet as pd,
-                babel_product as p,
-                llx_propal as pl
+                sum(pd.qty) as c
+           FROM llx_commandedet as pd,
+                llx_product as p,
+                llx_commande as pl
           WHERE p.rowid = pd.fk_product
-            AND pl.rowid = pd.fk_propal
-            AND pl.datep > date_sub(now(), interval 12 month)
+            AND pl.rowid = pd.fk_commande
+            AND pl.date_commande > date_sub(now(), interval 12 month)
             AND pl.fk_statut in (2,4)";
 if ($type."x" != "x")
 {
@@ -60,9 +72,9 @@ if ($result)
       {
           $nolabel=false;
           $radius=150;
-          $arrVal[$i]=array("value" => round($res->c), "label" => dolibarr_trunc($res->label,45), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
+          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,45), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
       } else {
-          $arrVal[$i]=array("value" => round($res->c), "label" => dolibarr_trunc($res->label,20), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
+          $arrVal[$i]=array("value" => round($res->c), "label" => dol_trunc($res->label,20), "on-click" => $dolibarr_main_url_root.'/product/fiche.php?id='.$res->rowid );
       }
       $i++;
   }
@@ -85,7 +97,10 @@ if ($result)
                                   "border" => "2" ));
       $arr['bg_colour'] ="#FAFCBC";
       $arr['ani--mate']=true;
-      if ($type==0)
+      if (!isset($type))
+      {
+          $arr['title']=array('text' => "5 meilleurs ventes produits/services (12 mois)", "style" => "font-size: 14px; color:#0000ff; font-family: Verdana; text-align: center;");
+      } else if($type==0)
       {
         $arr['title']=array('text' => "5 meilleurs ventes produits (12 mois)", "style" => "font-size: 14px; color:#0000ff; font-family: Verdana; text-align: center;");
       } else if ($type==1){

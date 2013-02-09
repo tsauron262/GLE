@@ -76,13 +76,13 @@
     $xml .= "<list>";
     foreach($activeArr as $key=>$val)
     {
-        $xml .= "<active id='".$key."'><![CDATA[".utf8_encode(html_entity_decode($val))."]]></active>";
+        $xml .= "<active id='".$key."'><![CDATA[".html_entity_decode($val)."]]></active>";
     }
     foreach($disableArr as $key=>$val)
     {
         if ($val)
         {
-            $xml .= "<disabled id='".$key."'><![CDATA[".utf8_encode(html_entity_decode($val))."]]></disabled>";
+            $xml .= "<disabled id='".$key."'><![CDATA[".html_entity_decode($val)."]]></disabled>";
         }
     }
     $xml .= "</list>";

@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxFactureFournImp() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_factures_fourn_imp.php", 'Fournisseur - Les 10 derni&egrave;res factures impay&eacute;es');
 }
 

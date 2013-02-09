@@ -121,7 +121,7 @@ if ( $user->rights->propale->lire == 1)
 } else {
   return array(
     'title' => 'Propositions commerciales - 10 derni&egrave;res prop. de financement',
-    'content' => utf8_encode("Ce module ne vous est pas accessible."),
+    'content' => utf8_encodeRien("Ce module ne vous est pas accessible."),
     'initScript' => "",
     'classes' => 'ui-state-default ui-widget-header',
     'settings' => false,

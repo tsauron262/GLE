@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxDernierePropale() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_propales.php", 'Propositions commerciales - Les 10 derni&egrave;res prop. enregistr&eacute;s');
 }
 

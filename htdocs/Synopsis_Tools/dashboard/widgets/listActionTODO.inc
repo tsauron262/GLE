@@ -21,8 +21,17 @@ function widget_listActionTODO() {
     if ($user->rights->agenda->myactions->read)
     {
         ob_start();
-        $table = "<p>".utf8_encode(show_array_actions_to_do(10,false))."</p>";
-        $table2 = "<p>".utf8_encode(show_array_actions_to_do(50,false))."</p>";
+        $table .= "<p>";
+        $table .= show_array_actions_to_do(10, false);
+        $table .= ob_get_contents();
+        $table .= "</p>";
+        ob_clean();
+        
+        ob_start();
+        $table2 .= "<p>";
+        $table2 .= show_array_actions_to_do(50, false);
+        $table2 .= ob_get_contents();
+        $table2 .= "</p>";
         ob_clean();
         
           return array(

@@ -31,7 +31,7 @@ function widget_statOfcService() {
     $js .= '<script type="text/javascript">';
 
     $js .= 'swfobject.embedSWF(';
-    $js .= '"'.DOL_URL_ROOT.'/Babel_Common/open-flash-chart/open-flash-chart.swf", "service_chart", "100%", "350px",';
+    $js .= '"'.DOL_URL_ROOT.'/Synopsis_Common/open-flash-chart/open-flash-chart.swf", "service_chart", "100%", "350px",';
     $js .= '"9.0.0", "expressInstall.swf",';
     $js .= '{"data-file":"'.DOL_URL_ROOT.'/Synopsis_Tools/dashboard/ajax/stat_produit_json.php?type=1"} );';
 

@@ -31,7 +31,7 @@ function widget_statOfcProduits() {
     $js .= '<script type="text/javascript">';
 
     $js .= 'swfobject.embedSWF(';
-    $js .= '"'.DOL_URL_ROOT.'/Babel_Common/open-flash-chart/open-flash-chart.swf", "products_chart", "100%", "350px",';
+    $js .= '"'.DOL_URL_ROOT.'/Synopsis_Common/open-flash-chart/open-flash-chart.swf", "products_chart", "100%", "350px",';
     $js .= '"9.0.0", "expressInstall.swf",';
     $js .= '{"data-file":"'.DOL_URL_ROOT.'/Synopsis_Tools/dashboard/ajax/stat_produit_json.php"} );';
 
@@ -47,20 +47,20 @@ function widget_statOfcProduits() {
     $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Les 20 meilleurs ventes';
 
 
-    $sql  = "SELECT p.rowid, p.label, p.ref, fk_product_type, count(*) as c";
-    $sql .= " FROM ".MAIN_DB_PREFIX."propaldet as pd, ".MAIN_DB_PREFIX."propal as pl, ".MAIN_DB_PREFIX."product as p";
-    if ($conf->categorie->enabled && !$user->rights->categorie->voir)
-    {
-      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
-      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cp.fk_categorie = c.rowid";
-    }
+    $sql  = "SELECT p.rowid, p.label, p.ref, fk_product_type, SUM(pd.qty) as c";
+    $sql .= " FROM ".MAIN_DB_PREFIX."commandedet as pd, ".MAIN_DB_PREFIX."commande as pl, ".MAIN_DB_PREFIX."product as p";
+//    if ($conf->categorie->enabled && !$user->rights->categorie->voir)
+//    {
+//      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
+//      $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cp.fk_categorie = c.rowid";
+//    }
     $sql .= " WHERE p.rowid = pd.fk_product";
-    if ($conf->categorie->enabled && !$user->rights->categorie->voir)
-    {
-      $sql.= ' AND IFNULL(c.visible,1)=1';
-    }
-    $sql.= ' AND pl.rowid = pd.fk_propal';
-    $sql.= ' AND pl.datep > date_sub(now(), interval 12 month)';
+//    if ($conf->categorie->enabled && !$user->rights->categorie->voir)
+//    {
+//      $sql.= ' AND IFNULL(c.visible,1)=1';
+//    }
+    $sql.= ' AND pl.rowid = pd.fk_commande';
+    $sql.= ' AND pl.date_commande > date_sub(now(), interval 12 month)';
     $sql.= 'AND pl.fk_statut in (2,4)';
     $sql .= " GROUP BY (p.rowid)";
     $sql .= " ORDER BY c DESC ";

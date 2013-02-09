@@ -33,7 +33,7 @@ function widget_statOfcSoldeBanque() {
         $js .= '<script type="text/javascript">';
 
         $js .= 'swfobject.embedSWF(';
-        $js .= '"'.DOL_URL_ROOT.'/Babel_Common/open-flash-chart/open-flash-chart.swf", "statOfcSoldeBanque_chart", "100%", "350px",';
+        $js .= '"'.DOL_URL_ROOT.'/Synopsis_Common/open-flash-chart/open-flash-chart.swf", "statOfcSoldeBanque_chart", "100%", "350px",';
         $js .= '"9.0.0", "expressInstall.swf",';
         $js .= '{"data-file":"'.DOL_URL_ROOT.'/Synopsis_Tools/dashboard/ajax/stat_statOfcSoldeBanque_json.php"} );';
 
@@ -311,7 +311,7 @@ function widget_statOfcSoldeBanque() {
         } else {
           return array(
             'title' => 'Stats - Solde bancaire',
-            'content' => utf8_encode("Ce module ne vous est pas accessible"),
+            'content' => utf8_encodeRien("Ce module ne vous est pas accessible"),
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
             'settings' => false,

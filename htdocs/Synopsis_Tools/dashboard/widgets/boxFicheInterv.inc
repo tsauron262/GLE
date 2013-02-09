@@ -10,7 +10,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxFicheInterv() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_ficheInterv.php", "FI - ".$langs->trans("BoxLastFicheInterv"));
 }
 

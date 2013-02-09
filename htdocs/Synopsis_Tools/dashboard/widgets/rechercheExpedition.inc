@@ -15,7 +15,7 @@ function widget_rechercheExpedition() {
     $var = true;
     if ($conf->expedition->enabled && $user->rights->expedition->lire)
     {
-        $table .= '<form method="post" action="liste.php">';
+        $table .= '<form method="post" action="'.DOL_URL_ROOT.'/expedition/liste.php">';
         $table .= '<table class="noborder" width="100%">';
         $table .= '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchASending").'</td></tr>';
         $table .= '<tr '.$bc[$var].'><td>';

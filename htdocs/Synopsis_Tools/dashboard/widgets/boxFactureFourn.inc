@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxFactureFourn() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_factures_fourn.php", "Facture - ".$langs->trans("BoxLastSupplierBills"));
 }
 

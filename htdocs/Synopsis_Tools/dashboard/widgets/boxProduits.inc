@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxProduits() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_produits.php", "Produits - ".$langs->trans("BoxLastProducts"));
 }
 

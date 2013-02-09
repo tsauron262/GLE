@@ -31,7 +31,7 @@
         while ($res = $db->fetch_object($sql))
         {
             $arr[$res->id]=0;
-            array_push($arrXLabel,utf8_encode($res->label));
+            array_push($arrXLabel,$res->label);
         }
         $requete = "SELECT ifnull(sum(total_ht),0) as count,
                            ifnull(fk_statut,-1) as fk_statut
@@ -48,7 +48,7 @@
             $arr[$res->fk_statut] = $res->count ;
         }
 
-        require_once(DOL_DOCUMENT_ROOT.'/Babel_Common/open-flash-chart/php5-ofc-library/lib/OFC/OFC_Chart.php');
+        require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Common/open-flash-chart/php5-ofc-library/lib/OFC/OFC_Chart.php');
 
         $title = new OFC_Elements_Title( "Mes proposition com. par statut 6 mois)" );
 

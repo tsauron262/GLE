@@ -31,7 +31,7 @@ function widget_statOfcPropalMyStatus() {
     $js .= '<script type="text/javascript">';
 
     $js .= 'swfobject.embedSWF(';
-    $js .= '"'.DOL_URL_ROOT.'/Babel_Common/open-flash-chart/open-flash-chart.swf", "statOfcPropalMyStatus_chart", "100%", "350px",';
+    $js .= '"'.DOL_URL_ROOT.'/Synopsis_Common/open-flash-chart/open-flash-chart.swf", "statOfcPropalMyStatus_chart", "100%", "350px",';
     $js .= '"9.0.0", "expressInstall.swf",';
     $js .= '{"data-file":"'.DOL_URL_ROOT.'/Synopsis_Tools/dashboard/ajax/stat_statOfcPropalMyStatus_json.php"} );';
 
@@ -71,7 +71,7 @@ function widget_statOfcPropalMyStatus() {
         $i = 0;
         if ($num> 0)
             {
-            $table2 .= "<thead><tr><th class='liste_titre' style='color: white;' colspan=4>" .$trans;
+            $table2 .= "<thead><tr class='ui-state-default'><th class='liste_titre' colspan=4>" .$trans;
             $table2 .= "</thead><tbody>";
         }
 
@@ -81,7 +81,7 @@ function widget_statOfcPropalMyStatus() {
             $objp = $db->fetch_object($result);
             $var=!$var;
             $table2 .= "<tr $bc[$var]>";
-            $table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/propal.php?propalid='.$objp->rowid.'">';
+            $table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/propal.php?id='.$objp->rowid.'">';
             $table2 .= img_object($langs->trans("Proposal"),"propal");
             $table2 .= " ";
             $table2 .= $objp->ref.'</a></td>';

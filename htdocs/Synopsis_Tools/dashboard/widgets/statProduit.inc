@@ -33,10 +33,10 @@ function widget_statProduit() {
         if ($conf->produit->enabled)
         {
           $statProducts = "<tr $bc[0]>";
-          $statProducts.= '<td><a href="liste_orig.php?type=0&amp;tobuy=0">'.$langs->trans("ProductsNotOnSell").'</a></td><td align="right">'.round($prodser[0][0]).'</td>';
+          $statProducts.= '<td><a href="'.DOL_URL_ROOT.'/product/liste.php?type=0&amp;tobuy=0">'.$langs->trans("ProductsNotOnSell").'</a></td><td align="right">'.round($prodser[0][0]).'</td>';
           $statProducts.= "</tr>";
           $statProducts.= "<tr $bc[1]>";
-          $statProducts.= '<td><a href="liste_orig.php?type=0&amp;tobuy=1">'.$langs->trans("ProductsOnSell").'</a></td><td align="right">'.round($prodser[0][1]).'</td>';
+          $statProducts.= '<td><a href="'.DOL_URL_ROOT.'/product/liste.php?type=0&amp;tobuy=1">'.$langs->trans("ProductsOnSell").'</a></td><td align="right">'.round($prodser[0][1]).'</td>';
           $statProducts.= "</tr>";
         }
         $table .= $statProducts;

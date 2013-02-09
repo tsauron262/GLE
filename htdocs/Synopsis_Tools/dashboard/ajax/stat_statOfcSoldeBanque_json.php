@@ -42,22 +42,9 @@
                             SUM(CASE 1 WHEN amount>0 THEN 0 ELSE amount END) as achat,
                             UNIX_TIMESTAMP(datev) as dv
                        FROM llx_bank
-   	 			      WHERE  datev > date_sub(now(), interval 6 month)
+   	 			      WHERE  datev > date_sub(now(), interval ".(($_REQUEST['fullSize'].'x' !=  "x")? 18 : 6)." month)
 				   GROUP BY month(datev), year(datev)
-				   ORDER BY datev DESC";
-	
-		if ($_REQUEST['fullSize'].'x' !=  "x")
-		{
-			$requete = "SELECT sum(amount) as total,
-							   SUM(CASE 1 WHEN amount<0 THEN 0 ELSE amount END) as vente,
-							   SUM(CASE 1 WHEN amount>0 THEN 0 ELSE amount END) as achat,
-							   UNIX_TIMESTAMP(datev) as dv
-						 FROM llx_bank
-						WHERE  datev > date_sub(now(), interval 18 month)
-				     GROUP BY month(datev), year(datev)
-           			 ORDER BY datev DESC";
-			
-		}
+				   ORDER BY datev ASC";
 	
 	
         $sql = $db->query($requete);
@@ -100,7 +87,7 @@
             $i++;
         }
         //var_dump($arrDate);
-        require_once(DOL_DOCUMENT_ROOT.'/Babel_Common/open-flash-chart/php5-ofc-library/lib/OFC/OFC_Chart.php');
+        require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Common/open-flash-chart/php5-ofc-library/lib/OFC/OFC_Chart.php');
 
         $title = new OFC_Elements_Title( "Solde bancaire" );
         $title->set_style("font-size: 14px; color:#0000ff; font-family: Verdana; text-align: center;");

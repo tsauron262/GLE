@@ -37,9 +37,10 @@ function widget_listCommandeCloture() {
         $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."co_fa AS co_fa ON co_fa.fk_commande = p.rowid";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture AS f ON co_fa.fk_facture = f.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.fk_source = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "facture AS f ON co_fa.fk_target = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
+        $sql.= " AND co_fa.sourcetype LIKE 'commande' AND co_fa.targettype LIKE 'facture'";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid)
         {
@@ -58,9 +59,6 @@ function widget_listCommandeCloture() {
             $total2 = 0;
             $ftotal = 0;
             $ftotal2 = 0;
-            $num = $db->num_rows($resql);
-            if ($num > 0)
-            {
 
                 $cssClass[true]='pair';
                 $cssClass[false]='impair';
@@ -102,7 +100,7 @@ function widget_listCommandeCloture() {
                             $table .= $formfile->showdocuments('commande',$filename,$filedir,$urlsource,'','','','','',1,18,false);
                             $table .= $formfile->html;
 
-                            $table .=  '<a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
+                            $table .=  '<a href="fiche.php?socid='.$res->socid.'">'.utf8_encodeRien(dol_trunc($res->nom,18)).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                             $table .=  '<td>'.$commandestatic->LibStatut($res->fk_statut,$res->facture,3).'</td>';
                     }
@@ -110,14 +108,13 @@ function widget_listCommandeCloture() {
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">'.
                             "<a href=\"".DOL_URL_ROOT."/commande/fiche.php?id=".$res->rowid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$res->ref.'</a></td>';
-                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encode(dol_trunc($res->nom,18)).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="fiche.php?socid='.$res->socid.'">'.utf8_encodeRien(dol_trunc($res->nom,18)).'</a></td>';
                     $table2 .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                     $table2 .=  '<td>'.$commandestatic->LibStatut($res->fk_statut,$res->facture,3).'</td>';
                     $iter++;
                 }
                 $table .=  "</table><br>";
                 $table2 .=  "</table><br>";
-            }
         }
         $table .="</p>";
         $table2 .="</p>";

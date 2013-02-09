@@ -38,6 +38,7 @@ function widget_listProduit() {
     $sql.= " WHERE sp.fk_product_fils IS NULL AND p.fk_product_type=0";
     if ($conf->categorie->enabled && !$user->rights->categorie->voir) $sql.= " AND IFNULL(c.visible,1)=1 ";
 //    if (isset($_GET["type"])) $sql.= " AND p.fk_product_type = ".$_GET["type"];
+    $sql.= " GROUP BY p.rowid ";
     $sql.= " ORDER BY p.tms DESC ";
     $sql.= $db->plimit($max,0);
     $result = $db->query($sql) ;

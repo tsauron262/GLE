@@ -113,7 +113,7 @@ if ( $user->rights->propale->valider == 1)
 } else {
   return array(
     'title' => 'Proposition commerciale - 10 derni&egrave;res prop. &agrave; valider',
-    'content' => utf8_encode("Ce modulenevous est pas accessible."),
+    'content' => utf8_encodeRien("Ce modulenevous est pas accessible."),
     'initScript' => "",
     'classes' => 'ui-state-default ui-widget-header',
     'settings' => false,

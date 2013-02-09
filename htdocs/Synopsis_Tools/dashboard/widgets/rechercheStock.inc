@@ -19,7 +19,7 @@ function widget_rechercheStock() {
     $table .= "<tr class=\"liste_titre\">";
     $table .= '<td colspan="3">'.$langs->trans("Search").'</td></tr>';
     $table .= "<tr $bc[0]><td>";
-    $table .= $langs->trans("Ref").':</td><td><input class="flat" type="text" size="18" name="sf_ref"></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
+    $table .= $langs->trans("Ref").':</td><td><input class="flat" type="text" size="18" name="sref"></td><td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
     $table .= "<tr $bc[0]><td>".$langs->trans("Other").':</td><td><input type="text" name="sall" class="flat" size="18"></td>';
     $table .= "</table></form><br>";
 

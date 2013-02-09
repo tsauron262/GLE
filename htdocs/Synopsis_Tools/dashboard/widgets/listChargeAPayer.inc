@@ -109,7 +109,7 @@ function widget_listChargeAPayer() {
     } else {
       return array(
         'title' => 'Charges sociales - A payer',
-        'content' => utf8_encode("Ce module ne vous est pas accessible"),
+        'content' => utf8_encodeRien("Ce module ne vous est pas accessible"),
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
         'settings' => false,

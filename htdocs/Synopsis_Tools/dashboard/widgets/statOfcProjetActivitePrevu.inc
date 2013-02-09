@@ -32,7 +32,7 @@ function widget_statOfcProjetActivitePrevu() {
     $js .= '<script type="text/javascript">';
 
     $js .= 'swfobject.embedSWF(';
-    $js .= '"'.DOL_URL_ROOT.'/Babel_Common/open-flash-chart/open-flash-chart.swf", "ProjetActivitePrevu_chart", "100%", "350px",';
+    $js .= '"'.DOL_URL_ROOT.'/Synopsis_Common/open-flash-chart/open-flash-chart.swf", "ProjetActivitePrevu_chart", "100%", "350px",';
     $js .= '"9.0.0", "expressInstall.swf",';
     $js .= '{"data-file":"'.DOL_URL_ROOT.'/projet/activity/activity-pie-chart.php"} );';
 
@@ -47,17 +47,17 @@ function widget_statOfcProjetActivitePrevu() {
     $table2 .= '       <td valign=top class="ui-widget-content"><table width=100%>';
     $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Les 50 derni&egrave;res t&acirc;ches modifi&eacute;es';
 
-    $sql  = "SELECT ifnull(sum(babel_projet_task_time.task_duration),0) as td,
-                   babel_projet_task.fk_projet,
-                   babel_projet.title
-              FROM babel_projet_task_actors,
-                   babel_projet,
-                   babel_projet_task
-         LEFT JOIN babel_projet_task_time ON babel_projet_task_time.fk_task = babel_projet_task.rowid
-             WHERE babel_projet_task_actors.fk_projet_task = babel_projet_task.rowid
-               AND babel_projet.rowid = babel_projet_task.fk_projet
-          GROUP BY babel_projet_task.fk_projet
-          ORDER BY babel_projet_task.tms
+    $sql  = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration),0) as td,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
+                   ".MAIN_DB_PREFIX."Synopsis_projet.title
+              FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
+                   ".MAIN_DB_PREFIX."Synopsis_projet,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_task
+         LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+             WHERE ".MAIN_DB_PREFIX."Synopsis_projet_task_actors.fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
+               AND ".MAIN_DB_PREFIX."Synopsis_projet.rowid = ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
+          GROUP BY ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet
+          ORDER BY ".MAIN_DB_PREFIX."Synopsis_projet_task.tms
   ";
 //    $table.= $sql;
     $sql .= $db->plimit(50);

@@ -4,6 +4,8 @@
  *
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
+var activeDebug = false;
+
 function serialize (mixed_value) {
     // Returns a string representation of variable (which can later be unserialized)
     //
@@ -445,14 +447,14 @@ window.dashboardDemo = $('#dashboard').dashboard(options);
 
     // Wraps the log function in a check for it.
     function log(message) {
-        if (window.console && console.log) {
+        if (window.console && console.log && activeDebug) {
             console.log(message);
         }
     }
 
     // Wraps the debug function in a check for it.
     function debug(variable) {
-        if (window.console && console.debug) {
+        if (window.console && console.debug && activeDebug) {
             console.debug(variable);
         }
     }

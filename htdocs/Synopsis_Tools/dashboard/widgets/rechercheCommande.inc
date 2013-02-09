@@ -21,7 +21,7 @@ function widget_rechercheCommande() {
       $table .=  '<table class="noborder" width="100%">';
       $table .=  '<tr class="liste_titre"><td colspan="3">'.$langs->trans("SearchOrder").'</td></tr>';
       $table .=  '<tr class="impair">';
-      $table .=  '<td nowrap>'.$langs->trans("Ref").':</td><td><input type="text" class="flat" name="sf_ref" size="18"></td>';
+      $table .=  '<td nowrap>'.$langs->trans("Ref").':</td><td><input type="text" class="flat" name="sref" size="18"></td>';
       $table .=  '<td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
       $table .=  '<tr class="impair"><td nowrap>'.$langs->trans("Other").':</td><td><input type="text" class="flat" name="sall" size="18"></td>';
       $table .=  '</tr>';

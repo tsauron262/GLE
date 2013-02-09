@@ -119,7 +119,7 @@ function widget_listFactureFournBrouillon() {
     } else {
       return array(
         'title' => 'Facture fourn. - 10 derniers brouillons',
-        'content' => utf8_encode("Ce module ne vous est pas accessible"),
+        'content' => utf8_encodeRien("Ce module ne vous est pas accessible"),
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
         'settings' => false,

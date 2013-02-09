@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 // The get widget handler.
 function widget_liensAction() {
   // A widget object as per jquery.dashboard.js.
-    global $db,$bc,$langs;
+    global $db,$bc,$langs, $user;
     $langs->load("companies");
     $langs->load("commercial");
     $langs->load("agenda");

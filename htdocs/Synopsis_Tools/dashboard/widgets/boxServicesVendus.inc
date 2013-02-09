@@ -9,8 +9,8 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxServicesVendus() {
-    global $langs;
-    return boxToWidget("box_services_vendus.php", "Contrat - ".$langs->trans("BoxLastProductsInContract"));
+    global $langs; $langs->load("boxes");
+    return boxToWidget("box_services_contracts.php", "Contrat - ".$langs->trans("BoxLastProductsInContract"));
 }
 
 // The widget settings handler.

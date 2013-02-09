@@ -10,7 +10,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxDemandeInterv() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_produits.php", "DI - ".$langs->trans("BoxLastDemandeInterv"));
 }
 

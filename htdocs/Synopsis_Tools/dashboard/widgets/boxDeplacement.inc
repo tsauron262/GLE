@@ -9,7 +9,7 @@ require_once("../../main.inc.php");
 
 // The get widget handler.
 function widget_boxDeplacement() {
-    global $langs;
+    global $langs; $langs->load("boxes");
     return boxToWidget("box_deplacement.php", "NDF - ".$langs->trans("BoxLastdeplacement"));
 }
 

@@ -399,6 +399,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `total_ht` double default NULL,
   `total_tva` double default NULL,
   `total_ttc` double default NULL,
+  `entity` int(11) NOT NULL DEFAULT '1',
   `natureInter` int(11) NOT NULL,
   PRIMARY KEY  (`rowid`),
   UNIQUE KEY `ref` (`ref`),

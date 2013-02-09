@@ -348,6 +348,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
   `finance_ok` int(11) NOT NULL,
   `finance_statut` int(11) NOT NULL,
   `logistique_date_dispo` datetime NOT NULL,
+  `fk_entrepot` INT NOT NULL ,
   PRIMARY KEY (`rowid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_commandedet` (

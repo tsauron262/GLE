@@ -62,7 +62,7 @@ if (function_exists('get_magic_quotes_gpc'))	// magic_quotes_* removed in PHP6
             return (is_array($value) ? array_map('stripslashes_deep', $value) : stripslashes($value));
         }
         $_GET     = array_map('stripslashes_deep', $_GET);
-        $_POST    = array_map('stripslashes_deep', $_POST);
+        $_POST    = @array_map('stripslashes_deep', $_POST);
         $_FILES   = array_map('stripslashes_deep', $_FILES);
         //$_COOKIE  = array_map('stripslashes_deep', $_COOKIE); // Useless because a cookie should never be outputed on screen nor used into sql
         @set_magic_quotes_runtime(0);

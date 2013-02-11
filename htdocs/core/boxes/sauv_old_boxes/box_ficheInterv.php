@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  *
  * $Id: box_ficheInterv.php,v 1.34 2008/05/30 07:06:37 ywarnier Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_ficheInterv.php,v $
@@ -84,16 +87,16 @@ class box_ficheInterv extends ModeleBoxes {
 
         if ($user->rights->ficheinter->lire)
         {
-            $sql = "SELECT llx_fichinter.rowid as diid,
-                           llx_fichinter.ref,
-                           llx_societe.nom,
-                           llx_societe.rowid as socid,
-                           llx_fichinter.datec,
-                           llx_fichinter.fk_statut
-                      FROM llx_fichinter
-                 LEFT JOIN llx_societe ON llx_fichinter.fk_soc = llx_societe.rowid
-                     WHERE llx_fichinter.fk_user_author = ".$user->id."
-                        OR llx_fichinter.fk_user_valid = ".$user->id."
+            $sql = "SELECT ".MAIN_DB_PREFIX."fichinter.rowid as diid,
+                           ".MAIN_DB_PREFIX."fichinter.ref,
+                           ".MAIN_DB_PREFIX."societe.nom,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."fichinter.datec,
+                           ".MAIN_DB_PREFIX."fichinter.fk_statut
+                      FROM ".MAIN_DB_PREFIX."fichinter
+                 LEFT JOIN ".MAIN_DB_PREFIX."societe ON ".MAIN_DB_PREFIX."fichinter.fk_soc = ".MAIN_DB_PREFIX."societe.rowid
+                     WHERE ".MAIN_DB_PREFIX."fichinter.fk_user_author = ".$user->id."
+                        OR ".MAIN_DB_PREFIX."fichinter.fk_user_valid = ".$user->id."
                     ORDER BY datei desc";
             $sql.= $db->plimit($max, 0);
 

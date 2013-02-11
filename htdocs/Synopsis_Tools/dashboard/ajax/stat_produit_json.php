@@ -26,9 +26,9 @@
 //                p.ref,
 //                fk_product_type,
 //                count(*) as c
-//           FROM llx_propaldet as pd,
-//                llx_product as p,
-//                llx_propal as pl
+//           FROM ".MAIN_DB_PREFIX."propaldet as pd,
+//                ".MAIN_DB_PREFIX."product as p,
+//                ".MAIN_DB_PREFIX."propal as pl
 //          WHERE p.rowid = pd.fk_product
 //            AND pl.rowid = pd.fk_propal
 //            AND pl.datep > date_sub(now(), interval 12 month)
@@ -38,9 +38,9 @@ $sql  = "SELECT p.rowid,
                 p.ref,
                 fk_product_type,
                 sum(pd.qty) as c
-           FROM llx_commandedet as pd,
-                llx_product as p,
-                llx_commande as pl
+           FROM ".MAIN_DB_PREFIX."commandedet as pd,
+                ".MAIN_DB_PREFIX."product as p,
+                ".MAIN_DB_PREFIX."commande as pl
           WHERE p.rowid = pd.fk_product
             AND pl.rowid = pd.fk_commande
             AND pl.date_commande > date_sub(now(), interval 12 month)

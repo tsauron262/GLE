@@ -85,6 +85,7 @@ class modSynopsisHisto extends DolibarrModules
 		//$this->style_sheet = '/mymodule/mymodule.css.php';
 
 		// Config pages. Put here list of php page names stored in admmin directory used to setup module.
+                $this->config_page_url = array("Synopsis_Histo.php");
 
 		// Dependencies
 		$this->depends = array();		// List of modules id that must be enabled if this module is enabled

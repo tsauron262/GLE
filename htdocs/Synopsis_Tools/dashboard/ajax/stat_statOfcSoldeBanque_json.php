@@ -21,17 +21,17 @@
        // CA genere depuis la campagne sur les societe prospecte
         $requete = "SELECT societe_refid,
                            (SELECT ifnull(sum(total_ht) ,0)
-                              FROM llx_propal
+                              FROM ".MAIN_DB_PREFIX."propal
                              WHERE fk_soc = Babel_campagne_societe.societe_refid
-                               AND llx_propal.datec >= Babel_campagne_societe.date_cloture) AS sommepropal,
+                               AND ".MAIN_DB_PREFIX."propal.datec >= Babel_campagne_societe.date_cloture) AS sommepropal,
                            (SELECT ifnull(sum(total_ht) ,0)
-                              FROM llx_commande
+                              FROM ".MAIN_DB_PREFIX."commande
                              WHERE fk_soc = Babel_campagne_societe.societe_refid
-                               AND llx_commande.date_creation >= Babel_campagne_societe.date_cloture) AS sommecommande,
+                               AND ".MAIN_DB_PREFIX."commande.date_creation >= Babel_campagne_societe.date_cloture) AS sommecommande,
                            (SELECT ifnull(sum(total) ,0)
-                              FROM llx_facture
+                              FROM ".MAIN_DB_PREFIX."facture
                              WHERE fk_soc = Babel_campagne_societe.societe_refid
-                               AND llx_facture.datec >= Babel_campagne_societe .date_cloture) AS sommefacture
+                               AND ".MAIN_DB_PREFIX."facture.datec >= Babel_campagne_societe .date_cloture) AS sommefacture
                       FROM Babel_campagne_societe
                      WHERE fk_statut = 3
                        AND campagne_refid = 1
@@ -41,7 +41,7 @@
                             SUM(CASE 1 WHEN amount<0 THEN 0 ELSE amount END) as vente,
                             SUM(CASE 1 WHEN amount>0 THEN 0 ELSE amount END) as achat,
                             UNIX_TIMESTAMP(datev) as dv
-                       FROM llx_bank
+                       FROM ".MAIN_DB_PREFIX."bank
    	 			      WHERE  datev > date_sub(now(), interval ".(($_REQUEST['fullSize'].'x' !=  "x")? 18 : 6)." month)
 				   GROUP BY month(datev), year(datev)
 				   ORDER BY datev ASC";

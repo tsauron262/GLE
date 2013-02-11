@@ -23,7 +23,7 @@
         $cascade_1    = isset($_GET['cascade_1'])?$_GET['cascade_1']:1;
 
 
-        $requete = "SELECT * FROM llx_c_propalst WHERE active = 1";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_propalst WHERE active = 1";
         $sql = $db->query($requete);
         $arr = array();
         $arrLang = array();
@@ -35,7 +35,7 @@
         }
         $requete = "SELECT ifnull(sum(total_ht),0) as count,
                            ifnull(fk_statut,-1) as fk_statut
-                      FROM llx_propal
+                      FROM ".MAIN_DB_PREFIX."propal
                      WHERE datep > date_sub(now() , interval 6 month)
                        AND fk_user_author = ".$user->id."
                   GROUP BY fk_statut ";

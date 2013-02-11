@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  *
  * $Id: box_demandeInterv.php,v 1.34 2008/05/30 07:06:37 ywarnier Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_demandeInterv.php,v $
@@ -86,12 +89,12 @@ class box_demandeInterv extends ModeleBoxes {
         {
             $sql = "SELECT Babel_demandeInterv.rowid as diid,
                            Babel_demandeInterv.ref,
-                           llx_societe.nom,
-                           llx_societe.rowid as socid,
+                           ".MAIN_DB_PREFIX."societe.nom,
+                           ".MAIN_DB_PREFIX."societe.rowid as socid,
                            Babel_demandeInterv.datec,
                            Babel_demandeInterv.fk_statut
                       FROM Babel_demandeInterv
-                 LEFT JOIN llx_societe ON Babel_demandeInterv.fk_soc = llx_societe.rowid
+                 LEFT JOIN ".MAIN_DB_PREFIX."societe ON Babel_demandeInterv.fk_soc = ".MAIN_DB_PREFIX."societe.rowid
                      WHERE (Babel_demandeInterv.fk_statut < 3
                            AND (Babel_demandeInterv.fk_user_author = ".$user->id." OR Babel_demandeInterv.fk_user_prisencharge = ".$user->id."  OR Babel_demandeInterv.fk_user_cloture = ".$user->id."  OR Babel_demandeInterv.fk_user_valid = ".$user->id." OR Babel_demandeInterv.fk_user_target = ".$user->id." )
                            )

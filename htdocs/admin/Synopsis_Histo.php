@@ -19,7 +19,7 @@
         \version    $Revision: 1.23 $
 */
 
-require("./pre.inc.php");
+require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 #require_once(DOL_DOCUMENT_ROOT.'/lib/webcal.class.php');
 
@@ -41,7 +41,7 @@ if ($actionsave)
 
     $db->begin();
 
-    $i+=dolibarr_set_const($db,'BABEL_MINIHISTO_LENGTH',trim($_POST["BABEL_MINIHISTO_LENGTH"]),'',0);
+    $i+=dolibarr_set_const($db,'SYNOPSIS_HISTO_LENGTH',trim($_POST["SYNOPSIS_HISTO_LENGTH"]),'',0);
 /*
 
  */
@@ -49,7 +49,7 @@ if ($actionsave)
     if ($i >= 1)
     {
         $db->commit();
-        header("Location: Babel_Historique.php");
+        header("Location: Synopsis_Histo.php");
         exit;
     }
     else
@@ -68,11 +68,11 @@ llxHeader();
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
 
-print_fiche_titre($langs->trans("BABELIM"),$linkback,'setup');
+print_fiche_titre($langs->trans("HISTONAV"),$linkback,'setup');
 print '<br>';
 
 
-print '<form name="BABELHistoConfig" action="Babel_Historique.php" method="POST">';
+print '<form name="BABELHistoConfig" action="Synopsis_Histo.php" method="POST">';
 print "<table class=\"noborder\" width=\"100%\">";
 print "<tr class=\"ui-widget-header ui-state-default\">";
 print "<th class=\"ui-widget-header ui-state-default\" width=\"30%\">".$langs->trans("Parameter")."</th>";
@@ -82,7 +82,7 @@ print "<th class=\"ui-widget-header ui-state-default\"></th>";
 print "</tr>";
 print "<tr class=\"impair\">";
 print "<td align=left>&nbsp;&nbsp;".$langs->trans("Longueur de l'historique")."</td>";
-print "<td align=center><input style='text-align:center;' type=\"text\" size=4 class=\"flat\" name=\"BABEL_MINIHISTO_LENGTH\" value=\"". ($_POST["BABEL_MINIHISTO_LENGTH"]?$_POST["BABEL_MINIHISTO_LENGTH"]:$conf->global->BABEL_MINIHISTO_LENGTH) . "\" ></td>";
+print "<td align=center><input style='text-align:center;' type=\"text\" size=4 class=\"flat\" name=\"SYNOPSIS_HISTO_LENGTH\" value=\"". ($_POST["SYNOPSIS_HISTO_LENGTH"]?$_POST["SYNOPSIS_HISTO_LENGTH"]:$conf->global->SYNOPSIS_HISTO_LENGTH) . "\" ></td>";
 print "<td align=center>5";
 print "</td>";
 print "<td align=center>";

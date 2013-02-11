@@ -23,7 +23,7 @@
  */
 
 /**
- *	\file       htdocs/admin/fichinter.php
+ *	\file       htdocs/admin/admin
  *	\ingroup    fichinter
  *	\brief      Setup page of module Interventions
  */

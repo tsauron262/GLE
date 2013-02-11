@@ -75,7 +75,7 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->dirs = array();
 
         // Config pages
-        $this->config_page_url = array("fichinter.php");
+        $this->config_page_url = array("Synopsis_fichinter.php");
 
         // Dependances
         $this->depends = array("modSociete", "modCommercial");

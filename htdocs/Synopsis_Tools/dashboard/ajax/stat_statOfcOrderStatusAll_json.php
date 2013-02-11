@@ -23,7 +23,7 @@ $delay_1 = isset($_GET['delay_1']) ? $_GET['delay_1'] : 0.5;
 $cascade_1 = isset($_GET['cascade_1']) ? $_GET['cascade_1'] : 1;
 
 
-$requete = "SELECT * FROM llx_c_order_statut WHERE active = 1";
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_order_statut WHERE active = 1";
 $sql = $db->query($requete);
 $arr = array();
 $arrLang = array();
@@ -39,7 +39,7 @@ foreach ($tabStat as $id => $label) {
 }
 $requete = "SELECT ifnull(sum(total_ht),0) as count,
                            concat(ifnull(fk_statut,-1),'-',facture) as fk_statut
-                      FROM llx_commande
+                      FROM ".MAIN_DB_PREFIX."commande
                      WHERE date_commande > date_sub(now() , interval 6 month)
                   GROUP BY fk_statut, facture ";
 /*                       AND fk_user_author = ".$user->id." */

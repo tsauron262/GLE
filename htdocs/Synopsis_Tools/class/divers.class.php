@@ -419,17 +419,17 @@ class Synopsis_OrderLine extends OrderLine {
 class histoNavigation {
 
     static function getBlocHisto() {
-        global $db, $user, $conf;
-//        if ($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher) {
+        global $db, $user, $conf, $langs;
+//        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
         $return = '<div class="blockvmenupair">';
         $return .= '<div class="menu_titre">';
-        $return .= '<a href="#" class="vmenu">Historique navigation</a>';
+        $return .= '<a href="#" class="vmenu">'.$langs->trans("HISTONAV").'</a>';
         $return .= "</div>";
         $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                      WHERE user_refid = " . $user->id .
                 " AND ref != '' AND element_type != '' ORDER BY tms DESC" .
-                (isset($conf->global->BABEL_MINIHISTO_LENGTH) && $conf->global->BABEL_MINIHISTO_LENGTH > 0 ? " LIMIT " . $conf->global->BABEL_MINIHISTO_LENGTH : " LIMIT 5");
+                (isset($conf->global->SYNOPSIS_HISTO_LENGTH) && $conf->global->SYNOPSIS_HISTO_LENGTH > 0 ? " LIMIT " . $conf->global->SYNOPSIS_HISTO_LENGTH : " LIMIT 5");
 
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {

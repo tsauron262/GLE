@@ -29,7 +29,7 @@ function widget_NavigationUser() {
     $table2 =  '<p>';
     $table2 .= '<table class="notopnoleftnoright" width="100%">';
     $table2 .= '<tr valign="top"><td class="notopnoleft" width="30%">';
-    if($conf->global->MAIN_MODULE_BABELMINIHISTOUSER && $user->rights->MiniHisto->all->Afficher){
+    if($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher){
 
         $requete = "SELECT *
                       FROM Babel_Histo_User
@@ -54,7 +54,7 @@ function widget_NavigationUser() {
                     $var=!$var;
                     $ret = histoUser($res);
 //                    $table .= print_r($ret,1);
-                    if ($i < ($conf->global->BABEL_MINIHISTO_LENGTH>0?"  ".$conf->global->BABEL_MINIHISTO_LENGTH:" 5")){
+                    if ($i < ($conf->global->SYNOPSIS_HISTO_LENGTH>0?"  ".$conf->global->SYNOPSIS_HISTO_LENGTH:" 5")){
                         $table .=  "<tr $bc[$var]><td>";
                         $table .= $ret;
                         $table .=  "</tr>\n";

@@ -83,7 +83,7 @@ if ($_GET["action"] == 'specimen')
 if ($_GET["action"] == 'set')
 {
     $type='demandeInterv';
-    $sql = "INSERT INTO llx_document_model (nom, type) VALUES ('".$_GET["value"]."','".$type."')";
+    $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type) VALUES ('".$_GET["value"]."','".$type."')";
     if ($db->query($sql))
     {
 
@@ -93,7 +93,7 @@ if ($_GET["action"] == 'set')
 if ($_GET["action"] == 'del')
 {
     $type='demandeInterv';
-    $sql = "DELETE FROM llx_document_model";
+    $sql = "DELETE FROM ".MAIN_DB_PREFIX."document_model";
     $sql .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
     if ($db->query($sql))
     {
@@ -238,7 +238,7 @@ print_titre($langs->trans("TemplatePDFInterventions"));
 $type='demandeInterv';
 $def = array();
 $sql = "SELECT nom";
-$sql.= " FROM llx_document_model";
+$sql.= " FROM ".MAIN_DB_PREFIX."document_model";
 $sql.= " WHERE type = '".$type."'";
 $resql=$db->query($sql);
 if ($resql)

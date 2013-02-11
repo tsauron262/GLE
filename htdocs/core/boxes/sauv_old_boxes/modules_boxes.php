@@ -13,7 +13,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -24,7 +26,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -74,7 +77,7 @@ class ModeleBoxes
     {
         // Recupere liste des boites d'un user si ce dernier a sa propre liste
         $sql = "SELECT b.rowid, b.box_id, b.position, b.box_order, b.fk_user";
-        $sql.= " FROM llx_boxes as b";
+        $sql.= " FROM ".MAIN_DB_PREFIX."boxes as b";
         $sql.= " WHERE b.rowid = ".$rowid;
         dolibarr_syslog("ModeleBoxes::fetch rowid=".$rowid);
 

@@ -104,7 +104,8 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
 {
     $acto = new User($db);
     $acto->id = $row['acto'];
-    $acto->fetch($acto->id);
+    if($acto->id)
+        $acto->fetch($acto->id);
     $responce->rows[$i]['id']=$row[id];
     $responce->rows[$i]['cell']=array($row[id],
                                       $acto->getNomUrl(1),

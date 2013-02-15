@@ -21,7 +21,7 @@ class synopsisHook {
     }
 
     static function getMenu() {
-        global $conf;
+        global $conf, $langs;
         $return = '';
         $tabElem = getTypeAndId();
         $element_type = $tabElem[0];
@@ -43,6 +43,16 @@ class synopsisHook {
             $return .= "</div>";
             $return .= "</div>";
         }
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+            $return .= '<div class="blockvmenupair">';
+            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts"><img src="/gle4/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
+            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
+            $return .= '<input type="text" class="flat" name="search_contract" size="10">';
+            $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
+            $return .= '</div></form>';
+        }
+
 
         return $return;
     }
@@ -399,28 +409,33 @@ class Synopsis_Commande extends Commande {
 //        return $this->fetch_lines($only_product);
     }
 
-    function getNomUrl($withpicto=0,$option=0,$max=0,$short=0)
-    {
+    function getNomUrl($withpicto = 0, $option = 0, $max = 0, $short = 0) {
         global $conf, $langs;
 
-        $result='';
+        $result = '';
 
-        if (! empty($conf->expedition->enabled) && ($option == 1 || $option == 2)) $url = DOL_URL_ROOT.'/expedition/shipment.php?id='.$this->id;
-        else $url = DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$this->id;
+        if (!empty($conf->expedition->enabled) && ($option == 1 || $option == 2))
+            $url = DOL_URL_ROOT . '/expedition/shipment.php?id=' . $this->id;
+        else
+            $url = DOL_URL_ROOT . '/Synopsis_PrepaCommande/prepacommande.php?id=' . $this->id;
 
-        if ($short) return $url;
+        if ($short)
+            return $url;
 
-        $linkstart = '<a href="'.$url.'">';
-        $linkend='</a>';
+        $linkstart = '<a href="' . $url . '">';
+        $linkend = '</a>';
 
-        $picto='order';
-        $label=$langs->trans("ShowOrder").': '.$this->ref;
+        $picto = 'order';
+        $label = $langs->trans("ShowOrder") . ': ' . $this->ref;
 
-        if ($withpicto) $result.=($linkstart.img_object($label,$picto).$linkend);
-        if ($withpicto && $withpicto != 2) $result.=' ';
-        $result.=$linkstart.$this->ref.$linkend;
+        if ($withpicto)
+            $result.=($linkstart . img_object($label, $picto) . $linkend);
+        if ($withpicto && $withpicto != 2)
+            $result.=' ';
+        $result.=$linkstart . $this->ref . $linkend;
         return $result;
     }
+
 }
 
 class Synopsis_OrderLine extends OrderLine {
@@ -445,7 +460,7 @@ class histoNavigation {
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
         $return = '<div class="blockvmenupair">';
         $return .= '<div class="menu_titre">';
-        $return .= '<a href="#" class="vmenu">'.$langs->trans("HISTONAV").'</a>';
+        $return .= '<a href="#" class="vmenu">' . $langs->trans("HISTONAV") . '</a>';
         $return .= "</div>";
         $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
@@ -649,31 +664,30 @@ class dashboard {
 //    </div>
 //  </div>
 //EOF;
-        
-$jQueryDashBoardPath = DOL_URL_ROOT.'/Synopsis_Tools/dashboard/';
-global $user;
-$js = '
-    <script>var DOL_URL_ROOT="'.DOL_URL_ROOT.'";</script>
-    <script>var DOL_DOCUMENT_ROOT="'.DOL_DOCUMENT_ROOT.'";</script>
-    <script type="text/javascript" src="'.$jQueryDashBoardPath.'jquery.dashboard.js"></script>
-    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'dashboard.css" />
 
-    <script type="text/javascript" src="'.$jQueryDashBoardPath.'dashboard.js"></script>
-    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'demo.css" />
-    <script type="text/javascript">var userid='.$user->id.';</script>
+        $jQueryDashBoardPath = DOL_URL_ROOT . '/Synopsis_Tools/dashboard/';
+        global $user;
+        $js = '
+    <script>var DOL_URL_ROOT="' . DOL_URL_ROOT . '";</script>
+    <script>var DOL_DOCUMENT_ROOT="' . DOL_DOCUMENT_ROOT . '";</script>
+    <script type="text/javascript" src="' . $jQueryDashBoardPath . 'jquery.dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="' . $jQueryDashBoardPath . 'dashboard.css" />
+
+    <script type="text/javascript" src="' . $jQueryDashBoardPath . 'dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="' . $jQueryDashBoardPath . 'demo.css" />
+    <script type="text/javascript">var userid=' . $user->id . ';</script>
     <script type="text/javascript">var dashtype="4";</script>
 
 ';
-echo $js;
-print '<div class="titre">Mon tableau de bord - Accueil</div>';
-    print "<br/>";
-    print "<br/>";
-    print "<div style='padding: 5px 10px; width: 270px;' class='ui-button ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
-    print "<br/>";
-    print '<div id="dashboard">';
-    print '  You need javascript to use the dashboard.';
-    print '</div>';
-        
+        echo $js;
+        print '<div class="titre">Mon tableau de bord - Accueil</div>';
+        print "<br/>";
+        print "<br/>";
+        print "<div style='padding: 5px 10px; width: 270px;' class='ui-button ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
+        print "<br/>";
+        print '<div id="dashboard">';
+        print '  You need javascript to use the dashboard.';
+        print '</div>';
     }
 
 }

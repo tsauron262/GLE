@@ -46,7 +46,8 @@ class synopsisHook {
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $return .= '<div class="blockvmenupair">';
-            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts"><img src="/gle4/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
+            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts">
+                    <img src="' . DOL_URL_ROOT .'/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
             $return .= '<input type="text" class="flat" name="search_contract" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';

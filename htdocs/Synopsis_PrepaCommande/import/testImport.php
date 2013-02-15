@@ -517,8 +517,8 @@ if (is_dir($dir)) {
                             $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
                         if ($res->tva_assuj != $assujTVA)
                             $sqlUpt[] = " tva_assuj = " . $assujTVA;
-            if ($secteurActiv && $secteurActiv != $res->ref_int)
-                $sqlUpt[] = " ref_int = " . $secteurActiv;
+                        if ($secteurActiv && $secteurActiv != $res->ref_int)
+                            $sqlUpt[] = " ref_int = " . $secteurActiv;
 //                        if ($typeEnt != $res->fk_typent)
 //                            $sqlUpt[] = " fk_typent = " . $typeEnt;
 //            if ($res->titre != $val['CliTitleEnu'] )
@@ -779,10 +779,11 @@ if (is_dir($dir)) {
 
                         $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Produits</th>";
                         $mailContent .= "<tr><th  style='color:#fff; background-color: #0073EA;'>Produits</th>" . "\n";
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "product WHERE import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
+                        $requete = "SELECT p.*, 0dureeSav as durSav FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
                         $sql = $db->query($requete);
                         $res = $db->fetch_object($sql);
                         $sqlUpt = array();
+                        $sqlUpt2 = array();
                         if ($db->num_rows($sql) > 0) {
                             $prodId = $res->rowid;
                             if ($res->description != $val['PlvLib'])
@@ -793,24 +794,39 @@ if (is_dir($dir)) {
                                 $sqlUpt[] = " price = '" . $val['ArtPrixBase'] . "'";
 //                if ($res->PrixAchatHT != $val['PlvPA'])
 //                    $sqlUpt[] = " PrixAchatHT = '".$val['PlvPA']."'";
-//                if ($res->durSav != $val['ArtDureeGar'])
-//                    $sqlUpt[] = " durSav = ".($val['ArtDureeGar']>0?$val['ArtDureeGar']:0)."";
+                            if ($res->durSav != $val['ArtDureeGar'])
+                                $sqlUpt2[] = " 0dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
                             if ($res->tva_tx != $val['TaxTaux'])
                                 $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
 
-                            if (count($sqlUpt) > 0) {
-                                $updtStr = join(',', $sqlUpt);
-                                $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET " . $updtStr . " WHERE import_key =" . $val['ArtID'];
-                                $sql = $db->query($requete);
-                                if ($sql) {
-                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour produit OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit OK</td>" . "\n";
-                                    $tmpProd = new Product($db);
-                                    $tmpProd->fetch($prodId);
-                                    $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
-                                } else {
-                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit KO</td>" . "\n";
+                            if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
+                                if (count($sqlUpt) > 0) {
+                                    $updtStr = join(',', $sqlUpt);
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET " . $updtStr . " WHERE import_key =" . $val['ArtID'];
+                                    $sql = $db->query($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour produit OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit OK</td>" . "\n";
+                                        $tmpProd = new Product($db);
+                                        $tmpProd->fetch($prodId);
+                                        $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                    } else {
+                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit KO</td>" . "\n";
+                                    }
+                                }
+
+                                if (count($sqlUpt2) > 0) {
+                                    $updtStr = join(',', $sqlUpt2);
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET " . $updtStr . " WHERE fk_object =" . $prodId;
+                                    $sql = $db->query($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour produit OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit KO</td>" . "\n";
+                                    }
                                 }
                             } else {
                                 $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour produit n&eacute;cessaire</td>";
@@ -850,10 +866,11 @@ if (is_dir($dir)) {
                                       " */ . ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0) . ",
                                     " . ($val['ArtID'] > 0 ? $val['ArtID'] : 0) . ") ";
                             $sql = $db->query($requete);
+                            
                             if ($sql) {
                                 $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
                                 $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit OK</td>" . "\n";
-                                $prodId = $db->last_insert_id(MAIN_DB_PREFIX . 'product');
+                                $prodId = $db->last_insert_id($sql);
 
                                 $tmpProd = new Product($db);
                                 $tmpProd->fetch($prodId);
@@ -1333,9 +1350,9 @@ if (is_dir($dir)) {
                                     $prodType = getProdType($val['PlvCode']);
                                 else
                                     $prodType = 5;
-                                    if ($res1->product_type != $prodType)
-                                        $sqlUpt[] = " product_type = '" . $prodType . "'";
-                                
+                                if ($res1->product_type != $prodType)
+                                    $sqlUpt[] = " product_type = '" . $prodType . "'";
+
 
                                 $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
                                 if (count($sqlUpt) > 0) {
@@ -1388,7 +1405,7 @@ if (is_dir($dir)) {
                                         " . ($totalCom_tva > 0 ? $totalCom_tva : 0) . ",
                                         " . ($totalCom_ttc > 0 ? $totalCom_ttc : 0) . ",
                                         " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
-                                        " . $prodType.")";
+                                        " . $prodType . ")";
 
 
                                 $sql = $db->query($requete);
@@ -1442,58 +1459,57 @@ if (is_dir($dir)) {
                              */
 
 
-                if ($val['AffCode'] . "x" == "x") {
-                    //Verifier par rapport à la référence. => supression
-                    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                    $sql = $db->query($requete);
-                    if ($sql) {
-                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
-                    } else {
-                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
-                    }
-                } else {
-                    //Recupere le groupeId
-                    $requete = "SELECT id FROM ".MAIN_DB_PREFIX."Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
-                    $sql = $db->query($requete);
-                    $res = $db->fetch_object($sql);
-                    $grpId = $res->id;
-                    if (!$grpId > 0) {
-                        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
-                        $sql = $db->query($requete);
-                        $grpId = $db->last_insert_id(MAIN_DB_PREFIX.'Synopsis_commande_grp');
-                        if ($sql) {
-                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
-                        } else {
-                            $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
-                        }
-                    } else {
-                        $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
-                    }
+                            if ($val['AffCode'] . "x" == "x") {
+                                //Verifier par rapport à la référence. => supression
+                                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                                $sql = $db->query($requete);
+                                if ($sql) {
+                                    $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                                }
+                            } else {
+                                //Recupere le groupeId
+                                $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
+                                $sql = $db->query($requete);
+                                $res = $db->fetch_object($sql);
+                                $grpId = $res->id;
+                                if (!$grpId > 0) {
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
+                                    $sql = $db->query($requete);
+                                    $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
+                                    if ($sql) {
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
+                                    }
+                                } else {
+                                    $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
+                                }
 
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
-                    $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
-                    //efface la ref
-                    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                    $sql = $db->query($requete);
-                    //ajoute la ref dans le groupe
-                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_commande_grpdet
+                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
+                                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
+                                //efface la ref
+                                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                                $sql = $db->query($requete);
+                                //ajoute la ref dans le groupe
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
                                             (commande_group_refid,refCommande,command_refid )
                                      VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
-                    $sql = $db->query($requete);
-                    if ($sql) {
-                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
-                    } else {
-                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
-                    }
-                }
-                
+                                $sql = $db->query($requete);
+                                if ($sql) {
+                                    $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                                }
+                            }
                         }
                     }
                 }
@@ -1782,7 +1798,7 @@ function updateCategorie($ref, $prodId, $val) {
 
         if (!is_array($remCatGlob)) {
             $remCatGlob = array();
-            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_cat ORDER BY rang";
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_import_product_cat ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
                 $remCatGlob[$res->id] = array('pattern' => $res->pattern, 'categorie_refid' => $res->categorie_refid, "rang" => $res->rang);
@@ -1800,11 +1816,11 @@ function updateCategorie($ref, $prodId, $val) {
 $remTypeGlob = false;
 
 function updateType($ref, $prodId) {
-        global $db;
+    global $db;
     if ($ref . 'x' != "x" && $prodId > 0) {
         $type = getProdType($ref);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET fk_product_type = '" . $type . "' WHERE rowid = " . $prodId;
-            $sql = $db->query($requete);
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET fk_product_type = '" . $type . "' WHERE rowid = " . $prodId;
+        $sql = $db->query($requete);
     }
 }
 
@@ -1813,7 +1829,7 @@ function getProdType($ref) {
         global $remTypeGlob, $db;
         if (!is_array($remTypeGlob)) {
             $remTypeGlob = array();
-            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_import_product_type ORDER BY rang";
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_import_product_type ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
                 $remTypeGlob[$res->rang] = array('pattern' => $res->pattern, 'product_type' => $res->product_type, "rang" => $res->rang);

@@ -207,11 +207,11 @@ if ($_REQUEST["id"] > 0) {
         print "<table class='nobordernopadding' width=100%>";
         if ($resql = $db->query($requete)) {
             while ($res = $db->fetch_object($resql)) {
-                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->di_refid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
+                print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'intervention') . " " . $res->ref . "</a></td></tr>";
             }
         }
+        print "</table>";
     }
-    print "</table>";
     print '</td>';
 
 

@@ -197,7 +197,7 @@ class contratMaintenance extends contrat {
     {
         global $langs;
         $h = count($head);
-        $head[$h][0] = DOL_URL_ROOT.'/Babel_GMAO/intervByContrat.php?id='.$this->id;
+        $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Contrat/intervByContrat.php?id='.$this->id;
         $head[$h][1] = $langs->trans("Interv.");
         $head[$h][2] = 'Interv';
         $h++;

@@ -52,7 +52,7 @@ if(!$sidx) $sidx =1;
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
         $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error() . $SQL);
-        $responce->page = $page;
+        @$responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;
         require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
@@ -106,7 +106,7 @@ if(!$sidx) $sidx =1;
                  LIMIT $start , $limit";
 //print $SQL;
         $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error() . $SQL);
-        $responce->page = $page;
+        @$responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;
         $i=0;

@@ -18,7 +18,7 @@
   */
 
 
-    require_once('pre.inc.php');
+    require_once('../main.inc.php');
     require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
     if ($conf->projet->enabled)  require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
     if ($conf->propal->enabled)  require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
@@ -55,11 +55,14 @@ $js = <<<EOF
     <script>
     jQuery(document).ready(function() {
         jQuery( "#sortable" ).sortable({
+        cursor: 'move',
             revert: true,
             stop: function(event, ui) {
                 saveAnnexe();
            },
            receive: function(event, ui) {
+                id = $(ui.item).attr("id");
+                jQuery('ul#sortable').find('.ui-draggable').attr("id", id);
                 jQuery('ul#sortable').find('.ui-draggable').removeClass("ui-draggable");
                 jQuery(ui.item).remove();
                 saveAnnexe();
@@ -67,6 +70,7 @@ $js = <<<EOF
         }).disableSelection();
         jQuery("#draggable li").each(function(){
             jQuery(this).draggable({
+        cursor: 'move',
                 connectToSortable: "#sortable",
                 helper: "clone",
                 revert: "invalid",
@@ -172,7 +176,7 @@ EOF;
         $head = contract_prepare_head($contrat);
 //        $head = $contrat->getExtraHeadTab($head);
 
-        $hselected = "Annexes";
+        $hselected = "annexe";
 
         dol_fiche_head($head, $hselected, $langs->trans("Contract"));
 
@@ -420,7 +424,7 @@ EOF;
         {
             print "<li class='ui-widget-content' id='modele_".$res->id."'>Annexe ".$i.": ".$res->modeleName." (ref:".$res->ref.")";
             print "<table style='float:right'><tr>
-                              <td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?action=Modify&modele=".$res->id."&id=".$contrat->id."\"' title='Modifier'></span>
+                              <td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?modForContrat=true&action=Modify&modele=".$res->id."&id=".$contrat->id."\"' title='Modifier'></span>
                               <td><span class='ui-icon ui-icon-trash' title='Effacer' onClick='location.href=\"annexes.php?action=DeleteAnnexe&modele=".$res->id."&id=".$contrat->id."\"'></span>
                               <td><span class='ui-icon ui-icon-triangle-2-n-s'  title='D&eacute;placer'></span></table>";
             $i++;

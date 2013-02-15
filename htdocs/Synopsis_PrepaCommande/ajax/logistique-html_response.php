@@ -23,6 +23,8 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 
+$tabBrutEtCondense = false;
+
 $arrProdNegQty = array();
 $arrProdPosQty = array();
 $com = new Synopsis_Commande($db);
@@ -30,7 +32,7 @@ $res = $com->fetch($id);
 if ($res > 0) {
 
     $arrGrpTmp = $com->listGroupMember();
-    if ($arrGrpTmp) {
+    if ($arrGrpTmp && $tabBrutEtCondense) {
 //Tabs brut ou condense
         $html = new Form($db);
         print "<div id='tabFinance'>";

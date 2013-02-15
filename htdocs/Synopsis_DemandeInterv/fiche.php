@@ -246,7 +246,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             foreach ($demandeInterv->lignes as $ligne => $idLigne) {
                 $objLigneFiche->fk_fichinter = $result;
                 $objLigneFiche->desc = $demandeInterv->lignes[$ligne]->desc;
-                $objLigneFiche->datei = date("Y-m-d", $demandeInterv->lignes[$ligne]->datei);
+                $objLigneFiche->datei = $demandeInterv->lignes[$ligne]->datei;
                 if ($conf->global->FICHINTER_RESET_DURATION_DI2FI == 1) {
                     $objLigneFiche->duration = 0;
                     $objLigneFiche->total_ht = 0;
@@ -264,14 +264,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
                 $objLigneFiche->fk_typeinterv = $demandeInterv->lignes[$ligne]->fk_typeinterv;
                 $objLigneFiche->isDeplacement = $demandeInterv->lignes[$ligne]->isDeplacement;
                 //Si deplacement
-                if ($objLigneFiche->isDeplacement == 1) {
                     $requete = "SELECT b.rowid
                                       FROM " . MAIN_DB_PREFIX . "product as b,
                                            " . MAIN_DB_PREFIX . "commandedet as cd
                                      WHERE cd.fk_product = b.rowid
-                                       AND b.fk_product_type = 3
                                        AND cd.rowid = " . $demandeInterv->lignes[$ligne]->fk_commandedet;
                     $sql3 = $db->query($requete);
+                if ($db->num_rows($sql3) >0) {
                     $res3 = $db->fetch_object($sql3);
                     $objLigneFiche->typeIntervProd = $res3->rowid;
                     $objLigneFiche->total_ht = $demandeInterv->lignes[$ligne]->total_ht;
@@ -279,6 +278,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
                     $objLigneFiche->total_tva = $demandeInterv->lignes[$ligne]->total_tva;
                     $objLigneFiche->pu_ht = $demandeInterv->lignes[$ligne]->pu_ht;
                 } else {
+                    die($requete);
                     $objLigneFiche->typeIntervProd = false;
                 }
 

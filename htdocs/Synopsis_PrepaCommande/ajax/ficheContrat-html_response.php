@@ -21,6 +21,8 @@
 //Faire un bouton creer si pas encore creéer
 //Si déjà creer rempalcer par un lien
 
+$ajouterTousLeTemp = true;
+
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/commande/modules_commande.php");
@@ -71,7 +73,7 @@ if ($id > 0) {
     if ($mesg)
         print $mesg . '<br>';
 
-    print "<table cellpadding=10 width=600>";
+    print "<table cellpadding=10>";
     print "<tr><th class='ui-widget-header ui-state-default'>Description";
     print "    <th class='ui-widget-header ui-state-default'>Qt&eacute;";
     print "    <th class='ui-widget-header ui-state-default'>Contrat associ&eacute;";
@@ -86,10 +88,10 @@ if ($id > 0) {
                            AND fk_commande = " . $id;
     $sql = $db->query($requete);
     $touCreer = false;
+            $longHtml = "";
     while ($res = $db->fetch_object($sql)) {
         $prodTmp = new Product($db);
         $prodTmp->fetch($res->fk_product);
-        print "<tr><td class='ui-widget-content'>" . $prodTmp->getNomUrl(1) . " " . utf8_encodeRien($prodTmp->libelle) . "<td align=center class='ui-widget-content'>" . $res->qty;
         $tab = getElementElement("commandedet", "contratdet", $res->rowid);
         if (count($tab) > 0) {
             $tabId = array();
@@ -103,49 +105,40 @@ if ($id > 0) {
         }
         else
             $num = 0;
-        print "<td class='ui-widget-content' align=center>";
-        if ($num > 0 && $num == $res->qty) {
+        $longHtml .= "<tr><td class='ui-widget-content'>" . $prodTmp->getNomUrl(1) . " " . utf8_encodeRien($prodTmp->libelle) . "<td align=center class='ui-widget-content'>" . $num . "/" . $res->qty;
+        $longHtml .= "<td class='ui-widget-content' align=center>";
+        if ($num > 0) {
+            $arr2 = array();
             $arr = array();
             while ($res1 = $db->fetch_object($sql1)) {
-                $contrat = new Contrat($db);
-                $contrat->fetch($res1->fk_contrat);
-                $arr[] = $contrat->getNomUrl(1);
-            }
-            print join('<br/>', $arr);
-        } else if ($num > 0) {
-            $arr = array();
-            $iter = 0;
-            while ($iter < max($num, $res->qty)) {
-                $res1 = $db->fetch_object($sql1);
-                if ($res1->fk_contrat > 0) {
+                if (!isset($arr2[$res1->fk_contrat])) {
+                    $arr2[$res1->fk_contrat] = $res1->fk_contrat;
                     $contrat = new Contrat($db);
                     $contrat->fetch($res1->fk_contrat);
                     $arr[] = $contrat->getNomUrl(1);
-                } else {
-                    
                 }
-                $iter++;
             }
-
+            $longHtml .= join('<br/>', $arr);
+        }
+        if($num < $res->qty || $ajouterTousLeTemp){
             $requete = "SELECT *
                                           FROM " . MAIN_DB_PREFIX . "contrat
                                          WHERE fk_soc = " . $commande->socid;
             $sql2 = $db->query($requete);
-            $longHtml = "";
             if ($db->num_rows($sql2) > 0) {
-                $longHtml .= "<select name='fk_contrat' id='fk_contrat'>";
+                $longHtml .= "<br/><select name='fk_contrat' id='fk_contrat'>";
                 while ($res2 = $db->fetch_object($sql2)) {
                     $longHtml .= "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
                 }
                 $longHtml .= "</select>";
                 $touCreer = true;
                 $longHtml .= "<button onClick='createContrat2(" . $res->fk_product . "," . $res->rowid . ")' class='butAction'>Ajouter au contrat</button>";
-            }
-            $arr[] = $longHtml;
+            } //else {
+                //Sinon creer un nouveau contrat et reviens ici
+//            }
 
 
-            print join('<br/>', $arr);
-        } else {
+        } /*else {
             //Si contrat existant => liste déroulante + ajout d'une ligne de contrat = lien contrat <=> commande
             $requete = "SELECT *
                                   FROM " . MAIN_DB_PREFIX . "contrat
@@ -163,9 +156,11 @@ if ($id > 0) {
                 //Sinon creer un nouveau contrat et reviens ici
                 print "<button onClick='createContrat(" . $res->fk_product . ")' class='butAction'>Cr&eacute;er le contrat</button>";
             }
-        }
-            $tabLigneIdS[] = array($res->fk_product, $res->rowid);
+        }*/
+        $tabLigneIdS[] = array($res->fk_product, $res->rowid);
     }
+    print $longHtml;
+                print "<tr><td><button onClick='createContrat(" . $res->fk_product . ")' class='butAction'>Cr&eacute;er le contrat</button>";
     if ($touCreer) {
         print '<tr><td colspan="3">';
         $requete = "SELECT *

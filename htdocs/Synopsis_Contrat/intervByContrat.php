@@ -17,7 +17,7 @@
   * GLE-1.2
   */
 
-require("./pre.inc.php");
+require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
 require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/SAV.class.php");

@@ -41,6 +41,7 @@ else
 
     include_once("./class/maj.class.php");
     $maj = new maj($dbS, $dbD);
+    $maj->req("DELETE FROM `".MAIN_DB_PREFIX."product_lang`");
     $maj->startMaj(getTab());
     $maj->startMaj(array(
         array("babel_categorie_association", MAIN_DB_PREFIX."categorie",
@@ -151,6 +152,14 @@ function getTab() {
             array('rowid', 'fk_commande',                         'fk_product', 'description', 'tva_tx',                                       'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva',                                             'total_ttc',                                                'info_bits', /*'marge_tx', 'marque_tx',*/ 'special_code', 'rang', /* 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef', 'external_id', 'pu_achat_ht', 'propaldet_refid' */),
             array('rowid', 'fk_commande', /* 'fk_parent_line', */ 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc', /* 'product_type', 'date_start', 'date_end', */'info_bits', /*'marge_tx', 'marque_tx',*/ 'special_code', 'rang', /* 'import_key' */)
         ),
+        array($oldPref."commande_fournisseur", MAIN_DB_PREFIX."commande_fournisseur",
+            array(),
+            array()
+        ),
+        array($oldPref."commande_fournisseurdet", MAIN_DB_PREFIX."commande_fournisseurdet",
+            array(),
+            array()
+        ),
         array($oldPref."commande", MAIN_DB_PREFIX."Synopsis_commande",
             array("rowid", "logistique_ok", "logistique_statut", "finance_ok", "finance_statut", "logistique_date_dispo"),
             array("rowid", "logistique_ok", "logistique_statut", "finance_ok", "finance_statut", "logistique_date_dispo")
@@ -250,6 +259,10 @@ function getTab() {
         array("babel_product", MAIN_DB_PREFIX."product",
             array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
             array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
+        ),
+        array("babel_product", MAIN_DB_PREFIX."product_extrafields",
+            array('rowid', 'durSav', /*'isSAV', */'durValid', /*'reconductionAuto', */'VisiteSurSite', 'SLA'/*, 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause',  'qteTempsPerDuree', 'qteTktPerDuree' */),
+            array('fk_object', '0dureeSav', '2dureeVal', '2visiteSite', '2sla')
         ),
         array("babel_categorie", MAIN_DB_PREFIX."categorie",
             array('rowid', 'label', 'type'           ,  'description',           'visible', 'magento_id'/*, 'position', 'magento_product', 'level'*/),

@@ -382,7 +382,7 @@ class Synopsis_Commande extends Commande {
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
         $lines = array();
         $comms = $this->listGroupMember(false);
-        if (isset($comms[0])) {
+        if (count($comms) > 0) {
             foreach ($comms as $commande) {
                 $commande->fetch_lines();
                 foreach ($commande->lines as $ligne) {
@@ -399,6 +399,28 @@ class Synopsis_Commande extends Commande {
 //        return $this->fetch_lines($only_product);
     }
 
+    function getNomUrl($withpicto=0,$option=0,$max=0,$short=0)
+    {
+        global $conf, $langs;
+
+        $result='';
+
+        if (! empty($conf->expedition->enabled) && ($option == 1 || $option == 2)) $url = DOL_URL_ROOT.'/expedition/shipment.php?id='.$this->id;
+        else $url = DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$this->id;
+
+        if ($short) return $url;
+
+        $linkstart = '<a href="'.$url.'">';
+        $linkend='</a>';
+
+        $picto='order';
+        $label=$langs->trans("ShowOrder").': '.$this->ref;
+
+        if ($withpicto) $result.=($linkstart.img_object($label,$picto).$linkend);
+        if ($withpicto && $withpicto != 2) $result.=' ';
+        $result.=$linkstart.$this->ref.$linkend;
+        return $result;
+    }
 }
 
 class Synopsis_OrderLine extends OrderLine {

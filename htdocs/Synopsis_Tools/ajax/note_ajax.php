@@ -33,8 +33,8 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->synopsisficheinter->creer;
     }
     if (stripos($url, '/contrat/') !== false
-            || stripos($url, '/Babel_GMAO/annexes.php')
-            || stripos($url, '/Babel_GMAO/intervByContrat.php')) {
+            || stripos($url, '/Synopsis_Contrat/annexes.php')
+            || stripos($url, '/Synopsis_Contrat/intervByContrat.php')) {
         $table = MAIN_DB_PREFIX . "contrat";
         $droit1 = $user->rights->contrat->lire;
         $droit2 = $user->rights->contrat->creer;

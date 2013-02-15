@@ -140,7 +140,7 @@ class Fichinter extends CommonObject {
         if ($this->fk_contrat > 0)
             $sql .= ", " . $this->fk_contrat;
         if ($this->date > 0)
-            $sql.= ", '" . date('Y-m-d', $this->date) . "'";
+            $sql.= ", '" . $this->date . "'";
         $sql.= ")";
         $sqlok = 0;
         dol_syslog("Fichinter::create sql=" . $sql);
@@ -192,7 +192,7 @@ class Fichinter extends CommonObject {
          *  Insertion dans la base
          */
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter SET ";
-        $sql .= " datei = " . $this->db->idate($this->date);
+        $sql .= " datei = '" . $this->date."'";
         $sql .= ", description  = '" . addslashes($this->description) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;

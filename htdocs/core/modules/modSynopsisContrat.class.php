@@ -1,4 +1,4 @@
-<?php
+t<?php
 /*
  * GLE by Synopsis et DRSI
  *
@@ -76,9 +76,9 @@ class modSynopsisContrat extends DolibarrModules
         $this->rights_class = 'synopsiscontrat';
 
         $r = 0;
-        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Babel_GMAO/annexes.php?id=__ID__',
-			'contract:+interv:Interventions:@monmodule:/Babel_GMAO/intervByContrat.php?id=__ID__',
-			/*'contract:+tickets:Tickets:@monmodule:/Babel_GMAO/annexes.php?id=__ID__',
+        $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
+			'contract:+interv:Interventions:@monmodule:/Synopsis_Contrat/intervByContrat.php?id=__ID__',
+			/*'contract:+tickets:Tickets:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
 			'contract:+sav:SAV:@monmodule:/Babel_GMAO/savByContrat.php?id=__ID__'*/); 
 
     }
@@ -92,6 +92,7 @@ class modSynopsisContrat extends DolibarrModules
   `annexe_refid` int(11) DEFAULT NULL,
   `contrat_refid` int(11) DEFAULT NULL,
   `rang` int(11) DEFAULT NULL,
+  annexe TEXT,
   KEY `annexe_refid` (`annexe_refid`),
   KEY `contrat_refid` (`contrat_refid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;",

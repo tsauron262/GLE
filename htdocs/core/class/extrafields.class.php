@@ -433,7 +433,7 @@ class ExtraFields
 	 * 	@param	string		$elementtype		Type of element
 	 * 	@return	array							Array of attributes for all extra fields
 	 */
-	function fetch_name_optionals_label($elementtype='member')
+	function fetch_name_optionals_label($elementtype='member', $elementtype2 = NULL)
 	{
 		global $conf;
 
@@ -453,6 +453,9 @@ class ExtraFields
 			{
 				while ($tab = $this->db->fetch_object($resql))
 				{
+                                    /*mod drsi*/
+                                    if(!isset($elementtype2) || stripos($tab->name, $elementtype2) === 0){
+                                        /*f mod drsi*/
 					// we can add this attribute to adherent object
 					$array_name_label[$tab->name]=$tab->label;
 					$this->attribute_type[$tab->name]=$tab->type;
@@ -461,6 +464,9 @@ class ExtraFields
                     $this->attribute_elementtype[$tab->name]=$tab->elementtype;
                     $this->attribute_unique[$tab->name]=$tab->fieldunique;
                     $this->attribute_required[$tab->name]=$tab->fieldrequired;
+                    /*mod drsi*/
+                                    }
+                                    /*f mod drsi*/
 				}
 			}
 			return $array_name_label;

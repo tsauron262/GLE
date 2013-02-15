@@ -28,6 +28,12 @@
  */
 
 require '../main.inc.php';
+require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/SynProd_fiche.php';
+die;
+
+
+
+/*fin mod drsi*/
 require_once DOL_DOCUMENT_ROOT.'/core/class/canvas.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/html.formproduct.class.php';

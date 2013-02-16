@@ -10,161 +10,65 @@ require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 //TODO la date est au contrat, pas au produit
 //TODO changement du nombre d'intervention / mois
 
-class contratMaintenance extends contrat {
+class contratMaintenance extends Synopsis_Contrat {
 
-    public $db;
-    public $product;
-    public $societe;
-    public $user_service;
-    public $user_cloture;
-    public $client_signataire;
 
-    //Special maintenance
-
-    public $sumDInterByStatut=array();
-    public $sumDInterByUser=array();
-    public $sumDInterCal=array();
-    public $totalDInter = 0;
-    public $totalFInter = 0;
-
-    public function contratMaintenance($db) {
-        $this->db = $db ;
-        $this->product = new Product($this->db);
-        $this->societe = new Societe($this->db);
-        $this->user_service = new User($this->db);
-        $this->user_cloture = new User($this->db);
-        $this->client_signataire = new User($this->db);
-    }
-    public function fetch($id)
-    {
-
-        $ret = parent::fetch($id);
-        $requete = "SELECT durValid,
-                           unix_timestamp(DateDeb) as DateDebU,
-                           fk_prod,
-                           reconductionAuto,
-                           qte,
-                           hotline,
-                           telemaintenance,
-                           maintenance,
-                           SLA,unix_timestamp(dateAnniv) as dateAnnivU,
-                           isSAV
-                      FROM Babel_GMAO_contrat_prop
-                     WHERE contrat_refid =".$id;
-        $sql = $this->db->query($requete);
-//        print $requete;
-        if ($this->db->num_rows($sql)>0)
-        {
-            $res = $this->db->fetch_object($sql);
-
-            $this->durValid = $res->durValid;
-            $this->DateDeb = $res->DateDebU;
-            $this->dateAnniv = $res->dateAnnivU;
-            $this->dateAnnivFR = date('d/m/Y',$res->dateAnnivU);
-            $this->DateDebFR = date('d/m/Y',$res->DateDebU);
-            $this->fk_prod = $res->fk_prod;
-            if ($this->fk_prod > 0)
-            {
-                require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
-                $prodTmp = new Product($this->db);
-                $prodTmp->fetch($this->fk_prod);
-                $this->prod = $prodTmp;
-            }
-            $this->reconductionAuto = $res->reconductionAuto;
-            $this->qte = $res->qte;
-            $this->hotline = $res->hotline;
-            $this->telemaintenance = $res->telemaintenance;
-            $this->maintenance = $res->maintenance;
-            $this->SLA = $res->SLA;
-            $this->isSAV = $res->isSAV;
-//TODO Prob pas le serial_number
-
-            $requete = "SELECT unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfinprev,
-                               unix_timestamp(date_add(date_add(Babel_GMAO_contratdet_prop.DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product.durSav,0) MONTH)) as dfin,
-                               unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddeb,
-                               unix_timestamp(Babel_GMAO_contratdet_prop.DateDeb) as ddebprev,
-                               ".MAIN_DB_PREFIX."contratdet.qty,
-                               ".MAIN_DB_PREFIX."contratdet.rowid,
-                               ".MAIN_DB_PREFIX."contratdet.subprice as pu,
-                               Babel_GMAO_contratdet_prop.durValid as durVal,
-                               Babel_GMAO_contratdet_prop.fk_contrat_prod,
-                               ".MAIN_DB_PREFIX."product_serial_cont.serial_number
-                          FROM Babel_GMAO_contratdet_prop, ".MAIN_DB_PREFIX."contratdet
-                     LEFT JOIN ".MAIN_DB_PREFIX."product ON ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."contratdet.fk_product
-                     LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont ON ".MAIN_DB_PREFIX."product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND ".MAIN_DB_PREFIX."product_serial_cont.element_type = 'contratSAV'
-                         WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
-                           AND fk_contrat =".$id;
-            $sql = $this->db->query($requete);
-            while ($res=$this->db->fetch_object($sql))
-            {
-                $this->lineTkt[$res->rowid]=array(
-                    'serial_number'=>$res->serial_number ,
-                    'fk_contrat_prod' => ($res->fk_contrat_prod>0?$res->fk_contrat_prod:false),
-                    'durVal' => $res->durVal,
-                    'qty'=>$res->qty,
-                    'pu'=>$res->pu,
-                    'dfinprev'=>$res->dfinprev,
-                    'dfin'=>$res->dfin,
-                    'ddeb'=>$res->ddeb,
-                    'ddebprev'=>$res->ddebprev);
-            }
-        }
-        return($ret);
-    }
-    public function display1Line($val)
-    {
-
-        global $user, $conf, $lang;
-        $html = "<li id='".$val->id."' class='ui-state-default'>";
-        $html .= "<table  width=100%><tr class='ui-widget-content'><td width=16 rowspan=1>";
-        if ( ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED)) && $user->rights->contrat->creer)
-        {
-            $html .= "<span class='ui-icon ui-icon-carat-2-n-s'></span>";
-        }
-        if ($val->product)
-        {
-            $contratProd = "-";
-            $price = price($val->total_ht * $val->qty,2);
-            if ($this->lineTkt[$val->id]['fk_contrat_prod'])
-            {
-                $tmpcontratProd = new Product($this->db);
-                $tmpcontratProd->fetch($this->lineTkt[$val->id]['fk_contrat_prod']);
-                $contratProd = $tmpcontratProd->getNomUrl(1);
-                $price = price($tmpcontratProd->price,2);
-            }
-            $spanExtra = "";
-            $spanExtraFin = "";
-            if ($val->statut != 5)
-            {
-            if ( time() > $this->lineTkt[$val->id]['dfin'])
-            {
-                $spanExtra = "<span style='border: 0px;' class='ui-state-error'><span style='float: left;' class='ui-icon ui-icon-alert'></span>";
-                $spanExtraFin = "</span>";
-            } else if (time() > $this->lineTkt[$val->id]['dfin'] - 10 * 24 * 3600)
-            {
-                $spanExtra = "<span style='border: 0px;' class='ui-state-highlight'><span style='float: left;' class='ui-icon ui-icon-alert'></span>";
-                $spanExtraFin = "</span>";
-            }
-            }
-            $li = new ContratLigne($this->db);
-            $li->fetch($val->id);
-            $html .= "<td align=left>".$val->product->getNomUrl(1) ."<font style='font-weight: normal;'> " .$val->product->libelle .'<br/>'.$val->desc."</font>
-                   <td nowrap=1  valign=top align=center style='white-space: nowrap; width: 100px;padding-top: 0.5em;'>".$this->lineTkt[$val->id]['serial_number']. "
-                   <td nowrap=1  valign=top align=right style='white-space: nowrap; width: 100px;padding-top: 0.5em;'>". $li->getLibStatut(5);
-//        require_once('Var_Dump.php');
-//        $val1 = $val;
-//        $val1->db="";
-//        $val1->product->db="";
-//        Var_Dump::Display($this->lineTkt);
-            if ($this->statut!=2)
-            {
-                $html .= $this->displayStatusIco($val);
-            }
-        }
-         $html .= "</table>";
-        $html .= "</li>";
-        return($html);
-    }
+    
+//    public function display1Line($val)
+//    {
+//
+//        global $user, $conf, $lang;
+//        $html = "<li id='".$val->id."' class='ui-state-default'>";
+//        $html .= "<table  width=100%><tr class='ui-widget-content'><td width=16 rowspan=1>";
+//        if ( ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED)) && $user->rights->contrat->creer)
+//        {
+//            $html .= "<span class='ui-icon ui-icon-carat-2-n-s'></span>";
+//        }
+//        if ($val->product)
+//        {
+//            $contratProd = "-";
+//            $price = price($val->total_ht * $val->qty,2);
+//            if ($this->lineTkt[$val->id]['fk_contrat_prod'])
+//            {
+//                $tmpcontratProd = new Product($this->db);
+//                $tmpcontratProd->fetch($this->lineTkt[$val->id]['fk_contrat_prod']);
+//                $contratProd = $tmpcontratProd->getNomUrl(1);
+//                $price = price($tmpcontratProd->price,2);
+//            }
+//            $spanExtra = "";
+//            $spanExtraFin = "";
+//            if ($val->statut != 5)
+//            {
+//            if ( time() > $this->lineTkt[$val->id]['dfin'])
+//            {
+//                $spanExtra = "<span style='border: 0px;' class='ui-state-error'><span style='float: left;' class='ui-icon ui-icon-alert'></span>";
+//                $spanExtraFin = "</span>";
+//            } else if (time() > $this->lineTkt[$val->id]['dfin'] - 10 * 24 * 3600)
+//            {
+//                $spanExtra = "<span style='border: 0px;' class='ui-state-highlight'><span style='float: left;' class='ui-icon ui-icon-alert'></span>";
+//                $spanExtraFin = "</span>";
+//            }
+//            }
+//            $li = new ContratLigne($this->db);
+//            $li->fetch($val->id);
+//            $html .= "<td align=left>".$val->product->getNomUrl(1) ."<font style='font-weight: normal;'> " .$val->product->libelle .'<br/>'.$val->desc."</font>
+//                   <td nowrap=1  valign=top align=center style='white-space: nowrap; width: 100px;padding-top: 0.5em;'>".$this->lineTkt[$val->id]['serial_number']. "
+//                   <td nowrap=1  valign=top align=right style='white-space: nowrap; width: 100px;padding-top: 0.5em;'>". $li->getLibStatut(5);
+////        require_once('Var_Dump.php');
+////        $val1 = $val;
+////        $val1->db="";
+////        $val1->product->db="";
+////        Var_Dump::Display($this->lineTkt);
+//            if ($this->statut!=2)
+//            {
+//                $html .= $this->displayStatusIco($val);
+//            }
+//        }
+//         $html .= "</table>";
+//        $html .= "</li>";
+//        return($html);
+//    }
+    
     public function displayLine()
     {
         global $user, $conf, $lang;
@@ -332,8 +236,9 @@ class contratMaintenance extends contrat {
         return ($html);
 
     }
-    public function validate($user,$langs,$conf)
+    public function validate($user)
     {
+        global $langs, $conf;
         $sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 1 ,date_valid=now()";
         $sql .= " WHERE rowid = ".$this->id. " AND statut = 0";
         $resql = $this->db->query($sql) ;

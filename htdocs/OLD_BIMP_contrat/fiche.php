@@ -47,7 +47,7 @@ if ($_REQUEST['action'] == "doChangeDateContrat") {
 //        $requete = "SELECT rowid as id, fk_contrat as idContrat,date_ouverture as dateOuv, (date_fin_validite - date_ouverture) as dureeJ FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = ".$_REQUEST['id'];
 
         $requete = "Update ".MAIN_DB_PREFIX."contratdet set date_ouverture_prevue = '" . $dateUS . "', date_fin_validite = DATE_ADD(date_ouverture_prevue, INTERVAL DATEDIFF(date_fin_validite, date_ouverture) DAY) , date_ouverture = date_ouverture_prevue where fk_contrat = " . $_REQUEST['id'] . ";";
-        $requete2 = "Update Babel_GMAO_contratdet_prop set DateDeb = '" . $dateUS . "' WHERE contratdet_refid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = " . $_REQUEST['id'] . ");";
+        $requete2 = "Update ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO set DateDeb = '" . $dateUS . "' WHERE contratdet_refid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."contratdet WHERE fk_contrat = " . $_REQUEST['id'] . ");";
         $sql = $db->query($requete);
         $sql = $db->query($requete2);
         $requete = "UPDATE ".MAIN_DB_PREFIX."contrat set date_contrat = '" . $dateUS . "' WHERE rowid = " . $_REQUEST['id'];
@@ -544,11 +544,11 @@ if ($_REQUEST['action'] == 'setDateAnniv') {
             $dateAnniv = $_REQUEST['dateAnniv'];
         }
         if (preg_match('/^([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})$/', $dateAnniv, $arr)) {
-            $requete = "UPDATE Babel_GMAO_contrat_prop SET dateAnniv='" . $arr[3] . '-' . $arr[2] . '-' . $arr[1] . "' WHERE contrat_refid = " . $_REQUEST['id'];
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET dateAnniv='" . $arr[3] . '-' . $arr[2] . '-' . $arr[1] . "' WHERE contrat_refid = " . $_REQUEST['id'];
             $sql = $db->query($requete);
         }
     } else {
-        $requete = "UPDATE Babel_GMAO_contrat_prop SET dateAnniv=NULL WHERE contrat_refid = " . $_REQUEST['id'];
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET dateAnniv=NULL WHERE contrat_refid = " . $_REQUEST['id'];
         $sql = $db->query($requete);
     }
 }

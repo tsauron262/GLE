@@ -1,15 +1,7 @@
 <?php
 require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-class ContratGA extends contrat{
+class ContratGA extends Synopsis_Contrat{
 
-    public function ContratGA($db) {
-        $this->db = $db ;
-        $this->product = new Product($this->db);
-        $this->societe = new Societe($this->db);
-        $this->user_service = new User($this->db);
-        $this->user_cloture = new User($this->db);
-        $this->client_signataire = new User($this->db);
-    }
     public $isTx0 =0;
     public $montantTotHTAFinancer = 0;
     public $tauxMarge = 0;
@@ -581,7 +573,7 @@ class ContratGA extends contrat{
             $html .= "<table width=100%>";
             $html .= "<tr><th width=250  class='ui-widget-header ui-state-default'>Taux de TVA</th>";
             $html .= "<td class='ui-widget-header ui-state-default'>";
-            $html .= $form->select_tva("Linetva_tx",$objp->tva_tx,$mysoc,$contrat->societe,"",0,false);
+            $html .= $form->load_tva("Linetva_tx",$objp->tva_tx,$mysoc,$contrat->societe,"",0,false);
             $html .= "</td>";
             $html .= "</table>";
 

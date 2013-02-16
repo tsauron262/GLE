@@ -1337,12 +1337,14 @@ class pdf_contratGA_finaproStd extends ModelePDFContratGA
         $tmpFourn->fetch($contratGA->fournisseur_refid);
         $fournisseur_name = utf8_encode($tmpFourn->nom);
         $numFacture="";
-        $contratGA->contratCheck_link();
+//        $contratGA->contratCheck_link();
         require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
         $fact = new Facture($this->db);
-        foreach($contratGA->linkedArray['fa'] as $key=>$val)
+        $tabFact = getElementElement("contrat", "facture", $contratGA->rowid);
+//        foreach($contratGA->linkedArray['fa'] as $key=>$val)
+        foreach($tabFact as $val)
         {
-            $fact->fetch($val);
+            $fact->fetch($val['d']);
             $numFacture = $fact->ref;
         }
         $numFactureFourn="";

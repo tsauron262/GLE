@@ -3,6 +3,31 @@
 require_once DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php";
 
 class Synopsis_Contrat extends Contrat {
+    
+    public $db;
+    public $product;
+    public $societe;
+    public $user_service;
+    public $user_cloture;
+    public $client_signataire;
+
+    //Special maintenance
+
+    public $sumDInterByStatut=array();
+    public $sumDInterByUser=array();
+    public $sumDInterCal=array();
+    public $totalDInter = 0;
+    public $totalFInter = 0;
+    
+    
+    public function _construct($db){
+        $this->db = $db ;
+        $this->product = new Product($this->db);
+        $this->societe = new Societe($this->db);
+        $this->user_service = new User($this->db);
+        $this->user_cloture = new User($this->db);
+        $this->client_signataire = new User($this->db);        
+    }
 
     public function getTypeContrat_noLoad($id) {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE rowid = " . $id;
@@ -12,73 +37,313 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function fetch($id, $ref = '') {
-        parent::fetch($id, $ref);
+        $ret = parent::fetch($id, $ref);
+        $requete = "SELECT durValid,
+                           unix_timestamp(DateDeb) as DateDebU,
+                           fk_prod,
+                           reconductionAuto,
+                           qte,
+                           hotline,
+                           telemaintenance,
+                           maintenance,
+                           SLA,unix_timestamp(dateAnniv) as dateAnnivU,
+                           isSAV
+                      FROM ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
+                     WHERE contrat_refid =".$id;
+        $sql = $this->db->query($requete);
+        if ($this->db->num_rows($sql)>0)
+        {
+            $res = $this->db->fetch_object($sql);
+
+            $this->durValid = $res->durValid;
+            $this->DateDeb = $res->DateDebU;
+            $this->dateAnniv = $res->dateAnnivU;
+            $this->dateAnnivFR = date('d/m/Y',$res->dateAnnivU);
+            $this->DateDebFR = date('d/m/Y',$res->DateDebU);
+            $this->fk_prod = $res->fk_prod;
+            if ($this->fk_prod > 0)
+            {
+                require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
+                $prodTmp = new Product($this->db);
+                $prodTmp->fetch($this->fk_prod);
+                $this->prod = $prodTmp;
+            }
+            $this->reconductionAuto = $res->reconductionAuto;
+            $this->qte = $res->qte;
+            $this->hotline = $res->hotline;
+            $this->telemaintenance = $res->telemaintenance;
+            $this->maintenance = $res->maintenance;
+            $this->SLA = $res->SLA;
+            $this->isSAV = $res->isSAV;
+
+            $requete = "SELECT unix_timestamp(date_add(date_add(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product_extrafields.0dureeSav,0) MONTH)) as dfinprev,
+                               unix_timestamp(date_add(date_add(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product_extrafields.0dureeSav,0) MONTH)) as dfin,
+                               unix_timestamp(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb) as ddeb,
+                               unix_timestamp(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb) as ddebprev,
+                               ".MAIN_DB_PREFIX."contratdet.qty,
+                               ".MAIN_DB_PREFIX."contratdet.rowid,
+                               ".MAIN_DB_PREFIX."contratdet.subprice as pu,
+                               ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid as durVal,
+                               ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.fk_contrat_prod,
+                               ".MAIN_DB_PREFIX."product_extrafields.0dureeSav,
+                               ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.serial_number
+                          FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO, ".MAIN_DB_PREFIX."contratdet
+                     LEFT JOIN ".MAIN_DB_PREFIX."product_extrafields ON fk_object = ".MAIN_DB_PREFIX."contratdet.fk_product
+                     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_product_serial_cont ON ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_type LIKE 'contrat%'
+                         WHERE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
+                           AND fk_contrat =".$id;
+            $sql = $this->db->query($requete);
+            while ($res=$this->db->fetch_object($sql))
+            {
+                $this->lineTkt[$res->rowid]=array(
+                    'serial_number'=>$res->serial_number ,
+                    'fk_contrat_prod' => ($res->fk_contrat_prod>0?$res->fk_contrat_prod:false),
+                    'durVal' => $res->durVal,
+                    'durSav' => $res->durSav,
+                    'qty'=>$res->qty,
+                    'pu'=>$res->pu,
+                    'dfinprev'=>$res->dfinprev,
+                    'dfin'=>$res->dfin,
+                    'ddeb'=>$res->ddeb,
+                    'ddebprev'=>$res->ddebprev);
+            }
+        }
         $this->type = $this->extraparams;
+        return($ret);
     }
 
     public function displayExtraInfoCartouche() {
         return "";
     }
 
-    public function contratCheck_link() {
-        $this->linkedArray['co'] = array();
-        $this->linkedArray['pr'] = array();
-        $this->linkedArray['fa'] = array();
+    public function displayDialog($type = 'add', $mysoc, $objp) {
+        global $conf, $form, $db;
+        $html .= '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
+        $html .= "<form id='" . $type . "Form' method='POST' onsubmit='return(false);'>";
+
+//        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
+        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr style="border-bottom: 1px Solid #0073EA !important">';
+        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Recherche de produits & financement</th></tr>';
+        $html .= '<tr style="border-top: 1px Solid #0073EA !important">';
+        $html .= '<td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Produits</td>
+                   <td style=" padding-top: 5px; padding-bottom: 3px;">';
+        // multiprix
+        $filter = "";
+        switch ($this->type) {
+            case 1:
+                //SAV
+                $filter = "1";
+                break;
+        }
+        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+            $html .= $form->select_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
+        else
+            $html .= $form->select_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
+        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
+            $html .= '<br>';
+
+
+
+        $html .= '</td><td  style=" padding-top: 5px; padding-bottom: 3px;border-right: 1px Solid #0073EA;">&nbsp;</td>';
+        $html .= '<tr>';
+        $html .= ' <td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Financement ? ';
+        $html .= ' </td>
+                    <td style="width: 30px;">
+                        <input type="checkbox" id="addFinancement' . $type . '"  name="addFinancement' . $type . '" /></td>
+                    <td style="border-right: 1px Solid #0073EA; padding-top: 5px; padding-bottom: 3px;">&nbsp;</td>';
+        $html .= '</tr>';
+        $html .= "</table>";
+        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+        $html .= '<tr>';
+        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Description ligne / produit</th></tr>';
+        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+        $html .= '<td style="border-right: 1px Solid #0073EA;">';
+        $html .= 'Description libre<br/>';
+        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
+        $html .= "<textarea style='width: 600px; height: 3em' name='" . $type . "Desc' id='" . $type . "Desc'></textarea>";
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= "</table>";
+
+        $html .= '<table style=" width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+        $html .= '<tr>';
+        $html .= '<th style="border-bottom: 1px Solid #0073EA !important; " colspan="8"  class="ui-widget-header">Prix & Quantit&eacute;</th></tr><tr style="padding: 10px; ">';
+        $html .= '<td align=right>Prix (&euro;)</td><td align=left>';
+        $html .= "<input id='" . $type . "Price' name='" . $type . "Price' style='width: 100px; text-align: center;'/>";
+        $html .= '</td>';
+        $html .= '<td align=right>TVA<td align=left width=180>';
+        $html .= $form->load_tva($type . "Linetva_tx", "19.6", $mysoc, $this->societe, "", 0, false);
+
+        $html .= '</td>';
+        $html .= '<td align=right>Qt&eacute;</td><td align=left>';
+        $html .= "<input id='" . $type . "Qty' value=1 name='" . $type . "Qty' style='width: 20px;  text-align: center;'/>";
+        $html .= '</td>';
+        $html .= '<td align=right>Remise (%)</td><td align=left>';
+        $html .= "<input id='" . $type . "Remise' value=0 name='" . $type . "Remise' style='width: 20px; text-align: center;'/>";
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= '</table>';
+
+        $html .= '<table style="width: 900px;  border-collapse: collapse; margin-top: 5px;"  cellpadding=10>';
+        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
+        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Chronologie</th>';
+        $html .= '</tr>';
+        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; '>";
+        $html .= '<td>Date de d&eacute;but pr&eacute;vue</td>';
+        $html .= '<td>
+                        <input value="' . date('d') . '/' . date('m') . '/' . date('Y') . '" style="text-align: center;" type="text" name="dateDeb' . $type . '" id="dateDeb' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left;margin-right: 3px; margin-top: 1px;"') . '</td>';
+        $html .= '<td>Date de fin pr&eacute;vue</td>';
+//        calendar.png
+        $html .= '<td style="border-right: 1px Solid #0073EA;">
+                        <input style="text-align: center;" type="text" name="dateFin' . $type . '" id="dateFin' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left; margin-right: 3px; margin-top: 1px;"') . '</td>';
+        $html .= '</tr>';
+        $html .= "</table>";
+
+        $html .= '<div id="financementLigne' . $type . '" style="display: none; margin-top: 5px;">';
+        $html .= '<table style="width: 900px;  border-collapse: collapse; "  cellpadding=10>';
+        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
+        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Financement</th>';
+        $html .= '</tr>';
+        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; border-top: 1px Solid #0073EA;'>";
+        $html .= '<td align=right>Nombre de p&eacute;riode</td>';
+        //TODO ds conf
+        $html .= '<td align=left><input style="text-align: center;width: 35px;" type="text" name="nbPeriode' . $type . '" id="nbPeriode' . $type . '"/></td>';
+        $html .= '<td align=right>Type de p&eacute;riode</td>';
+        $html .= '<td align=left><select id="typePeriod' . $type . '">';
+        $requete = "SELECT * FROM Babel_financement_period ORDER BY id";
+        $sqlPeriod = $db->query($requete);
+        while ($res = $db->fetch_object($sqlPeriod)) {
+            $html .= "<option value='" . $res->id . "'>" . $res->Description . "</option>";
+        }
+        $html .= '</select>';
+        $html .= '</td>';
+        //TODO dans conf taux par défaut configurable selon droit ++ droit de choisir le taux
+        $html .= '<td align=right>Taux achat</td>';
+        $html .= '<td align=left><input style="text-align: center; width: 35px;" name="' . $type . 'TauxAchat" id="' . $type . 'TauxAchat"/></td>';
+        //TODO dans conf taux par défaut configurable selon droit + droit de choisir le taux
+        $html .= '<td align=right>Taux vente</td>';
+        $html .= '<td align=left style="border-right: 1px Solid #0073EA;">
+                        <input style="text-align: center;width: 35px;" name="' . $type . 'TauxVente" id="' . $type . 'TauxVente"/></td>';
+        $html .= '</tr>';
+        $html .= "</table>";
+        $html .= '</div>';
+
+        $html .= '</form>';
+        $html .= '</div>';
+        return ($html);
+    }
+
+    public function getHtmlLinked($tabLiked) {
+        global $langs, $conf;
         $db = $this->db;
-        //check si commande ou propale ou facture
-        if (preg_match('/^([c|p|f]{1})([0-9]*)/', $this->linkedTo, $arr)) {
-            //si commande check si propal lie a la commande / facture etc ...
-            switch ($arr[1]) {
-                case "p":
-                    //test si commande facture
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_pr WHERE fk_propale = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['co'], $res->fk_commande);
+        foreach ($tabLiked as $elem) {
+            if (1) {
+                print '<tr><th class="ui-widget-header ui-state-default"><table class="nobordernopadding" style="width:100%;">';
+                print '<tr><th style="border:0" class="ui-widget-header ui-state-default">Contrat associ&eacute; &agrave; ';
+                $val1 = $elem['s'];
+                switch ($elem['ts']) {
+                    case 'commande':
+                        print 'la commande<td>';
+                        print '<td align="right"><a href="' . $_SERVER["PHP_SELF"] . '?action=chSrc&amp;id=' . $id . '">' . img_edit($langs->trans("Change la source")) . '</a>';
+                        require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+                        $comm = new Commande($db);
+                        $comm->fetch($val1);
+                        if ($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE == 1) {
+                            $comm2 = new Synopsis_Commande($db);
+                            $comm2->fetch($val1);
+                            print "</table><td colspan=1 class='ui-widget-content'>" . $comm->getNomUrl(1);
+                            print "<th class='ui-widget-header ui-state-default'>Prepa. commande";
+                            print "<td colspan=1 class='ui-widget-content'>" . $comm2->getNomUrl(1);
+                        } else {
+                            print "</table><td colspan=3 class='ui-widget-content'>" . $comm->getNomUrl(1);
                         }
-                    }
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "fa_pr WHERE fk_propale = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['fa'], $res->fk_facture);
-                        }
-                    }
-                    break;
-                case "c":
-                    //test si commande propal ...
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_pr WHERE fk_commande = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['pr'], $res->fk_propale);
-                        }
-                    }
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_fa WHERE fk_commande = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['fa'], $res->fk_facture);
-                        }
-                    }
-                    break;
-                case "f":
-                    //test si propal facture ...
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_fa WHERE fk_facture = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['co'], $res->fk_commande);
-                        }
-                    }
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "fa_pr WHERE fk_facture = " . $arr[2];
-                    if ($resql = $db->query($requete)) {
-                        while ($res = $db->fetch_object($resql)) {
-                            array_push($this->linkedArray['pr'], $res->fk_propal);
-                        }
-                    }
-                    break;
+
+                        break;
+                    case 'propal':
+                        print 'la proposition<td>';
+                        print '<td align="right"><a href="' . $_SERVER["PHP_SELF"] . '?action=chSrc&amp;id=' . $id . '">' . img_edit($langs->trans("Change la source")) . '</a>';
+                        require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                        $prop = new Propal($db);
+                        $prop->fetch($val1);
+                        print "</table><td colspan=3 class='ui-widget-content'>" . $prop->getNomUrl(1);
+                        break;
+                }
+                $val1 = $elem['d'];
+                switch ($elem['td']) {
+                    case 'facture':
+                        print 'la facture<td>';
+                        print '<td align="right"><a href="' . $_SERVER["PHP_SELF"] . '?action=chSrc&amp;id=' . $id . '">' . img_edit($langs->trans("Change la source")) . '</a>';
+                        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                        $fact = new Facture($db);
+                        $fact->fetch($val1);
+                        print "</table><td colspan=3 class='ui-widget-content'>" . $fact->getNomUrl(1);
+                        break;
+                }
             }
         }
-        //ajoute donnees dans les tables
-//        var_dump($this->linkedArray);
     }
+
+//    public function contratCheck_link() {
+//        $this->linkedArray['co'] = array();
+//        $this->linkedArray['pr'] = array();
+//        $this->linkedArray['fa'] = array();
+//        $db = $this->db;
+//        //check si commande ou propale ou facture
+//        if (preg_match('/^([c|p|f]{1})([0-9]*)/', $this->linkedTo, $arr)) {
+//            //si commande check si propal lie a la commande / facture etc ...
+//            switch ($arr[1]) {
+//                case "p":
+//                    //test si commande facture
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_pr WHERE fk_propale = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['co'], $res->fk_commande);
+//                        }
+//                    }
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "fa_pr WHERE fk_propale = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['fa'], $res->fk_facture);
+//                        }
+//                    }
+//                    break;
+//                case "c":
+//                    //test si commande propal ...
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_pr WHERE fk_commande = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['pr'], $res->fk_propale);
+//                        }
+//                    }
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_fa WHERE fk_commande = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['fa'], $res->fk_facture);
+//                        }
+//                    }
+//                    break;
+//                case "f":
+//                    //test si propal facture ...
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_fa WHERE fk_facture = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['co'], $res->fk_commande);
+//                        }
+//                    }
+//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "fa_pr WHERE fk_facture = " . $arr[2];
+//                    if ($resql = $db->query($requete)) {
+//                        while ($res = $db->fetch_object($resql)) {
+//                            array_push($this->linkedArray['pr'], $res->fk_propal);
+//                        }
+//                    }
+//                    break;
+//            }
+//        }
+//        //ajoute donnees dans les tables
+////        var_dump($this->linkedArray);
+//    }
 
     public function getTypeContrat() {
         $array[0]['type'] = "Simple";
@@ -107,6 +372,37 @@ class Synopsis_Contrat extends Contrat {
     public function list_all_valid_contacts() {
         return array();
     }
+    
+    
+    public function intervRestant($val){
+        $tickets = $val->GMAO_Mixte['tickets'];
+
+        $qteTempsPerDuree  = $val->GMAO_Mixte['qteTempsPerDuree'];
+        $qteTktPerDuree   = $val->GMAO_Mixte['qteTktPerDuree'];
+
+
+        $requete = "SELECT fd.rowid, fd.duree
+                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
+                           ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
+                           ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as b
+                     WHERE b.id = fd.fk_typeinterv
+                       AND fd.fk_fichinter = f.rowid
+                       AND b.decountTkt = 1
+                       AND fd.fk_contratdet = " . $val->id;
+         $consomme = 0;
+         $sqlCnt = $this->db->query($requete);
+         while($resCnt = $this->db->fetch_object($sqlCnt)){
+            if ($qteTempsPerDuree==0){
+                $consomme += $qteTktPerDuree;
+            } else {
+                for($i=0;$i<$resCnt->duree;$i+=$qteTempsPerDuree){
+                    $consomme += $qteTktPerDuree;
+                }
+            }
+         }
+         $restant = $tickets - $consomme;
+         return(array('restant' => $restant,'consomme' => $consomme));
+    }
 
     function display1Line($object, $objL) {
         global $langs;
@@ -119,9 +415,7 @@ class Synopsis_Contrat extends Contrat {
 //        $return .= '<tr height="16" ' . $bc[false] . '>';
 //        $return .= '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
 //            $return .= $langs->trans("ServiceNb",$cursorline).'</td>';
-
 //        $return .= '<td class="tab" style="border-right: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';" rowspan="2">';
-
         // Area with common detail of line
         $return .= '<table class="notopnoleft" width="100%">';
 
@@ -499,7 +793,6 @@ class Synopsis_Contrat extends Contrat {
         }
 
 //        $return .= '</td>'; // End td if line is 1
-
 //        $return .= '</tr>';
 //        $return .= '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;';
         return $return;

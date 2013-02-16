@@ -309,12 +309,12 @@ if ($_REQUEST['dateFinConf'])
                     $sla = "";
                     $reconducationAuto=0;
                     $durVal = $_REQUEST['valDur'];
-                    $requete="INSERT INTO Babel_GMAO_contratdet_prop (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,Maintenance,SLA,fk_contrat_prod)
+                    $requete="INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,Maintenance,SLA,fk_contrat_prod)
                                 VALUES (now(),".$contrat->newContractLigneId.",".$durVal.",'".date('Y-m-d',$date_start)."',".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",".$reconducationAuto.",1,'".$sla."',".($_REQUEST['fk_prod_contrat']>0?$_REQUEST['fk_prod_contrat']:"NULL").")";
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
 
-                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."product_serial_cont (element_id, serial_number, date_creation, fk_user_author,element_type)
+                    $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_product_serial_cont (element_id, serial_number, date_creation, fk_user_author,element_type)
                                      VALUES (".$contrat->newContractLigneId.", '".$_REQUEST['serial']."',now(),".$user->id.",'contratMnt')";
                     $result1 = $db->query($requete);
                     $xml .= "<OK>OK</OK>";
@@ -424,7 +424,7 @@ if ($_REQUEST['dateFinConf'])
                 if ($result > 0)
                 {
 
-                    $requete="UPDATE Babel_GMAO_contratdet_prop
+                    $requete="UPDATE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
                                  SET durValid = ".$durVal.",
                                      DateDeb = '".date('Y-m-d',$date_start)."',
                                      fk_prod = ".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",
@@ -435,7 +435,7 @@ if ($_REQUEST['dateFinConf'])
                                WHERE contratdet_refid=".$_REQUEST['lineid'];
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
-                    $requete = "UPDATE ".MAIN_DB_PREFIX."product_serial_cont
+                    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_product_serial_cont
                                    SET serial_number = '".$_REQUEST['serial']."',
                                        date_fin_SAV = date_add('".date('Y-m-d',$date_start)."', INTERVAL ".$totalSAV." MONTH),
                                        fk_user_author = ".$user->id."
@@ -601,11 +601,11 @@ if ($_REQUEST['dateFinConf'])
                 $xml .= "<libelleProduit>".$res1->label."</libelleProduit>";
                 $xml .= "<descriptionProduit>".$res1->description."</descriptionProduit>";
             }
-            $requete = "SELECT durValid, qte,".MAIN_DB_PREFIX."product_serial_cont.serial_number,
+            $requete = "SELECT durValid, qte,".MAIN_DB_PREFIX."Synopsis_product_serial_cont.serial_number,
                                date_format(DateDeb,'%d/%m/%Y') as DateDeb,fk_contrat_prod,
                                date_format(date_add(DateDeb,INTERVAL durValid MONTH),'%d/%m/%Y') as DateFin
-                          FROM Babel_GMAO_contratdet_prop
-                     LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont ON ".MAIN_DB_PREFIX."product_serial_cont.element_id = Babel_GMAO_contratdet_prop.contratdet_refid AND ".MAIN_DB_PREFIX."product_serial_cont.element_type='contratMnt'
+                          FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+                     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_product_serial_cont ON ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_id = ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.contratdet_refid AND ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_type='contratMnt'
                          WHERE contratdet_refid =".$idLigne;
 //print $requete;
             $sql2 = $db->query($requete);

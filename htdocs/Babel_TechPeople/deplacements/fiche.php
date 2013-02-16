@@ -217,7 +217,7 @@ if ($_GET["action"] == 'create')
 
     print '<tr><td class="ui-state-default ui-widget-header">'.$langs->trans("VAT").'</td>
                <td class="ui-widget-content">';
-    $html->select_tva('taux','','','','update');
+    $html->load_tva('taux','','','','update');
     print '</td></tr>';
 
 
@@ -307,7 +307,7 @@ if ($_GET["action"] == 'create')
 
                 print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("VAT").'</td>
                            <td class="ui-widget-content">';
-                $html->select_tva("taux",$deplacement->tva_taux,'','','','update');
+                $html->load_tva("taux",$deplacement->tva_taux,'','','','update');
                 print '</td></tr>';
 
                 print '<tr><td class="ui-widget-header ui-state-default" align="center" colspan="3"><input type="submit" class="button" value="'.$langs->trans("Save").'"> &nbsp; ';

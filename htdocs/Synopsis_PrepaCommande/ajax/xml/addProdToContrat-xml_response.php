@@ -121,8 +121,8 @@ if ($res2->condReg_refid != $com->cond_reglement_id || $res2->modeReg_refid != $
 
 
 //Lier a contratdetprop
-//Babel_GMAO_contratdet_prop
-$requete2 = "INSERT INTO Babel_GMAO_contratdet_prop
+//".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+$requete2 = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
@@ -134,7 +134,7 @@ $requete2 = "INSERT INTO Babel_GMAO_contratdet_prop
 $sql1 = $db->query($requete2);
 //print $requete;
 //lier a contratProp normalement OK??
-//Babel_GMAO_contrat_prop
+//".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
 //}
 if ($sql) {
     $resXml = "<OK>OK</OK>";

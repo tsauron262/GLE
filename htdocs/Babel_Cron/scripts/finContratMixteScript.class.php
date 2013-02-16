@@ -50,8 +50,8 @@
             {
                 $result = 1;
                 $requete = "SELECT DISTINCT ".MAIN_DB_PREFIX."contrat.rowid
-                              FROM ".MAIN_DB_PREFIX."contrat, ".MAIN_DB_PREFIX."contratdet, Babel_GMAO_contratdet_prop
-                             WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
+                              FROM ".MAIN_DB_PREFIX."contrat, ".MAIN_DB_PREFIX."contratdet, ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+                             WHERE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
                                AND ".MAIN_DB_PREFIX."contratdet.fk_contrat = ".MAIN_DB_PREFIX."contrat.rowid
                                AND (".MAIN_DB_PREFIX."contratdet.statut > 0 AND ".MAIN_DB_PREFIX."contratdet.statut < 5)
                                AND date_sub(".MAIN_DB_PREFIX."contratdet.date_fin_validite, interval 3 month ) < now()";

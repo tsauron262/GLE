@@ -8,21 +8,19 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
-
-function boxToWidget($file, $title){
-  // A widget object as per jquery.dashboard.js.
-    global $db,$user,$langs;
-    if ($user->societe_id > 0)
-    {
-      $socid = $user->societe_id;
+function boxToWidget($file, $title) {
+    // A widget object as per jquery.dashboard.js.
+    global $db, $user, $langs;
+    if ($user->societe_id > 0) {
+        $socid = $user->societe_id;
     }
     $langs->load('commercial');
     $langs->load("boxes");
 
-    
-    require_once(DOL_DOCUMENT_ROOT.'/core/boxes/'.$file);
-    $nameShort =preg_replace('/.php$/','',$file);
-    $box=new $nameShort($db);
+
+    require_once(DOL_DOCUMENT_ROOT . '/core/boxes/' . $file);
+    $nameShort = preg_replace('/.php$/', '', $file);
+    $box = new $nameShort($db);
 
     $table = "<p>";
     ob_start();
@@ -41,17 +39,16 @@ function boxToWidget($file, $title){
     $table2 .= "</p>";
 
 
-      return array(
+    return array(
         'title' => $title,
         'content' => $table,
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
         'settings' => false,
         'fullscreen' => $table2,
-        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
-        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
-      );
-
+        'fullscreenScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
+        'fullscreenInitScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
+    );
 }
 
 /**
@@ -93,7 +90,7 @@ function getContratObj($id) {
     global $db, $conf;
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
-    if (isset($conf->global->MAIN_MODULE_BABELGA) || isset($conf->global->MAIN_MODULE_BABELGMAO)) {
+    if (1 || isset($conf->global->MAIN_MODULE_BABELGA) || isset($conf->global->MAIN_MODULE_BABELGMAO)) {
         $contrat = new Synopsis_Contrat($db);
         $contratTmp = new Synopsis_Contrat($db);
         $type = $contratTmp->getTypeContrat_noLoad($id);
@@ -240,24 +237,30 @@ function SynSanitize($str) {
     return($str);
 }
 
-
 function seems_utf8($str) {
-	$length = strlen($str);
-	for ($i=0; $i < $length; $i++) {
-		$c = ord($str[$i]);
-		if ($c < 0x80) $n = 0; # 0bbbbbbb
-		elseif (($c & 0xE0) == 0xC0) $n=1; # 110bbbbb
-		elseif (($c & 0xF0) == 0xE0) $n=2; # 1110bbbb
-		elseif (($c & 0xF8) == 0xF0) $n=3; # 11110bbb
-		elseif (($c & 0xFC) == 0xF8) $n=4; # 111110bb
-		elseif (($c & 0xFE) == 0xFC) $n=5; # 1111110b
-		else return false; # Does not match any model
-		for ($j=0; $j<$n; $j++) { # n bytes matching 10bbbbbb follow ?
-			if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
-				return false;
-		}
-	}
-	return true;
+    $length = strlen($str);
+    for ($i = 0; $i < $length; $i++) {
+        $c = ord($str[$i]);
+        if ($c < 0x80)
+            $n = 0;# 0bbbbbbb
+        elseif (($c & 0xE0) == 0xC0)
+            $n = 1;# 110bbbbb
+        elseif (($c & 0xF0) == 0xE0)
+            $n = 2;# 1110bbbb
+        elseif (($c & 0xF8) == 0xF0)
+            $n = 3;# 11110bbb
+        elseif (($c & 0xFC) == 0xF8)
+            $n = 4;# 111110bb
+        elseif (($c & 0xFE) == 0xFC)
+            $n = 5;# 1111110b
+        else
+            return false;# Does not match any model
+        for ($j = 0; $j < $n; $j++) { # n bytes matching 10bbbbbb follow ?
+            if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
+                return false;
+        }
+    }
+    return true;
 }
 
 function remove_accents($string) {
@@ -398,7 +401,7 @@ function debug($arr) {
     echo $i;
 }
 
-function getIdInUrl($url, $nomId = "id"){
+function getIdInUrl($url, $nomId = "id") {
     $tabUrl = explode("?", $url);
     $tabUrl = explode("#", $tabUrl[1]);
     $tabUrl = explode("&", $tabUrl[0]);
@@ -410,9 +413,9 @@ function getIdInUrl($url, $nomId = "id"){
 }
 
 function getTypeAndId($url = null, $request = null) {
-    if($url == NULL)
+    if ($url == NULL)
         $url = $_SERVER['REQUEST_URI'];
-    if($request == NULL)
+    if ($request == NULL)
         $request = $_REQUEST;
     if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
@@ -505,9 +508,16 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
     $db->query($req);
 }
 
-function getElementElement($typeS, $typeD, $idS = null, $idD = null) {
+function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = null) {
     global $db;
-    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "element_element WHERE ";
+    $tabWhere = array("1");
+    if ($typeS)
+        $tabWhere[] = "sourcetype = '" . $typeS . "'";
+    if ($typeD)
+        $tabWhere[] = "targettype = '" . $typeD . "'";
+    $req .= implode(" AND ", $tabWhere);
+
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -515,7 +525,7 @@ function getElementElement($typeS, $typeD, $idS = null, $idD = null) {
     $sql = $db->query($req);
     $tab = array();
     while ($result = $db->fetch_object($sql)) {
-        $tab[] = array("s" => $result->fk_source, "d" => $result->fk_target);
+        $tab[] = array("s" => $result->fk_source, "d" => $result->fk_target, "ts" => $result->sourcetype, "td" => $result->targettype);
     }
     return $tab;
 }
@@ -547,7 +557,7 @@ function mailSyn($to, $sujet, $text, $headers = null) {
     if (!$headers) {
         $headers = 'MIME-Version: 1.0' . "\r\n";
         $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        $headers .= 'From: Application GLE '.MAIN_INFO_SOCIETE_NOM.' <no-replay-'.str_replace(" ", "", MAIN_INFO_SOCIETE_NOM).'@synopsis-erp.com>' . "\r\n";
+        $headers .= 'From: Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
         $headers .= 'Cc: ' . $ccAdmin . "\r\n";
         $headers .= 'Reply-To: ' . $toReplay . "\r\n";
         $text = str_replace("\n", "<br/>", $text);

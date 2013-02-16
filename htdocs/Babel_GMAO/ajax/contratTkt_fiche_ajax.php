@@ -348,7 +348,7 @@ if ($_REQUEST['dateFinConf'])
                     $sla = "";
                     $reconducationAuto=0;
                     $durVal = $_REQUEST['addDur'];
-                    $requete="INSERT INTO Babel_GMAO_contratdet_prop (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,qte,SLA)
+                    $requete="INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,qte,SLA)
                                 VALUES (now(),".$contrat->newContractLigneId.",".$durVal.",'".date('Y-m-d',$date_start)."',".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",".$reconducationAuto.",".$_REQUEST['pqty'].",'".$sla."')";
                     $result1 = $db->query($requete);
 
@@ -405,7 +405,7 @@ if ($_REQUEST['dateFinConf'])
                     $sla = "";
                     $reconducationAuto=0;
                     $durVal = $_REQUEST['addDur'];
-                    $requete="INSERT INTO Babel_GMAO_contratdet_prop (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,qte,SLA)
+                    $requete="INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO (tms,contratdet_refid,durValid,DateDeb,fk_prod,reconductionAuto,qte,SLA)
                                 VALUES (now(),".$contrat->newContractLigneId.",".$durVal.",'".date('Y-m-d',$date_start)."',".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",".$reconducationAuto.",".$_REQUEST['pqty'].",'".$sla."')";
                     $result1 = $db->query($requete);
                     $contrat->updateProp();
@@ -508,7 +508,7 @@ if ($_REQUEST['dateFinConf'])
                     $sla = "";
                     $reconducationAuto=0;
                     $durVal = $_REQUEST['modDur'];
-                    $requete="UPDATE Babel_GMAO_contratdet_prop
+                    $requete="UPDATE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
                                  SET durValid=".$durVal.",
                                      DateDeb = '".date('Y-m-d',$date_start)."',
                                      fk_prod = ".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",
@@ -568,7 +568,7 @@ if ($_REQUEST['dateFinConf'])
                     $sla = "";
                     $reconducationAuto=0;
                     $durVal = $_REQUEST['modDur'];
-                    $requete="UPDATE Babel_GMAO_contratdet_prop
+                    $requete="UPDATE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
                                  SET durValid=".$durVal.",
                                      DateDeb = '".date('Y-m-d',$date_start)."',
                                      fk_prod = ".($_REQUEST["p_idprod"]>0?$_REQUEST["p_idprod"]:"NULL").",
@@ -745,7 +745,7 @@ if ($_REQUEST['dateFinConf'])
             $requete = "SELECT durValid, qte,
                                date_format(DateDeb,'%d/%m/%Y') as DateDeb,
                                date_format(date_add(DateDeb,INTERVAL durValid MONTH),'%d/%m/%Y') as DateFin
-                          FROM Babel_GMAO_contratdet_prop
+                          FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
                          WHERE contratdet_refid =".$idLigne;
             $sql2 = $db->query($requete);
             $res2=$db->fetch_object($sql2);

@@ -38,7 +38,7 @@ function widget_listPrepaCommandeContratAFaire() {
                    AND p.`fk_product_type` = 2
                    AND c.rowid = dt.fk_commande
                    AND dt.rowid NOT IN (SELECT cd.`fk_commande_ligne`
-                                          FROM Babel_GMAO_contratdet_prop AS cdp,
+                                          FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO AS cdp,
                                                ".MAIN_DB_PREFIX."contratdet  AS cd
                                          WHERE cd.rowid = cdp.contratdet_refid
                                            AND cd.`fk_commande_ligne` IS NOT NULL)";

@@ -22,7 +22,7 @@ require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
 //TODO entrée contrat dans prepacommande
 
 
-class contratTicket extends contrat{
+class contratTicket extends Synopsis_contrat{
     public $lineTkt=array();
     public $countTkt=array();
         public $durValid;
@@ -46,74 +46,74 @@ class contratTicket extends contrat{
         $this->client_signataire = new User($this->db);
     }
 
-    public function fetch($id)
-    {
-
-        $ret = parent::fetch($id);
-        $requete = "SELECT durValid,
-                           unix_timestamp(DateDeb) as DateDebU,
-                           fk_prod,
-                           reconductionAuto,
-                           qte,
-                           hotline,
-                           telemaintenance,
-                           maintenance,
-                           SLA,unix_timestamp(dateAnniv) as dateAnnivU,
-                           isSAV
-                      FROM Babel_GMAO_contrat_prop
-                     WHERE contrat_refid =".$id;
-        $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql)>0)
-        {
-            $res = $this->db->fetch_object($sql);
-
-            $this->durValid = $res->durValid;
-            $this->DateDeb = $res->DateDebU;
-            $this->dateAnniv = $res->dateAnnivU;
-            $this->dateAnnivFR = date('d/m/Y',$res->dateAnnivU);
-            $this->DateDebFR = date('d/m/Y',$res->DateDebU);
-            $this->fk_prod = $res->fk_prod;
-            if ($this->fk_prod > 0)
-            {
-                require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
-                $prodTmp = new Product($this->db);
-                $prodTmp->fetch($this->fk_prod);
-                $this->prod = $prodTmp;
-            }
-            $this->reconductionAuto = $res->reconductionAuto;
-            $this->qte = $res->qte;
-            $this->hotline = $res->hotline;
-            $this->telemaintenance = $res->telemaintenance;
-            $this->SLA = $res->SLA;
-            $this->isSAV = $res->isSAV;
-            $requete = "SELECT unix_timestamp(date_add(DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month)) as dfinprev,
-                               unix_timestamp(date_add(DateDeb, INTERVAL Babel_GMAO_contratdet_prop.durValid month)) as dfin,
-                               unix_timestamp(DateDeb) as ddeb,
-                               unix_timestamp(DateDeb) as ddebprev,
-                               qty,
-                               rowid,
-                               subprice as pu
-                          FROM ".MAIN_DB_PREFIX."contratdet, Babel_GMAO_contratdet_prop
-                         WHERE Babel_GMAO_contratdet_prop.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
-                           AND fk_contrat =".$id;
-            $sql = $this->db->query($requete);
-            while ($res=$this->db->fetch_object($sql))
-            {
-                $this->lineTkt[$res->rowid]=array(
-                    'qty'=>$res->qty,
-                    'pu'=>$res->pu,
-                    'dfinprev'=>$res->dfinprev,
-                    'dfin'=>$res->dfin,
-                    'ddeb'=>$res->ddeb,
-                    'ddebprev'=>$res->ddebprev);
-            }
-        }
-        return($ret);
-    }
+//    public function fetch($id)
+//    {
+//
+//        $ret = parent::fetch($id);
+//        $requete = "SELECT durValid,
+//                           unix_timestamp(DateDeb) as DateDebU,
+//                           fk_prod,
+//                           reconductionAuto,
+//                           qte,
+//                           hotline,
+//                           telemaintenance,
+//                           maintenance,
+//                           SLA,unix_timestamp(dateAnniv) as dateAnnivU,
+//                           isSAV
+//                      FROM ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
+//                     WHERE contrat_refid =".$id;
+//        $sql = $this->db->query($requete);
+//        if ($this->db->num_rows($sql)>0)
+//        {
+//            $res = $this->db->fetch_object($sql);
+//
+//            $this->durValid = $res->durValid;
+//            $this->DateDeb = $res->DateDebU;
+//            $this->dateAnniv = $res->dateAnnivU;
+//            $this->dateAnnivFR = date('d/m/Y',$res->dateAnnivU);
+//            $this->DateDebFR = date('d/m/Y',$res->DateDebU);
+//            $this->fk_prod = $res->fk_prod;
+//            if ($this->fk_prod > 0)
+//            {
+//                require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
+//                $prodTmp = new Product($this->db);
+//                $prodTmp->fetch($this->fk_prod);
+//                $this->prod = $prodTmp;
+//            }
+//            $this->reconductionAuto = $res->reconductionAuto;
+//            $this->qte = $res->qte;
+//            $this->hotline = $res->hotline;
+//            $this->telemaintenance = $res->telemaintenance;
+//            $this->SLA = $res->SLA;
+//            $this->isSAV = $res->isSAV;
+//            $requete = "SELECT unix_timestamp(date_add(DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month)) as dfinprev,
+//                               unix_timestamp(date_add(DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month)) as dfin,
+//                               unix_timestamp(DateDeb) as ddeb,
+//                               unix_timestamp(DateDeb) as ddebprev,
+//                               qty,
+//                               rowid,
+//                               subprice as pu
+//                          FROM ".MAIN_DB_PREFIX."contratdet, ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+//                         WHERE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
+//                           AND fk_contrat =".$id;
+//            $sql = $this->db->query($requete);
+//            while ($res=$this->db->fetch_object($sql))
+//            {
+//                $this->lineTkt[$res->rowid]=array(
+//                    'qty'=>$res->qty,
+//                    'pu'=>$res->pu,
+//                    'dfinprev'=>$res->dfinprev,
+//                    'dfin'=>$res->dfin,
+//                    'ddeb'=>$res->ddeb,
+//                    'ddebprev'=>$res->ddebprev);
+//            }
+//        }
+//        return($ret);
+//    }
     public function updateProp()
     {
         $this->countTicket();
-        $requete = "UPDATE Babel_GMAO_contrat_prop SET qte=".$this->countTotalTkt." WHERE contrat_refid =  ".$this->id;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET qte=".$this->countTotalTkt." WHERE contrat_refid =  ".$this->id;
         $sql = $this->db->query($requete);
     }
     public function countTicket()
@@ -516,7 +516,7 @@ EOF;
         $html .=  '<tr style=" ">';
         $html .= '<td align="left">PU HT (&euro;)<td><INPUT  style="margin-left: 20px; text-align:center;" name="'.$type.'pu_ht" id="'.$type.'pu_ht" value="0">';
         $html .=  '<td align=right>TVA<td align=left width=180>';
-        $html .= $form->select_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
+        $html .= $form->load_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
 
 
 

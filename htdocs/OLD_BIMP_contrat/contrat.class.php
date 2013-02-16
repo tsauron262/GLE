@@ -673,22 +673,22 @@ class Contrat extends CommonObject
             $requete = false;
             //Si type contrat = 2 3 4 7
             if ($this->typeContrat == 2){
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms,qte,hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),-1,0,0,0,0)";
             } else if ($this->typeContrat == 3)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms,hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,1,0)";
             }else if ($this->typeContrat == 4)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms, hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,0,1)";
             }else if ($this->typeContrat == 7)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms, hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,0,0)";
             }
@@ -1914,7 +1914,7 @@ class Contrat extends CommonObject
         $html .=  "<input id='".$type."Price' name='".$type."Price' style='width: 100px; text-align: center;'/>";
         $html .=  '</td>';
         $html .=  '<td align=right>TVA<td align=left width=180>';
-        $html .= $form->select_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
+        $html .= $form->load_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
 
         $html .=  '</td>';
         $html .=  '<td align=right>Qt&eacute;</td><td align=left>';

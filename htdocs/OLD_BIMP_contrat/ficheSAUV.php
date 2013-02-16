@@ -598,11 +598,11 @@ if ($_REQUEST['action']=='setDateAnniv')
         }
         if (preg_match('/^([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})$/',$dateAnniv,$arr))
         {
-            $requete = "UPDATE Babel_GMAO_contrat_prop SET dateAnniv='".$arr[3].'-'.$arr[2].'-'.$arr[1]."' WHERE contrat_refid = ".$_REQUEST['id'];
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET dateAnniv='".$arr[3].'-'.$arr[2].'-'.$arr[1]."' WHERE contrat_refid = ".$_REQUEST['id'];
             $sql = $db->query($requete);
         }
     } else {
-        $requete = "UPDATE Babel_GMAO_contrat_prop SET dateAnniv=NULL WHERE contrat_refid = ".$_REQUEST['id'];
+        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET dateAnniv=NULL WHERE contrat_refid = ".$_REQUEST['id'];
         $sql = $db->query($requete);
     }
 }

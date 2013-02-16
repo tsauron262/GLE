@@ -32,7 +32,7 @@ function widget_listContratSAVParDateFin() {
         $sql = "SELECT date_format(date_add(g.DateDeb,INTERVAL g.durValid MONTH),'%Y-%m-%d') as DateFin,
                        c.fk_contrat
                   FROM ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN ".MAIN_DB_PREFIX."product as p ON c.fk_product = p.rowid,
-                       Babel_GMAO_contratdet_prop as g LEFT JOIN ".MAIN_DB_PREFIX."product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
+                       ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO as g LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
                  WHERE c.rowid = g.contratdet_refid
                    AND c.statut <> 5";
         $sql.= " ORDER BY DateFin ASC";

@@ -1,15 +1,6 @@
 <?php
 require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-class ContratLocProdGA extends contrat{
-
-    public function ContratLocProdGA($db) {
-        $this->db = $db ;
-        $this->product = new Product($this->db);
-        $this->societe = new Societe($this->db);
-        $this->user_service = new User($this->db);
-        $this->user_cloture = new User($this->db);
-        $this->client_signataire = new User($this->db);
-    }
+class ContratLocProdGA extends Synopsis_Contrat{
     public $isTx0 =0;
     public $montantTotHTAFinancer = 0;
     public $tauxMarge = 0;
@@ -31,7 +22,7 @@ class ContratLocProdGA extends contrat{
         $sql = "SELECT rowid, statut, ref, fk_soc, mise_en_service as datemise,";
         $sql.= " fk_user_mise_en_service, date_contrat as datecontrat,";
         $sql.= " fk_user_author, fin_validite as datefin,";
-        $sql.= " fk_projet, type,prorata,facturation_freq,";
+        $sql.= " fk_projet, extraparams as type,prorata,facturation_freq,";
         $sql.= " modelPdf,";
         $sql.= " linkedTo,";
         $sql.= " is_financement,cessionnaire_refid,fournisseur_refid, tva_tx,";
@@ -452,7 +443,7 @@ EOF;
         $prodTmp->id = $res->fk_product;
         $prodTmp->fetch($prodTmp->id);
         $serial = false;
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_product_serial_cont WHERE element_id = ".$res->rowid." AND element_type='contratLOC'";
         $sql = $this->db->query($requete);
         $res1 = $this->db->fetch_object($sql);
         $serial = ($res1->serial_number."x" != "x"?$res1->serial_number:false);
@@ -2203,22 +2194,22 @@ EOF;
             $requete = false;
             //Si type contrat = 2 3 4 7
             if ($this->typeContrat == 2){
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms,qte,hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),-1,0,0,0,0)";
             } else if ($this->typeContrat == 3)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms,hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,1,0)";
             }else if ($this->typeContrat == 4)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms, hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,0,1)";
             }else if ($this->typeContrat == 7)
             {
-                $requete = "INSERT INTO Babel_GMAO_contrat_prop
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                                         (contrat_refid,tms, hotline,telemaintenance,maintenance,isSAV)
                                  VALUES (".$this->id.",now(),0,0,0,0)";
             }

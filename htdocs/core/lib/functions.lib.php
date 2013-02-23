@@ -1,5 +1,4 @@
 <?php
-
 /* Copyright (C) 2000-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2003      Jean-Louis Bergamo   <jlb@j1b.org>
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
@@ -26,9 +25,9 @@
  */
 
 /**
- * 	\file			htdocs/core/lib/functions.lib.php
- * 	\brief			A set of functions for Dolibarr
- * 					This file contains all frequently used functions.
+ *	\file			htdocs/core/lib/functions.lib.php
+ *	\brief			A set of functions for Dolibarr
+ *					This file contains all frequently used functions.
  */
 
 
@@ -46,21 +45,24 @@ if (! function_exists('json_encode'))
  * @param 	string 	$member		Name of property
  * @return 	string				Return value of static property.
  */
-function getStaticMember($class, $member) {
-    if (is_object($class))
-        $class = get_class($class);
-    $classObj = new ReflectionClass($class);
-    $result = null;
+function getStaticMember($class, $member)
+{
+	if (is_object($class)) $class = get_class($class);
+	$classObj = new ReflectionClass($class);
+	$result = null;
 
-    foreach ($classObj->getStaticProperties() as $prop => $value) {
-        if ($prop == $member) {
-            $result = $value;
-            break;
-        }
-    }
+	foreach($classObj->getStaticProperties() as $prop => $value)
+	{
+		if($prop == $member)
+		{
+			$result = $value;
+			break;
+		}
+	}
 
-    return $result;
+	return $result;
 }
+
 
 /**
  * Return a DoliDB instance (database handler).
@@ -89,22 +91,25 @@ function getDoliDBInstance($type, $host, $user, $pass, $name, $port)
  * 	@param	int		$shared		1=Return shared entities
  * 	@return	mixed				Entity id(s) to use
  */
-function getEntity($element = false, $shared = false) {
-    global $conf, $mc;
+function getEntity($element=false, $shared=false)
+{
+	global $conf, $mc;
 
-    if (is_object($mc)) {
-        return $mc->getEntity($element, $shared);
-    } else {
-        $out = '';
+	if (is_object($mc))
+	{
+		return $mc->getEntity($element, $shared);
+	}
+	else
+	{
+		$out='';
 
-        $addzero = array('user', 'usergroup');
-        if (in_array($element, $addzero))
-            $out.= '0,';
+		$addzero = array('user', 'usergroup');
+		if (in_array($element, $addzero)) $out.= '0,';
 
-        $out.= $conf->entity;
+		$out.= $conf->entity;
 
-        return $out;
-    }
+		return $out;
+	}
 }
 
 /**
@@ -157,6 +162,7 @@ function dol_shutdown()
 	dol_syslog("--- End access to ".$_SERVER["PHP_SELF"].(($disconnectdone && $depth)?' (Warn: db disconnection forced, transaction depth was '.$depth.')':''), (($disconnectdone && $depth)?LOG_WARNING:LOG_DEBUG));
 }
 
+
 /**
  *  Return value of a param into GET or POST supervariable
  *
@@ -196,8 +202,9 @@ function GETPOST($paramname,$check='',$method=0)
 		}
 	}
 
-    return $out;
+	return $out;
 }
+
 
 /**
  *  Return a prefix to use for this Dolibarr instance for session or cookie names.
@@ -212,8 +219,8 @@ function dol_getprefix()
 }
 
 /**
- * 	Make an include_once using default root and alternate root if it fails.
- * 	WARNING: In most cases, you should not use this function:
+ *	Make an include_once using default root and alternate root if it fails.
+ *	WARNING: In most cases, you should not use this function:
  *  To link to a core file, use include(DOL_DOCUMENT_ROOT.'/pathtofile')
  *  To link to a module file from a module file, use include './mymodulefile';
  *  To link to a module file from a core file, then this function can be used
@@ -233,8 +240,9 @@ function dol_include_once($relpath, $classname='')
 	}
 }
 
+
 /**
- * 	Return path of url or filesystem. Return default_root or alternate root if file_exist fails
+ *	Return path of url or filesystem. Return default_root or alternate root if file_exist fails
  *
  * 	@param	string	$path		Relative path to file (if mode=0, ie: mydir/myfile, ../myfile, ...) or relative url (if mode=1).
  *  @param	int		$type		0=Used for a Filesystem path, 1=Used for an URL path (output relative), 2=Used for an URL path (output full path)
@@ -286,11 +294,11 @@ function dol_buildpath($path, $type=0)
 }
 
 /**
- * 	Create a clone of instance of object (new instance with same properties)
+ *	Create a clone of instance of object (new instance with same properties)
  * 	This function works for both PHP4 and PHP5
  *
  * 	@param	object	$object		Object to clone
- * 	@return object				Object clone
+ *	@return object				Object clone
  */
 function dol_clone($object)
 {
@@ -306,13 +314,13 @@ function dol_clone($object)
 }
 
 /**
- * 	Optimize a size for some browsers (phone, smarphone, ...)
+ *	Optimize a size for some browsers (phone, smarphone, ...)
  *
  * 	@param	int		$size		Size we want
  * 	@param	string	$type		Type of optimizing:
  * 										'' = function used to define a size for truncation
  * 										'width' = function is used to define a width
- * 	@return int					New size after optimizing
+ *	@return int					New size after optimizing
  */
 function dol_size($size,$type='')
 {
@@ -322,13 +330,14 @@ function dol_size($size,$type='')
 	else return 10;
 }
 
+
 /**
- * 	Clean a string to use it as a file name
+ *	Clean a string to use it as a file name
  *
- * 	@param	string	$str            String to clean
+ *	@param	string	$str            String to clean
  * 	@param	string	$newstr			String to replace bad chars with
  *  @param	string	$unaccent		1=Remove also accent (default), 0 do not remove them
- * 	@return string          		String cleaned (a-zA-Z_)
+ *	@return string          		String cleaned (a-zA-Z_)
  *
  * 	@see        	dol_string_nospecial, dol_string_unaccent
  */
@@ -339,10 +348,10 @@ function dol_sanitizeFileName($str,$newstr='_',$unaccent=1)
 }
 
 /**
- * 	Clean a string from all accent characters to be used as ref, login or by dol_sanitizeFileName
+ *	Clean a string from all accent characters to be used as ref, login or by dol_sanitizeFileName
  *
- * 	@param	string	$str			String to clean
- * 	@return string   	       		Cleaned string
+ *	@param	string	$str			String to clean
+ *	@return string   	       		Cleaned string
  *
  * 	@see    		dol_sanitizeFilename, dol_string_nospecial
  */
@@ -389,9 +398,9 @@ function dol_string_unaccent($str)
 }
 
 /**
- * 	Clean a string from all punctuation characters to use it as a ref or login
+ *	Clean a string from all punctuation characters to use it as a ref or login
  *
- * 	@param	string	$str            String to clean
+ *	@param	string	$str            String to clean
  * 	@param	string	$newstr			String to replace forbidden chars with
  *  @param  array	$badchars       List of forbidden characters
  * 	@return string          		Cleaned string
@@ -420,6 +429,7 @@ function dol_escape_js($stringtoescape)
 	$substitjs=array("&#039;"=>"\\'",'\\'=>'\\\\',"'"=>"\\'",'"'=>"\\'","\r"=>'\\r',"\n"=>'\\n','</'=>'<\/');
 	return strtr($stringtoescape, $substitjs);
 }
+
 
 /**
  *  Returns text escaped for inclusion in HTML alt or title tags
@@ -544,13 +554,14 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0)
 	}
 }
 
+
 /**
- * 	Show tab header of a card
+ *	Show tab header of a card
  *
- * 	@param	array	$links		Array of tabs
- * 	@param	string	$active     Active tab name (document', 'info', 'ldap', ....)
- * 	@param  string	$title      Title
- * 	@param  int		$notab		0=Add tab header, 1=no tab header
+ *	@param	array	$links		Array of tabs
+ *	@param	string	$active     Active tab name (document', 'info', 'ldap', ....)
+ *	@param  string	$title      Title
+ *	@param  int		$notab		0=Add tab header, 1=no tab header
  * 	@param	string	$picto		Add a picto on tab title
  * 	@return	void
  */
@@ -562,10 +573,10 @@ function dol_fiche_head($links=array(), $active='0', $title='', $notab=0, $picto
 /**
  *  Show tab header of a card
  *
- * 	@param	array	$links		Array of tabs
- * 	@param	int		$active     Active tab name
- * 	@param  string	$title      Title
- * 	@param  int		$notab		0=Add tab header, 1=no tab header
+ *	@param	array	$links		Array of tabs
+ *	@param	int		$active     Active tab name
+ *	@param  string	$title      Title
+ *	@param  int		$notab		0=Add tab header, 1=no tab header
  * 	@param	string	$picto		Add a picto on tab title
  * 	@return	void
  */
@@ -639,9 +650,9 @@ function dol_fiche_end($notab=0)
 }
 
 /**
- * 	Return tab footer of a card
+ *	Return tab footer of a card
  *
- * 	@param  int		$notab		0=Add tab footer, 1=no tab footer
+ *	@param  int		$notab		0=Add tab footer, 1=no tab footer
  *  @return	void
  */
 function dol_get_fiche_end($notab=0)
@@ -844,187 +855,37 @@ function dol_print_date($time,$format='',$tzoutput='tzserver',$outputlangs='',$e
 	return $ret;
 }
 
-/**
- * 	Output date in a string format according to outputlangs (or langs if not defined).
- * 	Return charset is always UTF-8, except if encodetoouput is defined. In this case charset is output charset
- *
- * 	@param	timestamp	$time        	GM Timestamps date
- * 	@param	string		$format      	Output date format
- * 										"%d %b %Y",
- * 										"%d/%m/%Y %H:%M",
- * 										"%d/%m/%Y %H:%M:%S",
- * 										"day", "daytext", "dayhour", "dayhourldap", "dayhourtext", "dayrfc", "dayhourrfc"
- * 	@param	string		$tzoutput		true=output or 'gmt' => string is for Greenwich location
- * 										false or 'tzserver' => output string is for local PHP server TZ usage
- * 										'tzuser' => output string is for local browser TZ usage
- * 	@param	Tranlsate	$outputlangs	Object lang that contains language for text translation.
- *  @param  boolean		$encodetooutput false=no convert into output pagecode
- * 	@return string      				Formated date or '' if time is null
- *
- *  @see        dol_mktime, dol_stringtotime, dol_getdate
- */
-function dol_print_date($time, $format = '', $tzoutput = 'tzserver', $outputlangs = '', $encodetooutput = false) {
-    global $conf, $langs;
-
-    $to_gmt = false;
-    $offsettz = $offsetdst = 0;
-    if ($tzoutput) {
-        $to_gmt = true; // For backward compatibility
-        if (is_string($tzoutput)) {
-            if ($tzoutput == 'tzserver') {
-                $to_gmt = false;
-                $offsettz = $offsetdst = 0;
-            } elseif ($tzoutput == 'tzuser') {
-                $to_gmt = true;
-                $offsettz = (empty($_SESSION['dol_tz']) ? 0 : $_SESSION['dol_tz']) * 60 * 60;
-                $offsetdst = (empty($_SESSION['dol_dst']) ? 0 : $_SESSION['dol_dst']) * 60 * 60;
-            } elseif ($tzoutput == 'tzcompany') {
-                $to_gmt = false;
-                $offsettz = $offsetdst = 0; // TODO Define this and use it later
-            }
-        }
-    }
-
-    if (!is_object($outputlangs))
-        $outputlangs = $langs;
-
-    // Si format non defini, on prend $conf->format_date_text_short sinon %Y-%m-%d %H:%M:%S
-    if (!$format)
-        $format = (isset($conf->format_date_text_short) ? $conf->format_date_text_short : '%Y-%m-%d %H:%M:%S');
-
-    // Change predefined format into computer format. If found translation in lang file we use it, otherwise we use default.
-    if ($format == 'day')
-        $format = ($outputlangs->trans("FormatDateShort") != "FormatDateShort" ? $outputlangs->trans("FormatDateShort") : $conf->format_date_short);
-    if ($format == 'hour')
-        $format = ($outputlangs->trans("FormatHourShort") != "FormatHourShort" ? $outputlangs->trans("FormatHourShort") : $conf->format_hour_short);
-    if ($format == 'hourduration')
-        $format = ($outputlangs->trans("FormatHourShortDuration") != "FormatHourShortDuration" ? $outputlangs->trans("FormatHourShortDuration") : $conf->format_hour_short_duration);
-    if ($format == 'daytext')
-        $format = ($outputlangs->trans("FormatDateText") != "FormatDateText" ? $outputlangs->trans("FormatDateText") : $conf->format_date_text);
-    if ($format == 'daytextshort')
-        $format = ($outputlangs->trans("FormatDateTextShort") != "FormatDateTextShort" ? $outputlangs->trans("FormatDateTextShort") : $conf->format_date_text_short);
-    if ($format == 'dayhour')
-        $format = ($outputlangs->trans("FormatDateHourShort") != "FormatDateHourShort" ? $outputlangs->trans("FormatDateHourShort") : $conf->format_date_hour_short);
-    if ($format == 'dayhourtext')
-        $format = ($outputlangs->trans("FormatDateHourText") != "FormatDateHourText" ? $outputlangs->trans("FormatDateHourText") : $conf->format_date_hour_text);
-    if ($format == 'dayhourtextshort')
-        $format = ($outputlangs->trans("FormatDateHourTextShort") != "FormatDateHourTextShort" ? $outputlangs->trans("FormatDateHourTextShort") : $conf->format_date_hour_text_short);
-
-    // Format not sensitive to language
-    if ($format == 'dayhourlog')
-        $format = '%Y%m%d%H%M%S';
-    if ($format == 'dayhourldap')
-        $format = '%Y%m%d%H%M%SZ';
-    if ($format == 'dayhourxcard')
-        $format = '%Y%m%dT%H%M%SZ';
-    if ($format == 'dayxcard')
-        $format = '%Y%m%d';
-    if ($format == 'dayrfc')
-        $format = '%Y-%m-%d';             // DATE_RFC3339
-    if ($format == 'dayhourrfc')
-        $format = '%Y-%m-%dT%H:%M:%SZ';   // DATETIME RFC3339
-
-
-        
-// If date undefined or "", we return ""
-    if (dol_strlen($time) == 0)
-        return '';  // $time=0 allowed (it means 01/01/1970 00:00:00)
-
-
-        
-//print 'x'.$time;
-
-    if (preg_match('/%b/i', $format)) {  // There is some text to translate
-        // We inhibate translation to text made by strftime functions. We will use trans instead later.
-        $format = str_replace('%b', '__b__', $format);
-        $format = str_replace('%B', '__B__', $format);
-    }
-    if (preg_match('/%a/i', $format)) {  // There is some text to translate
-        // We inhibate translation to text made by strftime functions. We will use trans instead later.
-        $format = str_replace('%a', '__a__', $format);
-        $format = str_replace('%A', '__A__', $format);
-    }
-
-    // Analyze date (deprecated)   Ex: 1970-01-01, 1970-01-01 01:00:00, 19700101010000
-    if (preg_match('/^([0-9]+)\-([0-9]+)\-([0-9]+) ?([0-9]+)?:?([0-9]+)?:?([0-9]+)?/i', $time, $reg)
-            || preg_match('/^([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])([0-9][0-9])$/i', $time, $reg)) {
-        // This part of code should not be used.
-        dol_syslog("Functions.lib::dol_print_date function call with deprecated value of time in page " . $_SERVER["PHP_SELF"], LOG_WARNING);
-        // Date has format 'YYYY-MM-DD' or 'YYYY-MM-DD HH:MM:SS' or 'YYYYMMDDHHMMSS'
-        $syear = (!empty($reg[1]) ? $reg[1] : '');
-        $smonth = (!empty($reg[2]) ? $reg[2] : '');
-        $sday = (!empty($reg[3]) ? $reg[3] : '');
-        $shour = (!empty($reg[4]) ? $reg[4] : '');
-        $smin = (!empty($reg[5]) ? $reg[5] : '');
-        $ssec = (!empty($reg[6]) ? $reg[6] : '');
-
-        $time = dol_mktime($shour, $smin, $ssec, $smonth, $sday, $syear, true);
-        $ret = adodb_strftime($format, $time + $offsettz + $offsetdst, $to_gmt);
-    } else {
-        // Date is a timestamps
-        if ($time < 100000000000) { // Protection against bad date values
-            $ret = adodb_strftime($format, $time + $offsettz + $offsetdst, $to_gmt);
-        }
-        else
-            $ret = 'Bad value ' . $time . ' for date';
-    }
-
-    if (preg_match('/__b__/i', $format)) {
-        // Here ret is string in PHP setup language (strftime was used). Now we convert to $outputlangs.
-        $month = adodb_strftime('%m', $time + $offsettz + $offsetdst);
-        if ($encodetooutput) {
-            $monthtext = $outputlangs->transnoentities('Month' . $month);
-            $monthtextshort = $outputlangs->transnoentities('MonthShort' . $month);
-        } else {
-            $monthtext = $outputlangs->transnoentitiesnoconv('Month' . $month);
-            $monthtextshort = $outputlangs->transnoentitiesnoconv('MonthShort' . $month);
-        }
-        //print 'monthtext='.$monthtext.' monthtextshort='.$monthtextshort;
-        $ret = str_replace('__b__', $monthtextshort, $ret);
-        $ret = str_replace('__B__', $monthtext, $ret);
-        //print 'x'.$outputlangs->charset_output.'-'.$ret.'x';
-        //return $ret;
-    }
-    if (preg_match('/__a__/i', $format)) {
-        $w = adodb_strftime('%w', $time + $offsettz + $offsetdst);
-        $dayweek = $outputlangs->transnoentitiesnoconv('Day' . $w);
-        $ret = str_replace('__A__', $dayweek, $ret);
-        $ret = str_replace('__a__', dol_substr($dayweek, 0, 3), $ret);
-    }
-
-    return $ret;
-}
 
 /**
- * 	Return an array with locale date info.
+ *	Return an array with locale date info.
  *  PHP getdate is restricted to the years 1901-2038 on Unix and 1970-2038 on Windows
  *  WARNING: This function always use PHP server timezone to return locale informations.
  *  Usage must be avoid.
  *
- * 	@param	timestamp	$timestamp      Timestamp
- * 	@param	boolean		$fast           Fast mode
- * 	@return	array						Array of informations
- * 										If no fast mode:
- * 										'seconds' => $secs,
- * 										'minutes' => $min,
- * 										'hours' => $hour,
- * 										'mday' => $day,
- * 										'wday' => $dow,
- * 										'mon' => $month,
- * 										'year' => $year,
- * 										'yday' => floor($secsInYear/$_day_power),
- * 										'weekday' => gmdate('l',$_day_power*(3+$dow)),
- * 										'month' => gmdate('F',mktime(0,0,0,$month,2,1971)),
- * 										If fast mode:
- * 										'seconds' => $secs,
- * 										'minutes' => $min,
- * 										'hours' => $hour,
- * 										'mday' => $day,
- * 										'mon' => $month,
- * 										'year' => $year,
- * 										'yday' => floor($secsInYear/$_day_power),
- * 										'leap' => $leaf,
- * 										'ndays' => $ndays
+ *	@param	timestamp	$timestamp      Timestamp
+ *	@param	boolean		$fast           Fast mode
+ *	@return	array						Array of informations
+ *										If no fast mode:
+ *										'seconds' => $secs,
+ *										'minutes' => $min,
+ *										'hours' => $hour,
+ *										'mday' => $day,
+ *										'wday' => $dow,
+ *										'mon' => $month,
+ *										'year' => $year,
+ *										'yday' => floor($secsInYear/$_day_power),
+ *										'weekday' => gmdate('l',$_day_power*(3+$dow)),
+ *										'month' => gmdate('F',mktime(0,0,0,$month,2,1971)),
+ *										If fast mode:
+ *										'seconds' => $secs,
+ *										'minutes' => $min,
+ *										'hours' => $hour,
+ *										'mday' => $day,
+ *										'mon' => $month,
+ *										'year' => $year,
+ *										'yday' => floor($secsInYear/$_day_power),
+ *										'leap' => $leaf,
+ *										'ndays' => $ndays
  * 	@see 								dol_print_date, dol_stringtotime, dol_mktime
  */
 function dol_getdate($timestamp,$fast=false)
@@ -1046,19 +907,19 @@ function dol_getdate($timestamp,$fast=false)
 }
 
 /**
- * 	Return a timestamp date built from detailed informations (by default a local PHP server timestamp)
+ *	Return a timestamp date built from detailed informations (by default a local PHP server timestamp)
  * 	Replace function mktime not available under Windows if year < 1970
- * 	PHP mktime is restricted to the years 1901-2038 on Unix and 1970-2038 on Windows
+ *	PHP mktime is restricted to the years 1901-2038 on Unix and 1970-2038 on Windows
  *
  * 	@param	int			$hour			Hour	(can be -1 for undefined)
- * 	@param	int			$minute			Minute	(can be -1 for undefined)
- * 	@param	int			$second			Second	(can be -1 for undefined)
- * 	@param	int			$month			Month (1 to 12)
- * 	@param	int			$day			Day (1 to 31)
- * 	@param	int			$year			Year
- * 	@param	int			$gm				1=Input informations are GMT values, otherwise local to server TZ
- * 	@param	int			$check			0=No check on parameters (Can use day 32, etc...)
- * 	@return	timestamp					Date as a timestamp, '' if error
+ *	@param	int			$minute			Minute	(can be -1 for undefined)
+ *	@param	int			$second			Second	(can be -1 for undefined)
+ *	@param	int			$month			Month (1 to 12)
+ *	@param	int			$day			Day (1 to 31)
+ *	@param	int			$year			Year
+ *	@param	int			$gm				1=Input informations are GMT values, otherwise local to server TZ
+ *	@param	int			$check			0=No check on parameters (Can use day 32, etc...)
+ *	@return	timestamp					Date as a timestamp, '' if error
  * 	@see 								dol_print_date, dol_stringtotime, dol_getdate
  */
 function dol_mktime($hour,$minute,$second,$month,$day,$year,$gm=false,$check=1)
@@ -1109,14 +970,15 @@ function dol_mktime($hour,$minute,$second,$month,$day,$year,$gm=false,$check=1)
 	return $date;
 }
 
+
 /**
- * 	Return date for now. We should always use this function without parameters (that means GMT time)
+ *	Return date for now. We should always use this function without parameters (that means GMT time)
  *
  * 	@param	string		$mode	'gmt' => we return GMT timestamp,
  * 								'tzserver' => we add the PHP server timezone
  *  							'tzref' => we add the company timezone
  * 								'tzuser' => we add the user timezone
- * 	@return timestamp   $date	Timestamp
+ *	@return timestamp   $date	Timestamp
  */
 function dol_now($mode='gmt')
 {
@@ -1144,6 +1006,7 @@ function dol_now($mode='gmt')
 	}
 	return $ret;
 }
+
 
 /**
  * Return string with formated size
@@ -1436,11 +1299,12 @@ function dol_print_address($address, $htmlid, $mode, $id)
 	}
 }
 
+
 /**
- * 	Return true if email syntax is ok
+ *	Return true if email syntax is ok
  *
- * 	@param	    string		$address    email (Ex: "toto@titi.com", "John Do <johndo@titi.com>")
- * 	@return     boolean     			true if email syntax is OK, false if KO or empty string
+ *	@param	    string		$address    email (Ex: "toto@titi.com", "John Do <johndo@titi.com>")
+ *	@return     boolean     			true if email syntax is OK, false if KO or empty string
  */
 function isValidEmail($address)
 {
@@ -1469,6 +1333,7 @@ function isValidPhone($phone)
 {
 	return true;
 }
+
 
 /**
  * Make a strlen call. Works even if mbstring module not enabled
@@ -1510,6 +1375,7 @@ function dol_substr($string,$start,$length,$stringencoding='')
 	return $ret;
 }
 
+
 /**
  *  Show a javascript graph.
  *  Do not use this function anymore. Use DolGraph class instead.
@@ -1525,13 +1391,13 @@ function dol_substr($string,$start,$length,$stringencoding='')
  *  @return		void
  *  @deprecated
  */
-function dol_print_graph($htmlid, $width, $height, $data, $showlegend = 0, $type = 'pie', $showpercent = 0, $url = '') {
-    global $conf, $langs;
-    global $theme_datacolor;    // To have var kept when function is called several times
-    if (empty($conf->use_javascript_ajax))
-        return;
-    $jsgraphlib = 'flot';
-    $datacolor = array();
+function dol_print_graph($htmlid,$width,$height,$data,$showlegend=0,$type='pie',$showpercent=0,$url='')
+{
+	global $conf,$langs;
+	global $theme_datacolor;    // To have var kept when function is called several times
+	if (empty($conf->use_javascript_ajax)) return;
+	$jsgraphlib='flot';
+	$datacolor=array();
 
 	// Load colors of theme into $datacolor array
 	$color_file = DOL_DOCUMENT_ROOT."/theme/".$conf->theme."/graph-color.php";
@@ -1549,21 +1415,23 @@ function dol_print_graph($htmlid, $width, $height, $data, $showlegend = 0, $type
 	}
 	print '<div id="'.$htmlid.'" style="width:'.$width.'px;height:'.$height.'px;"></div>';
 
-    // We use Flot js lib
-    if ($jsgraphlib == 'flot') {
-        if ($type == 'pie') {
-            // data is   array('series'=>array(serie1,serie2,...),
-            //                 'seriestype'=>array('bar','line',...),
-            //                 'seriescolor'=>array(0=>'#999999',1=>'#999999',...)
-            //                 'xlabel'=>array(0=>labelx1,1=>labelx2,...));
-            // serieX is array('label'=>'label', data=>val)
-            print '
+	// We use Flot js lib
+	if ($jsgraphlib == 'flot')
+	{
+		if ($type == 'pie')
+		{
+			// data is   array('series'=>array(serie1,serie2,...),
+			//                 'seriestype'=>array('bar','line',...),
+			//                 'seriescolor'=>array(0=>'#999999',1=>'#999999',...)
+			//                 'xlabel'=>array(0=>labelx1,1=>labelx2,...));
+			// serieX is array('label'=>'label', data=>val)
+			print '
 			<script type="text/javascript">
 			$(function () {
-				var data = ' . json_encode($data['series']) . ';
+				var data = '.json_encode($data['series']).';
 
 				function plotWithOptions() {
-					$.plot($("#' . $htmlid . '"), data,
+					$.plot($("#'.$htmlid.'"), data,
 					{
 						series: {
 							pie: {
@@ -1576,16 +1444,13 @@ function dol_print_graph($htmlid, $width, $height, $data, $showlegend = 0, $type
 										var percent=Math.round(series.percent);
 										var number=series.data[0][1];
 										return \'';
-            print '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">';
-            if ($url)
-                print '<a style="color: #FFFFFF;" border="0" href="' . $url . '=">';
-            print '\'+' . ($showlegend ? 'number' : 'label+\'<br/>\'+number');
-            if (!empty($showpercent))
-                print '+\'<br/>\'+percent+\'%\'';
-            print '+\'';
-            if ($url)
-                print '</a>';
-            print '</div>\';
+										print '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">';
+										if ($url) print '<a style="color: #FFFFFF;" border="0" href="'.$url.'=">';
+										print '\'+'.($showlegend?'number':'label+\'<br/>\'+number');
+										if (! empty($showpercent)) print '+\'<br/>\'+percent+\'%\'';
+										print '+\'';
+										if ($url) print '</a>';
+										print '</div>\';
 									},
 									background: {
 										opacity: 0.5,
@@ -1600,60 +1465,52 @@ function dol_print_graph($htmlid, $width, $height, $data, $showlegend = 0, $type
 						pan: {
 							interactive: true
 						},';
-            if (count($datacolor)) {
-                print 'colors: ' . (!empty($data['seriescolor']) ? json_encode($data['seriescolor']) : json_encode($datacolor)) . ',';
-            }
-            print 'legend: {show: ' . ($showlegend ? 'true' : 'false') . ', position: \'ne\' }
+						if (count($datacolor))
+						{
+							print 'colors: '.(! empty($data['seriescolor']) ? json_encode($data['seriescolor']) : json_encode($datacolor)).',';
+						}
+						print 'legend: {show: '.($showlegend?'true':'false').', position: \'ne\' }
 					});
 				}
 				plotWithOptions();
 			});
 			</script>';
-        } else if ($type == 'barline') {
-            // data is   array('series'=>array(serie1,serie2,...),
-            //                 'seriestype'=>array('bar','line',...),
-            //                 'seriescolor'=>array(0=>'#999999',1=>'#999999',...)
-            //                 'xlabel'=>array(0=>labelx1,1=>labelx2,...));
-            // serieX is array('label'=>'label', data=>array(0=>y1,1=>y2,...)) with same nb of value than into xlabel
-            print '
+		}
+		else if ($type == 'barline')
+		{
+			// data is   array('series'=>array(serie1,serie2,...),
+			//                 'seriestype'=>array('bar','line',...),
+			//                 'seriescolor'=>array(0=>'#999999',1=>'#999999',...)
+			//                 'xlabel'=>array(0=>labelx1,1=>labelx2,...));
+			// serieX is array('label'=>'label', data=>array(0=>y1,1=>y2,...)) with same nb of value than into xlabel
+			print '
 			<script type="text/javascript">
 			$(function () {
 				var data = [';
-            $i = 0;
-            $outputserie = 0;
-            foreach ($data['series'] as $serie) {
-                if ($data['seriestype'][$i] == 'line') {
-                    $i++;
-                    continue;
-                };
-                if ($outputserie > 0)
-                    print ',';
-                print '{ bars: { stack: 0, show: true, barWidth: 0.9, align: \'center\' }, label: \'' . dol_escape_js($serie['label']) . '\', data: ' . json_encode($serie['data']) . '}' . "\n";
-                $outputserie++;
-                $i++;
-            }
-            if ($outputserie)
-                print ', ';
-            //print '];
-            //var datalines = [';
-            $i = 0;
-            $outputserie = 0;
-            foreach ($data['series'] as $serie) {
-                if (empty($data['seriestype'][$i]) || $data['seriestype'][$i] == 'bar') {
-                    $i++;
-                    continue;
-                };
-                if ($outputserie > 0)
-                    print ',';
-                print '{ lines: { show: true }, label: \'' . dol_escape_js($serie['label']) . '\', data: ' . json_encode($serie['data']) . '}' . "\n";
-                $outputserie++;
-                $i++;
-            }
-            print '];
-				var dataticks = ' . json_encode($data['xlabel']) . '
+				$i=0; $outputserie=0;
+				foreach($data['series'] as $serie)
+				{
+					if ($data['seriestype'][$i]=='line') { $i++; continue; };
+					if ($outputserie > 0) print ',';
+					print '{ bars: { stack: 0, show: true, barWidth: 0.9, align: \'center\' }, label: \''.dol_escape_js($serie['label']).'\', data: '.json_encode($serie['data']).'}'."\n";
+					$outputserie++; $i++;
+				}
+				if ($outputserie) print ', ';
+				//print '];
+				//var datalines = [';
+				$i=0; $outputserie=0;
+				foreach($data['series'] as $serie)
+				{
+					if (empty($data['seriestype'][$i]) || $data['seriestype'][$i]=='bar') { $i++; continue; };
+					if ($outputserie > 0) print ',';
+					print '{ lines: { show: true }, label: \''.dol_escape_js($serie['label']).'\', data: '.json_encode($serie['data']).'}'."\n";
+					$outputserie++; $i++;
+				}
+				print '];
+				var dataticks = '.json_encode($data['xlabel']).'
 
 				function plotWithOptions() {
-					$.plot(jQuery("#' . $htmlid . '"), data,
+					$.plot(jQuery("#'.$htmlid.'"), data,
 					{
 						series: {
 							stack: 0
@@ -1664,33 +1521,33 @@ function dol_print_graph($htmlid, $width, $height, $data, $showlegend = 0, $type
 						pan: {
 							interactive: true
 						},';
-            if (count($datacolor)) {
-                print 'colors: ' . json_encode($datacolor) . ',';
-            }
-            print 'legend: {show: ' . ($showlegend ? 'true' : 'false') . '},
+						if (count($datacolor))
+						{
+							print 'colors: '.json_encode($datacolor).',';
+						}
+						print 'legend: {show: '.($showlegend?'true':'false').'},
 						xaxis: {ticks: dataticks}
 					});
 				}
 				plotWithOptions();
 			});
 			</script>';
-        }
-        else
-            print 'BadValueForPArameterType';
-    }
+		}
+		else print 'BadValueForPArameterType';
+	}
 }
 
 /**
- * 	Truncate a string to a particular length adding '...' if string larger than length.
+ *	Truncate a string to a particular length adding '...' if string larger than length.
  * 	If length = max length+1, we do no truncate to avoid having just 1 char replaced with '...'.
  *  MAIN_DISABLE_TRUNC=1 can disable all truncings
  *
- * 	@param	string	$string				String to truncate
- * 	@param  int		$size				Max string size visible. 0 for no limit. finale string size can be 1 more (if size was max+1) or 3 more (if we added ...)
- * 	@param	string	$trunc				Where to trunc: right, left, middle (size must be a 2 power), wrap
+ *	@param	string	$string				String to truncate
+ *	@param  int		$size				Max string size visible. 0 for no limit. finale string size can be 1 more (if size was max+1) or 3 more (if we added ...)
+ *	@param	string	$trunc				Where to trunc: right, left, middle (size must be a 2 power), wrap
  * 	@param	string	$stringencoding		Tell what is source string encoding
  *  @param	int		$nodot				Truncation do not add ... after truncation. So it's an exact truncation.
- * 	@return string						Truncated string
+ *	@return string						Truncated string
  */
 function dol_trunc($string,$size=40,$trunc='right',$stringencoding='UTF-8',$nodot=0)
 {
@@ -1739,16 +1596,16 @@ function dol_trunc($string,$size=40,$trunc='right',$stringencoding='UTF-8',$nodo
 }
 
 /**
- * 	Show picto whatever it's its name (generic function)
+ *	Show picto whatever it's its name (generic function)
  *
- * 	@param      string		$alt         		Text on alt and title of image
- * 	@param      string		$picto       		Name of image file to show ('filenew', ...)
- * 												If no extension provided, we use '.png'. Image must be stored into theme/xxx/img directory.
+ *	@param      string		$alt         		Text on alt and title of image
+ *	@param      string		$picto       		Name of image file to show ('filenew', ...)
+ *												If no extension provided, we use '.png'. Image must be stored into theme/xxx/img directory.
  *                                  			Example: picto.png                  if picto.png is stored into htdocs/theme/mytheme/img
  *                                  			Example: picto.png@mymodule         if picto.png is stored into htdocs/mymodule/img
  *                                  			Example: /mydir/mysubdir/picto.png  if picto.png is stored into htdocs/mydir/mysubdir (pictoisfullpath must be set to 1)
- * 	@param		string		$options			Add more attribute on img tag (For example 'style="float: right"')
- * 	@param		int			$pictoisfullpath	If 1, image path is a full path
+ *	@param		string		$options			Add more attribute on img tag (For example 'style="float: right"')
+ *	@param		int			$pictoisfullpath	If 1, image path is a full path
  *  @return     string       				    Return img tag
  *  @see        #img_object, #img_picto_common
  */
@@ -1806,28 +1663,13 @@ function img_object($alt, $picto, $options = '', $pictoisfullpath = false)
 }
 
 /**
- * 	Show a picto called object_picto (generic function)
+ *	Show picto (generic function)
  *
- * 	@param	string	$alt				Text of alt on image
- * 	@param	string	$picto				Name of image to show object_picto (example: user, group, action, bill, contract, propal, product, ...)
- * 										For external modules use imagename@mymodule to search into directory "img" of module.
- * 	@param	string	$options			Add more attribute on img tag (ie: class="datecallink")
- * 	@param	int		$pictoisfullpath	If 1, image path is a full path
- * 	@return	string						Return img tag
- * 	@see	#img_picto, #img_picto_common
- */
-function img_object($alt, $picto, $options = '', $pictoisfullpath = false) {
-    return img_picto($alt, 'object_' . $picto, $options, $pictoisfullpath);
-}
-
-/**
- * 	Show picto (generic function)
- *
- * 	@param      string		$alt         		Text on alt and title of image
- * 	@param      string		$picto       		Name of image file to show (If no extension provided, we use '.png'). Image must be stored into htdocs/theme/common directory.
- * 	@param		string		$options			Add more attribute on img tag
- * 	@param		int			$pictoisfullpath	If 1, image path is a full path
- * 	@return     string      					Return img tag
+ *	@param      string		$alt         		Text on alt and title of image
+ *	@param      string		$picto       		Name of image file to show (If no extension provided, we use '.png'). Image must be stored into htdocs/theme/common directory.
+ *	@param		string		$options			Add more attribute on img tag
+ *	@param		int			$pictoisfullpath	If 1, image path is a full path
+ *	@return     string      					Return img tag
  *  @see        #img_object, #img_picto
  */
 function img_picto_common($alt, $picto, $options = '', $pictoisfullpath = 0)
@@ -1853,11 +1695,11 @@ function img_picto_common($alt, $picto, $options = '', $pictoisfullpath = 0)
 }
 
 /**
- * 	Show logo action
+ *	Show logo action
  *
- * 	@param	string	$alt         	Text for image alt and title ('default', ...)
- * 	@param  int		$numaction   	Action to show
- * 	@return string      			Return an img tag
+ *	@param	string	$alt         	Text for image alt and title ('default', ...)
+ *	@param  int		$numaction   	Action to show
+ *	@return string      			Return an img tag
  */
 function img_action($alt, $numaction)
 {
@@ -1892,10 +1734,10 @@ function img_pdf($alt = 'default', $size = 3)
 }
 
 /**
- * 	Show logo +
+ *	Show logo +
  *
- * 	@param	string	$alt        Texte sur le alt de l'image
- * 	@return string      		Return tag img
+ *	@param	string	$alt        Texte sur le alt de l'image
+ *	@return string      		Return tag img
  */
 function img_edit_add($alt = 'default')
 {
@@ -1921,10 +1763,12 @@ function img_edit_remove($alt = 'default')
 }
 
 /**
- * 	Show logo -
+ *	Show logo editer/modifier fiche
  *
- * 	@param	string	$alt         Texte sur le alt de l'image
- * 	@return string      Retourne tag img
+ *	@param  string	$alt        Texte sur le alt de l'image
+ *	@param  float	$float      Si il faut y mettre le style "float: right"
+ *	@param  string	$other		Add more attributes on img
+ *	@return string      		Retourne tag img
  */
 function img_edit($alt = 'default', $float = 0, $other = '')
 {
@@ -1936,12 +1780,12 @@ function img_edit($alt = 'default', $float = 0, $other = '')
 }
 
 /**
- * 	Show logo editer/modifier fiche
+ *	Show logo view card
  *
- * 	@param  string	$alt        Texte sur le alt de l'image
- * 	@param  float	$float      Si il faut y mettre le style "float: right"
- * 	@param  string	$other		Add more attributes on img
- * 	@return string      		Retourne tag img
+ *	@param	string	$alt         Texte sur le alt de l'image
+ *	@param  float	$float       Si il faut y mettre le style "float: right"
+ *	@param  string	$other		Add more attributes on img
+ *	@return string      Retourne tag img
  */
 function img_view($alt = 'default', $float = 0, $other = '')
 {
@@ -1958,7 +1802,7 @@ function img_view($alt = 'default', $float = 0, $other = '')
  *  Show delete logo
  *
  *  @param	string	$alt        Text on alt image
- * 	@param  string	$other      Add more attributes on img
+ *	@param  string	$other      Add more attributes on img
  *  @return string      		Retourne tag img
  */
 function img_delete($alt = 'default', $other = '')
@@ -1971,7 +1815,7 @@ function img_delete($alt = 'default', $other = '')
 }
 
 /**
- * 	Show help logo with cursor "?"
+ *	Show help logo with cursor "?"
  *
  * 	@param	string	$usehelpcursor		Use help cursor
  * 	@param	string	$usealttitle		Text to use as alt title
@@ -1993,8 +1837,8 @@ function img_help($usehelpcursor = 1, $usealttitle = 1)
 /**
  *	Show info logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@return string      		Return img tag
  */
 function img_info($alt = 'default')
 {
@@ -2008,9 +1852,9 @@ function img_info($alt = 'default')
 /**
  *	Show warning logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@param  int		$float      If we must add style "float: right"
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@param  int		$float      If we must add style "float: right"
+ *	@return string      		Return img tag
  */
 function img_warning($alt = 'default', $float = 0)
 {
@@ -2024,8 +1868,8 @@ function img_warning($alt = 'default', $float = 0)
 /**
  *  Show error logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@return string      		Return img tag
  */
 function img_error($alt = 'default')
 {
@@ -2054,8 +1898,8 @@ function img_next($alt = 'default')
 /**
  *	Show previous logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@return string      		Return img tag
  */
 function img_previous($alt = 'default')
 {
@@ -2069,9 +1913,9 @@ function img_previous($alt = 'default')
 /**
  *	Show down arrow logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@param  int		$selected   Selected
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@param  int		$selected   Selected
+ *	@return string      		Return img tag
  */
 function img_down($alt = 'default', $selected = 0)
 {
@@ -2085,9 +1929,9 @@ function img_down($alt = 'default', $selected = 0)
 /**
  *	Show top arrow logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@param  int		$selected	Selected
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@param  int		$selected	Selected
+ *	@return string      		Return img tag
  */
 function img_up($alt = 'default', $selected = 0)
 {
@@ -2101,9 +1945,9 @@ function img_up($alt = 'default', $selected = 0)
 /**
  *	Show left arrow logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@param  int		$selected	Selected
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@param  int		$selected	Selected
+ *	@return string      		Return img tag
  */
 function img_left($alt = 'default', $selected = 0)
 {
@@ -2117,9 +1961,9 @@ function img_left($alt = 'default', $selected = 0)
 /**
  *	Show right arrow logo
  *
- * 	@param	string	$alt        Text to show on alt image
- * 	@param  int		$selected	Selected
- * 	@return string      		Return img tag
+ *	@param	string	$alt        Text to show on alt image
+ *	@param  int		$selected	Selected
+ *	@return string      		Return img tag
  */
 function img_right($alt = 'default', $selected = 0)
 {
@@ -2133,9 +1977,9 @@ function img_right($alt = 'default', $selected = 0)
 /**
  *	Show tick logo if allowed
  *
- * 	@param	string	$allow		Allow
- * 	@param	string	$alt        Text to show on alt image
- * 	@return string      		Return img tag
+ *	@param	string	$allow		Allow
+ *	@param	string	$alt        Text to show on alt image
+ *	@return string      		Return img tag
  */
 function img_allow($allow, $alt = 'default')
 {
@@ -2148,12 +1992,13 @@ function img_allow($allow, $alt = 'default')
 	return '-';
 }
 
+
 /**
- * 	Show MIME img of a file
+ *	Show MIME img of a file
  *
- * 	@param	string	$file		Filename
+ *	@param	string	$file		Filename
  * 	@param	string	$alt		Alternate text to show on img mous hover
- * 	@return string     			Return img tag
+ *	@return string     			Return img tag
  */
 function img_mime($file, $alt = '')
 {
@@ -2189,9 +2034,9 @@ function img_phone($alt = 'default', $option = 0)
 	return img_picto($alt, $img);
 }
 
+
 /**
- * 	Show phone logo.
- *  Use img_picto instead.
+ *	Show information for admin users
  *
  *	@param	string	$text			Text info
  *	@param  string	$infoonimgalt	Info is shown only on alt of star picto, otherwise it is show on output after the star picto
@@ -2210,28 +2055,12 @@ function info_admin($text, $infoonimgalt = 0, $nodiv=0)
 	return ($nodiv?'':'<div class="info">').img_picto($langs->trans('InfoAdmin'), 'star').' '.$text.($nodiv?'':'</div>');
 }
 
-/**
- * 	Show information for admin users
- *
- * 	@param	string	$text			Text info
- * 	@param  string	$infoonimgalt	Info is shown only on alt of star picto, otherwise it is show on output after the star picto
- * 	@return	string					String with info text
- */
-function info_admin($text, $infoonimgalt = 0) {
-    global $conf, $langs;
-
-    if ($infoonimgalt) {
-        return img_picto($text, 'star');
-    }
-
-    return '<div class="info">' . img_picto($langs->trans('InfoAdmin'), 'star') . ' ' . $text . '</div>';
-}
 
 /**
- * 	Affiche message erreur system avec toutes les informations pour faciliter le diagnostic et la remontee des bugs.
- * 	On doit appeler cette fonction quand une erreur technique bloquante est rencontree.
- * 	Toutefois, il faut essayer de ne l'appeler qu'au sein de pages php, les classes devant
- * 	renvoyer leur erreur par l'intermediaire de leur propriete "error".
+ *	Affiche message erreur system avec toutes les informations pour faciliter le diagnostic et la remontee des bugs.
+ *	On doit appeler cette fonction quand une erreur technique bloquante est rencontree.
+ *	Toutefois, il faut essayer de ne l'appeler qu'au sein de pages php, les classes devant
+ *	renvoyer leur erreur par l'intermediaire de leur propriete "error".
  *
  *	@param	 DoliDB	$db      	Database handler
  *	@param  string	$error		String or array of errors strings to show
@@ -2361,24 +2190,25 @@ function dol_print_error_email($prefixcode)
 }
 
 /**
- * 	Show title line of an array
+ *	Show title line of an array
  *
- * 	@param	string	$name        Label of field
- * 	@param	string	$file        Url used when we click on sort picto
- * 	@param	string	$field       Field to use for new sorting
- * 	@param	string	$begin       ("" by defaut)
- * 	@param	string	$moreparam   Add more parameters on sort url links ("" by default)
- * 	@param  string	$td          Options of attribute td ("" by defaut)
- * 	@param  string	$sortfield   Current field used to sort
- * 	@param  string	$sortorder   Current sort order
- * 	@return	void
+ *	@param	string	$name        Label of field
+ *	@param	string	$file        Url used when we click on sort picto
+ *	@param	string	$field       Field to use for new sorting
+ *	@param	string	$begin       ("" by defaut)
+ *	@param	string	$moreparam   Add more parameters on sort url links ("" by default)
+ *	@param  string	$td          Options of attribute td ("" by defaut)
+ *	@param  string	$sortfield   Current field used to sort
+ *	@param  string	$sortorder   Current sort order
+ *	@return	void
  */
-function print_liste_field_titre($name, $file = "", $field = "", $begin = "", $moreparam = "", $td = "", $sortfield = "", $sortorder = "") {
-    print getTitleFieldOfList($name, 0, $file, $field, $begin, $moreparam, $td, $sortfield, $sortorder);
+function print_liste_field_titre($name, $file="", $field="", $begin="", $moreparam="", $td="", $sortfield="", $sortorder="")
+{
+	print getTitleFieldOfList($name, 0, $file, $field, $begin, $moreparam, $td, $sortfield, $sortorder);
 }
 
 /**
- * 	Get title line of an array
+ *	Get title line of an array
  *
  *	@param	string	$name        Label of field
  *	@param	int		$thead		 For thead format
@@ -2449,10 +2279,10 @@ function getTitleFieldOfList($name, $thead=0, $file="", $field="", $begin="", $m
 }
 
 /**
- * 	Show a title (deprecated. use print_fiche_titre instrad)
+ *	Show a title (deprecated. use print_fiche_titre instrad)
  *
- * 	@param	string	$title			Title to show
- * 	@return	string					Title to show
+ *	@param	string	$title			Title to show
+ *	@return	string					Title to show
  */
 function print_titre($title)
 {
@@ -2460,12 +2290,12 @@ function print_titre($title)
 }
 
 /**
- * 	Show a title with picto
+ *	Show a title with picto
  *
- * 	@param	string	$titre				Title to show
- * 	@param	string	$mesg				Added message to show on right
- * 	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
- * 	@param	int		$pictoisfullpath	1=Icon name is a full absolute url of image
+ *	@param	string	$titre				Title to show
+ *	@param	string	$mesg				Added message to show on right
+ *	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
+ *	@param	int		$pictoisfullpath	1=Icon name is a full absolute url of image
  * 	@param	int		$id					To force an id on html objects
  * 	@return	void
  */
@@ -2475,12 +2305,12 @@ function print_fiche_titre($titre, $mesg='', $picto='title.png', $pictoisfullpat
 }
 
 /**
- * 	Load a title with picto
+ *	Load a title with picto
  *
- * 	@param	string	$titre				Title to show
- * 	@param	string	$mesg				Added message to show on right
- * 	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
- * 	@param	int		$pictoisfullpath	1=Icon name is a full absolute url of image
+ *	@param	string	$titre				Title to show
+ *	@param	string	$mesg				Added message to show on right
+ *	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
+ *	@param	int		$pictoisfullpath	1=Icon name is a full absolute url of image
  * 	@param	int		$id					To force an id on html objects
  * 	@return	void
  */
@@ -2509,20 +2339,20 @@ function load_fiche_titre($titre, $mesg='', $picto='title.png', $pictoisfullpath
 }
 
 /**
- * 	Print a title with navigation controls for pagination
+ *	Print a title with navigation controls for pagination
  *
- * 	@param	string	$titre				Title to show (required)
- * 	@param	string	$page				Numero of page (required)
- * 	@param	string	$file				Url of page (required)
- * 	@param	string	$options         	parametres complementaires lien ('' par defaut)
- * 	@param	string	$sortfield       	champ de tri ('' par defaut)
- * 	@param	string	$sortorder       	ordre de tri ('' par defaut)
- * 	@param	string	$center          	chaine du centre ('' par defaut)
- * 	@param	int		$num				number of records found by select with limit+1
- * 	@param	int		$totalnboflines		Total number of records/lines for all pages (if known)
- * 	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
- * 	@param	int		$pictoisfullpath		1=Icon name is a full absolute url of image
- * 	@return	void
+ *	@param	string	$titre				Title to show (required)
+ *	@param	string	$page				Numero of page (required)
+ *	@param	string	$file				Url of page (required)
+ *	@param	string	$options         	parametres complementaires lien ('' par defaut)
+ *	@param	string	$sortfield       	champ de tri ('' par defaut)
+ *	@param	string	$sortorder       	ordre de tri ('' par defaut)
+ *	@param	string	$center          	chaine du centre ('' par defaut)
+ *	@param	int		$num				number of records found by select with limit+1
+ *	@param	int		$totalnboflines		Total number of records/lines for all pages (if known)
+ *	@param	string	$picto				Icon to use before title (should be a 32x32 transparent png file)
+ *	@param	int		$pictoisfullpath		1=Icon name is a full absolute url of image
+ *	@return	void
  */
 function print_barre_liste($titre, $page, $file, $options='', $sortfield='', $sortorder='', $center='', $num=-1, $totalnboflines=0, $picto='title.png', $pictoisfullpath=0)
 {
@@ -2620,14 +2450,14 @@ function print_barre_liste($titre, $page, $file, $options='', $sortfield='', $so
 }
 
 /**
- * 	Fonction servant a afficher les fleches de navigation dans les pages de listes
+ *	Fonction servant a afficher les fleches de navigation dans les pages de listes
  *
- * 	@param	int		$page				Numero of page
- * 	@param	string	$file				Lien
- * 	@param	string	$options         	Autres parametres d'url a propager dans les liens ("" par defaut)
- * 	@param	int		$nextpage	    	Faut-il une page suivante
- * 	@param	string	$betweenarrows		HTML Content to show between arrows
- * 	@return	void
+ *	@param	int		$page				Numero of page
+ *	@param	string	$file				Lien
+ *	@param	string	$options         	Autres parametres d'url a propager dans les liens ("" par defaut)
+ *	@param	int		$nextpage	    	Faut-il une page suivante
+ *	@param	string	$betweenarrows		HTML Content to show between arrows
+ *	@return	void
  */
 function print_fleche_navigation($page,$file,$options='',$nextpage=0,$betweenarrows='')
 {
@@ -2643,14 +2473,15 @@ function print_fleche_navigation($page,$file,$options='',$nextpage=0,$betweenarr
 	}
 }
 
+
 /**
- * 	Return a string with VAT rate label formated for view output
- * 	Used into pdf and HTML pages
+ *	Return a string with VAT rate label formated for view output
+ *	Used into pdf and HTML pages
  *
- * 	@param	float	$rate			Rate value to format (19.6 19,6 19.6% 19,6%,...)
+ *	@param	float	$rate			Rate value to format (19.6 19,6 19.6% 19,6%,...)
  *  @param	boolean	$addpercent		Add a percent % sign in output
- * 	@param	int		$info_bits		Miscellanous information on vat (0=Default, 1=French NPR vat)
- * 	@param	int		$usestarfornpr	1=Use '*' for NPR vat rate intead of MAIN_LABEL_MENTION_NPR
+ *	@param	int		$info_bits		Miscellanous information on vat (0=Default, 1=French NPR vat)
+ *	@param	int		$usestarfornpr	1=Use '*' for NPR vat rate intead of MAIN_LABEL_MENTION_NPR
  *  @return	string					String with formated amounts (19,6 or 19,6% or 8.5% NPR or 8.5% *)
  */
 function vatrate($rate,$addpercent=false,$info_bits=0,$usestarfornpr=0)
@@ -2672,19 +2503,20 @@ function vatrate($rate,$addpercent=false,$info_bits=0,$usestarfornpr=0)
 	return $ret;
 }
 
+
 /**
- * 		Fonction qui formate un montant pour visualisation
- * 		Fonction utilisee dans les pdf et les pages html
+ *		Fonction qui formate un montant pour visualisation
+ *		Fonction utilisee dans les pdf et les pages html
  *
- * 		@param	float		$amount			Montant a formater
- * 		@param	string		$form			Type de formatage, html ou pas (par defaut)
- * 		@param	Translate	$outlangs		Objet langs pour formatage text
- * 		@param	int			$trunc			1=Tronque affichage si trop de decimales,0=Force le non troncage
- * 		@param	int			$rounding		Minimum number of decimal. If not defined we use min($conf->global->MAIN_MAX_DECIMALS_UNIT,$conf->global->MAIN_MAX_DECIMALS_TOTAL)
- * 		@param	int			$forcerounding	Force the number of decimal
- * 		@return	string						Chaine avec montant formate
+ *		@param	float		$amount			Montant a formater
+ *		@param	string		$form			Type de formatage, html ou pas (par defaut)
+ *		@param	Translate	$outlangs		Objet langs pour formatage text
+ *		@param	int			$trunc			1=Tronque affichage si trop de decimales,0=Force le non troncage
+ *		@param	int			$rounding		Minimum number of decimal. If not defined we use min($conf->global->MAIN_MAX_DECIMALS_UNIT,$conf->global->MAIN_MAX_DECIMALS_TOTAL)
+ *		@param	int			$forcerounding	Force the number of decimal
+ *		@return	string						Chaine avec montant formate
  *
- * 		@see	price2num					Revert function of price
+ *		@see	price2num					Revert function of price
  */
 function price($amount, $form=0, $outlangs='', $trunc=1, $rounding=-1, $forcerounding=-1)
 {
@@ -2748,19 +2580,19 @@ function price($amount, $form=0, $outlangs='', $trunc=1, $rounding=-1, $forcerou
 }
 
 /**
- * 	Function that return a number with universal decimal format (decimal separator is '.') from
- * 	an amount typed by a user.
- * 	Function to use on each input amount before any numeric test or database insert
+ *	Function that return a number with universal decimal format (decimal separator is '.') from
+ *	an amount typed by a user.
+ *	Function to use on each input amount before any numeric test or database insert
  *
- * 	@param	float	$amount			Amount to convert/clean
- * 	@param	string	$rounding		''=No rounding
+ *	@param	float	$amount			Amount to convert/clean
+ *	@param	string	$rounding		''=No rounding
  * 									'MU'=Round to Max unit price (MAIN_MAX_DECIMALS_UNIT)
- * 									'MT'=Round to Max for totals with Tax (MAIN_MAX_DECIMALS_TOT)
- * 									'MS'=Round to Max Shown (MAIN_MAX_DECIMALS_SHOWN)
+ *									'MT'=Round to Max for totals with Tax (MAIN_MAX_DECIMALS_TOT)
+ *									'MS'=Round to Max Shown (MAIN_MAX_DECIMALS_SHOWN)
  * 	@param	int		$alreadysqlnb	Put 1 if you know that content is already universal format number
- * 	@return	string					Amount with universal numeric format (Example: '99.99999')
+ *	@return	string					Amount with universal numeric format (Example: '99.99999')
  *
- * 	@see    price					Opposite function of price2num
+ *	@see    price					Opposite function of price2num
  */
 function price2num($amount,$rounding='',$alreadysqlnb=0)
 {
@@ -3064,13 +2896,13 @@ function get_product_localtax_for_country($idprod, $local, $thirdparty_seller)
 }
 
 /**
- * 	Function that return vat rate of a product line (according to seller, buyer and product vat rate)
+ *	Function that return vat rate of a product line (according to seller, buyer and product vat rate)
  *   Si vendeur non assujeti a TVA, TVA par defaut=0. Fin de regle.
- * 	 Si le (pays vendeur = pays acheteur) alors TVA par defaut=TVA du produit vendu. Fin de regle.
- * 	 Si (vendeur et acheteur dans Communaute europeenne) et (bien vendu = moyen de transports neuf comme auto, bateau, avion) alors TVA par defaut=0 (La TVA doit etre paye par acheteur au centre d'impots de son pays et non au vendeur). Fin de regle.
- * 	 Si (vendeur et acheteur dans Communaute europeenne) et (acheteur = particulier ou entreprise sans num TVA intra) alors TVA par defaut=TVA du produit vendu. Fin de regle
- * 	 Si (vendeur et acheteur dans Communaute europeenne) et (acheteur = entreprise avec num TVA) intra alors TVA par defaut=0. Fin de regle
- * 	 Sinon TVA proposee par defaut=0. Fin de regle.
+ *	 Si le (pays vendeur = pays acheteur) alors TVA par defaut=TVA du produit vendu. Fin de regle.
+ *	 Si (vendeur et acheteur dans Communaute europeenne) et (bien vendu = moyen de transports neuf comme auto, bateau, avion) alors TVA par defaut=0 (La TVA doit etre paye par acheteur au centre d'impots de son pays et non au vendeur). Fin de regle.
+ *	 Si (vendeur et acheteur dans Communaute europeenne) et (acheteur = particulier ou entreprise sans num TVA intra) alors TVA par defaut=TVA du produit vendu. Fin de regle
+ *	 Si (vendeur et acheteur dans Communaute europeenne) et (acheteur = entreprise avec num TVA) intra alors TVA par defaut=0. Fin de regle
+ *	 Sinon TVA proposee par defaut=0. Fin de regle.
  *
  *	@param	Societe		$thirdparty_seller    	Objet societe vendeuse
  *	@param  Societe		$thirdparty_buyer   	Objet societe acheteuse
@@ -3149,13 +2981,14 @@ function get_default_tva($thirdparty_seller, $thirdparty_buyer, $idprod=0, $idpr
 	return 0;
 }
 
+
 /**
- * 	Fonction qui renvoie si tva doit etre tva percue recuperable
+ *	Fonction qui renvoie si tva doit etre tva percue recuperable
  *
  *	@param	Societe		$thirdparty_seller    	Objet societe vendeuse
  *	@param  Societe		$thirdparty_buyer   	Objet societe acheteuse
  *  @param  int			$idprod                 Id product
- * 	@return float       			        	0 or 1
+ *	@return float       			        	0 or 1
  */
 function get_default_npr($thirdparty_seller, $thirdparty_buyer, $idprod)
 {
@@ -3211,12 +3044,12 @@ function get_default_localtax($thirdparty_seller, $thirdparty_buyer, $local, $id
 }
 
 /**
- * 	Return yes or no in current language
+ *	Return yes or no in current language
  *
- * 	@param	string	$yesno			Value to test (1, 'yes', 'true' or 0, 'no', 'false')
- * 	@param	string	$case			1=Yes/No, 0=yes/no
- * 	@param	int		$color			0=texte only, 1=Text is formated with a color font style ('ok' or 'error'), 2=Text is formated with 'ok' color.
- * 	@return	string					HTML string
+ *	@param	string	$yesno			Value to test (1, 'yes', 'true' or 0, 'no', 'false')
+ *	@param	string	$case			1=Yes/No, 0=yes/no
+ *	@param	int		$color			0=texte only, 1=Text is formated with a color font style ('ok' or 'error'), 2=Text is formated with 'ok' color.
+ *	@return	string					HTML string
  */
 function yn($yesno, $case=1, $color=0)
 {
@@ -3237,13 +3070,14 @@ function yn($yesno, $case=1, $color=0)
 	return $result;
 }
 
+
 /**
- * 	Return a path to have a directory according to an id
+ *	Return a path to have a directory according to an id
  *  Examples:       '001' with level 3->"0/0/1/", '015' with level 3->"0/1/5/"
  *  Examples:       'ABC-1' with level 3 ->"0/0/1/", '015' with level 1->"5/"
  *
- * 	@param	string	$num            Id to develop
- * 	@param  int		$level		    Level of development (1, 2 or 3 level)
+ *	@param	string	$num            Id to develop
+ *	@param  int		$level		    Level of development (1, 2 or 3 level)
  * 	@param	int		$alpha		    Use alpha ref
  *  @param  int		$withoutslash   0=With slash at end, 1=without slash at end
  *  @return	string					Dir to use
@@ -3262,7 +3096,7 @@ function get_exdir($num,$level=3,$alpha=0,$withoutslash=0)
 }
 
 /**
- * 	Creation of a directory (this can create recursive subdir)
+ *	Creation of a directory (this can create recursive subdir)
  *
  *	@param	string	$dir		Directory to create (Separator must be '/'. Example: '/mydir/mysubdir')
  *	@param	string	$dataroot	Data root directory (To avoid having the data root in the loop. Using this will also lost the warning on first dir PHP has no permission when open_basedir is used)
@@ -3330,23 +3164,25 @@ function dol_mkdir($dir, $dataroot='')
 	return ($nberr ? -$nberr : $nbcreated);
 }
 
+
 /**
- * 	Return picto saying a field is required
+ *	Return picto saying a field is required
  *
- * 	@return  string		Chaine avec picto obligatoire
+ *	@return  string		Chaine avec picto obligatoire
  */
 function picto_required()
 {
 	return '<span class="fieldrequired">*</span>';
 }
 
+
 /**
- * 	Clean a string from all HTML tags and entities
+ *	Clean a string from all HTML tags and entities
  *
- * 	@param	string	$StringHtml			String to clean
- * 	@param	string	$removelinefeed		Replace also all lines feeds by a space
+ *	@param	string	$StringHtml			String to clean
+ *	@param	string	$removelinefeed		Replace also all lines feeds by a space
  *  @param  string	$pagecodeto      	Encoding of input string
- * 	@return string	    				String cleaned
+ *	@return string	    				String cleaned
  */
 function dol_string_nohtmltag($StringHtml,$removelinefeed=1,$pagecodeto='UTF-8')
 {
@@ -3366,13 +3202,14 @@ function dol_string_nohtmltag($StringHtml,$removelinefeed=1,$pagecodeto='UTF-8')
 	return $CleanString;
 }
 
+
 /**
- * 	Replace CRLF in string with a HTML BR tag
+ *	Replace CRLF in string with a HTML BR tag
  *
- * 	@param	string	$stringtoencode		String to encode
- * 	@param	string	$nl2brmode			0=Adding br before \n, 1=Replacing \n by br
+ *	@param	string	$stringtoencode		String to encode
+ *	@param	string	$nl2brmode			0=Adding br before \n, 1=Replacing \n by br
  *  @param  string	$forxml             false=Use <br>, true=Use <br />
- * 	@return	string						String encoded
+ *	@return	string						String encoded
  */
 function dol_nl2br($stringtoencode,$nl2brmode=0,$forxml=false)
 {
@@ -3390,7 +3227,7 @@ function dol_nl2br($stringtoencode,$nl2brmode=0,$forxml=false)
 }
 
 /**
- * 	This function is called to encode a string into a HTML string but differs from htmlentities because
+ *	This function is called to encode a string into a HTML string but differs from htmlentities because
  * 	all entities but &,<,> are converted. This permits to encode special chars to entities with no double
  *  encoding for already encoded HTML strings.
  * 	This function also remove last CR/BR.
@@ -3400,8 +3237,8 @@ function dol_nl2br($stringtoencode,$nl2brmode=0,$forxml=false)
  *              Because writeHTMLCell convert also \n into <br>, if function
  *              is used to build PDF, nl2brmode must be 1
  *
- * 	@param	string	$stringtoencode		String to encode
- * 	@param	int		$nl2brmode			0=Adding br before \n, 1=Replacing \n by br (for use with FPDF writeHTMLCell function for example)
+ *	@param	string	$stringtoencode		String to encode
+ *	@param	int		$nl2brmode			0=Adding br before \n, 1=Replacing \n by br (for use with FPDF writeHTMLCell function for example)
  *  @param  string	$pagecodefrom       Pagecode stringtoencode is encoded
  *  @return	string						String encoded
  */
@@ -3427,11 +3264,11 @@ function dol_htmlentitiesbr($stringtoencode,$nl2brmode=0,$pagecodefrom='UTF-8')
 }
 
 /**
- * 	This function is called to decode a HTML string (it decodes entities and br tags)
+ *	This function is called to decode a HTML string (it decodes entities and br tags)
  *
- * 	@param	string	$stringtodecode		String to decode
- * 	@param	string	$pagecodeto			Page code for result
- * 	@return	string						String decoded
+ *	@param	string	$stringtodecode		String to decode
+ *	@param	string	$pagecodeto			Page code for result
+ *	@return	string						String decoded
  */
 function dol_htmlentitiesbr_decode($stringtodecode,$pagecodeto='UTF-8')
 {
@@ -3444,10 +3281,10 @@ function dol_htmlentitiesbr_decode($stringtodecode,$pagecodeto='UTF-8')
 }
 
 /**
- * 	This function remove all ending \n and br at end
+ *	This function remove all ending \n and br at end
  *
- * 	@param	string	$stringtodecode		String to decode
- * 	@return	string						String decoded
+ *	@param	string	$stringtodecode		String to decode
+ *	@return	string						String decoded
  */
 function dol_htmlcleanlastbr($stringtodecode)
 {
@@ -3485,13 +3322,14 @@ function dol_htmlentities($a,$b,$c='UTF-8')
 	return $ret;
 }
 
+
 /**
- * 	Check if a string is a correct iso string
- * 	If not, it will we considered not HTML encoded even if it is by FPDF.
- * 	Example, if string contains euro symbol that has ascii code 128
+ *	Check if a string is a correct iso string
+ *	If not, it will we considered not HTML encoded even if it is by FPDF.
+ *	Example, if string contains euro symbol that has ascii code 128
  *
- * 	@param	string	$s      String to check
- * 	@return	int     		0 if bad iso, 1 if good iso
+ *	@param	string	$s      String to check
+ *	@return	int     		0 if bad iso, 1 if good iso
  */
 function dol_string_is_good_iso($s)
 {
@@ -3507,12 +3345,13 @@ function dol_string_is_good_iso($s)
 	return $ok;
 }
 
+
 /**
- * 	Return nb of lines of a clear text
+ *	Return nb of lines of a clear text
  *
- * 	@param	string	$s			String to check
+ *	@param	string	$s			String to check
  * 	@param	string	$maxchar	Not yet used
- * 	@return	int					Number of lines
+ *	@return	int					Number of lines
  */
 function dol_nboflines($s,$maxchar=0)
 {
@@ -3523,13 +3362,14 @@ function dol_nboflines($s,$maxchar=0)
 	return $nb;
 }
 
+
 /**
  *	Return nb of lines of a formated text with \n and <br> (we can't have both \n and br)
  *
- * 	@param	string	$text      		Text
- * 	@param	int		$maxlinesize  	Largeur de ligne en caracteres (ou 0 si pas de limite - defaut)
+ *	@param	string	$text      		Text
+ *	@param	int		$maxlinesize  	Largeur de ligne en caracteres (ou 0 si pas de limite - defaut)
  * 	@param	string	$charset		Give the charset used to encode the $text variable in memory.
- * 	@return int						Number of lines
+ *	@return int						Number of lines
  */
 function dol_nboflines_bis($text,$maxlinesize=0,$charset='UTF-8')
 {
@@ -3563,9 +3403,9 @@ function dol_nboflines_bis($text,$maxlinesize=0,$charset='UTF-8')
 }
 
 /**
- * 	 Same function than microtime in PHP 5 but compatible with PHP4
+ *	 Same function than microtime in PHP 5 but compatible with PHP4
  *
- * 	 @return		float		Time (millisecondes) with microsecondes in decimal part
+ *	 @return		float		Time (millisecondes) with microsecondes in decimal part
  */
 function dol_microtime_float()
 {
@@ -3801,39 +3641,13 @@ function dol_htmloutput_events()
 }
 
 /**
- * 	Print formated messages to output (Used to show messages on html output).
+ *	Get formated messages to output (Used to show messages on html output).
  *
- *  @return	void
- *  @see    dol_htmloutput_mesg
- */
-function dol_htmloutput_events() {
-    // Show mesgs
-    if (isset($_SESSION['dol_events']['mesgs'])) {
-        dol_htmloutput_mesg('', $_SESSION['dol_events']['mesgs']);
-        unset($_SESSION['dol_events']['mesgs']);
-    }
-
-    // Show errors
-    if (isset($_SESSION['dol_events']['errors'])) {
-        dol_htmloutput_mesg('', $_SESSION['dol_events']['errors'], 'error');
-        unset($_SESSION['dol_events']['errors']);
-    }
-
-    // Show warnings
-    if (isset($_SESSION['dol_events']['warnings'])) {
-        dol_htmloutput_mesg('', $_SESSION['dol_events']['warnings'], 'warning');
-        unset($_SESSION['dol_events']['warnings']);
-    }
-}
-
-/**
- * 	Get formated messages to output (Used to show messages on html output).
- *
- * 	@param	string		$mesgstring		Message string
- * 	@param	array		$mesgarray      Messages array
+ *	@param	string		$mesgstring		Message string
+ *	@param	array		$mesgarray      Messages array
  *  @param  string		$style          Style of message output ('ok' or 'error')
  *  @param  int			$keepembedded   Set to 1 in error message must be kept embedded into its html place (this disable jnotify)
- * 	@return	string						Return html output
+ *	@return	string						Return html output
  *
  *  @see    dol_print_error
  *  @see    dol_htmloutput_errors
@@ -3919,10 +3733,10 @@ function get_htmloutput_errors($mesgstring='', $mesgarray='', $keepembedded=0)
 }
 
 /**
- * 	Print formated messages to output (Used to show messages on html output).
+ *	Print formated messages to output (Used to show messages on html output).
  *
- * 	@param	string	$mesgstring		 Message
- * 	@param	array	$mesgarray       Messages array
+ *	@param	string	$mesgstring		 Message
+ *	@param	array	$mesgarray       Messages array
  *  @param  string	$style           Which style to use ('ok', 'warning', 'error')
  *  @param  int		$keepembedded    Set to 1 if message must be kept embedded into its html place (this disable jnotify)
  *  @return	void
@@ -4022,6 +3836,7 @@ function dol_sort_array(&$array, $index, $order='asc', $natsort=0, $case_sensiti
 	return $array;
 }
 
+
 /**
  *      Check if a string is in UTF8
  *
@@ -4049,6 +3864,7 @@ function utf8_check($str)
 	return true;
 }
 
+
 /**
  *      Return an UTF-8 string encoded into OS filesystem encoding. This function is used to define
  * 	    value to pass to filesystem PHP functions.
@@ -4068,6 +3884,7 @@ function dol_osencode($str)
 	if ($tmp == 'iso-8859-1') return utf8_decode($str);
 	return $str;
 }
+
 
 /**
  *      Return an id or code from a code or id. Store Code-Id in a cache.
@@ -4160,13 +3977,14 @@ function dol_eval($s,$returnvalue=0)
 }
 
 /**
- * Return if var element is ok
- *
- * @param   string      $element    Variable to check
- * @return  boolean                 Return true of variable is not empty
- */
-function dol_validElement($element) {
-    return (trim($element) != '');
+* Return if var element is ok
+*
+* @param   string      $element    Variable to check
+* @return  boolean                 Return true of variable is not empty
+*/
+function dol_validElement($element)
+{
+	return (trim($element) != '');
 }
 
 /**
@@ -4213,7 +4031,7 @@ function picto_from_langcode($codelang)
  *  @param  int			&$h             New position to fill
  *  @param  string		$type           Value for object where objectvalue can be
  *                              		'thirdparty'       to add a tab in third party view
- * 		                              	'intervention'     to add a tab in intervention view
+ *		                              	'intervention'     to add a tab in intervention view
  *     		                         	'supplier_order'   to add a tab in supplier order view
  *          		                    'supplier_invoice' to add a tab in supplier invoice view
  *                  		            'invoice'          to add a tab in customer invoice view
@@ -4225,7 +4043,7 @@ function picto_from_langcode($codelang)
  * 		        	                    'member'           to add a tab in fundation member view
  *      		                        'categories_x'	   to add a tab in category view ('x': type of category (0=product, 1=supplier, 2=customer, 3=member)
  *  @param  string		$mode  	        'add' to complete head, 'remove' to remove entries
- * 	@return	void
+ *	@return	void
  */
 function complete_head_from_modules($conf,$langs,$object,&$head,&$h,$type,$mode='add')
 {
@@ -4235,10 +4053,11 @@ function complete_head_from_modules($conf,$langs,$object,&$head,&$h,$type,$mode=
 		{
 			$values=explode(':',$value);
 
-            if ($mode == 'add' && !preg_match('/^\-/', $values[1])) {
-                if (count($values) == 6) {       // new declaration with permissions:  $value='objecttype:+tabname1:Title1:langfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__'
-                    if ($values[0] != $type)
-                        continue;
+			if ($mode == 'add' && ! preg_match('/^\-/',$values[1]))
+			{
+				if (count($values) == 6)       // new declaration with permissions:  $value='objecttype:+tabname1:Title1:langfile@mymodule:$user->rights->mymodule->read:/mymodule/mynewtab1.php?id=__ID__'
+				{
+					if ($values[0] != $type) continue;
 
 					if (verifCond($values[4]))
 					{
@@ -4372,7 +4191,7 @@ function printCommonFooter($zone='private')
 }
 
 /**
- * 	Convert an array with RGB value into hex RGB value
+ *	Convert an array with RGB value into hex RGB value
  *
  *  @param	array	$arraycolor			Array
  *  @param	string	$colorifnotfound	Color code to return if entry not defined
@@ -4430,46 +4249,4 @@ if (! function_exists('getmypid'))
 	}
 }
 
-/**
- * Get type of one localtax
- *
- *  @param		int	$vatrate			VAT Rate
- *  @param		int	$number             Number of localtax (1 / 2)
- *  @param		int	$thirdparty         company object
- *  @return		array      				array(Type of local tax (1 to 7 / 0 if not found), rate or amount of localtax)
- */
-function getTypeOfLocalTaxFromRate($vatrate, $number, $thirdparty) {
-    global $db;
-
-    // Search local taxes
-    $sql = "SELECT t.localtax1, t.localtax1_type, t.localtax2, t.localtax2_type";
-    $sql .= " FROM " . MAIN_DB_PREFIX . "c_tva as t, " . MAIN_DB_PREFIX . "c_pays as p";
-    $sql .= " WHERE t.fk_pays = p.rowid AND p.code = '" . $thirdparty->country_code . "'";
-    $sql .= " AND t.taux = " . $vatrate . " AND t.active = 1";
-
-    $resql = $db->query($sql);
-    if ($resql) {
-        $obj = $db->fetch_object($resql);
-        if ($number == 1)
-            return array($obj->localtax1_type, $obj->localtax1);
-        elseif ($number == 2)
-            return array($obj->localtax2_type, $obj->localtax2);
-    }
-
-    return 0;
-}
-
-if (!function_exists('getmypid')) {
-
-    /**
-     * Return random PID
-     * Some web hosts disable this php function for security reasons
-     *
-     * @return	int
-     */
-    function getmypid() {
-        return rand(1, 32768);
-    }
-
-}
 ?>

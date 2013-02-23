@@ -1510,6 +1510,10 @@ function left_menu($menu_array_before, $helppagename='', $moresearchform='', $me
 	    $menuleft=new MenuLeft($db,$menu_array_before,$menu_array_after);
 	    $menuleft->showmenu(); // output menu_array and menu found in database
 
+            /* Mod drsi*/
+            global $synopsisHook;
+            print $synopsisHook->getMenu();
+            /*FMod drsi*/
 
 	    // Show other forms
 	    if ($searchform)

@@ -108,7 +108,7 @@ class box_fournisseurs extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/fourn/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->dc, "day"));
+                    'text' => dol_print_date($objp->dc, "day"));
 
                     $i++;
                 }

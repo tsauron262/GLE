@@ -151,7 +151,7 @@ class ContratGA extends Synopsis_Contrat{
 
                 $ligne                 = new ContratLigne($this->db);
                 $ligne->id             = $objp->rowid;
-                $ligne->desc           = $objp->description;  // Description ligne
+                $ligne->description           = $objp->description;  // Description ligne
                 $ligne->description    = $objp->description;  // Description ligne
                 $ligne->qty            = $objp->qty;
                 $ligne->tva_tx         = $objp->tva_tx;
@@ -187,7 +187,7 @@ class ContratGA extends Synopsis_Contrat{
                 } else {
                     $this->lignes[]        = $ligne;
                 }
-                //dol_syslog("1 ".$ligne->desc);
+                //dol_syslog("1 ".$ligne->description);
                 //dol_syslog("2 ".$ligne->product_desc);
 
                 if ($ligne->statut == 0) $this->nbofserviceswait++;
@@ -234,7 +234,7 @@ class ContratGA extends Synopsis_Contrat{
                 $ligne                 = new ContratLigne($this->db);
                 $ligne->id                = $objp->rowid;
                 $ligne->libelle        = stripslashes($objp->description);
-                $ligne->desc           = stripslashes($objp->description);
+                $ligne->description           = stripslashes($objp->description);
                 $ligne->qty            = $objp->qty;
                 $ligne->statut            = $objp->statut;
                 $ligne->ref            = $objp->ref;

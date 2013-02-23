@@ -108,7 +108,7 @@ class box_prospect extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/comm/prospect/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->dc, "day"));
+                    'text' => dol_print_date($objp->dc, "day"));
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
                     'width' => 18,

@@ -51,6 +51,7 @@ else
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
     
     $maj->req("UPDATE `".MAIN_DB_PREFIX."commandedet` SET `product_type`= 5 WHERE `fk_product` is null AND `total_ttc` = 0");
+    $maj->req("UPDATE `".MAIN_DB_PREFIX."contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `llx_Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
 } else {
     echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
 }
@@ -224,6 +225,10 @@ function getTab() {
             array('rowid', 'fk_facture', 'fk_product', 'description', 'tva_taux', 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'subprice', 'price', 'total_ht', 'total_tva', 'total_ttc', 'product_type', 'date_start', 'date_end', 'info_bits', 'fk_code_ventilation', 'fk_export_compta', 'special_code', 'rang'/* ,              'durSav', 'coef', 'lineFromComId', 'lineFromPropId' */),
             array('rowid', 'fk_facture'/* , 'fk_parent_line' */, 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'subprice', 'price', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */'total_ttc', 'product_type', 'date_start', 'date_end', 'info_bits', 'fk_code_ventilation', 'fk_export_compta', 'special_code', 'rang'/* , 'import_key' */)
         ),
+        array($oldPref."societe_remise_except", MAIN_DB_PREFIX."societe_remise_except",
+            array(),
+            array()
+        ),
         array($oldPref."fa_pr", MAIN_DB_PREFIX."element_element",
             array('fk_propal', '$%propal', 'fk_facture', '$%facture'),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
@@ -295,6 +300,10 @@ function getTab() {
         array($oldPref."contratdet", MAIN_DB_PREFIX."contratdet",
             array('rowid', 'tms', 'fk_contrat', 'fk_product', 'statut', 'label', 'description', 'fk_remise_except', 'date_commande', 'date_ouverture_prevue', 'date_ouverture', 'date_fin_validite', 'date_cloture', 'tva_tx',                                 'qty', 'remise_percent'/*, 'isSubPricePerMonth'*/, 'subprice', 'price_ht', 'remise', 'total_ht', 'total_tva',                                       'total_ttc', 'info_bits', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture', 'commentaire'),//, 'line_order', 'fk_commande_ligne', 'avenant', 'date_valid', 'prod_duree_loc'),
             array('rowid', 'tms', 'fk_contrat', 'fk_product', 'statut', 'label', 'description', 'fk_remise_except', 'date_commande', 'date_ouverture_prevue', 'date_ouverture', 'date_fin_validite', 'date_cloture', 'tva_tx'/*, 'localtax1_tx', 'localtax2_tx'*/, 'qty', 'remise_percent',                       'subprice', 'price_ht', 'remise', 'total_ht', 'total_tva'/*, 'total_localtax1', 'total_localtax2'*/, 'total_ttc', 'info_bits', 'fk_user_author', 'fk_user_ouverture', 'fk_user_cloture', 'commentaire')
+        ),
+        array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX."Synopsis_contratdet_GMAO",
+            array(),
+            array()
         ),
         array("Babel_demandeInterv", MAIN_DB_PREFIX."Synopsis_demandeInterv",
             array(),

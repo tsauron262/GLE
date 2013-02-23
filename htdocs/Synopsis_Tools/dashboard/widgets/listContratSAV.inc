@@ -111,7 +111,7 @@ function widget_listContratSAV() {
                 $staticcompany->id=$obj->socid;
                 $staticcompany->fetch($obj->socid);
                 $staticcompany->nom=$obj->nom;
-                $table2 .=  $staticcompany->getNomUrl(1,'',20);
+//                $table2 .=  $staticcompany->getNomUrl(1,'',20);
                 $table2 .=  '</td>';
                 $table2 .=  '<td align="center">'.dol_print_date($obj->tms,'day').'</td>';
                 //$table .=  '<td align="left">'.$staticcontrat->LibStatut($obj->statut,2).'</td>';

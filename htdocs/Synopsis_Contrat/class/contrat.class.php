@@ -3,30 +3,28 @@
 require_once DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php";
 
 class Synopsis_Contrat extends Contrat {
-    
+
     public $db;
     public $product;
     public $societe;
     public $user_service;
     public $user_cloture;
     public $client_signataire;
-
     //Special maintenance
 
-    public $sumDInterByStatut=array();
-    public $sumDInterByUser=array();
-    public $sumDInterCal=array();
+    public $sumDInterByStatut = array();
+    public $sumDInterByUser = array();
+    public $sumDInterCal = array();
     public $totalDInter = 0;
     public $totalFInter = 0;
-    
-    
-    public function _construct($db){
-        $this->db = $db ;
+
+    public function _construct($db) {
+        $this->db = $db;
         $this->product = new Product($this->db);
         $this->societe = new Societe($this->db);
         $this->user_service = new User($this->db);
         $this->user_cloture = new User($this->db);
-        $this->client_signataire = new User($this->db);        
+        $this->client_signataire = new User($this->db);
     }
 
     public function getTypeContrat_noLoad($id) {
@@ -38,6 +36,8 @@ class Synopsis_Contrat extends Contrat {
 
     public function fetch($id, $ref = '') {
         $ret = parent::fetch($id, $ref);
+        $this->societe = new Societe($this->db);
+        $this->societe->fetch($this->socid);
         $requete = "SELECT durValid,
                            unix_timestamp(DateDeb) as DateDebU,
                            fk_prod,
@@ -48,22 +48,20 @@ class Synopsis_Contrat extends Contrat {
                            maintenance,
                            SLA,unix_timestamp(dateAnniv) as dateAnnivU,
                            isSAV
-                      FROM ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
-                     WHERE contrat_refid =".$id;
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
+                     WHERE contrat_refid =" . $id;
         $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql)>0)
-        {
+        if ($this->db->num_rows($sql) > 0) {
             $res = $this->db->fetch_object($sql);
 
             $this->durValid = $res->durValid;
             $this->DateDeb = $res->DateDebU;
             $this->dateAnniv = $res->dateAnnivU;
-            $this->dateAnnivFR = date('d/m/Y',$res->dateAnnivU);
-            $this->DateDebFR = date('d/m/Y',$res->DateDebU);
+            $this->dateAnnivFR = date('d/m/Y', $res->dateAnnivU);
+            $this->DateDebFR = date('d/m/Y', $res->DateDebU);
             $this->fk_prod = $res->fk_prod;
-            if ($this->fk_prod > 0)
-            {
-                require_once(DOL_DOCUMENT_ROOT.'/product/class/product.class.php');
+            if ($this->fk_prod > 0) {
+                require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
                 $prodTmp = new Product($this->db);
                 $prodTmp->fetch($this->fk_prod);
                 $this->prod = $prodTmp;
@@ -76,164 +74,512 @@ class Synopsis_Contrat extends Contrat {
             $this->SLA = $res->SLA;
             $this->isSAV = $res->isSAV;
 
-            $requete = "SELECT unix_timestamp(date_add(date_add(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product_extrafields.0dureeSav,0) MONTH)) as dfinprev,
-                               unix_timestamp(date_add(date_add(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb, INTERVAL ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(".MAIN_DB_PREFIX."product_extrafields.0dureeSav,0) MONTH)) as dfin,
-                               unix_timestamp(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb) as ddeb,
-                               unix_timestamp(".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.DateDeb) as ddebprev,
-                               ".MAIN_DB_PREFIX."contratdet.qty,
-                               ".MAIN_DB_PREFIX."contratdet.rowid,
-                               ".MAIN_DB_PREFIX."contratdet.subprice as pu,
-                               ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.durValid as durVal,
-                               ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.fk_contrat_prod,
-                               ".MAIN_DB_PREFIX."product_extrafields.0dureeSav,
-                               ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.serial_number
-                          FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO, ".MAIN_DB_PREFIX."contratdet
-                     LEFT JOIN ".MAIN_DB_PREFIX."product_extrafields ON fk_object = ".MAIN_DB_PREFIX."contratdet.fk_product
-                     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_product_serial_cont ON ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_id = ".MAIN_DB_PREFIX."contratdet.rowid AND ".MAIN_DB_PREFIX."Synopsis_product_serial_cont.element_type LIKE 'contrat%'
-                         WHERE ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO.contratdet_refid = ".MAIN_DB_PREFIX."contratdet.rowid
-                           AND fk_contrat =".$id;
+            $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,0) MONTH)) as dfinprev,
+                               unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,0) MONTH)) as dfin,
+                               unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddeb,
+                               unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddebprev,
+                               " . MAIN_DB_PREFIX . "contratdet.qty,
+                               " . MAIN_DB_PREFIX . "contratdet.rowid,
+                               " . MAIN_DB_PREFIX . "contratdet.subprice as pu,
+                               " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid as durVal,
+                               " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.fk_contrat_prod,
+                               " . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,
+                               " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.serial_number
+                          FROM " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO, " . MAIN_DB_PREFIX . "contratdet
+                     LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = " . MAIN_DB_PREFIX . "contratdet.fk_product
+                     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont ON " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_id = " . MAIN_DB_PREFIX . "contratdet.rowid AND " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_type LIKE 'contrat%'
+                         WHERE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.contratdet_refid = " . MAIN_DB_PREFIX . "contratdet.rowid
+                           AND fk_contrat =" . $id;
             $sql = $this->db->query($requete);
-            while ($res=$this->db->fetch_object($sql))
-            {
-                $this->lineTkt[$res->rowid]=array(
-                    'serial_number'=>$res->serial_number ,
-                    'fk_contrat_prod' => ($res->fk_contrat_prod>0?$res->fk_contrat_prod:false),
+            while ($res = $this->db->fetch_object($sql)) {
+                $this->lineTkt[$res->rowid] = array(
+                    'serial_number' => $res->serial_number,
+                    'fk_contrat_prod' => ($res->fk_contrat_prod > 0 ? $res->fk_contrat_prod : false),
                     'durVal' => $res->durVal,
                     'durSav' => $res->durSav,
-                    'qty'=>$res->qty,
-                    'pu'=>$res->pu,
-                    'dfinprev'=>$res->dfinprev,
-                    'dfin'=>$res->dfin,
-                    'ddeb'=>$res->ddeb,
-                    'ddebprev'=>$res->ddebprev);
+                    'qty' => $res->qty,
+                    'pu' => $res->pu,
+                    'dfinprev' => $res->dfinprev,
+                    'dfin' => $res->dfin,
+                    'ddeb' => $res->ddeb,
+                    'ddebprev' => $res->ddebprev);
             }
         }
         $this->type = $this->extraparams;
         return($ret);
     }
 
+//    
+//    public function fetch_lines($byid = false) {
+//        $this->nbofserviceswait = 0;
+//        $this->nbofservicesopened = 0;
+//        $this->nbofservicesclosed = 0;
+//        $this->lignes = array();
+//        // Selectionne les lignes contrats liees a un produit
+//
+//        $sql = "SELECT p.label,
+//                       p.description as product_desc,
+//                       p.ref,
+//                       d.rowid,
+//                       d.statut,
+//                       d.description,
+//                       d.price_ht,
+//                       d.tva_tx,
+//                       d.line_order,
+//                       g.type,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+//                       g.durValid as GMAO_durVal,
+//                       g.hotline as GMAO_hotline,
+//                       g.telemaintenance as GMAO_telemaintenance,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.SLA as GMAO_sla,
+//                       g.clause as GMAO_clause,
+//                       g.isSAV as GMAO_isSAV,
+//                       g.qte as GMAO_qte,
+//                       g.nbVisite as GMAO_nbVisite,
+//                       g.fk_prod as GMAO_fk_prod,
+//                       g.reconductionAuto as GMAO_reconductionAuto,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.prorataTemporis as GMAO_prorata,
+//                       g.prixAn1 as GMAO_prixAn1,
+//                       g.prixAnDernier as GMAO_prixAnDernier,
+//                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+//                       g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
+//                       g.qteTktPerDuree as GMAO_qteTktPerDuree,
+//                       sc.serial_number as GMAO_serial_number,
+//                       d.total_ht,
+//                       d.qty,
+//                       d.remise_percent,
+//                       d.subprice,
+//                       d.info_bits,
+//                       d.fk_product,
+//                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
+//                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
+//                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
+//                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
+//                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
+//                       ifnull(d.avenant,9999999999) as avenant
+//                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+//             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+//                 WHERE d.fk_contrat = " . $this->id . "
+//              ORDER BY avenant, line_order";
+//        $sql = "SELECT d.rowid, g.type,
+//                       unix_timestamp(date_add(g.DateDeb, INTERVAL g.durValid month)) as GMAO_dfinprev,
+//                       unix_timestamp(date_add(g.DateDeb, INTERVAL g.durValid month)) as GMAO_dfin,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+//                       g.durValid as GMAO_durVal,
+//                       g.hotline as GMAO_hotline,
+//                       g.telemaintenance as GMAO_telemaintenance,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.SLA as GMAO_sla,
+//                       g.clause as GMAO_clause,
+//                       g.isSAV as GMAO_isSAV,
+//                       g.qte as GMAO_qte,
+//                       g.nbVisite as GMAO_nbVisite,
+//                       g.fk_prod as GMAO_fk_prod,
+//                       g.reconductionAuto as GMAO_reconductionAuto,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.prorataTemporis as GMAO_prorata,
+//                       g.prixAn1 as GMAO_prixAn1,
+//                       g.prixAnDernier as GMAO_prixAnDernier,
+//                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+//                       g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
+//                       g.qteTktPerDuree as GMAO_qteTktPerDuree
+//                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+//                 WHERE d.fk_contrat = " . $this->id;
+////date_debut_prevue = $objp->date_ouverture_prevue;
+//print $sql;
+////                //$ligne->date_debut_reel   = $objp->date_ouverture;
+//        dol_syslog("Contrat::fetch_lignes sql=" . $sql);
+//        $result = $this->db->query($sql);
+//        if ($result) {
+//            $this->lignes = array();
+//            $num = $this->db->num_rows($result);
+//            $i = 0;
+//
+//            while ($objp = $this->db->fetch_object($result)) {
+//
+//                $ligne = new ContratLigne($this->db);
+//                $ligne->fetch($objp->rowid);
+////                $ligne->description = $objp->description;  // Description ligne
+////                $ligne->description = $objp->description;  // Description ligne
+////                $ligne->qty = $objp->qty;
+////                $ligne->fk_contrat = $this->id;
+////                $ligne->tva_tx = $objp->tva_tx;
+////                $ligne->subprice = $objp->subprice;
+////                $ligne->statut = $objp->statut;
+////                $ligne->remise_percent = $objp->remise_percent;
+////                $ligne->price = $objp->total_ht;
+////                $ligne->total_ht = $objp->total_ht;
+////                $ligne->fk_product = $objp->fk_product;
+////                $ligne->type = $objp->type;           //contrat Mixte
+////                $ligne->avenant = $objp->avenant;
+////                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+////                $tmpProd = new Product($this->db);
+////                $tmpProd1 = new Product($this->db);
+////                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
+////                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
+////                $ligne->product = $tmpProd1;
+//////LineTkt
+//////                    'serial_number'=>$res->serial_number ,
+//                $ligne->GMAO_Mixte = array();
+//                $ligne->GMAO_Mixte = array(
+//                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
+//                    'contrat_prod' => $tmpProd,
+//                    'durVal' => $objp->GMAO_durVal,
+//                    'tickets' => $objp->GMAO_qte,
+//                    'qty' => $objp->qty,
+//                    'pu' => $objp->subprice,
+//                    'dfinprev' => $objp->GMAO_dfinprev,
+//                    'dfin' => $objp->GMAO_dfin,
+//                    'ddeb' => $objp->GMAO_ddeb,
+//                    'hotline' => $objp->GMAO_hotline,
+//                    'telemaintenance' => $objp->GMAO_telemaintenance,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'SLA' => $objp->GMAO_sla,
+//                    'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
+//                    'isSAV' => $objp->GMAO_isSAV,
+//                    'fk_prod' => $objp->GMAO_fk_prod,
+//                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'serial_number' => $objp->GMAO_serial_number,
+//                    'ddebprev' => $objp->GMAO_ddebprev,
+//                    "clause" => $objp->GMAO_clause,
+//                    "prorata" => $objp->GMAO_prorata,
+//                    "prixAn1" => $objp->GMAO_prixAn1,
+//                    "prixAnDernier" => $objp->GMAO_prixAnDernier,
+//                    "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
+//                    "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
+//                );
+//                echo "<pre>".$objp->rowid;
+//                print_r( $ligne->GMAO_Mixte);
+//
+//
+//
+////
+////                if ($objp->fk_product > 0) {
+////                    $product = new Product($this->db);
+////                    $product->id = $objp->fk_product;
+////                    $product->fetch($objp->fk_product);
+////                    $ligne->product = $product;
+////                } else {
+////                    $ligne->product = false;
+////                }
+////
+////                $ligne->info_bits = $objp->info_bits;
+////
+////                $ligne->ref = $objp->ref;
+////                $ligne->libelle = $objp->label;        // Label produit
+////                $ligne->product_desc = $objp->product_desc; // Description produit
+////
+////                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
+////                $ligne->date_debut_reel = $objp->date_ouverture;
+////                $ligne->date_fin_prevue = $objp->date_fin_validite;
+////                $ligne->date_fin_reel = $objp->date_cloture;
+////                $ligne->dateCompare = $objp->dateCompare;
+////                if ($byid) {
+////                    $this->lignes[$objp->rowid] = $ligne;
+////                } else {
+////                    if ($objp->line_order != 0) {
+////                        $this->lignes[$objp->line_order] = $ligne;
+////                    } else {
+////                        $this->lignes[] = $ligne;
+////                    }
+////                }
+////                //dol_syslog("1 ".$ligne->description);
+////                //dol_syslog("2 ".$ligne->product_desc);
+////
+////                if ($ligne->statut == 0)
+////                    $this->nbofserviceswait++;
+////                if ($ligne->statut == 4)
+////                    $this->nbofservicesopened++;
+////                if ($ligne->statut == 5)
+////                    $this->nbofservicesclosed++;
+//
+//                $i++;
+//            }
+//            $this->db->free($result);
+////            require_once('Var_Dump.php');
+////            Var_Dump::Display($this->lignes);
+//        } else {
+//            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrats liees aux produits");
+//            return -3;
+//        }
+////        // Selectionne les lignes contrat liees a aucun produit
+////        $sql = "SELECT p.label,
+////                       p.description as product_desc,
+////                       p.ref,
+////                       d.rowid,
+////                       d.statut,
+////                       d.description,
+////                       d.price_ht,
+////                       d.tva_tx,
+////                       d.line_order,
+////                       g.type,
+////                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
+////                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
+////                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+////                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+////                       g.durValid as GMAO_durVal,
+////                       g.hotline as GMAO_hotline,
+////                       g.telemaintenance as GMAO_telemaintenance,
+////                       g.maintenance as GMAO_maintenance,
+////                       g.SLA as GMAO_sla,
+////                       g.clause as GMAO_clause,
+////                       g.isSAV as GMAO_isSAV,
+////                       g.fk_prod as GMAO_fk_prod,
+////                       g.reconductionAuto as GMAO_reconductionAuto,
+////                       g.maintenance as GMAO_maintenance,
+////                       g.prorataTemporis as GMAO_prorata,
+////                       g.prixAn1 as GMAO_prixAn1,
+////                       g.prixAnDernier as GMAO_prixAnDernier,
+////                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+////                       sc.serial_number as GMAO_serial_number,
+////                       d.total_ht,
+////                       d.qty,
+////                       d.remise_percent,
+////                       d.subprice,
+////                       d.info_bits,
+////                       d.fk_product,
+////                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
+////                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
+////                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
+////                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
+////                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
+////                       ifnull(d.avenant,9999999999) as avenant
+////                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+////             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
+////             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+////             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+////                 WHERE d.fk_contrat = " . $this->id . "
+////                   AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 garde pour compatibilite
+////
+////        $result = $this->db->query($sql);
+////        if ($result) {
+////            $num = $this->db->num_rows($result);
+////            $i = 0;
+////
+////            while ($i < $num) {
+////                $objp = $this->db->fetch_object($result);
+////                $ligne = new ContratLigne($this->db);
+////                $ligne->id = $objp->rowid;
+////                $ligne->libelle = stripslashes($objp->description);
+////                $ligne->description = stripslashes($objp->description);
+////                $ligne->qty = $objp->qty;
+////                $ligne->statut = $objp->statut;
+////                $ligne->ref = $objp->ref;
+////                $ligne->tva_tx = $objp->tva_tx;
+////                $ligne->subprice = $objp->subprice;
+////                $ligne->type = $objp->type;
+////                $ligne->remise_percent = $objp->remise_percent;
+////                $ligne->price = $objp->total_ht;
+////                $ligne->total_ht = $objp->total_ht;
+////                $ligne->fk_product = 0;
+////
+////                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
+////                $ligne->date_debut_reel = $objp->date_ouverture;
+////                $ligne->date_fin_prevue = $objp->date_fin_validite;
+////                $ligne->date_fin_reel = $objp->date_cloture;
+////
+////                if ($ligne->statut == 0)
+////                    $this->nbofserviceswait++;
+////                if ($ligne->statut == 4)
+////                    $this->nbofservicesopened++;
+////                if ($ligne->statut == 5)
+////                    $this->nbofservicesclosed++;
+////
+////                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+////                $tmpProd = new Product($this->db);
+////                $tmpProd1 = new Product($this->db);
+////                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
+////                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
+////                $ligne->product = $tmpProd1;
+//////LineTkt
+//////                    'serial_number'=>$res->serial_number ,
+////                $ligne->GMAO_Mixte = array();
+////                $ligne->GMAO_Mixte = array(
+////                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
+////                    'contrat_prod' => $tmpProd,
+////                    'durVal' => $objp->GMAO_durVal,
+////                    'qty' => $objp->qty,
+////                    'pu' => $objp->subprice,
+////                    'dfinprev' => $objp->GMAO_dfinprev,
+////                    'dfin' => $objp->GMAO_dfin,
+////                    'ddeb' => $objp->GMAO_ddeb,
+////                    'hotline' => $objp->GMAO_hotline,
+////                    'telemaintenance' => $objp->GMAO_telemaintenance,
+////                    'maintenance' => $objp->GMAO_maintenance,
+////                    'SLA' => $objp->GMAO_sla,
+////                    'isSAV' => $objp->GMAO_isSAV,
+////                    'fk_prod' => $objp->GMAO_fk_prod,
+////                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
+////                    'maintenance' => $objp->GMAO_maintenance,
+////                    'serial_number' => $objp->GMAO_serial_number,
+////                    'ddebprev' => $objp->GMAO_ddebprev,
+////                    "clause" => $objp->GMAO_clause,
+////                    "prorata" => $objp->GMAO_prorata,
+////                    "prixAn1" => $objp->GMAO_prixAn1,
+////                    "prixAnDernier" => $objp->GMAO_prixAnDernier
+////                );
+////
+////
+////                if ($byid) {
+////                    $this->lignes[$objp->rowid] = $ligne;
+////                } else {
+////                    if ($objp->line_order != 0) {
+////                        $this->lignes[$objp->line_order] = $ligne;
+////                    } else {
+////                        $this->lignes[] = $ligne;
+////                    }
+////                }
+////
+////                $i++;
+////            }
+////
+////            $this->db->free($result);
+////        } else {
+////            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrat non liees aux produits");
+////            $this->error = $this->db->error();
+////            return -2;
+////        }
+//
+//        $this->nbofservices = sizeof($this->lignes);
+//
+//        ksort($this->lignes);
+//        return $this->lignes;
+//    }
+
+
     public function displayExtraInfoCartouche() {
         return "";
     }
 
-    public function displayDialog($type = 'add', $mysoc, $objp) {
-        global $conf, $form, $db;
-        $html .= '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
-        $html .= "<form id='" . $type . "Form' method='POST' onsubmit='return(false);'>";
-
-//        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
-        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
-        $html .= '<tr style="border-bottom: 1px Solid #0073EA !important">';
-        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Recherche de produits & financement</th></tr>';
-        $html .= '<tr style="border-top: 1px Solid #0073EA !important">';
-        $html .= '<td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Produits</td>
-                   <td style=" padding-top: 5px; padding-bottom: 3px;">';
-        // multiprix
-        $filter = "";
-        switch ($this->type) {
-            case 1:
-                //SAV
-                $filter = "1";
-                break;
-        }
-        if ($conf->global->PRODUIT_MULTIPRICES == 1)
-            $html .= $form->select_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
-        else
-            $html .= $form->select_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
-        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
-            $html .= '<br>';
-
-
-
-        $html .= '</td><td  style=" padding-top: 5px; padding-bottom: 3px;border-right: 1px Solid #0073EA;">&nbsp;</td>';
-        $html .= '<tr>';
-        $html .= ' <td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Financement ? ';
-        $html .= ' </td>
-                    <td style="width: 30px;">
-                        <input type="checkbox" id="addFinancement' . $type . '"  name="addFinancement' . $type . '" /></td>
-                    <td style="border-right: 1px Solid #0073EA; padding-top: 5px; padding-bottom: 3px;">&nbsp;</td>';
-        $html .= '</tr>';
-        $html .= "</table>";
-        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
-        $html .= '<tr>';
-        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Description ligne / produit</th></tr>';
-        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
-        $html .= '<td style="border-right: 1px Solid #0073EA;">';
-        $html .= 'Description libre<br/>';
-        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
-        $html .= "<textarea style='width: 600px; height: 3em' name='" . $type . "Desc' id='" . $type . "Desc'></textarea>";
-        $html .= '</td>';
-        $html .= '</tr>';
-        $html .= "</table>";
-
-        $html .= '<table style=" width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
-        $html .= '<tr>';
-        $html .= '<th style="border-bottom: 1px Solid #0073EA !important; " colspan="8"  class="ui-widget-header">Prix & Quantit&eacute;</th></tr><tr style="padding: 10px; ">';
-        $html .= '<td align=right>Prix (&euro;)</td><td align=left>';
-        $html .= "<input id='" . $type . "Price' name='" . $type . "Price' style='width: 100px; text-align: center;'/>";
-        $html .= '</td>';
-        $html .= '<td align=right>TVA<td align=left width=180>';
-        $html .= $form->load_tva($type . "Linetva_tx", "19.6", $mysoc, $this->societe, "", 0, false);
-
-        $html .= '</td>';
-        $html .= '<td align=right>Qt&eacute;</td><td align=left>';
-        $html .= "<input id='" . $type . "Qty' value=1 name='" . $type . "Qty' style='width: 20px;  text-align: center;'/>";
-        $html .= '</td>';
-        $html .= '<td align=right>Remise (%)</td><td align=left>';
-        $html .= "<input id='" . $type . "Remise' value=0 name='" . $type . "Remise' style='width: 20px; text-align: center;'/>";
-        $html .= '</td>';
-        $html .= '</tr>';
-
-        $html .= '</table>';
-
-        $html .= '<table style="width: 900px;  border-collapse: collapse; margin-top: 5px;"  cellpadding=10>';
-        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
-        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Chronologie</th>';
-        $html .= '</tr>';
-        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; '>";
-        $html .= '<td>Date de d&eacute;but pr&eacute;vue</td>';
-        $html .= '<td>
-                        <input value="' . date('d') . '/' . date('m') . '/' . date('Y') . '" style="text-align: center;" type="text" name="dateDeb' . $type . '" id="dateDeb' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left;margin-right: 3px; margin-top: 1px;"') . '</td>';
-        $html .= '<td>Date de fin pr&eacute;vue</td>';
-//        calendar.png
-        $html .= '<td style="border-right: 1px Solid #0073EA;">
-                        <input style="text-align: center;" type="text" name="dateFin' . $type . '" id="dateFin' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left; margin-right: 3px; margin-top: 1px;"') . '</td>';
-        $html .= '</tr>';
-        $html .= "</table>";
-
-        $html .= '<div id="financementLigne' . $type . '" style="display: none; margin-top: 5px;">';
-        $html .= '<table style="width: 900px;  border-collapse: collapse; "  cellpadding=10>';
-        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
-        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Financement</th>';
-        $html .= '</tr>';
-        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; border-top: 1px Solid #0073EA;'>";
-        $html .= '<td align=right>Nombre de p&eacute;riode</td>';
-        //TODO ds conf
-        $html .= '<td align=left><input style="text-align: center;width: 35px;" type="text" name="nbPeriode' . $type . '" id="nbPeriode' . $type . '"/></td>';
-        $html .= '<td align=right>Type de p&eacute;riode</td>';
-        $html .= '<td align=left><select id="typePeriod' . $type . '">';
-        $requete = "SELECT * FROM Babel_financement_period ORDER BY id";
-        $sqlPeriod = $db->query($requete);
-        while ($res = $db->fetch_object($sqlPeriod)) {
-            $html .= "<option value='" . $res->id . "'>" . $res->Description . "</option>";
-        }
-        $html .= '</select>';
-        $html .= '</td>';
-        //TODO dans conf taux par défaut configurable selon droit ++ droit de choisir le taux
-        $html .= '<td align=right>Taux achat</td>';
-        $html .= '<td align=left><input style="text-align: center; width: 35px;" name="' . $type . 'TauxAchat" id="' . $type . 'TauxAchat"/></td>';
-        //TODO dans conf taux par défaut configurable selon droit + droit de choisir le taux
-        $html .= '<td align=right>Taux vente</td>';
-        $html .= '<td align=left style="border-right: 1px Solid #0073EA;">
-                        <input style="text-align: center;width: 35px;" name="' . $type . 'TauxVente" id="' . $type . 'TauxVente"/></td>';
-        $html .= '</tr>';
-        $html .= "</table>";
-        $html .= '</div>';
-
-        $html .= '</form>';
-        $html .= '</div>';
-        return ($html);
-    }
+//
+//    public function displayDialog($type = 'add', $mysoc, $objp) {
+//        global $conf, $form, $db;
+//        $html .= '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
+//        $html .= "<form id='" . $type . "Form' method='POST' onsubmit='return(false);'>";
+//
+////        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
+//        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+//        $html .= '<tr style="border-bottom: 1px Solid #0073EA !important">';
+//        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Recherche de produits & financement</th></tr>';
+//        $html .= '<tr style="border-top: 1px Solid #0073EA !important">';
+//        $html .= '<td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Produits</td>
+//                   <td style=" padding-top: 5px; padding-bottom: 3px;">';
+//        // multiprix
+//        $filter = "";
+//        switch ($this->type) {
+//            case 1:
+//                //SAV
+//                $filter = "1";
+//                break;
+//        }
+//        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+//            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
+//        else
+//            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
+//        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
+//            $html .= '<br>';
+//
+//
+//
+//        $html .= '</td><td  style=" padding-top: 5px; padding-bottom: 3px;border-right: 1px Solid #0073EA;">&nbsp;</td>';
+//        $html .= '<tr>';
+//        $html .= ' <td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Financement ? ';
+//        $html .= ' </td>
+//                    <td style="width: 30px;">
+//                        <input type="checkbox" id="addFinancement' . $type . '"  name="addFinancement' . $type . '" /></td>
+//                    <td style="border-right: 1px Solid #0073EA; padding-top: 5px; padding-bottom: 3px;">&nbsp;</td>';
+//        $html .= '</tr>';
+//        $html .= "</table>";
+//        $html .= '<table style="width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+//        $html .= '<tr>';
+//        $html .= '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Description ligne / produit</th></tr>';
+//        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+//        $html .= '<td style="border-right: 1px Solid #0073EA;">';
+//        $html .= 'Description libre<br/>';
+//        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
+//        $html .= "<textarea style='width: 600px; height: 3em' name='" . $type . "Desc' id='" . $type . "Desc'></textarea>";
+//        $html .= '</td>';
+//        $html .= '</tr>';
+//        $html .= "</table>";
+//
+//        $html .= '<table style=" width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+//        $html .= '<tr>';
+//        $html .= '<th style="border-bottom: 1px Solid #0073EA !important; " colspan="8"  class="ui-widget-header">Prix & Quantit&eacute;</th></tr><tr style="padding: 10px; ">';
+//        $html .= '<td align=right>Prix (&euro;)</td><td align=left>';
+//        $html .= "<input id='" . $type . "Price' name='" . $type . "Price' style='width: 100px; text-align: center;'/>";
+//        $html .= '</td>';
+//        $html .= '<td align=right>TVA<td align=left width=180>';
+//        $html .= $form->load_tva($type . "Linetva_tx", "19.6", $mysoc, $this->societe, "", 0, false);
+//
+//        $html .= '</td>';
+//        $html .= '<td align=right>Qt&eacute;</td><td align=left>';
+//        $html .= "<input id='" . $type . "Qty' value=1 name='" . $type . "Qty' style='width: 20px;  text-align: center;'/>";
+//        $html .= '</td>';
+//        $html .= '<td align=right>Remise (%)</td><td align=left>';
+//        $html .= "<input id='" . $type . "Remise' value=0 name='" . $type . "Remise' style='width: 20px; text-align: center;'/>";
+//        $html .= '</td>';
+//        $html .= '</tr>';
+//
+//        $html .= '</table>';
+//
+//        $html .= '<table style="width: 900px;  border-collapse: collapse; margin-top: 5px;"  cellpadding=10>';
+//        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
+//        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Chronologie</th>';
+//        $html .= '</tr>';
+//        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; '>";
+//        $html .= '<td>Date de d&eacute;but pr&eacute;vue</td>';
+//        $html .= '<td>
+//                        <input value="' . date('d') . '/' . date('m') . '/' . date('Y') . '" style="text-align: center;" type="text" name="dateDeb' . $type . '" id="dateDeb' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left;margin-right: 3px; margin-top: 1px;"') . '</td>';
+//        $html .= '<td>Date de fin pr&eacute;vue</td>';
+////        calendar.png
+//        $html .= '<td style="border-right: 1px Solid #0073EA;">
+//                        <input style="text-align: center;" type="text" name="dateFin' . $type . '" id="dateFin' . $type . '"/>' . img_picto('calendrier', 'calendar.png', 'style="float: left; margin-right: 3px; margin-top: 1px;"') . '</td>';
+//        $html .= '</tr>';
+//        $html .= "</table>";
+//
+//        $html .= '<div id="financementLigne' . $type . '" style="display: none; margin-top: 5px;">';
+//        $html .= '<table style="width: 900px;  border-collapse: collapse; "  cellpadding=10>';
+//        $html .= '<tr style="border-bottom: 1px Solid #0073EA; ">';
+//        $html .= '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Financement</th>';
+//        $html .= '</tr>';
+//        $html .= "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; border-top: 1px Solid #0073EA;'>";
+//        $html .= '<td align=right>Nombre de p&eacute;riode</td>';
+//        //TODO ds conf
+//        $html .= '<td align=left><input style="text-align: center;width: 35px;" type="text" name="nbPeriode' . $type . '" id="nbPeriode' . $type . '"/></td>';
+//        $html .= '<td align=right>Type de p&eacute;riode</td>';
+//        $html .= '<td align=left><select id="typePeriod' . $type . '">';
+//        $requete = "SELECT * FROM Babel_financement_period ORDER BY id";
+//        $sqlPeriod = $db->query($requete);
+//        while ($res = $db->fetch_object($sqlPeriod)) {
+//            $html .= "<option value='" . $res->id . "'>" . $res->Description . "</option>";
+//        }
+//        $html .= '</select>';
+//        $html .= '</td>';
+//        //TODO dans conf taux par défaut configurable selon droit ++ droit de choisir le taux
+//        $html .= '<td align=right>Taux achat</td>';
+//        $html .= '<td align=left><input style="text-align: center; width: 35px;" name="' . $type . 'TauxAchat" id="' . $type . 'TauxAchat"/></td>';
+//        //TODO dans conf taux par défaut configurable selon droit + droit de choisir le taux
+//        $html .= '<td align=right>Taux vente</td>';
+//        $html .= '<td align=left style="border-right: 1px Solid #0073EA;">
+//                        <input style="text-align: center;width: 35px;" name="' . $type . 'TauxVente" id="' . $type . 'TauxVente"/></td>';
+//        $html .= '</tr>';
+//        $html .= "</table>";
+//        $html .= '</div>';
+//
+//        $html .= '</form>';
+//        $html .= '</div>';
+//        return ($html);
+//    }
 
     public function getHtmlLinked($tabLiked) {
         global $langs, $conf;
@@ -372,36 +718,35 @@ class Synopsis_Contrat extends Contrat {
     public function list_all_valid_contacts() {
         return array();
     }
-    
-    
-    public function intervRestant($val){
+
+    public function intervRestant($val) {
         $tickets = $val->GMAO_Mixte['tickets'];
 
-        $qteTempsPerDuree  = $val->GMAO_Mixte['qteTempsPerDuree'];
-        $qteTktPerDuree   = $val->GMAO_Mixte['qteTktPerDuree'];
+        $qteTempsPerDuree = $val->GMAO_Mixte['qteTempsPerDuree'];
+        $qteTktPerDuree = $val->GMAO_Mixte['qteTktPerDuree'];
 
 
         $requete = "SELECT fd.rowid, fd.duree
-                      FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
-                           ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
-                           ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as b
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+                           " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
+                           " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as b
                      WHERE b.id = fd.fk_typeinterv
                        AND fd.fk_fichinter = f.rowid
                        AND b.decountTkt = 1
                        AND fd.fk_contratdet = " . $val->id;
-         $consomme = 0;
-         $sqlCnt = $this->db->query($requete);
-         while($resCnt = $this->db->fetch_object($sqlCnt)){
-            if ($qteTempsPerDuree==0){
+        $consomme = 0;
+        $sqlCnt = $this->db->query($requete);
+        while ($resCnt = $this->db->fetch_object($sqlCnt)) {
+            if ($qteTempsPerDuree == 0) {
                 $consomme += $qteTktPerDuree;
             } else {
-                for($i=0;$i<$resCnt->duree;$i+=$qteTempsPerDuree){
+                for ($i = 0; $i < $resCnt->duree; $i+=$qteTempsPerDuree) {
                     $consomme += $qteTktPerDuree;
                 }
             }
-         }
-         $restant = $tickets - $consomme;
-         return(array('restant' => $restant,'consomme' => $consomme));
+        }
+        $restant = $tickets - $consomme;
+        return(array('restant' => $restant, 'consomme' => $consomme));
     }
 
     function display1Line($object, $objL) {
@@ -796,6 +1141,1016 @@ class Synopsis_Contrat extends Contrat {
 //        $return .= '</tr>';
 //        $return .= '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;';
         return $return;
+    }
+
+    public function addLigneCommande($commId, $comLigneId) {
+        global $user;
+        $contratId = $this->id;
+        $db = $this->db;
+        require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+        $com = new Synopsis_Commande($db);
+        $com->fetch($commId);
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $comLigneId;
+
+        $sql = $db->query($requete);
+        $res = $db->fetch_object($sql);
+        $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice);
+        $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice);
+        $sql = false;
+//for ($i = 0; $i < $qty; $i++) {
+        /* $line0 = 0;
+          $requete = "SELECT max(line_order) + 1 as mx
+          FROM ".MAIN_DB_PREFIX."contratdet
+          WHERE fk_contrat = ".$contratId;
+          $sql1 = $db->query($requete);
+          $res1 = $db->fetch_object($sql1);
+          $lineO = ($res1->mx>0?$res1->mx:1);
+
+          $tmpProd = new Product($db);
+          $tmpProd->fetch($res->fk_product);
+
+          $avenant = 'NULL';
+          //SI contrat statut > 0 => avenant pas NULL
+          $requete = "SELECT *
+          FROM ".MAIN_DB_PREFIX."contrat
+          WHERE rowid = ".$contratId;
+          $sql2 = $db->query($requete);
+          $res2 = $db->fetch_object($sql2);
+          if ($res2->statut > 0)
+          {
+          $avenant=0;
+          //avenant en cours ou pas ?
+          $requete = "SELECT max(avenant) + 1 as mx
+          FROM ".MAIN_DB_PREFIX."contratdet
+          WHERE fk_contrat=".$contratId."
+          AND statut > 0";
+          $sql3 = $db->query($requete);
+          $res3 = $db->fetch_object($sql3);
+          $avenant= $res3->mx;
+          } */
+
+
+        $tmpProd = new Product($db);
+        $tmpProd->fetch($res->fk_product);
+        $tmpProd->fetch_optionals($res->fk_product);
+
+        if ($tmpProd->array_options['options_2annexe'] > 0)
+            $this->addAnnexe($tmpProd->array_options['options_2annexe']);
+
+
+
+        $isMnt = false;
+        $isSAV = false;
+        $isTkt = false;
+        $qte = $res->qty;
+        if ($tmpProd->Hotline > 0 || $tmpProd->TeleMaintenance > 0 || $tmpProd->Maintenance > 0) {
+            $isMnt = true;
+            $qte = $tmpProd->VisiteSurSite;
+        } else if ($tmpProd->isSAV > 0) {
+            $isSAV = true;
+        } else if ($tmpProd->qte > 0) {
+            $isTkt = true;
+            $qte = $tmpProd->qte;
+        }
+
+
+
+        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "contratdet
+                            (fk_contrat,fk_product,statut,description,
+                             tva_tx,qty,subprice,price_ht,
+                             total_ht, total_tva, total_ttc,fk_user_author,
+                             "/* line_order,fk_commande_ligne,avenant, */ . "date_ouverture_prevue,date_ouverture, date_fin_validite)
+                     VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
+                             19.6," . $qte . "," . $res->subprice . "," . $res->subprice . ",
+                             " . $res->subprice . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . ($tmpProd->durVal > 0 ? $tmpProd->durVal : 0) . " MONTH))";
+        $sql = $db->query($requete);
+//    die($requete);
+        $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
+
+        addElementElement("commandedet", "contratdet", $comLigneId, $cdid);
+
+//Mode de reglement et condition de reglement
+        if ($res2->condReg_refid != $com->cond_reglement_id || $res2->modeReg_refid != $com->mode_reglement_id) {
+            // Appel des triggers
+            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+            $interface = new Interfaces($db);
+            $result = $interface->run_triggers('NOTIFY_ORDER_CHANGE_CONTRAT_MODE_REG', $com, $user, $langs, $conf);
+            if ($result < 0) {
+                $error++;
+                $errors = $interface->errors;
+            }
+            // Fin appel triggers
+        }
+
+
+
+
+//Lier a contratdetprop
+//".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+        $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
+                            (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
+                            isSAV, SLA, durValid,
+                            hotline, telemaintenance, maintenance,
+                            type )
+                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte . ",now(),now(),0,
+                            " . ($tmpProd->isSAV > 0 ? $tmpProd->isSAV : 0) . ",'" . addslashes($tmpProd->SLA) . "'," . ($tmpProd->durValid > 0 ? $tmpProd->durValid : 0) . ",
+                            " . ($tmpProd->Hotline > 0 ? $tmpProd->Hotline : 0) . "," . ($tmpProd->TeleMaintenance > 0 ? $tmpProd->TeleMaintenance : 0) . "," . ($tmpProd->Maintenance > 0 ? $tmpProd->Maintenance : 0) . ",
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ")";
+        $sql1 = $db->query($requete2);
+
+        if ($sql && $sql1)
+            return true;
+        return false;
+    }
+
+    public function addAnnexe($annexeId) {
+        $maxRang = 0;
+        $req1 = "SELECT max(`rang`) as max FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id;
+        $result = $this->db->query($req1);
+        while ($res = $this->db->fetch_object($result))
+            $maxRang = $res->max;
+        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (" . $annexeId . ", " . $this->id . ", " . ($maxRang + 1) . ", '')";
+        if (!$this->db->query($req2))
+            die($req2);
+    }
+
+//    
+//    
+//    public function initDialog($mysoc,$objp)
+//    {
+//        global $user;
+//        $html = "";
+//        if ($user->rights->contrat->creer && $this->statut ==0)
+//        {
+//            $html .= '<div id="addDialog" class="ui-state-default ui-corner-all" style="">';
+//            $html .= $this->displayDialog('add',$mysoc,$objp);
+//            $html .= '</div>';
+//        }
+//        if ($user->rights->contrat->supprimer)
+//        {
+//            $html .=  '<div id="delDialog"><span id="delDialog-content"></span></div>';
+//        }
+//        if ($user->rights->contrat->creer && ($this->statut ==0   || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) ) )
+//        {
+//            $html .=  '<div id="modDialog"><span id="modDialog-content">';
+//            $html .=  $this->displayDialog('mod',$mysoc,$objp);
+//            $html .=  '</span></div>';
+//        }
+//
+//        if ($user->rights->contrat->activer && $this->statut !=0)
+//        {
+//            $html .=  '<div id="activateDialog" class="ui-state-default ui-corner-all" style="">';
+//            $html .=  "<table width=450><tr><td>Date de d&eacute;but effective du service<td>";
+//            $html .=  "<input type='text' name='dateDebEff' id='dateDebEff'>";
+//            $html .=  "<tr><td>Date de fin effective du service<td>";
+//            $html .=  "<input type='text' name='dateFinEff' id='dateFinEff'>";
+//            $html .=  "</table>";
+//            $html .=  '</div>';
+//        }
+//        if ($user->rights->contrat->desactiver && $this->statut !=0)
+//        {
+//            $html .=  '<div id="unactivateDialog" class="ui-state-default ui-corner-all" style="">';
+//            $html .=  "<p>&Ecirc;tes vous sur de vouloir d&eacute;sactiver cette ligne&nbsp;?</p>";
+//            $html .=  '</div>';
+//        }
+//        //var_dump($user->rights->contrat);
+//        if ($user->rights->contrat->activer && $this->statut != 0)
+//        {
+//            $html .=  '<div id="closeLineDialog" class="ui-state-default ui-corner-all" style="">';
+//            $html .=  "<p>&Ecirc;tes vous sur de vouloir cl&ocirc;turer cette ligne&nbsp;?</p>";
+//            $html .=  '</div>';
+//        }
+//
+//
+//        return($html);
+//    }
+//    
+//    public function displayDialog($type='add',$mysoc,$objp)
+//    {
+//        global $conf, $form, $db;
+//        $html .=  '<div id="'.$type.'Line" class="ui-state-default ui-corner-all" style="">';
+//        $html .= "<form id='".$type."Form' method='POST' onsubmit='return(false);'>";
+//
+////        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
+//        $html .=  '<table style="width: 900px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+//        $html .=  '<tr style="border-bottom: 1px Solid #0073EA !important">';
+//        $html .=  '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Recherche de produits & financement</th></tr>';
+//        $html .=  '<tr style="border-top: 1px Solid #0073EA !important">';
+//        $html .=  '<td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Produits</td>
+//                   <td style=" padding-top: 5px; padding-bottom: 3px;">';
+//            // multiprix
+//            $filter = "";
+//            switch ($this->type)
+//            {
+//                case 1:
+//                    //SAV
+//                    $filter="1";
+//                break;
+//            }
+//            if($conf->global->PRODUIT_MULTIPRICES == 1)
+//                $html .= $this->returnSelect_produits('','p_idprod_'.$type,$filter,$conf->produit->limit_size,$this->societe->price_level,1,true,false,false);
+//            else
+//                $html .= $this->returnSelect_produits('','p_idprod_'.$type,$filter,$conf->produit->limit_size,false,1,true,true,false);
+//            if (! $conf->global->PRODUIT_USE_SEARCH_TO_SELECT) $html .=  '<br>';
+//
+//
+//
+//        $html .=  '</td><td  style=" padding-top: 5px; padding-bottom: 3px;border-right: 1px Solid #0073EA;">&nbsp;</td>';
+//        $html .=  '<tr>';
+//        $html .=  ' <td style="width: 300px; padding-top: 5px; padding-bottom: 3px;">Financement ? ';
+//        $html .=  ' </td>
+//                    <td style="width: 30px;">
+//                        <input type="checkbox" id="addFinancement'.$type.'"  name="addFinancement'.$type.'" /></td>
+//                    <td style="border-right: 1px Solid #0073EA; padding-top: 5px; padding-bottom: 3px;">&nbsp;</td>';
+//        $html .=  '</tr>';
+//        $html .=  "</table>";
+//        $html .=  '<table style="width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+//        $html .=  '<tr>';
+//        $html .=  '<th style="border-bottom: 1px Solid #0073EA !important" colspan="4"  class="ui-widget-header">Description ligne / produit</th></tr>';
+//        $html .=  '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+//        $html .=  '<td style="border-right: 1px Solid #0073EA;">';
+//        $html .=  'Description libre<br/>';
+//        $html .=  '<div class="nocellnopadd" id="ajdynfieldp_idprod_'.$type.'"></div>';
+//        $html .=  "<textarea style='width: 600px; height: 3em' name='".$type."Desc' id='".$type."Desc'></textarea>";
+//        $html .=  '</td>';
+//        $html .=  '</tr>';
+//        $html .=  "</table>";
+//
+//        $html .=  '<table style=" width: 900px; border: 1px Solid; border-collapse: collapse; margin-top: 5px; " cellpadding=10>';
+//        $html .=  '<tr>';
+//        $html .=  '<th style="border-bottom: 1px Solid #0073EA !important; " colspan="8"  class="ui-widget-header">Prix & Quantit&eacute;</th></tr><tr style="padding: 10px; ">';
+//        $html .=  '<td align=right>Prix (&euro;)</td><td align=left>';
+//        $html .=  "<input id='".$type."Price' name='".$type."Price' style='width: 100px; text-align: center;'/>";
+//        $html .=  '</td>';
+//        $html .=  '<td align=right>TVA<td align=left width=180>';
+//        $html .= $form->load_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
+//
+//        $html .=  '</td>';
+//        $html .=  '<td align=right>Qt&eacute;</td><td align=left>';
+//        $html .=  "<input id='".$type."Qty' value=1 name='".$type."Qty' style='width: 20px;  text-align: center;'/>";
+//        $html .=  '</td>';
+//        $html .=  '<td align=right>Remise (%)</td><td align=left>';
+//        $html .=  "<input id='".$type."Remise' value=0 name='".$type."Remise' style='width: 20px; text-align: center;'/>";
+//        $html .=  '</td>';
+//        $html .=  '</tr>';
+//
+//        $html .=  '</table>';
+//
+//        $html .=  '<table style="width: 900px;  border-collapse: collapse; margin-top: 5px;"  cellpadding=10>';
+//        $html .=  '<tr style="border-bottom: 1px Solid #0073EA; ">';
+//        $html .=  '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Chronologie</th>';
+//        $html .=  '</tr>';
+//        $html .=  "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; '>";
+//        $html .=  '<td>Date de d&eacute;but pr&eacute;vue</td>';
+//        $html .=  '<td>
+//                        <input value="'. date('d').'/'.date('m').'/'.date('Y') .'" style="text-align: center;" type="text" name="dateDeb'.$type.'" id="dateDeb'.$type.'"/>'.img_picto('calendrier','calendar.png','style="float: left;margin-right: 3px; margin-top: 1px;"').'</td>';
+//        $html .=  '<td>Date de fin pr&eacute;vue</td>';
+////        calendar.png
+//        $html .=  '<td style="border-right: 1px Solid #0073EA;">
+//                        <input style="text-align: center;" type="text" name="dateFin'.$type.'" id="dateFin'.$type.'"/>'.img_picto('calendrier','calendar.png','style="float: left; margin-right: 3px; margin-top: 1px;"').'</td>';
+//        $html .=  '</tr>';
+//        $html .=  "</table>";
+//
+//        $html .= '<div id="financementLigne'.$type.'" style="display: none; margin-top: 5px;">';
+//        $html .=  '<table style="width: 900px;  border-collapse: collapse; "  cellpadding=10>';
+//        $html .=  '<tr style="border-bottom: 1px Solid #0073EA; ">';
+//        $html .=  '<th colspan=10" class="ui-widget-header" style=" border-bottom: 1px Solid #0073EA;" >Financement</th>';
+//        $html .=  '</tr>';
+//        $html .=  "<tr  class='ui-state-default' style='border: 1px Solid #0073EA; border-top: 1px Solid #0073EA;'>";
+//        if ($conf->global->MAIN_MODULE_BABELGA == 1){
+//        $html .=  '<td align=right>Nombre de p&eacute;riode</td>';
+//        //TODO ds conf
+//        $html .=  '<td align=left><input style="text-align: center;width: 35px;" type="text" name="nbPeriode'.$type.'" id="nbPeriode'.$type.'"/></td>';
+//        $html .=  '<td align=right>Type de p&eacute;riode</td>';
+//        $html .=  '<td align=left><select id="typePeriod'.$type.'">';
+//        $requete = "SELECT * FROM Babel_financement_period ORDER BY id";
+//        $sqlPeriod = $db->query($requete);
+//        while ($res = $db->fetch_object($sqlPeriod))
+//        {
+//            $html .=  "<option value='".$res->id."'>".$res->Description."</option>";
+//        }
+//        $html .=  '</select>';
+//        $html .=  '</td>';
+//        }
+//        //TODO dans conf taux par défaut configurable selon droit ++ droit de choisir le taux
+//        $html .=  '<td align=right>Taux achat</td>';
+//        $html .=  '<td align=left><input style="text-align: center; width: 35px;" name="'.$type.'TauxAchat" id="'.$type.'TauxAchat"/></td>';
+//        //TODO dans conf taux par défaut configurable selon droit + droit de choisir le taux
+//        $html .=  '<td align=right>Taux vente</td>';
+//        $html .=  '<td align=left style="border-right: 1px Solid #0073EA;">
+//                        <input style="text-align: center;width: 35px;" name="'.$type.'TauxVente" id="'.$type.'TauxVente"/></td>';
+//        $html .=  '</tr>';
+//        $html .=  "</table>";
+//        $html .=  '</div>';
+//
+//        $html .=  '</form>';
+//        $html .=  '</div>';
+//        return ($html);
+//
+//    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+    public function initDialog($mysoc, $objp) {
+        global $user, $conf;
+        $html = "";
+        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
+            $html .= '<div id="addDialog" class="ui-state-default ui-corner-all" style="">';
+            $html .= $this->displayDialog('add', $mysoc, $objp);
+            $html .= '</div>';
+        }
+
+        if ($user->rights->contrat->supprimer && ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED))) {
+            $html .= '<div id="delDialog"><span id="delDialog-content"></span></div>';
+        }
+        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
+            $html .= '<div id="modDialog"><span id="modDialog-content">';
+            $html .= $this->displayDialog('mod', $mysoc, $objp);
+            $html .= '</span></div>';
+        }
+
+        if ($user->rights->contrat->activer && $this->statut != 0) {
+            $html .= '<div id="activateDialog" class="ui-state-default ui-corner-all" style="">';
+            $html .= "<table width=450><tr><td>Date de d&eacute;but effective du service<td>";
+            $html .= "<input type='text' name='dateDebEff' id='dateDebEff'>";
+            $html .= "<tr><td>Date de fin effective du service<td>";
+            $html .= "<input type='text' name='dateFinEff' id='dateFinEff'>";
+            $html .= "</table>";
+            $html .= '</div>';
+        }
+        if ($user->rights->contrat->desactiver && $this->statut != 0) {
+            $html .= '<div id="unactivateDialog" class="ui-state-default ui-corner-all" style="">';
+            $html .= "<p>&Ecirc;tes vous sur de vouloir d&eacute;sactiver cette ligne&nbsp;?</p>";
+            $html .= '</div>';
+        }
+        //var_dump($user->rights->contrat);
+        if ($user->rights->contrat->activer && $this->statut != 0) {
+            $html .= '<div id="closeLineDialog" class="ui-state-default ui-corner-all" style="">';
+            $html .= "<p>&Ecirc;tes vous sur de vouloir cl&ocirc;turer cette ligne&nbsp;?</p>";
+            $html .= '</div>';
+        }
+
+
+        return($html);
+    }
+
+    public function displayDialog($type = 'add', $mysoc, $objp = false) {
+        global $conf, $form;
+
+
+        $html .= '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
+        $html .= "<form id='" . $type . "Form' method='POST' onsubmit='return(false);'>";
+        $html .= "<div id='" . $type . "dialogTab'>";
+        $html .= "<ul>";
+        $html .= "    <li><a href='#" . $type . "general'><span>G&eacute;n&eacute;ral</span></a></li>";
+        $html .= "    <li><a href='#" . $type . "price'><span>Prix</span></a></li>";
+        $html .= "    <li><a href='#" . $type . "produit'><span>Produit</span></a></li>";
+        $html .= "    <li><a href='#" . $type . "detail'><span>D&eacute;tail</span></a></li>";
+        $html .= "    <li><a href='#" . $type . "clause'><span>Condition</span></a></li>";
+        $html .= "</ul>";
+
+        $html .= "<div id='" . $type . "clause'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr style="border-bottom: 1px Solid #0073EA !important">';
+        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+        $html .= '<td style="border-right: 1px Solid #0073EA;" colspan=3>';
+        $html .= 'Clauses juridiques<br/>';
+        $html .= "<textarea style='width: 600px; height: 6em' name='" . $type . "Clause' id='" . $type . "Clause'></textarea>";
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+        $html .= '<td style="border-right: 1px Solid #0073EA;" colspan=3>';
+        $html .= 'Clauses produit (rappel)<br/>';
+        $html .= "<div style='width: 600px; height: 6em border:1px Solid;padding: 5px;'  class='ui-widget-content'   name='" . $type . "ClauseProd' id='" . $type . "ClauseProd'></div>";
+        $html .= '</td>';
+        $html .= '</tr>';
+        $html .= '<tr class="ui-state-default ui-widget-content" style="border: 1px Solid #0073EA;">';
+        $html .= '<td style="border-right: 1px Solid #0073EA;" colspan=3>';
+        $html .= 'Clauses contrat (rappel)<br/>';
+        $html .= "<div style='width: 600px; height: 6em border:1px Solid;padding: 5px;' class='ui-widget-content' name='" . $type . "ClauseProdCont' id='" . $type . "ClauseProdCont'></div>";
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= "</table>";
+        $html .= "</div>";
+
+
+        $html .= "<div id='" . $type . "general'>" . "\n";
+//        $html .=  '<span class="ui-state-default ui-widget-header ui-corner-all" style="margin-top: -4px; padding: 5px 35px 5px 35px;">Ajout d\'une ligne</span>';
+        $html .= '<table style="width: 870px;" cellpadding=10 >' . "\n";
+        $html .= '<tr>' . "\n";
+        $html .= '<th class="ui-widget-header ui-state-default" colspan=1>Description</th>' . "\n";
+        $html .= "<td class='ui-widget-content' colspan=2><textarea style='width: 600px; height: 3em' name='" . $type . "Desc' id='" . $type . "Desc'></textarea>" . "\n";
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+        $html .= '<tr>' . "\n";
+        $html .= '<th class="ui-widget-header ui-state-default" width=150 colspan=1>Date de d&eacute;but' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 100px" name="dateDeb' . $type . '" id="dateDeb' . $type . '">' . "\n";
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+        $html .= '<tr>' . "\n";
+        $html .= '<th class="ui-widget-header ui-state-default" colspan=1>SLA' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 100px" name="' . $type . 'SLA" id="' . $type . 'SLA">' . "\n";
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+        $html .= '<tr>' . "\n";
+        $html .= '<th class="ui-widget-header ui-state-default" colspan=1>Reconduction automatique' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=2><input type="checkbox" name="' . $type . 'recondAuto" id="' . $type . 'recondAuto">' . "\n";
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+        $html .= '<tr>' . "\n";
+        $html .= '<th class="ui-widget-header ui-state-default" colspan=1>Commande' . "\n";
+
+        $html .= '<td class="ui-widget-content" width=200>' . "\n";
+        $html .= "\n" . '<SELECT name="' . $type . 'Commande" id="' . $type . 'Commande"> ' . "\n";
+        $html .= "<OPTION value='-1'>S&eacute;lectionner -></OPTION>" . "\n";
+
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc = " . $this->societe->id;
+        $sql = $this->db->query($requete);
+
+        while ($res = $this->db->fetch_object($sql)) {
+            $html .= "<OPTION value='" . $res->rowid . "'>" . $res->ref . " " . $res->date_commande . "</OPTION>\n";
+        }
+        $html .= "</SELECT>\n";
+
+        $html .= "<script>\n";
+        $html .= "       var fk_soc = " . $this->societe->id . ";";
+        $html .= "   jQuery(document).ready(function(){\n";
+        $html .= "       jQuery('#" . $type . "Commande').change(function(){\n";
+        $html .= "       var type = '" . $type . "';\n";
+        $html .= <<<EOF
+          var seekId = jQuery(this).find(':selected').val();
+          if (seekId > 0){
+
+              jQuery.ajax({
+                  url: DOL_URL_ROOT+"/Babel_GMAO/ajax/listCommandeDet-xml_response.php",
+                  data: "id="+seekId,
+                  datatype:"xml",
+                  type: "POST",
+                  cache: true,
+                  success: function(msg){
+                    var longHtml = '<span id="'+type+'commandeDet">';
+                        longHtml += "<SELECT name='"+type+"LigneCom'  name='"+type+"LigneCom'><OPTION value='-1'>S&eacute;lectionner-></OPTION>";
+                    jQuery(msg).find('commandeDet').each(function(){
+                        var idLigne = jQuery(this).attr('id');
+                        var valLigne = jQuery(this).text();
+                        longHtml += "<OPTION value='"+idLigne+"'>"+valLigne+"</OPTION>";
+                    });
+                    longHtml += "</SELECT></span>";
+                    jQuery('#'+type+'commandeDet').replaceWith(longHtml);
+                    jQuery('#'+type+'commandeDet').find('SELECT').selectmenu({style: 'dropdown', maxHeight: 300 });
+                  }
+              });
+          } else {
+              jQuery('#'+type+'commandeDet').replaceWith('<span id="'+type+'commandeDet">&nbsp;</span>');
+          }
+        });
+EOF;
+
+        $html .= 'jQuery("#MnTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("MnT"); });' . "\n";
+        $html .= 'jQuery("#TkTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("TkT"); });' . "\n";
+        $html .= 'jQuery("#SaVtype' . $type . '").click(function(){ ' . $type . 'showGMAO("SaV"); });' . "\n";
+        $html .= '});' . "\n";
+        $html .= ' var typeContratRem=false;' . "\n";
+        $html .= 'function ' . $type . 'showGMAO(typeContrat){' . "\n";
+        $html .= "    typeContratRem=typeContrat" . "\n";
+        $html .= "    if (jQuery('#ticket" . $type . "').css('display')=='block') { jQuery('#ticket" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $html .= "    else if (jQuery('#maintenance" . $type . "').css('display')=='block') { jQuery('#maintenance" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $html .= "    else if (jQuery('#savgmao" . $type . "').css('display')=='block') { jQuery('#savgmao" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $html .= "    else { " . $type . "showGMAO2(); }" . "\n";
+        $html .= "}" . "\n";
+
+        $html .= 'function ' . $type . 'showGMAO2(){' . "\n";
+        $html .= "    if (typeContratRem == 'MnT'){" . "\n";
+        $html .= "      jQuery('#maintenance" . $type . "').slideDown();" . "\n";
+        $html .= "    }" . "\n";
+        $html .= "    if (typeContratRem == 'TkT'){" . "\n";
+        $html .= "      jQuery('#ticket" . $type . "').slideDown();" . "\n";
+        $html .= "    }" . "\n";
+        $html .= "    if (typeContratRem == 'SaV'){" . "\n";
+        $html .= "      jQuery('#savgmao" . $type . "').slideDown();" . "\n";
+        $html .= "    }" . "\n";
+        $html .= "}" . "\n";
+
+        $html .=<<<EOF
+    function publish_selvalue_callBack(obj,value){
+        if (jQuery(obj).attr('id') == "p_idprod_add")
+        {
+            jQuery.ajax({
+                url:DOL_URL_ROOT+"/Babel_GMAO/ajax/getProdClause-xml_response.php",
+                data:"prod="+value+"&fk_soc="+fk_soc,
+                datatype:"xml",
+                type: "POST",
+                success: function(msg){
+                    var clause = jQuery(msg).find('clause').text();
+                    jQuery('#addClauseProd').replaceWith('<div id="addClauseProd" class="ui-widget-content" style="padding: 5px;">'+clause+'</div>');
+                }
+            });
+        }
+        if (jQuery(obj).attr('id') == "p_idprod_mod")
+        {
+            jQuery.ajax({
+                url:DOL_URL_ROOT+"/Babel_GMAO/ajax/getProdClause-xml_response.php",
+                data:"prod="+value+"&fk_soc="+fk_soc,
+                datatype:"xml",
+                type: "POST",
+                success: function(msg){
+                    var clause = jQuery(msg).find('clause').text();
+                    jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+clause+'</div>');
+                }
+            });
+        }
+        if (jQuery(obj).attr('id') == "p_idContratprod_add")
+        {
+            jQuery.ajax({
+                url:DOL_URL_ROOT+"/Babel_GMAO/ajax/getProdContratProd-xml_response.php",
+                data:"prod="+value+"&fk_soc="+fk_soc,
+                datatype:"xml",
+                type: "POST",
+                success: function(msg){
+                    var price = jQuery(msg).find('price').text();
+                    var tva = jQuery(msg).find('tva').text();
+                    var qte = jQuery(msg).find('qte').text();
+                    var qteMNT = jQuery(msg).find('qteMNT').text();
+                    var clause = jQuery(msg).find('clause').text();
+                    var Hotline = jQuery(msg).find('Hotline').text();
+                    var TeleMaintenance = jQuery(msg).find('TeleMaintenance').text();
+                    var Maintenance = jQuery(msg).find('Maintenance').text();
+                    var SLA = jQuery(msg).find('SLA').text();
+                    var VisiteSurSite = jQuery(msg).find('VisiteSurSite').text();
+                    var reconductionAuto = jQuery(msg).find('reconductionAuto').text();
+                    var durValid = jQuery(msg).find('durValid').text();
+                    var isSAV = jQuery(msg).find('isSAV').text();
+
+                    var qteTktPerDuree = jQuery(msg).find('qteTktPerDuree').text();
+                    var qteTempsPerDuree = jQuery(msg).find('qteTempsPerDuree').text();
+                    var qteTempsPerDureeH = jQuery(msg).find('qteTempsPerDureeH').text();
+                    var qteTempsPerDureeM = jQuery(msg).find('qteTempsPerDureeM').text();
+
+                    jQuery('#qteTktPerDureeadd').val(qteTktPerDuree);
+                    jQuery('#qteTempsPerDureeHadd').val(qteTempsPerDureeH);
+                    jQuery('#qteTempsPerDureeMadd').val(qteTempsPerDureeM);
+
+                    if (tva + "x" != "x")
+                    {
+                        var i =0;
+                        var remi=0;
+                        jQuery('#addtauxtva').find('option').each(function(){
+                            if (tva.replace(/,/,'.') == jQuery(this).val())
+                            {
+                                remi=i;
+                            }
+                            i++;
+                        });
+                        jQuery('#addtauxtva').selectmenu('value',remi);
+                    }
+
+                    jQuery('#nbTicketadd').val(qte);
+                    jQuery('#nbTicketMNTadd').val(qteMNT);
+                    if (Hotline == 1){
+                        jQuery('#hotlineadd').attr('checked',true);
+                    } else {
+                        jQuery('#hotlineadd').attr('checked',false);
+                    }
+                    if (TeleMaintenance == 1){
+                        jQuery('#telemaintenanceadd').attr('checked',true);
+                    } else {
+                        jQuery('#telemaintenanceadd').attr('checked',false);
+                    }
+                    if (reconductionAuto == 1)
+                    {
+                        jQuery('#addrecondAuto').attr('checked',true);
+                    } else {
+                        jQuery('#addrecondAuto').attr('checked',false);
+                    }
+                    jQuery('#nbVisiteadd').val(VisiteSurSite);
+                    jQuery('#addSLA').val(SLA);
+                    jQuery('#DurSAVadd').val(durValid);
+                    var clause = jQuery(msg).find('clause').text();
+                    jQuery('#addClauseProdCont').replaceWith('<div id="addClauseProdCont" class="ui-widget-content" style="padding: 5px;">'+clause+'</div>');
+
+                    jQuery('input[name=typeadd]').attr('checked',false);
+                    //reinit durValid Mnt et Tkt
+                    jQuery('#DurValMntadd').val("");
+                    jQuery('#DurValTktadd').val("");
+
+                    if (Maintenance == 1)
+                    {
+                        jQuery('#MnTtypeadd').attr('checked',true);
+                        jQuery('#ticketadd').hide();
+                        jQuery('#savgmaoadd').hide();
+                        addshowGMAO("MnT");
+                        jQuery('#DurSAVadd').val("");
+                        jQuery('#nbTicketadd').val("");
+//                        jQuery('#nbTicketMNTadd').val("");
+                        jQuery('#DurValMntadd').val(durValid);
+                    } else if (isSAV == 1){
+                        jQuery('#SaVtypeadd').attr('checked',true);
+                        jQuery('#ticketadd').hide();
+                        jQuery('#maintenanceadd').hide();
+                        addshowGMAO("SaV");
+                        jQuery('#nbTicketadd').val("");
+                        jQuery('#nbTicketMNTadd').val("");
+                        jQuery('#telemaintenanceadd').attr('checked',false);
+                        jQuery('#hotlineadd').attr('checked',false);
+                    } else if (qte+"x"!= "x"){
+                        jQuery('#TkTtypeadd').attr('checked',true);
+                        jQuery('#savgmaoadd').hide();
+                        jQuery('#maintenanceadd').hide();
+                        addshowGMAO("TkT");
+                        jQuery('#DurSAVadd').val("");
+                        jQuery('#telemaintenanceadd').attr('checked',false);
+                        jQuery('#hotlineadd').attr('checked',false);
+                        jQuery('#DurValTktadd').val(durValid);
+                        jQuery('#nbTicketMNTadd').val("");
+                    }
+
+                    jQuery('#addPuHT').val(price);
+                }
+            });
+        }
+        if (jQuery(obj).attr('id') == "p_idContratprod_mod")
+        {
+            jQuery.ajax({
+                url:DOL_URL_ROOT+"/Babel_GMAO/ajax/getProdContratProd-xml_response.php",
+                data:"prod="+value+"&fk_soc="+fk_soc,
+                datatype:"xml",
+                type: "POST",
+                success: function(msg){
+                    var price = jQuery(msg).find('price').text();
+                    var tva = jQuery(msg).find('tva').text();
+                    var qte = jQuery(msg).find('qte').text();
+                    var qteMNT = jQuery(msg).find('qteMNT').text();
+                    var clause = jQuery(msg).find('clause').text();
+                    var Hotline = jQuery(msg).find('Hotline').text();
+                    var TeleMaintenance = jQuery(msg).find('TeleMaintenance').text();
+                    var Maintenance = jQuery(msg).find('Maintenance').text();
+                    var SLA = jQuery(msg).find('SLA').text();
+                    var VisiteSurSite = jQuery(msg).find('VisiteSurSite').text();
+                    var reconductionAuto = jQuery(msg).find('reconductionAuto').text();
+                    var durValid = jQuery(msg).find('durValid').text();
+                    var isSAV = jQuery(msg).find('isSAV').text();
+                    var qteTktPerDuree = jQuery(msg).find('qteTktPerDuree').text();
+                    var qteTempsPerDuree = jQuery(msg).find('qteTempsPerDuree').text();
+                    var qteTempsPerDureeH = jQuery(msg).find('qteTempsPerDureeH').text();
+                    var qteTempsPerDureeM = jQuery(msg).find('qteTempsPerDureeM').text();
+
+                    jQuery('#qteTktPerDureemod').val(qteTktPerDuree);
+                    jQuery('#qteTempsPerDureeHmod').val(qteTempsPerDureeH);
+                    jQuery('#qteTempsPerDureeMmod').val(qteTempsPerDureeM);
+
+                    if (tva + "x" != "x")
+                    {
+                        var i =0;
+                        var remi=0;
+                        jQuery('#modtauxtva').find('option').each(function(){
+                            if (tva.replace(/,/,'.') == jQuery(this).val())
+                            {
+                                remi=i;
+                            }
+                            i++;
+                        });
+                        jQuery('#modtauxtva').selectmenu('value',remi);
+                    }
+
+                    jQuery('#nbTicketmod').val(qte);
+                    jQuery('#nbTicketMNTmod').val(qteMNT);
+
+                    if (Hotline == 1){
+                        jQuery('#hotlinemod').attr('checked',true);
+                    } else {
+                        jQuery('#hotlinemod').attr('checked',false);
+                    }
+                    if (TeleMaintenance == 1){
+                        jQuery('#telemaintenancemod').attr('checked',true);
+                    } else {
+                        jQuery('#telemaintenancemod').attr('checked',false);
+                    }
+                    if (reconductionAuto == 1)
+                    {
+                        jQuery('#modrecondAuto').attr('checked',true);
+                    } else {
+                        jQuery('#modrecondAuto').attr('checked',false);
+                    }
+                    jQuery('#nbVisitemod').val(VisiteSurSite);
+                    jQuery('#modSLA').val(SLA);
+                    jQuery('#DurSAVmod').val(durValid);
+                    var clause = jQuery(msg).find('clause').text();
+                    jQuery('#modClauseProdCont').replaceWith('<div id="modClauseProdCont" class="ui-widget-content" style="padding: 5px;">'+clause+'</div>');
+
+                    jQuery('input[name=typemod]').attr('checked',false);
+                    jQuery('#DurValMntmod').val("");
+                    jQuery('#DurValTktmod').val("");
+                    if (Maintenance == 1)
+                    {
+                        jQuery('#MnTtypemod').attr('checked',true);
+                        jQuery('#ticketmod').hide();
+                        jQuery('#savgmaomod').hide();
+                        modshowGMAO("MnT");
+                        jQuery('#DurSAVmod').val("");
+                        jQuery('#nbTicketmod').val("");
+                        jQuery('#DurValMntmod').val(durValid);
+                    } else if (isSAV == 1){
+                        jQuery('#SaVtypemod').attr('checked',true);
+                        jQuery('#ticketmod').hide();
+                        jQuery('#maintenancemod').hide();
+                        modshowGMAO("SaV");
+                        jQuery('#nbTicketmod').val("");
+                        jQuery('#nbTicketMNTmod').val("");
+                        jQuery('#telemaintenancemod').attr('checked',false);
+                        jQuery('#hotlinemod').attr('checked',false);
+                    } else if (qte+"x"!= "x"){
+                        jQuery('#TkTtypemod').attr('checked',true);
+                        jQuery('#savgmaomod').hide();
+                        jQuery('#maintenancemod').hide();
+                        modshowGMAO("TkT");
+                        jQuery('#DurSAVmod').val("");
+                        jQuery('#nbTicketMNTmod').val("");
+                        jQuery('#telemaintenancemod').attr('checked',false);
+                        jQuery('#hotlinemod').attr('checked',false);
+                        jQuery('#DurValTktmod').val(durValid);
+                    }
+
+                    jQuery('#modPuHT').val(price);
+                }
+            });
+        }
+    }
+
+EOF;
+        $html .= "</script>" . "\n";
+        $html .= '<td class="ui-widget-content"><span id="' . $type . 'commandeDet">&nbsp;</span>';
+        $html .= '</td>';
+        $html .= '</tr>';
+
+        $html .= "</table>";
+        $html .= "</div>";
+
+
+        $html .= "<div id='" . $type . "produit'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th colspan="4" class="ui-widget-header">Recherche de produits</th></tr>';
+        $html .= '<tr>';
+        $html .= '<th colspan=1 class="ui-state-default ui-widget-header">Produit</th>';
+        $html .= '<td class="ui-widget-content" width=175>';
+        // multiprix
+        $filter = "0";
+        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
+        else
+            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
+        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
+            $html .= '<br>';
+        $html .= '<td class="ui-widget-content">';
+        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
+
+
+        $html .= '</td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Num&eacute;ro de s&eacute;rie';
+        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 300px" name="' . $type . 'serial" id="' . $type . 'serial">';
+        $html .= "</table>";
+        $html .= "</div>";
+
+        $html .= "<div id='" . $type . "price'>";
+        $html .= '<table style="width: 870px; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" width=150 colspan=1>Produit contrat' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=1 width=175>' . "\n";
+        $filter = "2";
+        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+            $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
+        else
+            $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
+        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
+            $html .= '<br>';
+        $html .= ' <td class="ui-widget-content" colspan=2>';
+        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idContratprod_' . $type . '"></div>';
+
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Prix HT' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=1><input type="text" style="width: 100px" name="' . $type . 'PuHT" id="' . $type . 'PuHT">' . "\n";
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Quantit&eacute;' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=1><input type="text" style="width: 100px" value="1" name="' . $type . 'Qte" id="' . $type . 'Qte">' . "\n";
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>TVA' . "\n";
+        $html .= '<td class="ui-widget-content" colspan=3>' . "\n";
+
+        $form = new Form($this->db);
+        $html .= $form->load_tva($type . 'tauxtva', '19.6', $mysoc, $this->societe->id, "", 0, false);
+
+        $html .= '<tr style="border: 1px Solid #0073EA;">' . "\n";
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Ajustement <em>Prorata temporis</em>' . "\n";
+        $html .= '<td class="ui-widget-content"  colspan=3><input type="checkbox" name="' . $type . 'prorata" id="' . $type . 'prorata">' . "\n";
+        $html .= '</td>' . "\n";
+        $html .= '</tr>' . "\n";
+
+        $html .= "</table>";
+        $html .= "</div>";
+        $html .= "<div id='" . $type . "detail'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header">Maintenance';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="MnTtype' . $type . '" name="type' . $type . '" value="MnT" type="radio"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header">Ticket';
+        $html .= '</th><td colspan=2 class="ui-widget-content"><input id="TkTtype' . $type . '" name="type' . $type . '" value="TkT" type="radio"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-content">SAV';
+        $html .= '</th><td colspan=2 class="ui-widget-content"><input id="SaVtype' . $type . '" name="type' . $type . '" value="SaV" type="radio"></td>';
+
+        $html .= "</table>";
+        $html .= "<div>";
+        $html .= "<div id='maintenance" . $type . "' style='display: none;'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=3>Maintenance';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb visite annuelle';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbVisite' . $type . '" name="nbVisite' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>T&eacute;l&eacute;maintenance';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input type=checkbox id="telemaintenance' . $type . '" name="telemaintenance' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Hotline';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input type=checkbox name="hotline' . $type . '" id="hotline' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Dur&eacute;e validit&eacute;<br/>(en mois)';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="DurValMnt' . $type . '" name="DurValMnt' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb Ticket<br/><em><small>(<b>0</b> Sans ticket, <b>-1</b> Illimit&eacute;)</small></em>';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbTicketMNT' . $type . '" name="nbTicketMNT' . $type . '"></td>';
+        $html .= '<tr><th class="ui-widget-header ui-state-default" >Dur&eacute;e par ticket<br/><em><small>(<b>0 h 0 min</b> sans d&eacute;compte de temps)</small></em></th>
+                   <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="1" id="qteTktPerDuree' . $type . '" name="qteTktPerDuree' . $type . '"> ticket(s) pour <input style="text-align:center;" type="text" size=4 value="0" id="qteTempsPerDureeH' . $type . '" name="qteTempsPerDureeH' . $type . '"> h <input style="text-align:center;" type="text" size=4 value="0" id="qteTempsPerDureeM' . $type . '" name="qteTempsPerDureeM' . $type . '"> min';
+//                $qteTempsPerDureeM = 0;
+//                $qteTempsPerDureeH = 0;
+//                if ($product->qteTempsPerDuree > 0 ){
+//                    $arrDur = $product->convDur($product->qteTempsPerDuree);
+//                    $qteTempsPerDureeH=$arrDur['hours']['abs'];
+//                    $qteTempsPerDureeM=$arrDur['minutes']['rel'];
+//                }
+//
+//
+//                print '<tr><th class="ui-widget-header ui-state-default" >'.$langs->trans("Dur&eacute;e par ticket<br/><em><small>(<b>0 h 0 min</b>sans d&eacute;compte de temps)</small></em>").'</th>
+//                           <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="'.$product->qteTktPerDuree.'" name="qteTktPerDuree"> ticket(s) pour <input style="text-align:center;" type="text" size=4 value="'.$qteTempsPerDureeH.'" name="qteTempsPerDureeH"> h <input style="text-align:center;" type="text" size=4 value="'.$qteTempsPerDureeM.'" name="qteTempsPerDureeM"> min';
+
+
+
+        $html .= "</table>";
+        $html .= "</div>";
+
+        $html .= "<div id='ticket" . $type . "' style='display: none;'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=3>Tickets';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb Ticket<br/><em><small>(<b>0</b> Sans ticket, <b>-1</b> Illimit&eacute;)</small></em>';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbTicket' . $type . '" name="nbTicket' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Dur&eacute;e validit&eacute;<br/>(en mois)';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="DurValTkt' . $type . '" name="DurValTkt' . $type . '"></td>';
+
+        $html .= "</table>";
+        $html .= "</div>";
+
+        $html .= "<div id='savgmao" . $type . "' style='display: none;'>";
+        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=3>SAV';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Dur&eacute;e extension<br/>(en mois)';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="DurSAV' . $type . '" name="DurSAV' . $type . '"></td>';
+        $html .= "</table>";
+        $html .= "</div>";
+        $html .= "</div>";
+        $html .= "</div>";
+
+        $html .= "</div>";
+
+        $html .= '</form>';
+        $html .= '</div>';
+        return ($html);
+    }
+
+    private function returnSelect_produits($selected = '', $htmlname = 'productid', $filtertype = '', $limit = 20, $price_level = 0, $status = 1, $finished = 2, $selected_input_value = '', $hidelabel = 0, $ajaxoptions = array()) {
+        $form = new Form($this->db);
+
+        ob_start();
+        $form->select_produits($selected, $htmlname, $filtertype, $limit, $price_level, $status, $finished, $selected_input_value, $hidelabel, $ajaxoptions);
+        $return = ob_get_contents();
+        ob_clean();
+        return $return;
+    }
+
+}
+
+class Synopsis_ContratLigne extends ContratLigne {
+
+    public function fetch($id, $ref = '') {
+        parent::fetch($id, $ref);
+        $sql = "SELECT d.rowid, g.type,
+                       unix_timestamp(date_add(g.DateDeb, INTERVAL g.durValid month)) as GMAO_dfinprev,
+                       unix_timestamp(date_add(g.DateDeb, INTERVAL g.durValid month)) as GMAO_dfin,
+                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+                       g.durValid as GMAO_durVal,
+                       g.hotline as GMAO_hotline,
+                       g.telemaintenance as GMAO_telemaintenance,
+                       g.maintenance as GMAO_maintenance,
+                       g.SLA as GMAO_sla,
+                       g.clause as GMAO_clause,
+                       g.isSAV as GMAO_isSAV,
+                       g.qte as GMAO_qte,
+                       g.nbVisite as GMAO_nbVisite,
+                       g.fk_prod as GMAO_fk_prod,
+                       g.reconductionAuto as GMAO_reconductionAuto,
+                       g.maintenance as GMAO_maintenance,
+                       g.prorataTemporis as GMAO_prorata,
+                       g.prixAn1 as GMAO_prixAn1,
+                       g.prixAnDernier as GMAO_prixAnDernier,
+                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+                       g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
+                       g.qteTktPerDuree as GMAO_qteTktPerDuree
+                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+                 WHERE d.rowid = " . $this->id;
+//date_debut_prevue = $objp->date_ouverture_prevue;
+//print $sql;
+//                //$ligne->date_debut_reel   = $objp->date_ouverture;
+        dol_syslog("Contrat::fetch_lignes sql=" . $sql);
+        $result = $this->db->query($sql);
+        if ($result) {
+            $this->lignes = array();
+            $num = $this->db->num_rows($result);
+            $i = 0;
+
+            while ($objp = $this->db->fetch_object($result)) {
+
+//                $ligne = new ContratLigne($this->db);
+                $ligne = $this;
+//                $ligne->description = $objp->description;  // Description ligne
+//                $ligne->description = $objp->description;  // Description ligne
+//                $ligne->qty = $objp->qty;
+//                $ligne->fk_contrat = $this->id;
+//                $ligne->tva_tx = $objp->tva_tx;
+//                $ligne->subprice = $objp->subprice;
+//                $ligne->statut = $objp->statut;
+//                $ligne->remise_percent = $objp->remise_percent;
+//                $ligne->price = $objp->total_ht;
+//                $ligne->total_ht = $objp->total_ht;
+//                $ligne->fk_product = $objp->fk_product;
+//                $ligne->type = $objp->type;           //contrat Mixte
+//                $ligne->avenant = $objp->avenant;
+//                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+//                $tmpProd = new Product($this->db);
+                $tmpProd1 = new Product($this->db);
+                if ($this->fk_product > 0)
+                    $tmpProd1->fetch($this->fk_product);
+//                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
+//                $ligne->product = $tmpProd1;
+////LineTkt
+////                    'serial_number'=>$res->serial_number ,
+//                @$ligne->GMAO_Mixte = array();
+                @$ligne->GMAO_Mixte = array(
+                    'contrat_prod' => $tmpProd1,
+                    'durVal' => $objp->GMAO_durVal,
+                    'tickets' => $objp->GMAO_qte,
+                    'dfinprev' => $objp->GMAO_dfinprev,
+                    'dfin' => $objp->GMAO_dfin,
+                    'ddeb' => $objp->GMAO_ddeb,
+                    'hotline' => $objp->GMAO_hotline,
+                    'telemaintenance' => $objp->GMAO_telemaintenance,
+                    'maintenance' => $objp->GMAO_maintenance,
+                    'SLA' => $objp->GMAO_sla,
+                    'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
+                    'isSAV' => $objp->GMAO_isSAV,
+                    'fk_prod' => $objp->GMAO_fk_prod,
+                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
+                    'maintenance' => $objp->GMAO_maintenance,
+                    'serial_number' => $objp->GMAO_serial_number,
+                    'ddebprev' => $objp->GMAO_ddebprev,
+                    "clause" => $objp->GMAO_clause,
+                    "prorata" => $objp->GMAO_prorata,
+                    "prixAn1" => $objp->GMAO_prixAn1,
+                    "prixAnDernier" => $objp->GMAO_prixAnDernier,
+                    "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
+                    "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
+                );
+            }
+        }
     }
 
 }

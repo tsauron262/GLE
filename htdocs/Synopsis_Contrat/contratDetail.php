@@ -25,6 +25,7 @@ if ($conf->propal->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
 if ($conf->contrat->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 
 
 $langs->load("contracts");
@@ -49,7 +50,7 @@ if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'societe', $socid);
 $idLigne = $_REQUEST["id"];
-$contratLn = new ContratLigne($db);
+$contratLn = new Synopsis_ContratLigne($db);
 $contratLn->fetch($idLigne);
 
 $form = new Form($db);
@@ -57,10 +58,10 @@ $html = new Form($db);
 
 
 
-$requete = "SELECT c.fk_contrat, extraparams as type"/* , g.type */ . "
-                  FROM " . MAIN_DB_PREFIX . "contratdet as c, " . MAIN_DB_PREFIX . "contrat as c1
-          "/*  LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO  as g ON c.rowid = g.contratdet_refid */ . "
-                 WHERE c1.rowid = c.fk_contrat AND c.rowid = " . $idLigne;
+$requete = "SELECT c.fk_contrat,  g.type  "
+        . " FROM " . MAIN_DB_PREFIX . "contratdet as c
+           LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO  as g ON c.rowid = g.contratdet_refid   
+                 WHERE c.rowid = " . $idLigne;
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
 $id = $res->fk_contrat;
@@ -70,7 +71,7 @@ if ($_REQUEST['action'] == 'delete') {
     $requete = "DELETE FROM " . MAIN_DB_PREFIX . "contratdet WHERE rowid = " . $idLigne;
     $sql = $db->query($requete);
     if ($sql) {
-        $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO WHERE contratdet_refid = " . $idLigne;
+        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO WHERE contratdet_refid = " . $idLigne;
         $sql = $db->query($requete);
         header('location: ' . DOL_URL_ROOT . "/contrat/fiche.php?id=" . $id);
     } else {
@@ -85,6 +86,24 @@ $isMaintenance = false;
 $isTicket = false;
 $type = $res->type;
 
+$product1 = new Product($db);
+$product2 = new Product($db);
+$hasProd1 = false;
+$hasProd2 = false;
+if ($contratLn->fk_product) {
+    $product1->fetch($contratLn->fk_product);
+//    $type = $product->type;
+    $hasProd1 = true;
+}
+if ($contratLn->GMAO_Mixte['fk_prod']) {
+    $product2->fetch($contratLn->GMAO_Mixte['fk_prod']);
+//    $type = $product->type;
+    $hasProd2 = true;
+}
+
+//$type = 2;
+
+
 $js = "<script src='" . DOL_URL_ROOT . "/Babel_GMAO/js/contratMixte-fiche.js' type='text/javascript'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js .= "<script>";
@@ -96,7 +115,7 @@ $js .= '    var g_idLigne = ' . $idLigne . ';';
 
 
 $js .= "</script>";
-llxHeader($js, utf8_decode('Détail Contrat'), 1);
+llxHeader($js, utf8_encodeRien('Détail Contrat'), 1);
 
 
 
@@ -331,195 +350,111 @@ if ($id > 0) {
         print "</span></div>";
     }
 
+
+    /* deb mod drsi */
     print '<table cellpadding=15 class="border" width="100%">';
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>
+                <td colspan="1" width="25%" class="ui-widget-content">';
+
+
     switch ($type) {
         case "2":
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>';
-            $prodContrat = new Product($db);
-            $hasProdContrat = false;
-
-            print '<td colspan="1" width="25%" class="ui-widget-content">Tickets';
-            print '<td colspan="2" width="50%" class="ui-widget-content">';
-            if ($ligne->GMAO_Mixte['fk_contrat_prod']) {
-                $prodContrat->fetch($ligne->GMAO_Mixte['fk_contrat_prod']);
-                $hasProdContrat = true;
-                print $prodContrat->getNomUrl(1);
-            } else {
-                print $contratLn->desc;
-            }
-
-            print "</td></tr>";
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Prix unit. HT</th>
-                           <td  width="25%" colspan="1" class="ui-widget-content">';
-            print price($ligne->GMAO_Mixte['pu']);
-
-            //Total HT
-            print '    <th width="25%" class="ui-widget-header ui-state-default">Total HT</th>
-                           <td colspan="1" class="ui-widget-content">' . price($ligne->GMAO_Mixte['pu'] * $ligne->GMAO_Mixte['qty']);
-            print "</td></tr>";
-
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Quantit&eacute;</th>
-                               <td colspan="3" class="ui-widget-content">';
-            if ($hasProdContrat) {
-                $total = intval($ligne->GMAO_Mixte['qty']) * intval($prodContrat->qte);
-                $qteTkt = $ligne->GMAO_Mixte['qty'] . " x " . $prodContrat->qte . " = " . $total;
-                if ($prodContrat->qte == -1)
-                    $qteTkt = "Illimit&eacute;";
-                print $qteTkt;
-            } else {
-                print $ligne->GMAO_Mixte['qty'];
-            }
-
+            print 'Tickets';
+            $isTicket = true;
             break;
         case "3":
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>';
-            $prodContrat = new Product($db);
-            $hasProdContrat = false;
-                print '<td colspan="1" width="25%" class="ui-widget-content">Maintenance';
-                print '<td colspan="2" width="50%" class="ui-widget-content">';
-            if ($ligne->GMAO_Mixte['fk_contrat_prod']) {
-                $prodContrat->fetch($ligne->GMAO_Mixte['fk_contrat_prod']);
-                $hasProdContrat = true;
-                print $prodContrat->getNomUrl(1);
-            } else {
-                print $contratLn->desc;
-            }
-
-            print "</td></tr>";
-
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Total HT</th>
-                           <td colspan="1" class="ui-widget-content">' . price($ligne->GMAO_Mixte['pu'] * $ligne->GMAO_Mixte['qty']);
-            print "</td>";
-
-
-            if ($hasProdContrat) {
-//                    var_dump::display($prodContrat);
-                $total = intval($ligne->GMAO_Mixte['qty']) * intval($prodContrat->qte);
-                if ($ligne->GMAO_Mixte['nbVisiteAn'] == 0) {
-                    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Nb visite annuel</th>
-                                   <td colspan="1" class="ui-widget-content"><b>Pas d\'intervention sur site</b>';
-                } else {
-                    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Nb visite annuel</th>
-                                   <td colspan="1" class="ui-widget-content">' . $ligne->GMAO_Mixte['nbVisiteAn'];
-                }
-            } else {
-                print '<tr><th width="25%" class="ui-widget-header ui-state-default">Quantit&eacute;</th>
-                               <td colspan="1" class="ui-widget-content">' . $ligne->GMAO_Mixte['qty'];
-            }
-            print "</td>";
-
-            print '    <th width="25%" class="ui-widget-header ui-state-default">Tickets';
-            print '<br>';
-            if ($ligne->GMAO_Mixte['qteTempsPerDuree'] == 0) {
-                print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) par intervention';
-            } else {
-                $txtDur = "";
-                $arrDur = $contrat->convDur($ligne->GMAO_Mixte['qteTempsPerDuree']);
-                $txtDur = $arrDur['hours']['abs'] . " heure" . ($arrDur['hours']['abs'] > 1 ? "s" : "") . " " . ($arrDur['minutes']['rel'] > 0 ? "et " . $arrDur['minutes']['rel'] . " minute" . ($arrDur['minutes']['rel'] > 1 ? "s" : "") : "");
-                print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) pour ' . $txtDur . " d'intervention";
-            }
-
-            print '    <td colspan="1" class="ui-widget-content">';
-
-            $arrIntervRestant = $contrat->intervRestant($ligne);
-            $consomme = $arrIntervRestant['consomme'];
-            $restant = $arrIntervRestant['restant'];
-            if ($ligne->GMAO_Mixte['tickets'] == -1)
-                print 'Illimit&eacute; ' . $consomme . " consomm&eacute; ";
-            if ($restant < 0) {
-                if ($ligne->GMAO_Mixte['tickets'] > 0)
-                    print '<table class="noborder" width=100%><tr><td align=center valign=middle rowspan=2><span class="ui-state-error" style="border:0;"><span class="ui-icon ui-icon-info"></span><td><b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <tr><td> <b><font style='font-size:10pt;' class='error'>" . $restant . "</b> restants</font></span></table>";
-            } else if ($restant < $conf->global->GMAO_TKT_RESTANT_WARNING) {
-                if ($ligne->GMAO_Mixte['tickets'] > 0)
-                    print '<table class="noborder" width=100%><tr><td align=center valign=middle rowspan=2><span class="ui-state-highlight" style="border:0"><span class="ui-icon ui-icon-info"></span><td><b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <tr><td> <font style='font-size:9pt;' class='highlight'><b>" . $restant . "</b> restants</span></table>";
-            } else {
-                if ($ligne->GMAO_Mixte['tickets'] > 0)
-                    print '<b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <br/> <b>" . $restant . "</b> restants";
-            }
-            if ($ligne->GMAO_Mixte['tickets'] == 0)
-                print 'Pas de tickets';
-
-
-//                print '<tr><th width="25%" class="ui-widget-header ui-state-default">Maintenance</th>';
-//                // Maintenance
-//                if ($ligne->GMAO_Mixte['maintenance']> 0)
-//                {
-//                    print '<td colspan="3" class="ui-widget-content">OUI';
-//                } else {
-//                    print '<td colspan="3" class="ui-widget-content">NON';
-//                }
-            //Hotline / telemaintenance
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Hotline</th>';
-            if ($ligne->GMAO_Mixte['hotline'] > 0) {
-                print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
-            } else {
-                print '<td colspan="1" class="ui-widget-content">NON';
-            }
-            print '    <th width="25%" class="ui-widget-header ui-state-default">T&eacute;l&eacute;maintenance</th>';
-            if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
-                print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
-            } else {
-                print '<td colspan="1" class="ui-widget-content">NON';
-            }
+            print 'Maintenance';
             break;
         case "4": //SAV
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>';
-            $prodContrat = new Product($db);
-            $hasProdContrat = false;
-                print '<td colspan="1" width="25%" class="ui-widget-content">SAV';
-                print '<td colspan="2" width="50%" class="ui-widget-content">';
-            if ($ligne->GMAO_Mixte['fk_contrat_prod']) {
-                $prodContrat->fetch($ligne->GMAO_Mixte['fk_contrat_prod']);
-                $hasProdContrat = true;
-                print $prodContrat->getNomUrl(1);
-            } else {
-                print $contratLn->desc;
-            }
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Prix HT</th>
-                           <td  width="25%" colspan="1" class="ui-widget-content">';
-            print price($ligne->GMAO_Mixte['pu']);
-
-
-            print "</td></tr>";
-
-
-            print "</td></tr>";
-
+            print 'SAV';
             break;
         default:
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Type</th>
-                           <td colspan="3" class="ui-widget-content">Divers';
-            print "</td></tr>";
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Description</th>
-                           <td colspan="3" class="ui-widget-content">';
-            print $contratLn->description;
-            print "</td></tr>";
-
-
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Prix Unitaire</th>
-                           <td colspan="3" class="ui-widget-content">';
-            print price($contratLn->subprice);
-            print "</td></tr>";
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Quantit&eacute;</th>
-                           <td colspan="3" class="ui-widget-content">';
-            print $contratLn->qty;
-            print "</td></tr>";
-            print '<tr><th width="25%" class="ui-widget-header ui-state-default">Total HT</th>
-                           <td colspan="3" class="ui-widget-content">';
-            print price($contratLn->total_ht);
-
-
-            print "</td></tr>";
+            print 'Divers';
             break;
+    }
+    print '<td colspan="2" width="50%" class="ui-widget-content">';
+    if ($hasProd1)
+        print $product1->getNomUrl(1) . "  " . $product1->description . "<br/>";
+        print $contratLn->description;
+    print "</td></tr>";
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Prix unit. HT</th>
+                           <td  width="25%" colspan="1" class="ui-widget-content">';
+    print price($ligne->subprice);
+
+    //Total HT
+    print '    <th width="25%" class="ui-widget-header ui-state-default">Total HT</th>
+                           <td colspan="1" class="ui-widget-content">' . price($ligne->subprice * $ligne->qty);
+    print "</td></tr>";
+
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Quantit&eacute;</th>
+                               <td colspan="3" class="ui-widget-content">';
+    $qte = $ligne->qty;
+    if ($isTicket) {
+        $qteTkt = $ligne->qty . " x " . $product1->qte . " = " . (intval($ligne->qty) * intval($product1->qte));
+        if ($product1->qte == -1)
+            $qteTkt = "Illimit&eacute;";
+        $qte = $qteTkt;
+    }
+    print $qte;
+
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Nb visite annuel</th>
+                                   <td colspan="1" class="ui-widget-content">';
+    if ($ligne->GMAO_Mixte['nbVisiteAn'] == 0) {
+        print '<b>Pas d\'intervention sur site</b>';
+    } else {
+        print $ligne->GMAO_Mixte['nbVisiteAn'];
+    }
+
+
+    if ($isTicket) {
+        print '    <th width="25%" class="ui-widget-header ui-state-default">Tickets';
+        print '<br>';
+        if ($ligne->GMAO_Mixte['qteTempsPerDuree'] == 0) {
+            print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) par intervention';
+        } else {
+            $txtDur = "";
+            $arrDur = $contrat->convDur($ligne->GMAO_Mixte['qteTempsPerDuree']);
+            $txtDur = $arrDur['hours']['abs'] . " heure" . ($arrDur['hours']['abs'] > 1 ? "s" : "") . " " . ($arrDur['minutes']['rel'] > 0 ? "et " . $arrDur['minutes']['rel'] . " minute" . ($arrDur['minutes']['rel'] > 1 ? "s" : "") : "");
+            print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) pour ' . $txtDur . " d'intervention";
+        }
+
+        print '    <td colspan="1" class="ui-widget-content">';
+
+        $arrIntervRestant = $contrat->intervRestant($ligne);
+        $consomme = $arrIntervRestant['consomme'];
+        $restant = $arrIntervRestant['restant'];
+
+        if ($ligne->GMAO_Mixte['tickets'] == -1)
+            print 'Illimit&eacute; ' . $consomme . " consomm&eacute; ";
+        else if ($ligne->GMAO_Mixte['tickets'] > 0 && $restant < 0)
+            print '<table class="noborder" width=100%><tr><td align=center valign=middle rowspan=2><span class="ui-state-error" style="border:0;"><span class="ui-icon ui-icon-info"></span><td><b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <tr><td> <b><font style='font-size:10pt;' class='error'>" . $restant . "</b> restants</font></span></table>";
+        else if ($ligne->GMAO_Mixte['tickets'] > 0 && $restant < $conf->global->GMAO_TKT_RESTANT_WARNING)
+            print '<table class="noborder" width=100%><tr><td align=center valign=middle rowspan=2><span class="ui-state-highlight" style="border:0"><span class="ui-icon ui-icon-info"></span><td><b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <tr><td> <font style='font-size:9pt;' class='highlight'><b>" . $restant . "</b> restants</span></table>";
+        else if ($ligne->GMAO_Mixte['tickets'] > 0)
+            print '<b>' . $ligne->GMAO_Mixte['tickets'] . "</b> initiaux <br/> <b>" . $restant . "</b> restants";
+        else
+            print 'Pas de tickets';
+    }
+
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Hotline</th>';
+    if ($ligne->GMAO_Mixte['hotline'] > 0) {
+        print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
+    } else {
+        print '<td colspan="1" class="ui-widget-content">NON';
+    }
+    print '    <th width="25%" class="ui-widget-header ui-state-default">T&eacute;l&eacute;maintenance</th>';
+    if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
+        print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
+    } else {
+        print '<td colspan="1" class="ui-widget-content">NON';
     }
 
     // reconduction auto
-    if ($ligne->GMAO_Mixte['reconductionAuto'] > 0) {
-        print '    <tr><th width="25%" class="ui-widget-header ui-state-default">Reconduction automatique</th>';
+    print '    <tr><th width="25%" class="ui-widget-header ui-state-default">Reconduction automatique</th>';
+    if ($ligne->GMAO_Mixte['reconductionAuto'] > 0)
         print '<td colspan="1" class="ui-widget-content">OUI';
-//            } else {
-//                print '<td colspan="1" class="ui-widget-content">NON';
-    }
+    else
+        print '<td colspan="1" class="ui-widget-content">NON';
 
     // SLA
     if ($ligne->GMAO_Mixte['SLA'] . "x" != "x") {
@@ -536,12 +471,10 @@ if ($id > 0) {
         print "</td></tr>";
     }
 
-    if ($contratLn->fk_product > 0) {
-        $prod = new Product($db);
-        $prod->fetch($contratLn->fk_product);
+    if ($hasProd2) {
         print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produit</th>';
         print '<td width="75%" colspan="3" class="ui-widget-content">';
-        print $prod->getNomUrl(1);
+        print $product2->getNomUrl(1);
         print "    </td>";
     }
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont WHERE element_id = " . $idLigne;
@@ -572,10 +505,11 @@ if ($id > 0) {
     print "<script>";
     print 'var socid = "' . $contrat->socid . '";';
     print 'var fk_contrat = "' . $contrat->id . '";';
+    print 'var fk_contratdet = "' . $_REQUEST['id'] . '";';
     print <<<EOF
     jQuery(document).ready(function(){
         jQuery('#NouvDI').click(function(){
-            location.href=DOL_URL_ROOT+"/Synopsis_DemandeInterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&socid="+socid;
+            location.href=DOL_URL_ROOT+"/Synopsis_DemandeInterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });
         jQuery('#supprLigne').click(function(){
             jQuery('#delDialog').dialog('open');

@@ -1,6 +1,6 @@
 <?php
 
-require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 
 //Objectif: contrat enveloppe :> 1 ligne par type de contrat
 //TODO recond auto
@@ -79,7 +79,7 @@ class contratMixte extends Synopsis_Contrat {
             }
             if ($val->product) {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
-                               <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->desc . "</font>
+                               <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
                                <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
                 $html .= "</tr>";
@@ -151,7 +151,7 @@ class contratMixte extends Synopsis_Contrat {
             }
             if ($val->product) {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
-                               <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->desc . "</font>
+                               <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
                                <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
                 $html .= "</tr>";
@@ -240,7 +240,7 @@ class contratMixte extends Synopsis_Contrat {
 //        $html .= '<td align=center style="width: 50px;">'.img_edit()."&nbsp;".img_delete().'</tr>';
         if ($val->product) {
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
-                           <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->desc . "</font>
+                           <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
                            <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
             $html .= "</tr>";
@@ -402,7 +402,7 @@ EOF;
 //        $html .= '<td align=center style="width: 50px;">'.img_edit()."&nbsp;".img_delete().'</tr>';
         if ($val->product) {
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
-                           <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->desc . "</font>
+                           <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
                            <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
             $html .= "</tr>";
@@ -562,324 +562,325 @@ EOF;
       }
       return($html);
       } */
-
-    public function fetch_lignes($byid = false) {
-        $this->nbofserviceswait = 0;
-        $this->nbofservicesopened = 0;
-        $this->nbofservicesclosed = 0;
-        $this->lignes = array();
-        // Selectionne les lignes contrats liees a un produit
-
-        $sql = "SELECT p.label,
-                       p.description as product_desc,
-                       p.ref,
-                       d.rowid,
-                       d.statut,
-                       d.description,
-                       d.price_ht,
-                       d.tva_tx,
-                       d.line_order,
-                       g.type,
-                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
-                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
-                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
-                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
-                       g.durValid as GMAO_durVal,
-                       g.hotline as GMAO_hotline,
-                       g.telemaintenance as GMAO_telemaintenance,
-                       g.maintenance as GMAO_maintenance,
-                       g.SLA as GMAO_sla,
-                       g.clause as GMAO_clause,
-                       g.isSAV as GMAO_isSAV,
-                       g.qte as GMAO_qte,
-                       g.nbVisite as GMAO_nbVisite,
-                       g.fk_prod as GMAO_fk_prod,
-                       g.reconductionAuto as GMAO_reconductionAuto,
-                       g.maintenance as GMAO_maintenance,
-                       g.prorataTemporis as GMAO_prorata,
-                       g.prixAn1 as GMAO_prixAn1,
-                       g.prixAnDernier as GMAO_prixAnDernier,
-                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
-                       g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
-                       g.qteTktPerDuree as GMAO_qteTktPerDuree,
-                       sc.serial_number as GMAO_serial_number,
-                       d.total_ht,
-                       d.qty,
-                       d.remise_percent,
-                       d.subprice,
-                       d.info_bits,
-                       d.fk_product,
-                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
-                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
-                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
-                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
-                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
-                       ifnull(d.avenant,9999999999) as avenant
-                  FROM " . MAIN_DB_PREFIX . "contratdet as d
-             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
-             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
-             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
-                 WHERE d.fk_contrat = " . $this->id . "
-              ORDER BY avenant, line_order";
-//date_debut_prevue = $objp->date_ouverture_prevue;
-//print $sql;
-//                //$ligne->date_debut_reel   = $objp->date_ouverture;
-        dol_syslog("Contrat::fetch_lignes sql=" . $sql);
-        $result = $this->db->query($sql);
-        if ($result) {
-            $this->lignes = array();
-            $num = $this->db->num_rows($result);
-            $i = 0;
-
-            while ($objp = $this->db->fetch_object($result)) {
-
-                $ligne = new ContratLigne($this->db);
-                $ligne->id = $objp->rowid;
-                $ligne->desc = $objp->description;  // Description ligne
-                $ligne->description = $objp->description;  // Description ligne
-                $ligne->qty = $objp->qty;
-                $ligne->fk_contrat = $this->id;
-                $ligne->tva_tx = $objp->tva_tx;
-                $ligne->subprice = $objp->subprice;
-                $ligne->statut = $objp->statut;
-                $ligne->remise_percent = $objp->remise_percent;
-                $ligne->price = $objp->total_ht;
-                $ligne->total_ht = $objp->total_ht;
-                $ligne->fk_product = $objp->fk_product;
-                $ligne->type = $objp->type;           //contrat Mixte
-                $ligne->avenant = $objp->avenant;
-                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
-                $tmpProd = new Product($this->db);
-                $tmpProd1 = new Product($this->db);
-                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
-                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
-                $ligne->product = $tmpProd1;
-//LineTkt
-//                    'serial_number'=>$res->serial_number ,
-                $ligne->GMAO_Mixte = array();
-                $ligne->GMAO_Mixte = array(
-                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
-                    'contrat_prod' => $tmpProd,
-                    'durVal' => $objp->GMAO_durVal,
-                    'tickets' => $objp->GMAO_qte,
-                    'qty' => $objp->qty,
-                    'pu' => $objp->subprice,
-                    'dfinprev' => $objp->GMAO_dfinprev,
-                    'dfin' => $objp->GMAO_dfin,
-                    'ddeb' => $objp->GMAO_ddeb,
-                    'hotline' => $objp->GMAO_hotline,
-                    'telemaintenance' => $objp->GMAO_telemaintenance,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'SLA' => $objp->GMAO_sla,
-                    'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
-                    'isSAV' => $objp->GMAO_isSAV,
-                    'fk_prod' => $objp->GMAO_fk_prod,
-                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'serial_number' => $objp->GMAO_serial_number,
-                    'ddebprev' => $objp->GMAO_ddebprev,
-                    "clause" => $objp->GMAO_clause,
-                    "prorata" => $objp->GMAO_prorata,
-                    "prixAn1" => $objp->GMAO_prixAn1,
-                    "prixAnDernier" => $objp->GMAO_prixAnDernier,
-                    "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
-                    "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
-                );
-
-
-
-
-                if ($objp->fk_product > 0) {
-                    $product = new Product($this->db);
-                    $product->id = $objp->fk_product;
-                    $product->fetch($objp->fk_product);
-                    $ligne->product = $product;
-                } else {
-                    $ligne->product = false;
-                }
-
-                $ligne->info_bits = $objp->info_bits;
-
-                $ligne->ref = $objp->ref;
-                $ligne->libelle = $objp->label;        // Label produit
-                $ligne->product_desc = $objp->product_desc; // Description produit
-
-                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
-                $ligne->date_debut_reel = $objp->date_ouverture;
-                $ligne->date_fin_prevue = $objp->date_fin_validite;
-                $ligne->date_fin_reel = $objp->date_cloture;
-                $ligne->dateCompare = $objp->dateCompare;
-                if ($byid) {
-                    $this->lignes[$objp->rowid] = $ligne;
-                } else {
-                    if ($objp->line_order != 0) {
-                        $this->lignes[$objp->line_order] = $ligne;
-                    } else {
-                        $this->lignes[] = $ligne;
-                    }
-                }
-                //dol_syslog("1 ".$ligne->desc);
-                //dol_syslog("2 ".$ligne->product_desc);
-
-                if ($ligne->statut == 0)
-                    $this->nbofserviceswait++;
-                if ($ligne->statut == 4)
-                    $this->nbofservicesopened++;
-                if ($ligne->statut == 5)
-                    $this->nbofservicesclosed++;
-
-                $i++;
-            }
-            $this->db->free($result);
-//            require_once('Var_Dump.php');
-//            Var_Dump::Display($this->lignes);
-        } else {
-            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrats liees aux produits");
-            return -3;
-        }
-        // Selectionne les lignes contrat liees a aucun produit
-        $sql = "SELECT p.label,
-                       p.description as product_desc,
-                       p.ref,
-                       d.rowid,
-                       d.statut,
-                       d.description,
-                       d.price_ht,
-                       d.tva_tx,
-                       d.line_order,
-                       g.type,
-                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
-                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
-                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
-                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
-                       g.durValid as GMAO_durVal,
-                       g.hotline as GMAO_hotline,
-                       g.telemaintenance as GMAO_telemaintenance,
-                       g.maintenance as GMAO_maintenance,
-                       g.SLA as GMAO_sla,
-                       g.clause as GMAO_clause,
-                       g.isSAV as GMAO_isSAV,
-                       g.fk_prod as GMAO_fk_prod,
-                       g.reconductionAuto as GMAO_reconductionAuto,
-                       g.maintenance as GMAO_maintenance,
-                       g.prorataTemporis as GMAO_prorata,
-                       g.prixAn1 as GMAO_prixAn1,
-                       g.prixAnDernier as GMAO_prixAnDernier,
-                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
-                       sc.serial_number as GMAO_serial_number,
-                       d.total_ht,
-                       d.qty,
-                       d.remise_percent,
-                       d.subprice,
-                       d.info_bits,
-                       d.fk_product,
-                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
-                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
-                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
-                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
-                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
-                       ifnull(d.avenant,9999999999) as avenant
-                  FROM " . MAIN_DB_PREFIX . "contratdet as d
-             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
-             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
-             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
-                 WHERE d.fk_contrat = " . $this->id . "
-                   AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 garde pour compatibilite
-
-        $result = $this->db->query($sql);
-        if ($result) {
-            $num = $this->db->num_rows($result);
-            $i = 0;
-
-            while ($i < $num) {
-                $objp = $this->db->fetch_object($result);
-                $ligne = new ContratLigne($this->db);
-                $ligne->id = $objp->rowid;
-                $ligne->libelle = stripslashes($objp->description);
-                $ligne->desc = stripslashes($objp->description);
-                $ligne->qty = $objp->qty;
-                $ligne->statut = $objp->statut;
-                $ligne->ref = $objp->ref;
-                $ligne->tva_tx = $objp->tva_tx;
-                $ligne->subprice = $objp->subprice;
-                $ligne->type = $objp->type;
-                $ligne->remise_percent = $objp->remise_percent;
-                $ligne->price = $objp->total_ht;
-                $ligne->total_ht = $objp->total_ht;
-                $ligne->fk_product = 0;
-
-                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
-                $ligne->date_debut_reel = $objp->date_ouverture;
-                $ligne->date_fin_prevue = $objp->date_fin_validite;
-                $ligne->date_fin_reel = $objp->date_cloture;
-
-                if ($ligne->statut == 0)
-                    $this->nbofserviceswait++;
-                if ($ligne->statut == 4)
-                    $this->nbofservicesopened++;
-                if ($ligne->statut == 5)
-                    $this->nbofservicesclosed++;
-
-                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
-                $tmpProd = new Product($this->db);
-                $tmpProd1 = new Product($this->db);
-                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
-                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
-                $ligne->product = $tmpProd1;
-//LineTkt
-//                    'serial_number'=>$res->serial_number ,
-                $ligne->GMAO_Mixte = array();
-                $ligne->GMAO_Mixte = array(
-                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
-                    'contrat_prod' => $tmpProd,
-                    'durVal' => $objp->GMAO_durVal,
-                    'qty' => $objp->qty,
-                    'pu' => $objp->subprice,
-                    'dfinprev' => $objp->GMAO_dfinprev,
-                    'dfin' => $objp->GMAO_dfin,
-                    'ddeb' => $objp->GMAO_ddeb,
-                    'hotline' => $objp->GMAO_hotline,
-                    'telemaintenance' => $objp->GMAO_telemaintenance,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'SLA' => $objp->GMAO_sla,
-                    'isSAV' => $objp->GMAO_isSAV,
-                    'fk_prod' => $objp->GMAO_fk_prod,
-                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'serial_number' => $objp->GMAO_serial_number,
-                    'ddebprev' => $objp->GMAO_ddebprev,
-                    "clause" => $objp->GMAO_clause,
-                    "prorata" => $objp->GMAO_prorata,
-                    "prixAn1" => $objp->GMAO_prixAn1,
-                    "prixAnDernier" => $objp->GMAO_prixAnDernier
-                );
-
-
-                if ($byid) {
-                    $this->lignes[$objp->rowid] = $ligne;
-                } else {
-                    if ($objp->line_order != 0) {
-                        $this->lignes[$objp->line_order] = $ligne;
-                    } else {
-                        $this->lignes[] = $ligne;
-                    }
-                }
-
-                $i++;
-            }
-
-            $this->db->free($result);
-        } else {
-            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrat non liees aux produits");
-            $this->error = $this->db->error();
-            return -2;
-        }
-
-        $this->nbofservices = sizeof($this->lignes);
-
-        ksort($this->lignes);
-        return $this->lignes;
-    }
+//
+//    public function fetch_lines($byid = false) {
+//        $this->nbofserviceswait = 0;
+//        $this->nbofservicesopened = 0;
+//        $this->nbofservicesclosed = 0;
+//        $this->lignes = array();
+//        // Selectionne les lignes contrats liees a un produit
+//
+//        $sql = "SELECT p.label,
+//                       p.description as product_desc,
+//                       p.ref,
+//                       d.rowid,
+//                       d.statut,
+//                       d.description,
+//                       d.price_ht,
+//                       d.tva_tx,
+//                       d.line_order,
+//                       g.type,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+//                       g.durValid as GMAO_durVal,
+//                       g.hotline as GMAO_hotline,
+//                       g.telemaintenance as GMAO_telemaintenance,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.SLA as GMAO_sla,
+//                       g.clause as GMAO_clause,
+//                       g.isSAV as GMAO_isSAV,
+//                       g.qte as GMAO_qte,
+//                       g.nbVisite as GMAO_nbVisite,
+//                       g.fk_prod as GMAO_fk_prod,
+//                       g.reconductionAuto as GMAO_reconductionAuto,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.prorataTemporis as GMAO_prorata,
+//                       g.prixAn1 as GMAO_prixAn1,
+//                       g.prixAnDernier as GMAO_prixAnDernier,
+//                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+//                       g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
+//                       g.qteTktPerDuree as GMAO_qteTktPerDuree,
+//                       sc.serial_number as GMAO_serial_number,
+//                       d.total_ht,
+//                       d.qty,
+//                       d.remise_percent,
+//                       d.subprice,
+//                       d.info_bits,
+//                       d.fk_product,
+//                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
+//                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
+//                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
+//                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
+//                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
+//                       ifnull(d.avenant,9999999999) as avenant
+//                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+//             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+//                 WHERE d.fk_contrat = " . $this->id . "
+//              ORDER BY avenant, line_order";
+//        die($sql);
+////date_debut_prevue = $objp->date_ouverture_prevue;
+////print $sql;
+////                //$ligne->date_debut_reel   = $objp->date_ouverture;
+//        dol_syslog("Contrat::fetch_lignes sql=" . $sql);
+//        $result = $this->db->query($sql);
+//        if ($result) {
+//            $this->lignes = array();
+//            $num = $this->db->num_rows($result);
+//            $i = 0;
+//
+//            while ($objp = $this->db->fetch_object($result)) {
+//
+//                $ligne = new ContratLigne($this->db);
+//                $ligne->id = $objp->rowid;
+//                $ligne->description = $objp->description;  // Description ligne
+//                $ligne->description = $objp->description;  // Description ligne
+//                $ligne->qty = $objp->qty;
+//                $ligne->fk_contrat = $this->id;
+//                $ligne->tva_tx = $objp->tva_tx;
+//                $ligne->subprice = $objp->subprice;
+//                $ligne->statut = $objp->statut;
+//                $ligne->remise_percent = $objp->remise_percent;
+//                $ligne->price = $objp->total_ht;
+//                $ligne->total_ht = $objp->total_ht;
+//                $ligne->fk_product = $objp->fk_product;
+//                $ligne->type = $objp->type;           //contrat Mixte
+//                $ligne->avenant = $objp->avenant;
+//                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+//                $tmpProd = new Product($this->db);
+//                $tmpProd1 = new Product($this->db);
+//                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
+//                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
+//                $ligne->product = $tmpProd1;
+////LineTkt
+////                    'serial_number'=>$res->serial_number ,
+//                $ligne->GMAO_Mixte = array();
+//                $ligne->GMAO_Mixte = array(
+//                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
+//                    'contrat_prod' => $tmpProd,
+//                    'durVal' => $objp->GMAO_durVal,
+//                    'tickets' => $objp->GMAO_qte,
+//                    'qty' => $objp->qty,
+//                    'pu' => $objp->subprice,
+//                    'dfinprev' => $objp->GMAO_dfinprev,
+//                    'dfin' => $objp->GMAO_dfin,
+//                    'ddeb' => $objp->GMAO_ddeb,
+//                    'hotline' => $objp->GMAO_hotline,
+//                    'telemaintenance' => $objp->GMAO_telemaintenance,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'SLA' => $objp->GMAO_sla,
+//                    'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
+//                    'isSAV' => $objp->GMAO_isSAV,
+//                    'fk_prod' => $objp->GMAO_fk_prod,
+//                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'serial_number' => $objp->GMAO_serial_number,
+//                    'ddebprev' => $objp->GMAO_ddebprev,
+//                    "clause" => $objp->GMAO_clause,
+//                    "prorata" => $objp->GMAO_prorata,
+//                    "prixAn1" => $objp->GMAO_prixAn1,
+//                    "prixAnDernier" => $objp->GMAO_prixAnDernier,
+//                    "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
+//                    "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
+//                );
+//
+//
+//
+//
+//                if ($objp->fk_product > 0) {
+//                    $product = new Product($this->db);
+//                    $product->id = $objp->fk_product;
+//                    $product->fetch($objp->fk_product);
+//                    $ligne->product = $product;
+//                } else {
+//                    $ligne->product = false;
+//                }
+//
+//                $ligne->info_bits = $objp->info_bits;
+//
+//                $ligne->ref = $objp->ref;
+//                $ligne->libelle = $objp->label;        // Label produit
+//                $ligne->product_desc = $objp->product_desc; // Description produit
+//
+//                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
+//                $ligne->date_debut_reel = $objp->date_ouverture;
+//                $ligne->date_fin_prevue = $objp->date_fin_validite;
+//                $ligne->date_fin_reel = $objp->date_cloture;
+//                $ligne->dateCompare = $objp->dateCompare;
+//                if ($byid) {
+//                    $this->lignes[$objp->rowid] = $ligne;
+//                } else {
+//                    if ($objp->line_order != 0) {
+//                        $this->lignes[$objp->line_order] = $ligne;
+//                    } else {
+//                        $this->lignes[] = $ligne;
+//                    }
+//                }
+//                //dol_syslog("1 ".$ligne->description);
+//                //dol_syslog("2 ".$ligne->product_desc);
+//
+//                if ($ligne->statut == 0)
+//                    $this->nbofserviceswait++;
+//                if ($ligne->statut == 4)
+//                    $this->nbofservicesopened++;
+//                if ($ligne->statut == 5)
+//                    $this->nbofservicesclosed++;
+//
+//                $i++;
+//            }
+//            $this->db->free($result);
+////            require_once('Var_Dump.php');
+////            Var_Dump::Display($this->lignes);
+//        } else {
+//            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrats liees aux produits");
+//            return -3;
+//        }
+//        // Selectionne les lignes contrat liees a aucun produit
+//        $sql = "SELECT p.label,
+//                       p.description as product_desc,
+//                       p.ref,
+//                       d.rowid,
+//                       d.statut,
+//                       d.description,
+//                       d.price_ht,
+//                       d.tva_tx,
+//                       d.line_order,
+//                       g.type,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfinprev,
+//                       unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(p.durSav,0) MONTH)) as GMAO_dfin,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddeb,
+//                       unix_timestamp(g.DateDeb) as GMAO_ddebprev,
+//                       g.durValid as GMAO_durVal,
+//                       g.hotline as GMAO_hotline,
+//                       g.telemaintenance as GMAO_telemaintenance,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.SLA as GMAO_sla,
+//                       g.clause as GMAO_clause,
+//                       g.isSAV as GMAO_isSAV,
+//                       g.fk_prod as GMAO_fk_prod,
+//                       g.reconductionAuto as GMAO_reconductionAuto,
+//                       g.maintenance as GMAO_maintenance,
+//                       g.prorataTemporis as GMAO_prorata,
+//                       g.prixAn1 as GMAO_prixAn1,
+//                       g.prixAnDernier as GMAO_prixAnDernier,
+//                       g.fk_contrat_prod as GMAO_fk_contrat_prod,
+//                       sc.serial_number as GMAO_serial_number,
+//                       d.total_ht,
+//                       d.qty,
+//                       d.remise_percent,
+//                       d.subprice,
+//                       d.info_bits,
+//                       d.fk_product,
+//                       date_format(d.date_ouverture_prevue,'%d/%m/%Y') as date_ouverture_prevue,
+//                       date_format(d.date_ouverture ,'%d/%m/%Y') as date_ouverture,
+//                       date_format(d.date_fin_validite,'%d/%m/%Y') as date_fin_validite,
+//                       date_format(d.date_cloture,'%d/%m/%Y') as date_cloture,
+//                       UNIX_TIMESTAMP(d.date_valid) as dateCompare,
+//                       ifnull(d.avenant,9999999999) as avenant
+//                  FROM " . MAIN_DB_PREFIX . "contratdet as d
+//             LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON  d.fk_product = p.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+//             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid AND sc.element_type LIKE 'contrat%'
+//                 WHERE d.fk_contrat = " . $this->id . "
+//                   AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 garde pour compatibilite
+//
+//        $result = $this->db->query($sql);
+//        if ($result) {
+//            $num = $this->db->num_rows($result);
+//            $i = 0;
+//
+//            while ($i < $num) {
+//                $objp = $this->db->fetch_object($result);
+//                $ligne = new ContratLigne($this->db);
+//                $ligne->id = $objp->rowid;
+//                $ligne->libelle = stripslashes($objp->description);
+//                $ligne->description = stripslashes($objp->description);
+//                $ligne->qty = $objp->qty;
+//                $ligne->statut = $objp->statut;
+//                $ligne->ref = $objp->ref;
+//                $ligne->tva_tx = $objp->tva_tx;
+//                $ligne->subprice = $objp->subprice;
+//                $ligne->type = $objp->type;
+//                $ligne->remise_percent = $objp->remise_percent;
+//                $ligne->price = $objp->total_ht;
+//                $ligne->total_ht = $objp->total_ht;
+//                $ligne->fk_product = 0;
+//
+//                $ligne->date_debut_prevue = $objp->date_ouverture_prevue;
+//                $ligne->date_debut_reel = $objp->date_ouverture;
+//                $ligne->date_fin_prevue = $objp->date_fin_validite;
+//                $ligne->date_fin_reel = $objp->date_cloture;
+//
+//                if ($ligne->statut == 0)
+//                    $this->nbofserviceswait++;
+//                if ($ligne->statut == 4)
+//                    $this->nbofservicesopened++;
+//                if ($ligne->statut == 5)
+//                    $this->nbofservicesclosed++;
+//
+//                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+//                $tmpProd = new Product($this->db);
+//                $tmpProd1 = new Product($this->db);
+//                ($objp->fk_product > 0 ? $tmpProd1->fetch($objp->fk_product) : $tmpProd1 = false);
+//                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
+//                $ligne->product = $tmpProd1;
+////LineTkt
+////                    'serial_number'=>$res->serial_number ,
+//                $ligne->GMAO_Mixte = array();
+//                $ligne->GMAO_Mixte = array(
+//                    'fk_contrat_prod' => ($objp->GMAO_fk_contrat_prod > 0 ? $objp->GMAO_fk_contrat_prod : false),
+//                    'contrat_prod' => $tmpProd,
+//                    'durVal' => $objp->GMAO_durVal,
+//                    'qty' => $objp->qty,
+//                    'pu' => $objp->subprice,
+//                    'dfinprev' => $objp->GMAO_dfinprev,
+//                    'dfin' => $objp->GMAO_dfin,
+//                    'ddeb' => $objp->GMAO_ddeb,
+//                    'hotline' => $objp->GMAO_hotline,
+//                    'telemaintenance' => $objp->GMAO_telemaintenance,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'SLA' => $objp->GMAO_sla,
+//                    'isSAV' => $objp->GMAO_isSAV,
+//                    'fk_prod' => $objp->GMAO_fk_prod,
+//                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
+//                    'maintenance' => $objp->GMAO_maintenance,
+//                    'serial_number' => $objp->GMAO_serial_number,
+//                    'ddebprev' => $objp->GMAO_ddebprev,
+//                    "clause" => $objp->GMAO_clause,
+//                    "prorata" => $objp->GMAO_prorata,
+//                    "prixAn1" => $objp->GMAO_prixAn1,
+//                    "prixAnDernier" => $objp->GMAO_prixAnDernier
+//                );
+//
+//
+//                if ($byid) {
+//                    $this->lignes[$objp->rowid] = $ligne;
+//                } else {
+//                    if ($objp->line_order != 0) {
+//                        $this->lignes[$objp->line_order] = $ligne;
+//                    } else {
+//                        $this->lignes[] = $ligne;
+//                    }
+//                }
+//
+//                $i++;
+//            }
+//
+//            $this->db->free($result);
+//        } else {
+//            dol_syslog("Contrat::Fetch Erreur lecture des lignes de contrat non liees aux produits");
+//            $this->error = $this->db->error();
+//            return -2;
+//        }
+//
+//        $this->nbofservices = sizeof($this->lignes);
+//
+//        ksort($this->lignes);
+//        return $this->lignes;
+//    }
 
     public function displayLine() {
         global $user, $conf, $lang;

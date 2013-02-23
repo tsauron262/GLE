@@ -104,7 +104,7 @@ class box_ficheInterv extends ModeleBoxes {
 
             if ($result)
             {
-                $num = $db->num_rows();
+                $num = $db->num_rows($result);
 
                 $i = 0;
                 $l_due_date = $langs->trans('Late').' ('.strtolower($langs->trans('DateEcheance')).': %s)';
@@ -126,7 +126,7 @@ class box_ficheInterv extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->datec,'day'),
+                    'text' => dol_print_date($objp->datec,'day'),
                     );
 
                     $this->info_box_contents[$i][3] = array(

@@ -39,6 +39,9 @@
   \ingroup    demandeInterv
   \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
+$activeLigneContrat = false;
+
+
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
@@ -264,22 +267,24 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
                 $objLigneFiche->fk_typeinterv = $demandeInterv->lignes[$ligne]->fk_typeinterv;
                 $objLigneFiche->isDeplacement = $demandeInterv->lignes[$ligne]->isDeplacement;
                 //Si deplacement
+                $objLigneFiche->typeIntervProd = false;
+                if (isset($demandeInterv->lignes[$ligne]->fk_commandede)) {
                     $requete = "SELECT b.rowid
                                       FROM " . MAIN_DB_PREFIX . "product as b,
                                            " . MAIN_DB_PREFIX . "commandedet as cd
                                      WHERE cd.fk_product = b.rowid
                                        AND cd.rowid = " . $demandeInterv->lignes[$ligne]->fk_commandedet;
                     $sql3 = $db->query($requete);
-                if ($db->num_rows($sql3) >0) {
-                    $res3 = $db->fetch_object($sql3);
-                    $objLigneFiche->typeIntervProd = $res3->rowid;
-                    $objLigneFiche->total_ht = $demandeInterv->lignes[$ligne]->total_ht;
-                    $objLigneFiche->total_ttc = $demandeInterv->lignes[$ligne]->total_ttc;
-                    $objLigneFiche->total_tva = $demandeInterv->lignes[$ligne]->total_tva;
-                    $objLigneFiche->pu_ht = $demandeInterv->lignes[$ligne]->pu_ht;
-                } else {
-                    die($requete);
-                    $objLigneFiche->typeIntervProd = false;
+                    if ($db->num_rows($sql3) > 0) {
+                        $res3 = $db->fetch_object($sql3);
+                        $objLigneFiche->typeIntervProd = $res3->rowid;
+                        $objLigneFiche->total_ht = $demandeInterv->lignes[$ligne]->total_ht;
+                        $objLigneFiche->total_ttc = $demandeInterv->lignes[$ligne]->total_ttc;
+                        $objLigneFiche->total_tva = $demandeInterv->lignes[$ligne]->total_tva;
+                        $objLigneFiche->pu_ht = $demandeInterv->lignes[$ligne]->pu_ht;
+                    } else {
+                        die($requete);
+                    }
                 }
 
                 $objLigneFiche->qte = $demandeInterv->lignes[$ligne]->qte;
@@ -404,6 +409,9 @@ if (isset($_REQUEST["action"]) && $_POST["action"] == 'add') {
                     demandeInterv_create($db, $demandeInterv, $demandeInterv->modelpdf, $outputlangs);
                 }
             }
+
+            if (isset($_REQUEST['fk_contratdet']))
+                addElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet'], $result);
         } else {
             $mesg = '<div class="error ui-state-error">' . $demandeInterv->error . '</div>';
             $_REQUEST["action"] = 'create';
@@ -794,13 +802,26 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Description") . '</th>';
         print "<td colspan=3 class='ui-widget-content'>";
 
+        $dsc = '';
+        if (isset($_REQUEST['fk_contratdet'])) {
+            $requete = "SELECT 2visiteSite as nb FROM `" . MAIN_DB_PREFIX . "contratdet` c, " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = `fk_product` AND c.`rowid` = " . $_REQUEST['fk_contratdet'];
+            $sql = $db->query($requete);
+            $tabExiste = getElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet']);
+            $nbExiste = count($tabExiste);
+            while ($result = $db->fetch_object($sql))
+                if ($result->nb)
+                    $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb;
+            echo '<input type="hidden" name="fk_contratdet" value="' . $_REQUEST['fk_contratdet'] . '"/>';
+        }
+
+
         if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
-            $doleditor = new DolEditor('description', '', 280, 'dolibarr_notes', 'In', true);
+            $doleditor = new DolEditor('description', $dsc, 280, 'dolibarr_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="12"></textarea>';
+            print '<textarea name="description" wrap="soft" cols="70" rows="12">' . $dsc . '</textarea>';
         }
 
         print '</td></tr>';
@@ -1269,6 +1290,12 @@ EOF;
         $contrat = new Contrat($db);
         $contrat->fetch($demandeInterv->fk_contrat);
         print "    <td class='ui-widget-content'>" . $contrat->getNomUrl(1) . "</td> ";
+        $tab = getElementElement("contratdet", "demandeInterv", NULL, $demandeInterv->rowid);
+        if(isset($tab[0])){
+        print "<th class='ui-widget-header ui-state-default'>Ligne Contrat</th>";
+            print "    <td class='ui-widget-content'><a href='".DOL_URL_ROOT."/Synopsis_Contrat/contratDetail.php?id=".$tab[0]['s']."'>" . $contrat->ref . "-".$tab[0]['s']."</a></td> ";
+        }
+            
     } else if ($demandeInterv->fk_commande > 0) {
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
@@ -1295,14 +1322,14 @@ EOF;
     print '</td>';
     print '</tr>';
 
-//Maintenance
-    if ($demandeInterv->fk_contrat > 0) {
-        require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
-        $contrat = new Contrat($db);
-        $contrat->fetch($demandeInterv->fk_contrat);
-        print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';
-        print '<td colspan="3" class="ui-widget-content">' . $contrat->getNomUrl(1);
-    }
+////Maintenance
+//    if ($demandeInterv->fk_contrat > 0) {
+//        require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+//        $contrat = new Contrat($db);
+//        $contrat->fetch($demandeInterv->fk_contrat);
+//        print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';
+//        print '<td colspan="3" class="ui-widget-content">' . $contrat->getNomUrl(1);
+//    }
 
 
     // Projet
@@ -1418,10 +1445,12 @@ EOF;
         print "</table>";
         print "</form>";
         print '</td>';
-    } else {
+    } elseif($demandeInterv->fk_user_prisencharge) {
         $demandeInterv->user_prisencharge->fetch($demandeInterv->fk_user_prisencharge);
         print ($demandeInterv->user_prisencharge ? $demandeInterv->user_prisencharge->getNomUrl(1) : "") . '</td>';
     }
+    else
+        print "Personne";
 
     print '<th class="ui-widget-header ui-state-default">Effectu&eacute; par :';
     if ($demandeInterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
@@ -1698,7 +1727,7 @@ EOF;
                 }
 
                 print '</tr>';
-                if ($demandeInterv->fk_contrat > 0) {
+                if ($activeLigneContrat && $demandeInterv->fk_contrat > 0) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
                     $contrat = getContratObj($demandeInterv->fk_contrat);
                     $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);
@@ -1805,7 +1834,7 @@ EOF;
                 print '<br /><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '"></td>';
                 print '</tr>' . "\n";
 
-                if (isset($demandeInterv->fk_contrat)) {
+                if ($activeLigneContrat && isset($demandeInterv->fk_contrat)) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
                     $contrat = getContratObj($demandeInterv->fk_contrat);
                     $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);
@@ -1922,10 +1951,10 @@ EOF;
             $com->fetch_group_lines(0, 0, 0, 0, 1);
             print "<td><select name='comLigneId'>";
             foreach ($com->lines as $key => $val) {
-                if($val->fk_product > 0){
-                $prod = new Product($db);
-                $prod->fetch($val->fk_product);
-                print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro;</option>";
+                if ($val->fk_product > 0) {
+                    $prod = new Product($db);
+                    $prod->fetch($val->fk_product);
+                    print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro;</option>";
                 }
             }
             print "</select>";
@@ -1950,7 +1979,7 @@ EOF;
 
         print '<td align="center" valign="middle" colspan="4"><input type="submit" class="button" value="' . $langs->trans('Add') . '" name="addligne"></td>';
         print '</tr>';
-        if ($demandeInterv->fk_contrat > 0) {
+        if ($activeLigneContrat && $demandeInterv->fk_contrat > 0) {
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
             $contrat = getContratObj($demandeInterv->fk_contrat);
             $type = getTypeContrat_noLoad($demandeInterv->fk_contrat);

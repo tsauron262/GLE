@@ -105,13 +105,13 @@ class box_external_rss extends ModeleBoxes {
         if ($rss->ERROR)
         {
             // Affiche warning car il y a eu une erreur
-            $title.=" ".img_error($langs->trans("FailedToRefreshDataInfoNotUpToDate",(isset($rss->date)?dolibarr_print_date($rss->date,"dayhourtext"):$langs->trans("Unknown"))));
+            $title.=" ".img_error($langs->trans("FailedToRefreshDataInfoNotUpToDate",(isset($rss->date)?dol_print_date($rss->date,"dayhourtext"):$langs->trans("Unknown"))));
             $this->info_box_head = array('text' => $title,'limit' => 0);
         }
         else
         {
             $this->info_box_head = array('text' => $title,
-                'sublink' => $link, 'subtext'=>$langs->trans("LastRefreshDate").': '.(isset($rss->date)?dolibarr_print_date($rss->date,"dayhourtext"):$langs->trans("Unknown")), 'subpicto'=>'object_bookmark');
+                'sublink' => $link, 'subtext'=>$langs->trans("LastRefreshDate").': '.(isset($rss->date)?dol_print_date($rss->date,"dayhourtext"):$langs->trans("Unknown")), 'subpicto'=>'object_bookmark');
         }
 
         // INFO sur l'elements
@@ -138,7 +138,7 @@ class box_external_rss extends ModeleBoxes {
                 //$item['modified']
                 //$item['atom_content']
             }
-            if (is_numeric($date)) $date=dolibarr_print_date($date,"dayhour");
+            if (is_numeric($date)) $date=dol_print_date($date,"dayhour");
             $result = $this->utf8_check($title);
             if ($result)
             {

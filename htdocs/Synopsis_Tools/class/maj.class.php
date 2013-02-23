@@ -1,4 +1,4 @@
-<?php
+mysqli_query<?php
 
 /*
  * $% signifie que l'element est un texte fixe est nom le nom d'une collone de la base
@@ -131,11 +131,17 @@ class maj {
 
     private function queryD($query) {
         $query = str_replace("llx_", MAIN_DB_PREFIX, $query);
-        return $this->dbD->query($query);
+        $result = $this->dbD->query($query);
+//        if(!$result)
+//            die("Erreur SQL D : ".$query);
+        return $result;
     }
 
     private function queryS($query) {
-        return $this->dbS->query($query);
+        $result = $this->dbS->query($query);
+//        if(!$result)
+//            die("Erreur SQL S : ".$query);
+        return $result;
     }
 
     private function traiteSql($srcCol, $destCol, $tableSrc, $tableDest, $update) {

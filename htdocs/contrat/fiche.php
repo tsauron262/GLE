@@ -63,7 +63,8 @@ include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 $hookmanager=new HookManager($db);
 $hookmanager->initHooks(array('contractcard'));
 
-$object = new Contrat($db);
+require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
+$object = new Synopsis_Contrat($db);
 
 
 /*
@@ -552,7 +553,63 @@ if (! empty($conf->global->MAIN_DISABLE_CONTACTS_TAB) && $user->rights->contrat-
  * View
  */
 
-llxHeader('',$langs->trans("ContractCard"),"Contrat");
+/* Mod drsi */
+$type = 7;
+$header = '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
+switch ($type) {
+        case '2': {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratTkt-fiche.js"></script>' . "\n";
+            }
+            break;
+        case '3': {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratMnt-fiche.js"></script>' . "\n";
+            }
+            break;
+        case '4': {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratSAV-fiche.js"></script>' . "\n";
+            }
+            break;
+        case '7': {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratMixte-fiche.js"></script>' . "\n";
+            }
+            break;
+        case '5': {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GA/js/contratLoc-fiche.js"></script>' . "\n";
+            }
+            break;
+        default: {
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/contrat/js/contrat-fiche.js"></script>' . "\n";
+            }
+            break;
+    }
+
+llxHeader($header .'<script>
+                    userId = "'.$user->rowid.'";
+                        idContratCurrent = "'.$id.'";
+                    $(document).ready(function(){ 
+                        $(\'img[alt="Supprimer"]\').each(function(){
+                            var id = $(this).parent().attr("href");
+                            var nId = id;
+                            id = id.split("&");
+                            for ( var i=0;i<id.length;i++) 
+                                if(id[i].indexOf("ligne") > -1 || id[i].indexOf("rowid") > -1)
+                                    nId = id[i].split("=")[1];
+                            elem = $(this).parent().parent().parent().parent().parent().parent().parent().children("td.liste_titre");
+                            elem.css(\'cursor\',\'pointer\');
+                            elem.html(elem.html()+"<p>Mod</p>");
+                            elem.click(function(){
+                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+                            });
+                            elem.find("p").click(function(){
+                                editLine(this, '.$id.', nId); 
+                                    return false;
+                            });
+                        });
+            });</script>',$langs->trans("ContractCard"),"Contrat");
+
+    $object->fetch($id);
+print $object->initDialog($societe, $objp);
+
 
 $form = new Form($db);
 

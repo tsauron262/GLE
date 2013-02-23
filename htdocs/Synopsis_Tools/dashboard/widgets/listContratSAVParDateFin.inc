@@ -72,7 +72,7 @@ function widget_listContratSAVParDateFin() {
                     if (strtotime($obj->DateFin) < time()) $table .=  img_warning($langs->trans("Late"),false);
                     $table .=  '</td>';
                     $table .=  '<td>';
-                    $staticcompany->fetch($staticcontrat->societe->id);
+                    $staticcompany->fetch($staticcontrat->socid);
                     $table .=  $staticcompany->getNomUrl(1,'',20);
                     $table .=  '</td>';
                     $table .=  '<td align="center">'.dol_print_date($obj->DateFin,'day').'</td>';

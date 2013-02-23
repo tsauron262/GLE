@@ -199,7 +199,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
                     $desc = $val->product_desc;
                     if ('x'.$desc == "x")
                     {
-                        $desc = $val->desc;
+                        $desc = $val->description;
                     }
                     $pdf->MultiCell(100, 3,  $desc, 0, 'L');
                     $pdf->setXY(120,$baseY + 10*$i);

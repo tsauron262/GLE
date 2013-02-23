@@ -126,7 +126,7 @@ if ($id > 0) {
                                          WHERE fk_soc = " . $commande->socid;
             $sql2 = $db->query($requete);
             if ($db->num_rows($sql2) > 0) {
-                $longHtml .= "<br/><select name='fk_contrat' id='fk_contrat'>";
+                $longHtml .= "<br/><select name='fk_contrat' id='fk_contrat-" . $res->rowid . "'>";
                 while ($res2 = $db->fetch_object($sql2)) {
                     $longHtml .= "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
                 }
@@ -226,15 +226,16 @@ function ajoutContratAll(tabLigne)
 function createContrat2(pId,ligneId)
 {
 //    //TODO ajoute la ligne, ouvre la page
+    idContrat = jQuery('#fk_contrat-'+ligneId).find(':selected').val();
     jQuery.ajax({
         url:"ajax/xml/addProdToContrat-xml_response.php",
-        data:"id="+comId+"&contratId="+jQuery('#fk_contrat').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId,
+        data:"id="+comId+"&contratId="+idContrat+"&prodId="+pId+"&comLigneId="+ligneId,
         datatype:"xml",
         type:"POST",
         cache:false,
         success:function(msg){
             if(jQuery(msg).find('OK').length > 0)
-                location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+jQuery('#fk_contrat').find(':selected').val();
+                location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+idContrat;
         }
     });
     //TODO passer en paramètre le numéro de ligne pour l'enregistrer dans la liaison contratdet<->commandedet

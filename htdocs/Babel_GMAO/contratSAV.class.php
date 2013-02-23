@@ -1,5 +1,5 @@
 <?php
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
 
 class contratSAV extends Synopsis_Contrat{
     public function getExtraHeadTab($head)

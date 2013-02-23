@@ -120,7 +120,7 @@ class box_propales extends ModeleBoxes {
 
                     $this->info_box_contents[$i][2] = array(
                     'align' => 'right',
-                    'text' => dolibarr_print_date($objp->datec,'day'));
+                    'text' => dol_print_date($objp->datec,'day'));
 
                     $this->info_box_contents[$i][3] = array(
                     'align' => 'right',

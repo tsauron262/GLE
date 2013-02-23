@@ -117,7 +117,7 @@ class box_factures extends ModeleBoxes {
                             if ($objp->type == 1) $picto.='r';
                             if ($objp->type == 2) $picto.='a';
                               $late = '';
-                              if($objp->paye == 0 && $objp->datelimite < (time() - $conf->facture->warning_delay)) { $late = img_warning(sprintf($l_due_date,dolibarr_print_date($objp->datelimite,'day')));}
+                              if($objp->paye == 0 && $objp->datelimite < (time() - $conf->facture->warning_delay)) { $late = img_warning(sprintf($l_due_date,dol_print_date($objp->datelimite,'day')));}
 
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $picto,
@@ -131,7 +131,7 @@ class box_factures extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->datec,'day'),
+                    'text' => dol_print_date($objp->datec,'day'),
                     );
 
                     $this->info_box_contents[$i][3] = array(

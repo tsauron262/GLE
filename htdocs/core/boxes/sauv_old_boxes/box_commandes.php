@@ -118,7 +118,7 @@ class box_commandes extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->tms,'day'),
+                    'text' => dol_print_date($objp->tms,'day'),
                     );
 
                     $this->info_box_contents[$i][3] = array(

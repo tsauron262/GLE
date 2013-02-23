@@ -1173,7 +1173,14 @@ class Form
         {
             $sql.= " AND p.tosell = ".$status;
         }
-        if (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
+        /*mod drsi */
+        if (is_int($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
+        elseif($filtertype != ''){
+            $tab = explode("||", $filtertype);
+            if(isset($tab[0]))
+                $sql.=" AND p.fk_product_type IN (".implode (",", $tab).")";
+        }
+        /*f mod drsi */
         // Add criteria on ref/label
         if ($filterkey && $filterkey != '')
         {

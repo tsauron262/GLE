@@ -13,14 +13,14 @@
  *       \brief      Fiche contrat
  *       \version    $Id: fiche.php,v 1.132 2008/08/07 20:46:15 eldy Exp $
  */
-require_once("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT . '/lib/contract.lib.php');
+require_once("../main.inc.php");
+require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');
 if ($conf->projet->enabled)
-    require_once(DOL_DOCUMENT_ROOT . "/project.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 if ($conf->propal->enabled)
-    require_once(DOL_DOCUMENT_ROOT . "/propal.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
 if ($conf->contrat->enabled)
-    require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 
 $langs->load("contracts");
 $langs->load("orders");
@@ -197,7 +197,7 @@ if ($_REQUEST['typeContrat'] == 'LocationFinanciere' && $_REQUEST["action"] == '
 } else if ($_POST["action"] == 'add') {
     $datecontrat = dol_mktime(12, 0, 0, $_POST["remonth"], $_POST["reday"], $_POST["reyear"]);
 
-    $contrat = new Contrat($db);
+    $contrat = new Synopsis_Contrat($db);
 
     $contrat->socid = $_POST["socid"];
     $contrat->date_contrat = $datecontrat;
@@ -270,14 +270,14 @@ if ($_REQUEST['typeContrat'] == 'LocationFinanciere' && $_REQUEST["action"] == '
 }
 
 if ($_POST["action"] == 'classin') {
-    $contrat = new Contrat($db);
+    $contrat = new Synopsis_Contrat($db);
     $contrat->fetch($_REQUEST["id"]);
     $contrat->setProject($_POST["projetid"]);
 }
 
 if ($_POST["action"] == 'addligne' && $user->rights->contrat->creer) {
     if ($_POST["pqty"] && (($_POST["pu"] != '' && $_POST["desc"]) || $_POST["p_idprod"])) {
-        $contrat = new Contrat($db);
+        $contrat = new Synopsis_Contrat($db);
         $ret = $contrat->fetch($_REQUEST["id"]);
         if ($ret < 0) {
             dol_print_error($db, $commande->error);
@@ -488,7 +488,7 @@ if ($_POST["action"] == 'updateligne' && $user->rights->contrat->creer && !$_POS
 }
 
 if ($_REQUEST["action"] == 'deleteline' && $user->rights->contrat->creer) {
-    $contrat = new Contrat($db);
+    $contrat = new Synopsis_Contrat($db);
     $contrat->fetch($_REQUEST["id"]);
 //Modif Babel post 1.0
     $requete = "DELETE FROM Babel_financement
@@ -569,8 +569,8 @@ $header = '<script language="javascript" src="' . DOL_URL_ROOT . '/lib/lib_head.
 EOF;
 if ($_REQUEST["id"] > 0) {
 //Type
-    $contrat = new Contrat($db);
-    $contratTmp = new Contrat($db);
+    $contrat = new Synopsis_Contrat($db);
+    $contratTmp = new Synopsis_Contrat($db);
     $type = $contratTmp->getTypeContrat_noLoad($_REQUEST["id"]);
 
     //if ($contrat->isGA($id))
@@ -634,12 +634,12 @@ if ($_REQUEST["action"] == 'create') {
         print "Merci de configurer la num&eacute;rotation des contrats";
         exit(0);
     }
-    dolibarr_fiche_head($head, $a, $langs->trans("AddContract"));
+    dol_fiche_head($head, $a, $langs->trans("AddContract"));
 
     if ($mesg)
         print $mesg;
 
-    $new_contrat = new Contrat($db);
+    $new_contrat = new Synopsis_Contrat($db);
 
     $sql = "SELECT s.nom, s.prefix_comm, s.rowid";
     $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
@@ -1069,9 +1069,9 @@ EOF;
     if ($id > 0) {
         $contrat = getContratObj($id);
         $result = $contrat->fetch($id);
-        saveHistoUser($contrat->id, "contrat", $contrat->ref);
+//        saveHistoUser($contrat->id, "contrat", $contrat->ref);
         if ($result > 0)
-            $result = $contrat->fetch_lignes();
+            $result = $contrat->fetch_lines();
         if ($result < 0) {
             dol_print_error($db, $contrat->error);
             exit;
@@ -1096,7 +1096,7 @@ EOF;
 
         $hselected = 0;
 
-        dolibarr_fiche_head($head, $hselected, $langs->trans("Contract"));
+        dol_fiche_head($head, $hselected, $langs->trans("Contract"));
 
 
         /*
@@ -1147,7 +1147,9 @@ EOF;
 
         // Customer
         print '   <th class="ui-widget-header ui-state-default">' . $langs->trans("Customer") . '</th>';
-        print '    <td colspan="1" class="ui-widget-content">' . $contrat->societe->getNomUrl(1) . '</td></tr>';
+        $societe = new Societe($db);
+        $societe->fetch($contrat->socid);
+        print '    <td colspan="1" class="ui-widget-content">' . $societe->getNomUrl(1) . '</td></tr>';
 
         // Statut contrat
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Status") . '</th>
@@ -1359,7 +1361,7 @@ EOF;
             print $contrat->displayPreLine();
             print "<div style='padding: 5px; padding-bottom: 0;  height: 2em;' class='ui-state-hover ui-widget-header ui-corner-top'>Contenu du contrat</div>";
 
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
             print $contrat->displayLine();
             if ($user->rights->contrat->creer && $contrat->statut == 0) {
                 print $contrat->displayAddLine($mysoc, $objp);
@@ -1407,7 +1409,7 @@ EOF;
             print $contrat->displayPreLine();
             print "<div style='padding: 5px; padding-bottom: 0;  height: 2em;' class='ui-state-hover ui-widget-header ui-corner-top'>Contenu du contrat</div>";
 
-            $contrat->fetch_lignes();
+            $contrat->fetch_lines();
             print $contrat->displayLine();
 
 

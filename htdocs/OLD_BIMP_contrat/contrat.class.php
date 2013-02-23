@@ -486,7 +486,7 @@ class Contrat extends CommonObject
                 } else {
                     $this->lignes[]        = $ligne;
                 }
-                //dolibarr_syslog("1 ".$ligne->desc);
+                //dolibarr_syslog("1 ".$ligne->description);
                 //dolibarr_syslog("2 ".$ligne->product_desc);
 
                 if ($ligne->statut == 0) $this->nbofserviceswait++;

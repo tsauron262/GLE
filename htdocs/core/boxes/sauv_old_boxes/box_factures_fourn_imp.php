@@ -107,7 +107,7 @@ class box_factures_fourn_imp extends ModeleBoxes {
                     $objp = $db->fetch_object($result);
 
                     $late='';
-                    if ($objp->datelimite < (time() - $conf->facture->fournisseur->warning_delay)) $late=img_warning(sprintf($l_due_date,dolibarr_print_date($objp->datelimite,'day')));
+                    if ($objp->datelimite < (time() - $conf->facture->fournisseur->warning_delay)) $late=img_warning(sprintf($l_due_date,dol_print_date($objp->datelimite,'day')));
 
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $this->boximg,
@@ -120,7 +120,7 @@ class box_factures_fourn_imp extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/fourn/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                    'text' => dolibarr_print_date($objp->datelimite,'day'));
+                    'text' => dol_print_date($objp->datelimite,'day'));
 
                     $this->info_box_contents[$i][3] = array(
                     'align' => 'right',

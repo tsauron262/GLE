@@ -412,7 +412,7 @@ class Menubase
     }
 
     /**
-     * 	Load entries found in database in a menu array.
+     * 	Load entries found from database in this->newmenu array.
      *
      * 	@param	array	$newmenu        Menu array to complete (in most cases, it's empty, may be already initialized with some menu manager like eldy)
      * 	@param	string	$mymainmenu		Value for mainmenu to filter menu to load (often $_SESSION["mainmenu"])
@@ -433,8 +433,8 @@ class Menubase
         // We initialize newmenu with first already found menu entries
         $this->newmenu = $newmenu;
 
-        // Load datas from database into $tabMenu, then we will complete this->newmenu with values into $tabMenu
-        if (count($tabMenu) == 0)
+        // Load datas from database into $tabMenu, later we will complete this->newmenu with values into $tabMenu
+        if (count($tabMenu) == 0)	// To avoid to read into database a second time
         {
             $this->menuLoad($mainmenu, $leftmenu, $type_user, $menu_handler, $tabMenu);
         }
@@ -526,7 +526,7 @@ class Menubase
         $mainmenu=$mymainmenu;  // To export to dol_eval function
         $leftmenu=$myleftmenu;  // To export to dol_eval function
 
-        $sql = "SELECT m.rowid, m.type, m.fk_menu, m.fk_mainmenu, m.fk_leftmenu, m.url, m.titre, m.langs, m.perms, m.enabled, m.target, m.mainmenu, m.leftmenu";
+        $sql = "SELECT m.rowid, m.type, m.module, m.fk_menu, m.fk_mainmenu, m.fk_leftmenu, m.url, m.titre, m.langs, m.perms, m.enabled, m.target, m.mainmenu, m.leftmenu, m.position";
         $sql.= " FROM ".MAIN_DB_PREFIX."menu as m";
         $sql.= " WHERE m.entity IN (0,".(! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)?"1,":"").$conf->entity.")";
         $sql.= " AND m.menu_handler IN ('".$menu_handler."','all')";
@@ -535,7 +535,7 @@ class Menubase
         // If type_user == 2, no test required
         $sql.= " ORDER BY m.position, m.rowid";
 
-        dol_syslog(get_class($this)."::menuLeftCharger sql=".$sql);
+        dol_syslog(get_class($this)."::menuLoad mymainmenu=".$mymainmenu." myleftmenu=".$myleftmenu." type_user=".$type_user." menu_handler=".$menu_handler." tabMenu size=".count($tabMenu)." sql=".$sql);
         $resql = $this->db->query($sql);
         if ($resql)
         {
@@ -597,6 +597,7 @@ class Menubase
 
                     // We complete tabMenu
                     $tabMenu[$b]['rowid']       = $menu['rowid'];
+                    $tabMenu[$b]['module']      = $menu['module'];
                     $tabMenu[$b]['fk_menu']     = $menu['fk_menu'];
                     $tabMenu[$b]['url']         = $menu['url'];
                     if (! preg_match("/^(http:\/\/|https:\/\/)/i",$tabMenu[$b]['url']))
@@ -614,7 +615,7 @@ class Menubase
                     //$tabMenu[$b]['langs']       = $menu['langs'];
                     $tabMenu[$b]['fk_mainmenu'] = $menu['fk_mainmenu'];
                     $tabMenu[$b]['fk_leftmenu'] = $menu['fk_leftmenu'];
-                    //$tabMenu[$b]['position']    = $menu['position'];
+                    $tabMenu[$b]['position']    = $menu['position'];
 
                     $b++;
                 }

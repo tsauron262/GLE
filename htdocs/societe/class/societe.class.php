@@ -375,9 +375,10 @@ class Societe extends CommonObject
      *		@param	int		$allowmodcodeclient			Inclut modif code client et code compta
      *		@param	int		$allowmodcodefournisseur	Inclut modif code fournisseur et code compta fournisseur
      *		@param	string	$action						'create' or 'update'
+     *		@param	int		$nosyncmember				Do not synchronize info of linked member
      *      @return int  			           			<0 if KO, >=0 if OK
      */
-    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update')
+    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1)
     {
         global $langs,$conf;
         require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -491,7 +492,7 @@ class Societe extends CommonObject
 
         if ($result >= 0)
         {
-            dol_syslog(get_class($this)."::Update verify ok");
+            dol_syslog(get_class($this)."::update verify ok");
 
             $sql  = "UPDATE ".MAIN_DB_PREFIX."societe SET ";
             $sql .= "nom = '" . $this->db->escape($this->name) ."'"; // Required
@@ -564,11 +565,49 @@ class Societe extends CommonObject
             $resql=$this->db->query($sql);
             if ($resql)
             {
-                unset($this->country_code);
-                unset($this->country);
-                unset($this->state_code);
-                unset($this->state);
+            	unset($this->country_code);		// We clean this because it may have been changed after an update of country_id
+            	unset($this->country);
+            	unset($this->state_code);
+            	unset($this->state);
 
+            	$nbrowsaffected+=$this->db->affected_rows($resql);
+
+            	if (! $error && $nbrowsaffected)
+            	{
+            		// Update information on linked member if it is an update
+	            	if (! $nosyncmember && ! empty($conf->adherent->enabled))
+	            	{
+		            	require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
+		            	
+		            	dol_syslog(get_class($this)."::update update linked member");
+		            	
+		            	$lmember=new Adherent($this->db);
+		            	$result=$lmember->fetch(0, 0, $this->id);
+		            	
+		            	if ($result > 0)
+		            	{
+		            		$lmember->firstname=$this->firstname;
+		            		$lmember->lastname=$this->lastname;
+		            		$lmember->address=$this->address;
+		            		$lmember->email=$this->email;
+		            		$lmember->phone=$this->phone;
+
+		            		$result=$lmember->update($user,0,1,1);	// Use nosync to 1 to avoid cyclic updates
+		            		if ($result < 0)
+		            		{
+		            			$this->error=$lmember->error;
+		            			dol_syslog(get_class($this)."::update ".$this->error,LOG_ERR);
+		            			$error++;
+		            		}
+		            	}
+		            	else if ($result < 0)
+		            	{
+		            		$this->error=$lmember->error;
+		            		$error++;
+		            	}            	
+	            	}
+            	}
+            	
                 // Si le fournisseur est classe on l'ajoute
                 $this->AddFournisseurInCategory($this->fournisseur_categorie);
 
@@ -1018,13 +1057,9 @@ class Societe extends CommonObject
                 {
                     $error++;
                     $this->error = $this->db->lasterror();
-                    dol_syslog(get_class($this)."::Delete erreur -2 ".$this->error, LOG_ERR);
+                    dol_syslog(get_class($this)."::delete erreur -2 ".$this->error, LOG_ERR);
                 }
             }
-
-            // Removed extrafields
-          	//$result=$this->deleteExtraFields($this);
-            //if ($result < 0) $error++;
 
             if (! $error)
             {
@@ -1041,15 +1076,13 @@ class Societe extends CommonObject
                 }
             }
 
-            // Remove extrafields
-            if (! $error)
+            // Removed extrafields
+            if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
             {
-            	$sql = "DELETE FROM ".MAIN_DB_PREFIX."societe_extrafields WHERE fk_object = ".$id;
-            	dol_syslog(get_class($this)."::delete sql=".$sql);
-            	if (! $this->db->query($sql))
+            	$result=$this->deleteExtraFields();
+            	if ($result < 0)
             	{
             		$error++;
-            		$this->error = $this->db->lasterror();
             		dol_syslog(get_class($this)."::delete error -3 ".$this->error, LOG_ERR);
             	}
             }
@@ -2564,6 +2597,8 @@ class Societe extends CommonObject
         $this->state='MyState';
         $this->country_id=1;
         $this->country_code='FR';
+        $this->email='specimen@specimen.com';
+        $this->url='http://www.specimen.com';
 
         $this->code_client='CC-'.dol_print_date($now,'dayhourlog');
         $this->code_fournisseur='SC-'.dol_print_date($now,'dayhourlog');

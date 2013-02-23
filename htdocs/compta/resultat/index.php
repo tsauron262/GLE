@@ -40,8 +40,9 @@ else {
 // Security check
 $socid = GETPOST('socid','int');
 if ($user->societe_id > 0) $socid = $user->societe_id;
-if (! $user->rights->compta->resultat->lire && ! $user->rights->accounting->comptarapport->lire)
-	accessforbidden();
+if (! empty($conf->comptabilite->enabled)) $result=restrictedArea($user,'compta','','','resultat');
+if (! empty($conf->accounting->enabled)) $result=restrictedArea($user,'accounting','','','comptarapport');
+
 
 // Define modecompta ('CREANCES-DETTES' or 'RECETTES-DEPENSES')
 $modecompta=(GETPOST("modecompta")?GETPOST("modecompta"):$conf->global->COMPTA_MODE);
@@ -65,9 +66,10 @@ if ($modecompta == 'CREANCES-DETTES')
 	$nom.='<br>('.$langs->trans("SeeReportInInputOutputMode",'<a href="'.$_SERVER["PHP_SELF"].'?year_start='.$year_start.'&modecompta=RECETTES-DEPENSES">','</a>').')';
 	$period="$year_start - $year_end";
 	$periodlink=($year_start?"<a href='".$_SERVER["PHP_SELF"]."?year_start=".($year_start-1)."&modecompta=".$modecompta."'>".img_previous()."</a> <a href='".$_SERVER["PHP_SELF"]."?year_start=".($year_start+1)."&modecompta=".$modecompta."'>".img_next()."</a>":"");
-	$description=$langs->trans("RulesResultDue")."<br>";
-	if (! empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) $description.= $langs->trans("DepositsAreNotIncluded");
-	else  $description.= $langs->trans("DepositsAreIncluded");
+	$description=$langs->trans("RulesAmountWithTaxIncluded");
+	$description.='<br>'.$langs->trans("RulesResultDue");
+	if (! empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) $description.="<br>".$langs->trans("DepositsAreNotIncluded");
+	else  $description.="<br>".$langs->trans("DepositsAreIncluded");
 	$builddate=time();
 	//$exportlink=$langs->trans("NotYetAvailable");
 }
@@ -76,7 +78,8 @@ else {
 	$nom.='<br>('.$langs->trans("SeeReportInDueDebtMode",'<a href="'.$_SERVER["PHP_SELF"].'?year_start='.$year_start.'&modecompta=CREANCES-DETTES">','</a>').')';
 	$period="$year_start - $year_end";
 	$periodlink=($year_start?"<a href='".$_SERVER["PHP_SELF"]."?year_start=".($year_start-1)."&modecompta=".$modecompta."'>".img_previous()."</a> <a href='".$_SERVER["PHP_SELF"]."?year_start=".($year_start+1)."&modecompta=".$modecompta."'>".img_next()."</a>":"");
-	$description=$langs->trans("RulesResultInOut");
+	$description=$langs->trans("RulesAmountWithTaxIncluded");
+	$description.='<br>'.$langs->trans("RulesResultInOut");
 	$builddate=time();
 	//$exportlink=$langs->trans("NotYetAvailable");
 }
@@ -513,7 +516,8 @@ for ($mois = 1+$nb_mois_decalage ; $mois <= 12+$nb_mois_decalage ; $mois++)
 		print "</td>";
 
 		print '<td align="right">&nbsp;';
-		if (isset($encaiss_ttc[$case]) && $encaiss_ttc[$case] != 0)
+		//if (isset($encaiss_ttc[$case]) && $encaiss_ttc[$case] != 0)
+		if (isset($encaiss_ttc[$case]))
 		{
 			print '<a href="clientfourn.php?year='.$annee_decalage.'&month='.$mois_modulo.($modecompta?'&modecompta='.$modecompta:'').'">'.price(price2num($encaiss_ttc[$case],'MT')).'</a>';
 			if (! isset($totentrees[$annee])) $totentrees[$annee]=0;

@@ -208,7 +208,6 @@ print $langs->trans("TotalNumberOfActivatedModules",($nbofactivatedmodules-1));
 if ($nbofactivatedmodules <= 1) print ' '.img_warning($langs->trans("YouMustEnableOneModule"));
 print '<br>'."\n";
 
-print "<br>\n";
 
 $h = 0;
 
@@ -265,6 +264,12 @@ $head[$h][1] = $langs->trans("ModulesMarketPlaces");
 $head[$h][2] = 'marketplace';
 $h++;
 
+
+// Show warning about external users
+print showModulesExludedForExternal($modules).'<br>'."\n";
+print "<br>\n";
+
+$var=true;
 
 dol_fiche_head($head, $mode, $langs->trans("Modules"));
 
@@ -495,9 +500,6 @@ else
 
 dol_fiche_end();
 
-// Pour eviter bug mise en page IE
-print '<div class="tabsAction">';
-print '</div>';
 
 llxFooter();
 

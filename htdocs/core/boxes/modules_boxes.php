@@ -32,6 +32,16 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 	var $db;
 	var $error='';
 	var $max=5;
+	var $enabled=1;
+	
+	var $rowid;
+	var $id;
+	var $position;
+	var $box_order;
+	var $fk_user;
+	var $sourcefile;
+	var $box_id;
+	var $note;
 
 	var $rowid;
 	var $id;
@@ -122,7 +132,7 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 		$bcx[1] = 'class="box_impair"';
 		$var = false;
 
-		dol_syslog(get_Class($this));
+		dol_syslog(get_class($this).'::showBox');
 
 		// Define nbcol and nblines of the box to show
 		$nbcol=0;
@@ -161,7 +171,7 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 			}
 			if ($conf->use_javascript_ajax)
 			{
-				print '</td><td class="nocellnopadd" width="30" nowrap="nowrap">';
+				print '</td><td class="nocellnopadd boxclose" nowrap="nowrap">';
 				// The image must have the class 'boxhandle' beause it's value used in DOM draggable objects to define the area used to catch the full object
 				print img_picto($langs->trans("MoveBox",$this->box_id),'grip','class="boxhandle" style="cursor:move;"');
 				print img_picto($langs->trans("Close",$this->box_id),'close','class="boxclose" style="cursor:pointer;" id="imgclose'.$this->box_id.'"');

@@ -55,7 +55,7 @@ $langs->load("paypal");
  * View
  */
 
-dol_syslog("Callback url when a PayBox payment was done. query_string=".$_SERVER["QUERY_STRING"]);
+dol_syslog("Callback url when a PayBox payment was done. query_string=".(empty($_SERVER["QUERY_STRING"])?'':$_SERVER["QUERY_STRING"])." script_uri=".(empty($_SERVER["SCRIPT_URI"])?'':$_SERVER["SCRIPT_URI"]));
 
 llxHeaderPayBox($langs->trans("PaymentForm"));
 
@@ -74,7 +74,7 @@ print "\n</div>\n";
 html_print_paybox_footer($mysoc,$langs);
 
 
-$db->close();
-
 llxFooterPayBox();
+
+$db->close();
 ?>

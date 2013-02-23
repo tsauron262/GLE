@@ -384,6 +384,15 @@ function agenda_prepare_head()
 	$head[$h][2] = 'extsites';
 	$h++;
 
+	complete_head_from_modules($conf,$langs,$object,$head,$h,'agenda_admin');
+
+	$head[$h][0] = DOL_URL_ROOT."/admin/agenda_extrafields.php";
+	$head[$h][1] = $langs->trans("ExtraFields");
+	$head[$h][2] = 'attributes';
+	$h++;
+
+	complete_head_from_modules($conf,$langs,$object,$head,$h,'agenda_admin','remove');
+
 
 	return $head;
 }
@@ -405,6 +414,14 @@ function actions_prepare_head($object)
 	$head[$h][1] = $langs->trans("CardAction");
 	$head[$h][2] = 'card';
 	$h++;
+
+	if (! empty($conf->global->AGENDA_USE_SEVERAL_CONTACTS))
+	{
+		$head[$h][0] = DOL_URL_ROOT.'/comm/action/contact.php?id='.$object->id;
+		$head[$h][1] = $langs->trans("Contacts");
+		$head[$h][2] = 'contact';
+		$h++;
+	}
 
 	$head[$h][0] = DOL_URL_ROOT.'/comm/action/document.php?id='.$object->id;
 	$head[$h][1] = $langs->trans('Documents');
@@ -438,7 +455,7 @@ function calendars_prepare_head($param)
     $head[$h][2] = 'card';
     $h++;
 
-	$object=(object) array();
+	$object=new stdClass();
 
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line

@@ -45,7 +45,13 @@ if (! function_exists('json_encode'))
  */
 function dol_json_encode($elements)
 {
-	$num = count($elements);
+	$num=count($elements);
+	if (is_object($elements))	// Count number of properties for an object
+	{
+		$num=0;
+		foreach($elements as $key => $value) $num++;
+	}
+	//var_dump($num);
 
 	// determine type
 	if (is_numeric(key($elements)))
@@ -54,9 +60,9 @@ function dol_json_encode($elements)
 		$output = '[';
 		for ($i = 0, $last = ($num - 1); isset($elements[$i]); ++$i)
 		{
-			if (is_array($elements[$i])) $output.= json_encode($elements[$i]);
+			if (is_array($elements[$i]) || is_object($elements[$i])) $output.= json_encode($elements[$i]);
 			else $output .= _val($elements[$i]);
-			if($i !== $last) $output.= ',';
+			if ($i !== $last) $output.= ',';
 		}
 		$output.= ']';
 	}

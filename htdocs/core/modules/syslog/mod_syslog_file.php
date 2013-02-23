@@ -107,39 +107,41 @@ class mod_syslog_file extends LogHandler implements LogHandlerInterface
 	 * Export the message
 	 *
 	 * @param  	array 	$content 	Array containing the info about the message
-     * @param	int		$ident		1=Increase ident of 1, -1=Decrease ident of 1
 	 * @return	void
 	 */
 	public function export($content)
 	{
 		$logfile = $this->getFilename();
 
-		if ($ident) $this->ident+=$ident;
-
 		if (defined("SYSLOG_FILE_NO_ERROR")) $filefd = @fopen($logfile, 'a+');
 		else $filefd = fopen($logfile, 'a+');
 
-		if (!$filefd && ! defined("SYSLOG_FILE_NO_ERROR"))
+		if (! $filefd)
 		{
-			// Do not break dolibarr usage if log fails
-			//throw new Exception('Failed to open log file '.basename($logfile));
-			print 'Failed to open log file '.basename($logfile);
+			if (! defined("SYSLOG_FILE_NO_ERROR"))
+			{
+				// Do not break dolibarr usage if log fails
+				//throw new Exception('Failed to open log file '.basename($logfile));
+				print 'Failed to open log file '.basename($logfile);
+			}
 		}
+		else
+		{
+			$logLevels = array(
+				LOG_EMERG => 'EMERG',
+				LOG_ALERT => 'ALERT',
+				LOG_CRIT => 'CRIT',
+				LOG_ERR => 'ERR',
+				LOG_WARNING => 'WARNING',
+				LOG_NOTICE => 'NOTICE',
+				LOG_INFO => 'INFO',
+				LOG_DEBUG => 'DEBUG'
+			);
 
-		$logLevels = array(
-			LOG_EMERG => 'EMERG',
-			LOG_ALERT => 'ALERT',
-			LOG_CRIT => 'CRIT',
-			LOG_ERR => 'ERR',
-			LOG_WARNING => 'WARNING',
-			LOG_NOTICE => 'NOTICE',
-			LOG_INFO => 'INFO',
-			LOG_DEBUG => 'DEBUG'
-		);
+			$message = dol_print_date(time(),"%Y-%m-%d %H:%M:%S")." ".sprintf("%-7s", $logLevels[$content['level']])." ".sprintf("%-15s", $content['ip'])." ".($this->ident>0?str_pad('',$this->ident,' '):'').$content['message'];
 
-		$message = dol_print_date(time(),"%Y-%m-%d %H:%M:%S")." ".sprintf("%-5s", $logLevels[$content['level']])." ".sprintf("%-15s", $content['ip'])." ".($this->ident>0?str_pad('',$this->ident,' '):'').$content['message'];
-
-		fwrite($filefd, $message."\n");
-		fclose($filefd);
+			fwrite($filefd, $message."\n");
+			fclose($filefd);
+		}
 	}
 }

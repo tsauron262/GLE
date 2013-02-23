@@ -795,37 +795,6 @@ class Contrat extends CommonObject
 		if (! $error)
 		{
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-			$interface=new Interfaces($this->db);
-			$result=$interface->run_triggers('CONTRACT_DELETE',$this,$user,$langs,$conf);
-			if ($result < 0) {
-				$error++; $this->errors=$interface->errors;
-			}
-			// Fin appel triggers
-		}
-
-		if (! $error)
-		{
-			// We remove directory
-			$ref = dol_sanitizeFileName($this->ref);
-			if ($conf->contrat->dir_output)
-			{
-				$dir = $conf->contrat->dir_output . "/" . $ref;
-				if (file_exists($dir))
-				{
-					$res=@dol_delete_dir_recursive($dir);
-					if (! $res)
-					{
-						$this->error='ErrorFailToDeleteDir';
-						$error++;
-					}
-				}
-			}
-		}
-
-		if (! $error)
-		{
-			// Appel des triggers
 			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
 			$result=$interface->run_triggers('CONTRACT_DELETE',$this,$user,$langs,$conf);
@@ -1047,7 +1016,7 @@ class Contrat extends CommonObject
 		// qty, pu, remise_percent et txtva
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1);
+		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $tvatx, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1);
 		$total_ht  = $tabprice[0];
 		$total_tva = $tabprice[1];
 		$total_ttc = $tabprice[2];
@@ -1143,7 +1112,7 @@ class Contrat extends CommonObject
 			// Appel des triggers
 			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
-			$result=$interface->run_triggers('CONTRACTLINE_DELETE',$this,$user,$langs,$conf);
+			$result=$interface->run_triggers('CONTRACT_LINE_DELETE',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
 			// Fin appel triggers
 
@@ -1971,7 +1940,7 @@ class ContratLigne
 			// Appel des triggers
 			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
-			$result=$interface->run_triggers('MYOBJECT_MODIFY',$this,$user,$langs,$conf);
+			$result=$interface->run_triggers('CONTRACT_LINE_MODIFY',$this,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
 			// Fin appel triggers
 		}

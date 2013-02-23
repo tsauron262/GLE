@@ -344,6 +344,7 @@ class FactureFournisseur extends CommonInvoice
                 $this->note_private			= $obj->note_private;
                 $this->note_public			= $obj->note_public;
                 $this->model_pdf			= $obj->model_pdf;
+                $this->modelpdf			    = $obj->model_pdf;
                 $this->import_key			= $obj->import_key;
 
                 $this->extraparams			= (array) json_decode($obj->extraparams, true);
@@ -406,7 +407,7 @@ class FactureFournisseur extends CommonInvoice
                 {
                     $obj = $this->db->fetch_object($resql_rows);
 
-                    $this->lines[$i]					= (object) array();
+                    $this->lines[$i]					= new stdClass();
                     $this->lines[$i]->rowid				= $obj->rowid;
                     $this->lines[$i]->description		= $obj->description;
                     $this->lines[$i]->ref				= $obj->product_ref;       // TODO deprecated
@@ -605,7 +606,7 @@ class FactureFournisseur extends CommonInvoice
         	// Appel des triggers
         	include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
         	$interface=new Interfaces($this->db);
-        	$result=$interface->run_triggers('INVOICE_SUPPLIER_DELETE',$this,$user,$langs,$conf);
+        	$result=$interface->run_triggers('BILL_SUPPLIER_DELETE',$this,$user,$langs,$conf);
         	if ($result < 0) {
         		$error++; $this->errors=$interface->errors;
         	}

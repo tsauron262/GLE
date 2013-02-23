@@ -120,6 +120,7 @@ class FormFile
             {
                 if ($perm)
                 {
+                	$langs->load('other');
                     print ' ('.$langs->trans("MaxSize").': '.$max.' '.$langs->trans("Kb");
                     print ' '.info_admin($langs->trans("ThisLimitIsDefinedInSetup",$max,$maxphp),1);
                     print ')';
@@ -378,7 +379,7 @@ class FormFile
             $out.= '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 
             $out.= '<div class="titre">'.$titletoshow.'</div>';
-            $out.= '<table class="liste formdoc" summary="listofdocumentstable" width="100%">';
+            $out.= '<table class="liste formdoc noborder" summary="listofdocumentstable" width="100%">';
 
             $out.= '<tr class="liste_titre">';
 
@@ -597,7 +598,7 @@ class FormFile
 		{
 			if (! class_exists('HookManager')) {
 				// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-				require_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+				require DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
 				$hookmanager=new HookManager($this->db);
 			}
 		}

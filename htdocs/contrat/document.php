@@ -97,21 +97,6 @@ if ($action == 'confirm_deletefile' && $confirm == 'yes')
 	}
 }
 
-// Delete
-if ($action == 'confirm_deletefile' && $confirm == 'yes')
-{
-	if ($object->id)
-	{
-		$langs->load("other");
-
-		$file = $upload_dir . '/' . GETPOST('urlfile');	// Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
-		$ret=dol_delete_file($file,0,0,0,$object);
-		$_SESSION['DolMessage'] = '<div class="ok">'.$langs->trans("FileWasRemoved",GETPOST('urlfile')).'</div>';
-		Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
-		exit;
-	}
-}
-
 
 /*
  *
@@ -157,6 +142,15 @@ if ($object->id)
     
     dol_htmloutput_mesg($mesg,$mesgs);
     
+    /*
+     * Confirmation suppression fichier
+     */
+    if ($action == 'delete')
+    {
+    	$ret=$form->form_confirm($_SERVER["PHP_SELF"].'?id='.$id.'&urlfile='.urlencode(GETPOST("urlfile")), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile', '', 0, 1);
+    	if ($ret == 'html') print '<br>';
+    }
+
     /*
      * Confirmation suppression fichier
      */

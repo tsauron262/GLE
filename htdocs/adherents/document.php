@@ -40,10 +40,6 @@ $id=GETPOST('id','int');
 $action=GETPOST('action','alpha');
 $confirm=GETPOST('confirm','alpha');
 
-$id=GETPOST('id','int');
-$action=GETPOST('action','alpha');
-$confirm=GETPOST('confirm','alpha');
-
 // Security check
 if ($user->societe_id > 0)
 {

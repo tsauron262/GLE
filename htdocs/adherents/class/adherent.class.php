@@ -423,7 +423,7 @@ class Adherent extends CommonObject
         $this->db->begin();
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."adherent SET";
-        $sql.= " civilite = ".($this->civilite_id?"'".$this->civilite_id."'":"null");
+        $sql.= " civilite = ".(!is_null($this->civilite_id)?"'".$this->civilite_id."'":"null");
         $sql.= ", prenom = ".($this->firstname?"'".$this->db->escape($this->firstname)."'":"null");
         $sql.= ", nom="     .($this->lastname?"'".$this->db->escape($this->lastname)."'":"null");
         $sql.= ", login="   .($this->login?"'".$this->db->escape($this->login)."'":"null");
@@ -537,8 +537,6 @@ class Adherent extends CommonObject
                         $luser->email=$this->email;
                         $luser->office_phone=$this->phone;
                         $luser->user_mobile=$this->phone_mobile;
-
-                        $luser->note=$this->note;
 
                         $luser->fk_member=$this->id;
 
@@ -701,75 +699,102 @@ class Adherent extends CommonObject
 
         $result = 0;
 		$error=0;
+		$errorflag=0;
 
         $this->db->begin();
 
-        // Remove extrafields
-        $sql = "DELETE FROM ".MAIN_DB_PREFIX."adherent_extrafields WHERE fk_object = ".$rowid;
-
+        // Remove category
+        $sql = "DELETE FROM ".MAIN_DB_PREFIX."categorie_member WHERE fk_member = ".$rowid;
         dol_syslog(get_class($this)."::delete sql=".$sql);
         $resql=$this->db->query($sql);
-        if ($resql)
+        if (! $resql)
         {
-            $sql = "DELETE FROM ".MAIN_DB_PREFIX."categorie_member WHERE fk_member = ".$rowid;
-            dol_syslog(get_class($this)."::delete sql=".$sql);
-            $resql=$this->db->query($sql);
+        	$error++;
+        	$this->error .= $this->db->lasterror();
+        	$errorflag=-1;
+        	dol_syslog(get_class($this)."::delete erreur ".$errorflag." ".$this->error, LOG_ERR);
 
-            $sql = "DELETE FROM ".MAIN_DB_PREFIX."cotisation WHERE fk_adherent = ".$rowid;
-            dol_syslog(get_class($this)."::delete sql=".$sql);
-            $resql=$this->db->query($sql);
-            if ($resql)
-            {
-            	// Remove linked user
-            	$ret=$this->setUserId(0);
-            	if ($ret > 0)
-            	{
-            		$sql = "DELETE FROM ".MAIN_DB_PREFIX."adherent WHERE rowid = ".$rowid;
-            		dol_syslog(get_class($this)."::delete sql=".$sql);
-            		$resql=$this->db->query($sql);
-            		if ($resql)
-            		{
-            			if ($this->db->affected_rows($resql))
-            			{
-            				// Appel des triggers
-            				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-            				$interface=new Interfaces($this->db);
-            				$result=$interface->run_triggers('MEMBER_DELETE',$this,$user,$langs,$conf);
-            				if ($result < 0) {
-            					$error++; $this->errors=$interface->errors;
-            				}
-            				// Fin appel triggers
+        }
 
-            				$this->db->commit();
-            				return 1;
-            			}
-            			else
-            			{
-            				// Rien a effacer
-            				$this->db->rollback();
-            				return 0;
-            			}
-            		}
-            		else
-            		{
-            			$this->error=$this->db->error();
-            			$this->db->rollback();
-            			return -3;
-            		}
-            	}
-            }
-            else
-            {
-                $this->error=$this->db->error();
-                $this->db->rollback();
-                return -2;
-            }
+        // Remove cotisation
+        if (! $error)
+        {
+        	 $sql = "DELETE FROM ".MAIN_DB_PREFIX."cotisation WHERE fk_adherent = ".$rowid;
+        	dol_syslog(get_class($this)."::delete sql=".$sql);
+        	$resql=$this->db->query($sql);
+        	if (! $resql)
+        	{
+        		$error++;
+        		$this->error .= $this->db->lasterror();
+        		$errorflag=-2;
+        		dol_syslog(get_class($this)."::delete erreur ".$errorflag." ".$this->error, LOG_ERR);
+        	}
+        }
+
+        // Remove linked user
+        if (! $error)
+        {
+        	$ret=$this->setUserId(0);
+        	if ($ret < 0)
+        	{
+        		$error++;
+        		$this->error .= $this->db->lasterror();
+        		$errorflag=-3;
+        		dol_syslog(get_class($this)."::delete erreur ".$errorflag." ".$this->error, LOG_ERR);
+        	}
+        }
+
+        // Removed extrafields
+        if (! $error)
+        {
+        	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+        	{
+        		$result=$this->deleteExtraFields();
+        		if ($result < 0)
+        		{
+        			$error++;
+        			$errorflag=-4;
+        			dol_syslog(get_class($this)."::delete erreur ".$errorflag." ".$this->error, LOG_ERR);
+        		}
+        	}
+        }
+
+        // Remove adherent
+        if (! $error)
+        {
+        	$sql = "DELETE FROM ".MAIN_DB_PREFIX."adherent WHERE rowid = ".$rowid;
+        	dol_syslog(get_class($this)."::delete sql=".$sql);
+        	$resql=$this->db->query($sql);
+        	if (! $resql)
+        	{
+        		$error++;
+        		$this->error .= $this->db->lasterror();
+        		$errorflag=-5;
+        		dol_syslog(get_class($this)."::delete erreur ".$errorflag." ".$this->error, LOG_ERR);
+        	}
+        }
+
+        if (! $error)
+        {
+        	// Appel des triggers
+       		include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+        	$interface=new Interfaces($this->db);
+        	$result=$interface->run_triggers('MEMBER_DELETE',$this,$user,$langs,$conf);
+        	if ($result < 0) {$error++; $this->errors=$interface->errors;}
+        	// Fin appel triggers
+        }
+
+
+
+        if (! $error)
+        {
+        	$this->db->commit();
+        	return 1;
         }
         else
         {
-            $this->error=$this->db->error();
-            $this->db->rollback();
-            return -1;
+        	$this->db->rollback();
+        	return $errorflag;
         }
     }
 
@@ -998,7 +1023,7 @@ class Adherent extends CommonObject
 
         $sql = "SELECT d.rowid, d.civilite, d.prenom as firstname, d.nom as lastname, d.societe, d.fk_soc, d.statut, d.public, d.adresse as address, d.cp as zip, d.ville as town, d.note,";
         $sql.= " d.email, d.phone, d.phone_perso, d.phone_mobile, d.login, d.pass,";
-        $sql.= " d.photo, d.fk_adherent_type, d.morphy,";
+        $sql.= " d.photo, d.fk_adherent_type, d.morphy, d.entity,";
         $sql.= " d.datec as datec,";
         $sql.= " d.tms as datem,";
         $sql.= " d.datefin as datefin,";
@@ -1030,63 +1055,66 @@ class Adherent extends CommonObject
             {
                 $obj = $this->db->fetch_object($resql);
 
-                $this->ref            = $obj->rowid;
-                $this->id             = $obj->rowid;
-                $this->civilite_id    = $obj->civilite;
-                $this->prenom         = $obj->firstname;   // deprecated
-                $this->firstname      = $obj->firstname;
-                $this->nom            = $obj->lastname;    // deprecated
-                $this->lastname       = $obj->lastname;
-                $this->login          = $obj->login;
-                $this->pass           = $obj->pass;
-                $this->societe        = $obj->societe;
-                $this->fk_soc         = $obj->fk_soc;
-                $this->adresse        = $obj->address;	// deprecated
-                $this->address        = $obj->address;
-                $this->cp             = $obj->zip;		// deprecated
-                $this->zip            = $obj->zip;
-                $this->ville          = $obj->town;	    // deprecated
-                $this->town           = $obj->town;
+                $this->entity			= $obj->entity;
+                $this->ref				= $obj->rowid;
+                $this->id				= $obj->rowid;
+                $this->civilite_id		= $obj->civilite;
+                $this->prenom			= $obj->firstname;   // deprecated
+                $this->firstname		= $obj->firstname;
+                $this->nom				= $obj->lastname;    // deprecated
+                $this->lastname			= $obj->lastname;
+                $this->login			= $obj->login;
+                $this->pass				= $obj->pass;
+                $this->societe			= $obj->societe;
+                $this->fk_soc			= $obj->fk_soc;
+                $this->adresse			= $obj->address;	// deprecated
+                $this->address			= $obj->address;
+                $this->cp				= $obj->zip;		// deprecated
+                $this->zip				= $obj->zip;
+                $this->ville			= $obj->town;	    // deprecated
+                $this->town				= $obj->town;
 
-                $this->state_id       = $obj->fk_departement;
-                $this->state_code     = $obj->fk_departement?$obj->state_code:'';
-                $this->state          = $obj->fk_departement?$obj->state:'';
-                $this->fk_departement   = $obj->fk_departement;                        // deprecated
-                $this->departement_code = $obj->fk_departement?$obj->state_code:'';    // deprecated
-                $this->departement	    = $obj->fk_departement?$obj->state:'';         // deprecated
+                $this->state_id			= $obj->fk_departement;
+                $this->state_code		= $obj->fk_departement?$obj->state_code:'';
+                $this->state			= $obj->fk_departement?$obj->state:'';
+                $this->fk_departement	= $obj->fk_departement;                        // deprecated
+                $this->departement_code	= $obj->fk_departement?$obj->state_code:'';    // deprecated
+                $this->departement		= $obj->fk_departement?$obj->state:'';         // deprecated
 
-                $this->country_id     = $obj->country_id;
-                $this->country_code   = $obj->country_code;
-                if ($langs->trans("Country".$obj->country_code) != "Country".$obj->country_code) $this->country = $langs->transnoentitiesnoconv("Country".$obj->country_code);
-                else $this->country=$obj->country;
-                $this->pays_id        = $obj->country_id;      // deprecated
-                $this->pays_code      = $obj->country_code;    // deprecated
-                $this->pays           = $this->country;        // deprecated
+                $this->country_id		= $obj->country_id;
+                $this->country_code		= $obj->country_code;
+                if ($langs->trans("Country".$obj->country_code) != "Country".$obj->country_code)
+                	$this->country = $langs->transnoentitiesnoconv("Country".$obj->country_code);
+                else
+                	$this->country=$obj->country;
+                $this->pays_id			= $obj->country_id;      // deprecated
+                $this->pays_code		= $obj->country_code;    // deprecated
+                $this->pays				= $this->country;        // deprecated
 
-                $this->phone          = $obj->phone;
-                $this->phone_perso    = $obj->phone_perso;
-                $this->phone_mobile   = $obj->phone_mobile;
-                $this->email          = $obj->email;
+                $this->phone			= $obj->phone;
+                $this->phone_perso		= $obj->phone_perso;
+                $this->phone_mobile		= $obj->phone_mobile;
+                $this->email			= $obj->email;
 
-                $this->photo          = $obj->photo;
-                $this->statut         = $obj->statut;
-                $this->public         = $obj->public;
+                $this->photo			= $obj->photo;
+                $this->statut			= $obj->statut;
+                $this->public			= $obj->public;
 
-                $this->datec          = $this->db->jdate($obj->datec);
-                $this->datem          = $this->db->jdate($obj->datem);
-                $this->datefin        = $this->db->jdate($obj->datefin);
-                $this->datevalid      = $this->db->jdate($obj->datev);
-                $this->naiss          = $this->db->jdate($obj->datenaiss);
+                $this->datec			= $this->db->jdate($obj->datec);
+                $this->datem			= $this->db->jdate($obj->datem);
+                $this->datefin			= $this->db->jdate($obj->datefin);
+                $this->datevalid		= $this->db->jdate($obj->datev);
+                $this->naiss			= $this->db->jdate($obj->datenaiss);
 
-                $this->note           = $obj->note;
-                $this->morphy         = $obj->morphy;
+                $this->note				= $obj->note;
+                $this->morphy			= $obj->morphy;
 
-                $this->typeid         = $obj->fk_adherent_type;
-                $this->type           = $obj->type;
+                $this->typeid			= $obj->fk_adherent_type;
+                $this->type				= $obj->type;
                 $this->need_subscription = ($obj->cotisation=='yes'?1:0);
 
-                $this->user_id        = $obj->user_id;
-                $this->user_login     = $obj->user_login;
+                $this->user_id			= $obj->user_id;
+                $this->user_login		= $obj->user_login;
 
                 // Load other properties
                 $result=$this->fetch_subscriptions();

@@ -35,6 +35,7 @@ require_once DOL_DOCUMENT_ROOT.'/comm/action/class/cactioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 $langs->load("companies");
 $langs->load("commercial");
@@ -60,6 +61,8 @@ $mesg='';
 $cactioncomm = new CActionComm($db);
 $actioncomm = new ActionComm($db);
 $contact = new Contact($db);
+$extrafields = new ExtraFields($db);
+
 //var_dump($_POST);
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
@@ -182,7 +185,7 @@ if ($action == 'add_action')
 	if (! empty($conf->phenix->enabled) && GETPOST('add_phenix') == 'on') $actioncomm->use_phenix=1;
 
 	// Check parameters
-	if ($actioncomm->type_code == 'AC_RDV' && ($datep == '' || $datef == ''))
+	if ($actioncomm->type_code == 'AC_RDV' && ($datep == '' || ($datef == '' && empty($fulldayevent))))
 	{
 		$error++;
 		$action = 'create';
@@ -200,6 +203,15 @@ if ($action == 'add_action')
 		$error++;
 		$action = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Date")).'</div>';
+	}
+
+	// Get extra fields
+	foreach($_POST as $key => $value)
+	{
+		if (preg_match("/^options_/",$key))
+		{
+			$actioncomm->array_options[$key]=GETPOST($key);
+		}
 	}
 
 	if (! $error)
@@ -231,19 +243,19 @@ if ($action == 'add_action')
 			}
 			else
 			{
-				// Si erreur
+				// If error
 				$db->rollback();
-				$id=$idaction;
 				$langs->load("errors");
 				$error=$langs->trans($actioncomm->error);
+				$action = 'create';
 			}
 		}
 		else
 		{
 			$db->rollback();
-			$id=$idaction;
 			$langs->load("errors");
 			$error=$langs->trans($actioncomm->error);
+			$action = 'create';
 		}
 	}
 }
@@ -332,6 +344,15 @@ if ($action == 'update')
 		}
 		$actioncomm->userdone = $userdone;
 
+		// Get extra fields
+		foreach($_POST as $key => $value)
+		{
+			if (preg_match("/^options_/",$key))
+			{
+				$actioncomm->array_options[$key]=GETPOST($key);
+			}
+		}
+
 		if (! $error)
 		{
 			$db->begin();
@@ -375,6 +396,8 @@ llxHeader('',$langs->trans("Agenda"),$help_url);
 $form = new Form($db);
 $htmlactions = new FormActions($db);
 
+// fetch optionals attributes and labels
+$extralabels=$extrafields->fetch_name_optionals_label('actioncomm');
 
 if ($action == 'create')
 {
@@ -532,7 +555,13 @@ if ($action == 'create')
 	}
 	else
 	{
-		print $form->select_company('','socid','',1,1);
+		//For external user force the company to user company
+		if (!empty($user->societe_id)) {
+			print $form->select_company($user->societe_id,'socid','',1,1);
+		} else {
+			print $form->select_company('','socid','',1,1);
+		}
+
 	}
 	print '</td></tr>';
 
@@ -582,7 +611,26 @@ if ($action == 'create')
         $parameters=array();
         $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$actioncomm,$action);    // Note that $action and $object may have been modified by hook
 
+    // Other attributes
+    $parameters=array();
+    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$actioncomm,$action);    // Note that $action and $object may have been modified by hook
+
 	print '</table>';
+
+	if (empty($reshook) && ! empty($extrafields->attribute_label))
+	{
+		print '<br><br><table class="border" width="100%">';
+		foreach($extrafields->attribute_label as $key=>$label)
+		{
+			$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:(isset($actioncomm->array_options["options_".$key])?$actioncomm->array_options["options_".$key]:''));
+			print '<tr><td';
+			if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
+			print ' width="30%">'.$label.'</td><td>';
+			print $extrafields->showInputField($key,$value);
+			print '</td></tr>'."\n";
+		}
+		print '</table><br>';
+	}
 
 	print '<center><br>';
 	print '<input type="submit" class="button" value="'.$langs->trans("Add").'">';
@@ -594,7 +642,7 @@ if ($action == 'create')
 }
 
 // View or edit
-if ($id)
+if ($id > 0)
 {
 	if ($error)
 	{
@@ -607,6 +655,8 @@ if ($id)
 
 	$act = new ActionComm($db);
 	$result=$act->fetch($id);
+	$act->fetch_optionals($id,$extralabels);
+
 	if ($result < 0)
 	{
 		dol_print_error($db,$act->error);
@@ -746,16 +796,19 @@ if ($id)
 
 		print '<table class="border" width="100%">';
 
-		// Company
-		print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td>';
-		print '<td>';
-		print $form->select_company($act->societe->id,'socid','',1,1);
-		print '</td>';
+		// Thirdparty - Contact
+		if ($conf->societe->enabled)
+		{
+			print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td>';
+			print '<td>';
+			print $form->select_company($act->societe->id,'socid','',1,1);
+			print '</td>';
 
-		// Contact
-		print '<td>'.$langs->trans("Contact").'</td><td width="30%">';
-		print $form->selectarray("contactid", (empty($act->societe->id)?array():$act->societe->contact_array()), $act->contact->id, 1);
-		print '</td></tr>';
+			// Contact
+			print '<td>'.$langs->trans("Contact").'</td><td width="30%">';
+			print $form->selectarray("contactid", (empty($act->societe->id)?array():$act->societe->contact_array()), $act->contact->id, 1);
+			print '</td></tr>';
+		}
 
 		// Project
 		if (! empty($conf->projet->enabled))
@@ -763,7 +816,7 @@ if ($id)
 			// Projet associe
 			$langs->load("project");
 
-			print '<tr><td valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
+			print '<tr><td width="30%" valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
 			$numprojet=select_projects($act->societe->id,$act->fk_project,'projectid');
 			if ($numprojet==0)
 			{
@@ -773,7 +826,7 @@ if ($id)
 		}
 
 		// Priority
-		print '<tr><td nowrap>'.$langs->trans("Priority").'</td><td colspan="3">';
+		print '<tr><td nowrap width="30%">'.$langs->trans("Priority").'</td><td colspan="3">';
 		print '<input type="text" name="priority" value="'.($act->priority?$act->priority:'').'" size="5">';
 		print '</td></tr>';
 
@@ -792,7 +845,27 @@ if ($id)
         $doleditor->Create();
         print '</td></tr>';
 
+        // Other attributes
+        $parameters=array('colspan' => ' colspan="3"', 'colspanvalue' => '3');
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
+
 		print '</table>';
+
+		if (empty($reshook) && ! empty($extrafields->attribute_label))
+		{
+			print '<br><br><table class="border" width="100%">';
+			foreach($extrafields->attribute_label as $key=>$label)
+			{
+				$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$act->array_options["options_".$key]);
+				print '<tr><td';
+				if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
+				print ' width="30%">'.$label.'</td><td>';
+				print $extrafields->showInputField($key,$value);
+				print '</td></tr>'."\n";
+			}
+			print '</table><br><br>';
+		}
+
 
 		print '<center><br><input type="submit" class="button" name="edit" value="'.$langs->trans("Save").'">';
 		print ' &nbsp; &nbsp; <input type="submit" class="button" name="cancel" value="'.$langs->trans("Cancel").'">';
@@ -898,39 +971,41 @@ if ($id)
 		print '</table><br><br><table class="border" width="100%">';
 
 		// Third party - Contact
-		print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td><td>'.($act->societe->id?$act->societe->getNomUrl(1):$langs->trans("None"));
-		if ($act->societe->id && $act->type_code == 'AC_TEL')
+		if ($conf->societe->enabled)
 		{
-			if ($act->societe->fetch($act->societe->id))
+			print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td><td>'.($act->societe->id?$act->societe->getNomUrl(1):$langs->trans("None"));
+			if ($act->societe->id && $act->type_code == 'AC_TEL')
 			{
-				print "<br>".dol_print_phone($act->societe->tel);
-			}
-		}
-		print '</td>';
-		print '<td>'.$langs->trans("Contact").'</td>';
-		print '<td>';
-		if ($act->contact->id > 0)
-		{
-			print $act->contact->getNomUrl(1);
-			if ($act->contact->id && $act->type_code == 'AC_TEL')
-			{
-				if ($act->contact->fetch($act->contact->id))
+				if ($act->societe->fetch($act->societe->id))
 				{
-					print "<br>".dol_print_phone($act->contact->phone_pro);
+					print "<br>".dol_print_phone($act->societe->tel);
 				}
 			}
+			print '</td>';
+			print '<td>'.$langs->trans("Contact").'</td>';
+			print '<td>';
+			if ($act->contact->id > 0)
+			{
+				print $act->contact->getNomUrl(1);
+				if ($act->contact->id && $act->type_code == 'AC_TEL')
+				{
+					if ($act->contact->fetch($act->contact->id))
+					{
+						print "<br>".dol_print_phone($act->contact->phone_pro);
+					}
+				}
+			}
+			else
+			{
+				print $langs->trans("None");
+			}
+			print '</td></tr>';
 		}
-		else
-		{
-			print $langs->trans("None");
-		}
-
-		print '</td></tr>';
 
 		// Project
 		if (! empty($conf->projet->enabled))
 		{
-			print '<tr><td valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
+			print '<tr><td width="30%" valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
 			if ($act->fk_project)
 			{
 				$project=new Project($db);
@@ -941,7 +1016,7 @@ if ($id)
 		}
 
 		// Priority
-		print '<tr><td nowrap>'.$langs->trans("Priority").'</td><td colspan="3">';
+		print '<tr><td nowrap width="30%">'.$langs->trans("Priority").'</td><td colspan="3">';
 		print ($act->priority?$act->priority:'');
 		print '</td></tr>';
 
@@ -961,7 +1036,25 @@ if ($id)
                 $parameters=array();
                 $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
 
+        // Other attributes
+		$parameters=array('colspan' => ' colspan="3"', 'colspanvalue' => '3');
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
+
 		print '</table>';
+
+		//Extra field
+		if (empty($reshook) && ! empty($extrafields->attribute_label))
+		{
+			print '<br><br><table class="border" width="100%">';
+			foreach($extrafields->attribute_label as $key=>$label)
+			{
+				$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:(isset($act->array_options['options_'.$key])?$act->array_options['options_'.$key]:''));
+				print '<tr><td width="30%">'.$label.'</td><td>';
+				print $extrafields->showOutputField($key,$value);
+				print "</td></tr>\n";
+			}
+			print '</table><br><br>';
+		}
 	}
 
 	print "</div>\n";

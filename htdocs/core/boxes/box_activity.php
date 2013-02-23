@@ -1,5 +1,7 @@
 <?php
 /* Copyright (C) 2012 Charles-François BENKE <charles.fr@benke.fr>
+ * Copyright (C) 2005-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -34,6 +36,7 @@ class box_activity extends ModeleBoxes
 
 	var $db;
 	var $param;
+	var $enabled = 1;
 
 	var $info_box_head = array();
 	var $info_box_contents = array();
@@ -43,7 +46,7 @@ class box_activity extends ModeleBoxes
 	 */
 	function __construct()
 	{
-		global $langs;
+		global $langs,$conf;
 
 		$langs->load("boxes");
 		$langs->load("bills");
@@ -51,6 +54,9 @@ class box_activity extends ModeleBoxes
 		$langs->load("orders");
 
 		$this->boxlabel = $langs->transnoentitiesnoconv("BoxGlobalActivity");
+
+		// Disabled by default because, still has some bug (pgsl support, filters, getCurrencySymbol us a cache into a form object not defined, ...) and slow down seriously Dolibarr
+		$this->enabled = (! empty($conf->global->MAIN_FEATURES_LEVEL) || ! empty($conf->global->MAIN_BOX_ACTIVITY_ENABLED));
 	}
 
 	/**
@@ -69,6 +75,7 @@ class box_activity extends ModeleBoxes
 		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 		$facturestatic=new Facture($db);
 		$propalstatic=new Propal($db);
 		$commandestatic=new Commande($db);
@@ -80,10 +87,14 @@ class box_activity extends ModeleBoxes
 		if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 		{
 			$sql = "SELECT f.paye, f.fk_statut, sum(f.total_ttc) as Mnttot, count(*) as nb";
-			$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture as f";
+			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture as f";
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+			$sql.= ")";
 			$sql.= " WHERE f.entity = ".$conf->entity;
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
 			$sql.= " AND f.fk_soc = s.rowid";
-			$sql.= " AND (DATE_FORMAT(f.datef,'%Y') = ".date("Y")." or paye=0)";
+			$sql.= " AND f.datef between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
 			$sql.= " GROUP BY f.paye, f.fk_statut ";
 			$sql.= " ORDER BY f.fk_statut DESC";
 
@@ -136,11 +147,16 @@ class box_activity extends ModeleBoxes
 		if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 		{
 			$sql = "SELECT c.fk_statut,c.facture, sum(c.total_ttc) as Mnttot, count(*) as nb";
-			$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."commande as c";
+			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."commande as c";
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+			$sql.= ")";
 			$sql.= " WHERE c.entity = ".$conf->entity;
 			$sql.= " AND c.fk_soc = s.rowid";
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
+			$sql.= " AND c.date_commande between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
 			$sql.= " AND c.facture=0";
-			$sql.= " GROUP BY c.fk_statut";
+			$sql.= " GROUP BY c.fk_statut,c.facture";
 			$sql.= " ORDER BY c.fk_statut DESC";
 
 			$result = $db->query($sql);
@@ -178,11 +194,15 @@ class box_activity extends ModeleBoxes
 		if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 		{
 			$sql = "SELECT p.fk_statut, sum(p.total) as Mnttot, count(*) as nb";
-			$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."propal as p";
+			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."propal as p";
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+			$sql.= ")";
 			$sql.= " WHERE p.entity = ".$conf->entity;
 			$sql.= " AND p.fk_soc = s.rowid";
-			$sql.= " AND DATE_FORMAT(p.datep,'%Y') = ".date("Y");
-			$sql.= " AND p.date_cloture IS NULL "; // just unclosed
+			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
+			$sql.= " AND p.datep between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
+			$sql.= " AND p.date_cloture IS NULL"; // just unclosed
 			$sql.= " GROUP BY p.fk_statut";
 			$sql.= " ORDER BY p.fk_statut DESC";
 

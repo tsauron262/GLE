@@ -18,6 +18,9 @@
 DROP TABLE llx_product_ca;
 DROP TABLE llx_document;
 DROP TABLE llx_dolibarr_modules;
+DROP TABLE llx_product_fournisseur;
+
+ALTER TABLE llx_adherent ADD COLUMN canvas varchar(32);
 
 ALTER TABLE llx_societe_rib MODIFY COLUMN bic varchar(20);
 
@@ -172,6 +175,7 @@ date_create    datetime NOT NULL ,
 description    varchar(255) NOT NULL ,
 date_debut     date NOT NULL ,
 date_fin       date NOT NULL ,
+halfday        integer DEFAULT 0,
 statut         integer NOT NULL DEFAULT '1',
 fk_validator   integer NOT NULL ,
 date_valid     datetime DEFAULT NULL ,
@@ -183,19 +187,27 @@ fk_user_cancel integer DEFAULT NULL,
 detail_refuse  varchar(250) DEFAULT NULL
 ) 
 ENGINE=innodb;
+ALTER TABLE llx_holiday ADD COLUMN halfday        integer DEFAULT 0 after date_fin;
+
 
 ALTER TABLE llx_holiday ADD INDEX idx_holiday_fk_user (fk_user);
 ALTER TABLE llx_holiday ADD INDEX idx_holiday_date_debut (date_debut);
 ALTER TABLE llx_holiday ADD INDEX idx_holiday_date_fin (date_fin);
 
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'userGroup', NULL);
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'lastUpdate', NULL);
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'nbUser', NULL);
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'delayForRequest', '31');
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'AlertValidatorDelay', '0');
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'AlertValidatorSolde', '0');
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'nbHolidayDeducted', '1');
-INSERT INTO llx_holiday_config (rowid ,name ,value) VALUES (NULL , 'nbHolidayEveryMonth', '2.08334');
+INSERT INTO llx_holiday_config (name ,value) VALUES ('userGroup', NULL);
+INSERT INTO llx_holiday_config (name ,value) VALUES ('lastUpdate', NULL);
+INSERT INTO llx_holiday_config (name ,value) VALUES ('nbUser', NULL);
+INSERT INTO llx_holiday_config (name ,value) VALUES ('delayForRequest', '31');
+INSERT INTO llx_holiday_config (name ,value) VALUES ('AlertValidatorDelay', '0');
+INSERT INTO llx_holiday_config (name ,value) VALUES ('AlertValidatorSolde', '0');
+INSERT INTO llx_holiday_config (name ,value) VALUES ('nbHolidayDeducted', '1');
+INSERT INTO llx_holiday_config (name ,value) VALUES ('nbHolidayEveryMonth', '2.08334');
+
+
+insert into llx_c_type_contact(rowid, element, source, code, libelle, active ) values (80, 'agenda',  'internal', 'ACTOR', 'Responsable', 1);
+insert into llx_c_type_contact(rowid, element, source, code, libelle, active ) values (81, 'agenda',  'internal', 'GUEST', 'Guest', 1);
+insert into llx_c_type_contact(rowid, element, source, code, libelle, active ) values (85, 'agenda',  'external', 'ACTOR', 'Responsable', 1);
+insert into llx_c_type_contact(rowid, element, source, code, libelle, active ) values (86, 'agenda',  'external', 'GUEST', 'Guest', 1);
 
 
 DELETE FROM llx_document_model WHERE (nom = 'oursin' AND type ='invoice') OR (nom = 'edison' AND type ='order') OR (nom = 'jaune' AND type ='propal');
@@ -206,8 +218,8 @@ ALTER TABLE llx_boxes ADD UNIQUE INDEX uk_boxes (entity, box_id, position, fk_us
 UPDATE llx_boxes as b SET b.entity = (SELECT bd.entity FROM llx_boxes_def as bd WHERE bd.rowid = b.box_id);
 
 -- TASK #204
-alter table llx_c_tva add column localtax1_type varchar(1) default '0' after localtax1;
-alter table llx_c_tva add column localtax2_type varchar(1) default '0' after localtax2;
+ALTER TABLE llx_c_tva ADD COLUMN localtax1_type varchar(1) default '0' after localtax1;
+ALTER TABLE llx_c_tva ADD COLUMN localtax2_type varchar(1) default '0' after localtax2;
 ALTER TABLE llx_c_tva MODIFY COLUMN localtax1_type varchar(1);
 ALTER TABLE llx_c_tva MODIFY COLUMN localtax2_type varchar(1);
 
@@ -231,10 +243,20 @@ alter table llx_facturedet add column localtax2_type varchar(1) after localtax2_
 ALTER TABLE llx_facturedet MODIFY COLUMN localtax1_type varchar(1);
 ALTER TABLE llx_facturedet MODIFY COLUMN localtax2_type varchar(1);
 
+alter table llx_facturedet_rec add column localtax1_type varchar(1) after localtax1_tx;
+alter table llx_facturedet_rec add column localtax2_type varchar(1) after localtax2_tx;
+ALTER TABLE llx_facturedet_rec MODIFY COLUMN localtax1_type varchar(1);
+ALTER TABLE llx_facturedet_rec MODIFY COLUMN localtax2_type varchar(1);
+
 alter table llx_propaldet add column localtax1_type varchar(1) after localtax1_tx;
 alter table llx_propaldet add column localtax2_type varchar(1) after localtax2_tx;
 ALTER TABLE llx_propaldet MODIFY COLUMN localtax1_type varchar(1);
 ALTER TABLE llx_propaldet MODIFY COLUMN localtax2_type varchar(1);
+
+alter table llx_contratdet add column localtax1_type varchar(1) after localtax1_tx;
+alter table llx_contratdet add column localtax2_type varchar(1) after localtax2_tx;
+ALTER TABLE llx_contratdet MODIFY COLUMN localtax1_type varchar(1);
+ALTER TABLE llx_contratdet MODIFY COLUMN localtax2_type varchar(1);
 -- END TASK #204
 
 ALTER TABLE llx_menu MODIFY COLUMN enabled varchar(255) NULL DEFAULT '1';
@@ -249,8 +271,19 @@ create table llx_socpeople_extrafields
   fk_object                 integer NOT NULL,
   import_key                varchar(14)                                 -- import key
 ) ENGINE=innodb;
-
 ALTER TABLE llx_socpeople_extrafields ADD INDEX idx_socpeople_extrafields (fk_object);
+
+create table llx_actioncomm_extrafields
+(
+  rowid                     integer AUTO_INCREMENT PRIMARY KEY,
+  tms                       timestamp,
+  fk_object                 integer NOT NULL,
+  import_key                varchar(14)                          		-- import key
+) ENGINE=innodb;
+ALTER TABLE llx_actioncomm_extrafields ADD INDEX idx_actioncomm_extrafields (fk_object);
+
+
+
 
 UPDATE llx_c_actioncomm set type = 'systemauto' where code IN ('AC_PROP','AC_COM','AC_FAC','AC_SHIP','AC_SUP_ORD','AC_SUP_INV');
 
@@ -283,8 +316,9 @@ ALTER TABLE llx_c_chargessociales ADD COLUMN accountancy_code varchar(15) DEFAUL
 -- Tables for accountancy expert
 DROP TABLE llx_accountingaccount;
 DROP TABLE llx_accountingsystem;
+DROP TABLE llx_accounting_system;
 
-create table llx_accountingsystem
+create table llx_accounting_system
 (
   rowid             integer         AUTO_INCREMENT PRIMARY KEY,
   pcg_version       varchar(12)     NOT NULL,
@@ -293,7 +327,7 @@ create table llx_accountingsystem
   active            smallint        DEFAULT 0
 )ENGINE=innodb;
 
-ALTER TABLE llx_accountingsystem ADD INDEX idx_accountingsystem_pcg_version (pcg_version);
+ALTER TABLE llx_accounting_system ADD UNIQUE INDEX uk_accounting_system_pcg_version (pcg_version);
 
 create table llx_accountingaccount
 (
@@ -308,12 +342,12 @@ create table llx_accountingaccount
 )ENGINE=innodb;
 
 ALTER TABLE llx_accountingaccount ADD INDEX idx_accountingaccount_fk_pcg_version (fk_pcg_version);
-ALTER TABLE llx_accountingaccount ADD CONSTRAINT fk_accountingaccount_fk_pcg_version FOREIGN KEY (fk_pcg_version) REFERENCES llx_accountingsystem (pcg_version);
+ALTER TABLE llx_accountingaccount ADD CONSTRAINT fk_accountingaccount_fk_pcg_version FOREIGN KEY (fk_pcg_version) REFERENCES llx_accounting_system (pcg_version);
 
 
 -- Data for accountancy expert
 
-insert into llx_accountingsystem (rowid, pcg_version, fk_pays, label, active) VALUES (1,'PCG99-ABREGE', 1, 'The simple accountancy french plan', 1);
+insert into llx_accounting_system (rowid, pcg_version, fk_pays, label, active) VALUES (1,'PCG99-ABREGE', 1, 'The simple accountancy french plan', 1);
 
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (  1,'PCG99-ABREGE','CAPIT', 'CAPITAL', '101', '1', 'Capital', '1');
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (  2,'PCG99-ABREGE','CAPIT', 'XXXXXX',  '105', '1', 'Ecarts de réévaluation', '1');
@@ -418,7 +452,7 @@ insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype,
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (101,'PCG99-ABREGE','PROD',  'XXXXXX',  '787', '7', 'Reprises sur provisions', '1');
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (102,'PCG99-ABREGE','PROD',  'XXXXXX',   '79', '7', 'Transferts de charges', '1');
 
-insert into llx_accountingsystem (rowid, pcg_version, fk_pays, label, active) VALUES (2,'PCG99-BASE', 1, 'The base accountancy french plan', 1);
+insert into llx_accounting_system (rowid, pcg_version, fk_pays, label, active) VALUES (2,'PCG99-BASE', 1, 'The base accountancy french plan', 1);
 
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (103,'PCG99-BASE','CAPIT', 'XXXXXX',   '10',  '1', 'Capital  et réserves', '1');
 insert into llx_accountingaccount (rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number, account_parent, label, active) VALUES (104,'PCG99-BASE','CAPIT', 'CAPITAL', '101', '10', 'Capital', '1');
@@ -795,22 +829,48 @@ ALTER TABLE llx_categorie ADD UNIQUE INDEX uk_categorie_ref (entity, fk_parent, 
 ALTER TABLE llx_categorie ADD INDEX idx_categorie_type (type);
 ALTER TABLE llx_categorie ADD INDEX idx_categorie_label (label);
 
--- Change index name to be compliant with SQL standard, index name must be unique in database schema
-ALTER TABLE llx_c_actioncomm DROP INDEX code, ADD UNIQUE uk_c_actioncomm (code);
-ALTER TABLE llx_c_civilite DROP INDEX code, ADD UNIQUE uk_c_civilite (code);
-ALTER TABLE llx_c_propalst DROP INDEX code, ADD UNIQUE uk_c_propalst (code);
-ALTER TABLE llx_c_stcomm DROP INDEX code, ADD UNIQUE uk_c_stcomm (code);
-ALTER TABLE llx_c_type_fees DROP INDEX code, ADD UNIQUE uk_c_type_fees (code);
-ALTER TABLE llx_c_typent DROP INDEX code, ADD UNIQUE uk_c_typent (code);
-ALTER TABLE llx_c_effectif DROP INDEX code, ADD UNIQUE uk_c_effectif (code);
-ALTER TABLE llx_c_paiement DROP INDEX code, ADD UNIQUE uk_c_paiement (code);
+-- [ task #559 ] Price by quantity management
+CREATE TABLE llx_product_price_by_qty
+(
+  rowid			integer AUTO_INCREMENT PRIMARY KEY,
+  fk_product_price	integer NOT NULL,
+  date_price		timestamp,
+  price			double (24,8) DEFAULT 0,
+  price_ttc		double (24,8) DEFAULT 0,
+  qty_min		real DEFAULT 0
+)ENGINE=innodb;
 
+ALTER TABLE llx_product_price ADD COLUMN price_by_qty integer NOT NULL DEFAULT 0;
+
+ALTER TABLE llx_product_price_by_qty ADD UNIQUE INDEX uk_product_price_by_qty_level (fk_product_price, qty_min);
+ALTER TABLE llx_product_price_by_qty ADD INDEX idx_product_price_by_qty_fk_product_price (fk_product_price);
+ALTER TABLE llx_product_price_by_qty ADD CONSTRAINT fk_product_price_by_qty_fk_product_price FOREIGN KEY (fk_product_price) REFERENCES llx_product_price (rowid);
+
+ALTER TABLE llx_product_price_by_qty ADD remise_percent DOUBLE NOT NULL DEFAULT '0' AFTER price_ttc;
+ALTER TABLE llx_product_price_by_qty ADD remise DOUBLE NOT NULL DEFAULT '0' AFTER remise_percent;
+
+-- Change index name to be compliant with SQL standard, index name must be unique in database schema
+ALTER TABLE llx_c_actioncomm DROP INDEX code;
+ALTER TABLE llx_c_actioncomm ADD UNIQUE INDEX uk_c_actioncomm(code);
+ALTER TABLE llx_c_civilite DROP INDEX code;
+ALTER TABLE llx_c_civilite ADD UNIQUE INDEX uk_c_civilite(code);
+ALTER TABLE llx_c_propalst DROP INDEX code;
+ALTER TABLE llx_c_propalst ADD UNIQUE INDEX uk_c_propalst(code);
+ALTER TABLE llx_c_stcomm DROP INDEX code;
+ALTER TABLE llx_c_stcomm ADD UNIQUE INDEX uk_c_stcomm(code);
+ALTER TABLE llx_c_type_fees DROP INDEX code;
+ALTER TABLE llx_c_type_fees ADD UNIQUE INDEX uk_c_type_fees(code);
+ALTER TABLE llx_c_typent DROP INDEX code;
+ALTER TABLE llx_c_typent ADD UNIQUE INDEX uk_c_typent(code);
+ALTER TABLE llx_c_effectif DROP INDEX code;
+ALTER TABLE llx_c_effectif ADD UNIQUE INDEX uk_c_effectif(code);
+ALTER TABLE llx_c_paiement DROP INDEX code;
+ALTER TABLE llx_c_paiement ADD UNIQUE INDEX uk_c_paiement(code);
 
 delete from llx_c_actioncomm where id = 40;
 INSERT INTO llx_c_actioncomm (id, code, type, libelle, module, position) values ( 40, 'AC_OTH_AUTO','systemauto', 'Other (automatically inserted events)' ,NULL, 20);
 UPDATE llx_c_actioncomm SET libelle = 'Other (manually inserted events)' WHERE code = 'AC_OTH';
 UPDATE llx_c_actioncomm SET active = 0 WHERE code in ('AC_PROP', 'AC_COM', 'AC_FAC', 'AC_SHIP', 'AC_SUP_ORD', 'AC_SUP_INV');
-
 
 -- Update dictionnary of table llx_c_paper_format
 DELETE FROM llx_c_paper_format;
@@ -844,8 +904,6 @@ INSERT INTO llx_c_paper_format (rowid, code, label, width, height, unit, active)
 -- increase field size
 ALTER TABLE llx_bank_account MODIFY COLUMN code_banque varchar(8);
 
-
-
 create table llx_user_extrafields
 (
   rowid            integer AUTO_INCREMENT PRIMARY KEY,
@@ -856,3 +914,12 @@ create table llx_user_extrafields
 
 ALTER TABLE llx_user_extrafields ADD INDEX idx_user_extrafields (fk_object);
 
+ALTER TABLE llx_element_lock ADD COLUMN sessionid varchar(255) AFTER datem;
+ALTER TABLE llx_element_lock MODIFY COLUMN elementtype varchar(32) NOT NULL;
+ALTER TABLE llx_element_lock DROP COLUMN fk_user_modif;
+ALTER TABLE llx_element_lock DROP COLUMN status;
+
+DELETE FROM llx_c_action_trigger WHERE elementtype='withdraw';
+UPDATE llx_c_action_trigger SET code='FICHINTER_VALIDATE' WHERE code='FICHEINTER_VALIDATE';
+
+UPDATE llx_c_departements SET ncc='ALAVA', nom='Álava' WHERE code_departement='01' AND fk_region=419;

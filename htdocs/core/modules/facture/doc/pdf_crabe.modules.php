@@ -376,10 +376,10 @@ class pdf_crabe extends ModelePDFFactures
 					if ($object->remise_percent) $localtax2ligne-=($localtax2ligne*$object->remise_percent)/100;
 
 					$vatrate=(string) $object->lines[$i]->tva_tx;
-					
+
 					// TODO : store local taxes types into object lines and remove this
-					$localtax1_array=getTypeOfLocalTaxFromRate($vatrate,1,$mysoc);
-					$localtax2_array=getTypeOfLocalTaxFromRate($vatrate,2,$mysoc);
+					$localtax1_array=getLocalTaxesFromRate($vatrate,1,$mysoc);
+					$localtax2_array=getLocalTaxesFromRate($vatrate,2,$mysoc);
 					if (empty($localtax1_type))
 						$localtax1_type = $localtax1_array[0];
 					if (empty($localtax2_type))
@@ -524,7 +524,12 @@ class pdf_crabe extends ModelePDFFactures
 	 */
 	function _tableau_versements(&$pdf, $object, $posy, $outputlangs)
 	{
-		$tab3_posx = 120;
+		global $conf;
+
+        $sign=1;
+        if ($object->type == 2 && ! empty($conf->global->INVOICE_POSITIVE_CREDIT_NOTE)) $sign=-1;
+
+        $tab3_posx = 120;
 		$tab3_top = $posy + 8;
 		$tab3_width = 80;
 		$tab3_height = 4;
@@ -535,9 +540,12 @@ class pdf_crabe extends ModelePDFFactures
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
+		$title=$outputlangs->transnoentities("PaymentsAlreadyDone");
+		if ($object->type == 2) $title=$outputlangs->transnoentities("PaymentsBackAlreadyDone");
+
 		$pdf->SetFont('','', $default_font_size - 3);
 		$pdf->SetXY($tab3_posx, $tab3_top - 4);
-		$pdf->MultiCell(60, 3, $outputlangs->transnoentities("PaymentsAlreadyDone"), 0, 'L', 0);
+		$pdf->MultiCell(60, 3, $title, 0, 'L', 0);
 
 		$pdf->line($tab3_posx, $tab3_top, $tab3_posx+$tab3_width, $tab3_top);
 
@@ -620,7 +628,7 @@ class pdf_crabe extends ModelePDFFactures
 				$pdf->SetXY($tab3_posx, $tab3_top+$y);
 				$pdf->MultiCell(20, 3, dol_print_date($this->db->jdate($row->date),'day',false,$outputlangs,true), 0, 'L', 0);
 				$pdf->SetXY($tab3_posx+21, $tab3_top+$y);
-				$pdf->MultiCell(20, 3, price($row->amount), 0, 'L', 0);
+				$pdf->MultiCell(20, 3, price($sign * $row->amount), 0, 'L', 0);
 				$pdf->SetXY($tab3_posx+40, $tab3_top+$y);
 				$oper = $outputlangs->transnoentitiesnoconv("PaymentTypeShort" . $row->code);
 
@@ -844,23 +852,19 @@ class pdf_crabe extends ModelePDFFactures
 				//Local tax 1 before VAT
 				if (! empty($conf->global->FACTURE_LOCAL_TAX1_OPTION) && $conf->global->FACTURE_LOCAL_TAX1_OPTION=='localtax1on')
 				{
-					foreach( $this->localtax1 as $localtax_type => $localtax_rate ) {
-						switch ($localtax_type) {
-							case '1':
-							case '3':
-							case '5':
-							case '7':
-								continue 2;
-								break;
-						}
+					foreach( $this->localtax1 as $localtax_type => $localtax_rate )
+					{
+						// TODO: Place into a function to control showing by country or study better option
+						if (in_array((string) $localtax_type, array('1','3','5','7')) && $mysoc->country_code != 'ES') continue;
+
 						foreach( $localtax_rate as $tvakey => $tvaval )
 						{
-							if ($tvakey>0)    // On affiche pas taux 0
+							if ($tvakey!=0)    // On affiche pas taux 0
 							{
 								//$this->atleastoneratenotnull++;
 
 								$index++;
-								$pdf->SetXY ($col1x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 
 								$tvacompl='';
 								if (preg_match('/\*/',$tvakey))
@@ -872,34 +876,30 @@ class pdf_crabe extends ModelePDFFactures
 								$totalvat.=vatrate($tvakey,1).$tvacompl;
 								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
 
-								$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval), 0, 'R', 1);
 							}
 						}
 					}
-	      }
-				//Local tax 2  before VAT
+	      		}
+				//Local tax 2 before VAT
 				if (! empty($conf->global->FACTURE_LOCAL_TAX2_OPTION) && $conf->global->FACTURE_LOCAL_TAX2_OPTION=='localtax2on')
 				{
-					foreach( $this->localtax2 as $localtax_type => $localtax_rate ) {
-						switch ($localtax_type) {
-							case '1':
-							case '3':
-							case '5':
-							case '7':
-								continue 2;
-								break;
-						}
+					foreach( $this->localtax2 as $localtax_type => $localtax_rate )
+					{
+						// TODO: Place into a function to control showing by country or study better option
+						if (in_array((string) $localtax_type, array('1','3','5','7')) && $mysoc->country_code != 'ES') continue;
+
 						foreach( $localtax_rate as $tvakey => $tvaval )
 						{
-							if ($tvakey>0)    // On affiche pas taux 0
+							if ($tvakey!=0)    // On affiche pas taux 0
 							{
 								//$this->atleastoneratenotnull++;
 
 
 
 								$index++;
-								$pdf->SetXY ($col1x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 
 								$tvacompl='';
 								if (preg_match('/\*/',$tvakey))
@@ -911,7 +911,7 @@ class pdf_crabe extends ModelePDFFactures
 								$totalvat.=vatrate($tvakey,1).$tvacompl;
 								$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
 
-								$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 								$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval), 0, 'R', 1);
 
 							}
@@ -946,14 +946,10 @@ class pdf_crabe extends ModelePDFFactures
 				//Local tax 1 after VAT
 				if (! empty($conf->global->FACTURE_LOCAL_TAX1_OPTION) && $conf->global->FACTURE_LOCAL_TAX1_OPTION=='localtax1on')
 				{
-					foreach( $this->localtax1 as $localtax_type => $localtax_rate ) {
-						switch ($localtax_type) {
-							case '2':
-							case '4':
-							case '6':
-								continue 2;
-								break;
-						}
+					foreach( $this->localtax1 as $localtax_type => $localtax_rate )
+					{
+						if (in_array((string) $localtax_type, array('2','4','6'))) continue;
+
 						foreach( $localtax_rate as $tvakey => $tvaval )
 						{
 							if ($tvakey>0)    // On affiche pas taux 0
@@ -961,7 +957,7 @@ class pdf_crabe extends ModelePDFFactures
 								//$this->atleastoneratenotnull++;
 
 								$index++;
-								$pdf->SetXY ($col1x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 
 								$tvacompl='';
 								if (preg_match('/\*/',$tvakey))
@@ -973,31 +969,27 @@ class pdf_crabe extends ModelePDFFactures
 								if ($localtax_type == '7') {  // amount on order
 									$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
 
-									$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+									$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 									$pdf->MultiCell($largcol2, $tab2_hl, price($tvakey), 0, 'R', 1);
 								}
 								else
 								{
 									$totalvat.=vatrate($tvakey,1).$tvacompl;
 									$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-									$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+									$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 									$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval), 0, 'R', 1);
 								}
 							}
 						}
 					}
 	      		}
-				//Local tax 2  after VAT
+				//Local tax 2 after VAT
 				if (! empty($conf->global->FACTURE_LOCAL_TAX2_OPTION) && $conf->global->FACTURE_LOCAL_TAX2_OPTION=='localtax2on')
 				{
-					foreach( $this->localtax2 as $localtax_type => $localtax_rate ) {
-						switch ($localtax_type) {
-							case '2':
-							case '4':
-							case '6':
-								continue 2;
-								break;
-						}
+					foreach( $this->localtax2 as $localtax_type => $localtax_rate )
+					{
+						if (in_array((string) $localtax_type, array('2','4','6'))) continue;
+
 						foreach( $localtax_rate as $tvakey => $tvaval )
 						{
 						    // retrieve global local tax
@@ -1006,7 +998,7 @@ class pdf_crabe extends ModelePDFFactures
 								//$this->atleastoneratenotnull++;
 
 								$index++;
-								$pdf->SetXY ($col1x, $tab2_top + $tab2_hl * $index);
+								$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 
 								$tvacompl='';
 								if (preg_match('/\*/',$tvakey))
@@ -1018,7 +1010,7 @@ class pdf_crabe extends ModelePDFFactures
 
 								if ($localtax_type == '7') {  // amount on order
 									$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
-									$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+									$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 									$pdf->MultiCell($largcol2, $tab2_hl, price($tvakey), 0, 'R', 1);
 								}
 								else
@@ -1026,7 +1018,7 @@ class pdf_crabe extends ModelePDFFactures
 									$totalvat.=vatrate($tvakey,1).$tvacompl;
 									$pdf->MultiCell($col2x-$col1x, $tab2_hl, $totalvat, 0, 'L', 1);
 
-									$pdf->SetXY ($col2x, $tab2_top + $tab2_hl * $index);
+									$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 									$pdf->MultiCell($largcol2, $tab2_hl, price($tvaval), 0, 'R', 1);
 								}
 							}
@@ -1042,7 +1034,7 @@ class pdf_crabe extends ModelePDFFactures
 				$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("TotalTTC"), $useborder, 'L', 1);
 
 				$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
-				$pdf->MultiCell($largcol2, $tab2_hl, price($object->total_ttc), $useborder, 'R', 1);
+				$pdf->MultiCell($largcol2, $tab2_hl, price($sign * $object->total_ttc), $useborder, 'R', 1);
 			}
 		}
 
@@ -1330,10 +1322,10 @@ class pdf_crabe extends ModelePDFFactures
 
 		if ($object->client->code_client)
 		{
-//			$posy+=4;
-//			$pdf->SetXY($posx,$posy);
-//			$pdf->SetTextColor(0,0,60);
-//			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode")." : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
+			$posy+=3;
+			$pdf->SetXY($posx,$posy);
+			$pdf->SetTextColor(0,0,60);
+			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode")." : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
 		}
 
 		$posy+=1;

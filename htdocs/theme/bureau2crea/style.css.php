@@ -835,6 +835,7 @@ a.toolbarbutton {
     background: #FFFFFF;*/
 }
 img.toolbarbutton {
+	margin-top: 2px;
     height: 28px;
 }
 
@@ -994,7 +995,6 @@ img.toolbarbutton {
 }
 
 .ecm-layout-resizer  { /* all 'resizer-bars' */
-    background:     #EEE;
     border:         1px solid #BBB;
     border-width:   0;
     }
@@ -1568,6 +1568,10 @@ tr.box_titre {
 	white-space: nowrap;
   -moz-border-radius-topleft:6px;
   -moz-border-radius-topright:6px;
+}
+
+tr.box_titre td.boxclose {
+	width: 30px;
 }
 
 tr.box_impair {

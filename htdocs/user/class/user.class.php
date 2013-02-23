@@ -112,11 +112,11 @@ class User extends CommonObject
 		$this->all_permissions_are_loaded = 0;
 		$this->admin=0;
 
-		$this->conf				    = (object) array();
-		$this->rights				= (object) array();
-		$this->rights->user			= (object) array();
-		$this->rights->user->user	= (object) array();
-		$this->rights->user->self	= (object) array();
+		$this->conf				    = new stdClass();
+		$this->rights				= new stdClass();
+		$this->rights->user			= new stdClass();
+		$this->rights->user->user	= new stdClass();
+		$this->rights->user->self	= new stdClass();
 	}
 
 	/**
@@ -248,6 +248,7 @@ class User extends CommonObject
 			$sql = "SELECT param, value FROM ".MAIN_DB_PREFIX."user_param";
 			$sql.= " WHERE fk_user = ".$this->id;
 			$sql.= " AND entity = ".$conf->entity;
+			//dol_syslog(get_class($this).'::fetch load personalized conf sql='.$sql, LOG_DEBUG);
 			$resql=$this->db->query($sql);
 			if ($resql)
 			{
@@ -537,11 +538,11 @@ class User extends CommonObject
 
 				if ($perms)
 				{
-					if (! isset($this->rights) || ! is_object($this->rights)) $this->rights = (object) array(); // For avoid error
-					if (! isset($this->rights->$module) || ! is_object($this->rights->$module)) $this->rights->$module = (object) array();
+					if (! isset($this->rights) || ! is_object($this->rights)) $this->rights = new stdClass(); // For avoid error
+					if (! isset($this->rights->$module) || ! is_object($this->rights->$module)) $this->rights->$module = new stdClass();
 					if ($subperms)
 					{
-						if (! isset($this->rights->$module->$perms) || ! is_object($this->rights->$module->$perms)) $this->rights->$module->$perms = (object) array();
+						if (! isset($this->rights->$module->$perms) || ! is_object($this->rights->$module->$perms)) $this->rights->$module->$perms = new stdClass();
 						$this->rights->$module->$perms->$subperms = 1;
 					}
 					else
@@ -587,11 +588,11 @@ class User extends CommonObject
 
 				if ($perms)
 				{
-					if (! isset($this->rights) || ! is_object($this->rights)) $this->rights = (object) array(); // For avoid error
-					if (! isset($this->rights->$module) || ! is_object($this->rights->$module)) $this->rights->$module = (object) array();
+					if (! isset($this->rights) || ! is_object($this->rights)) $this->rights = new stdClass(); // For avoid error
+					if (! isset($this->rights->$module) || ! is_object($this->rights->$module)) $this->rights->$module = new stdClass();
 					if ($subperms)
 					{
-						if (! isset($this->rights->$module->$perms) || ! is_object($this->rights->$module->$perms)) $this->rights->$module->$perms = (object) array();
+						if (! isset($this->rights->$module->$perms) || ! is_object($this->rights->$module->$perms)) $this->rights->$module->$perms = new stdClass();
 						$this->rights->$module->$perms->$subperms = 1;
 					}
 					else
@@ -717,15 +718,13 @@ class User extends CommonObject
 			}
 		}
 
-        // Remove extrafields
-        if (! $error)
+		// Remove extrafields
+		if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
         {
-         	$sql = "DELETE FROM ".MAIN_DB_PREFIX."user_extrafields WHERE fk_object = ".$this->id;
-           	dol_syslog(get_class($this)."::delete sql=".$sql);
-           	if (! $this->db->query($sql))
-           	{
+			$result=$this->deleteExtraFields();
+			if ($result < 0)
+			{
            		$error++;
-           		$this->error = $this->db->lasterror();
            		dol_syslog(get_class($this)."::delete error -4 ".$this->error, LOG_ERR);
            	}
         }
@@ -910,14 +909,14 @@ class User extends CommonObject
 		$this->admin		= 0;
 		$this->nom			= $contact->nom;			// TODO deprecated
 		$this->prenom		= $contact->prenom;	// TODO deprecated
-		$this->lastname		= $contact->nom;
-		$this->firstname	= $contact->prenom;
+		$this->lastname		= $contact->lastname;
+		$this->firstname	= $contact->firstname;
 		$this->email		= $contact->email;
 		$this->office_phone	= $contact->phone_pro;
 		$this->office_fax	= $contact->fax;
 		$this->user_mobile	= $contact->phone_mobile;
 
-		if (empty($login)) $login=strtolower(substr($contact->prenom, 0, 4)) . strtolower(substr($contact->nom, 0, 4));
+		if (empty($login)) $login=strtolower(substr($contact->firstname, 0, 4)) . strtolower(substr($contact->lastname, 0, 4));
 		$this->login = $login;
 
 		$this->db->begin();
@@ -1463,17 +1462,10 @@ class User extends CommonObject
 			$outputlangs=$langs;
 		}
 
-		// Define urlwithouturlroot
-		if (! empty($_SERVER["HTTP_HOST"])) // Autodetect main url root
-		{
-			$urlwithouturlroot='http://'.preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',$_SERVER["HTTP_HOST"]);
-		}
-		else
-		{
-			$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',$dolibarr_main_url_root);
-		}
-		if (! empty($dolibarr_main_force_https)
-			|| (! empty($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == 'on')) $urlwithouturlroot=preg_replace('/http:/i','https:',$urlwithouturlroot);
+		// Define $urlwithroot
+		//$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
+		//$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
+		$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
 
 		// TODO Use outputlangs to translate messages
 		if (! $changelater)
@@ -1483,7 +1475,7 @@ class User extends CommonObject
 			$mesg.= $langs->trans("Login")." : $this->login\n";
 			$mesg.= $langs->trans("Password")." : $password\n\n";
 			$mesg.= "\n";
-			$url = $urlwithouturlroot.DOL_URL_ROOT;
+			$url = $urlwithroot;
 			$mesg.= 'Click here to go to Dolibarr: '.$url."\n\n";
 			$mesg.= "--\n";
 			$mesg.= $user->getFullName($langs);	// Username that make then sending
@@ -1496,7 +1488,7 @@ class User extends CommonObject
 			$mesg.= $langs->trans("Password")." : $password\n\n";
 			$mesg.= "\n";
 			$mesg.= "You must click on the folowing link to validate its change.\n";
-			$url = $urlwithouturlroot.DOL_URL_ROOT.'/user/passwordforgotten.php?action=validatenewpassword&username='.$this->login."&passwordmd5=".dol_hash($password);
+			$url = $urlwithroot.'/user/passwordforgotten.php?action=validatenewpassword&username='.$this->login."&passwordmd5=".dol_hash($password);
 			$mesg.= $url."\n\n";
 			$mesg.= "If you didn't ask anything, just forget this email\n\n";
 			dol_syslog(get_class($this)."::send_password url=".$url);

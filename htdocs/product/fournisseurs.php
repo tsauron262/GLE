@@ -501,6 +501,19 @@ if ($id || $ref)
 							print '</td>';
 						}
 
+						// Discount
+						print '<td align="right">';
+						print price2num($productfourn->fourn_remise_percent).'%';
+						print '</td>';
+
+						// Unit Charges ???
+						if (! empty($conf->margin->enabled))
+						{
+							print '<td align="right">';
+							print $productfourn->fourn_unitcharges?price($productfourn->fourn_unitcharges) : ($productfourn->fourn_qty?price($productfourn->fourn_charges/$productfourn->fourn_qty):"&nbsp;");
+							print '</td>';
+						}
+
 						// Modify-Remove
 						print '<td align="center">';
 						if ($user->rights->produit->creer || $user->rights->service->creer)

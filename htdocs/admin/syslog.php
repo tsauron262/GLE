@@ -37,7 +37,7 @@ $action = GETPOST("action");
 $syslogModules = array();
 $activeModules = array();
 
-if (defined('SYSLOG_HANDLERS')) $activeModules = json_decode(SYSLOG_HANDLERS);
+if (defined('SYSLOG_HANDLERS')) $activeModules = json_decode(constant('SYSLOG_HANDLERS'));
 
 $dir = dol_buildpath('/core/modules/syslog/');
 
@@ -198,7 +198,8 @@ foreach ($syslogModules as $moduleName)
 	{
 		foreach ($setuparray as $option)
 		{
-			if (defined($option['constant'])) $value = constant($option['constant']);
+			if (isset($_POST[$option['constant']])) $value=$_POST[$option['constant']]; 
+			else if (defined($option['constant'])) $value = constant($option['constant']);
 			else $value = (isset($option['default']) ? $option['default'] : '');
 
 			print $option['name'].': <input type="text" class="flat" name="'.$option['constant'].'" value="'.$value.'"'.(isset($option['attr']) ? ' '.$option['attr'] : '').'>';

@@ -84,7 +84,8 @@ if ($action == 'validatenewpassword' && $username && $passwordmd5)
         }
         else
         {
-            $message = '<div class="error">'.$langs->trans("ErrorFailedToValidatePassword").'</div>';
+        	$langs->load("errors");
+            $message = '<div class="error">'.$langs->trans("ErrorFailedToValidatePasswordReset").'</div>';
         }
     }
 }
@@ -209,13 +210,13 @@ elseif (! empty($mysoc->logo_small) && is_readable($conf->mycompany->dir_output.
 	$urllogo=DOL_URL_ROOT.'/viewimage.php?cache=1&amp;modulepart=companylogo&amp;file='.urlencode($mysoc->logo);
 	$width=128;
 }
-elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/gle_logo.png'))
+elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png'))
 {
-	$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/gle_logo.png';
+	$urllogo=DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/dolibarr_logo.png';
 }
-elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/gle_logo.png'))
+elseif (is_readable(DOL_DOCUMENT_ROOT.'/theme/dolibarr_logo.png'))
 {
-	$urllogo=DOL_URL_ROOT.'/theme/gle_logo.png';
+	$urllogo=DOL_URL_ROOT.'/theme/dolibarr_logo.png';
 }
 
 // Security graphical code
@@ -229,6 +230,8 @@ if (function_exists("imagecreatefrompng") && ! $disabled)
 // Should be an array with differents options in $hookmanager->resArray
 $parameters=array('entity' => GETPOST('entity','int'));
 $hookmanager->executeHooks('getPasswordForgottenPageOptions',$parameters);    // Note that $action and $object may have been modified by some hooks
+
+include $template_dir.'passwordforgotten.tpl.php';	// To use native PHP
 
 include $template_dir.'passwordforgotten.tpl.php';	// To use native PHP
 

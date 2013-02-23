@@ -34,8 +34,6 @@ $langs->load("admin");
 
 $action=GETPOST('action');
 
-$action=GETPOST('action');
-
 // Security check
 $contactid = isset($_GET["id"])?$_GET["id"]:'';
 if ($user->societe_id) $socid=$user->societe_id;

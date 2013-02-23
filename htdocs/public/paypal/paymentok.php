@@ -92,7 +92,7 @@ if (empty($PAYPAL_API_SIGNATURE))
  * View
  */
 
-dol_syslog("Callback url when a PayPal payment was done. query_string=".$_SERVER["QUERY_STRING"]);
+dol_syslog("Callback url when a PayPal payment was done. query_string=".(empty($_SERVER["QUERY_STRING"])?'':$_SERVER["QUERY_STRING"])." script_uri=".(empty($_SERVER["SCRIPT_URI"])?'':$_SERVER["SCRIPT_URI"]));
 
 llxHeaderPaypal($langs->trans("PaymentForm"));
 
@@ -122,6 +122,7 @@ if ($PAYPALTOKEN)
     // From env
     $ipaddress          = $_SESSION['ipaddress'];
 
+	dol_syslog("Call newpaymentok with token=".$token." paymentType=".$paymentType." currencyCodeType=".$currencyCodeType." payerID=".$payerID." ipaddress=".$ipaddress." FinalPaymentAmt=".$FinalPaymentAmt." fulltag=".$fulltag);
 
     if (! empty($paymentType))
     {
@@ -135,7 +136,7 @@ if ($PAYPALTOKEN)
         $ack = strtoupper($resArray["ACK"]);
         if($ack=="SUCCESS" || $ack=="SUCCESSWITHWARNING")
         {
-        	$object = (object) 'paypal';
+        	$object = new stdClass();
 
         	$object->source		= $source;
         	$object->ref		= $ref;
@@ -193,7 +194,7 @@ print "\n</div>\n";
 html_print_paypal_footer($mysoc,$langs);
 
 
-$db->close();
-
 llxFooterPaypal();
+
+$db->close();
 ?>

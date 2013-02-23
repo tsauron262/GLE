@@ -1483,8 +1483,8 @@ abstract class CommonObject
         $fieldlocaltax2='total_localtax2';
         if ($this->element == 'facture_fourn' || $this->element == 'invoice_supplier') $fieldtva='tva';
 
-        $sql = 'SELECT qty, total_ht, '.$fieldtva.' as total_tva, '.$fieldlocaltax1.' as total_localtax1, '.$fieldlocaltax2.' as total_localtax2, total_ttc,';
-        $sql.= ' tva_tx as vatrate';
+        $sql = 'SELECT qty, total_ht, '.$fieldtva.' as total_tva, total_ttc, '.$fieldlocaltax1.' as total_localtax1, '.$fieldlocaltax2.' as total_localtax2,';
+        $sql.= ' tva_tx as vatrate, localtax1_tx, localtax2_tx, localtax1_type, localtax2_type';
         $sql.= ' FROM '.MAIN_DB_PREFIX.$this->table_element_line;
         $sql.= ' WHERE '.$this->fk_element.' = '.$this->id;
         if ($exclspec)
@@ -1518,49 +1518,48 @@ abstract class CommonObject
                 $this->total_localtax2 += $obj->total_localtax2;
                 $this->total_ttc       += $obj->total_ttc;
 
-                // Check if global invoice tax for this vat rate
-                if (! empty($obj->vatrate))
+                // Check if there is a global invoice tax for this vat rate
+                // FIXME: We should have no database access into this function. Also localtax 7 seems to have problem so i add condition to avoid it into standard usage without loosing it.
+                if (! empty($conf->global->MAIN_USE_LOCALTAX_TYPE_7))
                 {
-                    if ($this->total_localtax1 == 0)
+                	if ($this->total_localtax1 == 0)
                     {
-						// Search local taxes
-						$sql  = "SELECT t.localtax1, t.localtax1_type";
-						$sql .= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_pays as p";
-						$sql .= " WHERE t.fk_pays = p.rowid AND p.code = '".$this->client->country_code."'";
-						$sql .= " AND t.taux = ".$obj->vatrate." AND t.active = 1";
+						// Search to know if there is a localtax of type 7
+                    	// TODO : store local taxes types into object lines and remove this. We should use here $obj->localtax1_type but it is not yet filled into database, so we search into table of vat rate
+                		global $mysoc;
+                    	$localtax1_array=getLocalTaxesFromRate($vatrate,1,$mysoc);
+                    	if (empty($obj->localtax1_type))
+                    	{
+                    		$obj->localtax1_type = $localtax1_array[0];
+                    		$obj->localtax1_tx = $localtax1_array[1];
+                    	}
+                    	//end TODO
 
-						dol_syslog("get_localtax sql=".$sql);
-						$resqlt=$this->db->query($sql);
-						if ($resqlt)
+						if ($obj->localtax1_type == '7')
 						{
-							$objt = $this->db->fetch_object($resqlt);
-       						if ($objt->localtax1_type == '7')
-							{
-                 				$this->total_localtax1 += $objt->localtax1;
-                 				$this->total_ttc       += $objt->localtax1;
-							}
+							$this->total_localtax1 += $obj->localtax1_tx;
+							$this->total_ttc       += $obj->localtax1_tx;
 						}
 					}
                     if ($this->total_localtax2 == 0)
                     {
-						// Search local taxes
-						$sql  = "SELECT t.localtax2, t.localtax2_type";
-						$sql .= " FROM ".MAIN_DB_PREFIX."c_tva as t, ".MAIN_DB_PREFIX."c_pays as p";
-						$sql .= " WHERE t.fk_pays = p.rowid AND p.code = '".$this->client->country_code."'";
-						$sql .= " AND t.taux = ".$obj->vatrate." AND t.active = 1";
+						// Search to know if there is a localtax of type 7
+                    	// TODO : store local taxes types into object lines and remove this. We should use here $obj->localtax1_type but it is not yet filled into database, so we search into table of vat rate
+                		global $mysoc;
+                    	$localtax2_array=getLocalTaxesFromRate($vatrate,2,$mysoc);
+                    	if (empty($obj->localtax2_type))
+                    	{
+                    		$obj->localtax2_type = $localtax2_array[0];
+                    		$obj->localtax2_tx = $localtax2_array[1];
+                    	}
+                    	//end TODO
 
-						dol_syslog("get_localtax sql=".$sql);
-						$resqlt=$this->db->query($sql);
-						if ($resqlt)
+                    	if ($obj->localtax2_type == '7')
 						{
-							$objt = $this->db->fetch_object($resqlt);
-       						if ($objt->localtax2_type == '7')
-							{
-                 				$this->total_localtax2 += $objt->localtax2;
-                 				$this->total_ttc       += $objt->localtax2;
-							}
+							$this->total_localtax2 += $obj->localtax2_tx;
+							$this->total_ttc       += $obj->localtax2_tx;
 						}
-					}
+                    }
                 }
 
                 $i++;
@@ -2067,6 +2066,35 @@ abstract class CommonObject
         }
     }
 
+    /**
+     *	Delete all extra fields values for the current object.
+     *
+     *  @return	int		<0 if KO, >0 if OK
+     */
+	function deleteExtraFields()
+	{
+		global $langs;
+
+		$error=0;
+
+		$this->db->begin();
+
+		$sql_del = "DELETE FROM ".MAIN_DB_PREFIX.$this->table_element."_extrafields WHERE fk_object = ".$this->id;
+		dol_syslog(get_class($this)."::deleteExtraFields delete sql=".$sql_del);
+		$resql=$this->db->query($sql_del);
+		if (! $resql)
+		{
+			$this->error=$this->db->lasterror();
+			dol_syslog(get_class($this)."::deleteExtraFields ".$this->error,LOG_ERR);
+			$this->db->rollback();
+			return -1;
+		}
+		else
+		{
+			$this->db->commit();
+			return 1;
+		}
+	}
 
     /**
      *	Add/Update all extra fields values for the current object.
@@ -2225,24 +2253,43 @@ abstract class CommonObject
     }
 
     /**
-     * Function that returns the total amount of discounts applied.
-     * 
-     * @return false|float False is returned if the discount couldn't be retrieved
+     * Function that returns the total amount HT of discounts applied for all lines.
+     *
+     * @return 	float
      */
     function getTotalDiscount()
     {
-        $sql = 'SELECT (SUM(`subprice`) - SUM(`total_ht`)) as `discount` FROM '.MAIN_DB_PREFIX.$this->table_element.'det WHERE `'.$this->fk_element.'` = '.$this->id;
+    	$total_discount=0.00;
 
-        $query = $this->db->query($sql);
-        
-        if ($query)
+        $sql = "SELECT subprice as pu_ht, qty, remise_percent, total_ht";
+        $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element."det";
+        $sql.= " WHERE ".$this->fk_element." = ".$this->id;
+
+        dol_syslog(get_class($this).'::getTotalDiscount sql='.$sql);
+        $resql = $this->db->query($sql);
+        if ($resql)
         {
-            $result = $this->db->fetch_object($query);
+        	$num=$this->db->num_rows($resql);
+        	$i=0;
+        	while ($i < $num)
+        	{
+            	$obj = $this->db->fetch_object($query);
 
-            return price2num($result->discount);
+            	$pu_ht = $obj->pu_ht;
+            	$qty= $obj->qty;
+            	$discount_percent_line = $obj->remise_percent;
+            	$total_ht = $obj->total_ht;
+
+        		$total_discount_line = price2num(($pu_ht * $qty) - $total_ht, 'MT');
+        		$total_discount += $total_discount_line;
+
+        		$i++;
+        	}
         }
+        else dol_syslog(get_class($this).'::getTotalDiscount '.$this->db->lasterror(), LOG_ERR);
 
-        return false;
+        //print $total_discount; exit;
+        return price2num($total_discount);
     }
 
     /**
@@ -2285,7 +2332,7 @@ abstract class CommonObject
     function isInEEC()
     {
         // List of all country codes that are in europe for european vat rules
-        // List found on http://ec.europa.eu/taxation_customs/vies/lang.do?fromWhichPage=vieshome
+        // List found on http://ec.europa.eu/taxation_customs/common/faq/faq_1179_en.htm#9
         $country_code_in_EEC=array(
     			'AT',	// Austria
     			'BE',	// Belgium
@@ -2298,16 +2345,17 @@ abstract class CommonObject
     			'ES',	// Spain
     			'FI',	// Finland
     			'FR',	// France
-    			'GB',	// Royaume-uni
+    			'GB',	// United Kingdom
     			'GR',	// Greece
     			'NL',	// Holland
     			'HU',	// Hungary
     			'IE',	// Ireland
+    			'IM',	// Isle of Man - Included in UK
     			'IT',	// Italy
     			'LT',	// Lithuania
     			'LU',	// Luxembourg
     			'LV',	// Latvia
-    			'MC',	// Monaco 		Seems to use same IntraVAT than France (http://www.gouv.mc/devwww/wwwnew.nsf/c3241c4782f528bdc1256d52004f970b/9e370807042516a5c1256f81003f5bb3!OpenDocument)
+    			'MC',	// Monaco - Included in France
     			'MT',	// Malta
         //'NO',	// Norway
     			'PL',	// Poland
@@ -2431,7 +2479,7 @@ abstract class CommonObject
         $parameters=array();
         $reshook=$hookmanager->executeHooks('showLinkedObjectBlock',$parameters,$this,$action);    // Note that $action and $object may have been modified by hook
 
-        if (! $reshook)
+        if (empty($reshook))
         {
         	$num = count($this->linkedObjects);
 
@@ -2527,17 +2575,7 @@ abstract class CommonObject
     	global $form,$bcnd,$var;
 
     	// Use global variables + $dateSelector + $seller and $buyer
-        $dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
-        foreach($dirtpls as $reldir)
-        {
-                $tpl = dol_buildpath($reldir.'/freeproductline_create.tpl.php');
-                if (empty($conf->file->strict_mode)) {
-                        $res=@include $tpl;
-                } else {
-                        $res=include $tpl; // for debug
-                }
-                if ($res) break;
-        }
+    	include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_create.tpl.php');
     }
 
 
@@ -2611,7 +2649,7 @@ abstract class CommonObject
 			if ($conf->global->MARGIN_TYPE == "1")
 				print '<td align="right" width="80">'.$langs->trans('BuyingPrice').'</td>';
 			else
-				print '<td align="right" width="80">'.$langs->trans('BuyingCost').'</td>';
+				print '<td align="right" width="80">'.$langs->trans('CostPrice').'</td>';
 			if (! empty($conf->global->DISPLAY_MARGIN_RATES))
 				print '<td align="right" width="50">'.$langs->trans('MarginRate').'</td>';
 			if (! empty($conf->global->DISPLAY_MARK_RATES))
@@ -3011,7 +3049,10 @@ abstract class CommonObject
     print '<tr class="liste_titre">';
     print '<td width="30%">'.$langs->trans('Margins').'</td>';
     print '<td width="20%" align="right">'.$langs->trans('SellingPrice').'</td>';
-    print '<td width="20%" align="right">'.$langs->trans('BuyingPrice').'</td>';
+	if ($conf->global->MARGIN_TYPE == "1")
+		print '<td width="20%" align="right">'.$langs->trans('BuyingPrice').'</td>';
+	else
+		print '<td width="20%" align="right">'.$langs->trans('CostPrice').'</td>';
     print '<td width="20%" align="right">'.$langs->trans('Margin').'</td>';
     if (! empty($conf->global->DISPLAY_MARGIN_RATES))
       print '<td align="right">'.$langs->trans('MarginRate').'</td>';

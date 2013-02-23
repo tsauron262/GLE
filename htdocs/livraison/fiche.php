@@ -195,22 +195,6 @@ if ($action == 'builddoc')	// En get ou en post
 // Delete file in doc form
 elseif ($action == 'remove_file')
 {
-	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
-
-	$object = new Livraison($db);
-	if ($object->fetch($id))
-	{
-		$object->fetch_thirdparty();
-		$upload_dir =	$conf->expedition->dir_output . "/receipt";
-		$file =	$upload_dir	. '/' .	GETPOST('file');
-		$ret=dol_delete_file($file,0,0,0,$object);
-		$mesg = '<div class="ok">'.$langs->trans("FileWasRemoved",GETPOST('file')).'</div>';
-	}
-}
-
-// Delete file in doc form
-elseif ($action == 'remove_file')
-{
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 	$object = new Livraison($db);

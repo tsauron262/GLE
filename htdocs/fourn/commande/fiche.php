@@ -36,9 +36,10 @@ require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/fourn.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-if (! empty($conf->produit->enabled))
+require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+if (!empty($conf->produit->enabled))
 	require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
-if (! empty($conf->projet->enabled))
+if (!empty($conf->projet->enabled))
 	require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 
 $langs->load('orders');
@@ -237,8 +238,8 @@ else if ($action == 'addline' && $user->rights->fournisseur->commande->creer)
                 $type = $productsupplier->type;
 
                 // Local Taxes
-                $localtax1_tx= get_localtax($tva_tx, 1, $object->thirdparty);
-                $localtax2_tx= get_localtax($tva_tx, 2, $object->thirdparty);
+                $localtax1_tx= get_localtax($tva_tx, 1,$mysoc,$object->thirdparty);
+                $localtax2_tx= get_localtax($tva_tx, 2,$mysoc,$object->thirdparty);
 
                 $result=$object->addline(
                     $desc,
@@ -268,8 +269,8 @@ else if ($action == 'addline' && $user->rights->fournisseur->commande->creer)
             $tva_tx = price2num($_POST['tva_tx']);
 
             // Local Taxes
-            $localtax1_tx= get_localtax($tva_tx, 1, $object->thirdparty);
-            $localtax2_tx= get_localtax($tva_tx, 2, $object->thirdparty);
+            $localtax1_tx= get_localtax($tva_tx, 1,$mysoc,$object->thirdparty);
+            $localtax2_tx= get_localtax($tva_tx, 2,$mysoc,$object->thirdparty);
 
             if (! $_POST['dp_desc'])
             {
@@ -340,8 +341,8 @@ else if ($action == 'updateligne' && $user->rights->fournisseur->commande->creer
         if ($product->fetch($_POST["elrowid"]) < 0) dol_print_error($db);
     }
 
-    $localtax1_tx=get_localtax($_POST['tva_tx'],1,$object->thirdparty);
-    $localtax2_tx=get_localtax($_POST['tva_tx'],2,$object->thirdparty);
+    $localtax1_tx=get_localtax($_POST['tva_tx'],1,$mysoc,$object->thirdparty);
+    $localtax2_tx=get_localtax($_POST['tva_tx'],2,$mysoc,$object->thirdparty);
 
     $result	= $object->updateline(
         $_POST['elrowid'],
@@ -1065,12 +1066,17 @@ if (! empty($object->id))
 	if (! empty($conf->projet->enabled))	$nbrow++;
 
 	//Local taxes
+	//TODO: Place into a function to control showing by country or study better option
 	if ($mysoc->country_code=='ES')
+	{
+		if($mysoc->localtax1_assuj=="1") $nbrow++;
+		if($object->thirdparty->localtax2_assuj=="1") $nbrow++;
+	}
+	else
 	{
 		if($mysoc->localtax1_assuj=="1") $nbrow++;
 		if($mysoc->localtax2_assuj=="1") $nbrow++;
 	}
-
 	print '<table class="border" width="100%">';
 
 	$linkback = '<a href="'.DOL_URL_ROOT.'/fourn/commande/liste.php'.(! empty($socid)?'?socid='.$socid:'').'">'.$langs->trans("BackToList").'</a>';
@@ -1224,6 +1230,7 @@ if (! empty($object->id))
 	print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
 
 	// Amount Local Taxes
+	//TODO: Place into a function to control showing by country or study better option
 	if ($mysoc->country_code=='ES')
 	{
 		if ($mysoc->localtax1_assuj=="1") //Localtax1 RE
@@ -1232,7 +1239,22 @@ if (! empty($object->id))
 			print '<td align="right">'.price($object->total_localtax1).'</td>';
 			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
 		}
-		if ($mysoc->localtax2_assuj=="1") //Localtax2 IRPF
+		if ($object->thirdparty->localtax2_assuj=="1") //Localtax2 IRPF
+		{
+			print '<tr><td>'.$langs->transcountry("AmountLT2",$mysoc->country_code).'</td>';
+			print '<td align="right">'.price($object->total_localtax2).'</td>';
+			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
+		}
+	}
+	else
+	{
+		if ($mysoc->localtax1_assuj=="1") //Localtax1
+		{
+			print '<tr><td>'.$langs->transcountry("AmountLT1",$mysoc->country_code).'</td>';
+			print '<td align="right">'.price($object->total_localtax1).'</td>';
+			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
+		}
+		if ($mysoc->localtax2_assuj=="1") //Localtax2
 		{
 			print '<tr><td>'.$langs->transcountry("AmountLT2",$mysoc->country_code).'</td>';
 			print '<td align="right">'.price($object->total_localtax2).'</td>';
@@ -1762,7 +1784,7 @@ if (! empty($object->id))
 	{
 		$ref = dol_sanitizeFileName($object->ref);
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-		$fileparams = dol_most_recent_file($conf->fournisseur->commande->dir_output . '/' . $ref);
+		$fileparams = dol_most_recent_file($conf->fournisseur->commande->dir_output . '/' . $ref, preg_quote($object->ref,'/'));
 		$file=$fileparams['fullname'];
 
 		// Build document if it not exists
@@ -1785,7 +1807,7 @@ if (! empty($object->id))
 				dol_print_error($db,$result);
 				exit;
 			}
-			$fileparams = dol_most_recent_file($conf->fournisseur->commande->dir_output . '/' . $ref);
+			$fileparams = dol_most_recent_file($conf->fournisseur->commande->dir_output . '/' . $ref, preg_quote($object->ref,'/'));
 			$file=$fileparams['fullname'];
 		}
 

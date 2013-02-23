@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/ws.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 
 dol_syslog("Call Dolibarr webservices interfaces");
@@ -82,14 +83,8 @@ $server->wsdl->addComplexType(
     )
 );
 
-// Define other specific objects
-$server->wsdl->addComplexType(
-    'thirdparty',
-    'complexType',
-    'struct',
-    'all',
-    '',
-    array(
+
+$thirdparty_fields= array(
     	'id' => array('name'=>'id','type'=>'xsd:string'),
         'ref' => array('name'=>'name','type'=>'xsd:string'),
         'ref_ext' => array('name'=>'ref_ext','type'=>'xsd:string'),
@@ -123,8 +118,35 @@ $server->wsdl->addComplexType(
     	'profid6' => array('name'=>'profid6','type'=>'xsd:string'),
         'capital' => array('name'=>'capital','type'=>'xsd:string'),
     	'vat_used' => array('name'=>'vat_used','type'=>'xsd:string'),
-    	'vat_number' => array('name'=>'vat_number','type'=>'xsd:string')
-    )
+    	'vat_number' => array('name'=>'vat_number','type'=>'xsd:string'));
+
+//Retreive all extrafield for thirdsparty
+// fetch optionals attributes and labels
+$extrafields=new ExtraFields($db);
+$extralabels=$extrafields->fetch_name_optionals_label('company',true);
+if (count($extrafields)>0) {
+	$extrafield_array = array();
+}
+foreach($extrafields->attribute_label as $key=>$label)
+{
+	//$value=$object->array_options["options_".$key];
+	$type =$extrafields->attribute_type[$key];
+	if ($type=='date' || $type=='datetime') {$type='xsd:dateTime';}
+	else {$type='xsd:string';}
+
+	$extrafield_array['options_'.$key]=array('name'=>'options_'.$key,'type'=>$type);
+}
+
+$thirdparty_fields=array_merge($thirdparty_fields,$extrafield_array);
+
+// Define other specific objects
+$server->wsdl->addComplexType(
+    'thirdparty',
+    'complexType',
+    'struct',
+    'all',
+    '',
+	$thirdparty_fields
 );
 
 // Define other specific objects
@@ -252,10 +274,8 @@ function getThirdParty($authentication,$id='',$ref='',$ref_ext='')
 			$result=$thirdparty->fetch($id,$ref,$ref_ext);
 			if ($result > 0)
 			{
-			    // Create
-			    $objectresp = array(
-			    	'result'=>array('result_code'=>'OK', 'result_label'=>''),
-			        'thirdparty'=>array(
+				
+				$thirdparty_result_fields=array(
 				    	'id' => $thirdparty->id,
 			   			'ref' => $thirdparty->name,
 			   			'ref_ext' => $thirdparty->ref_ext,
@@ -289,8 +309,24 @@ function getThirdParty($authentication,$id='',$ref='',$ref_ext='')
 			            'capital' => $thirdparty->capital,
 			   			'barcode' => $thirdparty->barcode,
 			            'vat_used' => $thirdparty->tva_assuj,
-				        'vat_number' => $thirdparty->tva_intra
-			    ));
+				        'vat_number' => $thirdparty->tva_intra);
+				
+				//Retreive all extrafield for thirdsparty
+				// fetch optionals attributes and labels
+				$extrafields=new ExtraFields($db);
+				$extralabels=$extrafields->fetch_name_optionals_label('company',true);
+				//Get extrafield values
+				$thirdparty->fetch_optionals($thirdparty->id,$extralabels);
+				
+				foreach($extrafields->attribute_label as $key=>$label)
+				{				
+					$thirdparty_result_fields=array_merge($thirdparty_result_fields,array('options_'.$key => $thirdparty->array_options['options_'.$key]));
+				}
+
+			    // Create
+			    $objectresp = array(
+			    	'result'=>array('result_code'=>'OK', 'result_label'=>''),
+			        'thirdparty'=>$thirdparty_result_fields);
 			}
 			else
 			{
@@ -388,6 +424,16 @@ function createThirdParty($authentication,$thirdparty)
         $newobject->tva_intra=$thirdparty['vat_number'];
 
         $newobject->canvas=$thirdparty['canvas'];
+        
+        //Retreive all extrafield for thirdsparty
+        // fetch optionals attributes and labels
+        $extrafields=new ExtraFields($db);
+        $extralabels=$extrafields->fetch_name_optionals_label('company',true);
+        foreach($extrafields->attribute_label as $key=>$label)
+        {
+        	$key='options_'.$key;
+        	$newobject->array_options[$key]=$thirdparty[$key];
+        }
 
         $db->begin();
 

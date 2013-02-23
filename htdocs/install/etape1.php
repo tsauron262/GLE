@@ -255,8 +255,10 @@ if (! $error && $db->connected)
 {
     if (! empty($_POST["db_create_database"]))	// If we create database, we force default value
     {
-    	$defaultCharacterSet=getStaticMember(get_class($db),'forcecharset');
-    	$defaultDBSortingCollation=getStaticMember(get_class($db),'forcecollate');
+    	//$defaultCharacterSet=getStaticMember(get_class($db),'forcecharset');
+    	//$defaultDBSortingCollation=getStaticMember(get_class($db),'forcecollate');
+    	$defaultCharacterSet=$db->forcecharset;
+    	$defaultDBSortingCollation=$db->forcecollate;
     }
     else	// If already created, we take current value
     {
@@ -268,6 +270,7 @@ if (! $error && $db->connected)
     print '<input type="hidden" name="dolibarr_main_db_collation" value="'.$defaultDBSortingCollation.'">';
     $db_character_set=$defaultCharacterSet;
     $db_collation=$defaultDBSortingCollation;
+    dolibarr_install_syslog("db_character_set=".$db_character_set." db_collation=".$db_collation);
 }
 
 
@@ -391,27 +394,6 @@ if (! $error && $db->connected && $action == "set")
                 print "</td></tr>";
                 print '<tr><td colspan="2"><br>'.$langs->trans("CorrectProblemAndReloadPage",$_SERVER['PHP_SELF'].'?testget=ok').'</td></tr>';
             }
-//            else
-//            {
-//            	//ODT templates
-//            	require_once(DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php');
-//            	$srcroot=$main_dir.'/install/doctemplates';
-//            	$destroot=$main_data_dir.'/doctemplates';
-//            	$docs=array('thirdparties' => 'thirdparty', 'proposals' => 'proposal', 'orders' => 'order', 'invoices' => 'invoice');
-//            	foreach($docs as $cursordir => $cursorfile)
-//            	{
-//            		$src=$srcroot.'/'.$cursordir.'/template_'.$cursorfile.'.odt';
-//            		$dirodt=$destroot.'/'.$cursordir;
-//            		$dest=$dirodt.'/template_'.$cursorfile.'.odt';
-//
-//            		dol_mkdir($dirodt);
-//            		$result=dol_copy($src,$dest,0,0);
-//            		if ($result < 0)
-//            		{
-//            			print '<tr><td colspan="2"><br>'.$langs->trans('ErrorFailToCopyFile',$src,$dest).'</td></tr>';
-//            		}
-//            	}
-//            }
             else
             {
             	//ODT templates
@@ -580,8 +562,8 @@ if (! $error && $db->connected && $action == "set")
         // If database creation is asked, we create it
         if (! $error && (isset($_POST["db_create_database"]) && $_POST["db_create_database"] == "on"))
         {
-            dolibarr_install_syslog("etape1: Create database : ".$dolibarr_main_db_name, LOG_DEBUG);
-            $newdb=getDoliDBInstance($conf->db->type,$conf->db->host,$userroot,$passroot,'',$conf->db->port);
+        	dolibarr_install_syslog("etape1: Create database : ".$dolibarr_main_db_name." ".$dolibarr_main_db_character_set." ".$dolibarr_main_db_collation." ".$dolibarr_main_db_user, LOG_DEBUG);
+        	$newdb=getDoliDBInstance($conf->db->type,$conf->db->host,$userroot,$passroot,'',$conf->db->port);
             //print 'eee'.$conf->db->type." ".$conf->db->host." ".$userroot." ".$passroot." ".$conf->db->port." ".$newdb->connected." ".$newdb->forcecharset;exit;
 
             if ($newdb->connected)
@@ -895,6 +877,15 @@ function write_conf_file($conffile)
 
         // Write params to overwrites default lib path
         fputs($fp,"\n");
+        if (empty($force_dolibarr_lib_TCPDF_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_TCPDF_PATH=''; }
+        fputs($fp, '$dolibarr_lib_TCPDF_PATH=\''.$force_dolibarr_lib_TCPDF_PATH.'\';');
+        fputs($fp,"\n");
+        if (empty($force_dolibarr_lib_FPDF_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_FPDF_PATH=''; }
+        fputs($fp, '$dolibarr_lib_FPDF_PATH=\''.$force_dolibarr_lib_FPDF_PATH.'\';');
+        fputs($fp,"\n");
+        if (empty($force_dolibarr_lib_FPDI_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_FPDI_PATH=''; }
+        fputs($fp, '$dolibarr_lib_FPDI_PATH=\''.$force_dolibarr_lib_FPDI_PATH.'\';');
+        fputs($fp,"\n");
         if (empty($force_dolibarr_lib_ADODB_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_ADODB_PATH=''; }
         fputs($fp, '$dolibarr_lib_ADODB_PATH=\''.$force_dolibarr_lib_ADODB_PATH.'\';');
         fputs($fp,"\n");
@@ -904,9 +895,6 @@ function write_conf_file($conffile)
         if (empty($force_dolibarr_lib_NUSOAP_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_NUSOAP_PATH=''; }
         fputs($fp, '$dolibarr_lib_NUSOAP_PATH=\''.$force_dolibarr_lib_NUSOAP_PATH.'\';');
         fputs($fp,"\n");
-        if (empty($force_dolibarr_lib_FPDI_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_FPDI_PATH=''; }
-        fputs($fp, '$dolibarr_lib_FPDI_PATH=\''.$force_dolibarr_lib_FPDI_PATH.'\';');
-        fputs($fp,"\n");
         if (empty($force_dolibarr_lib_PHPEXCEL_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_PHPEXCEL_PATH=''; }
         fputs($fp, '$dolibarr_lib_PHPEXCEL_PATH=\''.$force_dolibarr_lib_PHPEXCEL_PATH.'\';');
         fputs($fp,"\n");
@@ -915,9 +903,6 @@ function write_conf_file($conffile)
         fputs($fp,"\n");
         if (empty($force_dolibarr_lib_ODTPHP_PATHTOPCLZIP)) { fputs($fp, '//'); $force_dolibarr_lib_ODTPHP_PATHTOPCLZIP=''; }
         fputs($fp, '$dolibarr_lib_ODTPHP_PATHTOPCLZIP=\''.$force_dolibarr_lib_ODTPHP_PATHTOPCLZIP.'\';');
-        fputs($fp,"\n");
-        if (empty($force_dolibarr_lib_TCPDF_PATH)) { fputs($fp, '//'); $force_dolibarr_lib_TCPDF_PATH=''; }
-        fputs($fp, '$dolibarr_lib_TCPDF_PATH=\''.$force_dolibarr_lib_TCPDF_PATH.'\';');
         fputs($fp,"\n");
         if (empty($force_dolibarr_js_CKEDITOR)) { fputs($fp, '//'); $force_dolibarr_js_CKEDITOR=''; }
         fputs($fp, '$dolibarr_js_CKEDITOR=\''.$force_dolibarr_js_CKEDITOR.'\';');

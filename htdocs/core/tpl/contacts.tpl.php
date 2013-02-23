@@ -17,10 +17,10 @@
  */
 
 if (! class_exists('Contact')) {
-	require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+	require DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 }
 if (! class_exists('FormCompany')) {
-	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
+	require DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 }
 
 $module = $object->element;

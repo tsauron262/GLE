@@ -30,6 +30,7 @@ if (! defined('DOL_INC_FOR_VERSION_ERROR')) define('DOL_INC_FOR_VERSION_ERROR','
 require_once '../filefunc.inc.php';
 
 
+
 // Define DOL_DOCUMENT_ROOT and ADODB_PATH used for install/upgrade process
 if (! defined('DOL_DOCUMENT_ROOT'))	    define('DOL_DOCUMENT_ROOT', '..');
 if (! defined('ADODB_PATH'))
@@ -47,10 +48,10 @@ require_once ADODB_PATH.'adodb-time.inc.php';
 
 // Avoid warnings with strict mode E_STRICT
 $conf = new stdClass(); // instantiate $conf explicitely
-$conf->global	= (object) array();
-$conf->file		= (object) array();
-$conf->db		= (object) array();
-$conf->syslog	= (object) array();
+$conf->global	= new stdClass();
+$conf->file		= new stdClass();
+$conf->db		= new stdClass();
+$conf->syslog	= new stdClass();
 
 // Force $_REQUEST["logtohtml"]
 $_REQUEST["logtohtml"]=1;
@@ -199,17 +200,36 @@ if (constant('DOL_DATA_ROOT') && file_exists($lockfile))
 // Force usage of log file for install and upgrades
 $conf->syslog->enabled=1;
 $conf->global->SYSLOG_LEVEL=constant('LOG_DEBUG');
-if (! defined('SYSLOG_FILE_ON')) define('SYSLOG_FILE_ON',1);
+if (! defined('SYSLOG_HANDLERS')) define('SYSLOG_HANDLERS','["mod_syslog_file"]');
 if (! defined('SYSLOG_FILE'))	// To avoid warning on systems with constant already defined
 {
-    if (@is_writable('/tmp')) define('SYSLOG_FILE','/tmp/dolibarr_install.log');
-    else if (! empty($_ENV["TMP"])  && @is_writable($_ENV["TMP"]))  define('SYSLOG_FILE',$_ENV["TMP"].'/dolibarr_install.log');
-    else if (! empty($_ENV["TEMP"]) && @is_writable($_ENV["TEMP"])) define('SYSLOG_FILE',$_ENV["TEMP"].'/dolibarr_install.log');
-    else if (@is_writable('../../../../') && @file_exists('../../../../startdoliwamp.bat')) define('SYSLOG_FILE','../../../../dolibarr_install.log');	// For DoliWamp
-    else if (@is_writable('../../')) define('SYSLOG_FILE','../../dolibarr_install.log');				// For others
-    //print 'SYSLOG_FILE='.SYSLOG_FILE;exit;
+	if (@is_writable('/tmp')) define('SYSLOG_FILE','/tmp/dolibarr_install.log');
+	else if (! empty($_ENV["TMP"])  && @is_writable($_ENV["TMP"]))  define('SYSLOG_FILE',$_ENV["TMP"].'/dolibarr_install.log');
+	else if (! empty($_ENV["TEMP"]) && @is_writable($_ENV["TEMP"])) define('SYSLOG_FILE',$_ENV["TEMP"].'/dolibarr_install.log');
+	else if (@is_writable('../../../../') && @file_exists('../../../../startdoliwamp.bat')) define('SYSLOG_FILE','../../../../dolibarr_install.log');	// For DoliWamp
+	else if (@is_writable('../../')) define('SYSLOG_FILE','../../dolibarr_install.log');				// For others
+	//print 'SYSLOG_FILE='.SYSLOG_FILE;exit;
 }
 if (! defined('SYSLOG_FILE_NO_ERROR')) define('SYSLOG_FILE_NO_ERROR',1);
+// We init log handler for install
+$handlers = array('mod_syslog_file');
+foreach ($handlers as $handler)
+{
+	$file = DOL_DOCUMENT_ROOT.'/core/modules/syslog/'.$handler.'.php';
+	if (!file_exists($file))
+	{
+		throw new Exception('Missing log handler file '.$handler.'.php');
+	}
+
+	require_once $file;
+	$loghandlerinstance = new $handler();
+	if (!$loghandlerinstance instanceof LogHandlerInterface)
+	{
+		throw new Exception('Log handler does not extend LogHandlerInterface');
+	}
+
+	if (empty($conf->loghandlers[$handler])) $conf->loghandlers[$handler]=$loghandlerinstance;
+}
 
 // Removed magic_quotes
 if (function_exists('get_magic_quotes_gpc'))	// magic_quotes_* removed in PHP 5.4
@@ -283,7 +303,7 @@ function conf($dolibarr_main_document_root)
     // Force usage of log file for install and upgrades
     $conf->syslog->enabled=1;
     $conf->global->SYSLOG_LEVEL=constant('LOG_DEBUG');
-    if (! defined('SYSLOG_FILE_ON')) define('SYSLOG_FILE_ON',1);
+    if (! defined('SYSLOG_HANDLERS')) define('SYSLOG_HANDLERS','["mod_syslog_file"]');
     if (! defined('SYSLOG_FILE'))	// To avoid warning on systems with constant already defined
     {
         if (@is_writable('/tmp')) define('SYSLOG_FILE','/tmp/dolibarr_install.log');
@@ -294,7 +314,26 @@ function conf($dolibarr_main_document_root)
         //print 'SYSLOG_FILE='.SYSLOG_FILE;exit;
     }
     if (! defined('SYSLOG_FILE_NO_ERROR')) define('SYSLOG_FILE_NO_ERROR',1);
-
+    // We init log handler for install
+    $handlers = array('mod_syslog_file');
+    foreach ($handlers as $handler)
+    {
+    	$file = DOL_DOCUMENT_ROOT.'/core/modules/syslog/'.$handler.'.php';
+    	if (!file_exists($file))
+    	{
+    		throw new Exception('Missing log handler file '.$handler.'.php');
+    	}
+    
+    	require_once $file;
+    	$loghandlerinstance = new $handler();
+    	if (!$loghandlerinstance instanceof LogHandlerInterface)
+    	{
+    		throw new Exception('Log handler does not extend LogHandlerInterface');
+    	}
+    
+    	if (empty($conf->loghandlers[$handler])) $conf->loghandlers[$handler]=$loghandlerinstance;
+    }
+    
     return 1;
 }
 
@@ -316,6 +355,8 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
     $langs->load("main");
     $langs->load("admin");
 
+    $jquerytheme='smoothness';
+
     if ($forcejqueryurl)
     {
         $jQueryCustomPath = $forcejqueryurl;
@@ -326,8 +367,6 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
         $jQueryCustomPath = (defined('JS_JQUERY') && constant('JS_JQUERY')) ? JS_JQUERY : false;
         $jQueryUiCustomPath = (defined('JS_JQUERY_UI') && constant('JS_JQUERY_UI')) ? JS_JQUERY_UI : false;
     }
-
-    $jquerytheme='smoothness';
 
     // We force the content charset
     header("Content-type: text/html; charset=".$conf->file->character_set_client);
@@ -354,7 +393,7 @@ function pHeader($subtitle,$next,$action='set',$param='',$forcejqueryurl='')
     print '<body>'."\n";
 
     print '<div style="text-align:center">';
-    print '<img src="../theme/gle_logo.png" alt="Dolibarr logo"><br>';
+    print '<img src="../theme/dolibarr_logo.png" alt="Dolibarr logo"><br>';
     print DOL_VERSION;
     print '</div><br><br>';
 

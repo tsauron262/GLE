@@ -166,7 +166,7 @@ $daylight=(is_numeric($c) && is_numeric($b))?round($c-$b):'unknown';
 $val=($a>=0?'+':'').$a;
 $val.=' ('.($a==='unknown'?'unknown':($a>=0?'+':'').($a*3600)).')';
 $val.=' &nbsp; &nbsp; &nbsp; '.getServerTimeZoneString();
-$val.=' &nbsp; &nbsp; &nbsp; '.$langs->trans("DaylingSavingTime").': '.($daylight==='unknown'?'unknown':yn($daylight));
+$val.=' &nbsp; &nbsp; &nbsp; '.$langs->trans("DaylingSavingTime").': '.($daylight==='unknown'?'unknown':($a==$c?yn($daylight):yn(0).($daylight?'  &nbsp; &nbsp; ('.$langs->trans('YesInSummer').')':'')));
 print $form->textwithtooltip($val,$txt,2,1,img_info(''));
 print '</td></tr>'."\n";	// value defined in http://fr3.php.net/manual/en/timezones.europe.php
 $var=!$var;
@@ -245,6 +245,7 @@ $configfileparameters=array(
 		'separator' => '',
 		'?dolibarr_lib_ADODB_PATH' => 'dolibarr_lib_ADODB_PATH',
 		'?dolibarr_lib_TCPDF_PATH' => 'dolibarr_lib_TCPDF_PATH',
+		'?dolibarr_lib_FPDF_PATH' => 'dolibarr_lib_FPDF_PATH',
 		'?dolibarr_lib_FPDI_PATH' => 'dolibarr_lib_FPDI_PATH',
 		'?dolibarr_lib_NUSOAP_PATH' => 'dolibarr_lib_NUSOAP_PATH',
 		'?dolibarr_lib_PHPEXCEL_PATH' => 'dolibarr_lib_PHPEXCEL_PATH',
@@ -259,7 +260,8 @@ $configfileparameters=array(
 		'?dolibarr_font_DOL_DEFAULT_TTF_BOLD' => 'dolibarr_font_DOL_DEFAULT_TTF_BOLD',
 		'separator' => '',
 		'?dolibarr_mailing_limit_sendbyweb' => 'Limit nb of email sent by page',
-		'?dolibarr_strict_mode' => 'Strict mode is on/off'
+		'?dolibarr_strict_mode' => 'Strict mode is on/off',
+		'?dolibarr_pdf_force_fpdf' => 'Force fpdf usage to generate PDF'
 );
 
 $var=true;

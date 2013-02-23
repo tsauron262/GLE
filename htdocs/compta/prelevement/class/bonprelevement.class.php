@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2004-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2010-2012 Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2010-2013 Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2010-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -450,7 +450,7 @@ class BonPrelevement extends CommonObject
                         }
                         else
                         {
-                            $result=$paiement->addPaymentToBank($user,'payment','(WithdrawalPayment)',$bankaccount);
+                            $result=$paiement->addPaymentToBank($user,'payment','(WithdrawalPayment)',$bankaccount,'','');
                             if ($result < 0)
                             {
                                 dol_syslog(get_class($this)."::set_credite AddPaymentToBank Error");
@@ -1224,15 +1224,15 @@ class BonPrelevement extends CommonObject
                 $esaeb19->configuraPresentador($this->numero_national_emetteur,$conf->global->ESAEB_SUFIX_PRESENTADOR,$this->raison_sociale,$this->emetteur_code_banque,$this->emetteur_code_guichet);
                 $idOrdenante = $esaeb19->agregaOrdenante($this->numero_national_emetteur,$conf->global->ESAEB_SUFIX_ORDENANTE,$this->raison_sociale,$this->emetteur_code_banque,$this->emetteur_code_guichet, $this->emetteur_number_key, $this->emetteur_numero_compte);
                 $this->total = 0;
-                $sql = "SELECT pl.rowid, pl.client_nom, pl.code_banque, pl.code_guichet, pl.cle_rib, pl.number, pl.amount,";
-                $sql.= " f.facnumber, pf.fk_facture";
-                $sql.= " FROM";
-                $sql.= " ".MAIN_DB_PREFIX."prelevement_lignes as pl,";
-                $sql.= " ".MAIN_DB_PREFIX."facture as f,";
-                $sql.= " ".MAIN_DB_PREFIX."prelevement_facture as pf";
-                $sql.= " WHERE pl.fk_prelevement_bons = ".$this->id;
-                $sql.= " AND pl.rowid = pf.fk_prelevement_lignes";
-                $sql.= " AND pf.fk_facture = f.rowid";
+                $sql = "SELECT pl.rowid, pl.fk_soc, pl.client_nom, pl.code_banque, pl.code_guichet, pl.cle_rib, pl.number, pl.amount,";
+	        	$sql.= " f.facnumber, pf.fk_facture";
+	        	$sql.= " FROM";
+	        	$sql.= " ".MAIN_DB_PREFIX."prelevement_lignes as pl,";
+	        	$sql.= " ".MAIN_DB_PREFIX."facture as f,";
+	        	$sql.= " ".MAIN_DB_PREFIX."prelevement_facture as pf";
+	        	$sql.= " WHERE pl.fk_prelevement_bons = ".$this->id;
+	        	$sql.= " AND pl.rowid = pf.fk_prelevement_lignes";
+	        	$sql.= " AND pf.fk_facture = f.rowid";
 
                 //Lines
                 $i = 0;
@@ -1241,13 +1241,16 @@ class BonPrelevement extends CommonObject
                 {
                     $num = $this->db->num_rows($resql);
 
+					$client = new Societe($this->db);
+                        
                     while ($i < $num)
                     {
-                        $obj = $this->db->fetch_object($resql);
+                    	$obj = $this->db->fetch_object($resql);
+						$client->fetch($obj->fk_soc);
 
                         $esaeb19->agregaRecibo(
                             $idOrdenante,
-                            "idcliente".$i+1,
+							$client->idprof1,
                             $obj->client_nom,
                             $obj->code_banque,
                             $obj->code_guichet,

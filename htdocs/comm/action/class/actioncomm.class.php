@@ -89,12 +89,12 @@ class ActionComm extends CommonObject
     {
         $this->db = $db;
 
-        $this->author = (object) array();
-        $this->usermod = (object) array();
-        $this->usertodo = (object) array();
-        $this->userdone = (object) array();
-        $this->societe = (object) array();
-        $this->contact = (object) array();
+        $this->author = new stdClass();
+        $this->usermod = new stdClass();
+        $this->usertodo = new stdClass();
+        $this->userdone = new stdClass();
+        $this->societe = new stdClass();
+        $this->contact = new stdClass();
     }
 
     /**
@@ -117,7 +117,7 @@ class ActionComm extends CommonObject
         $this->note=dol_htmlcleanlastbr(trim($this->note));
         if (empty($this->percentage))   $this->percentage = 0;
         if (empty($this->priority))     $this->priority = 0;
-        if (empty($this->fulldayevent)) $this->fuldayevent = 0;
+        if (empty($this->fulldayevent)) $this->fulldayevent = 0;
         if (empty($this->punctual))     $this->punctual = 0;
         if ($this->percentage > 100) $this->percentage = 100;
         if ($this->percentage == 100 && ! $this->dateend) $this->dateend = $this->date;
@@ -209,7 +209,26 @@ class ActionComm extends CommonObject
         {
             $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."actioncomm","id");
 
-            if (! $notrigger)
+            // Actions on extra fields (by external module or standard code)
+            include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+            $hookmanager=new HookManager($this->db);
+            $hookmanager->initHooks(array('actioncommdao'));
+            $parameters=array('actcomm'=>$this->id);
+            $reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+            if (empty($reshook))
+            {
+            	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+            	{
+            		$result=$this->insertExtraFields();
+            		if ($result < 0)
+            		{
+            			$error++;
+            		}
+            	}
+            }
+            else if ($reshook < 0) $error++;
+
+            if (! $error && ! $notrigger)
             {
                 // Appel des triggers
                 include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
@@ -221,8 +240,16 @@ class ActionComm extends CommonObject
                 // Fin appel triggers
             }
 
-            $this->db->commit();
-            return $this->id;
+            if (! $error)
+            {
+            	$this->db->commit();
+            	return $this->id;
+            }
+            else
+           {
+	           	$this->db->rollback();
+	           	return -1;
+            }
         }
         else
         {
@@ -343,7 +370,23 @@ class ActionComm extends CommonObject
         $sql.= " WHERE id=".$this->id;
 
         dol_syslog(get_class($this)."::delete sql=".$sql, LOG_DEBUG);
-        if ($this->db->query($sql))
+        $res=$this->db->query($sql);
+        if ($res < 0) {
+        	$this->error=$this->db->lasterror();
+        	$error++;
+        }
+
+        // Removed extrafields
+        if (! $error) {
+        	$result=$this->deleteExtraFields();
+          	if ($result < 0)
+           	{
+           		$error++;
+           		dol_syslog(get_class($this)."::delete error -3 ".$this->error, LOG_ERR);
+           	}
+        }
+
+        if (!$error)
         {
             if (! $notrigger)
             {
@@ -437,6 +480,26 @@ class ActionComm extends CommonObject
         dol_syslog(get_class($this)."::update sql=".$sql);
         if ($this->db->query($sql))
         {
+
+        	// Actions on extra fields (by external module or standard code)
+        	include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+        	$hookmanager=new HookManager($this->db);
+        	$hookmanager->initHooks(array('actioncommdao'));
+        	$parameters=array('actcomm'=>$this->id);
+        	$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+        	if (empty($reshook))
+        	{
+        		if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+        		{
+        			$result=$this->insertExtraFields();
+        			if ($result < 0)
+        			{
+        				$error++;
+        			}
+        		}
+        	}
+        	else if ($reshook < 0) $error++;
+
             if (! $notrigger)
             {
                 // Appel des triggers
@@ -473,11 +536,12 @@ class ActionComm extends CommonObject
     /**
      *   Load all objects with filters
      *
+     *   @param		DoliDb	$db				Database handler
      *   @param		int		$socid			Filter by thirdparty
      * 	 @param		int		$fk_element		Id of element action is linked to
      *   @param		string	$elementtype	Type of element action is linked to
      *   @param		string	$filter			Other filter
-     *   @return	array					<0 if KO, array with actions
+     *   @return	array or string			Error string if KO, array with actions if OK
      */
     static function getActions($db, $socid=0, $fk_element=0, $elementtype='', $filter='')
     {
@@ -496,7 +560,7 @@ class ActionComm extends CommonObject
         }
         if (! empty($filter)) $sql.= $filter;
 
-        dol_syslog(get_class($this)."::getActions sql=".$sql);
+        dol_syslog(get_class()."::getActions sql=".$sql);
         $resql=$db->query($sql);
         if ($resql)
         {
@@ -516,9 +580,8 @@ class ActionComm extends CommonObject
             return $resarray;
         }
         else
-        {
-            $this->error=$db->lasterror();
-            return -1;
+       {
+            return $db->lasterror();
         }
     }
 
@@ -535,16 +598,17 @@ class ActionComm extends CommonObject
         $now=dol_now();
 
         $this->nbtodo=$this->nbtodolate=0;
+
         $sql = "SELECT a.id, a.datep as dp";
         $sql.= " FROM (".MAIN_DB_PREFIX."actioncomm as a";
-        if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= ")";
+        if (! $user->rights->societe->client->voir && ! $user->societe_id) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON a.fk_soc = sc.fk_soc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON a.fk_soc = s.rowid";
         $sql.= " WHERE a.percent >= 0 AND a.percent < 100";
         $sql.= " AND a.entity = ".$conf->entity;
-        if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND a.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
+        if (! $user->rights->societe->client->voir && ! $user->societe_id) $sql.= " AND (a.fk_soc IS NULL OR sc.fk_user = " .$user->id . ")";
         if ($user->societe_id) $sql.=" AND a.fk_soc = ".$user->societe_id;
-        //print $sql;
+        if (! $user->rights->agenda->allactions->read) $sql.= " AND (a.fk_user_author = ".$user->id . " OR a.fk_user_action = ".$user->id . " OR a.fk_user_done = ".$user->id . ")";
 
         $resql=$this->db->query($sql);
         if ($resql)
@@ -897,8 +961,11 @@ class ActionComm extends CommonObject
                     $event['location']=$obj->location;
                     $event['transparency']='TRANSPARENT';		// OPAQUE (busy) or TRANSPARENT (not busy)
                     $event['category']=$obj->libelle;	// libelle type action
-                    $urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',$dolibarr_main_url_root);
-                    $url=$urlwithouturlroot.DOL_URL_ROOT.'/comm/action/fiche.php?id='.$obj->id;
+					// Define $urlwithroot
+					$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
+					$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;			// This is to use external domain name found into config file
+					//$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
+                    $url=$urlwithroot.'/comm/action/fiche.php?id='.$obj->id;
                     $event['url']=$url;
                     $event['created']=$this->db->jdate($obj->datec);
                     $event['modified']=$this->db->jdate($obj->datem);

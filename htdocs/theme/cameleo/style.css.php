@@ -870,7 +870,8 @@ a.toolbarbutton {
     background: #FFFFFF;*/
 }
 img.toolbarbutton {
-    height: 28px;
+	margin-top: 2px;
+	height: 28px;
 }
 
 
@@ -1029,7 +1030,6 @@ img.toolbarbutton {
 }
 
 .ecm-layout-resizer  { /* all 'resizer-bars' */
-    background:     #EEE;
     border:         1px solid #BBB;
     border-width:   0;
     }
@@ -1236,6 +1236,12 @@ span.tabspan {
     background: #FFe7ec;
 	color: #666;
 }
+
+<?php if (! empty($conf->global->MAIN_BUTTON_HIDE_UNAUTHORIZED)) { ?>
+.butActionRefused {
+	display: none;
+}
+<?php } ?>
 
 <?php if (! empty($conf->global->MAIN_BUTTON_HIDE_UNAUTHORIZED)) { ?>
 .butActionRefused {
@@ -1475,6 +1481,10 @@ tr.box_titre {
   -moz-border-radius-topright:6px;
     border-top-left-radius:6px;
     border-top-right-radius:6px;
+}
+
+tr.box_titre td.boxclose {
+	width: 30px;
 }
 
 tr.box_impair {

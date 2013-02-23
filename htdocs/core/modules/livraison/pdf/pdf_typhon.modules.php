@@ -1,13 +1,13 @@
 <?php
 /* Copyright (C) 2004-2008 Laurent Destailleur   <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2009 Regis Houssin         <regis@dolibarr.fr>
+ * Copyright (C) 2005-2009 Regis Houssin         <regis.houssin@capnetworks.com>
  * Copyright (C) 2007      Franky Van Liedekerke <franky.van.liedekerke@telenet.be>
  * Copyright (C) 2008      Chiptronik
  * Copyright (C) 2011-2012 Philippe Grand        <philippe.grand@atoo-net.com>
 
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,

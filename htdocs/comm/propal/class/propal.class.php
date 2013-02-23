@@ -3,7 +3,7 @@
  * Copyright (C) 2004      Eric Seigne				<eric.seigne@ryxeo.com>
  * Copyright (C) 2004-2011 Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2005      Marc Barilley			<marc@ocebo.com>
- * Copyright (C) 2005-2012 Regis Houssin			<regis@dolibarr.fr>
+ * Copyright (C) 2005-2012 Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2006      Andre Cianfarani			<acianfa@free.fr>
  * Copyright (C) 2008      Raphael Bertrand			<raphael.bertrand@resultic.fr>
  * Copyright (C) 2010-2012 Juanjo Menent			<jmenent@2byte.es>
@@ -12,7 +12,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
+ * the Free Software Foundation; either version 3 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,

@@ -19,6 +19,8 @@
  */
 $maxFileImport = 10000;
 $tempDeb = microtime(true);
+global $tabStat;
+$tabStat = array('c' => 0, 'd' => 0, 'pc' => 0, 'pd' => 0, 'pcd' => 0, 'ef' => 0);
 
 ini_set('max_execution_time', 0);
 $displayHTML = true;
@@ -261,23 +263,23 @@ $webContent .= " <a href='index.php'><span style='float: left;' class='ui-icon u
  */
 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label = 'Famille'"; // AND ( level=2 OR level is null)";
 $sql = requeteWithCache($requete);
-$res = $db->fetch_object($sql);
+$res = fetchWithCache($sql);
 $gammeCatId = $res->rowid;
 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label = 'Gamme'"; // AND ( level=2 OR level is null)";
 $sql = requeteWithCache($requete);
-$res = $db->fetch_object($sql);
+$res = fetchWithCache($sql);
 $familleCatId = $res->rowid;
 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label = 'Collection'"; // AND ( level=2 OR level is null)";
 $sql = requeteWithCache($requete);
-$res = $db->fetch_object($sql);
+$res = fetchWithCache($sql);
 $collectionCatId = $res->rowid;
 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label = 'Nature'"; // AND ( level=2 OR level is null)";
 $sql = requeteWithCache($requete);
-$res = $db->fetch_object($sql);
+$res = fetchWithCache($sql);
 $natureCatId = $res->rowid;
 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "categorie WHERE label LIKE '%lection Bimp'"; // AND ( level=2 OR level is null)";
 $sql = requeteWithCache($requete);
-$res = $db->fetch_object($sql);
+$res = fetchWithCache($sql);
 $selectBIMPCatId = $res->rowid;
 
 //  exit();
@@ -442,7 +444,7 @@ if (is_dir($dir)) {
                         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_secteur WHERE LOWER(libelle) = '" . strtolower($val['CliActivEnu']) . "' ";
                         $sql = requeteWithCache($requete);
                         if ($db->num_rows($sql) > 0) {
-                            $res = $db->fetch_object($sql);
+                            $res = fetchWithCache($sql);
                             $secteurActiv = $res->id;
                         } else {
                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "c_secteur (code,libelle,active) VALUES ('" . SynSanitize($val['CliActivEnu']) . "','" . addslashes($val['CliActivEnu']) . "',1)";
@@ -466,7 +468,7 @@ if (is_dir($dir)) {
                     $codSoc = $val["CliCode"];
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
                     $sql = requeteWithCache($requete);
-                    $res = $db->fetch_object($sql);
+                    $res = fetchWithCache($sql);
                     $socid = "";
                     $assujTVA = 0;
                     $typeEnt = 0;
@@ -503,7 +505,9 @@ if (is_dir($dir)) {
                         $sqlUpt = array();
                         if ($res->nom != $nomSoc)
                             $sqlUpt[] = " nom = '" . $nomSoc . "'";
-                        if ($res->siret != $val['CliSIRET'])
+                        if ($res->siret == 'NULL')
+                            $res->siret = '';
+                        if ($res->siret . "x" != $val['CliSIRET'] . "x")
                             $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
                         if ($res->address != $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'])
                             $sqlUpt[] = " address = '" . (strlen($val['CliFAdrRue1'] . " " . $val['CliFAdrRue2']) > 2 ? $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'] : "NULL") . "'";
@@ -634,11 +638,11 @@ if (is_dir($dir)) {
                     }
 
 
-                    if ($internalUserId > 0)
-                        if (is_object($tmpSoc))
-                            $tmpSoc->add_commercial($user, $internalUserId);
-                        else
-                            echo "Erreur pas de societe";
+//                    if ($internalUserId > 0)
+//                        if (is_object($tmpSoc))
+//                            $tmpSoc->add_commercial($user, $internalUserId);
+//                        else
+//                            echo "Erreur pas de societe";
 
                     /*
                       +--------------------------------------------------------------------------------------------------------------+
@@ -659,11 +663,16 @@ if (is_dir($dir)) {
 
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
                     $sql = requeteWithCache($requete);
-                    $res = $db->fetch_object($sql);
+                    $res = fetchWithCache($sql);
                     $socContact = false;
                     if ($db->num_rows($sql) > 0) {
                         $sqlUpt = array();
                         $socContact = $res->rowid;
+                        if ($socContact < 1) {
+                            print_r($res);
+                            echo("ici97" . $socContact . $requete);
+                            die;
+                        }
                         if ($res->phone != $val['PcvMocTel'])
                             $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
                         if ($res->phone_mobile != $val['PcvMocPort'])
@@ -716,7 +725,7 @@ if (is_dir($dir)) {
 //                          FROM ".MAIN_DB_PREFIX."societe_adresse_livraison
 //                         WHERE import_key = '".$val['PcvLAdpID']."'";
 //            $sql = requeteWithCache($requete);
-//            $res = $db->fetch_object($sql);
+//            $res = fetchWithCache($sql);
 //            if ($db->num_rows($sql) > 0)
 //            {
 //                $livAdd=$res->rowid;
@@ -779,9 +788,9 @@ if (is_dir($dir)) {
 
                         $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Produits</th>";
                         $mailContent .= "<tr><th  style='color:#fff; background-color: #0073EA;'>Produits</th>" . "\n";
-                        $requete = "SELECT p.*, 0dureeSav as durSav FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
+                        $requete = "SELECT p.*, 2dureeSav as durSav, 2prixAchatHt as prixAchat FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
                         $sql = requeteWithCache($requete);
-                        $res = $db->fetch_object($sql);
+                        $res = fetchWithCache($sql);
                         $sqlUpt = array();
                         $sqlUpt2 = array();
                         if ($db->num_rows($sql) > 0) {
@@ -792,10 +801,10 @@ if (is_dir($dir)) {
                                 $sqlUpt[] = " label = '" . $val['ArtLib'] . "'";
                             if ($res->price != $val['ArtPrixBase'])
                                 $sqlUpt[] = " price = '" . $val['ArtPrixBase'] . "'";
-//                if ($res->PrixAchatHT != $val['PlvPA'])
-//                    $sqlUpt[] = " PrixAchatHT = '".$val['PlvPA']."'";
+                            if ($res->prixAchat != $val['PlvPA'])
+                                $sqlUpt2[] = " 2prixAchatHt = '" . $val['PlvPA'] . "'";
                             if ($res->durSav != $val['ArtDureeGar'])
-                                $sqlUpt2[] = " 0dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
+                                $sqlUpt2[] = " 2dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
                             if ($res->tva_tx != $val['TaxTaux'])
                                 $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
 
@@ -839,8 +848,8 @@ if (is_dir($dir)) {
                               |                                                                                                              |
                               +--------------------------------------------------------------------------------------------------------------+
                              */
-                            updateCategorie($val['PlvCode'], $prodId, $val);
-                            updateType($val['PlvCode'], $prodId);
+//                            updateCategorie($val['PlvCode'], $prodId, $val);
+//                            updateType($val['PlvCode'], $prodId);
                         } else {
                             $requete = "INSERT " . MAIN_DB_PREFIX . "product
                                    (datec,
@@ -906,7 +915,7 @@ if (is_dir($dir)) {
                         $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>Commande</th>" . "\n";
                         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE ref = '" . $val['PcvCode'] . "'";
                         $sql = requeteWithCache($requete);
-                        $res = $db->fetch_object($sql);
+                        $res = fetchWithCache($sql);
                         //Creer la commande
                         $comId = false;
 
@@ -1264,6 +1273,8 @@ if (is_dir($dir)) {
                                 $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
                             if ($res->fk_mode_reglement != $modReg)
                                 $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
+                            if ($livAdd == '')
+                                $livAdd = 0;
                             if ($res->fk_adresse_livraison != $livAdd)
                                 $sqlUpt[] = " fk_adresse_livraison = '" . $livAdd . "'";
                             if (count($sqlUpt) > 0) {
@@ -1284,15 +1295,20 @@ if (is_dir($dir)) {
                             }
                         }
                         if ($comId > 0 && $socContact > 0) {
-                            $requete = "DELETE FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
+                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
+                            $requete = "SELECT *" . $finReq;
                             $sql = requeteWithCache($requete);
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                            if ($db->num_rows($sql) < 2) {
+                                $requete = "DELETE" . $finReq;
+                                $sql = requeteWithCache($requete);
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
                                    VALUES (" . $socContact . ",100," . $comId . ",4,now() )";
-                            $sql = requeteWithCache($requete);
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                $sql = requeteWithCache($requete);
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
                                    VALUES (" . $socContact . ",101," . $comId . ",4,now() )";
+                                $sql = requeteWithCache($requete);
+                            }
 //print $requete;
-                            $sql = requeteWithCache($requete);
                         }
 
                         /*
@@ -1317,7 +1333,7 @@ if (is_dir($dir)) {
 //Prix Achat
                             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE import_key = " . $val['PlvID'];
                             $sql1 = requeteWithCache($requete);
-                            $res1 = $db->fetch_object($sql1);
+                            $res1 = fetchWithCache($sql1);
                             if ($db->num_rows($sql1) > 0) {
                                 //Update
                                 $sqlUpt = array();
@@ -1328,15 +1344,19 @@ if (is_dir($dir)) {
                                     $sqlUpt[] = " buy_price_ht = '" . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . "'";
                                 if ($res1->description != $val['PlvLib'])
                                     $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
+                                if ($val['PlvQteUV'] == '')
+                                    $val['PlvQteUV'] = 0;
                                 if ($res1->qty != $val['PlvQteUV'])
                                     $sqlUpt[] = " qty = '" . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvQteUV'] < 0 ? abs($val['PlvQteUV']) : 0))) . "'";
                                 if ($val['PlvQteUV'] < 0) {
                                     $val['PlvPUNet'] = - $val['PlvPUNet'];
                                     $val['PlvQteUV'] = - $val['PlvQteUV'];
                                 }
+                                if ($val['PlvPUNet'] == '')
+                                    $val['PlvPUNet'] = 0;
                                 if ($res1->subprice != $val['PlvPUNet'])
                                     $sqlUpt[] = " subprice = '" . preg_replace('/,/', '.', ($val['PlvPUNet']) > 0 ? $val['PlvPUNet'] : 0) . "'";
-                                if ($res1->subprice * $res->qty != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
+                                if ($res1->total_ht != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
                                     $sqlUpt[] = " total_ht = qty * subprice ";
                                 if ($res1->rang != $val['PlvNumLig'])
                                     $sqlUpt[] = " rang = " . $val['PlvNumLig'];
@@ -1458,23 +1478,27 @@ if (is_dir($dir)) {
                               +--------------------------------------------------------------------------------------------------------------+
                              */
 
-
+                            $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                            $requete = "SELECT *" . $finReq;
+                            $sqlGr = requeteWithCache($requete);
                             if ($val['AffCode'] . "x" == "x") {
-                                //Verifier par rapport à la référence. => supression
-                                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
-                                } else {
-                                    $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                                if ($db->num_rows($sqlGr) > 0) {
+                                    //Verifier par rapport à la référence. => supression
+                                    $requete = "DELETE" . $finReq;
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                                    }
                                 }
                             } else {
                                 //Recupere le groupeId
                                 $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
                                 $sql = requeteWithCache($requete);
-                                $res = $db->fetch_object($sql);
+                                $res = fetchWithCache($sql);
                                 $grpId = $res->id;
                                 if (!$grpId > 0) {
                                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
@@ -1495,19 +1519,22 @@ if (is_dir($dir)) {
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
                                 $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
                                 //efface la ref
-                                $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                                $sql = requeteWithCache($requete);
-                                //ajoute la ref dans le groupe
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
+                                $lnDet = fetchWithCache($sqlGr);
+                                if (!$lnDet || $lnDet->commande_group_refid != $grpId || $lnDet->command_refid != $com->id) {
+                                    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                                    $sql = requeteWithCache($requete);
+                                    //ajoute la ref dans le groupe
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
                                             (commande_group_refid,refCommande,command_refid )
                                      VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
-                                } else {
-                                    $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                                    }
                                 }
                             }
                         }
@@ -1629,7 +1656,7 @@ function updateCategorie($ref, $prodId, $val) {
         $selectBIMPWasFound = false;
         $collecWasFound = false;
         $familleWasFound = false;
-        while ($res = $db->fetch_object($sql)) {
+        while ($res = fetchWithCache($sql)) {
             //
             //  Sélection Bimp
             //
@@ -1802,7 +1829,7 @@ function updateCategorie($ref, $prodId, $val) {
             $remCatGlob = array();
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_import_product_cat ORDER BY rang";
             $sql = requeteWithCache($requete);
-            while ($res = $db->fetch_object($sql)) {
+            while ($res = fetchWithCache($sql)) {
                 $remCatGlob[$res->id] = array('pattern' => $res->pattern, 'categorie_refid' => $res->categorie_refid, "rang" => $res->rang);
             }
         }
@@ -1833,7 +1860,7 @@ function getProdType($ref) {
             $remTypeGlob = array();
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_import_product_type ORDER BY rang";
             $sql = requeteWithCache($requete);
-            while ($res = $db->fetch_object($sql)) {
+            while ($res = fetchWithCache($sql)) {
                 $remTypeGlob[$res->rang] = array('pattern' => $res->pattern, 'product_type' => $res->product_type, "rang" => $res->rang);
             }
         }
@@ -1915,7 +1942,10 @@ if ($displayHTML) {
         print "Import partielle trop de fichier. Merci de relancer l'import.";
     print $webContent;
 }
-print "<br/><br/>Temps import : ".(microtime(true) - $tempDeb) ."s.";
+print "<br/><br/>Temps import : " . (microtime(true) - $tempDeb) . "s.";
+print "<br/><br/>Req direct : " . $tabStat['d'] . ". Parcours " . $tabStat['pd'];
+print "<br/><br/>Req cache : " . $tabStat['c'] . ". Parcours " . $tabStat['pc'] . ". Parcours direct pour cache " . $tabStat['pcd'];
+print "<br/><br/>Cache suppr : " . $tabStat['ef'];
 
 /*
   +--------------------------------------------------------------------------------------------------------------+
@@ -1975,13 +2005,12 @@ function processPays($codePays) {
         }
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_pays WHERE code = '" . $codePays . "'";
         $sql = requeteWithCache($requete);
-        $res = $db->fetch_object($sql);
+        $res = fetchWithCache($sql);
         return ($res->rowid);
     } else {
         return 1; //Code pays France
     }
 }
-
 
 function processUser($import_key) {
 //    return 59;
@@ -1989,7 +2018,7 @@ function processUser($import_key) {
     if (!$remUserArray[$import_key]) {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
         $sql = requeteWithCache($requete);
-        $res = $db->fetch_object($sql);
+        $res = fetchWithCache($sql);
         $remUserArray[$import_key] = $res->rowid;
         return($res->rowid);
     } else {
@@ -1997,39 +2026,99 @@ function processUser($import_key) {
     }
 }
 
-$tabCacheReq = array();
-
-function fetchWithCache($sql) {
-    
+function fetchWithCache($result) {
+    global $db, $tabRequete, $tabStat;
+    $resultStr = get_resource_id($result);
+    if (isset($tabRequete[$resultStr]['result'])) {
+        $tabStat['pc']++;
+        $tabRequete[$resultStr]['index'] = $tabRequete[$resultStr]['index'] + 1;
+        $index = $tabRequete[$resultStr]['index'];
+        if (isset($tabRequete[$resultStr]['result'][$index]))
+            return $tabRequete[$resultStr]['result'][$index];
+        else
+            return false;
+    }
+    else {
+        $tabStat['pd']++;
+        return $db->fetch_object($result);
+    }
 }
 
+/*
+ * Tab requete = array('requete'=>list des req avec tab et afface
+ *                      ''
+ */
+
 function requeteWithCache($requete) {
-    global $db;
-    $tabRequete = explode(" ", $requete);
-    $tab = 'nc';
-    foreach ($tabRequete as $morcReqeute)
-        if (stripos("llx_", $morcReqeute) !== false) {
-            $tab = $morcReqeute;
-            break;
+    global $db, $tabRequete, $tabStat;
+    $noCache = false;
+    if ($noCache) {
+        $tabStat['d']++;
+        return $db->query($requete);
+    }
+    if (isset($tabRequete[$requete])) {
+        $tab = $tabRequete[$requete]['tab'];
+        $effaceResult = $tabRequete[$requete]['efface'];
+    } else {
+        $tabRequeteM = explode(" ", $requete);
+        $tab = 'nc';
+        $effaceResult = false;
+        foreach ($tabRequeteM as $morcReqeute) {
+            if (stripos($morcReqeute, "llx") !== false) {
+                $tab = $morcReqeute;
+                break;
+            }
         }
-    if ($tab != 'nc') {
-        if (stripos("INSERT", $requete) !== false ||
-                stripos("UPDATE", $requete) !== false ||
-                stripos("DELETE", $requete) !== false) {
-            die($requete . "-" . $tab);
-            $tabRequete[$tab] = array();
+        if ($tab != 'nc') {
+            $tabRequete[$requete]['tab'] = $tab;
+            if (stripos($requete, "INSERT") !== false ||
+                    stripos($requete, "UPDATE") !== false ||
+                    stripos($requete, "DELETE") !== false) {
+                $effaceResult = $tab;
+                $tab = 'nc';
+                echo($requete);
+            }
+            $tabRequete[$requete]['efface'] = $effaceResult;
+            $tabRequete[$requete]['tab'] = $tab;
         }
     }
-    if (!isset($tabRequete[$tab][$requete]) || $tab == 'nc') {
+    if ($effaceResult && isset($tabRequete[$effaceResult])) {
+        $tabRequete[$effaceResult] = array();
+        $tabStat['ef']++;
+    }
+    if (isset($tabRequete[$tab][$requete])) {
+        $tabStat['c']++;
+        $result = $tabRequete[$tab][$requete];
+        $strResult = get_resource_id($result);
+        $tabRequete[$strResult]['index'] = -1;
+        $result->data_seek(0);
+    } else {
+        $tabStat['d']++;
         $result = $db->query($requete);
-        $tabRequete[$tab][$requete] = array();
-        $i = 0;
-        while ($obj = $db->fetch_object($result)){
-            $tabRequete[$tab][$requete][$i] = $obj;
-            $i++;
+        if (!$result)
+            die("Erreur SQL : " . $requete);
+        if ($tab != 'nc') {
+            $strResult = get_resource_id($result);
+            $tabRequete[$strResult]['result'] = array();
+            $i = 0;
+            while ($obj = $db->fetch_object($result)) {
+                $tabStat['pcd']++;
+//            $tabRequete[$tab][$requete]['result'][$i] = $obj;
+//            $tabRequete[$tab][$requete]['count'] = $i;
+//            $tabRequete[$tab][$requete]['sql'] = $result;
+                $tabRequete[$strResult]['result'][$i] = $obj;
+                $i++;
+            }
+            $tabRequete[$tab][$requete] = $result;
+            $tabRequete[$strResult]['index'] = -1;
+            $result->data_seek(0);
         }
     }
-    return $tabRequete[$tab][$requete];
+    return $result;
+}
+
+function get_resource_id($resource) {
+    return is_object($resource) ? spl_object_hash($resource /* strlen("Resource id #") */) : 'pas de ress';
 }
 
 ?>

@@ -168,6 +168,20 @@ class modSynopsisContrat extends DolibarrModules {
   PRIMARY KEY (`id`),
   KEY `fk_prod` (`fk_prod`),
   KEY `contrat_refid` (`contrat_refid`)
+)",
+                "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_product_serial_cont` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `element_id` int(11) DEFAULT NULL,
+  `serial_number` varchar(100) DEFAULT NULL,
+  `date_creation` datetime DEFAULT NULL,
+  `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `date_fin_SAV` datetime DEFAULT NULL,
+  `fk_user_author` int(11) DEFAULT NULL,
+  `element_type` varchar(10) DEFAULT 'contratGA',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `serial_cont_uniq` (`element_id`,`element_type`),
+  KEY `element_id` (`element_id`),
+  KEY `fk_user_author` (`fk_user_author`)
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
 

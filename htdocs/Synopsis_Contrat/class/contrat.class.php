@@ -95,8 +95,8 @@ class Synopsis_Contrat extends Contrat {
                 $this->lineTkt[$res->rowid] = array(
                     'serial_number' => $res->serial_number,
                     'fk_contrat_prod' => ($res->fk_contrat_prod > 0 ? $res->fk_contrat_prod : false),
-                    'durVal' => $res->durVal,
-                    'durSav' => $res->durSav,
+                    'durVal' => $res->durVal,/*
+                    'durSav' => $res->durSav,*/
                     'qty' => $res->qty,
                     'pu' => $res->pu,
                     'dfinprev' => $res->dfinprev,
@@ -1506,7 +1506,7 @@ class Synopsis_Contrat extends Contrat {
 
 
 
-    public function initDialog($mysoc, $objp) {
+    public function initDialog($mysoc, $objp = null) {
         global $user, $conf;
         $html = "";
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
@@ -1549,11 +1549,11 @@ class Synopsis_Contrat extends Contrat {
         return($html);
     }
 
-    public function displayDialog($type = 'add', $mysoc, $objp = false) {
+    public function displayDialog($type = 'add', $mysoc = null, $objp = null) {
         global $conf, $form;
 
 
-        $html .= '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
+        $html = '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
         $html .= "<form id='" . $type . "Form' method='POST' onsubmit='return(false);'>";
         $html .= "<div id='" . $type . "dialogTab'>";
         $html .= "<ul>";
@@ -1951,7 +1951,7 @@ EOF;
         $html .= '<td class="ui-widget-content" width=175>';
         // multiprix
         $filter = "0";
-        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+        if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
             $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
         else
             $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
@@ -1974,7 +1974,7 @@ EOF;
         $html .= '<th class="ui-state-default ui-widget-header" width=150 colspan=1>Produit contrat' . "\n";
         $html .= '<td class="ui-widget-content" colspan=1 width=175>' . "\n";
         $filter = "2";
-        if ($conf->global->PRODUIT_MULTIPRICES == 1)
+        if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
             $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
         else
             $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
@@ -2193,7 +2193,7 @@ class Synopsis_ContratLigne extends ContratLigne {
                 'telemaintenance' => $objp->GMAO_telemaintenance,
                 'maintenance' => $objp->GMAO_maintenance,
                 'SLA' => $objp->GMAO_sla,
-                'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
+                'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($this->qty > 0 ? $this->qty : 1)),
                 'isSAV' => $objp->GMAO_isSAV,
                 'fk_prod' => $objp->GMAO_fk_prod,
                 'reconductionAuto' => $objp->GMAO_reconductionAuto,

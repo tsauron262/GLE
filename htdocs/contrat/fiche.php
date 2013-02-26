@@ -82,7 +82,8 @@ if ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc') {
 //        contratGA_pdf_create($db, $contrat->id, $_REQUEST['model']);
 //    } else {//if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4)) {
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-        contrat_pdf_create($db, $object->id, $_REQUEST['model']);
+        $model = (isset($_REQUEST['model'])? $_REQUEST['model'] : '');
+        contrat_pdf_create($db, $object->id, $model);
 //    } else {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/contrat/modules_contrat.php");
 //        contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
@@ -678,7 +679,8 @@ llxHeader($header .'<script>
             });</script>',$langs->trans("ContractCard"),"Contrat");
 
     $object->fetch($id);
-print $object->initDialog($societe, $objp);
+    global $mysoc;
+print $object->initDialog($mysoc);
 /*
  * f mod drsi
  */
@@ -1514,8 +1516,7 @@ $filename = sanitize_string($contrat->ref);
 $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
 $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $contrat->id;
 
-$genallowed = ($user->rights->contrat->generate || ($user->rights->GA->contrat->Generate && $contrat->total_ht > 0 && $contrat->cessionnaire_refid > 0 && $contrat->statut > 0) || ($user->rights->GMAO->contrat->generate));
-$delallowed = ($user->rights->contrat->supprimer || $user->rights->GA->contrat->Effacer);
+$genallowed = $user->rights->synopsiscontrat->generate;
 
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 $html = new Form($db);
@@ -1532,7 +1533,7 @@ $formfile = new FormFile($db);
 //} else {
 //    $somethingshown = $formfile->show_documents('contrat', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
 //}
-$somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, true, true, $contrat->modelPdf);
+$somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, $genallowed, $genallowed);//, $contrat->modelPdf);
 
 /*
  * f mod drsi

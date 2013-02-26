@@ -116,7 +116,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
             }
 
             // Definition de $dir et $file
-            if ($contrat->specimen) {
+            if (isset($contrat->specimen) && $contrat->specimen) {
                 $dir = $conf->synopsiscontrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
@@ -491,7 +491,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 }
                 if ($needExtGarPage) {
                     $init = $this->marge_gauche - 1;
-                    getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne);
+                    $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne);
 
                     $nextY = $pdf->getY();
                     foreach ($contrat->lines as $key => $val) {
@@ -499,7 +499,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                             continue;
 
                         if ($nextY > 274) {
-                            getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, true);
+                            $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, true);
                         }
 
                         $nextY = $pdf->getY();

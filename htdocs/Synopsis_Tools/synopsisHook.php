@@ -23,7 +23,7 @@ setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
 include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
 
-global $conf, $langs;
+global $conf, $langs, $user;
 
 $conf->global->MAIN_MAX_DECIMALS_TOT = 5;
 $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
@@ -57,6 +57,7 @@ $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
     @$conf->projet->enabled = true;
     $conf->projet->dir_output = $conf->synopsisprojet->dir_output;
+    @$user->rights->projet->lire = true;
     @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
 }
 if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {

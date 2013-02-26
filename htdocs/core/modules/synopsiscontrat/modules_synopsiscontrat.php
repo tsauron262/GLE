@@ -111,7 +111,7 @@ class ModeleSynopsiscontrat extends CommonDocGenerator
 */
 function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
 {
-    global $langs;
+    global $langs, $conf;
     $langs->load("babel");
     $langs->load("contracts");
 
@@ -125,7 +125,8 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
     // Si model pas encore bon
     if (! $modelisok)
     {
-        if ($conf->global->CONTRAT_ADDON_PDF) $modele = $conf->global->CONTRAT_ADDON_PDF;
+        if (isset($conf->global->SYNOPSIS_CONTRAT_ADDON_PDF))
+            $modele = $conf->global->SYNOPSIS_CONTRAT_ADDON_PDF;
         $file = "pdf_contrat_".$modele.".modules.php";
         if (file_exists($dir.$file)) $modelisok=1;
     }
@@ -162,9 +163,9 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
             return 0;
         }
     } else {
-        if (! $conf->global->CONTRAT_ADDON_PDF)
+        if (!isset($conf->global->SYNOPSIS_CONTRAT_ADDON_PDF))
         {
-            print $langs->trans("Error")." ".$langs->trans("Error_CONTRAT_ADDON_PDF_NotDefined :" .$modele);
+            print $langs->trans("Error")." ".$langs->trans("Error_SYNOPSIS_CONTRAT_ADDON_PDF_NotDefined :" .$modele);
         } else {
             print $langs->trans("Error")." ".$langs->trans("ErrorFileDoesNotExists",$dir.$file);
         }

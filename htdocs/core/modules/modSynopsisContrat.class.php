@@ -56,10 +56,10 @@ class modSynopsisContrat extends DolibarrModules {
         $this->const = array();
         $r = 0;
 
-        $this->const[$r][0] = "CONTRAT_GMAO_ADDON_PDF";
+        $this->const[$r][0] = "SYNOPSIS_CONTRAT_ADDON_PDF";
         $this->const[$r][1] = "chaine";
         $this->const[$r][2] = "BIMP";
-        
+
         $r++;
 
 //        // Boites
@@ -72,6 +72,13 @@ class modSynopsisContrat extends DolibarrModules {
         // Permissions
         $this->rights = array();
         $this->rights_class = 'synopsiscontrat';
+
+        $this->rights[1][0] = 161881;
+        $this->rights[1][1] = 'Generer les PDF contrats';
+        $this->rights[1][2] = 'r';
+        $this->rights[1][3] = 1;
+        $this->rights[1][4] = 'generate';
+
 
         $r = 0;
         $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',
@@ -105,7 +112,7 @@ class modSynopsisContrat extends DolibarrModules {
   `afficheTitre` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;",
-                "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GA` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GA` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `contratdet_refid` int(11) DEFAULT NULL,
   `isTx0` tinyint(1) DEFAULT NULL,
@@ -122,7 +129,7 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `propaldet_refid` (`contratdet_refid`),
   KEY `financement_period_refid` (`financement_period_refid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
-                "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `contratdet_refid` int(11) DEFAULT NULL,
   `tms` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -149,7 +156,7 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `fk_prod` (`fk_prod`),
   KEY `contrat_refid` (`contratdet_refid`)
 )",
-                "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `contrat_refid` int(11) DEFAULT NULL,
   `tms` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
@@ -169,7 +176,7 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `fk_prod` (`fk_prod`),
   KEY `contrat_refid` (`contrat_refid`)
 )",
-                "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_product_serial_cont` (
+            "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_product_serial_cont` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `element_id` int(11) DEFAULT NULL,
   `serial_number` varchar(100) DEFAULT NULL,

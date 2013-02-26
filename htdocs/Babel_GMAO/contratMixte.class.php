@@ -1070,7 +1070,7 @@ EOF;
         return $html;
     }
 
-    public function initDialog($mysoc, $objp) {
+    public function initDialog($mysoc, $objp = NULL) {
         global $user, $conf;
         $html = "";
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
@@ -1113,7 +1113,7 @@ EOF;
         return($html);
     }
 
-    public function displayDialog($type = 'add', $mysoc, $objp = false) {
+    public function displayDialog($type = 'add', $mysoc = NULL, $objp = NULL) {
         global $conf, $form;
 
 

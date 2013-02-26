@@ -43,14 +43,6 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 	var $box_id;
 	var $note;
 
-	var $rowid;
-	var $id;
-	var $position;
-	var $box_order;
-	var $fk_user;
-	var $sourcefile;
-	var $box_id;
-	var $note;
 
 
 	/**

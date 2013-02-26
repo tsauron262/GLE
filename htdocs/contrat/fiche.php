@@ -67,6 +67,57 @@ require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
 $object = new Synopsis_Contrat($db);
 
 
+
+
+
+/*
+ * Deb mod drsi
+ */
+
+$object->fetch($_REQUEST["id"]);
+$contrat = $object;
+if ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc') {
+//    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 6 || $contrat->typeContrat == 5)) {
+//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
+//        contratGA_pdf_create($db, $contrat->id, $_REQUEST['model']);
+//    } else {//if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4)) {
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+        contrat_pdf_create($db, $object->id, $_REQUEST['model']);
+//    } else {
+//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/contrat/modules_contrat.php");
+//        contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
+//    }
+    header('location: fiche.php?id=' . $object->id . "#documentAnchor");
+}// Remove file in doc form
+else if ($action == 'remove_file')
+{
+	if ($object->id > 0)
+	{
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
+		$langs->load("other");
+		$upload_dir = $conf->synopsiscontrat->dir_output;
+		$file = $upload_dir . '/' . GETPOST('file');
+		$ret=dol_delete_file($file,0,0,0,$object);
+		if ($ret) setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
+		else setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
+		$action='';
+	}
+}
+
+
+/*
+ * f mod drsi
+ */
+
+
+
+
+
+
+
+
+
 /*
  * Actions
  */
@@ -628,7 +679,9 @@ llxHeader($header .'<script>
 
     $object->fetch($id);
 print $object->initDialog($societe, $objp);
-
+/*
+ * f mod drsi
+ */
 
 $form = new Form($db);
 
@@ -1448,6 +1501,45 @@ else
         print '</td></tr></table>';
     }
 }
+
+
+
+
+/*
+ * deb mod drsi
+ */
+
+
+$filename = sanitize_string($contrat->ref);
+$filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
+$urlsource = $_SERVER["PHP_SELF"] . "?id=" . $contrat->id;
+
+$genallowed = ($user->rights->contrat->generate || ($user->rights->GA->contrat->Generate && $contrat->total_ht > 0 && $contrat->cessionnaire_refid > 0 && $contrat->statut > 0) || ($user->rights->GMAO->contrat->generate));
+$delallowed = ($user->rights->contrat->supprimer || $user->rights->GA->contrat->Effacer);
+
+require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
+$html = new Form($db);
+$formfile = new FormFile($db);
+//if ($contrat->typeContrat == 6 || $contrat->typeContrat == 5) {
+//    $filedir = $conf->CONTRATGA->dir_output . '/' . sanitize_string($contrat->ref);
+//    $somethingshown = $formfile->show_documents('contratGA', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
+//} else if ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4) {
+//
+//    $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
+//    print "<div style='width: 600px'>";
+//    $somethingshown = $formfile->show_documents('contratGMAO', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
+//    print "</div>";
+//} else {
+//    $somethingshown = $formfile->show_documents('contrat', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
+//}
+$somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, true, true, $contrat->modelPdf);
+
+/*
+ * f mod drsi
+ */
+
+
+
 
 
 llxFooter();

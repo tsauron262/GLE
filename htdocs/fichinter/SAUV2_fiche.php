@@ -65,8 +65,8 @@ if ($conf->projet->enabled) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 }
-if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/includes/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php")) {
-    require_once(DOL_DOCUMENT_ROOT . "/includes/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php");
+if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php")) {
+    require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php");
 }
 
 $langs->load("companies");

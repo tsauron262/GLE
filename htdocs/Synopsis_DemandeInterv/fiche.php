@@ -804,13 +804,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         $dsc = '';
         if (isset($_REQUEST['fk_contratdet'])) {
-            $requete = "SELECT 2visiteSite as nb FROM `" . MAIN_DB_PREFIX . "contratdet` c, " . MAIN_DB_PREFIX . "product_extrafields WHERE fk_object = `fk_product` AND c.`rowid` = " . $_REQUEST['fk_contratdet'];
+            $requete = "SELECT nbVisite as nb, ref FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO`, " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cdet WHERE c.rowid = cdet.fk_contrat AND cdet.rowid = contratdet_refid AND contratdet_refid = " . $_REQUEST['fk_contratdet'];
             $sql = $db->query($requete);
             $tabExiste = getElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet']);
             $nbExiste = count($tabExiste);
             while ($result = $db->fetch_object($sql))
                 if ($result->nb)
-                    $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb;
+                    $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb ." Contrat : ".$result->ref;
             echo '<input type="hidden" name="fk_contratdet" value="' . $_REQUEST['fk_contratdet'] . '"/>';
         }
 

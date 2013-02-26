@@ -25,7 +25,7 @@
 
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . '/lib/contract.lib.php');
-require_once(DOL_DOCUMENT_ROOT . '/lib/functions.lib.php');
+require_once(DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php');
 if ($conf->projet->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/project.class.php");
 if ($conf->propal->enabled)

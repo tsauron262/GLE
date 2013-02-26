@@ -702,7 +702,7 @@ if ($_GET["action"] == 'set')
     $sql_del .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
     $result1=$db->query($sql_del);
 
-    $dir = DOL_DOCUMENT_ROOT."/includes/modules/propaleGA/";
+    $dir = DOL_DOCUMENT_ROOT."/core/modules/propaleGA/";
 
     //preg_match('/^pdf_deplacement/',$file) && preg_match('/.modules.php$/',$file)
     //
@@ -773,7 +773,7 @@ if ($_GET["action"] == 'setmod')
         $sql_del .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
         $result1=$db->query($sql_del);
 
-        $dir = DOL_DOCUMENT_ROOT."/includes/modules/propaleGA/";
+        $dir = DOL_DOCUMENT_ROOT."/core/modules/propaleGA/";
 
         //preg_match('/^pdf_deplacement/',$file) && preg_match('/.modules.php$/',$file)
         //
@@ -808,7 +808,7 @@ if ($_GET["action"] == 'setmod')
         $sql_del .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
         $result1=$db->query($sql_del);
 
-        $dir = DOL_DOCUMENT_ROOT."/includes/modules/contratGA/";
+        $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/";
 
         //preg_match('/^pdf_deplacement/',$file) && preg_match('/.modules.php$/',$file)
         //
@@ -1295,7 +1295,7 @@ clearstatcache();
 
 
 //Propale GA
-$dir = DOL_DOCUMENT_ROOT."/includes/modules/propaleGA/";
+$dir = DOL_DOCUMENT_ROOT."/core/modules/propaleGA/";
 $handle=opendir($dir);
 $html=new Form($db);
 
@@ -1397,7 +1397,7 @@ if ($handle)
         if (substr($file, 0, 14) == 'mod_propaleGA_' && substr($file, strlen($file)-3, 3) == 'php')
         {
             $file = substr($file, 0, strlen($file)-4);
-            require_once(DOL_DOCUMENT_ROOT ."/includes/modules/propaleGA/".$file.".php");
+            require_once(DOL_DOCUMENT_ROOT ."/core/modules/propaleGA/".$file.".php");
 
             $module = new $file;
 
@@ -1490,7 +1490,7 @@ print '<td align="center" width="60">'.$langs->trans("Default")."</td>\n";
 print '<td align="center" width="32" colspan="2">'.$langs->trans("Infos").'</td>';
 print "</tr>\n";
 //Contrat GA
-$dir = DOL_DOCUMENT_ROOT."/includes/modules/contratGA/";
+$dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/";
 $handle=opendir($dir);
 $html=new Form($db);
 
@@ -1591,7 +1591,7 @@ if ($handle)
         if (substr($file, 0, 14) == 'mod_contratGA_' && substr($file, strlen($file)-3, 3) == 'php')
         {
             $file = substr($file, 0, strlen($file)-4);
-            require_once(DOL_DOCUMENT_ROOT ."/includes/modules/contratGA/".$file.".php");
+            require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsiscontrat/".$file.".php");
 
             $module = new $file;
 

@@ -32,22 +32,23 @@ function widget_listPrepaCommandeProb() {
     {
         $sql = "SELECT sum(f.total) as tot_fht, sum(f.total_ttc) as tot_fttc,";
         $sql.= " s.nom, s.rowid as socid,";
-        $sql.= " p.rowid, p.ref, p.facture, p.fk_statut, p.total_ht, p.total_ttc, b.statut_refid, bs.label as Blabel";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s, BIMP_commande_status as b, BIMP_status as bs";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+        $sql.= " p.rowid, p.ref, p.facture, p.fk_statut, p.total_ht, p.total_ttc, bs.id, bs.label as Blabel";
+        if (!$user->rights->societe->client->voir && !$socid) 
+            $sql .= ", sc.fk_soc, sc.fk_user ";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s";
         $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."co_fa AS co_fa ON co_fa.fk_commande = p.rowid";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture AS f ON co_fa.fk_facture = f.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element ON `fk_source` = 'commande' AND `fk_target` = 'statutS' AND fk_source = p.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status as bs ON fk_target = bs.id";
+        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element AS co_fa ON co_fa.sourcetype = 'commande' AND co_fa.targettype = 'facture' AND co_fa.fk_source = p.rowid ";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture AS f ON co_fa.fk_target = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid)
         {
             $sql.= " AND p.fk_soc = ".$socid;
         }
-        $sql .= " AND b.commande_refid = p.rowid ";
-        $sql .= " AND b.statut_refid = bs.id ";
-        $sql.= " AND b.statut_refid IN (2,3,4,5,6,7)";
+        $sql.= " AND bs.id IN (2,3,4,5,6,7)";
         $sql.= " GROUP BY p.rowid";
         $sql .= " ORDER BY p.date_creation DESC LIMIT 50";
 
@@ -96,7 +97,7 @@ function widget_listPrepaCommandeProb() {
                             $table .= $commandestatic->getNomUrl(1,5);
                             $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
+                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
                             $table .=  '<td>'.$res->Blabel.'</td>';
                     }
                     $var=!$var;
@@ -104,7 +105,7 @@ function widget_listPrepaCommandeProb() {
                             <td  nowrap="nowrap">';
                     $table2 .= $commandestatic->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td>'.$res->Blabel.'</td>';
                     $iter++;
                 }

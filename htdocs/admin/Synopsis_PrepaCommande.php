@@ -40,7 +40,7 @@ if ($_POST["action"] == 'form_PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY')
 
 llxHeader('',$langs->trans(utf8_decode("Pr&eacute;paration de commande")));
 
-$dir = "../includes/modules/Affaire/";
+$dir = "../core/modules/Affaire/";
 $html=new Form($db);
 
 

@@ -57,7 +57,7 @@ if ($_GET["action"] == 'setmod')
 
 llxHeader('',$langs->trans("Affaire"));
 
-$dir = "../includes/modules/Affaire/";
+$dir = "../core/modules/Affaire/";
 $html=new Form($db);
 
 
@@ -90,7 +90,7 @@ if ($handle)
         {
             $file = substr($file, 0, strlen($file)-4);
 
-            require_once(DOL_DOCUMENT_ROOT ."/includes/modules/Affaire/".$file.".php");
+            require_once(DOL_DOCUMENT_ROOT ."/core/modules/Affaire/".$file.".php");
 
             $module = new $file;
 

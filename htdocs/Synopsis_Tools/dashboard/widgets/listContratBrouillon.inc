@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
+require_once (DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
 
 // The get widget handler.
 function widget_listContratBrouillon() {
@@ -26,9 +26,9 @@ function widget_listContratBrouillon() {
 
     if ($conf->contrat->enabled && $user->rights->contrat->lire)
     {
-        $staticcontrat= new Contrat($db);
+        $staticcontrat= new Synopsis_Contrat($db);
 
-        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.type, ";
+        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.extraparams as type, ";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql .= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."societe as s";

@@ -17,9 +17,9 @@
   * GLE-1.2
   */
 
-    $id=$_REQUEST['id'];
     require_once('../../main.inc.php');
     require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
+    $id=$_REQUEST['id'];
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."commandedet WHERE fk_commande = ".$id." ORDER BY rang";
     $sql = $db->query($requete);
     $xml = "<commande>";
@@ -31,10 +31,11 @@
             $tmpProd = new Product($db);
             $tmpProd->fetch($res->fk_product);
             $desc = $tmpProd->ref." ".$tmpProd->libelle;
-        } else {
-            $desc = substr($res->description,0,30);
-        }
-        $xml .="<commandeDet id='".$res->rowid."'><![CDATA[".utf8_encode($desc)."]]></commandeDet>";
+//        } else {
+//            $desc = substr($res->description,0,30);
+//        }
+        $xml .="<commandeDet id='".$res->rowid."'><![CDATA[".utf8_encodeRien($desc)."]]></commandeDet>";
+    }
     }
     $xml .= "</commande>";
 

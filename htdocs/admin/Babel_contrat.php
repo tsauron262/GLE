@@ -104,7 +104,7 @@ if ($_GET["action"] == 'setmod')
 
 llxHeader('',$langs->trans("Contrat de services"));
 
-$dir = DOL_DOCUMENT_ROOT."/includes/modules/contrat/";
+$dir = DOL_DOCUMENT_ROOT."/core/modules/contrat/";
 $html=new Form($db);
 
 
@@ -250,7 +250,7 @@ if ($handle)
         if (substr($file, 0, 12) == 'mod_contrat_' && substr($file, strlen($file)-3, 3) == 'php')
         {
             $file = substr($file, 0, strlen($file)-4);
-            require_once(DOL_DOCUMENT_ROOT ."/includes/modules/contrat/".$file.".php");
+            require_once(DOL_DOCUMENT_ROOT ."/core/modules/contrat/".$file.".php");
 
             $module = new $file;
 

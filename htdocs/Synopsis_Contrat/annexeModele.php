@@ -262,7 +262,7 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
 
     foreach ($contrat->list_all_valid_contacts() as $key => $val) {
         foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-            if (in_array($remCode, "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0))
+            if (in_array("Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0, $remCode))
                 continue;
             $remCode[] = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
             if (!$lastType) {
@@ -274,7 +274,7 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
             $lastType = $val['libelle'];
             print "<tr><td>Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
             print "    <td>" . $arr[$val0];
-            print "    <td>" . $val['obj']->$val0;
+            print "    <td>" . $val[$val0];
         }
     }
 

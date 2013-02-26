@@ -457,9 +457,9 @@ if ($id > 0) {
         print '<td colspan="1" class="ui-widget-content">NON';
 
     // SLA
-    if ($ligne->GMAO_Mixte['SLA'] . "x" != "x") {
+    if ($ligne->SLA . "x" != "x") {
         print '<tr><th width="25%" class="ui-widget-header ui-state-default">SLA</th>';
-        print '<td colspan="3" class="ui-widget-content">' . $ligne->GMAO_Mixte['SLA'];
+        print '<td colspan="3" class="ui-widget-content">' . $ligne->SLA;
     }
 
     if ($ligne->GMAO_Mixte['prorata'] == 1) {

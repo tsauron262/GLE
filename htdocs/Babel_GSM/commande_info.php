@@ -26,7 +26,7 @@ if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/p
 if ($conf->facture->enabled) require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
 
 
-require_once(DOL_DOCUMENT_ROOT."/includes/modules/propale/modules_propale.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/order.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/sendings.lib.php");
 
@@ -49,9 +49,9 @@ if ($_REQUEST['action'] == 'builddoc')  // In get or post
 {
     /*
      * Generate order document
-     * define into /includes/modules/commande/modules_commande.php
+     * define into /core/modules/commande/modules_commande.php
      */
-    require_once(DOL_DOCUMENT_ROOT."/includes/modules/commande/modules_commande.php");
+    require_once(DOL_DOCUMENT_ROOT."/core/modules/commande/modules_commande.php");
 
     // Sauvegarde le dernier modele choisi pour generer un document
     $commande = new Commande($db, 0, $_REQUEST['commande_id']);
@@ -530,7 +530,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/propale/modules_propale.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/propale/modules_propale.php');
                     $model=new ModelePDFPropales();
                     $modellist=$model->liste_modeles($db);
                 }
@@ -540,7 +540,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/commande/modules_commande.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/commande/modules_commande.php');
                     $model=new ModelePDFCommandes();
                     $modellist=$model->liste_modeles($db);
                 }
@@ -570,7 +570,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/fichinter/modules_fichinter.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/fichinter/modules_fichinter.php');
                     $model=new ModelePDFFicheinter();
                     $modellist=$model->liste_modeles($db);
                 }
@@ -580,7 +580,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/facture/modules_facture.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
                     $model=new ModelePDFFactures();
                     $modellist=$model->liste_modeles($db);
                 }
@@ -590,7 +590,7 @@ function show_documents($db,$modulepart,$filename,$filedir,$urlsource,$genallowe
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/includes/modules/export/modules_export.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/export/modules_export.php');
                     $model=new ModeleExports();
                     $modellist=$model->liste_modeles($db);
                 }

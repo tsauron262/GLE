@@ -275,7 +275,7 @@ switch ($action) {
                 $info_bits = 0;
                 // Insert line
                 $result = $contrat->addline(
-                        htmlentities(utf8_decode($description)), $pu_ht, $qte, $tva_tx, ($prodid ? $prodid : ""), ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $price_base_type, $pu_ttc, $info_bits, $commandeDetId
+                        htmlentities(utf8_encodeRien($description)), $pu_ht, $qte, $tva_tx, ($prodid ? $prodid : ""), ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $price_base_type, $pu_ttc, $info_bits, $commandeDetId
                 );
                 if ($result > 0) {
                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
@@ -411,7 +411,7 @@ switch ($action) {
             //Prix
             $pu_ht = ($_REQUEST["modPuHT"] > 0 ? $_REQUEST['modPuHT'] : 0);
             //SLA
-            $sla = utf8_decode(addslashes(($_REQUEST["modSLA"] . "x" == "x" ? "" : $_REQUEST['modSLA'])));
+            $sla = utf8_encodeRien(addslashes(($_REQUEST["modSLA"] . "x" == "x" ? "" : $_REQUEST['modSLA'])));
             //Reconductionauto
             $recondAuto = ($_REQUEST["modrecondAuto"] == "on" ? 1 : 0);
             //Commande
@@ -495,7 +495,7 @@ switch ($action) {
 
 //var_dump($date_start);
             //Clause
-            $clause = utf8_decode(addslashes($_REQUEST['modClause']));
+            $clause = utf8_encodeRien(addslashes($_REQUEST['modClause']));
             //Faire requetes
             //1 ajoute dans contratDet
             //2 ajoute dans ".MAIN_DB_PREFIX."cont_co
@@ -548,10 +548,12 @@ switch ($action) {
 //         $date_start='', $date_end='', $tvatx,
 //         $date_debut_reel='', $date_fin_reel='')
                 $result = $contrat->updateline(
-                        $_REQUEST['lineid'], utf8_decode($description), $pu_ht, $qte, ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $tva_tx); /* ,'','',
+                        $_REQUEST['lineid'], utf8_encodeRien($description), $pu_ht, $qte, ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $tva_tx); /* ,'','',
                   ($prodid>0?$prodid:0),
                   $commandeDetId
                   ); */
+                delElementElement("commandedet", "contratdet", NULL, $_REQUEST['lineid']);
+                setElementElement("commandedet", "contratdet", $commandeDetId, $_REQUEST['lineid']);
                 
                 if ($result > 0) {
                     $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
@@ -798,8 +800,8 @@ switch ($action) {
                            ee.fk_source fk_commande_ligne,
                            c.total_tva,
                            g.type,
-                           unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(pe.0dureeSav,0) MONTH)) as GMAO_dfinprev,
-                           unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(pe.0dureeSav,0) MONTH)) as GMAO_dfin,
+                           unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(pe.2dureeSav,0) MONTH)) as GMAO_dfinprev,
+                           unix_timestamp(date_add(date_add(g.DateDeb, INTERVAL g.durValid month), INTERVAL ifnull(pe.2dureeSav,0) MONTH)) as GMAO_dfin,
                            unix_timestamp(g.DateDeb) as GMAO_ddeb,
                            unix_timestamp(g.DateDeb) as GMAO_ddebprev,
                            g.durValid as GMAO_durVal,

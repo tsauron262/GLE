@@ -81,13 +81,13 @@ class contratMixte extends Synopsis_Contrat {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                                <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
                 $html .= "</tr>";
             } else {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                                <td align=left class='ui-widget-content' colspan=4>-<br/><br/>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
                 $html .= "</tr>";
             }
         } else if ($this->lineTkt[$val->id]['fk_contrat_prod'] > 0) {
@@ -153,13 +153,13 @@ class contratMixte extends Synopsis_Contrat {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                                <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
                 $html .= "</tr>";
             } else {
                 $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                                <td align=left class='ui-widget-content' colspan=4>-<br/><br/>
                                <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                               <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
                 $html .= "</tr>";
             }
         }
@@ -242,13 +242,13 @@ class contratMixte extends Synopsis_Contrat {
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                            <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
             $html .= "</tr>";
         } else {
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                            <td align=left class='ui-widget-content' colspan=4>-<br/><br/>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
             $html .= "</tr>";
         }
 
@@ -404,13 +404,13 @@ EOF;
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                            <td align=left class='ui-widget-content' colspan=4>" . $val->product->getNomUrl(1) . "<font style='font-weight: normal;'> " . $val->product->libelle . "<br/>" . $val->description . "</font>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
             $html .= "</tr>";
         } else {
             $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Produit concern&eacute;
                            <td align=left class='ui-widget-content' colspan=4>-<br/><br/>
                            <th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie
-                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->GMAO_Mixte['serial_number'];
+                           <td  style='font-weight: 0!important;' class='ui-widget-content' colspan=2>" . $val->serial_number;
             $html .= "</tr>";
         }
         $html .= "</table>";
@@ -488,7 +488,7 @@ EOF;
       }
 
       $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie";
-      $html .= " <td style='font-weight: 0!important; height:3em; padding-left: 5px;' class='ui-widget-content' colspan=2>".$val->GMAO_Mixte['serial_number']."";
+      $html .= " <td style='font-weight: 0!important; height:3em; padding-left: 5px;' class='ui-widget-content' colspan=2>".$val->serial_number."";
 
       //        require_once('Var_Dump.php');
       //        $val1 = $val;
@@ -548,7 +548,7 @@ EOF;
       }
 
       $html .= " <tr><th style='font-weight:normal!important;' class='ui-widget-header ui-state-default' colspan=1>Num de s&eacute;rie";
-      $html .= " <td style='font-weight: 0!important; height:3em; padding-left: 5px;' class='ui-widget-content' colspan=2>".$val->GMAO_Mixte['serial_number']."";
+      $html .= " <td style='font-weight: 0!important; height:3em; padding-left: 5px;' class='ui-widget-content' colspan=2>".$val->serial_number."";
 
       //        require_once('Var_Dump.php');
       //        $val1 = $val;
@@ -1699,11 +1699,11 @@ EOF;
                 print "<tr style='" . $style . "'><th class='ui-widget-header ui-state-default'>Type";
                 print "    <td class='ui-widget-content'>" . ($val->type == 2 ? 'Ticket' : ($val->type == 3 ? 'Maintenance' : ($val->type == 4 ? 'SAV' : "Libre")));
                 print "    <th class='ui-widget-header ui-state-default'>Produit Contrat";
-                print "    <td class='ui-widget-content'>" . ($val->GMAO_Mixte['contrat_prod'] ? $val->GMAO_Mixte['contrat_prod']->getNomUrl(1) : "-");
+                print "    <td class='ui-widget-content'>" . ($val->prodContrat ? $val->prodContrat->getNomUrl(1) : "-");
                 print "<tr><th class='ui-widget-header ui-state-default'>Produit Concern&eacute;";
                 print "    <td class='ui-widget-content'>" . ($val->product ? $val->product->getNomUrl(1) : "-");
                 print "    <th class='ui-widget-header ui-state-default'>Num. s&eacute;rie";
-                print "    <td class='ui-widget-content'>" . ($val->GMAO_Mixte['serial_number'] . "x" != "x" ? $val->GMAO_Mixte['serial_number'] : "-");
+                print "    <td class='ui-widget-content'>" . ($val->serial_number . "x" != "x" ? $val->serial_number : "-");
                 $iter++;
             }
         }

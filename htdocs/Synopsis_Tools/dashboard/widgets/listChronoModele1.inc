@@ -111,7 +111,7 @@ function widget_listChronoModele1() {
                             <td  nowrap="nowrap">';
                     $table2 .= $chrono->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','societe')." ".dol_trunc($res->nom,18).'</a></td>';
+                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
                     $table2 .=  '<td>'.$res->Blabel.'</td>';
                     $iter++;
                 }

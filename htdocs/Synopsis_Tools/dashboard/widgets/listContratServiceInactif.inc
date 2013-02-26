@@ -33,10 +33,11 @@ function widget_listContratServiceInactif() {
 
         $sql = "SELECT cd.rowid as cid, c.ref, cd.statut, cd.label, cd.description as note, cd.fk_contrat, c.fk_soc, s.nom";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+        $sql.= ", ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_contrat_GA c2 ON c2.`contratdet_refid` = cd.fk_contrat";
         $sql.= " WHERE c.statut=1 AND cd.statut = 0";
-        $sql.= " AND is_financement = 0 AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
+        $sql.= " AND is_financement IS NULL AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid > 0) $sql.= " AND s.rowid = ".$socid;
         $sql.= " ORDER BY cd.tms DESC";
@@ -59,7 +60,7 @@ function widget_listContratServiceInactif() {
             $var=True;
             while ($i < $num)
             {
-                $obj = $db->fetch_object();
+                $obj = $db->fetch_object($result);
                 $var=!$var;
 
                 if ($i<10)
@@ -110,7 +111,7 @@ function widget_listContratServiceInactif() {
 
                 $i++;
             }
-            $db->free();
+            $db->free($result);
 
             $table .= "</table>";
 

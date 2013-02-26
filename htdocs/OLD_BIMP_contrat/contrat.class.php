@@ -1732,7 +1732,7 @@ class Contrat extends CommonObject
         $langs->load("contracts");
         $langs->load("babel");
 
-        $dir = DOL_DOCUMENT_ROOT . "/includes/modules/contrat/";
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/contrat/";
         if (defined("CONTRAT_ADDON") && CONTRAT_ADDON)
         {
             $file = CONTRAT_ADDON.".php";

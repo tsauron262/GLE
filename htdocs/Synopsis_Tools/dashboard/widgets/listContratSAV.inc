@@ -41,7 +41,7 @@ function widget_listContratSAV() {
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
         $sql.= " ".MAIN_DB_PREFIX."contrat as c";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
-        $sql.= " WHERE c.fk_soc = s.rowid AND c.statut > 0  AND type=4";
+        $sql.= " WHERE c.fk_soc = s.rowid AND c.statut > 0  AND c.extraparams=4";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid > 0) $sql .= " AND s.rowid = ".$socid;
         $sql.= " GROUP BY c.rowid, c.datec, c.statut, s.nom, s.rowid";

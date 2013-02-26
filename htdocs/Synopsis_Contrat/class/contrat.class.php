@@ -74,8 +74,8 @@ class Synopsis_Contrat extends Contrat {
             $this->SLA = $res->SLA;
             $this->isSAV = $res->isSAV;
 
-            $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,0) MONTH)) as dfinprev,
-                               unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,0) MONTH)) as dfin,
+            $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfinprev,
+                               unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfin,
                                unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddeb,
                                unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddebprev,
                                " . MAIN_DB_PREFIX . "contratdet.qty,
@@ -83,7 +83,7 @@ class Synopsis_Contrat extends Contrat {
                                " . MAIN_DB_PREFIX . "contratdet.subprice as pu,
                                " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid as durVal,
                                " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.fk_contrat_prod,
-                               " . MAIN_DB_PREFIX . "product_extrafields.0dureeSav,
+                               " . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,
                                " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.serial_number
                           FROM " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO, " . MAIN_DB_PREFIX . "contratdet
                      LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = " . MAIN_DB_PREFIX . "contratdet.fk_product
@@ -107,6 +107,20 @@ class Synopsis_Contrat extends Contrat {
         }
         $this->type = $this->extraparams;
         return($ret);
+    }
+
+    public function fetch_lines($byid = false) {
+        $id = $this->id;
+        $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
+        $result = $this->db->query($requete);
+        while ($ligneDb = $this->db->fetch_object($result)) {
+            $ligne = new Synopsis_ContratLigne($this->db);
+            $ligne->fetch($ligneDb->rowid);
+            if ($byid)
+                $this->lines[$ligneDb->rowid] = $ligne;
+            else
+                $this->lines[] = $ligne;
+        }
     }
 
 //    
@@ -716,7 +730,32 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function list_all_valid_contacts() {
-        return array();
+        $arr = array();
+        $arr1 = array();
+        $arr = $this->liste_contact(4, 'external');
+        $arr1 = $this->liste_contact(4, 'internal');
+        $arr2 = array_merge($arr, $arr1);
+        $newArr = array();
+        foreach($arr2 as $id => $elem){
+            $obj = new Contact($this->db);
+            $obj->fetch($elem['id']);
+            
+            $newArr[$id]['cp'] = $obj->cp;
+            $newArr[$id]['ville'] = $obj->ville;
+            $newArr[$id]['email'] = $obj->email;
+            $newArr[$id]['tel'] = $obj->phone_pro;
+            $newArr[$id]['fax'] = $obj->fax;
+            foreach (array('fullname' => 'fullname', 'civilite' => 'civility', 'nom' => 'lastname', 'prenom' => 'firstname') as $val0 => $val1) {
+                $result = $elem[$val1];
+                if($val0 == 'fullname')
+                    $result = $elem['civility']." ".$elem['lastname']." ".$elem['firstname'];
+                $newArr[$id][$val0] = $result;
+            }
+            foreach($elem as $nom => $val)
+                $newArr[$id][$nom] = $val;
+        }
+        $this->element_contact_arr = $newArr;
+        return($this->element_contact_arr);
     }
 
     public function intervRestant($val) {
@@ -1149,11 +1188,14 @@ class Synopsis_Contrat extends Contrat {
         $db = $this->db;
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
         require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
+        
         $com = new Synopsis_Commande($db);
         $com->fetch($commId);
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $comLigneId;
 
         $sql = $db->query($requete);
+        if(!$sql)
+            die("Erreur SQL : ".$requete);
         $res = $db->fetch_object($sql);
         $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice);
         $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice);
@@ -1203,15 +1245,16 @@ class Synopsis_Contrat extends Contrat {
         $isMnt = false;
         $isSAV = false;
         $isTkt = false;
-        $qte = $res->qty;
-        if ($tmpProd->Hotline > 0 || $tmpProd->TeleMaintenance > 0 || $tmpProd->Maintenance > 0) {
+        $qte1 = $res->qty;
+        $qte2 = $tmpProd->array_options['options_2qte'];
+        if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance']> 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
-            $qte = $tmpProd->VisiteSurSite;
-        } else if ($tmpProd->isSAV > 0) {
+//            $qte = $tmpProd->array_options['options_2visiteSurSite'];
+        } else if ($tmpProd->array_options['options_2isSAV'] > 0) {
             $isSAV = true;
-        } else if ($tmpProd->qte > 0) {
+        } else if ($tmpProd->array_options['options_2qte'] > 0) {
             $isTkt = true;
-            $qte = $tmpProd->qte;
+//            $qte = $tmpProd->array_options['options_2qte'];
         }
 
 
@@ -1222,9 +1265,9 @@ class Synopsis_Contrat extends Contrat {
                              total_ht, total_tva, total_ttc,fk_user_author,
                              "/* line_order,fk_commande_ligne,avenant, */ . "date_ouverture_prevue,date_ouverture, date_fin_validite)
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
-                             19.6," . $qte . "," . $res->subprice . "," . $res->subprice . ",
+                             19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $res->subprice . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
-                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . ($tmpProd->durVal > 0 ? $tmpProd->durVal : 0) . " MONTH))";
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . ($tmpProd->array_options['options_2dureeVal'] > 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . " MONTH))";
         $sql = $db->query($requete);
 //    die($requete);
         $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
@@ -1253,11 +1296,11 @@ class Synopsis_Contrat extends Contrat {
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
-                            type )
-                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte . ",now(),now(),0,
-                            " . ($tmpProd->isSAV > 0 ? $tmpProd->isSAV : 0) . ",'" . addslashes($tmpProd->SLA) . "'," . ($tmpProd->durValid > 0 ? $tmpProd->durValid : 0) . ",
-                            " . ($tmpProd->Hotline > 0 ? $tmpProd->Hotline : 0) . "," . ($tmpProd->TeleMaintenance > 0 ? $tmpProd->TeleMaintenance : 0) . "," . ($tmpProd->Maintenance > 0 ? $tmpProd->Maintenance : 0) . ",
-                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ")";
+                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
+                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
+                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . ($tmpProd->array_options['options_2dureeVal']> 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . ",
+                            " . ($tmpProd->array_options['options_2hotline'] ? 1 : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? 1 : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ", '".$tmpProd->array_options['options_2timePerDuree']."','".$tmpProd->array_options['options_2qtePerDuree']."','".$tmpProd->array_options['options_2visiteSurSite']."')";
         $sql1 = $db->query($requete2);
 
         if ($sql && $sql1)
@@ -2083,9 +2126,11 @@ class Synopsis_ContratLigne extends ContratLigne {
                        g.prixAnDernier as GMAO_prixAnDernier,
                        g.fk_contrat_prod as GMAO_fk_contrat_prod,
                        g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
-                       g.qteTktPerDuree as GMAO_qteTktPerDuree
+                       g.qteTktPerDuree as GMAO_qteTktPerDuree,
+                       sc.serial_number as GMAO_serial_number
                   FROM " . MAIN_DB_PREFIX . "contratdet as d
              LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
+             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid
                  WHERE d.rowid = " . $this->id;
 //date_debut_prevue = $objp->date_ouverture_prevue;
 //print $sql;
@@ -2097,10 +2142,10 @@ class Synopsis_ContratLigne extends ContratLigne {
             $num = $this->db->num_rows($result);
             $i = 0;
 
-            while ($objp = $this->db->fetch_object($result)) {
+            $objp = $this->db->fetch_object($result);
 
 //                $ligne = new ContratLigne($this->db);
-                $ligne = $this;
+            $ligne = $this;
 //                $ligne->description = $objp->description;  // Description ligne
 //                $ligne->description = $objp->description;  // Description ligne
 //                $ligne->qty = $objp->qty;
@@ -2116,40 +2161,52 @@ class Synopsis_ContratLigne extends ContratLigne {
 //                $ligne->avenant = $objp->avenant;
 //                require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 //                $tmpProd = new Product($this->db);
-                $tmpProd1 = new Product($this->db);
-                if ($this->fk_product > 0)
-                    $tmpProd1->fetch($this->fk_product);
+            $tmpProd1 = new Product($this->db);
+            if ($this->fk_product > 0) {
+                $tmpProd1->fetch($this->fk_product);
+                $tmpProd1->fetch_optionals($this->fk_product);
+            }
+            $tmpProd2 = new Product($this->db);
+            if ($objp->GMAO_fk_prod > 0) {
+                $tmpProd2->fetch($objp->GMAO_fk_prod);
+                $tmpProd2->fetch_optionals($objp->GMAO_fk_prod);
+            }
+            $this->prodContrat = $tmpProd1;
+            $this->prod2 = $tmpProd2;
+            $this->type = $objp->type;
+            $this->serial_number = $objp->GMAO_serial_number;
+            $this->SLA = $objp->GMAO_sla;
+            $this->qty2 = $objp->GMAO_qte;
 //                ($objp->GMAO_fk_contrat_prod > 0 ? $tmpProd->fetch($objp->GMAO_fk_contrat_prod) : $tmpProd = false);
 //                $ligne->product = $tmpProd1;
 ////LineTkt
 ////                    'serial_number'=>$res->serial_number ,
 //                @$ligne->GMAO_Mixte = array();
-                @$ligne->GMAO_Mixte = array(
-                    'contrat_prod' => $tmpProd1,
-                    'durVal' => $objp->GMAO_durVal,
-                    'tickets' => $objp->GMAO_qte,
-                    'dfinprev' => $objp->GMAO_dfinprev,
-                    'dfin' => $objp->GMAO_dfin,
-                    'ddeb' => $objp->GMAO_ddeb,
-                    'hotline' => $objp->GMAO_hotline,
-                    'telemaintenance' => $objp->GMAO_telemaintenance,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'SLA' => $objp->GMAO_sla,
-                    'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
-                    'isSAV' => $objp->GMAO_isSAV,
-                    'fk_prod' => $objp->GMAO_fk_prod,
-                    'reconductionAuto' => $objp->GMAO_reconductionAuto,
-                    'maintenance' => $objp->GMAO_maintenance,
-                    'serial_number' => $objp->GMAO_serial_number,
-                    'ddebprev' => $objp->GMAO_ddebprev,
-                    "clause" => $objp->GMAO_clause,
-                    "prorata" => $objp->GMAO_prorata,
-                    "prixAn1" => $objp->GMAO_prixAn1,
-                    "prixAnDernier" => $objp->GMAO_prixAnDernier,
-                    "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
-                    "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
-                );
-            }
+            $this->GMAO_Mixte = array(
+                'contrat_prod' => $tmpProd1,
+                'durVal' => $objp->GMAO_durVal,
+                'tickets' => $objp->GMAO_qte,
+                'dfinprev' => $objp->GMAO_dfinprev,
+                'dfin' => $objp->GMAO_dfin,
+                'ddeb' => $objp->GMAO_ddeb,
+                'hotline' => $objp->GMAO_hotline,
+                'telemaintenance' => $objp->GMAO_telemaintenance,
+                'maintenance' => $objp->GMAO_maintenance,
+                'SLA' => $objp->GMAO_sla,
+                'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($objp->qty > 0 ? $objp->qty : 1)),
+                'isSAV' => $objp->GMAO_isSAV,
+                'fk_prod' => $objp->GMAO_fk_prod,
+                'reconductionAuto' => $objp->GMAO_reconductionAuto,
+                'maintenance' => $objp->GMAO_maintenance,
+                'serial_number' => $objp->GMAO_serial_number,
+                'ddebprev' => $objp->GMAO_ddebprev,
+                "clause" => $objp->GMAO_clause,
+                "prorata" => $objp->GMAO_prorata,
+                "prixAn1" => $objp->GMAO_prixAn1,
+                "prixAnDernier" => $objp->GMAO_prixAnDernier,
+                "qteTempsPerDuree" => $objp->GMAO_qteTempsPerDuree,
+                "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
+            );
         }
     }
 

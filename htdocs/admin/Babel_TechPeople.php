@@ -91,7 +91,7 @@ if ($_GET["action"] == 'setmod')
 
 llxHeader('',$langs->trans("Sous-module déplacement"));
 
-$dir = DOL_DOCUMENT_ROOT."/includes/modules/deplacement/";
+$dir = DOL_DOCUMENT_ROOT."/core/modules/deplacement/";
 $html=new Form($db);
 
 

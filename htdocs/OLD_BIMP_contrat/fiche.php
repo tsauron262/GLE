@@ -67,13 +67,13 @@ if ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc') {
     $contrat->fetch($_REQUEST['id']);
 
     if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 6 || $contrat->typeContrat == 5)) {
-        require_once(DOL_DOCUMENT_ROOT . "/includes/modules/contratGA/modules_contratGA.php");
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
         contratGA_pdf_create($db, $contrat->id, $_REQUEST['model']);
     } else if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4)) {
-        require_once(DOL_DOCUMENT_ROOT . "/includes/modules/contratGMAO/modules_contratGMAO.php");
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGMAO.php");
         contratGMAO_pdf_create($db, $contrat->id, $_REQUEST['model']);
     } else {
-        require_once(DOL_DOCUMENT_ROOT . "/includes/modules/contrat/modules_contrat.php");
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/contrat/modules_contrat.php");
         contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
     }
     header('location: fiche.php?id=' . $contrat->id . "#documentAnchor");
@@ -1449,7 +1449,7 @@ if ($contrat->typeContrat == 6 || $contrat->typeContrat == 5) {
     $somethingshown = $formfile->show_documents('contratGA', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
 } else if ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4) {
 
-    $filedir = $conf->CONTRATGMAO->dir_output . '/' . sanitize_string($contrat->ref);
+    $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
     print "<div style='width: 600px'>";
     $somethingshown = $formfile->show_documents('contratGMAO', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
     print "</div>";

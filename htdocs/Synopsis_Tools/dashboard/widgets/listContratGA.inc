@@ -41,6 +41,7 @@ function widget_listContratGA() {
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " ".MAIN_DB_PREFIX."societe_commerciaux as sc,";
         $sql.= " ".MAIN_DB_PREFIX."contrat as c";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_contrat_GA c2 ON c2.`contratdet_refid` = cd.fk_contrat";
         $sql.= " WHERE c.fk_soc = s.rowid AND c.statut > 0 AND is_financement=1";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid > 0) $sql .= " AND s.rowid = ".$socid;

@@ -436,7 +436,7 @@ class Fichinter extends CommonObject {
         global $db, $langs, $conf;
         $langs->load("interventions");
 
-        $dir = DOL_DOCUMENT_ROOT . "/includes/modules/synopsisficheinter/";
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/";
 
         if (defined($conf->global->FICHEINTER_ADDON) && $conf->global->FICHEINTER_ADDON) {
             $file = $conf->global->FICHEINTER_ADDON . ".php";

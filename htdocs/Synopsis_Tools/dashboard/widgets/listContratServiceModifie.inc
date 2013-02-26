@@ -34,9 +34,10 @@ function widget_listContratServiceModifie() {
         $sql.= " cd.rowid as cid, cd.statut, cd.label, cd.description as note, cd.fk_contrat,";
         $sql.= " s.nom";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
-        $sql.= " FROM ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."societe as s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        $sql.= " WHERE is_financement = 0 AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
+        $sql.= ", ".MAIN_DB_PREFIX."contratdet as cd LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_contrat_GA c2 ON c2.`contratdet_refid` = cd.fk_contrat";
+        $sql.= " WHERE is_financement IS NULL AND cd.fk_contrat = c.rowid AND c.fk_soc = s.rowid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid > 0) $sql.= " AND s.rowid = ".$socid;
         $sql.= " ORDER BY cd.tms DESC LIMIT 50";
@@ -106,7 +107,7 @@ function widget_listContratServiceModifie() {
                 $table2 .= "</tr>\n";
                 $i++;
             }
-            $db->free();
+            $db->free($resql);
 
             $table .= "</table>";
 

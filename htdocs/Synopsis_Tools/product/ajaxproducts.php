@@ -45,8 +45,9 @@ $langs->load("main");
 
 if (isset($_REQUEST["keysearch"])) {
     $tab = explode("/", $_REQUEST["keysearch"]);
-    $_REQUEST["keysearch"] = $tab[0];
-    $_REQUEST["keysearch"] = utf8_encode(addslashes($_REQUEST["keysearch"]));
+    $tab = explode("   ", $tab[0]);
+    $_REQUEST["keysearch"] = utf8_encode(addslashes($tab[0]));
+//    $_REQUEST["keysearch"] = utf8_encode(addslashes($_REQUEST["keysearch"]));
 }
 
 

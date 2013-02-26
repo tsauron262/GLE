@@ -463,6 +463,7 @@ jQuery(function() {
                 var remIter = 0;
                 jQuery('#modCommande option').each(function(){
                     if (jQuery(this).val()==jQuery(msg).find('commande').text()){
+                        jQuery(this).attr('selected', true);
                         remIter = iter;
                         return false;
                     }

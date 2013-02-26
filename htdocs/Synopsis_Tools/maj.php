@@ -266,8 +266,8 @@ function getTab() {
             array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
         ),
         array("babel_product", MAIN_DB_PREFIX."product_extrafields",
-            array('rowid', 'durSav', /*'isSAV', */'durValid', /*'reconductionAuto', */'VisiteSurSite', 'SLA'/*, 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause',  'qteTempsPerDuree', 'qteTktPerDuree' */),
-            array('fk_object', '0dureeSav', '2dureeVal', '2visiteSite', '2sla')
+            array('rowid', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause',  'qteTempsPerDuree', 'qteTktPerDuree', 'annexe'),
+            array('fk_object', '2dureeSav', '2isSav', '2dureeVal', '2reconductionAuto', '2visiteSurSite', '2sla', '2maintenance', '2teleMaintenance', '2hotline', '2prixAchatHt', '2qte', '2clause', '2timePerDuree', '2qtePerDuree', '2annexe')
         ),
         array("babel_categorie", MAIN_DB_PREFIX."categorie",
             array('rowid', 'label', 'type'           ,  'description',           'visible', 'magento_id'/*, 'position', 'magento_product', 'level'*/),

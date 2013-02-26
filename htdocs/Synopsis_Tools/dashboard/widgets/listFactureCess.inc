@@ -29,7 +29,8 @@ function widget_listFactureCess() {
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
     $sql .= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."societe as s";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-    $sql .= " WHERE s.rowid = f.fk_soc AND s.cessionnaire = 1 ";
+//    $sql .= " WHERE s.rowid = f.fk_soc AND s.cessionnaire = 1 ";
+    $sql .= " WHERE s.rowid = f.fk_soc AND 0 = 1 ";
     if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
     if ($socid)

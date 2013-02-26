@@ -49,7 +49,7 @@ if ($_REQUEST['action']== 'set_PROPAL_REVISION_MODEL')
 
 llxHeader('',$langs->trans("PropalSetup"));
 
-$dir = "../includes/modules/propale/";
+$dir = "../core/modules/propale/";
 $html=new Form($db);
 
 
@@ -125,7 +125,7 @@ if ($resql)
     dol_print_error($db);
 }
 
-$dir = "../includes/modules/propale/";
+$dir = "../core/modules/propale/";
 
 print "<table class=\"noborder\" width=\"100%\">\n";
 print "<tr class=\"liste_titre\">\n";

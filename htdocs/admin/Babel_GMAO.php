@@ -58,7 +58,7 @@ if ($_POST["action"] == 'form_GMAO_TKT_RESTANT_WARNING') {
 }
 llxHeader($js,$langs->trans("GMAO"));
 
-$dir = DOL_DOCUMENT_ROOT."/includes/modules/sav/";
+$dir = DOL_DOCUMENT_ROOT."/core/modules/sav/";
 $html=new Form($db);
 
 
@@ -94,7 +94,7 @@ if ($handle)
         if (substr($file, 0, 8) == 'mod_sav_' && substr($file, strlen($file)-3, 3) == 'php')
         {
             $file = substr($file, 0, strlen($file)-4);
-            require_once(DOL_DOCUMENT_ROOT ."/includes/modules/sav/".$file.".php");
+            require_once(DOL_DOCUMENT_ROOT ."/core/modules/sav/".$file.".php");
 
             $module = new $file;
 

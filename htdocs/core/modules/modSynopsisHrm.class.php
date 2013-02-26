@@ -17,7 +17,7 @@
   \brief      Module pour inclure ProspectBabel dans Dolibarr
  */
 /**
-  \file       htdocs/includes/modules/modProspectBabel.class.php
+  \file       htdocs/core/modules/modProspectBabel.class.php
   \ingroup    ProspectBabel
   \brief      Fichier de description et activation du module de Prospection Babel
  */

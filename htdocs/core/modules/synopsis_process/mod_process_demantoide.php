@@ -35,7 +35,7 @@
  */
 
 /**
-    \file       htdocs/includes/modules/synopsis_process/mod_process_demantoide.php
+    \file       htdocs/core/modules/synopsis_process/mod_process_demantoide.php
     \ingroup    process
     \brief      Fichier contenant la classe du modele de numerotation de reference de process demantoide
     \version    $Id: mod_process_demantoide.php,v 1.19 2008/07/05 14:20:10 eldy Exp $

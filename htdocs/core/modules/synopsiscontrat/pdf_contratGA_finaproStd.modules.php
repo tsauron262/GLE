@@ -16,14 +16,14 @@
  */
 
 /**
- \file       htdocs/core/modules/contratGA/pdf_contratGA_finaproStd.modules.php
+ \file       htdocs/core/modules/synopsiscontrat/pdf_contratGA_finaproStd.modules.php
  \ingroup    contratGA
  \brief      Fichier de la classe permettant de generer les contratGAs au modele finaproStd
  \author        Laurent Destailleur
  \version    $Id: pdf_contratGA_finaproStd.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/contratGA/modules_contratGA.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_contratGA.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
@@ -33,7 +33,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
  \brief      Classe permettant de generer les contratGAs au modele finaproStd
  */
 
-class pdf_contratGA_finaproStd extends ModelePDFContratGA
+class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 {
     var $emetteur;    // Objet societe qui emet
 

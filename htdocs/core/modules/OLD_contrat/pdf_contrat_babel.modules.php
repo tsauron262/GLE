@@ -1,38 +1,39 @@
 <?php
 /*
-  * GLE by Synopsis et DRSI
+  * GLE by Babel-Services
   *
-  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.finapro.fr
+  * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
 /**
- \file       htdocs/core/modules/contratGA/pdf_contratGA_babel.modules.php
- \ingroup    contratGA
- \brief      Fichier de la classe permettant de generer les contratGAs au modele babel
+ \file       htdocs/includes/modules/contrat/pdf_contrat_babel.modules.php
+ \ingroup    contrat
+ \brief      Fichier de la classe permettant de generer les contrats au modele babel
  \author        Laurent Destailleur
- \version    $Id: pdf_contratGA_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
+ \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/contratGA/modules_contratGA.php");
-require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/includes/modules/contrat/modules_contrat.php");
+require_once(DOL_DOCUMENT_ROOT."/product.class.php");
+require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
 
 
 /**
- \class      pdf_contratGA_babel
- \brief      Classe permettant de generer les contratGAs au modele babel
+ \class      pdf_contrat_babel
+ \brief      Classe permettant de generer les contrats au modele babel
  */
 
-class pdf_contratGA_babelGA extends ModelePDFContratGA
+class pdf_contrat_babel extends ModeleSynopsiscontrat
 {
     var $emetteur;    // Objet societe qui emet
 
@@ -41,7 +42,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contratGA_babelGA($db)
+    function pdf_contrat_babel($db)
     {
         global $conf,$langs,$mysoc;
 
@@ -49,9 +50,8 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
         $langs->load("bills");
 
         $this->db = $db;
-        $this->name = "babelGA";
-        $this->description = $langs->trans('PDFcontratGASynopsisDescription');
-        $this->libelle = "Babel GA";
+        $this->name = "babel";
+        $this->description = $langs->trans('PDFContratbabelDescription');
 
         // Dimension page pour format A4
         $this->type = 'pdf';
@@ -80,12 +80,12 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
     }
 
     /**
-    \brief      Fonction generant la contratGA sur le disque
-    \param        contratGA            Objet contratGA a generer (ou id si ancienne methode)
+    \brief      Fonction generant la contrat sur le disque
+    \param        contrat            Objet contrat a generer (ou id si ancienne methode)
         \param        outputlangs        Lang object for output language
         \return        int             1=ok, 0=ko
         */
-    function write_file($contratGA,$outputlangs='')
+    function write_file($contrat,$outputlangs='')
     {
         global $user,$langs,$conf;
 
@@ -94,35 +94,35 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
         $outputlangs->load("dict");
         $outputlangs->load("companies");
         $outputlangs->load("bills");
-        $outputlangs->load("contratGA");
+        $outputlangs->load("contrat");
         $outputlangs->load("products");
 
         $outputlangs->setPhpLang();
 
-        if ($conf->CONTRATGA->dir_output)
+        if ($conf->contrat->dir_output)
         {
-            // Definition de l'objet $contratGA (pour compatibilite ascendante)
-            if (! is_object($contratGA))
+            // Definition de l'objet $contrat (pour compatibilite ascendante)
+            if (! is_object($contrat))
             {
-                $id = $contratGA;
-                $contratGA = new ContratGA($this->db);
-                $ret=$contratGA->fetch($id);
+                $id = $contrat;
+                $contrat = new Contrat($this->db);
+                $ret=$contrat->fetch($id);
             }
 
             // Definition de $dir et $file
-            if ($contratGA->specimen)
+            if ($contrat->specimen)
             {
-                $dir = $conf->CONTRATGA->dir_output;
+                $dir = $conf->contrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
-                $propref = sanitize_string($contratGA->ref);
-                $dir = $conf->CONTRATGA->dir_output . "/".$contratGA->fk_user . $propref;
+                $propref = sanitize_string($contrat->ref);
+                $dir = $conf->contrat->dir_output . "/".$contrat->fk_user . $propref;
                 $file = $dir ."/" . $propref . ".pdf";
             }
 
             if (! file_exists($dir))
             {
-                if (dol_mkdir($dir) < 0)
+                if (create_exdir($dir) < 0)
                 {
                     $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
                     return 0;
@@ -131,7 +131,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
 
             if (file_exists($dir))
             {
-                $nblignes = sizeof($contratGA->lignes);
+                $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
                 if ($conf->global->PDF_SECURITY_ENCRYPTION)
                 {
@@ -148,7 +148,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
 
                 $pdf->SetDrawColor(128,128,128);
 
-                $pdf->SetTitle($contratGA->ref);
+                $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
                 $pdf->SetCreator("GLE ".GLE_VERSION);
                 $pdf->SetAuthor($user->fullname);
@@ -160,14 +160,14 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
                 $pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
-                $this->_pagehead($pdf, $contratGA, 1, $outputlangs,0);
+                $this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont('Arial', '', 8);
 
 
-//Affiche le header avec les infos basic du contratGA
-                $ref = $contratGA->ref;
-                $client = $contratGA->societe->nom;
-                $date = $contratGA->date_contrat;
+//Affiche le header avec les infos basic du contrat
+                $ref = $contrat->ref;
+                $client = $contrat->societe->nom;
+                $date = $contrat->date_contrat;
                 $pdf->setXY(50,50);
                 $pdf->MultiCell(100, 3, $ref, 0, 'L');
                 $pdf->setXY(150,50);
@@ -175,19 +175,19 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
                 $pdf->setXY(250,50);
                 $pdf->MultiCell(100, 3,  date("d/m/Y",$date), 0, 'L');
 
-                $contratGA->fetch_lignes();
+                $contrat->fetch_lignes();
                 $pdf->setXY(50,60);
-                $pdf->MultiCell(50, 3,  "Services :".$contratGA->nbofservices, 0, 'L');
+                $pdf->MultiCell(50, 3,  "Services :".$contrat->nbofservices, 0, 'L');
                 $pdf->setXY(100,60);
-                $pdf->MultiCell(50, 3,  "En attente :".$contratGA->nbofserviceswait, 0, 'L');
+                $pdf->MultiCell(50, 3,  "En attente :".$contrat->nbofserviceswait, 0, 'L');
                 $pdf->setXY(150,60);
-                $pdf->MultiCell(50, 3,  "Ouverts :".$contratGA->nbofservicesopened, 0, 'L');
+                $pdf->MultiCell(50, 3,  "Ouverts :".$contrat->nbofservicesopened, 0, 'L');
                 $pdf->setXY(200,60);
-                $pdf->MultiCell(50, 3,  "Fermés :".$contratGA->nbofservicesclosed, 0, 'L');
+                $pdf->MultiCell(50, 3,  "Fermés :".$contrat->nbofservicesclosed, 0, 'L');
 
                 $baseY = 80;
                 $i=0;
-                foreach( $contratGA->lignes as $key=>$val)
+                foreach( $contrat->lignes as $key=>$val)
                 {
 
                     $pdf->setXY(20,$baseY + 10*$i);
@@ -199,7 +199,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
                     $desc = $val->product_desc;
                     if ('x'.$desc == "x")
                     {
-                        $desc = $val->description;
+                        $desc = $val->desc;
                     }
                     $pdf->MultiCell(100, 3,  $desc, 0, 'L');
                     $pdf->setXY(120,$baseY + 10*$i);
@@ -231,8 +231,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
                 $this->_pagefoot($pdf,$outputlangs);
                 $pdf->AliasNbPages();
                 $pdf->Close();
-                $this->file = $file;$pdf->Output($file);
-
+                $pdf->Output($file);
 
                 $langs->setPhpLang();    // On restaure langue session
 
@@ -312,7 +311,7 @@ class pdf_contratGA_babelGA extends ModelePDFContratGA
     */
     function _pagefoot(&$pdf,$outputlangs)
     {
-        return pdf_pagefoot($pdf,$outputlangs,'contratGA_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
+        return pdf_pagefoot($pdf,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
     }
 
 }

@@ -42,11 +42,11 @@ require_once(DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php');
 
 
 /**
-        \class      ModelePDFcontratGA
+        \class      ModeleSynopsiscontratGA
         \brief      Classe mere des modeles de deplacement
 */
 
-class ModelePDFContratGA extends CommonDocGenerator
+class ModeleSynopsiscontratGA extends CommonDocGenerator
 {
     var $error='';
 
@@ -112,7 +112,7 @@ function contratGA_pdf_create($db, $id, $modele='', $outputlangs='')
     $langs->load("synopsisGene@Synopsis_Tools");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/contratGA/";
+    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
@@ -130,7 +130,7 @@ function contratGA_pdf_create($db, $id, $modele='', $outputlangs='')
     if (! $modelisok)
     {
         $liste=array();
-        $model=new ModelePDFContratGA();
+        $model=new ModeleSynopsiscontratGA();
         $liste=$model->liste_modeles($db);
         $modele=key($liste);        // Renvoie premiere valeur de cle trouve dans le tableau
         $file = "pdf_contratGA_".$modele.".modules.php";

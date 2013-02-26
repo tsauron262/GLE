@@ -3,7 +3,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -13,32 +13,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
-/*
-  * GLE by Synopsis et DRSI
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+  * GLE by Babel-Services
   *
-  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.finapro.fr
+  * Infos on http://www.babel-services.com
   *
-  */
-/*
+  *//*
  * or see http://www.gnu.org/
  */
 
 /**
- \file       htdocs/core/modules/contratGA/mod_contratGA_malachite.php
+ \file       htdocs/includes/modules/contrat/mod_contrat_malachite.php
  \ingroup    commande
- \brief      Fichier contenant la classe du modele de numerotation de reference de contratGA Malachite
- \version    $Id: mod_commande_malachite.php,v 1.9 2010 Tommy SAURON Exp $
+ \brief      Fichier contenant la classe du modele de numerotation de reference de contrat Malachite
+ \version    $Id: mod_commande_malachite.php,v 1.9 2010 Jean-Marc LE FEVRE Exp $
  */
 
-include_once("modules_contratGA.php");
+include_once("modules_contrat.php");
 
 
 /**
@@ -46,16 +43,16 @@ include_once("modules_contratGA.php");
  \brief      Classe du modele de numerotation de reference de commande Malachite
  */
 
-class mod_contratGA_malachite extends ModeleNumRefContratGA
+class mod_contrat_malachite extends ModeleNumRefContrat
 {
-    var $version='1.0';        // 'development', 'experimental', 'dolibarr'
-    var $error = '';
-    var $nom = 'Malachite';
+    public $version='1.0';        // 'development', 'experimental', 'dolibarr'
+    public $error = '';
+    public $nom = 'Malachite';
 
 
     /**   \brief      Constructeur
     */
-    function mod_contratGA_malachite()
+    function mod_contrat_malachite()
     {
         $this->nom = "Malachite";
     }
@@ -83,15 +80,15 @@ class mod_contratGA_malachite extends ModeleNumRefContratGA
     *        \param        commande    Object order
     *          \return     string      Value if OK, 0 if KO
     */
-    function getNextValue($objsoc,$contratGA)
+    function getNextValue($objsoc,$contrat)
     {
         global $db;
 
         // D'abord on recupere la valeur max (reponse immediate car champ indexe)
         $com='';
         $sql = "SELECT MAX(ref)";
-        $sql.= " FROM ".MAIN_DB_PREFIX."contrat";
-        $sql.= " WHERE is_financement = 1";
+        $sql.= " FROM llx_contrat";
+        $sql.= " WHERE is_financement <> 1";
         $resql=$db->query($sql);
         if ($resql)
         {
@@ -105,7 +102,7 @@ class mod_contratGA_malachite extends ModeleNumRefContratGA
             $max=0;
         }
         //$date=time();
-        $date=$contratGA->date;
+        $date=$contrat->date;
         $yy = strftime("%y",$date);
         $hex = strtoupper(dechex($max+1));
         $ref = substr("000000".($hex),-6);
@@ -118,7 +115,7 @@ class mod_contratGA_malachite extends ModeleNumRefContratGA
     *         \param        objforref    Object for number to search
     *       \return     string      Next free value
     */
-    function contratGA_get_num($objsoc,$objforref)
+    function contrat_get_num($objsoc,$objforref)
     {
         return $this->getNextValue($objsoc,$objforref);
     }

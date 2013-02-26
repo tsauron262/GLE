@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -14,23 +14,26 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
-  * GLE by Synopsis et DRSI
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
+  * GLE by Babel-Services
   *
-  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.finapro.fr
+  * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
 /**
-        \file       htdocs/core/modules/deplacement/modules_deplacement.php
+        \file       htdocs/includes/modules/deplacement/modules_deplacement.php
         \ingroup    deplacement
         \brief      Fichier contenant la classe mere de generation des deplacements en PDF
                     et la classe mere de numerotation des deplacements
@@ -38,17 +41,17 @@
 */
 
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php');
-require_once(DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php');
+require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
 
 
 /**
-        \class      ModelePDFContrat
+        \class      ModeleSynopsiscontrat
         \brief      Classe mere des modeles de deplacement
 */
 
-class ModelePDFContratGMAO extends CommonDocGenerator
+class ModeleSynopsiscontrat extends CommonDocGenerator
 {
-    public $error='';
+    var $error='';
 
     /**
      *      \brief      Renvoi le dernier message d'erreur de creation de deplacement
@@ -63,13 +66,14 @@ class ModelePDFContratGMAO extends CommonDocGenerator
     /**
      *      \brief      Renvoi la liste des modeles actifs
      */
-    function liste_modeles($db)
+    static function liste_modeles($db, $maxfilenamelength = 0)
     {
-        $type='contratGMAO';
+        $type='synopsiscontrat';
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
-        $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
+        $sql.=" FROM llx_document_model";
         $sql.=" WHERE type = '".$type."'";
+
         $resql = $db->query($sql);
         if ($resql)
         {
@@ -87,7 +91,7 @@ class ModelePDFContratGMAO extends CommonDocGenerator
         }
         return $liste;
 
-    }
+}
 
 }
 /**
@@ -105,19 +109,19 @@ class ModelePDFContratGMAO extends CommonDocGenerator
         \param        outputlangs        objet lang a utiliser pour traduction
         \return     int             0 si KO, 1 si OK
 */
-function contratGMAO_pdf_create($db, $id, $modele='', $outputlangs='')
+function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
 {
     global $langs;
-    $langs->load("synopsisGene@Synopsis_Tools");
+    $langs->load("babel");
     $langs->load("contracts");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/contratGMAO/";
+    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/doc/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
-    $file = "pdf_contratGMAO_".$modele.".modules.php";
-
+    $file = "pdf_contrat_".$modele.".modules.php";
     if ($modele && file_exists($dir.$file)) $modelisok=1;
+
     // Si model pas encore bon
     if (! $modelisok)
     {
@@ -129,7 +133,7 @@ function contratGMAO_pdf_create($db, $id, $modele='', $outputlangs='')
     if (! $modelisok)
     {
         $liste=array();
-        $model=new ModelePDFContratGMAO();
+        $model=new ModeleSynopsiscontrat();
         $liste=$model->liste_modeles($db);
         $modele=key($liste);        // Renvoie premiere valeur de cle trouve dans le tableau
         $file = "pdf_contrat_".$modele.".modules.php";
@@ -139,42 +143,28 @@ function contratGMAO_pdf_create($db, $id, $modele='', $outputlangs='')
     // Charge le modele
     if ($modelisok)
     {
-        $classname = "pdf_contratGMAO_".$modele;
+        $classname = "pdf_contrat_".$modele;
         require_once($dir.$file);
 
-
-
-        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
-        $db->query($requete);
+//        $requete = "UPDATE llx_contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
+//        $db->query($requete);
         $obj = new $classname($db);
+
         if ($obj->write_file($id, $outputlangs) > 0)
         {
             // on supprime l'image correspondant au preview
-            contratGMAO_delete_preview($db, $id);
-
-            global $user,$langs, $conf;
-            require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/contratMixte.class.php");
-            $contrat=getContratObj($id);
-            $contrat->fetch($id);
-
-            // Appel des triggers
-            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-            $interface=new Interfaces($db);
-            $contrat->file = $obj->file;
-            $result=$interface->run_triggers('ECM_GENCONTRAT',$contrat,$user,$langs,$conf);
-            if ($result < 0) { $error++; $this->errors=$interface->errors; }
-            // Fin appel triggers
-
+            contrat_delete_preview($db, $id);
             return 1;
         } else {
-            dol_syslog("Erreur dans contratGMAO_pdf_create");
+            dol_syslog("Erreur dans contrat_pdf_create");
             dol_print_error($db,$obj->pdferror());
+            die;
             return 0;
         }
     } else {
         if (! $conf->global->CONTRAT_ADDON_PDF)
         {
-            print $langs->trans("Error")." ".$langs->trans("Error_CONTRATGMAO_ADDON_PDF_NotDefined");
+            print $langs->trans("Error")." ".$langs->trans("Error_CONTRAT_ADDON_PDF_NotDefined :" .$modele);
         } else {
             print $langs->trans("Error")." ".$langs->trans("ErrorFileDoesNotExists",$dir.$file);
         }
@@ -190,22 +180,21 @@ function contratGMAO_pdf_create($db, $id, $modele='', $outputlangs='')
    \param        propalid    id de la propal e effacer
    \param     propalref reference de la propal si besoin
 */
-function contratGMAO_delete_preview($db, $contratid, $contratref='')
+function contrat_delete_preview($db, $contratid, $contratref='')
 {
         global $langs,$conf;
 
         if (!$contratref)
         {
-            $contrat=getContratObj($_REQUEST["id"]);
+            $contrat = new Contrat($db);
             $contrat->fetch($contratid);
-
             $contratref = $contrat->ref;
         }
 
-        if ($conf->CONTRATGMAO->dir_output)
+        if ($conf->contrat->dir_output)
         {
             $contratref = sanitize_string($contratref);
-            $dir = $conf->CONTRATGMAO->dir_output . "/" . $contratref ;
+            $dir = $conf->contrat->dir_output . "/" . $contratref ;
             $file = $dir . "/" . $contratref . ".pdf.png";
             $multiple = $file . ".";
 
@@ -242,9 +231,9 @@ function contratGMAO_delete_preview($db, $contratid, $contratref='')
             \brief      Classe mere des modeles de numerotation des references de commandes
 */
 
-class ModeleNumRefContratGMAO
+class ModeleNumRefSynopsiscontrat
 {
-    public $error='';
+    var $error='';
 
     /**     \brief      Renvoi la description par defaut du modele de numerotation
      *      \return     string      Texte descripif
@@ -253,7 +242,7 @@ class ModeleNumRefContratGMAO
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("babel");
         return $langs->trans("NoDescription");
     }
 
@@ -264,7 +253,7 @@ class ModeleNumRefContratGMAO
     {
         global $langs;
         $langs->load("contracts");
-        $langs->load("synopsisGene@Synopsis_Tools");
+        $langs->load("babel");
         return $langs->trans("NoExample");
     }
 

@@ -33,7 +33,7 @@
  */
 
 /**
-        \file       htdocs/includes/modules/propale/modules_process.php
+        \file       htdocs/core/modules/propale/modules_process.php
         \ingroup    propaleGA
         \brief      Fichier contenant la classe mere de generation des process en PDF
                     et la classe mere de numerotation des propales

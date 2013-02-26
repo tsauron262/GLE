@@ -39,7 +39,7 @@
 /**  \defgroup   projet     Module projet
   \brief      Module pour inclure le detail par projets dans les autres modules
  */
-/** \file       htdocs/includes/modules/modProjet.class.php
+/** \file       htdocs/core/modules/modProjet.class.php
   \ingroup    projet
   \brief      Fichier de description et activation du module Projet
  */

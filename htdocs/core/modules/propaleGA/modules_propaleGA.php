@@ -33,14 +33,14 @@
  */
 
 /**
-        \file       htdocs/includes/modules/propale/modules_propale.php
+        \file       htdocs/core/modules/propale/modules_propale.php
         \ingroup    propaleGA
         \brief      Fichier contenant la classe mere de generation des propalesGA en PDF
                     et la classe mere de numerotation des propales
         \version    $Id: modules_propale.php,v 1.35 2008/07/11 16:14:59 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT.'/lib/functions.lib.php');
+require_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php');
 require_once(DOL_DOCUMENT_ROOT.'/includes/fpdf/fpdfi/fpdi_protection.php');
 require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");   // Requis car utilise dans les classes qui heritent
 
@@ -181,7 +181,7 @@ function propaleGA_pdf_create($db, $id, $modele='', $outputlangs='')
     global $langs;
     $langs->load("propale");
 
-    $dir = DOL_DOCUMENT_ROOT."/includes/modules/propaleGA/";
+    $dir = DOL_DOCUMENT_ROOT."/core/modules/propaleGA/";
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de propale a utiliser

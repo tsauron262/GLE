@@ -32,7 +32,7 @@
  */
 
 /**
-    \file       htdocs/core/modules/contratGA/mod_contratGA_tourmaline.php
+    \file       htdocs/core/modules/synopsiscontrat/mod_contratGA_tourmaline.php
     \ingroup    facture
     \brief      Class filte of tourmaline numbering module for invoice
     \version    $Id: tourmaline.modules.php,v 1.15 2008/07/05 14:20:08 eldy Exp $

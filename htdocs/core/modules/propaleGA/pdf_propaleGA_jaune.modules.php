@@ -31,13 +31,13 @@
  */
 
 /**
- *     \file       htdocs/includes/modules/propale/pdf_propale_jaune.modules.php
+ *     \file       htdocs/core/modules/propale/pdf_propale_jaune.modules.php
  *    \ingroup    propale
  *    \brief      Fichier de la classe permettant de generer les propales au modele Jaune
  *    \version    $Id: pdf_propale_jaune.modules.php,v 1.40 2008/08/07 07:26:31 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT ."/includes/modules/propaleGA/modules_propaleGA.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/propaleGA/modules_propaleGA.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 

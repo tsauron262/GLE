@@ -30,13 +30,13 @@
  */
 
 /**
-        \file       htdocs/includes/modules/propale/mod_propale_calcedoine.php
+        \file       htdocs/core/modules/propale/mod_propale_calcedoine.php
         \ingroup    propale
         \brief      Fichier contenant la classe du modele de numerotation de reference de propale calcedoine
         \version    $Id: mod_propale_calcedoine.php,v 1.13 2008/07/08 22:29:34 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/includes/modules/propaleGA/modules_propaleGA.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/propaleGA/modules_propaleGA.php");
 
 
 /**        \class      mod_propale_calcedoine

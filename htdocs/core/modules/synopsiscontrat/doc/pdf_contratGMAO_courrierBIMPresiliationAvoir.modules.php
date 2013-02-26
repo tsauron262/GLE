@@ -32,7 +32,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contratGMAO_courrierBIMPresiliationAvoir extends ModelePDFContrat
+class pdf_contratGMAO_courrierBIMPresiliationAvoir extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -90,7 +90,7 @@ class pdf_contratGMAO_courrierBIMPresiliationAvoir extends ModelePDFContrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         $outputlangs->setPhpLang();
-        if ($conf->CONTRATGMAO->dir_output)
+        if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -109,11 +109,11 @@ class pdf_contratGMAO_courrierBIMPresiliationAvoir extends ModelePDFContrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->CONTRATGMAO->dir_output;
+                $dir = $conf->synopsiscontrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->CONTRATGMAO->dir_output . "/" . $propref;
+                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
                 $file = $dir ."/Courrier_resiliationAvoir_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;

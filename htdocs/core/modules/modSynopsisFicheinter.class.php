@@ -40,7 +40,7 @@
   \version    $Id: modFicheinter.class.php,v 1.33 2008/02/25 16:30:48 eldy Exp $
  */
 /**
-  \file       htdocs/includes/modules/modFicheinter.class.php
+  \file       htdocs/core/modules/modFicheinter.class.php
   \ingroup    ficheinter
   \brief      Fichier de description et activation du module Ficheinter
  */

@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : pdf_contratGMAO_courrierBIMPresiliation.modules.php
+  * Name : pdf_contratGMAO_courrierBIMPavenant.modules.php
   * GLE-1.2
   */
 
@@ -32,7 +32,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
+class pdf_contratGMAO_courrierBIMPavenant extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -41,7 +41,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contratGMAO_courrierBIMPresiliation($db)
+    function pdf_contratGMAO_courrierBIMPavenant($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -90,7 +90,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         $outputlangs->setPhpLang();
-        if ($conf->CONTRATGMAO->dir_output)
+        if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -109,12 +109,12 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->CONTRATGMAO->dir_output;
+                $dir = $conf->synopsiscontrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->CONTRATGMAO->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_resiliation_".date("d_m_Y")."_" . $propref . ".pdf";
+                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $file = $dir ."/Courrier_avenant_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -212,7 +212,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
                 $pdf->SetFont('Arial', '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Résiliation du contrat ".$contrat->ref),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Avenant à votre contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
                 $pdf->SetFont('Arial', 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
@@ -226,19 +226,14 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModelePDFContrat
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous avez souhaité résilier votre contrat N° ".$contrat->ref).".",0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous trouverez ci-joint l'avenant correspondant à votre contrat
+N° ").$contrat->ref.".",0,'L');
 
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 109);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Nous en prenons bonne note."),0,'L');
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 118);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Sachez que vous pouvez réactiver votre contrat à tout moment, ceci sur simple
-demande de devis."),0,'J');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Restant à votre disposition, nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'J');
-
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+27);
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 143);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
 Direction Technique
 "),0,'L');

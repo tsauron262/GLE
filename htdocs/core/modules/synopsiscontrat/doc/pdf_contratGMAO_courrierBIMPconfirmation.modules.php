@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : pdf_contratGMAO_courrierBIMPAutoPrelevement.modules.php
+  * Name : pdf_contratGMAO_courrierBIMPconfirmation.modules.php
   * GLE-1.2
   */
 
@@ -32,7 +32,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModelePDFContrat
+class pdf_contratGMAO_courrierBIMPconfirmation extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -41,7 +41,7 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModelePDFContrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contratGMAO_courrierBIMPAutoPrelevement($db)
+    function pdf_contratGMAO_courrierBIMPconfirmation($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -90,7 +90,7 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModelePDFContrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
         $outputlangs->setPhpLang();
-        if ($conf->CONTRATGMAO->dir_output)
+        if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (! is_object($contrat))
@@ -109,12 +109,12 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModelePDFContrat
             // Definition de $dir et $file
             if ($contrat->specimen)
             {
-                $dir = $conf->CONTRATGMAO->dir_output;
+                $dir = $conf->synopsiscontrat->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
                 $propref = sanitize_string($contrat->ref);
-                $dir = $conf->CONTRATGMAO->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_AutoPrelev.pdf";
+                $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
+                $file = $dir ."/Courrier_confirmation_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -170,10 +170,80 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModelePDFContrat
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont('Arial', 'B', 12);
 
-                $pagecountTpl=$pdf->setSourceFile(DOL_DOCUMENT_ROOT.'/core/modules/contratGMAO/AUTORISATIONPRELEVEMENT.pdf');
+//Encart societe
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
+                $pdf->SetFont('Arial', '', 11);
+                $pdf->SetX($this->marge_gauche + 100);
 
-                $tplidx=$pdf->importPage(1,"/MediaBox");
-                $pdf->useTemplate($tplidx, 0, 0,0,0,true);
+//representant légal : signataire contrat
+                $requete = "SELECT fk_socpeople
+                              FROM ".MAIN_DB_PREFIX."c_type_contact as c,
+                                   ".MAIN_DB_PREFIX."element_contact as e
+                             WHERE c.element = 'contrat'
+                               AND c.source = 'external'
+                               AND c.code = 'SALESREPSIGN'
+                               AND e.statut = 4
+                               AND e.fk_c_type_contact = c.rowid
+                               AND e.element_id = ".$contrat->id;
+                $sql = $this->db->query($requete);
+                $contact = "";
+                if ($sql && $this->db->num_rows($sql) > 0)
+                {
+                    $res = $this->db->fetch_object($sql);
+                    require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+                    $tmpcontact = new Contact($this->db);
+                    $tmpcontact->fetch($res->fk_socpeople);
+                    $contact = $tmpcontact->fullname;
+                }
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contact,0,'L');
+                $pdf->SetX($this->marge_gauche + 100);
+//addresse :> add de la société
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->adresse_full,0,'L');
+
+//Date
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
+
+//Objet
+                $pdf->SetFont('Arial', 'U', 10);
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
+                $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Confirmation de contrat ".$contrat->ref),0,'L');
+                $remY = $pdf->GetY();
+                $pdf->SetFont('Arial', 'U', 10);
+                $pdf->SetXY($this->marge_gauche,$remY);
+                $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
+                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetXY($this->marge_gauche + 23,$remY);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_decode($contrat->societe->code_client),0,'L');
+
+//Madame, Monsieur
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 90);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous avez souscrit un contrat de services et nous vous en remercions").".",0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 112);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Nous vous informons que nous avons procédé à son enregistrement. Ce contrat sera totalement validé lors du règlement de la facture. Vous trouverez ci-joint votre
+exemplaire signé."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
+Direction Technique
+"),0,'L');
+
 
                 $this->_pagefoot($pdf,$outputlangs);
 

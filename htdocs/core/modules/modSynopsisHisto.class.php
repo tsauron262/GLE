@@ -24,7 +24,7 @@
  */
 
 /**
- *      \file       htdocs/includes/modules/modMyModule.class.php
+ *      \file       htdocs/core/modules/modMyModule.class.php
  *      \ingroup    mymodule
  *      \brief      Description and activation file for module MyModule
  *		\version	$Id: modMyModule.class.php,v 1.67 2011/08/01 13:26:21 hregis Exp $

@@ -34,14 +34,14 @@
  */
 
 /**
- \file       htdocs/includes/modules/commande/pdf_pholos.modules.php
+ \file       htdocs/core/modules/commande/pdf_pholos.modules.php
  \ingroup    commande
  \brief      Fichier de la classe permettant de generer les commandes au modele Einstein
  \author        Laurent Destailleur
  \version    $Id: pdf_pholos.modules.php,v 1.64 2008/08/07 07:50:04 eldy Exp $
  */
 
-//require_once(DOL_DOCUMENT_ROOT ."/includes/modules/commande/modules_commande.php");
+//require_once(DOL_DOCUMENT_ROOT ."/core/modules/commande/modules_commande.php");
 //require_once(DOL_DOCUMENT_ROOT."/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 

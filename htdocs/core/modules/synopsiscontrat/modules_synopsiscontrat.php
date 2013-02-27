@@ -159,7 +159,6 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
         } else {
             dol_syslog("Erreur dans contrat_pdf_create");
             dol_print_error($db,$obj->pdferror());
-            die;
             return 0;
         }
     } else {

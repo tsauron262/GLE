@@ -1034,7 +1034,7 @@ EOF;
         require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
         $form = new Form($this->db);
         global $langs;
-        if ($_GET['action'] == "setCondReg") {
+        if ($_REQUEST['action'] == "setCondReg") {
             $requete = "UPDATE " . MAIN_DB_PREFIX . "contrat
                           SET condReg_refid =" . $_REQUEST['cond_reglement_id'] . "
                         WHERE rowid = " . $this->id;
@@ -1042,7 +1042,7 @@ EOF;
             if ($sql)
                 $this->condReg_refid = $_REQUEST['cond_reglement_id'];
         }
-        if ($_GET['action'] == "setModeReg") {
+        if ($_REQUEST['action'] == "setModeReg") {
             $requete = "UPDATE " . MAIN_DB_PREFIX . "contrat
                           SET modeReg_refid =" . $_REQUEST['mode_reglement_id'] . "
                         WHERE rowid = " . $this->id;

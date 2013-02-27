@@ -685,7 +685,7 @@ if ($_REQUEST["action"] == 'create') {
             $absolute_discount = $soc->getAvailableDiscounts();
             print '. ';
             if ($absolute_discount)
-                print $langs->trans("CompanyHasAbsoluteDiscount", price($absolute_discount), $langs->trans("Currency" . $conf->monnaie));
+                print $langs->trans("CompanyHasAbsoluteDiscount", price($absolute_discount), $langs->trans("Currency" . $conf->global->MAIN_MONNAIE));
             else
                 print $langs->trans("CompanyHasNoAbsoluteDiscount");
             print '.';

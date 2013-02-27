@@ -180,7 +180,7 @@ EOF;
         print '<th nowrap="nowrap" class="ui-state-default ui-widget-header">';
         print $langs->trans('RefCustomer');
         print '</th><td colspan="1" class="ui-widget-content">';
-        if ($user->rights->commande->creer && $_REQUEST['action'] == 'RefCustomerOrder') {
+        if ($user->rights->commande->creer && isset($_REQUEST['action']) && $_REQUEST['action'] == 'RefCustomerOrder') {
             print '<form action="fiche.php?id=' . $id . '" method="post">';
             print '<input type="hidden" name="action" value="set_ref_client">';
             print '<input type="text" class="flat" size="20" name="ref_client" value="' . traiteStr($commande->ref_client) . '">';
@@ -202,10 +202,10 @@ EOF;
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Date') . '</th>';
         print '<td class="ui-widget-content" colspan="2">' . traiteStr(dol_print_date($commande->date, 'day')) . '</td>';
         print '<td class="ui-widget-content" colspan=2 width="50%">' . $langs->trans('Source') . ' : ' . $commande->getLabelSource();
-        if ($commande->source == 0 && $conf->propal->enabled && $commande->propale_id) {
+        if ($commande->source == 0 && $conf->propal->enabled && isset($commande->linked_objects['propal'])) {
             // Si source = propal
             $propal = new Propal($db);
-            $propal->fetch($commande->propale_id);
+            $propal->fetch($commande->linked_objects['propal']);
             print ' -> <a href="' . DOL_URL_ROOT . '/comm/propal.php?propalid=' . $propal->id . '">' . traiteStr($propal->ref) . '</a>';
         }
         print '</td>';
@@ -216,7 +216,7 @@ EOF;
             print '<tr><th height="10" class="ui-state-default ui-widget-header">';
             print $langs->trans('DeliveryDate');
             print '</th><td colspan="3" class="ui-widget-content">';
-            if ($_REQUEST['action'] == 'editdate_livraison') {
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_livraison') {
                 print '<form name="setdate_livraison" action="' . $_SERVER["PHP_SELF"] . '?id=' . $commande->id . '" method="post">';
                 print '<input type="hidden" name="action" value="setdate_livraison">';
                 $html->select_date($commande->date_livraison, 'liv_', '', '', '', "setdate_livraison");
@@ -252,7 +252,7 @@ EOF;
             print '</td>';
 
             print '</th><td colspan="3" class="ui-widget-content">';
-            if ($_REQUEST['action'] == 'editdelivery_adress') {
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdelivery_adress') {
 //                    print traiteStr($html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'adresse_livraison_id','commande',$commande->id,false));
                 print getAdresseLivraisonComm($commande->id);
             } else {
@@ -280,7 +280,7 @@ EOF;
                 print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
                 $total_ht += $commande->total_ht;
                 print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
 
 
                 foreach ($arrGrpTmp as $key => $val) {
@@ -289,36 +289,36 @@ EOF;
                     print '<tr><th style="padding: 5px;" colspan=4 class="ui-state-default ui-widget-header">' . $val->ref . '</th>';
                     print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
                     print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($val->total_ht) . '</b></td>';
-                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
                 }
                 //Total groupe
                 print '<tr><th colspan=4 class="ui-state-default ui-widget-header">Total groupe</th>';
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
                 print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($total_ht) . '</b></td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
 
                 // Total TVA
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th>
                                <td class="ui-widget-content" align="right">' . price($total_tva) . '</td>';
-                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
 
                 // Total TTC
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th>
                                <td class="ui-widget-content" align="right">' . price($total_ttc) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
             } else {
                 // Total HT
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
                 print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
 
                 // Total TVA
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_tva) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
 
                 // Total TTC
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_ttc) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->monnaie) . '</td></tr>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
             }
         }
 
@@ -351,7 +351,7 @@ EOF;
         }
 
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . ' logistique</th>';
-        if ($conf->global->PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY) {
+        if (isset($conf->global->PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY) && $conf->global->PREPACOMMANDE_SHOW_WEEK_WHEN_TEMPORARY) {
             print '<td class="ui-widget-content" colspan="3">' . $statusLog . '&nbsp;' . ($dateDispo . "x" == "x" ? "" : "Dispo semaine " . $weekDispo) . '</td>';
         } else {
             print '<td class="ui-widget-content" colspan="3">' . $statusLog . '&nbsp;' . ($dateDispo . "x" == "x" ? "" : "Dispo le " . $dateDispo) . '</td>';

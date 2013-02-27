@@ -252,7 +252,7 @@ print $soc->nom;
 
     // Capital
     print '<tr><td>'.$langs->trans('Capital').'</td><td colspan="3">';
-    if ($soc->capital) print $soc->capital.' '.$langs->trans("Currency".$conf->monnaie);
+    if ($soc->capital) print $soc->capital.' '.$langs->trans("Currency".$conf->global->MAIN_MONNAIE);
     else print '&nbsp;';
     print '</td></tr>';
 

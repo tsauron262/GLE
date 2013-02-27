@@ -12,6 +12,10 @@ ini_set('display_errors', 1);
 //elseif (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
 //    error_reporting(E_ALL);
 //else
+
+if (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
+    error_reporting(E_ALL);
+else
     error_reporting(E_ALL ^ (E_NOTICE));
 
 ini_set('upload_max_filesize', 10000);
@@ -54,18 +58,6 @@ global $tabProductType, $tabTypeLigne;
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
 
-if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
-    @$conf->projet->enabled = true;
-    $conf->projet->dir_output = $conf->synopsisprojet->dir_output;
-    @$user->rights->projet->lire = true;
-    @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
-}
-if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
-    @$conf->ficheinter->enabled = true;
-    @$user->rights->ficheinter->lire = true;
-}
-
-
 
 
 $synopsisHook = new synopsisHook();
@@ -73,4 +65,6 @@ global $synopsisHook;
 
 
 $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
+
+
 ?>

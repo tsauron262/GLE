@@ -63,6 +63,7 @@ class Project extends CommonObject {
     public $CostRHByUser = array();
     public $CostRHByTaskByUser = array();
     public $CostRHByUserByTask = array();
+    public $element = 'synopsisprojet';
 
     /**
      *    \brief  Constructeur de la classe

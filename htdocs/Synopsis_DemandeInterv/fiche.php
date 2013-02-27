@@ -41,6 +41,9 @@
  */
 $activeLigneContrat = false;
 
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
 
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
@@ -346,7 +349,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
     }
 }
 
-if (isset($_REQUEST["action"]) && $_POST["action"] == 'add') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
     $demandeInterv = new demandeInterv($db);
 
     $demandeInterv->date = dol_mktime($_POST["phour"], $_POST["pmin"], $_POST["psec"], $_POST["pmonth"], $_POST["pday"], $_POST["pyear"]);
@@ -422,7 +425,7 @@ if (isset($_REQUEST["action"]) && $_POST["action"] == 'add') {
     }
 }
 
-if (isset($_REQUEST["action"]) && $_POST["action"] == 'update') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'update') {
     $demandeInterv = new demandeInterv($db);
 
     $demandeInterv->date = dol_mktime($_POST["phour"], $_POST["pmin"], $_POST["psec"], $_POST["remonth"], $_POST["reday"], $_POST["reyear"]);
@@ -469,7 +472,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'builddoc') {    // En 
 /*
  * Classer dans un projet
  */
-if (isset($_REQUEST["action"]) && $_POST['action'] == 'classin') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'classin') {
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->fetch($_REQUEST['id']);
     $demandeInterv->set_project($user, $_POST['projetidp']);
@@ -485,7 +488,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_delete' && $_R
     exit;
 }
 
-if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdate_delivery') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'setdate_delivery') {
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->fetch($_REQUEST['id']);
     $result = $demandeInterv->set_date_delivery($user, dol_mktime(12, 0, 0, $_POST['liv_month'], $_POST['liv_day'], $_POST['liv_year']));
@@ -493,7 +496,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdate_delivery') {
         dol_print_error($db, $demandeInterv->error);
 }
 
-if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription') {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'setdescription') {
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->fetch($_REQUEST['id']);
     $result = $demandeInterv->set_description($user, $_POST['description']);
@@ -504,7 +507,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'setdescription') {
 /*
  *  Ajout d'une ligne d'intervention
  */
-if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->rights->synopsisdemandeinterv->creer) {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == "addligne" && $user->rights->synopsisdemandeinterv->creer) {
 
     if ($_POST['np_desc'] && ($_POST['durationhour'] || $_POST['durationmin'])) {
         $demandeInterv = new demandeInterv($db);
@@ -534,7 +537,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
 /*
  *  Mise a jour d'une ligne d'intervention
  */
-if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer && $_POST["save"] == $langs->trans("Save")) {
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer && $_POST["save"] == $langs->trans("Save")) {
     $demandeIntervline = new demandeIntervLigne($db);
     if ($demandeIntervline->fetch($_POST['ligne']) <= 0) {
         dol_print_error($db, "fetch demandeintervdet");
@@ -815,7 +818,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         }
 
 
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && isset($conf->global->FCKEDITOR_ENABLE_SOCIETE) && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
             $doleditor = new DolEditor('description', $dsc, 280, 'dolibarr_notes', 'In', true);

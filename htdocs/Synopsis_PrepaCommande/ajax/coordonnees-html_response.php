@@ -21,6 +21,9 @@ require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 $langs->load("companies");
+
+$errmesg = '';
+
 // Security check
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : '';
 if ($user->societe_id)
@@ -40,7 +43,7 @@ if ($socid > 0) {
     // On recupere les donnees societes par l'objet
     $objsoc = new Societe($db);
     $objsoc->id = $socid;
-    $objsoc->fetch($socid, $to);
+    $objsoc->fetch($socid);//, $to);
 
     $dac = utf8_decode(strftime("%Y-%m-%d %H:%M", time()));
     if ($errmesg) {
@@ -100,7 +103,7 @@ if ($socid > 0) {
 
 
     // Multiprix
-    if ($conf->global->PRODUIT_MULTIPRICES) {
+    if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES) {
         print '<tr><th nowrap class="ui-state-default ui-widget-header">';
         print '<table width="100%" class="nobordernopadding"><tr><th nowrap>';
         print $langs->trans("PriceLevel");

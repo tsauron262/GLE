@@ -23,7 +23,7 @@
 require_once('../../main.inc.php');
 
 $id = $_REQUEST['id'];
-$DiId = $_REQUEST['diId'];
+$DiId = isset($_REQUEST['diId'])? $_REQUEST['diId'] : 0;
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");

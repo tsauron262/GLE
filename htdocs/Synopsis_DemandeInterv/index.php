@@ -47,10 +47,10 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 $langs->load("companies");
 $langs->load("interventions");
 
-$sortorder=$_GET["sortorder"]?$_GET["sortorder"]:$_POST["sortorder"];
-$sortfield=$_GET["sortfield"]?$_GET["sortfield"]:$_POST["sortfield"];
-$socid=$_GET["socid"]?$_GET["socid"]:$_POST["socid"];
-$page=$_GET["page"]?$_GET["page"]:$_POST["page"];
+$sortorder=isset($_GET["sortorder"])?$_GET["sortorder"]:"";
+$sortfield=isset($_GET["sortfield"])?$_GET["sortfield"]:"";
+$socid=isset($_GET["socid"])?$_GET["socid"]:"";
+$page=isset($_GET["page"])?$_GET["page"]:"";
 
 // Security check
 $demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';

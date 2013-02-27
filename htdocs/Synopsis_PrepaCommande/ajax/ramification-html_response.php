@@ -21,7 +21,7 @@
     //Ajoute une intervention à la commande
     $requete = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_fichinter WHERE fk_commande is null ";
     $sql = $db->query($requete);
-    print "<table cellpadding=10 width=700>";
+    print "<table cellpadding=10>";
     print "<tr><th class='ui-widget-header ui-state-default'>Ref";
     print "    <th class='ui-widget-header ui-state-default'>Tiers";
     print "    <th class='ui-widget-header ui-state-default'>Statut";
@@ -45,7 +45,7 @@
             print "<td class='ui-widget-content'>-";
         }
         print "<td class='ui-widget-content'>".$finter->getLibStatut(4);
-        print "<td class='ui-widget-content'>".date('d/m/Y',$finter->di);
+        print "<td class='ui-widget-content'>".date('d/m/Y',  strtotime($finter->di));
         $durArr = convDur($finter->duree);
         $durr = $durArr['hours']['abs'].'h'.$durArr['minutes']['rel'];
         print "<td class='ui-widget-content'>".$durr;

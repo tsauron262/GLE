@@ -38,38 +38,37 @@ $langs->load("products");
 // Security check
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'contrat', $contratid, 'contrat');
+$result = restrictedArea($user, 'contrat', $_REQUEST['idContrat'], 'contrat');
 
 
 $xml = "<ajax-response>";
 
 $action = $_REQUEST['action'];
-$lineId = $_REQUEST['lineId'];
 
 $date_start_update = '';
 $date_end_update = '';
 $date_start = '';
 $date_start_real_update = '';
 $date_end_real_update = '';
-if ($_REQUEST['dateDeb']) {
+if (isset($_REQUEST['dateDeb'])) {
     if (preg_match("/([0-9]*)[\W]([0-9]*)[\W]([0-9]*)/", $_REQUEST['dateDeb'], $arr)) {
         $date_start_update = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     }
 } else {
     $date_start_update = "";
 }
-if ($_REQUEST['dateDebmod']) {
+if (isset($_REQUEST['dateDebmod'])) {
     if (preg_match("/([0-9]{2})[\W]{1}([0-9]{2})[\W]{1}([0-9]{4})/", $_REQUEST['dateDebmod'], $arr)) {
         $date_start = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     }
 }
-if ($_REQUEST['dateDebadd']) {
+if (isset($_REQUEST['dateDebadd'])) {
     if (preg_match("/([0-9]*)[\W]([0-9]*)[\W]([0-9]*)/", $_REQUEST['dateDebadd'], $arr)) {
         $date_start = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     }
 }
 
-if ($_REQUEST['dateFin']) {
+if (isset($_REQUEST['dateFin'])) {
     if (preg_match("/([0-9]*)[\W]([0-9]*)[\W]([0-9]*)/", $_REQUEST['dateFin'], $arr)) {
         $date_end_update = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     } else {
@@ -78,14 +77,14 @@ if ($_REQUEST['dateFin']) {
 } else {
     $date_end_update = "";
 }
-if ($_REQUEST['dateDebConf']) {
+if (isset($_REQUEST['dateDebConf'])) {
     if (preg_match("/([0-9]*)[\W]([0-9]*)[\W]([0-9]*)/", $_REQUEST['dateDebConf'], $arr)) {
         $date_start_real_update = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     }
 } else {
     $date_start_real_update = "";
 }
-if ($_REQUEST['dateFinConf']) {
+if (isset($_REQUEST['dateFinConf'])) {
     if (preg_match("/([0-9]*)[\W]([0-9]*)[\W]([0-9]*)/", $_REQUEST['dateFinConf'], $arr)) {
         $date_end_real_update = $arr[3] . "-" . $arr[2] . "-" . $arr[1];
     }
@@ -554,7 +553,7 @@ switch ($action) {
                   ); */
                 delElementElement("commandedet", "contratdet", NULL, $_REQUEST['lineid']);
                 setElementElement("commandedet", "contratdet", $commandeDetId, $_REQUEST['lineid']);
-                
+
                 if ($result > 0) {
                     $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
                                  SET
@@ -858,8 +857,9 @@ switch ($action) {
 
                 if ($res->GMAO_fk_contrat_prod > 0) {
                     $tmpProd = new Product($db);
-                    $tmpProd->fetch($res->GMAO_fk_contrat_prod);
-                    $xml .= "<contratClause><![CDATA[" . utf8_encodeRien($tmpProd->clause) . "]]></contratClause>";
+                    $tmpProd->fetch($res->fk_product);
+                    $tmpProd->fetch_optionals($tmpProd->id);
+                    $xml .= "<contratClause><![CDATA[" . utf8_encodeRien($tmpProd->array_options["options_2clause"]) . "]]></contratClause>";
                 } else {
                     $xml .= "<contratClause><![CDATA[]]></contratClause>";
                 }
@@ -873,8 +873,9 @@ switch ($action) {
                 //  Produit
                 if ($res->fk_product > 0) {
                     $tmpProd = new Product($db);
-                    $tmpProd->fetch($res->fk_product);
-                    $xml .= "<productClause><![CDATA[" . utf8_encodeRien($tmpProd->clause) . "]]></productClause>";
+                    $tmpProd->fetch($res->GMAO_fk_prod);
+                    $tmpProd->fetch_optionals($tmpProd->id);
+                    $xml .= "<productClause><![CDATA[" . utf8_encodeRien($tmpProd->array_options["options_2clause"]) . "]]></productClause>";
                 } else {
                     $xml .= "<productClause><![CDATA[]]></productClause>";
                 }

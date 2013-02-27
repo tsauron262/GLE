@@ -224,15 +224,15 @@ if ($_GET["commande_id"] > 0)
     // Total HT
         print '<tr><td>'.$langs->trans('AmountHT').'</td>';
         print '<td align="right"><b>'.price($commande->total_ht).'</b></td>';
-        print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td>'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TVA
         print '<tr><td>'.$langs->trans('AmountVAT').'</td><td align="right">'.price($commande->total_tva).'</td>';
-        print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td>'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TTC
         print '<tr><td>'.$langs->trans('AmountTTC').'</td><td align="right">'.price($commande->total_ttc).'</td>';
-        print '<td>'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td>'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Statut
         print '<tr><td>'.$langs->trans('Status').'</td>';

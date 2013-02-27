@@ -23,7 +23,7 @@
   require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
   require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
 
-  if ($conf->global->PREPACOMMANDE_SHOW_FINANCE_FULL_DETAIL)
+  if (isset($conf->global->PREPACOMMANDE_SHOW_FINANCE_FULL_DETAIL) && $conf->global->PREPACOMMANDE_SHOW_FINANCE_FULL_DETAIL)
   {
       $com = new Synopsis_Commande($db);
       $html = new Form($db);
@@ -374,7 +374,7 @@ EOF;
     print '<tr><th nowrap="nowrap" class="ui-state-default ui-widget-header">';
     print $langs->trans('RefCustomer');
     print '</th><td colspan="4" class="ui-widget-content">';
-    if ($user->rights->commande->creer && $_REQUEST['action'] == 'RefCustomerOrder')
+    if ($user->rights->commande->creer && isset($_REQUEST['action']) && $_REQUEST['action'] == 'RefCustomerOrder')
     {
         print '<form action="fiche.php?id='.$id.'" method="post">';
         print '<input type="hidden" name="action" value="set_ref_client">';
@@ -407,7 +407,7 @@ EOF;
 
     // Condition de paiement
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Conditions de paiement').'</th>';
-    print '<td class="ui-widget-content" colspan="4">'.utf8_encodeRien($commande->cond_reglement_facture).'</td>';
+    print '<td class="ui-widget-content" colspan="4">'.utf8_encodeRien($commande->cond_reglement).'</td>';
     print '</tr>';
 
 
@@ -425,7 +425,7 @@ EOF;
         print '<tr><th style="padding: 5px;" colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountHT').'</th>';
         $total_ht += $commande->total_ht;
         print '<td style="padding: 5px;" colspan=2 class="ui-widget-content" align="right"><b>'.price($commande->total_ht).'</b></td>';
-        print '<td style="padding: 5px;" class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td style="padding: 5px;" class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
 //require_once('Var_Dump.php');
 //var_dump::Display($arrGrpTmp);
@@ -436,41 +436,41 @@ EOF;
             print '<tr><th style="padding: 5px;" colspan=5 class="ui-state-default ui-widget-header">'.$val->ref.'</th>';
             print '<tr><th style="padding: 5px;" colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountHT').'</th>';
             print '<td style="padding: 5px;" colspan=2 class="ui-widget-content" align="right"><b>'.price($val->total_ht).'</b></td>';
-            print '<td style="padding: 5px;" class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+            print '<td style="padding: 5px;" class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         }
         //Total groupe
         print '<tr><th colspan=5 class="ui-state-default ui-widget-header">Total groupe</th>';
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountHT').'</th>';
         print '<td colspan=2  class="ui-widget-content" align="right"><b>'.price($total_ht).'</b></td>';
-        print '<td class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TVA
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountVAT').'</th>
                    <td colspan=2 class="ui-widget-content" align="right">'.price($total_tva).'</td>';
-        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TTC
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountTTC').'</th>
                    <td colspan=2 class="ui-widget-content" align="right">'.price($total_ttc).'</td>';
-        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
 
     } else {
         // Total HT
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountHT').'</th>';
         print '<td colspan=2  class="ui-widget-content" align="right"><b>'.price($commande->total_ht).'</b></td>';
-        print '<td class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TVA
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountVAT').'</th>
                    <td colspan=2 class="ui-widget-content" align="right">'.price($commande->total_tva).'</td>';
-        print '<td colspan=1 class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td colspan=1 class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
 
         // Total TTC
         print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('AmountTTC').'</th>
                    <td colspan=2 class="ui-widget-content" align="right">'.price($commande->total_ttc).'</td>';
-        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->monnaie).'</td></tr>';
+        print '<td colspan=1  class="ui-widget-content">'.$langs->trans('Currency'.$conf->global->MAIN_MONNAIE).'</td></tr>';
     }
     print '<tr><th colspan=2 class="ui-state-default ui-widget-header">'.$langs->trans('Status').' financier</th>';
     $statusFin = "-";

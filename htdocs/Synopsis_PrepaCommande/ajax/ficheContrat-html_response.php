@@ -160,7 +160,7 @@ if ($id > 0) {
         $tabLigneIdS[] = array($res->fk_product, $res->rowid);
     }
     print $longHtml;
-                print "<tr><td><button onClick='createContrat(" . $res->fk_product . ")' class='butAction'>Cr&eacute;er le contrat</button>";
+                print "<tr><td><button onClick='createContrat(" . 0 . ")' class='butAction'>Cr&eacute;er le contrat</button>";
     if ($touCreer) {
         print '<tr><td colspan="3">';
         $requete = "SELECT *

@@ -50,7 +50,7 @@ $requete = "SELECT SUM(total_ht) as tht
              WHERE p.rowid = cdet.fk_product
                AND c.rowid = cp.fk_categorie
                AND cp.fk_product = p.rowid
-               AND c.rowid IN (SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_total)
+               AND c.rowid IN (SELECT catId FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_total)
                AND cdet.fk_commande IN (" . join(',', $arrGrpCom) . ") ";
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
@@ -132,9 +132,9 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par cat&eacute;
 
 //table avec le dispatch
 $requete = "SELECT SUM(dt.total_ht) as tht, t.label
-              FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as d,
-                   ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as dt,
-                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t
+              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as d,
+                   " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet as dt,
+                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
         " AND t.id = dt.fk_typeinterv
                AND dt.fk_demandeInterv = d.rowid
@@ -168,7 +168,7 @@ while ($res = $db->fetch_object($sql)) {
 print "</table>";
 
 //Categorie
-$requete = "SELECT l.catId, c.label FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_listContent as l, ".MAIN_DB_PREFIX."categorie as c WHERE l.catId = c.rowid";
+$requete = "SELECT l.catId, c.label FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent as l, " . MAIN_DB_PREFIX . "categorie as c WHERE l.catId = c.rowid";
 $sqlContent = $db->query($requete);
 $iter = 0;
 $replacePosition = 0;
@@ -195,10 +195,10 @@ while ($resContent = $db->fetch_object($sqlContent)) {
         if ($val->fk_product > 0) {
             $replacePosition++;
             $requete = "SELECT ct.fk_categorie, c.label, c.rowid, '" . $replacePosition . "' as position, fk_parent
-                      FROM ".MAIN_DB_PREFIX."categorie_product as ct
-                        LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON ct.fk_categorie = c.rowid
+                      FROM " . MAIN_DB_PREFIX . "categorie_product as ct
+                        LEFT JOIN " . MAIN_DB_PREFIX . "categorie as c ON ct.fk_categorie = c.rowid
                      WHERE  ct.fk_product = " . $val->fk_product . "
-                         AND c.rowid IN (SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_listContent)";
+                         AND c.rowid IN (SELECT catId FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent)";
             $sql = $db->query($requete);
 
 
@@ -222,11 +222,14 @@ while ($resContent = $db->fetch_object($sqlContent)) {
 ////                    print $requete."<br/>";
 //                    while ($res2 = $db->fetch_object($sql2)) {
 ////                    die($requete);
-                        if ($res1->fk_parent == $resContent->catId) {
-                            $arrLabelSort[$res1->rowid] = $res1->label;
-                            $arrCat[$res1->rowid]+= $val->total_ht;
-                            $arrPos[$res1->rowid] = $res1->rowid;
-                        }
+                    if ($res1->fk_parent == $resContent->catId) {
+                        $arrLabelSort[$res1->rowid] = $res1->label;
+                        if (isset($arrCat[$res1->rowid]))
+                            $arrCat[$res1->rowid] += $val->total_ht;
+                        else
+                            $arrCat[$res1->rowid] = $val->total_ht;
+                        $arrPos[$res1->rowid] = $res1->rowid;
+                    }
 //                    }
                     //var_dump($arrLabelSort);
                 }

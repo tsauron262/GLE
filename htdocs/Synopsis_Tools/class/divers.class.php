@@ -20,6 +20,20 @@ class synopsisHook {
         }
     }
 
+    function initRightsSyn() {
+        global $conf, $user;
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
+            @$conf->projet = $conf->synopsisprojet;
+            @$user->rights->projet = $user->rights->synopsisprojet;
+            @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
+        }
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
+            @$conf->ficheinter = $conf->synopsisficheinter;
+            @$user->rights->ficheinter = $user->rights->synopsisficheinter;
+        }
+    }
+
     static function getMenu() {
         global $conf, $langs;
         $return = '';
@@ -47,7 +61,7 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $return .= '<div class="blockvmenupair">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts">
-                    <img src="' . DOL_URL_ROOT .'/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
+                    <img src="' . DOL_URL_ROOT . '/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
             $return .= '<input type="text" class="flat" name="search_contract" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
@@ -231,6 +245,8 @@ class consigneCommande {
 
     var $note = '';
     var $rowid = 0;
+    var $fk_group = 0;
+    var $fk_comm = 0;
 
     public function consigneCommande($db) {
         $this->db = $db;
@@ -354,7 +370,7 @@ class Synopsis_Commande extends Commande {
         }
     }
 
-    //La commande est elle membre d'un groupe
+//La commande est elle membre d'un groupe
     public function isGroupMember() {
 //        return false;
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id as gid
@@ -471,7 +487,7 @@ class histoNavigation {
 
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {
-            //print '<a href="#" class="vsmenu">'..'</a>';
+//print '<a href="#" class="vsmenu">'..'</a>';
             $ret = self::histoUser($res);
             if ($ret)
                 $return .= "<div class='menu_contenu'>  " . $ret . "</div>";

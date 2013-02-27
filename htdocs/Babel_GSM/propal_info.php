@@ -173,7 +173,7 @@ print "<TBODY>\n";
     {
         if ($propal->statut > 0)
         {
-            print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->monnaie));
+            print $langs->trans("CompanyHasAbsoluteDiscount",price($absolute_discount),$langs->transnoentities("Currency".$conf->global->MAIN_MONNAIE));
         }
         else
         {
@@ -185,7 +185,7 @@ print "<TBODY>\n";
     }
     if ($absolute_creditnote)
     {
-        print $langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->monnaie)).'. ';
+        print $langs->trans("CompanyHasCreditNote",price($absolute_creditnote),$langs->transnoentities("Currency".$conf->global->MAIN_MONNAIE)).'. ';
     }
     if (! $absolute_discount && ! $absolute_creditnote) print $langs->trans("CompanyHasNoAbsoluteDiscount").'.';
     print '</td></tr>';
@@ -325,17 +325,17 @@ print "<TBODY>\n";
 //    // Amount HT
 //    print '<tr><td height="10">'.$langs->trans('AmountHT').'</td>';
 //    print '<td align="right" colspan="2" nowrap><b>'.price($propal->total_ht).'</b></td>';
-//    print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+//    print '<td>'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td></tr>';
 //
 //    // Amount VAT
 //    print '<tr><td height="10">'.$langs->trans('AmountVAT').'</td>';
 //    print '<td align="right" colspan="2" nowrap>'.price($propal->total_tva).'</td>';
-//    print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+//    print '<td>'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td></tr>';
 //
 //    // Amount TTC
 //    print '<tr><td height="10">'.$langs->trans('AmountTTC').'</td>';
 //    print '<td align="right" colspan="2" nowrap>'.price($propal->total_ttc).'</td>';
-//    print '<td>'.$langs->trans("Currency".$conf->monnaie).'</td></tr>';
+//    print '<td>'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td></tr>';
 
 //Amount Babel
 
@@ -391,33 +391,33 @@ print "<TBODY>\n";
     // Amount HT Babel 1
     print '<tr><td height="10" class="pair">'.$langs->trans('Total HT sans remise').'</td>';
     print '<td  class="pair" align="right" colspan="1" ><b>'.price($arrRem['TotalHTsansRemise']).'</b></td>';
-    print '<td class="pair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="pair">&nbsp;</td></tr>';
+    print '<td class="pair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="pair">&nbsp;</td></tr>';
 
     // Amount HT Babel 2 (sur lignes)
     print '<tr><td height="10" class="impair">'.$langs->trans('Total HT avec remise sur ligne').'</td>';
     print '<td  class="impair" align="right" colspan="1" ><b>'.price($arrRem['TotalHTavecRemiseSurLigne']).'</b></td>';
-    print '<td class="impair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="impair">&nbsp;</td></tr>';
+    print '<td class="impair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="impair">&nbsp;</td></tr>';
 
 
     // Remises HT Babel 2 (sur lignes)
     print '<tr><td height="10" class="pair">'.$langs->trans('Remise HT sur ligne').'</td>';
     print '<td  class="pair" align="right" colspan="1" ><b>'.price($arrRem['TotalHTsansRemise']-$arrRem['TotalHTavecRemiseSurLigne']).'</b></td>';
-    print '<td class="pair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="pair">&nbsp;</td></tr>';
+    print '<td class="pair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="pair">&nbsp;</td></tr>';
 
     // Amount HT Babel 4 (sur lignes et global)
     print '<tr><td height="10" class="impair">'.$langs->trans('Total HT avec remises sur lignes et globals').'</td>';
     print '<td  class="impair" align="right" colspan="1" ><b>'.price($arrRem['TotalHTavecRemiseSurLigne']*(1-$remise_client/100)).'</b></td>';
-    print '<td class="impair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="impair">&nbsp;</td></tr>';
+    print '<td class="impair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="impair">&nbsp;</td></tr>';
 
     // Amount TTC Babel 4 (sur lignes et global)
     print '<tr><td height="10" class="pair">'.$langs->trans('Total TTC avec remises sur lignes et globals').'</td>';
     print '<td  class="pair" align="right" colspan="1" ><b>'.price($arrRem['TotalHTavecRemiseSurLigne']*(1-$remise_client/100)*1.196).'</b></td>';
-    print '<td class="pair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="pair">&nbsp;</td></tr>';
+    print '<td class="pair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="pair">&nbsp;</td></tr>';
 
     // Remise HT Babel 5
     print '<tr><td height="10" class="impair">'.$langs->trans('Total remises HT globals').'</td>';
     print '<td align="right" colspan="1"  class="impair">'.price($arrRem['TotalHTavecRemiseSurLigne']*($remise_client/100)).'</td>';
-    print '<td class="impair">'.$langs->trans("Currency".$conf->monnaie).'</td><td class="impair">&nbsp;</td></tr>';
+    print '<td class="impair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td><td class="impair">&nbsp;</td></tr>';
 
     // Total Remise HT Babel 5
     $comp=0;
@@ -430,7 +430,7 @@ print "<TBODY>\n";
 
     print '<tr><td height="10" class="pair">'.$langs->trans('Total remises HT').'</td>';
     print '<td align="right" colspan="1"  class="pair">'.price($arrRem['TotalHTsansRemise'] - $arrRem['TotalHTavecRemiseSurLigne']*(1-$remise_client/100)).'</td>';
-    print '<td class="pair">'.$langs->trans("Currency".$conf->monnaie).'</td>';
+    print '<td class="pair">'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE).'</td>';
     print '<td align="center"  class="pair">'.' ('.$comp.'%)</td></tr>';
 
 

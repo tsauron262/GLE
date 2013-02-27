@@ -25,7 +25,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/sendings.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/stock/class/entrepot.class.php");
 $msg = "";
 
-if ($_REQUEST['nd'] . "x" != "x" && $_REQUEST['action'] == "setDateLiv") {
+if (isset($_REQUEST['nd']) && $_REQUEST['nd'] . "x" != "x" && isset($_REQUEST['action']) && $_REQUEST['action'] == "setDateLiv") {
     if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/', $_REQUEST['nd'], $arrRegEx)) {
         $dateLiv = $arrRegEx[3] . "-" . $arrRegEx[2] . "-" . $arrRegEx[1];
         //date_livraison
@@ -33,7 +33,7 @@ if ($_REQUEST['nd'] . "x" != "x" && $_REQUEST['action'] == "setDateLiv") {
         $db->query($requete);
     }
 }
-if ($_REQUEST['action'] == "setDepot" && $_REQUEST['nd'] . 'x' != "x") {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == "setDepot" && isset($_REQUEST['nd']) && $_REQUEST['nd'] . 'x' != "x") {
     if ($_REQUEST["id"] > 0) {
         $commande = new Synopsis_Commande($db);
         if ($commande->fetch($_REQUEST["id"]) > 0) {
@@ -41,7 +41,7 @@ if ($_REQUEST['action'] == "setDepot" && $_REQUEST['nd'] . 'x' != "x") {
         }
     }
 }
-if ($_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQUEST["id"] > 0) {
     //sendmail
     require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
     $commande = new Synopsis_Commande($db);
@@ -145,7 +145,7 @@ if ($_REQUEST["id"] > 0) {
         print $langs->trans('DeliveryDate');
         print '<a href="#" onClick="changeDateLivraison();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
         print '</th><td colspan="2"  class="ui-widget-content">';
-        if ($_REQUEST['action'] == 'editdate_livraison') {
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_livraison') {
             //print '<form name="setdate_livraison" action="'.$_SERVER["PHP_SELF"].'?id='.$commande->id.'" method="post">';
             print "<input type='text' class='datePicker' id='livDate' name='livDate'>";
             print '<button onClick="validateDateLiv();" class="butAction" >OK</button>';
@@ -161,7 +161,7 @@ if ($_REQUEST["id"] > 0) {
         print $langs->trans('D&eacute;poser &agrave;');
         print '<a href="#" onClick="changeSiteDepot();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
         print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
-        if ($_REQUEST['action'] == 'editDepot') {
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editDepot') {
             $requete = "SELECT * FROM ".MAIN_DB_PREFIX."entrepot";
             print "<select name='newDepot' id='newDepot'>";
             $sql6 = $db->query($requete);
@@ -401,7 +401,7 @@ EOF;
             print "<br/>";
             print '<table width="100%">';
 
-            if ($conf->stock->enabled && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer) {
+            if ($conf->stock->enabled && isset($reste_a_livrer_total) && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer) {
                 print '<tr><td width="50%" colspan="2" valign="top">';
                 print_titre($langs->trans("NewSending"));
 

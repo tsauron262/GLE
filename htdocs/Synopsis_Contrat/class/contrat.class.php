@@ -738,6 +738,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function list_all_valid_contacts() {
+	include_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
         $arr = array();
         $arr1 = array();
         $arr = $this->liste_contact(4, 'external');

@@ -532,8 +532,8 @@ jQuery(function() {
 //                if (fkProd2 + "x" != "x") {
                     jQuery('#modClauseProdCont').replaceWith('<div id="modClauseProdCont" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('contratClause').text()+'</div>');
 
-                    var retId2 = 'ajdynfieldp_idContratprod_mod';
-                    var param2 = 'htmlname=p_idContratprod_mod&price_level=&type=2||4&mode=1&status=1';
+                    var retId2 = 'p_idContratprod_mod';
+                    var param2 = 'htmlname=p_idContratprod_mod&price_level=&type=2&mode=1&status=1';
                     if (fkProd2 + "x" != "x")
                         param2 = param2 + '&prodId=' + fkProd2;
                     $('#search_p_idContratprod_mod').bind('keyup',function(){

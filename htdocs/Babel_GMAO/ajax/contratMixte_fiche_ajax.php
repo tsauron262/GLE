@@ -825,8 +825,8 @@ switch ($action) {
                            c.fk_user_cloture,
                            c.commentaire,
                            o.fk_commande,
-                           p.label as prodLabel,
-                           p2.label as prodLabel2
+                           p.ref as prodLabel,
+                           p2.ref as prodLabel2
                       FROM " . MAIN_DB_PREFIX . "contratdet as c
                  LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ee ON ee.sourcetype = 'commandedet' AND ee.targettype = 'contratdet' AND ee.fk_target = c.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "commandedet as o ON ee.fk_source = o.rowid

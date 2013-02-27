@@ -1203,7 +1203,8 @@ class Form
         {
             $sql.= " AND p.tosell = ".$status;
         }
-        if (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
+        if(is_array($filtertype)) $sql.=" AND p.fk_product_type IN (".implode(",",$filtertype).")";
+        elseif (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
         // Add criteria on ref/label
         if ($filterkey && $filterkey != '')
         {

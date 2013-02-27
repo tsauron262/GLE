@@ -951,7 +951,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $modeReg = utf8_encodeRien($res->libelle);
         }
         $condReg = "Indéterminé";
-        $requete = "SELECT * FROM llx_cond_reglement WHERE rowid = " . $this->contrat->condReg_refid;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_payment_term WHERE rowid = " . $this->contrat->condReg_refid;
         $sql = $this->db->query($requete);
         if ($sql) {
             $res = $this->db->fetch_object($sql);

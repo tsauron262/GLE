@@ -276,10 +276,10 @@ if ($_REQUEST['typeContrat'] =='LocationFinanciere' && $_REQUEST["action"] == 'a
     {
         if($_REQUEST['condid']>=0 && $_REQUEST['paiementtype'] >=0)
         {
-            $requete = "UPDATE ".MAIN_DB_PREFIX."contrat
+            $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
                            SET condReg_refid = ".$_REQUEST['condid']." ,
                                modeReg_refid = ".$_REQUEST['paiementtype']."
-                         WHERE rowid =".$contrat->id;
+                         WHERE id =".$contrat->id;
             $sql = $db->query($requete);
         }
         if ($_REQUEST['returnPrepacom'] > 0 )

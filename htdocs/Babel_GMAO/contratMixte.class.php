@@ -1035,17 +1035,17 @@ EOF;
         $form = new Form($this->db);
         global $langs;
         if ($_REQUEST['action'] == "setCondReg") {
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "contrat
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
                           SET condReg_refid =" . $_REQUEST['cond_reglement_id'] . "
-                        WHERE rowid = " . $this->id;
+                        WHERE id = " . $this->id;
             $sql = $this->db->query($requete);
             if ($sql)
                 $this->condReg_refid = $_REQUEST['cond_reglement_id'];
         }
         if ($_REQUEST['action'] == "setModeReg") {
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "contrat
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
                           SET modeReg_refid =" . $_REQUEST['mode_reglement_id'] . "
-                        WHERE rowid = " . $this->id;
+                        WHERE id = " . $this->id;
 //print $requete;
             $sql = $this->db->query($requete);
             if ($sql)

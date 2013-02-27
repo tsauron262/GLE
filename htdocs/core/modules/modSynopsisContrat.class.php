@@ -172,6 +172,8 @@ class modSynopsisContrat extends DolibarrModules {
   `isSAV` int(11) DEFAULT NULL,
   `dateAnniv` datetime DEFAULT NULL,
   `nbVisite` int(11) DEFAULT NULL,
+  `condReg_refid` int(11) default NULL,
+  `modeReg_refid` int(11) default NULL,
   PRIMARY KEY (`id`),
   KEY `fk_prod` (`fk_prod`),
   KEY `contrat_refid` (`contrat_refid`)

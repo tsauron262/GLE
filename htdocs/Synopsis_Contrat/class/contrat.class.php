@@ -47,13 +47,17 @@ class Synopsis_Contrat extends Contrat {
                            telemaintenance,
                            maintenance,
                            SLA,unix_timestamp(dateAnniv) as dateAnnivU,
-                           isSAV
+                           isSAV,
+                           condReg_refid, 
+                           modeReg_refid
                       FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
                      WHERE contrat_refid =" . $id;
         $sql = $this->db->query($requete);
         if ($this->db->num_rows($sql) > 0) {
             $res = $this->db->fetch_object($sql);
 
+            $this->condReg_refid = (isset($res->condReg_refid)? $res->condReg_refid : 0);
+            $this->modeReg_refid = (isset($res->modeReg_refid)? $res->modeReg_refid : 0);
             $this->durValid = $res->durValid;
             $this->DateDeb = $res->DateDebU;
             $this->dateAnniv = $res->dateAnnivU;

@@ -69,8 +69,8 @@ class modSynopsisDemandeInterv  extends DolibarrModules
     $this->name = "Demande d'intervention";
     $this->description = "Gestion des demandes d'intervention";
 
-    $this->revision = explode(" ","$Revision: 0.1 $");
-    $this->version = $this->revision[1];
+//    $this->revision = explode(" ","$Revision: 0.1 $");
+    $this->version = "1";//$this->revision[1];
 
     $this->const_name = 'MAIN_MODULE_SYNOPSISDEMANDEINTERV';
     $this->special = 0;

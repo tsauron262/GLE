@@ -1203,14 +1203,7 @@ class Form
         {
             $sql.= " AND p.tosell = ".$status;
         }
-        /*mod drsi */
-        if (is_int($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
-        elseif($filtertype != ''){
-            $tab = explode("||", $filtertype);
-            if(isset($tab[0]))
-                $sql.=" AND p.fk_product_type IN (".implode (",", $tab).")";
-        }
-        /*f mod drsi */
+        if (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
         // Add criteria on ref/label
         if ($filterkey && $filterkey != '')
         {
@@ -1315,7 +1308,7 @@ class Form
 
 	function _construct_product_list_option(&$objp, &$opt, &$optJson, $price_level, $selected) {
 		global $langs,$conf,$user,$db;
-
+$filterkey = '';
         $outkey='';
         $outval='';
         $outref='';
@@ -1655,7 +1648,7 @@ class Form
                     }
                 }
                 else
-              {
+                {
                     $opt.= $langs->trans("NoPriceDefinedForThisSupplier");
                     $outval.=$langs->transnoentities("NoPriceDefinedForThisSupplier");
                 }

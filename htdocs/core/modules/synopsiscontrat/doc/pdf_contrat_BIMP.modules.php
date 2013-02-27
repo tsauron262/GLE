@@ -407,7 +407,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $condition .= utf8_encodeRien(preg_replace("/\[\[Annexe:([\w]*)\]\]/", "Annexe " . $numAnnexe, $val->GMAO_Mixte['clause']));
                         $pdf->Link($this->marge_gauche + $col1, $nextY, $this->page_largeur - ($this->marge_droite + $this->marge_gauche), 2 * $hauteur_ligne, $arrAnnexe[$arr[1]]['lnk']);
                     } else {
-                        $sql = "SELECT annexe.rang FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` annexe, Babel_product prod WHERE `annexe_refid` = prod.`annexe`
+                        $sql = "SELECT annexe.rang FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` annexe, " . MAIN_DB_PREFIX . "product_extrafields prod WHERE `annexe_refid` = prod.`annexe`
                                     AND prod.`rowid` = '" . $val->fk_product . "' 
                                     AND `contrat_refid` = '" . $contrat->id . "'";
                         $res = $this->db->query($sql);

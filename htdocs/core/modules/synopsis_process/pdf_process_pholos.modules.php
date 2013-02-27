@@ -714,7 +714,7 @@ class pdf_process_pholos extends ModeleNumRefProcess
         // Montants exprimes en     (en tab_top - 1)
         $pdf->SetTextColor(0,0,0);
         $pdf->SetFont(pdf_getPDFFont($outputlangs),'',8);
-        $titre = $outputlangs->transnoentities("AmountInCurrency",$outputlangs->transnoentities("Currency".$conf->monnaie));
+        $titre = $outputlangs->transnoentities("AmountInCurrency",$outputlangs->transnoentities("Currency".$conf->global->MAIN_MONNAIE));
         $pdf->Text($this->page_largeur - $this->marge_droite - $pdf->GetStringWidth($titre), $tab_top-1, $titre);
 
         $pdf->SetDrawColor(128,128,128);

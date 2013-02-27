@@ -188,7 +188,7 @@ $feuilxl->getDefaultStyle()->getFont()->setSize(12);
 $objDrawing = new PHPExcel_Worksheet_Drawing();
 $objDrawing->setName('Logo');
 $objDrawing->setDescription('logo');
-$Pathlogo = $conf->societe->dir_logos."/thumbs/".MAIN_INFO_SOCIETE_LOGO_SMALL;
+$Pathlogo = $conf->mycompany->dir_output .'/logos'."/thumbs/".MAIN_INFO_SOCIETE_LOGO_SMALL;
 
 //$Pathlogo=DOL_DOCUMENT_ROOT.'/theme/'.$conf->theme.'/Logo-72ppp.png';
 

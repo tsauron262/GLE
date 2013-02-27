@@ -1,5 +1,4 @@
 <?php
-
 /* Copyright (C) 2002-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2002-2003 Jean-Louis Bergamo   <jlb@j1b.org>
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
@@ -41,13 +40,12 @@ $module=GETPOST('module', 'alpha');
 $rights=GETPOST('rights', 'int');
 $entity=(GETPOST('entity','int')?GETPOST('entity','int'):$conf->entity);
 
-if (!isset($id) || empty($id))
-    accessforbidden();
+if (! isset($id) || empty($id)) accessforbidden();
 
 // Defini si peux lire les permissions
-$canreaduser = ($user->admin || $user->rights->user->user->lire);
+$canreaduser=($user->admin || $user->rights->user->user->lire);
 // Defini si peux modifier les autres utilisateurs et leurs permisssions
-$caneditperms = ($user->admin || $user->rights->user->user->creer);
+$caneditperms=($user->admin || $user->rights->user->user->creer);
 // Advanced permissions
 if (! empty($conf->global->MAIN_USE_ADVANCED_PERMS))
 {
@@ -66,8 +64,7 @@ if ($user->id == $id && (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user-
 	$canreaduser=1;
 }
 $result = restrictedArea($user, 'user', $id, '&user', $feature2);
-if ($user->id <> $id && !$canreaduser)
-    accessforbidden();
+if ($user->id <> $id && ! $canreaduser) accessforbidden();
 
 
 /**
@@ -81,24 +78,27 @@ if ($action == 'addrights' && $caneditperms)
     //$edituser->addrights($rights, $module, '', $entity); // FIXME unused for the moment
     $edituser->addrights($rights, $module);
 
-    // Si on a touche a ses propres droits, on recharge
-    if ($id == $user->id) {
-        $user->clearrights();
-        $user->getrights();
-    }
+	// Si on a touche a ses propres droits, on recharge
+	if ($id == $user->id)
+	{
+		$user->clearrights();
+		$user->getrights();
+	}
 }
 
-if ($action == 'delrights' && $caneditperms) {
+if ($action == 'delrights' && $caneditperms)
+{
     $edituser = new User($db);
 	$edituser->fetch($id);
     //$edituser->delrights($rights, $module, '', $entity); // FIXME unused for the moment
     $edituser->delrights($rights, $module);
 
-    // Si on a touche a ses propres droits, on recharge
-    if ($id == $user->id) {
-        $user->clearrights();
-        $user->getrights();
-    }
+	// Si on a touche a ses propres droits, on recharge
+	if ($id == $user->id)
+	{
+		$user->clearrights();
+		$user->getrights();
+	}
 }
 
 
@@ -107,7 +107,9 @@ if ($action == 'delrights' && $caneditperms) {
  *	View
  */
 
-$form = new Form($db);
+llxHeader('',$langs->trans("Permissions"));
+
+$form=new Form($db);
 
 $fuser = new User($db);
 $fuser->fetch($id);
@@ -169,8 +171,8 @@ $db->commit();
 $permsuser = array();
 
 $sql = "SELECT r.id, r.libelle, r.module";
-$sql.= " FROM " . MAIN_DB_PREFIX . "rights_def as r,";
-$sql.= " " . MAIN_DB_PREFIX . "user_rights as ur";
+$sql.= " FROM ".MAIN_DB_PREFIX."rights_def as r,";
+$sql.= " ".MAIN_DB_PREFIX."user_rights as ur";
 $sql.= " WHERE ur.fk_id = r.id";
 if (! empty($conf->multicompany->enabled)) {
 	if (1==2 && ! empty($conf->multicompany->transverse_mode)) {
@@ -183,17 +185,21 @@ if (! empty($conf->multicompany->enabled)) {
 }
 $sql.= " AND ur.fk_user = ".$fuser->id;
 
-$result = $db->query($sql);
-if ($result) {
+$result=$db->query($sql);
+if ($result)
+{
     $num = $db->num_rows($result);
     $i = 0;
-    while ($i < $num) {
+    while ($i < $num)
+    {
         $obj = $db->fetch_object($result);
-        array_push($permsuser, $obj->id);
+        array_push($permsuser,$obj->id);
         $i++;
     }
     $db->free($result);
-} else {
+}
+else
+{
     dol_print_error($db);
 }
 
@@ -212,13 +218,15 @@ if (! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transv
 	$sql.= " AND r.entity = ".((! empty($conf->multicompany->enabled) && ! empty($fuser->entity)) ? $fuser->entity : $conf->entity);
 }
 $sql.= " AND gr.fk_usergroup = gu.fk_usergroup";
-$sql.= " AND gu.fk_user = " . $fuser->id;
+$sql.= " AND gu.fk_user = ".$fuser->id;
 
-$result = $db->query($sql);
-if ($result) {
+$result=$db->query($sql);
+if ($result)
+{
     $num = $db->num_rows($result);
     $i = 0;
-    while ($i < $num) {
+    while ($i < $num)
+    {
         $obj = $db->fetch_object($result);
         if (! isset($permsgroupbyentity[$obj->entity]))
         	$permsgroupbyentity[$obj->entity] = array();
@@ -227,7 +235,8 @@ if ($result) {
     }
     $db->free($result);
 }
-else {
+else
+{
     dol_print_error($db);
 }
 
@@ -239,11 +248,11 @@ else {
 print '<table class="border" width="100%">';
 
 // Ref
-print '<tr><td width="25%" valign="top">' . $langs->trans("Ref") . '</td>';
+print '<tr><td width="25%" valign="top">'.$langs->trans("Ref").'</td>';
 print '<td>';
-print $form->showrefnav($fuser, 'id', '', $user->rights->user->user->lire || $user->admin);
+print $form->showrefnav($fuser,'id','',$user->rights->user->user->lire || $user->admin);
 print '</td>';
-print '</tr>' . "\n";
+print '</tr>'."\n";
 
 // Lastname
 print '<tr><td width="25%" valign="top">'.$langs->trans("Lastname").'</td>';
@@ -276,31 +285,31 @@ if (! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transv
 print "\n";
 print '<table width="100%" class="noborder">';
 print '<tr class="liste_titre">';
-print '<td>' . $langs->trans("Module") . '</td>';
-if ($caneditperms)
-    print '<td>&nbsp</td>';
+print '<td>'.$langs->trans("Module").'</td>';
+if ($caneditperms) print '<td>&nbsp</td>';
 print '<td align="center" width="24">&nbsp;</td>';
-print '<td>' . $langs->trans("Permissions") . '</td>';
-print '</tr>' . "\n";
+print '<td>'.$langs->trans("Permissions").'</td>';
+print '</tr>'."\n";
 
 //print "xx".$conf->global->MAIN_USE_ADVANCED_PERMS;
 $sql = "SELECT r.id, r.libelle, r.module";
-$sql.= " FROM " . MAIN_DB_PREFIX . "rights_def as r";
+$sql.= " FROM ".MAIN_DB_PREFIX."rights_def as r";
 $sql.= " WHERE r.libelle NOT LIKE 'tou%'";    // On ignore droits "tous"
-$sql.= " AND r.entity = " . ((!empty($conf->multicompany->enabled) && !empty($fuser->entity)) ? $fuser->entity : $conf->entity);
-if (empty($conf->global->MAIN_USE_ADVANCED_PERMS))
-    $sql.= " AND r.perms NOT LIKE '%_advance'";  // Hide advanced perms if option is disable
+$sql.= " AND r.entity = ".((! empty($conf->multicompany->enabled) && ! empty($fuser->entity)) ? $fuser->entity : $conf->entity);
+if (empty($conf->global->MAIN_USE_ADVANCED_PERMS)) $sql.= " AND r.perms NOT LIKE '%_advance'";  // Hide advanced perms if option is disable
 $sql.= " ORDER BY r.module, r.id";
 
-dol_syslog("sql=" . $sql);
-$result = $db->query($sql);
-if ($result) {
+dol_syslog("sql=".$sql);
+$result=$db->query($sql);
+if ($result)
+{
     $num = $db->num_rows($result);
     $i = 0;
     $var = True;
     $oldmod='';
 
-    while ($i < $num) {
+    while ($i < $num)
+    {
         $obj = $db->fetch_object($result);
 
         // Si la ligne correspond a un module qui n'existe plus (absent de includes/module), on l'ignore
@@ -335,7 +344,7 @@ if ($result) {
         	}
         }
 
-        print '<tr ' . $bc[$var] . '>';
+        print '<tr '. $bc[$var].'>';
 
         // Picto and label of permission
         print '<td>'.img_object('',$picto).' '.$objMod->getName().'</td>';
@@ -396,16 +405,15 @@ if ($result) {
         	print '<td>&nbsp</td>';
         }
 
-        $perm_libelle = ($conf->global->MAIN_USE_ADVANCED_PERMS && ($langs->trans("PermissionAdvanced" . $obj->id) != ("PermissionAdvanced" . $obj->id)) ? $langs->trans("PermissionAdvanced" . $obj->id) : (($langs->trans("Permission" . $obj->id) != ("Permission" . $obj->id)) ? $langs->trans("Permission" . $obj->id) : $obj->libelle));
-        print '<td>' . $perm_libelle . '</td>';
+        $perm_libelle=($conf->global->MAIN_USE_ADVANCED_PERMS && ($langs->trans("PermissionAdvanced".$obj->id)!=("PermissionAdvanced".$obj->id))?$langs->trans("PermissionAdvanced".$obj->id):(($langs->trans("Permission".$obj->id)!=("Permission".$obj->id))?$langs->trans("Permission".$obj->id):$obj->libelle));
+        print '<td>'.$perm_libelle. '</td>';
 
-        print '</tr>' . "\n";
+        print '</tr>'."\n";
 
         $i++;
     }
 }
-else
-    dol_print_error($db);
+else dol_print_error($db);
 print '</table>';
 
 

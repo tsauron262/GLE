@@ -140,11 +140,11 @@ class pdf_imputations_caracal extends ModeleImputations {
             $objDrawing = new PHPExcel_Worksheet_Drawing();
             $objDrawing->setName('Logo');
             $objDrawing->setDescription('logo');
-            $Pathlogo = $conf->societe->dir_logos . "/thumbs/" . MAIN_INFO_SOCIETE_LOGO_SMALL;
+            $Pathlogo = $conf->mycompany->dir_output .'/logos' . "/thumbs/" . MAIN_INFO_SOCIETE_LOGO_SMALL;
             if (!is_file($Pathlogo)) {
                 $Pathlogo = MAIN_INFO_SOCIETE_LOGO_SMALL;
                 if (!is_file($Pathlogo)) {
-                    $conf->societe->dir_logos . "/thumbs/" . $mysoc->nom . "_small.png";
+                    $conf->mycompany->dir_output .'/logos' . "/thumbs/" . $mysoc->nom . "_small.png";
                     if (!is_file($Pathlogo)) {
                         $Pathlogo = false;
                     }
@@ -385,11 +385,11 @@ class pdf_imputations_caracal extends ModeleImputations {
                 $objDrawing = new PHPExcel_Worksheet_Drawing();
                 $objDrawing->setName('Logo');
                 $objDrawing->setDescription('logo');
-                $Pathlogo = $conf->societe->dir_logos . "/thumbs/" . MAIN_INFO_SOCIETE_LOGO_SMALL;
+                $Pathlogo = $conf->mycompany->dir_output .'/logos' . "/thumbs/" . MAIN_INFO_SOCIETE_LOGO_SMALL;
                 if (!is_file($Pathlogo)) {
                     $Pathlogo = MAIN_INFO_SOCIETE_LOGO_SMALL;
                     if (!is_file($Pathlogo)) {
-                        $conf->societe->dir_logos . "/thumbs/" . $mysoc->nom . "_small.png";
+                        $conf->mycompany->dir_output .'/logos' . "/thumbs/" . $mysoc->nom . "_small.png";
                         if (!is_file($Pathlogo)) {
                             $Pathlogo = false;
                         }

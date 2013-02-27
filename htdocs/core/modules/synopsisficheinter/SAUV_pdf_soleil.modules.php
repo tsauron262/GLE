@@ -177,15 +177,15 @@ class pdf_soleil extends ModelePDFFicheinter
                 // Logo
         // Logo
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$mysoc->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$mysoc->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$mysoc->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$mysoc->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$mysoc->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$mysoc->logo;
         }
 
 
-//                $logo=$conf->societe->dir_logos.'/'.$mysoc->logo;
+//                $logo=$conf->mycompany->dir_output .'/logos'.'/'.$mysoc->logo;
                 if ($mysoc->logo)
                 {
                     if (is_readable($logo))

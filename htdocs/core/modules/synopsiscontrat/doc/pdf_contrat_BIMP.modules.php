@@ -1104,13 +1104,13 @@ Signature et cachet
 
         // Logo
         $logo = false;
-        if (is_file($conf->societe->dir_logos . '/' . $this->emetteur->logo . "noalpha.png")) {
-            $logo = $conf->societe->dir_logos . '/' . $this->emetteur->logo . "noalpha.png";
+        if (is_file($conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+            $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo . "noalpha.png";
         } else {
-            $logo = $conf->societe->dir_logos . '/' . $this->emetteur->logo;
+            $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
         }
 
-//        $logo = $conf->societe->dir_logos . '/' . $this->emetteur->logo;
+//        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
         if ($this->emetteur->logo) {
             if (is_readable($logo)) {
                 $pdf->Image($logo, 5, 13, 0, 24);
@@ -1163,7 +1163,9 @@ Signature et cachet
         $ligne = "SA OLYS";
         if(defined('MAIN_INFO_CAPITAL'))
             $ligne .= " au capital de ".MAIN_INFO_CAPITAL;
-        if(defined('MAIN_INFO_SIREN'))
+        if(defined('MAIN_INFO_RCS'))
+            $ligne .= " - R.C.S. ".MAIN_INFO_RCS;
+        elseif(defined('MAIN_INFO_SIREN'))
             $ligne .= " - R.C.S. ".MAIN_INFO_SIREN;
         if(defined('MAIN_INFO_APE'))
             $ligne .= " - APE ".MAIN_INFO_APE;

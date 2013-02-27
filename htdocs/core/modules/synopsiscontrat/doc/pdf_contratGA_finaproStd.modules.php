@@ -1498,11 +1498,11 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetY($posy);
         $pdf->SetX($this->marge_gauche);
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo;
         }
         if ($this->emetteur->logo)
         {
@@ -1648,11 +1648,11 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetY($posy);
         $pdf->SetX($this->marge_gauche);
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo;
         }
         if ($this->emetteur->logo)
         {
@@ -1754,11 +1754,11 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetY($posy);
         $pdf->SetX($this->marge_gauche);
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo;
         }
         if ($this->emetteur->logo && $displayLogo)
         {

@@ -283,14 +283,14 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
 
         // Logo
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo;
         }
 
-//        $logo = $conf->societe->dir_logos . '/' . $this->emetteur->logo;
+//        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
         if ($this->emetteur->logo) {
             if (is_readable($logo)) {
                 $pdf->Image($logo, $this->marge_gauche, $posy, 0, 24);

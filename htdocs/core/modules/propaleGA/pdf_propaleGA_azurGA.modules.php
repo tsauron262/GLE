@@ -784,11 +784,11 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
         $pdf->SetXY($this->marge_gauche,$posy);
 
         $logo = false;
-        if (is_file ($conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png"))
+        if (is_file ($conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png"))
         {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo."noalpha.png";
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo."noalpha.png";
         } else {
-            $logo=$conf->societe->dir_logos.'/'.$this->emetteur->logo;
+            $logo=$conf->mycompany->dir_output .'/logos'.'/'.$this->emetteur->logo;
         }
         if ($this->emetteur->logo)
         {

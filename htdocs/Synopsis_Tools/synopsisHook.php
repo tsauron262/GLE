@@ -4,7 +4,14 @@ date_default_timezone_set('Europe/Paris');
 
 ini_set('display_errors', 1);
 
-//$builddoc = (isset($_REQUEST['action']));
+$builddoc = (isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
+$viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
+$modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
+
+if(($modDev == 2 && !$builddoc && !$viewDoc) || ($modDev == 1))
+    error_reporting(E_ALL);
+else
+    error_reporting(E_ALL ^ (E_NOTICE));
 //if ($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
 //    error_reporting(E_ALL ^ (E_STRICT));
 //elseif ($builddoc)
@@ -13,10 +20,10 @@ ini_set('display_errors', 1);
 //    error_reporting(E_ALL);
 //else
 
-if (defined('MOD_DEV_SYN') && MOD_DEV_SYN)
-    error_reporting(E_ALL);
-else
-    error_reporting(E_ALL ^ (E_NOTICE));
+//if (defined('MOD_DEV_SYN') && MOD_DEV_SYN && (MOD_DEV_SYN == 2 || !isset($_REQUEST['action']) || ($_REQUEST['action'] != 'generatePdf' && $_REQUEST['action'] != 'builddoc')))
+//    error_reporting(E_ALL);
+//else
+//    error_reporting(E_ALL ^ (E_NOTICE));
 
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);

@@ -53,35 +53,38 @@ class Synopsis_Contrat extends Contrat {
                       FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
                      WHERE contrat_refid =" . $id;
         $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql) > 0) {
-            $res = $this->db->fetch_object($sql);
+        if (!$this->db->num_rows($sql) > 0) {
+            $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO (contrat_refid) VALUES (" . $id . ")");
+            $sql = $this->db->query($requete);
+        }
+        $res = $this->db->fetch_object($sql);
 
-            $this->condReg_refid = (isset($res->condReg_refid)? $res->condReg_refid : 0);
-            $this->modeReg_refid = (isset($res->modeReg_refid)? $res->modeReg_refid : 0);
-            $this->durValid = $res->durValid;
-            $this->DateDeb = $res->DateDebU;
-            $this->dateAnniv = $res->dateAnnivU;
-            $this->dateAnnivFR = date('d/m/Y', $res->dateAnnivU);
-            $this->DateDebFR = date('d/m/Y', $res->DateDebU);
-            $this->fk_prod = $res->fk_prod;
-            if ($this->fk_prod > 0) {
-                require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
-                $prodTmp = new Product($this->db);
-                $prodTmp->fetch($this->fk_prod);
-                $this->prod = $prodTmp;
-            }
-            $this->reconductionAuto = $res->reconductionAuto;
-            $this->qte = $res->qte;
-            $this->hotline = $res->hotline;
-            $this->telemaintenance = $res->telemaintenance;
-            $this->maintenance = $res->maintenance;
-            $this->SLA = $res->SLA;
-            $this->isSAV = $res->isSAV;
+        $this->condReg_refid = (isset($res->condReg_refid) ? $res->condReg_refid : 0);
+        $this->modeReg_refid = (isset($res->modeReg_refid) ? $res->modeReg_refid : 0);
+        $this->durValid = $res->durValid;
+        $this->DateDeb = $res->DateDebU;
+        $this->dateAnniv = $res->dateAnnivU;
+        $this->dateAnnivFR = date('d/m/Y', $res->dateAnnivU);
+        $this->DateDebFR = date('d/m/Y', $res->DateDebU);
+        $this->fk_prod = $res->fk_prod;
+        if ($this->fk_prod > 0) {
+            require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
+            $prodTmp = new Product($this->db);
+            $prodTmp->fetch($this->fk_prod);
+            $this->prod = $prodTmp;
+        }
+        $this->reconductionAuto = $res->reconductionAuto;
+        $this->qte = $res->qte;
+        $this->hotline = $res->hotline;
+        $this->telemaintenance = $res->telemaintenance;
+        $this->maintenance = $res->maintenance;
+        $this->SLA = $res->SLA;
+        $this->isSAV = $res->isSAV;
 
-            $this->type = $this->extraparams;
-            $this->typeContrat = $this->type;
+        $this->type = $this->extraparams;
+        $this->typeContrat = $this->type;
 
-            $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfinprev,
+        $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfinprev,
                                unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfin,
                                unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddeb,
                                unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddebprev,
@@ -97,20 +100,19 @@ class Synopsis_Contrat extends Contrat {
                      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont ON " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_id = " . MAIN_DB_PREFIX . "contratdet.rowid AND " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont.element_type LIKE 'contrat%'
                          WHERE " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.contratdet_refid = " . MAIN_DB_PREFIX . "contratdet.rowid
                            AND fk_contrat =" . $id;
-            $sql = $this->db->query($requete);
-            while ($res = $this->db->fetch_object($sql)) {
-                $this->lineTkt[$res->rowid] = array(
-                    'serial_number' => $res->serial_number,
-                    'fk_contrat_prod' => ($res->fk_contrat_prod > 0 ? $res->fk_contrat_prod : false),
-                    'durVal' => $res->durVal, /*
-                      'durSav' => $res->durSav, */
-                    'qty' => $res->qty,
-                    'pu' => $res->pu,
-                    'dfinprev' => $res->dfinprev,
-                    'dfin' => $res->dfin,
-                    'ddeb' => $res->ddeb,
-                    'ddebprev' => $res->ddebprev);
-            }
+        $sql = $this->db->query($requete);
+        while ($res = $this->db->fetch_object($sql)) {
+            $this->lineTkt[$res->rowid] = array(
+                'serial_number' => $res->serial_number,
+                'fk_contrat_prod' => ($res->fk_contrat_prod > 0 ? $res->fk_contrat_prod : false),
+                'durVal' => $res->durVal, /*
+                  'durSav' => $res->durSav, */
+                'qty' => $res->qty,
+                'pu' => $res->pu,
+                'dfinprev' => $res->dfinprev,
+                'dfin' => $res->dfin,
+                'ddeb' => $res->ddeb,
+                'ddebprev' => $res->ddebprev);
         }
         return($ret);
     }
@@ -738,7 +740,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function list_all_valid_contacts() {
-	include_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+        include_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
         $arr = array();
         $arr1 = array();
         $arr = $this->liste_contact(4, 'external');
@@ -1192,7 +1194,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function addLigneCommande($commId, $comLigneId) {
-        global $user;
+        global $user, $langs, $conf;
         $contratId = $this->id;
         $db = $this->db;
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
@@ -1255,15 +1257,15 @@ class Synopsis_Contrat extends Contrat {
         $isSAV = false;
         $isTkt = false;
         $qte1 = $res->qty;
-        $qte2 = $tmpProd->array_options['options_2qte'];
+        $qte2 = ($tmpProd->array_options['options_2qte'] > 0) ? $tmpProd->array_options['options_2qte'] : 1;
         if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance'] > 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
 //            $qte = $tmpProd->array_options['options_2visiteSurSite'];
         } else if ($tmpProd->array_options['options_2isSAV'] > 0) {
             $isSAV = true;
-        } else if ($tmpProd->array_options['options_2qte'] > 0) {
+        } else if ($tmpProd->array_options['options_2timePerDuree'] > 0) {
             $isTkt = true;
-//            $qte = $tmpProd->array_options['options_2qte'];
+            $qte2 = $tmpProd->array_options['options_2qte'];
         }
 
 
@@ -1284,7 +1286,7 @@ class Synopsis_Contrat extends Contrat {
         addElementElement("commandedet", "contratdet", $comLigneId, $cdid);
 
 //Mode de reglement et condition de reglement
-        if ($res2->condReg_refid != $com->cond_reglement_id || $res2->modeReg_refid != $com->mode_reglement_id) {
+        if ($this->condReg_refid != $com->cond_reglement_id || $this->modeReg_refid != $com->mode_reglement_id) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($db);

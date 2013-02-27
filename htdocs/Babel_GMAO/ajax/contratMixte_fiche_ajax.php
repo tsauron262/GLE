@@ -888,7 +888,7 @@ switch ($action) {
 
 
                 //  Maintenance
-                if ($res->GMAO_maintenance == 1) {
+                if ($res->GMAO_maintenance == 1 || $res->GMAO_telemaintenance == 1 || $res->GMAO_hotline == 1) {
                     //  Nb visite an
                     //  télémaintenance
                     //  hotline

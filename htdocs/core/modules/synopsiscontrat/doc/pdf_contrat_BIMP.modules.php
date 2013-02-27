@@ -1160,8 +1160,19 @@ Signature et cachet
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('', '', 7);
-        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
-        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
+        $ligne = "SA OLYS";
+        if(defined('MAIN_INFO_CAPITAL'))
+            $ligne .= " au capital de ".MAIN_INFO_CAPITAL;
+        if(defined('MAIN_INFO_SIREN'))
+            $ligne .= " - R.C.S. ".MAIN_INFO_SIREN;
+        if(defined('MAIN_INFO_APE'))
+            $ligne .= " - APE ".MAIN_INFO_APE;
+        if(defined('MAIN_INFO_TVAINTRA'))
+            $ligne .= " - TVA/CEE ".MAIN_INFO_TVAINTRA;
+        $ligne .= "\n". "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
+        
+//        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
+//        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
 
         $pdf->SetXY(48, 285);
         $pdf->MultiCell(157, 3, $ligne, 0, "C");

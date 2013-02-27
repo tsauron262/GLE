@@ -36,18 +36,18 @@ $langs->load("products");
 
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'contrat', $contratid, 'contrat');
+$result = restrictedArea($user, 'contrat', $_REQUEST['id'], 'contrat');
 
 $form = new Form($db);
 $html = new Form($db);
-if ($_REQUEST['action'] == 'DeleteAnnexe') {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'DeleteAnnexe') {
     $idAnnexe = $_REQUEST['modele'];
     $id = $_REQUEST['id'];
     $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe WHERE contrat_refid = " . $id . " AND annexe_refid = " . $idAnnexe;
     $sql = $db->query($requete);
     header('location:annexes.php?id=' . $id);
 }
-if ($_REQUEST['action'] == 'chgSrvAction') {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'chgSrvAction') {
     $idL = $_REQUEST['Link'];
     $i = 0;
     $idL = str_replace("c", "", $idL, $i);
@@ -178,7 +178,7 @@ if ($id > 0) {
     if ($mesg)
         print $mesg;
 
-    $nbofservices = sizeof($contrat->lignes);
+//    $nbofservices = sizeof($contrat->lines);
 
     $author = new User($db);
     $author->fetch($contrat->user_author_id);
@@ -227,7 +227,7 @@ if ($id > 0) {
     //Type contrat
     print '    <th class="ui-widget-header ui-state-default">' . $langs->trans("Type") . '</th>
                    <td colspan="1" class="ui-widget-content" id="typePanel">';
-//        $arrTmpType = $contrat->getTypeContrat();
+        $arrTmpType = $contrat->getTypeContrat();
     print $arrTmpType['Nom'];
     print "</td></tr>";
 
@@ -240,10 +240,10 @@ if ($id > 0) {
         $langs->load("projects");
         print '<tr><th class="ui-widget-header ui-state-default">';
         print $langs->trans("Project");
-        if ($_REQUEST["action"] != "classer" && $user->rights->projet->creer)
+        if (isset($_REQUEST["action"]) && $_REQUEST["action"] != "classer" && $user->rights->projet->creer)
             print '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=classer&amp;id=' . $id . '">' . img_edit($langs->trans("SetProject")) . '</a></span>';
         print '</th><td colspan="3" class="ui-widget-content">';
-        if ($_REQUEST["action"] == "classer") {
+        if (isset($_REQUEST["action"]) && $_REQUEST["action"] == "classer") {
             $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "projetid");
         } else {
             $form->form_project("fiche.php?id=$id", $contrat->socid, $contrat->fk_projet, "none");
@@ -255,7 +255,7 @@ if ($id > 0) {
 
     $tabLiked = getElementElement(NULL, "contrat", NULL, $_REQUEST['id']);
     $tabLiked = array_merge($tabLiked, getElementElement("contrat", NULL, $_REQUEST['id']));
-    if ($_REQUEST['action'] == "chSrc" || count($tabLiked) == 0) {
+    if (isset($_REQUEST["action"]) && $_REQUEST['action'] == "chSrc" || count($tabLiked) == 0) {
         print '<tr><th class="ui-widget-header ui-state-default"><table class="nobordernopadding" style="width:100%;">';
         print '<tr><th class="ui-widget-header ui-state-default">Contrat associ&eacute; &agrave; ';
         print '</table>';

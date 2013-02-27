@@ -1266,15 +1266,15 @@ else
                 // Si active et en cours
                 if ($objp->date_debut_reelle && ! $objp->date_fin_reelle) {
                     print $langs->trans("DateStartReal").': ';
-                    print dol_print_date($objp->date_debut_reelle);
+                    print dol_print_date($db->jdate($objp->date_debut_reelle));
                 }
                 // Si desactive
                 if ($objp->date_debut_reelle && $objp->date_fin_reelle) {
                     print $langs->trans("DateStartReal").': ';
-                    print dol_print_date($objp->date_debut_reelle);
+                    print dol_print_date($db->jdate($objp->date_debut_reelle));
                     print ' &nbsp;-&nbsp; ';
                     print $langs->trans("DateEndReal").': ';
-                    print dol_print_date($objp->date_fin_reelle);
+                    print dol_print_date($db->jdate($objp->date_fin_reelle));
                 }
                 if (! empty($objp->comment)) print "<br>".$objp->comment;
                 print '</td>';

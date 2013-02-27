@@ -2147,14 +2147,14 @@ class Synopsis_ContratLigne extends ContratLigne {
         dol_syslog("Contrat::fetch_lignes sql=" . $sql);
         $result = $this->db->query($sql);
         if ($result) {
-            $this->lignes = array();
+//            $this->lignes = array();
             $num = $this->db->num_rows($result);
             $i = 0;
 
             $objp = $this->db->fetch_object($result);
 
 //                $ligne = new ContratLigne($this->db);
-            $ligne = $this;
+//            $ligne = $this;
 //                $ligne->description = $objp->description;  // Description ligne
 //                $ligne->description = $objp->description;  // Description ligne
 //                $ligne->qty = $objp->qty;

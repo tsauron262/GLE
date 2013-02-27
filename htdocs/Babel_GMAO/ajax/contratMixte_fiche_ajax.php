@@ -855,7 +855,7 @@ switch ($action) {
                 $xml .= "<fk_contrat_prod><![CDATA[" . $res->fk_product . "]]></fk_contrat_prod>";
                 $xml .= "<product><![CDATA[" . $res->prodLabel . "]]></product>";
 
-                if ($res->GMAO_fk_contrat_prod > 0) {
+                if ($res->fk_product > 0) {
                     $tmpProd = new Product($db);
                     $tmpProd->fetch($res->fk_product);
                     $tmpProd->fetch_optionals($tmpProd->id);
@@ -871,7 +871,7 @@ switch ($action) {
                 $xml .= "<tva_tx><![CDATA[" . $res->tva_tx . "]]></tva_tx>";
 
                 //  Produit
-                if ($res->fk_product > 0) {
+                if ($res->GMAO_fk_prod > 0) {
                     $tmpProd = new Product($db);
                     $tmpProd->fetch($res->GMAO_fk_prod);
                     $tmpProd->fetch_optionals($tmpProd->id);

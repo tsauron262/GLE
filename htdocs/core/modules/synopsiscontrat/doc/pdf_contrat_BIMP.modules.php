@@ -73,6 +73,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -490,8 +491,9 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     }
                 }
                 if ($needExtGarPage) {
+                    $col = 40;
                     $init = $this->marge_gauche - 1;
-                    $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne);
+                    $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, $init);
 
                     $nextY = $pdf->getY();
                     foreach ($contrat->lines as $key => $val) {
@@ -499,7 +501,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                             continue;
 
                         if ($nextY > 274) {
-                            $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, true);
+                            $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, $init, true);
                         }
 
                         $nextY = $pdf->getY();
@@ -535,7 +537,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                         $pdf->SetXY($init, $nextY);
                         $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
-                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien($val->desc), 0, 'L', 1);
+                        $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien($val->description), 0, 'L', 1);
                         $pdf->SetXY($init + $col, $nextY);
                         $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien($val->serial_number), 0, 'C', 1);
                         $pdf->SetXY($init + $col + $col, $nextY);
@@ -951,7 +953,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $modeReg = utf8_encodeRien($res->libelle);
         }
         $condReg = "Indéterminé";
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_payment_term WHERE rowid = " . $this->contrat->condReg_refid;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_payment_term WHERE rowid = " . $this->contrat->condReg_refid;
         $sql = $this->db->query($requete);
         if ($sql) {
             $res = $this->db->fetch_object($sql);
@@ -1168,7 +1170,7 @@ Signature et cachet
         $pdf->SetFont('', 'B', 8);
         $pdf->SetTextColor(255, 63, 50);
         $pdf->SetXY(192, 292);
-        $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{nb}', 0, 'R', 0);
+        $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
 
         //return pdf_pagefoot($pdf,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
     }
@@ -1191,7 +1193,7 @@ Signature et cachet
         return $returnAsString ? implode($seperator, $rgbArray) : $rgbArray; // returns the rgb string or the associative array
     }
 
-    function getHeadExtensionsGarenties(&$pdf, $outputlangs, $contrat, $hauteur_ligne, $suite = false) {
+    function getHeadExtensionsGarenties(&$pdf, $outputlangs, $contrat, $hauteur_ligne, $init, $suite = false) {
         if ($suite)
             $this->_pagefoot($pdf, $outputlangs);
         $pdf->AddPage();
@@ -1201,7 +1203,7 @@ Signature et cachet
         $pdf->SetFont('Helvetica', 'B', 12);
 
         //Titre Page 1
-        $pdf->SetXY(49, 42);
+        $pdf->SetXY(59, 32);
         $pdf->MultiCell(157, 6, utf8_encodeRien('Résumé des extensions de garanties' . ($suite ? ' (Suite)' : '')), 0, 'C');
 
         $pdf->SetFont('', 'B', 8);

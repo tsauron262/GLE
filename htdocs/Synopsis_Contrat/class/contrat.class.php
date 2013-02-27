@@ -74,6 +74,9 @@ class Synopsis_Contrat extends Contrat {
             $this->SLA = $res->SLA;
             $this->isSAV = $res->isSAV;
 
+            $this->type = $this->extraparams;
+            $this->typeContrat = $this->type;
+
             $requete = "SELECT unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfinprev,
                                unix_timestamp(date_add(date_add(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb, INTERVAL " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.durValid month), INTERVAL ifnull(" . MAIN_DB_PREFIX . "product_extrafields.2dureeSav,0) MONTH)) as dfin,
                                unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO.DateDeb) as ddeb,
@@ -95,8 +98,8 @@ class Synopsis_Contrat extends Contrat {
                 $this->lineTkt[$res->rowid] = array(
                     'serial_number' => $res->serial_number,
                     'fk_contrat_prod' => ($res->fk_contrat_prod > 0 ? $res->fk_contrat_prod : false),
-                    'durVal' => $res->durVal,/*
-                    'durSav' => $res->durSav,*/
+                    'durVal' => $res->durVal, /*
+                      'durSav' => $res->durSav, */
                     'qty' => $res->qty,
                     'pu' => $res->pu,
                     'dfinprev' => $res->dfinprev,
@@ -105,11 +108,12 @@ class Synopsis_Contrat extends Contrat {
                     'ddebprev' => $res->ddebprev);
             }
         }
-        $this->type = $this->extraparams;
         return($ret);
     }
 
     public function fetch_lines($byid = false) {
+        parent::fetch_lines();
+        $this->lines = array();
         $id = $this->id;
         $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
         $result = $this->db->query($requete);
@@ -706,23 +710,23 @@ class Synopsis_Contrat extends Contrat {
 //    }
 
     public function getTypeContrat() {
-        $array[0]['type'] = "Simple";
-        $array[0]['Nom'] = "Simple";
-        $array[1]['type'] = "Service";
-        $array[1]['Nom'] = "Service";
-        $array[2]['type'] = "Ticket";
-        $array[2]['Nom'] = "Au ticket";
-        $array[3]['type'] = "Maintenance";
-        $array[3]['Nom'] = "Maintenance";
-        $array[4]['type'] = "SAV";
-        $array[4]['Nom'] = "SAV";
-        $array[5]['type'] = "Location";
-        $array[5]['Nom'] = "Location de produits";
-        $array[6]['type'] = "LocationFinanciere";
-        $array[6]['Nom'] = "Location Financi&egrave;re";
-        $array[7]['type'] = "Mixte";
-        $array[7]['Nom'] = "Mixte";
-        return ($array[$this->typeContrat]);
+        $arrayT[0]['type'] = "Simple";
+        $arrayT[0]['Nom'] = "Simple";
+        $arrayT[1]['type'] = "Service";
+        $arrayT[1]['Nom'] = "Service";
+        $arrayT[2]['type'] = "Ticket";
+        $arrayT[2]['Nom'] = "Au ticket";
+        $arrayT[3]['type'] = "Maintenance";
+        $arrayT[3]['Nom'] = "Maintenance";
+        $arrayT[4]['type'] = "SAV";
+        $arrayT[4]['Nom'] = "SAV";
+        $arrayT[5]['type'] = "Location";
+        $arrayT[5]['Nom'] = "Location de produits";
+        $arrayT[6]['type'] = "LocationFinanciere";
+        $arrayT[6]['Nom'] = "Location Financi&egrave;re";
+        $arrayT[7]['type'] = "Mixte";
+        $arrayT[7]['Nom'] = "Mixte";
+        return $arrayT[intval($this->typeContrat)];
     }
 
     public function getExtraHeadTab($head) {
@@ -736,10 +740,10 @@ class Synopsis_Contrat extends Contrat {
         $arr1 = $this->liste_contact(4, 'internal');
         $arr2 = array_merge($arr, $arr1);
         $newArr = array();
-        foreach($arr2 as $id => $elem){
+        foreach ($arr2 as $id => $elem) {
             $obj = new Contact($this->db);
             $obj->fetch($elem['id']);
-            
+
             $newArr[$id]['cp'] = $obj->cp;
             $newArr[$id]['ville'] = $obj->ville;
             $newArr[$id]['email'] = $obj->email;
@@ -747,11 +751,11 @@ class Synopsis_Contrat extends Contrat {
             $newArr[$id]['fax'] = $obj->fax;
             foreach (array('fullname' => 'fullname', 'civilite' => 'civility', 'nom' => 'lastname', 'prenom' => 'firstname') as $val0 => $val1) {
                 $result = $elem[$val1];
-                if($val0 == 'fullname')
-                    $result = $elem['civility']." ".$elem['lastname']." ".$elem['firstname'];
+                if ($val0 == 'fullname')
+                    $result = $elem['civility'] . " " . $elem['lastname'] . " " . $elem['firstname'];
                 $newArr[$id][$val0] = $result;
             }
-            foreach($elem as $nom => $val)
+            foreach ($elem as $nom => $val)
                 $newArr[$id][$nom] = $val;
         }
         $this->element_contact_arr = $newArr;
@@ -1188,14 +1192,14 @@ class Synopsis_Contrat extends Contrat {
         $db = $this->db;
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
         require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
-        
+
         $com = new Synopsis_Commande($db);
         $com->fetch($commId);
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $comLigneId;
 
         $sql = $db->query($requete);
-        if(!$sql)
-            die("Erreur SQL : ".$requete);
+        if (!$sql)
+            die("Erreur SQL : " . $requete);
         $res = $db->fetch_object($sql);
         $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice);
         $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice);
@@ -1247,7 +1251,7 @@ class Synopsis_Contrat extends Contrat {
         $isTkt = false;
         $qte1 = $res->qty;
         $qte2 = $tmpProd->array_options['options_2qte'];
-        if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance']> 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
+        if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance'] > 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
 //            $qte = $tmpProd->array_options['options_2visiteSurSite'];
         } else if ($tmpProd->array_options['options_2isSAV'] > 0) {
@@ -1298,9 +1302,9 @@ class Synopsis_Contrat extends Contrat {
                             hotline, telemaintenance, maintenance,
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
-                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . ($tmpProd->array_options['options_2dureeVal']> 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . ",
+                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . ($tmpProd->array_options['options_2dureeVal'] > 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . ",
                             " . ($tmpProd->array_options['options_2hotline'] ? 1 : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? 1 : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
-                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ", '".$tmpProd->array_options['options_2timePerDuree']."','".$tmpProd->array_options['options_2qtePerDuree']."','".$tmpProd->array_options['options_2visiteSurSite']."')";
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);
 
         if ($sql && $sql1)
@@ -1335,7 +1339,7 @@ class Synopsis_Contrat extends Contrat {
 //        {
 //            $html .=  '<div id="delDialog"><span id="delDialog-content"></span></div>';
 //        }
-//        if ($user->rights->contrat->creer && ($this->statut ==0   || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) ) )
+//        if ($user->rights->contrat->creer && ($this->statut ==0   || ($this->statut == 1 && isset(isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) ) )
 //        {
 //            $html .=  '<div id="modDialog"><span id="modDialog-content">';
 //            $html .=  $this->displayDialog('mod',$mysoc,$objp);
@@ -1509,16 +1513,16 @@ class Synopsis_Contrat extends Contrat {
     public function initDialog($mysoc, $objp = null) {
         global $user, $conf;
         $html = "";
-        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
+        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
             $html .= '<div id="addDialog" class="ui-state-default ui-corner-all" style="">';
             $html .= $this->displayDialog('add', $mysoc, $objp);
             $html .= '</div>';
         }
 
-        if ($user->rights->contrat->supprimer && ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED))) {
+        if ($user->rights->contrat->supprimer && ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED))) {
             $html .= '<div id="delDialog"><span id="delDialog-content"></span></div>';
         }
-        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
+        if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
             $html .= '<div id="modDialog"><span id="modDialog-content">';
             $html .= $this->displayDialog('mod', $mysoc, $objp);
             $html .= '</span></div>';

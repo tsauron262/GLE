@@ -17,6 +17,10 @@
  * Name : contratDetail.php
  * GLE-1.2
  */
+
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
 require_once("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');
 if ($conf->projet->enabled)
@@ -37,18 +41,13 @@ $langs->load("products");
 // Security check
 $msg = false;
 
-if ($user->societe_id)
-    $socid = $user->societe_id;
-$result = restrictedArea($user, 'contrat', $contratid, 'contrat');
 
 $tmp0 = date('Y') - 10;
 $tmp = date('Y') + 15;
 $dateRange = $tmp0 . ":" . $tmp;
 // Security check
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : '';
-if ($user->societe_id)
-    $socid = $user->societe_id;
-$result = restrictedArea($user, 'societe', $socid);
+
 $idLigne = $_REQUEST["id"];
 $contratLn = new Synopsis_ContratLigne($db);
 $contratLn->fetch($idLigne);
@@ -65,6 +64,8 @@ $requete = "SELECT c.fk_contrat,  g.type  "
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
 $id = $res->fk_contrat;
+
+$result = restrictedArea($user, 'contrat', $id, 'contrat');
 
 
 if ($_REQUEST['action'] == 'delete') {
@@ -137,7 +138,7 @@ if ($id > 0) {
     if ($mesg)
         print $mesg;
 
-    $nbofservices = sizeof($contrat->lignes);
+    $nbofservices = sizeof($contrat->lines);
 
     $author = new User($db);
     $author->fetch($contrat->user_author_id);

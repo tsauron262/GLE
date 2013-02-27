@@ -294,7 +294,7 @@ if ($socid > 0)
     print '<td colspan="3" class="ui-widget-content">';
         $amount_discount=$objsoc->getAvailableDiscounts();
         if ($amount_discount < 0) dol_print_error($db,$societe->error);
-        if ($amount_discount > 0) print price($amount_discount).'&nbsp;'.$langs->trans("Currency".$conf->monnaie);
+        if ($amount_discount > 0) print price($amount_discount).'&nbsp;'.$langs->trans("Currency".$conf->global->MAIN_MONNAIE);
         else print $langs->trans("DiscountNone");
     print '</td>';
     print '</tr>';

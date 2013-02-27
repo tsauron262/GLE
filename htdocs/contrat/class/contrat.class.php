@@ -508,7 +508,7 @@ class Contrat extends CommonObject
 		$sql.= " d.date_fin_validite, d.date_cloture,";
 		$sql.= " d.fk_user_author,";
 		$sql.= " d.fk_user_ouverture,";
-		$sql.= " d.fk_user_cloture";
+		$sql.= " d.fk_user_cloture, d.ref";
 		$sql.= " FROM ".MAIN_DB_PREFIX."contratdet as d";
 		$sql.= " WHERE d.fk_contrat = ".$this->id;
 		$sql.= " AND (d.fk_product IS NULL OR d.fk_product = 0)";   // fk_product = 0 gardee pour compatibilitee

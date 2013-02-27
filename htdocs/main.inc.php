@@ -723,6 +723,9 @@ if (! defined('NOLOGIN'))
     // Load permissions
     $user->getrights();
 }
+        /* Mod drsi  */
+        $synopsisHook->initRightsSyn();
+        /*f mod drsi*/
 
 
 dol_syslog("--- Access to ".$_SERVER["PHP_SELF"]);

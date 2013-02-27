@@ -75,8 +75,9 @@ $object = new Synopsis_Contrat($db);
  */
 
 $object->fetch($_REQUEST["id"]);
+$object->fetch_lines();
 $contrat = $object;
-if ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc') {
+if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
 //    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 6 || $contrat->typeContrat == 5)) {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
 //        contratGA_pdf_create($db, $contrat->id, $_REQUEST['model']);
@@ -655,7 +656,7 @@ switch ($type) {
     }
 
 llxHeader($header .'<script>
-                    userId = "'.$user->rowid.'";
+                    userId = "'.$user->id.'";
                         idContratCurrent = "'.$id.'";
                     $(document).ready(function(){ 
                         $(\'img[alt="Supprimer"]\').each(function(){

@@ -317,14 +317,20 @@ class Synopsis_Commande extends Commande {
 
     function fetch($id, $ref = '', $ref_ext = '', $ref_int = '') {
         $return = parent::fetch($id, $ref, $ref_ext, $ref_int);
-        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $id);
-        $result = $this->db->fetch_object($sql);
-        $this->logistique_ok = $result->logistique_ok;
-        $this->logistique_statut = $result->logistique_statut;
-        $this->finance_ok = $result->finance_ok;
-        $this->finance_statut = $result->finance_statut;
-        $this->logistique_date_dispo = $result->logistique_date_dispo;
-        return $return;
+        if (isset($this->id)) {
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $this->id);
+            if ($this->db->num_rows($sql) < 1) {
+                $this->db->query("INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande (`rowid`) VALUES (" . $this->id . ")");
+                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_commande WHERE rowid = " . $this->id);
+            }
+            $result = $this->db->fetch_object($sql);
+            $this->logistique_ok = $result->logistique_ok;
+            $this->logistique_statut = $result->logistique_statut;
+            $this->finance_ok = $result->finance_ok;
+            $this->finance_statut = $result->finance_statut;
+            $this->logistique_date_dispo = $result->logistique_date_dispo;
+            return $return;
+        }
     }
 
     function fetch_lines($only_product = 0) {

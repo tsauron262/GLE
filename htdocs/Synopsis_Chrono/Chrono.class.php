@@ -536,7 +536,7 @@ $langs->load("chrono@Synopsis_Chrono");
         $lienfin = '</a>';
 
         if ($option == 6) {
-            $lien = '<a title="' . $this->nom . '" href="' . GLE_FULL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $this->id . '">';
+            $lien = '<a title="' . $this->nom . '" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $this->id . '">';
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {

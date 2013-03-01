@@ -42,7 +42,7 @@ dol_fiche_head($head, 'Pilotage GPI', $langs->trans("CustomerPilotage"));
 
 print "<p><h2 class='ui-widget-header ui-state-default' style='padding: 5px 15px; '> Acc&egrave;s client : </h2></p>";
 print "<br>";
-print "<pre  class='ui-widget-content ui-state-highlight' style='padding : 5px 10px; width: auto'><span class='ui-icon ui-icon-extlink' style='float: left; margin-right: 5px;'></span><a href='".GLE_FULL_ROOT."Babel_GPI/index.php'>".GLE_FULL_ROOT."Babel_GPI/index.php</pre>";
+print "<pre  class='ui-widget-content ui-state-highlight' style='padding : 5px 10px; width: auto'><span class='ui-icon ui-icon-extlink' style='float: left; margin-right: 5px;'></span><a href='".DOL_URL_ROOT."Babel_GPI/index.php'>".DOL_URL_ROOT."Babel_GPI/index.php</pre>";
 
 ?>
 <br>

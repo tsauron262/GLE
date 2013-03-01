@@ -28,6 +28,7 @@ else
 ini_set('upload_max_filesize', 10000);
 ini_set('post_max_size', 10000);
 
+
 setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
 
 
@@ -44,6 +45,9 @@ $conf->global->MAIN_APPLICATION_TITLE = "GLE";
 $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
 $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
 $conf->global->MAIN_MODULE_ORANGEHRM = "1";
+
+
+$conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
 
 //$conf->global->PROJET_ADDON = "mod_projet_tourmaline";
 

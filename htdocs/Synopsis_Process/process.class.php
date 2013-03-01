@@ -782,7 +782,7 @@ class process extends CommonObject {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/processBuilder.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/processBuilder.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/processBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'process@Synopsis_Process';
@@ -1008,7 +1008,7 @@ class processDet extends process {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/form.php?processDetId=' . $this->id . '&process_id=' . $this->process_refid . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/form.php?processDetId=' . $this->id . '&process_id=' . $this->process_refid . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/form.php?processDetId=' . $this->id . '&process_id=' . $this->process_refid . '">';
 
         $lienfin = '</a>';
 
@@ -1790,7 +1790,7 @@ class listform extends formulaireSource {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/listBuilder.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/listBuilder.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/listBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'formListe@Synopsis_Process';
@@ -2285,7 +2285,7 @@ class requete extends formulaireSource {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/queryBuilder.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/queryBuilder.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/queryBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'query@Synopsis_Process';
@@ -2565,7 +2565,7 @@ class fct extends formulaireSource {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/fctBuilder.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/fctBuilder.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/fctBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'fct@Synopsis_Process';
@@ -2717,7 +2717,7 @@ class formulaire extends process {
 
         $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . GLE_FULL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
         $picto = 'formulaire@Synopsis_Process';

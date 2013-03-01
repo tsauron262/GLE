@@ -71,7 +71,7 @@ if ($id > 0) {
             -moz-border-radius: 8px 8px 8px 8px;
             background-color: #0073EA;
 EOF;
-    print ' background-image: url("' . $conf->global->GLE_FULL_ROOT . '/Synopsis_Common/css/flick/images/ui-bg_highlight-soft_100_f6f6f6_1x100.png");';
+    print ' background-image: url("' . $conf->global->DOL_URL_ROOT . '/Synopsis_Common/css/flick/images/ui-bg_highlight-soft_100_f6f6f6_1x100.png");';
     print <<<EOF
             background-repeat: repeat-x;
             border: 1px solid #0073EA;
@@ -95,7 +95,7 @@ EOF;
             -moz-border-radius: 8px 8px 8px 8px;
             background-color: #F6F6F6;
 EOF;
-    print ' background-image: url("' . $conf->global->GLE_FULL_ROOT . '/Synopsis_Common/css/flick/images/ui-bg_highlight-soft_25_0073ea_1x100.png");';
+    print ' background-image: url("' . $conf->global->DOL_URL_ROOT . '/Synopsis_Common/css/flick/images/ui-bg_highlight-soft_25_0073ea_1x100.png");';
     print <<<EOF
             background-repeat: repeat-x;
             border: 1px solid #DDDDDD;

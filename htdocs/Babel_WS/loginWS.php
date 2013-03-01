@@ -22,7 +22,7 @@
     $cookieName = "GleWSCookie";
 
     ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
-    $server = new SoapServer(GLE_FULL_ROOT."/Babel_WS/connect.wsdl.php");
+    $server = new SoapServer(DOL_URL_ROOT."/Babel_WS/connect.wsdl.php");
     $server->addFunction("WSconnect");
     $server->handle();
 

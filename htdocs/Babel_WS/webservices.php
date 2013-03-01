@@ -47,7 +47,7 @@ ini_set("soap.wsdl_cache_enabled", "0"); // disabling WSDL cache
 ini_set('soap.wsdl_cache_ttl',0);
 ini_set('soap.wsdl_cache',0);
 
-$server = new SoapServer(GLE_FULL_ROOT."/Babel_WS/BabelGMAO.wsdl.php");
+$server = new SoapServer(DOL_URL_ROOT."/Babel_WS/BabelGMAO.wsdl.php");
 $server->addFunction("getContratList");
 $server->addFunction("getItemCount");
 $server->addFunction("getItemList");

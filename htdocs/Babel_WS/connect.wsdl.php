@@ -93,7 +93,7 @@ print <<<EOF
             <soap:address
 EOF;
              require_once('../conf/conf.php');
-             print ' location="'.GLE_FULL_ROOT.'/Babel_WS/loginWS.php"';
+             print ' location="'.DOL_URL_ROOT.'/Babel_WS/loginWS.php"';
 print <<<EOF
             />
         </wsdl:port>

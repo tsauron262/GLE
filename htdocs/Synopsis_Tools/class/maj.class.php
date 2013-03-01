@@ -1,4 +1,4 @@
-mysqli_query<?php
+<?php
 
 /*
  * $% signifie que l'element est un texte fixe est nom le nom d'une collone de la base
@@ -77,11 +77,14 @@ class maj {
 //        $this->netoyeDet("user", MAIN_DB_PREFIX."user_rights");
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
-        foreach ($tab as $ligne) {
-            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
-        }
+//        foreach ($tab as $ligne) {
+//            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
+//        }
 
-        $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        if($this->erreur == 0)
+            $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        else
+            $this->infoL("Finit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ".$this->erreur." errerus");
     }
 
 //    private function netoyeDet($table, $table2 = null, $prefTab = null) {
@@ -132,15 +135,15 @@ class maj {
     private function queryD($query) {
         $query = str_replace("llx_", MAIN_DB_PREFIX, $query);
         $result = $this->dbD->query($query);
-//        if(!$result)
-//            die("Erreur SQL D : ".$query);
+        if(!$result)
+            $this->erreurL("Erreur SQL D : ".$query);
         return $result;
     }
 
     private function queryS($query) {
         $result = $this->dbS->query($query);
-//        if(!$result)
-//            die("Erreur SQL S : ".$query);
+        if(!$result)
+           $this->erreurL("Erreur SQL S : ".$query);
         return $result;
     }
 

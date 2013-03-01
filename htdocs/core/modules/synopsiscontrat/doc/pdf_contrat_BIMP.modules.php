@@ -483,8 +483,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                 $needExtGarPage = false;
                 foreach ($contrat->lines as $key => $val) {
-                    if ($val->statut == 0 || $val->statut == 5)
-                        continue;
+//                    if ($val->statut == 0 || $val->statut == 5)
+//                        continue;
                     if ($val->type == 4) {
                         $needExtGarPage = true;
                         break;
@@ -497,8 +497,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                     $nextY = $pdf->getY();
                     foreach ($contrat->lines as $key => $val) {
-                        if ($val->statut == 0 || $val->statut == 5)
-                            continue;
+//                        if ($val->statut == 0 || $val->statut == 5)
+//                            continue;
 
                         if ($nextY > 274) {
                             $this->getHeadExtensionsGarenties($pdf, $outputlangs, $contrat, $hauteur_ligne, $init, true);

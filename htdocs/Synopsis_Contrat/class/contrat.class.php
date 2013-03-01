@@ -1261,12 +1261,18 @@ class Synopsis_Contrat extends Contrat {
         if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance'] > 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
 //            $qte = $tmpProd->array_options['options_2visiteSurSite'];
-        } else if ($tmpProd->array_options['options_2isSAV'] > 0) {
+        } else if ($tmpProd->array_options['options_2isSav'] > 0) {
             $isSAV = true;
         } else if ($tmpProd->array_options['options_2timePerDuree'] > 0) {
             $isTkt = true;
             $qte2 = $tmpProd->array_options['options_2qte'];
         }
+        
+        $duree = 12;
+        if($isSAV && $tmpProd->array_options['options_2dureeSav'] > 0)
+            $duree = $tmpProd->array_options['options_2dureeSav'];
+        elseif($tmpProd->array_options['options_2dureeVal'] > 0)
+            $duree = $tmpProd->array_options['options_2dureeVal'];
 
 
 
@@ -1278,7 +1284,7 @@ class Synopsis_Contrat extends Contrat {
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
                              19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $res->subprice . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
-                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . ($tmpProd->array_options['options_2dureeVal'] > 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . " MONTH))";
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . $duree . " MONTH))";
         $sql = $db->query($requete);
 //    die($requete);
         $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
@@ -1303,13 +1309,15 @@ class Synopsis_Contrat extends Contrat {
 
 //Lier a contratdetprop
 //".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
+        
+        
         $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
-                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . ($tmpProd->array_options['options_2dureeVal'] > 0 ? $tmpProd->array_options['options_2dureeVal'] : 0) . ",
+                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
                             " . ($tmpProd->array_options['options_2hotline'] ? 1 : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? 1 : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
                             " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);

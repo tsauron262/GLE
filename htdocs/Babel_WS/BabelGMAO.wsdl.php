@@ -271,7 +271,7 @@ print <<<EOF
         <port name='InventoryPort' binding='tns:InventoryBinding'>
 EOF;
             include_once('../conf/conf.php');
-            print "<soap:address location='".GLE_FULL_ROOT."/Babel_WS/webservices.php'/>";
+            print "<soap:address location='".DOL_URL_ROOT."/Babel_WS/webservices.php'/>";
 print <<<EOF
         </port>
         <wsdl:port
@@ -280,7 +280,7 @@ print <<<EOF
         >
 EOF;
             include_once('../conf/conf.php');
-            print "<soap:address location='".GLE_FULL_ROOT."/Babel_WS/webservices.php'/>";
+            print "<soap:address location='".DOL_URL_ROOT."/Babel_WS/webservices.php'/>";
 print <<<EOF
         </wsdl:port>
     </service>

@@ -1327,7 +1327,7 @@ class Contrat extends CommonObject
 
         $lien = '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$this->id.'">';
         if ($option == 6){
-            $lien = '<a href="'.GLE_FULL_ROOT.'/contrat/fiche.php?id='.$this->id.'">';
+            $lien = '<a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$this->id.'">';
         }
         $lienfin='</a>';
 

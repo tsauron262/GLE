@@ -174,10 +174,6 @@ function getTab() {
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef'),
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef')
         ),
-        array($oldPref . "contratdet", MAIN_DB_PREFIX . "element_element",
-            array('rowid', '$%commandedet', 'fk_commande_ligne', '$%contratdet'),
-            array('fk_target', 'targettype', 'fk_source', 'sourcetype')
-        ),
         array("Babel_commande_grp", MAIN_DB_PREFIX . "Synopsis_commande_grp",
             array(),
             array()
@@ -317,6 +313,10 @@ function getTab() {
         array("Babel_GMAO_contrat_prop", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
             array(),
             array()
+        ),
+        array($oldPref . "contratdet", MAIN_DB_PREFIX . "element_element",
+            array('rowid', '$%commandedet', 'fk_commande_ligne', '$%contratdet'),
+            array('fk_target', 'targettype', 'fk_source', 'sourcetype')
         ),
         array("Babel_demandeInterv", MAIN_DB_PREFIX . "Synopsis_demandeInterv",
             array(),

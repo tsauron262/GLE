@@ -178,7 +178,7 @@ class maj {
                 $newCle = $destCol[$id];
                 if ((($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user") || 
                         ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights")  || 
-                        ($cle == "user_refid" && $tableDest == MAIN_DB_PREFIX . "Synopsis_Histo_User") 
+                       0// ($cle == "user_refid" && $tableDest == MAIN_DB_PREFIX . "Synopsis_Histo_User") 
                         )&& $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport

@@ -174,7 +174,7 @@ function getTab() {
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef'),
             array('rowid', 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef')
         ),
-        array($oldPref . "commandedet", MAIN_DB_PREFIX . "Synopsis_commandedet",
+        array($oldPref . "commandedet", MAIN_DB_PREFIX . "element_element",
             array('rowid', '$%commandedet', 'fk_commande_ligne', '$%contratdet'),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),

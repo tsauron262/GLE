@@ -77,9 +77,9 @@ class maj {
 //        $this->netoyeDet("user", MAIN_DB_PREFIX."user_rights");
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
-//        foreach ($tab as $ligne) {
-//            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
-//        }
+        foreach ($tab as $ligne) {
+            $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
+        }
 
         if($this->erreur == 0)
             $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

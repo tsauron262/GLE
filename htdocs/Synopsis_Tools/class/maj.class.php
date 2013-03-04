@@ -176,11 +176,12 @@ class maj {
 
                 //Exception
                 $newCle = $destCol[$id];
-                if ($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user" && $val == "1")//On laisse l'admin de la nouvelle version
+                if ((($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user") || 
+                        ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights")  || 
+                        ($cle == "user_refid" && $tableDest == MAIN_DB_PREFIX . "Synopsis_Histo_User") 
+                        )&& $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
-                    $importOff = true;
-                if ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights" && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
@@ -274,6 +275,8 @@ class maj {
                 $where = "rowid != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "user_rights")
                 $where = "fk_user != 1";
+            if ($ligne[1] == MAIN_DB_PREFIX . "Synopsis_Histo_User")
+                $where = "user_refid != 1";
             if ($ligne[1] == MAIN_DB_PREFIX . "facture") {
 //                $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IN (SELECT rowid FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL)"); //Suppression des facture de 2eme niveau
                 $this->queryD("DELETE FROM " . $ligne[1] . " WHERE fk_facture_source IS NOT NULL"); //Suppression des facture de 1er niveau

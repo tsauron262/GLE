@@ -12,7 +12,7 @@ require_once(DOL_DOCUMENT_ROOT."/compta/bank/class/account.class.php");
 function widget_statOfcSoldeBanque() {
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user,$bc;
-    if ($user->societe_id > 0)
+    $socid = 0; if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }

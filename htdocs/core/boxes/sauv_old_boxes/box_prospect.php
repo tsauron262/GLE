@@ -90,7 +90,7 @@ class box_prospect extends ModeleBoxes {
             $sql .= " ORDER BY s.datec DESC";
             $sql .= $db->plimit($max, 0);
 
-            dolibarr_syslog("box_prospect::loadBox sql=".$sql,LOG_DEBUG);
+            dol_syslog("box_prospect::loadBox sql=".$sql,LOG_DEBUG);
             $resql = $db->query($sql);
             if ($resql)
             {
@@ -141,7 +141,7 @@ class box_prospect extends ModeleBoxes {
             }
         }
         else {
-            dolibarr_syslog("box_prospect::loadBox not allowed de read this box content",LOG_ERR);
+            dol_syslog("box_prospect::loadBox not allowed de read this box content",LOG_ERR);
             $this->info_box_contents[0][0] = array('align' => 'left',
             'text' => $langs->trans("ReadPermissionNotAllowed"));
         }

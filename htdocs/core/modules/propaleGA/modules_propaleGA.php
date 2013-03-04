@@ -221,7 +221,7 @@ function propaleGA_pdf_create($db, $id, $modele='', $outputlangs='')
         }
         else
         {
-            dolibarr_syslog("Erreur dans propale_pdf_create");
+            dol_syslog("Erreur dans propale_pdf_create");
             dol_print_error($db,$obj->pdferror());
             return 0;
         }

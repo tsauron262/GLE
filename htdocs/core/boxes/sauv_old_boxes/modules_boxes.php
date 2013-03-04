@@ -79,7 +79,7 @@ class ModeleBoxes
         $sql = "SELECT b.rowid, b.box_id, b.position, b.box_order, b.fk_user";
         $sql.= " FROM ".MAIN_DB_PREFIX."boxes as b";
         $sql.= " WHERE b.rowid = ".$rowid;
-        dolibarr_syslog("ModeleBoxes::fetch rowid=".$rowid);
+        dol_syslog("ModeleBoxes::fetch rowid=".$rowid);
 
         $resql = $this->db->query($sql);
         if ($resql)

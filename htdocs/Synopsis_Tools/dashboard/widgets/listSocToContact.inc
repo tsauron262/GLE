@@ -15,7 +15,7 @@ function widget_listSocToContact() {
 
     $table = '<p>';
     $table2 = '<p>';
-    if ($user->societe_id > 0)
+    $socid = 0; if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }

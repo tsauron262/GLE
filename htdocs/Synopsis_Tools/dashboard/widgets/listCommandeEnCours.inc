@@ -14,7 +14,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 function widget_listCommandeEnCours() {
     // A widget object as per jquery.dashboard.js.
     global $db, $conf, $langs, $user;
-    if ($user->societe_id > 0) {
+    $socid = 0; if ($user->societe_id > 0) {
         $socid = $user->societe_id;
     }
     $langs->load("orders");

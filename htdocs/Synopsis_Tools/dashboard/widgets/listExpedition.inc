@@ -13,7 +13,7 @@ require_once (DOL_DOCUMENT_ROOT . "/expedition/class/expedition.class.php");
 function widget_listExpedition() {
     // A widget object as per jquery.dashboard.js.
     global $db, $conf, $langs, $user, $bc;
-    if ($user->societe_id > 0) {
+    $socid = 0; if ($user->societe_id > 0) {
         $socid = $user->societe_id;
     }
     $langs->load("sendings");

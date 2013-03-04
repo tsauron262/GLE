@@ -25,7 +25,7 @@ function widget_statProjectPerTask() {
     global $db, $conf, $user, $langs,$bc;
     if ($user->rights->projet->lire)
     {
-        if ($user->societe_id > 0)
+        $socid = 0; if ($user->societe_id > 0)
         {
           $socid = $user->societe_id;
         }

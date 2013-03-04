@@ -120,7 +120,7 @@ class mod_propaleGA_calcedoine extends ModeleNumRefPropalesGA
         }
         else
         {
-            dolibarr_syslog("mod_propale_calcedoine::getNextValue sql=".$sql);
+            dol_syslog("mod_propale_calcedoine::getNextValue sql=".$sql);
             return -1;
         }
 
@@ -129,7 +129,7 @@ class mod_propaleGA_calcedoine extends ModeleNumRefPropalesGA
         $yymm = utf8_decode(strftime("%y%m",$date));
         $num = sprintf("%04s",$max+1);
 
-        dolibarr_syslog("mod_propale_calcedoine::getNextValue return ".$this->prefix.$yymm."-".$num);
+        dol_syslog("mod_propale_calcedoine::getNextValue return ".$this->prefix.$yymm."-".$num);
         return $this->prefix.$yymm."-".$num;
     }
 

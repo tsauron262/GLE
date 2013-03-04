@@ -136,7 +136,7 @@ class InterfaceZimbraSync {
         // Actions
 //        if ($action == 'COMPANY_CREATE')
 //        {
-//            dolibarr_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+//            dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
 //            $langs->load("synopsisGene@Synopsis_Tools");
 //
 ////            file_put_contents("/tmp/somefile","created soc".$objet->nom);

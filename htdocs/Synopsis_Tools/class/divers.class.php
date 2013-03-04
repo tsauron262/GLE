@@ -527,7 +527,8 @@ class histoNavigation {
                 return ("&nbsp;&nbsp;<span href='#' title='" . $res->element_type . " " . $res->ref . " (supprimer)' class='vsmenu ui-widget-error' style='font-size: 8.5px;'><del>" . dol_trunc($res->ref, 25) . "</del></span>");
             }
         } else {
-            die("objet Incorect");
+            dol_syslog("objet Incorect ".$res->element_type, LOG_WARNING);
+//            die("objet Incorect");
             return (false);
         }
     }

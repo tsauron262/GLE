@@ -14,7 +14,7 @@ require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
 function widget_listFactureBrouillon() {
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user;
-    if ($user->societe_id > 0)
+    $socid = 0; if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }

@@ -26,7 +26,7 @@ function widget_listProjetMonActivite() {
     $datestarty=dol_mktime(0,0,0,1,1,$info["year"]);
     $dateendy=dol_mktime(23,59,59,12,31,$info["year"]);
 
-    if ($user->societe_id > 0)
+    $socid = 0; if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }
@@ -52,7 +52,7 @@ function widget_listProjetMonActivite() {
         $sql .= " AND tt.fk_user = ".$user->id;
         $sql .= " AND week(task_date) = ".strftime("%W",time());
         $sql .= " GROUP BY p.rowid";
-        dolibarr_syslog("Index: sql=".$sql);
+        dol_syslog("Index: sql=".$sql);
         $resql = $db->query($sql);
         if ( $resql )
         {

@@ -118,6 +118,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function fetch_lines($byid = false) {
+        if($this->id > 0){
         parent::fetch_lines();
         $this->lines = array();
         $id = $this->id;
@@ -131,6 +132,9 @@ class Synopsis_Contrat extends Contrat {
             else
                 $this->lines[] = $ligne;
         }
+        }
+        else
+            die("Pas d'id");
     }
 
 //    
@@ -1528,9 +1532,12 @@ class Synopsis_Contrat extends Contrat {
     public function initDialog($mysoc, $objp = null) {
         global $user, $conf;
         $html = "";
+        $js = "";
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
             $html .= '<div id="addDialog" class="ui-state-default ui-corner-all" style="">';
-            $html .= $this->displayDialog('add', $mysoc, $objp);
+            $tab = $this->displayDialog('add', $mysoc, $objp);
+            $html .= $tab[0];
+            $js .= $tab[1];
             $html .= '</div>';
         }
 
@@ -1539,7 +1546,9 @@ class Synopsis_Contrat extends Contrat {
         }
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
             $html .= '<div id="modDialog"><span id="modDialog-content">';
-            $html .= $this->displayDialog('mod', $mysoc, $objp);
+            $tab = $this->displayDialog('mod', $mysoc, $objp);
+            $html .= $tab[0];
+            $js .= $tab[1];
             $html .= '</span></div>';
         }
 
@@ -1565,7 +1574,7 @@ class Synopsis_Contrat extends Contrat {
         }
 
 
-        return($html);
+        return array($html, $js);
     }
 
     public function displayDialog($type = 'add', $mysoc = null, $objp = null) {
@@ -1639,7 +1648,7 @@ class Synopsis_Contrat extends Contrat {
         $html .= "\n" . '<SELECT name="' . $type . 'Commande" id="' . $type . 'Commande"> ' . "\n";
         $html .= "<OPTION value='-1'>S&eacute;lectionner -></OPTION>" . "\n";
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc = " . $this->societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc = " . $this->socid;
         $sql = $this->db->query($requete);
 
         while ($res = $this->db->fetch_object($sql)) {
@@ -1647,12 +1656,12 @@ class Synopsis_Contrat extends Contrat {
         }
         $html .= "</SELECT>\n";
 
-        $html .= "<script>\n";
-        $html .= "       var fk_soc = " . $this->societe->id . ";";
-        $html .= "   jQuery(document).ready(function(){\n";
-        $html .= "       jQuery('#" . $type . "Commande').change(function(){\n";
-        $html .= "       var type = '" . $type . "';\n";
-        $html .= <<<EOF
+        $js = "<script>\n";
+        $js .= "       var fk_soc = " . $this->societe->id . ";";
+        $js .= "   jQuery(document).ready(function(){\n";
+        $js .= "       jQuery('#" . $type . "Commande').change(function(){\n";
+        $js .= "       var type = '" . $type . "';\n";
+        $js .= <<<EOF
           var seekId = jQuery(this).find(':selected').val();
           if (seekId > 0){
 
@@ -1681,32 +1690,32 @@ class Synopsis_Contrat extends Contrat {
         });
 EOF;
 
-        $html .= 'jQuery("#MnTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("MnT"); });' . "\n";
-        $html .= 'jQuery("#TkTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("TkT"); });' . "\n";
-        $html .= 'jQuery("#SaVtype' . $type . '").click(function(){ ' . $type . 'showGMAO("SaV"); });' . "\n";
-        $html .= '});' . "\n";
-        $html .= ' var typeContratRem=false;' . "\n";
-        $html .= 'function ' . $type . 'showGMAO(typeContrat){' . "\n";
-        $html .= "    typeContratRem=typeContrat" . "\n";
-        $html .= "    if (jQuery('#ticket" . $type . "').css('display')=='block') { jQuery('#ticket" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
-        $html .= "    else if (jQuery('#maintenance" . $type . "').css('display')=='block') { jQuery('#maintenance" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
-        $html .= "    else if (jQuery('#savgmao" . $type . "').css('display')=='block') { jQuery('#savgmao" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
-        $html .= "    else { " . $type . "showGMAO2(); }" . "\n";
-        $html .= "}" . "\n";
+        $js .= 'jQuery("#MnTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("MnT"); });' . "\n";
+        $js .= 'jQuery("#TkTtype' . $type . '").click(function(){ ' . $type . 'showGMAO("TkT"); });' . "\n";
+        $js .= 'jQuery("#SaVtype' . $type . '").click(function(){ ' . $type . 'showGMAO("SaV"); });' . "\n";
+        $js .= '});' . "\n";
+        $js .= ' var typeContratRem=false;' . "\n";
+        $js .= 'function ' . $type . 'showGMAO(typeContrat){' . "\n";
+        $js .= "    typeContratRem=typeContrat" . "\n";
+        $js .= "    if (jQuery('#ticket" . $type . "').css('display')=='block') { jQuery('#ticket" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $js .= "    else if (jQuery('#maintenance" . $type . "').css('display')=='block') { jQuery('#maintenance" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $js .= "    else if (jQuery('#savgmao" . $type . "').css('display')=='block') { jQuery('#savgmao" . $type . "').slideUp('fast',function(){ " . $type . "showGMAO2(); })}" . "\n";
+        $js .= "    else { " . $type . "showGMAO2(); }" . "\n";
+        $js .= "}" . "\n";
 
-        $html .= 'function ' . $type . 'showGMAO2(){' . "\n";
-        $html .= "    if (typeContratRem == 'MnT'){" . "\n";
-        $html .= "      jQuery('#maintenance" . $type . "').slideDown();" . "\n";
-        $html .= "    }" . "\n";
-        $html .= "    if (typeContratRem == 'TkT'){" . "\n";
-        $html .= "      jQuery('#ticket" . $type . "').slideDown();" . "\n";
-        $html .= "    }" . "\n";
-        $html .= "    if (typeContratRem == 'SaV'){" . "\n";
-        $html .= "      jQuery('#savgmao" . $type . "').slideDown();" . "\n";
-        $html .= "    }" . "\n";
-        $html .= "}" . "\n";
+        $js .= 'function ' . $type . 'showGMAO2(){' . "\n";
+        $js .= "    if (typeContratRem == 'MnT'){" . "\n";
+        $js .= "      jQuery('#maintenance" . $type . "').slideDown();" . "\n";
+        $js .= "    }" . "\n";
+        $js .= "    if (typeContratRem == 'TkT'){" . "\n";
+        $js .= "      jQuery('#ticket" . $type . "').slideDown();" . "\n";
+        $js .= "    }" . "\n";
+        $js .= "    if (typeContratRem == 'SaV'){" . "\n";
+        $js .= "      jQuery('#savgmao" . $type . "').slideDown();" . "\n";
+        $js .= "    }" . "\n";
+        $js .= "}" . "\n";
 
-        $html .=<<<EOF
+        $js .=<<<EOF
     function publish_selvalue_callBack(obj,value){
         if (jQuery(obj).attr('id') == "p_idprod_add")
         {
@@ -1952,7 +1961,7 @@ EOF;
     }
 
 EOF;
-        $html .= "</script>" . "\n";
+        $js .= "</script>" . "\n";
         $html .= '<td class="ui-widget-content"><span id="' . $type . 'commandeDet">&nbsp;</span>';
         $html .= '</td>';
         $html .= '</tr>';
@@ -1993,6 +2002,8 @@ EOF;
         $html .= '<th class="ui-state-default ui-widget-header" width=150 colspan=1>Produit contrat' . "\n";
         $html .= '<td class="ui-widget-content" colspan=1 width=175>' . "\n";
         $filter = "2";
+        
+//        $html .= '<input type="text" name="p_idContratprod_mod" value="p_idContratprod_mod"/>';
         if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
             $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
         else
@@ -2104,7 +2115,7 @@ EOF;
 
         $html .= '</form>';
         $html .= '</div>';
-        return ($html);
+        return array($html, $js);
     }
 
     private function returnSelect_produits($selected = '', $htmlname = 'productid', $filtertype = '', $limit = 20, $price_level = 0, $status = 1, $finished = 2, $selected_input_value = '', $hidelabel = 0, $ajaxoptions = array()) {

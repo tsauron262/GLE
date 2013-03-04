@@ -88,7 +88,7 @@ class box_comptes extends ModeleBoxes {
             $sql.= " ORDER BY label";
             $sql.= $db->plimit($max, 0);
 
-            dolibarr_syslog("Box_comptes::loadBox sql=".$sql);
+            dol_syslog("Box_comptes::loadBox sql=".$sql);
             $result = $db->query($sql);
             if ($result)
             {

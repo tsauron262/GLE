@@ -24,7 +24,7 @@ function widget_listRetard() {
     // A widget object as per jquery.dashboard.js.
     global $db, $user, $langs, $bc, $conf;
     $var = true;
-    if ($user->societe_id > 0) {
+    $socid = 0; if ($user->societe_id > 0) {
         $socid = $user->societe_id;
     }
 

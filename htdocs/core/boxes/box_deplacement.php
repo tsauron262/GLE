@@ -15,7 +15,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -26,7 +28,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  *
  * $Id: box_deplacement.php,v 1.34 2008/05/30 07:06:37 ywarnier Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_deplacement.php,v $
@@ -113,8 +116,7 @@ class box_deplacement extends ModeleBoxes {
 //                        'url' => DOL_URL_ROOT."/Babel_deplacement/deplacements/ficheNdf.php?id=".$deplacementtatic->id);
 
                         $tuser = new User($db);
-                        $tuser->id=$deplacementtatic->fk_user_author;
-                        $tuser->fetch();
+                        $tuser->fetch($deplacementtatic->fk_user_author);
 
                         $this->info_box_contents[$i][1] = array('align' => 'left',
                         'text' => $tuser->getNomUrl(1),

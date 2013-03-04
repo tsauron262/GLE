@@ -190,7 +190,7 @@ function select_projects($socid=false, $selected='', $htmlname='projectid')
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe ON fk_soc=".MAIN_DB_PREFIX."societe.rowid";
         $sql.= " ORDER BY ".MAIN_DB_PREFIX."societe.nom ASC, p.title ASC";
     }
-    dolibarr_syslog("project.lib::select_projects sql=".$sql);
+    dol_syslog("project.lib::select_projects sql=".$sql);
     $resql=$db->query($sql);
     if ($resql)
     {

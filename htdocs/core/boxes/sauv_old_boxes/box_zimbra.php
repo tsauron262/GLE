@@ -80,8 +80,8 @@ class box_zimbra extends ModeleBoxes {
         $rss=fetch_rss($url);
         if (! is_object($rss))
         {
-            dolibarr_syslog("FETCH_RSS site=".$site);
-            dolibarr_syslog("FETCH_RSS url=".$url);
+            dol_syslog("FETCH_RSS site=".$site);
+            dol_syslog("FETCH_RSS url=".$url);
             return -1;
         }
 

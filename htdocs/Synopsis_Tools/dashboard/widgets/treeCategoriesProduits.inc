@@ -13,7 +13,7 @@ ini_set('browscap',DOL_DOCUMENT_ROOT."/Synopsis_Tools/dashboard/browscap.ini");
 function widget_treeCategoriesProduits() {
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user, $browser,$bc;
-    if ($user->societe_id > 0)
+    $socid = 0; if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }

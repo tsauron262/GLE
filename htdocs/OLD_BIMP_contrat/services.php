@@ -123,7 +123,7 @@ $sql .= $db->plimit($limit + 1 ,$offset);
 
 
 //print $sql;
-dolibarr_syslog("contrat/services.php sql=".$sql);
+dol_syslog("contrat/services.php sql=".$sql);
 $resql=$db->query($sql);
 if ($resql)
 {

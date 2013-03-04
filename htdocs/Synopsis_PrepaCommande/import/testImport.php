@@ -318,7 +318,7 @@ $mailHeader .= "<table  border=0 width=700 cellpadding=10 style='border-collapse
 $mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=3>Les commandes ajout&eacute;es / modifi&eacute;es" . "</td>" . "\n";
 
 
-$cntFile = -1;
+$cntFile = -2;
 if (is_dir($dir)) {
     if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false && $cntFile <= $maxFileImport) {

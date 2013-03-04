@@ -315,7 +315,7 @@ function getTab() {
             array()
         ),
         array($oldPref . "contratdet", MAIN_DB_PREFIX . "element_element",
-            array('rowid', '$%commandedet', 'fk_commande_ligne', '$%contratdet'),
+            array('fk_commande_ligne', '$%commandedet', 'rowid', '$%contratdet'),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
         array("Babel_demandeInterv", MAIN_DB_PREFIX . "Synopsis_demandeInterv",

@@ -94,18 +94,22 @@ function getTab() {
             array("rowid", "nom", "external_id", "statut", "parent", "tms", "datec", "datea", "titre", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", "fk_secteur", "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", /* "description", */ "fk_stcomm", "note"/* , "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj"),
             array("rowid", "nom", "ref_ext", "statut", "parent", "tms", "datec", "datea", "status", "code_client", "code_fournisseur", "code_compta", "code_compta_fournisseur", "address", "cp", "ville", "fk_departement", "fk_pays", "tel", "fax", "url", "email", "ref_int", "fk_effectif", "fk_typent", "fk_forme_juridique", "siren", "siret", "ape", "idprof4", "tva_intra", "capital", /* "description", */ "fk_stcomm", "note"/* , "services"/* , "prefix_comm" */, "client", "fournisseur", "supplier_account", "fk_prospectlevel", "customer_bad", "customer_rate", "supplier_rate", "fk_user_creat", "fk_user_modif", "remise_client", "mode_reglement", "cond_reglement", "tva_assuj")
         ),
+        array($oldPref . "c_type_contact", MAIN_DB_PREFIX . "c_type_contact",
+            array(),
+            array()
+        ),
         array($oldPref . "socpeople", MAIN_DB_PREFIX . "socpeople",
             array('rowid', 'datec', 'tms', 'fk_soc', 'civilite', 'name', 'firstname', 'address', 'cp', 'ville', 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'/* , 'email2', 'email3', 'email4' */),
             array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civilite', 'name', 'firstname', 'address', 'cp', 'ville', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note', /* 'default_lang', 'canvas', */ 'import_key')
         ),
         array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
-            array(/* 'rowid', */'datec', 'tms', 'fk_societe', 'nom', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
-            array(/* 'rowid', */ 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */'name', /* 'firstname', */ 'address', 'cp', 'ville', /* 'fk_departement', */'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */'fax', /* 'email', 'jabberid', 'priv', */'fk_user_creat', 'fk_user_modif', 'note'/* , 'default_lang', 'canvas' */, 'import_key')
+            array( 'rowid', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
+            array( 'rowid',  'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */'name', /* 'firstname', */ 'address', 'cp', 'ville', /* 'fk_departement', */'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */'fax', /* 'email', 'jabberid', 'priv', */'fk_user_creat', 'fk_user_modif', 'note'/* , 'default_lang', 'canvas' */, 'import_key')
         ),
-        array($oldPref . "c_type_contact", MAIN_DB_PREFIX . "c_type_contact",
-            array(),
-            array()
-        ),
+//        array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "element_contact",
+//            array( '$%4', 'fk_societe', '$%102', 'rowid', 'external_id'),
+//            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
+//        ),
         array($oldPref . "element_contact", MAIN_DB_PREFIX . "element_contact",
             array('rowid', 'datecreate', 'statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople'/* , 'inPDF' */),
             array('rowid', 'datecreate', 'statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople')
@@ -151,8 +155,8 @@ function getTab() {
 //            array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
 //        ),
         array($oldPref . "commande", MAIN_DB_PREFIX . "commande",
-            array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison", "fk_adresse_livraison"),
-            array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison", "fk_adresse_livraison")
+            array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison"),
+            array("rowid", "ref", "ref_client", "fk_soc", "fk_projet", "tms", "date_creation", "date_valid", "date_cloture", "date_commande", "fk_user_author", "fk_user_valid", "fk_user_cloture", "source", "fk_statut", "amount_ht", "remise_percent", "remise_absolue", "remise", "tva", "total_ht", "total_ttc", "note", "note_public", "model_pdf", "facture", "fk_cond_reglement", "fk_mode_reglement", "date_livraison")
         ),
         array($oldPref . "commandedet", MAIN_DB_PREFIX . "commandedet",
             array('rowid', 'fk_commande', 'fk_product', 'description', 'tva_tx', 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva', 'total_ttc', 'info_bits', /* 'marge_tx', 'marque_tx', */ 'special_code', 'rang', /* 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef', 'external_id', 'pu_achat_ht', 'propaldet_refid' */),
@@ -353,6 +357,14 @@ function getTab() {
         array("Babel_Histo_User", MAIN_DB_PREFIX . "Synopsis_Histo_User",
             array(),
             array()
+        ),
+        array($oldPref . "commande", MAIN_DB_PREFIX . "element_contact",
+            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
+            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
+        ),
+        array($oldPref . "expedition", MAIN_DB_PREFIX . "element_contact",
+            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
+            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
         )
     );
 }

@@ -569,10 +569,10 @@ if (isset($_REQUEST["id"])) {
     $object->fetch($id);
     global $mysoc;
     $tab = $object->initDialog($mysoc);
-    print $tab[0];
     $header .= $tab[1];
 }
 llxHeader($header, $langs->trans("ContractCard"), "Contrat");
+    print $tab[0];
 /*
  * f mod drsi
  */
@@ -819,6 +819,11 @@ if ($action == 'create') {
             }
             print "</td></tr>";
         }
+        
+        /* deb mod drsi */
+        echo "<tr><td>Total HT</td><td>".$object->total_ht." &euro;"."</td>";
+        echo "<td>Total TTC</td><td>".$object->total_ttc." &euro;"."</td></tr>";
+        /* fin mod drsi */
 
         // Other attributes
         $parameters = array('colspan' => ' colspan="3"');

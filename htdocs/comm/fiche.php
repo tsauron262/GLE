@@ -579,7 +579,7 @@ if ($id > 0)
 				print '<td nowrap="nowrap">';
 				$contrat->id=$objp->id;
 				$contrat->ref=$objp->ref?$objp->ref:$objp->id;
-				print $contrat->getNomUrl(1,12);
+				print $contrat->getNomUrl(1,20);
 				print "</td>\n";
 				print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->dc),'day')."</td>\n";
 				print '<td width="20">&nbsp;</td>';

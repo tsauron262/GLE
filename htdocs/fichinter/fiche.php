@@ -164,6 +164,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
     if ($fichinter->socid > 0) {
         $result = $fichinter->create();
         if ($result > 0) {
+            if (isset($_REQUEST['fk_contratdet']))
+                addElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet'], $result);
+            
             $_REQUEST["id"] = $result;      // Force raffraichissement sur fiche venant d'etre creee
             $fichinterid = $result;
         } else {
@@ -651,22 +654,30 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
           print "</td></tr>";
 
 
+         */
+        $dsc = '';
+        if (isset($_REQUEST['fk_contratdet'])) {
+            require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
+            $ln = new Synopsis_ContratLigne($db);
+            $ln->fetch($_REQUEST['fk_contratdet']);
+            $dsc = $ln->getTitreInter();
+            echo '<input type="hidden" name="fk_contratdet" value="' . $_REQUEST['fk_contratdet'] . '"/>';
+        }
+        print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Titre") . '</td>';
+        print "<td colspan=3 class='ui-widget-content'>";
 
-          print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Description") . '</td>';
-          print "<td colspan=3 class='ui-widget-content'>";
+        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
+            // Editeur wysiwyg
+            require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
+            $doleditor = new DolEditor('description', '', 280, 'dol_notes', 'In', true);
+            $doleditor->Create();
+        } else {
+            print '<textarea name="description" wrap="soft" cols="70" rows="12">'.$dsc.'</textarea>';
+        }
 
-          if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
-          // Editeur wysiwyg
-          require_once(DOL_DOCUMENT_ROOT . "/lib/doleditor.class.php");
-          $doleditor = new DolEditor('description', '', 280, 'dol_notes', 'In', true);
-          $doleditor->Create();
-          } else {
-          print '<textarea name="description" wrap="soft" cols="70" rows="12"></textarea>';
-          }
+        print '</td></tr>';
 
-          print '</td></tr>';
-
-
+        /*
           //Extra Field
           $requete = "SELECT *
           FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key

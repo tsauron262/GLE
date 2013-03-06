@@ -11,14 +11,15 @@ class maj {
     private $maxErreur = 5;
     private $erreur = 0;
     private $tabNonImport = array();
+    private $tabException = array();
 
     function maj($dbS, $dbD) {
         $this->dbS = $dbS;
         $this->dbD = $dbD;
         $this->timeDeb = microtime(true);
     }
-    
-    public function req($req){
+
+    public function req($req) {
         $this->queryD($req);
     }
 
@@ -73,7 +74,7 @@ class maj {
 //        $this->netoyeDet("propal");
 //        $this->netoyeDet("usergroup", MAIN_DB_PREFIX."usergroup_user");
 //        $this->netoyeDet("user", MAIN_DB_PREFIX."usergroup_user");
-        $this->setTabNonImport("user", MAIN_DB_PREFIX."usergroup_user");
+        $this->setTabNonImport("user", MAIN_DB_PREFIX . "usergroup_user");
 //        $this->netoyeDet("user", MAIN_DB_PREFIX."user_rights");
 //        $this->netoyeDet("product", "babel_categorie_product", "babel_");
 
@@ -81,10 +82,10 @@ class maj {
             $this->traiteSql($ligne[2], $ligne[3], $ligne[0], $ligne[1], $update);
         }
 
-        if($this->erreur == 0)
+        if ($this->erreur == 0)
             $this->infoL("Succes !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         else
-            $this->infoL("Finit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ".$this->erreur." errerus");
+            $this->infoL("Finit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " . $this->erreur . " errerus");
     }
 
 //    private function netoyeDet($table, $table2 = null, $prefTab = null) {
@@ -101,8 +102,8 @@ class maj {
 ////        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
 ////        $this->queryS($requete);
 //    }
-    
-    private function setTabNonImport($table, $table2 = null, $prefTab = null){
+
+    private function setTabNonImport($table, $table2 = null, $prefTab = null) {
         global $db;
         if ($prefTab)
             $nomTable = $prefTab . $table;
@@ -114,8 +115,8 @@ class maj {
             $nomTable2 = $nomTable . "det";
         $requete = "SELECT * FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
         $result = $this->queryS($requete);
-        while($ligne = $this->dbS->fetch_object($result))
-            $this->tabNonImport[$nomTable2][$ligne->rowid]    = true;    
+        while ($ligne = $this->dbS->fetch_object($result))
+            $this->tabNonImport[$nomTable2][$ligne->rowid] = true;
     }
 
     public function ajoutDroitGr($tabGr, $tabDroit) {
@@ -135,15 +136,15 @@ class maj {
     private function queryD($query) {
         $query = str_replace("llx_", MAIN_DB_PREFIX, $query);
         $result = $this->dbD->query($query);
-        if(!$result)
-            $this->erreurL("Erreur SQL D : ".$query);
+        if (!$result)
+            $this->erreurL("Erreur SQL D : " . $query);
         return $result;
     }
 
     private function queryS($query) {
         $result = $this->dbS->query($query);
-        if(!$result)
-           $this->erreurL("Erreur SQL S : ".$query);
+        if (!$result)
+            $this->erreurL("Erreur SQL S : " . $query);
         return $result;
     }
 
@@ -176,10 +177,10 @@ class maj {
 
                 //Exception
                 $newCle = $destCol[$id];
-                if ((($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user") || 
-                        ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights")  || 
-                       0// ($cle == "user_refid" && $tableDest == MAIN_DB_PREFIX . "Synopsis_Histo_User") 
-                        )&& $val == "1")//On laisse l'admin de la nouvelle version
+                if ((($cle == "rowid" && $tableDest == MAIN_DB_PREFIX . "user") ||
+                        ($cle == "fk_user" && $tableDest == MAIN_DB_PREFIX . "user_rights") ||
+                        0// ($cle == "user_refid" && $tableDest == MAIN_DB_PREFIX . "Synopsis_Histo_User") 
+                        ) && $val == "1")//On laisse l'admin de la nouvelle version
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
                     $importOff = true;
@@ -189,6 +190,42 @@ class maj {
                 if (($newCle == "fk_product_type" && preg_match('/' . str_replace('/', '\/', '^YOFD') . '/', $ligne['ref'])) &&
                         $tableDest == MAIN_DB_PREFIX . "product")//Deplacement = service
                     $val = 4;
+                if ($tableSrc == "llx_societe_adresse_livraison" && $tableDest == "llx_socpeople" && $cle == "rowid") {
+                    $oldId = $val;
+                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE rowid = " . $ligne['fk_societe'];
+                    $result = $this->queryD($requete);
+                    $ligneT = $this->dbD->fetch_array($result);
+                    if ($ligne['nom'] . "x" == "x" && $ligne['adress'] == $ligneT['adress'] && $ligne['cp'] == $ligneT['cp'] && $ligne['ville'] == $ligneT['ville'] && $ligne['fk_pays'] == $ligneT['fk_pays'] && (is_null($ligne['tel']) || $ligne['tel'] == $ligneT['tel']) && (is_null($ligne['fax']) || $ligne['fax'] == $ligneT['fax'])) {//L'adresse est la meme que celle de la societe
+//                        die("ok");
+                        $importOff = true;
+                    }
+//                    $this->tabException['adresseLivraison'][$val] = $ligne['external_id'];
+                    $val = NULL;
+                }
+                if ($tableDest == "llx_element_contact" && ($tableSrc == "llx_commande" || $tableSrc == "llx_expedition")) {
+                    if ($cle == "rowid") {
+                        $ok = false;
+                        if ($ligne['fk_adresse_livraison'] > 0) {
+                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_adresse_livraison'] . "'";
+                            $result = $this->queryS($requete);
+                            if ($this->dbS->num_rows($result) > 0) {
+                                $ligneT = $this->dbD->fetch_array($result);
+
+                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = '" . $ligneT['external_id'] . "'";
+                                $result = $this->queryD($requete);
+                                if ($this->dbD->num_rows($result) > 0) {
+                                    $ligneT = $this->dbD->fetch_array($result);
+                                    $ligne['fk_adresse_livraison'] = $ligneT['rowid'];
+                                    $ok = true;
+                                }
+                            }
+                        }
+                        if (!$ok)
+                            $importOff = true;
+                    }
+//                    elseif ($cle == "external_id")
+//                        break;
+                }
 
 
                 if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX . "propal" && $val == "99")//On vire les statue 99 sur les propal
@@ -206,17 +243,17 @@ class maj {
                 if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe
                     $val = str_replace(array("[header]", "[desc]"), array("", ""), $val);
                 if ($cle == "fk_id" && ($tableDest == MAIN_DB_PREFIX . "user_rights" || $tableDest == MAIN_DB_PREFIX . "usergroup_rights") && (!isset($_REQUEST['type']) || $_REQUEST['type'] == 1)) {//Nouveau num des droit
-                    if ($val > 59 && $val < 70){
+                    if ($val > 59 && $val < 70) {
                         $tabClone[] = array(count($tabVal) => ($val - 60 + 87449), 0 => "null");
                     }
-                    if ($val == 22234113){//On utilise e doit pour les droit inexistant admin
+                    if ($val == 22234113) {//On utilise e doit pour les droit inexistant admin
                         $tabClone[] = array(count($tabVal) => (87457), 0 => "null");
-                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");  
+                        $tabClone[] = array(count($tabVal) => (80880), 0 => "null");
                     }
-                    if ($val > 29 && $val < 40){
-                        $tabClone[] = array(count($tabVal) => "5".$val, 0 => "null");
+                    if ($val > 29 && $val < 40) {
+                        $tabClone[] = array(count($tabVal) => "5" . $val, 0 => "null");
                     }
-                    if (stripos($val, "222341") !== false) 
+                    if (stripos($val, "222341") !== false)
                         $val = str_replace(222341, 2227, $val);
                 }
                 //Fin exception
@@ -246,10 +283,10 @@ class maj {
                     $tabVal[1001] = ($ligne->sui ? $ligne->sui : 'NULL');
                 }
                 $tabIns[] = $tabVal;
-                
-                foreach($tabClone as $clone){
+
+                foreach ($tabClone as $clone) {
                     $newTab = $tabVal;
-                    foreach($clone as $cle => $newVal)
+                    foreach ($clone as $cle => $newVal)
                         $newTab[$cle] = $newVal;
                     $tabIns[] = $newTab;
                 }

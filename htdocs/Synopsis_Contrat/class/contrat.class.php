@@ -118,20 +118,20 @@ class Synopsis_Contrat extends Contrat {
     }
 
     public function fetch_lines($byid = false) {
-        if($this->id > 0){
-        parent::fetch_lines();
-        $this->lines = array();
-        $id = $this->id;
-        $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
-        $result = $this->db->query($requete);
-        while ($ligneDb = $this->db->fetch_object($result)) {
-            $ligne = new Synopsis_ContratLigne($this->db);
-            $ligne->fetch($ligneDb->rowid);
-            if ($byid)
-                $this->lines[$ligneDb->rowid] = $ligne;
-            else
-                $this->lines[] = $ligne;
-        }
+        if ($this->id > 0) {
+            parent::fetch_lines();
+            $this->lines = array();
+            $id = $this->id;
+            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
+            $result = $this->db->query($requete);
+            while ($ligneDb = $this->db->fetch_object($result)) {
+                $ligne = new Synopsis_ContratLigne($this->db);
+                $ligne->fetch($ligneDb->rowid);
+                if ($byid)
+                    $this->lines[$ligneDb->rowid] = $ligne;
+                else
+                    $this->lines[] = $ligne;
+            }
         }
         else
             die("Pas d'id");
@@ -1271,11 +1271,11 @@ class Synopsis_Contrat extends Contrat {
             $isTkt = true;
             $qte2 = $tmpProd->array_options['options_2qte'];
         }
-        
+
         $duree = 12;
-        if($isSAV && $tmpProd->array_options['options_2dureeSav'] > 0)
+        if ($isSAV && $tmpProd->array_options['options_2dureeSav'] > 0)
             $duree = $tmpProd->array_options['options_2dureeSav'];
-        elseif($tmpProd->array_options['options_2dureeVal'] > 0)
+        elseif ($tmpProd->array_options['options_2dureeVal'] > 0)
             $duree = $tmpProd->array_options['options_2dureeVal'];
 
 
@@ -1313,8 +1313,8 @@ class Synopsis_Contrat extends Contrat {
 
 //Lier a contratdetprop
 //".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO
-        
-        
+
+
         $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
@@ -2002,7 +2002,7 @@ EOF;
         $html .= '<th class="ui-state-default ui-widget-header" width=150 colspan=1>Produit contrat' . "\n";
         $html .= '<td class="ui-widget-content" colspan=1 width=175>' . "\n";
         $filter = "2";
-        
+
 //        $html .= '<input type="text" name="p_idContratprod_mod" value="p_idContratprod_mod"/>';
         if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
             $html .= $this->returnSelect_produits('', 'p_idContratprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
@@ -2238,6 +2238,20 @@ class Synopsis_ContratLigne extends ContratLigne {
                 "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
             );
         }
+    }
+
+    public function getTitreInter() {
+        $dsc = '';
+        $requete = "SELECT nbVisite as nb, ref FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO`, " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cdet WHERE c.rowid = cdet.fk_contrat AND cdet.rowid = contratdet_refid AND contratdet_refid = " . $_REQUEST['fk_contratdet'];
+        $sql = $this->db->query($requete);
+        $tabExiste = getElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet']);
+        $nbExiste = count($tabExiste);
+        $tabExiste = getElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet']);
+        $nbExiste += count($tabExiste);
+        while ($result = $this->db->fetch_object($sql))
+            if ($result->nb)
+                $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb . " Contrat : " . $result->ref;
+        return $dsc;
     }
 
 }

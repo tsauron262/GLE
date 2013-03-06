@@ -460,7 +460,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //                $pdf->MultiCell(8.5, 2.5, , 0, 'C', 0);
 
                 $longtext = "";
-                $tmpArr = array();
+                $tmpArr = array($fichinter->description, "");
                 $atLeastOneDescError = false;
                 $atLeastOneTimeError = false;
                 foreach ($fichinter->lignes as $key => $val) {
@@ -768,7 +768,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 
     function affDesc($pdf, $newArr, $outputlangs) {
         $longText = join("\n", $newArr);
-        $pdf->SetXY(45, 53);
+        $pdf->SetXY(45, 50);
         $pdf->MultiCell(147, 4, stripslashes($longText), 0, 'L', 0);
         $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
     }

@@ -516,7 +516,7 @@ if ($id > 0) {
             jQuery('#delDialog').dialog('open');
         });
         jQuery('#NouvFI').click(function(){
-            location.href=DOL_URL_ROOT+"/fichinter/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&socid="+socid;
+            location.href=DOL_URL_ROOT+"/fichinter/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });
         jQuery('#delDialog').dialog({
             buttons: {

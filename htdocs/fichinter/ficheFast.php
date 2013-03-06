@@ -319,38 +319,38 @@ if ($_REQUEST["id"] > 0) {
         require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
         require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
         $htmlStr = '';
-        if ($fichinter->fk_contrat > 0) {
-            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
-            $sql = $db->query($requete);
-            $arrTmp = array();
-            while ($res = $db->fetch_object($sql)) {
-                $arrTmp[$res->fk_contratdet] = $res->fk_contratdet;
-            }
-            require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
-            $contrat = getContratObj($fichinter->fk_contrat);
-            $type = getTypeContrat_noLoad($fichinter->fk_contrat);
-            if ($type == 7) {
-                $contrat->fetch($fichinter->fk_contrat);
-                $contrat->fetch_lines(true);
-                $htmlStr .= '<tr>
-            <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
-            <td class="ui-widget-content" colspan="3">';
-
-                $htmlStr .= "<table width=100%>";
-                $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet' value='0' checked=\"checked\"><td>";
-                foreach ($contrat->lines as $key => $val) {
-                    $selected = ($prestation->fk_contratdet == $val->id);
-                    $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet contradet" . $val->id . "' value='" . $val->id . "' " . ($selected ? 'checked="checked"' : '') . "><td>";
-                    $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-                    $htmlStr .= $contrat->display1Line($contrat, $val);
-                    $htmlStr .= "</ul>";
-                }
-                $htmlStr .= "</table>";
-
-
-                echo '</td></tr>';
-            }
-        }
+//        if ($fichinter->fk_contrat > 0) {
+//            $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+//            $sql = $db->query($requete);
+//            $arrTmp = array();
+//            while ($res = $db->fetch_object($sql)) {
+//                $arrTmp[$res->fk_contratdet] = $res->fk_contratdet;
+//            }
+//            require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+//            $contrat = getContratObj($fichinter->fk_contrat);
+//            $type = getTypeContrat_noLoad($fichinter->fk_contrat);
+//            if ($type == 7) {
+//                $contrat->fetch($fichinter->fk_contrat);
+//                $contrat->fetch_lines(true);
+//                $htmlStr .= '<tr>
+//            <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
+//            <td class="ui-widget-content" colspan="3">';
+//
+//                $htmlStr .= "<table width=100%>";
+//                $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet' value='0' checked=\"checked\"><td>";
+//                foreach ($contrat->lines as $key => $val) {
+//                    $selected = ($prestation->fk_contratdet == $val->id);
+//                    $htmlStr .= "<tr><td><input type=radio name='" . $prefId . "contradet' class='radioContradet contradet" . $val->id . "' value='" . $val->id . "' " . ($selected ? 'checked="checked"' : '') . "><td>";
+//                    $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
+//                    $htmlStr .= $contrat->display1Line($contrat, $val);
+//                    $htmlStr .= "</ul>";
+//                }
+//                $htmlStr .= "</table>";
+//
+//
+//                echo '</td></tr>';
+//            }
+//        }
         echo $htmlStr;
     }
     echo '<tr id="ajPrestaZone"><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
@@ -466,38 +466,38 @@ $htmlStr .= '<tr>
 //Contradet
 require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
 require_once(DOL_DOCUMENT_ROOT . '/product/class/product.class.php');
-if ($fichinter->fk_contrat > 0) {
-    $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
-    $sql = $db->query($requete);
-    $arrTmp = array();
-    while ($res = $db->fetch_object($sql)) {
-        $arrTmp[$res->fk_contratdet] = $res->fk_contratdet;
-    }
-    require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
-    $contrat = getContratObj($fichinter->fk_contrat);
-    $type = getTypeContrat_noLoad($fichinter->fk_contrat);
-    if ($type == 7) {
-        $contrat->fetch($fichinter->fk_contrat);
-        $contrat->fetch_lines(true);
-        $htmlStr .= '<tr>
-            <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
-            <td class="ui-widget-content" colspan="3">';
-
-        $htmlStr .= "<table width=100%>";
-        $htmlStr .= '<tr><td><input type=radio name="\'+prefId+\'contradet" class="radioContradet" value="0" checked="checked"><td>';
-        foreach ($contrat->lines as $key => $val) {
-            $selected = false;
-            $htmlStr .= '<tr><td><input type="radio" name="\'+prefId+\'contradet" class="radioContradet contradet' . $val->id . '" value="' . $val->id . '" ' . ($selected ? 'checked="checked"' : '') . "><td>";
-            $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
-            $htmlStr .= $contrat->display1Line($contrat, $val);
-            $htmlStr .= "</ul>";
-        }
-        $htmlStr .= "</table>";
-
-
-        $htmlStr .= '</td></tr>';
-    }
-}
+//if ($fichinter->fk_contrat > 0) {
+//    $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
+//    $sql = $db->query($requete);
+//    $arrTmp = array();
+//    while ($res = $db->fetch_object($sql)) {
+//        $arrTmp[$res->fk_contratdet] = $res->fk_contratdet;
+//    }
+//    require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
+//    $contrat = getContratObj($fichinter->fk_contrat);
+//    $type = getTypeContrat_noLoad($fichinter->fk_contrat);
+//    if ($type == 7) {
+//        $contrat->fetch($fichinter->fk_contrat);
+//        $contrat->fetch_lines(true);
+//        $htmlStr .= '<tr>
+//            <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
+//            <td class="ui-widget-content" colspan="3">';
+//
+//        $htmlStr .= "<table width=100%>";
+//        $htmlStr .= '<tr><td><input type=radio name="\'+prefId+\'contradet" class="radioContradet" value="0" checked="checked"><td>';
+//        foreach ($contrat->lines as $key => $val) {
+//            $selected = false;
+//            $htmlStr .= '<tr><td><input type="radio" name="\'+prefId+\'contradet" class="radioContradet contradet' . $val->id . '" value="' . $val->id . '" ' . ($selected ? 'checked="checked"' : '') . "><td>";
+//            $htmlStr .= "<ul style='list-style: none; padding-left: 0px; padding-top:0; margin-bottom:0; margin-top: 0px;'>";
+//            $htmlStr .= $contrat->display1Line($contrat, $val);
+//            $htmlStr .= "</ul>";
+//        }
+//        $htmlStr .= "</table>";
+//
+//
+//        $htmlStr .= '</td></tr>';
+//    }
+//}
 //Fin contradet
 echo '<div style="display:none" id="refAjaxLigne"><table>' . $htmlStr . '</table></div>';
 

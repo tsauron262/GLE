@@ -508,6 +508,8 @@ if (is_dir($dir)) {
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
                     $sql = requeteWithCache($requete);
 
+                    $socAdresse = $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'];
+
                     if ($db->num_rows($sql) > 0) {
                         $res = fetchWithCache($sql);
                         $socid = $res->rowid;
@@ -521,8 +523,8 @@ if (is_dir($dir)) {
                             $res->siret = '';
                         if ($res->siret . "x" != $val['CliSIRET'] . "x")
                             $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
-                        if ($res->address != $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'])
-                            $sqlUpt[] = " address = '" . (strlen($val['CliFAdrRue1'] . " " . $val['CliFAdrRue2']) > 2 ? $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'] : "NULL") . "'";
+                        if ($res->address != $socAdresse)
+                            $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
                         if ($res->cp != $val['CliFAdrZip'])
                             $sqlUpt[] = " cp = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
                         if ($res->ville != $val['CliFAdrCity'])
@@ -600,7 +602,7 @@ if (is_dir($dir)) {
                                      now(),
                                      now(),
                                      '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "',
-                                     '" . (strlen($val['CliFAdrRue1'] . " " . $val['CliFAdrRue2']) > 2 ? $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'] : "NULL") . "',
+                                     '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "',
                                      '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "','" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "',
                                      '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "',
                                      " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL") . ",
@@ -729,54 +731,63 @@ if (is_dir($dir)) {
                       +--------------------------------------------------------------------------------------------------------------+
                      */
 
-                    if ($val['PcvLAdpID'] > 0) {
-//            $webContent .=  "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
-//            $mailContent .=  "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>"."\n";
-//            $livAdd = "";
-//            $requete = "SELECT *
-//                          FROM ".MAIN_DB_PREFIX."societe_adresse_livraison
-//                         WHERE import_key = '".$val['PcvLAdpID']."'";
-//            $sql = requeteWithCache($requete);
-//            $res = fetchWithCache($sql);
-//            if ($db->num_rows($sql) > 0)
-//            {
-//                $livAdd=$res->rowid;
-//    //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
-//    //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
-//                $nomLivAdd = $val['CliLAdrLib']." - ".$val['PcvLAdpID'];
-//                $requete = "UPDATE ".MAIN_DB_PREFIX."societe_adresse_livraison
-//                            SET fk_societe = ".$socid."
-//                                , cp = '".$val['CliLAdrZip']."'
-//                                , ville = '".$val['CliLAdrCity']."'
-//                                , address = '".$val['CliLAdrRue1']." ".$val['CliLAdrRue2']."'
-//                                , fk_pays = ".($paysGlobal."x"!="x"?$paysGlobal:NULL)."
-//                                , label = '".$nomLivAdd."'
-//                            WHERE import_key= ".$val['PcvLAdpID'];
-//                $sql = requeteWithCache($requete);
-//                if ($sql){
-//                    $webContent .=  "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
-//                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK"."\n";
-//                } else {
-//                    $webContent .=  "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: ".$db->lasterrno."<br/>".$db->lastqueryerror."<br/>".$db->lasterror."</span>";
-//                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO"."\n";
-//                }
-//
-//                //Si modif
-//            } else {
-//                $nomLivAdd = $val['CliLAdrLib']." - ".$val['PcvLAdpID'];
-//                $requete = "INSERT INTO ".MAIN_DB_PREFIX."societe_adresse_livraison (fk_societe, cp, ville, address, fk_pays, label,import_key)
-//                                 VALUES (".$socid.",'".$val['CliLAdrZip']."','".$val['CliLAdrCity']."','".$val['CliLAdrRue1']." ".$val['CliLAdrRue2']."',1,'".$nomLivAdd."',".$val['PcvLAdpID'].")";
-//                $sql = requeteWithCache($requete);
-//                if ($sql){
-//                    $webContent .=  "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
-//                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK"."\n";
-//                } else {
-//                    $webContent .=  "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: ".$db->lasterrno."<br/>".$db->lastqueryerror."<br/>".$db->lasterror."</span>";
-//                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO"."\n";
-//                }
-//                $livAdd=$db->last_insert_id('".MAIN_DB_PREFIX."societe_adresse_livraison');
-//            }
+                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
+                    $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
+                    $livAdd = NULL;
+                    $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
+                    if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
+
+
+                        $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                        $requete = "SELECT *
+                          FROM " . MAIN_DB_PREFIX . "socpeople
+                         WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND name = '" . $nomLivAdd . "')";
+//                        $requete = "SELECT *
+//                          FROM " . MAIN_DB_PREFIX . "societe_adresse_livraison
+//                         WHERE import_key = '" . $val['PcvLAdpID'] . "'";
+                        $sql = requeteWithCache($requete);
+                        $res = fetchWithCache($sql);
+                        if ($db->num_rows($sql) > 0) {
+                            $livAdd = $res->rowid;
+                            //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
+                            //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
+                            $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
+                            SET fk_soc = " . $socid . "
+                                , cp = '" . $val['CliLAdrZip'] . "'
+                                , ville = '" . $val['CliLAdrCity'] . "'
+                                , address = '" . $livAdresse . "'
+                                , fk_pays = " . ($paysGlobal . "x" != "x" ? $paysGlobal : NULL) . "
+                                , name = '" . $nomLivAdd . "'
+                            WHERE import_key= " . $val['PcvLAdpID'];
+                            $sql = requeteWithCache($requete);
+                            if ($sql) {
+                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
+                                $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK" . "\n";
+                            } else {
+                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO" . "\n";
+                            }
+
+                            //Si modif
+                        } else {
+                            $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe_adresse_livraison (fk_societe, cp, ville, address, fk_pays, label,import_key)
+                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
+                            $sql = requeteWithCache($requete);
+                            if ($sql) {
+                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
+                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+                            } else {
+                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
+                            }
+                            $livAdd = $db->last_insert_id('".MAIN_DB_PREFIX."societe_adresse_livraison');
+                        }
+                    } else {
+                        $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
+                        $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
                     }
+//                    }
                     /*
                       +--------------------------------------------------------------------------------------------------------------+
                       |                                                                                                              |
@@ -883,8 +894,8 @@ if (is_dir($dir)) {
                                       " */ . ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0) . ",
                                     " . ($val['ArtID'] > 0 ? $val['ArtID'] : 0) . ") ";
                             $sql = requeteWithCache($requete);
-                                $prodId = $db->last_insert_id($sql);
-                            
+                            $prodId = $db->last_insert_id($sql);
+
                             $requete = "INSERT " . MAIN_DB_PREFIX . "product_extrafields
                                     (
                                     `tms` ,
@@ -893,9 +904,9 @@ if (is_dir($dir)) {
                                     `2prixAchatHt`
                                     )
                                      VALUES (now(),
-                                    '" .$prodId . "',
+                                    '" . $prodId . "',
                                     '" . $val['ArtDureeGar'] . "',
-                                    ".($val['PlvPA']>0?$val['PlvPA']:0).") ";
+                                    " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") ";
                             $sql2 = requeteWithCache($requete);
 
                             if ($sql && $sql2) {
@@ -1268,8 +1279,6 @@ if (is_dir($dir)) {
                         $mode = ""; //pour les trigger
 
                         if (!$db->num_rows($sql) > 0) {
-                            if (!isset($livAdd) || $livAdd == '')
-                                $livAdd = 0;
                             //Insert commande
                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
                                         (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_adresse_livraison,import_key)
@@ -1296,8 +1305,6 @@ if (is_dir($dir)) {
                                 $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
                             if ($res->fk_mode_reglement != $modReg)
                                 $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
-                            if (!isset($livAdd) || $livAdd == '')
-                                $livAdd = 0;
                             if ($res->fk_adresse_livraison != $livAdd)
                                 $sqlUpt[] = " fk_adresse_livraison = '" . $livAdd . "'";
                             if (count($sqlUpt) > 0) {

@@ -1004,7 +1004,8 @@ Toute nouvelle installation de logiciels, de nouveaux postes ou de nouveaux pér
         $clause15 = "6 REGLEMENTS";
         $clause16 = "Nos tarifs s'entendent hors taxe et nos prestations sont payables telles que :
 
-    Mode de paiement : " . $modeReg . "
+    Total Ht : ".$this->contrat->total_ht."
+    Mode de paiement : " . $modeReg . " &euro;
     Condition de paiement :  " . $condReg . ".
 
 Fait en deux exemplaires

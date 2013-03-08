@@ -29,15 +29,15 @@ function widget_NavigationUser() {
     $table2 =  '<p>';
     $table2 .= '<table class="notopnoleftnoright" width="100%">';
     $table2 .= '<tr valign="top"><td class="notopnoleft" width="30%">';
-    if($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher){
+    if($conf->global->MAIN_MODULE_SYNOPSISHISTO){
 
         $requete = "SELECT *
-                      FROM Babel_Histo_User
+                      FROM ".MAIN_DB_PREFIX."Synopsis_Histo_User
                      WHERE user_refid = ".$user->id.
                    " ORDER BY tms DESC
                     LIMIT 50";
         $sql = $db->query($requete);
-        global $conf;
+        global $conf, $bc;
         if ($sql)
         {
             $num = $db->num_rows($sql);
@@ -47,12 +47,12 @@ function widget_NavigationUser() {
                 $table .= '<table class="liste" width="100%">';
                 $table2 .= '<table class="liste" width="100%">';
 
-
+                $var = true;
                 while ($res=$db->fetch_object($sql))
                 {
 
                     $var=!$var;
-                    $ret = histoUser($res);
+                    $ret = histoNavigation::histoUser($res);
 //                    $table .= print_r($ret,1);
                     if ($i < ($conf->global->SYNOPSIS_HISTO_LENGTH>0?"  ".$conf->global->SYNOPSIS_HISTO_LENGTH:" 5")){
                         $table .=  "<tr $bc[$var]><td>";

@@ -39,7 +39,7 @@ require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT ."/notify.class.php");
 
-if (!$user->rights->commande->commande->group) accessforbidden();
+if (!$user->rights->commande->lire) accessforbidden();
 
 $langs->load("orders");
 

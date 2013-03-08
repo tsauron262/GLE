@@ -241,7 +241,7 @@ if ($_REQUEST["id"] > 0) {
 ';
     echo '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Titre</th>
-            <td class="ui-widget-content" colspan="3"><textarea name="desc">' . $resultG->description . '</textarea></td>
+            <td class="ui-widget-content" colspan="3"><input type="text" name="desc" style="width:320px;" value="' . $resultG->description . '"/></td>
         </tr>';
     echo '<tr>
             <th>Intervention</th>

@@ -73,7 +73,7 @@ switch ($action)
         }
         print "<td colspan=1 rowspan=5 width=45%>";
                     // editeur wysiwyg
-                    if ($conf->fckeditor->enabled )
+                    if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled )
                     {
                         require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
                         $doleditor=new DolEditor('desc',$objp->description,164,'dolibarr_details');

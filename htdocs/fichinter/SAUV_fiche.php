@@ -695,7 +695,7 @@ if ($_REQUEST["action"] == 'create')
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">'.$langs->trans("Description").'</td>';
         print "<td colspan=3 class='ui-widget-content'>";
 
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
         {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
@@ -913,7 +913,7 @@ EOF;
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">'.$langs->trans("Description").'</th>';
         print "<td colspan=3 class='ui-widget-content'>";
 
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
         {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
@@ -1065,7 +1065,7 @@ EOF;
         print '<tr '.$bc[$var].">\n";
         print '<td width=340>';
         // editeur wysiwyg
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
         {
             require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
             $doleditor=new DolEditor('np_desc','',100,'dol_details');
@@ -1320,7 +1320,7 @@ EOF;
     {
         print '<form name="editdescription" action="'.$_SERVER["PHP_SELF"].'?id='.$fichinter->id.'" method="post">';
         print '<input type="hidden" name="action" value="setdescription">';
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE)
         {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
@@ -1606,7 +1606,7 @@ EOF;
                     print '<td align="center">';
                     if ($conf->global->PRODUIT_CONFIRM_DELETE_LINE)
                     {
-                        if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+                        if ($conf->use_javascript_ajax)
                         {
                             $url = $_SERVER["PHP_SELF"].'?id='.$fichinter->id.'&ligne='.$objp->rowid.'&action=confirm_deleteline&confirm=yes';
                             print '<a href="#" onClick="dialogConfirm(\''.$url.'\',\''.$langs->trans('ConfirmDeleteInterventionLine').'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'deleteline'.$i.'\')">';
@@ -1681,7 +1681,7 @@ EOF;
                 print '<a name="'.$objp->rowid.'"></a>'; // ancre pour retourner sur la ligne
 
                 // editeur wysiwyg
-                if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
+                if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
                 {
                     require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
                     $doleditor=new DolEditor('desc',$objp->description,164,'dol_details');
@@ -1857,7 +1857,7 @@ EOF;
         print '<tr '.$bc[$var].">\n";
         print '<td>';
         // editeur wysiwyg
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS)
         {
             require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
             $doleditor=new DolEditor('np_desc','',100,'dol_details');
@@ -2009,7 +2009,7 @@ EOF;
         if (($fichinter->statut == 0) && $user->rights->synopsisficheinter->creer)
         {
             print '<a class="butAction" ';
-            if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+            if ($conf->use_javascript_ajax)
             {
                 $url = $_SERVER["PHP_SELF"].'?id='.$fichinter->id.'&action=confirm_validate&confirm=yes';
                 print 'href="#" onClick="dialogConfirm(\''.$url.'\',\''.dol_escape_js($langs->trans('ConfirmValidateIntervention')).'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'validate\')"';
@@ -2023,7 +2023,7 @@ EOF;
         if (($fichinter->statut == 0|| $user->rights->synopsisficheinter->modifAfterValid) && $user->rights->synopsisficheinter->supprimer)
         {
             print '<a class="ui-button ui-button-error butActionDelete" ';
-            if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+            if ($conf->use_javascript_ajax)
             {
                 $url = $_SERVER["PHP_SELF"].'?id='.$fichinter->id.'&action=confirm_delete&confirm=yes';
                 print 'href="#" onClick="dialogConfirm(\''.$url.'\',\''.$langs->trans("ConfirmDeleteIntervention").'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'delete\')"';

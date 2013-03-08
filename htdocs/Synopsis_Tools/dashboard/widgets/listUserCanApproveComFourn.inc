@@ -64,12 +64,14 @@ if ($resql)
           $table .=  "</tr>\n";
           $var=True;
 
+                $arrCss[true]='pair';
+                $arrCss[false]='impair';
           while ($i < $num)
             {
               $row = $db->fetch_row($resql);
               $var=!$var;
 
-              $table .=  "<tr $bc[$var]>";
+              $table .=  "<tr class=\"".$arrCss[$var]."\">";
               $table .=  '<td>'.$row[1].' '.$row[0].'</td>';
               $table .=  "</tr>\n";
               $i++;

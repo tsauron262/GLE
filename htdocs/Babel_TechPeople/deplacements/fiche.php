@@ -199,7 +199,7 @@ if ($_GET["action"] == 'create')
     $html->select_company($_GET["socid"],'socid','',1);
     print '</td>';
     print '<td rowspan=6 class="ui-widget-content">';
-    if ($conf->fckeditor->enabled)
+    if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled)
     {
         // Editeur wysiwyg
         require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");
@@ -279,7 +279,7 @@ if ($_GET["action"] == 'create')
                 $html->select_company($soc->id,'socid','',1);
                 print '</td>';
                 print '<td rowspan=6 class="ui-widget-content">';
-                if ($conf->fckeditor->enabled)
+                if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled)
                 {
                     // Editeur wysiwyg
                     require_once(DOL_DOCUMENT_ROOT."/core/lib/doleditor.class.php");

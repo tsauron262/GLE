@@ -28,7 +28,7 @@ function widget_treeCategoriesSocietes() {
 
         $cate_arbo = $c->get_full_arbo($type);
         $table = "<p>";
-        if ($conf->use_javascript_ajax  && $browser->browser != 'IE')
+        if ($conf->use_javascript_ajax)//  && $browser->browser != 'IE')
         {
             $table .= "<script>var DOL_URL_ROOT='".DOL_URL_ROOT."';</script>";
             $table .= '<script type="text/javascript" src="'.DOL_URL_ROOT.'/Synopsis_Tools/jquery/jquery.treeview.js" ></script>';
@@ -94,10 +94,12 @@ function widget_treeCategoriesSocietes() {
                 if (is_array($cate_arbo))
                 {
                     $var=true;
+                $arrCss[true]='pair';
+                $arrCss[false]='impair';
                     foreach($cate_arbo as $key => $value)
                     {
                         $var = ! $var;
-                        $table .= "\t<tr ".$bc[$var].">\n";
+                        $table .= "\t<tr class=\"".$arrCss[$var]."\">\n";
                         $table .= '<td><a href="viewcat.php?id='.$cate_arbo[$key]['id'].'&amp;type='.$type.'">'.$cate_arbo[$key]['fulllabel'].'</a></td>';
                         $table .= '<td>'.$c->get_desc($cate_arbo[$key]['id']).'</td>';
                         $table .= "\t</tr>\n";

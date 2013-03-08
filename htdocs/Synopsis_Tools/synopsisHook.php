@@ -46,6 +46,8 @@ $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
 $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
 $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
+$conf->global->PRODUIT_CONFIRM_DELETE_LINE = "1";
+
 
 $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
 

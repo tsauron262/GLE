@@ -263,7 +263,7 @@ function top_htmlhead($head, $title='', $disablejs=0, $disablehead=0, $arrayofjs
             print '<script language="javascript" type="text/javascript" src="'.DOL_URL_ROOT.'/includes/scriptaculous/src/scriptaculous.js"></script>'."\n";
 
             // Those ones are required only with option "confirm by ajax popup"
-            if ($conf->global->MAIN_CONFIRM_AJAX)
+            if ($conf->use_javascript_ajax)
             {
                 // PWC css
                 print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/alert.css">'."\n";

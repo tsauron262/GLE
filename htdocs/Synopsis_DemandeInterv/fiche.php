@@ -41,7 +41,7 @@
  */
 $activeLigneContrat = false;
 
-if(!isset($_REQUEST['action']))
+if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
 
@@ -249,10 +249,10 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             //all lines id if lignes[]
             $objLigneFiche = new FichinterLigne($db);
 
-            foreach ($demandeInterv->lignes as $ligne => $idLigne) {
+            foreach ($demandeInterv->lignes as $ligne) {
                 $objLigneFiche->fk_fichinter = $result;
-                $objLigneFiche->desc = $demandeInterv->lignes[$ligne]->desc;
-                $objLigneFiche->datei = $demandeInterv->lignes[$ligne]->datei;
+                $objLigneFiche->desc = $ligne->desc;
+                $objLigneFiche->datei = $ligne->datei;
                 if ($conf->global->FICHINTER_RESET_DURATION_DI2FI == 1) {
                     $objLigneFiche->duration = 0;
                     $objLigneFiche->total_ht = 0;
@@ -260,41 +260,43 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
                     $objLigneFiche->total_tva = 0;
                     $objLigneFiche->pu_ht = 0;
                 } else {
-                    $objLigneFiche->duration = $demandeInterv->lignes[$ligne]->duration;
-                    $objLigneFiche->total_ht = $demandeInterv->lignes[$ligne]->total_ht;
-                    $objLigneFiche->total_ttc = $demandeInterv->lignes[$ligne]->total_ttc;
-                    $objLigneFiche->total_tva = $demandeInterv->lignes[$ligne]->total_tva;
-                    $objLigneFiche->pu_ht = $demandeInterv->lignes[$ligne]->pu_ht;
+                    $objLigneFiche->duration = $ligne->duration;
+                    $objLigneFiche->total_ht = $ligne->total_ht;
+                    $objLigneFiche->total_ttc = $ligne->total_ttc;
+                    $objLigneFiche->total_tva = $ligne->total_tva;
+                    $objLigneFiche->pu_ht = $ligne->pu_ht;
                 }
+                if (isset($ligne->fk_prod))
+                    $objLigneFiche->typeIntervProd = $ligne->fk_prod;
 
-                $objLigneFiche->fk_typeinterv = $demandeInterv->lignes[$ligne]->fk_typeinterv;
-                $objLigneFiche->isDeplacement = $demandeInterv->lignes[$ligne]->isDeplacement;
+                $objLigneFiche->fk_typeinterv = $ligne->fk_typeinterv;
+                $objLigneFiche->isDeplacement = $ligne->isDeplacement;
                 //Si deplacement
-                $objLigneFiche->typeIntervProd = false;
-                if (isset($demandeInterv->lignes[$ligne]->fk_commandede)) {
-                    $requete = "SELECT b.rowid
-                                      FROM " . MAIN_DB_PREFIX . "product as b,
-                                           " . MAIN_DB_PREFIX . "commandedet as cd
-                                     WHERE cd.fk_product = b.rowid
-                                       AND cd.rowid = " . $demandeInterv->lignes[$ligne]->fk_commandedet;
-                    $sql3 = $db->query($requete);
-                    if ($db->num_rows($sql3) > 0) {
-                        $res3 = $db->fetch_object($sql3);
-                        $objLigneFiche->typeIntervProd = $res3->rowid;
-                        $objLigneFiche->total_ht = $demandeInterv->lignes[$ligne]->total_ht;
-                        $objLigneFiche->total_ttc = $demandeInterv->lignes[$ligne]->total_ttc;
-                        $objLigneFiche->total_tva = $demandeInterv->lignes[$ligne]->total_tva;
-                        $objLigneFiche->pu_ht = $demandeInterv->lignes[$ligne]->pu_ht;
-                    } else {
-                        die($requete);
-                    }
-                }
+//                $objLigneFiche->typeIntervProd = false;
+//                if (isset($ligne->fk_commandede)) {
+//                    $requete = "SELECT b.rowid
+//                                      FROM " . MAIN_DB_PREFIX . "product as b,
+//                                           " . MAIN_DB_PREFIX . "commandedet as cd
+//                                     WHERE cd.fk_product = b.rowid
+//                                       AND cd.rowid = " . $ligne->fk_commandedet;
+//                    $sql3 = $db->query($requete);
+//                    if ($db->num_rows($sql3) > 0) {
+//                        $res3 = $db->fetch_object($sql3);
+//                        $objLigneFiche->typeIntervProd = $res3->rowid;
+//                        $objLigneFiche->total_ht = $ligne->total_ht;
+//                        $objLigneFiche->total_ttc = $ligne->total_ttc;
+//                        $objLigneFiche->total_tva = $ligne->total_tva;
+//                        $objLigneFiche->pu_ht = $ligne->pu_ht;
+//                    } else {
+//                        die($requete);
+//                    }
+//                }
 
-                $objLigneFiche->qte = $demandeInterv->lignes[$ligne]->qte;
-                $objLigneFiche->isForfait = $demandeInterv->lignes[$ligne]->isForfait;
-                $objLigneFiche->fk_commandedet = $demandeInterv->lignes[$ligne]->fk_commandedet;
-                $objLigneFiche->fk_contratdet = $demandeInterv->lignes[$ligne]->fk_contratdet;
-                $objLigneFiche->tx_tva = $demandeInterv->lignes[$ligne]->tx_tva;
+                $objLigneFiche->qte = $ligne->qte;
+                $objLigneFiche->isForfait = $ligne->isForfait;
+                $objLigneFiche->fk_commandedet = $ligne->fk_commandedet;
+                $objLigneFiche->fk_contratdet = $ligne->fk_contratdet;
+                $objLigneFiche->tx_tva = $ligne->tx_tva;
 
 //                    print '<br/>';
 //                    var_dump($objLigneFiche);
@@ -807,13 +809,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
         $dsc = '';
         if (isset($_REQUEST['fk_contratdet'])) {
-            require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
-        $ln = new Synopsis_ContratLigne($db);
-        $ln->fetch($_REQUEST['fk_contratdet']);
-        $dsc = $ln->getTitreInter();
+            require_once DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php";
+            $ln = new Synopsis_ContratLigne($db);
+            $ln->fetch($_REQUEST['fk_contratdet']);
+            $dsc = $ln->getTitreInter();
             echo '<input type="hidden" name="fk_contratdet" value="' . $_REQUEST['fk_contratdet'] . '"/>';
         }
-        
+
 
 
         if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && isset($conf->global->FCKEDITOR_ENABLE_SOCIETE) && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
@@ -822,7 +824,8 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             $doleditor = new DolEditor('description', $dsc, 280, 'dolibarr_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="1">' . $dsc . '</textarea>';
+//            print '<textarea name="description" wrap="soft" cols="70" rows="1">' . $dsc . '</textarea>';
+            print '<input type="text" style="width:320px;" name="description" value="' . $dsc . '"/>';
         }
 
         print '</td></tr>';
@@ -1014,13 +1017,14 @@ EOF;
         print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Description") . '</th>';
         print "<td colspan=3 class='ui-widget-content'>";
 
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
             $doleditor = new DolEditor('description', '', 280, 'dolibarr_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="12"></textarea>';
+//            print '<textarea name="description" wrap="soft" cols="70" rows="12"></textarea>';
+            print '<input type="text" style="width:320px;" name="description" value=""/>';
         }
 
         print '</td></tr>';
@@ -1150,7 +1154,7 @@ EOF;
         print '<tr ' . $bc[$var] . ">\n";
         print '<td width=340>';
         // editeur wysiwyg
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
             $doleditor = new DolEditor('np_desc', '', 100, 'dolibarr_details');
             $doleditor->Create();
@@ -1292,11 +1296,10 @@ EOF;
         $contrat->fetch($demandeInterv->fk_contrat);
         print "    <td class='ui-widget-content'>" . $contrat->getNomUrl(1) . "</td> ";
         $tab = getElementElement("contratdet", "demandeInterv", NULL, $demandeInterv->rowid);
-        if(isset($tab[0])){
-        print "<th class='ui-widget-header ui-state-default'>Ligne Contrat</th>";
-            print "    <td class='ui-widget-content'><a href='".DOL_URL_ROOT."/Synopsis_Contrat/contratDetail.php?id=".$tab[0]['s']."'>" . $contrat->ref . "-".$tab[0]['s']."</a></td> ";
+        if (isset($tab[0])) {
+            print "<th class='ui-widget-header ui-state-default'>Ligne Contrat</th>";
+            print "    <td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $tab[0]['s'] . "'>" . $contrat->ref . "-" . $tab[0]['s'] . "</a></td> ";
         }
-            
     } else if ($demandeInterv->fk_commande > 0) {
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
@@ -1331,8 +1334,6 @@ EOF;
 //        print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';
 //        print '<td colspan="3" class="ui-widget-content">' . $contrat->getNomUrl(1);
 //    }
-
-
     // Projet
     if (isset($conf->projet->enabled)) {
         $langs->load("projects");
@@ -1399,13 +1400,14 @@ EOF;
     if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editdescription') {
         print '<form name="editdescription" action="' . $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '" method="post">';
         print '<input type="hidden" name="action" value="setdescription">';
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_SOCIETE) {
             // Editeur wysiwyg
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
             $doleditor = new DolEditor('description', $demandeInterv->description, 280, 'dolibarr_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="12">' . dol_htmlentitiesbr_decode($demandeInterv->description) . '</textarea>';
+//            print '<textarea name="description" wrap="soft" cols="70" rows="12">' . dol_htmlentitiesbr_decode($demandeInterv->description) . '</textarea>';
+            print '<input type="text" name="description" style="width:320px;" value="' . dol_htmlentitiesbr_decode($demandeInterv->description) . '"/>';
         }
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
@@ -1446,7 +1448,7 @@ EOF;
         print "</table>";
         print "</form>";
         print '</td>';
-    } elseif($demandeInterv->fk_user_prisencharge) {
+    } elseif ($demandeInterv->fk_user_prisencharge) {
         $demandeInterv->user_prisencharge->fetch($demandeInterv->fk_user_prisencharge);
         print ($demandeInterv->user_prisencharge ? $demandeInterv->user_prisencharge->getNomUrl(1) : "") . '</td>';
     }
@@ -1691,7 +1693,7 @@ EOF;
                     print '</td>';
                     print '<td width=16 align="center">';
                     if ($conf->global->PRODUIT_CONFIRM_DELETE_LINE) {
-                        #if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+                        #if ($conf->use_javascript_ajax)
                         #{
                         $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&ligne=' . $objp->rowid . '&action=confirm_deleteline&confirm=yes';
                         print '<a href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . $langs->trans('ConfirmDeleteDILine') . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'deleteline' . $i . '\')">';
@@ -1760,12 +1762,13 @@ EOF;
                 print '<td>';
                 print '<a name="' . $objp->rowid . '"></a>'; // ancre pour retourner sur la ligne
                 // editeur wysiwyg
-                if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
+                if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
                     $doleditor = new DolEditor('desc', $objp->description, 164, 'dolibarr_details');
                     $doleditor->Create();
                 } else {
-                    print '<textarea name="desc" cols="40" class="flat" rows="' . ROWS_2 . '">' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '</textarea>';
+                    /* print '<textarea name="desc" cols="40" class="flat" rows="' . ROWS_2 . '">' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '</textarea>'; */
+                    print '<input type="text" style="width:320px;" name="description" value="' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '"/>';
                 }
                 print '</td>';
 
@@ -1913,7 +1916,7 @@ EOF;
         }
         print '<td>';
         // editeur wysiwyg
-        if ($conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
+        if (isset($conf->fckeditor->enabled) && $conf->fckeditor->enabled && $conf->global->FCKEDITOR_ENABLE_DETAILS) {
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/doleditor.class.php");
             $doleditor = new DolEditor('np_desc', '', 100, 'dolibarr_details');
             $doleditor->Create();

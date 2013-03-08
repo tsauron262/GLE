@@ -2242,15 +2242,21 @@ class Synopsis_ContratLigne extends ContratLigne {
 
     public function getTitreInter() {
         $dsc = '';
-        $requete = "SELECT nbVisite as nb, ref FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO`, " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cdet WHERE c.rowid = cdet.fk_contrat AND cdet.rowid = contratdet_refid AND contratdet_refid = " . $_REQUEST['fk_contratdet'];
+        $requete = "SELECT nbVisite as nb, ref, qte, qty, GMAO.* FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` GMAO, " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cdet WHERE c.rowid = cdet.fk_contrat AND cdet.rowid = contratdet_refid AND contratdet_refid = " . $_REQUEST['fk_contratdet'];
         $sql = $this->db->query($requete);
         $tabExiste = getElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet']);
         $nbExiste = count($tabExiste);
         $tabExiste = getElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet']);
         $nbExiste += count($tabExiste);
-        while ($result = $this->db->fetch_object($sql))
+        while ($result = $this->db->fetch_object($sql)){
+            $qte = $result->qte * $result->qty;
             if ($result->nb)
                 $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb . " Contrat : " . $result->ref;
+            elseif ($result->telemaintenance)
+                $dsc = "Télémaintenance " . ($nbExiste + 1) . " / " . $qte . " Contrat : " . $result->ref;
+            elseif ($result->hotline)
+                $dsc = "Hotline " . ($nbExiste + 1) . " / " . $qte . " Contrat : " . $result->ref;
+        }
         return $dsc;
     }
 

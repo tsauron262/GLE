@@ -20,7 +20,7 @@
     require_once('pre.inc.php');
     require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/commandeGroup/commandeGroup.class.php");
     $msg =  "";
-    if (!$user->rights->commande->commande->group) accessforbidden();
+    if (!$user->rights->commande->lire) accessforbidden();
 $js = <<<EOF
 <script>
 jQuery(document).ready(function(){

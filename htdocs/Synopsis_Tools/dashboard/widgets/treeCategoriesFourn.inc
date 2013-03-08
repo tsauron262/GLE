@@ -28,7 +28,7 @@ function widget_treeCategoriesFourn() {
 
         $cate_arbo = $c->get_full_arbo($type);
         $table = "<p>";
-        if ($conf->use_javascript_ajax  && $browser->browser != 'IE')
+        if ($conf->use_javascript_ajax)//  && $browser->browser != 'IE')
         {
             $table .= "<script>var DOL_URL_ROOT='".DOL_URL_ROOT."';</script>";
             $table .= '<script type="text/javascript" src="'.DOL_URL_ROOT.'/Synopsis_Tools/jquery/jquery.treeview.js" ></script>';

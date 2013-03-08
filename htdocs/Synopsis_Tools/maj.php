@@ -362,10 +362,10 @@ function getTab() {
             array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
             array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
         ),
-        array($oldPref . "expedition", MAIN_DB_PREFIX . "element_contact",
-            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
-            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
-        )
+//        array($oldPref . "expedition", MAIN_DB_PREFIX . "element_contact",
+//            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
+//            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
+//        )
     );
 }
 

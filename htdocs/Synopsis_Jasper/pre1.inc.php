@@ -315,7 +315,7 @@ function top_htmlhead1($head, $title='', $disablejs=0, $disablehead=0)
         print '<link rel="stylesheet" type="text/css" media="print" href="'.DOL_URL_ROOT.'/theme/print.css">'."\n";
 
         // Style sheets pour la class Window
-        if (! empty($conf->global->MAIN_CONFIRM_AJAX))
+        if (! empty($conf->use_javascript_ajax))
         {
             print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/window/default.css">'."\n";
             print '<link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/theme/common/window/alphacube.css">'."\n";

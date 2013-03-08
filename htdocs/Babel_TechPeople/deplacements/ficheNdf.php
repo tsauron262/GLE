@@ -431,7 +431,7 @@ print '<div class="tabsAction">';
 if ($ndf->statut == 1|| $ndf->statut == 4 || $ndf->statut == 0)
 {
         print '<a class="butAction" ';
-        if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+        if ($conf->use_javascript_ajax)
         {
             $url = $_SERVER["PHP_SELF"].'?id='.$ndf->id.'&action=confirm_validate&confirm=yes';
             print 'href="#" onClick="dialogConfirm(\''.$url.'\',\''.dol_escape_js($langs->trans('ConfirmDemandeValid')).'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'validate\')"';
@@ -444,7 +444,7 @@ if ($ndf->statut == 1|| $ndf->statut == 4 || $ndf->statut == 0)
 if ($ndf->statut == 2)
 {
         print '<a class="butAction" ';
-        if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+        if ($conf->use_javascript_ajax)
         {
             $url = $_SERVER["PHP_SELF"].'?id='.$ndf->id.'&action=confirm_validateNdf&confirm=yes';
             print 'href="#" onClick="dialogConfirm(\''.$url.'\',\''.dol_escape_js($langs->trans('ConfirmValidateNdf')).'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'validate\')"';
@@ -453,7 +453,7 @@ if ($ndf->statut == 2)
         }
         print '>'.$langs->trans('Validate').'</a>';
         print '<a class="butAction" ';
-        if ($conf->use_javascript_ajax && $conf->global->MAIN_CONFIRM_AJAX)
+        if ($conf->use_javascript_ajax)
         {
             $url = $_SERVER["PHP_SELF"].'?id='.$ndf->id.'&action=confirm_refuseNdf&confirm=yes';
             print 'href="#" onClick="dialogConfirm(\''.$url.'\',\''.dol_escape_js($langs->trans('ConfirmRefuseNdf')).'\',\''.$langs->trans("Yes").'\',\''.$langs->trans("No").'\',\'validate\')"';

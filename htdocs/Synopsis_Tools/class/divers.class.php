@@ -497,7 +497,7 @@ class histoNavigation {
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User
                      WHERE user_refid = " . $user->id .
                 " AND ref != '' AND element_type != '' ORDER BY tms DESC" .
-                (isset($conf->global->SYNOPSIS_HISTO_LENGTH) && $conf->global->SYNOPSIS_HISTO_LENGTH > 0 ? " LIMIT " . $conf->global->SYNOPSIS_HISTO_LENGTH : " LIMIT 5");
+                (isset($conf->global->SYNOPSIS_HISTO_LENGTH) && $conf->global->SYNOPSIS_HISTO_LENGTH > 0 ? " LIMIT 0," . $conf->global->SYNOPSIS_HISTO_LENGTH : " LIMIT 0,5");
 
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {
@@ -510,7 +510,7 @@ class histoNavigation {
         return $return;
     }
 
-    private static function histoUser($res) {
+    public static function histoUser($res) {
         $tabResult = synopsisHook::getObjAndMenu($res->element_type);
         $obj = $tabResult[0];
         $tabMenu = $tabResult[1];

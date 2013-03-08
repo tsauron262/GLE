@@ -27,7 +27,7 @@ function widget_listPrepaGroupCommande() {
       $table =  '<p>';
       $table2 = '</p>';
 
-    if ($conf->commande->enabled && $user->rights->commande->commande->group)
+    if ($conf->commande->enabled && $user->rights->commande->lire)
     {
         $sql = "SELECT count(".MAIN_DB_PREFIX."Synopsis_commande_grpdet.commande_group_refid) as cnt,
                        ".MAIN_DB_PREFIX."Synopsis_commande_grp.id
@@ -72,13 +72,13 @@ function widget_listPrepaGroupCommande() {
                     $bool = !$bool;
                     if ($iter < 10)
                     {
-                            $var=!$var;
+//                            $var=!$var;
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $commandeGroup->getNomUrl(1);
                             $table .=  '<td align="center">'.$res->cnt.'</td>';
                     }
-                    $var=!$var;
+//                    $var=!$var;
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $commandeGroup->getNomUrl(1);

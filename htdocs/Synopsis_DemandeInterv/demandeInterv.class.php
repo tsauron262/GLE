@@ -141,7 +141,8 @@ class demandeInterv extends CommonObject
         // on verifie si la ref n'est pas utilisee
         $soc = new Societe($this->db);
         $result=$soc->fetch($this->socid);
-        $this->verifyNumRef($soc);
+        $this->soc = $soc;
+        $this->verifyNumRef();
 
         $sql = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_demandeInterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id) $sql.=  ", fk_projet";
@@ -686,7 +687,7 @@ class demandeInterv extends CommonObject
     *      \brief      Verifie si la ref n'est pas deja utilisee
     *      \param        soc                      objet societe
     */
-    function verifyNumRef($soc)
+    function verifyNumRef()
     {
         $sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " WHERE ref = '".$this->ref."'";
@@ -697,7 +698,7 @@ class demandeInterv extends CommonObject
             $num = $this->db->num_rows($result);
             if ($num > 0)
             {
-                $this->ref = $this->getNextNumRef($soc);
+                $this->ref = $this->getNextNumRef($this->soc);
             }
         }
     }
@@ -1234,10 +1235,12 @@ class demandeIntervLigne
                             ft.fk_contratdet,
                             ft.pu_ht,
                             ft.tx_tva,
-                            ft.date as dateiunformated,';
+                            ft.date as dateiunformated,
+                            c.fk_product as fk_product1,';
         $sql.= '            ft.date as datei ';
         $sql.= '       FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet as ft';
         $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON ft.fk_typeinterv=t.id";
+        $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."commandedet as c ON c.rowid = ft.fk_commandedet";
         $sql.= '      WHERE ft.rowid = '.$rowid;
         dol_syslog("demandeIntervLigne::fetch sql=".$sql);
         $result = $this->db->query($sql);
@@ -1264,6 +1267,9 @@ class demandeIntervLigne
             $this->pu_ht              = $objp->pu_ht;
             $this->tx_tva             = $objp->tx_tva;
             $this->comLigneId             = $objp->comLigneId;
+            
+            if($objp->fk_product1 > 0)
+                $this->fk_prod = $objp->fk_product1;
 
 
             $this->db->free($result);

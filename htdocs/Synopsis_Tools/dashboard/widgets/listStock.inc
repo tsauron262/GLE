@@ -27,7 +27,7 @@ function widget_listStock() {
 
 
     $max=50;
-    $sql = "SELECT e.label, e.rowid, e.statut FROM ".MAIN_DB_PREFIX."entrepot as e";
+    $sql = "SELECT e.label, e.rowid, e.statut, label FROM ".MAIN_DB_PREFIX."entrepot as e";
     $sql .= " WHERE statut in (0,1) ORDER BY e.statut DESC ";
     $sql .= $db->plimit($max ,0);
     $result = $db->query($sql) ;
@@ -51,16 +51,15 @@ function widget_listStock() {
             $var=True;
             while ($i < $num)
             {
+                    $objp = $db->fetch_object($result);
                 if ($i < 10)
                 {
-                    $objp = $db->fetch_object($result);
                     $var=!$var;
                     $table .= "<tr $bc[$var]>";
                     $table .= "<td><a href=\"fiche.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";
                     $table .= '<td align="right">'.$entrepot->LibStatut($objp->statut,3).'</td>';
                     $table .= "</tr>\n";
                 }
-                $objp = $db->fetch_object($result);
                 $var=!$var;
                 $table2 .= "<tr $bc[$var]>";
                 $table2 .= "<td><a href=\"fiche.php?id=$objp->rowid\">".img_object($langs->trans("ShowStock"),"stock")." ".$objp->label."</a></td>\n";

@@ -873,7 +873,12 @@ abstract class DolibarrModules
                     }
 
                     dol_syslog(get_class($this)."::insert_permissions sql=".$sql, LOG_DEBUG);
+                    /*Mod drsi*/
+                    $oldLog = (isset($conf->syslog->enabled)? $conf->syslog->enabled : NULL);
+                    $conf->syslog->enabled = NULL;
                     $resqlinsert=$this->db->query($sql,1);
+                    $conf->syslog->enabled = $oldLog;
+                    /* fin mod drsi */ 
                     if (! $resqlinsert)
                     {
                         if ($this->db->errno() != "DB_ERROR_RECORD_ALREADY_EXISTS")

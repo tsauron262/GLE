@@ -80,7 +80,7 @@ class box_produits extends ModeleBoxes {
         {
             $sql = "SELECT p.rowid, p.label, p.price, p.price_base_type, p.price_ttc, p.fk_product_type, p.tms, p.tobuy";
             $sql .= " FROM babel_product as p";
-            if ($conf->categorie->enabled && !$user->rights->categorie->voir)
+            if ($conf->categorie->enabled && !$user->rights->categorie->lire)
             {
                 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
                 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cp.fk_categorie = c.rowid";
@@ -101,7 +101,7 @@ class box_produits extends ModeleBoxes {
                     // Multilangs
                             if ($conf->global->MAIN_MULTILANGS) // si l'option est active
                             {
-                                $sqld = "SELECT label FROM ".MAIN_DB_PREFIX."product_det";
+                                $sqld = "SELECT label FROM ".MAIN_DB_PREFIX."product_lang";
                                 $sqld.= " WHERE fk_product=".$objp->rowid." AND lang='". $langs->getDefaultLang() ."'";
                                 $sqld.= " LIMIT 1";
 

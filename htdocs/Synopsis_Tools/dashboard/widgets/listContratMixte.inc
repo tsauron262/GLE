@@ -28,7 +28,7 @@ function widget_listContratMixte() {
     {
         $staticcontrat= new Contrat($db);
 
-        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.extraparams as type, ";
+        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.extraparams as type, total_ttc, ";
         $sql.= " s.nom, s.rowid as socid,  cd.date_fin_validite";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql .= " FROM ".MAIN_DB_PREFIX."societe as s,  ".MAIN_DB_PREFIX."contrat as c LEFT JOIN ".MAIN_DB_PREFIX."contratdet as cd ON c.rowid = cd.fk_contrat ";

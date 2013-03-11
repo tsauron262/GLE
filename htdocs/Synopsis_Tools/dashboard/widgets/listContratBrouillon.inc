@@ -20,7 +20,7 @@ function widget_listContratBrouillon() {
 
 
       $table =  '<p>';
-      $table2 = '</p>';
+      $table2 = '<p>';
 
 
 
@@ -28,7 +28,7 @@ function widget_listContratBrouillon() {
     {
         $staticcontrat= new Synopsis_Contrat($db);
 
-        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.extraparams as type, ";
+        $sql  = "SELECT DISTINCT c.ref as ref, c.rowid, c.extraparams as type, total_ttc,";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql .= " FROM ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."societe as s";
@@ -42,7 +42,7 @@ function widget_listContratBrouillon() {
         {
             $sql .= " AND f.fk_soc = ".$socid;
         }
-        $sql .= " ORDER BY cd.tms DESC LIMIT 50 ";
+        $sql .= " GROUP BY c.rowid ORDER BY cd.tms DESC LIMIT 50 ";
         $resql = $db->query($sql);
 
         if ( $resql )
@@ -53,36 +53,54 @@ function widget_listContratBrouillon() {
             $table .=  '<br>';
             $table .=  '<table class="noborder" width="100%">';
             $table .=  '<tr class="liste_titre">';
-            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num?' ('.$num.')':'').'</td>';
+            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num<10?' ('.$num.')':'10').'</td>';
     //        $table .=  "<td>Type</td>";
             $table .=  '</tr>';
+            $table2 .=  '<br>';
+            $table2 .=  '<table class="noborder" width="100%">';
+            $table2 .=  '<tr class="liste_titre">';
+            $table2 .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num?' ('.$num.')':'').'</td>';
+    //        $table .=  "<td>Type</td>";
+            $table2 .=  '</tr>';
             if ($num)
             {
                 $companystatic=new Societe($db);
 
                 $i = 0;
                 $tot_ttc = 0;
-                while ($i < $num && $i < 10)
+                while ($i < $num)
                 {
                     $obj = $db->fetch_object($resql);
-                    $table .=  '<tr '.$bc[$var].'><td nowrap>';
                     $staticcontrat->ref=$obj->ref;
                     $staticcontrat->id=$obj->rowid;
-                    $table .=  $staticcontrat->getNomUrl(1,'');
-                    $table .=  '</td>';
-                    $table .=  '<td>';
                     $companystatic->id=$obj->socid;
                     $companystatic->fetch($obj->socid);
                     $companystatic->nom=$obj->nom;
                     $companystatic->client=1;
-                    $table .=  $companystatic->getNomUrl(1,'',16);
-                    $table .=  '</td>';
                     $staticcontrat->typeContrat = $obj->type;
                     $typeC = $staticcontrat->getTypeContrat();
+                    if($i < 10){
+                    $table .=  '<tr '.$bc[$var].'><td nowrap>';
+                    $table .=  $staticcontrat->getNomUrl(1,'');
+                    $table .=  '</td>';
+                    $table .=  '<td>';
+                    $table .=  $companystatic->getNomUrl(1,'',16);
+                    $table .=  '</td>';
                     $table .= "<td>";
                     $table .= $typeC['Nom'];
                     $table .= '</td>';
                     $table .=  '</tr>';
+                    }
+                    $table2 .=  '<tr '.$bc[$var].'><td nowrap>';
+                    $table2 .=  $staticcontrat->getNomUrl(1,'');
+                    $table2 .=  '</td>';
+                    $table2 .=  '<td>';
+                    $table2 .=  $companystatic->getNomUrl(1,'',16);
+                    $table2 .=  '</td>';
+                    $table2 .= "<td>";
+                    $table2 .= $typeC['Nom'];
+                    $table2 .= '</td>';
+                    $table2 .=  '</tr>';
                     $tot_ttc+=$obj->total_ttc;
                     $i++;
                     $var=!$var;

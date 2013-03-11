@@ -23,8 +23,8 @@ $delay_1 = isset($_GET['delay_1']) ? $_GET['delay_1'] : 0.5;
 $cascade_1 = isset($_GET['cascade_1']) ? $_GET['cascade_1'] : 1;
 
 
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_order_statut WHERE active = 1";
-$sql = $db->query($requete);
+//$requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_order_statut WHERE active = 1";
+//$sql = $db->query($requete);
 $arr = array();
 $arrLang = array();
 $arrXLabel = array();

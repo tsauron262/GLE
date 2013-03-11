@@ -14,6 +14,10 @@
  */
 require_once('../../../main.inc.php');
 
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+if(!isset($_REQUEST['userId']))
+    $_REQUEST['userId'] = '';
 
 $action = $_REQUEST['action'];
 $user_id = $_REQUEST['userId'];

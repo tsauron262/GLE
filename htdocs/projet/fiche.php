@@ -47,6 +47,11 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 //require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 
+
+if (!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
+
 $langs->load("projectsSyn@projet");
 
 $projetid = '';
@@ -55,7 +60,7 @@ if ($_GET["id"]) {
 }
 
 
-if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add" && $_POST["action"] != "update" && !$_POST["cancel"]))
+if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add" && $_REQUEST['action'] != "update" && !$_POST["cancel"]))
     accessforbidden();
 
 // SecuritrestrictedAreay check
@@ -95,7 +100,7 @@ if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($_POST["action"] == 'add' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
     //print $_POST["socid"];
     $pro = new Project($db);
 
@@ -124,11 +129,11 @@ if ($_POST["action"] == 'add' && $user->rights->synopsisprojet->creer) {
         } else {
             $mesg = '<div class="error ui-state-error">' . $langs->trans($pro->error) . '</div>';
         }
-        $_GET["action"] = 'create';
+        $_REQUEST['action'] = 'create';
     }
 }
 
-if ($_POST["action"] == 'update' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
     if (!$_POST["cancel"]) {
         $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE rowid=" . $_POST['id'];
         $sql = $db->query($requete);
@@ -162,7 +167,7 @@ if ($_POST["action"] == 'update' && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($_POST["action"] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
+if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
     $projet = new Project($db);
     $projet->id = $_GET["id"];
     if ($projet->delete($user) == 0) {
@@ -179,7 +184,7 @@ if ($_POST["action"] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user-
  *    View
  */
 
-if ($_GET["action"] != 'create') {
+if ($_REQUEST['action'] != 'create') {
     $csspath = DOL_URL_ROOT . '/Synopsis_Common/css/';
     $jspath = DOL_URL_ROOT . '/Synopsis_Common/jquery/';
     $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
@@ -244,7 +249,7 @@ if (isset($msg) && $msg . "x" != "x") {
 
 $html = new Form($db);
 
-if ($_GET["action"] == 'create' && $user->rights->synopsisprojet->creer) {
+if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     /*
      * Create
      */
@@ -312,12 +317,12 @@ if ($_GET["action"] == 'create' && $user->rights->synopsisprojet->creer) {
     $head = synopsis_project_prepare_head($projet);
     dol_fiche_head($head, 'project', $langs->trans("Project"));
 
-    if ($_GET["action"] == 'delete') {
+    if ($_REQUEST['action'] == 'delete') {
         $html->form_confirm("fiche.php?id=" . $_GET["id"], $langs->trans("DeleteAProject"), $langs->trans("ConfirmDeleteAProject"), "confirm_delete");
         print "<br>";
     }
 
-    if ($_GET["action"] == 'edit') {
+    if ($_REQUEST['action'] == 'edit') {
         print '<form method="post" action="fiche.php">';
         print '<input type="hidden" name="action" value="update">';
         print '<input type="hidden" name="id" value="' . $_GET["id"] . '">';
@@ -460,7 +465,7 @@ if ($_GET["action"] == 'create' && $user->rights->synopsisprojet->creer) {
      */
     print '<div class="tabsAction">';
 
-    if ($_GET["action"] != "edit") {
+    if ($_REQUEST['action'] != "edit") {
         if ($user->rights->synopsisprojet->creer) {
             print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
         }

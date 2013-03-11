@@ -21,14 +21,14 @@ function widget_listActionDone() {
 
     if ($user->rights->agenda->myactions->read) {
         ob_start();
-        $table .= "<p>";
+        $table = "<p>";
         $table .= show_array_last_actions_done(5, false);
         $table .= ob_get_contents();
         $table .= "</p>";
         ob_clean();
         
         ob_start();
-        $table2 .= "<p>";
+        $table2 = "<p>";
         $table2 .= show_array_last_actions_done(50, false);
         $table2 .= ob_get_contents();
         $table2 .= "</p>";

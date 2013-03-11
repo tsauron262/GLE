@@ -27,6 +27,7 @@ function widget_listExpeditionAValider() {
         $sql.= " FROM " . MAIN_DB_PREFIX . "expedition as e";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON e.rowid = ce.fk_target";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "commande as c ON ce.fk_source = c.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_commande as sc ON ce.fk_source = sc.rowid";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as s ON s.rowid = e.fk_soc";
         if (!$user->rights->societe->client->voir && !$socid) {
             $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";

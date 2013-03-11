@@ -88,6 +88,7 @@ function widget_listSAVAttenteClient() {
         $table2 .="</p>";
     } else {
         $table = "Modules non actif";
+        $table2 = "Modules non actif";
     }
     return array(
         'title' => 'SAV - En attente du client',

@@ -58,7 +58,7 @@ function widget_statOfcOrderStatusAll() {
         $trans = $langs->trans($label);
 //        if ($trans == $langs->trans($trans))
 //        $trans = $resql->label;
-        $sql = "SELECT *
+        $sql = "SELECT *, ref as label
                 FROM " . MAIN_DB_PREFIX . "commande
                 WHERE date_commande > date_sub(now(),interval 6 month)
                 AND fk_statut = " . $id . "

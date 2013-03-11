@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file
  *    Defines the hello_world widget.
@@ -6,47 +7,47 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
-require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
+require_once(DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php');
+require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
 // The get widget handler.
 function widget_listPrepaCommande() {
-  // A widget object as per jquery.dashboard.js.
-    global $db, $conf,$langs, $user;
-    $socid = 0; if ($user->societe_id > 0)
-    {
-      $socid = $user->societe_id;
+    // A widget object as per jquery.dashboard.js.
+    global $db, $conf, $langs, $user;
+    $socid = 0;
+    if ($user->societe_id > 0) {
+        $socid = $user->societe_id;
     }
     $langs->load("orders");
-    $formfile = new FormFile($db);
+//    $formfile = new FormFile($db);
     $langs->load("compta");
     $langs->load("bills");
 
-    $commandestatic=new Commande($db);
+    $commandestatic = new Commande($db);
 
 
-      $table =  '<p>';
-      $table2 = '</p>';
+    $table = '<p>';
+    $table2 = '</p>';
 
-    if ($conf->commande->enabled && $user->rights->commande->lire)
-    {
+    if ($conf->commande->enabled && $user->rights->commande->lire) {
         $sql = "SELECT sum(f.total) as tot_fht, sum(f.total_ttc) as tot_fttc,";
         $sql.= " s.nom, s.rowid as socid,";
         $sql.= " p.rowid, p.ref, p.facture, p.fk_statut, p.total_ht, p.total_ttc, bs.id, bs.label as Blabel";
-        if (!$user->rights->societe->client->voir && !$socid) 
+        if (!$user->rights->societe->client->voir && !$socid)
             $sql .= ", sc.fk_soc, sc.fk_user ";
-        $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s";
-        $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element ON `fk_source` = 'commande' AND `fk_target` = 'statutS' AND fk_source = p.rowid";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status as bs ON fk_target = bs.id";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element AS co_fa ON co_fa.sourcetype = 'commande' AND co_fa.targettype = 'facture' AND co_fa.fk_source = p.rowid ";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture AS f ON co_fa.fk_target = f.rowid";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "societe AS s";
+        $sql.= ", " . MAIN_DB_PREFIX . "commande AS p";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element ON `fk_source` = 'commande' AND `fk_target` = 'statutS' AND fk_source = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_commande_status as bs ON fk_target = bs.id";
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.sourcetype = 'commande' AND co_fa.targettype = 'facture' AND co_fa.fk_source = p.rowid ";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "facture AS f ON co_fa.fk_target = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
-        if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-        if ($socid)
-        {
-            $sql.= " AND p.fk_soc = ".$socid;
+        if (!$user->rights->societe->client->voir && !$socid)
+            $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " . $user->id;
+        if ($socid) {
+            $sql.= " AND p.fk_soc = " . $socid;
         }
         $sql.= " AND (bs.id = 0 OR bs.id IS NULL)";
         $sql.= " GROUP BY p.rowid";
@@ -54,86 +55,79 @@ function widget_listPrepaCommande() {
 
 //$table .= $sql;
 
-        $resql=$db->query($sql);
-        if ($resql)
-        {
+        $resql = $db->query($sql);
+        if ($resql) {
             $total = 0;
             $total2 = 0;
             $ftotal = 0;
             $ftotal2 = 0;
             $num = $db->num_rows($resql);
-            if ($num > 0)
-            {
+            if ($num > 0) {
 
-                $cssClass[true]='pair';
-                $cssClass[false]='impair';
+                $cssClass[true] = 'pair';
+                $cssClass[false] = 'impair';
                 $bool = false;
                 $iter = 0;
                 $table .= '<table class="noborder" width="100%">';
                 $table .= "<tr class=\"liste_titre\">";
-                $table .= "<td colspan=\"2\">".$langs->trans("Orders")."</td>";
+                $table .= "<td colspan=\"2\">" . $langs->trans("Orders") . "</td>";
                 $table .= "<td colspan=\"1\">&nbsp;</td></tr>";
 
                 $table2 .= '<table class="noborder" width="100%">';
                 $table2 .= "<tr class=\"liste_titre\">";
-                $table2 .= "<td colspan=\"2\">".$langs->trans("Orders")."</td>";
+                $table2 .= "<td colspan=\"2\">" . $langs->trans("Orders") . "</td>";
                 $table2 .= "<td colspan=\"1\">&nbsp;</td></tr>";
 
                 $bool = false;
-                $arrCss[true]='pair';
-                $arrCss[false]='impair';
-                while ($res =$db->fetch_object($resql))
-                {
+                $arrCss[true] = 'pair';
+                $arrCss[false] = 'impair';
+                while ($res = $db->fetch_object($resql)) {
 
-                    $commandestatic->id=$res->rowid;
-                    $commandestatic->ref=$res->ref;
+                    $commandestatic->id = $res->rowid;
+                    $commandestatic->ref = $res->ref;
 
-                    $bool = !$bool;
-                    if ($iter < 10)
-                    {
-                            $var=!$var;
-                            $table .= '<tr class='.$arrCss[$bool].'>
+                    if ($iter < 10) {
+                        $bool = !$bool;
+                        $table .= '<tr class=' . $arrCss[$bool] . '>
                                     <td  nowrap="nowrap">';
-                            $table .= $commandestatic->getNomUrl(1,5);
-                            $table .= $formfile->html;
+                        $table .= $commandestatic->getNomUrl(1, 5);
+//                        $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
-                            $table .=  '<td>'.$res->Blabel.'</td>';
+                        $table .= '<td nowrap="nowrap"><a href="' . DOL_URL_ROOT . '/soc.php?socid=' . $res->socid . '">' . img_object('', 'company') . " " . dol_trunc($res->nom, 18) . '</a></td>';
+                        $table .= '<td>' . $res->Blabel . '</td>';
                     }
-                    $var=!$var;
-                    $table2 .= '<tr class='.$arrCss[$bool].'>
+                    $bool = !$bool;
+                    $table2 .= '<tr class=' . $arrCss[$bool] . '>
                             <td  nowrap="nowrap">';
-                    $table2 .= $commandestatic->getNomUrl(1,5);
+                    $table2 .= $commandestatic->getNomUrl(1, 5);
 
-                    $table2 .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
-                    $table2 .=  '<td>'.$res->Blabel.'</td>';
+                    $table2 .= '<td nowrap="nowrap"><a href="' . DOL_URL_ROOT . '/soc.php?socid=' . $res->socid . '">' . img_object('', 'company') . " " . dol_trunc($res->nom, 18) . '</a></td>';
+                    $table2 .= '<td>' . $res->Blabel . '</td>';
                     $iter++;
                 }
-                $table2 .=  "</table><br>";
+                $table2 .= "</table><br>";
             }
         }
         $table .="</p>";
         $table2 .="</p>";
-      return array(
-        'title' => 'Pr&eacute;paration commande - 10 derniers com. non examin&eacute;',
-        'content' => $table,
-        'initScript' => "",
-        'classes' => 'ui-state-default ui-widget-header',
-        'settings' => false,
-        'fullscreen' => $table2,
-        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
-        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
-      );
-
-    }else {
-      return array(
-        'title' => 'Pr&eacute;paration commande - 10 derniers com. non examin&eacute;',
-        'content' => 'Vous ne possedez pas les droits requis pour ce module',
-        'initScript' => "",
-        'classes' => 'ui-state-default ui-widget-header',
-        'settings' => false,
-      );
-
+        return array(
+            'title' => 'Pr&eacute;paration commande - 10 derniers com. non examin&eacute;',
+            'content' => $table,
+            'initScript' => "",
+            'classes' => 'ui-state-default ui-widget-header',
+            'settings' => false,
+            'fullscreen' => $table2,
+            'fullscreenScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
+            'fullscreenInitScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
+        );
+    } else {
+        return array(
+            'title' => 'Pr&eacute;paration commande - 10 derniers com. non examin&eacute;',
+            'content' => 'Vous ne possedez pas les droits requis pour ce module',
+            'initScript' => "",
+            'classes' => 'ui-state-default ui-widget-header',
+            'settings' => false,
+        );
     }
 }
 

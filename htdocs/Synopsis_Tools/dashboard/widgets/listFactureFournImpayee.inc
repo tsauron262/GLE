@@ -31,7 +31,7 @@ function widget_listFactureFournImpayee() {
         $facturestatic=new FactureFournisseur($db);
 
         $sql = "SELECT ff.rowid, ff.facnumber, ff.fk_statut, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc,";
-        $sql.= " sum(pf.amount) as am,";
+        $sql.= " sum(pf.amount) as am, ff.type, ff.paye,";
         $sql.= " s.nom, s.rowid as socid";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture_fourn as ff";
@@ -84,10 +84,9 @@ function widget_listFactureFournImpayee() {
                     $facturestatic->id=$res->rowid;
                     $facturestatic->type=$res->type;
 
-                    $bool = !$bool;
                     if ($iter < 10)
                     {
-                            $var=!$var;
+                    $bool = !$bool;
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $facturestatic->getNomUrl(1,'');;
@@ -98,7 +97,7 @@ function widget_listFactureFournImpayee() {
                             $total += $res->total_ttc;
                             $ftotal += $res->am;
                     }
-                    $var=!$var;
+                    $bool = !$bool;
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $facturestatic->getNomUrl(1,'');

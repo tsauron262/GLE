@@ -21,6 +21,14 @@ require_once('../../../main.inc.php');
 
 $langs->load('projects');
 
+
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+if(!isset($_REQUEST['userId']))
+    $_REQUEST['userId'] = '';
+if(!isset($_REQUEST['projId']))
+    $_REQUEST['projId'] = '';
+
 $action = $_REQUEST['action'];
 $user_id = $_REQUEST['userId'];
 $project_id = $_REQUEST['projId'];
@@ -148,7 +156,7 @@ while ($row = $db->fetch_object($result)) {
             ($row->dateFin . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateFin)) : ""),
             $projet->sec2hour(abs($row->task_duration)),
             ($row->dateDebEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateDebEff)) : ""),
-            ($row->dateFinEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateFinEff)) : ""),
+            ($row->dateFinPrevEff . "x" != "x" ? date('d/m/Y H:i', strtotime($row->dateFinPrevEff)) : ""),
             $projet->sec2hour(abs($row->task_duration_effective)),
         );
         $i++;

@@ -42,9 +42,10 @@ function widget_statAVentiler() {
     }
 
     $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."facture_fourn_det";
-    $sql .= " WHERE fk_export_compta = 0";
+    $sql .= " WHERE fk_code_ventilation = 0";
 
     $result = $db->query($sql);
+    $nbfacfourn = 0;
     if ($result)
     {
       $row = $db->fetch_row($result);
@@ -54,8 +55,9 @@ function widget_statAVentiler() {
     }
 
     $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."paiementfourn";
-    $sql .= " WHERE fk_export_compta = 0";
+//    $sql .= " WHERE fk_export_compta = 0";
 
+    $nbpfourn = 0;
     $result = $db->query($sql);
     if ($result)
     {

@@ -170,7 +170,7 @@ class contratSAV extends Synopsis_Contrat{
         $html = "";
         return $html;
     }
-    public function displayDialog($type='add',$mysoc,$objp)
+  /*  public function displayDialog($type='add',$mysoc,$objp)
     {
         global $conf, $form, $db;
         $html .=  '<div id="'.$type.'Line" class="ui-state-default ui-corner-all" style="">';
@@ -259,6 +259,8 @@ class contratSAV extends Synopsis_Contrat{
         return ($html);
 
     }
+   
+   */
     public function validate($user)
     {
         global $langs, $conf;

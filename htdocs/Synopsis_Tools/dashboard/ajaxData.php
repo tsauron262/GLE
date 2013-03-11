@@ -14,7 +14,7 @@ function execute() {
     // Simulate slow network connections.
     //sleep(rand(10, 50) * 0.05);
     // Find the operation of this request.
-    $op = $GLOBALS['_GET']['op'] ? $GLOBALS['_GET']['op'] : ($GLOBALS['_POST']['op'] ? $GLOBALS['_POST']['op'] : false);
+    $op = isset($GLOBALS['_GET']['op']) ? $GLOBALS['_GET']['op'] : (isset($GLOBALS['_POST']['op']) ? $GLOBALS['_POST']['op'] : false);
 
     // Call this operation's handler.
     if ($op and $ret = call_function_if_exists("execute_op_$op")) {

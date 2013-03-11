@@ -4,6 +4,14 @@
  */
 require_once('../../../main.inc.php');
 
+if (!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+if (!isset($_REQUEST['projetId']))
+    $_REQUEST['projetId'] = '';
+if (!isset($_REQUEST['extra']))
+    $_REQUEST['extra'] = '';
+if (!isset($_REQUEST['socid']))
+    $_REQUEST['socid'] = '';
 
  $action = $_REQUEST['action'];
  $project_id = $_REQUEST['projetId'];
@@ -204,22 +212,22 @@ $i=0;
 while($row = $db->fetch_array($result,MYSQL_ASSOC))
 {
     $soc= new Societe($db);
-    $soc->fetch($row[socid]);
-    $responce->rows[$i]['id']=$row[id];
+    $soc->fetch($row['socid']);
+    $responce->rows[$i]['id']=$row['id'];
     $localUser = new User($db);
-    $localUser->fetch($row[fk_user_resp]);
+    $localUser->fetch($row['fk_user_resp']);
     require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     $proj = new Projet($db);
-    $proj->fetch($row[id]);
-    $overallprogress = '<div class="progressbar ui-corner-all">'.round($row[statut]).'</div>';
-    $responce->rows[$i]['cell']=array($row[id],
-                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['nom']."</a>",
-                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row[id]."'>".$row['ref']."</a>",
-                                      $row[dateo],
+    $proj->fetch($row['id']);
+    $overallprogress = '<div class="progressbar ui-corner-all">'.round($row['statut']).'</div>';
+    $responce->rows[$i]['cell']=array($row['id'],
+                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['nom']."</a>",
+                                      "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['ref']."</a>",
+                                      $row['dateo'],
                                       $proj->getLibStatut(4),
                                       $overallprogress,
                                       $soc->getNomUrl(1),
-                                      $row[cntMyTask],
+                                      $row['cntMyTask'],
                                       $localUser->getNomUrl(1));
     $i++;
 }

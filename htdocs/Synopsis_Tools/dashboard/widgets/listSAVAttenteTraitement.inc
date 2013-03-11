@@ -82,6 +82,7 @@ function widget_listSAVAttenteTraitement() {
         $table2.="</tbody></table></p>";
     } else {
         $table = "Modules non actif";
+        $table2 = "Modules non actif";
     }
     return array(
         'title' => 'SAV - En attente de traitement',

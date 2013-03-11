@@ -22,6 +22,10 @@ $activePOST=$_REQUEST['ajoute'];
 //
 
     require_once("../../../main.inc.php");
+    
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
     $action = $_REQUEST['action'];
     $xml = "<ajax-response>";
 

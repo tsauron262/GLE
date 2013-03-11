@@ -18,7 +18,7 @@ function widget_listPrepaCommandeContratAFaire() {
       $socid = $user->societe_id;
     }
     $langs->load("orders");
-    $formfile = new FormFile($db);
+//    $formfile = new FormFile($db);
     $langs->load("compta");
     $langs->load("bills");
 
@@ -75,24 +75,25 @@ function widget_listPrepaCommandeContratAFaire() {
                 {
 
                     $commandestatic->fetch($res->fk_commande);
+                    $societe = new Societe($db);
+                    $societe->fetch($commandestatic->socid);
 
-                    $bool = !$bool;
                     if ($iter < 10)
                     {
-                            $var=!$var;
+                    $bool = !$bool;
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $commandestatic->getNomUrl(1,5);
-                            $table .= $formfile->html;
+//                            $table .= $formfile->html;
 
-                            $table .=  '<td nowrap="nowrap">'.($commandestatic->societe?$commandestatic->societe->getNomUrl(1):'');
+                            $table .=  '<td nowrap="nowrap">'.($societe?$societe->getNomUrl(1):'');
                     }
-                    $var=!$var;
+                    $bool = !$bool;
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $commandestatic->getNomUrl(1,5);
 
-                    $table2 .=  '<td nowrap="nowrap">'.($commandestatic->societe?$commandestatic->societe->getNomUrl(1):'');
+                    $table2 .=  '<td nowrap="nowrap">'.($societe?$societe->getNomUrl(1):'');
                     $iter++;
                 }
                 $table2 .=  "</table><br>";

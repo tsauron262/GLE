@@ -90,14 +90,14 @@ class box_services_vendus extends ModeleBoxes {
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", sc.fk_soc, sc.fk_user";
             $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contrat as c, ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."product as p";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-            if ($conf->categorie->enabled && !$user->rights->categorie->voir)
+            if ($conf->categorie->enabled && !$user->rights->categorie->lire)
             {
             $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_product = p.rowid";
             $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as ca ON cp.fk_categorie = ca.rowid";
             }
             $sql.= " WHERE s.rowid = c.fk_soc AND c.rowid = cd.fk_contrat AND cd.fk_product = p.rowid";
             if (!$user->rights->societe->client->voir && !$user->societe_id) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-            if ($conf->categorie->enabled && !$user->rights->categorie->voir)
+            if ($conf->categorie->enabled && !$user->rights->categorie->lire)
             {
                 $sql.= ' AND IFNULL(ca.visible,1)=1';
             }
@@ -124,7 +124,7 @@ class box_services_vendus extends ModeleBoxes {
                     // Multilangs
                             if ($conf->global->MAIN_MULTILANGS) // si l'option est active
                             {
-                                $sqld = "SELECT label FROM ".MAIN_DB_PREFIX."product_det";
+                                $sqld = "SELECT label FROM ".MAIN_DB_PREFIX."product_lang";
                                 $sqld.= " WHERE fk_product=".$objp->pid." AND lang='". $langs->getDefaultLang() ."'";
                                 $sqld.= " LIMIT 1";
 

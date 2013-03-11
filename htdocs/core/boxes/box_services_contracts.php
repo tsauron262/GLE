@@ -73,7 +73,7 @@ class box_services_contracts extends ModeleBoxes
 		if ($user->rights->service->lire && $user->rights->contrat->lire)
 		{
 			$sql = "SELECT s.nom, s.rowid as socid,";
-			$sql.= " c.rowid,";
+			$sql.= " c.rowid, p.label,";
 			$sql.= " cd.rowid as cdid, cd.tms as datem, cd.statut,";
 			$sql.= " p.rowid as pid, p.label, p.fk_product_type";
 			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s";

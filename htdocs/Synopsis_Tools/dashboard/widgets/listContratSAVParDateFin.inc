@@ -30,10 +30,10 @@ function widget_listContratSAVParDateFin() {
     if ($conf->contrat->enabled && $user->rights->contrat->lire)
     {
         $sql = "SELECT date_format(date_add(g.DateDeb,INTERVAL g.durValid MONTH),'%Y-%m-%d') as DateFin,
-                       c.fk_contrat
-                  FROM ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN ".MAIN_DB_PREFIX."product as p ON c.fk_product = p.rowid,
+                       c.fk_contrat, fk_soc as socid
+                  FROM ".MAIN_DB_PREFIX."contrat as c1, ".MAIN_DB_PREFIX."contratdet as c LEFT JOIN ".MAIN_DB_PREFIX."product as p ON c.fk_product = p.rowid,
                        ".MAIN_DB_PREFIX."Synopsis_contratdet_GMAO as g LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_product_serial_cont as s ON s.element_id = g.contratdet_refid AND s.element_type='contratSAV'
-                 WHERE c.rowid = g.contratdet_refid
+                 WHERE c.rowid = g.contratdet_refid AND c1.rowid = c.fk_contrat
                    AND c.statut <> 5";
         $sql.= " ORDER BY DateFin ASC";
         $sql.= " LIMIT 50";
@@ -89,7 +89,7 @@ function widget_listContratSAVParDateFin() {
                 $table2 .=  '<td>';
                 $staticcompany->id=$obj->socid;
                 $staticcompany->fetch($obj->socid);
-                $staticcompany->nom=$obj->nom;
+//                $staticcompany->nom=$obj->nom;
                 $table2 .=  $staticcompany->getNomUrl(1,'',20);
                 $table2 .=  '</td>';
                 $table2 .=  '<td align="center">'.dol_print_date($obj->DateFin,'day').'</td>';

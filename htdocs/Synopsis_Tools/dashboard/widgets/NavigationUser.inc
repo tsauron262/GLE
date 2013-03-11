@@ -34,7 +34,7 @@ function widget_NavigationUser() {
         $requete = "SELECT *
                       FROM ".MAIN_DB_PREFIX."Synopsis_Histo_User
                      WHERE user_refid = ".$user->id.
-                   " ORDER BY tms DESC
+                " AND ref != '' AND element_type != '' ORDER BY tms DESC
                     LIMIT 50";
         $sql = $db->query($requete);
         global $conf, $bc;

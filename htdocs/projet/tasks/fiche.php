@@ -20,6 +20,10 @@
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
+
+if (!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
 //
 /*
  * Securite acces client
@@ -27,12 +31,15 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 $projetid = '';
 if ($_REQUEST["id"]) {
     $projetid = $_REQUEST["id"];
+    $projet = new Project($db);
+    $projet->fetch($projetid);
 }
 
 if ($projetid == '')
     accessforbidden();
 
 // Security check
+$socid = 0;
 if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'synopsisprojet', $projetid);
@@ -908,11 +915,11 @@ print '</div>';
 //Importer depuis la proposition
 //Nouvelle tache
 // fk_projet   fk_task_parent  title   duration_effective  fk_user_creat   statut  note    progress    description color   url fk_task_type    shortDesc   level   tms
-$project_id = $_REQUEST['id'];
 $requete = "SELECT *
               FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-             WHERE fk_projet = " . $project_id;
+             WHERE fk_projet = " . $projetid;
 $sql = $db->query($requete);
+
 $optDependStr = "";
 $optGrpStr = "";
 while ($res = $db->fetch_object($sql)) {

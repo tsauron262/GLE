@@ -49,6 +49,7 @@ function widget_statOfcProjetActiviteEffective() {
 
     $sql  = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective.task_duration_effective),0) as td,
                    ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
+                   ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid,
                    ".MAIN_DB_PREFIX."Synopsis_projet.title
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
                    ".MAIN_DB_PREFIX."Synopsis_projet,

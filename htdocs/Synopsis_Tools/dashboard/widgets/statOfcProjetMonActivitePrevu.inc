@@ -50,7 +50,8 @@ function widget_statOfcProjetMonActivitePrevu() {
 
     $sql  = "SELECT ifnull(sum(".MAIN_DB_PREFIX."Synopsis_projet_task_time.task_duration),0) as td,
                    ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet,
-                   ".MAIN_DB_PREFIX."Synopsis_projet.title
+                   ".MAIN_DB_PREFIX."Synopsis_projet.title,
+                   ".MAIN_DB_PREFIX."Synopsis_projet.rowid
               FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_actors,
                    ".MAIN_DB_PREFIX."Synopsis_projet,
                    ".MAIN_DB_PREFIX."Synopsis_projet_task

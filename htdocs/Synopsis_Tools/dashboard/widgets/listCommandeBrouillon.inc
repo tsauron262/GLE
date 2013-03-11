@@ -56,9 +56,8 @@ function widget_listCommandeBrouillon() {
             $arrCss[true] = 'pair';
             $arrCss[false] = 'impair';
             while ($res = $db->fetch_object($resql)) {
-                $bool = !$bool;
                 if ($iter < 10) {
-                    $var = !$var;
+                $bool = !$bool;
                     $table .= '<tr class=' . $arrCss[$bool] . '>
                                     <td  nowrap="nowrap">' .
                             "<a href=\"" . DOL_URL_ROOT . "/commande/fiche.php?id=" . $res->rowid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $res->ref . '</a></td>';
@@ -66,7 +65,7 @@ function widget_listCommandeBrouillon() {
                     $table .= '<td align="right" nowrap="nowrap">' . price($res->total_ttc) . '</td></tr>';
                     $total += $res->total_ttc;
                 }
-                $var = !$var;
+                $bool = !$bool;
                 $table2 .= '<tr class=' . $arrCss[$bool] . '>
                             <td  nowrap="nowrap">' .
                         "<a href=\"" . DOL_URL_ROOT . "/commande/fiche.php?id=" . $res->rowid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $res->ref . '</a></td>';

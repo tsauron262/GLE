@@ -47,7 +47,7 @@ function widget_statOfcProduitContrat() {
     $table2 .= '       <tr><th style="padding: 15px; font-size: 16px;" colspan=4 class="ui-widget-header ui-state-default">Les 20 meilleurs ventes';
 
 
-    $sql = "SELECT p.rowid, p.label, p.ref, fk_product_type, SUM(pd.qty)  c";
+    $sql = "SELECT p.rowid, p.label, p.ref, fk_product_type, SUM(pd.qty)  c, fk_product_type as type";
     $sql .= " FROM " . MAIN_DB_PREFIX . "commandedet as pd, " . MAIN_DB_PREFIX . "commande as pl, " . MAIN_DB_PREFIX . "product as p";
     $sql .= " WHERE p.rowid = pd.fk_product";
     $sql.= ' AND pl.rowid = pd.fk_commande';

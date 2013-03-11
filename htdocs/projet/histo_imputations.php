@@ -732,7 +732,7 @@ if ($modVal != 2) {
     print "</tr>";
 }
 
-if ($modVal == 1) {
+if ($modVal == 1 && count($arrTaskId) > 0) {
     $colspan = $arrNbJour[$format] - 5; // -5 -5 + 5
 //Total Mois
     $requete = "SELECT sum(task_duration_effective) / 3600 as durEff

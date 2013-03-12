@@ -37,7 +37,7 @@ function widget_listPrepaCommandeEnCours() {
             $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s";
         $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element ON `fk_source` = 'commande' AND `fk_target` = 'statutS' AND fk_source = p.rowid";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element ON `sourcetype` = 'commande' AND `targettype` = 'statutS' AND fk_source = p.rowid";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_commande_status as bs ON fk_target = bs.id";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element AS co_fa ON co_fa.sourcetype = 'commande' AND co_fa.targettype = 'facture' AND co_fa.fk_source = p.rowid ";
@@ -64,10 +64,6 @@ function widget_listPrepaCommandeEnCours() {
             $num = $db->num_rows($resql);
             if ($num > 0)
             {
-
-                $cssClass[true]='pair';
-                $cssClass[false]='impair';
-                $bool = false;
                 $iter = 0;
                 $table .= '<table class="noborder" width="100%">';
                 $table .= "<tr class=\"liste_titre\">";
@@ -91,16 +87,14 @@ function widget_listPrepaCommandeEnCours() {
                     $bool = !$bool;
                     if ($iter < 10)
                     {
-                            $var=!$var;
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $commandestatic->getNomUrl(1,5);
-                            $table .= $formfile->html;
+//                            $table .= $formfile->html;
 
                             $table .=  '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/soc.php?socid='.$res->socid.'">'.img_object('','company')." ".dol_trunc($res->nom,18).'</a></td>';
                             $table .=  '<td>'.$res->Blabel.'</td>';
                     }
-                    $var=!$var;
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">';
                     $table2 .= $commandestatic->getNomUrl(1,5);

@@ -46,12 +46,12 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj = new maj($dbS, $dbD);
     $maj->req("DELETE FROM `" . MAIN_DB_PREFIX . "product_lang`");
     $maj->startMaj(getTab());
-    $maj->startMaj(array( // Modification de certaine table
+    $maj->startMaj(array(// Modification de certaine table
         array("babel_categorie_association", MAIN_DB_PREFIX . "categorie",
             array('fk_categorie_fille_babel', 'fk_categorie_mere_babel'),
             array('rowid', 'fk_parent')
         ),
-        array($oldPref."contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
+        array($oldPref . "contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
             array('rowid', 'condReg_refid', 'modeReg_refid'),
             array('id', 'condReg_refid', 'modeReg_refid')
             )), true);
@@ -106,8 +106,8 @@ function getTab() {
             array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civilite', 'name', 'firstname', 'address', 'cp', 'ville', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note', /* 'default_lang', 'canvas', */ 'import_key')
         ),
         array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
-            array( 'rowid', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
-            array( 'rowid',  'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */'name', /* 'firstname', */ 'address', 'cp', 'ville', /* 'fk_departement', */'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */'fax', /* 'email', 'jabberid', 'priv', */'fk_user_creat', 'fk_user_modif', 'note'/* , 'default_lang', 'canvas' */, 'import_key')
+            array('rowid', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
+            array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */'name', /* 'firstname', */ 'address', 'cp', 'ville', /* 'fk_departement', */'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */'fax', /* 'email', 'jabberid', 'priv', */'fk_user_creat', 'fk_user_modif', 'note'/* , 'default_lang', 'canvas' */, 'import_key')
         ),
 //        array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "element_contact",
 //            array( '$%4', 'fk_societe', '$%102', 'rowid', 'external_id'),
@@ -188,6 +188,10 @@ function getTab() {
         array("Babel_commande_grpdet", MAIN_DB_PREFIX . "Synopsis_commande_grpdet",
             array(),
             array()
+        ),
+        array("BIMP_commande_status", MAIN_DB_PREFIX . "element_element",
+            array('commande_refid', '$%commande', 'statut_refid', '$%statutS'),
+            array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
         array($oldPref . "propal", MAIN_DB_PREFIX . "propal",
             array('rowid', 'ref', 'ref_client', 'fk_soc', 'fk_projet', 'tms', 'datec', 'datep', 'fin_validite', 'date_valid', 'date_cloture', 'fk_user_author', 'fk_user_valid', 'fk_user_cloture', 'fk_statut', 'price', 'remise_percent', 'remise_absolue', 'remise'/* , 'date_abandon', 'fk_user_abandon', 'accompte_ht' */, 'total_ht', 'tva', 'total', 'fk_cond_reglement', 'fk_mode_reglement', 'note', 'note_public', 'model_pdf', 'date_livraison', 'fk_adresse_livraison'/* , 'date_demandeValid', 'isFinancement', 'isLocation', 'date_devis_fourn', 'fournisseur_refid', 'tva_tx_fin_refid', 'revision', 'orig_ref' */),
@@ -362,8 +366,8 @@ function getTab() {
             array()
         ),
         array($oldPref . "commande", MAIN_DB_PREFIX . "element_contact",
-            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
-            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
+            array('$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
+            array('statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople')
         ),
 //        array($oldPref . "expedition", MAIN_DB_PREFIX . "element_contact",
 //            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),

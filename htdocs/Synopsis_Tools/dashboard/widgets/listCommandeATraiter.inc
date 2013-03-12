@@ -38,10 +38,9 @@ function widget_listCommandeATraiter() {
         if (!$user->rights->societe->client->voir && !$socid)
             $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
         $sql.= ", " . MAIN_DB_PREFIX . "commande AS p";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.fk_source = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.fk_source = p.rowid AND co_fa.sourcetype LIKE 'commande' AND co_fa.targettype LIKE 'facture'";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "facture AS f ON co_fa.fk_target = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
-        $sql.= " AND co_fa.sourcetype LIKE 'commande' AND co_fa.targettype LIKE 'facture'";
         if (!$user->rights->societe->client->voir && !$socid)
             $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " . $user->id;
         if ($socid) {
@@ -86,7 +85,6 @@ function widget_listCommandeATraiter() {
 
                 $bool = !$bool;
                 if ($iter < 10) {
-                    $var = !$var;
                     $table .= '<tr class=' . $arrCss[$bool] . '>
                                     <td  nowrap="nowrap">';
                     $table .= $commandestatic->getNomUrl(1);
@@ -96,7 +94,7 @@ function widget_listCommandeATraiter() {
                     $table .= '<td nowrap="nowrap">';
                     $table .= $formfile->showdocuments('commande', $filename, $filedir, $urlsource, '', '', '', '', '', 1, 18, false);
 
-                    $table .= $formfile->html . "&nbsp;";
+//                    $table .= $formfile->html . "&nbsp;";
 
                     $table .= '<a href="fiche.php?socid=' . $res->socid . '">' . dol_trunc($res->nom, 18) . '</a></td>';
                     $table .= '<td align="right" nowrap="nowrap">' . price($res->total_ttc) . '</td>';
@@ -105,7 +103,6 @@ function widget_listCommandeATraiter() {
                     //$total += $res->total_ttc;
                     //$ftotal += $res->total_ttc - $res->tot_fttc;
                 }
-                $var = !$var;
                 $table2 .= '<tr class=' . $arrCss[$bool] . '>
                             <td  nowrap="nowrap">' .
                         "<a href=\"" . DOL_URL_ROOT . "/commande/fiche.php?id=" . $res->rowid . "\">" . img_object($langs->trans("ShowOrder"), "order") . " " . $res->ref . '</a></td>';

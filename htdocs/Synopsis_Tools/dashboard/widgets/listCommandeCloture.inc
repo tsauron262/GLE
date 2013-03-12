@@ -37,10 +37,9 @@ function widget_listCommandeCloture() {
         $sql.= " FROM ".MAIN_DB_PREFIX."societe AS s";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
         $sql.= ", ".MAIN_DB_PREFIX."commande AS p";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.fk_source = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element AS co_fa ON co_fa.fk_source = p.rowid AND co_fa.sourcetype LIKE 'commande' AND co_fa.targettype LIKE 'facture'";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "facture AS f ON co_fa.fk_target = f.rowid";
         $sql.= " WHERE p.fk_soc = s.rowid";
-        $sql.= " AND co_fa.sourcetype LIKE 'commande' AND co_fa.targettype LIKE 'facture'";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
         if ($socid)
         {
@@ -60,9 +59,6 @@ function widget_listCommandeCloture() {
             $ftotal = 0;
             $ftotal2 = 0;
 
-                $cssClass[true]='pair';
-                $cssClass[false]='impair';
-                $bool = false;
                 $iter = 0;
                 $table .= '<table class="noborder" width="100%">';
                 $table .= "<tr class=\"liste_titre\">";
@@ -88,7 +84,6 @@ function widget_listCommandeCloture() {
                     $bool = !$bool;
                     if ($iter < 10)
                     {
-                            $var=!$var;
                             $table .= '<tr class='.$arrCss[$bool].'>
                                     <td  nowrap="nowrap">';
                             $table .= $commandestatic->getNomUrl(1);
@@ -98,13 +93,12 @@ function widget_listCommandeCloture() {
                             $urlsource=$_SERVER['PHP_SELF'].'?id='.$res->rowid;
                             $table .= '<td nowrap="nowrap">';
                             $table .= $formfile->showdocuments('commande',$filename,$filedir,$urlsource,'','','','','',1,18,false);
-                            $table .= $formfile->html;
+//                            $table .= $formfile->html;
 
                             $table .=  '<a href="fiche.php?socid='.$res->socid.'">'.utf8_encodeRien(dol_trunc($res->nom,18)).'</a></td>';
                             $table .=  '<td align="right" nowrap="nowrap">'.price($res->total_ttc).'</td>';
                             $table .=  '<td>'.$commandestatic->LibStatut($res->fk_statut,$res->facture,3).'</td>';
                     }
-                    $var=!$var;
                     $table2 .= '<tr class='.$arrCss[$bool].'>
                             <td  nowrap="nowrap">'.
                             "<a href=\"".DOL_URL_ROOT."/commande/fiche.php?id=".$res->rowid."\">".img_object($langs->trans("ShowOrder"),"order")." ".$res->ref.'</a></td>';

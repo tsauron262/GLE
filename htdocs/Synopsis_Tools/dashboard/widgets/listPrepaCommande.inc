@@ -37,7 +37,7 @@ function widget_listPrepaCommande() {
             $sql .= ", sc.fk_soc, sc.fk_user ";
         $sql.= " FROM " . MAIN_DB_PREFIX . "societe AS s";
         $sql.= ", " . MAIN_DB_PREFIX . "commande AS p";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element ON `fk_source` = 'commande' AND `fk_target` = 'statutS' AND fk_source = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element ON `sourcetype` = 'commande' AND `targettype` = 'statutS' AND fk_source = p.rowid";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_commande_status as bs ON bs.id = IF(fk_target, fk_target, 1)";
         if (!$user->rights->societe->client->voir && !$socid)
             $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";

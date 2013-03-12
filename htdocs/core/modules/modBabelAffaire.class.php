@@ -67,7 +67,7 @@ class modBabelAffaire extends DolibarrModules
         $this->name = "Affaire";
         $this->description = "Gestion par affaire";
         $this->version = '0.1';            // 'development' or 'experimental' or 'dolibarr' or version
-        $this->const_name = 'MAIN_MODULE_AFFAIRE';
+        $this->const_name = 'MAIN_MODULE_BABELAFFAIRE';
         $this->special = 0;
         $this->picto='affaire';
 

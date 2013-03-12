@@ -543,13 +543,15 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn($to, $sujet, $text, $headers = null) {
+function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {
         $text = "OrigineTo = " . $to . "\n\n" . $text;
         $to = MOD_DEV_SYN_MAIL;
     }
+    elseif($cc != '')
+        $ccAdmin .= ", ".$cc;
     if (!isset($to) || $to == '') {
         $text = "Pas de mail expediteur definit." . "\n\n" . $text;
         $to = $toReplay;

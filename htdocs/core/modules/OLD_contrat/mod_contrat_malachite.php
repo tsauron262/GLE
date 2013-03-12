@@ -14,15 +14,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
-  * GLE by Babel-Services
+  * GLE by DRSI & Synopsis
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   *//*
  * or see http://www.gnu.org/
@@ -87,7 +87,7 @@ class mod_contrat_malachite extends ModeleNumRefContrat
         // D'abord on recupere la valeur max (reponse immediate car champ indexe)
         $com='';
         $sql = "SELECT MAX(ref)";
-        $sql.= " FROM llx_contrat";
+        $sql.= " FROM ".MAIN_DB_PREFIX."contrat";
         $sql.= " WHERE is_financement <> 1";
         $resql=$db->query($sql);
         if ($resql)

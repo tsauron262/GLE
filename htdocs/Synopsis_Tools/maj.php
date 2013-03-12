@@ -14,6 +14,9 @@
  */
 require_once('../main.inc.php');
 
+global $oldPref;
+$oldPref = "llx_";
+
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Importation de données");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Importation de données"));
@@ -48,14 +51,14 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
             array('fk_categorie_fille_babel', 'fk_categorie_mere_babel'),
             array('rowid', 'fk_parent')
         ),
-        array("llx_contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
+        array($oldPref."contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
             array('rowid', 'condReg_refid', 'modeReg_refid'),
             array('id', 'condReg_refid', 'modeReg_refid')
             )), true);
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
 
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "commandedet` SET `product_type`= 5 WHERE `fk_product` is null AND `total_ttc` = 0");
-    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `llx_Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE element_type = 'prepaCom'");
 } else {
     echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
@@ -68,7 +71,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 llxFooter();
 
 function getTab() {
-    $oldPref = "llx_";
+    global $oldPref;
     return array(
         array($oldPref . "user", MAIN_DB_PREFIX . "user",
             array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin", */ "webcal_login", "phenix_login", "phenix_pass", "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),

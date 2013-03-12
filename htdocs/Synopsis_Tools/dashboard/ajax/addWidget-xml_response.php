@@ -1,14 +1,14 @@
 <?php
 /*
-  * GLE by Babel-Services
+  * GLE by DRSI & Synopsis
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.0
   * Created on : 7 juil. 2010
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
  /**

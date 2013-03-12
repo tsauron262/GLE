@@ -22,15 +22,15 @@
 
 include_once(DOL_DOCUMENT_ROOT."/core/boxes/modules_boxes.php");
 /*
-  * GLE by Babel-Services
+  * GLE by DRSI & Synopsis
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
 class box_energie_releve extends ModeleBoxes {

@@ -17,15 +17,15 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 /*
-  * GLE by Babel-Services
+  * GLE by DRSI & Synopsis
   *
-  * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
+  * Author: SAURON Tommy <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
   *
   * Version 1.1
   * Create on : 4-1-2009
   *
-  * Infos on http://www.babel-services.com
+  * Infos on http://www.synopsis-erp.com
   *
   */
 /*
@@ -71,7 +71,7 @@ class ModeleSynopsiscontrat extends CommonDocGenerator
         $type='synopsiscontrat';
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
-        $sql.=" FROM llx_document_model";
+        $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
         $sql.=" WHERE type = '".$type."'";
 
         $resql = $db->query($sql);
@@ -147,7 +147,7 @@ function contrat_pdf_create($db, $id, $modele='', $outputlangs='')
         $classname = "pdf_contrat_".$modele;
         require_once($dir.$file);
 
-//        $requete = "UPDATE llx_contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
+//        $requete = "UPDATE ".MAIN_DB_PREFIX."contrat SET modelPdf= '".$modele."' WHERE rowid=".$id;
 //        $db->query($requete);
         $obj = new $classname($db);
 

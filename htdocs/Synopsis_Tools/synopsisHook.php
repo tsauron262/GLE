@@ -48,6 +48,8 @@ $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
 $conf->global->PRODUIT_CONFIRM_DELETE_LINE = "1";
 
+define('PREF_BDD_ORIG', 'llx_');
+
 
 $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
 

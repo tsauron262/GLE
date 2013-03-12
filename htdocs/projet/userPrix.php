@@ -32,8 +32,8 @@ require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/images.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/usergroups.lib.php");
-if ($conf->ldap->enabled)
-    require_once(DOL_DOCUMENT_ROOT . "/core/class/ldap.class.php");
+//if ($conf->ldap->enabled)
+//    require_once(DOL_DOCUMENT_ROOT . "/core/class/ldap.class.php");
 if ($conf->adherent->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/adherents/class/adherent.class.php");
 if (!empty($conf->multicompany->enabled))
@@ -226,7 +226,7 @@ if ($id) {
         print '</div>';
     }
 
-    $ldap->close;
+//    $ldap->close;
 }
 
 $db->close();

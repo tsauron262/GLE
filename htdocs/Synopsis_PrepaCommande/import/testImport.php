@@ -2096,7 +2096,6 @@ function requeteWithCache($requete) {
     $tab = $tabRequete[$requete]['tab'];
     $tabSuppr = $tabRequete[$requete]['tabSuppr'];
 
-//    print_r($tabRequete['llx_societe']);
 
     if ($tabSuppr && isset($tabRequete[$tabSuppr])) {
         $tabRequete[$tabSuppr] = array();

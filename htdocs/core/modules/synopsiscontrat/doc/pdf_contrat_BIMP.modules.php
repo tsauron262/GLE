@@ -946,7 +946,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $to = "Pas de client signataire désigné";
         }
         $modeReg = "Indéterminé";
-        $requete = "SELECT * FROM llx_c_paiement WHERE id = " . $this->contrat->modeReg_refid;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_paiement WHERE id = " . $this->contrat->modeReg_refid;
         $sql = $this->db->query($requete);
         if ($sql) {
             $res = $this->db->fetch_object($sql);
@@ -1390,7 +1390,7 @@ Tél. : Soc-tel
           Contact-internal-SALESREPFOLL-prenom    Préom   Jean-Marcéé
           Contact-internal-SALESREPFOLL-cp    Code postal
           Contact-internal-SALESREPFOLL-ville     Ville
-          Contact-internal-SALESREPFOLL-email     Email   jm.lefevre@babel-services.com
+          Contact-internal-SALESREPFOLL-email     Email   tommy@drsi.fr
           Contact-internal-SALESREPFOLL-tel   N° tel
           Contact-internal-SALESREPFOLL-fax   N° fax
 
@@ -1400,7 +1400,7 @@ Tél. : Soc-tel
           Contact-internal-TECHRESP-prenom    Préom   Jean-Marcéé
           Contact-internal-TECHRESP-cp    Code postal
           Contact-internal-TECHRESP-ville     Ville
-          Contact-internal-TECHRESP-email     Email   jm.lefevre@babel-services.com
+          Contact-internal-TECHRESP-email     Email   tommy@drsi.fr
           Contact-internal-TECHRESP-tel   N° tel
           Contact-internal-TECHRESP-fax   N° fax
 
@@ -1410,7 +1410,7 @@ Tél. : Soc-tel
           Contact-internal-SALESREPSIGN-prenom    Préom   Jean-Marcéé
           Contact-internal-SALESREPSIGN-cp    Code postal
           Contact-internal-SALESREPSIGN-ville     Ville
-          Contact-internal-SALESREPSIGN-email     Email   jm.lefevre@babel-services.com
+          Contact-internal-SALESREPSIGN-email     Email   tommy@drsi.fr
           Contact-internal-SALESREPSIGN-tel   N° tel
           Contact-internal-SALESREPSIGN-fax   N° fax
 

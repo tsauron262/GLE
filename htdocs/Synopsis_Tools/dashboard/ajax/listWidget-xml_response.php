@@ -91,6 +91,6 @@ if (stristr($_SERVER["HTTP_ACCEPT"], "application/xhtml+xml")) {
     header("Content-type: text/xml;charset=utf-8");
 } $et = ">";
 echo "<?xml version='1.0' encoding='utf-8'?$et\n";
-echo $xml;
+echo html_entity_decode($xml);
 echo "</ajax-response>";
 ?>

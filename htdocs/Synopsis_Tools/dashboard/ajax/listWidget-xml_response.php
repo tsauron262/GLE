@@ -74,11 +74,11 @@ while ($res = $db->fetch_object($sql)) {
 
 $xml .= "<list>";
 foreach ($activeArr as $key => $val) {
-    $xml .= "<active id='" . $key . "'><![CDATA[" . html_entity_decode($val) . "]]></active>";
+    $xml .= "<active id='" . $key . "'><![CDATA[" . $val . "]]></active>";
 }
 foreach ($disableArr as $key => $val) {
     if ($val) {
-        $xml .= "<disabled id='" . $key . "'><![CDATA[" . html_entity_decode($val) . "]]></disabled>";
+        $xml .= "<disabled id='" . $key . "'><![CDATA[" . $val . "]]></disabled>";
     }
 }
 $xml .= "</list>";

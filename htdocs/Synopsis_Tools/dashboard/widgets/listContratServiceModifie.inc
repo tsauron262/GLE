@@ -45,7 +45,7 @@ function widget_listContratServiceModifie() {
             $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " . $user->id;
         if ($socid > 0)
             $sql.= " AND s.rowid = " . $socid;
-        $sql.= " ORDER BY cd.tms DESC LIMIT 50";
+        $sql.= " GROUP BY cd.rowid ORDER BY cd.tms DESC LIMIT 50";
 
         $resql = $db->query($sql);
         if ($resql) {
@@ -54,7 +54,7 @@ function widget_listContratServiceModifie() {
 
             $table .= '<table class="noborder" width="100%">';
 
-            $table .= '<tr class="liste_titre"><td colspan="4">' . $langs->trans("LastModifiedServices", min($num, 50)) . '</td>';
+            $table .= '<tr class="liste_titre"><td colspan="4">' . $langs->trans("LastModifiedServices", min($num, 10)) . '</td>';
             $table .= "</tr>\n";
             $table2 .= '<table class="noborder" width="100%">';
 

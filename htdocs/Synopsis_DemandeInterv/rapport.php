@@ -41,6 +41,7 @@ $html = new Form($db);
 if ($user->societe_id > 0) {
     $socidUser = $user->societe_id;
 }
+$socid = 0;
 if (isset($_SESSION['socid'])) {
     $socid = $_SESSION['socid'];
 }
@@ -63,7 +64,7 @@ if ($user->rights->synopsisdemandeinterv->rapportTous) {
         $filterUser = $_SESSION['filterUser'];
     }
 
-    if ($_REQUEST['filterUser'] == -1)
+    if (isset($_REQUEST['filterUser']) && $_REQUEST['filterUser'] == -1)
         $filterUser = false;
     elseif (isset($_REQUEST['filterUser'])) {
 
@@ -72,21 +73,21 @@ if ($user->rights->synopsisdemandeinterv->rapportTous) {
     $_SESSION['filterUser'] = $filterUser;
 }
 
-if ($sortorder == "") {
+//if ($sortorder == "") {
     $sortorder = "ASC";
-}
-if ($sortfield == "") {
+//}
+//if ($sortfield == "") {
     $sortfield = "f.datei";
-}
+//}
 
-if ($page == -1) {
+//if ($page == -1) {
     $page = 0;
-}
-
-$limit = $conf->liste_limit;
-$offset = $limit * $page;
-$pageprev = $page - 1;
-$pagenext = $page + 1;
+//}
+//
+//$limit = $conf->liste_limit;
+//$offset = $limit * $page;
+//$pageprev = $page - 1;
+//$pagenext = $page + 1;
 
 $sql = "SELECT s.nom,
                s.rowid as socid,
@@ -105,8 +106,8 @@ if ($filterUser) {
 }
 
 
-$MM = $_REQUEST['MM'];
-$YY = $_REQUEST['YY'];
+$MM = isset($_REQUEST['MM'])? $_REQUEST['MM'] : '';
+$YY = isset($_REQUEST['YY'])? $_REQUEST['YY'] : '';
 
 if ($socid > 0) {
     $sql .= " AND s.rowid = " . $socid;
@@ -198,6 +199,12 @@ if ($resql) {
     print '<table class="noborder" width="100%" cellspacing="0" cellpadding="3">';
     $var = true;
     $DureeTotal = 0;
+    $totTReel = 0;
+    $totReel = 0;
+    $totTPrev = 0;
+    $totPrev = 0;
+    $totVendu = 0;
+    $htmlTab = '';
     while ($objp = $db->fetch_object($resql)) {
 
         $var = !$var;
@@ -293,7 +300,7 @@ if ($resql) {
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $realEuro = $res->totHT;
-            $realTemp = $res->durTot;
+//            $realTemp = $res->durTot;
             $arr2 = convDur($res->durTot);
             $totReel += $res->totHT;
             $totTReel += $res->durTot;
@@ -341,7 +348,7 @@ if ($resql) {
     $htmlTot .= '<td align="center">' . price($totPrev) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
     $htmlTot .= '<td align="center">' . price($totVendu) . '</td>';
     $htmlTot .= '<td align="center">' . price($totReel) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';
-    $htmlTot .= '<td align="center">' . ($totPrevue == 0 ? 0 : price(($totPrev - $totReel) / $totPrev * 100)) . " %" . '</td>';
+    $htmlTot .= '<td align="center">' . ($totPrev == 0 ? 0 : price(($totPrev - $totReel) / $totPrev * 100)) . " %" . '</td>';
     $htmlTot .= '<td align="center">' . ($totVendu == 0 ? 0 : price(($totVendu - $totReel) / $totVendu * 100)) . " %" . '</td>';
     $htmlTot .= '</tr>';
 
@@ -357,42 +364,5 @@ if ($resql) {
 }
 $db->close();
 
-llxFooter("<em>Derni&egrave;re modification $Date: 2007/06/22 08:44:46 $ r&eacute;vision $Revision: 1.12 $</em>");
-
-function convDur($duration) {
-
-    // Initialisation
-    $duration = abs($duration);
-    $converted_duration = array();
-
-    // Conversion en semaines
-    $converted_duration['weeks']['abs'] = floor($duration / (60 * 60 * 24 * 7));
-    $modulus = $duration % (60 * 60 * 24 * 7);
-
-    // Conversion en jours
-    $converted_duration['days']['abs'] = floor($duration / (60 * 60 * 24));
-    $converted_duration['days']['rel'] = floor($modulus / (60 * 60 * 24));
-    $modulus = $modulus % (60 * 60 * 24);
-
-    // Conversion en heures
-    $converted_duration['hours']['abs'] = floor($duration / (60 * 60));
-    $converted_duration['hours']['rel'] = floor($modulus / (60 * 60));
-    $modulus = $modulus % (60 * 60);
-
-    // Conversion en minutes
-    $converted_duration['minutes']['abs'] = floor($duration / 60);
-    $converted_duration['minutes']['rel'] = floor($modulus / 60);
-    if ($converted_duration['minutes']['rel'] < 10) {
-        $converted_duration['minutes']['rel'] = "0" . $converted_duration['minutes']['rel'];
-    };
-    $modulus = $modulus % 60;
-
-    // Conversion en secondes
-    $converted_duration['seconds']['abs'] = $duration;
-    $converted_duration['seconds']['rel'] = $modulus;
-
-    // Affichage
-    return( $converted_duration);
-}
-
+llxFooter("<em>Derni&egrave;re modification : 2007/06/22 08:44:46 $ r&eacute;vision  1.12 $</em>");
 ?>

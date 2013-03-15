@@ -43,6 +43,7 @@ function widget_listExpedition() {
         $sql .= " AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
 
         $sql.= " GROUP BY e.rowid";
+        $sql.= " ORDER BY e.rowid DESC";
         $sql.= " LIMIT 50";
 
         $result = $db->query($sql);

@@ -30,7 +30,7 @@ $csspath = DOL_URL_ROOT . '/Synopsis_Common/css/';
 $jspath = DOL_URL_ROOT . '/Synopsis_Common/jquery/';
 $jqueryuipath = DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/';
 //
-$header .= '<link rel="stylesheet" type="text/css" href="css/jsgantt.css" />' . "\n";
+$header = '<link rel="stylesheet" type="text/css" href="css/jsgantt.css" />' . "\n";
 $header .= '<link rel="stylesheet" type="text/css" href="css/GLEgantt.css" />' . "\n";
 $header .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/includes/jquery/css/smoothness/jquery-ui-latest.custom.css" />' . "\n";
 //

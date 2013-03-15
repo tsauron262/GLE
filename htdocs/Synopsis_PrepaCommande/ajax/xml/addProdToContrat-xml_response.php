@@ -40,7 +40,7 @@ $result = $contrat->addLigneCommande($commId, $comLigneId);
 if ($result) {
     $resXml = "<OK>OK</OK>";
 } else {
-    $resXml = "<KO>KO" . $requete . "</KO>";
+    $resXml = "<KO>KO</KO>";
 }
 if (stristr($_SERVER["HTTP_ACCEPT"], "application/xhtml+xml")) {
     header("Content-type: application/xhtml+xml;charset=utf-8");

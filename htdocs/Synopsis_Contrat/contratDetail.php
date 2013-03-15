@@ -414,7 +414,7 @@ if ($id > 0) {
             print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) par intervention';
         } else {
             $txtDur = "";
-            $arrDur = $contrat->convDur($ligne->GMAO_Mixte['qteTempsPerDuree']);
+            $arrDur = convDur($ligne->GMAO_Mixte['qteTempsPerDuree']);
             $txtDur = $arrDur['hours']['abs'] . " heure" . ($arrDur['hours']['abs'] > 1 ? "s" : "") . " " . ($arrDur['minutes']['rel'] > 0 ? "et " . $arrDur['minutes']['rel'] . " minute" . ($arrDur['minutes']['rel'] > 1 ? "s" : "") : "");
             print ' ' . $ligne->GMAO_Mixte['qteTktPerDuree'] . ' ticket(s) pour ' . $txtDur . " d'intervention";
         }

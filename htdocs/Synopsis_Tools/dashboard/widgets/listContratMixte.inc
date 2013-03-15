@@ -41,6 +41,7 @@ function widget_listContratMixte() {
             $sql .= " AND f.fk_soc = ".$socid;
         }
         $sql .= " ORDER BY cd.date_fin_validite ASC";
+        $sql .= " LIMIT 50";
         $resql = $db->query($sql);
         if ( $resql )
         {
@@ -49,40 +50,51 @@ function widget_listContratMixte() {
 
             $table .=  '<table class="noborder" width="100%">';
             $table .=  '<tr class="liste_titre">';
-            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num?' ('.$num.')':'').'</td>';
+            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts")." (".min(array($num, 10)).')</td>';
     //        $table .=  "<td>Type</td>";
             $table .=  '</tr>';
+            
+            $table2 .=  '<table class="noborder" width="100%">';
+            $table2 .=  '<tr class="liste_titre">';
+            $table2 .=  '<td colspan="3">'.$langs->trans("DraftContracts")." (".$num.')</td>';
+    //        $table .=  "<td>Type</td>";
+            $table2 .=  '</tr>';
             if ($num)
             {
                 $companystatic=new Societe($db);
 
                 $i = 0;
                 $tot_ttc = 0;
-                while ($i < $num && $i < 10)
+                while ($i < $num)
                 {
                     $obj = $db->fetch_object($resql);
-                    $table .=  '<tr '.$bc[$var].'><td nowrap>';
+                    $temp =  '<tr '.$bc[$var].'><td nowrap>';
                     $staticcontrat->ref=$obj->ref;
                     $staticcontrat->id=$obj->rowid;
-                    $table .=  $staticcontrat->getNomUrl(1,'');
-                    $table .=  '</td>';
-                    $table .=  '<td>';
+                    $temp .=  $staticcontrat->getNomUrl(1,'');
+                    $temp .=  '</td>';
+                    $temp .=  '<td>';
                     $companystatic->id=$obj->socid;
                     $companystatic->fetch($obj->socid);
                     $companystatic->nom=$obj->nom;
                     $companystatic->client=1;
-                    $table .=  $companystatic->getNomUrl(1,'',16);
-                    $table .=  '</td>';
-                    $table .=  "<td align=right>";
+                    $temp .=  $companystatic->getNomUrl(1,'',16);
+                    $temp .=  '</td>';
+                    $temp .=  "<td align=right>";
                     if (strtotime($obj->date_fin_validite) - 20 * 3600 * 24 < time())
                     {
-                        $table .= img_warning('Alerte');
+                        $temp .= img_warning('Alerte');
                     }
-                    $table .=  ''.date('d/m/Y',strtotime($obj->date_fin_validite));
-                    $table .=  '</td>';
+                    $temp .=  ''.date('d/m/Y',strtotime($obj->date_fin_validite));
+                    $temp .=  '</td>';
 
-                    $table .=  '</tr>';
+                    $temp .=  '</tr>';
                     $tot_ttc+=$obj->total_ttc;
+                    
+                    if($i < 10)
+                        $table .= $temp;
+                    $table2 .= $temp;
+                    
                     $i++;
                     $var=!$var;
                 }

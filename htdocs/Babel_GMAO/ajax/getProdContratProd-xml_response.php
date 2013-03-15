@@ -47,7 +47,7 @@
 
         $xml .= "<qteTktPerDuree><![CDATA[".$res->qteTktPerDuree."]]></qteTktPerDuree>";
         $xml .= "<qteTempsPerDuree><![CDATA[".$res->qteTempsPerDuree."]]></qteTempsPerDuree>";
-        $arrDur= $prod->convDur($res->qteTempsPerDuree);
+        $arrDur= convDur($res->qteTempsPerDuree);
         $xml .= "<qteTempsPerDureeH><![CDATA[".$arrDur['hours']['abs']."]]></qteTempsPerDureeH>";
         $xml .= "<qteTempsPerDureeM><![CDATA[".$arrDur['minutes']['rel']."]]></qteTempsPerDureeM>";
 

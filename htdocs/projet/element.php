@@ -294,7 +294,7 @@ $arr['facture'] = "Factures";
 $arr['Synopsis_Chrono'] = "Chronos";
 if ($projet->societe->fournisseur && isset($conf->global->MAIN_MODULE_FOURNISSEUR) && $conf->global->MAIN_MODULE_FOURNISSEUR) {
     $arr['commande_fournisseur'] = "Commande fournisseurs";
-    $arr['facture_fournisseurLL'] = "Factures fournisseurs";
+    $arr['facture_fourn'] = "Factures fournisseurs";
 }
 //foreach(array('Synopsis_Chrono', 'propal','commande','facture') as $val)
 foreach ($arr as $val => $nom) {

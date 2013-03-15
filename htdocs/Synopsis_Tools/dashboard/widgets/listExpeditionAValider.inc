@@ -23,6 +23,7 @@ function widget_listExpeditionAValider() {
 
     if ($conf->expedition->enabled && $user->rights->expedition->lire)
     {  
+        $staticcontrat= new Commande($db);
         $sql = "SELECT *";
         $sql.= " FROM " . MAIN_DB_PREFIX . "expedition as e";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON e.rowid = ce.fk_target";
@@ -115,6 +116,8 @@ function widget_listExpeditionAValider() {
                 	$fin_ok="KO";
                 }
 
+                    $staticcontrat->ref=$obj->ref;
+                    $staticcontrat->id=$obj->rowid;
 
                 if ($i < 10)
                 {
@@ -122,7 +125,7 @@ function widget_listExpeditionAValider() {
                     //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                    $table .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
+                    $table .= '<tr '.$bc[$var].''.'><td>'.$staticcontrat->getNomUrl(1,'').'</td>';
                     $table .= '<td>'.$obj->date_livraison.'</td>';
                     $table .= '<td>'.$log_ok.' , '.$log_stat.'</td>';
                     $table .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';
@@ -131,7 +134,7 @@ function widget_listExpeditionAValider() {
                 //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                $table2 .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
+                $table2 .= '<tr '.$bc[$var].''.'><td>'.$staticcontrat->getNomUrl(1,'').'</td>';
                 $table2 .= '<td>'.$obj->date_livraison.'</td>';
                 $table2 .= '<td>'.$log_ok.', '.$log_stat.'</td>';
                 $table2 .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';

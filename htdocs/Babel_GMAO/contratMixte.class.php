@@ -1603,7 +1603,7 @@ EOF;
 //                $qteTempsPerDureeM = 0;
 //                $qteTempsPerDureeH = 0;
 //                if ($product->qteTempsPerDuree > 0 ){
-//                    $arrDur = $product->convDur($product->qteTempsPerDuree);
+//                    $arrDur = convDur($product->qteTempsPerDuree);
 //                    $qteTempsPerDureeH=$arrDur['hours']['abs'];
 //                    $qteTempsPerDureeM=$arrDur['minutes']['rel'];
 //                }

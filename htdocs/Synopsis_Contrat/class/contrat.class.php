@@ -1261,7 +1261,7 @@ class Synopsis_Contrat extends Contrat {
         $isSAV = false;
         $isTkt = false;
         $qte1 = $res->qty;
-        $qte2 = ($tmpProd->array_options['options_2qte'] > 0) ? $tmpProd->array_options['options_2qte'] : 1;
+        $qte2 = ($tmpProd->array_options['options_2qte']>0)? $tmpProd->array_options['options_2qte'] : 0;
         if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance'] > 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
 //            $qte = $tmpProd->array_options['options_2visiteSurSite'];
@@ -1269,7 +1269,6 @@ class Synopsis_Contrat extends Contrat {
             $isSAV = true;
         } else if ($tmpProd->array_options['options_2timePerDuree'] > 0) {
             $isTkt = true;
-            $qte2 = $tmpProd->array_options['options_2qte'];
         }
 
         $duree = 12;
@@ -1323,11 +1322,13 @@ class Synopsis_Contrat extends Contrat {
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
                             " . ($tmpProd->array_options['options_2hotline'] ? 1 : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? 1 : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
-                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 0))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 2))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);
 
         if ($sql && $sql1)
             return true;
+        echo "\n\n".$requete;
+        echo "\n\n".$requete2;
         return false;
     }
 
@@ -2071,7 +2072,7 @@ EOF;
 //                $qteTempsPerDureeM = 0;
 //                $qteTempsPerDureeH = 0;
 //                if ($product->qteTempsPerDuree > 0 ){
-//                    $arrDur = $product->convDur($product->qteTempsPerDuree);
+//                    $arrDur = convDur($product->qteTempsPerDuree);
 //                    $qteTempsPerDureeH=$arrDur['hours']['abs'];
 //                    $qteTempsPerDureeM=$arrDur['minutes']['rel'];
 //                }

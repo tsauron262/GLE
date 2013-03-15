@@ -14,11 +14,15 @@ $langs->load("projectsSyn@projet");
 $userId = $user->id;
 
 
+if(!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
+
 define('_IMPUT_POURC_MULTI_USER_', false);
 
 $messErreur = array();
 
-if ($user->rights->synopsisprojet->voirImputations && ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2))
+if ($user->rights->synopsisprojet->voirImputations && isset($_REQUEST['userid']) && ($_REQUEST['userid'] > 0 || $_REQUEST['userid'] == -2))
     $userId = $_REQUEST['userid'];
 
 
@@ -29,10 +33,10 @@ $curUser = new User($db);
 $curUser->fetch($userId);
 
 $format = 'weekly';
-if ($_REQUEST['format'] . 'x' != "x")
+if (isset($_REQUEST['format']) && $_REQUEST['format'] . 'x' != "x")
     $format = $_REQUEST['format'];
 $date = strtotime(date('Y-m-d'));
-if ($_REQUEST['date'] . 'x' != "x")
+if (isset($_REQUEST['date']) && $_REQUEST['date'] . 'x' != "x")
     $date = $_REQUEST['date'];
 
 
@@ -113,7 +117,7 @@ if ($_REQUEST['fromProjet'] == 1 && $_REQUEST['id'] > 0) {
     $projet->fetch($_REQUEST['id']);
     $fromProj = true;
 }
-print_r($_REQUEST['model']);
+
 if ($_REQUEST['action'] == 'builddoc') {    // In get or post
     require_once(DOL_DOCUMENT_ROOT . "/core/modules/imputation/modules_imputations.php");
     $outputlangs = '';
@@ -597,7 +601,7 @@ while ($res = $db->fetch_object($sql)) {
     $prixTot = $prixTot * $pourcTache;
     global $prevue, $prixTot;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
-    $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
+//    $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 
     $restant = toAffiche($restant);
     $totalLigne = toAffiche($totalLigne);
@@ -802,7 +806,7 @@ $somethingshown = @$formfile->show_documents('imputations', $comref, $filedir . 
 
 
 print "</table>";
-llxFooter("<em>Derni&egrave;re modification $Date: 2008/06/18 20:01:02 $ r&eacute;vision $Revision: 1.41 $</em>");
+llxFooter("<em>Derni&egrave;re modification </em>");
 
 function toAffiche($val, $unite = true) {
     global $prevue, $prixTot, $modVal, $grandType;

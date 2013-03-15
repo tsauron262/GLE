@@ -110,6 +110,7 @@ function execute_op_save_columns() {
                VALUES ('" . serialize($cols) . "'," . $user->id . ",'" . $type . "')";
         $sql = $db->query($requete);
     }
+    return "OK";
 }
 
 // Operation handler for widget_settings operation.

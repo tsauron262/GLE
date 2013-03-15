@@ -114,7 +114,7 @@ class box_services_contracts extends ModeleBoxes
 						$sqld.= " LIMIT 1";
 
 						$resultd = $db->query($sqld);
-						if ($resultd)
+						if ($resultd && $db->num_rows($resultd) > 0)
 						{
 							$objtp = $db->fetch_object($resultd);
 							if ($objtp->label != '') $objp->label = $objtp->label;

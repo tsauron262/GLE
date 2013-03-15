@@ -1,53 +1,54 @@
 <?php
-/*
-  ** GLE by Synopsis et DRSI
-  *
-  * Author: Tommy SAURON <tommy@drsi.fr>
-  * Licence : Artistic Licence v2.0
-  *
-  * Version 1.2
-  * Created on : 19 oct. 2010
-  *
-  * Infos on http://www.finapro.fr
-  *
-  */
- /**
-  *
-  * Name : intervByContrat.php
-  * GLE-1.2
-  */
 
+/*
+ * * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.2
+ * Created on : 19 oct. 2010
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+/**
+ *
+ * Name : intervByContrat.php
+ * GLE-1.2
+ */
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
-require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/SAV.class.php");
-require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');
+require_once(DOL_DOCUMENT_ROOT . "/contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Babel_GMAO/SAV.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
 
 $langs->load("contracts");
 
 // Security check
-$contratid = isset($_REQUEST["id"])?$_REQUEST["id"]:'';
-if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'contrat',$contratid,'');
-    $jspath = DOL_URL_ROOT."/Synopsis_Common/jquery";
-    $jsMainpath = DOL_URL_ROOT."/Synopsis_Common/js";
-    $jqueryuipath = DOL_URL_ROOT."/Synopsis_Common/jquery/ui";
-    $css = DOL_URL_ROOT."/Synopsis_Common/css";
-    $imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
+$contratid = isset($_REQUEST["id"]) ? $_REQUEST["id"] : '';
+if ($user->societe_id)
+    $socid = $user->societe_id;
+$result = restrictedArea($user, 'contrat', $contratid, '');
+$jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";
+$jsMainpath = DOL_URL_ROOT . "/Synopsis_Common/js";
+$jqueryuipath = DOL_URL_ROOT . "/Synopsis_Common/jquery/ui";
+$css = DOL_URL_ROOT . "/Synopsis_Common/css";
+$imgPath = DOL_URL_ROOT . "/Synopsis_Common/images";
 
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-    $js .= ' <script src="'.$jspath.'/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
-    $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';
-    $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/jquery.searchFilter.css" />';
+$js = ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+$js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+$js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
+$js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
 
 
 /*
-* View
-*/
+ * View
+ */
 
-llxHeader($js,'Détails interventions');
+llxHeader($js, 'Détails interventions');
 
-$contrat = $contrat=getContratObj($_REQUEST["id"]);
+$contrat = $contrat = getContratObj($_REQUEST["id"]);
 $contrat->fetch($_GET["id"]);
 $contrat->info($_GET["id"]);
 
@@ -71,34 +72,37 @@ $arrResByStatutTotHT = array();
 $arrRemDate = array();
 
 $requete = "SELECT *
-              FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
-             WHERE fk_contrat = ".$contratid;
+              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter
+             WHERE fk_contrat = " . $contratid;
 $sql = $db->query($requete);
 
 $totalSAV = 0;
-while ($res=$db->fetch_object($sql))
-{
-    if ($arrResByStatut[$res->fk_statut]."x" == "x"){
+while ($res = $db->fetch_object($sql)) {
+    $anneeMoi = date('Ym', strtotime($res->datei));
+    if (!isset($arrResByStatut[$res->fk_statut])) {
         $arrResByStatut[$res->fk_statut] = 0;
+        $arrResByStatutDur[$res->fk_statut] = 0;
+        $arrResByStatutTotHT[$res->fk_statut] = 0;
+    }
+    if (!isset($arrResByDate[$anneeMoi])) {
+        $arrResByDate[$anneeMoi] = 0;
+        $arrResByDateDur[$anneeMoi] = 0;
+        $arrResByDateTotHT[$anneeMoi] = 0;
     }
     $arrResByStatut[$res->fk_statut]++;
     $arrResByStatutDur[$res->fk_statut] += $res->duree;
     $arrResByStatutTotHT[$res->fk_statut] += $res->total_ht;
 
-
-    if (date('U',strtotime($res->datei)) > 0 && $arrResByDate[date('Ym',strtotime($res->datei))]."x" == "x"){
-        $arrResByDate[date('Ym',strtotime($res->datei))] = 0;
-    }
-    if (date('U',strtotime($res->datei)) > 0){
-        $arrResByDate[date('Ym',strtotime($res->datei))]++;
-        $arrRemDate[date('Ym',strtotime($res->datei))] = date('m/Y',strtotime($res->datei));
-        $arrResByDateDur[date('Ym',strtotime($res->datei))] += $res->duree;
-        $arrResByDateTotHT[date('Ym',strtotime($res->datei))] += $res->total_ht;
+    if (date('U', strtotime($res->datei)) > 0) {
+        $arrResByDate[$anneeMoi]++;
+        $arrRemDate[$anneeMoi] = date('m/Y', strtotime($res->datei));
+        $arrResByDateDur[$anneeMoi] += $res->duree;
+        $arrResByDateTotHT[$anneeMoi] += $res->total_ht;
     }
     $totalSAV++;
 }
 print "<div class='titre'>Total</div>";
-print "<h2>Intervention : ".$totalSAV."</h2>";
+print "<h2>Intervention : " . $totalSAV . "</h2>";
 print "<div id='tab'>";
 print "<ul>";
 print " <li><a href='#Statut'><span>Par statut</span></a></li>";
@@ -113,12 +117,11 @@ print "<tr><th class='ui-widget-header ui-state-hover'>Statut";
 print "    <th class='ui-widget-header ui-state-hover'>Total interv.";
 print "    <th class='ui-widget-header ui-state-hover'>Total dur&eacute;e";
 print "    <th class='ui-widget-header ui-state-hover'>Total HT";
-foreach($arrResByStatut as $key=>$val)
-{
-    print "<tr><th align=left class='ui-widget-header ui-state-default'>".$objSav->LibStatut($key,4);
-    print "<td align=center class='ui-widget-content'>".$val;
-    print "<td align=center class='ui-widget-content'>".sec2time($arrResByStatutDur[$key]);
-    print "<td align=center class='ui-widget-content'>".price($arrResByStatutTotHT[$key])." &euro;";
+foreach ($arrResByStatut as $key => $val) {
+    print "<tr><th align=left class='ui-widget-header ui-state-default'>" . $objSav->LibStatut($key, 4);
+    print "<td align=center class='ui-widget-content'>" . $val;
+    print "<td align=center class='ui-widget-content'>" . sec2time($arrResByStatutDur[$key]);
+    print "<td align=center class='ui-widget-content'>" . price($arrResByStatutTotHT[$key]) . " &euro;";
 }
 print "</table>";
 print '</div>';
@@ -129,32 +132,33 @@ print "<tr><th class='ui-widget-header ui-state-hover'>Mois";
 print "    <th class='ui-widget-header ui-state-hover'>Total";
 print "    <th class='ui-widget-header ui-state-hover'>Total dur&eacute;e";
 print "    <th class='ui-widget-header ui-state-hover'>Total HT";
-foreach($arrResByDate as $key=>$val)
-{
-    print "<tr><th align=left class='ui-widget-header ui-state-default'>".$arrRemDate[$key];
-    print "    <td class='ui-widget-content' align=center>".$val;
-    print "    <td align=center class='ui-widget-content'>".sec2time($arrResByDateDur[$key]);
-    print "    <td align=center class='ui-widget-content'>".price($arrResByDateTotHT[$key])." &euro;";
+foreach ($arrResByDate as $key => $val) {
+    print "<tr><th align=left class='ui-widget-header ui-state-default'>" . $arrRemDate[$key];
+    print "    <td class='ui-widget-content' align=center>" . $val;
+    print "    <td align=center class='ui-widget-content'>" . sec2time($arrResByDateDur[$key]);
+    print "    <td align=center class='ui-widget-content'>" . price($arrResByDateTotHT[$key]) . " &euro;";
 }
 print "</table>";
 print '</div>';
 
 $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
-              FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet as fd,
-                   ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
-                   ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as b
+              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
+                   " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as b
              WHERE fd.fk_fichinter = f.rowid
                AND b.id = fd.fk_typeinterv
-               AND f.fk_contrat = ". $contratid."
+               AND f.fk_contrat = " . $contratid . "
           ORDER BY b.rang";
 $sql = $db->query($requete);
-$arrResByTypeInterv=array();
-$arrLabelInterv=array();
-while($res = $db->fetch_object($sql))
-{
+$arrResByTypeInterv = array();
+$arrLabelInterv = array();
+while ($res = $db->fetch_object($sql)) {
+    if (!isset($arrResByTypeInterv[$res->fk_typeinterv])) {
+        $arrResByTypeInterv[$res->fk_typeinterv] = array("duree"=>0, "total_ht"=>0);
+    }
     $arrResByTypeInterv[$res->fk_typeinterv]["duree"]+=$res->duree;
     $arrResByTypeInterv[$res->fk_typeinterv]["total_ht"]+=$res->total_ht;
-    $arrLabelInterv[$res->fk_typeinterv]=$res->label;
+    $arrLabelInterv[$res->fk_typeinterv] = $res->label;
 }
 
 
@@ -163,11 +167,10 @@ print "<table cellpadding=15 width=450>";
 print "<tr><th class='ui-widget-header ui-state-hover'>Type";
 print "    <th class='ui-widget-header ui-state-hover'>Total dur&eacute;e";
 print "    <th class='ui-widget-header ui-state-hover'>Total HT";
-foreach($arrResByTypeInterv as $key=>$val)
-{
-    print "<tr><th align=left class='ui-widget-header ui-state-default'>".$arrLabelInterv[$key];
-    print "    <td align=center class='ui-widget-content'>".sec2time($arrResByTypeInterv[$key]["duree"]);
-    print "    <td align=center class='ui-widget-content'>".price($arrResByTypeInterv[$key]["total_ht"])." &euro;";
+foreach ($arrResByTypeInterv as $key => $val) {
+    print "<tr><th align=left class='ui-widget-header ui-state-default'>" . $arrLabelInterv[$key];
+    print "    <td align=center class='ui-widget-content'>" . sec2time($arrResByTypeInterv[$key]["duree"]);
+    print "    <td align=center class='ui-widget-content'>" . price($arrResByTypeInterv[$key]["total_ht"]) . " &euro;";
 }
 print "</table>";
 print '</div>';
@@ -180,7 +183,7 @@ print '</div>';
 
 $db->close();
 print '<script>';
-print 'var contratId='.$contratid.';';
+print 'var contratId=' . $contratid . ';';
 print <<<EOF
 jQuery(document).ready(function(){
     jQuery('#tab').tabs({
@@ -298,19 +301,18 @@ jQuery(document).ready(function(){
 EOF;
 llxFooter('$Date: 2008/03/01 01:26:47 $ - $Revision: 1.16 $');
 
-
-function sec2time($sec){
+function sec2time($sec) {
     $returnstring = " ";
-    $days = intval($sec/86400);
-    $hours = intval ( ($sec/3600) - ($days*24));
-    $minutes = intval( ($sec - (($days*86400)+ ($hours*3600)))/60);
-    $seconds = $sec - ( ($days*86400)+($hours*3600)+($minutes * 60));
+    $days = intval($sec / 86400);
+    $hours = intval(($sec / 3600) - ($days * 24));
+    $minutes = intval(($sec - (($days * 86400) + ($hours * 3600))) / 60);
+    $seconds = $sec - ( ($days * 86400) + ($hours * 3600) + ($minutes * 60));
 
-    $returnstring .= ($days)?(($days == 1)? "1 j":$days."j"):"";
-    $returnstring .= ($days && $hours && !$minutes && !$seconds)?"":"";
-    $returnstring .= ($hours)?( ($hours == 1)?" 1h":" " .$hours."h"):"";
-    $returnstring .= (($days || $hours) && ($minutes && !$seconds))?"  ":" ";
-    $returnstring .= ($minutes)?( ($minutes == 1)?" 1 min":" ".$minutes."min"):"";
+    $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
+    $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
+    $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
+    $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
+    $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
     //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
     //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
     return ($returnstring);

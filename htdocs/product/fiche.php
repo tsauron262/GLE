@@ -28,7 +28,7 @@
  */
 
 require '../main.inc.php';
-require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/SynProd_fiche.php';
+require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/fiche.php';
 die;
 
 

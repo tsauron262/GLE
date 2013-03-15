@@ -104,38 +104,4 @@ function associateFI(pId){
 </script>
 
 EOF;
-function convDur($duration)
-{
-
-    // Initialisation
-    $duration = abs($duration);
-    $converted_duration = array();
-
-    // Conversion en semaines
-    $converted_duration['weeks']['abs'] = floor($duration / (60*60*24*7));
-    $modulus = $duration % (60*60*24*7);
-
-    // Conversion en jours
-    $converted_duration['days']['abs'] = floor($duration / (60*60*24));
-    $converted_duration['days']['rel'] = floor($modulus / (60*60*24));
-    $modulus = $modulus % (60*60*24);
-
-    // Conversion en heures
-    $converted_duration['hours']['abs'] = floor($duration / (60*60));
-    $converted_duration['hours']['rel'] = floor($modulus / (60*60));
-    $modulus = $modulus % (60*60);
-
-    // Conversion en minutes
-    $converted_duration['minutes']['abs'] = floor($duration / 60);
-    $converted_duration['minutes']['rel'] = floor($modulus / 60);
-    if ($converted_duration['minutes']['rel'] <10){$converted_duration['minutes']['rel'] ="0".$converted_duration['minutes']['rel']; } ;
-    $modulus = $modulus % 60;
-
-    // Conversion en secondes
-    $converted_duration['seconds']['abs'] = $duration;
-    $converted_duration['seconds']['rel'] = $modulus;
-
-    // Affichage
-    return( $converted_duration);
-}
 ?>

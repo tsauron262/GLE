@@ -496,6 +496,9 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0)
 
 	// If syslog module enabled
 	if (empty($conf->syslog->enabled)) return false;
+        
+        $monUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        $message = $monUrl . " | " . $message;
 
 	if (! empty($level))
 	{

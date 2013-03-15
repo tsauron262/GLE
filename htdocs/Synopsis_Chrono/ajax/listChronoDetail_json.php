@@ -241,7 +241,7 @@ switch ($action) {
                     $requeteArr[] .= "`" . $key . "` VARCHAR(100) DEFAULT NULL";
             }
             $requete .= join(',', $requeteArr);
-            $requete .= ")ENGINE=MyISAM DEFAULT CHARSET=latin1";
+            $requete .= ")ENGINE=MyISAM DEFAULT CHARSET=utf8";
             $sql = $db->query($requete);
 //Insert datas
 

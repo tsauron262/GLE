@@ -212,7 +212,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
   PRIMARY KEY  (`rowid`),
   UNIQUE KEY `ref` (`ref`),
   KEY `idx_demandeInterv_fk_soc` (`fk_soc`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2280 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2280 ;";
         
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet` (
   `rowid` int(11) NOT NULL auto_increment,
@@ -232,7 +232,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
   `fk_commandedet` int(11) default NULL,
   `isForfait` tinyint(1) default '0',
   PRIMARY KEY  (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4325 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         return $this->_init($sql);
   }

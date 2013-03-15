@@ -74,15 +74,14 @@ while ($res = $db->fetch_object($sql)) {
 
 $xml .= "<list>";
 foreach ($activeArr as $key => $val) {
-    $xml .= "<active id='" . $key . "'><![CDATA[" . $val . "]]></active>";
+    $xml .= "<active id='" . $key . "'><![CDATA[" . html_entity_decode($val) . "]]></active>";
 }
 foreach ($disableArr as $key => $val) {
     if ($val) {
-        $xml .= "<disabled id='" . $key . "'><![CDATA[" . $val . "]]></disabled>";
+        $xml .= "<disabled id='" . $key . "'><![CDATA[" . html_entity_decode($val) . "]]></disabled>";
     }
 }
 $xml .= "</list>";
-$xml .= "</ajax-response>";
 
 
 
@@ -92,5 +91,6 @@ if (stristr($_SERVER["HTTP_ACCEPT"], "application/xhtml+xml")) {
     header("Content-type: text/xml;charset=utf-8");
 } $et = ">";
 echo "<?xml version='1.0' encoding='utf-8'?$et\n";
-echo utf8_encode(utf8_decode(html_entity_decode($xml)));
+echo $xml;
+echo "</ajax-response>";
 ?>

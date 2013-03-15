@@ -32,7 +32,7 @@ CREATE TABLE  `northwind`.`categories` (
   `Description` text,
   `Picture` varchar(40) default NULL,
   PRIMARY KEY  (`CategoryID`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`categories`
@@ -70,7 +70,7 @@ CREATE TABLE  `northwind`.`customers` (
   `Fax` varchar(24) default NULL,
   PRIMARY KEY  (`CustomerID`),
   UNIQUE KEY `CustomerID` (`CustomerID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`customers`
@@ -209,7 +209,7 @@ CREATE TABLE  `northwind`.`employees` (
   `PhotoFileName` varchar(255) default NULL,
   PRIMARY KEY  (`EmployeeID`),
   UNIQUE KEY `EmployeeID` (`EmployeeID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`employees`
@@ -243,7 +243,7 @@ CREATE TABLE  `northwind`.`order_details` (
   `Quantity` smallint(5) unsigned NOT NULL default '1',
   `Discount` double NOT NULL default '0',
   PRIMARY KEY  (`OrderID`,`ProductID`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`order_details`
@@ -2491,7 +2491,7 @@ CREATE TABLE  `northwind`.`orders` (
   `ShipPostalCode` varchar(10) default NULL,
   `ShipCountry` varchar(15) default NULL,
   PRIMARY KEY  (`OrderID`)
-) ENGINE=MyISAM AUTO_INCREMENT=11078 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=11078 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`orders`
@@ -3487,7 +3487,7 @@ CREATE TABLE  `northwind`.`products` (
   `ReorderLevel` smallint(6) default '0',
   `Discontinued` char(1) default '0',
   PRIMARY KEY  (`ProductID`)
-) ENGINE=MyISAM AUTO_INCREMENT=78 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=78 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`products`
@@ -3590,7 +3590,7 @@ CREATE TABLE  `northwind`.`shippers` (
   `CompanyName` varchar(40) NOT NULL default '',
   `Phone` varchar(24) default NULL,
   PRIMARY KEY  (`ShipperID`)
-) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`shippers`
@@ -3623,7 +3623,7 @@ CREATE TABLE  `northwind`.`suppliers` (
   `Fax` varchar(24) default NULL,
   `HomePage` text,
   PRIMARY KEY  (`SupplierID`)
-) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 
 --
 -- Dumping data for table `northwind`.`suppliers`

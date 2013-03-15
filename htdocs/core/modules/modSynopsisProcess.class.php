@@ -392,7 +392,7 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `typeElement_refid` (`typeElement_refid`),
   KEY `trigger_refid` (`trigger_refid`),
   KEY `formulaire_refid` (`formulaire_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process` (`id`, `label`, `description`, `fk_statut`, `bloquant`, `formulaire_refid`, `pretraitement`, `posttraitement`, `validAction`, `askValidAction`, `reviseAction`, `PROCESS_MASK`, `ADDON_PDF`, `PROCESS_ADDON`, `typeElement_refid`, `trigger_refid`, `revision_model_refid`) VALUES
 (1, \'TR15\', \'FICHE ANALYSE FAISABILITE\', 1, 1, 1, \'\', \'\', \'\', \'\', \'\', \'{yy}TR15{0000@1}\', \'\', \'demantoide\', 1, 49, 2),
 (2, \'FORM_TEST\', \'TESTONS CES PROCESS\', NULL, 0, 1, \'\', \'\', \'\', \'\', \'\', \'FORM/{00000@}\', \'pholos\', \'demantoide\', 1, 47, 1);',
@@ -410,7 +410,7 @@ class modSynopsisProcess extends DolibarrModules {
   `entity` int(11) NOT NULL DEFAULT \'1\',
   PRIMARY KEY (`id`),
   KEY `process_refid` (`process_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet_active` (
   `type_refid` int(11) DEFAULT NULL,
   `process_refid` int(11) DEFAULT NULL,
@@ -419,7 +419,7 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `type_refid` (`type_refid`),
   KEY `process_refid` (`process_refid`),
   KEY `element_refid` (`element_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet_validation` (
   `user_refid` int(11) DEFAULT NULL,
   `process_refid` int(11) DEFAULT NULL,
@@ -431,21 +431,21 @@ class modSynopsisProcess extends DolibarrModules {
   `note` longtext,
   `dateValid` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   UNIQUE KEY `' . MAIN_DB_PREFIX . 'Synopsis_Processdet_validation_uniq_key` (`validation_type_refid`,`validation_number`,`element_refid`,`processdet_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet_value` (
   `processDet_refid` int(11) DEFAULT NULL,
   `nom` varchar(150) DEFAULT NULL,
   `valeur` longtext,
   `model_refid` int(11) DEFAULT NULL,
   UNIQUE KEY `uniq_processdet_value` (`processDet_refid`,`nom`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) DEFAULT NULL,
   `description` longtext,
   `fk_statut` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form` (`id`, `label`, `description`, `fk_statut`) VALUES
 (1, \'Form-TR15\', \'Formulaire TR15\', 1),
 (2, \'FORM_TEST\', \'FORMULAIRE DE TEST\', 1);',
@@ -463,7 +463,7 @@ class modSynopsisProcess extends DolibarrModules {
   `paramsForHtmlSelect` varchar(50) DEFAULT NULL,
   `postTraitementValue` longtext,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct` (`id`, `fct`, `params`, `label`, `description`, `class`, `fileClass`, `printVarInsteadOdReturn`, `VarToBePrinted`, `paramsForHtmlName`, `paramsForHtmlSelect`, `postTraitementValue`) VALUES
 (1, \'form_conditions_reglement\', \'PHP_SELF||SELECTED||ID||SHOW_EMPTY\', \'Conditions Reglement\', \'Conditions Reglement\', \'form\', \'/core/class/html.form.class.php\', 0, \'\', \'ID\', \'SELECTED\', \'\'),
 (2, \'select_users\', \'SELECTED||ID||SHOWEMPTY||EXCLUDE||DISABLED||DISPLAY\', \'Utilisateurs\', \'Liste des utilisateurs\', \'form\', \'/core/class/html.form.class.php\', 1, \'tmpReturn\', \'ID\', \'SELECTED\', \'$requete = "SELECT * FROM '.MAIN_DB_PREFIX.'user WHERE rowid=[[valeur]]";\n$sql = $db->query($requete);\n$res = $db->fetch_object($sql);\nreturn($res->name." ".$res->firstname);\'),
@@ -478,14 +478,14 @@ class modSynopsisProcess extends DolibarrModules {
   PRIMARY KEY (`id`),
   KEY `model_refid` (`model_refid`),
   KEY `fct_refid` (`fct_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `global` longtext,
   `label` varchar(50) DEFAULT NULL,
   `description` longtext,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global` (`id`, `global`, `label`, `description`) VALUES
 (1, \'$user->id\', \'ID Utilisateur\', \'ID Utilisateur\'),
 (2, \'$user->fullname\', \'Nom complet\', \'Nom complet de l\'\'utilisateur courant\'),
@@ -497,7 +497,7 @@ class modSynopsisProcess extends DolibarrModules {
   `label` varchar(50) DEFAULT NULL,
   `description` longtext,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list` (`id`, `label`, `description`) VALUES
 (1, \'TypeCourrier\', \'Type de courrier / document départ\'),
 (2, \'Oui/Non\', \'Oui/Non\'),
@@ -510,7 +510,7 @@ class modSynopsisProcess extends DolibarrModules {
   `list_refid` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `list_refid` (`list_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=41 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=41 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members` (`id`, `label`, `valeur`, `list_refid`) VALUES
 (1, \'Courrier\', \'Courrier\', 1),
 (2, \'Fiche collecte données\', \'Fiche collecte données\', 1),
@@ -546,7 +546,7 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `type_refid` (`type_refid`),
   KEY `src_refid` (`src_refid`),
   KEY `form_refid` (`form_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=373 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=373 ;',
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_Process_form_model` (`id`, `type_refid`, `label`, `description`, `dflt`, `src_refid`, `form_refid`, `rang`, `rights`) VALUES
 (1, 15, '', '', '', NULL, 1, 4, ''),
 (2, 17, '', '', '', NULL, 1, 5, NULL),
@@ -772,7 +772,7 @@ class modSynopsisProcess extends DolibarrModules {
   `OptGroupLabel` longtext,
   `postTraitement` longtext,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=16 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=16 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete` (`id`, `requete`, `requeteValue`, `params`, `limite`, `label`, `description`, `showFields`, `indexField`, `tableName`, `groupBy`, `orderBy`, `filter`, `OptGroup`, `OptGroupLabel`, `postTraitement`) VALUES
 (1, \'SELECT name, firstname FROM '.MAIN_DB_PREFIX.'socpeople where name like \'\'%%%s\'\' order by name\', \'SELECT name, firstname FROM '.MAIN_DB_PREFIX.'socpeople where name like \'\'%%%s\'\' AND [[indexField]] order by name \', \'a\', 100, \'test query\', \'tezst query\', \'name, firstname\', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9, \'SELECT * FROM '.MAIN_DB_PREFIX.'user\', \'SELECT * FROM '.MAIN_DB_PREFIX.'user WHERE [[indexField]]\', NULL, 100, \'reqUser\', \'reqUser\', \'a:2:{i:0;s:4:"name";i:1;s:9:"firstname";}\', \'rowid\', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
@@ -791,7 +791,7 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `global_refid` (`global_refid`),
   KEY `fct_refid` (`fct_refid`),
   KEY `list_refid` (`list_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=6 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src` (`id`, `requete_refid`, `fct_refid`, `global_refid`, `list_refid`) VALUES
 (1, NULL, NULL, NULL, 1),
 (2, NULL, NULL, NULL, 2),
@@ -830,7 +830,7 @@ class modSynopsisProcess extends DolibarrModules {
   `valueIsChecked` tinyint(4) DEFAULT NULL,
   `valueIsSelected` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=38 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type` (`id`, `code`, `label`, `description`, `cssClass`, `endNedded`, `htmlTag`, `htmlEndTag`, `hasDescription`, `hasDflt`, `hasTitle`, `hasSource`, `isInput`, `descriptionInsideTag`, `titleInsideTag`, `sourceIsOption`, `sourceGroupByName`, `titleInLegend`, `cssScript`, `jsScript`, `jsCode`, `isTabTitle`, `isStarRating`, `isHidden`, `isBegEndTab`, `repeatTag`, `valueInValueField`, `valueInTag`, `valueIsChecked`, `valueIsSelected`) VALUES
 (1, \'inpt\', \'Champs Texte\', \'Champs texte\', NULL, 0, \'<input>\', NULL, 1, 1, 1, 1, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL, NULL, NULL),
 (2, \'inptRadio\', \'Radio\', \'Champs Radio\', NULL, 0, \'<input type="radio">\', NULL, 1, 1, 1, 2, 1, NULL, NULL, NULL, 1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL),
@@ -874,7 +874,7 @@ class modSynopsisProcess extends DolibarrModules {
   `valeur` varchar(250) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_process_form_class_model_refid` (`model_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=314 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=314 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_class_value` (`id`, `model_refid`, `valeur`) VALUES
 (196, 44, \'ui-widget-header ui-state-default\'),
 (195, 51, \'ui-widget-header ui-state-default\'),
@@ -1004,7 +1004,7 @@ class modSynopsisProcess extends DolibarrModules {
   `element_name` varchar(75) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_process_form_type_prop` (`type_refid`,`element_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=55 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=55 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop` (`id`, `type_refid`, `element_name`) VALUES
 (4, 1, \'id\'),
 (2, 1, \'length\'),
@@ -1065,7 +1065,7 @@ class modSynopsisProcess extends DolibarrModules {
   `valeur` varchar(250) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `process_form_type_prop_value` (`prop_refid`,`model_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=107 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=107 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop_value` (`id`, `prop_refid`, `model_refid`, `valeur`) VALUES
 (1, 50, 3, \'\'),
 (2, 53, 3, \'4\'),
@@ -1179,7 +1179,7 @@ class modSynopsisProcess extends DolibarrModules {
   `element_name` varchar(75) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `uniq_process_form_type_style` (`type_refid`,`element_name`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=157 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=157 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style` (`id`, `type_refid`, `element_name`) VALUES
 (4, 1, \'border\'),
 (7, 1, \'clear\'),
@@ -1338,7 +1338,7 @@ class modSynopsisProcess extends DolibarrModules {
   PRIMARY KEY (`id`),
   KEY `model_refid` (`model_refid`),
   KEY `style_refid` (`style_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=171 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=171 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style_value` (`id`, `style_refid`, `valeur`, `model_refid`) VALUES
 (1, 151, \'\', 3),
 (2, 154, \'\', 3),
@@ -1517,7 +1517,7 @@ class modSynopsisProcess extends DolibarrModules {
   `right_refid` int(11) DEFAULT NULL,
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=38 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_rights` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `process_refid` int(11) DEFAULT NULL,
@@ -1525,7 +1525,7 @@ class modSynopsisProcess extends DolibarrModules {
   `right_refid` int(11) DEFAULT NULL,
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=7 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_rights` (`id`, `process_refid`, `user_refid`, `right_refid`, `valeur`) VALUES
 (6, 1, 1, 1, 1);',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_rights_def` (
@@ -1539,7 +1539,7 @@ class modSynopsisProcess extends DolibarrModules {
   `isValidationRight` tinyint(4) DEFAULT NULL,
   `isValidationForAll` tinyint(4) DEFAULT \'0\',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_rights_def` (`id`, `label`, `description`, `dflt`, `code`, `rang`, `active`, `isValidationRight`, `isValidationForAll`) VALUES
 (1, \'Voir\', \'Voir le process\', 1, \'voir\', 1, 1, NULL, 0),
 (2, \'Modifer\', \'Modifier le process\', 0, \'modifier\', 2, 1, NULL, 0),
@@ -1557,7 +1557,7 @@ class modSynopsisProcess extends DolibarrModules {
   `_GET_id` varchar(50) DEFAULT NULL,
   `classFile` longtext,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=21 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=21 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element` (`id`, `label`, `type`, `rang`, `ficheUrl`, `_GET_id`, `classFile`) VALUES
 (1, \'Propale\', \'Propal\', 1, \'/comm/propal.php\', \'propalid\', \'/comm/propal/class/propal.class.php\'),
 (2, \'Commande\', \'Commande\', 2, \'/commande/fiche.php\', \'id\', \'/commande/class/commande.class.php\'),
@@ -1584,7 +1584,7 @@ class modSynopsisProcess extends DolibarrModules {
   `trigger_refid` int(11) DEFAULT NULL,
   UNIQUE KEY `uniq_process_type_element_trigger` (`element_refid`,`trigger_refid`),
   KEY `trigger_refid` (`trigger_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;',
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element_trigger` (`element_refid`, `trigger_refid`) VALUES
 (1, 47),
 (1, 48),
@@ -1706,7 +1706,7 @@ class modSynopsisProcess extends DolibarrModules {
   `description` longtext,
   `phpClass` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;',
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_revision_model` (`id`, `nom`, `description`, `phpClass`) VALUES
 (1, 'Aligote', 'Révision numérique sur 4 chiffres', 'revision_aligote'),
 (2, 'Merlot', 'Révision alphabétique', 'revision_merlot');",
@@ -1714,7 +1714,7 @@ class modSynopsisProcess extends DolibarrModules {
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `code` varchar(150) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=209 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=209 ;",
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_trigger` (`id`, `code`) VALUES
 (1, 'ACTION_CREATE'),
 (2, 'BILL_CANCEL'),

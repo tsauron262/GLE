@@ -356,7 +356,7 @@ class modSynopsisProjet extends DolibarrModules {
   UNIQUE KEY `uniq_nom` (`nom`),
   KEY `fk_ressource_resp` (`fk_user_resp`),
   KEY `fk_parent_ressource_key` (`fk_parent_ressource`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa` (
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fk_ressource` int(11) DEFAULT NULL,
   `datedeb` datetime DEFAULT NULL,
@@ -372,7 +372,7 @@ class modSynopsisProjet extends DolibarrModules {
   KEY `user_imputation_resa_ressource_key` (`fk_user_imputation`),
   KEY `resa_ressource_key` (`fk_ressource`),
   KEY `fk_projet` (`fk_projet`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=18 ;",
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=18 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (
   `id` smallint(6) NOT NULL,
   `code` varchar(12) NOT NULL,
@@ -380,7 +380,7 @@ class modSynopsisProjet extends DolibarrModules {
   `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;", 
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_c_projet_statut` (`id`, `code`, `label`, `active`) VALUES
 (0, 'PROJDRAFT', 'Brouillon', 1),
 (5, 'PROJPLANNING', 'Planification', 1),
@@ -407,17 +407,17 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`rowid`),
   UNIQUE KEY `ref` (`ref`),
   KEY `fk_statut` (`fk_statut`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=545 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_group` (
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=545 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,
   `fk_projet` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_li_group` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_document_li_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fk_group` int(11) DEFAULT NULL,
   `fk_document` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_frais` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_frais` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `montantHT` float(11,3) DEFAULT NULL,
   `tms` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' ON UPDATE CURRENT_TIMESTAMP,
@@ -430,7 +430,7 @@ class modSynopsisProjet extends DolibarrModules {
   `fk_facture_fourn` int(11) DEFAULT NULL,
   `fk_commande_fourn` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources` (
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_Hressources` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tms` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `date_debut_resa` datetime DEFAULT NULL,
@@ -442,12 +442,12 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`id`),
   KEY `fk_user_resa_key` (`fk_user_resa`),
   KEY `fk_global_ressource_key` (`fk_global_ressource`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_li_task_group` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_li_task_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) DEFAULT NULL,
   `fk_group_risk` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_ressources` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `tms` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `nom` varchar(50) DEFAULT NULL,
@@ -468,7 +468,7 @@ class modSynopsisProjet extends DolibarrModules {
   UNIQUE KEY `uniq_nom` (`nom`),
   KEY `fk_projressource_resp` (`fk_user_resp`),
   KEY `fk_projparent_ressource_key` (`fk_parent_ressource`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_risk` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_risk` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `occurence` int(3) DEFAULT NULL,
   `gravite` int(3) DEFAULT NULL,
@@ -481,12 +481,12 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`rowid`),
   KEY `fk_projet` (`fk_projet`),
   KEY `fk_task` (`fk_task`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_risk_group` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_risk_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `group_name` varchar(150) NOT NULL,
   `fk_projet` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_projet` int(11) NOT NULL,
   `fk_task_parent` int(11) DEFAULT NULL,
@@ -510,7 +510,7 @@ class modSynopsisProjet extends DolibarrModules {
   KEY `statut` (`statut`),
   KEY `fk_user_creat` (`fk_user_creat`),
   KEY `fk_parent_task_sql` (`fk_task_parent`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=201 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors` (
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=201 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_actors` (
   `fk_projet_task` int(11) NOT NULL,
   `fk_user` int(11) NOT NULL,
   `role` enum('admin','read','acto','info') DEFAULT 'admin',
@@ -518,7 +518,7 @@ class modSynopsisProjet extends DolibarrModules {
   `type` enum('user','group') NOT NULL DEFAULT 'user',
   UNIQUE KEY `fk_projet_task` (`fk_projet_task`,`fk_user`),
   KEY `role` (`role`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) DEFAULT NULL,
   `fk_depends` int(11) DEFAULT NULL,
@@ -526,7 +526,7 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`id`),
   UNIQUE KEY `" . MAIN_DB_PREFIX . "Synopsis_projet_task_depends` (`fk_task`,`fk_depends`),
   KEY `fk_parent_task_depends_2_sql` (`fk_depends`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time` (
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) NOT NULL,
   `task_date` datetime DEFAULT NULL,
@@ -536,7 +536,7 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`rowid`),
   KEY `fk_task` (`fk_task`),
   KEY `fk_user` (`fk_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=653 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective` (
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=653 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `fk_task` int(11) NOT NULL,
   `task_date_effective` datetime DEFAULT NULL,
@@ -546,7 +546,7 @@ class modSynopsisProjet extends DolibarrModules {
   PRIMARY KEY (`rowid`),
   KEY `fk_task` (`fk_task`),
   KEY `fk_user` (`fk_user`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2347 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_special` (
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2347 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_task_time_special` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fk_tranche` int(11) DEFAULT NULL,
   `fk_user` int(11) DEFAULT NULL,
@@ -554,14 +554,14 @@ class modSynopsisProjet extends DolibarrModules {
   `qte` int(11) DEFAULT NULL,
   `fk_task` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=38 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_trancheHoraire` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=38 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_trancheHoraire` (
   `debut` varchar(5) DEFAULT NULL,
   `fin` varchar(5) DEFAULT NULL,
   `facteur` int(11) DEFAULT NULL,
   `day` int(11) DEFAULT NULL,
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_projet_type` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(50) DEFAULT NULL,
@@ -582,7 +582,7 @@ class modSynopsisProjet extends DolibarrModules {
   `hasStats` tinyint(4) DEFAULT NULL,
   `hasReferent` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;", 
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;", 
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_projet_type` (`id`, `type`, `active`, `defaut`, `refAddOn`, `hasTache`, `hasTacheLight`, `hasGantt`, `hasCout`, `hasRH`, `hasRessources`, `hasRisque`, `hasImputation`, `hasPointage`, `hasAgenda`, `hasDocuments`, `hasStats`, `hasReferent`) VALUES
 (1, 'Gantt', NULL, NULL, '1', 1, NULL, 1, 1, 1, 1, NULL, NULL, NULL, NULL, 1, 1, 1),
 (2, 'Imputations', 1, 1, '6', 1, 1, 1, 1, 1, 1, NULL, 1, NULL, NULL, 1, 1, 1),
@@ -592,7 +592,7 @@ class modSynopsisProjet extends DolibarrModules {
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;",
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_task_type` (`id`, `label`) VALUES
 (1, 'milestone'),
 (2, 'task'),
@@ -604,12 +604,12 @@ class modSynopsisProjet extends DolibarrModules {
   `couthoraire` float(11,3) DEFAULT NULL,
   `startDate` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=5 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_global_resatype` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;",
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_global_resatype` (`id`, `name`) VALUES
 (1, 'Par heure'),
 (2, 'Par demi journ&eacute;e'),
@@ -627,7 +627,7 @@ class modSynopsisProjet extends DolibarrModules {
   `fk_facture_fourn` int(11) DEFAULT NULL,
   `fk_commande_fourn` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=12 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_assoc` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `ref` varchar(16) NOT NULL,
@@ -648,7 +648,7 @@ class modSynopsisProjet extends DolibarrModules {
   `categorie_refid` int(11) DEFAULT NULL,
   `rev` int(11) DEFAULT '0',
   PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9 ;",
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_auto` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `ref` varchar(16) NOT NULL,
@@ -669,7 +669,7 @@ class modSynopsisProjet extends DolibarrModules {
   `categorie_refid` int(11) DEFAULT NULL,
   `rev` int(11) DEFAULT '0',
   PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=101 ;",
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=101 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_ecm_document_auto_categorie` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) NOT NULL DEFAULT '',
@@ -681,7 +681,7 @@ class modSynopsisProjet extends DolibarrModules {
   `conf` varchar(200) DEFAULT NULL,
   `droits` varchar(200) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=23 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_ecm_indexer_pool` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `filename` varchar(255) DEFAULT NULL,
@@ -689,18 +689,18 @@ class modSynopsisProjet extends DolibarrModules {
   `object_id` int(11) DEFAULT NULL,
   `status` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element` (
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element` (
   `category_refid` int(11) NOT NULL DEFAULT '0',
   `ecm_refid` int(11) NOT NULL DEFAULT '0',
   `element_refid` int(11) NOT NULL DEFAULT '0',
   KEY `liaison_fk` (`ecm_refid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;",
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element_assoc` (
   `category_refid` int(11) NOT NULL DEFAULT '0',
   `ecm_assoc_refid` int(11) NOT NULL DEFAULT '0',
   `element_refid` int(11) NOT NULL DEFAULT '0',
   KEY `liaison_ecm_assoc` (`ecm_assoc_refid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;","SET foreign_key_checks = 0;",
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;","SET foreign_key_checks = 0;",
             "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."projet;",
             "CREATE VIEW ". MAIN_DB_PREFIX ."projet as (SELECT rowid, fk_soc, date_create as datec, tms, dateo, date_cloture as datee, ref, entity, title, note as description, fk_user_creat, '' as public, fk_statut, '' as note_private, '' as note_public, '' as model_pdf FROM ". MAIN_DB_PREFIX ."Synopsis_projet);",
@@ -711,7 +711,7 @@ class modSynopsisProjet extends DolibarrModules {
   `date` date NOT NULL,
   `val` int(11) NOT NULL,
   PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1;",
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;",
             
             
             "ALTER IGNORE TABLE `" . MAIN_DB_PREFIX . "Synopsis_li_ecm_element`

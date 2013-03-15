@@ -260,7 +260,7 @@ class modSynopsisChrono extends DolibarrModules
   KEY `fk_user_author` (`fk_user_author`),
   KEY `fk_socpeople` (`fk_socpeople`),
   KEY `fk_societe` (`fk_societe`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_conf` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `titre` varchar(50) DEFAULT NULL,
@@ -275,7 +275,7 @@ class modSynopsisChrono extends DolibarrModules
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `active` tinyint(1) DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=11 ;",
         "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`) VALUES
 (1, 'Document indiçable', 'Document indiçable', 1, 0, 0, 1, 2, '{yy}I{0000@1}-A', '2011-03-17', '2011-11-25 15:03:14', 1),
 (2, 'Document départ', 'Courrier, mail, documents ...', 1, 0, 0, 0, NULL, '{yy}D{0000@1} ', '2011-03-17', '2012-01-09 16:28:37', 1),
@@ -296,7 +296,7 @@ class modSynopsisChrono extends DolibarrModules
   PRIMARY KEY (`id`),
   KEY `model_refid` (`chrono_conf_refid`),
   KEY `fct_refid` (`fct_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_group_rights` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
@@ -304,7 +304,7 @@ class modSynopsisChrono extends DolibarrModules
   `right_refid` int(11) DEFAULT NULL,
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,
@@ -317,7 +317,7 @@ class modSynopsisChrono extends DolibarrModules
   PRIMARY KEY (`id`),
   KEY `model_refid` (`model_refid`),
   KEY `type_valeur` (`type_valeur`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=57 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=57 ;",
         "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`) VALUES
 (1, 'Classification', 'Classification', 1, 1, NULL, '', 1),
 (2, 'Titre', 'Titre', 1, 9, NULL, '', 1),
@@ -381,7 +381,7 @@ class modSynopsisChrono extends DolibarrModules
   `valueInValueField` tinyint(1) DEFAULT NULL,
   `sourceIsOption` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;",
         "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_key_type_valeur` (`id`, `nom`, `hasSubValeur`, `subValeur_table`, `subValeur_idx`, `subValeur_text`, `phpClass`, `htmlTag`, `htmlEndTag`, `endNeeded`, `cssClass`, `cssScript`, `jsCode`, `valueIsChecked`, `valueIsSelected`, `valueInTag`, `valueInValueField`, `sourceIsOption`) VALUES
 (1, 'Texte', 0, NULL, NULL, NULL, NULL, '<input>', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, NULL),
 (2, 'Date', 0, NULL, NULL, NULL, NULL, '<input>', NULL, NULL, 'datepicker', NULL, NULL, NULL, NULL, NULL, 1, NULL),
@@ -427,7 +427,7 @@ class modSynopsisChrono extends DolibarrModules
   `note` longtext,
   PRIMARY KEY (`id`),
   UNIQUE KEY `multivalidation_chrono_uniq_key` (`right_refid`,`validation_number`,`chrono_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_rights` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `chrono_refid` int(11) DEFAULT NULL,
@@ -435,7 +435,7 @@ class modSynopsisChrono extends DolibarrModules
   `right_refid` int(11) DEFAULT NULL,
   `valeur` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_rights_def` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) DEFAULT NULL,
@@ -447,7 +447,7 @@ class modSynopsisChrono extends DolibarrModules
   `isValidationRight` tinyint(4) DEFAULT NULL,
   `isValidationForAll` tinyint(4) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=8 ;",
         "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_rights_def` (`id`, `label`, `description`, `dflt`, `code`, `rang`, `active`, `isValidationRight`, `isValidationForAll`) VALUES
 (1, 'Voir', 'Voir le chrono', 1, 'voir', 1, 1, NULL, 0),
 (2, 'Modifer', 'Modifier le chrono', 0, 'modifier', 2, 1, NULL, 0),
@@ -464,7 +464,7 @@ class modSynopsisChrono extends DolibarrModules
   PRIMARY KEY (`id`),
   KEY `key_id` (`key_id`),
   KEY `chrono_refid` (`chrono_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "DROP TABLE IF EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_key_value_view`;",
         "DROP VIEW IF EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_key_value_view`;",
         "CREATE VIEW `".MAIN_DB_PREFIX."Synopsis_Chrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`".MAIN_DB_PREFIX."Synopsis_Chrono` `c` left join (`".MAIN_DB_PREFIX."Synopsis_Chrono_key` `k` left join `".MAIN_DB_PREFIX."Synopsis_Chrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)));

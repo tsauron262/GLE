@@ -142,7 +142,7 @@ class modSynopsisZimbra extends DolibarrModules
   `user_refid` int(11) DEFAULT NULL,
   `BriefcaseName` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Zimbra_li_Ressources` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `Ressource_refid` int(11) DEFAULT NULL,
@@ -151,7 +151,7 @@ class modSynopsisZimbra extends DolibarrModules
   `calFolderZimId` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `Ressource_refid` (`Ressource_refid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Zimbra_li_User` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `User_refid` int(11) DEFAULT NULL,
@@ -160,7 +160,7 @@ class modSynopsisZimbra extends DolibarrModules
   `ZimbraId` varchar(36) DEFAULT NULL,
   `calFolderZimId` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=87 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=87 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type_event_refid` int(11) DEFAULT NULL,
@@ -172,7 +172,7 @@ class modSynopsisZimbra extends DolibarrModules
   `dateu` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `zimbra_event_id` (`event_uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1415 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1415 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_folder` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT,
   `folder_type_refid` int(11) DEFAULT NULL,
@@ -184,12 +184,12 @@ class modSynopsisZimbra extends DolibarrModules
   `skeleton_part` tinyint(4) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `zimbra_id` (`folder_uid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=9908 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9908 ;",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `val` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;",
        /* "ALTER TABLE `".MAIN_DB_PREFIX."Synopsis_Zimbra_li_Ressources`
   ADD CONSTRAINT `".MAIN_DB_PREFIX."Synopsis_Zimbra_li_ressources_ibfk_1` FOREIGN KEY (`Ressource_refid`) REFERENCES `".MAIN_DB_PREFIX."Synopsis_global_ressources` (`id`) ON DELETE CASCADE;",*/
         "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type` (`id`, `val`) VALUES

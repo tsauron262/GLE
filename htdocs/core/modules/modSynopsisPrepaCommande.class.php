@@ -291,7 +291,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
         $sql = array("CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_total` (
   `catId` int(11) default NULL,
   KEY `catId` (`catId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_total` (`catId`) VALUES
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_total` (`catId`) VALUES
 (57),
 (59),
 (79),
@@ -299,7 +299,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
 (87);", "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent` (
   `catId` int(11) default NULL,
   KEY `catId` (`catId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent` (`catId`) VALUES
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;", "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent` (`catId`) VALUES
 (3),
 (4),
 (5),
@@ -330,7 +330,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(50) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10 ;",
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=10 ;",
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_commande_status` (`id`, `label`) VALUES
 (1, 'Non examinée'),
 (2, 'Problèmes Techniques'),

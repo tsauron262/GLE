@@ -404,7 +404,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`rowid`),
   UNIQUE KEY `ref` (`ref`),
   KEY `idx_fichinter_fk_soc` (`fk_soc`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2655 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (
   `rowid` int(11) NOT NULL auto_increment,
@@ -425,7 +425,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `fk_commandedet` int(11) default NULL,
   `isForfait` tinyint(1) default NULL,
   PRIMARY KEY  (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=5132 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
@@ -437,7 +437,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `inTotalRecap` tinyint(4) default '0',
   `decountTkt` tinyint(4) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
@@ -449,7 +449,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `inTotalRecap` tinyint(4) default '0',
   `decountTkt` tinyint(4) default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=22 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (`id`, `label`, `active`, `rang`, `default`, `isDeplacement`, `inTotalRecap`, `decountTkt`) VALUES
@@ -486,7 +486,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `isInMainPanel` tinyint(11) default NULL,
   `fullLine` tinyint(4) default '0',
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=37 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key` (`id`, `label`, `type`, `active`, `description`, `isQuality`, `rang`, `isInMainPanel`, `fullLine`) VALUES
 (13, 'Total bons', 'text', 1, NULL, NULL, 6, NULL, 0),
@@ -520,7 +520,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `extra_value` longtext,
   `typeI` enum('DI','FI') default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=29195 ;";
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice` (
   `id` int(11) NOT NULL auto_increment,
@@ -529,7 +529,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `key_refid` int(11) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `uniq_extra_choice_interv` (`label`,`value`,`key_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=12 ;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice` (`id`, `label`, `value`, `key_refid`) VALUES
 (8, 'Contrat 8H', 1, 34),
@@ -545,7 +545,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `fk_product` int(11) default NULL,
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2577 ;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
 
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv` (
   `id` int(11) NOT NULL auto_increment,
@@ -553,7 +553,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `typeInterv_refid` int(11) default NULL,
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=1752 ;";
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
         
         $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
         

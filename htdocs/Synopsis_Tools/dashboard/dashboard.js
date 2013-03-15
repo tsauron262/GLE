@@ -182,8 +182,8 @@ $(function() {
     title: "Ajouter un widget",
     open: function(){
 
-        jQuery('ul#Ajoute').find('li').remove();
-        jQuery('ul#Dispo').find('li').remove();
+        jQuery('ul#Ajoute').find('div').remove();
+        jQuery('ul#Dispo').find('div').remove();
 
 
         jQuery.ajax({

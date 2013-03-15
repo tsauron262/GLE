@@ -103,7 +103,7 @@ class modSynopsisContrat extends DolibarrModules {
   annexe TEXT,
   KEY `annexe_refid` (`annexe_refid`),
   KEY `contrat_refid` (`contrat_refid`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;",
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `modeleName` varchar(150) DEFAULT NULL,
@@ -111,7 +111,7 @@ class modSynopsisContrat extends DolibarrModules {
   `annexe` longtext,
   `afficheTitre` tinyint(1) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=39 ;",
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=39 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GA` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `contratdet_refid` int(11) DEFAULT NULL,
@@ -128,7 +128,7 @@ class modSynopsisContrat extends DolibarrModules {
   PRIMARY KEY (`id`),
   KEY `propaldet_refid` (`contratdet_refid`),
   KEY `financement_period_refid` (`financement_period_refid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;",
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `contratdet_refid` int(11) DEFAULT NULL,

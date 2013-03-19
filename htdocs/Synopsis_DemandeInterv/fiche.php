@@ -1807,10 +1807,12 @@ EOF;
                         if ($val->fk_product > 0) {
                             $prod = new Product($db);
                             $prod->fetch($val->fk_product);
-                            if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
-                                print "<option selected='selected' value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . " </option>";
-                            } elseif ($prod->ref != '') {
-                                print "<option value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . "</option>";
+                            if ($prod->type == 1 || $prod->type == 3) {
+                                if ($val->rowid == $objp->fk_commandedet && $objp->fk_commandedet > 0) {
+                                    print "<option selected='selected' value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . " </option>";
+                                } elseif ($prod->ref != '') {
+                                    print "<option value='" . $val->rowid . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro; " . $val->description . "</option>";
+                                }
                             }
                         }
                     }
@@ -1958,7 +1960,8 @@ EOF;
                 if ($val->fk_product > 0) {
                     $prod = new Product($db);
                     $prod->fetch($val->fk_product);
-                    print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro;</option>";
+                    if ($prod->type == 1 || $prod->type == 3)
+                        print "<option value='" . $val->id . "'>" . $prod->ref . "   " . price($val->total_ht) . "&euro;</option>";
                 }
             }
             print "</select>";

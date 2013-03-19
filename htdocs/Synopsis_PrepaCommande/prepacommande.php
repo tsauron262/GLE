@@ -270,7 +270,7 @@ function reloadResult()
 
 </script>
 EOF;
-$js .= "<script src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/ui/ui.datepickerWithWeek.js' type='text/javascript'></script>";
+//$js .= "<script src='" . DOL_URL_ROOT . "/newGle/htdocs/core/js/datepicker.js.php' type='text/javascript'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 
 $js .= "<style>.submenu:hover { cursor: pointer; text-decoration: underline; font-weight: 900;}

@@ -613,9 +613,9 @@ if ($_REQUEST['action']=='setDateAnniv')
  * View
  */
 
-$csspath = DOL_URL_ROOT.'/Babel_Common/css/';
-$jspath = DOL_URL_ROOT.'/Babel_Common/jquery/';
-$jqueryuipath = DOL_URL_ROOT.'/Babel_Common/jquery/ui/';
+$csspath = DOL_URL_ROOT.'/Synopsis_Common/css/';
+$jspath = DOL_URL_ROOT.'/Synopsis_Common/jquery/';
+$jqueryuipath = DOL_URL_ROOT.'/Synopsis_Common/jquery/ui/';
 
 
 $header = '<script language="javascript" src="'.DOL_URL_ROOT.'/lib/lib_head.js"></script>'."\n";

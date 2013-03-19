@@ -58,7 +58,7 @@ if ($user->societe_id > 0)
 
   $js="";
 
-$jQueryDashBoardPath = DOL_URL_ROOT.'/Babel_Common/jquery/dashboard/';
+$jQueryDashBoardPath = DOL_URL_ROOT.'/Synopsis_Common/jquery/dashboard/';
 
 $js = '
     <script>var DOL_URL_ROOT="'.DOL_URL_ROOT.'";</script>

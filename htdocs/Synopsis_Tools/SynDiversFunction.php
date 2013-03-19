@@ -628,5 +628,117 @@ function convDur($duration)
 }
 
 
+    function select_dolusersInGroup($form, $group, $selected='',$htmlname='userid',$show_empty=0,$exclude='',$disabled=0,$include='',$enableonly='',$force_entity=false)
+    {
+        global $conf,$user,$langs;
+
+        // If no preselected user defined, we take current user
+        if ($selected < -1 && empty($conf->global->SOCIETE_DISABLE_DEFAULT_SALESREPRESENTATIVE)) $selected=$user->id;
+
+        // Permettre l'exclusion d'utilisateurs
+        if (is_array($exclude))	$excludeUsers = implode("','",$exclude);
+        // Permettre l'inclusion d'utilisateurs
+        if (is_array($include))	$includeUsers = implode("','",$include);
+
+        $out='';
+
+        // On recherche les utilisateurs
+        $sql = "SELECT DISTINCT u.rowid, u.name as lastname, u.firstname, u.login, u.admin, u.entity";
+        if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
+        {
+            $sql.= ", e.label";
+        }
+        $sql.= " FROM ".MAIN_DB_PREFIX ."user as u";
+        		$sql.= ", ".MAIN_DB_PREFIX."usergroup_user as ug2";
+        if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
+        {
+            $sql.= " LEFT JOIN ".MAIN_DB_PREFIX ."entity as e ON e.rowid=u.entity";
+            if ($force_entity) $sql.= " WHERE u.entity IN (0,".$force_entity.")";
+            else $sql.= " WHERE u.entity IS NOT NULL";
+        }
+        else
+        {
+        	if (! empty($conf->multicompany->transverse_mode))
+        	{
+        		$sql.= ", ".MAIN_DB_PREFIX."usergroup_user as ug";
+        		$sql.= " WHERE ug.fk_user = u.rowid";
+        		$sql.= " AND ug.entity = ".$conf->entity;
+        	}
+        	else
+        	{
+        		$sql.= " WHERE u.entity IN (0,".$conf->entity.")";
+        	}
+        }
+        		$sql.= " AND ug2.fk_user = u.rowid";
+        		$sql.= " AND ug2.fk_usergroup =".$group;
+        if (! empty($user->societe_id)) $sql.= " AND u.fk_societe = ".$user->societe_id;
+        if (is_array($exclude) && $excludeUsers) $sql.= " AND u.rowid NOT IN ('".$excludeUsers."')";
+        if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
+        $sql.= " ORDER BY u.name ASC";
+
+        dol_syslog(get_class($form)."::select_dolusers sql=".$sql);
+        $resql=$form->db->query($sql);
+        if ($resql)
+        {
+            $num = $form->db->num_rows($resql);
+            $i = 0;
+            if ($num)
+            {
+                $out.= '<select class="flat" id="'.$htmlname.'" name="'.$htmlname.'"'.($disabled?' disabled="disabled"':'').'>';
+                if ($show_empty) $out.= '<option value="-1"'.($selected==-1?' selected="selected"':'').'>&nbsp;</option>'."\n";
+
+                $userstatic=new User($form->db);
+
+                while ($i < $num)
+                {
+                    $obj = $form->db->fetch_object($resql);
+
+                    $userstatic->id=$obj->rowid;
+                    $userstatic->lastname=$obj->lastname;
+                    $userstatic->firstname=$obj->firstname;
+
+                    $disableline=0;
+                    if (is_array($enableonly) && count($enableonly) && ! in_array($obj->rowid,$enableonly)) $disableline=1;
+
+                    if ((is_object($selected) && $selected->id == $obj->rowid) || (! is_object($selected) && $selected == $obj->rowid))
+                    {
+                        $out.= '<option value="'.$obj->rowid.'"';
+                        if ($disableline) $out.= ' disabled="disabled"';
+                        $out.= ' selected="selected">';
+                    }
+                    else
+                    {
+                        $out.= '<option value="'.$obj->rowid.'"';
+                        if ($disableline) $out.= ' disabled="disabled"';
+                        $out.= '>';
+                    }
+                    $out.= $userstatic->getFullName($langs);
+
+                    if (! empty($conf->multicompany->enabled) && empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && ! $user->entity)
+                    {
+                        if ($obj->admin && ! $obj->entity) $out.=" (".$langs->trans("AllEntities").")";
+                        else $out.=" (".$obj->label.")";
+                    }
+
+                    //if ($obj->admin) $out.= ' *';
+                    if (! empty($conf->global->MAIN_SHOW_LOGIN)) $out.= ' ('.$obj->login.')';
+                    $out.= '</option>';
+                    $i++;
+                }
+            }
+            else
+            {
+                $out.= '<select class="flat" name="'.$htmlname.'" disabled="disabled">';
+                $out.= '<option value="">'.$langs->trans("None").'</option>';
+            }
+            $out.= '</select>';
+        }
+        else
+        {
+            dol_print_error($form->db);
+        }
+
+        return $out;
+    }
 
 ?>

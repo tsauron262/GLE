@@ -147,10 +147,12 @@ while ($res = $db->fetch_object($sql)) {
         print "</table>";
     }
     print "    <td class='ui-widget-content' align=center>";
-    if ($user->rights->synopsisdemandeinterv->supprimer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
+    if ($user->rights->synopsisdemandeinterv->supprimer)
         print "    <button class='butAction' onClick='delDi(" . $res->rowid . ")'>Supprimer</button>";
-    if ($user->rights->synopsisdemandeinterv->creer || $user->rights->SynopsisPrepaCom->interventions->Modifier)
+    if ($user->rights->synopsisdemandeinterv->creer)
         print "    <button class='butAction' onClick='cloneDi(" . $res->rowid . ")'>Cloner</button>";
+    if ($res->fk_statut == 0 && $user->rights->synopsisdemandeinterv->creer)
+        print "<button class='butAction' onClick='validDi(" . $res->rowid . ")'>Valider</button>";
 }
 print "</table>";
 print "<br/>";
@@ -180,16 +182,16 @@ print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment
 print "<div id='fragment1'>";
 print "<table cellpadding=10 width=100%><tr><th class='ui-widget-header ui-state-default'>Date Intervention</td>";
 print "<td class='ui-widget-content' colspan=1>";
-print $form->select_date('',"datei");
+print $form->select_date($com->date_livraison,"datei");
 print '<input type="button" value="Répliqué" id="repliDate"/>';
 
 print "<th class='ui-widget-header ui-state-default'>Intervenant</th>";
 print "<td class='ui-widget-content' colspan=1>";
-$html->select_users('', 'userid', 1, array(1 => 1), 0, false);
-print $html->tmpReturn;
+print select_dolusersInGroup($form, 3, '', 'userid', 1, array(1 => 1), 0, false);
+//print $html->tmpReturn;
 
 print "<tr><th class='ui-widget-header ui-state-default'>Description globale</th>";
-print "<td colspan=3 class='ui-widget-content'><textarea style='width:100%' name='desc'></textarea>";
+print "<td colspan=3 class='ui-widget-content'><textarea style='width:100%' name='desc' id='desc'></textarea>";
 
 print "</table>";
 print "</div>";
@@ -292,7 +294,7 @@ jQuery(document).ready(function(){
             $("#toReplace tr").each(function(){
                 id = $(this).attr("id");
                 $(this).find("#qte"+id).val(1);
-                desc = $(this).find("#desci"+id);
+                desc = $('#desc');
                 forfait = $(this).find("#isForfait"+id);
                 i=0;
                 $(this).find("a").each(function(){
@@ -303,7 +305,7 @@ jQuery(document).ready(function(){
                         if($(this).html() == "FPR30")
                             desc.html("Intervention comprennent : ");
                         if($(this).html().match("FD.*")){
-                            desc.html("Déplacement comprennent : ");
+//                            desc.html("Déplacement comprennent : ");
                             forfait.attr('checked', true);
                         }
                     }
@@ -568,7 +570,7 @@ jQuery(document).ready(function(){
                             var ligneId = jQuery(this).find("id").text();
                             i++;
                             longHtml+= "<tr id='"+ligneId+"' rel='"+jQuery(this).find('fk_product').text()+"'><td class='ui-widget-content' nowrap align=center>"+jQuery(this).find("product").text();
-                            longHtml+= "    <td class='ui-widget-content' align=center><textarea  class='required' rel='La description de la ligne "+i+" est manquante' name='desci"+ligneId+"' id='desci"+ligneId+"' ></textarea>";
+                            longHtml+= "    <td class='ui-widget-content' align=center><textarea  class='required' rel='La description de la ligne "+i+" est manquante' name='desci"+ligneId+"' id='desci"+ligneId+"' >"+jQuery(this).find("description").text()+"</textarea>";
                             longHtml+= "    <td class='ui-widget-content' align=center><input rel='La date de la ligne "+i+" est manquante' size=8 class='datePicker required FRDate' type='text' name='datei"+ligneId+"' id='datei"+ligneId+"'  >";
                             longHtml+= "    <td class='ui-widget-content' align=center>"+printSelDur(ligneId);
                             longHtml+= "    <td class='ui-widget-content' align=center><input type='checkbox' "+(jQuery(this).find("forfait").text()==1?'Checked':"")+" name='isForfait"+ligneId+"' id='isForfait"+ligneId+"'  >";;
@@ -834,6 +836,39 @@ function delDi(id){
 function cloneDi(id){
     jQuery.ajax({
         url:'ajax/xml/cloneDI-xml_response.php',
+        data:"id="+id,
+        datatype:"xml",
+        type:"POST",
+        cache:false,
+        success:function(msg){
+            if(jQuery(msg).find('OK').length>0)
+            {
+                jQuery('#createDIDialog').dialog('close');
+                //reload
+                reloadResult();
+                jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
+                jQuery('#createDIDialog').dialog( "destroy" );
+                jQuery('#createDIDialog').remove();
+                jQuery.ajax({
+                    url: "ajax/interventions-html_response.php",
+                    data: "id="+comId,
+                    cache: false,
+                    datatype: "html",
+                    type: "POST",
+                    success: function(msg){
+                        jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
+                    },
+                });
+            } else {
+                alert('Il y a eu une erreur');
+            }
+        }
+    });
+}
+
+function validDi(id){
+    jQuery.ajax({
+        url:'ajax/xml/validDI-xml_response.php',
         data:"id="+id,
         datatype:"xml",
         type:"POST",

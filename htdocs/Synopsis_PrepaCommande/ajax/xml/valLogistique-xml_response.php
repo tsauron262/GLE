@@ -77,7 +77,7 @@
           // Appel des triggers
           include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
           $interface=new Interfaces($db);
-          $result=$interface->run_triggers('PREPACOM_INDISPO_PROD',$this,$user,$langs,$conf);
+          $result=$interface->run_triggers('PREPACOM_INDISPO_PROD',$commande,$user,$langs,$conf);
           if ($result < 0) { $error++; $errors=$interface->errors; }
           // Fin appel triggers
           $subject="[Non Dispo Produit] Nouveau message concernant la logistique de la commande ".$commande->ref;
@@ -85,12 +85,13 @@
           // Appel des triggers
           include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
           $interface=new Interfaces($db);
-          $result=$interface->run_triggers('PREPACOM_DISPO_PROD',$this,$user,$langs,$conf);
+          $result=$interface->run_triggers('PREPACOM_DISPO_PROD',$commande,$user,$langs,$conf);
           if ($result < 0) { $error++; $errors=$interface->errors; }
           // Fin appel triggers
       }
 //PREPACOM_DISPO_PROD
 
+    if (isset($conf->global->BIMP_MAIL_FROM) && isset($conf->global->BIMP_MAIL_GESTLOGISTIQUE)) {
       $msg = "Bonjour,<br/><br/>";
       $msg .= "La commande ".$commande->getNomUrl(1,6)." a &eacute;t&eacute; modifié après la valididation logistique.";
       if ($commande->logistique_ok != 1)
@@ -105,6 +106,7 @@
 
       require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
       sendMail($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
+    }
   } else {
       $xmlStr .= "<KO>KO</KO>";
   }

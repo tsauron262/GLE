@@ -36,6 +36,8 @@
         $xmlStr.= "<id>".$res->rowid."</id>";
         $xmlStr.= "<pu_ht>".round($res->subprice*100)/100 ."</pu_ht>";
         $xmlStr.= "<qte>".$res->qty."</qte>";
+        $xmlStr.= "<description><![CDATA[".$res->description."]]></description>";
+        $xmlStr.= "<forfait>0</forfait>";
         $prodTmp->fetch($res->fk_product);
         $xmlStr.= "<product><![CDATA[".$prodTmp->getNomUrl(1)."]]></product>";
         $xmlStr.= "<fk_product><![CDATA[".$res->fk_product."]]></fk_product>";

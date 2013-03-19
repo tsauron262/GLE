@@ -32,13 +32,13 @@ $staticcontratligne=new ContratLigne($db);
  * Affichage page
  */
 
-$jspath = DOL_URL_ROOT."/Babel_Common/jquery";
-$jqueryuipath = DOL_URL_ROOT."/Babel_Common/jquery/ui";
-$css = DOL_URL_ROOT."/Babel_Common/css";
-$imgPath = DOL_URL_ROOT."/Babel_Common/images";
+$jspath = DOL_URL_ROOT."/Synopsis_Common/jquery";
+$jqueryuipath = DOL_URL_ROOT."/Synopsis_Common/jquery/ui";
+$css = DOL_URL_ROOT."/Synopsis_Common/css";
+$imgPath = DOL_URL_ROOT."/Synopsis_Common/images";
 
 
-$js .= '      <link type="text/css" rel="stylesheet" href="'.DOL_URL_ROOT.'/Babel_Common/css/jquery.treeview.css" />';
+$js .= '      <link type="text/css" rel="stylesheet" href="'.DOL_URL_ROOT.'/Synopsis_Common/css/jquery.treeview.css" />';
 
 
 $js .= '<link rel="stylesheet" type="text/css" media="screen" href="'.$jspath.'/jqGrid-3.5/css/ui.jqgrid.css" />';

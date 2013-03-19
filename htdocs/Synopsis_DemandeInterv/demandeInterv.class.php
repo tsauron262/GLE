@@ -315,7 +315,7 @@ class demandeInterv extends CommonObject
         $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
         $sql.= " SET fk_statut = 1, date_valid=now(), fk_user_valid=".$user->id;
         $sql.= " WHERE rowid = ".$this->id." AND fk_statut = 0";
-
+//die($sql);
         dol_syslog("demandeInterv::valid sql=".$sql);
         $resql=$this->db->query($sql);
 
@@ -333,7 +333,7 @@ class demandeInterv extends CommonObject
 
                 $this->db->commit();
                 //notification
-                if($conf->global->BIMP_MAIL_GESTPROD){
+                if(isset($conf->global->BIMP_MAIL_GESTPROD)){
                     $this->info($this->id);
                     $subject=utf8_encode("[Nouvelle Intervention] Nouvelle intervention chez ".$this->societe->nom);
                     $to = $this->user_prisencharge->email;

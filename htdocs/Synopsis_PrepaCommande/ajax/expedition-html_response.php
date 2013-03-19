@@ -161,19 +161,22 @@ if ($_REQUEST["id"] > 0) {
         print $langs->trans('D&eacute;poser &agrave;');
         print '<a href="#" onClick="changeSiteDepot();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
         print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
+            $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
+            $idEntr = 0;
+            if (isset($tabEntrep[0]))
+                $idEntr = $tabEntrep[0]['d'];
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editDepot') {
-            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."entrepot";
+            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."entrepot ORDER BY lieu";
             print "<select name='newDepot' id='newDepot'>";
             $sql6 = $db->query($requete);
             while ($res6 = $db->fetch_object($sql6)) {
-                print "<option value='" . $res6->rowid . "'>" . traite_str($res6->lieu) . "</option>";
+                print "<option value='" . $res6->rowid . "'".(($res6->rowid == $idEntr)?" selected='selected'" : '') .">" . traite_str($res6->lieu) . "</option>";
             }
             print "</select>";
             print "<button onClick='validateDepot();' class='butAction'>OK</button>";
         } else {
             $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
-            if (isset($tabEntrep[0])) {
-                $idEntr = $tabEntrep[0]['d'];
+            if ($idEntr) {
                 $requete = "SELECT lieu FROM ".MAIN_DB_PREFIX."entrepot WHERE rowid = " . $idEntr;
                 $sql6 = $db->query($requete);
                 $res6 = $db->fetch_object($sql6);
@@ -332,6 +335,7 @@ EOF;
 
             $var = true;
             $reste_a_livrer = array();
+            $reste_a_livrer_total = 0;
             while ($i < $num) {
                 $objp = $db->fetch_object($resql);
                 if ($objp->qty == 0) {
@@ -419,7 +423,7 @@ EOF;
                 print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Warehouse") . '</td>';
                 print '<td class="ui-widget-content">';
 
-                if (sizeof($user->entrepots) === 1) {
+                if (sizeof($entrepot->list_array()) === 1) {
                     $uentrepot = array();
                     $uentrepot[$user->entrepots[0]['id']] = $user->entrepots[0]['label'];
                     print $html->selectarray("entrepot_id", $uentrepot);

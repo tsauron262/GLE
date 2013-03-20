@@ -771,16 +771,16 @@ if (is_dir($dir)) {
                             //Si modif
                         } else {
                             $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe_adresse_livraison (fk_societe, cp, ville, address, fk_pays, label,import_key)
-                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
-                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
-                            } else {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
-                            }
+//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe_adresse_livraison (fk_societe, cp, ville, address, fk_pays, label,import_key)
+//                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
+//                            $sql = requeteWithCache($requete);
+//                            if ($sql) {
+//                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
+//                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+//                            } else {
+//                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+//                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
+//                            }
                             $livAdd = $db->last_insert_id('".MAIN_DB_PREFIX."societe_adresse_livraison');
                         }
                     } else {

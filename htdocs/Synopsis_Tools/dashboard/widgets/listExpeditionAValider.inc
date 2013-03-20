@@ -57,6 +57,7 @@ function widget_listExpeditionAValider() {
             //$table .=  '<tr class="liste_titre"><td colspan="1">'.$langs->trans("SendingsToValidate",30).'</td>';
             //$table .=  '<tr class="liste_titre"><td align="right" width="80" colspan="">'.$langs->trans("Soci&eacute;t&eacute;").'</td>';
             $table .=  '<tr class="liste_titre"><td align="left" width="20" colspan="1">'.$langs->trans("Comm.").'</td>';
+            $table2 .=  '<td align="left" width="20" colspan="1">'.$langs->trans("Client").'</td>';
             $table .=  '<td align="left" width="20" colspan="">'.$langs->trans("date livrais.").'</td>';
             $table .=  '<td align="left" width="40" colspan="">'.$langs->trans("Logist.").'</td>';
             $table .=  '<td align="left" width="20" colspan="">'.$langs->trans("Financ.").'</td>';
@@ -139,6 +140,7 @@ $societe->fetch($staticcontrat->socid);
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
                 $table2 .= '<tr '.$bc[$var].''.'><td>'.$staticcontrat->getNomUrl(1,'').'</td>';
+                    $table .= '<td>'.$societe->getNomUrl(1).'</td>';
                 $table2 .= '<td>'.$obj->date_livraison.'</td>';
                 $table2 .= '<td>'.$log_ok.', '.$log_stat.'</td>';
                 $table2 .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';

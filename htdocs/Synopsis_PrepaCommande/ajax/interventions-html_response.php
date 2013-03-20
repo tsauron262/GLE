@@ -293,7 +293,7 @@ jQuery(document).ready(function(){
         function initSynScript(){
             $("#toReplace tr").each(function(){
                 id = $(this).attr("id");
-                $(this).find("#qte"+id).val(1);
+//                $(this).find("#qte"+id).val(1);
                 desc = $('#desc');
                 forfait = $(this).find("#isForfait"+id);
                 i=0;

@@ -30,10 +30,12 @@
     $di->socid = $com->socid;
     $di->fk_commande = $id;
     $di->date = convertDate($_REQUEST['datei']);
-    $di->ref=$di->getNextNumRef($com->societe);
+    $societe = new Societe($db);
+    $societe->fetch($com->socid);
+    $di->ref=$di->getNextNumRef($societe);
     $di->fk_user_prisencharge=$_REQUEST['userid'];
     $di->author=$user->id;
-    $di->description=utf8_decode($_REQUEST['desc']);
+    $di->description=utf8_encodeRien($_REQUEST['desc']);
     $di->modelpdf='soleil';
 
     $diId = $di->create();
@@ -57,7 +59,7 @@
                 }
                 $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
                                         ( interv_refid,extra_key_refid,extra_value,typeI)
-                                 VALUES ( ".$demandeIntervid.",'".$idExtraKey."','".addslashes(utf8_decode($val))."','DI')";
+                                 VALUES ( ".$demandeIntervid.",'".$idExtraKey."','".addslashes(utf8_encodeRien($val))."','DI')";
                 $sql = $db->query($requete);
                 //print $requete;
             }
@@ -71,7 +73,7 @@
         {
             if (preg_match('/^desci([0-9]*)/',$key,$arr))
             {
-                 $desc = utf8_decode($val);
+                 $desc = utf8_encodeRien($val);
                  $datei = "'".date('Y-m-d',convertDate($_REQUEST['datei'.$arr[1]]))."'";
                  $duration = ConvertTime2Seconds($_REQUEST['duri'.$arr[1]],$_REQUEST['durmini'.$arr[1]]);
                  $typeInter = $_REQUEST['typeInterv'.$arr[1]];

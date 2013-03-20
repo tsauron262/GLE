@@ -415,6 +415,7 @@ class Synopsis_Commande extends Commande {
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
         $lines = array();
         $comms = $this->listGroupMember(false);
+        $i = 0;
         if (count($comms) > 0) {
             foreach ($comms as $commande) {
                 $commande->fetch_lines();

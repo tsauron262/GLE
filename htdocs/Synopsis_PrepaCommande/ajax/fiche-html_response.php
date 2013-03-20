@@ -147,7 +147,7 @@ EOF;
         if ($conf->projet->enabled)
             $nbrow++;
 
-        print '<table class="border" width="700" cellpadding=10>';
+        print '<table class="border" cellpadding=10>';
 
         // Ref
         $extra = "";

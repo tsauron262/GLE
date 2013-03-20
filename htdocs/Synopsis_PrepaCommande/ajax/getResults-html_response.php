@@ -28,8 +28,8 @@ print "<div class='titre'>R&eacute;sum&eacute;</div>";
 print "<br/>";
 
 
-print "<table><tr><td valign=top>";
-print "<table cellpadding=10 width=600>";
+print "<table><tr><td valign=top colspan=2>";
+print "<table cellpadding=10 width=764>";
 print "<tr><th class='ui-widget-header ui-state-hover' colspan=4>Interventions";
 //Prevu dans la commande
 $arrGrp = array();
@@ -126,8 +126,8 @@ if ($prevuTemp > 0 || $realTemp > 0) {
 }
 
 print "</table>";
-print "<td valign=top>";
-print "<table width=300 cellpadding=10>";
+print "<tr><td valign=top>";
+print "<table width=380 cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par cat&eacute;gorie (Pr&eacute;vu)";
 
 //table avec le dispatch
@@ -146,7 +146,7 @@ while ($res = $db->fetch_object($sql)) {
 }
 print "</table>";
 print "<td valign=top>";
-print "<table width=300 cellpadding=10>";
+print "<table width=380 cellpadding=10>";
 print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par cat&eacute;gorie (R&eacute;alis&eacute;)";
 
 //table avec le dispatch
@@ -185,7 +185,7 @@ while ($resContent = $db->fetch_object($sqlContent)) {
     else
         print "    <td valign='top' colspan=2>";
 
-    print "<table width=600 cellpadding=10>";
+    print "<table width=380 cellpadding=10>";
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=4>Vendu par " . strtolower($resContent->label);
     $arrCat = array();
     $arrPos = array();

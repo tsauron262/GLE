@@ -25,6 +25,13 @@ div.fiche.reglabe{
 }
 
 
+/* Pour le menu a onglet des fiche */
+div.tabs a.tab:link{
+    display: inline-block;
+}
+div.tabBar{
+    margin-top: -4px;
+}
 
 
 

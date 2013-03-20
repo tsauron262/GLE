@@ -23,13 +23,12 @@ function widget_listExpeditionAValider() {
     $table2 = '</p>';
 
     if ($conf->expedition->enabled && $user->rights->expedition->lire) {
-        $staticcontrat = new Commande($db);
+        $staticcontrat = new Synopsis_Commande($db);
         $sql = "SELECT *, c.rowid as idContrat";
         $sql.= " FROM " . MAIN_DB_PREFIX . "expedition as e";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON e.rowid = ce.fk_target";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON e.rowid = ce.fk_target AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "commande as c ON ce.fk_source = c.rowid";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_commande as sc ON ce.fk_source = sc.rowid";
-        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "societe as s ON s.rowid = e.fk_soc";
         if (!$user->rights->societe->client->voir && !$socid) {
             $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "societe_commerciaux as sc ON e.fk_soc = sc.fk_soc";
             $sql.= $clause . " sc.fk_user = " . $user->id;
@@ -39,11 +38,10 @@ function widget_listExpeditionAValider() {
             $sql .= $clause . " c.fk_soc = " . $socid;
         }
 
-        $sql .= " AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
 
-        $sql.= " AND e.fk_statut = 1";
+        $sql.= " WHERE e.fk_statut = 0";
         $sql.= " GROUP BY e.rowid";
-        $sql.= " ORDER BY e.date_valid desc";
+        $sql.= " ORDER BY e.rowid desc";
         $sql.= " LIMIT 50";
 
         $result = $db->query($sql);
@@ -115,8 +113,8 @@ function widget_listExpeditionAValider() {
                     //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                    $table .= '<tr ' . $bc[$var] . '' . '><td>' . $staticcontrat->getNomUrl(1, '') . '</td>';
-                    $table .= '<td>' . $societe->getNomUrl(1) . '</td>';
+                    $table .= '<tr ' . $bc[$var] . '' . '><td>' . $staticcontrat->getNomUrl(1, '', 15) . '</td>';
+                    $table .= '<td>' . $societe->getNomUrl(1, '', 12) . '</td>';
                     $table .= '<td>' . $obj->date_livraison . '</td>';
                     $table .= '<td>' . $log_ok . ' , ' . $log_stat . '</td>';
                     $table .= '<td>' . $fin_ok . ' , ' . $fin_stat . '</td></tr>';

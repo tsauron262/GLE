@@ -1212,8 +1212,9 @@ class Synopsis_Contrat extends Contrat {
         if (!$sql)
             die("Erreur SQL : " . $requete);
         $res = $db->fetch_object($sql);
-        $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice * $res->qty);
-        $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice * $res->qty);
+        $total_ht = preg_replace('/,/', '.', $res->subprice * $res->qty);
+        $total_tva = preg_replace('/,/', '.', 0.196 * $total_ht);
+        $total_ttc = preg_replace('/,/', '.', 1.196 * $total_ht);
         $sql = false;
 //for ($i = 0; $i < $qty; $i++) {
         /* $line0 = 0;
@@ -1286,7 +1287,7 @@ class Synopsis_Contrat extends Contrat {
                              "/* line_order,fk_commande_ligne,avenant, */ . "date_ouverture_prevue,date_ouverture, date_fin_validite)
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
                              19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
-                             " . $res->subprice . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
+                             " . $total_ht . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
                              " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . $duree . " MONTH))";
         $sql = $db->query($requete);
 //    die($requete);

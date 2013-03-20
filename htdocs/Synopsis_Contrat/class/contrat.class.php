@@ -1212,8 +1212,8 @@ class Synopsis_Contrat extends Contrat {
         if (!$sql)
             die("Erreur SQL : " . $requete);
         $res = $db->fetch_object($sql);
-        $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice);
-        $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice);
+        $total_tva = preg_replace('/,/', '.', 0.196 * $res->subprice * $res->qty);
+        $total_ttc = preg_replace('/,/', '.', 1.196 * $res->subprice * $res->qty);
         $sql = false;
 //for ($i = 0; $i < $qty; $i++) {
         /* $line0 = 0;

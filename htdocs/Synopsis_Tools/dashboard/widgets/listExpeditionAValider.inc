@@ -40,7 +40,7 @@ function widget_listExpeditionAValider() {
 
 
         $sql.= " WHERE e.fk_statut = 0";
-        $sql.= " GROUP BY e.rowid";
+        $sql.= " GROUP BY c.rowid";
         $sql.= " ORDER BY e.rowid desc";
         $sql.= " LIMIT 50";
 

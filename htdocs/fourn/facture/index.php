@@ -124,7 +124,7 @@ if (GETPOST('filtre'))
 	}
 }
 
-if (GETPOST("search_ref"))
+if (GETPOST("search_ref") && is_int(GETPOST("search_ref")))
 {
 	$sql .= " AND fac.rowid = ".$db->escape(GETPOST("search_ref"));
 }
@@ -191,7 +191,7 @@ if ($resql)
 	print '<form method="GET" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<table class="liste" width="100%">';
 	print '<tr class="liste_titre">';
-	print_liste_field_titre($langs->trans("Ref"),$_SERVER["PHP_SELF"],"fac.rowid","",$param,"",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("Id"),$_SERVER["PHP_SELF"],"fac.rowid","",$param,"",$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("RefSupplier"),$_SERVER["PHP_SELF"],"facnumber","",$param,"",$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("Date"),$_SERVER["PHP_SELF"],"fac.datef,fac.rowid","",$param,'align="center"',$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("DateDue"),$_SERVER["PHP_SELF"],"fac.date_lim_reglement","",$param,'align="center"',$sortfield,$sortorder);

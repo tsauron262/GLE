@@ -24,7 +24,7 @@ function widget_listExpeditionAValider() {
 
     if ($conf->expedition->enabled && $user->rights->expedition->lire) {
         $staticcontrat = new Synopsis_Commande($db);
-        $sql = "SELECT *, c.rowid as idContrat";
+        $sql = "SELECT *, c.rowid as idContrat, e.rowid as idExpe";
         $sql.= " FROM " . MAIN_DB_PREFIX . "expedition as e";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "element_element as ce ON e.rowid = ce.fk_target AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "commande as c ON ce.fk_source = c.rowid";
@@ -40,7 +40,7 @@ function widget_listExpeditionAValider() {
 
 
         $sql.= " WHERE e.fk_statut = 0";
-        $sql.= " GROUP BY c.rowid";
+        $sql.= " GROUP BY e.rowid";
         $sql.= " ORDER BY e.rowid desc";
         $sql.= " LIMIT 50";
 
@@ -64,7 +64,8 @@ function widget_listExpeditionAValider() {
 
             //$table2 .=  '<tr class="liste_titre"><td colspan="1">'.$langs->trans("SendingsToValidate",30).'</td>';
             //$table2 .=  '<tr class="liste_titre"><td align="right" width="80" colspan="">'.$langs->trans("Soci&eacute;t&eacute;").'</td>';
-            $table2 .= '<tr class="liste_titre"><td align="left" width="20" colspan="1">' . $langs->trans("Comm.") . '</td>';
+            $table2 .= '<tr class="liste_titre"><td align="left" width="20" colspan="1">' . $langs->trans("Expe.") . '</td>';
+            $table2 .= '<td align="left" width="20" colspan="1">' . $langs->trans("Comm.") . '</td>';
             $table2 .= '<td align="left" width="20" colspan="1">' . $langs->trans("Client") . '</td>';
             $table2 .= '<td align="left" width="20" colspan="">' . $langs->trans("date livrais.") . '</td>';
             $table2 .= '<td align="left" width="40" colspan="">' . $langs->trans("Logist.") . '</td>';
@@ -105,6 +106,8 @@ function widget_listExpeditionAValider() {
                 $staticcontrat->fetch($obj->idContrat);
                 $societe = new Societe($db);
                 $societe->fetch($staticcontrat->socid);
+                $expedition = new Expedition($db);
+                $expedition->fetch($obj->idExpe);
 //                    $staticcontrat->ref=$obj->ref;
 //                    $staticcontrat->id=$obj->idContrat;
 
@@ -123,7 +126,8 @@ function widget_listExpeditionAValider() {
                 //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                $table2 .= '<tr ' . $bc[$var] . '' . '><td>' . $staticcontrat->getNomUrl(1, '') . '</td>';
+                $table2 .= '<tr ' . $bc[$var] . '' . '><td>' . $expedition->getNomUrl(1, '') . '</td>';
+                $table2 .= '<td>' . $staticcontrat->getNomUrl(1, '') . '</td>';
                 $table2 .= '<td>' . $societe->getNomUrl(1) . '</td>';
                 $table2 .= '<td>' . $obj->date_livraison . '</td>';
                 $table2 .= '<td>' . $log_ok . ', ' . $log_stat . '</td>';

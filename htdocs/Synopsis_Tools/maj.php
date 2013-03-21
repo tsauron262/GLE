@@ -60,6 +60,8 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "commandedet` SET `product_type`= 5 WHERE `fk_product` is null AND `total_ttc` = 0");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE element_type = 'prepaCom'");
+    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "expedition WHERE rowid NOT IN (SELECT DISTINCT `fk_expedition` FROM " . MAIN_DB_PREFIX . "expeditiondet)");
+    $maj->req("UPDATE " . MAIN_DB_PREFIX . "commande SET `fk_user_author` = `fk_user_valid` WHERE `fk_user_author` is NULL AND `fk_user_valid` IS NOT NULL");
 } else {
     echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
 }

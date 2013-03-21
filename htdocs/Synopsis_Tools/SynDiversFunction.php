@@ -417,6 +417,9 @@ function getTypeAndId($url = null, $request = null) {
         $url = $_SERVER['REQUEST_URI'];
     if ($request == NULL)
         $request = $_REQUEST;
+    if (stripos($url, "ajax") != false) {
+        return null;
+    }
     if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
         @$element_id = $request['facid'];

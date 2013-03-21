@@ -6,6 +6,7 @@ InterventionCard=Fiche intervention
 NewIntervention=Nouvelle intervention
 AddIntervention=Créer intervention
 ListOfInterventions=Liste des interventions
+ListOfMyInterventions=Liste de mes interventions
 EditIntervention=Editer
 ActionsOnFicheInter=Événements sur l'intervention
 LastInterventions=Les %s dernières interventions

@@ -252,6 +252,19 @@ class modSynopsisFicheinter extends DolibarrModules {
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
             'type' => 'left',
+            'titre' => 'ListOfMyInterventions',
+            'mainmenu' => 'synopsisficheinter',
+            'url' => '/fichinter/liste.php?leftmenu=ficheinter&filtreUser=true',
+            'langs' => 'interventions',
+            'position' => 1,
+            'perms' => '$user->rights->synopsisficheinter->lire',
+            'target' => '',
+            'user' => 0,
+            'constraints' => array(0 => '$leftmenu==ficheinter'));
+        $r++;
+
+        $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
+            'type' => 'left',
             'titre' => 'NewIntervention',
             'mainmenu' => 'synopsisficheinter',
             'url' => '/fichinter/fiche.php?action=create&leftmenu=ficheinter',
@@ -290,6 +303,19 @@ class modSynopsisFicheinter extends DolibarrModules {
             'user' => 0,
             'constraints' => array(0 => '$leftmenu==ficheinter'));
         $rem2 = $r;
+        $r++;
+
+        $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,
+            'type' => 'left',
+            'titre' => 'ListOfMyDIs',
+            'mainmenu' => 'synopsisficheinter',
+            'url' => '/Synopsis_DemandeInterv/index.php?leftmenu=ficheinter&filtreUser=true',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 5,
+            'perms' => '$user->rights->synopsisdemandeinterv->lire',
+            'target' => '',
+            'user' => 0,
+            'constraints' => array(0 => '$leftmenu==ficheinter'));
         $r++;
 
         $this->menu[$r] = array('fk_menu' => 'r=' . $rem2,

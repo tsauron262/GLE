@@ -467,6 +467,9 @@ function getTypeAndId($url = null, $request = null) {
     } elseif (stripos($url, "ndfp") != false) {
         $element_type = 'ndfp';
         @$element_id = $request['id'];
+    } elseif (stripos($url, "expedition") != false) {
+        $element_type = 'expedition';
+        @$element_id = $request['id'];
     } else {
         return null;
     }
@@ -674,6 +677,7 @@ function convDur($duration)
         if (! empty($user->societe_id)) $sql.= " AND u.fk_societe = ".$user->societe_id;
         if (is_array($exclude) && $excludeUsers) $sql.= " AND u.rowid NOT IN ('".$excludeUsers."')";
         if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
+        $sql .= " AND statut = 1";
         $sql.= " ORDER BY u.name ASC";
 
         dol_syslog(get_class($form)."::select_dolusers sql=".$sql);

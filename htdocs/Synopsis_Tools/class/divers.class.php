@@ -44,7 +44,7 @@ class synopsisHook {
             histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto();
         }
-        if ($element_id > 0 && ($element_type == "commande" || $element_type == "DI" || $element_type == "FI")) {
+        if ($element_id > 0 && ($element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
             $return .= '<div class="blockvmenupair rouge">';
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
@@ -262,6 +262,8 @@ class consigneCommande {
                 $id_comm = $element_id;
             } elseif ($element_type == "FI" || $element_type == "DI") {
                 $id_comm = $obj->fk_commande;
+            }elseif ($element_type == "expedition") {
+                $id_comm = $obj->origin_id;
             }
 
             if (isset($id_comm) && $id_comm > 0) {

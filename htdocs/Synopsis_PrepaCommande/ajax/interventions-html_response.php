@@ -908,9 +908,9 @@ $requete = " SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql)) {
     if ($res->default == 1) {
-        print "<option SELECTED value='" . $res->id . "'>" . htmlentities($res->label) . "</option>";
+        print "<option SELECTED value='" . $res->id . "'>" . $res->label . "</option>";
     } else {
-        print "<option value='" . $res->id . "'>" . htmlentities($res->label) . "</option>";
+        print "<option value='" . $res->id . "'>" . $res->label . "</option>";
     }
 }
 print "</select>";

@@ -550,10 +550,10 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'updateligne' && $user-
         dol_print_error($db, "fetch demandeinterv");
         exit;
     }
-    $desc = $_POST['desc'];
+    $desc = $_POST['description'];
     $date_intervention = dol_mktime(12, 1, 1, $_POST["dimonth"], $_POST["diday"], $_POST["diyear"]);
     $duration = ConvertTime2Seconds($_POST['durationhour'], $_POST['durationmin']);
-
+    
     $demandeIntervline->desc = $desc;
     $demandeIntervline->datei = $date_intervention;
     $demandeIntervline->duration = $duration;

@@ -173,7 +173,8 @@ if ($id > 0) {
                 print "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
             }
             print "</select>";
-            print "<button onClick='ajoutContratAll(tabLigneIdS)' class='butAction'>Tous ajouter au contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS)'>Tout ajouter au contrat</button>";
+            print '<img class="imgLoad" style="display:none;" src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">';
         }
         print '</td></tr>';
     }
@@ -201,6 +202,8 @@ function boucleAttendreResult(nbResultT){
 
 function ajoutContratAll(tabLigne)
 {
+    $(".imgLoad").show();
+    $(".butAjoutContratAll").attr('disabled', 'disabled');
     for(var i=0; i<tabLigne.length;i++){
         pId = tabLigne[i][0];
         ligneId = tabLigne[i][1];

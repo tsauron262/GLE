@@ -1239,7 +1239,7 @@ class demandeIntervLigne {
         $sql.= ' (fk_demandeInterv, description, date, duree, rang,fk_typeinterv, isForfait ';
         if ($this->qte > 0)
             $sql .= ',qte ';
-        if ($this->pu_ht != 0)
+        if ($this->pu_ht != 0 && $this->pu_ht != '')
             $sql .= ',pu_ht, total_ht, total_tva, total_ttc ';
         if ($this->fk_commandedet > 0)
             $sql .= ',fk_commandedet ';
@@ -1255,7 +1255,7 @@ class demandeIntervLigne {
         $sql.= ' ' . ($this->isForfait > 0 ? 1 : 0);
         if ($this->qte > 0)
             $sql .= ' ,' . preg_replace('/,/', '.', $this->qte);
-        if ($this->pu_ht != 0)
+        if ($this->pu_ht != 0 && $this->pu_ht != '')
             $sql .= "," . preg_replace('/,/', '.', $this->pu_ht) . "," . preg_replace('/,/', '.', $this->total_ht) . "," . preg_replace('/,/', '.', $total_tva) . "," . preg_replace('/,/', '.', $total_ttc);
         if ($this->fk_commandedet > 0)
             $sql .= ', ' . $this->fk_commandedet;

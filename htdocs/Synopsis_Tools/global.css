@@ -136,6 +136,12 @@ div.bodyline{
 
 .blockvmenupair.rouge{
     background-image: -moz-linear-gradient(center bottom , red 10%, #DCE0E3 100%);
+    background-image: -o-linear-gradient(bottom, red 10%, #DCE0E3 100%);
+    background-image: -moz-linear-gradient(bottom, red 10%, #DCE0E3 100%);
+/*    background-image: -webkit-linear-gradient(bottom, rgb(253,253,253) 90%, rgb(232,234,236) 100%); */
+    background-image: -webkit-linear-gradient(right, red 10%, #DCE0E3 100%);
+    background-image: -ms-linear-gradient(bottom, red 10%, #DCE0E3 100%);
+    background-image: linear-gradient(bottom, red 10%, #DCE0E3 100%);
 }
 .blockvmenupair.rouge .editable{
     text-decoration: blink;

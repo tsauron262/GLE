@@ -77,7 +77,7 @@
                  $datei = "'".date('Y-m-d',convertDate($_REQUEST['datei'.$arr[1]]))."'";
                  $duration = ConvertTime2Seconds($_REQUEST['duri'.$arr[1]],$_REQUEST['durmini'.$arr[1]]);
                  $typeInter = $_REQUEST['typeInterv'.$arr[1]];
-                 $isForfait = ($_REQUEST['isForfait'.$arr[1]]=='On' ||$_REQUEST['isForfait'.$arr[1]]=='on' ||$_REQUEST['isForfait'.$arr[1]]=='ON'?1:0);
+                 $isForfait = (isset($_REQUEST['isForfait'.$arr[1]]) && ($_REQUEST['isForfait'.$arr[1]] =='On' ||$_REQUEST['isForfait'.$arr[1]]=='on' ||$_REQUEST['isForfait'.$arr[1]]=='ON'?1:0));
                  $pu_ht = $_REQUEST['pu_ht'.$arr[1]];
                  $qte = $_REQUEST['qte'.$arr[1]];
                  $fk_commandedet = $arr[1];

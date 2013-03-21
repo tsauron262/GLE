@@ -266,6 +266,7 @@ DIs=Demandes d'interventions
 NewDI=Nouvelle DI
 AddDI=Créer demande  d'interventions
 ListOfDIs=Liste des demandes d'interventions
+ListOfMyDIs=Liste de mes DI
 LastInterventions=Les %s dernières demandes
 AllDI=Toutes les DI
 ConfirmModifDI=Êtes vous sur de vouloir modifier cette DI ?

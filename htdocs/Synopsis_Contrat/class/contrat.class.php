@@ -1278,8 +1278,7 @@ class Synopsis_Contrat extends Contrat {
         elseif ($tmpProd->array_options['options_2dureeVal'] > 0)
             $duree = $tmpProd->array_options['options_2dureeVal'];
 
-
-
+        $date = date("Y-m-d", $this->date_contrat);
         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "contratdet
                             (fk_contrat,fk_product,statut,description,
                              tva_tx,qty,subprice,price_ht,
@@ -1288,7 +1287,7 @@ class Synopsis_Contrat extends Contrat {
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
                              19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $total_ht . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
-                             " . /* $lineO.",".$comLigneId.",".$avenant. */",now(),now(), date_add(now(),INTERVAL " . $duree . " MONTH))";
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",'".$date."','".$date."', date_add('".$date."',INTERVAL " . $duree . " MONTH))";
         $sql = $db->query($requete);
 //    die($requete);
         $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");

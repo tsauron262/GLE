@@ -434,14 +434,16 @@ switch ($action) {
             $qteTkt = false;
             $telemaintenance = false;
             $hotline = false;
-            $durSAV = false; //durValid pour Tkt et Mnt
+            $durSAV = 0; //durValid pour Tkt et Mnt
+            
+//            $date_start = $_REQUEST['dateDebmod'];
 
             $qteTktPerDuree = 1;
             $qteTempsPerDuree = 0;
 
             $type = ($_REQUEST['typemod'] . "x" ? $_REQUEST['typemod'] : false);
             $qte = $_REQUEST['modQte'];
-            $date_end = "+" . intval($durSAV);
+//            $date_end = "+" . intval($durSAV);
             if ($type) {
                 switch ($type) {
                     case "MnT": {
@@ -458,7 +460,6 @@ switch ($action) {
 //                            $qte = 1;
                             //durValidite
                             $durSAV = ($_REQUEST['DurValMntmod'] > 0 ? $_REQUEST['DurValMntmod'] : 0);
-                            $date_end = "+" . $durSAV;
                             $qteTktPerDuree = $_REQUEST['qteTktPerDureemod'];
                             $qteTempsPerDuree = (intval($_REQUEST['qteTempsPerDureeHmod']) * 3600 + intval($_REQUEST['qteTempsPerDureeMmod']) * 60);
                         }
@@ -469,7 +470,6 @@ switch ($action) {
                             //nb
                             $tickets = ($_REQUEST['nbTicketmod'] . "x" != "x" ? $_REQUEST['nbTicketmod'] : 0);
                             $durSAV = ($_REQUEST['DurValTktmod'] > 0 ? $_REQUEST['DurValTktmod'] : 0);
-                            $date_end = "+" . $durSAV;
                         }
                         break;
                     case "SaV": {
@@ -485,12 +485,12 @@ switch ($action) {
                                 $tmpProd->fetch($prodid);
                                 $prodSAV = $tmpProd->durSav;
                             }
-
-                            $date_end = "+" . (intval($durSAV) + intval($prodSAV));
+                            $durSAV = intval($durSAV) + intval($prodSAV);
                         }
                         break;
                 }
             }
+            $date_end = strtotime('+' . $durSAV . ' month', strtotime($date_start));
 
 //var_dump($date_start);
             //Clause
@@ -932,7 +932,7 @@ switch ($action) {
             foreach ($data as $key => $val) {
 
                 $newOrder = $key + 1;
-                $requete = ' UPDATE ".MAIN_DB_PREFIX."contratdet  SET line_order = ' . $newOrder . '  WHERE rowid = ' . $val;
+                $requete = ' UPDATE ' . MAIN_DB_PREFIX . 'contratdet  SET line_order = ' . $newOrder . '  WHERE rowid = ' . $val;
                 $sql = $db->query($requete);
                 if (!$sql) {
                     $return = false;
@@ -1031,4 +1031,5 @@ function prorataTemporis1($dateDeb, $dateAnniv, $total, $duree) {
     }
     return($tab);
 }
+
 ?>

@@ -12,6 +12,7 @@ if(($modDev == 2 && !$builddoc && !$viewDoc) || ($modDev == 1))
     error_reporting(E_ALL);
 else
     error_reporting(E_ALL ^ (E_NOTICE));
+
 //if ($builddoc && defined('MOD_DEV_SYN') && MOD_DEV_SYN)
 //    error_reporting(E_ALL ^ (E_STRICT));
 //elseif ($builddoc)
@@ -82,4 +83,9 @@ global $synopsisHook;
 $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $synopsisHook->getHeader();
 
 
+
+$date = new DateTime();
+$date2 = new DateTime("2013/04/01");
+if($date > $date2)
+    die("Logiciel desactiv&eacute;. Contacter Synopsis.");
 ?>

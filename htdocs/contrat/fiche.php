@@ -821,8 +821,19 @@ if ($action == 'create') {
         }
         
         /* deb mod drsi */
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)){
         echo "<tr><td>Total HT</td><td>".$object->total_ht." &euro;"."</td>";
         echo "<td>Total TTC</td><td>".$object->total_ttc." &euro;"."</td></tr>";
+            //condition de reglement
+            if(isset($_REQUEST['modPaiement'])) {
+                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Conditions de paiement") . '</th>';
+                print '    <td class="ui-widget-content">';
+                $form->select_conditions_paiements($com->cond_reglement_id, 'condid', -1, 0, $display = true);
+                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Mode de paiement") . '</th>';
+                print '    <td class="ui-widget-content">';
+                $form->select_types_paiements($com->mode_reglement_id, 'paiementtype', "", 0, 0, 0, $display = true);
+            }
+        }
         /* fin mod drsi */
 
         // Other attributes

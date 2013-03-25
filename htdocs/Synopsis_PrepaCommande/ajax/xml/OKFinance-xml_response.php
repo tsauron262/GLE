@@ -21,7 +21,7 @@
 
     $xmlStr = "<ajax-response>";
     $totalOK=true;
-    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commandedet SET finance_ok=1 WHERE fk_commande = ".$id;
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commandedet SET finance_ok=1 WHERE rowid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."commandedet WHERE fk_commande = ".$id.")";
     $sql = $db->query($requete);
     $totpart = 'OK';//1
     $idePart = 1;
@@ -35,7 +35,7 @@
   $arrGrpTmp = $commande->listGroupMember();
   foreach($arrGrpTmp as $key=>$val)
   {
-      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commandedet SET finance_ok=1 WHERE fk_commande = ".$vak->id;
+      $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commandedet SET finance_ok=1 WHERE rowid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."commandedet WHERE fk_commande = ".$val->id.")";
       $sql = $db->query($requete);
       $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_commande SET finance_ok=1 WHERE rowid =".$val->id;
       $sql = $db->query($requete);

@@ -143,7 +143,7 @@ EOF;
 
 //        $author = new User($db);
 //        $author->fetch($commande->user_author_id);
-        $nbrow = 8;
+        $nbrow = 10;
         if ($conf->projet->enabled)
             $nbrow++;
 
@@ -232,7 +232,7 @@ EOF;
                 $nbrow-=3;
             } else {
                 if ($arrGrpTmp) {
-                    $nbrow += ( 2 * count($arrGrpTmp) + 4);
+                    $nbrow += (count($arrGrpTmp) + 4);
                 }
             }
 
@@ -276,20 +276,20 @@ EOF;
                 $total_tva = 0;
                 $total_ttc = 0;
                 // Total HT
-                print '<tr><th style="padding: 5px;" colspan=4 class="ui-state-default ui-widget-header">' . $commande->ref . '</th>';
-                print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
+                print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $commande->ref . '</th>';
+//                print ' | ' . $langs->trans('AmountHT') . '</th>';
                 $total_ht += $commande->total_ht;
                 print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
 
 
                 foreach ($arrGrpTmp as $key => $val) {
                     // Total HT
                     $total_ht += $val->total_ht;
-                    print '<tr><th style="padding: 5px;" colspan=4 class="ui-state-default ui-widget-header">' . $val->ref . '</th>';
-                    print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
+                    print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $val->ref . '</th>';
+//                    print ' | ' . $langs->trans('AmountHT') . '</th>';
                     print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($val->total_ht) . '</b></td>';
-                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
                 }
                 //Total groupe
                 print '<tr><th colspan=4 class="ui-state-default ui-widget-header">Total groupe</th>';
@@ -405,7 +405,7 @@ EOF;
                 print "<td colspan=2 class='ui-widget-content'>&nbsp;";
             print "</table>";
         } else {
-            print '<td class="ui-widget-content" colspan="4">';
+            print '<td class="ui-widget-content" colspan="3">';
             print "Pas d'exp&eacute;dition planifi&eacute;e";
         }
 
@@ -432,7 +432,7 @@ EOF;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . ' BIMP</th>';
-        print '<td class="ui-widget-content" colspan="4">' . traiteStr($res->label);
+        print '<td class="ui-widget-content" colspan="3">' . traiteStr($res->label);
         if ($user->rights->SynopsisPrepaCom->all->ModifierEtat)
             print '  <span onClick="openBIMPStatusDial();">' . img_edit() . '</span>';
         print '</td>';

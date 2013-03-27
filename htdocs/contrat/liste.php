@@ -83,7 +83,7 @@ if ($search_nom)      $sql.= " AND s.nom LIKE '%".$db->escape($search_nom)."%'";
 /* mod drsi */
 if ($search_contract) $sql.= " AND (c.rowid LIKE '%".$db->escape($search_contract)."%' || c.ref LIKE '%".$db->escape($search_contract)."%')";
 /* fin mod drsi */
-if ($sall)            $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR cd.label LIKE '%".$db->escape($sall)."%' OR cd.description LIKE '%".$db->escape($sall)."%')";
+if ($sall)            $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR cd.label LIKE '%".$db->escape($sall)."%' OR cd.description LIKE '%".$db->escape($sall)."%' || c.rowid LIKE '%".$db->escape($sall)."%' || c.ref LIKE '%".$db->escape($sall)."%')";
 $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut,";
 $sql.= " s.nom, s.rowid";
 $sql.= " ORDER BY $sortfield $sortorder";

@@ -168,6 +168,14 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $rang++;
                     }
                 }
+                
+                
+                $pdf->SetAutoPageBreak(1, 0);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
 
 
                 $pdf->Open();
@@ -186,7 +194,6 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-                $pdf->SetAutoPageBreak(0, 0);
 
 //                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
 //                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');

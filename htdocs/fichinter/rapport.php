@@ -109,9 +109,9 @@ if (isset($_GET['assocContrat']))
     $sql .= " AND fk_contrat > 0";
 
 if (isset($_GET['statutInter'])) {
-    if ($_GET['statutInter'] == 2)
+    if ($_GET['statutInter'] == 1)
         $sql .= " AND fk_statut = 0";
-    elseif ($_GET['statutInter'] == 1)
+    elseif ($_GET['statutInter'] == 2)
         $sql .= " AND fk_statut = 1";
 }
 

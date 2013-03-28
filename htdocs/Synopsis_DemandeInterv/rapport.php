@@ -131,6 +131,11 @@ $sql .= " AND datei >= '$start' AND datei < '$end'";
 if ($socid > 0) {
     $sql .= " AND fk_soc = " . $socid;
 }
+
+if(isset($_REQUEST['statut']) && $_REQUEST['statut']> 0)
+    $sql .= " AND f.fk_statut = ".($_REQUEST['statut']-1);
+
+
 $sql .= " ORDER BY $sortfield $sortorder ";
 
 $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
@@ -192,6 +197,15 @@ if ($resql) {
         echo "<td align=center>Intervenant";
         $html->select_users(($filterUser > 0 ? $filterUser : 0), 'filterUser', 1, '', 0, 1);
     }
+    $tabStat = array("Sélectionner", "Brouillon", "Valider", "En cours", "Clôturer");
+    echo "<td> Statut <select name='statut'>";
+    foreach($tabStat as $id => $stat){
+            echo "<option value='".$id."'";
+        if(isset($_REQUEST["statut"]) && $_REQUEST["statut"] == $id)
+            echo " selected='selected'";
+        echo ">".$stat."</option>";
+    }
+    echo "</select>";
     echo "<tr><td colspan=6 align=center><input class='button ui-state-default' style='padding: 3px;' type='submit' name='g' value='Afficher le rapport'></td>";
     echo "</table><form>";
     echo "</div><br/><br/><br/>";

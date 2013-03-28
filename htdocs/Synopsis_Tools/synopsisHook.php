@@ -63,10 +63,10 @@ $conf->global->devMailTo = 'tommy@drsi.fr';
 $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
 $tabTypeLigne = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 if (is_object($langs)) {
-    foreach ($tabProductType as $id => $val)
-        $tabProductType[$id] = $langs->trans($val);
-    foreach ($tabTypeLigne as $id => $val)
-        $tabTypeLigne[$id] = $langs->trans($val);
+    foreach ($tabProductType as $idT => $val)
+        $tabProductType[$idT] = $langs->trans($val);
+    foreach ($tabTypeLigne as $idT => $val)
+        $tabTypeLigne[$idT] = $langs->trans($val);
 }
 $tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
 global $tabProductType, $tabTypeLigne;

@@ -86,11 +86,11 @@ class demandeInterv extends CommonObject {
         $this->statuts[0] = $langs->trans("Draft");
         $this->statuts[1] = $langs->trans("Validated");
         $this->statuts[2] = $langs->trans("En cours");
-        $this->statuts[3] = $langs->trans("Cl&ocirc;turer");
+        $this->statuts[3] = $langs->trans("Cl&ocirc;turé");
         $this->statuts_short[0] = $langs->trans("Draft");
         $this->statuts_short[1] = $langs->trans("Validated");
         $this->statuts_short[2] = $langs->trans("En cours");
-        $this->statuts_short[3] = $langs->trans("Cl&ocirc;turer");
+        $this->statuts_short[3] = $langs->trans("Cl&ocirc;turé");
     }
 
     /*

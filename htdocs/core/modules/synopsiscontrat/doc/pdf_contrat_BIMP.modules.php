@@ -188,12 +188,12 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(0, 0);
 
-                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
-                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
+//                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
+//                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                $pdf->SetFont('Helvetica', 'B', 12);
+                $pdf->SetFont('', 'B', 12);
 
                 //Titre Page 1
                 $pdf->SetXY(49, 42);
@@ -245,7 +245,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         }
 
                         $pdf->SetXY(59, 32);
-                        $pdf->SetFont('Helvetica', 'B', 12);
+                        $pdf->SetFont('', 'B', 12);
                         $pdf->MultiCell(157, 6, utf8_encodeRien('Avenant ' . $avenantTxt), 0, 'C');
                         $pdf->SetFont('', '', 8);
                         $pdf->SetXY($this->marge_gauche - 1, $init);
@@ -256,7 +256,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $i = 1;
                         if ($page == 1) {
                             $pdf->SetXY(59, 32);
-                            $pdf->SetFont('Helvetica', 'B', 12);
+                            $pdf->SetFont('', 'B', 12);
                             $pdf->MultiCell(157, 6, utf8_encodeRien('Contenu du contrat'), 0, 'C');
                             $pdf->SetFont('', '', 8);
                             $pdf->SetXY($this->marge_gauche - 1, $init);
@@ -351,7 +351,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Désignation"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
                     //Data Désignation
-                    $pdf->SetFont('Helvetica', '', 7);
+                    $pdf->SetFont('', '', 7);
                     $designation = couperChaine("  " . traiteStr($val->prodContrat->ref . " - ") . traiteStr($libelleContrat), 70);
                     $pdf->MultiCell($col2, $hauteur_ligne, $designation, 0, 'L', 1);
                     $pdf->SetFont('', '', 8);
@@ -362,7 +362,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col1, $hauteur_ligne * 2, utf8_encodeRien("Matériel"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
                     //Data Matériel
-                    //$pdf->SetFont('Helvetica', '', 7);
+                    //$pdf->SetFont('', '', 7);
 
                     $pdf->MultiCell($col2, $hauteur_ligne * 2, "", 0, 'L', 1);
                     $pdf->setXY($this->marge_gauche + $col1, $nextY);
@@ -557,7 +557,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                 //Titre Page 1
                 $pdf->SetXY(59, 32);
-                $pdf->SetFont('Helvetica', 'B', 12);
+                $pdf->SetFont('', 'B', 12);
 
                 $pdf->MultiCell(157, 6, utf8_encodeRien('Résumé des services'), 0, 'C');
 
@@ -630,7 +630,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $pdf->AddPage();
                         $this->_pagehead($pdf, $contrat, 1, $outputlangs);
 
-                        $pdf->SetFont('Helvetica', 'B', 12);
+                        $pdf->SetFont('', 'B', 12);
 
                         //Titre Page 1
                         $pdf->SetXY(49, 42);
@@ -706,9 +706,9 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                             $res = $this->db->fetch_object($sql);
                             $avenantTxt = " du " . date('d/m/Y', $res->da);
                         }
-                        $pdf->SetFont('Helvetica', 'B', 8);
+                        $pdf->SetFont('', 'B', 8);
                         $pdf->MultiCell(157, 6, utf8_encodeRien('Avenant ' . $avenantTxt), 1, 'C', 0);
-                        $pdf->SetFont('Helvetica', '', 6.5);
+                        $pdf->SetFont('', '', 6.5);
                         $avenant = $val->avenant;
 
                         $pdf->SetTextColor(0, 0, 60);
@@ -747,7 +747,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                     $desc = couperChaine(utf8_encodeRien($libelleContrat . " " . $val->desc), 60);
 
-                    $pdf->SetFont('Helvetica', '', 6.5);
+                    $pdf->SetFont('', '', 6.5);
                     $pdf1->SetFont('Helvetica', '', 6.5);
                     $pdf1->SetXY(0, 0);
                     $pdf1->MultiCell($col, $hauteur_ligne, utf8_encodeRien($desc), 0, 'L', 1);
@@ -820,7 +820,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                     }
                     $pdf->SetFont('', '', 8);
                     $pdf->SetXY($this->marge_gauche, $this->marge_haute);
-                    $pdf->SetFont('Helvetica', 'B', 12);
+                    $pdf->SetFont('', 'B', 12);
                     if ($res->afficheTitre == 1) {
                         $pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien("Annexe " . $rang . " : " . $res->modeleName)), 0, 'L');
                         $rang++;
@@ -838,7 +838,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
 //
 //                    $pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($annexe)));
                     $tabLigneAnnexe = explode("\n", $annexe);
-                    foreach ($tabLigneAnnexe as $ligne) {
+                    foreach ($tabLigneAnnexe as $idL => $ligne) {
                         $style = '';
                         $titre = false;
                         if (stripos($ligne, "<g>") > -1) {
@@ -864,7 +864,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                             $nbLn++;
                         }
                         $yAfter = $pdf->getY() + (5 * $nbLn);
-                        if ($yAfter > 270 || ($titre && $yAfter > 250)) {
+                        if ($yAfter > 270 || ($titre && $yAfter > 250 && (count($tabLigneAnnexe)-3) > $idL)) {
                             $this->_pagefoot($pdf, $outputlangs);
                             $pdf->AddPage();
                             $this->_pagehead($pdf, $contrat, 1, $outputlangs);
@@ -884,7 +884,6 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 $pdf->AliasNbPages();
                 $pdf->Close();
 
-                $this->file = $file;
                 $this->file = $file;
                 $pdf->Output($file, 'F');
 
@@ -1147,6 +1146,7 @@ Signature et cachet
 
         $pdf->SetFont('', 'B', 9);
         $pdf->SetTextColor(255, 63, 50);
+                $pdf->SetDrawColor(0, 0, 0);
         //Société
         global $mysoc;
 
@@ -1214,7 +1214,7 @@ Signature et cachet
         $this->_pagehead($pdf, $contrat, 1, $outputlangs);
         $nextY = $this->marge_haute;
 
-        $pdf->SetFont('Helvetica', 'B', 12);
+        $pdf->SetFont('', 'B', 12);
 
         //Titre Page 1
         $pdf->SetXY(59, 32);
@@ -1237,7 +1237,7 @@ Signature et cachet
         $pdf->SetXY($init + $col + $col + $col - $decal_type, $nextY);
         $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Dates"), 0, 'C', 1);
         $pdf->SetTextColor(0, 0, 60);
-        $pdf->SetFont('Helvetica', '', 6.5);
+        $pdf->SetFont('', '', 6.5);
     }
 
     function replaceWithAnnexe($annexe, $contrat, $idAnnexe) {

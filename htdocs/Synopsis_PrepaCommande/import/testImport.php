@@ -1356,6 +1356,12 @@ if (is_dir($dir)) {
                           PlvFree0 => string(19)  Libre/Série Météor => coef ? sinon duree estimé (ajouter champs)
                          */
 
+
+                        if ($val['PlvQteUV'] < 0) {
+                            $val['PlvQteUV'] = 0 - $val['PlvQteUV'];
+                            $val['PlvPUNet'] = 0 - $val['PlvPUNet'];
+                        }
+
                         $totalCom_ttc = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (1 + ( $val['TaxTaux'] / 100)));
                         $totalCom_tva = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (( $val['TaxTaux'] / 100)));
 

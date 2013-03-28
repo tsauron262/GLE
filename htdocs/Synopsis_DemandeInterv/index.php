@@ -48,7 +48,7 @@ $langs->load("companies");
 $langs->load("interventions");
 
 $sortorder = isset($_GET["sortorder"]) ? $_GET["sortorder"] : "";
-$sortfield = isset($_GET["sortfield"]) ? $_GET["sortfield"] : "";
+$sortfield = isset($_GET["sortfield"]) ? $_GET["sortfield"] : "fk_statut";
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : "";
 $page = isset($_GET["page"]) ? $_GET["page"] : "";
 
@@ -59,7 +59,7 @@ if ($user->societe_id)
 //$result = restrictedArea($user, 'demandeInterv', $demandeIntervid,'');
 
 if (!$sortorder)
-    $sortorder = "DESC";
+    $sortorder = "ASC";
 if (!$sortfield)
     $sortfield = "f.datei";
 if ($page == -1) {

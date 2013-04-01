@@ -84,8 +84,8 @@ $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $con
 
 
 
-$date = new DateTime();
-$date2 = new DateTime("2013/04/01");
-if($date > $date2)
-    die("Logiciel desactiv&eacute;. Contacter Synopsis.");
+//$date = new DateTime();
+//$date2 = new DateTime("2013/04/01");
+//if($date > $date2)
+//    die("Logiciel desactiv&eacute;. Contacter Synopsis.");
 ?>

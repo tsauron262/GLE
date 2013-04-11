@@ -197,7 +197,7 @@ if ($resql) {
         echo "<td align=center>Intervenant";
         $html->select_users(($filterUser > 0 ? $filterUser : 0), 'filterUser', 1, '', 0, 1);
     }
-    $tabStat = array("Sélectionner", "Brouillon", "Valider", "En cours", "Clôturer");
+    $tabStat = array("Sélectionner", "Brouillon", "Validée", "En cours", "Clôturée");
     echo "<td> Statut <select name='statut'>";
     foreach($tabStat as $id => $stat){
             echo "<option value='".$id."'";

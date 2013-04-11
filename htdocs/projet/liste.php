@@ -48,7 +48,7 @@ require("./pre.inc.php");
 $langs->load("projectsSyn@projet");    
 if (!$user->rights->synopsisprojet->lire) accessforbidden();
 
-$socid = ( is_numeric($_REQUEST["socid"]) ? $_REQUEST["socid"] : 0 );
+$socid = ( isset($_REQUEST["socid"]) && is_numeric($_REQUEST["socid"]) ? $_REQUEST["socid"] : 0 );
 
 $title = $langs->trans("Projects");
 

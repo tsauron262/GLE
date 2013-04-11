@@ -835,7 +835,7 @@ if ($_GET["action"] == 'create' && $user->rights->produit->creer) {
         print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Status") . '</th>
                    <td class="ui-widget-content">';
         $statutarray = array('1' => $langs->trans("OnSell"), '0' => $langs->trans("NotOnSell"));
-        $html->select_array('statut', $statutarray, $_POST["statut"]);
+        print $html->selectarray('statut', $statutarray, $_POST["statut"]);
         print '</td></tr>';
 
         // Stock min level

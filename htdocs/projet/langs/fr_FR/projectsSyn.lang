@@ -45,12 +45,12 @@ ProjectStatusDraft=Brouillon
 ProjectStatusOpened=Ouvert
 ProjectStatusSigned=Signé
 ProjectStatusNotSigned=Non signé
-ProjectStatusBilled=Clôturer
+ProjectStatusBilled=Clôturé
 ProjectStatusWaitingValid=En attente de validation
 ProjectStatusWaitingValidation=En attente de validation
 ProjectStatusPlanning=En planification
 ProjectStatusRunning=En cours
-ProjectStatusClose=Clôturer
+ProjectStatusClose=Clôturé
 
 ProjectStatusDraftShort=Brouil.
 ProjectStatusOpenedShort=Ouv.
@@ -58,7 +58,7 @@ ProjectStatusSignedShort=Sign.;
 ProjectStatusNotSignedShort=Non sign.;
 ProjectStatusBilledShort=Cl&ot.
 ProjectStatusWaitingValidShort=Att valid
-ProjectStatusCloseShort=Clôturer
+ProjectStatusCloseShort=Clôturé
 ProjectStatusPlanningShort=Plan.
 ProjectStatusRunningShort=En cours
 

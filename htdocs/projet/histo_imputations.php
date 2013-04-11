@@ -110,7 +110,7 @@ $arrTitleNav = array('nextweekly' => "Semaine suivante", 'nextbiweekly' => "Sema
 
 $fromProj = false;
 $projet = false;
-if ($_REQUEST['fromProjet'] == 1 && $_REQUEST['id'] > 0) {
+if (isset($_REQUEST['fromProjet']) && $_REQUEST['fromProjet'] == 1 && $_REQUEST['id'] > 0) {
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
     $projet = new Project($db);
@@ -511,6 +511,7 @@ $arrPairImpair[true] = "ui-widget-content ui-priority-primary ui-state-default";
 require_once(DOL_DOCUMENT_ROOT . '/projet/class/project.class.php');
 $proj = new Project($db);
 $arrTaskId = array();
+$grandTotalRestant = 0;
 $grandTotalLigne = 0;
 $grandTotalLigne2 = 0;
 while ($res = $db->fetch_object($sql)) {
@@ -688,6 +689,7 @@ while ($res = $db->fetch_object($sql)) {
         $remProjId = $res->pid;
     }
 
+    $grandTotalRestant += $restant;
     $grandTotalLigne += $totalLigne;
     $grandTotalLigne2 += toAffiche($totalPeriode);
 }
@@ -697,11 +699,13 @@ print '    </tbody>';
 print "<tfoot>";
 if ($modVal != 2) {
     print '         <tr>';
-    print '             <th class="ui-state-default ui-widget-header" colspan=3 align=right>Total&nbsp;';
+    print '             <th class="ui-state-default ui-widget-header" colspan=2 align=right>Total&nbsp;';
 
 //  $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
 //  $grandTotalLignePerDay = round($grandTotalLigne * 100 / $hourPerDay) / 100;
 //  $grandTotalLigne = round($grandTotalLigne * 100) / 100;
+//Total restant
+    print '             <th class="ui-state-default ui-widget-header">' . getUnite($grandTotalRestant) . '</th>';
 //Total h
     print '             <th class="ui-state-default ui-widget-header">' . getUnite($grandTotalLigne) . '</th>';
 //Total periode

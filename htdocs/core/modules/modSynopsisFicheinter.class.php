@@ -170,7 +170,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'titre' => 'Fiche inter',
             'mainmenu' => 'synopsisficheinter',
             'leftmenu' => '1', // To say if we can overwrite leftmenu
-            'url' => '/fichinter/liste.php?leftmenu=ficheinter',
+            'url' => '/Synopsis_DemandeInterv/index.php?leftmenu=ficheinter&filtreUser=true',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 110,
             'perms' => '$user->rights->synopsisficheinter->lire',

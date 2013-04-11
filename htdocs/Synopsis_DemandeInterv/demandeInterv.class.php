@@ -1382,7 +1382,7 @@ class demandeIntervLigne {
         $requete = "SELECT sum(total_ht) as sht, sum(total_tva) as stva, sum(total_ttc) as sttc, sum(duree) as sdur FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE fk_demandeInterv = " . $this->fk_demandeInterv;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv SET total_ht = " . $res->sht . ", total_tva = " . $res->stva . " , total_ttc = " . $res->sttc . ", duree = " . $res->sdur . " WHERE rowid = " . $this->fk_demandeInterv;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv SET total_ht = " . ($res->sht > 0) ? $res->sht : 0 . ", total_tva = " . ($res->stva > 0) ? $res->stva : 0 . " , total_ttc = " . ($res->sttc > 0) ? $res->sttc : 0 . ", duree = " . ($res->sdur > 0) ? $res->sdur : 0 . " WHERE rowid = " . $this->fk_demandeInterv;
         $sql = $this->db->query($requete);
         if ($sql) {
             $result = 1;

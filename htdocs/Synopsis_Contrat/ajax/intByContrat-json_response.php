@@ -19,12 +19,12 @@
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
 
-$id=$_REQUEST["id"];
-$action = $_REQUEST['action'];
-$page = $_GET['page'];
-$limit = $_GET['rows'];
-$sidx = $_GET['sidx'];
-$sord = $_GET['sord'];
+$id= isset($_REQUEST["id"])? $_REQUEST["id"] : '';
+$action = isset($_REQUEST["action"])? $_REQUEST["action"] : '';
+$page = isset($_REQUEST["page"])? $_REQUEST["page"] : '';
+$limit = isset($_REQUEST["rows"])? $_REQUEST["rows"] : '';
+$sidx = isset($_REQUEST["sidx"])? $_REQUEST["sidx"] : '';
+$sord = isset($_REQUEST["sord"])? $_REQUEST["sord"] : '';
 if(!$sidx) $sidx =1;
 
   switch($action)
@@ -63,6 +63,9 @@ if(!$sidx) $sidx =1;
             $arr = convDur($row->duree);
             $desc=$row->description;
             $fi->fetch($row->rowid);
+            $userT = new User($db);
+            $userT->fetch($fi->user_author_id);
+            
             $responce->rows[$i]['id']=$row->rowid;
             $responce->rows[$i]['cell']=array($row->rowid,
                                                traite_str("&nbsp;&nbsp;".$desc),
@@ -70,6 +73,7 @@ if(!$sidx) $sidx =1;
                                                price($row->total_ht)."&nbsp;&nbsp;",
                                                $arr['hours']["abs"].":".$arr['minutes']['rel'],
                                                $fi->getNomUrl(1),
+                                               $userT->getNomUrl(1),
                                                $fi->getLibStatut(4)
                                                );
             $i++;

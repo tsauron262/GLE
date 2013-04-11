@@ -48,7 +48,7 @@ $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath 
 
 llxHeader($js, 'Détails interventions');
 
-$contrat = $contrat = getContratObj($_REQUEST["id"]);
+$contrat = getContratObj($_REQUEST["id"]);
 $contrat->fetch($_GET["id"]);
 $contrat->info($_GET["id"]);
 
@@ -61,7 +61,6 @@ dol_fiche_head($head, "interv", $langs->trans("Contract"));
 
 //jqGrid SAV
 
-print '<table id="list1"></table> <div id="pager1"></div>';
 
 $arrResByDate = array();
 $arrResByDateDur = array();
@@ -77,6 +76,7 @@ $requete = "SELECT *
 $sql = $db->query($requete);
 
 $totalSAV = 0;
+$total_ht = 0;
 while ($res = $db->fetch_object($sql)) {
     $anneeMoi = date('Ym', strtotime($res->datei));
     if (!isset($arrResByStatut[$res->fk_statut])) {
@@ -100,14 +100,28 @@ while ($res = $db->fetch_object($sql)) {
         $arrResByDateTotHT[$anneeMoi] += $res->total_ht;
     }
     $totalSAV++;
+    $total_ht += $res->total_ht;
 }
+
+
+$contrat->fetch_lines();
+print "<table class='border' width='100%'><tr><td> Date contrat <td>".dol_print_date($contrat->date_contrat)."
+    <tr><td>Vendue <td> ".$contrat->total_ht." &euro;";
+print "<td>Réaliser <td> ".$total_ht." &euro;</tr></table><br/><br/>";
+
+print '<table id="list1"></table> <div id="pager1"></div>';
 print "<div class='titre'>Total</div>";
+
+
+
+
 print "<h2>Intervention : " . $totalSAV . "</h2>";
 print "<div id='tab'>";
 print "<ul>";
 print " <li><a href='#Statut'><span>Par statut</span></a></li>";
 print " <li><a href='#Date'><span>Par date</span></a></li>";
 print " <li><a href='#type'><span>Par type d'intervention</span></a></li>";
+print " <li><a href='#Tech'><span>Par tech</span></a></li>";
 print "</ul>";
 print " <div id='Statut'>";
 print "<table cellpadding=15 width=450>";
@@ -140,6 +154,7 @@ foreach ($arrResByDate as $key => $val) {
 }
 print "</table>";
 print '</div>';
+
 
 $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
@@ -176,6 +191,46 @@ print "</table>";
 print '</div>';
 
 
+
+
+
+$requete = "SELECT b.name, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
+              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
+                   " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+                   " . MAIN_DB_PREFIX . "user as b
+             WHERE fd.fk_fichinter = f.rowid
+               AND b.rowid = f.fk_user_author
+               AND f.fk_contrat = " . $contratid . "
+          ORDER BY b.firstname";
+$sql = $db->query($requete);
+$arrResByTypeInterv = array();
+$arrLabelInterv = array();
+while ($res = $db->fetch_object($sql)) {
+    if (!isset($arrResByTypeInterv[$res->fk_user_author])) {
+        $arrResByTypeInterv[$res->fk_user_author] = array("duree"=>0, "total_ht"=>0);
+    }
+    $arrResByTypeInterv[$res->fk_user_author]["duree"]+=$res->duree;
+    $arrResByTypeInterv[$res->fk_user_author]["total_ht"]+=$res->total_ht;
+    $arrLabelInterv[$res->fk_user_author] = $res->firstname." ".$res->name;
+}
+
+
+print " <div id='Tech'>";
+print "<table cellpadding=15 width=450>";
+print "<tr><th class='ui-widget-header ui-state-hover'>Type";
+print "    <th class='ui-widget-header ui-state-hover'>Total dur&eacute;e";
+print "    <th class='ui-widget-header ui-state-hover'>Total HT";
+foreach ($arrResByTypeInterv as $key => $val) {
+    print "<tr><th align=left class='ui-widget-header ui-state-default'>" . $arrLabelInterv[$key];
+    print "    <td align=center class='ui-widget-content'>" . sec2time($arrResByTypeInterv[$key]["duree"]);
+    print "    <td align=center class='ui-widget-content'>" . price($arrResByTypeInterv[$key]["total_ht"]) . " &euro;";
+}
+print "</table>";
+print '</div>';
+
+
+
+
 print '</div>';
 
 print '</div>';
@@ -195,7 +250,7 @@ jQuery(document).ready(function(){
     jQuery('#list1').jqGrid({
         url:'ajax/intByContrat-json_response.php?id='+contratId,
         datatype: 'json',
-        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Fiche intervention',"statut"],
+        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Fiche intervention', 'Tech',"statut"],
         colModel:[ {name:'rowid',index:'rowid', width:55, hidden: true,hidedlg: true, search: false},
                    {name:'description',index:'description', align: 'left'},
                    {name:'datei',index:'datei', width:40,
@@ -223,6 +278,7 @@ jQuery(document).ready(function(){
                     },
                    {name:'total_ht',index:'total_ht', width:80, align: 'right'},
                    {name:'duree',index:'duree', width:80, align: 'center'},
+                   {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'fk_statut',index:'fk_statut', width:80, align: 'center'},
                  ],

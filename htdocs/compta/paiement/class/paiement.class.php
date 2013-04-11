@@ -190,6 +190,9 @@ class Paiement extends CommonObject
                             $deposits=$invoice->getSumDepositsUsed();
                             $alreadypayed=price2num($paiement + $creditnotes + $deposits,'MT');
                             $remaintopay=price2num($invoice->total_ttc - $paiement - $creditnotes - $deposits,'MT');
+                            
+                            if($remaintopay < 0.01)
+                                    $remaintopay = 0;
 
 							//var_dump($invoice->total_ttc.' - '.$paiement.' -'.$creditnotes.' - '.$deposits.' - '.$remaintopay);exit;
 

@@ -62,6 +62,10 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE element_type = 'prepaCom'");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "expedition WHERE rowid NOT IN (SELECT DISTINCT `fk_expedition` FROM " . MAIN_DB_PREFIX . "expeditiondet)");
     $maj->req("UPDATE " . MAIN_DB_PREFIX . "commande SET `fk_user_author` = `fk_user_valid` WHERE `fk_user_author` is NULL AND `fk_user_valid` IS NOT NULL");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '8' WHERE `2SLA` = '8 heures ouvrées' OR `2SLA` = '8 h. ouvrées' OR `2SLA` = '8 H. OUVRÉES'");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4M' WHERE `2SLA` = '4 heures ouvrées pour prise en main'");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4' WHERE `2SLA` = '4 heures ouvrées'");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '16' WHERE `2SLA` = '16 heures ouvrées'");
 } else {
     echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
 }

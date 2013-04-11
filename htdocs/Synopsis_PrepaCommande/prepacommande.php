@@ -60,13 +60,12 @@ if ($user->societe_id > 0 && isset($_GET["id"]) && $_GET["id"] > 0) {
 
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'addTech') {
-    $requete = "INSERT into ".MAIN_DB_PREFIX."element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('soc', " . $_REQUEST['socid'] . ", 'userTech', " . $_REQUEST['userid'] . ");";
+    $requete = "INSERT into " . MAIN_DB_PREFIX . "element_element (sourcetype, fk_source, targettype, fk_target) VALUES ('soc', " . $_REQUEST['socid'] . ", 'userTech', " . $_REQUEST['userid'] . ");";
+    $db->query($requete);
+} elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'delTech') {
+    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = 'soc' AND fk_source = " . $_REQUEST['socid'] . " AND targettype = 'userTech' AND fk_target = " . $_REQUEST['userid'] . ";";
     $db->query($requete);
 }
-elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == 'delTech') {
-    $requete = "DELETE FROM ".MAIN_DB_PREFIX."element_element WHERE sourcetype = 'soc' AND fk_source = " . $_REQUEST['socid'] . " AND targettype = 'userTech' AND fk_target = " . $_REQUEST['userid'] . ";";
-    $db->query($requete);
-}   
 
 
 
@@ -82,45 +81,47 @@ $com->fetch($id);
 //saveHistoUser($com->id, "prepaCom",$com->ref);
 
 
-$js = '<script> var comId = ' . $id . ';';
-$js .= ' var userId = ' . $user->id . ';';
-$js .= ' var socId = ' . $com->socid . ';';
-$js .= ' var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";';
+$js = '<script>';
+$js .= ' userId = ' . $user->id . ';';
+$js .= ' socId = ' . $com->socid . ';
+    comId = ' . $id . ';';
+$js .= ' DOL_URL_ROOT = "' . DOL_URL_ROOT . '";';
 $js.=<<<EOF
+    url = {
+        part1 : "fiche-html_response.php",
+        part2 : "coordonnees-html_response.php",
+        part3 : "logistique-html_response.php?part=3",
+        part4 : "finance-html_response.php",
+        part5 : "commerciaux-html_response.php",
+        part6 : "tech-html_response.php",
+        part7 : "expedition-html_response.php",
+        part9 : "interventions-html_response.php",
+        part10 : "ficheContrat-html_response.php",
+        part11 : "messages-html_response.php",
+    };
 
-var url = {
-    part1 : "fiche-html_response.php",
-    part2 : "coordonnees-html_response.php",
-    part3 : "logistique-html_response.php?part=3",
-    part4 : "finance-html_response.php",
-    part5 : "commerciaux-html_response.php",
-    part6 : "tech-html_response.php",
-    part7 : "expedition-html_response.php",
-    part9 : "interventions-html_response.php",
-    part10 : "ficheContrat-html_response.php",
-    part11 : "messages-html_response.php",
-};
-
-var suburl = {
-    part1a: "fiche-html_response.php",
-    part1b: "ficheClient-html_response.php",
-    part1c: "ficheCommande-html_response.php",
-    part2a: "coordonnees-html_response.php",
-    part3a: "logistique-html_response.php",
-    part4a: "finance-html_response.php",
-    part5a: "commerciaux-html_response.php",
-    part6a: "tech-html_response.php",
-    part7a: "expedition-html_response.php",
-    part9a: "interventions-html_response.php",
-    part9b: "demandeInterv-html_response.php",
-    part9c: "ficheInterv-html_response.php",
-    part9d: "dispoEquipe-html_response.php",
-    part9e: "ramification-html_response.php",
-    part9f: "diffInterv-html_response.php",
-    part10a: "ficheContrat-html_response.php",
-    part11a: "messages-html_response.php",
-}
+    suburl = {
+        part1a: "fiche-html_response.php",
+        part1b: "ficheClient-html_response.php",
+        part1c: "ficheCommande-html_response.php",
+        part2a: "coordonnees-html_response.php",
+        part3a: "logistique-html_response.php",
+        part4a: "finance-html_response.php",
+        part5a: "commerciaux-html_response.php",
+        part6a: "tech-html_response.php",
+        part7a: "expedition-html_response.php",
+        part9a: "interventions-html_response.php",
+        part9b: "demandeInterv-html_response.php",
+        part9c: "ficheInterv-html_response.php",
+        part9d: "dispoEquipe-html_response.php",
+        part9e: "ramification-html_response.php",
+        part9f: "diffInterv-html_response.php",
+        part10a: "ficheContrat-html_response.php",
+        part11a: "messages-html_response.php",
+    }
 jQuery(document).ready(function(){
+
+    
     jQuery( ".accordion" ).accordion({
         animated: 'bounceslide',
         autoHeight: false,
@@ -143,13 +144,41 @@ jQuery(document).ready(function(){
             type: "POST",
             success: function(msg){
                 jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
-            },
+            }
         });
     });
     jQuery('.accordion').accordion('activate',0);
 
+    hash = window.location.hash.replace("#pp", "");
+    if(hash != ''){
+        traiteHash(hash);
+    }
+     
+    $(window).on('hashchange', function() {
+        hash = window.location.hash.replace("#pp", "");
+        if(actu != hash)
+            traiteHash(hash);
+    });
+    
+    function traiteHash(hash){
+        hash2 = hash.slice(0,hash.length-1);
+        $("#"+hash2).click();
+        changePage(hash);
+    }
+    
+    jQuery(".ui-accordion-header").click(function(){
+    actu = $(this).attr("id")+"a";
+        window.location.hash = "pp"+$(this).attr("id")+"a";  
+    });
+
     jQuery('.submenu').click(function(){
-        var subid=jQuery(this).attr('id');
+        changePage(jQuery(this).attr('id'));
+    });
+    
+
+function changePage(subid){
+    actu = subid;
+    window.location.hash = "pp"+subid;
         jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
         //Load HTML
         var urlAjax = 'ajax/'+suburl[subid];
@@ -174,12 +203,12 @@ jQuery(document).ready(function(){
                     });
                     longHtml += "</table>";
                     jQuery('#subDI').replaceWith('<div id="subDI">'+longHtml+'</div>');
-                    reloadResult();
+//                    reloadResult();
                 }
             });
         } else {
             jQuery('#subDI').replaceWith('<div id="subDI"></div>');
-             reloadResult();
+//             reloadResult();
         }
         if (SubSubid=="9c")
         {
@@ -203,10 +232,10 @@ jQuery(document).ready(function(){
                 }
             });
             jQuery('#subFI').replaceWith('<div id="subFI"><table><tr><td width=20><td>FI-0000<td>01/09/2010<td>Nom Utilisateur</table></div>');
-            reloadResult();
+//            reloadResult();
         } else {
             jQuery('#subFI').replaceWith('<div id="subFI"></div>');
-            reloadResult();
+//            reloadResult();
         }
         jQuery.ajax({
             url: urlAjax,
@@ -220,9 +249,8 @@ jQuery(document).ready(function(){
             },
         });
 
-    });
 
-});
+};
 function openDI(rowid)
 {
     var subid="part9b";
@@ -253,6 +281,7 @@ function openFI(rowid)
         },
     });
 }
+    });
 function reloadResult()
 {
     jQuery.ajax({
@@ -346,7 +375,7 @@ print "</table>";
 print "<div id='replaceResult'>";
 
 
-require(DOL_DOCUMENT_ROOT."/Synopsis_PrepaCommande/ajax/getResults-html_response.php");
+require(DOL_DOCUMENT_ROOT . "/Synopsis_PrepaCommande/ajax/getResults-html_response.php");
 
 print "</div>";
 print "<br/>";

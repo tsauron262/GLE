@@ -1518,13 +1518,13 @@ EOF;
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">OUI';
                 }
-                if ($product->array_options['options_2qte'] > 0) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Qt&eacute; de tickets") . '</th>
+//                if ($product->array_options['options_2qte'] > 0) {
+                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">' . $product->array_options['options_2qte'];
-                } if ($product->array_options['options_2qte'] == -1) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Qt&eacute; de tickets") . '</th>
-                               <td ' . $colspan . ' class="ui-widget-content">Illimit&eacute;';
-                }
+//                } if ($product->array_options['options_2qte'] == -1) {
+//                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Qt&eacute; de tickets") . '</th>
+//                               <td ' . $colspan . ' class="ui-widget-content">Illimit&eacute;';
+//                }
                 //Valo Ticket
                 if ($product->array_options['options_2qtePerDuree'] . "x" != "x" && $product->array_options['options_2timePerDuree'] . "x" != "x") {
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Dur&eacute;e par ticket") . '</th>';
@@ -1828,7 +1828,7 @@ EOF;
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
                            <td class="ui-widget-content"><input type="checkbox" ' . ($product->array_options['options_2hotline'] > 0 ? 'checked' : '') . ' name="hotline">';
                 //Tkt
-                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Qt&eacute; de tickets <br/><em><small>(<b>0</b> Sans ticket, <b>-1</b> Illimit&eacute;)</small></em>") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="' . $product->array_options['options_2qte'] . '" name="qteMNT">';
                 //Valo Ticket
                 $qteTempsPerDureeM = 0;

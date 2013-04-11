@@ -2065,7 +2065,7 @@ EOF;
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Dur&eacute;e validit&eacute;<br/>(en mois)';
         $html .= '</th><td class="ui-widget-content" colspan=2><input id="DurValMnt' . $type . '" name="DurValMnt' . $type . '"></td>';
         $html .= '<tr>';
-        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb Ticket<br/><em><small>(<b>0</b> Sans ticket, <b>-1</b> Illimit&eacute;)</small></em>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Duree appel max avant interv. <br/><em><small>(en min)</small></em>';
         $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbTicketMNT' . $type . '" name="nbTicketMNT' . $type . '"></td>';
         $html .= '<tr><th class="ui-widget-header ui-state-default" >Dur&eacute;e par ticket<br/><em><small>(<b>0 h 0 min</b> sans d&eacute;compte de temps)</small></em></th>
                    <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="1" id="qteTktPerDuree' . $type . '" name="qteTktPerDuree' . $type . '"> ticket(s) pour <input style="text-align:center;" type="text" size=4 value="0" id="qteTempsPerDureeH' . $type . '" name="qteTempsPerDureeH' . $type . '"> h <input style="text-align:center;" type="text" size=4 value="0" id="qteTempsPerDureeM' . $type . '" name="qteTempsPerDureeM' . $type . '"> min';

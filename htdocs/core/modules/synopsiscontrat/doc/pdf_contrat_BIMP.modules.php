@@ -92,6 +92,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
      */
     function write_file($contrat, $outputlangs = '') {
         global $user, $langs, $conf;
+        
+        $afficherPrix = false;
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -380,6 +382,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
+                    if($afficherPrix){
                     //Prix
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
@@ -388,7 +391,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $nextY = $pdf->getY();
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
-
+                    }
 
 //                    //Date
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Date"), 0, 'C', 1);
@@ -1010,8 +1013,10 @@ Toute nouvelle installation de logiciels, de nouveaux postes ou de nouveaux pér
         $clause15 = "6 REGLEMENTS";
         $clause16 = "Nos tarifs s'entendent hors taxe et nos prestations sont payables telles que :
 
-    Total Ht : ".$this->contrat->total_ht."
-    Mode de paiement : " . $modeReg . " &euro;
+    ";
+        if($afficherPrix)
+            $clause16 .= "Total Ht : ".$this->contrat->total_ht;
+    $clause16 .= "Mode de paiement : " . $modeReg . " €
     Condition de paiement :  " . $condReg . ".
 
 Fait en deux exemplaires

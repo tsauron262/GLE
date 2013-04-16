@@ -792,7 +792,7 @@ class Facture extends CommonInvoice
         $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_payment_term as c ON f.fk_cond_reglement = c.rowid';
         $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement as p ON f.fk_mode_reglement = p.id';
         $sql.= ' WHERE f.entity = '.$conf->entity;
-        if ($rowid)   $sql.= " AND f.rowid=".$rowid;
+        if ($rowid)   $sql.= " AND f.rowid=".$rowfactureid;
         if ($ref)     $sql.= " AND f.facnumber='".$this->db->escape($ref)."'";
         if ($ref_ext) $sql.= " AND f.ref_ext='".$this->db->escape($ref_ext)."'";
         if ($ref_int) $sql.= " AND f.ref_int='".$this->db->escape($ref_int)."'";
@@ -1576,7 +1576,7 @@ class Facture extends CommonInvoice
         $now=dol_now();
 
         $error=0;
-        dol_syslog(get_class($this).'::validate user='.$user->id.', force_number='.$force_number.', idwarehouse='.$idwarehouse, LOG_WARNING);
+        dol_syslog(get_class($this).'::validate user='.$user->id.', force_number='.$force_number.', idwarehouse='.$idwarehouse);
 
 	    // Check parameters
         if (! $this->brouillon)

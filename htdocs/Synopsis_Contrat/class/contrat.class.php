@@ -1341,6 +1341,12 @@ class Synopsis_Contrat extends Contrat {
         $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (" . $annexeId . ", " . $this->id . ", " . ($maxRang + 1) . ", '')";
         if (!$this->db->query($req2))
             die($req2);
+        $req2 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE contrat_refid = ".$this->id." AND annexe_refid IN (36,25,2)";
+        if (!$this->db->query($req2))
+            die($req2);
+        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (36, " . $this->id . ", " . ($maxRang + 2) . ", ''), (25, " . $this->id . ", " . ($maxRang + 3) . ", ''), (2, " . $this->id . ", " . ($maxRang + 4) . ", '')";
+        if (!$this->db->query($req2))
+            die($req2);
     }
 
 //    

@@ -337,9 +337,9 @@ echo "82";
 
                 $this->_pagefoot($pdf,$demandeInterv,$outputlangs);
                 $pdf->AliasNbPages();
-
+echo "mmmmmmmmmm47";
                 $pdf->Close();
-
+echo "48";
                 $this->file = $file;
                 $pdf->Output($file, 'f');
 

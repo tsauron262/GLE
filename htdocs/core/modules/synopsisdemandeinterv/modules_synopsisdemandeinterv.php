@@ -197,6 +197,7 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
         else
         {
             dol_print_error($db,$obj->pdferror());
+            echo "lll";
             return 0;
         }
     }

@@ -164,7 +164,7 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
     $langs->load("demandeInterv");
 
     $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/";
-
+echo "mm";
     // Positionne modele sur le nom du modele de facture e utiliser
     if (! strlen($modele))
     {

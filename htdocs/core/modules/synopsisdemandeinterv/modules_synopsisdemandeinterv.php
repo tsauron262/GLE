@@ -164,7 +164,7 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
     $langs->load("demandeInterv");
 
     $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/";
-echo "mm";
+
     // Positionne modele sur le nom du modele de facture e utiliser
     if (! strlen($modele))
     {
@@ -186,20 +186,17 @@ echo "mm";
     {
         $classname = "pdf_".$modele;
         require_once($dir.$file);
-echo "mm1";
+
         $obj = new $classname($db);
-echo "mm2";
+
         dol_syslog("demandeInterv_create build PDF", LOG_DEBUG);
         if ($obj->write_file($object,$outputlangs) > 0)
         {
-            echo "mm3";
             return 1;
         }
         else
         {
-            echo "mm4";
             dol_print_error($db,$obj->pdferror());
-            echo "lll";
             return 0;
         }
     }

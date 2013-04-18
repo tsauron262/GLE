@@ -108,6 +108,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
 
         if ($conf->synopsisdemandeinterv->dir_output)
         {
+            echo "mm80";
             // If $demandeInterv is id instead of object
             if (! is_object($demandeInterv))
             {
@@ -116,9 +117,11 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 $result=$demandeInterv->fetch($id);
                 if ($result < 0)
                 {
+                    echo "mm78";
                     dol_print_error($this->db,$demandeInterv->error);
                 }
             }
+            echo "mm79";
 
             $fichref = sanitize_string($demandeInterv->ref);
             $dir = $conf->synopsisdemandeinterv->dir_output;

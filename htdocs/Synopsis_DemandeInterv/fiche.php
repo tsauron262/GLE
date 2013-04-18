@@ -429,6 +429,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 
 if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'update') {
     $demandeInterv = new demandeInterv($db);
+    $demandeInterv->id = $_REQUEST["id"];
 
     $demandeInterv->date = dol_mktime($_POST["phour"], $_POST["pmin"], $_POST["psec"], $_POST["remonth"], $_POST["reday"], $_POST["reyear"]);
     $demandeInterv->socid = $_POST["socid"];

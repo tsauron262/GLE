@@ -124,13 +124,25 @@ class Synopsis_Contrat extends Contrat {
             $id = $this->id;
             $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
             $result = $this->db->query($requete);
+            $i = -1;
             while ($ligneDb = $this->db->fetch_object($result)) {
                 $ligne = new Synopsis_ContratLigne($this->db);
                 $ligne->fetch($ligneDb->rowid);
+                $ligne->rang = ($ligne->rang > 0) ? $ligne->rang + 100 : 0;
                 if ($byid)
-                    $this->lines[$ligneDb->rowid] = $ligne;
-                else
-                    $this->lines[] = $ligne;
+                    $this->lines[$ligne->rowid] = $ligne;
+                elseif (!isset($this->lines[$ligne->rang]))
+                    $this->lines[$ligne->rang] = $ligne;
+                else {
+                    $i++;
+                    $this->lines[$i] = $ligne;
+                }
+            }
+            $ligne2 = $this->lines;
+            $this->lines = array();
+            ksort($ligne2);
+            foreach ($ligne2 as $cle => $obj) {
+                $this->lines[] = $obj;
             }
         }
         else
@@ -1262,7 +1274,7 @@ class Synopsis_Contrat extends Contrat {
         $isSAV = false;
         $isTkt = false;
         $qte1 = $res->qty;
-        $qte2 = ($tmpProd->array_options['options_2qte']>0)? $tmpProd->array_options['options_2qte'] : 0;
+        $qte2 = ($tmpProd->array_options['options_2qte'] > 0) ? $tmpProd->array_options['options_2qte'] : 0;
         if ($tmpProd->array_options['options_2hotline'] > 0 || $tmpProd->array_options['options_2teleMaintenance'] > 0 || $tmpProd->array_options['options_2maintenance'] > 0) {
             $isMnt = true;
 //            $qte = $tmpProd->array_options['options_2visiteSurSite'];
@@ -1287,7 +1299,7 @@ class Synopsis_Contrat extends Contrat {
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
                              19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $total_ht . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
-                             " . /* $lineO.",".$comLigneId.",".$avenant. */",'".$date."','".$date."', date_add('".$date."',INTERVAL " . $duree . " MONTH))";
+                             " . /* $lineO.",".$comLigneId.",".$avenant. */",'" . $date . "','" . $date . "', date_add('" . $date . "',INTERVAL " . $duree . " MONTH))";
         $sql = $db->query($requete);
 //    die($requete);
         $cdid = $db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
@@ -1327,8 +1339,8 @@ class Synopsis_Contrat extends Contrat {
 
         if ($sql && $sql1)
             return true;
-        echo "\n\n".$requete;
-        echo "\n\n".$requete2;
+        echo "\n\n" . $requete;
+        echo "\n\n" . $requete2;
         return false;
     }
 
@@ -1341,7 +1353,7 @@ class Synopsis_Contrat extends Contrat {
         $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (" . $annexeId . ", " . $this->id . ", " . ($maxRang + 1) . ", '')";
         if (!$this->db->query($req2))
             die($req2);
-        $req2 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE contrat_refid = ".$this->id." AND annexe_refid IN (36,25,2)";
+        $req2 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE contrat_refid = " . $this->id . " AND annexe_refid IN (36,25,2)";
         if (!$this->db->query($req2))
             die($req2);
         $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (36, " . $this->id . ", " . ($maxRang + 2) . ", ''), (25, " . $this->id . ", " . ($maxRang + 3) . ", ''), (2, " . $this->id . ", " . ($maxRang + 4) . ", '')";
@@ -2164,7 +2176,8 @@ class Synopsis_ContratLigne extends ContratLigne {
                        g.fk_contrat_prod as GMAO_fk_contrat_prod,
                        g.qteTempsPerDuree as GMAO_qteTempsPerDuree,
                        g.qteTktPerDuree as GMAO_qteTktPerDuree,
-                       sc.serial_number as GMAO_serial_number
+                       sc.serial_number as GMAO_serial_number,
+                       g.rang
                   FROM " . MAIN_DB_PREFIX . "contratdet as d
              LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO as g ON g.contratdet_refid = d.rowid
              LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont as sc ON sc.element_id = d.rowid
@@ -2208,6 +2221,7 @@ class Synopsis_ContratLigne extends ContratLigne {
                 $tmpProd2->fetch($objp->GMAO_fk_prod);
                 $tmpProd2->fetch_optionals($objp->GMAO_fk_prod);
             }
+            $this->rang = $objp->rang;
             $this->prodContrat = $tmpProd1;
             $this->prod2 = $tmpProd2;
             $this->type = $objp->type;
@@ -2255,7 +2269,7 @@ class Synopsis_ContratLigne extends ContratLigne {
         $nbExiste = count($tabExiste);
         $tabExiste = getElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet']);
         $nbExiste += count($tabExiste);
-        while ($result = $this->db->fetch_object($sql)){
+        while ($result = $this->db->fetch_object($sql)) {
             $qte = $result->qte * $result->qty;
             if ($result->nb)
                 $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb . " Contrat : " . $result->ref;

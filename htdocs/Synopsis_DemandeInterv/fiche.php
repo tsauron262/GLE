@@ -526,6 +526,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == "addligne" && $user->ri
         $demandeInterv->addline(
                 $_POST['demandeIntervid'], $desc, $date_intervention, $duration, $fk_typeinterv, $qte, $pu_ht, $isForfait, ($_REQUEST['comLigneId'] > 0 ? $_REQUEST['comLigneId'] : false), ($_REQUEST['fk_contratdet'] > 0 ? $_REQUEST['fk_contratdet'] : false)
         );
+        echo "kkkkkk";
 
 
         if ($_REQUEST['lang_id']) {

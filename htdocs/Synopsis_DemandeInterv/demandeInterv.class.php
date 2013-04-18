@@ -239,7 +239,7 @@ class demandeInterv extends CommonObject {
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf";
         $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
         $sql.= " WHERE rowid=" . $rowid;
-die($sql);
+
         dol_syslog("demandeInterv::fetch sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {

@@ -127,7 +127,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
             $dir = $conf->synopsisdemandeinterv->dir_output;
             if (! preg_match('/specimen/i',$fichref)) $dir.= "/" . $fichref;
             $file = $dir . "/" . $fichref . ".pdf";
-
+echo "81";
             if (! file_exists($dir))
             {
                 if (dol_mkdir($dir) < 0)
@@ -136,7 +136,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                     return 0;
                 }
             }
-
+echo "82";
             if (file_exists($dir))
             {
                 $pdf=pdf_getInstance($this->format);
@@ -352,6 +352,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
                 return 0;
             }
+            echo "mm777";
         }
         else
         {

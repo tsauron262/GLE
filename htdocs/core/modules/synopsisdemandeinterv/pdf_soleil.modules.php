@@ -147,13 +147,13 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv {
 //                {
 //                    $pdf=new FPDI('P','mm',$this->format);
 //                }
-
+echo "mm99";
                 $pdf->Open();
                 $pdf->AddPage();
-
+echo "mm100";
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1, 0);
-
+echo "mm101";
                 //Affiche le filigrane brouillon - Print Draft Watermark
                 if ($demandeInterv->statut == 0 && (!empty($conf->global->DEMANDEINTERV_DRAFT_WATERMARK))) {
                     $watermark_angle = atan($this->page_hauteur / $this->page_largeur);
@@ -175,7 +175,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv {
                 $posy = $this->marge_haute;
 
                 $pdf->SetXY($this->marge_gauche, $posy);
-
+echo "mm102";
                 // Logo
                 // Logo
                 $logo = false;
@@ -185,7 +185,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv {
                     $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
                 }
 
-
+echo "mm103";
 
 //                $logo=$conf->mycompany->dir_output .'/logos'.'/'.$mysoc->logo;
                 if ($mysoc->logo) {
@@ -198,7 +198,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv {
                         $pdf->MultiCell(100, 3, $langs->transnoentities("ErrorGoToModuleSetup"), 0, 'L');
                     }
                 }
-
+echo "mm104";
                 // Nom emetteur
                 $posy = 40;
                 $hautcadre = 40;

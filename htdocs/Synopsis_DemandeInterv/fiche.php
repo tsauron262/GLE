@@ -1823,7 +1823,7 @@ EOF;
 
                 // Forfait
                 print '<td width=32 align=center>';
-                print "<input type='checkbox' name='isForfait' '" . ($objp->isForfait == 1 ? 'Checked="checked"' : "") . "'>";
+                print "<input type='checkbox' name='isForfait' " . ($objp->isForfait == 1 ? 'Checked="checked"' : "") . ">";
                 print '</td>';
 
                 // pu_ht

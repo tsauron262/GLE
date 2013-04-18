@@ -278,12 +278,12 @@ class demandeInterv extends CommonObject {
                 return $this->id;
             } else {
                 $this->error = $this->db->error();
-                dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
+                dol_syslog("demandeInterv::fetch error " . $this->error." | ".$sql, LOG_ERR);
                 return -2;
             }
         } else {
             $this->error = $this->db->error();
-            dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
+            dol_syslog("demandeInterv::fetch error " . $this->error." | ".$sql, LOG_ERR);
             return -1;
         }
     }

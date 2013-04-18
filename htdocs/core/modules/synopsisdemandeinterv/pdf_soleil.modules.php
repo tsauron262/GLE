@@ -139,7 +139,9 @@ echo "81";
 echo "82";
             if (file_exists($dir))
             {
+                echo "pp4";
                 $pdf=pdf_getInstance($this->format);
+                echo "pp5";
                 // Protection et encryption du pdf
 //                if ($conf->global->PDF_SECURITY_ENCRYPTION)
 //                {

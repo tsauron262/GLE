@@ -158,6 +158,7 @@ class modSynopsisContrat extends DolibarrModules {
   `nbVisite` int(11) DEFAULT NULL,
   `qteTempsPerDuree` int(11) NOT NULL DEFAULT '0',
   `qteTktPerDuree` int(11) NOT NULL DEFAULT '1',
+  `rang` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_prod` (`fk_prod`),
   KEY `contrat_refid` (`contratdet_refid`)

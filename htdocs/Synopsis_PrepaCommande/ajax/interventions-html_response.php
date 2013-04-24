@@ -296,10 +296,11 @@ jQuery(document).ready(function(){
 //                $(this).find("#qte"+id).val(1);
                 desc = $('#desc');
                 forfait = $(this).find("#isForfait"+id);
+                qte = $(this).find("#qte"+id);
                 i=0;
                 $(this).find("a").each(function(){
                     i++;
-                    if(i == 2){
+//                    if(i == 2){
                         if($(this).html() == "FPR50"){
                             forfait.attr('checked', true);
                             desc.html("Installation comprenant : ");
@@ -309,8 +310,10 @@ jQuery(document).ready(function(){
                         if($(this).html().match("FD.*")){
 //                            desc.html("Déplacement comprenant : ");
                             forfait.attr('checked', true);
+                            qte.val(1);
+                            
                         }
-                    }
+//                    }
                 });
             });
         }

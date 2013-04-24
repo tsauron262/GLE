@@ -1436,7 +1436,7 @@ EOF;
         print '</td></tr>';
     }
     print '<tr><th class="ui-widget-header ui-state-default">Attribu&eacute; &agrave;';
-    if ($demandeInterv->statuts == 0)
+    if ($demandeInterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
         print '<a href="' . $_SERVER['PHP_SELF'] . '?action=editAttrib&id=' . $_REQUEST['id'] . '">' . img_edit($langs->trans('Changer Attribution'), 1) . '</a>';
 
     print '    <td class="ui-widget-content" colspan=1>';

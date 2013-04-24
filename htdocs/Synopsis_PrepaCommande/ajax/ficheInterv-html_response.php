@@ -124,7 +124,8 @@
 
             print "    <td style='padding:15px 10px 10px 10px;' align=center  valign=top width=230 class='ui-widget-content'> ";
 
-            print "<button id='validFI-".$res->rowid."' class='validFI butAction ui-widget-header ui-state-default'>Valid. Interv.</button>";
+            if($res->fk_statut == 0)
+                print "<button id='validFI-".$res->rowid."' class='validFI butAction ui-widget-header ui-state-default'>Valid. Interv.</button>";
 
             print "<button id='modFI-".$res->rowid."' class='modFI butAction ui-widget-header ui-state-default'>Modifier</button>";
 
@@ -246,6 +247,10 @@
         jQuery('.modFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^modFI-/,"");
             location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id;
+        });
+        jQuery('.validFI').click(function(){
+            var id = jQuery(this).attr('id').replace(/^validFI-/,"");
+            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes';
         });
         jQuery('.rafraichePrixFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^rafraichePrixFI-/,"");

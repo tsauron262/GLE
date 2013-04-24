@@ -37,7 +37,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "setDepot" && isset($_R
     if ($_REQUEST["id"] > 0) {
         $commande = new Synopsis_Commande($db);
         if ($commande->fetch($_REQUEST["id"]) > 0) {
-            setElementElement('comm', 'entrepot', $_REQUEST["id"], $_REQUEST["nd"]);
+            setElementElement('comm', 'entrepot' . $_REQUEST["numDep"], $_REQUEST["id"], $_REQUEST["nd"]);
         }
     }
 }
@@ -52,7 +52,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
     $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
     if (isset($tabEntrep[0])) {
         $idEntr = $tabEntrep[0]['d'];
-        $requete = "SELECT description as email FROM ".MAIN_DB_PREFIX."entrepot WHERE rowid = " . $idEntr;
+        $requete = "SELECT description as email FROM " . MAIN_DB_PREFIX . "entrepot WHERE rowid = " . $idEntr;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
 
@@ -86,10 +86,10 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
     require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
     sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
     $msg = "Le mail a &eacute;t&eacute; envoy&eacute;";
-        $tabExpe = getElementElement("commande", "shipping", $commande->id);
-        foreach($elem as $tabExpe)
-            $tabExp[] = $elem['d'];
-    $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (".  implode(", ", $tabExp).")";
+    $tabExpe = getElementElement("commande", "shipping", $commande->id);
+    foreach ($elem as $tabExpe)
+        $tabExp[] = $elem['d'];
+    $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (" . implode(", ", $tabExp) . ")";
     $sql = $db->query($requete);
 }
 
@@ -157,31 +157,33 @@ if ($_REQUEST["id"] > 0) {
 
 
         // Deposer a
-        print '<tr><th height="10"  class="ui-widget-header ui-state-default">';
-        print $langs->trans('D&eacute;poser &agrave;');
-        print '<a href="#" onClick="changeSiteDepot();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
-        print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
-            $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
+        for ($i = 0; $i < 3; $i++) {
+            print '<tr><th height="10"  class="ui-widget-header ui-state-default">';
+            print $langs->trans('D&eacute;poser &agrave;');
+            print '<a href="#" onClick="changeSiteDepot(' . $i . ');">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
+            print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
+            $tabEntrep = getElementElement('comm', 'entrepot' . $i, $commande->id);
             $idEntr = 0;
             if (isset($tabEntrep[0]))
                 $idEntr = $tabEntrep[0]['d'];
-        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editDepot') {
-            $requete = "SELECT * FROM ".MAIN_DB_PREFIX."entrepot ORDER BY lieu";
-            print "<select name='newDepot' id='newDepot'>";
-            $sql6 = $db->query($requete);
-            while ($res6 = $db->fetch_object($sql6)) {
-                print "<option value='" . $res6->rowid . "'".(($res6->rowid == $idEntr)?" selected='selected'" : '') .">" . traite_str($res6->lieu) . "</option>";
-            }
-            print "</select>";
-            print "<button onClick='validateDepot();' class='butAction'>OK</button>";
-        } else {
-            $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
-            if ($idEntr) {
-                $requete = "SELECT lieu FROM ".MAIN_DB_PREFIX."entrepot WHERE rowid = " . $idEntr;
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editDepot' . $i) {
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "entrepot ORDER BY lieu";
+                print "<select name='newDepot' id='newDepot'>";
                 $sql6 = $db->query($requete);
-                $res6 = $db->fetch_object($sql6);
-                if ($res6->lieu . "x" != 'x')
-                    print traite_str($res6->lieu);
+                while ($res6 = $db->fetch_object($sql6)) {
+                    print "<option value='" . $res6->rowid . "'" . (($res6->rowid == $idEntr) ? " selected='selected'" : '') . ">" . traite_str($res6->lieu) . "</option>";
+                }
+                print "</select>";
+                print "<button onClick='validateDepot(" . $i . ");' class='butAction'>OK</button>";
+            } else {
+//            $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
+                if ($idEntr) {
+                    $requete = "SELECT lieu FROM " . MAIN_DB_PREFIX . "entrepot WHERE rowid = " . $idEntr;
+                    $sql6 = $db->query($requete);
+                    $res6 = $db->fetch_object($sql6);
+                    if ($res6->lieu . "x" != 'x')
+                        print traite_str($res6->lieu);
+                }
             }
         }
         print '</td>';
@@ -218,11 +220,11 @@ jQuery(document).ready(function(){
         jQuery('.datePicker').datepicker();
 });
 
-function validateDepot(){
+function validateDepot(numDep){
     var nd = jQuery('#newDepot').find(':selected').val();
     jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
     jQuery.ajax({
-        url: "ajax/expedition-html_response.php?action=setDepot&nd="+nd+"&id="+comId,
+        url: "ajax/expedition-html_response.php?action=setDepot&nd="+nd+"&id="+comId+"&numDep="+numDep,
         data: "id="+comId,
         cache: false,
         datatype: "html",
@@ -261,10 +263,10 @@ function changeDateLivraison(){
 
 }
 
-function changeSiteDepot(){
+function changeSiteDepot(nb){
     jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
     jQuery.ajax({
-        url: "ajax/expedition-html_response.php?action=editDepot",
+        url: "ajax/expedition-html_response.php?action=editDepot"+nb,
         data: "id="+comId,
         cache: false,
         datatype: "html",
@@ -303,7 +305,7 @@ EOF;
 
         $sql = "SELECT cd.fk_product, cd.description, cd.price, sum(cd.qty) as qty, cd.rowid, cd.tva_tx, cd.subprice";
         $sql.= " FROM " . MAIN_DB_PREFIX . "commandedet as cd ";
-        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON cd.fk_product = p.rowid";
         if ($arrGrpTmp) {
             $arrTmp = array();
             foreach ($arrGrpTmp as $key => $val)
@@ -481,6 +483,10 @@ function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
         return -1;
     }
 }
-function traite_str($str){ return $str;}
+
+function traite_str($str) {
+    return $str;
+}
+
 $db->close();
 ?>

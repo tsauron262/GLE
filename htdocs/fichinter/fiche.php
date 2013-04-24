@@ -51,6 +51,11 @@
   \ingroup    ficheinter
   \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
+
+
+$afficherLigneContrat = false;
+
+
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
@@ -1578,7 +1583,7 @@ EOF;
                 }
 
                 print '</tr>';
-                if ($fichinter->fk_contrat) {
+                if ($fichinter->fk_contrat && $afficherLigneContrat) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
                     $contrat = getContratObj($fichinter->fk_contrat);
                     $type = $contrat->getTypeContrat_noLoad($fichinter->fk_contrat);
@@ -1723,7 +1728,7 @@ EOF;
                 print '<br /><input type="submit" class="button" name="cancel" value="' . $langs->trans("Cancel") . '"></td>';
                 print '</tr>' . "\n";
 
-                if ($fichinter->fk_contrat > 0) {
+                if ($fichinter->fk_contrat > 0 && $afficherLigneContrat) {
                     require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
                     $contrat = getContratObj($fichinter->fk_contrat);
                     $type = getTypeContrat_noLoad($fichinter->fk_contrat);
@@ -1849,7 +1854,7 @@ EOF;
 
         print '<td align="center" valign="middle" colspan="4"><input type="submit" class="button" value="' . $langs->trans('Add') . '" name="addligne"></td>';
         print '</tr>';
-        if ($fichinter->fk_contrat > 0) {
+        if ($fichinter->fk_contrat > 0  && $afficherLigneContrat) {
             $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
             $sql = $db->query($requete);
             $arrTmp = array();

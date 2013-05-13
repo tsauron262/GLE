@@ -546,7 +546,10 @@ if (isset($_REQUEST["id"])) {
                     userId = "' . $user->id . '";
                         idContratCurrent = "' . $id . '";
                     $(document).ready(function(){ 
+                    var z = 0;
                         $(\'img[alt="Supprimer"]\').each(function(){
+                            z++;
+                            var j = z;
                             var id = $(this).parent().attr("href");
                             var nId = id;
                             id = id.split("&");
@@ -555,13 +558,24 @@ if (isset($_REQUEST["id"])) {
                                     nId = id[i].split("=")[1];
                             elem = $(this).parent().parent().parent().parent().parent().parent().parent().children("td.liste_titre");
                             elem.css(\'cursor\',\'pointer\');
-                            elem.html(elem.html()+"<p>Mod</p>");
-                            elem.click(function(){
+                            elem.html(elem.html()+"<p class=\'mod\'>Mod</p>");
+                            elem.html(elem.html()+"<p class=\'detail\'>Detail</p>");
+                            elem.html(elem.html()+"<p class=\'haut\'>\/</p>");
+                            elem.html(elem.html()+"<p class=\'bas\'>/\</p>");
+//                            elem.click(function(){
+//                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
+//                            });
+                            elem.find(".mod").click(function(){
+                                editLine(this, ' . $id . ', nId);
+                            });
+                            elem.find(".detail").click(function(){
                                 location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
                             });
-                            elem.find("p").click(function(){
-                                editLine(this, ' . $id . ', nId); 
-                                    return false;
+                            elem.find(".haut").click(function(){
+                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk=427&newRang="+(j-1)+"&oldRang="+j;
+                            });
+                            elem.find(".bas").click(function(){
+                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk=427&newRang="+(j+1)+"&oldRang="+j;
                             });
                         });
             });</script>';

@@ -124,11 +124,11 @@ class Synopsis_Contrat extends Contrat {
             $id = $this->id;
             $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
             $result = $this->db->query($requete);
-            $i = -1;
+            $i = 100;
             while ($ligneDb = $this->db->fetch_object($result)) {
                 $ligne = new Synopsis_ContratLigne($this->db);
                 $ligne->fetch($ligneDb->rowid);
-                $ligne->rang = ($ligne->rang > 0) ? $ligne->rang + 100 : 0;
+                $ligne->rang = ($ligne->rang > 0) ? $ligne->rang : 100;
                 if ($byid)
                     $this->lines[$ligne->rowid] = $ligne;
                 elseif (!isset($this->lines[$ligne->rang]))

@@ -190,7 +190,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                             $intervHasFPR40 = true;
                             $FPR40arr[$key] = $val;
                             $totFPR40+=$val->total_ht;
-                            $totFPR40Tva+=$val->total_ht * $val->total_tva;
+                            $totFPR40Tva+=$val->total_tva;
                             $totTempsFPR40+=$val->duration;
                             $pu_fpr40 = $val->pu_ht;
                         } else if ($res1->ref == 'FPR30') {
@@ -200,7 +200,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                             $intervHasFPR30 = true;
                             $FPR30arr[$key] = $val;
                             $isTempsPasse = true;
-                            $pu_fpr30 = $val->pu_ht;
+                            $pu_fpr30 = $val->pu_ht * $val->qte;
                         }
                     }
                     if ($val->fk_typeinterv == 8) {

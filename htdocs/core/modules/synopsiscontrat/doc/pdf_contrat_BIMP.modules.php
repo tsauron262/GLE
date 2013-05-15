@@ -942,7 +942,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $res = $this->db->fetch_object($sql);
             $tel = "\nTel: " . ($res->phone . "x" != "x" ? $res->phone : $tmpSoc->tel) . "        email : " . $res->email;
             $civilite = $res->civilite;
-            if ($langs->trans("CivilityShort" . $res->civilite) != "CivilityShort" . $civilite)
+            if ($langs->trans("CivilityShort" . $res->civilite) != "Short" . $civilite)
                 $civilite = $langs->trans("CivilityShort" . $res->civilite);
             $to = $civilite . " " . $res->name . " " . $res->firstname;
             $to_signature = $civilite . " " . $res->name . " " . $res->firstname;

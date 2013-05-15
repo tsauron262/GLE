@@ -309,6 +309,7 @@ print <<<EOF
         if($(elem).attr('value') != val || oblige){
             var tmp=jQuery(elem).attr('id').replace(/^logistiqueOK-/,'');
             jQuery(elem).attr('value', val);
+            alert(val);
             if(val == 'yes')
                 jQuery(suff+'#pasdispo-'+tmp).show();
             else

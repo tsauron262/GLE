@@ -554,7 +554,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'updateligne' && $user-
     $desc = $_POST['description'];
     $date_intervention = dol_mktime(12, 1, 1, $_POST["dimonth"], $_POST["diday"], $_POST["diyear"]);
     $duration = ConvertTime2Seconds($_POST['durationhour'], $_POST['durationmin']);
-    
+
     $demandeIntervline->desc = $desc;
     $demandeIntervline->datei = $date_intervention;
     $demandeIntervline->duration = $duration;
@@ -1443,7 +1443,7 @@ EOF;
     if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editAttrib') {
         print "<form action='" . $_SERVER['PHP_SELF'] . "?id=" . $_REQUEST['id'] . "&action=setAttUser' method=POST>";
         print "<table border=0 class='noborder'><tr><td>";
-        print $html->select_users('', 'AttUserid', 0, '', 0, true);
+        print select_dolusersInGroup($html, 3, '', 'AttUserid', 0, '', 0, true);
         print "<td colspan=1>";
         print "<button class='butAction ui-widget-header ui-state-default ui-corner-all'>Attribuer</button>";
         print "</table>";
@@ -2090,6 +2090,20 @@ EOF;
     print "&nbsp;</td>";
     print "</tr></table>\n";
 }
+
+
+
+
+if (isset($demandeInterv->fk_commande) && $demandeInterv->fk_commande > 0) {
+    print "<br/><br/><div id='replaceResult'>";
+
+    $_REQUEST['id'] = $demandeInterv->fk_commande;
+    require(DOL_DOCUMENT_ROOT . "/Synopsis_PrepaCommande/ajax/getResults-html_response.php");
+
+    print "</div>";
+}
+
+
 
 $db->close();
 

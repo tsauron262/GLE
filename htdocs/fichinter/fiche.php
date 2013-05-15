@@ -303,7 +303,18 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
         $fk_typeinterv = (isset($_REQUEST["fk_typeinterv"]) ? $_REQUEST["fk_typeinterv"] : "");
         $pu_ht = 0;
 
-        if (preg_match('/dep-([0-9]*)/', $fk_typeinterv, $arr)) {
+        $resultT = getElementElement("contratdet", "fichinter", null, $_REQUEST['id']);
+        if(isset($resultT[0]['s'])){
+            $contradet = $resultT[0]['s'];
+//            die("ok".$contradet);
+            $requete = "SELECT `price_ht` as prix_ht FROM `llx_contratdet` WHERE `rowid` = ".$contradet;
+            $sql = $db->query($requete);
+            $res = $db->fetch_object($sql);
+            if ($res->prix_ht > 0) {
+                $pu_ht = $res->prix_ht;
+            }
+        }
+        elseif (preg_match('/dep-([0-9]*)/', $fk_typeinterv, $arr)) {
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht

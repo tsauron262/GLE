@@ -41,15 +41,15 @@ if($searchOn=='true')
 
 
 $SQL = "SELECT count(*) as count
-          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-         WHERE 1 = 1 AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3";
+          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task t 
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = t.rowid
+         WHERE 1 = 1 AND t.fk_task_type <> 3";
 if ('x'.$project_id != "x")
 {
-    $SQL .= " AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id . " ";
+    $SQL .= " AND t.fk_projet = ".$project_id . " ";
 }
 
 $result = $db->query($SQL." ".$wh);
@@ -70,7 +70,7 @@ if ($start<0) $start = 0;
 // get role, datedebut, fin, temps prevu, temps effectif, avancement, fille enfant et dependance
 
 
-$SQL = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as id,
+$SQL = "SELECT t.rowid as id,
                title,
                statut,
                progress,
@@ -82,21 +82,21 @@ $SQL = "SELECT ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid as id,
                duration_effective,
                task_duration_effective,
                task_date_effective
-          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = ".MAIN_DB_PREFIX."Synopsis_projet_task.rowid
-         WHERE 1 = 1 AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3";
+          FROM ".MAIN_DB_PREFIX."Synopsis_projet_task t
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_actors ON fk_projet_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_depends ON ".MAIN_DB_PREFIX."Synopsis_projet_task_depends .fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time.fk_task = t.rowid
+     LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective ON ".MAIN_DB_PREFIX."Synopsis_projet_task_time_effective .fk_task = t.rowid
+         WHERE 1 = 1 AND t.fk_task_type <> 3";
 if ('x'.$project_id != "x")
 {
-    $SQL .= " AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_projet = ".$project_id . " ";
+    $SQL .= " AND t.fk_projet = ".$project_id . " ";
 }
-$SQL .= "      ORDER BY $sidx $sord
+$SQL .= " GROUP BY t.rowid     ORDER BY $sidx $sord
          LIMIT $start , $limit";
-//print $SQL;
+//print $SQL; die;
 $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error());
-$responce->page = $page;
+@$responce->page = $page;
 $responce->total = $total_pages;
 $responce->records = $count;
 $i=0;

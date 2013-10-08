@@ -25,6 +25,7 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
             @$conf->projet = $conf->synopsisprojet;
             @$user->rights->projet = $user->rights->synopsisprojet;
+            @$user->rights->projet->all = $user->rights->synopsisprojet;
             @$conf->imputations->dir_output = $conf->synopsisprojet->dir_output . "/imputation";
         }
 

@@ -208,7 +208,6 @@ $SQL .= " ".$wh."
       ORDER BY $sidx $sord
          LIMIT $start , $limit";
 //print $SQL;
-die($SQL);
 $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error());
 @$responce->page = $page;
 $responce->total = $total_pages;

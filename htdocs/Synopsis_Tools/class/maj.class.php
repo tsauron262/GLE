@@ -52,7 +52,7 @@ class maj {
 
     public function startMAj($tab, $update = false) {
         if (!$update) {
-            $this->netoyerTables($tab);
+            $this->netoyerTables($tab);die;
 
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
 //                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 

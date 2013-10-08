@@ -44,7 +44,7 @@ if($searchOn=='true')
     //Prob searchfield = statut & cntMyTask + date ???
     $searchField = $_REQUEST['searchField'];
     $searchString = $_REQUEST['searchString'];
-    if ($searchField == "statut")
+    if ($searchField == "avanc")
     {
          $searchField = ' (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task WHERE fk_projet = p.rowid) ';
     }
@@ -223,7 +223,7 @@ while($row = $db->fetch_array($result,MYSQL_ASSOC))
     require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
     $proj = new Projet($db);
     $proj->fetch($row['id']);
-    $overallprogress = '<div class="progressbar ui-corner-all">'.round($row['statut']).'</div>';
+    $overallprogress = '<div class="progressbar ui-corner-all">'.round($row['avanc']).'</div>';
     $responce->rows[$i]['cell']=array($row['id'],
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['nom']."</a>",
                                       "<a href='".DOL_URL_ROOT."/projet/fiche.php?id=".$row['id']."'>".$row['ref']."</a>",

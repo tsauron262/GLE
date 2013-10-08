@@ -168,7 +168,7 @@ $SQL = "SELECT p.rowid as id,
                p.ref as ref,
                date_format(p.dateo,'%d/%m/%Y') as dateo,
                (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                    WHERE fk_projet = p.rowid) as avanc, statut,
+                                    WHERE fk_projet = p.rowid) as avanc, p.fk_statut as statut,
                s.rowid as socid,
                s.nom as socname";
 
@@ -208,6 +208,7 @@ $SQL .= " ".$wh."
       ORDER BY $sidx $sord
          LIMIT $start , $limit";
 //print $SQL;
+die($SQL);
 $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error());
 @$responce->page = $page;
 $responce->total = $total_pages;

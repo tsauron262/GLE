@@ -200,6 +200,10 @@ if ($extra == "viewmine")
 }
 
 //$SQL .= "   AND ".MAIN_DB_PREFIX."societe.rowid = p.fk_soc
+
+if($sidx == "dateo")
+    $sidx = "p.dateo";
+
 $SQL .= " ".$wh."
       ORDER BY $sidx $sord
          LIMIT $start , $limit";

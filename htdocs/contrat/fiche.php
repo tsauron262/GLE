@@ -558,10 +558,10 @@ if (isset($_REQUEST["id"])) {
                                     nId = id[i].split("=")[1];
                             elem = $(this).parent().parent().parent().parent().parent().parent().parent().children("td.liste_titre");
                             elem.css(\'cursor\',\'pointer\');
-                            elem.html(elem.html()+"<p class=\'mod\'>Mod</p>");
+                            elem.html(elem.html()+"<p class=\'mod\'>Modifier</p>");
                             elem.html(elem.html()+"<p class=\'detail\'>Detail</p>");
-                            elem.html(elem.html()+"<p class=\'haut\'>\/</p>");
-                            elem.html(elem.html()+"<p class=\'bas\'>/\</p>");
+                            elem.html(elem.html()+"<p class=\'haut\'>/\\\</p>");
+                            elem.html(elem.html()+"<p class=\'bas\'>\\\/</p>");
 //                            elem.click(function(){
 //                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
 //                            });

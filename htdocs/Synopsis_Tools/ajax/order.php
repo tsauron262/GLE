@@ -31,13 +31,13 @@ if (isset($champFk)) {
     $db->query($request);
     echo $request . "|" . $oldRang . "|" . $newRang;
     if ($oldRang > 0) {
-        $request = "UPDATE " . $nomTab . " SET rang = rang " . ($changePlus ? "+" : "-") . "1 WHERE " . $champFk . " AND rang >= " . $ptiRang . " AND rang <= " . $grRang;
+        $request = "UPDATE " . $nomTab . " SET rang = rang " . ($changePlus ? "-" : "+") . "1 WHERE " . $champFk . " AND rang >= " . $ptiRang . " AND rang <= " . $grRang;
         $db->query($request);
     echo $request . "|" . $oldRang . "|" . $newRang;
     }
     $request = "UPDATE " . $nomTab . " SET rang = " . $newRang . " WHERE " . $champFk . " AND " . $champId . " = " . $idElem;
     $db->query($request);
     echo $request . "|" . $oldRang . "|" . $newRang;
-//    header($header);
+    header($header);
 }
 ?>

@@ -48,11 +48,11 @@ class maj {
 
     private function infoL($text) {
         echo "<br/>" . $this->getTime() . " | Info : " . $text . "<br/>";
-    }
+    }UPDATE `llx_user_rights` SET `rowid`= `rowid` + 100000 WHERE `rowid` < 100000
 
     public function startMAj($tab, $update = false) {
         if (!$update) {
-            $this->netoyerTables($tab);die;
+            $this->netoyerTables($tab);
 
 //            $requete = "ALTER TABLE " . MAIN_DB_PREFIX . "commande DROP FOREIGN KEY fk_commande_fk_projet ,
 //                ADD FOREIGN KEY (fk_projet) REFERENCES " . MAIN_DB_PREFIX . "Synopsis_projet (rowid) 

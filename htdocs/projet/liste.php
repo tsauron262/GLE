@@ -108,7 +108,7 @@ jQuery(document).ready(function(){
                         {name:'title',index:'title', width:300},
                         {name:'ref',index:'ref', width:30},
                         {name:'dateo',index:'dateo', width:60, align:"center"},
-                        {name:'avanc',index:'avanc', width:60, align:"center"},
+                        {name:'staut',index:'statut', width:60, align:"center"},
                         {name:'statut',index:'statut', width:60, align:"right"},
                         {name:'socname',index:'socname', width:150, align:"center"},
                         {name:'cntMyTask',index:'cntMyTask', width:50, align:"center"},

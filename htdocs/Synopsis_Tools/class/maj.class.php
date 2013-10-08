@@ -48,7 +48,7 @@ class maj {
 
     private function infoL($text) {
         echo "<br/>" . $this->getTime() . " | Info : " . $text . "<br/>";
-    }UPDATE `llx_user_rights` SET `rowid`= `rowid` + 100000 WHERE `rowid` < 100000
+    }
 
     public function startMAj($tab, $update = false) {
         if (!$update) {

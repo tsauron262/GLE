@@ -293,7 +293,11 @@ function show_array_last_actions_done($max=5)
     $sql.= " AND (a.percent >= 100 OR (a.percent = -1 AND a.datep2 <= '".$db->idate($now)."'))";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
     if ($socid) $sql.= " AND s.rowid = ".$socid;
-	$sql .= " ORDER BY a.datep2 DESC";
+    //MOD drsi 
+//	$sql .= " ORDER BY a.datep2 DESC";
+	$sql .= " ORDER BY a.datep DESC";
+        //F mod drsi
+    
 	$sql .= $db->plimit($max, 0);
 
 	$resql=$db->query($sql);

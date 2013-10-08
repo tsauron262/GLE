@@ -51,7 +51,7 @@ if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'synopsisprojet', $projetid);
 
 
-if($_REQUEST['action'] == "modtask")
+if(isset($_REQUEST['action']) && $_REQUEST['action'] == "modtask")
 {
         $taskId=$_REQUEST['id'];
         $name = addslashes($_REQUEST['label']);
@@ -210,7 +210,7 @@ if ($_REQUEST["id"] > 0)
 
         dol_fiche_head($head, 'tasks', $langs->trans("Tasks"));
 
-        if ($_REQUEST['action'] == 'modify')
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'modify')
         {
             print '<form method="POST" action="task.php?id='.$task->id.'">';
             print '<input type="hidden" name="action" value="modtask">';
@@ -315,8 +315,8 @@ $task->user_creat->fetch($task->user_creat->id);
 
             print "</table>";
             print "<div class='tabsAction'>";
-            print "    <button class='butAction' onClick='location.href=\"task.php?id=".$task->id."\"; return(false);'>Annuler</button>";
             print "    <button class='butAction'>Modifier</button>";
+            print "    <button class='butAction' onClick='location.href=\"task.php?id=".$task->id."\"; return(false);'>Annuler</button>";
             print "</div>";
             print "</form>";
 
@@ -332,7 +332,7 @@ $task->user_creat->fetch($task->user_creat->id);
             print '    <th class="ui-widget-header ui-state-default">'.$langs->trans("Company").'</th><td class="ui-widget-content">'.$projet->societe->getNomUrl(1).'</td></tr>';
 
             $parent = false;
-            if ($res->fk_task_parent > 0)
+            if (isset($res) && $res->fk_task_parent > 0)
             {
                 $parent = new ProjectTask($db);
                 $parent->fetch($res->fk_task_parent);

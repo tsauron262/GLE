@@ -807,10 +807,11 @@ step2c = false;
 
         jQuery('.datepicker').each(function(){
             jQuery(this).datetimepicker();
+            jQuery(this).val("");
         });
         jQuery("#ui-datepicker-div").addClass("promoteZ");
         jQuery("#ui-timepicker-div").addClass("promoteZ");
-
+        
         //Buttons
 
         jQuery("#ajouter").click(function(){

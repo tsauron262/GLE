@@ -226,7 +226,7 @@ switch ($action)
     break;
     case 'insert':
     {
-        $name = stripslashes($_REQUEST['name']);
+        $name = $_REQUEST['name'];
         $parentId = $_REQUEST['parent'];
         if ($parentId == -1 )
         {
@@ -280,6 +280,7 @@ switch ($action)
 
 //        $name = utf8_decode($name);
         $db->begin();
+        $name = addslashes($name);
         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_projet_task
                                 (fk_projet, fk_task_parent, title, dateDeb, fk_user_creat,statut,note,progress,description,color,url,fk_task_type , shortDesc, level)
                          VALUES ($project_id,$parentId, '$name', '$debdateUS', $userid,'$statut','$note', $progress,'$description', '$color', '$url', $fk_task_type,'$shortDescription',$level)";

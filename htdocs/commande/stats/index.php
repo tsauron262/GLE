@@ -270,7 +270,7 @@ if (empty($socid))
 	print '</table>';
 	print '</form>';
 	print '<br><br>';
-//}
+}
 
 print '<table class="border" width="100%">';
 print '<tr height="24">';

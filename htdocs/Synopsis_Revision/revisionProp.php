@@ -84,13 +84,12 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
     $requete = "SELECT *,b.ref as refb FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as b, " . MAIN_DB_PREFIX . "propal as l WHERE b.propalid = l.rowid AND l.rowid = " . $propal->id;
     $resql = $db->query($requete);
 
-    print '<td><br/>Doc. indicable : <br/>';
+    print '<td><br/>Doc. indicable : ';
     if ($db->num_rows($resql) > 0) {
-        $res = $db->fetch_object($resql);
-        print '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a>';
+        while($res = $db->fetch_object($resql))
+            print '<br/><a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a><br/>';
     } else {
-        $res = $db->fetch_object($resql);
-        print '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a>';
+        print '<br/><a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a><br/>';
     }
 }
 

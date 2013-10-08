@@ -168,7 +168,7 @@ $SQL = "SELECT p.rowid as id,
                p.ref as ref,
                date_format(p.dateo,'%d/%m/%Y') as dateo,
                (SELECT avg(progress) FROM ".MAIN_DB_PREFIX."Synopsis_projet_task
-                                    WHERE fk_projet = p.rowid) as statut,
+                                    WHERE fk_projet = p.rowid) as avanc, statut,
                s.rowid as socid,
                s.nom as socname";
 

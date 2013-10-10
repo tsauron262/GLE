@@ -8,6 +8,10 @@
     overflow: auto;
 }*/
 
+div.tabs{
+    height: auto;
+}
+
 
 div.tabBar.reglabe2{
     overflow: auto;

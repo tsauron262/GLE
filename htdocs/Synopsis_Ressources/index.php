@@ -96,7 +96,7 @@ button {
     $requete = "SELECT *
               FROM ".MAIN_DB_PREFIX."user
              WHERE statut = 1
-          ORDER BY firstname, name" ;
+          ORDER BY firstname, lastname" ;
     $sql = $db->query( $requete ) ;
     $jsEditopts[ "userincomp" ] = "" ;
     $jsEditopts[ "userincomp" ].= "-1:" . preg_replace( "/'/", "\\'", utf8_decode( utf8_encode( html_entity_decode( "Sélection ->" ) ) ) ) . ";" ;
@@ -894,7 +894,7 @@ EOF;
     }
     print "</SELECT></td></tr>" ;
     print "<tr><td>Imputer &agrave; : </td><td><SELECT>" ;
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1 ORDER BY firstname, name" ;
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1 ORDER BY firstname, lastname" ;
     $sql = $db->query( $requete ) ;
     print "<option value='-1'>Selection -></option>" ;
     while ( $res = $db->fetch_object( $sql ) )

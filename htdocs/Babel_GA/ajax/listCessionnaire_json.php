@@ -149,7 +149,7 @@ switch ($action)
 
 
 
-        $sql = "SELECT s.rowid, s.nom as socname, s.ville, s.datec  as datec, s.datea as datea,";
+        $sql = "SELECT s.rowid, s.nom as socname, s.town, s.datec  as datec, s.datea as datea,";
         $sql.= " st.libelle as stcomm, s.prefix_comm, s.fk_stcomm, s.fk_prospectlevel,";
         $sql.= " d.nom as departement";
         if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";

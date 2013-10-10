@@ -20,13 +20,13 @@
  */
 
 /**
- *  \file       htdocs/core/modules/synopsisficheinter/modules_fichinter.php
+ *  \file       htdocs/core/modules/fichinter/modules_fichinter.php
  *  \ingroup    ficheinter
  *  \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
  *   			et la classe mere de numerotation des fiches interventions
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/class/commondocgenerator.class.php");
+require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
 
 
 /**
@@ -44,14 +44,14 @@ abstract class ModelePDFFicheinter extends CommonDocGenerator
      *  @param  string	$maxfilenamelength  Max length of value to show
      *  @return	array						List of templates
 	 */
-	function liste_modeles($db,$maxfilenamelength=0)
+	static function liste_modeles($db,$maxfilenamelength=0)
 	{
 		global $conf;
 
 		$type='ficheinter';
 		$liste=array();
 
-		include_once(DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php');
+		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 		$liste=getListOfModels($db,$type,$maxfilenamelength);
 
 		return $liste;
@@ -151,9 +151,10 @@ abstract class ModeleNumRefFicheinter
  *  @param  int			$hidedetails    Hide details of lines
  *  @param  int			$hidedesc       Hide description
  *  @param  int			$hideref        Hide ref
+ *  @param  HookManager	$hookmanager	Hook manager instance
  *  @return int         				0 if KO, 1 if OK
  */
-function fichinter_create($db, $object, $modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0)
+function fichinter_create($db, $object, $modele, $outputlangs, $hidedetails=0, $hidedesc=0, $hideref=0, $hookmanager=false)
 {
 	global $conf,$langs,$user;
 	$langs->load("ficheinter");
@@ -165,7 +166,7 @@ function fichinter_create($db, $object, $modele, $outputlangs, $hidedetails=0, $
 	// Positionne modele sur le nom du modele de fichinter a utiliser
 	if (! dol_strlen($modele))
 	{
-		if ($conf->global->FICHEINTER_ADDON_PDF)
+		if (! empty($conf->global->FICHEINTER_ADDON_PDF))
 		{
 			$modele = $conf->global->FICHEINTER_ADDON_PDF;
 		}
@@ -208,28 +209,25 @@ function fichinter_create($db, $object, $modele, $outputlangs, $hidedetails=0, $
 	// Charge le modele
 	if ($filefound)
 	{
-		require_once($file);
+		require_once $file;
 
 		$obj = new $classname($db);
 
 		// We save charset_output to restore it because write_file can change it if needed for
 		// output format that does not support UTF8.
 		$sav_charset_output=$outputlangs->charset_output;
-		if ($obj->write_file($object, $outputlangs, $srctemplatepath, $hidedetails, $hidedesc, $hideref) > 0)
+		if ($obj->write_file($object, $outputlangs, $srctemplatepath, $hidedetails, $hidedesc, $hideref, $hookmanager) > 0)
 		{
 			$outputlangs->charset_output=$sav_charset_output;
 
 			// We delete old preview
-			require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
+			require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 			dol_delete_preview($object);
 
-			// Success in building document. We build meta file.
-			dol_meta_create($object);
-
 			// Appel des triggers
-			include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($db);
-			$result=$interface->run_triggers('FICHEINTER_BUILDDOC',$object,$user,$langs,$conf);
+			$result=$interface->run_triggers('FICHINTER_BUILDDOC',$object,$user,$langs,$conf);
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
 			// Fin appel triggers
 

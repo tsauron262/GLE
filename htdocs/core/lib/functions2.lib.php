@@ -1359,7 +1359,7 @@ function is_ip($ip)
 }
 
 /**
- *  Build a login from lastname, firstname
+ *  Build a login from lastlastname, firstname
  *
  *  @param	string		$lastname		Lastname
  *  @param  string		$firstname		Firstname

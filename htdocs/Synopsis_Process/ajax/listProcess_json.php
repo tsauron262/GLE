@@ -24,7 +24,7 @@ require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
 
 $langs->load("process@Synopsis_Process");
 
- $user_id = $_REQUEST['userId'];
+ //$user_id = $_REQUEST['userId'];
 
  $action = $_REQUEST['action'];
 
@@ -139,7 +139,7 @@ switch ($action)
                 LIMIT $start , $limit";
 
         $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
-        $responce->page = $page;
+        @$responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;
         $i=0;

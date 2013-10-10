@@ -543,9 +543,6 @@ class ExtraFields
 			{
 				while ($tab = $this->db->fetch_object($resql))
 				{
-                                    /*mod drsi*/
-                                    if(!isset($elementtype2) || stripos($tab->name, $elementtype2) === 0){
-                                        /*f mod drsi*/
 					// we can add this attribute to adherent object
 					if ($tab->type != 'separate')
 					{
@@ -680,9 +677,9 @@ class ExtraFields
 		}
 		elseif ($type == 'sellist')
 		{
+
 			$out='<select class="flat" name="options_'.$key.'">';
-			if (is_array($param['options']))
-			{
+			if (is_array($param['options'])) {
 				$param_list=array_keys($param['options']);
 				$InfoFieldList = explode(":", $param_list[0]);
 
@@ -701,6 +698,7 @@ class ExtraFields
 
 				dol_syslog(get_class($this).'::showInputField type=sellist sql='.$sql);
 				$resql = $this->db->query($sql);
+
 				if ($resql)
 				{
 					$out.='<option value="0">&nbsp;</option>';
@@ -712,7 +710,7 @@ class ExtraFields
 						{
 							$obj = $this->db->fetch_object($resql);
 							$labeltoshow=dol_trunc($obj->$InfoFieldList[1],18);
-													if ($value==$obj->rowid)
+							if ($value==$obj->rowid)
 							{
 								$out.='<option value="'.$obj->rowid.'" selected="selected">'.$labeltoshow.'</option>';
 							}
@@ -723,7 +721,7 @@ class ExtraFields
 							$i++;
 						}
 					}
-					$this->db->free($resql);
+					$this->db->free();
 				}
 			}
 			$out.='</select>';

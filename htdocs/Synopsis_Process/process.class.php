@@ -400,9 +400,9 @@ class process extends CommonObject {
                 'isValidationForAll' => ($res->isValidationForAll > 0 ? true : false));
 
             if ($val == 1)
-                $grpObj->rights->$module->$process->$code = 1;
+                @$grpObj->rights->$module->$process->$code = 1;
             else
-                $grpObj->rights->$module->$process->$code = false;
+                @$grpObj->rights->$module->$process->$code = false;
         }
         return $grpObj;
     }

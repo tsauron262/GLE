@@ -84,10 +84,10 @@ while ($res = $db->fetch_object($sql))
 }
 
 
-$requete =  "SELECT DISTINCT ".MAIN_DB_PREFIX."user.rowid, concat(".MAIN_DB_PREFIX."user.firstname, ' ' ,".MAIN_DB_PREFIX."user.name) as fullname
+$requete =  "SELECT DISTINCT ".MAIN_DB_PREFIX."user.rowid, concat(".MAIN_DB_PREFIX."user.firstname, ' ' ,".MAIN_DB_PREFIX."user.lastname) as fullname
                FROM ".MAIN_DB_PREFIX."user, Babel_campagne_people
               WHERE ".MAIN_DB_PREFIX."user.rowid = Babel_campagne_people.user_refid
-           ORDER BY ".MAIN_DB_PREFIX."user.name";
+           ORDER BY ".MAIN_DB_PREFIX."user.lastname";
 $sql = $db->query($requete);
 $userStr="-2:aucun;";
 while ($res = $db->fetch_object($sql))

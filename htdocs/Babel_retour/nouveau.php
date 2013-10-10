@@ -199,7 +199,7 @@ jQuery(document).ready(function(){
 EOF;
 llxHeader($js,'Nouveau litige',"","1");
 
-//$sql = "SELECT s.rowid, s.nom, s.ville, s.datec")." as datec, ".$db->pdate("s.datea as datea";
+//$sql = "SELECT s.rowid, s.nom, s.town, s.datec")." as datec, ".$db->pdate("s.datea as datea";
 //$sql.= ", s.client, s.fournisseur ";
 //if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 //$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
@@ -251,7 +251,7 @@ print "<h3 class='serial'>Recherche par client</h3>";
         $offset = $conf->liste_limit * $page ;
         $pageprev = $page - 1;
         $pagenext = $page + 1;
-        $sql = "SELECT s.rowid, s.nom, s.ville, s.datec as datec, s.datea as datea";
+        $sql = "SELECT s.rowid, s.nom, s.town, s.datec as datec, s.datea as datea";
         $sql.= ", st.libelle as stcomm, s.prefix_comm, s.client, s.fournisseur,";
         if ($conf->global->MAIN_MODULE_BABELGA)
         {

@@ -859,13 +859,13 @@ function cartouche_campagne($db,$id,$title='Nouvelle campagne de prospection')
     print '</td>';
     $requete = "SELECT Babel_campagne_people.isResponsable,
                        ".MAIN_DB_PREFIX."user.rowid as uid,
-                       ".MAIN_DB_PREFIX."user.name as uname,
+                       ".MAIN_DB_PREFIX."user.lastname as uname,
                        ".MAIN_DB_PREFIX."user.firstname as ufirstname
                   FROM ".MAIN_DB_PREFIX."user,
                        Babel_campagne_people
                  where ".MAIN_DB_PREFIX."user.rowid = Babel_campagne_people.user_refid
                    AND campagne_refid = ". $campagne->id."
-               order by ".MAIN_DB_PREFIX."user.name, ".MAIN_DB_PREFIX."user.firstname";
+               order by ".MAIN_DB_PREFIX."user.lastname, ".MAIN_DB_PREFIX."user.firstname";
     $strResponsable= "";
     $strCommerciaux= "";
 //        print $requete

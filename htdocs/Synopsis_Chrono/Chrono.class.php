@@ -81,8 +81,8 @@ class Chrono extends CommonObject {
                 $this->model_refid = $res->model_refid;
                 $this->propalid = $res->propalid;
                 $this->projetid = $res->projetid;
-                $this->orig_ref = $res->orig_ref;
                 $this->ref = $res->ref;
+                $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
                 $this->revision = ($res->revision > 0 ? $res->revision : false);
                 if ($this->model_refid > 0) {
                     $this->model = new ChronoRef($this->db);

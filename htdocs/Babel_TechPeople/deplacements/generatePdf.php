@@ -44,7 +44,7 @@ $db=new BD();
 $pdf=new PDF('L','mm','A4');
 //utilisateur
 //$ndf->detail_user($userid,"2007");
-$requete = "SELECT user.name as uname," .
+$requete = "SELECT user.lastname as uname," .
         "          user.firstname as ufirstname," .
         "          user.email as uemail," .
         "          distance.seuil as dseuil," .

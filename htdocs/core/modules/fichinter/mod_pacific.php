@@ -1,7 +1,6 @@
 <?php
 /* Copyright (C) 2005-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2009 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2013	   Juanjo Menent        <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +18,11 @@
  */
 
 /**
- *  \file       htdocs/core/modules/synopsisficheinter/mod_pacific.php
+ *  \file       htdocs/core/modules/fichinter/mod_pacific.php
  *  \ingroup    fiche intervention
  *  \brief      File with Pacific numbering module for interventions
  */
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_fichinter.php");
+require_once DOL_DOCUMENT_ROOT .'/core/modules/fichinter/modules_fichinter.php';
 
 /**
  *	Class to manage numbering of intervention cards with rule Pacific.
@@ -122,7 +121,7 @@ class mod_pacific extends ModeleNumRefFicheinter
 		}
 
 		//$date=time();
-		$date=$object->datec;
+		$date=$object->date;
 		$yymm = strftime("%y%m",$date);
 		$num = sprintf("%04s",$max+1);
 

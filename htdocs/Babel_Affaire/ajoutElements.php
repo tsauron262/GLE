@@ -246,7 +246,7 @@ if ($id > 0 )
   //Arbre avec les clients par nom
     $title=$langs->trans("ListOfThirdParties");
 
-    $sql = "SELECT s.rowid, s.nom, s.ville";
+    $sql = "SELECT s.rowid, s.nom, s.town";
     $sql.= ", s.prefix_comm, s.client, s.fournisseur ";
     if ($conf->global->MAIN_MODULE_BABELGA)
     {

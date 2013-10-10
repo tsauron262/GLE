@@ -146,7 +146,7 @@ class mailing_pomme extends MailingTargets
 
 		$cibles = array();
 
-		// La requete doit retourner: id, email, fk_contact, name, firstname
+		// La requete doit retourner: id, email, fk_contact, lastname, firstname
 		$sql = "SELECT u.rowid as id, u.email as email, null as fk_contact,";
 		$sql.= " u.lastname as name, u.firstname as firstname, u.login, u.office_phone";
 		$sql.= " FROM ".MAIN_DB_PREFIX."user as u";

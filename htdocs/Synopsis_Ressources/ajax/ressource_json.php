@@ -49,7 +49,7 @@
 
     if ( $sidx == "fk_user_resp" )
     {
-	$sidx == ' CONCAT(".MAIN_DB_PREFIX."user.name . " ".".MAIN_DB_PREFIX."user.firstname) ' ;
+	$sidx == ' CONCAT(".MAIN_DB_PREFIX."user.lastname . " ".".MAIN_DB_PREFIX."user.firstname) ' ;
     }
 
     $wh = "" ;
@@ -61,7 +61,7 @@
 	$searchString = $_REQUEST[ 'searchString' ] ;
 	if ( $searchField == "fk_user_resp" )
 	{
-	    $searchField == ' CONCAT(".MAIN_DB_PREFIX."user.firstname . " ".".MAIN_DB_PREFIX."user.name) ' ;
+	    $searchField == ' CONCAT(".MAIN_DB_PREFIX."user.firstname . " ".".MAIN_DB_PREFIX."user.lastname) ' ;
 	}
 
 	if ( $_REQUEST[ 'searchOper' ] == 'eq' )

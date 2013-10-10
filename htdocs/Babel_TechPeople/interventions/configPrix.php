@@ -138,9 +138,9 @@ EOF;
 
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1 AND rowid != 1";
         if ($conf->global->FIRSTNAME_BEFORE_NAME){
-            $requete .= " ORDER BY firstname, name ";
+            $requete .= " ORDER BY firstname, lastname ";
         } else {
-            $requete .= "  ORDER BY name, firstname ";
+            $requete .= "  ORDER BY lastname, firstname ";
         }
 
     $sql = $db->query($requete);

@@ -66,7 +66,7 @@ print '<html><head></head><body>';
     $requete = "SELECT *
                   FROM ".MAIN_DB_PREFIX."user
                  WHERE statut = 1
-              ORDER BY firstname, name";
+              ORDER BY firstname, lastname";
     $sql = $db->query($requete);
     $jsEditopts["userincomp"]="";
      $jsEditopts["userincomp"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";
@@ -75,12 +75,12 @@ print '<html><head></head><body>';
         $jsEditopts["userincomp"].= $res->rowid . ":" . preg_replace("/'/","\\'",utf8_decode(utf8_encode($res->firstname . " ".$res->name)))  . ";";
     }
     $requete = "SELECT unix_timestamp(datef) as Fdatef,
-                       facnumber as ref,
+                       ref,
                        rowid,
                        total_ht
                   FROM ".MAIN_DB_PREFIX."facture_fourn
                  WHERE fk_projet = ".$projId."
-              ORDER BY facnumber";
+              ORDER BY ref";
     $sql = $db->query($requete);
     $jsEditopts["factFourn"]="";
     $jsEditopts["factFourn"].=  "-1:" . preg_replace("/'/","\\'",utf8_decode(utf8_encode(html_entity_decode("Sélection ->"))))  . ";";

@@ -233,7 +233,7 @@ if ($socid)
 
 			$title=$langs->trans("CompanyList");
 
-			$sql = "SELECT s.rowid as socid, s.nom, s.ville, s.prefix_comm, s.client, s.fournisseur,";
+			$sql = "SELECT s.rowid as socid, s.nom, s.town, s.prefix_comm, s.client, s.fournisseur,";
 			$sql.= " te.code, te.libelle";
 			$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 			$sql.= ", ".MAIN_DB_PREFIX."c_typent as te";

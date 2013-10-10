@@ -10,7 +10,7 @@ require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_chrono.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
 //  require_once('Var_Dump.php');
 //Var_Dump::Display($_REQUEST);
 $id = $_REQUEST['id'];
@@ -177,7 +177,7 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
     $interface = new Interfaces($db);
     $interface->texte = $tmpName;
-    
+
     $chr = new Chrono($db);
     $chr->fetch($_REQUEST['id']);
     $result = $interface->run_triggers('ECM_UL_DEL_CHRONO', $chr, $user, $langs, $conf);
@@ -663,7 +663,7 @@ EOF;
         } else {
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
-                    print "<a href='" . DOL_URL_ROOT . "/projet/fiche.php?id=" . $res->rowid . "'>" . $res->title . "</a>";
+                    print "<a href='" . DOL_URL_ROOT . "/projet/fiche.php?id=" . $res->rowid . "'>" . $res->ref . " : " . $res->title . "</a>";
                 }
             }
         }
@@ -755,12 +755,34 @@ EOF;
             print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
         } else if (($user->rights->synopsischrono->ModifierApresValide ) && $chr->statut > 0 && $chr->statut != 999) {
             print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
+
+            $requete = "SELECT *
+                                FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
+                               WHERE ";
+            if ($chr->revision >= 1) {
+                if ($chr->revision > 1)
+                    $requete .= "orig_ref = '" . $chr->orig_ref . "'
+                                 AND revision = " . ($chr->revision > 0 ? $chr->revision - 1 : 1);
+                else
+                    $requete .= "ref = '" . $chr->orig_ref . "'";
+                echo $requete;
+                $sql = $db->query($requete);
+                $res = $db->fetch_object($sql);
+                if ($res->id > 0) {
+                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $res->id . "\"'>R&eacute;vision précédente: " . $res->ref . "</button>";
+                }
+            }
+
+
             if ($chr->model->hasRevision == 1 && $chr->model->revision_model_refid > 0 && $chr->statut != 3)
                 print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
             else if ($chr->model->hasRevision == 1 && $chr->statut != 3)
                 print "<div class='ui-error error'>Pas de mod&egrave;le de r&eacute;visions !</div>";
             else if ($chr->model->hasRevision == 1 && $chr->statut == 3) {
 //Affiche le dernier et le suivant
+
+
+
                 $requete = "SELECT *
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
                                WHERE orig_ref = '" . $chr->orig_ref . "'
@@ -770,6 +792,8 @@ EOF;
                 if ($res->id > 0) {
                     print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $res->id . "\"'>R&eacute;vision suivante: " . $res->ref . "</button>";
                 }
+
+
                 $requete = "SELECT *
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
                                WHERE orig_ref = '" . $chr->orig_ref . "'

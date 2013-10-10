@@ -379,7 +379,7 @@ if ($action == 'add' && $user->rights->contrat->creer)
         setEventMessage($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Description")), 'errors');
         $error++;
     }
-
+}
 else if ($action == 'addline' && $user->rights->contrat->creer)
 {
     if (! GETPOST('qty'))
@@ -657,30 +657,11 @@ else if ($action == 'setnote' && $user->rights->contrat->creer) {
         dol_print_error($db, $object->error);
 }
 
-if (!empty($conf->global->MAIN_DISABLE_CONTACTS_TAB) && $user->rights->contrat->creer) {
-    if ($action == 'addcontact') {
-        $result = $object->fetch($id);
-
-else if ($action == 'setnote_public' && $user->rights->contrat->creer)
+if (! empty($conf->global->MAIN_DISABLE_CONTACTS_TAB) && $user->rights->contrat->creer)
 {
-	$result=$object->update_note(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES),'_public');
-	if ($result < 0) dol_print_error($db,$object->error);
-}
-
-else if ($action == 'setnote_private' && $user->rights->contrat->creer)
-{
-	$result=$object->update_note(dol_html_entity_decode(GETPOST('note_private'), ENT_QUOTES),'_private');
-	if ($result < 0) dol_print_error($db,$object->error);
-}
-
-    // bascule du statut d'un contact
-    else if ($action == 'swapstatut') {
-        if ($object->fetch($id)) {
-            $result = $object->swapContactStatus(GETPOST('ligne'));
-        } else {
-            dol_print_error($db);
-        }
-    }
+	if ($action == 'addcontact')
+	{
+		$result = $object->fetch($id);
 
 		if ($result > 0 && $id > 0)
 		{
@@ -688,13 +669,53 @@ else if ($action == 'setnote_private' && $user->rights->contrat->creer)
 			$result = $object->add_contact($contactid, GETPOST('type'), GETPOST('source'));
 		}
 
-        if ($result >= 0) {
-            header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $object->id);
-            exit;
-        } else {
-            dol_print_error($db);
-        }
-    }
+		if ($result >= 0)
+		{
+			header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+			exit;
+		}
+		else
+		{
+			if ($object->error == 'DB_ERROR_RECORD_ALREADY_EXISTS')
+			{
+				$langs->load("errors");
+				$mesg = '<div class="error">'.$langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType").'</div>';
+			}
+			else
+			{
+				$mesg = '<div class="error">'.$object->error.'</div>';
+			}
+		}
+	}
+
+	// bascule du statut d'un contact
+	else if ($action == 'swapstatut')
+	{
+		if ($object->fetch($id))
+		{
+			$result=$object->swapContactStatus(GETPOST('ligne'));
+		}
+		else
+		{
+			dol_print_error($db);
+		}
+	}
+
+	// Efface un contact
+	else if ($action == 'deletecontact')
+	{
+		$object->fetch($id);
+		$result = $object->delete_contact(GETPOST('lineid'));
+
+		if ($result >= 0)
+		{
+			header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+			exit;
+		}
+		else {
+			dol_print_error($db);
+		}
+	}
 }
 
 

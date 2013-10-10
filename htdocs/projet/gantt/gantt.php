@@ -156,11 +156,11 @@ print "</script>";
 $requete = "SELECT *
               FROM " . MAIN_DB_PREFIX . "user
              WHERE statut = 1
-          ORDER BY firstname, name";
+          ORDER BY firstname, lastname";
 $sql = $db->query($requete);
 $optUsrStr = "";
 while ($res = $db->fetch_object($sql)) {
-    $optUsrStr .= "<option value='" . $res->rowid . "'>" . $res->firstname . " " . $res->name . "</option>";
+    $optUsrStr .= "<option value='" . $res->rowid . "'>" . $res->firstname . " " . $res->lastname . "</option>";
 }
 print "<script>";
 print 'var optUsrStr = "<option value=\'-1\'>S&eacute;lectionn&eacute;-></option>' . $optUsrStr . '";';

@@ -125,7 +125,7 @@ print "<a rel='toptop'>&nbsp;</a>";
                       FROM ".MAIN_DB_PREFIX."user
                      WHERE statut = 1
                        AND rowid <> ".$user->id."
-                  ORDER BY firstname, name";
+                  ORDER BY firstname, lastname";
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql))
         {
@@ -255,14 +255,14 @@ function img_action_jquery($alt = "default", $numaction)
 
     $requete = "SELECT Babel_campagne_people.isResponsable,
                        ".MAIN_DB_PREFIX."user.rowid as uid,
-                       ".MAIN_DB_PREFIX."user.name as uname,
+                       ".MAIN_DB_PREFIX."user.lastname as uname,
                        ".MAIN_DB_PREFIX."user.firstname as ufirstname
                   FROM ".MAIN_DB_PREFIX."user,
                        Babel_campagne_people
                  WHERE ".MAIN_DB_PREFIX."user.rowid = Babel_campagne_people.user_refid
                    AND campagne_refid = ". $campagne->id."
                    AND ".MAIN_DB_PREFIX."user.rowid <> ".$user->id."
-              ORDER BY ".MAIN_DB_PREFIX."user.name, ".MAIN_DB_PREFIX."user.firstname";
+              ORDER BY ".MAIN_DB_PREFIX."user.lastname, ".MAIN_DB_PREFIX."user.firstname";
     $sql = $db->query($requete);
     print "<tr><td style='width: 75px;'><em>*</em>&nbsp;&nbsp;Passer &agrave;</td><td><select name='userGiveTo' id='userGiveTo' ><option value=''>S&eacute;lectionner-></option>";
     while ($res = $db->fetch_object($sql))

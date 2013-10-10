@@ -195,7 +195,7 @@ class mailing_contacts1 extends MailingTargets
 		}
 		else dol_print_error($this->db);
 
-		// La requete doit retourner: id, email, fk_contact, name, firstname, other
+		// La requete doit retourner: id, email, fk_contact, lastname, firstname, other
 		$sql = "SELECT c.rowid as id, c.email as email, c.rowid as fk_contact,";
 		$sql.= " c.lastname, c.firstname, c.civilite,";
 		$sql.= " s.nom as companyname";

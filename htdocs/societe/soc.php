@@ -729,7 +729,7 @@ else
 
         print '<table class="border" width="100%">';
 
-        // Name, firstname
+        // lastname, firstname
         if ($object->particulier || $private)
         {
             print '<tr><td><span id="TypeName" class="fieldrequired">'.$langs->trans('LastName').'</span></td><td'.(empty($conf->global->SOCIETE_USEPREFIX)?' colspan="3"':'').'><input type="text" size="30" maxlength="60" name="nom" value="'.$object->name.'"></td>';

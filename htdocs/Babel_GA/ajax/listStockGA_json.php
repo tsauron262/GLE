@@ -356,7 +356,7 @@ switch ($action)
 
         $sql = "SELECT DISTINCT s.rowid,
                        s.nom as socname,
-                       s.ville,
+                       s.town,
                        s.datec  as datec,
                        s.datea as datea,
                        d.nom as departement,

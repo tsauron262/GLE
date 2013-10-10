@@ -164,7 +164,7 @@ class mailing_fraise extends MailingTargets
         $dateendsubscriptionafter=dol_mktime($_POST['subscriptionafterhour'],$_POST['subscriptionaftermin'],$_POST['subscriptionaftersec'],$_POST['subscriptionaftermonth'],$_POST['subscriptionafterday'],$_POST['subscriptionafteryear']);
         $dateendsubscriptionbefore=dol_mktime($_POST['subscriptionbeforehour'],$_POST['subscriptionbeforemin'],$_POST['subscriptionbeforesec'],$_POST['subscriptionbeforemonth'],$_POST['subscriptionbeforeday'],$_POST['subscriptionbeforeyear']);
 
-        // La requete doit retourner: id, email, fk_contact, name, firstname
+        // La requete doit retourner: id, email, fk_contact, lastname, firstname
         $sql = "SELECT a.rowid as id, a.email as email, null as fk_contact, ";
         $sql.= " a.lastname, a.firstname,";
         $sql.= " a.datefin, a.civilite, a.login, a.societe";	// Other fields

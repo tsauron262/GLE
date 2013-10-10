@@ -21,11 +21,11 @@
 
 require_once('../../main.inc.php');
 
- $user_id = $_REQUEST['userId'];
+ //$user_id = $_REQUEST['userId'];
 
  $action = $_REQUEST['action'];
 
-$user->fetch($user_id);
+//$user->fetch($user_id);
 $user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
@@ -133,7 +133,7 @@ switch ($action)
                 LIMIT $start , $limit";
 
         $result = $db->query( $sql ) or die("Couldn t execute query : ".$sql.".".mysql_error());
-        $responce->page = $page;
+        @$responce->page = $page;
         $responce->total = $total_pages;
         $responce->records = $count;
         $i=0;

@@ -75,7 +75,7 @@ class mailing_contacts3 extends MailingTargets
 
     	$target = array();
 
-        // La requete doit retourner: id, email, fk_contact, name, firstname, other
+        // La requete doit retourner: id, email, fk_contact, lastname, firstname, other
         $sql = "SELECT sp.rowid as id, sp.email as email, sp.rowid as fk_contact,";
         $sql.= " sp.lastname, sp.firstname, sp.civilite,";
         $sql.= " s.nom as companyname";

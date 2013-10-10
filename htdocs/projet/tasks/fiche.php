@@ -882,7 +882,7 @@ dol_fiche_head($head, 'tasks', $langs->trans("Project"));
 $requete = "SELECT *
               FROM " . MAIN_DB_PREFIX . "user
              WHERE statut = 1
-          ORDER BY firstname, name";
+          ORDER BY firstname, lastname";
 $sql = $db->query($requete);
 $optUsrStr = "";
 while ($res = $db->fetch_object($sql)) {
@@ -1127,11 +1127,11 @@ if ($user->rights->synopsisprojet->attribution) {
     print "  <form id='userTimeForm'>";
 //1 Liste des utilisateurs
     $requete = "SELECT firstname,
-                   name,
+                   lastname,
                    rowid as id
               FROM " . MAIN_DB_PREFIX . "user
              WHERE statut = 1
-          ORDER BY firstname, name";
+          ORDER BY firstname, lastname";
     $sql = $db->query($requete);
     print "<table width=100% cellpadding=10>";
     print "<tr><th class='ui-widget-header ui-state-hover'>Nom";

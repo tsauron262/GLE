@@ -1372,14 +1372,17 @@ EOF;
 
             // Libelle
             print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Label") . '</td><td class="ui-widget-content">' . $product->libelle . '</td></tr>';
-            $sql = "SELECT id, modeleName FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf WHERE id='" . $product->array_options['options_2annexe'] . "'";
-            $resql = $db->query($sql);
-            print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Annexe") . '</td><td class="ui-widget-content">';
-            if ($db->num_rows($resql)) {
-                $res = $db->fetch_object($resql);
-                print $res->modeleName;
+
+            if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+                $sql = "SELECT id, modeleName FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf WHERE id='" . $product->array_options['options_2annexe'] . "'";
+                $resql = $db->query($sql);
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans("Annexe") . '</td><td class="ui-widget-content">';
+                if ($db->num_rows($resql)) {
+                    $res = $db->fetch_object($resql);
+                    print $res->modeleName;
+                }
+                print '</td></tr>';
             }
-            print '</td></tr>';
             if (0 && $product->islocation()) {
                 print '<tr><th class="ui-state-default ui-widget-header" >' . $langs->trans("Price") . '</td><td class="ui-widget-content">';
                 if ($product->price_base_type == 'TTC') {
@@ -1519,7 +1522,7 @@ EOF;
                                <td ' . $colspan . ' class="ui-widget-content">OUI';
                 }
 //                if ($product->array_options['options_2qte'] > 0) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">' . $product->array_options['options_2qte'];
 //                } if ($product->array_options['options_2qte'] == -1) {
 //                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Qt&eacute; de tickets") . '</th>

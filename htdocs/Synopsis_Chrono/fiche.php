@@ -765,7 +765,7 @@ EOF;
                                  AND revision = " . ($chr->revision > 0 ? $chr->revision - 1 : 1);
                 else
                     $requete .= "ref = '" . $chr->orig_ref . "'";
-                echo $requete;
+
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 if ($res->id > 0) {

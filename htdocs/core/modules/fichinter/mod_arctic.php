@@ -20,11 +20,11 @@
  */
 
 /**
- *	\file       htdocs/core/modules/fichinter/mod_arctic.php
+ *	\file       htdocs/core/modules/synopsisficheinter/mod_arctic.php
  *	\ingroup    fiche intervention
  *	\brief      File with Arctic numbering module for interventions
  */
-require_once DOL_DOCUMENT_ROOT .'/core/modules/fichinter/modules_fichinter.php';
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_fichinter.php");
 
 /**
  *	Class to manage numbering of intervention cards with rule Artic.
@@ -108,7 +108,7 @@ class mod_arctic extends ModeleNumRefFicheinter
     {
 		global $db,$conf;
 
-		require_once DOL_DOCUMENT_ROOT .'/core/lib/functions2.lib.php';
+		require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
 
 		// On d�fini critere recherche compteur
 		$mask=$conf->global->FICHINTER_ARTIC_MASK;

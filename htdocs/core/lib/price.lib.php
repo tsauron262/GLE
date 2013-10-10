@@ -43,7 +43,7 @@
  *		@param  float	$uselocaltax2_rate          0=do not use this localtax, >0=apply, -1=autodetect according to seller
  *		@param 	float	$remise_percent_global		0
  *		@param	string	$price_base_type 			HT=on calcule sur le HT, TTC=on calcule sur le TTC
- *		@param	int		$info_bits					Miscellanous informations on line
+ *		@param	int		$info_bits					Miscellaneous informations on line
  *		@param	int		$type						0/1=Product/service
  *		@param  string	$seller						Thirdparty seller (we need $seller->country_code property). Provided only if seller is the supplier.
  *		@return result[ 0=total_ht,
@@ -69,17 +69,22 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 
 	$result=array();
 
+	// Clean parameters
+	if (empty($txtva)) $txtva=0;
+	
 	if (empty($seller) || ! is_object($seller))
 	{
 		if (! is_object($mysoc))	// mysoc may be not defined (during migration process)
 		{
 			$mysoc=new Societe($db);
-			$mysoc->getMysoc($conf);
+			$mysoc->setMysoc($conf);
 		}
-		$seller=$mysoc;	// If seller is a customer, $seller is not provided, we use $mysoc
+		$seller=$mysoc;	// If sell is done to a customer, $seller is not provided, we use $mysoc
 		//var_dump($seller->country_id);exit;
 	}
-
+	// Too verbose. Enable for debug only
+	//dol_syslog("calcul_price_total qty=".$qty." pu=".$pu." remiserpercent_ligne=".$remise_percent_ligne." txtva=".$txtva." uselocaltax1_rate=".$uselocaltax1_rate." uselocaltax2_rate=".$uselocaltax2_rate);
+	
 	$countryid=$seller->country_id;
 	if ($uselocaltax1_rate < 0) $uselocaltax1_rate=$seller->localtax1_assuj;
 	if ($uselocaltax2_rate < 0) $uselocaltax2_rate=$seller->localtax2_assuj;
@@ -91,7 +96,7 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 	$sql.= " FROM ".MAIN_DB_PREFIX."c_tva as cv";
 	$sql.= " WHERE cv.taux = ".$txtva;
 	$sql.= " AND cv.fk_pays = ".$countryid;
-	dol_syslog("search vat information sql=".$sql);
+	dol_syslog("calcul_price_total search vat information sql=".$sql);
 	$resql = $db->query($sql);
 	if ($resql)
 	{

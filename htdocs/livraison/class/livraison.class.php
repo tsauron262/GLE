@@ -4,6 +4,7 @@
  * Copyright (C) 2006-2007 Laurent Destailleur   <eldy@users.sourceforge.net>
  * Copyright (C) 2007      Franky Van Liedekerke <franky.van.liedekerke@telenet.be>
  * Copyright (C) 2011-2012 Philippe Grand	     <philippe.grand@atoo-net.com>
+ * Copyright (C) 2013      Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,11 +51,15 @@ class Livraison extends CommonObject
 	var $ref_customer;
 	var $statut;
 
+	var $note_public;
+	var $note_private;
+
 	var $expedition_id;
 
 	var $date_delivery;    // Date really received
 	var $date_creation;
 	var $date_valid;
+	var $model_pdf;
 
 
 	/**
@@ -86,6 +91,8 @@ class Livraison extends CommonObject
 
 		dol_syslog("Livraison::create");
 
+		if (empty($this->model_pdf)) $this->model_pdf=$conf->global->LIVRAISON_ADDON_PDF;
+
 		$error = 0;
 
         $now=dol_now();
@@ -106,15 +113,21 @@ class Livraison extends CommonObject
 		$sql.= ", fk_user_author";
 		$sql.= ", date_delivery";
 		$sql.= ", fk_address";
+		$sql.= ", note_private";
+		$sql.= ", note_public";
+		$sql.= ", model_pdf";
 		$sql.= ") VALUES (";
 		$sql.= "'(PROV)'";
 		$sql.= ", ".$conf->entity;
 		$sql.= ", ".$this->socid;
-		$sql.= ", '".$this->ref_customer."'";
+		$sql.= ", '".$this->db->escape($this->ref_customer)."'";
 		$sql.= ", ".$this->db->idate($now);
 		$sql.= ", ".$user->id;
 		$sql.= ", ".($this->date_delivery?"'".$this->db->idate($this->date_delivery)."'":"null");
 		$sql.= ", ".($this->fk_delivery_address > 0 ? $this->fk_delivery_address : "null");
+		$sql.= ", ".(!empty($this->note_private)?"'".$this->db->escape($this->note_private)."'":"null");
+		$sql.= ", ".(!empty($this->note_public)?"'".$this->db->escape($this->note_public)."'":"null");
+		$sql.= ", ".(!empty($this->model_pdf)?"'".$this->db->escape($this->model_pdf)."'":"null");
 		$sql.= ")";
 
 		dol_syslog("Livraison::create sql=".$sql, LOG_DEBUG);
@@ -253,7 +266,7 @@ class Livraison extends CommonObject
 		global $conf;
 
 		$sql = "SELECT l.rowid, l.fk_soc, l.date_creation, l.date_valid, l.ref, l.ref_customer, l.fk_user_author,";
-		$sql.=" l.total_ht, l.fk_statut, l.fk_user_valid, l.note, l.note_public";
+		$sql.=" l.total_ht, l.fk_statut, l.fk_user_valid, l.note_private, l.note_public";
 		$sql.= ", l.date_delivery, l.fk_address, l.model_pdf";
 		$sql.= ", el.fk_source as origin_id, el.sourcetype as origin";
 		$sql.= " FROM ".MAIN_DB_PREFIX."livraison as l";
@@ -279,7 +292,8 @@ class Livraison extends CommonObject
 				$this->user_author_id       = $obj->fk_user_author;
 				$this->user_valid_id        = $obj->fk_user_valid;
 				$this->fk_delivery_address  = $obj->fk_address;
-				$this->note                 = $obj->note;
+				$this->note                 = $obj->note_private; //TODO deprecated
+				$this->note_private         = $obj->note_private;
 				$this->note_public          = $obj->note_public;
 				$this->modelpdf             = $obj->model_pdf;
 				$this->origin               = $obj->origin;		// May be 'shipping'
@@ -334,10 +348,10 @@ class Livraison extends CommonObject
 
 		if ($user->rights->expedition->livraison->valider)
 		{
-			if (! empty($conf->global->LIVRAISON_ADDON))
+			if (! empty($conf->global->LIVRAISON_ADDON_NUMBER))
 			{
 				// Definition du nom de module de numerotation de commande
-				$modName = $conf->global->LIVRAISON_ADDON;
+				$modName = $conf->global->LIVRAISON_ADDON_NUMBER;
 
 				if (is_readable(DOL_DOCUMENT_ROOT .'/core/modules/livraison/'.$modName.'.php'))
 				{
@@ -488,7 +502,8 @@ class Livraison extends CommonObject
 
 		$this->origin               = $expedition->element;
 		$this->origin_id            = $expedition->id;
-		$this->note                 = $expedition->note;
+		$this->note_private         = $expedition->note_private;
+		$this->note_public          = $expedition->note_public;
 		$this->fk_project           = $expedition->fk_project;
 		$this->date_delivery        = $expedition->date_delivery;
 		$this->fk_delivery_address  = $expedition->fk_delivery_address;
@@ -792,7 +807,8 @@ class Livraison extends CommonObject
 		$this->specimen=1;
 		$this->socid = 1;
 		$this->date_delivery = $now;
-		$this->note_public='SPECIMEN';
+		$this->note_public='Pulbic note';
+		$this->note_private='Private note';
 
 		$i=0;
 		$line=new LivraisonLigne($this->db);
@@ -883,6 +899,41 @@ class Livraison extends CommonObject
 			$this->error=$this->db->error()." - sql=$sqlSourceLine";
 			dol_syslog(get_class($this)."::getRemainingDelivered ".$this->error, LOG_ERR);
 			return -1;
+		}
+	}
+
+	/**
+	 *	Set the planned delivery date
+	 *
+	 *	@param      User			$user        		Objet utilisateur qui modifie
+	 *	@param      timestamp		$date_livraison     Date de livraison
+	 *	@return     int         						<0 if KO, >0 if OK
+	 */
+	function set_date_livraison($user, $date_livraison)
+	{
+		if ($user->rights->expedition->creer)
+		{
+			$sql = "UPDATE ".MAIN_DB_PREFIX."livraison";
+			$sql.= " SET date_delivery = ".($date_livraison ? "'".$this->db->idate($date_livraison)."'" : 'null');
+			$sql.= " WHERE rowid = ".$this->id;
+
+			dol_syslog(get_class($this)."::set_date_livraison sql=".$sql,LOG_DEBUG);
+			$resql=$this->db->query($sql);
+			if ($resql)
+			{
+				$this->date_delivery = $date_livraison;
+				return 1;
+			}
+			else
+			{
+				$this->error=$this->db->error();
+				dol_syslog(get_class($this)."::set_date_livraison ".$this->error,LOG_ERR);
+				return -1;
+			}
+		}
+		else
+		{
+			return -2;
 		}
 	}
 

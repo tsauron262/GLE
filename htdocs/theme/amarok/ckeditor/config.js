@@ -1,4 +1,4 @@
-﻿/*
+/*
 Copyright (c) 2003-2010, CKSource - Frederico Knabben. All rights reserved.
 For licensing, see LICENSE.html or http://ckeditor.com/license
 */
@@ -79,4 +79,12 @@ CKEDITOR.editorConfig = function( config )
 	 	['JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'],
 	    ['SpecialChar']
 	];
+	
+	// Used for mailing fields
+	config.toolbar_dolibarr_readonly =
+	[
+	 	['Source','Maximize'],
+	 	['Find']
+	];	
+	
 };

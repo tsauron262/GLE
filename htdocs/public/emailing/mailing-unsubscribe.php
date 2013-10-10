@@ -25,8 +25,23 @@
  *      \brief      Script use to update unsubcribe contact to prospect mailing list
  */
 
-define("NOLOGIN",1);		// This means this output page does not require to be logged.
-define("NOCSRFCHECK",1);	// We accept to go on this page from external web site.
+if (! defined('NOLOGIN'))        define("NOLOGIN",1);			// This means this output page does not require to be logged.
+if (! defined('NOCSRFCHECK'))    define('NOCSRFCHECK','1');		// Do not check anti CSRF attack test
+if (! defined('NOREQUIREMENU'))  define('NOREQUIREMENU','1');	// If there is no need to load and show top and left menu
+
+/**
+ * Header empty
+ *
+ * @return	void
+ */
+function llxHeader() { }
+/**
+ * Footer empty
+ *
+ * @return	void
+ */
+function llxFooter() { }
+
 
 require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
@@ -38,15 +53,23 @@ $langs->load("mails");
 
 $tag=GETPOST('tag');
 $unsuscrib=GETPOST('unsuscrib');
-
-if (empty($conf->global->MAILING_EMAIL_UNSUBSCRIBE)) accessforbidden('Option not enabled');
+$securitykey=GETPOST('securitykey');
 
 
 /*
  * Actions
  */
 
-if (($tag!='') && ($unsuscrib=='1'))
+dol_syslog("public/emailing/mailing-read.php : tag=".$tag." securitykey=".$securitykey, LOG_DEBUG);
+
+if ($securitykey != $conf->global->MAILING_EMAIL_UNSUBSCRIBE_KEY)
+{
+	print 'Bad security key value.';
+	exit;
+}
+
+
+if (! empty($tag) && ($unsuscrib=='1'))
 {
 	//Udate status of mail in Destinaries maling list
 	$statut='3';
@@ -62,7 +85,7 @@ if (($tag!='') && ($unsuscrib=='1'))
 	$resql=$db->query($sql);
 
     //Update status communication of contact prospect
-	$sql = "UPDATE ".MAIN_DB_PREFIX."societe SET fk_stcomm=-1 WHERE rowid IN (SELECT fk_soc FROM ".MAIN_DB_PREFIX."socpeople AS sc INNER JOIN ".MAIN_DB_PREFIX."mailing_cibles AS mc ON mc.tag = '".$db->escape($tag)."' AND mc.source_type = 'contact' AND mc.source_id = sc.rowid)";
+	$sql = "UPDATE ".MAIN_DB_PREFIX."socpeople SET no_email=1 WHERE rowid IN (SELECT rowid FROM ".MAIN_DB_PREFIX."socpeople AS sc INNER JOIN ".MAIN_DB_PREFIX."mailing_cibles AS mc ON mc.tag = '".$db->escape($tag)."' AND mc.source_type = 'contact' AND mc.source_id = sc.rowid)";
 	dol_syslog("public/emailing/mailing-unsubscribe.php : Mail unsubcribe contact : ".$sql, LOG_DEBUG);
 
 	$resql=$db->query($sql);

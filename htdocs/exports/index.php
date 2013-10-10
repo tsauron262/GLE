@@ -51,9 +51,8 @@ print $langs->trans("FormatedExportDesc2").' ';
 print $langs->trans("FormatedExportDesc3").'<br>';
 print '<br>';
 
-print '<table class="notopnoleftnoright" width="100%">';
 
-print '<tr><td valign="top" width="70%" class="notopnoleft">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
 // List export set
@@ -109,9 +108,9 @@ if (count($export->array_export_code))
 	*/
 }
 print '</center>';
+print '<br>';
 
-
-print '</td><td valign="top" width="30%" class="notopnoleftnoright">';
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 // List of available export format
@@ -136,15 +135,14 @@ foreach($liste as $key => $val)
 	$text=$model->getDriverDescForKey($key);
 	print '<td>'.$form->textwithpicto($model->getDriverLabelForKey($key),$text).'</td>';
 	print '<td>'.$model->getLibLabelForKey($key).'</td>';
-	print '<td nowrap="nowrap" align="right">'.$model->getLibVersionForKey($key).'</td>';
+	print '<td class="nowrap" align="right">'.$model->getLibVersionForKey($key).'</td>';
 	print '</tr>';
 }
 
 print '</table>';
 
 
-print '</td></tr>';
-print '</table>';
+print '</div></div></div>';
 
 
 llxFooter();

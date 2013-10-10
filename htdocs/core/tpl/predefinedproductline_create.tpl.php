@@ -32,38 +32,6 @@ if (! empty($conf->margin->enabled) && ! empty($object->element) && in_array($ob
 
 <!-- BEGIN PHP TEMPLATE predefinedproductline_create.tpl.php -->
 
-<tr class="liste_titre nodrag nodrop">
-	<td<?php echo (! empty($conf->global->MAIN_VIEW_LINE_NUMBER) ? ' colspan="4"' : ' colspan="3"'); ?>>
-	<?php
-	echo $langs->trans("AddNewLine").' - ';
-	if (! empty($conf->product->enabled) && empty($conf->service->enabled)) echo $langs->trans('RecordedProducts');
-	else if (empty($conf->product->enabled) && ! empty($conf->service->enabled)) echo $langs->trans('RecordedServices');
-	else echo $langs->trans('RecordedProductsAndServices');
-	?>
-	</td>
-	<td align="right"><?php echo $langs->trans('Qty'); ?></td>
-	<td align="right"><?php echo $langs->trans('ReductionShort'); ?></td>
-<?php
-$colspan = 4;
-if (! empty($usemargins)) 
-{
-	if (! empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
-	if (! empty($conf->global->DISPLAY_MARK_RATES))   $colspan++;
-	?>
-	<td align="right">
-	<?php
-	if ($conf->global->MARGIN_TYPE == "1")
-		echo $langs->trans('BuyingPrice');
-	else
-		echo $langs->trans('CostPrice');
-	?>
-	</td>
-	<?php
-} 
-?>
-	<td colspan="<?php echo $colspan; ?>">&nbsp;</td>
-</tr>
-
 <form name="addpredefinedproduct" id="addpredefinedproduct" action="<?php echo $_SERVER["PHP_SELF"].'?id='.$this->id; ?>#add" method="POST">
 <input type="hidden" name="token" value="<?php echo $_SESSION['newtoken']; ?>">
 <input type="hidden" name="action" value="addline">
@@ -77,6 +45,39 @@ jQuery(document).ready(function() {
 	});
 });
 </script>
+
+
+<tr class="liste_titre nodrag nodrop">
+	<td<?php echo (! empty($conf->global->MAIN_VIEW_LINE_NUMBER) ? ' colspan="4"' : ' colspan="3"'); ?>>
+	<?php
+	echo '<span class="hideonsmartphone">'.$langs->trans("AddNewLine").' - </span>';
+	if (! empty($conf->product->enabled) && empty($conf->service->enabled)) echo $langs->trans('RecordedProducts');
+	else if (empty($conf->product->enabled) && ! empty($conf->service->enabled)) echo $langs->trans('RecordedServices');
+	else echo $langs->trans('RecordedProductsAndServices');
+	?>
+	</td>
+	<td align="right"><?php echo $langs->trans('Qty'); ?></td>
+	<td align="right"><?php echo $langs->trans('ReductionShort'); ?></td>
+<?php
+$colspan = 4;
+if (! empty($usemargins))
+{
+	if (! empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
+	if (! empty($conf->global->DISPLAY_MARK_RATES))   $colspan++;
+	?>
+	<td align="right">
+	<?php
+	if ($conf->global->MARGIN_TYPE == "1")
+		echo $langs->trans('BuyingPrice');
+	else
+		echo $langs->trans('CostPrice');
+	?>
+	</td>
+	<?php
+}
+?>
+	<td colspan="<?php echo $colspan; ?>">&nbsp;</td>
+</tr>
 
 <tr <?php echo $bcnd[$var]; ?>>
 	<td<?php echo (! empty($conf->global->MAIN_VIEW_LINE_NUMBER) ? ' colspan="4"' : ' colspan="3"'); ?>>
@@ -105,18 +106,18 @@ jQuery(document).ready(function() {
 	$doleditor->Create();
 	?>
 	</td>
-	<td align="right"><input type="text" size="2" name="qty" value="1"></td>
-	<td align="right" nowrap><input type="text" size="1" name="remise_percent" value="<?php echo $buyer->remise_client; ?>">%</td>
+	<td align="right"><input type="text" size="2" name="qty" class="flat" value="1"></td>
+	<td align="right" nowrap><input type="text" size="1" class="flat" name="remise_percent" value="<?php echo $buyer->remise_client; ?>"><span class="hideonsmartphone">%</span></td>
 	<?php
 	$colspan = 4;
-	if (! empty($usemargins)) 
+	if (! empty($usemargins))
 	{
 		if (! empty($conf->global->DISPLAY_MARGIN_RATES)) $colspan++;
 		if (! empty($conf->global->DISPLAY_MARK_RATES))   $colspan++;
 		?>
 		<td align="right">
-			<select id="fournprice" name="fournprice" style="display: none;"></select>
-			<input type="text" size="5" id="buying_price" name="buying_price" value="<?php echo (isset($_POST["buying_price"])?$_POST["buying_price"]:''); ?>">
+			<select id="fournprice" name="fournprice" class="flat" style="display: none;"></select>
+			<input type="text" size="5" id="buying_price" name="buying_price" class="flat" value="<?php echo (isset($_POST["buying_price"])?$_POST["buying_price"]:''); ?>">
 		</td>
 		<?php
 	}
@@ -126,8 +127,8 @@ jQuery(document).ready(function() {
 	</td>
 </tr>
 
-<?php 
-if (! empty($conf->service->enabled) && $dateSelector) 
+<?php
+if (! empty($conf->service->enabled) && $dateSelector)
 {
 	if (! empty($conf->global->MAIN_VIEW_LINE_NUMBER)) $colspan = 10;
 	else $colspan = 9;
@@ -138,6 +139,7 @@ if (! empty($conf->service->enabled) && $dateSelector)
 		if (! empty($conf->global->DISPLAY_MARK_RATES))   $colspan++;
 	}
 ?>
+
 <tr <?php echo $bcnd[$var]; ?>>
 	<td colspan="<?php echo $colspan; ?>">
 	<?php
@@ -146,7 +148,7 @@ if (! empty($conf->service->enabled) && $dateSelector)
 		print $langs->trans("DateStartPlanned").' ';
 		$form->select_date('',"date_start",$usehm,$usehm,1,"addline");
 		print ' &nbsp; '.$langs->trans("DateEndPlanned").' ';
-		$form->select_date('',"date_end",$usehm,$usehm,1,"addline");		
+		$form->select_date('',"date_end",$usehm,$usehm,1,"addline");
 	}
 	else
 	{
@@ -159,13 +161,13 @@ if (! empty($conf->service->enabled) && $dateSelector)
 	</td>
 </tr>
 <?php
-} 
+}
 ?>
 
 </form>
 
 <?php
-if (! empty($usemargins)) 
+if (! empty($usemargins))
 {
 ?>
 	<script type="text/javascript">
@@ -186,7 +188,7 @@ if (! empty($usemargins))
 	        }
 	        options += '>'+this.label+'</option>';
 	      });
-	      options += '<option value=null><?php echo $langs->trans("InputPrice"); ?></option>';
+	      options += '<option value=""><?php echo $langs->trans("InputPrice"); ?></option>';
 	      $("#buying_price").hide();
 	      $("#fournprice").html(options).show();
 	      $("#fournprice").change(function() {
@@ -202,6 +204,6 @@ if (! empty($usemargins))
 	});
 	</script>
 <?php
-} 
+}
 ?>
 <!-- END PHP TEMPLATE predefinedproductline_create.tpl.php -->

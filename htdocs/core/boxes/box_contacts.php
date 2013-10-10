@@ -34,7 +34,7 @@ class box_contacts extends ModeleBoxes
 {
 	var $boxcode="lastcontacts";
 	var $boximg="object_contact";
-	var $boxlabel;
+	var $boxlabel="BoxLastContacts";
 	var $depends = array("societe");
 
 	var $db;
@@ -43,16 +43,6 @@ class box_contacts extends ModeleBoxes
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
-	/**
-     *  Constructor
-	 */
-	function __construct()
-	{
-		global $langs;
-		$langs->load("boxes");
-
-		$this->boxlabel=$langs->transnoentitiesnoconv("BoxLastContacts");
-	}
 
 	/**
 	 *  Load data into info_box_contents array to show array later.
@@ -71,7 +61,7 @@ class box_contacts extends ModeleBoxes
 
 		if ($user->rights->societe->lire)
 		{
-			$sql = "SELECT sp.rowid, sp.name, sp.firstname, sp.civilite, sp.datec, sp.tms, sp.fk_soc,";
+			$sql = "SELECT sp.rowid, sp.lastname, sp.firstname, sp.civilite, sp.datec, sp.tms, sp.fk_soc,";
 			$sql.= " s.nom as socname";
 			$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as sp";
 			$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON sp.fk_soc = s.rowid";
@@ -97,7 +87,7 @@ class box_contacts extends ModeleBoxes
 					$datec=$db->jdate($objp->datec);
 					$datem=$db->jdate($objp->tms);
 
-					$contactstatic->name=$objp->name;
+					$contactstatic->lastname=$objp->lastname;
                     $contactstatic->firstname=$objp->firstname;
                     $contactstatic->civilite_id=$objp->civilite;
 
@@ -109,7 +99,7 @@ class box_contacts extends ModeleBoxes
                     'url' => DOL_URL_ROOT."/contact/fiche.php?id=".$objp->rowid);
 
 					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
-                    'text' => $contactstatic->getFullName($langs,1),
+                    'text' => $contactstatic->getFullName($langs,0),
                     'url' => DOL_URL_ROOT."/contact/fiche.php?id=".$objp->rowid);
 
                     $this->info_box_contents[$i][2] = array('td' => 'align="left" width="16"',

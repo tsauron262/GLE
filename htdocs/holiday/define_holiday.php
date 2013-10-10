@@ -67,11 +67,18 @@ if ($action == 'update' && isset($_POST['update_cp']))
     }
 
     // On ajoute la modification dans le LOG
-    $holiday->addLogCP($user->id,$userID,'Event : Manual update',$userValue);
+    $holiday->addLogCP($user->id,$userID, $langs->trans('Event').': '.$langs->trans('ManualUpdate'),$userValue);
 
     // Mise à jour des congés de l'utilisateur
     $holiday->updateSoldeCP($userID,$userValue);
 
+    // If it first update of sold, we set date to havoid to have sold incremented by new month
+	$now=dol_now();
+    $sql = "UPDATE ".MAIN_DB_PREFIX."holiday_config SET";
+    $sql.= " value = '".dol_print_date($now,'%Y%m%d%H%M%S')."'";
+    $sql.= " WHERE name = 'lastUpdate' and value IS NULL";	// Add value IS NULL to be sure to update only at init.
+    dol_syslog('define_holiday update lastUpdate entry sql='.$sql);
+    $result = $db->query($sql);    
 
     $mesg='<div class="ok">'.$langs->trans('UpdateConfCPOK').'</div>';
 
@@ -100,7 +107,7 @@ elseif($action == 'add_event')
         $new_holiday = $nb_holiday + $add_holiday;
 
         // On ajoute la modification dans le LOG
-        $holiday->addLogCP($user->id,$userCP,'Event : '.$holiday->getNameEventCp($event),$new_holiday);
+        $holiday->addLogCP($user->id,$userCP, $langs->trans('Event').': '.$holiday->getNameEventCp($event),$new_holiday);
 
         $holiday->updateSoldeCP($userCP,$new_holiday);
 
@@ -110,6 +117,7 @@ elseif($action == 'add_event')
     dol_htmloutput_mesg($message);
 }
 
+$langs->load('users');
 $var=true;
 $i = 0;
 
@@ -125,7 +133,7 @@ if($cp_events == 1)
 	print $langs->trans('MotifCP').' : ';
 	print $holiday->selectEventCP();
 	print ' &nbsp; '.$langs->trans('UserCP').' : ';
-	print $form->select_users('',"userCP",1,"",0,'');
+	print $form->select_dolusers('',"userCP",1,"",0,'');
 	print ' <input type="submit" value="'.$langs->trans("addEventToUserCP").'" name="bouton" class="button"/>';
 
 	print '</form><br>';
@@ -137,9 +145,9 @@ print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
 print '<input type="hidden" name="action" value="update" />';
 print '<table class="noborder" width="100%;">';
 print "<tr class=\"liste_titre\">";
-print '<td width="5%">User ID</td>';
-print '<td width="20%">'.$langs->trans('UserName').'</td>';
-print '<td width="10%">'.$langs->trans('Available').'</td>';
+print '<td width="5%">'.$langs->trans('ID').'</td>';
+print '<td width="60%">'.$langs->trans('UserName').'</td>';
+print '<td width="20%" style="text-align:center">'.$langs->trans('Available').'</td>';
 print '<td>'.$langs->trans('UpdateButtonCP').'</td>';
 print '</tr>';
 
@@ -152,13 +160,13 @@ foreach($listUsers as $users)
     print '<td>'.$users['rowid'].'</td>';
     print '<td>';
     $userstatic->id=$users['rowid'];
-    $userstatic->nom=$users['name'];
-    $userstatic->prenom=$users['firstname'];
+    $userstatic->lastname=$users['name'];
+    $userstatic->firstname=$users['firstname'];
     print $userstatic->getNomUrl(1);
     print '</td>';
-    print '<td>';
+    print '<td style="text-align:center">';
     print '<input type="text" value="'.$holiday->getCPforUser($users['rowid']).'" name="nb_holiday['.$users['rowid'].']" size="5" style="text-align: center;"/>';
-    print ' jours</td>'."\n";
+    print ' '.$langs->trans('days').'</td>'."\n";
     print '<td><input type="submit" name="update_cp['.$users['rowid'].']" value="'.dol_escape_htmltag($langs->trans("Update")).'" class="button"/></td>'."\n";
     print '</tr>';
 

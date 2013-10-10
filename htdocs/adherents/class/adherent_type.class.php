@@ -33,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
 class AdherentType extends CommonObject
 {
     public $table_element = 'adherent_type';
+    public $element = 'adherent_type';
 
     var $id;
     var $libelle;
@@ -41,7 +42,6 @@ class AdherentType extends CommonObject
     var $vote;		  // droit de vote
     var $note; 		  // commentaire
     var $mail_valid;  //mail envoye lors de la validation
-
 
 
     /**
@@ -99,6 +99,8 @@ class AdherentType extends CommonObject
      */
     function update($user)
     {
+    	global $hookmanager;
+    	
         $this->libelle=trim($this->libelle);
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."adherent_type ";
@@ -114,6 +116,24 @@ class AdherentType extends CommonObject
         $result = $this->db->query($sql);
         if ($result)
         {
+        	// Actions on extra fields (by external module or standard code)
+        	$hookmanager->initHooks(array('membertypedao'));
+        	$parameters=array('membertype'=>$this->id);
+        	$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
+        	if (empty($reshook))
+        	{
+        		if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+        		{
+        			$result=$this->insertExtraFields();
+        			if ($result < 0)
+        			{
+        				$error++;
+        			}
+        		}
+        	}
+        	else if ($reshook < 0) $error++;
+        	
+        	
             return 1;
         }
         else

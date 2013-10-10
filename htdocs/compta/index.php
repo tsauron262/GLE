@@ -104,10 +104,9 @@ llxHeader("",$langs->trans("AccountancyTreasuryArea"));
 
 print_fiche_titre($langs->trans("AccountancyTreasuryArea"));
 
-print '<table border="0" width="100%" class="notopnoleftnoright">';
 
-print '<tr>';
-print '<td valign="top" width="30%" class="notopnoleft">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
+
 
 $max=3;
 
@@ -122,9 +121,9 @@ if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 	print '<table class="noborder nohover" width="100%">';
 	print "<tr class=\"liste_titre\">";
 	print '<td colspan="3">'.$langs->trans("SearchACustomerInvoice").'</td></tr>';
-	print "<tr $bc[0]><td>".$langs->trans("Ref").':</td><td><input type="text" name="sf_ref" class="flat" size="18"></td>';
+	print "<tr ".$bc[0]."><td>".$langs->trans("Ref").':</td><td><input type="text" name="sf_ref" class="flat" size="18"></td>';
 	print '<td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
-	print "<tr $bc[0]><td>".$langs->trans("Other").':</td><td><input type="text" name="sall" class="flat" size="18"></td>';
+	print "<tr ".$bc[0]."><td>".$langs->trans("Other").':</td><td><input type="text" name="sall" class="flat" size="18"></td>';
 	print '</tr>';
 	print "</table></form><br>";
 }
@@ -141,7 +140,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->lire)
 	print "<tr ".$bc[0].">";
 	print "<td>".$langs->trans("Ref").':</td><td><input type="text" name="search_ref" class="flat" size="18"></td>';
 	print '<td rowspan="2"><input type="submit" value="'.$langs->trans("Search").'" class="button"></td></tr>';
-	print "<tr $bc[0]><td>".$langs->trans("RefSupplier").':</td><td><input type="text" name="search_ref_supplier" class="flat" size="18"></td>';
+	print "<tr ".$bc[0]."><td>".$langs->trans("RefSupplier").':</td><td><input type="text" name="search_ref_supplier" class="flat" size="18"></td>';
 	print '</tr>';
 	print "</table></form><br>";
 }
@@ -151,6 +150,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->lire)
  */
 if (! empty($conf->don->enabled) && $user->rights->don->lire)
 {
+	$langs->load("donations");
     print '<form method="post" action="'.DOL_URL_ROOT.'/compta/dons/liste.php">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
     print '<table class="noborder nohover" width="100%">';
@@ -168,6 +168,7 @@ if (! empty($conf->don->enabled) && $user->rights->don->lire)
  */
 if (! empty($conf->deplacement->enabled) && $user->rights->deplacement->lire)
 {
+	$langs->load("trips");
     print '<form method="post" action="'.DOL_URL_ROOT.'/compta/deplacement/list.php">';
     print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
     print '<table class="noborder nohover" width="100%">';
@@ -218,19 +219,19 @@ if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 			while ($i < $num && $i < 20)
 			{
 				$obj = $db->fetch_object($resql);
-				print '<tr '.$bc[$var].'><td nowrap="nowrap">';
+				print '<tr '.$bc[$var].'><td class="nowrap">';
 				$facturestatic->ref=$obj->facnumber;
 				$facturestatic->id=$obj->rowid;
 				$facturestatic->type=$obj->type;
 				print $facturestatic->getNomUrl(1,'');
 				print '</td>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				$companystatic->id=$obj->socid;
 				$companystatic->nom=$obj->nom;
 				$companystatic->client=1;
 				print $companystatic->getNomUrl(1,'',16);
 				print '</td>';
-				print '<td align="right" nowrap="nowrap">'.price($obj->total_ttc).'</td>';
+				print '<td align="right" class="nowrap">'.price($obj->total_ttc).'</td>';
 				print '</tr>';
 				$tot_ttc+=$obj->total_ttc;
 				$i++;
@@ -259,7 +260,7 @@ if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
  */
 if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture->lire)
 {
-	$sql  = "SELECT f.facnumber, f.rowid, f.total_ttc, f.type,";
+	$sql  = "SELECT f.ref, f.rowid, f.total_ttc, f.type,";
 	$sql.= " s.nom, s.rowid as socid";
 	$sql.= " FROM ".MAIN_DB_PREFIX."facture_fourn as f, ".MAIN_DB_PREFIX."societe as s";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
@@ -288,7 +289,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 			{
 				$obj = $db->fetch_object($resql);
 				print '<tr '.$bc[$var].'><td nowrap>';
-				$facturesupplierstatic->ref=$obj->facnumber;
+				$facturesupplierstatic->ref=$obj->ref;
 				$facturesupplierstatic->id=$obj->rowid;
 				$facturesupplierstatic->type=$obj->type;
 				print $facturesupplierstatic->getNomUrl(1,'',16);
@@ -323,8 +324,9 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 	}
 }
 
-print '</td>';
-print '<td valign="top" width="70%" class="notopnoleftnoright">';
+
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
+
 
 // Last modified customer invoices
 if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
@@ -369,19 +371,19 @@ if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 				$obj = $db->fetch_object($resql);
 
 				print '<tr '.$bc[$var].'>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td width="100" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="110" class="nobordernopadding nowrap">';
 				$facturestatic->ref=$obj->facnumber;
 				$facturestatic->id=$obj->rowid;
 				$facturestatic->type=$obj->type;
 				print $facturestatic->getNomUrl(1,'');
 				print '</td>';
-				print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="20" class="nobordernopadding nowrap">';
 				if ($obj->fk_statut == 1 && ! $obj->paye && $db->jdate($obj->datelimite) < ($now - $conf->facture->client->warning_delay)) print img_warning($langs->trans("Late"));
 				print '</td>';
-				print '<td width="16" align="right" class="nobordernopadding">';
+				print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
 				$filename=dol_sanitizeFileName($obj->facnumber);
 				$filedir=$conf->facture->dir_output . '/' . dol_sanitizeFileName($obj->facnumber);
 				$urlsource=$_SERVER['PHP_SELF'].'?facid='.$obj->rowid;
@@ -431,7 +433,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 	$langs->load("boxes");
 	$facstatic=new FactureFournisseur($db);
 
-	$sql = "SELECT ff.rowid, ff.facnumber, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.tms, ff.paye";
+	$sql = "SELECT ff.rowid, ff.ref, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.tms, ff.paye";
 	$sql.= ", s.nom, s.rowid as socid";
 	$sql.= ", SUM(pf.amount) as am";
 	$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture_fourn as ff";
@@ -441,7 +443,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 	$sql.= " AND ff.entity = ".$conf->entity;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = ".$user->id;
 	if ($socid) $sql.= " AND ff.fk_soc = ".$socid;
-	$sql.= " GROUP BY ff.rowid, ff.facnumber, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.tms, ff.paye, s.nom, s.rowid";
+	$sql.= " GROUP BY ff.rowid, ff.ref, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.tms, ff.paye, s.nom, s.rowid";
 	$sql.= " ORDER BY ff.tms DESC ";
 	$sql.= $db->plimit($max, 0);
 
@@ -466,7 +468,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 			{
 				$obj = $db->fetch_object($resql);
 				print '<tr '.$bc[$var].'><td>';
-				$facstatic->ref=$obj->facnumber;
+				$facstatic->ref=$obj->ref;
 				$facstatic->id=$obj->rowid;
 				print $facstatic->getNomUrl(1,'');
 				print '</td>';
@@ -512,7 +514,7 @@ if (! empty($conf->don->enabled) && $user->rights->societe->lire)
 	$langs->load("boxes");
     $donationstatic=new Don($db);
 
-	$sql = "SELECT d.rowid, d.nom, d.prenom, d.societe, d.datedon as date, d.tms as dm, d.amount, d.fk_statut";
+	$sql = "SELECT d.rowid, d.lastname, d.firstname, d.societe, d.datedon as date, d.tms as dm, d.amount, d.fk_statut";
 	$sql.= " FROM ".MAIN_DB_PREFIX."don as d";
 	$sql.= " WHERE d.entity = ".$conf->entity;
 	$sql.= $db->order("d.tms","DESC");
@@ -544,8 +546,8 @@ if (! empty($conf->don->enabled) && $user->rights->societe->lire)
 				$var=!$var;
 				print '<tr '.$bc[$var].'>';
 				$donationstatic->id=$objp->rowid;
-				$donationstatic->nom=$objp->nom;
-				$donationstatic->prenom=$objp->prenom;
+				$donationstatic->lastname=$objp->lastname;
+				$donationstatic->firstname=$objp->firstname;
 				$label=$donationstatic->getFullName($langs);
 				if ($objp->societe) $label.=($label?' - ':'').$objp->societe;
 				$donationstatic->ref=$label;
@@ -576,7 +578,7 @@ if (! empty($conf->deplacement->enabled) && $user->rights->deplacement->lire)
 
     $langs->load("boxes");
 
-	$sql = "SELECT u.rowid as uid, u.name, u.firstname, d.fk_statut, d.rowid, d.dated as date, d.tms as dm, d.km";
+	$sql = "SELECT u.rowid as uid, u.lastname, u.firstname, d.fk_statut, d.rowid, d.dated as date, d.tms as dm, d.km";
 	$sql.= " FROM ".MAIN_DB_PREFIX."deplacement as d, ".MAIN_DB_PREFIX."user as u";
 	if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE u.rowid = d.fk_user";
@@ -613,7 +615,7 @@ if (! empty($conf->deplacement->enabled) && $user->rights->deplacement->lire)
 				$deplacementstatic->ref=$objp->rowid;
 				$deplacementstatic->id=$objp->rowid;
 				$userstatic->id=$objp->uid;
-				$userstatic->lastname=$objp->name;
+				$userstatic->lastname=$objp->lastname;
 				$userstatic->firstname=$objp->firstname;
 				print '<tr '.$bc[$var].'>';
                 print '<td>'.$deplacementstatic->getNomUrl(1).'</td>';
@@ -761,19 +763,19 @@ if (! empty($conf->facture->enabled) && ! empty($conf->commande->enabled) && $us
 				$obj = $db->fetch_object($resql);
 
 				print "<tr $bc[$var]>";
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 
 				$commandestatic->id=$obj->rowid;
 				$commandestatic->ref=$obj->ref;
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td width="100" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="110" class="nobordernopadding nowrap">';
 				print $commandestatic->getNomUrl(1);
 				print '</td>';
-				print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="20" class="nobordernopadding nowrap">';
 				print '&nbsp;';
 				print '</td>';
-				print '<td width="16" align="right" class="nobordernopadding">';
+				print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
 				$filename=dol_sanitizeFileName($obj->ref);
 				$filedir=$conf->commande->dir_output . '/' . dol_sanitizeFileName($obj->ref);
 				$urlsource=$_SERVER['PHP_SELF'].'?id='.$obj->rowid;
@@ -861,19 +863,19 @@ if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 				$obj = $db->fetch_object($resql);
 
 				print '<tr '.$bc[$var].'>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td width="100" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="110" class="nobordernopadding nowrap">';
 				$facturestatic->ref=$obj->facnumber;
 				$facturestatic->id=$obj->rowid;
 				$facturestatic->type=$obj->type;
 				print $facturestatic->getNomUrl(1,'');
 				print '</td>';
-				print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="20" class="nobordernopadding nowrap">';
 				if ($db->jdate($obj->datelimite) < ($now - $conf->facture->client->warning_delay)) print img_warning($langs->trans("Late"));
 				print '</td>';
-				print '<td width="16" align="right" class="nobordernopadding">';
+				print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
 				$filename=dol_sanitizeFileName($obj->facnumber);
 				$filedir=$conf->facture->dir_output . '/' . dol_sanitizeFileName($obj->facnumber);
 				$urlsource=$_SERVER['PHP_SELF'].'?facid='.$obj->rowid;
@@ -929,7 +931,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 {
 	$facstatic=new FactureFournisseur($db);
 
-	$sql = "SELECT ff.rowid, ff.facnumber, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.paye,";
+	$sql = "SELECT ff.rowid, ff.ref, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.paye,";
 	$sql.= " s.nom, s.rowid as socid,";
 	$sql.= " sum(pf.amount) as am";
 	$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."facture_fourn as ff";
@@ -941,7 +943,8 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 	$sql.= " AND ff.fk_statut = 1";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = ".$user->id;
 	if ($socid) $sql.= " AND ff.fk_soc = ".$socid;
-	$sql.= " GROUP BY ff.rowid, ff.facnumber, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, s.nom, s.rowid";
+	$sql.= " GROUP BY ff.rowid, ff.ref, ff.fk_statut, ff.libelle, ff.total_ht, ff.total_ttc, ff.paye,";
+	$sql.= " s.nom, s.rowid";
 
 	$resql=$db->query($sql);
 	if ($resql)
@@ -966,7 +969,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->fournisseur->facture-
 				$obj = $db->fetch_object($resql);
 
 				print '<tr '.$bc[$var].'><td>';
-				$facstatic->ref=$obj->facnumber;
+				$facstatic->ref=$obj->ref;
 				$facstatic->id=$obj->rowid;
 				print $facstatic->getNomUrl(1,'');
 				print '</td>';
@@ -1031,12 +1034,11 @@ if ($resql)
 	print "</table><br>";
 }
 
-print '</td></tr>';
 
-print '</table>';
+print '</div></div></div>';
+
 
 llxFooter();
 
 $db->close();
-
 ?>

@@ -35,7 +35,7 @@ class box_prospect extends ModeleBoxes
 {
 	var $boxcode="lastprospects";
 	var $boximg="object_company";
-	var $boxlabel;
+	var $boxlabel="BoxLastProspects";
 	var $depends = array("societe");
 
 	var $db;
@@ -43,21 +43,6 @@ class box_prospect extends ModeleBoxes
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
-
-	/**
-     *  Constructor
-     *
-     *  @param	DoliDB	$db		Database handler
-	 */
-	function __construct($db)
-	{
-		global $langs;
-		$langs->load("boxes");
-
-		$this->db=$db;
-
-		$this->boxlabel=$langs->transnoentitiesnoconv("BoxLastProspects");
-	}
 
 	/**
 	 *  Load data into info_box_contents array to show array later.
@@ -104,11 +89,11 @@ class box_prospect extends ModeleBoxes
 
 					$this->info_box_contents[$i][0] = array('td' => 'align="left" width="16"',
 			            'logo' => $this->boximg,
-			            'url' => DOL_URL_ROOT."/comm/prospect/fiche.php?socid=".$objp->socid);
+			            'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
 					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
 			            'text' => $objp->nom,
-			            'url' => DOL_URL_ROOT."/comm/prospect/fiche.php?socid=".$objp->socid);
+			            'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
 					$this->info_box_contents[$i][2] = array('td' => 'align="right"',
  			           'text' => dol_print_date($datem, "day"));

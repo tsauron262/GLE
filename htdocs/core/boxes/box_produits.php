@@ -34,7 +34,7 @@ class box_produits extends ModeleBoxes
 {
 	var $boxcode="lastproducts";
 	var $boximg="object_product";
-	var $boxlabel;
+	var $boxlabel="BoxLastProducts";
 	var $depends = array("produit");
 
 	var $db;
@@ -43,17 +43,6 @@ class box_produits extends ModeleBoxes
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
-
-	/**
-     *  Constructor
-	 */
-	function __construct()
-	{
-		global $langs;
-		$langs->load("boxes");
-
-		$this->boxlabel=$langs->transnoentitiesnoconv("BoxLastProducts");
-	}
 
 	/**
 	 *  Load data into info_box_contents array to show array later.
@@ -131,7 +120,7 @@ class box_produits extends ModeleBoxes
 					$this->info_box_contents[$i][2] = array('td' => 'align="right"',
                     'text' => $price);
 
-					$this->info_box_contents[$i][3] = array('td' => 'align="left" nowrap="nowrap"',
+					$this->info_box_contents[$i][3] = array('td' => 'align="left" class="nowrap"',
                     'text' => $price_base_type);
 
 					$this->info_box_contents[$i][4] = array('td' => 'align="right"',

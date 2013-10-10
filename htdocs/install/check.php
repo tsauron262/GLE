@@ -55,7 +55,7 @@ pHeader('','');     // No next step for navigation buttons. Next step is defined
 //print "<br>\n";
 //print $langs->trans("InstallEasy")."<br><br>\n";
 
-print '<b>'.$langs->trans("MiscellanousChecks")."</b>:<br>\n";
+print '<b>'.$langs->trans("MiscellaneousChecks")."</b>:<br>\n";
 
 // Check browser
 $useragent=$_SERVER['HTTP_USER_AGENT'];
@@ -138,17 +138,6 @@ else
 	print '<img src="../theme/eldy/img/tick.png" alt="Ok"> '.$langs->trans("PHPSupportUTF8")."<br>\n";
 }
 
-// Check if mb_convert_encoding supported (used by getCurrencySymbol)
-/*if (! function_exists("mb_convert_encoding"))
-{
-	$langs->load("errors");
-	print '<img src="../theme/eldy/img/warning.png" alt="Error"> '.$langs->trans("ErrorPHPDoesNotSupportUTF8")."<br>\n";
-	// $checksok=0;		// If image ko, just warning. So check must still be 1 (otherwise no way to install)
-}
-else
-{
-	print '<img src="../theme/eldy/img/tick.png" alt="Ok"> '.$langs->trans("PHPSupportUTF8")."<br>\n";
-}*/
 
 
 // Check memory
@@ -350,7 +339,7 @@ else
 		print '<table width="100%" class="listofchoices">';
 
 		// Show first install line
-		print '<tr class="listofchoices"><td class="listofchoices" nowrap="nowrap" align="center"><b>'.$langs->trans("FreshInstall").'</b>';
+		print '<tr class="listofchoices"><td class="listofchoices nowrap" align="center"><b>'.$langs->trans("FreshInstall").'</b>';
 		print '</td>';
 		print '<td class="listofchoices">';
 		print $langs->trans("FreshInstallDesc");
@@ -394,8 +383,9 @@ else
 								array('from'=>'2.9.0', 'to'=>'3.0.0'),
 								array('from'=>'3.0.0', 'to'=>'3.1.0'),
 								array('from'=>'3.1.0', 'to'=>'3.2.0'),
-								array('from'=>'3.2.0', 'to'=>'3.3.0')
-                                );
+								array('from'=>'3.2.0', 'to'=>'3.3.0'),
+								array('from'=>'3.3.0', 'to'=>'3.4.0')
+						);
 
 		$count=0;
 		foreach ($migrationscript as $migarray)
@@ -410,7 +400,7 @@ else
             $version=preg_split('/[\.-]/',DOL_VERSION);
             $newversionfrombis='';
             if (versioncompare($dolibarrversiontoarray,$version) < -2) $newversionfrombis=' '.$langs->trans("or").' '.$versionto;
-			print '<tr class="listofchoices"><td class="listofchoices" nowrap="nowrap" align="center"><b>'.$langs->trans("Upgrade").'<br>'.$newversionfrom.$newversionfrombis.' -> '.$newversionto.'</b></td>';
+			print '<tr class="listofchoices"><td class="listofchoices nowrap" align="center"><b>'.$langs->trans("Upgrade").'<br>'.$newversionfrom.$newversionfrombis.' -> '.$newversionto.'</b></td>';
 			print '<td class="listofchoices">';
 			print $langs->trans("UpgradeDesc");
 			if ($ok)

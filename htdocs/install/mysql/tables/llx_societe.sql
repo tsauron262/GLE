@@ -40,12 +40,12 @@ create table llx_societe
   code_fournisseur         varchar(24),                         		-- code founisseur
   code_compta              varchar(24),                         		-- code compta client
   code_compta_fournisseur  varchar(24),                         		-- code compta founisseur
-  address                  varchar(255),                        		-- company adresse
-  cp                       varchar(10),                         		-- zipcode
-  ville                    varchar(50),                         		-- town
+  address                  varchar(255),                        		-- company address
+  zip                      varchar(25),                         		-- zipcode
+  town                     varchar(50),                         		-- town
   fk_departement           integer        DEFAULT 0,            		--
   fk_pays                  integer        DEFAULT 0,            		--
-  tel                      varchar(20),                         		-- phone number
+  phone                    varchar(20),                         		-- phone number
   fax                      varchar(20),                         		-- fax number
   url                      varchar(255),                        		--
   email                    varchar(128),                        		--
@@ -62,7 +62,8 @@ create table llx_societe
   tva_intra                varchar(20),                         		-- tva
   capital                  real,                                		-- capital de la societe
   fk_stcomm                integer        DEFAULT 0 NOT NULL,      		-- commercial statut
-  note                     text,                                		--
+  note_private             text,                                		--
+  note_public              text,                                        --
   prefix_comm              varchar(5),                          		-- prefix commercial
   client                   tinyint        DEFAULT 0,            		-- client 0/1/2
   fournisseur              tinyint        DEFAULT 0,            		-- fournisseur 0/1

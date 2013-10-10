@@ -299,12 +299,17 @@ function ajax_dialog($title,$message,$w=350,$h=150)
 /**
  * 	Convert a html select field into an ajax combobox
  *
- * 	@param	string	$htmlname		Name of html select field
- * 	@param	array	$event			Event options. Example: array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))
- *  @return	string					Return html string to convert a select field into a combo
+ * 	@param	string	$htmlname					Name of html select field
+ * 	@param	array	$event						Event options. Example: array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))
+ *  @param  int		$minLengthToAutocomplete	Minimum length of input string to start autocomplete
+ *  @return	string								Return html string to convert a select field into a combo
  */
 function ajax_combobox($htmlname, $event=array(), $minLengthToAutocomplete=0)
 {
+	global $conf;
+
+	if (! empty($conf->browser->phone)) return '';	// combobox disabled for smartphones (does not works)
+
 	$msg = '<script type="text/javascript">
     $(function() {
     	$("#'.$htmlname.'").combobox({
@@ -353,18 +358,20 @@ function ajax_combobox($htmlname, $event=array(), $minLengthToAutocomplete=0)
 /**
  * 	On/off button for constant
  *
- * 	@param	string	$code		Name of constant
- * 	@param	array	$input		Input element (enable/disable or show/hide another element, set/del another constant)
- * 	@param	int		$entity		Entity to set
+ * 	@param	string	$code			Name of constant
+ * 	@param	array	$input			Array of type->list of CSS element to switch. Example: array('disabled'=>array(0=>'cssid'))
+ * 	@param	int		$entity			Entity to set
+ *  @param	int		$revertonoff	Revert on/off
  * 	@return	void
  */
-function ajax_constantonoff($code, $input=array(), $entity=false)
+function ajax_constantonoff($code, $input=array(), $entity=null, $revertonoff=0)
 {
 	global $conf, $langs;
 
 	$entity = ((isset($entity) && is_numeric($entity) && $entity >= 0) ? $entity : $conf->entity);
 
-	$out= '<script type="text/javascript">
+	$out= "\n<!-- Ajax code to switch constant ".$code." -->".'
+	<script type="text/javascript">
 		$(function() {
 			var input = '.json_encode($input).';
 			var url = \''.DOL_URL_ROOT.'/core/ajax/constantonoff.php\';
@@ -376,11 +383,8 @@ function ajax_constantonoff($code, $input=array(), $entity=false)
 			// Set constant
 			$("#set_" + code).click(function() {
 				if (input.alert && input.alert.set) {
-					// Posibility to force label of buttons
-					if (input.alert.set.yesButton)
-						yesButton = input.alert.set.yesButton;
-					if (input.alert.set.noButton)
-						noButton = input.alert.set.noButton;
+					if (input.alert.set.yesButton) yesButton = input.alert.set.yesButton;
+					if (input.alert.set.noButton)  noButton = input.alert.set.noButton;
 					confirmConstantAction("set", url, code, input, input.alert.set, entity, yesButton, noButton);
 				} else {
 					setConstant(url, code, input, entity);
@@ -390,22 +394,20 @@ function ajax_constantonoff($code, $input=array(), $entity=false)
 			// Del constant
 			$("#del_" + code).click(function() {
 				if (input.alert && input.alert.del) {
-					// Posibility to force label of buttons
-					if (input.alert.del.yesButton)
-						yesButton = input.alert.del.yesButton;
-					if (input.alert.del.noButton)
-						noButton = input.alert.del.noButton;
+					if (input.alert.del.yesButton) yesButton = input.alert.del.yesButton;
+					if (input.alert.del.noButton)  noButton = input.alert.del.noButton;
 					confirmConstantAction("del", url, code, input, input.alert.del, entity, yesButton, noButton);
 				} else {
 					delConstant(url, code, input, entity);
 				}
 			});
 		});
-	</script>';
+	</script>'."\n";
 
 	$out.= '<div id="confirm_'.$code.'" title="" style="display: none;"></div>';
-	$out.= '<span id="set_'.$code.'" class="linkobject '.(! empty($conf->global->$code)?'hideobject':'').'">'.img_picto($langs->trans("Disabled"),'switch_off').'</span>';
-	$out.= '<span id="del_'.$code.'" class="linkobject '.(! empty($conf->global->$code)?'':'hideobject').'">'.img_picto($langs->trans("Enabled"),'switch_on').'</span>';
+	$out.= '<span id="set_'.$code.'" class="linkobject '.(! empty($conf->global->$code)?'hideobject':'').'">'.($revertonoff?img_picto($langs->trans("Enabled"),'switch_on'):img_picto($langs->trans("Disabled"),'switch_off')).'</span>';
+	$out.= '<span id="del_'.$code.'" class="linkobject '.(! empty($conf->global->$code)?'':'hideobject').'">'.($revertonoff?img_picto($langs->trans("Disabled"),'switch_off'):img_picto($langs->trans("Enabled"),'switch_on')).'</span>';
+	$out.="\n";
 
 	return $out;
 }

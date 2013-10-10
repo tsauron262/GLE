@@ -30,6 +30,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 $langs->load("companies");
 $langs->load("admin");
+$langs->load("members");
 
 $extrafields = new ExtraFields($db);
 $form = new Form($db);
@@ -41,7 +42,7 @@ foreach ($tmptype2label as $key => $val) $type2label[$key]=$langs->trans($val);
 
 $action=GETPOST('action', 'alpha');
 $attrname=GETPOST('attrname', 'alpha');
-$elementtype='company';
+$elementtype='societe';  //Must be the $element of the class that manage extrafield
 
 if (!$user->admin) accessforbidden();
 
@@ -76,14 +77,13 @@ dol_fiche_head($head, 'attributes', $langs->trans("ThirdParties"), 0, 'company')
 print $langs->trans("DefineHereComplementaryAttributes",$textobject).'<br>'."\n";
 print '<br>';
 
-dol_htmloutput_errors($mesg);
-
 // Load attribute_label
 $extrafields->fetch_name_optionals_label($elementtype);
 
 print "<table summary=\"listofattributes\" class=\"noborder\" width=\"100%\">";
 
 print '<tr class="liste_titre">';
+print '<td align="center">'.$langs->trans("Position").'</td>';
 print '<td>'.$langs->trans("Label").'</td>';
 print '<td>'.$langs->trans("AttributeCode").'</td>';
 print '<td>'.$langs->trans("Type").'</td>';
@@ -98,6 +98,7 @@ foreach($extrafields->attribute_type as $key => $value)
 {
     $var=!$var;
     print "<tr ".$bc[$var].">";
+    print "<td>".$extrafields->attribute_pos[$key]."</td>\n";
     print "<td>".$extrafields->attribute_label[$key]."</td>\n";
     print "<td>".$key."</td>\n";
     print "<td>".$type2label[$extrafields->attribute_type[$key]]."</td>\n";

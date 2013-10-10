@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2001-2002	Rodolphe Quiedeville	<rodolphe@quiedeville.org>
  * Copyright (C) 2003		Jean-Louis Bergamo		<jlb@j1b.org>
- * Copyright (C) 2004-2011	Laurent Destailleur		<eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2013	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2012		Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2012		Florian Henry			<florian.henry@open-concept.pro>
  *
@@ -35,6 +35,7 @@ if (!$user->admin)
 
 $langs->load("admin");
 $langs->load("other");
+$langs->load("agenda");
 
 $extrafields = new ExtraFields($db);
 $form = new Form($db);
@@ -46,7 +47,7 @@ foreach ($tmptype2label as $key => $val) $type2label[$key]=$langs->trans($val);
 
 $action=GETPOST('action', 'alpha');
 $attrname=GETPOST('attrname', 'alpha');
-$elementtype='actioncomm';
+$elementtype='actioncomm'; //Must be the $table_element of the class that manage extrafield
 
 if (!$user->admin) accessforbidden();
 
@@ -63,24 +64,20 @@ require DOL_DOCUMENT_ROOT.'/core/admin_extrafields.inc.php';
  * View
  */
 
+$textobject=$langs->transnoentitiesnoconv("Agenda");
 
-llxHeader();
+llxHeader('',$langs->trans("AgendaSetup"));
 
 $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
 print_fiche_titre($langs->trans("AgendaSetup"),$linkback,'setup');
-print "<br>\n";
-
 print "<br>\n";
 
 $head=agenda_prepare_head();
 
 dol_fiche_head($head, 'attributes', $langs->trans("Agenda"));
 
-
-print $langs->trans("DefineHereComplementaryAttributes",$textobject).'<br>'."\n";
+print $langs->trans("DefineHereComplementaryAttributes", $langs->transnoentitiesnoconv("Agenda")).'<br>'."\n";
 print '<br>';
-
-dol_htmloutput_errors($mesg);
 
 // Load attribute_label
 $extrafields->fetch_name_optionals_label($elementtype);
@@ -111,7 +108,6 @@ foreach($extrafields->attribute_type as $key => $value)
     print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=edit&attrname='.$key.'">'.img_edit().'</a>';
     print "&nbsp; <a href=\"".$_SERVER["PHP_SELF"]."?action=delete&attrname=$key\">".img_delete()."</a></td>\n";
     print "</tr>";
-    //      $i++;
 }
 
 print "</table>";
@@ -130,8 +126,8 @@ if ($action != 'create' && $action != 'edit')
 
 /* ************************************************************************** */
 /*                                                                            */
-/* Creation d'un champ optionnel
- /*                                                                            */
+/* Creation d'un champ optionnel											  */
+/*                                                                            */
 /* ************************************************************************** */
 
 if ($action == 'create')

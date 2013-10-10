@@ -1,8 +1,8 @@
 # Dolibarr language file - fr_FR - install
 CHARSET=UTF-8
 InstallEasy=Veuillez suivre les étapes une à une.
-MiscellanousChecks=Vérification de prérequis
-DolibarrWelcome=Bienvenue sur Gle
+MiscellaneousChecks=Vérification de prérequis
+DolibarrWelcome=Bienvenue sur Dolibarr
 ConfFileExists=Le fichier de configuration <b>%s</b> existe.
 ConfFileDoesNotExists=Le fichier de configuration <b>%s</b> n'existe pas !
 ConfFileDoesNotExistsAndCouldNotBeCreated=Le fichier de configuration <b>%s</b> n'existe pas et n'a pu être créé !

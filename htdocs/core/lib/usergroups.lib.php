@@ -78,14 +78,15 @@ function user_prepare_head($object)
 	    $head[$h][2] = 'clicktodial';
         $h++;
     }
-
+    
     // Show more tabs from modules
     // Entries must be declared in modules descriptor with line
     // $this->tabs = array('entity:+tabname:Title:@mymodule:/mymodule/mypage.php?id=__ID__');   to add new tab
     // $this->tabs = array('entity:-tabname);   												to remove a tab
     complete_head_from_modules($conf,$langs,$object,$head,$h,'user');
-
-    if (! empty($user->societe_id))
+	
+    //Info on users is visible only by internal user
+    if (empty($user->societe_id))
     {
     	$head[$h][0] = DOL_URL_ROOT.'/user/note.php?id='.$object->id;
     	$head[$h][1] = $langs->trans("Note");
@@ -223,12 +224,17 @@ function show_theme($fuser,$edit=0,$foruserprofile=false)
 {
     global $conf,$langs,$bc;
 
-    $forcethemedir=(! empty($conf->global->MAIN_FORCETHEMEDIR) ? $conf->global->MAIN_FORCETHEMEDIR : '');
-    $dirthemes=array($forcethemedir.'/theme');
-    if (! empty($conf->modules_parts['themes'])) {
-    	$dirthemes=array_merge(array($forcethemedir.'/theme'),(array) $conf->modules_parts['themes']);
+    //$conf->global->MAIN_FORCETHEMEDIR='';
+    $dirthemes=array(empty($conf->global->MAIN_FORCETHEMEDIR)?'/theme':$conf->global->MAIN_FORCETHEMEDIR.'/theme');
+    if (! empty($conf->modules_parts['theme']))		// Using this feature slow down application
+    {
+    	foreach($conf->modules_parts['theme'] as $reldir)
+    	{
+	    	$dirthemes=array_merge($dirthemes,(array) ($reldir.'theme'));
+    	}
     }
-
+    $dirthemes=array_unique($dirthemes);
+    
     $selected_theme='';
     if (empty($foruserprofile)) $selected_theme=$conf->global->MAIN_THEME;
     else $selected_theme=empty($fuser->conf->MAIN_THEME)?'':$fuser->conf->MAIN_THEME;
@@ -251,7 +257,7 @@ function show_theme($fuser,$edit=0,$foruserprofile=false)
 	    print '<tr '.$bc[$var].'>';
 	    print '<td>'.$langs->trans("DefaultSkin").'</td>';
 	    print '<td>'.$conf->global->MAIN_THEME.'</td>';
-	    print '<td align="left" nowrap="nowrap" width="20%"><input '.$bc[$var].' name="check_MAIN_THEME"'.($edit?'':' disabled').' type="checkbox" '.($selected_theme?" checked":"").'> '.$langs->trans("UsePersonalValue").'</td>';
+	    print '<td align="left" class="nowrap" width="20%"><input '.$bc[$var].' name="check_MAIN_THEME"'.($edit?'':' disabled').' type="checkbox" '.($selected_theme?" checked":"").'> '.$langs->trans("UsePersonalValue").'</td>';
 	    print '<td>&nbsp;</td>';
 	    print '</tr>';
     }

@@ -33,30 +33,32 @@ class box_members extends ModeleBoxes
 {
 	var $boxcode="lastmembers";
 	var $boximg="object_user";
-	var $boxlabel;
+	var $boxlabel="BoxLastMembers";
 	var $depends = array("adherent");
 
 	var $db;
 	var $param;
 	var $enabled = 1;
-	
+
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
 
 	/**
-     *  Constructor
+	 *  Constructor
+	 *
+	 *  @param  DoliDB	$db      	Database handler
+     *  @param	string	$param		More parameters
 	 */
-	function __construct()
+	function __construct($db,$param='')
 	{
-		global $conf, $langs, $user;
-		$langs->load("boxes");
+		global $conf, $user;
 
-		$this->boxlabel=$langs->transnoentitiesnoconv("BoxLastMembers");
-		
+		$this->db = $db;
+
 		// disable module for such cases
 		$listofmodulesforexternal=explode(',',$conf->global->MAIN_MODULES_FOR_EXTERNAL);
-		if (! in_array('banque',$listofmodulesforexternal) && ! empty($user->societe_id)) $this->enabled=0;	// disabled for external users
+		if (! in_array('adherent',$listofmodulesforexternal) && ! empty($user->societe_id)) $this->enabled=0;	// disabled for external users
 	}
 
 	/**
@@ -77,9 +79,9 @@ class box_members extends ModeleBoxes
 
 		$this->info_box_head = array('text' => $langs->trans("BoxTitleLastModifiedMembers",$max));
 
-		if ($user->rights->societe->lire)
+		if ($user->rights->adherent->lire)
 		{
-			$sql = "SELECT a.rowid, a.nom as lastname, a.prenom as firstname, a.societe as company, a.fk_soc,";
+			$sql = "SELECT a.rowid, a.lastname, a.firstname, a.societe as company, a.fk_soc,";
 			$sql.= " a.datec, a.tms, a.statut as status, a.datefin as date_end_subscription,";
 			$sql.= " t.cotisation";
 			$sql.= " FROM ".MAIN_DB_PREFIX."adherent as a, ".MAIN_DB_PREFIX."adherent_type as t";

@@ -58,7 +58,7 @@ if ($action == 'update' && $user->rights->user->user->creer && ! $_POST["cancel"
 {
 	$db->begin();
 
-	$res=$fuser->update_note($_POST["note"],$user);
+	$res=$fuser->update_note(dol_html_entity_decode(GETPOST('note'), ENT_QUOTES));
 	if ($res < 0)
 	{
 		$mesg='<div class="error">'.$adh->error.'</div>';
@@ -101,12 +101,12 @@ if ($id)
 	print '</td>';
 	print '</tr>';
 
-    // Nom
-    print '<tr><td>'.$langs->trans("Lastname").'</td><td class="valeur" colspan="3">'.$fuser->nom.'&nbsp;</td>';
+    // Lastname
+    print '<tr><td>'.$langs->trans("Lastname").'</td><td class="valeur" colspan="3">'.$fuser->lastname.'&nbsp;</td>';
 	print '</tr>';
 
-    // Prenom
-    print '<tr><td>'.$langs->trans("Firstname").'</td><td class="valeur" colspan="3">'.$fuser->prenom.'&nbsp;</td></tr>';
+    // Firstname
+    print '<tr><td>'.$langs->trans("Firstname").'</td><td class="valeur" colspan="3">'.$fuser->firstname.'&nbsp;</td></tr>';
 
     // Login
     print '<tr><td>'.$langs->trans("Login").'</td><td class="valeur" colspan="3">'.$fuser->login.'&nbsp;</td></tr>';

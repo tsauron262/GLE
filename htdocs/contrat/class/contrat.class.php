@@ -4,7 +4,9 @@
  * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2006		Andre Cianfarani		<acianfa@free.fr>
  * Copyright (C) 2008		Raphael Bertrand		<raphael.bertrand@resultic.fr>
- * Copyright (C) 2010-2011	Juanjo Menent			<jmenent@2byte.es>
+ * Copyright (C) 2010-2013	Juanjo Menent			<jmenent@2byte.es>
+ * Copyright (C) 2013       Christophe Battarel  <christophe.battarel@altairis.fr>
+ * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +29,7 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
-
+require_once(DOL_DOCUMENT_ROOT ."/margin/lib/margins.lib.php");
 
 /**
  *	Class to manage contracts
@@ -279,11 +281,29 @@ class Contrat extends CommonObject
 	 */
 	function validate($user)
 	{
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 		global $langs, $conf;
 
 		$error=0;
 
-		$sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET statut = 1";
+		// Definition du nom de module de numerotation de commande
+		$soc = new Societe($this->db);
+		$soc->fetch($this->socid);
+
+		// Class of company linked to order
+		$result=$soc->set_as_client();
+
+		// Define new ref
+		if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref)))
+		{
+			$num = $this->getNextNumRef($soc);
+		}
+		else
+		{
+			$num = $this->ref;
+		}
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX."contrat SET ref = '".$num."', statut = 1";
 		$sql .= " WHERE rowid = ".$this->id . " AND statut = 0";
 
 		$resql = $this->db->query($sql);
@@ -296,7 +316,36 @@ class Contrat extends CommonObject
 			if ($result < 0) { $error++; $this->errors=$interface->errors; }
 			// Fin appel triggers
 
-			return 1;
+			if (! $error)
+			{
+				// Rename directory if dir was a temporary ref
+				if (preg_match('/^[\(]?PROV/i', $this->ref))
+				{
+					// Rename of propal directory ($this->ref = old ref, $num = new ref)
+					// to  not lose the linked files
+					$facref = dol_sanitizeFileName($this->ref);
+					$snumfa = dol_sanitizeFileName($num);
+					$dirsource = $conf->contract->dir_output.'/'.$facref;
+					$dirdest = $conf->contract->dir_output.'/'.$snumfa;
+					if (file_exists($dirsource))
+					{
+						dol_syslog(get_class($this)."::validate rename dir ".$dirsource." into ".$dirdest);
+						
+						if (@rename($dirsource, $dirdest))
+						{
+							dol_syslog("Rename ok");
+							// Deleting old PDF in new rep
+							dol_delete_file($conf->contract->dir_output.'/'.$snumfa.'/'.$facref.'*.*');
+						}
+					}
+				}
+
+				return 1;
+			}
+			else
+			{
+				return -1;
+			}
 		}
 		else
 		{
@@ -320,7 +369,7 @@ class Contrat extends CommonObject
 		$sql.= " fk_user_author,";
 		$sql.= " fk_projet,";
 		$sql.= " fk_commercial_signature, fk_commercial_suivi,";
-		$sql.= " note as note_private, note_public, extraparams";
+		$sql.= " note_private, note_public, extraparams";
 		$sql.= " FROM ".MAIN_DB_PREFIX."contrat";
 		if ($ref)
 		{
@@ -402,7 +451,7 @@ class Contrat extends CommonObject
 
 		// Selectionne les lignes contrats liees a un produit
 		$sql = "SELECT p.label, p.description as product_desc, p.ref,";
-		$sql.= " d.rowid, d.fk_contrat, d.statut, d.description, d.price_ht, d.tva_tx, d.localtax1_tx, d.localtax2_tx, d.qty, d.remise_percent, d.subprice,";
+		$sql.= " d.rowid, d.fk_contrat, d.statut, d.description, d.price_ht, d.tva_tx, d.localtax1_tx, d.localtax2_tx, d.qty, d.remise_percent, d.subprice, d.fk_product_fournisseur_price as fk_fournprice, d.buy_price_ht as pa_ht,";
 		$sql.= " d.total_ht,";
 		$sql.= " d.total_tva,";
 		$sql.= " d.total_localtax1,";
@@ -450,6 +499,10 @@ class Contrat extends CommonObject
 				$line->total_ttc		= $objp->total_ttc;
 				$line->fk_product		= $objp->fk_product;
 				$line->info_bits		= $objp->info_bits;
+
+				$line->fk_fournprice 	= $objp->fk_fournprice;
+				$marginInfos = getMarginInfos($objp->subprice, $objp->remise_percent, $objp->tva_tx, $objp->localtax1_tx, $objp->localtax2_tx, $line->fk_fournprice, $objp->pa_ht);
+				$line->pa_ht 			= $marginInfos[0];
 
 				$line->fk_user_author	= $objp->fk_user_author;
 				$line->fk_user_ouverture= $objp->fk_user_ouverture;
@@ -524,20 +577,20 @@ class Contrat extends CommonObject
 				$objp                  = $this->db->fetch_object($result);
 
 				$line                 = new ContratLigne($this->db);
-				$line->id 			   = $objp->rowid;
+				$line->id 			  = $objp->rowid;
 				$line->fk_contrat     = $objp->fk_contrat;
 				$line->libelle        = $objp->description;
 				$line->desc           = $objp->description;
 				$line->qty            = $objp->qty;
-				$line->statut 		   = $objp->statut;
-//				$line->ref            = $objp->ref;
+				$line->statut 		  = $objp->statut;
+				$line->ref            = '';
 				$line->tva_tx         = $objp->tva_tx;
 				$line->localtax1_tx   = $objp->localtax1_tx;
 				$line->localtax2_tx   = $objp->localtax2_tx;
 				$line->subprice       = $objp->subprice;
 				$line->remise_percent = $objp->remise_percent;
 				$line->price_ht       = $objp->price_ht;
-				$line->price          = $objp->price;	// For backward compatibility
+				$line->price          = (isset($objp->price)?$objp->price:null);	// For backward compatibility
 				$line->total_ht       = $objp->total_ht;
 				$line->total_tva      = $objp->total_tva;
 				$line->total_localtax1= $objp->total_localtax1;
@@ -627,14 +680,16 @@ class Contrat extends CommonObject
 		// Insert contract
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."contrat (datec, fk_soc, fk_user_author, date_contrat,";
 		$sql.= " fk_commercial_signature, fk_commercial_suivi, fk_projet,";
-		$sql.= " ref, entity)";
+		$sql.= " ref, entity, note_private, note_public)";
 		$sql.= " VALUES (".$this->db->idate($now).",".$this->socid.",".$user->id;
 		$sql.= ",".$this->db->idate($this->date_contrat);
 		$sql.= ",".($this->commercial_signature_id>0?$this->commercial_signature_id:"NULL");
 		$sql.= ",".($this->commercial_suivi_id>0?$this->commercial_suivi_id:"NULL");
-		$sql.= ",".($this->fk_projet>0?$this->fk_projet:"NULL");
+		$sql.= ",".($this->fk_project>0?$this->fk_project:"NULL");
 		$sql.= ", ".(dol_strlen($this->ref)<=0 ? "null" : "'".$this->ref."'");
 		$sql.= ", ".$conf->entity;
+		$sql.= ", ".(!empty($this->note_private)?("'".$this->db->escape($this->note_private)."'"):"NULL");
+		$sql.= ", ".(!empty($this->note_public)?("'".$this->db->escape($this->note_public)."'"):"NULL");
 		$sql.= ")";
 		$resql=$this->db->query($sql);
 		if ($resql)
@@ -642,6 +697,16 @@ class Contrat extends CommonObject
 			$error=0;
 
 			$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX."contrat");
+
+			// Mise a jour ref
+			$sql = 'UPDATE '.MAIN_DB_PREFIX."contrat SET ref='(PROV".$this->id.")' WHERE rowid=".$this->id;
+			if ($this->db->query($sql))
+			{
+				if ($this->id)
+				{
+					$this->ref="(PROV".$this->id.")";
+				}
+			}
 
 			// Insert contacts commerciaux ('SALESREPSIGN','contrat')
 			$result=$this->add_contact($this->commercial_signature_id,'SALESREPSIGN','internal');
@@ -662,6 +727,12 @@ class Contrat extends CommonObject
 
 				if (! $error)
 				{
+		            // Add linked object
+		            if (! $error && $this->origin && $this->origin_id)
+		            {
+		                $ret = $this->add_object_linked();
+		                if (! $ret)	dol_print_error($this->db);
+		            }
 					$this->db->commit();
 					return $this->id;
 				}
@@ -854,9 +925,11 @@ class Contrat extends CommonObject
 	 *	@param	float		$price_base_type	HT or TTC
 	 * 	@param  float		$pu_ttc             Prix unitaire TTC
 	 * 	@param  int			$info_bits			Bits de type de lignes
+	 * 	@param  int			$fk_fournprice		Fourn price id
+	 *  @param  int			$pa_ht				Buying price HT
 	 *  @return int             				<0 si erreur, >0 si ok
 	 */
-	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0, $info_bits=0)
+	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $fk_fournprice=null, $pa_ht = 0)
 	{
 		global $user, $langs, $conf;
 
@@ -875,6 +948,7 @@ class Contrat extends CommonObject
 			if (! $pu_ttc) $pu_ttc=0;
 			$pu_ht=price2num($pu_ht);
 			$pu_ttc=price2num($pu_ttc);
+			$pa_ht=price2num($pa_ht);
 			$txtva=price2num($txtva);
 			$txlocaltax1=price2num($txlocaltax1);
 			$txlocaltax2=price2num($txlocaltax2);
@@ -908,13 +982,21 @@ class Contrat extends CommonObject
 				$price = $pu_ht - $remise;
 			}
 
+		    if (empty($pa_ht)) $pa_ht=0;
+
+			// si prix d'achat non renseigne et utilise pour calcul des marges alors prix achat = prix vente
+			if ($pa_ht == 0) {
+				if ($pu_ht > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1))
+					$pa_ht = $pu_ht * (1 - $remise_percent / 100);
+			}
+
 			// Insertion dans la base
 			$sql = "INSERT INTO ".MAIN_DB_PREFIX."contratdet";
 			$sql.= " (fk_contrat, label, description, fk_product, qty, tva_tx,";
 			$sql.= " localtax1_tx, localtax2_tx, remise_percent, subprice,";
 			$sql.= " total_ht, total_tva, total_localtax1, total_localtax2, total_ttc,";
 			$sql.= " info_bits,";
-			$sql.= " price_ht, remise";								// TODO A virer
+			$sql.= " price_ht, remise, fk_product_fournisseur_price, buy_price_ht";
 			if ($date_start > 0) { $sql.= ",date_ouverture_prevue"; }
 			if ($date_end > 0)   { $sql.= ",date_fin_validite"; }
 			$sql.= ") VALUES ($this->id, '', '" . $this->db->escape($desc) . "',";
@@ -926,7 +1008,11 @@ class Contrat extends CommonObject
 			$sql.= " ".price2num($remise_percent).",".price2num($pu_ht).",";
 			$sql.= " ".price2num($total_ht).",".price2num($total_tva).",".price2num($total_localtax1).",".price2num($total_localtax2).",".price2num($total_ttc).",";
 			$sql.= " '".$info_bits."',";
-			$sql.= " ".price2num($price).",".price2num($remise);	// TODO A virer
+			$sql.= " ".price2num($price).",".price2num($remise).",";
+			if (isset($fk_fournprice)) $sql.= ' '.$fk_fournprice.',';
+			else $sql.= ' null,';
+			if (isset($pa_ht)) $sql.= ' '.price2num($pa_ht);
+			else $sql.= ' null';
 			if ($date_start > 0) { $sql.= ",'".$this->db->idate($date_start)."'"; }
 			if ($date_end > 0) { $sql.= ",'".$this->db->idate($date_end)."'"; }
 			$sql.= ")";
@@ -981,9 +1067,11 @@ class Contrat extends CommonObject
 	 *  @param  timestamp	$date_fin_reel    	Date de fin reelle
 	 *	@param	float		$price_base_type	HT or TTC
 	 * 	@param  int			$info_bits			Bits de type de lignes
+	 * 	@param  int			$fk_fournprice		Fourn price id
+	 *  @param  int			$pa_ht				Buying price HT
 	 *  @return int              				< 0 si erreur, > 0 si ok
 	 */
-	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0, $localtax2tx=0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0)
+	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $date_start, $date_end, $tvatx, $localtax1tx=0, $localtax2tx=0, $date_debut_reel='', $date_fin_reel='', $price_base_type='HT', $info_bits=0, $fk_fournprice=null, $pa_ht = 0)
 	{
 		global $user, $conf, $langs;
 
@@ -995,6 +1083,7 @@ class Contrat extends CommonObject
 		$tvatx = price2num($tvatx);
 		$localtax1tx = price2num($localtax1tx);
 		$localtax2tx = price2num($localtax2tx);
+		$pa_ht=price2num($pa_ht);
 
 		$subprice = $price;
 		$remise = 0;
@@ -1032,6 +1121,14 @@ class Contrat extends CommonObject
 		    $price = $pu_ht - $remise;
 		}
 
+	    if (empty($pa_ht)) $pa_ht=0;
+
+		// si prix d'achat non renseigne et utilise pour calcul des marges alors prix achat = prix vente
+		if ($pa_ht == 0) {
+			if ($pu_ht > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1))
+				$pa_ht = $pu_ht * (1 - $remise_percent / 100);
+		}
+
 		$sql = "UPDATE ".MAIN_DB_PREFIX."contratdet set description='".$this->db->escape($desc)."'";
 		$sql.= ",price_ht='" .     price2num($price)."'";
 		$sql.= ",subprice='" .     price2num($subprice)."'";
@@ -1046,6 +1143,8 @@ class Contrat extends CommonObject
 		$sql.= ", total_localtax1='".price2num($total_localtax1)."'";
 		$sql.= ", total_localtax2='".price2num($total_localtax2)."'";
 		$sql.= ", total_ttc='".      price2num($total_ttc)."'";
+		$sql.= ", fk_product_fournisseur_price='".$fk_fournprice."'";
+		$sql.= ", buy_price_ht='".price2num($pa_ht)."'";
 		if ($date_start > 0) { $sql.= ",date_ouverture_prevue='".$this->db->idate($date_start)."'"; }
 		else { $sql.=",date_ouverture_prevue=null"; }
 		if ($date_end > 0) { $sql.= ",date_fin_validite='".$this->db->idate($date_end)."'"; }
@@ -1537,8 +1636,8 @@ class Contrat extends CommonObject
 		$this->date_contrat = dol_now();
 		$this->commercial_signature_id = 1;
 		$this->commercial_suivi_id = 1;
-		$this->note='This is a comment (private)';
-		$this->note='This is a comment (public)';
+		$this->note_private='This is a comment (private)';
+		$this->note_public='This is a comment (public)';
 		$this->fk_projet = 0;
 		// Lines
 		$nbp = 5;
@@ -1609,6 +1708,9 @@ class ContratLigne
 	var $total_localtax1;
 	var $total_localtax2;
 	var $total_ttc;
+
+	var $fk_fournprice;
+	var $pa_ht;
 
 	var $info_bits;
 	var $fk_user_author;
@@ -1769,6 +1871,8 @@ class ContratLigne
 		$sql.= " t.total_localtax1,";
 		$sql.= " t.total_localtax2,";
 		$sql.= " t.total_ttc,";
+		$sql.= " t.fk_product_fournisseur_price as fk_fournprice,";
+		$sql.= " t.buy_price_ht as pa_ht,";
 		$sql.= " t.info_bits,";
 		$sql.= " t.fk_user_author,";
 		$sql.= " t.fk_user_ouverture,";
@@ -1819,6 +1923,9 @@ class ContratLigne
 				$this->fk_user_ouverture = $obj->fk_user_ouverture;
 				$this->fk_user_cloture = $obj->fk_user_cloture;
 				$this->commentaire = $obj->commentaire;
+				$this->fk_fournprice = $obj->fk_fournprice;
+				$marginInfos = getMarginInfos($obj->subprice, $obj->remise_percent, $obj->tva_tx, $obj->localtax1_tx, $obj->localtax2_tx, $this->fk_fournprice, $obj->pa_ht);
+				$this->pa_ht = $marginInfos[0];
 
 			}
 			$this->db->free($resql);
@@ -1887,6 +1994,14 @@ class ContratLigne
 		$this->total_localtax1= $tabprice[9];
 		$this->total_localtax2= $tabprice[10];
 
+	    if (empty($this->pa_ht)) $this->pa_ht=0;
+
+		// si prix d'achat non renseigné et utilisé pour calcul des marges alors prix achat = prix vente
+		if ($this->pa_ht == 0) {
+			if ($this->subprice > 0 && (isset($conf->global->ForceBuyingPriceIfNull) && $conf->global->ForceBuyingPriceIfNull == 1))
+				$this->pa_ht = $this->subprice * (1 - $this->remise_percent / 100);
+		}
+
 		// Update request
 		$sql = "UPDATE ".MAIN_DB_PREFIX."contratdet SET";
 		$sql.= " fk_contrat='".$this->fk_contrat."',";
@@ -1913,6 +2028,8 @@ class ContratLigne
 		$sql.= " total_localtax1='".$this->total_localtax1."',";
 		$sql.= " total_localtax2='".$this->total_localtax2."',";
 		$sql.= " total_ttc='".$this->total_ttc."',";
+		$sql.= " fk_product_fournisseur_price='".$this->fk_fournprice."',";
+		$sql.= " buy_price_ht='".price2num($this->pa_ht)."',";
 		$sql.= " info_bits='".$this->info_bits."',";
 		$sql.= " fk_user_author=".($this->fk_user_author >= 0?$this->fk_user_author:"NULL").",";
 		$sql.= " fk_user_ouverture=".($this->fk_user_ouverture > 0?$this->fk_user_ouverture:"NULL").",";

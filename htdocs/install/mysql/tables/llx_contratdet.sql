@@ -39,9 +39,9 @@ create table llx_contratdet
 
   tva_tx                double(6,3)   DEFAULT 0, 	         -- taux tva
   localtax1_tx		double(6,3)   DEFAULT 0,           -- local tax 1 rate
-  localtax1_type			 	varchar(1)	  	 NULL, 			 -- localtax1 type
+  localtax1_type			 	varchar(10)	  	 NULL, 			 -- localtax1 type
   localtax2_tx		double(6,3)   DEFAULT 0,           -- local tax 2 rate
-  localtax2_type			 	varchar(1)	  	 NULL, 			 -- localtax2 type
+  localtax2_type			 	varchar(10)	  	 NULL, 			 -- localtax2 type
   qty                   real          NOT NULL,            -- quantity
   remise_percent        real          DEFAULT 0,    		   -- pourcentage de remise
   subprice              double(24,8)  DEFAULT 0,           -- prix unitaire
@@ -52,7 +52,9 @@ create table llx_contratdet
   total_localtax1       double(24,8)  DEFAULT 0,	   		   -- Total Local tax 1 de la ligne
   total_localtax2       double(24,8)  DEFAULT 0,	   		   -- Total Local tax 2 de la ligne
   total_ttc             double(24,8)  DEFAULT 0,	   		   -- Total TTC de la ligne toute quantite et incluant remise ligne et globale
-  info_bits		          integer       DEFAULT 0, 		       -- TVA NPR ou non
+  info_bits		               integer DEFAULT 0, 		       -- TVA NPR ou non
+  fk_product_fournisseur_price integer DEFAULT NULL,         -- supplier price id
+  buy_price_ht          double(24,8)  DEFAULT NULL,   -- buying price
 
   fk_user_author        integer       NOT NULL DEFAULT 0,
   fk_user_ouverture     integer,

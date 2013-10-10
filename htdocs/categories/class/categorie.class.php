@@ -5,6 +5,7 @@
  * Copyright (C) 2006-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2006-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2007      Patrick Raguin	  	<patrick.raguin@gmail.com>
+ * Copyright (C) 2013      Juanjo Menent	  	<jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -241,11 +242,8 @@ class Categorie
 		$this->db->begin();
 
 		$sql = "UPDATE ".MAIN_DB_PREFIX."categorie";
-		$sql.= " SET label = '".$this->db->escape($this->label)."'";
-		if (! empty($this->description))
-		{
-			$sql .= ", description = '".$this->db->escape($this->description)."'";
-		}
+		$sql.= " SET label = '".$this->db->escape($this->label)."',";
+		$sql.= " description = '".$this->db->escape($this->description)."'";
 		if (! empty($conf->global->CATEGORY_ASSIGNED_TO_A_CUSTOMER))
 		{
 			$sql .= ", fk_soc = ".($this->socid != -1 ? $this->socid : 'null');
@@ -420,6 +418,7 @@ class Categorie
 		$sql .= " WHERE fk_categorie = ".$this->id;
 		$sql .= " AND   fk_".($type=='fournisseur'?'societe':$type)."   = ".$obj->id;
 
+		dol_syslog(get_class($this).'::del_type sql='.$sql);
 		if ($this->db->query($sql))
 		{
 			return 1;
@@ -477,7 +476,7 @@ class Categorie
 
 
 	/**
-	 * Retourne les filles de la categorie
+	 * Return childs of a category
 	 *
 	 * @return	void
 	 */
@@ -508,43 +507,6 @@ class Categorie
 
 
 	/**
-	 * Return category description
-	 *
-	 * @param	int		$cate		Category id
-	 * @return	string				Description
-	 * @deprecated function not used ?
-	 */
-	function get_desc($cate)
-	{
-		$sql = "SELECT description FROM ".MAIN_DB_PREFIX."categorie";
-		$sql.= " WHERE rowid = ".$cate;
-
-		$res = $this->db->query($sql);
-		$n   = $this->db->fetch_array($res);
-
-		return($n[0]);
-	}
-
-	/**
-	 * La categorie $fille est-elle une fille de cette categorie ?
-	 *
-	 * @param	Category	$child		Object category
-	 * @return	void
-	 * @deprecated function not used ?
-	 */
-	function is_fille($child)
-	{
-		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."categorie";
-		$sql.= " WHERE fk_parent = ".$this->id." AND rowid = ".$child->id;
-
-		$res  = $this->db->query($sql);
-		$n    = $this->db->fetch_array($res);
-
-		return ($n[0] > 0);
-	}
-
-
-	/**
 	 * 	Load this->motherof that is array(id_son=>id_parent, ...)
 	 *
 	 *	@return		int		<0 if KO, >0 if OK
@@ -559,8 +521,8 @@ class Categorie
 		$sql = "SELECT fk_parent as id_parent, rowid as id_son";
 		$sql.= " FROM ".MAIN_DB_PREFIX."categorie";
 		$sql.= " WHERE fk_parent != 0";
-		$sql.= " AND entity = ".$conf->entity;
-
+		$sql.= " AND entity IN (".getEntity('category',1).")";
+		
 		dol_syslog(get_class($this)."::load_motherof sql=".$sql);
 		$resql = $this->db->query($sql);
 		if ($resql)

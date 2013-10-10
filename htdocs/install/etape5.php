@@ -142,6 +142,10 @@ if ($action == "set" || empty($action) || preg_match('/upgrade/i',$action))
 
     $db=getDoliDBInstance($conf->db->type,$conf->db->host,$conf->db->user,$conf->db->pass,$conf->db->name,$conf->db->port);
 
+    // Create the global $hookmanager object
+    include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+    $hookmanager=new HookManager($db);
+        
     $ok = 0;
 
     // If first install
@@ -233,7 +237,7 @@ if ($action == "set" || empty($action) || preg_match('/upgrade/i',$action))
                         dolibarr_install_syslog('install/etape5.php Activate module file='.$file);
                         $res=dol_include_once("/core/modules/".$file);
 
-                        $res=Activate($modtoactivatenew,1);
+                        $res=activateModule($modtoactivatenew,1);
                         if (! $result) print 'ERROR in activating module file='.$file;
                     }
                 }

@@ -24,14 +24,15 @@
  *	\brief      Page for cheque deposits
  */
 
-require 'pre.inc.php';	// We use pre.inc.php to have a dynamic menu
+require('../../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/paiement/cheque/class/remisecheque.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
+$langs->load("banks");
+$langs->load("categories");
 $langs->load('bills');
-$langs->load('banks');
 $langs->load('companies');
 $langs->load('compta');
 
@@ -343,8 +344,8 @@ if ($action == 'new')
 	$sql.= " AND ba.entity = ".$conf->entity;
 	$sql.= " AND b.fk_bordereau = 0";
 	$sql.= " AND b.amount > 0";
-	if ($filterdate)      $sql.=" AND b.dateo = '".$db->idate($filterdate)."'";
-    if ($filteraccountid) $sql.=" AND ba.rowid= '".$filteraccountid."'";
+	if ($filterdate)          $sql.=" AND b.dateo = '".$db->idate($filterdate)."'";
+    if ($filteraccountid > 0) $sql.=" AND ba.rowid= '".$filteraccountid."'";
 	$sql.= $db->order("b.dateo,b.rowid","ASC");
 
 	$resql = $db->query($sql);
@@ -601,10 +602,10 @@ else
 
 print '<div class="tabsAction">';
 
-if ($user->societe_id == 0 && count($accounts) == 1 && $action == 'new' && $user->rights->banque->cheque)
+/*if ($user->societe_id == 0 && count($accounts) == 1 && $action == 'new' && $user->rights->banque->cheque)
 {
 	print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?action=create&amp;accountid='.$account_id.'">'.$langs->trans('NewCheckReceipt').'</a>';
-}
+}*/
 
 if ($user->societe_id == 0 && ! empty($object->id) && $object->statut == 0 && $user->rights->banque->cheque)
 {

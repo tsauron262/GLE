@@ -44,9 +44,9 @@ llxHeader('','EMailing',$help_url);
 
 print_fiche_titre($langs->trans("MailingArea"));
 
-print '<table class="notopnoleftnoright" width="100%">';
-
-print '<tr><td valign="top" width="30%" class="notopnoleft">';
+//print '<table class="notopnoleftnoright" width="100%">';
+//print '<tr><td valign="top" width="30%" class="notopnoleft">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
 // Recherche emails
@@ -141,7 +141,9 @@ if (is_resource($handle))
 
 print "</table><br>";
 
-print '</td><td valign="top" width="70%" class="notopnoleftnoright">';
+
+//print '</td><td valign="top" width="70%" class="notopnoleftnoright">';
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 /*
@@ -174,9 +176,9 @@ if ($result)
 	  $var=!$var;
 
 	  print "<tr $bc[$var]>";
-	  print '<td nowrap="nowrap"><a href="fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowEMail"),"email").' '.$obj->rowid.'</a></td>';
+	  print '<td class="nowrap"><a href="fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowEMail"),"email").' '.$obj->rowid.'</a></td>';
 	  print '<td>'.dol_trunc($obj->titre,38).'</td>';
-	  print '<td align="center">'.dol_print_date($obj->date_creat,'day').'</td>';
+	  print '<td align="center">'.dol_print_date($db->jdate($obj->date_creat),'day').'</td>';
 	  print '<td align="center">'.($obj->nbemail?$obj->nbemail:"0").'</td>';
 	  $mailstatic=new Mailing($db);
 	  print '<td align="right">'.$mailstatic->LibStatut($obj->statut,5).'</td>';
@@ -198,11 +200,8 @@ else
 }
 
 
-
-print '</td></tr>';
-print '</table>';
-
-$db->close();
+//print '</td></tr></table>';
+print '</div></div></div>';
 
 
 if ($langs->file_exists("html/spam.html",0)) {
@@ -217,4 +216,5 @@ if ($langs->file_exists("html/spam.html",0)) {
 
 llxFooter();
 
+$db->close();
 ?>

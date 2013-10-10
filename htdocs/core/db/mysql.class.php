@@ -479,16 +479,17 @@ class DoliDBMysql
 
 
 	/**
-	 *	Define limits of request
-	 *
-	 *	@param	int		$limit      nombre maximum de lignes retournees
-	 *	@param	int		$offset     numero de la ligne a partir de laquelle recuperer les ligne
-	 *	@return	string      		chaine exprimant la syntax sql de la limite
+     *	Define limits and offset of request
+     *
+     *	@param	int		$limit      Maximum number of lines returned (-1=conf->liste_limit, 0=no limit)
+     *	@param	int		$offset     Numero of line from where starting fetch
+     *	@return	string      		String with SQL syntax to add a limit and offset
 	 */
 	function plimit($limit=0,$offset=0)
 	{
 		global $conf;
-		if (! $limit) $limit=$conf->liste_limit;
+        if (empty($limit)) return "";
+		if ($limit < 0) $limit=$conf->liste_limit;
 		if ($offset > 0) return " LIMIT $offset,$limit ";
 		else return " LIMIT $limit ";
 	}
@@ -878,28 +879,33 @@ class DoliDBMysql
 	{
 		// cles recherchees dans le tableau des descriptions (fields) : type,value,attribute,null,default,extra
 		// ex. : $fields['rowid'] = array('type'=>'int','value'=>'11','null'=>'not null','extra'=> 'auto_increment');
-		$sql = "create table ".$table."(";
+		$sql = "CREATE TABLE ".$table."(";
 		$i=0;
 		foreach($fields as $field_name => $field_desc)
 		{
 			$sqlfields[$i] = $field_name." ";
 			$sqlfields[$i]  .= $field_desc['type'];
-			if( preg_match("/^[^\s]/i",$field_desc['value']))
-			$sqlfields[$i]  .= "(".$field_desc['value'].")";
-			else if( preg_match("/^[^\s]/i",$field_desc['attribute']))
-			$sqlfields[$i]  .= " ".$field_desc['attribute'];
-			else if( preg_match("/^[^\s]/i",$field_desc['default']))
-			{
-				if(preg_match("/null/i",$field_desc['default']))
-				$sqlfields[$i]  .= " default ".$field_desc['default'];
-				else
-				$sqlfields[$i]  .= " default '".$field_desc['default']."'";
+			if( preg_match("/^[^\s]/i",$field_desc['value'])) {
+				$sqlfields[$i]  .= "(".$field_desc['value'].")";
 			}
-			else if( preg_match("/^[^\s]/i",$field_desc['null']))
-			$sqlfields[$i]  .= " ".$field_desc['null'];
-
-			else if( preg_match("/^[^\s]/i",$field_desc['extra']))
-			$sqlfields[$i]  .= " ".$field_desc['extra'];
+			if( preg_match("/^[^\s]/i",$field_desc['attribute'])) {
+				$sqlfields[$i]  .= " ".$field_desc['attribute'];
+			}
+			if( preg_match("/^[^\s]/i",$field_desc['default']))
+			{
+				if ((preg_match("/null/i",$field_desc['default'])) || (preg_match("/CURRENT_TIMESTAMP/i",$field_desc['default']))) {
+					$sqlfields[$i]  .= " default ".$field_desc['default'];
+				}
+				else {
+					$sqlfields[$i]  .= " default '".$field_desc['default']."'";
+				}
+			}
+			if( preg_match("/^[^\s]/i",$field_desc['null'])) {
+				$sqlfields[$i]  .= " ".$field_desc['null'];
+			}
+			if( preg_match("/^[^\s]/i",$field_desc['extra'])) {
+				$sqlfields[$i]  .= " ".$field_desc['extra'];
+			}
 			$i++;
 		}
 		if($primary_key != "")
@@ -930,7 +936,7 @@ class DoliDBMysql
 		$sql .= ",".implode(',',$sqluq);
 		if($keys != "")
 		$sql .= ",".implode(',',$sqlk);
-		$sql .=") type=".$type;
+		$sql .=") engine=".$type;
 
 		dol_syslog($sql,LOG_DEBUG);
 		if(! $this -> query($sql))

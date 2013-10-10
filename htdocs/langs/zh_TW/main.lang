@@ -1,18 +1,23 @@
 /*
- * Language code: zh_TW
+ * Language code: zh_TW (traditionnal)
  * Generation date 2012-09-04 16:02:00
  */
 
 // Reference language: en_US
 CHARSET=UTF-8
 DIRECTION=ltr
-#FONTFORPDF=chinese
-FONTFORPDF=stsongstdlight
+# msungstdlight or cid0ct are for traditionnal chinese (traditionnal does not render with ubuntu pdf reader) 
+# stsongstdlight or cid0cs are for simplified chinese
+FONTFORPDF=msungstdlight
 #FONTSIZEFORPDF=9
 SeparatorDecimal=.
 SeparatorThousand=None
 FormatDateShort=%Y/%m/%d
+FormatDateShortInput=%Y/%m/%d
 FormatDateShortJava=yyyy/MM/dd
+FormatDateShortJavaInput=yyyy/MM/dd
+FormatDateShortJQuery=yy/mm/dd
+FormatDateShortJQueryInput=yy/mm/dd
 FormatHourShort=%I:%M %p
 FormatDateTextShort=%Y %b %d
 FormatDateText=%Y %B %d
@@ -599,7 +604,6 @@ Prefix=字首
 
 // START - Lines generated via autotranslator.php tool (2012-02-29 17:37:09).
 // Reference language: en_US -> zh_CN
-FormatDateShortJQuery=dd/mm/yy
 AddLink=添加鏈接
 Of=的
 SearchOf=搜尋

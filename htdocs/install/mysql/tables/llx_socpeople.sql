@@ -25,12 +25,13 @@ create table llx_socpeople
   tms				timestamp,
   fk_soc			integer,									-- lien vers la societe
   entity			integer DEFAULT 1 NOT NULL,					-- multi company id
+  ref_ext           varchar(128),                               -- reference into an external system (not used by dolibarr)
   civilite			varchar(6),
-  name				varchar(50),
+  lastname			varchar(50),
   firstname			varchar(50),
   address			varchar(255),
-  cp				varchar(25),
-  ville				varchar(255),
+  zip				varchar(25),
+  town				varchar(255),
   fk_departement	integer,
   fk_pays			integer        DEFAULT 0,
   birthday			date,
@@ -45,7 +46,8 @@ create table llx_socpeople
   priv				smallint NOT NULL DEFAULT 0,
   fk_user_creat		integer DEFAULT 0,							-- user qui a creel'enregistrement
   fk_user_modif		integer,
-  note				text,
+  note_private		text,
+  note_public		text,
   default_lang		varchar(6),
   canvas			varchar(32),			-- type of canvas if used (null by default)
   import_key		varchar(14)

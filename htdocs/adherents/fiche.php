@@ -4,7 +4,7 @@
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2012      Marcos García        <marcosgdf@gmail.com>
- * Copyright (C) 2012      Philippe Grand       <philippe.grand@atoo-net.com>
+ * Copyright (C) 2012-2013 Philippe Grand       <philippe.grand@atoo-net.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,8 +64,11 @@ if (! empty($conf->mailmanspip->enabled))
 $object = new Adherent($db);
 $extrafields = new ExtraFields($db);
 
+// fetch optionals attributes and labels
+$extralabels=$extrafields->fetch_name_optionals_label($object->table_element);
+
 // Get object canvas (By default, this is not defined, so standard usage of dolibarr)
-$object->getCanvas($socid);
+$object->getCanvas($rowid);
 $canvas = $object->canvas?$object->canvas:GETPOST("canvas");
 $objcanvas='';
 if (! empty($canvas))
@@ -98,17 +101,15 @@ if ($rowid > 0)
 	}
 }
 
-// Define variables to know what current user can do on members
+// Define variables to determine what the current user can do on the members
 $canaddmember=$user->rights->adherent->creer;
-// Define variables to know what current user can do on properties of a member
+// Define variables to determine what the current user can do on the properties of a member
 if ($rowid)
 {
 	$caneditfieldmember=$user->rights->adherent->creer;
 }
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
-$hookmanager=new HookManager($db);
 $hookmanager->initHooks(array('membercard'));
 
 
@@ -116,7 +117,7 @@ $hookmanager->initHooks(array('membercard'));
  * 	Actions
 */
 
-$parameters=array('socid'=>$socid, 'objcanvas'=>$objcanvas);
+$parameters=array('rowid'=>$rowid, 'objcanvas'=>$objcanvas);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
 
 if ($action == 'setuserid' && ($user->rights->user->self->creer || $user->rights->user->user->creer))
@@ -238,45 +239,53 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 {
 	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
-	$datenaiss='';
-	if (isset($_POST["naissday"]) && $_POST["naissday"]
-			&& isset($_POST["naissmonth"]) && $_POST["naissmonth"]
-			&& isset($_POST["naissyear"]) && $_POST["naissyear"])
+	$birthdate='';
+	if (isset($_POST["birthday"]) && $_POST["birthday"]
+			&& isset($_POST["birthmonth"]) && $_POST["birthmonth"]
+			&& isset($_POST["birthyear"]) && $_POST["birthyear"])
 	{
-		$datenaiss=dol_mktime(12, 0, 0, $_POST["naissmonth"], $_POST["naissday"], $_POST["naissyear"]);
+		$birthdate=dol_mktime(12, 0, 0, $_POST["birthmonth"], $_POST["birthday"], $_POST["birthyear"]);
+	}
+	$lastname=$_POST["lastname"];
+	$firstname=$_POST["firstname"];
+	$morphy=$morphy=$_POST["morphy"];;
+	if ($morphy != 'mor' && empty($lastname)) {
+		$error++;
+		$langs->load("errors");
+		$errmsg .= $langs->trans("ErrorFieldRequired",$langs->transnoentities("Lastname"))."<br>\n";
+	}
+	if ($morphy != 'mor' && (!isset($firstname) || $firstname=='')) {
+		$error++;
+		$langs->load("errors");
+		$errmsg .= $langs->trans("ErrorFieldRequired",$langs->transnoentities("Firstname"))."<br>\n";
 	}
 
 	// Create new object
-	if ($result > 0)
+	if ($result > 0 && ! $error)
 	{
 		$object->oldcopy=dol_clone($object);
 
 		// Change values
 		$object->civilite_id = trim($_POST["civilite_id"]);
-		$object->prenom      = trim($_POST["prenom"]);     // deprecated
-		$object->nom         = trim($_POST["nom"]);        // deprecated
-		$object->firstname   = trim($_POST["prenom"]);
-		$object->lastname    = trim($_POST["nom"]);
+		$object->firstname   = trim($_POST["firstname"]);
+		$object->lastname    = trim($_POST["lastname"]);
 		$object->login       = trim($_POST["login"]);
 		$object->pass        = trim($_POST["pass"]);
 
 		$object->societe     = trim($_POST["societe"]);
-		$object->adresse     = trim($_POST["address"]);    // deprecated
+		$object->company     = trim($_POST["societe"]);
+
 		$object->address     = trim($_POST["address"]);
-		$object->cp          = trim($_POST["zipcode"]);    // deprecated
 		$object->zip         = trim($_POST["zipcode"]);
-		$object->ville       = trim($_POST["town"]);       // deprecated
 		$object->town        = trim($_POST["town"]);
-		$object->state_id    = $_POST["departement_id"];
+		$object->state_id    = $_POST["state_id"];
 		$object->country_id  = $_POST["country_id"];
-		$object->fk_departement = $_POST["departement_id"];   // deprecated
-		$object->pays_id     = $_POST["country_id"];   // deprecated
 
 		$object->phone       = trim($_POST["phone"]);
 		$object->phone_perso = trim($_POST["phone_perso"]);
 		$object->phone_mobile= trim($_POST["phone_mobile"]);
 		$object->email       = trim($_POST["email"]);
-		$object->naiss       = $datenaiss;
+		$object->birth       = $birthdate;
 
 		$object->typeid      = $_POST["typeid"];
 		//$object->note        = trim($_POST["comment"]);
@@ -291,14 +300,8 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 		$object->statut      = $_POST["statut"];
 		$object->public      = $_POST["public"];
 
-		// Get extra fields
-		foreach($_POST as $key => $value)
-		{
-			if (preg_match("/^options_/",$key))
-			{
-				$object->array_options[$key]=$_POST[$key];
-			}
-		}
+		// Fill array 'array_options' with data from add form
+		$ret = $extrafields->setOptionalsFromPost($extralabels,$object);
 
 		// Check if we need to also synchronize user information
 		$nosyncuser=0;
@@ -365,14 +368,23 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 				{
 					if ($object->oldcopy->del_to_abo() < 0)
 					{
-						// error
-						$errmsgs[]= $langs->trans("FailedToCleanMailmanList").': '.$object->error."<br>\n";
+						if (! empty($object->oldcopy->error)) setEventMessage($langs->trans("ErrorFailedToRemoveToMailmanList").': '.$object->oldcopy->error, 'errors');
+						setEventMessage($object->oldcopy->errors, 'errors');
+					}
+					else
+					{
+						setEventMessage($object->oldcopy->mesgs,'mesgs');
 					}
 				}
-				if ($object->add_to_abo() < 0)    // We add subscription if new email or new type (new type may means more mailing-list to subscribe)
+    			// We add subscription if new email or new type (new type may means more mailing-list to subscribe)
+    			if ($object->add_to_abo() < 0)
+    			{
+    				 if (! empty($object->error)) setEventMessage($langs->trans("ErrorFailedToAddToMailmanList").': '.$object->error, 'errors');
+    				 setEventMessage($object->errors, 'errors');
+    			}
+				else
 				{
-					// error
-					$errmsgs[]= $langs->trans("FailedToAddToMailmanList").': '.$object->error."<br>\n";
+					setEventMessage($object->mesgs, 'mesgs');
 				}
 			}
 
@@ -392,17 +404,21 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 			$action='';
 		}
 	}
+	else
+	{
+		$action='edit';
+	}
 }
 
 if ($action == 'add' && $user->rights->adherent->creer)
 {
 	if ($canvas) $object->canvas=$canvas;
-	$datenaiss='';
-	if (isset($_POST["naissday"]) && $_POST["naissday"]
-			&& isset($_POST["naissmonth"]) && $_POST["naissmonth"]
-			&& isset($_POST["naissyear"]) && $_POST["naissyear"])
+	$birthdate='';
+	if (isset($_POST["birthday"]) && $_POST["birthday"]
+			&& isset($_POST["birthmonth"]) && $_POST["birthmonth"]
+			&& isset($_POST["birthyear"]) && $_POST["birthyear"])
 	{
-		$datenaiss=dol_mktime(12, 0, 0, $_POST["naissmonth"], $_POST["naissday"], $_POST["naissyear"]);
+		$birthdate=dol_mktime(12, 0, 0, $_POST["birthmonth"], $_POST["birthday"], $_POST["birthyear"]);
 	}
 	$datecotisation='';
 	if (isset($_POST["reday"]) && isset($_POST["remonth"]) && isset($_POST["reyear"]))
@@ -412,13 +428,13 @@ if ($action == 'add' && $user->rights->adherent->creer)
 
 	$typeid=$_POST["typeid"];
 	$civilite_id=$_POST["civilite_id"];
-	$nom=$_POST["nom"];
-	$prenom=$_POST["prenom"];
+	$lastname=$_POST["lastname"];
+	$firstname=$_POST["firstname"];
 	$societe=$_POST["societe"];
 	$address=$_POST["address"];
 	$zip=$_POST["zipcode"];
 	$town=$_POST["town"];
-	$state_id=$_POST["departement_id"];
+	$state_id=$_POST["state_id"];
 	$country_id=$_POST["country_id"];
 
 	$phone=$_POST["phone"];
@@ -437,20 +453,13 @@ if ($action == 'add' && $user->rights->adherent->creer)
 	$socid=$_POST["socid"];
 
 	$object->civilite_id = $civilite_id;
-	$object->prenom      = $prenom;    // deprecated
-	$object->nom         = $nom;       // deprecated
-	$object->firstname   = $prenom;
-	$object->lastname    = $nom;
+	$object->firstname   = $firstname;
+	$object->lastname    = $lastname;
 	$object->societe     = $societe;
-	$object->adresse     = $address; // deprecated
 	$object->address     = $address;
-	$object->cp          = $zip;     // deprecated
 	$object->zip         = $zip;
-	$object->ville       = $town;    // deprecated
 	$object->town        = $town;
-	$object->fk_departement = $state_id;
 	$object->state_id    = $state_id;
-	$object->pays_id     = $country_id;
 	$object->country_id  = $country_id;
 	$object->phone       = $phone;
 	$object->phone_perso = $phone_perso;
@@ -458,7 +467,7 @@ if ($action == 'add' && $user->rights->adherent->creer)
 	$object->email       = $email;
 	$object->login       = $login;
 	$object->pass        = $pass;
-	$object->naiss       = $datenaiss;
+	$object->naiss       = $birthdate;
 	$object->photo       = $photo;
 	$object->typeid      = $typeid;
 	//$object->note        = $comment;
@@ -467,14 +476,8 @@ if ($action == 'add' && $user->rights->adherent->creer)
 	$object->fk_soc      = $socid;
 	$object->public      = $public;
 
-	// Get extra fields
-	foreach($_POST as $key => $value)
-	{
-		if (preg_match("/^options_/",$key))
-		{
-			$object->array_options[$key]=$_POST[$key];
-		}
-	}
+	// Fill array 'array_options' with data from add form
+	$ret = $extrafields->setOptionalsFromPost($extralabels,$object);
 
 	// Check parameters
 	if (empty($morphy) || $morphy == "-1") {
@@ -505,12 +508,12 @@ if ($action == 'add' && $user->rights->adherent->creer)
 			$errmsg .= $langs->trans("ErrorFieldRequired",$langs->transnoentities("Password"))."<br>\n";
 		}
 	}
-	if (empty($nom)) {
+	if ($morphy != 'mor' && empty($lastname)) {
 		$error++;
 		$langs->load("errors");
 		$errmsg .= $langs->trans("ErrorFieldRequired",$langs->transnoentities("Lastname"))."<br>\n";
 	}
-	if ($morphy != 'mor' && (!isset($prenom) || $prenom=='')) {
+	if ($morphy != 'mor' && (!isset($firstname) || $firstname=='')) {
 		$error++;
 		$langs->load("errors");
 		$errmsg .= $langs->trans("ErrorFieldRequired",$langs->transnoentities("Firstname"))."<br>\n";
@@ -700,9 +703,6 @@ if ($user->rights->adherent->creer && $action == 'confirm_add_spip' && $confirm 
 $form = new Form($db);
 $formcompany = new FormCompany($db);
 
-// fetch optionals attributes and labels
-$extralabels=$extrafields->fetch_name_optionals_label('member');
-
 $help_url='EN:Module_Foundations|FR:Module_Adh&eacute;rents|ES:M&oacute;dulo_Miembros';
 llxHeader('',$langs->trans("Member"),$help_url);
 
@@ -713,13 +713,14 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action))
 	// -----------------------------------------
 	// When used with CANVAS
 	// -----------------------------------------
-	if (empty($object->error) && $socid)
+	if (empty($object->error) && $rowid)
 	{
 		$object = new Adherent($db);
-		$object->fetch($socid);
+		$result=$object->fetch($rowid);
+		if ($result <= 0) dol_print_error('',$object->error);
 	}
-	$objcanvas->assign_values($action, $socid);	// Set value for templates
-	$objcanvas->display_canvas($action);		// Show template
+   	$objcanvas->assign_values($action, $object->id, $object->ref);	// Set value for templates
+    $objcanvas->display_canvas($action);							// Show template
 }
 else
 {
@@ -735,15 +736,13 @@ else
 		/*                                                                            */
 		/* ************************************************************************** */
 		$object->canvas=$canvas;
-		$object->fk_departement = GETPOST('departement_id', 'int');
+		$object->state_id = GETPOST('departement_id', 'int');
 
 		// We set country_id, country_code and country for the selected country
 		$object->country_id=GETPOST('country_id','int')?GETPOST('country_id','int'):$mysoc->country_id;
 		if ($object->country_id)
 		{
 			$tmparray=getCountry($object->country_id,'all');
-			$object->pays_code=$tmparray['code'];
-			$object->pays=$tmparray['code'];
 			$object->country_code=$tmparray['code'];
 			$object->country=$tmparray['label'];
 		}
@@ -825,11 +824,11 @@ else
 		print '</tr>';
 
 		// Lastname
-		print '<tr><td id="tdlastname">'.$langs->trans("Lastname").'</td><td><input type="text" name="nom" value="'.(GETPOST('nom','alpha')?GETPOST('nom','alpha'):$object->lastname).'" size="40"></td>';
+		print '<tr><td id="tdlastname">'.$langs->trans("Lastname").'</td><td><input type="text" name="lastname" value="'.(GETPOST('lastname','alpha')?GETPOST('lastname','alpha'):$object->lastname).'" size="40"></td>';
 		print '</tr>';
 
 		// Firstname
-		print '<tr><td id="tdfirstname">'.$langs->trans("Firstname").'</td><td><input type="text" name="prenom" size="40" value="'.(GETPOST('prenom','alpha')?GETPOST('prenom','alpha'):$object->firstname).'"></td>';
+		print '<tr><td id="tdfirstname">'.$langs->trans("Firstname").'</td><td><input type="text" name="firstname" size="40" value="'.(GETPOST('firstname','alpha')?GETPOST('firstname','alpha'):$object->firstname).'"></td>';
 		print '</tr>';
 
 		// Password
@@ -849,9 +848,9 @@ else
 
 		// Zip / Town
 		print '<tr><td>'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td>';
-		print $formcompany->select_ziptown((GETPOST('zipcode','alpha')?GETPOST('zipcode','alpha'):$object->zip),'zipcode',array('town','selectcountry_id','departement_id'),6);
+		print $formcompany->select_ziptown((GETPOST('zipcode','alpha')?GETPOST('zipcode','alpha'):$object->zip),'zipcode',array('town','selectcountry_id','state_id'),6);
 		print ' ';
-		print $formcompany->select_ziptown((GETPOST('town','alpha')?GETPOST('town','alpha'):$object->town),'town',array('zipcode','selectcountry_id','departement_id'));
+		print $formcompany->select_ziptown((GETPOST('town','alpha')?GETPOST('town','alpha'):$object->town),'town',array('zipcode','selectcountry_id','state_id'));
 		print '</td></tr>';
 
 		// Country
@@ -867,7 +866,7 @@ else
 			print '<tr><td>'.$langs->trans('State').'</td><td>';
 			if ($object->country_id)
 			{
-				print $formcompany->select_state(GETPOST('departement_id','int')?GETPOST('departement_id','int'):$object->fk_departement,$object->country_code);
+				print $formcompany->select_state(GETPOST('state_id','int')?GETPOST('state_id','int'):$object->state_id,$object->country_code);
 			}
 			else
 			{
@@ -903,15 +902,7 @@ else
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			foreach($extrafields->attribute_label as $key=>$label)
-			{
-				$value=(isset($_POST["options_".$key])?GETPOST('options_'.$key,'alpha'):(isset($object->array_options["options_".$key])?$object->array_options["options_".$key]:''));
-           		print '<tr><td';
-           		if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-           		print '>'.$label.'</td><td>';
-				print $extrafields->showInputField($key,$value);
-				print '</td></tr>'."\n";
-			}
+			print $object->showOptionals($extrafields,'edit');
 		}
 
 		/*
@@ -925,7 +916,7 @@ else
 
 		// Login Dolibarr
 		print '<tr><td>'.$langs->trans("LinkedToDolibarrUser").'</td><td class="valeur">';
-		print $form->select_users($object->user_id,'userid',1);
+		print $form->select_dolusers($object->user_id,'userid',1);
 		print '</td></tr>';
 		*/
 
@@ -959,9 +950,10 @@ else
 		$adht->fetch($object->typeid);
 
 		// We set country_id, and country_code, country of the chosen country
-		if (isset($_POST["pays"]) || $object->country_id)
+		$country=GETPOST('country','int');
+		if (!empty($country) || $object->country_id)
 		{
-			$sql = "SELECT rowid, code, libelle as label from ".MAIN_DB_PREFIX."c_pays where rowid = ".(isset($_POST["pays"])?$_POST["pays"]:$object->country_id);
+			$sql = "SELECT rowid, code, libelle as label from ".MAIN_DB_PREFIX."c_pays where rowid = ".(!empty($country)?$country:$object->country_id);
 			$resql=$db->query($sql);
 			if ($resql)
 			{
@@ -971,9 +963,6 @@ else
 			{
 				dol_print_error($db);
 			}
-			$object->pays_id=$obj->rowid;
-			$object->pays_code=$obj->code;
-			$object->pays=$langs->trans("Country".$obj->code)?$langs->trans("Country".$obj->code):$obj->label;
 			$object->country_id=$obj->rowid;
 			$object->country_code=$obj->code;
 			$object->country=$langs->trans("Country".$obj->code)?$langs->trans("Country".$obj->code):$obj->label;
@@ -1046,7 +1035,7 @@ else
 		print $form->selectarray("morphy", $morphys, isset($_POST["morphy"])?$_POST["morphy"]:$object->morphy);
 		print "</td>";
 		// Photo
-		print '<td align="center" valign="middle" width="25%" rowspan="'.$rowspan.'">';
+		print '<td align="center" class="hideonsmartphone" valign="middle" width="25%" rowspan="'.$rowspan.'">';
 		print $form->showphoto('memberphoto',$object)."\n";
 		if ($caneditfieldmember)
 		{
@@ -1081,12 +1070,12 @@ else
 		print '</td>';
 		print '</tr>';
 
-		// Name
-		print '<tr><td id="tdlastname">'.$langs->trans("Lastname").'</td><td><input type="text" name="nom" size="40" value="'.(isset($_POST["nom"])?$_POST["nom"]:$object->lastname).'"></td>';
+		// Lastname
+		print '<tr><td id="tdlastname">'.$langs->trans("Lastname").'</td><td><input type="text" name="lastname" size="40" value="'.(isset($_POST["lastname"])?$_POST["lastname"]:$object->lastname).'"></td>';
 		print '</tr>';
 
 		// Firstname
-		print '<tr><td id="tdfirstname">'.$langs->trans("Firstname").'</td><td><input type="text" name="prenom" size="40" value="'.(isset($_POST["prenom"])?$_POST["prenom"]:$object->firstname).'"></td>';
+		print '<tr><td id="tdfirstname">'.$langs->trans("Firstname").'</td><td><input type="text" name="firstname" size="40" value="'.(isset($_POST["firstname"])?$_POST["firstname"]:$object->firstname).'"></td>';
 		print '</tr>';
 
 		// Password
@@ -1102,9 +1091,9 @@ else
 
 		// Zip / Town
 		print '<tr><td>'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td>';
-		print $formcompany->select_ziptown((isset($_POST["zipcode"])?$_POST["zipcode"]:$object->zip),'zipcode',array('town','selectcountry_id','departement_id'),6);
+		print $formcompany->select_ziptown((isset($_POST["zipcode"])?$_POST["zipcode"]:$object->zip),'zipcode',array('town','selectcountry_id','state_id'),6);
 		print ' ';
-		print $formcompany->select_ziptown((isset($_POST["town"])?$_POST["town"]:$object->town),'town',array('zipcode','selectcountry_id','departement_id'));
+		print $formcompany->select_ziptown((isset($_POST["town"])?$_POST["town"]:$object->town),'town',array('zipcode','selectcountry_id','state_id'));
 		print '</td></tr>';
 
 		// Country
@@ -1118,7 +1107,7 @@ else
 		if (empty($conf->global->MEMBER_DISABLE_STATE))
 		{
 			print '<tr><td>'.$langs->trans('State').'</td><td>';
-			print $formcompany->select_state($object->fk_departement,isset($_POST["country_id"])?$_POST["country_id"]:$object->country_id);
+			print $formcompany->select_state($object->state_id,isset($_POST["country_id"])?$_POST["country_id"]:$object->country_id);
 			print '</td></tr>';
 		}
 
@@ -1134,9 +1123,9 @@ else
 		// EMail
 		print '<tr><td>'.($conf->global->ADHERENT_MAIL_REQUIRED?'<span class="fieldrequired">':'').$langs->trans("EMail").($conf->global->ADHERENT_MAIL_REQUIRED?'</span>':'').'</td><td><input type="text" name="email" size="40" value="'.(isset($_POST["email"])?$_POST["email"]:$object->email).'"></td></tr>';
 
-		// Date naissance
+		// Birthday
 		print "<tr><td>".$langs->trans("Birthday")."</td><td>\n";
-		$form->select_date(($object->naiss ? $object->naiss : -1),'naiss','','',1,'formsoc');
+		$form->select_date(($object->birth ? $object->birth : -1),'birth','','',1,'formsoc');
 		print "</td></tr>\n";
 
 		// Profil public
@@ -1149,15 +1138,7 @@ else
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			foreach($extrafields->attribute_label as $key=>$label)
-			{
-				$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$object->array_options["options_".$key]);
-           		print '<tr><td';
-           		if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-           		print '>'.$label.'</td><td>';
-				print $extrafields->showInputField($key,$value);
-				print '</td></tr>'."\n";
-			}
+			print $object->showOptionals($extrafields,'edit');
 		}
 
 		// Third party Dolibarr
@@ -1395,7 +1376,7 @@ else
 		print $form->showrefnav($object, 'rowid', $linkback);
 		print '</td></tr>';
 
-		$showphoto='<td rowspan="'.$rowspan.'" align="center" valign="middle" width="25%">';
+		$showphoto='<td rowspan="'.$rowspan.'" align="center" class="hideonsmartphone" valign="middle" width="25%">';
 		$showphoto.=$form->showphoto('memberphoto',$object);
 		$showphoto.='</td>';
 
@@ -1403,6 +1384,7 @@ else
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
 			print '<tr><td>'.$langs->trans("Login").' / '.$langs->trans("Id").'</td><td class="valeur">'.$object->login.'&nbsp;</td>';
+			// Photo
 			print $showphoto; $showphoto='';
 			print '</tr>';
 		}
@@ -1441,7 +1423,7 @@ else
 		print '</td></tr>';
 
 		// Zip / Town
-		print '<tr><td nowrap="nowrap">'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td class="valeur">'.$object->zip.(($object->zip && $object->town)?' / ':'').$object->town.'</td></tr>';
+		print '<tr><td class="nowrap">'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td class="valeur">'.$object->zip.(($object->zip && $object->town)?' / ':'').$object->town.'</td></tr>';
 
 		// Country
 		print '<tr><td>'.$langs->trans("Country").'</td><td class="valeur">';
@@ -1451,7 +1433,7 @@ else
 		print '</td></tr>';
 
 		// State
-		print '<tr><td>'.$langs->trans('State').'</td><td class="valeur">'.$object->departement.'</td>';
+		print '<tr><td>'.$langs->trans('State').'</td><td class="valeur">'.$object->state.'</td>';
 
 		// Tel pro.
 		print '<tr><td>'.$langs->trans("PhonePro").'</td><td class="valeur">'.dol_print_phone($object->phone,$object->country_code,0,$object->fk_soc,1).'</td></tr>';
@@ -1465,8 +1447,8 @@ else
 		// EMail
 		print '<tr><td>'.$langs->trans("EMail").'</td><td class="valeur">'.dol_print_email($object->email,0,$object->fk_soc,1).'</td></tr>';
 
-		// Date naissance
-		print '<tr><td>'.$langs->trans("Birthday").'</td><td class="valeur">'.dol_print_date($object->naiss,'day').'</td></tr>';
+		// Birthday
+		print '<tr><td>'.$langs->trans("Birthday").'</td><td class="valeur">'.dol_print_date($object->birth,'day').'</td></tr>';
 
 		// Public
 		print '<tr><td>'.$langs->trans("Public").'</td><td class="valeur">'.yn($object->public).'</td></tr>';
@@ -1479,13 +1461,7 @@ else
 		$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			foreach($extrafields->attribute_label as $key=>$label)
-			{
-				$value=$object->array_options["options_$key"];
-				print "<tr><td>".$label."</td><td>";
-				print $extrafields->showOutputField($key,$value);
-				print "</td></tr>\n";
-			}
+			print $object->showOptionals($extrafields);
 		}
 
 		// Third party Dolibarr
@@ -1574,11 +1550,11 @@ else
 			// Modify
 			if ($user->rights->adherent->creer)
 			{
-				print "<a class=\"butAction\" href=\"fiche.php?rowid=$rowid&action=edit\">".$langs->trans("Modify")."</a>";
+				print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$rowid.'&action=edit">'.$langs->trans("Modify")."</a></div>";
 			}
 			else
 			{
-				print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("Modify")."</font>";
+				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Modify").'</font></div>';
 			}
 
 			// Valider
@@ -1586,11 +1562,11 @@ else
 			{
 				if ($user->rights->adherent->creer)
 				{
-					print "<a class=\"butAction\" href=\"fiche.php?rowid=$rowid&action=valid\">".$langs->trans("Validate")."</a>\n";
+					print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Validate")."</a></div>\n";
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("Validate")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Validate").'</font></div>';
 				}
 			}
 
@@ -1599,11 +1575,11 @@ else
 			{
 				if ($user->rights->adherent->creer)
 				{
-					print "<a class=\"butAction\" href=\"fiche.php?rowid=$rowid&action=valid\">".$langs->trans("Reenable")."</a>\n";
+					print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$rowid.'&action=valid">'.$langs->trans("Reenable")."</a></div>\n";
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("Reenable")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Reenable")."</font></div>";
 				}
 			}
 
@@ -1612,17 +1588,17 @@ else
 			{
 				if ($object->statut >= 1)
 				{
-					if ($object->email) print "<a class=\"butAction\" href=\"fiche.php?rowid=$object->id&action=sendinfo\">".$langs->trans("SendCardByMail")."</a>\n";
-					else print "<a class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NoEMail"))."\">".$langs->trans("SendCardByMail")."</a>\n";
+					if ($object->email) print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$object->id.'&action=sendinfo">'.$langs->trans("SendCardByMail")."</a></div>\n";
+					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NoEMail")).'">'.$langs->trans("SendCardByMail")."</a></div>\n";
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("ValidateBefore"))."\">".$langs->trans("SendCardByMail")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("SendCardByMail")."</font></div>";
 				}
 			}
 			else
 			{
-				print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("SendCardByMail")."</font>";
+				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("SendCardByMail")."</font></div>";
 			}
 
 			// Resilier
@@ -1630,11 +1606,11 @@ else
 			{
 				if ($user->rights->adherent->supprimer)
 				{
-					print "<a class=\"butAction\" href=\"fiche.php?rowid=$rowid&action=resign\">".$langs->trans("Resiliate")."</a>\n";
+					print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$rowid.'&action=resign">'.$langs->trans("Resiliate")."</a></div>\n";
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("Resiliate")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Resiliate")."</font></div>";
 				}
 			}
 
@@ -1643,12 +1619,12 @@ else
 			{
 				if ($user->rights->societe->creer)
 				{
-					if ($object->statut != -1) print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_thirdparty">'.$langs->trans("CreateDolibarrThirdParty").'</a>';
-					else print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrThirdParty").'</a>';
+					if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_thirdparty">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
+					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrThirdParty").'</a></div>';
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("CreateDolibarrThirdParty")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrThirdParty")."</font></div>";
 				}
 			}
 
@@ -1657,23 +1633,23 @@ else
 			{
 				if ($user->rights->user->user->creer)
 				{
-					if ($object->statut != -1) print '<a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_user">'.$langs->trans("CreateDolibarrLogin").'</a>';
-					else print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrLogin").'</a>';
+					if ($object->statut != -1) print '<div class="inline-block divButAction"><a class="butAction" href="'.$_SERVER["PHP_SELF"].'?rowid='.$object->id.'&amp;action=create_user">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
+					else print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("ValidateBefore")).'">'.$langs->trans("CreateDolibarrLogin").'</a></div>';
 				}
 				else
 				{
-					print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("CreateDolibarrLogin")."</font>";
+					print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("CreateDolibarrLogin")."</font></div>";
 				}
 			}
 
 			// Delete
 			if ($user->rights->adherent->supprimer)
 			{
-				print "<a class=\"butActionDelete\" href=\"fiche.php?rowid=$object->id&action=delete\">".$langs->trans("Delete")."</a>\n";
+				print '<div class="inline-block divButAction"><a class="butActionDelete" href="fiche.php?rowid='.$object->id.'&action=delete">'.$langs->trans("Delete")."</a></div>\n";
 			}
 			else
 			{
-				print "<font class=\"butActionRefused\" href=\"#\" title=\"".dol_escape_htmltag($langs->trans("NotEnoughPermissions"))."\">".$langs->trans("Delete")."</font>";
+				print '<div class="inline-block divButAction"><font class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("Delete")."</font></div>";
 			}
 
 			// Action SPIP
@@ -1683,21 +1659,22 @@ else
 
 				if ($isinspip == 1)
 				{
-					print "<a class=\"butAction\" href=\"fiche.php?rowid=$object->id&action=del_spip\">".$langs->trans("DeleteIntoSpip")."</a>\n";
+					print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$object->id.'&action=del_spip">'.$langs->trans("DeleteIntoSpip")."</a></div>\n";
 				}
 				if ($isinspip == 0)
 				{
-					print "<a class=\"butAction\" href=\"fiche.php?rowid=$object->id&action=add_spip\">".$langs->trans("AddIntoSpip")."</a>\n";
-				}
-				if ($isinspip == -1)
-				{
-					print '<br><br><font class="error">'.$langs->trans('SPIPConnectionFailed').': '.$mailmanspip->error.'</font>';
+					print '<div class="inline-block divButAction"><a class="butAction" href="fiche.php?rowid='.$object->id.'&action=add_spip">'.$langs->trans("AddIntoSpip")."</a></div>\n";
 				}
 			}
 
 		}
 
 		print '</div>';
+
+		if ($isinspip == -1)
+		{
+			print '<br><br><font class="error">'.$langs->trans('SPIPConnectionFailed').': '.$mailmanspip->error.'</font>';
+		}
 		print "<br>\n";
 
 	}

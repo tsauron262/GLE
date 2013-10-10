@@ -27,7 +27,7 @@
  *		\brief      List of details of bank transactions for an account
  */
 
-require 'pre.inc.php';	// We use pre.inc.php to have a dynamic menu
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
@@ -35,7 +35,10 @@ require_once DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php'
 require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/tva/class/tva.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
+$langs->load("banks");
+$langs->load("categories");
 $langs->load("bills");
 
 $id = (GETPOST('id','int') ? GETPOST('id','int') : GETPOST('account','int'));
@@ -52,6 +55,10 @@ $result=restrictedArea($user,'banque',$fieldvalue,'bank_account','','',$fieldtyp
 $paiementtype=GETPOST('paiementtype','alpha',3);
 $req_nb=GETPOST("req_nb",'',3);
 $thirdparty=GETPOST("thirdparty",'',3);
+$req_desc=GETPOST("req_desc",'',3);
+$req_debit=GETPOST("req_debit",'',3);
+$req_credit=GETPOST("req_credit",'',3);
+
 $vline=GETPOST("vline");
 $page=GETPOST('page','int');
 $negpage=GETPOST('negpage','int');
@@ -113,7 +120,7 @@ if ($action == 'add' && $id && ! isset($_POST["cancel"]) && $user->rights->banqu
 if ($action == 'confirm_delete' && $confirm == 'yes' && $user->rights->banque->modifier)
 {
 	$accline=new AccountLine($db);
-	$accline->fetch($_GET["rowid"]);
+	$result=$accline->fetch(GETPOST("rowid"));
 	$result=$accline->delete();
 }
 
@@ -130,6 +137,8 @@ $memberstatic=new Adherent($db);
 $paymentstatic=new Paiement($db);
 $paymentsupplierstatic=new PaiementFourn($db);
 $paymentvatstatic=new TVA($db);
+$bankstatic=new Account($db);
+$banklinestatic=new AccountLine($db);
 
 $form = new Form($db);
 
@@ -181,22 +190,22 @@ if ($id > 0 || ! empty($ref))
 		$param.='&amp;req_nb='.urlencode($req_nb);
 		$mode_search = 1;
 	}
-	if (GETPOST("req_desc"))
+	if ($req_desc)
 	{
-		$sql_rech.= " AND b.label LIKE '%".$db->escape(GETPOST("req_desc"))."%'";
-		$param.='&amp;req_desc='.urlencode(GETPOST("req_desc"));
+		$sql_rech.= " AND b.label LIKE '%".$db->escape($req_desc)."%'";
+		$param.='&amp;req_desc='.urlencode($req_desc);
 		$mode_search = 1;
 	}
-	if (GETPOST("req_debit"))
+	if ($req_debit != '')
 	{
-		$sql_rech.=" AND b.amount = -".price2num(GETPOST("req_debit"));
-		$param.='&amp;req_debit='.urlencode(GETPOST("req_debit"));
+		$sql_rech.=" AND b.amount = -".price2num($req_debit);
+		$param.='&amp;req_debit='.urlencode($req_debit);
 		$mode_search = 1;
 	}
-	if (GETPOST("req_credit"))
+	if ($req_credit != '')
 	{
-		$sql_rech.=" AND b.amount = ".price2num(GETPOST("req_credit"));
-		$param.='&amp;req_credit='.urlencode(GETPOST("req_credit"));
+		$sql_rech.=" AND b.amount = ".price2num($req_credit);
+		$param.='&amp;req_credit='.urlencode($req_credit);
 		$mode_search = 1;
 	}
 	if ($thirdparty)
@@ -285,42 +294,42 @@ if ($id > 0 || ! empty($ref))
 	 */
 	$param.='&amp;account='.$object->id;
 
+	// Confirmation delete
+	if ($action == 'delete')
+	{
+		$text=$langs->trans('ConfirmDeleteTransaction');
+		$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;rowid='.GETPOST("rowid"),$langs->trans('DeleteTransaction'),$text,'confirm_delete');
+		if ($ret == 'html') print '<br>';
+	}
+
 	// Define transaction list navigation string
-	$navig = '<form action="'.$_SERVER["PHP_SELF"].'" name="newpage" method="GET">';
+	$navig = '<form action="'.$_SERVER["PHP_SELF"].'" name="newpage" method="GET"><div data-role="fieldcontain">';
 	//print 'nbpage='.$totalPages.' viewline='.$viewline.' limitsql='.$limitsql;
 	if ($limitsql > $viewline) $navig.='<a href="account.php?'.$param.'&amp;page='.($page+1).'">'.img_previous().'</a>';
-	$navig.= $langs->trans("Page")." "; // ' Page ';
-	$navig.='<input type="text" name="negpage" size="1" class="flat" value="'.($totalPages-$page).'">';
+	$navig.= '<label for="negpage">'.$langs->trans("Page")."</label> "; // ' Page ';
+	$navig.='<input type="text" name="negpage" id="negpage" size="1" class="flat" value="'.($totalPages-$page).'">';
 	$navig.='<input type="hidden" name="paiementtype" value="'.$paiementtype.'">';
 	$navig.='<input type="hidden" name="req_nb"     value="'.$req_nb.'">';
-	$navig.='<input type="hidden" name="req_desc"   value="'.GETPOST("req_desc").'">';
-	$navig.='<input type="hidden" name="req_debit"  value="'.GETPOST("req_debit").'">';
-	$navig.='<input type="hidden" name="req_credit" value="'.GETPOST("req_credit").'">';
+	$navig.='<input type="hidden" name="req_desc"   value="'.$req_desc.'">';
+	$navig.='<input type="hidden" name="req_debit"  value="'.$req_debit.'">';
+	$navig.='<input type="hidden" name="req_credit" value="'.$req_credit.'">';
 	$navig.='<input type="hidden" name="thirdparty" value="'.$thirdparty.'">';
-	$navig.='<input type="hidden" name="nbpage"  value="'.$totalPages.'">';
-	$navig.='<input type="hidden" name="id" value="'.$object->id.'">';
+	$navig.='<input type="hidden" name="nbpage"     value="'.$totalPages.'">';
+	$navig.='<input type="hidden" name="id"         value="'.$object->id.'">';
 	$navig.='/'.$totalPages.' ';
 	if ($total_lines > $limitsql )
 	{
 		$navig.= '<a href="'.$_SERVER["PHP_SELF"].'?'.$param.'&amp;page='.($page-1).'">'.img_next().'</a>';
 	}
-	$navig.='</form>';
+	$navig.='</fieldset></div></form>';
 	//var_dump($navig);
-
-	// Confirmation delete
-	if ($action == 'delete')
-	{
-		$text=$langs->trans('ConfirmDeleteTransaction');
-		$ret=$form->form_confirm($_SERVER['PHP_SELF'].'?id='.$object->id.'&amp;rowid='.$_GET["rowid"],$langs->trans('DeleteTransaction'),$text,'confirm_delete');
-		if ($ret == 'html') print '<br>';
-	}
 
 	print '<table class="notopnoleftnoright" width="100%">';
 
 	// Show title
 	if ($action != 'addline' && $action != 'delete')
 	{
-		print '<tr><td colspan="9" align="right">'.$navig.'</td></tr>';
+		print '<tr><td colspan="10" align="right">'.$navig.'</td></tr>';
 	}
 
 	// Form to add a transaction with no invoice
@@ -348,10 +357,10 @@ if ($id > 0 || ! empty($ref))
 		print '</tr>';
 
 		print '<tr '.$bc[false].'>';
-		print '<td nowrap="nowrap" colspan="2">';
+		print '<td class="nowrap" colspan="2">';
 		$form->select_date($dateop,'op',0,0,0,'transaction');
 		print '</td>';
-		print '<td nowrap="nowrap">';
+		print '<td class="nowrap">';
 		$form->select_types_paiements((GETPOST('operation')?GETPOST('operation'):($object->courant == 2 ? 'LIQ' : '')),'operation','1,2',2,1);
 		print '</td><td>';
 		print '<input name="num_chq" class="flat" type="text" size="4" value="'.GETPOST("num_chq").'"></td>';
@@ -370,7 +379,7 @@ if ($id > 0 || ! empty($ref))
 		print '</td></tr>';
 		print "</form>";
 
-		print '<tr class="noborder"><td colspan="8">&nbsp;</td></tr>'."\n";
+		print '<tr class="noborder"><td colspan="10">&nbsp;</td></tr>'."\n";
 	}
 
 	/*
@@ -407,10 +416,10 @@ if ($id > 0 || ! empty($ref))
 	print $form->select_types_paiements($paiementtype,'paiementtype',$filtertype,2,1,1,8);
 	print '</td>';
 	print '<td><input type="text" class="flat" name="req_nb" value="'.$req_nb.'" size="2"></td>';
-	print '<td><input type="text" class="flat" name="req_desc" value="'.GETPOST("req_desc").'" size="24"></td>';
+	print '<td><input type="text" class="flat" name="req_desc" value="'.$req_desc.'" size="24"></td>';
 	print '<td><input type="text" class="flat" name="thirdparty" value="'.$thirdparty.'" size="14"></td>';
-	print '<td align="right"><input type="text" class="flat" name="req_debit" value="'.GETPOST("req_debit").'" size="4"></td>';
-	print '<td align="right"><input type="text" class="flat" name="req_credit" value="'.GETPOST("req_credit").'" size="4"></td>';
+	print '<td align="right"><input type="text" class="flat" name="req_debit" value="'.$req_debit.'" size="4"></td>';
+	print '<td align="right"><input type="text" class="flat" name="req_credit" value="'.$req_credit.'" size="4"></td>';
 	print '<td align="center">&nbsp;</td>';
 	print '<td align="center" width="40"><input type="image" class="liste_titre" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/search.png" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
 	print "</tr>\n";
@@ -423,7 +432,8 @@ if ($id > 0 || ! empty($ref))
      */
 
 	$sql = "SELECT b.rowid, b.dateo as do, b.datev as dv,";
-	$sql.= " b.amount, b.label, b.rappro, b.num_releve, b.num_chq, b.fk_type";
+	$sql.= " b.amount, b.label, b.rappro, b.num_releve, b.num_chq, b.fk_type,";
+	$sql.= " ba.rowid as bankid, ba.ref as bankref, ba.label as banklabel";
 	if ($mode_search)
 	{
 		$sql.= ", s.rowid as socid, s.nom as thirdparty";
@@ -502,9 +512,9 @@ if ($id > 0 || ! empty($ref))
 
 				print '<tr '.$bc[$var].'>';
 
-				print '<td nowrap="nowrap">'.dol_print_date($db->jdate($objp->do),"day")."</td>\n";
+				print '<td class="nowrap">'.dol_print_date($db->jdate($objp->do),"day")."</td>\n";
 
-				print '<td nowrap="nowrap">'.dol_print_date($db->jdate($objp->dv),"day");
+				print '<td class="nowrap">'.dol_print_date($db->jdate($objp->dv),"day");
 				print "</td>\n";
 
 				// Payment type
@@ -565,7 +575,34 @@ if ($id > 0 || ! empty($ref))
 					}
 					else if ($links[$key]['type']=='banktransfert')
 					{
-						// Do not show this link (avoid confusion). Can already be accessed from transaction detail
+						// Do not show link to transfer ince there is no transfer card (avoid confusion). Can already be accessed from transaction detail.
+						if ($objp->amount > 0)
+						{
+							$banklinestatic->fetch($links[$key]['url_id']);
+							$bankstatic->id=$banklinestatic->fk_account;
+							$bankstatic->label=$banklinestatic->bank_account_label;
+							print ' ('.$langs->trans("From ");
+							print $bankstatic->getNomUrl(1,'transactions');
+							print ' '.$langs->trans("toward").' ';
+							$bankstatic->id=$objp->bankid;
+							$bankstatic->label=$objp->bankref;
+							print $bankstatic->getNomUrl(1,'');
+							print ')';
+						}
+						else
+						{
+							$bankstatic->id=$objp->bankid;
+							$bankstatic->label=$objp->bankref;
+							print ' ('.$langs->trans("From ");
+							print $bankstatic->getNomUrl(1,'');
+							print ' '.$langs->trans("toward").' ';
+							$banklinestatic->fetch($links[$key]['url_id']);
+							$bankstatic->id=$banklinestatic->fk_account;
+							$bankstatic->label=$banklinestatic->bank_account_label;
+							print $bankstatic->getNomUrl(1,'transactions');
+							print ')';
+						}
+						//var_dump($links);
 					}
 					else if ($links[$key]['type']=='member')
 					{
@@ -633,15 +670,15 @@ if ($id > 0 || ! empty($ref))
 				// Amount
 				if ($objp->amount < 0)
 				{
-					print '<td align="right" nowrap="nowrap">'.price($objp->amount * -1).'</td><td>&nbsp;</td>'."\n";
+					print '<td align="right" class="nowrap">'.price($objp->amount * -1).'</td><td>&nbsp;</td>'."\n";
 				}
 				else
 				{
-					print '<td>&nbsp;</td><td align="right" nowrap="nowrap">&nbsp;'.price($objp->amount).'</td>'."\n";
+					print '<td>&nbsp;</td><td align="right" class="nowrap">&nbsp;'.price($objp->amount).'</td>'."\n";
 				}
 
 				// Balance
-				if ($action != 'search')
+				if (! $mode_search)
 				{
 					if ($total >= 0)
 					{

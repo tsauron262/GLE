@@ -75,37 +75,39 @@ See ChangeLog file found into package.
 
 ### Main modules/features:
 
-- Products and services catalog
 - Customers, Prospects or Suppliers directory
-- Address book
+- Products and services catalog
 - Stock management
 - Bank accounts management
 - Orders management with PDF export
-- Commercial proposals management with PDF export
+- Commercial proposals management
 - Contracts management
-- Invoices management with PDF export
+- Invoices management
 - Payments management
 - Standing orders management
 - Shipping management
-- ECM (Electronic Content Management)
-- EMailings
 - Agenda with ical,vcal export for third tools integration
-- Management of foundation members
-- Donation management
+- EDM (Electronic Document Management)
+- Foundations members management
+- Employee's holidays management
+- Mass Emailing
+- Realize surveys
+- Point of Sale
 
 ### Other modules:
 
 - Bookmarks management
-- Can reports GLE events inside Webcalendar or Phenix
-- Data export tools
+- Donations management
+- Reporting
+- Data export/import tools
 - LDAP connectivity
 - Third parties or products categories 
 - ClickToDial phone numbers
-- RSS
+- RSS integration
 
-### Miscellanous:
+### Miscellaneous:
 
-- Mutli-user, with several permissions levels for each feature.
+- Multi-user, with several permissions levels for each feature.
 - Serveral menu managers (can be used by internal users, as a back-office, with a particular menu, or by external users, as a front-office, with another menu and permissions).
 - Very user friendly and easy to use.
 - Optional WYSIWYG forms, optional Ajax forms.
@@ -123,11 +125,10 @@ See ChangeLog file found into package.
 
 This is features that GLE does not support completely yet:
 
-- No accountancy (only bank management).
-- GLE manage one currency at once (mono-currency).
-- GLE manage one company/foundation (mono-company). If you want to manage several companies or foundations, you must install several time the software (on same server or not). Another solution is to extend GLE with the addon Module MultiCompany that allows to manage several companies in one GLE instance (one database but with a logical isolation of datas).
-- Does not support double VAT (Federal / provincial) for Canada.
-- GLE does not contains Payroll module.
+- No double party accountancy (only bank management).
+- Dolibarr manage one currency at once (mono-currency).
+- Dolibarr manage one master company/foundation (mono-company). If you want to manage several companies or foundations, you must install several time the software (on same server or not). Another solution is to extend Dolibarr with the addon Module MultiCompany that allows to manage several companies in one Dolibarr instance (one database but with a logical isolation of datas).
+- Dolibarr does not contains Payroll module.
 - Tasks on module project can't have dependencies between each other.
-- GLE does not include any Webmail.
-- GLE can't do coffee (not yet).
+- Dolibarr does not include any Webmail.
+- Dolibarr can't do coffee (not yet).

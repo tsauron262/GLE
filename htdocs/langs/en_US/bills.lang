@@ -189,6 +189,7 @@ Abandoned=Abandoned
 RemainderToPay=Remainder to pay
 RemainderToTake=Remainder to take
 RemainderToPayBack=Remainder to pay back
+Rest=Pending
 AmountExpected=Amount claimed
 ExcessReceived=Excess received
 EscompteOffered=Discount offered (payment before term)
@@ -310,6 +311,8 @@ PaymentConditionShortPT_ORDER=On order
 PaymentConditionPT_ORDER=On order
 PaymentConditionShortPT_5050=50-50
 PaymentConditionPT_5050=50%% in advance, 50%% on delivery
+FixAmount=Fix amount
+VarAmount=Variable amount (%% tot.)
 
 # PaymentType
 PaymentTypeVIR=Bank deposit
@@ -384,11 +387,14 @@ DisabledBecausePayments=Not possible since there is some payments
 CantRemovePaymentWithOneInvoicePaid=Can't remove payment since there is at least one invoice classified payed
 ExpectedToPay=Expected payment
 PayedByThisPayment=Payed by this payment
-ClosePaidInvoicesAutomatically=Classify "Payed" all standard or replacement invoices entierely payed. 
-ClosePaidCreditNotesAutomatically=Classify "Payed" all credit notes entierely paid back. 
+ClosePaidInvoicesAutomatically=Classify "Payed" all standard or replacement invoices entirely payed. 
+ClosePaidCreditNotesAutomatically=Classify "Payed" all credit notes entirely paid back. 
 AllCompletelyPayedInvoiceWillBeClosed=All invoice with no remain to pay will be automatically closed to status "Payed".
 ToMakePayment=Pay
 ToMakePaymentBack=Pay back
+ListOfYourUnpaidInvoices=List of unpaid invoices
+NoteListOfYourUnpaidInvoices=Note: This list contains only invoices for third parties you are linked to as a sale representative.
+RevenueStamp=Revenue stamp
 ##### Types de contacts #####
 TypeContact_facture_internal_SALESREPFOLL=Representative following-up customer invoice
 TypeContact_facture_external_BILLING=Customer invoice contact

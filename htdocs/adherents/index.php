@@ -27,6 +27,7 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent_type.class.php';
+require_once DOL_DOCUMENT_ROOT.'/adherents/class/cotisation.class.php';
 
 $langs->load("companies");
 $langs->load("members");
@@ -47,7 +48,6 @@ $subscriptionstatic=new Cotisation($db);
 
 print_fiche_titre($langs->trans("MembersArea"));
 
-print '<table border="0" width="100%" class="notopnoleftnoright">';
 
 $var=True;
 
@@ -122,7 +122,8 @@ if ($result)
 }
 
 
-print '<tr><td width="30%" class="notopnoleft" valign="top">';
+//print '<tr><td width="30%" class="notopnoleft" valign="top">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
 // Formulaire recherche adherent
@@ -140,7 +141,7 @@ print $langs->trans("Ref").':</td><td><input type="text" name="search_ref" class
 print '</td><td rowspan="3"><input class="button" type="submit" value="'.$langs->trans("Search").'"></td></tr>';
 print "<tr $bc[$var]>";
 print '<td>';
-print $langs->trans("Name").':</td><td><input type="text" name="search_nom" class="flat" size="16">';
+print $langs->trans("Name").':</td><td><input type="text" name="search_lastname" class="flat" size="16">';
 print '</td></tr>';
 print "<tr $bc[$var]>";
 print '<td>';
@@ -195,7 +196,9 @@ if ($conf->use_javascript_ajax)
     print '</table>';
 }
 
-print '</td><td class="notopnoleftnoright" valign="top">';
+
+//print '</td><td class="notopnoleftnoright" valign="top">';
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 $var=true;
@@ -205,7 +208,7 @@ $var=true;
  */
 $max=5;
 
-$sql = "SELECT a.rowid, a.statut, a.nom as lastname, a.prenom as firstname, a.societe as company, a.fk_soc,";
+$sql = "SELECT a.rowid, a.statut, a.lastname, a.firstname, a.societe as company, a.fk_soc,";
 $sql.= " a.tms as datem, datefin as date_end_subscription,";
 $sql.= " ta.rowid as typeid, ta.libelle, ta.cotisation";
 $sql.= " FROM ".MAIN_DB_PREFIX."adherent as a, ".MAIN_DB_PREFIX."adherent_type as ta";
@@ -265,7 +268,7 @@ else
  */
 $max=5;
 
-$sql = "SELECT a.rowid, a.statut, a.nom as lastname, a.prenom as firstname, a.societe as company, a.fk_soc,";
+$sql = "SELECT a.rowid, a.statut, a.lastname, a.firstname, a.societe as company, a.fk_soc,";
 $sql.= " datefin as date_end_subscription,";
 $sql.= " c.rowid as cid, c.tms as datem, c.datec as datec, c.dateadh as date_start, c.datef as date_end, c.cotisation";
 $sql.= " FROM ".MAIN_DB_PREFIX."adherent as a, ".MAIN_DB_PREFIX."cotisation as c";
@@ -416,8 +419,8 @@ print "<td align=\"right\">".price(price2num($numb>0?($tot/$numb):0,'MT'))."</td
 print "</tr>\n";
 print "</table><br>\n";
 
-print '</td></tr>';
-print '</table>';
+//print '</td></tr></table>';
+print '</div></div></div>';
 
 
 llxFooter();

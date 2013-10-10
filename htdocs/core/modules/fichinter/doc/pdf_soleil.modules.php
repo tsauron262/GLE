@@ -97,9 +97,13 @@ class pdf_soleil extends ModelePDFFicheinter
      *
      *  @param		object	$object				Object to generate
      *  @param		object	$outputlangs		Lang output object
-     *  @return	    int							1=ok, 0=ko
+     *  @param		string	$srctemplatepath	Full path of source filename for generator using a template file
+     *  @param		int		$hidedetails		Do not show line details
+     *  @param		int		$hidedesc			Do not show desc
+     *  @param		int		$hideref			Do not show ref
+     *  @return     int             			1=OK, 0=KO
 	 */
-	function write_file($object,$outputlangs)
+	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
 	{
 		global $user,$langs,$conf,$mysoc;
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
@@ -167,7 +171,6 @@ class pdf_soleil extends ModelePDFFicheinter
 				if (! empty($tplidx)) $pdf->useTemplate($tplidx);
 				$pagenb++;
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
-				$pdf->SetTextColor(0,0,0);
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 
@@ -334,7 +337,7 @@ class pdf_soleil extends ModelePDFFicheinter
 				$pdf->SetFont('','', $default_font_size - 1);   // On repositionne la police par defaut
 
 				$this->_pagefoot($pdf,$object,$outputlangs);
-				$pdf->AliasNbPages();
+				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->Close();
 
@@ -536,10 +539,11 @@ class pdf_soleil extends ModelePDFFicheinter
 			$pdf->SetTextColor(0,0,60);
 			$pdf->SetFont('','B',$default_font_size);
 			$pdf->MultiCell(80, 3, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
+			$posy=$pdf->getY();
 
 			// Show sender information
 			$pdf->SetFont('','', $default_font_size - 1);
-			$pdf->SetXY($posx+2,$posy+8);
+			$pdf->SetXY($posx+2,$posy);
 			$pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
 
 

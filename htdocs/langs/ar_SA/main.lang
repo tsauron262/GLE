@@ -15,7 +15,11 @@ FONTSIZEFORPDF=9
 SeparatorDecimal=.
 SeparatorThousand=None
 FormatDateShort=%d/%m/%Y
+FormatDateShortInpu=%d/%m/%Y
 FormatDateShortJava=dd/MM/yyyy
+FormatDateShortJavaInput=dd/MM/yyyy
+FormatDateShortJQuery=dd/mm/yy
+FormatDateShortJQueryInput=dd/mm/yy
 FormatHourShort=%H:%M
 FormatDateTextShort=%d %b %Y
 FormatDateText=%d %B %Y
@@ -428,8 +432,6 @@ NbOfThirdParties=عدد من الأطراف الثالثة
 NbOfCustomers=عدد من العملاء
 NbOfLines=عدد الخطوط
 NbOfObjects=عدد الأجسام
-NbOfReferers=عدد referers
-Referers=Referers
 TotalQuantity=الكمية الإجمالية
 DateFromTo=ل٪ من ق ق ٪
 DateFrom=من ق ٪
@@ -602,7 +604,6 @@ Prefix=بادئة
 
 // START - Lines generated via autotranslator.php tool (2012-02-29 15:55:27).
 // Reference language: en_US -> ar_SA
-FormatDateShortJQuery=dd/mm/yy
 AddLink=إضافة وصلة
 Of=من
 SearchOf=البحث

@@ -1,28 +1,28 @@
 <?php
 /* Copyright (C) 2002-2003 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2011	   Juanjo Menent        <jmenent@2byte.es>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
- */
+* Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+* Copyright (C) 2011-2013 Juanjo Menent        <jmenent@2byte.es>
+*
+* This program is free software; you can redistribute it and/or modify
+* it under the terms of the GNU General Public License as published by
+* the Free Software Foundation; either version 3 of the License, or
+* (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU General Public License for more details.
+*
+* You should have received a copy of the GNU General Public License
+* along with this program. If not, see <http://www.gnu.org/licenses/>.
+*/
 
 /**
  * 	\file       htdocs/fichinter/class/fichinter.class.php
- * 	\ingroup    ficheinter
- * 	\brief      Fichier de la classe des gestion des fiches interventions
- */
+* 	\ingroup    ficheinter
+* 	\brief      Fichier de la classe des gestion des fiches interventions
+*/
 require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
 
 
@@ -61,7 +61,7 @@ class Fichinter extends CommonObject
 	 *	Constructor
 	 *
 	 *  @param	DoliDB	$db		Database handler
-	 */
+	*/
 	function __construct($db)
 	{
 		$this->db = $db;
@@ -91,7 +91,9 @@ class Fichinter extends CommonObject
 		dol_syslog(get_class($this)."::create ref=".$this->ref);
 
 		// Check parameters
-		if (! is_numeric($this->duree)) { $this->duree = 0; }
+		if (! is_numeric($this->duree)) {
+			$this->duree = 0;
+		}
 		if ($this->socid <= 0)
 		{
 			$this->error='ErrorBadParameterForFunc';
@@ -165,12 +167,30 @@ class Fichinter extends CommonObject
 			// Fin appel triggers
 			
 			$this->id=$this->db->last_insert_id(MAIN_DB_PREFIX."fichinter");
-			$this->db->commit();
+
+			if ($this->id)
+			{
+				$this->ref='(PROV'.$this->id.')';
+				$sql = 'UPDATE '.MAIN_DB_PREFIX."fichinter SET ref='".$this->ref."' WHERE rowid=".$this->id;
+					
+				dol_syslog(get_class($this)."::create sql=".$sql);
+				$resql=$this->db->query($sql);
+				if (! $resql) $error++;
+			}
+			// Add linked object
+			if (! $error && $this->origin && $this->origin_id)
+			{
+				$ret = $this->add_object_linked();
+				if (! $ret)	dol_print_error($this->db);
+			}
+
 
 			// Appel des triggers
 			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 			$interface=new Interfaces($this->db);
-			$result=$interface->run_triggers('FICHEINTER_CREATE',$this,$user,$langs,$conf);
+			$tmpuser=new User($this->db);
+			$tmpuser->fetch($this->author);
+			$result=$interface->run_triggers('FICHINTER_CREATE',$this,$tmpuser,$langs,$conf);
 			if ($result < 0) {
 				$error++; $this->errors=$interface->errors;
 			}
@@ -195,8 +215,12 @@ class Fichinter extends CommonObject
 	 */
 	function update()
 	{
-		if (! is_numeric($this->duree)) { $this->duree = 0; }
-		if (! dol_strlen($this->fk_project)) { $this->fk_project = 0; }
+		if (! is_numeric($this->duree)) {
+			$this->duree = 0;
+		}
+		if (! dol_strlen($this->fk_project)) {
+			$this->fk_project = 0;
+		}
 
 		$this->db->begin();
 
@@ -219,6 +243,7 @@ class Fichinter extends CommonObject
 				$error++; $this->errors=$interface->errors;
 			}
 			// Fin appel triggers
+
 
 			$this->db->commit();
 			return 1;
@@ -278,7 +303,7 @@ class Fichinter extends CommonObject
 
 				/*
 				 * Lines
-				 */
+				*/
 				$result=$this->fetch_lines();
 				if ($result < 0)
 				{
@@ -349,9 +374,20 @@ class Fichinter extends CommonObject
 			$this->db->begin();
 
 			$now=dol_now();
+				
+			// Define new ref
+			if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref)))
+			{
+				$num = $this->getNextNumRef($this->thirdparty);
+			}
+			else
+			{
+				$num = $this->ref;
+			}
 
 			$sql = "UPDATE ".MAIN_DB_PREFIX."fichinter";
 			$sql.= " SET fk_statut = 1";
+			$sql.= ", ref = '".$num."'";
 			$sql.= ", date_valid = ".$this->db->idate($now);
 			$sql.= ", fk_user_valid = ".$user->id;
 			$sql.= " WHERE rowid = ".$this->id;
@@ -365,8 +401,10 @@ class Fichinter extends CommonObject
 				// Appel des triggers
 				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
 				$interface=new Interfaces($this->db);
-				$result=$interface->run_triggers('FICHEINTER_VALIDATE',$this,$user,$langs,$conf);
-				if ($result < 0) { $error++; $this->errors=$interface->errors; }
+				$result=$interface->run_triggers('FICHINTER_VALIDATE',$this,$user,$langs,$conf);
+				if ($result < 0) {
+					$error++; $this->errors=$interface->errors;
+				}
 				// Fin appel triggers
 
 				if (! $error)
@@ -468,9 +506,9 @@ class Fichinter extends CommonObject
 		}
 		if ($mode == 5)
 		{
-			if ($statut==0) return $langs->trans($this->statuts_short[$statut]).' '.img_picto($langs->trans($this->statuts_short[$statut]),'statut0');
-			if ($statut==1) return $langs->trans($this->statuts_short[$statut]).' '.img_picto($langs->trans($this->statuts_short[$statut]),'statut4');
-			if ($statut==2) return $langs->trans($this->statuts_short[$statut]).' '.img_picto($langs->trans($this->statuts_short[$statut]),'statut6');
+			if ($statut==0) return '<span class="hideonsmartphone">'.$langs->trans($this->statuts_short[$statut]).' </span>'.img_picto($langs->trans($this->statuts_short[$statut]),'statut0');
+			if ($statut==1) return '<span class="hideonsmartphone">'.$langs->trans($this->statuts_short[$statut]).' </span>'.img_picto($langs->trans($this->statuts_short[$statut]),'statut4');
+			if ($statut==2) return '<span class="hideonsmartphone">'.$langs->trans($this->statuts_short[$statut]).' </span>'.img_picto($langs->trans($this->statuts_short[$statut]),'statut6');
 		}
 	}
 
@@ -609,15 +647,15 @@ class Fichinter extends CommonObject
 	function delete($user)
 	{
 		global $conf;
-        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+		require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
 		$error=0;
 
 		$this->db->begin();
 
 		// Delete linked object
-        $res = $this->deleteObjectLinked();
-        if ($res < 0) $error++;
+		$res = $this->deleteObjectLinked();
+		if ($res < 0) $error++;
 
 		// Delete linked contacts
 		$res = $this->delete_linked_contact();
@@ -673,14 +711,14 @@ class Fichinter extends CommonObject
 					}
 				}
 
-				// Appel des triggers
-				include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-				$interface=new Interfaces($this->db);
-				$result=$interface->run_triggers('FICHEINTER_DELETE',$this,$user,$langs,$conf);
-				if ($result < 0) {
-					$error++; $this->errors=$interface->errors;
-				}
-				// Fin appel triggers
+	 			// Appel des triggers
+	 			include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+	 			$interface=new Interfaces($this->db);
+	 			$result=$interface->run_triggers('FICHINTER_DELETE',$this,$user,$langs,$conf);
+	 			if ($result < 0) {
+	 				$error++; $this->errors=$interface->errors;
+	 			}
+	 			// Fin appel triggers
 
 				$this->db->commit();
 				return 1;
@@ -809,11 +847,11 @@ class Fichinter extends CommonObject
 
 
 	/**
-     *  Initialise an instance with random values.
-     *  Used to build previews or test instances.
-     *	id must be 0 if object instance is a specimen.
-     *
-     *  @return	void
+	 *  Initialise an instance with random values.
+	 *  Used to build previews or test instances.
+	 *	id must be 0 if object instance is a specimen.
+	 *
+	 *  @return	void
 	 */
 	function initAsSpecimen()
 	{
@@ -838,7 +876,7 @@ class Fichinter extends CommonObject
 			$line->desc=$langs->trans("Description")." ".$xnbp;
 			$line->datei=($now-3600*(1+$xnbp));
 			$line->duration=600;
-            $line->fk_fichinter=0;
+			$line->fk_fichinter=0;
 			$this->lines[$xnbp]=$line;
 			$xnbp++;
 
@@ -962,6 +1000,7 @@ class FichinterLigne
 	 */
 	function insert()
 	{
+
 		dol_syslog("FichinterLigne::insert rang=".$this->rang);
 
 		$this->db->begin();
@@ -991,7 +1030,7 @@ class FichinterLigne
 		$sql.= ' (fk_fichinter, description, date, duree, rang)';
 		$sql.= " VALUES (".$this->fk_fichinter.",";
 		$sql.= " '".$this->db->escape($this->desc)."',";
-		$sql.= " ".$this->db->idate($this->datei).",";
+		$sql.= " '".$this->db->idate($this->datei)."',";
 		$sql.= " ".$this->duration.",";
 		$sql.= ' '.$rangToUse;
 		$sql.= ')';
@@ -1125,7 +1164,7 @@ class FichinterLigne
 	 *	@return     int		>0 if ok, <0 if ko
 	 */
 	function deleteline()
-	{
+	{		
 		if ($this->statut == 0)
 		{
 			dol_syslog(get_class($this)."::deleteline lineid=".$this->rowid);

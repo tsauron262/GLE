@@ -47,17 +47,11 @@ class Conf
 	//! Used to store current css (from theme)
 	public $theme;        // Contains current theme ("eldy", "auguria", ...)
 	public $css;          // Contains full path of css page ("/theme/eldy/style.css.php", ...)
-    //! Used to store current menu handlers
-	public $top_menu;
-	public $smart_menu;
+    //! Used to store current menu handler
+	public $standard_menu;
 
 	public $modules					= array();	// List of activated modules
-	public $modules_parts			= array('css'=>array(), 'js'=>array(),'triggers'=>array(),'login'=>array(),'substitutions'=>array(),'menus'=>array(),'theme'=>array(),'tpl'=>array(),'barcode'=>array(),'models'=>array(),'hooks'=>array(),'dir'=>array());	// List of modules parts
-
-	// TODO Remove thoose arrays with generic module_parts
-	public $tabs_modules			= array();
-	public $sms_engine_modules		= array();
-	public $societe_modules	        = array();
+	public $modules_parts			= array('css'=>array(),'js'=>array(),'tabs'=>array(),'triggers'=>array(),'login'=>array(),'substitutions'=>array(),'menus'=>array(),'theme'=>array(),'sms'=>array(),'tpl'=>array(),'barcode'=>array(),'models'=>array(),'societe'=>array(),'hooks'=>array(),'dir'=>array());
 
 	var $logbuffer					= array();
 	var $loghandlers                = array();
@@ -69,6 +63,11 @@ class Conf
 	//! Used to store list of entities to use for each element
 	public $entities				= array();
 
+	public $dol_hide_topmenu;			// Set if we force param dol_hide_topmenu into login url
+	public $dol_hide_leftmenu;			// Set if we force param dol_hide_leftmenu into login url
+	public $dol_optimize_smallscreen;	// Set if we force param dol_optimize_smallscreen into login url or if browser is smartphone
+	public $dol_no_mouse_hover;			// Set if we force param dol_no_mouse_hover into login url or if browser is smartphone
+	public $dol_use_jmobile;			// Set if we force param dol_use_jmobile into login url
 
 
 	/**
@@ -160,20 +159,10 @@ class Conf
 						// If this is constant for a new tab page activated by a module.
 						if (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_TABS_/i',$key))
 						{
+							$partname = 'tabs';
 							$params=explode(':',$value,2);
-							$this->tabs_modules[$params[0]][]=$value;				// Add this module in list of modules that provide tabs
-						}
-						// If this is constant for a sms engine
-						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_SMS$/i',$key,$reg))
-						{
-							$modulename=strtolower($reg[1]);
-							$this->sms_engine_modules[$modulename]=$modulename;		// Add this module in list of modules that provide SMS
-						}
-						// If this is constant for a societe submodule
-						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_SOCIETE$/i',$key,$reg))
-						{
-							$modulename=strtolower($reg[1]);
-							$this->societe_modules[$modulename]=$modulename;		// Add this module in list of modules that provide societe modules
+							if (! isset($this->modules_parts[$partname]) || ! is_array($this->modules_parts[$partname])) { $this->modules_parts[$partname] = array(); }
+							$this->modules_parts[$partname][$params[0]][]=$value;
 						}
 						// If this is constant for all generic part activated by a module
 						elseif (preg_match('/^MAIN_MODULE_([0-9A-Z_]+)_([A-Z]+)$/i',$key,$reg))
@@ -183,9 +172,10 @@ class Conf
 							if (! isset($this->modules_parts[$partname]) || ! is_array($this->modules_parts[$partname])) { $this->modules_parts[$partname] = array(); }
 							$arrValue = json_decode($value,true);
 							if (is_array($arrValue) && ! empty($arrValue)) $value = $arrValue;
-							else if (in_array($partname,array('login','menus','substitutions','triggers','tpl','theme'))) $value = '/'.$modulename.'/core/'.$partname.'/';
-							else if (in_array($partname,array('models'))) $value = '/'.$modulename.'/';
-							else if ($value == 1) $value = '/'.$modulename.'/core/modules/'.$partname.'/';
+							else if (in_array($partname,array('login','menus','substitutions','triggers','tpl'))) $value = '/'.$modulename.'/core/'.$partname.'/';
+							else if (in_array($partname,array('models','theme'))) $value = '/'.$modulename.'/';
+							else if (in_array($partname,array('sms'))) $value = $modulename;
+							else if ($value == 1) $value = '/'.$modulename.'/core/modules/'.$partname.'/';	// ex: partname = societe
 							$this->modules_parts[$partname] = array_merge($this->modules_parts[$partname], array($modulename => $value));
 						}
                         // If this is a module constant (must be at end)
@@ -205,7 +195,7 @@ class Conf
 		    $db->free($resql);
 		}
 		//var_dump($this->modules);
-		//var_dump($this->modules_parts);
+		//var_dump($this->modules_parts['theme']);
 
 		// Object $mc
 		if (! defined('NOREQUIREMC') && ! empty($this->multicompany->enabled))
@@ -232,10 +222,10 @@ class Conf
 		$this->bank->cheque					= new stdClass();
 
 		// Clean some variables
-		if (empty($this->global->MAIN_MENU_STANDARD)) $this->global->MAIN_MENU_STANDARD="eldy_backoffice.php";
-		if (empty($this->global->MAIN_MENUFRONT_STANDARD)) $this->global->MAIN_MENUFRONT_STANDARD="eldy_frontoffice.php";
-		if (empty($this->global->MAIN_MENU_SMARTPHONE)) $this->global->MAIN_MENU_SMARTPHONE="eldy_backoffice.php";	// Use eldy by default because smartphone does not work on all phones
-		if (empty($this->global->MAIN_MENUFRONT_SMARTPHONE)) $this->global->MAIN_MENUFRONT_SMARTPHONE="eldy_frontoffice.php";	// Ue eldy by default because smartphone does not work on all phones
+		if (empty($this->global->MAIN_MENU_STANDARD)) $this->global->MAIN_MENU_STANDARD="eldy_menu.php";
+		if (empty($this->global->MAIN_MENUFRONT_STANDARD)) $this->global->MAIN_MENUFRONT_STANDARD="eldy_menu.php";
+		if (empty($this->global->MAIN_MENU_SMARTPHONE)) $this->global->MAIN_MENU_SMARTPHONE="eldy_menu.php";	// Use eldy by default because smartphone does not work on all phones
+		if (empty($this->global->MAIN_MENUFRONT_SMARTPHONE)) $this->global->MAIN_MENUFRONT_SMARTPHONE="eldy_menu.php";	// Use eldy by default because smartphone does not work on all phones
 
 		// Variable globales LDAP
 		if (empty($this->global->LDAP_FIELD_FULLNAME)) $this->global->LDAP_FIELD_FULLNAME='';
@@ -341,7 +331,6 @@ class Conf
 
 		// societe
 		if (empty($this->global->SOCIETE_CODECLIENT_ADDON))       $this->global->SOCIETE_CODECLIENT_ADDON="mod_codeclient_leopard";
-		if (empty($this->global->SOCIETE_CODEFOURNISSEUR_ADDON))  $this->global->SOCIETE_CODEFOURNISSEUR_ADDON=$this->global->SOCIETE_CODECLIENT_ADDON;
 		if (empty($this->global->SOCIETE_CODECOMPTA_ADDON))       $this->global->SOCIETE_CODECOMPTA_ADDON="mod_codecompta_panicum";
 
         // Security
@@ -371,6 +360,7 @@ class Conf
 
 		// conf->theme et $this->css
 		if (empty($this->global->MAIN_THEME)) $this->global->MAIN_THEME="eldy";
+        if (! empty($this->global->MAIN_FORCETHEME)) $this->global->MAIN_THEME=$this->global->MAIN_FORCETHEME;
 		$this->theme=$this->global->MAIN_THEME;
 		$this->css  = "/theme/".$this->theme."/style.css.php";
 
@@ -394,6 +384,7 @@ class Conf
         $this->format_date_text_short="%d %b %Y";
         $this->format_date_text="%d %B %Y";
         $this->format_date_hour_short="%d/%m/%Y %H:%M";
+        $this->format_date_hour_sec_short="%d/%m/%Y %H:%M:%S";
         $this->format_date_hour_text_short="%d %b %Y %H:%M";
         $this->format_date_hour_text="%d %B %Y %H:%M";
 
@@ -409,7 +400,7 @@ class Conf
 		$this->maxfilesize = (empty($this->global->MAIN_UPLOAD_DOC) ? 0 : $this->global->MAIN_UPLOAD_DOC * 1024);
 
 		// Define list of limited modules
-		if (! isset($this->global->MAIN_MODULES_FOR_EXTERNAL)) $this->global->MAIN_MODULES_FOR_EXTERNAL='facture,commande,fournisseur,contact,propal,projet,contrat,societe,ficheinter,expedition,agenda';	// '' means 'all'. Note that contact is added here as it should be a module later.
+		if (! isset($this->global->MAIN_MODULES_FOR_EXTERNAL)) $this->global->MAIN_MODULES_FOR_EXTERNAL='user,facture,commande,fournisseur,contact,propal,projet,contrat,societe,ficheinter,expedition,agenda';	// '' means 'all'. Note that contact is added here as it should be a module later.
 
 		// Timeouts
         if (empty($this->global->MAIN_USE_CONNECT_TIMEOUT)) $this->global->MAIN_USE_CONNECT_TIMEOUT=10;

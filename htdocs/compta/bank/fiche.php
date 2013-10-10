@@ -24,13 +24,15 @@
  *		\brief      Page to create/view a bank account
  */
 
-require 'pre.inc.php';
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formbank.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 $langs->load("banks");
+$langs->load("categories");
 $langs->load("companies");
 
 $action=GETPOST("action");
@@ -69,8 +71,8 @@ if ($_POST["action"] == 'add')
 
     $account->currency_code   = trim($_POST["account_currency_code"]);
 
-    $account->fk_departement  = $_POST["account_departement_id"];
-    $account->fk_pays         = $_POST["account_country_id"];
+    $account->state_id  	  = $_POST["account_state_id"];
+    $account->country_id      = $_POST["account_country_id"];
 
     $account->min_allowed     = $_POST["account_min_allowed"];
     $account->min_desired     = $_POST["account_min_desired"];
@@ -134,13 +136,13 @@ if ($_POST["action"] == 'update' && ! $_POST["cancel"])
     $account->domiciliation   = trim($_POST["domiciliation"]);
 
     $account->proprio 	      = trim($_POST["proprio"]);
-    $account->adresse_proprio = trim($_POST["adresse_proprio"]);
+    $account->owner_address   = trim($_POST["owner_address"]);
 
     $account->account_number  = trim($_POST["account_number"]);
 
     $account->currency_code   = trim($_POST["account_currency_code"]);
 
-    $account->state_id        = $_POST["account_departement_id"];
+    $account->state_id        = $_POST["account_state_id"];
     $account->country_id      = $_POST["account_country_id"];
 
     $account->min_allowed     = $_POST["account_min_allowed"];
@@ -237,7 +239,7 @@ if ($action == 'create')
 
 	// Ref
 	print '<tr><td valign="top" class="fieldrequired">'.$langs->trans("Ref").'</td>';
-	print '<td colspan="3"><input size="8" type="text" class="flat" name="ref" value="'.($_POST["ref"]?$_POST["ref"]:$account->ref).'"></td></tr>';
+	print '<td colspan="3"><input size="8" type="text" class="flat" name="ref" value="'.($_POST["ref"]?$_POST["ref"]:$account->ref).'" maxlength="12"></td></tr>';
 
 	// Label
 	print '<tr><td valign="top" class="fieldrequired">'.$langs->trans("LabelBankCashAccount").'</td>';
@@ -282,7 +284,7 @@ if ($action == 'create')
 	print '<tr><td>'.$langs->trans('State').'</td><td colspan="3">';
 	if ($selectedcode)
 	{
-		$formcompany->select_departement(isset($_POST["account_departement_id"])?$_POST["account_departement_id"]:'',$selectedcode,'account_departement_id');
+		$formcompany->select_departement(isset($_POST["account_state_id"])?$_POST["account_state_id"]:'',$selectedcode,'account_state_id');
 	}
 	else
 	{
@@ -407,7 +409,7 @@ else
 
 		// Country
 		print '<tr><td>'.$langs->trans("BankAccountCountry").'</td><td>';
-		if ($account->fk_pays > 0)
+		if ($account->country_id > 0)
 		{
 			$img=picto_from_langcode($account->country_code);
 			print $img?$img.' ':'';
@@ -555,7 +557,7 @@ else
 		print '<tr><td>'.$langs->trans('State').'</td><td colspan="3">';
 		if ($selectedcode)
 		{
-			print $formcompany->select_state(isset($_POST["account_departement_id"])?$_POST["account_departement_id"]:$account->fk_departement,$selectedcode,'account_departement_id');
+			print $formcompany->select_state(isset($_POST["account_state_id"])?$_POST["account_state_id"]:$account->state_id,$selectedcode,'account_state_id');
 		}
 		else
 		{

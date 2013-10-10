@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2010	   Juanjo Menent	    <jmenent@2byte.es>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,7 +23,7 @@
  *       \brief      Page to reconciliate bank transactions
  */
 
-require 'pre.inc.php';
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
@@ -31,8 +31,10 @@ require_once DOL_DOCUMENT_ROOT.'/compta/sociales/class/chargesociales.class.php'
 require_once DOL_DOCUMENT_ROOT.'/compta/paiement/class/paiement.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/tva/class/tva.class.php';
 require_once DOL_DOCUMENT_ROOT.'/fourn/class/paiementfourn.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
 $langs->load("banks");
+$langs->load("categories");
 $langs->load("bills");
 
 if (! $user->rights->banque->consolidate) accessforbidden();
@@ -47,6 +49,8 @@ $id=GETPOST('account', 'int');
 // Conciliation
 if ($action == 'rappro' && $user->rights->banque->consolidate)
 {
+	$error=0;
+
 	// Definition, nettoyage parametres
     $num_releve=trim($_POST["num_releve"]);
 
@@ -54,24 +58,36 @@ if ($action == 'rappro' && $user->rights->banque->consolidate)
     {
         $bankline=new AccountLine($db);
 
-		if (isset($_POST["rowid"]) && is_array($_POST["rowid"]))
+		if (isset($_POST['rowid']) && is_array($_POST['rowid']))
 		{
-			foreach($_POST["rowid"] as $row)
+			foreach($_POST['rowid'] as $row)
 			{
 				if($row > 0)
 				{
 					$result=$bankline->fetch($row);
 					$bankline->num_releve=$num_releve; //$_POST["num_releve"];
 					$result=$bankline->update_conciliation($user,$_POST["cat"]);
-					if ($result < 0) $mesg.=$bankline->error;
+					if ($result < 0)
+					{
+						$mesg.=$bankline->error;
+						$error++;
+						break;
+					}
 				}
 			}
         }
     }
     else
     {
+    	$error++;
     	$langs->load("errors");
         $mesg='<div class="error">'.$langs->trans("ErrorPleaseTypeBankTransactionReportName").'</div>';
+    }
+
+    if (! $error)
+    {
+		header('Location: '.DOL_URL_ROOT.'/compta/bank/rappro.php?account='.$id);	// To avoid to submit twice and allow back
+    	exit;
     }
 }
 
@@ -80,12 +96,12 @@ if ($action == 'rappro' && $user->rights->banque->consolidate)
  */
 if ($action == 'del')
 {
-	$accline=new AccountLine($db);
-	$accline->fetch($_GET["rowid"]);
-	$result=$accline->delete();
+	$bankline=new AccountLine($db);
+	$bankline->fetch($_GET["rowid"]);
+	$result=$bankline->delete($user);
     if ($result < 0)
 	{
-        dol_print_error($db,$accline->error);
+        dol_print_error($db,$bankline->error);
     }
 }
 
@@ -200,7 +216,7 @@ if ($resql)
     }
 
 
-	print '<form method="post" action="rappro.php?account='.$acct->id.'">';
+	print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'?account='.$acct->id.'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
 	print "<input type=\"hidden\" name=\"action\" value=\"rappro\">";
 	print "<input type=\"hidden\" name=\"account\" value=\"".$acct->id."\">";
@@ -212,8 +228,7 @@ if ($resql)
     {
         print $langs->trans("EventualyAddCategory").': <select class="flat" name="cat">'.$options.'</select><br>';
     }
-    print $langs->trans("ThenCheckLinesAndConciliate").' ';
-    print "<input class=\"button\" type=\"submit\" value=\"".$langs->trans("Conciliate")."\"><br>";
+    print '<br>'.$langs->trans("ThenCheckLinesAndConciliate").' "'.$langs->trans("Conciliate").'"<br>';
 
     print '<br>';
 
@@ -223,12 +238,11 @@ if ($resql)
     print '<td align="center">'.$langs->trans("DateValueShort").'</td>';
     print '<td>'.$langs->trans("Type").'</td>';
     print '<td>'.$langs->trans("Description").'</td>';
-    print '<td align="right" width="60" nowrap="nowrap">'.$langs->trans("Debit").'</td>';
-    print '<td align="right" width="60" nowrap="nowrap">'.$langs->trans("Credit").'</td>';
+    print '<td align="right" width="60" class="nowrap">'.$langs->trans("Debit").'</td>';
+    print '<td align="right" width="60" class="nowrap">'.$langs->trans("Credit").'</td>';
     print '<td align="center" width="80">'.$langs->trans("Action").'</td>';
-    print '<td align="center" width="60" nowrap="nowrap">'.$langs->trans("ToConciliate").'</td>';
+    print '<td align="center" width="60" class="nowrap">'.$langs->trans("ToConciliate").'</td>';
     print "</tr>\n";
-
 
 
     $i = 0;
@@ -244,12 +258,12 @@ if ($resql)
 //         print "<input type=\"hidden\" name=\"rowid\" value=\"".$objp->rowid."\">";
 
         // Date op
-        print '<td align="center" nowrap="nowrap">'.dol_print_date($db->jdate($objp->do),"day").'</td>';
+        print '<td align="center" class="nowrap">'.dol_print_date($db->jdate($objp->do),"day").'</td>';
 
         // Date value
 		if (! $objp->rappro && ($user->rights->banque->modifier || $user->rights->banque->consolidate))
 		{
-			print '<td align="center" nowrap="nowrap">';
+			print '<td align="center" class="nowrap">';
 			print '<span id="datevalue_'.$objp->rowid.'">'.dol_print_date($db->jdate($objp->dv),"day")."</span>";
 			print ' <span>&nbsp; ';
 			print '<a class="ajax" href="'.$_SERVER['PHP_SELF'].'?action=dvprev&amp;account='.$acct->id.'&amp;rowid='.$objp->rowid.'">';
@@ -265,10 +279,10 @@ if ($resql)
 			print '</td>';
 		}
 
-		// Number
+		// Type + Number
 		$label=($langs->trans("PaymentType".$objp->type)!="PaymentType".$objp->type)?$langs->trans("PaymentType".$objp->type):$objp->type;  // $objp->type is a code
 		if ($label=='SOLD') $label='';
-		print '<td nowrap="nowrap">'.$label.($objp->num_chq?' '.$objp->num_chq:'').'</td>';
+		print '<td class="nowrap">'.$label.($objp->num_chq?' '.$objp->num_chq:'').'</td>';
 
 		// Description
         print '<td valign="center"><a href="'.DOL_URL_ROOT.'/compta/bank/ligne.php?rowid='.$objp->rowid.'&amp;account='.$acct->id.'">';
@@ -376,7 +390,7 @@ if ($resql)
             // If not already reconciliated
             if ($user->rights->banque->modifier)
             {
-                print '<td align="center" width="30" nowrap="nowrap">';
+                print '<td align="center" width="30" class="nowrap">';
 
                 print '<a href="'.DOL_URL_ROOT.'/compta/bank/ligne.php?rowid='.$objp->rowid.'&amp;account='.$acct->id.'&amp;orig_account='.$acct->id.'">';
                 print img_edit();
@@ -400,12 +414,12 @@ if ($resql)
         }
 
 
-        // Affiche zone saisie releve + bouton "Rapprocher"
+        // Show checkbox for conciliation
         if ($db->jdate($objp->do) <= $now)
         {
 
-            print '<td align="center" nowrap="nowrap">';
-            print '<input class="flat" name="rowid[]" type="checkbox" value="'.$objp->rowid.'" size="1">';
+            print '<td align="center" class="nowrap">';
+            print '<input class="flat" name="rowid['.$objp->rowid.']" type="checkbox" value="'.$objp->rowid.'" size="1"'.(! empty($_POST['rowid'][$objp->rowid])?' checked="checked"':'').'>';
 //             print '<input class="flat" name="num_releve" type="text" value="'.$objp->num_releve.'" size="8">';
 //             print ' &nbsp; ';
 //             print "<input class=\"button\" type=\"submit\" value=\"".$langs->trans("Conciliate")."\">";
@@ -429,13 +443,12 @@ if ($resql)
     }
     $db->free($resql);
 
+    print "</table><br>\n";
 
-	print "</form>\n";
+    print '<div align="right"><input class="button" type="submit" value="'.$langs->trans("Conciliate").'"></div><br>';
 
-	if ($num != 0)
-	{
-        print "</table><br>\n";
-	}
+    print "</form>\n";
+
 }
 else
 {

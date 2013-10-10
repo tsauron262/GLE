@@ -29,6 +29,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/menubase.class.php';
 
 
 $langs->load("admin");
+$langs->load('other');
 
 if (! $user->admin) accessforbidden();
 
@@ -49,8 +50,8 @@ $menu_handler_smartphone=preg_replace('/_frontoffice.php/i','',$menu_handler_sma
 
 $menu_handler=$menu_handler_top;
 
-if ($_REQUEST["handler_origine"]) $menu_handler=$_REQUEST["handler_origine"];
-if ($_REQUEST["menu_handler"])    $menu_handler=$_REQUEST["menu_handler"];
+if (GETPOST("handler_origine")) $menu_handler=GETPOST("handler_origine");
+if (GETPOST("menu_handler"))    $menu_handler=GETPOST("menu_handler");
 
 
 
@@ -173,7 +174,7 @@ if ($action == 'add')
     if (! $error)
     {
         $menu = new Menubase($db);
-        $menu->menu_handler=$_POST['menu_handler'];
+        $menu->menu_handler=preg_replace('/_menu$/','',$_POST['menu_handler']);
         $menu->type=$_POST['type'];
         $menu->titre=$_POST['titre'];
         $menu->url=$_POST['url'];
@@ -304,7 +305,7 @@ if ($action == 'create')
     print '<td>'.$langs->trans('DetailMenuHandler').'</td></tr>';
 
     //User
-    print '<tr><td nowrap="nowrap" class="fieldrequired">'.$langs->trans('MenuForUsers').'</td>';
+    print '<tr><td class="nowrap fieldrequired">'.$langs->trans('MenuForUsers').'</td>';
     print '<td><select class="flat" name="user">';
     print '<option value="2" selected>'.$langs->trans("AllMenus").'</option>';
     print '<option value="0">'.$langs->trans('Internal').'</option>';
@@ -405,7 +406,7 @@ elseif ($action == 'edit')
     print '<tr><td class="fieldrequired">'.$langs->trans('MenuHandler').'</td><td>'.$handler.'</td><td>'.$langs->trans('DetailMenuHandler').'</td></tr>';
 
     // User
-    print '<tr><td nowrap="nowrap" class="fieldrequired">'.$langs->trans('MenuForUsers').'</td><td><select class="flat" name="user">';
+    print '<tr><td class="nowrap fieldrequired">'.$langs->trans('MenuForUsers').'</td><td><select class="flat" name="user">';
     print '<option value="2"'.($menu->user==2?' selected="true"':'').'>'.$langs->trans("AllMenus").'</option>';
     print '<option value="0"'.($menu->user==0?' selected="true"':'').'>'.$langs->trans('Internal').'</option>';
     print '<option value="1"'.($menu->user==1?' selected="true"':'').'>'.$langs->trans('External').'</option>';
@@ -443,10 +444,14 @@ elseif ($action == 'edit')
     print '</select></td><td>'.$langs->trans('DetailTarget').'</td></tr>';
 
     // Enabled
-    print '<tr><td>'.$langs->trans('Enabled').'</td><td><input type="text" size="60" name="enabled" value="'.$menu->enabled.'"></td><td>'.$langs->trans('DetailEnabled').'</td></tr>';
+    print '<tr><td>'.$langs->trans('Enabled').'</td><td><input type="text" size="60" name="enabled" value="'.dol_escape_htmltag($menu->enabled).'"></td><td>'.$langs->trans('DetailEnabled');
+    if (! empty($menu->enabled)) print ' ('.$langs->trans("ConditionIsCurrently").': '.yn(dol_eval($menu->enabled,1)).')';
+    print '</td></tr>';
 
     // Perms
-    print '<tr><td>'.$langs->trans('Rights').'</td><td><input type="text" size="60" name="perms" value="'.$menu->perms.'"></td><td>'.$langs->trans('DetailRight').'</td></tr>';
+    print '<tr><td>'.$langs->trans('Rights').'</td><td><input type="text" size="60" name="perms" value="'.dol_escape_htmltag($menu->perms).'"></td><td>'.$langs->trans('DetailRight');
+    if (! empty($menu->perms)) print ' ('.$langs->trans("ConditionIsCurrently").': '.yn(dol_eval($menu->perms,1)).')';
+    print '</td></tr>';
 
     print '</table>';
 

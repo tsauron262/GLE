@@ -55,8 +55,8 @@ print $langs->trans("SetupDescription2")."<br><br>";
 
 print '<br>';
 //print '<hr style="color: #DDDDDD;">';
-if (empty($conf->global->MAIN_INFO_SOCIETE_NOM) || empty($conf->global->MAIN_INFO_SOCIETE_PAYS)) $setupcompanynotcomplete=1;
-print img_picto('','puce').' '.$langs->trans("SetupDescription3",DOL_URL_ROOT.'/admin/company.php?mainmenu=home');
+if (empty($conf->global->MAIN_INFO_SOCIETE_NOM) || empty($conf->global->MAIN_INFO_SOCIETE_COUNTRY)) $setupcompanynotcomplete=1;
+print img_picto('','puce').' '.$langs->trans("SetupDescription3",DOL_URL_ROOT.'/admin/company.php?mainmenu=home'.(empty($setupcompanynotcomplete)?'':'&action=edit'));
 if (! empty($setupcompanynotcomplete))
 {
 	$langs->load("errors");
@@ -68,7 +68,7 @@ print '<br>';
 print '<br>';
 //print '<hr style="color: #DDDDDD;">';
 print img_picto('','puce').' '.$langs->trans("SetupDescription4",DOL_URL_ROOT.'/admin/modules.php?mainmenu=home');
-if (count($conf->modules) <= 1)	// If only user module enabled
+if (count($conf->modules) <= (empty($conf->global->MAIN_MINNB_MODULE)?1:$conf->global->MAIN_MINNB_MODULE))	// If only user module enabled
 {
 	$langs->load("errors");
 	$warnpicto=img_warning($langs->trans("WarningMandatorySetupNotComplete"));
@@ -82,16 +82,8 @@ print $langs->trans("SetupDescription5")."<br>";
 //print '<hr style="color: #DDDDDD;">';
 print "<br>";
 
-/*
-print '<table width="100%">';
-print '<tr '.$bc[false].'><td '.$bc[false].'>'.img_picto('','puce').' '.$langs->trans("SetupDescription3")."</td></tr>";
-print '<tr '.$bc[true].'><td '.$bc[true].'>'.img_picto('','puce').' '.$langs->trans("SetupDescription4")."</td></tr>";
-print '<tr '.$bc[false].'><td '.$bc[false].'>'.img_picto('','puce').' '.$langs->trans("SetupDescription5")."</td></tr>";
-print '</table>';
-*/
-
-//print '<br>';
-//print info_admin($langs->trans("OnceSetupFinishedCreateUsers")).'<br>';
+// Show logo
+print '<center><div class="logo_setup"></div></center>';
 
 
 llxFooter();

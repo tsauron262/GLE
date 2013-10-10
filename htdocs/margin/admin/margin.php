@@ -99,6 +99,7 @@ if ($action == 'contact')
     if (dolibarr_set_const($db, 'AGENT_CONTACT_TYPE', $_POST['AGENT_CONTACT_TYPE'], 'chaine', 0, '', $conf->entity) > 0)
     {
           $conf->global->AGENT_CONTACT_TYPE = $_POST['AGENT_CONTACT_TYPE'];
+          setEventMessage($langs->trans("RecordModifiedSuccessfully"));
     }
     else
     {
@@ -126,7 +127,7 @@ print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td width=300>'.$langs->trans("Description").'</td>';
 print '<td colspan="2" align="center">'.$langs->trans("Value").'</td>'."\n";
-print '<td align="left">'.$langs->trans("Details").'</td>'."\n";
+print '<td align="left">'.$langs->trans("Description").'</td>'."\n";
 print '</tr>';
 
 $var=true;

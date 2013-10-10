@@ -3,6 +3,7 @@
  * Copyright (C) 2005-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2009 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2011      Juanjo Menent		<jmenent@2byte.es>
+ * Copyright (C) 2013      Florian Henry		<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +25,17 @@
  *	\brief      Prelevement index page
  */
 
-require '../bank/pre.inc.php';
+
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/bonprelevement.class.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/prelevement.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
-$langs->load("withdrawals");
+$langs->load("banks");
 $langs->load("categories");
+$langs->load("withdrawals");
 
 // Security check
 $socid = GETPOST('socid','int');
@@ -61,9 +65,9 @@ if (prelevement_check_config() < 0)
 
 print_fiche_titre($langs->trans("CustomersStandingOrdersArea"));
 
-print '<table border="0" width="100%" class="notopnoleftnoright">';
 
-print '<tr><td valign="top" width="30%" class="notopnoleft">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
+
 
 $thirdpartystatic=new Societe($db);
 $invoicestatic=new Facture($db);
@@ -85,8 +89,8 @@ print '<td align="right">';
 print price($bprev->SommeAPrelever());
 print '</td></tr></table><br>';
 
-print '</td><td valign="top" width="70%">';
 
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 /*
@@ -218,7 +222,9 @@ else
 }
 
 
-print '</td></tr></table>';
+print '</div></div></div>';
 
 llxFooter();
+
+$db->close();
 ?>

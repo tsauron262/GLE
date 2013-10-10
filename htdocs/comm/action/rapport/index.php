@@ -104,7 +104,7 @@ if ($resql)
 	print '<tr class="liste_titre">';
 	print '<td>'.$langs->trans("Date").'</td>';
 	print '<td align="center">'.$langs->trans("EventsNb").'</td>';
-	print '<td>'.$langs->trans("Action").'</td>';
+	print '<td align="center">'.$langs->trans("Action").'</td>';
 	print '<td align="center">'.$langs->trans("PDF").'</td>';
 	print '<td align="center">'.$langs->trans("Date").'</td>';
 	print '<td align="center">'.$langs->trans("Size").'</td>';
@@ -122,7 +122,7 @@ if ($resql)
 			print "<td>".$obj->df."</td>\n";
 			print '<td align="center">'.$obj->cc.'</td>';
 
-			print '<td>';
+			print '<td align="center">';
 			print '<a href="'.$_SERVER["PHP_SELF"].'?action=builddoc&amp;page='.$page.'&amp;month='.$obj->month.'&amp;year='.$obj->year.'">'.img_picto($langs->trans('GenerateReport'),'filenew').'</a>';
 			print '</td>';
 
@@ -132,7 +132,7 @@ if ($resql)
 
 			if (file_exists($file))
 			{
-				print '<td align="center"><a href="'.DOL_URL_ROOT.'/document.php?page='.$page.'&amp;file='.urlencode($relativepath).'&amp;modulepart=actionsreport">'.img_pdf().'</a></td>';
+				print '<td align="center"><a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?page='.$page.'&amp;file='.urlencode($relativepath).'&amp;modulepart=actionsreport">'.img_pdf().'</a></td>';
 				print '<td align="center">'.dol_print_date(dol_filemtime($file),'dayhour').'</td>';
 				print '<td align="center">'.dol_print_size(dol_filesize($file)).'</td>';
 			}

@@ -40,9 +40,10 @@
  * @param 	int		$pid			Product id
  * @param 	int		$socid			Third party id
  * @param	array	$showextcals	Array with list of external calendars, or -1 to show no legend
+ * @param	string	$actioncode		Preselected value of actioncode for filter on type
  * @return	void
  */
-function print_actions_filter($form,$canedit,$status,$year,$month,$day,$showbirthday,$filtera,$filtert,$filterd,$pid,$socid,$showextcals=array())
+function print_actions_filter($form,$canedit,$status,$year,$month,$day,$showbirthday,$filtera,$filtert,$filterd,$pid,$socid,$showextcals=array(),$actioncode='')
 {
 	global $conf,$user,$langs,$db;
 
@@ -59,43 +60,42 @@ function print_actions_filter($form,$canedit,$status,$year,$month,$day,$showbirt
 		print '<table class="nobordernopadding" width="100%">';
 		if ($canedit || ! empty($conf->projet->enabled))
 		{
-			print '<tr><td nowrap="nowrap">';
+			print '<tr><td class="nowrap">';
 
 			print '<table class="nobordernopadding">';
 
 			if ($canedit)
 			{
 				print '<tr>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print $langs->trans("ActionsAskedBy");
-				print ' &nbsp;</td><td nowrap="nowrap">';
+				print ' &nbsp;</td><td class="nowrap">';
 				print $form->select_dolusers($filtera,'userasked',1,'',!$canedit);
 				print '</td>';
 				print '</tr>';
 
 				print '<tr>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print $langs->trans("or").' '.$langs->trans("ActionsToDoBy");
-				print ' &nbsp;</td><td nowrap="nowrap">';
+				print ' &nbsp;</td><td class="nowrap">';
 				print $form->select_dolusers($filtert,'usertodo',1,'',!$canedit);
 				print '</td></tr>';
 
 				print '<tr>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print $langs->trans("or").' '.$langs->trans("ActionsDoneBy");
-				print ' &nbsp;</td><td nowrap="nowrap">';
+				print ' &nbsp;</td><td class="nowrap">';
 				print $form->select_dolusers($filterd,'userdone',1,'',!$canedit);
 				print '</td></tr>';
 
 				include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
 				$formactions=new FormActions($db);
 				print '<tr>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print $langs->trans("Type");
-				print ' &nbsp;</td><td nowrap="nowrap">';
+				print ' &nbsp;</td><td class="nowrap">';
 
-				// print $formactions->select_type_actions(GETPOST('actioncode'), "actioncode");
-				print $formactions->select_type_actions(GETPOST('actioncode')?GETPOST('actioncode'):'manual', "actioncode", '', (empty($conf->global->AGENDA_USE_EVENT_TYPE)?1:0));
+				print $formactions->select_type_actions($actioncode, "actioncode", '', (empty($conf->global->AGENDA_USE_EVENT_TYPE)?1:0));
 
 				print '</td></tr>';
 			}
@@ -103,9 +103,9 @@ function print_actions_filter($form,$canedit,$status,$year,$month,$day,$showbirt
 			if (! empty($conf->projet->enabled) && $user->rights->projet->lire)
 			{
 				print '<tr>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print $langs->trans("Project").' &nbsp; ';
-				print '</td><td nowrap="nowrap">';
+				print '</td><td class="nowrap">';
 				select_projects($socid?$socid:-1, $pid, 'projectid', 64);
 				print '</td></tr>';
 			}
@@ -114,20 +114,20 @@ function print_actions_filter($form,$canedit,$status,$year,$month,$day,$showbirt
 			print '</td>';
 
 			// Buttons
-			print '<td align="center" valign="middle" nowrap="nowrap">';
-			print img_picto($langs->trans("ViewCal"),'object_calendar').' <input type="submit" class="button" style="width:120px" name="viewcal" value="'.$langs->trans("ViewCal").'">';
+			print '<td align="center" valign="middle" class="nowrap">';
+			print img_picto($langs->trans("ViewCal"),'object_calendar','class="hideonsmartphone"').' <input type="submit" class="button" style="min-width:120px" name="viewcal" value="'.$langs->trans("ViewCal").'">';
 			print '<br>';
-			print img_picto($langs->trans("ViewWeek"),'object_calendarweek').' <input type="submit" class="button" style="width:120px" name="viewweek" value="'.$langs->trans("ViewWeek").'">';
+			print img_picto($langs->trans("ViewWeek"),'object_calendarweek','class="hideonsmartphone"').' <input type="submit" class="button" style="min-width:120px" name="viewweek" value="'.$langs->trans("ViewWeek").'">';
 			print '<br>';
-            print img_picto($langs->trans("ViewDay"),'object_calendarday').' <input type="submit" class="button" style="width:120px" name="viewday" value="'.$langs->trans("ViewDay").'">';
+            print img_picto($langs->trans("ViewDay"),'object_calendarday','class="hideonsmartphone"').' <input type="submit" class="button" style="min-width:120px" name="viewday" value="'.$langs->trans("ViewDay").'">';
 			print '<br>';
-			print img_picto($langs->trans("ViewList"),'object_list').' <input type="submit" class="button" style="width:120px" name="viewlist" value="'.$langs->trans("ViewList").'">';
+			print img_picto($langs->trans("ViewList"),'object_list','class="hideonsmartphone"').' <input type="submit" class="button" style="min-width:120px" name="viewlist" value="'.$langs->trans("ViewList").'">';
 			print '</td>';
 
 			// Legend
 			if ($conf->use_javascript_ajax && is_array($showextcals))
 			{
-    			print '<td align="center" valign="middle" nowrap="nowrap">';
+    			print '<td align="center" valign="middle" class="nowrap">';
                 print '<script type="text/javascript">'."\n";
                 print 'jQuery(document).ready(function () {'."\n";
                 print 'jQuery("#check_mytasks").click(function() { jQuery(".family_mytasks").toggle(); jQuery(".family_other").toggle(); });'."\n";
@@ -184,13 +184,11 @@ function show_array_actions_to_do($max=5)
 	$sql = "SELECT a.id, a.label, a.datep as dp, a.datep2 as dp2, a.fk_user_author, a.percent,";
 	$sql.= " c.code, c.libelle,";
 	$sql.= " s.nom as sname, s.rowid, s.client";
-	$sql.= " FROM (".MAIN_DB_PREFIX."c_actioncomm as c,";
-	$sql.= " ".MAIN_DB_PREFIX."actioncomm as a";
-	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-	$sql.= ")";
+	$sql.= " FROM ".MAIN_DB_PREFIX."c_actioncomm as c LEFT JOIN ";
+	$sql.= " ".MAIN_DB_PREFIX."actioncomm as a ON c.id = a.fk_action";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON a.fk_soc = s.rowid";
-	$sql.= " WHERE c.id = a.fk_action";
-	$sql.= " AND a.entity = ".$conf->entity;
+	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+	$sql.= " WHERE a.entity = ".$conf->entity;
     $sql.= " AND ((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep2 > '".$db->idate($now)."'))";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;
@@ -283,13 +281,11 @@ function show_array_last_actions_done($max=5)
 	$sql = "SELECT a.id, a.percent, a.datep as da, a.datep2 as da2, a.fk_user_author, a.label,";
 	$sql.= " c.code, c.libelle,";
 	$sql.= " s.rowid, s.nom as sname, s.client";
-	$sql.= " FROM (".MAIN_DB_PREFIX."c_actioncomm as c,";
-	$sql.= " ".MAIN_DB_PREFIX."actioncomm as a";
-	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-	$sql.=")";
+	$sql.= " FROM ".MAIN_DB_PREFIX."c_actioncomm as c LEFT JOIN ";
+	$sql.= " ".MAIN_DB_PREFIX."actioncomm as a ON c.id = a.fk_action ";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON a.fk_soc = s.rowid";
-	$sql.= " WHERE c.id = a.fk_action";
-	$sql.= " AND a.entity = ".$conf->entity;
+	if (!$user->rights->societe->client->voir && !$socid) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
+	$sql.= " WHERE a.entity = ".$conf->entity;
     $sql.= " AND (a.percent >= 100 OR (a.percent = -1 AND a.datep2 <= '".$db->idate($now)."'))";
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
     if ($socid) $sql.= " AND s.rowid = ".$socid;
@@ -386,6 +382,11 @@ function agenda_prepare_head()
 	$head[$h][0] = DOL_URL_ROOT."/admin/agenda_extsites.php";
 	$head[$h][1] = $langs->trans("ExtSites");
 	$head[$h][2] = 'extsites';
+	$h++;
+
+	$head[$h][0] = DOL_URL_ROOT."/admin/agenda_other.php";
+	$head[$h][1] = $langs->trans("Other");
+	$head[$h][2] = 'other';
 	$h++;
 
 	complete_head_from_modules($conf,$langs,$object,$head,$h,'agenda_admin');

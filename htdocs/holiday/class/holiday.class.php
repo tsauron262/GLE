@@ -2,6 +2,7 @@
 /* Copyright (C) 2011	Dimitri Mouillard	<dmouillard@teclib.com>
  * Copyright (C) 2012	Laurent Destailleur	<eldy@users.sourceforge.net>
  * Copyright (C) 2012	Regis Houssin		<regis.houssin@capnetworks.com>
+ * Copyright (C) 2013   Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -123,7 +124,7 @@ class Holiday extends CommonObject
         // User
         $sql.= "'".$this->fk_user."',";
         $sql.= " '".$this->db->idate($now)."',";
-        $sql.= " '".addslashes($this->description)."',";
+        $sql.= " '".$this->db->escape($this->description)."',";
         $sql.= " '".$this->db->idate($this->date_debut)."',";
         $sql.= " '".$this->db->idate($this->date_fin)."',";
         $sql.= " ".$this->halfday.",";
@@ -177,7 +178,6 @@ class Holiday extends CommonObject
 
         $sql = "SELECT";
         $sql.= " cp.rowid,";
-
         $sql.= " cp.fk_user,";
         $sql.= " cp.date_create,";
         $sql.= " cp.description,";
@@ -192,8 +192,9 @@ class Holiday extends CommonObject
         $sql.= " cp.fk_user_refuse,";
         $sql.= " cp.date_cancel,";
         $sql.= " cp.fk_user_cancel,";
-        $sql.= " cp.detail_refuse";
-
+        $sql.= " cp.detail_refuse,";
+        $sql.= " cp.note_private,";
+        $sql.= " cp.note_public";
         $sql.= " FROM ".MAIN_DB_PREFIX."holiday as cp";
         $sql.= " WHERE cp.rowid = ".$id;
 
@@ -223,6 +224,8 @@ class Holiday extends CommonObject
                 $this->date_cancel = $this->db->jdate($obj->date_cancel);
                 $this->fk_user_cancel = $obj->fk_user_cancel;
                 $this->detail_refuse = $obj->detail_refuse;
+                $this->note_private = $obj->note_private;
+                $this->note_public = $obj->note_public;
             }
             $this->db->free($resql);
 
@@ -265,10 +268,17 @@ class Holiday extends CommonObject
         $sql.= " cp.fk_user_refuse,";
         $sql.= " cp.date_cancel,";
         $sql.= " cp.fk_user_cancel,";
-        $sql.= " cp.detail_refuse";
+        $sql.= " cp.detail_refuse,";
 
-        $sql.= " FROM ".MAIN_DB_PREFIX."holiday as cp";
-        $sql.= " WHERE cp.fk_user = '".$user_id."'";
+		$sql.= " uu.lastname as user_lastname,";
+        $sql.= " uu.firstname as user_firstname,";
+
+        $sql.= " ua.lastname as validator_lastname,";
+        $sql.= " ua.firstname as validator_firstname";
+
+        $sql.= " FROM ".MAIN_DB_PREFIX."holiday as cp, ".MAIN_DB_PREFIX."user as uu, ".MAIN_DB_PREFIX."user as ua";
+		$sql.= " WHERE cp.fk_user = uu.rowid AND cp.fk_validator = ua.rowid "; // Hack pour la recherche sur le tableau
+        $sql.= " AND cp.fk_user = '".$user_id."'";
 
         // Filtre de séléction
         if(!empty($filter)) {
@@ -318,6 +328,12 @@ class Holiday extends CommonObject
                 $tab_result[$i]['fk_user_cancel'] = $obj->fk_user_cancel;
                 $tab_result[$i]['detail_refuse'] = $obj->detail_refuse;
 
+                $tab_result[$i]['user_firstname'] = $obj->user_firstname;
+                $tab_result[$i]['user_lastname'] = $obj->user_lastname;
+
+                $tab_result[$i]['validator_firstname'] = $obj->validator_firstname;
+                $tab_result[$i]['validator_lastname'] = $obj->validator_lastname;
+
                 $i++;
             }
 
@@ -364,10 +380,10 @@ class Holiday extends CommonObject
         $sql.= " cp.fk_user_cancel,";
         $sql.= " cp.detail_refuse,";
 
-        $sql.= " uu.name as user_lastname,";
+        $sql.= " uu.lastname as user_lastname,";
         $sql.= " uu.firstname as user_firstname,";
 
-        $sql.= " ua.name as validator_lastname,";
+        $sql.= " ua.lastname as validator_lastname,";
         $sql.= " ua.firstname as validator_firstname";
 
         $sql.= " FROM ".MAIN_DB_PREFIX."holiday as cp, ".MAIN_DB_PREFIX."user as uu, ".MAIN_DB_PREFIX."user as ua";
@@ -457,7 +473,7 @@ class Holiday extends CommonObject
         // Update request
         $sql = "UPDATE ".MAIN_DB_PREFIX."holiday SET";
 
-        $sql.= " description= '".addslashes($this->description)."',";
+        $sql.= " description= '".$this->db->escape($this->description)."',";
 
         if(!empty($this->date_debut)) {
             $sql.= " date_debut = '".$this->db->idate($this->date_debut)."',";
@@ -511,7 +527,7 @@ class Holiday extends CommonObject
             $sql.= " fk_user_cancel = NULL,";
         }
         if(!empty($this->detail_refuse)) {
-            $sql.= " detail_refuse = '".addslashes($this->detail_refuse)."'";
+            $sql.= " detail_refuse = '".$this->db->escape($this->detail_refuse)."'";
         } else {
             $sql.= " detail_refuse = NULL";
         }
@@ -678,8 +694,8 @@ class Holiday extends CommonObject
 		if ($mode == 0)
 		{
             if ($statut == 1) return $langs->trans('DraftCP');
-            if ($statut == 2) return $langs->trans('ToValidateCP');
-            if ($statut == 3) return $langs->trans('ValidateCP');
+            if ($statut == 2) return $langs->trans('ToReviewCP');
+            if ($statut == 3) return $langs->trans('ApprovedCP');
             if ($statut == 4) return $langs->trans('CancelCP');
             if ($statut == 5) return $langs->trans('RefuseCP');
 		}
@@ -688,8 +704,8 @@ class Holiday extends CommonObject
 			$pictoapproved='statut6';
 			if (! empty($startdate) && $startdate > dol_now()) $pictoapproved='statut4';
 			if ($statut == 1) return img_picto($langs->trans('DraftCP'),'statut0').' '.$langs->trans('DraftCP');				// Draft
-			if ($statut == 2) return img_picto($langs->trans('ToValidateCP'),'statut1').' '.$langs->trans('ToValidateCP');		// Waiting approval
-			if ($statut == 3) return img_picto($langs->trans('ValidateCP'),$pictoapproved).' '.$langs->trans('ValidateCP');
+			if ($statut == 2) return img_picto($langs->trans('ToReviewCP'),'statut1').' '.$langs->trans('ToReviewCP');		// Waiting approval
+			if ($statut == 3) return img_picto($langs->trans('ApprovedCP'),$pictoapproved).' '.$langs->trans('ApprovedCP');
 			if ($statut == 4) return img_picto($langs->trans('CancelCP'),'statut5').' '.$langs->trans('CancelCP');
 			if ($statut == 5) return img_picto($langs->trans('RefuseCP'),'statut5').' '.$langs->trans('RefuseCP');
 		}
@@ -698,8 +714,8 @@ class Holiday extends CommonObject
 			$pictoapproved='statut6';
 			if (! empty($startdate) && $startdate > dol_now()) $pictoapproved='statut4';
 			if ($statut == 1) return $langs->trans('DraftCP').' '.img_picto($langs->trans('DraftCP'),'statut0');				// Draft
-			if ($statut == 2) return $langs->trans('ToValidateCP').' '.img_picto($langs->trans('ToValidateCP'),'statut1');		// Waiting approval
-			if ($statut == 3) return $langs->trans('ValidateCP').' '.img_picto($langs->trans('ValidateCP'),$pictoapproved);
+			if ($statut == 2) return $langs->trans('ToReviewCP').' '.img_picto($langs->trans('ToReviewCP'),'statut1');		// Waiting approval
+			if ($statut == 3) return $langs->trans('ApprovedCP').' '.img_picto($langs->trans('ApprovedCP'),$pictoapproved);
 			if ($statut == 4) return $langs->trans('CancelCP').' '.img_picto($langs->trans('CancelCP'),'statut5');
 			if ($statut == 5) return $langs->trans('RefuseCP').' '.img_picto($langs->trans('RefuseCP'),'statut5');
 		}
@@ -719,7 +735,7 @@ class Holiday extends CommonObject
         global $langs;
 
         // Liste des statuts
-        $name = array('DraftCP','ToValidateCP','ValidateCP','CancelCP','RefuseCP');
+        $name = array('DraftCP','ToReviewCP','ApprovedCP','CancelCP','RefuseCP');
         $nb = count($name)+1;
 
         // Select HTML
@@ -859,7 +875,7 @@ class Holiday extends CommonObject
      */
     function updateSoldeCP($userID='',$nbHoliday='')
     {
-        global $user;
+        global $user, $langs;
 
         if (empty($userID) && empty($nbHoliday))
         {
@@ -897,7 +913,7 @@ class Holiday extends CommonObject
                     $new_solde = $now_holiday + $this->getConfCP('nbHolidayEveryMonth');
 
                     // On ajoute la modification dans le LOG
-                    $this->addLogCP($user->id,$users[$i]['rowid'],'Event : Mise à jour mensuelle',$new_solde);
+                    $this->addLogCP($user->id,$users[$i]['rowid'], $langs->trans('Event').': '.$langs->trans('HolidaysMonthlyUpdate'),$new_solde);
 
                     $i++;
                 }
@@ -1115,7 +1131,7 @@ class Holiday extends CommonObject
             // Si c'est pour les utilisateurs de Dolibarr
             if($type) {
 
-                $sql = "SELECT u.rowid, u.name, u.firstname";
+                $sql = "SELECT u.rowid, u.lastname, u.firstname";
                 $sql.= " FROM ".MAIN_DB_PREFIX."user as u";
                 $sql.= " WHERE statut > '0'";
 
@@ -1135,7 +1151,7 @@ class Holiday extends CommonObject
                         $obj = $this->db->fetch_object($resql);
 
                         $tab_result[$i]['rowid'] = $obj->rowid;
-                        $tab_result[$i]['name'] = $obj->name;
+                        $tab_result[$i]['name'] = $obj->lastname;
                         $tab_result[$i]['firstname'] = $obj->firstname;
 
                         $i++;
@@ -1154,7 +1170,7 @@ class Holiday extends CommonObject
                 // Si c'est pour les utilisateurs du module Congés Payés
             } else {
 
-                $sql = "SELECT cpu.fk_user, u.name, u.firstname";
+                $sql = "SELECT cpu.fk_user, u.lastname, u.firstname";
                 $sql.= " FROM ".MAIN_DB_PREFIX."holiday_users as cpu,";
                 $sql.= " ".MAIN_DB_PREFIX."user as u";
                 $sql.= " WHERE cpu.fk_user = u.rowid";
@@ -1175,7 +1191,7 @@ class Holiday extends CommonObject
                         $obj = $this->db->fetch_object($resql);
 
                         $tab_result[$i]['rowid'] = $obj->fk_user;
-                        $tab_result[$i]['name'] = $obj->name;
+                        $tab_result[$i]['name'] = $obj->lastname;
                         $tab_result[$i]['firstname'] = $obj->firstname;
 
                         $i++;
@@ -1231,7 +1247,7 @@ class Holiday extends CommonObject
             $listUsersCP = $this->fetchUsers(true,false);
 
             // On séléctionne les utilisateurs qui ne sont pas déjà dans le module
-            $sql = "SELECT u.rowid, u.name, u.firstname";
+            $sql = "SELECT u.rowid, u.lastname, u.firstname";
             $sql.= " FROM ".MAIN_DB_PREFIX."user as u";
             $sql.= " WHERE u.rowid NOT IN(".$listUsersCP.")";
 
@@ -1378,7 +1394,7 @@ class Holiday extends CommonObject
 
         $sql.= ") VALUES (";
 
-        $sql.= " '".addslashes($this->optName)."',";
+        $sql.= " '".$this->db->escape($this->optName)."',";
         $sql.= " '".$this->optValue."'";
         $sql.= ")";
 
@@ -1425,7 +1441,7 @@ class Holiday extends CommonObject
     function updateEventCP($rowid, $name, $value) {
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."holiday_events SET";
-        $sql.= " name = '".addslashes($name)."', value = '".$value."'";
+        $sql.= " name = '".$this->db->escape($name)."', value = '".$value."'";
         $sql.= " WHERE rowid = '".$rowid."'";
 
         $result = $this->db->query($sql);
@@ -1548,7 +1564,7 @@ class Holiday extends CommonObject
      */
     function addLogCP($fk_user_action,$fk_user_update,$type,$new_solde) {
 
-        global $conf, $langs, $db;
+        global $conf, $langs;
 
         $error=0;
 
@@ -1570,7 +1586,7 @@ class Holiday extends CommonObject
         $sql.= " NOW(), ";
         $sql.= " '".$fk_user_action."',";
         $sql.= " '".$fk_user_update."',";
-        $sql.= " '".addslashes($type)."',";
+        $sql.= " '".$this->db->escape($type)."',";
         $sql.= " '".$prev_solde."',";
         $sql.= " '".$new_solde."'";
         $sql.= ")";

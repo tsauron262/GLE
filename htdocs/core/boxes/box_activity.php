@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2012 Charles-François BENKE <charles.fr@benke.fr>
+/* Copyright (C) 2012      Charles-François BENKE <charles.fr@benke.fr>
  * Copyright (C) 2005-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,7 +31,7 @@ class box_activity extends ModeleBoxes
 {
 	var $boxcode="activity";
 	var $boximg="object_bill";
-	var $boxlabel;
+	var $boxlabel='BoxGlobalActivity';
 	var $depends = array("facture");
 
 	var $db;
@@ -41,22 +41,22 @@ class box_activity extends ModeleBoxes
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
+
 	/**
-	 *	Constructor
+	 *  Constructor
+	 *
+	 * 	@param	DoliDB	$db			Database handler
+	 *  @param	string	$param		More parameters
 	 */
-	function __construct()
+	function __construct($db,$param)
 	{
-		global $langs,$conf;
+		global $conf;
 
-		$langs->load("boxes");
-		$langs->load("bills");
-		$langs->load("projects");
-		$langs->load("orders");
-
-		$this->boxlabel = $langs->transnoentitiesnoconv("BoxGlobalActivity");
-
-		// Disabled by default because, still has some bug (pgsl support, filters, getCurrencySymbol us a cache into a form object not defined, ...) and slow down seriously Dolibarr
-		$this->enabled = (! empty($conf->global->MAIN_FEATURES_LEVEL) || ! empty($conf->global->MAIN_BOX_ACTIVITY_ENABLED));
+		$this->db=$db;
+		// FIXME: Use a cache to save data because this slow down too much main home page. This box slow down too seriously software.
+		// FIXME: Removed number_format (not compatible with all languages)
+		// FIXME: Pb into some status
+		$this->enabled=$conf->global->MAIN_FEATURES_LEVEL;	// Not enabled by default due to bugs (see previous FIXME)
 	}
 
 	/**
@@ -71,22 +71,25 @@ class box_activity extends ModeleBoxes
 
 		$totalMnt = 0;
 		$totalnb = 0;
+		$i = 0;
 
-		include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
-		include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
-		include_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-		$facturestatic=new Facture($db);
-		$propalstatic=new Propal($db);
-		$commandestatic=new Commande($db);
 
-		$textHead = $langs->trans("Activity")."&nbsp;".date("Y");
+		$nbofyears=2;
+		if (! empty($conf->global->MAIN_BOX_ACTIVITY_DURATION)) $nbofyears=$conf->global->MAIN_BOX_ACTIVITY_DURATION;
+		$textHead = $langs->trans("Activity").' ('.$nbofyears.' '.$langs->trans("DurationYears").')';
 		$this->info_box_head = array('text' => $textHead, 'limit'=> dol_strlen($textHead));
+
+		// compute the year limit to show
+		$tmpdate= dol_time_plus_duree(dol_now(), -1*$nbofyears, "y");
 
 		// list the summary of the bills
 		if (! empty($conf->facture->enabled) && $user->rights->facture->lire)
 		{
-			$sql = "SELECT f.paye, f.fk_statut, sum(f.total_ttc) as Mnttot, count(*) as nb";
+			include_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
+			$facturestatic=new Facture($db);
+
+			$sql = "SELECT f.fk_statut, SUM(f.total_ttc) as Mnttot, COUNT(*) as nb";
 			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture as f";
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 			$sql.= ")";
@@ -94,16 +97,56 @@ class box_activity extends ModeleBoxes
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
 			$sql.= " AND f.fk_soc = s.rowid";
-			$sql.= " AND f.datef between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
-			$sql.= " GROUP BY f.paye, f.fk_statut ";
+			$sql.= " AND f.datef >= '".$db->idate($tmpdate)."' AND paye=1";
+			$sql.= " GROUP BY f.fk_statut";
 			$sql.= " ORDER BY f.fk_statut DESC";
 
 			$result = $db->query($sql);
 			if ($result)
 			{
 				$num = $db->num_rows($result);
+				while ($i < $num)
+				{
+					$this->info_box_contents[$i][0] = array('td' => 'align="left" width="16"', 'logo' => 'bill');
+					$objp = $db->fetch_object($result);
+
+					$this->info_box_contents[$i][1] = array('td' => 'align="left"', 'text' => $langs->trans("Bills")."&nbsp;".$facturestatic->LibStatut(1,$objp->fk_statut,0)." ".$objp->annee);
+					$billurl="viewstatut=2&paye=1&year=".$objp->annee;
+
+					$this->info_box_contents[$i][2] = array('td' => 'align="right"',
+					'text' => $objp->nb, 'url' => DOL_URL_ROOT."/compta/facture/liste.php?".$billurl."&mainmenu=accountancy&leftmenu=customers_bills"
+					);
+
+					$this->info_box_contents[$i][3] = array('td' => 'align="right"',
+					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".$langs->getCurrencySymbol($conf->currency)
+					);
+
+					// We add only for the current year
+					if ($objp->annee == date("Y"))
+					{
+						$totalnb += $objp->nb;
+						$totalMnt += $objp->Mnttot;
+					}
+					$this->info_box_contents[$i][4] = array('td' => 'align="right" width="18"', 'text' => $facturestatic->LibStatut(1,$objp->fk_statut,3) );
+					$i++;
+				}
+				if ($num==0) $this->info_box_contents[$i][0] = array('td' => 'align="center"','text'=>$langs->trans("NoRecordedInvoices"));
+			}
+			else dol_print_error($db);
+
+			$sql = "SELECT f.fk_statut, SUM(f.total_ttc) as Mnttot, COUNT(*) as nb";
+			$sql.= " FROM ".MAIN_DB_PREFIX."societe as s,".MAIN_DB_PREFIX."facture as f";
+			$sql.= " WHERE f.entity = ".$conf->entity;
+			$sql.= " AND f.fk_soc = s.rowid";
+			$sql.= " AND paye=0";
+			$sql.= " GROUP BY f.fk_statut";
+			$sql.= " ORDER BY f.fk_statut DESC";
+
+			$result = $db->query($sql);
+			if ($result)
+			{
+				$num = $db->num_rows($result) + $i;
 				$now=dol_now();
-				$i = 0;
 
 				while ($i < $num)
 				{
@@ -112,28 +155,19 @@ class box_activity extends ModeleBoxes
 					$objp = $db->fetch_object($result);
 
 					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
-                    'text' => $langs->trans("Bills")."&nbsp;".$facturestatic->LibStatut($objp->paye,$objp->fk_statut,0));
+                    'text' => $langs->trans("Bills")."&nbsp;".$facturestatic->LibStatut(0,$objp->fk_statut,0));
 
-					if($objp->fk_statut==0)
-					{	// draft
-						$billurl="viewstatut=0&paye=0";
-					} elseif($objp->fk_statut==1)
-					{	// unpaid
-						$billurl="viewstatut=1&paye=0";
-					} else
-					{	// paid for current year
-						$billurl="viewstatut=2&paye=1";
-					}
+					$billurl="viewstatut=".$objp->fk_statut."&paye=0";
 					$this->info_box_contents[$i][2] = array('td' => 'align="right"',
                     'text' => $objp->nb, 'url' => DOL_URL_ROOT."/compta/facture/list.php?".$billurl."&mainmenu=accountancy&leftmenu=customers_bills"
 					);
 					$totalnb += $objp->nb;
 					$this->info_box_contents[$i][3] = array('td' => 'align="right"',
-					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".getCurrencySymbol($conf->currency)
+					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".$langs->getCurrencySymbol($conf->currency)
 					);
 					$totalMnt += $objp->Mnttot;
 					$this->info_box_contents[$i][4] = array('td' => 'align="right" width="18"',
-					'text' => $facturestatic->LibStatut($objp->paye,$objp->fk_statut,3)
+					'text' => $facturestatic->LibStatut(0,$objp->fk_statut,3)
 					);
 					$i++;
 				}
@@ -146,7 +180,10 @@ class box_activity extends ModeleBoxes
 		// list the summary of the orders
 		if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 		{
-			$sql = "SELECT c.fk_statut,c.facture, sum(c.total_ttc) as Mnttot, count(*) as nb";
+			include_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
+			$commandestatic=new Commande($db);
+
+			$sql = "SELECT c.fk_statut, sum(c.total_ttc) as Mnttot, count(*) as nb";
 			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."commande as c";
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 			$sql.= ")";
@@ -154,23 +191,23 @@ class box_activity extends ModeleBoxes
 			$sql.= " AND c.fk_soc = s.rowid";
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
-			$sql.= " AND c.date_commande between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
+			$sql.= " AND c.date_commande >= '".$db->idate($tmpdate)."'";
 			$sql.= " AND c.facture=0";
-			$sql.= " GROUP BY c.fk_statut,c.facture";
+			$sql.= " GROUP BY c.fk_statut";
 			$sql.= " ORDER BY c.fk_statut DESC";
 
 			$result = $db->query($sql);
 
 			if ($result)
 			{
-				$num = $db->num_rows($result)+$i;
+				$num = $db->num_rows($result) + $i;
 				while ($i < $num)
 				{
 					$this->info_box_contents[$i][0] = array('td' => 'align="left" width="16"','logo' => 'object_order');
 
 					$objp = $db->fetch_object($result);
 					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
-					'text' =>$langs->trans("Orders")."&nbsp;".$commandestatic->LibStatut($objp->fk_statut,$objp->facture,0)
+					'text' =>$langs->trans("Orders")."&nbsp;".$commandestatic->LibStatut($objp->fk_statut,0,0)
 					);
 
 					$this->info_box_contents[$i][2] = array('td' => 'align="right"',
@@ -180,20 +217,24 @@ class box_activity extends ModeleBoxes
 					$totalnb += $objp->nb;
 
 					$this->info_box_contents[$i][3] = array('td' => 'align="right"',
-					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".getCurrencySymbol($conf->currency)
+					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".$langs->getCurrencySymbol($conf->currency)
 					);
 					$totalMnt += $objp->Mnttot;
-					$this->info_box_contents[$i][4] = array('td' => 'align="right" width="18"', 'text' => $commandestatic->LibStatut($objp->fk_statut,$objp->facture,3));
+					$this->info_box_contents[$i][4] = array('td' => 'align="right" width="18"', 'text' => $commandestatic->LibStatut($objp->fk_statut,0,3));
 
 					$i++;
 				}
 			}
+			else dol_print_error($db);
 		}
 
 		// list the summary of the propals
 		if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 		{
-			$sql = "SELECT p.fk_statut, sum(p.total) as Mnttot, count(*) as nb";
+			include_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
+			$propalstatic=new Propal($db);
+
+			$sql = "SELECT p.fk_statut, SUM(p.total) as Mnttot, COUNT(*) as nb";
 			$sql.= " FROM (".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."propal as p";
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 			$sql.= ")";
@@ -201,7 +242,7 @@ class box_activity extends ModeleBoxes
 			$sql.= " AND p.fk_soc = s.rowid";
 			if (!$user->rights->societe->client->voir && !$user->societe_id) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 			if($user->societe_id)	$sql.= " AND s.rowid = ".$user->societe_id;
-			$sql.= " AND p.datep between '".$db->idate(dol_get_first_day(date("Y"),1,1))."' AND '".$db->idate(dol_get_last_day(date("Y"),12,1))."'";
+			$sql.= " AND p.datep >= '".$db->idate($tmpdate)."'";
 			$sql.= " AND p.date_cloture IS NULL"; // just unclosed
 			$sql.= " GROUP BY p.fk_statut";
 			$sql.= " ORDER BY p.fk_statut DESC";
@@ -210,7 +251,7 @@ class box_activity extends ModeleBoxes
 
 			if ($result)
 			{
-				$num = $db->num_rows($result)+$i;
+				$num = $db->num_rows($result) + $i;
 				while ($i < $num)
 				{
 					$this->info_box_contents[$i][0] = array('td' => 'align="left" width="16"','logo' => 'object_propal');
@@ -227,7 +268,7 @@ class box_activity extends ModeleBoxes
 					$totalnb += $objp->nb;
 
 					$this->info_box_contents[$i][3] = array('td' => 'align="right"',
-					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".getCurrencySymbol($conf->currency)
+					'text' => dol_trunc(number_format($objp->Mnttot, 0, ',', ' '),40)."&nbsp;".$langs->getCurrencySymbol($conf->currency)
 					);
 					$totalMnt += $objp->Mnttot;
 					$this->info_box_contents[$i][4] = array('td' => 'align="right" width="18"', 'text' => $propalstatic->LibStatut($objp->fk_statut,3));
@@ -235,12 +276,13 @@ class box_activity extends ModeleBoxes
 					$i++;
 				}
 			}
+			else dol_print_error($db);
 		}
 
 		// Add the sum in the bottom of the boxes
 		$this->info_box_contents[$i][1] = array('td' => 'align="left" ', 'text' => $langs->trans("Total")."&nbsp;".$textHead);
 		$this->info_box_contents[$i][2] = array('td' => 'align="right" ', 'text' => number_format($totalnb, 0, ',', ' '));
-		$this->info_box_contents[$i][3] = array('td' => 'align="right" ', 'text' => number_format($totalMnt, 0, ',', ' ')."&nbsp;".getCurrencySymbol($conf->currency));
+		$this->info_box_contents[$i][3] = array('td' => 'align="right" ', 'text' => number_format($totalMnt, 0, ',', ' ')."&nbsp;".$langs->getCurrencySymbol($conf->currency));
 		$this->info_box_contents[$i][4] = array('td' => 'align="right" ', 'text' => "");
 		$this->info_box_contents[$i][5] = array('td' => 'align="right"', 'text' => "");
 	}

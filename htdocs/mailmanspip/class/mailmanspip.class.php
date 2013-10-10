@@ -40,6 +40,11 @@ class MailmanSpip
     var $db;
     var $error;
 
+    var $mladded_ok;
+    var $mladded_ko;
+    var $mlremoved_ok;
+    var $mlremoved_ko;
+
 
     /**
 	 *	Constructor
@@ -176,7 +181,7 @@ class MailmanSpip
                     require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
                     $mdpass=dol_hash($object->pass);
                     $htpass=crypt($object->pass,makesalt());
-                    $query = "INSERT INTO spip_auteurs (nom, email, login, pass, htpass, alea_futur, statut) VALUES(\"".$object->firstname." ".$object->lastname."\",\"".$object->email."\",\"".$object->login."\",\"$mdpass\",\"$htpass\",FLOOR(32000*RAND()),\"1comite\")";
+                    $query = "INSERT INTO spip_auteurs (nom, email, login, pass, htpass, alea_futur, statut) VALUES(\"".dolGetFirstLastname($object->firstname,$object->lastname)."\",\"".$object->email."\",\"".$object->login."\",\"$mdpass\",\"$htpass\",FLOOR(32000*RAND()),\"1comite\")";
 
                     $result = $mydb->query($query);
 
@@ -299,6 +304,9 @@ class MailmanSpip
 
         dol_syslog(get_class($this)."::add_to_mailman");
 
+        $this->mladded_ok=array();
+        $this->mladded_ko=array();
+
         if (! function_exists("curl_init"))
         {
             $langs->load("errors");
@@ -335,13 +343,15 @@ class MailmanSpip
 
 				if ($result === false)
 				{
+					$this->mladded_ko[$list]=$object->email;
 				    return -2;
 				}
+				else $this->mladded_ok[$list]=$object->email;
             }
             return count($lists);
         }
         else
-        {
+       {
             $this->error="ADHERENT_MAILMAN_URL not defined";
             return -1;
         }
@@ -358,6 +368,18 @@ class MailmanSpip
     function del_to_mailman($object,$listes='')
     {
         global $conf,$langs,$user;
+
+        dol_syslog(get_class($this)."::del_to_mailman");
+
+        $this->mlremoved_ok=array();
+        $this->mlremoved_ko=array();
+
+        if (! function_exists("curl_init"))
+        {
+            $langs->load("errors");
+            $this->error=$langs->trans("ErrorFunctionNotAvailableInPHP","curl_init");
+            return -1;
+        }
 
         if (! empty($conf->global->ADHERENT_MAILMAN_UNSUB_URL))
         {
@@ -388,8 +410,10 @@ class MailmanSpip
 
 				if ($result === false)
 				{
+					$this->mlremoved_ko[$list]=$object->email;
 				    return -2;
 				}
+				else $this->mlremoved_ok[$list]=$object->email;
             }
             return count($lists);
         }

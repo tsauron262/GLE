@@ -28,11 +28,13 @@
 
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/admin.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/invoice.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
 
 $langs->load("admin");
 $langs->load("errors");
 $langs->load('other');
+$langs->load('bills');
 
 if (! $user->admin) accessforbidden();
 
@@ -304,6 +306,8 @@ $linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToM
 print_fiche_titre($langs->trans("BillsSetup"),$linkback,'setup');
 print '<br>';
 
+$head = invoice_admin_prepare_head(null);
+dol_fiche_head($head, 'general', $langs->trans("Invoices"), 0, 'invoice');
 
 /*
  *  Numbering module
@@ -315,7 +319,7 @@ print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
 print '<td>'.$langs->trans("Name").'</td>';
 print '<td>'.$langs->trans("Description").'</td>';
-print '<td nowrap="nowrap">'.$langs->trans("Example").'</td>';
+print '<td class="nowrap">'.$langs->trans("Example").'</td>';
 print '<td align="center" width="60">'.$langs->trans("Status").'</td>';
 print '<td align="center" width="16">'.$langs->trans("Infos").'</td>';
 print '</tr>'."\n";
@@ -367,7 +371,7 @@ foreach ($dirmodels as $reldir)
                             print '</td>';
 
                             // Show example of numbering module
-                            print '<td nowrap="nowrap">';
+                            print '<td class="nowrap">';
                             $tmp=$module->getExample();
                             if (preg_match('/^Error/',$tmp)) print '<div class="error">'.$langs->trans($tmp).'</div>';
                             elseif ($tmp=='NotConfigured') print $langs->trans($tmp);

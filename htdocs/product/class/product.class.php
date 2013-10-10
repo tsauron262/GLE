@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2001-2007 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2013 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2006      Andre Cianfarani     <acianfa@free.fr>
  * Copyright (C) 2007-2011 Jean Heimburger      <jean@tiaris.info>
  * Copyright (C) 2010-2011 Juanjo Menent        <jmenent@2byte.es>
@@ -61,6 +61,7 @@ class Product extends CommonObject
 	var $multiprices_ttc=array();
 	var $multiprices_base_type=array();
 	var $multiprices_tva_tx=array();
+	var $multiprices_recuperableonly=array();
 	//! Price by quantity arrays
 	var $price_by_qty;
 	var $prices_by_qty=array();
@@ -225,7 +226,6 @@ class Product extends CommonObject
 
 		if (empty($this->status))    	$this->status = 0;
 		if (empty($this->status_buy))   $this->status_buy = 0;
-		if (empty($this->finished))  	$this->finished = 0;
 
 		$price_ht=0;
 		$price_ttc=0;
@@ -315,7 +315,7 @@ class Product extends CommonObject
 				$sql.= ", ".$this->status;
 				$sql.= ", ".$this->status_buy;
 				$sql.= ", '".$this->canvas."'";
-				$sql.= ", ".$this->finished;
+				$sql.= ", ".((empty($this->finished) || $this->finished < 0)?'null':$this->finished);
 				$sql.= ")";
 
 				dol_syslog(get_class($this)."::Create sql=".$sql);
@@ -417,7 +417,7 @@ class Product extends CommonObject
 	 */
 	function update($id, $user, $notrigger=false, $action='update')
 	{
-		global $langs, $conf;
+		global $langs, $conf, $hookmanager;
 
 		$error=0;
 
@@ -430,7 +430,7 @@ class Product extends CommonObject
 		$this->ref = dol_string_nospecial(trim($this->ref));
 		$this->libelle = trim($this->libelle);
 		$this->description = trim($this->description);
-		$this->note = trim($this->note);
+		$this->note = (isset($this->note)? trim($this->note):"null");
 		$this->weight = price2num($this->weight);
 		$this->weight_units = trim($this->weight_units);
 		$this->length = price2num($this->length);
@@ -445,7 +445,6 @@ class Product extends CommonObject
 		if (empty($this->localtax1_tx))			$this->localtax1_tx = 0;
 		if (empty($this->localtax2_tx))			$this->localtax2_tx = 0;
 
-		if (empty($this->finished))  			$this->finished = 0;
         if (empty($this->country_id))           $this->country_id = 0;
 
 		$this->accountancy_code_buy = trim($this->accountancy_code_buy);
@@ -463,7 +462,7 @@ class Product extends CommonObject
 
 		$sql.= ",tosell = " . $this->status;
 		$sql.= ",tobuy = " . $this->status_buy;
-		$sql.= ",finished = " . ($this->finished<0 ? "null" : $this->finished);
+		$sql.= ",finished = " . ((empty($this->finished) || $this->finished < 0) ? "null" : $this->finished);
 		$sql.= ",weight = " . ($this->weight!='' ? "'".$this->weight."'" : 'null');
 		$sql.= ",weight_units = " . ($this->weight_units!='' ? "'".$this->weight_units."'": 'null');
 		$sql.= ",length = " . ($this->length!='' ? "'".$this->length."'" : 'null');
@@ -499,8 +498,6 @@ class Product extends CommonObject
 			}
 
 			// Actions on extra fields (by external module or standard code)
-			include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
-			$hookmanager=new HookManager($this->db);
 			$hookmanager->initHooks(array('productdao'));
 			$parameters=array('id'=>$this->id);
 			$reshook=$hookmanager->executeHooks('insertExtraFields',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
@@ -587,7 +584,7 @@ class Product extends CommonObject
 
 		$error=0;
 
-		if ($user->rights->produit->supprimer)
+		if (($this->type == 0 && $user->rights->produit->supprimer) || ($this->type == 1 && $user->rights->service->supprimer))
 		{
 			$objectisused = $this->isObjectUsed($id);
 			if (empty($objectisused))
@@ -619,21 +616,10 @@ class Product extends CommonObject
         				if (! $result)
         				{
         				    $error++;
-        					$this->error = $this->db->lasterror();
+        					$this->errors[] = $this->db->lasterror();
         				    dol_syslog(get_class($this).'::delete error '.$this->error, LOG_ERR);
         				}
 				    }
-				}
-
-				// Removed extrafields
-				if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
-				{
-					$result=$this->deleteExtraFields();
-					if ($result < 0)
-					{
-						$error++;
-						dol_syslog(get_class($this).'::delete error '.$this->error, LOG_ERR);
-					}
 				}
 
                 // Delete product
@@ -646,7 +632,7 @@ class Product extends CommonObject
        				if ( ! $resultz )
     				{
     					$error++;
-    					$this->error = $this->db->lasterror();
+    					$this->errors[] = $this->db->lasterror();
     				    dol_syslog(get_class($this).'::delete error '.$this->error, LOG_ERR);
     				}
                 }
@@ -663,10 +649,21 @@ class Product extends CommonObject
                 			$res=@dol_delete_dir_recursive($dir);
                 			if (! $res)
                 			{
-                				$this->error='ErrorFailToDeleteDir';
+                				$this->errors[] = 'ErrorFailToDeleteDir';
                 				$error++;
                 			}
                 		}
+                	}
+                }
+                
+                // Remove extrafields
+                if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
+                {
+                	$result=$this->deleteExtraFields();
+                	if ($result < 0)
+                	{
+                		$error++;
+                		dol_syslog(get_class($this)."::delete error -4 ".$this->error, LOG_ERR);
                 	}
                 }
 
@@ -677,6 +674,11 @@ class Product extends CommonObject
 				}
 				else
 				{
+					foreach($this->errors as $errmsg)
+					{
+						dol_syslog(get_class($this)."::delete ".$errmsg, LOG_ERR);
+						$this->error.=($this->error?', '.$errmsg:$errmsg);
+					}
 					$this->db->rollback();
 					return -$error;
 				}
@@ -821,13 +823,15 @@ class Product extends CommonObject
 	 */
 	function _log_price($user,$level=0)
 	{
+		global $conf;
+
 		$now=dol_now();
 
 		// Add new price
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."product_price(price_level,date_price,fk_product,fk_user_author,price,price_ttc,price_base_type,tosell,tva_tx,recuperableonly,";
-		$sql.= " localtax1_tx, localtax2_tx, price_min,price_min_ttc,price_by_qty) ";
+		$sql.= " localtax1_tx, localtax2_tx, price_min,price_min_ttc,price_by_qty,entity) ";
 		$sql.= " VALUES(".($level?$level:1).", '".$this->db->idate($now)."',".$this->id.",".$user->id.",".$this->price.",".$this->price_ttc.",'".$this->price_base_type."',".$this->status.",".$this->tva_tx.",".$this->tva_npr.",";
-		$sql.= " ".$this->localtax1_tx.",".$this->localtax2_tx.",".$this->price_min.",".$this->price_min_ttc.",".$this->price_by_qty;
+		$sql.= " ".$this->localtax1_tx.",".$this->localtax2_tx.",".$this->price_min.",".$this->price_min_ttc.",".$this->price_by_qty.",".$conf->entity;
 		$sql.= ")";
 
 		dol_syslog(get_class($this)."_log_price sql=".$sql);
@@ -1003,7 +1007,7 @@ class Product extends CommonObject
 			else
 			{
 				$price = price2num($newprice,'MU');
-				$price_ttc = price2num($newprice) * (1 + ($newvat / 100));
+				$price_ttc = ( $newnpr != 1 ) ? price2num($newprice) * (1 + ($newvat / 100)) : $price;
 				$price_ttc = price2num($price_ttc,'MU');
 
 				if ($newminprice!='' || $newminprice==0)
@@ -1059,7 +1063,9 @@ class Product extends CommonObject
 				// Price by quantity
 				$this->price_by_qty = $newpsq;
 
-				$this->_log_price($user,$level);
+				$this->_log_price($user,$level);	// Save price for level into table product_price
+
+				$this->level = $level;				// Store level of price edited for trigger
 
 				// Appel des triggers
 				include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -1193,9 +1199,10 @@ class Product extends CommonObject
 					for ($i=1; $i <= $conf->global->PRODUIT_MULTIPRICES_LIMIT; $i++)
 					{
 						$sql = "SELECT price, price_ttc, price_min, price_min_ttc,";
-						$sql.= " price_base_type, tva_tx, tosell, price_by_qty, rowid";
+						$sql.= " price_base_type, tva_tx, tosell, price_by_qty, rowid, recuperableonly";
 						$sql.= " FROM ".MAIN_DB_PREFIX."product_price";
-						$sql.= " WHERE price_level=".$i;
+						$sql.= " WHERE entity IN (".getEntity('productprice', 1).")";
+						$sql.= " AND price_level=".$i;
 						$sql.= " AND fk_product = '".$this->id."'";
 						$sql.= " ORDER BY date_price DESC";
 						$sql.= " LIMIT 1";
@@ -1210,6 +1217,7 @@ class Product extends CommonObject
 							$this->multiprices_min_ttc[$i]=$result["price_min_ttc"];
 							$this->multiprices_base_type[$i]=$result["price_base_type"];
 							$this->multiprices_tva_tx[$i]=$result["tva_tx"];
+							$this->multiprices_recuperableonly[$i]=$result["recuperableonly"];
 
 							// Price by quantity
 							$this->prices_by_qty[$i]=$result["price_by_qty"];
@@ -1798,8 +1806,16 @@ class Product extends CommonObject
 	 */
 	function add_sousproduit($id_pere, $id_fils,$qty)
 	{
-		$sql = 'DELETE from '.MAIN_DB_PREFIX.'product_association';
-		$sql .= ' WHERE fk_product_pere  = "'.$id_pere.'" AND fk_product_fils = "'.$id_fils.'"';
+		// Clean parameters
+		if (! is_numeric($id_pere)) $id_pere=0;
+		if (! is_numeric($id_fils)) $id_fils=0;
+
+		$result=$this->del_sousproduit($id_pere, $id_fils);
+		if ($result < 0) return $result;
+
+		// Check not already father of id_pere (to avoid father -> child -> father links)
+		$sql = 'SELECT fk_product_pere from '.MAIN_DB_PREFIX.'product_association';
+		$sql .= ' WHERE fk_product_pere  = '.$id_fils.' AND fk_product_fils = '.$id_pere;
 		if (! $this->db->query($sql))
 		{
 			dol_print_error($this->db);
@@ -1807,37 +1823,27 @@ class Product extends CommonObject
 		}
 		else
 		{
-			$sql = 'SELECT fk_product_pere from '.MAIN_DB_PREFIX.'product_association';
-			$sql .= ' WHERE fk_product_pere  = "'.$id_fils.'" AND fk_product_fils = "'.$id_pere.'"';
-			if (! $this->db->query($sql))
+			$result = $this->db->query($sql);
+			if ($result)
 			{
-				dol_print_error($this->db);
-				return -1;
-			}
-			else
-			{
-				$result = $this->db->query($sql);
-				if ($result)
+				$num = $this->db->num_rows($result);
+				if($num > 0)
 				{
-					$num = $this->db->num_rows($result);
-					if($num > 0)
+					$this->error="isFatherOfThis";
+					return -1;
+				}
+				else
+				{
+					$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'product_association(fk_product_pere,fk_product_fils,qty)';
+					$sql .= ' VALUES ('.$id_pere.', '.$id_fils.', '.$qty.')';
+					if (! $this->db->query($sql))
 					{
-						$this->error="isFatherOfThis";
+						dol_print_error($this->db);
 						return -1;
 					}
 					else
 					{
-						$sql = 'INSERT INTO '.MAIN_DB_PREFIX.'product_association(fk_product_pere,fk_product_fils,qty)';
-						$sql .= ' VALUES ("'.$id_pere.'","'.$id_fils.'","'.$qty.'")';
-						if (! $this->db->query($sql))
-						{
-							dol_print_error($this->db);
-							return -1;
-						}
-						else
-						{
-							return 1;
-						}
+						return 1;
 					}
 				}
 			}
@@ -1849,14 +1855,18 @@ class Product extends CommonObject
 	 *
 	 *  @param      int	$fk_parent		Id du produit auquel ne sera plus lie le produit lie
 	 *  @param      int	$fk_child		Id du produit a ne plus lie
-	 *  @return     int			    	< 0 si erreur, > 0 si ok
+	 *  @return     int			    	< 0 if KO, > 0 if OK
 	 */
 	function del_sousproduit($fk_parent, $fk_child)
 	{
-		$sql = "DELETE FROM ".MAIN_DB_PREFIX."product_association";
-		$sql.= " WHERE fk_product_pere  = '".$fk_parent."'";
-		$sql.= " AND fk_product_fils = '".$fk_child."'";
+		if (! is_numeric($fk_parent)) $fk_parent=0;
+		if (! is_numeric($fk_child)) $fk_child=0;
 
+		$sql = "DELETE FROM ".MAIN_DB_PREFIX."product_association";
+		$sql.= " WHERE fk_product_pere  = ".$fk_parent;
+		$sql.= " AND fk_product_fils = ".$fk_child;
+
+		dol_syslog(get_class($this).'::del_sousproduit sql='.$sql);
 		if (! $this->db->query($sql))
 		{
 			dol_print_error($this->db);
@@ -2121,7 +2131,7 @@ class Product extends CommonObject
 	 * 	Define value of this->res
 	 *
 	 *	@param		array	$prod			Products array
-	 *	@param		string	$compl_path		Directory path
+	 *	@param		string	$compl_path		Directory path of parents to add before
 	 *	@param		int		$multiply		Because each sublevel must be multiplicated by parent nb
 	 *	@param		int		$level			Init level
 	 *  @return 	void
@@ -2131,65 +2141,36 @@ class Product extends CommonObject
 		global $conf,$langs;
 
 		$product = new Product($this->db);
-		foreach($prod as $nom_pere => $desc_pere)
+		//var_dump($prod);
+		foreach($prod as $id_product => $desc_pere)	// nom_pere is 0 or id of sub_product
 		{
 			if (is_array($desc_pere))	// If this parent desc is an array, this is an array of childs
 			{
 				$id=(! empty($desc_pere[0]) ? $desc_pere[0] :'');
 				$nb=(! empty($desc_pere[1]) ? $desc_pere[1] :'');
 				$type=(! empty($desc_pere[2]) ? $desc_pere[2] :'');
+				$label=(! empty($desc_pere[3]) ? $desc_pere[3] :'');
+				if ($multiply < 1) $multiply=1;
 
-				if ($multiply)
-				{
-					//print "XXX ".$desc_pere[1]." multiply=".$multiply;
-					$img="";
-					$this->fetch($id);
-					$this->load_stock();
-					if ($this->stock_warehouse[1]->real < $this->seuil_stock_alerte)
-					{
-						$img=img_warning($langs->trans("StockTooLow"));
-					}
-					$this->res[]= array(
-/*								"<tr><td>&nbsp; &nbsp; &nbsp; ->
-                                <a href=\"".DOL_URL_ROOT."/product/fiche.php?id=".$desc_pere[0]."\">".$compl_path.stripslashes($nom_pere)."
-                                </a> (".$desc_pere[1].")</td><td align=\"center\"> ".($desc_pere[1]*$multiply)."</td><td>&nbsp</td><td>&nbsp</td>
-                                <td align=\"center\">".$this->stock_entrepot[1]." ".$img."</td></tr>",
-								$desc_pere[0],							// Id product
-*/								'id'=>$id,					// Id product
-								'nb'=>$nb,					// Nb of units that compose parent product
-								'nb_total'=>$nb*$multiply,	// Nb of units for all nb of product
-								'stock'=>$this->stock_warehouse[1]->real,		// Stock
-								'stock_alert'=>$this->seuil_stock_alerte,	// Stock alert
-								'fullpath' => $compl_path.$nom_pere,	// Label
-								'type'=>$type					// Nb of units that compose parent product
-								);
-				}
-				else
-				{
-					$this->fetch($desc_pere[0]);
-					$this->load_stock();
-					$this->res[]= array(
-/*					$compl_path.$nom_pere." (".$desc_pere[1].")",
-					$desc_pere[0],							// Id product
-*/					'id'=>$id,					// Id product
+				//print "XXX We add id=".$id." - label=".$label." - nb=".$nb." - multiply=".$multiply." fullpath=".$compl_path.$label."\n";
+				$this->fetch($id);
+				$this->load_stock();
+				$this->res[]= array(
+					'id'=>$id,					// Id product
 					'nb'=>$nb,					// Nb of units that compose parent product
-					'nb_total'=>$nb,				// Nb of units for all nb of product
-					'stock'=>$this->stock_warehouse[1]->real,		// Stock
+					'nb_total'=>$nb*$multiply,	// Nb of units for all nb of product
+					'stock'=>$this->stock_warehouse[1]->real,	// Stock
 					'stock_alert'=>$this->seuil_stock_alerte,	// Stock alert
-					'fullpath' => $compl_path.$nom_pere,	// Label
-					'type'=>$type					// Nb of units that compose parent product
-					);
-				}
-			}
-			else if($nom_pere != "0" && $nom_pere != "1")
-			{
-				$this->res[]= array($compl_path.$nom_pere,$desc_pere);
-			}
+					'fullpath' => $compl_path.$label,			// Label
+					'type'=>$type				// Nb of units that compose parent product
+				);
 
-			// Recursive call if child is an array
-			if (is_array($desc_pere[0]))
-			{
-				$this ->fetch_prod_arbo($desc_pere[0], $nom_pere." -> ", $desc_pere[1]*$multiply, $level+1);
+				// Recursive call if child is an array
+				if (is_array($desc_pere['childs']))
+				{
+					//print 'YYY We go down for '.$desc_pere[3]." -> \n";
+					$this ->fetch_prod_arbo($desc_pere['childs'], $compl_path.$desc_pere[3]." -> ", $desc_pere[1]*$multiply, $level+1);
+				}
 			}
 		}
 	}
@@ -2226,11 +2207,12 @@ class Product extends CommonObject
 		$this->res = array();
 		if (isset($this->sousprods) && is_array($this->sousprods))
 		{
-			foreach($this->sousprods as $nom_pere => $desc_pere)
+			foreach($this->sousprods as $prod_name => $desc_product)
 			{
-				if (is_array($desc_pere)) $this->fetch_prod_arbo($desc_pere,"",$multiply);
+				if (is_array($desc_product)) $this->fetch_prod_arbo($desc_product,"",$multiply);
 			}
 		}
+		//var_dump($this->res);
 		return $this->res;
 	}
 
@@ -2291,7 +2273,7 @@ class Product extends CommonObject
 
 
 	/**
-	 *  Return all parent products fo current product
+	 *  Return all direct parent products fo current product
 	 *
 	 *  @return 	array prod
 	 */
@@ -2322,31 +2304,34 @@ class Product extends CommonObject
 	}
 
 	/**
-	 *  Return childs of prodcut with if fk_parent
+	 *  Return childs of product $id
 	 *
-	 * 	@param		int		$fk_parent	Id of product to search childs of
+	 * 	@param		int		$id			Id of product to search childs of
 	 *  @return     array       		Prod
 	 */
-	function getChildsArbo($fk_parent)
+	function getChildsArbo($id)
 	{
 		$sql = "SELECT p.rowid, p.label as label, pa.qty as qty, pa.fk_product_fils as id, p.fk_product_type";
 		$sql.= " FROM ".MAIN_DB_PREFIX."product as p";
 		$sql.= ", ".MAIN_DB_PREFIX."product_association as pa";
 		$sql.= " WHERE p.rowid = pa.fk_product_fils";
-		$sql.= " AND pa.fk_product_pere = ".$fk_parent;
+		$sql.= " AND pa.fk_product_pere = ".$id;
+		$sql.= " AND pa.fk_product_fils != ".$id;	// This should not happens, it is to avoid infinite loop if it happens
 
+		dol_syslog(get_class($this).'::getChildsArbo sql='.$sql);
 		$res  = $this->db->query($sql);
 		if ($res)
 		{
 			$prods = array();
 			while ($rec = $this->db->fetch_array($res))
 			{
+				$prods[$rec['rowid']]= array(0=>$rec['id'],1=>$rec['qty'],2=>$rec['fk_product_type'],3=>$this->db->escape($rec['label']));
 				//$prods[$this->db->escape($rec['label'])]= array(0=>$rec['id'],1=>$rec['qty'],2=>$rec['fk_product_type']);
-				$prods[$this->db->escape($rec['label'])]= array(0=>$rec['id'],1=>$rec['qty']);
+				//$prods[$this->db->escape($rec['label'])]= array(0=>$rec['id'],1=>$rec['qty']);
 				$listofchilds=$this->getChildsArbo($rec['id']);
 				foreach($listofchilds as $keyChild => $valueChild)
 				{
-					$prods[$this->db->escape($rec['label'])][$keyChild] = $valueChild;
+					$prods[$rec['rowid']]['childs'][$keyChild] = $valueChild;
 				}
 			}
 
@@ -2368,14 +2353,14 @@ class Product extends CommonObject
 	function get_sousproduits_arbo()
 	{
 		$parent = $this->getParent();
-		foreach($parent as $key => $value)
+		foreach($parent as $key => $value)		// key=label, value[0]=id
 		{
 			foreach($this->getChildsArbo($value[0]) as $keyChild => $valueChild)
 			{
 				$parent[$key][$keyChild] = $valueChild;
 			}
 		}
-		foreach($parent as $key => $value)
+		foreach($parent as $key => $value)		// key=label, value is array of childs
 		{
 			$this->sousprods[$key] = $value;
 		}
@@ -2409,6 +2394,10 @@ class Product extends CommonObject
         {
 			$lien = '<a href="'.DOL_URL_ROOT.'/product/composition/fiche.php?id='.$this->id.'">';
 			$lienfin='</a>';
+        }
+        else if ($option == 'category')
+        {
+        	$lien = '<a href="'.DOL_URL_ROOT.'/categories/categorie.php?id='.$this->id.'&type=0">';
         }
         else
 		{

@@ -48,9 +48,11 @@ llxHeader("",$langs->trans("ThirdParties"),$helpurl);
 
 print_fiche_titre($transAreaType);
 
-print '<table border="0" width="100%" class="notopnoleftnoright">';
 
-print '<tr><td valign="top" width="30%" class="notopnoleft">';
+//print '<table border="0" width="100%" class="notopnoleftnoright">';
+//print '<tr><td valign="top" width="30%" class="notopnoleft">';
+print '<div class="fichecenter"><div class="fichethirdleft">';
+
 
 /*
  * Search area
@@ -148,7 +150,10 @@ print $total;
 print '</td></tr>';
 print '</table>';
 
-print '</td><td valign="top" width="70%" class="notopnoleftnoright">';
+
+//print '</td><td valign="top" width="70%" class="notopnoleftnoright">';
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
+
 
 /*
  * Last third parties modified
@@ -192,7 +197,7 @@ if ($result)
             $var=!$var;
             print "<tr $bc[$var]>";
             // Name
-            print '<td nowrap="nowrap">';
+            print '<td class="nowrap">';
             $thirdparty_static->id=$objp->rowid;
             $thirdparty_static->name=$objp->name;
             $thirdparty_static->client=$objp->client;
@@ -226,7 +231,7 @@ if ($result)
             print '<td align="right">';
             print dol_print_date($thirdparty_static->datem,'day');
             print "</td>";
-            print '<td align="right" nowrap="nowrap">';
+            print '<td align="right" class="nowrap">';
             print $thirdparty_static->getLibStatut(3);
             print "</td>";
             print "</tr>\n";
@@ -243,10 +248,10 @@ else
     dol_print_error($db);
 }
 
-print '</td></tr></table>';
+//print '</td></tr></table>';
+print '</div></div></div>';
 
 llxFooter();
 
 $db->close();
-
 ?>

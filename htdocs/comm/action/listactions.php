@@ -152,10 +152,10 @@ $sql.= " c.code as acode, c.libelle,";
 $sql.= " ua.login as loginauthor, ua.rowid as useridauthor,";
 $sql.= " ut.login as logintodo, ut.rowid as useridtodo,";
 $sql.= " ud.login as logindone, ud.rowid as useriddone,";
-$sql.= " sp.name, sp.firstname";
-$sql.= " FROM (".MAIN_DB_PREFIX."c_actioncomm as c,";
+$sql.= " sp.lastname, sp.firstname";
+$sql.= " FROM ".MAIN_DB_PREFIX."c_actioncomm as c,";
 $sql.= " ".MAIN_DB_PREFIX.'user as u,';
-$sql.= " ".MAIN_DB_PREFIX."actioncomm as a)";
+$sql.= " ".MAIN_DB_PREFIX."actioncomm as a";
 if (! $user->rights->societe->client->voir && ! $socid) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON a.fk_soc = sc.fk_soc";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON a.fk_soc = s.rowid";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as sp ON a.fk_contact = sp.rowid";
@@ -242,7 +242,7 @@ if ($resql)
 	$i = 0;
 	print '<table class="liste" width="100%">';
 	print '<tr class="liste_titre">';
-	print_liste_field_titre($langs->trans("Action"),$_SERVER["PHP_SELF"],"acode",$param,"","",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("Action"),$_SERVER["PHP_SELF"],"a.label",$param,"","",$sortfield,$sortorder);
 	//print_liste_field_titre($langs->trans("Title"),$_SERVER["PHP_SELF"],"a.label",$param,"","",$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("DateStart"),$_SERVER["PHP_SELF"],"a.datep",$param,'','align="center"',$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("DateEnd"),$_SERVER["PHP_SELF"],"a.datep2",$param,'','align="center"',$sortfield,$sortorder);
@@ -280,7 +280,7 @@ if ($resql)
 		//print dol_trunc($obj->label,12);
 		//print '</td>';
 
-		print '<td align="center" nowrap="nowrap">';
+		print '<td align="center" class="nowrap">';
 		print dol_print_date($db->jdate($obj->dp),"day");
 		$late=0;
 		if ($obj->percent == 0 && $obj->dp && $db->jdate($obj->dp) < ($now - $delay_warning)) $late=1;
@@ -290,7 +290,7 @@ if ($resql)
 		if ($late) print img_warning($langs->trans("Late")).' ';
 		print '</td>';
 
-		print '<td align="center" nowrap="nowrap">';
+		print '<td align="center" class="nowrap">';
 		print dol_print_date($db->jdate($obj->dp2),"day");
 		print '</td>';
 
@@ -310,7 +310,7 @@ if ($resql)
 		print '<td>';
 		if ($obj->fk_contact > 0)
 		{
-			$contactstatic->name=$obj->name;
+			$contactstatic->lastname=$obj->lastname;
 			$contactstatic->firstname=$obj->firstname;
 			$contactstatic->id=$obj->fk_contact;
 			print $contactstatic->getNomUrl(1,'',10);
@@ -358,7 +358,7 @@ if ($resql)
 		print '</td>';
 
 		// Status/Percent
-		print '<td align="right" nowrap="nowrap">'.$actionstatic->LibStatut($obj->percent,6).'</td>';
+		print '<td align="right" class="nowrap">'.$actionstatic->LibStatut($obj->percent,6).'</td>';
 
 		print "</tr>\n";
 		$i++;

@@ -77,7 +77,7 @@ if ( $retour >= 0 )
 {
 	$return=array();
 
-	$sql = "SELECT rowid, name, firstname";
+	$sql = "SELECT rowid, lastname, firstname";
 	$sql.= " FROM ".MAIN_DB_PREFIX."user";
 	$sql.= " WHERE login = '".$username."'";
 	$sql.= " AND entity IN (0,".$conf->entity.")";
@@ -94,8 +94,8 @@ if ( $retour >= 0 )
 
 		$_SESSION['uid'] = $tab['rowid'];
 		$_SESSION['uname'] = $username;
-		$_SESSION['nom'] = $tab['name'];
-		$_SESSION['prenom'] = $tab['firstname'];
+		$_SESSION['lastname'] = $tab['lastname'];
+		$_SESSION['firstname'] = $tab['firstname'];
 		$_SESSION['CASHDESK_ID_THIRDPARTY'] = $thirdpartyid;
         $_SESSION['CASHDESK_ID_WAREHOUSE'] = $warehouseid;
         $_SESSION['CASHDESK_ID_BANKACCOUNT_CASH'] = ($bankid_cash > 0 ? $bankid_cash : '');

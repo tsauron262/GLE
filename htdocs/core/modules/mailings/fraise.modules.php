@@ -82,13 +82,15 @@ class mailing_fraise extends MailingTargets
 	}
 
 
-    /*
-     *		\brief		Return here number of distinct emails returned by your selector.
-     *					For example if this selector is used to extract 500 different
-     *					emails from a text file, this function must return 500.
-     *		\return		int
-     */
-    function getNbOfRecipients()
+    /**
+	 *	Return here number of distinct emails returned by your selector.
+	 *	For example if this selector is used to extract 500 different
+	 *	emails from a text file, this function must return 500.
+	 *
+	 *  @param	string	$sql		Requete sql de comptage
+	 *	@return		int			Nb of recipients
+	 */
+    function getNbOfRecipients($sql='')
     {
         $sql  = "SELECT count(distinct(a.email)) as nb";
         $sql .= " FROM ".MAIN_DB_PREFIX."adherent as a";
@@ -164,10 +166,11 @@ class mailing_fraise extends MailingTargets
 
         // La requete doit retourner: id, email, fk_contact, name, firstname
         $sql = "SELECT a.rowid as id, a.email as email, null as fk_contact, ";
-        $sql.= " a.nom as name, a.prenom as firstname,";
+        $sql.= " a.lastname, a.firstname,";
         $sql.= " a.datefin, a.civilite, a.login, a.societe";	// Other fields
         $sql.= " FROM ".MAIN_DB_PREFIX."adherent as a";
-        $sql.= " WHERE a.email IS NOT NULL";
+        $sql.= " WHERE a.email <> ''";     // Note that null != '' is false
+        $sql.= " AND a.email NOT IN (SELECT email FROM ".MAIN_DB_PREFIX."mailing_cibles WHERE fk_mailing=".$mailing_id.")";
         if (isset($_POST["filter"]) && $_POST["filter"] == '-1') $sql.= " AND a.statut=-1";
         if (isset($_POST["filter"]) && $_POST["filter"] == '1a') $sql.= " AND a.statut=1 AND a.datefin >= '".$this->db->idate($now)."'";
         if (isset($_POST["filter"]) && $_POST["filter"] == '1b') $sql.= " AND a.statut=1 AND (a.datefin IS NULL or a.datefin < '".$this->db->idate($now)."')";
@@ -197,7 +200,7 @@ class mailing_fraise extends MailingTargets
                     $cibles[$j] = array(
                     			'email' => $obj->email,
                     			'fk_contact' => $obj->fk_contact,
-                    			'name' => $obj->name,
+                    			'lastname' => $obj->lastname,
                     			'firstname' => $obj->firstname,
                     			'other' =>
                                 ($langs->transnoentities("Login").'='.$obj->login).';'.

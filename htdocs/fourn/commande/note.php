@@ -39,7 +39,7 @@ $action = GETPOST('action');
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'commande_fournisseur', $id,'');
+$result = restrictedArea($user, 'fournisseur', $id, '', 'commande');
 
 $object = new CommandeFournisseur($db);
 $object->fetch($id, $ref);
@@ -51,12 +51,12 @@ $object->fetch($id, $ref);
 
 if ($action == 'setnote_public' && $user->rights->fournisseur->commande->creer)
 {
-    $result=$object->update_note_public(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES));
+    $result=$object->update_note(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES),'_public');
     if ($result < 0) dol_print_error($db,$object->error);
 }
-elseif ($action == 'setnote' && $user->rights->fournisseur->commande->creer)
+elseif ($action == 'setnote_private' && $user->rights->fournisseur->commande->creer)
 {
-    $result=$object->update_note(dol_html_entity_decode(GETPOST('note'), ENT_QUOTES));
+    $result=$object->update_note(dol_html_entity_decode(GETPOST('note_private'), ENT_QUOTES), '_private');
     if ($result < 0) dol_print_error($db,$object->error);
 }
 

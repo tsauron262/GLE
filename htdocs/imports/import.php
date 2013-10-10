@@ -511,7 +511,7 @@ if ($step == 3 && $datatoimport)
 	print '<td>';
     $text=$objmodelimport->getDriverDescForKey($format);
     print $form->textwithpicto($objmodelimport->getDriverLabelForKey($format),$text);
-    print '</td><td align="right" nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$format.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>';
+    print '</td><td align="right" class="nowrap"><a href="'.DOL_URL_ROOT.'/imports/emptyexample.php?format='.$format.$param.'" target="_blank">'.$langs->trans("DownloadEmptyExample").'</a>';
 
 	print '</td></tr>';
 
@@ -569,7 +569,7 @@ if ($step == 3 && $datatoimport)
 			print '<tr '.$bc[$var].'>';
 			print '<td width="16">'.img_mime($file).'</td>';
 			print '<td>';
-    		print '<a href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=3'.$param.'" target="_blank">';
+    		print '<a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=3'.$param.'" target="_blank">';
     		print $file;
     		print '</a>';
 			print '</td>';
@@ -742,7 +742,7 @@ if ($step == 4 && $datatoimport)
 	print '<td>';
 	$modulepart='import';
 	$relativepath=GETPOST('filetoimport');
-    print '<a href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
+    print '<a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
     print $filetoimport;
     print '</a>';
 	print '</td></tr>';
@@ -847,7 +847,7 @@ if ($step == 4 && $datatoimport)
 		$entityicon=$entitytoicon[$entity]?$entitytoicon[$entity]:$entity;
 		$entitylang=$entitytolang[$entity]?$entitytolang[$entity]:$entity;
 
-		print '<td nowrap="nowrap" style="font-weight: normal">=>'.img_object('',$entityicon).' '.$langs->trans($entitylang).'</td>';
+		print '<td class="nowrap" style="font-weight: normal">=>'.img_object('',$entityicon).' '.$langs->trans($entitylang).'</td>';
 		print '<td style="font-weight: normal">';
 		$newlabel=preg_replace('/\*$/','',$label);
 		$text=$langs->trans($newlabel);
@@ -1017,7 +1017,7 @@ if ($step == 4 && $datatoimport)
 		}
 		else
 		{
-			print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("SomeMandatoryFieldHaveNoSource")).'">'.$langs->trans("NextStep").'</a>';
+			print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("SomeMandatoryFieldHaveNoSource")).'">'.$langs->trans("NextStep").'</a>';
 		}
 	}
 
@@ -1172,7 +1172,7 @@ if ($step == 5 && $datatoimport)
 	print '<td>';
 	$modulepart='import';
 	$relativepath=GETPOST('filetoimport');
-    print '<a href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
+    print '<a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
     print $filetoimport;
     print '</a>';
     print '</td></tr>';
@@ -1281,7 +1281,7 @@ if ($step == 5 && $datatoimport)
         }
         else
         {
-            print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->trans("NotEnoughPermissions")).'">'.$langs->trans("RunSimulateImportFile").'</a>';
+            print '<a class="butActionRefused" href="#" title="'.dol_escape_htmltag($langs->transnoentitiesnoconv("NotEnoughPermissions")).'">'.$langs->trans("RunSimulateImportFile").'</a>';
         }
         print '</center>';
     }
@@ -1307,13 +1307,19 @@ if ($step == 5 && $datatoimport)
         $result=$obj->import_open_file($pathfile,$langs);
         if ($result > 0)
         {
-            $sourcelinenb=0;
+            $sourcelinenb=0; $endoffile=0;
             // Loop on each input file record
-            while ($sourcelinenb < $nboflines)
+            while ($sourcelinenb < $nboflines && ! $endoffile)
             {
                 $sourcelinenb++;
                 // Read line and stor it into $arrayrecord
                 $arrayrecord=$obj->import_read_record();
+                if ($arrayrecord === false)
+                {
+					$arrayofwarnings[$sourcelinenb][0]=array('lib'=>'File has '.$nboflines.' lines. However we reach end of file after record '.$sourcelinenb.'. This may occurs when some records are split onto several lines.','type'=>'EOF_RECORD_ON_SEVERAL_LINES');
+                	$endoffile++;
+                	continue;
+                }
                 if ($excludefirstline && $sourcelinenb == 1) continue;
 
                 //
@@ -1506,7 +1512,7 @@ if ($step == 6 && $datatoimport)
 	print '<td>';
 	$modulepart='import';
     $relativepath=GETPOST('filetoimport');
-    print '<a href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
+    print '<a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?modulepart='.$modulepart.'&file='.urlencode($relativepath).'&step=4'.$param.'" target="_blank">';
     print $filetoimport;
     print '</a>';
 	print '</td></tr>';
@@ -1615,11 +1621,17 @@ if ($step == 6 && $datatoimport)
 	$result=$obj->import_open_file($pathfile,$langs);
 	if ($result > 0)
 	{
-		$sourcelinenb=0;
-		while ($sourcelinenb < $nboflines)
+		$sourcelinenb=0; $endoffile=0;
+		while ($sourcelinenb < $nboflines && ! $endoffile)
 		{
 			$sourcelinenb++;
 			$arrayrecord=$obj->import_read_record();
+			if ($arrayrecord === false)
+			{
+				$arrayofwarnings[$sourcelinenb][0]=array('lib'=>'File has '.$nboflines.' lines. However we reach end of file after record '.$sourcelinenb.'. This may occurs when some records are split onto several lines.','type'=>'EOF_RECORD_ON_SEVERAL_LINES');
+				$endoffile++;
+				continue;
+			}
 			if ($excludefirstline && $sourcelinenb == 1) continue;
 
 			$result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);

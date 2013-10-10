@@ -37,11 +37,17 @@ $socid = GETPOST('socid','int');
 if ($user->societe_id) $socid=$user->societe_id;
 $result = restrictedArea($user, 'societe', $socid, '&societe');
 
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('agendathirdparty'));
+
 
 /*
  *	Actions
  */
 
+$parameters=array('id'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+$error=$hookmanager->error; $errors=array_merge($errors, (array) $hookmanager->errors);
 
 
 
@@ -113,30 +119,31 @@ if ($socid)
 	print "</td></tr>";
 
 	// Zip / Town
-	print '<tr><td width="25%">'.$langs->trans('Zip').'</td><td width="25%">'.$soc->cp."</td>";
-	print '<td width="25%">'.$langs->trans('Town').'</td><td width="25%">'.$soc->ville."</td></tr>";
+	print '<tr><td width="25%">'.$langs->trans('Zip').'</td><td width="25%">'.$soc->zip."</td>";
+	print '<td width="25%">'.$langs->trans('Town').'</td><td width="25%">'.$soc->town."</td></tr>";
 
 	// Country
-	if ($soc->pays) {
+	if ($soc->country) {
 		print '<tr><td>'.$langs->trans('Country').'</td><td colspan="3">';
 		$img=picto_from_langcode($soc->country_code);
 		print ($img?$img.' ':'');
-		print $soc->pays;
+		print $soc->country;
 		print '</td></tr>';
 	}
 
-	print '<tr><td>'.$langs->trans('Phone').'</td><td>'.dol_print_phone($soc->tel,$soc->country_code,0,$soc->id,'AC_TEL').'</td>';
-	print '<td>'.$langs->trans('Fax').'</td><td>'.dol_print_phone($soc->fax,$soc->country_code,0,$soc->id,'AC_FAX').'</td></tr>';
-
 	// EMail
-	print '<tr><td>'.$langs->trans('EMail').'</td><td>';
+	print '<tr><td>'.$langs->trans('EMail').'</td><td colspan="3">';
 	print dol_print_email($soc->email,0,$soc->id,'AC_EMAIL');
-	print '</td>';
+	print '</td></tr>';
 
 	// Web
-	print '<td>'.$langs->trans('Web').'</td><td>';
+	print '<tr><td>'.$langs->trans('Web').'</td><td colspan="3">';
 	print dol_print_url($soc->url);
 	print '</td></tr>';
+
+	// Phone / Fax
+	print '<tr><td>'.$langs->trans('Phone').'</td><td>'.dol_print_phone($soc->tel,$soc->country_code,0,$soc->id,'AC_TEL').'</td>';
+	print '<td>'.$langs->trans('Fax').'</td><td>'.dol_print_phone($soc->fax,$soc->country_code,0,$soc->id,'AC_FAX').'</td></tr>';
 
 	print '</table>';
 

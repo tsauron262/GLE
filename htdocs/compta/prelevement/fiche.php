@@ -23,16 +23,19 @@
  *	\brief      Fiche prelevement
  */
 
-require '../bank/pre.inc.php';
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/prelevement.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/compta/prelevement/class/bonprelevement.class.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
+
+$langs->load("banks");
+$langs->load("categories");
 
 if (!$user->rights->prelevement->bons->lire)
 accessforbidden();
 
 $langs->load("bills");
 $langs->load("withdrawals");
-$langs->load("categories");
 
 
 // Security check
@@ -188,7 +191,7 @@ if ($id > 0)
 	print '<table class="border" width="100%"><tr><td width="20%">';
 	print $langs->trans("WithdrawalFile").'</td><td>';
 	$relativepath = 'receipts/'.$bon->ref;
-	print '<a href="'.DOL_URL_ROOT.'/document.php?type=text/plain&amp;modulepart=prelevement&amp;file='.urlencode($relativepath).'">'.$relativepath.'</a>';
+	print '<a data-ajax="false" href="'.DOL_URL_ROOT.'/document.php?type=text/plain&amp;modulepart=prelevement&amp;file='.urlencode($relativepath).'">'.$relativepath.'</a>';
 	print '</td></tr></table>';
 
 	dol_fiche_end();

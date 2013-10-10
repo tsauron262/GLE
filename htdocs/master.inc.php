@@ -34,6 +34,7 @@
 require_once 'filefunc.inc.php';	// May have been already require by main.inc.php. But may not by scripts.
 
 
+
 /*
  * Create $conf object
  */
@@ -75,6 +76,7 @@ if (! empty($dolibarr_main_document_root_alt))
 }
 
 // Set properties specific to multicompany
+// TODO Multicompany Remove this. Useless. Var should be read when required.
 $conf->multicompany->transverse_mode = empty($multicompany_transverse_mode)?'':$multicompany_transverse_mode;		// Force Multi-Company transverse mode
 $conf->multicompany->force_entity = empty($multicompany_force_entity)?'':(int) $multicompany_force_entity;			// Force entity in login page
 
@@ -141,6 +143,10 @@ if (! defined('NOREQUIREDB'))
 	{
 		$conf->entity = DOLENTITY;
 	}
+	else if (!empty($_COOKIE['DOLENTITY']))							// For other application with MultiCompany module
+	{
+		$conf->entity = $_COOKIE['DOLENTITY'];
+	}
 	else if (! empty($conf->multicompany->force_entity) && is_int($conf->multicompany->force_entity)) // To force entity in login page
 	{
 		$conf->entity = $conf->multicompany->force_entity;
@@ -186,26 +192,31 @@ if (! empty($conf->global->MAIN_ONLY_LOGIN_ALLOWED))
 	}
 }
 
-/*
- * Create object $mysoc (A thirdparty object that contains properties of companies managed by Dolibarr.
- */
+// Create object $mysoc (A thirdparty object that contains properties of companies managed by Dolibarr.
 if (! defined('NOREQUIREDB') && ! defined('NOREQUIRESOC'))
 {
 	require_once DOL_DOCUMENT_ROOT .'/societe/class/societe.class.php';
 
 	$mysoc=new Societe($db);
-	$mysoc->getMysoc($conf);
+	$mysoc->setMysoc($conf);
 
 	// For some countries, we need to invert our address with customer address
 	if ($mysoc->country_code == 'DE' && ! isset($conf->global->MAIN_INVERT_SENDER_RECIPIENT)) $conf->global->MAIN_INVERT_SENDER_RECIPIENT=1;
 }
 
 
-// Set default language (must be after the setValues of $conf)
+// Set default language (must be after the setValues setting global $conf->global->MAIN_LANG_DEFAULT. Page main.inc.php will overwrite langs->defaultlang with user value later)
 if (! defined('NOREQUIRETRAN'))
 {
-	$langs->setDefaultLang((! empty($conf->global->MAIN_LANG_DEFAULT)?$conf->global->MAIN_LANG_DEFAULT:''));
+    $langcode=(GETPOST('lang')?GETPOST('lang','alpha',1):(empty($conf->global->MAIN_LANG_DEFAULT)?'auto':$conf->global->MAIN_LANG_DEFAULT));
+	$langs->setDefaultLang($langcode);
 }
+
+
+// Create the global $hookmanager object
+include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
+$hookmanager=new HookManager($db);
+
 
 if (! defined('MAIN_LABEL_MENTION_NPR') ) define('MAIN_LABEL_MENTION_NPR','NPR');
 

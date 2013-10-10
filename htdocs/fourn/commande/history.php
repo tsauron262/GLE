@@ -38,7 +38,7 @@ $ref=GETPOST('ref','alpha');
 // Security check
 $socid='';
 if (! empty($user->societe_id)) $socid=$user->societe_id;
-$result = restrictedArea($user, 'commande_fournisseur', $id,'');
+$result = restrictedArea($user, 'fournisseur', $id, '', 'commande');
 
 
 /*
@@ -133,7 +133,7 @@ if ($id > 0 || ! empty($ref))
 		print '<td class="liste_titre" align="left">'.$langs->trans("Comment").'</td>';
 		print '</tr>';
 
-		$sql = "SELECT l.fk_statut, l.datelog as dl, l.comment, u.rowid, u.login, u.firstname, u.name";
+		$sql = "SELECT l.fk_statut, l.datelog as dl, l.comment, u.rowid, u.login, u.firstname, u.lastname";
 		$sql.= " FROM ".MAIN_DB_PREFIX."commande_fournisseur_log as l";
 		$sql.= " , ".MAIN_DB_PREFIX."user as u ";
 		$sql.= " WHERE l.fk_commande = ".$commande->id;
@@ -157,14 +157,14 @@ if ($id > 0 || ! empty($ref))
 				print '<td width="20%">'.dol_print_date($db->jdate($obj->dl),"dayhour")."</td>\n";
 
 				// Statut
-				print '<td nowrap="nowrap">'.$commande->LibStatut($obj->fk_statut,4)."</td>\n";
+				print '<td class="nowrap">'.$commande->LibStatut($obj->fk_statut,4)."</td>\n";
 
 				// User
 				print '<td align="center"><a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
 				print img_object($langs->trans("ShowUser"),'user').' '.$obj->login.'</a></td>';
 
 				// Comment
-				print '<td nowrap="nowrap" title="'.dol_escape_htmltag($obj->comment).'">'.dol_trunc($obj->comment,48)."</td>\n";
+				print '<td class="nowrap" title="'.dol_escape_htmltag($obj->comment).'">'.dol_trunc($obj->comment,48)."</td>\n";
 
 				print '</tr>';
 

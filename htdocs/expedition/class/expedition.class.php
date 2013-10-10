@@ -4,6 +4,7 @@
  * Copyright (C) 2007		Franky Van Liedekerke	<franky.van.liedekerke@telenet.be>
  * Copyright (C) 2006-2012	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2011-2012	Juanjo Menent			<jmenent@2byte.es>
+ * Copyright (C) 2013      Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,12 +52,14 @@ class Expedition extends CommonObject
 	var $origin;
 	var $origin_id;
 	var $lines=array();
-	var $expedition_method_id; // deprecated
 	var $shipping_method_id;
 	var $tracking_number;
 	var $tracking_url;
 	var $statut;
 	var $billed;
+	var $note_public;
+	var $note_private;
+	var $model_pdf;
 
 	var $trueWeight;
 	var $weight_units;
@@ -80,6 +83,8 @@ class Expedition extends CommonObject
 	var $total_tva;			// Total VAT
 	var $total_localtax1;   // Total Local tax 1
 	var $total_localtax2;   // Total Local tax 2
+
+	var $listmeths;			// List of carriers
 
 
 	/**
@@ -159,6 +164,8 @@ class Expedition extends CommonObject
 
 		$now=dol_now();
 
+		if (empty($this->model_pdf)) $this->model_pdf=$conf->global->EXPEDITION_ADDON_PDF;
+
 		require_once DOL_DOCUMENT_ROOT .'/product/stock/class/mouvementstock.class.php';
 		$error = 0;
 
@@ -182,7 +189,7 @@ class Expedition extends CommonObject
 		$sql.= ", date_delivery";
 		$sql.= ", fk_soc";
 		$sql.= ", fk_address";
-		$sql.= ", fk_expedition_methode";
+		$sql.= ", fk_shipping_method";
 		$sql.= ", tracking_number";
 		$sql.= ", weight";
 		$sql.= ", size";
@@ -190,6 +197,9 @@ class Expedition extends CommonObject
 		$sql.= ", height";
 		$sql.= ", weight_units";
 		$sql.= ", size_units";
+		$sql.= ", note_private";
+		$sql.= ", note_public";
+		$sql.= ", model_pdf";
 		$sql.= ") VALUES (";
 		$sql.= "'(PROV)'";
 		$sql.= ", ".$conf->entity;
@@ -201,7 +211,7 @@ class Expedition extends CommonObject
 		$sql.= ", ".($this->date_delivery>0?"'".$this->db->idate($this->date_delivery)."'":"null");
 		$sql.= ", ".$this->socid;
 		$sql.= ", ".($this->fk_delivery_address>0?$this->fk_delivery_address:"null");
-		$sql.= ", ".($this->expedition_method_id>0?$this->expedition_method_id:"null");
+		$sql.= ", ".($this->shipping_method_id>0?$this->shipping_method_id:"null");
 		$sql.= ", '".$this->db->escape($this->tracking_number)."'";
 		$sql.= ", ".$this->weight;
 		$sql.= ", ".$this->sizeS;	// TODO Should use this->trueDepth
@@ -209,8 +219,12 @@ class Expedition extends CommonObject
 		$sql.= ", ".$this->sizeH;	// TODO Should use this->trueHeight
 		$sql.= ", ".$this->weight_units;
 		$sql.= ", ".$this->size_units;
+		$sql.= ", ".(!empty($this->note_private)?"'".$this->db->escape($this->note_private)."'":"null");
+		$sql.= ", ".(!empty($this->note_public)?"'".$this->db->escape($this->note_public)."'":"null");
+		$sql.= ", ".(!empty($this->model_pdf)?"'".$this->db->escape($this->model_pdf)."'":"null");
 		$sql.= ")";
 
+		dol_syslog(get_class($this)."::create sql=".$sql, LOG_DEBUG);
 		$resql=$this->db->query($sql);
 		if ($resql)
 		{
@@ -310,6 +324,7 @@ class Expedition extends CommonObject
 		$sql.= ", ".$qty;
 		$sql.= ")";
 
+		dol_syslog(get_class($this)."::create_line sql=".$sql, LOG_DEBUG);
 		if (! $this->db->query($sql))
 		{
 			$error++;
@@ -338,8 +353,9 @@ class Expedition extends CommonObject
 		$sql = "SELECT e.rowid, e.ref, e.fk_soc as socid, e.date_creation, e.ref_customer, e.ref_ext, e.ref_int, e.fk_user_author, e.fk_statut";
 		$sql.= ", e.weight, e.weight_units, e.size, e.size_units, e.width, e.height";
 		$sql.= ", e.date_expedition as date_expedition, e.model_pdf, e.fk_address, e.date_delivery";
-		$sql.= ", e.fk_expedition_methode, e.tracking_number";
+		$sql.= ", e.fk_shipping_method, e.tracking_number";
 		$sql.= ", el.fk_source as origin_id, el.sourcetype as origin";
+		$sql.= ", e.note_private, e.note_public";
 		$sql.= " FROM ".MAIN_DB_PREFIX."expedition as e";
 		$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."element_element as el ON el.fk_target = e.rowid AND el.targettype = '".$this->element."'";
 		$sql.= " WHERE e.entity = ".$conf->entity;
@@ -371,8 +387,7 @@ class Expedition extends CommonObject
 				$this->date_delivery        = $this->db->jdate($obj->date_delivery);	// Date planed
 				$this->fk_delivery_address  = $obj->fk_address;
 				$this->modelpdf             = $obj->model_pdf;
-				$this->expedition_method_id = $obj->fk_expedition_methode; // TODO deprecated
-				$this->shipping_method_id	= $obj->fk_expedition_methode;
+				$this->shipping_method_id	= $obj->fk_shipping_method;
 				$this->tracking_number      = $obj->tracking_number;
 				$this->origin               = ($obj->origin?$obj->origin:'commande'); // For compatibility
 				$this->origin_id            = $obj->origin_id;
@@ -388,6 +403,9 @@ class Expedition extends CommonObject
 				$this->trueDepth            = $obj->size;
 				$this->depth_units          = $obj->size_units;
 
+				$this->note_public          = $obj->note_public;
+				$this->note_private         = $obj->note_private;
+
 				// A denormalized value
 				$this->trueSize           	= $obj->size."x".$obj->width."x".$obj->height;
 				$this->size_units           = $obj->size_units;
@@ -401,6 +419,11 @@ class Expedition extends CommonObject
 
 				// Tracking url
 				$this->GetUrlTrackingStatus($obj->tracking_number);
+
+				/*
+				 * Thirparty
+				 */
+				$result=$this->fetch_thirdparty();
 
 				/*
 				 * Lines
@@ -675,8 +698,8 @@ class Expedition extends CommonObject
 		if (isset($this->socid)) $this->socid=trim($this->socid);
 		if (isset($this->fk_user_author)) $this->fk_user_author=trim($this->fk_user_author);
 		if (isset($this->fk_user_valid)) $this->fk_user_valid=trim($this->fk_user_valid);
-		if (isset($this->fk_adresse_livraison)) $this->fk_adresse_livraison=trim($this->fk_adresse_livraison);
-		if (isset($this->expedition_method_id)) $this->expedition_method_id=trim($this->expedition_method_id);
+		if (isset($this->fk_delivery_address)) $this->fk_delivery_address=trim($this->fk_delivery_address);
+		if (isset($this->shipping_method_id)) $this->shipping_method_id=trim($this->shipping_method_id);
 		if (isset($this->tracking_number)) $this->tracking_number=trim($this->tracking_number);
 		if (isset($this->statut)) $this->statut=trim($this->statut);
 		if (isset($this->trueDepth)) $this->trueDepth=trim($this->trueDepth);
@@ -685,7 +708,8 @@ class Expedition extends CommonObject
 		if (isset($this->size_units)) $this->size_units=trim($this->size_units);
 		if (isset($this->weight_units)) $this->weight_units=trim($this->weight_units);
 		if (isset($this->trueWeight)) $this->weight=trim($this->trueWeight);
-		if (isset($this->note)) $this->note=trim($this->note);
+		if (isset($this->note_private)) $this->note=trim($this->note_private);
+		if (isset($this->note_public)) $this->note=trim($this->note_public);
 		if (isset($this->model_pdf)) $this->model_pdf=trim($this->model_pdf);
 
 
@@ -706,8 +730,8 @@ class Expedition extends CommonObject
 		$sql.= " fk_user_valid=".(isset($this->fk_user_valid)?$this->fk_user_valid:"null").",";
 		$sql.= " date_expedition=".(dol_strlen($this->date_expedition)!=0 ? "'".$this->db->idate($this->date_expedition)."'" : 'null').",";
 		$sql.= " date_delivery=".(dol_strlen($this->date_delivery)!=0 ? "'".$this->db->idate($this->date_delivery)."'" : 'null').",";
-		$sql.= " fk_address=".(isset($this->fk_adresse_livraison)?$this->fk_adresse_livraison:"null").",";
-		$sql.= " fk_expedition_methode=".((isset($this->expedition_method_id) && $this->expedition_method_id > 0)?$this->expedition_method_id:"null").",";
+		$sql.= " fk_address=".(isset($this->fk_delivery_address)?$this->fk_delivery_address:"null").",";
+		$sql.= " fk_shipping_method=".((isset($this->shipping_method_id) && $this->shipping_method_id > 0)?$this->shipping_method_id:"null").",";
 		$sql.= " tracking_number=".(isset($this->tracking_number)?"'".$this->db->escape($this->tracking_number)."'":"null").",";
 		$sql.= " fk_statut=".(isset($this->statut)?$this->statut:"null").",";
 		$sql.= " height=".(($this->trueHeight != '')?$this->trueHeight:"null").",";
@@ -716,7 +740,8 @@ class Expedition extends CommonObject
 		$sql.= " size=".(($this->trueDepth != '')?$this->trueDepth:"null").",";
 		$sql.= " weight_units=".(isset($this->weight_units)?$this->weight_units:"null").",";
 		$sql.= " weight=".(($this->trueWeight != '')?$this->trueWeight:"null").",";
-		$sql.= " note=".(isset($this->note)?"'".$this->db->escape($this->note)."'":"null").",";
+		$sql.= " note_private=".(isset($this->note_private)?"'".$this->db->escape($this->note_private)."'":"null").",";
+		$sql.= " note_public=".(isset($this->note_public)?"'".$this->db->escape($this->note_public)."'":"null").",";
 		$sql.= " model_pdf=".(isset($this->model_pdf)?"'".$this->db->escape($this->model_pdf)."'":"null").",";
 		$sql.= " entity=".$conf->entity;
 
@@ -909,8 +934,8 @@ class Expedition extends CommonObject
 				$line->volume         	= $obj->volume;
 				$line->volume_units   	= $obj->volume_units;
 
-				//Invoicing
-				$line->desc				= $obj->product_label;
+				// For invoicing
+				$line->desc	         	= $obj->description;		// We need ->desc because some code into CommonObject use desc (property defined for other elements)
 				$line->qty 				= $obj->qty_shipped;
 				$line->total_ht			= $obj->total_ht;
 				$line->total_localtax1 	= $obj->total_localtax1;
@@ -1089,6 +1114,9 @@ $info_bits = '';
         $this->origin_id            = 1;
         $this->origin               = 'commande';
 
+        $this->note_private			= 'Private note';
+        $this->note_public			= 'Public note';
+
 		$nbp = 5;
 		$xnbp = 0;
 		while ($xnbp < $nbp)
@@ -1132,7 +1160,7 @@ $info_bits = '';
 			else
 			{
 				$this->error=$this->db->error();
-				dol_syslog("Commande::set_date_livraison ".$this->error,LOG_ERR);
+				dol_syslog(get_class($this)."::set_date_livraison ".$this->error,LOG_ERR);
 				return -1;
 			}
 		}
@@ -1168,6 +1196,100 @@ $info_bits = '';
 		}
 	}
 
+    /**
+     *  Fetch all deliveries method and return an array. Load array this->listmeths.
+     *
+     *  @param  id      $id     only this carrier, all if none
+     *  @return void
+     */
+    function list_delivery_methods($id='')
+    {
+        global $langs;
+
+        $this->listmeths = array();
+        $i=0;
+
+        $sql = "SELECT em.rowid, em.code, em.libelle, em.description, em.tracking, em.active";
+        $sql.= " FROM ".MAIN_DB_PREFIX."c_shipment_mode as em";
+        if ($id!='') $sql.= " WHERE em.rowid=".$id;
+
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            while ($obj = $this->db->fetch_object($resql))
+            {
+                $this->listmeths[$i]['rowid'] = $obj->rowid;
+                $this->listmeths[$i]['code'] = $obj->code;
+                $label=$langs->trans('SendingMethod'.$obj->code);
+                $this->listmeths[$i]['libelle'] = ($label != 'SendingMethod'.$obj->code?$label:$obj->libelle);
+                $this->listmeths[$i]['description'] = $obj->description;
+                $this->listmeths[$i]['tracking'] = $obj->tracking;
+                $this->listmeths[$i]['active'] = $obj->active;
+                $i++;
+            }
+        }
+    }
+
+    /**
+     *  Update/create delivery method.
+     *
+     *  @param	string      $id     id method to activate
+     *
+     *  @return void
+     */
+    function update_delivery_method($id='')
+    {
+        if ($id=='')
+        {
+            $sql = "INSERT INTO ".MAIN_DB_PREFIX."c_shipment_mode (code, libelle, description, tracking)";
+            $sql.=" VALUES ('".$this->update['code']."','".$this->update['libelle']."','".$this->update['description']."','".$this->update['tracking']."')";
+            $resql = $this->db->query($sql);
+        }
+        else
+        {
+            $sql = "UPDATE ".MAIN_DB_PREFIX."c_shipment_mode SET";
+            $sql.= " code='".$this->update['code']."'";
+            $sql.= ",libelle='".$this->update['libelle']."'";
+            $sql.= ",description='".$this->update['description']."'";
+            $sql.= ",tracking='".$this->update['tracking']."'";
+            $sql.= " WHERE rowid=".$id;
+            $resql = $this->db->query($sql);
+        }
+        if ($resql < 0) dol_print_error($this->db,'');
+    }
+
+    /**
+     *  Activate delivery method.
+     *
+     *  @param      id      $id     id method to activate
+     *
+     *  @return void
+     */
+    function activ_delivery_method($id)
+    {
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.'c_shipment_mode SET active=1';
+        $sql.= ' WHERE rowid='.$id;
+
+        $resql = $this->db->query($sql);
+
+    }
+
+    /**
+     *  DesActivate delivery method.
+     *
+     *  @param      id      $id     id method to desactivate
+     *
+     *  @return void
+     */
+    function disable_delivery_method($id)
+    {
+        $sql = 'UPDATE '.MAIN_DB_PREFIX.'c_shipment_mode SET active=0';
+        $sql.= ' WHERE rowid='.$id;
+
+        $resql = $this->db->query($sql);
+
+    }
+
 	/**
 	 * Get tracking url status
 	 *
@@ -1176,44 +1298,26 @@ $info_bits = '';
 	 */
 	function GetUrlTrackingStatus($value='')
 	{
-		$code='';
-
-		if (! empty($this->expedition_method_id))
+		if (! empty($this->shipping_method_id))
 		{
-			$sql = "SELECT em.code";
+			$sql = "SELECT em.code, em.tracking";
 			$sql.= " FROM ".MAIN_DB_PREFIX."c_shipment_mode as em";
-			$sql.= " WHERE em.rowid = ".$this->expedition_method_id;
+			$sql.= " WHERE em.rowid = ".$this->shipping_method_id;
 
 			$resql = $this->db->query($sql);
 			if ($resql)
 			{
 				if ($obj = $this->db->fetch_object($resql))
 				{
-					$code = $obj->code;
+					$tracking = $obj->tracking;
 				}
 			}
 		}
 
-		if ($code)
+		if (!empty($tracking) && !empty($value))
 		{
-			$classname = "methode_expedition_".strtolower($code);
-
-			$url='';
-			if (file_exists(DOL_DOCUMENT_ROOT."/core/modules/expedition/methode_expedition_".strtolower($code).".modules.php") && ! empty($this->tracking_number))
-			{
-				require_once DOL_DOCUMENT_ROOT."/core/modules/expedition/methode_expedition_".strtolower($code).'.modules.php';
-				$shipmethod = new $classname();
-				$url = $shipmethod->provider_url_status($this->tracking_number);
-			}
-
-			if ($url)
-			{
-				$this->tracking_url = sprintf('<a target="_blank" href="%s">'.($value?$value:'url').'</a>',$url,$url);
-			}
-			else
-			{
-				$this->tracking_url = $value;
-			}
+			$url = str_replace('{TRACKID}', $value, $tracking);
+			$this->tracking_url = sprintf('<a target="_blank" href="%s">'.($value?$value:'url').'</a>',$url,$url);
 		}
 		else
 		{

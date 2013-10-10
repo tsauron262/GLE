@@ -33,6 +33,8 @@ date_refuse    DATETIME DEFAULT NULL,
 fk_user_refuse integer DEFAULT NULL,
 date_cancel    DATETIME DEFAULT NULL,
 fk_user_cancel integer DEFAULT NULL,
-detail_refuse  varchar( 250 ) DEFAULT NULL
+detail_refuse  varchar( 250 ) DEFAULT NULL,
+note_private   text,
+note_public    text
 ) 
 ENGINE=innodb;

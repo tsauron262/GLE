@@ -2,6 +2,7 @@
 /* Copyright (C) 2005      Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2005-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2013      Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +66,7 @@ class pdf_expedition_merou extends ModelePdfExpedition
 
 		// Recupere emmetteur
 		$this->emetteur=$mysoc;
-		if (! $this->emetteur->pays_code) $this->emetteur->pays_code=substr($langs->defaultlang,-2);    // By default if not defined
+		if (! $this->emetteur->country_code) $this->emetteur->country_code=substr($langs->defaultlang,-2);    // By default if not defined
 	}
 
 
@@ -78,12 +79,11 @@ class pdf_expedition_merou extends ModelePdfExpedition
      *  @param		int			$hidedetails		Do not show line details
      *  @param		int			$hidedesc			Do not show desc
      *  @param		int			$hideref			Do not show ref
-     *  @param		object		$hookmanager		Hookmanager object
      *  @return     int         	    			1=OK, 0=KO
 	 */
-	function write_file(&$object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0,$hookmanager=false)
+	function write_file(&$object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
 	{
-		global $user,$conf,$langs,$mysoc;
+		global $user,$conf,$langs,$mysoc,$hookmanager;
 
 		$object->fetch_thirdparty();
 
@@ -169,7 +169,7 @@ class pdf_expedition_merou extends ModelePdfExpedition
 				$pagenb=0;
 				$pdf->SetDrawColor(128,128,128);
 
-				$pdf->AliasNbPages();
+				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->SetTitle($outputlangs->convToOutputCharset($object->ref));
 				$pdf->SetSubject($outputlangs->transnoentities("Sending"));
@@ -183,7 +183,7 @@ class pdf_expedition_merou extends ModelePdfExpedition
 				// New page
 				$pdf->AddPage();
 				$pagenb++;
-				$this->_pagehead($pdf, $object, 1, $outputlangs, $hookmanager);
+				$this->_pagehead($pdf, $object, 1, $outputlangs);
 				$pdf->SetFont('','', $default_font_size - 3);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 				$pdf->SetTextColor(0,0,0);
@@ -192,6 +192,27 @@ class pdf_expedition_merou extends ModelePdfExpedition
 				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
 				$tab_height = $this->page_hauteur - $tab_top - $heightforfooter;
 				$tab_height_newpage = $this->page_hauteur - $tab_top_newpage - $heightforfooter;
+				
+				// Affiche notes
+				if (! empty($object->note_public))
+				{				
+					$pdf->SetFont('','', $default_font_size - 1);
+					$pdf->writeHTMLCell(190, 3, $this->marge_gauche, $tab_top, dol_htmlentitiesbr($object->note_public), 0, 1);
+					$nexY = $pdf->GetY();
+					$height_note=$nexY-$tab_top;
+				
+					// Rect prend une longueur en 3eme param
+					$pdf->SetDrawColor(192,192,192);
+					$pdf->Rect($this->marge_gauche, $tab_top-1, $this->page_largeur-$this->marge_gauche-$this->marge_droite, $height_note+1);
+				
+					$tab_height = $tab_height - $height_note;
+					$tab_top = $nexY+6;
+				}
+				else
+				{
+					$height_note=0;
+				}
+				
 
 				$pdf->SetFillColor(240,240,240);
 				$pdf->SetTextColor(0,0,0);
@@ -302,7 +323,7 @@ class pdf_expedition_merou extends ModelePdfExpedition
 
 				// Pied de page
 				$this->_pagefoot($pdf, $object, $outputlangs);
-				$pdf->AliasNbPages();
+				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->Close();
 
@@ -547,10 +568,10 @@ class pdf_expedition_merou extends ModelePdfExpedition
 			$object->GetUrlTrackingStatus($object->tracking_number);
 			if (! empty($object->tracking_url))
 			{
-				if ($object->expedition_method_id > 0)
+				if ($object->shipping_method_id > 0)
 				{
 					// Get code using getLabelFromKey
-					$code=$outputlangs->getLabelFromKey($this->db,$object->expedition_method_id,'c_shipment_mode','rowid','code');
+					$code=$outputlangs->getLabelFromKey($this->db,$object->shipping_method_id,'c_shipment_mode','rowid','code');
 					$label=$outputlangs->trans("SendingMethod".strtoupper($code))." :";
 				}
 				else

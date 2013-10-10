@@ -66,18 +66,24 @@ class UserGroup extends CommonObject
 	/**
 	 *	Charge un objet group avec toutes ces caracteristiques (excpet ->members array)
 	 *
-	 *	@param      int		$id     id du groupe a charger
-	 *	@return		int				<0 if KO, >0 if OK
+	 *	@param      int		$id			id du groupe a charger
+	 *	@param      string	$groupname	nom du groupe a charger
+	 *	@return		int					<0 if KO, >0 if OK
 	 */
-	function fetch($id)
+	function fetch($id='', $groupname='')
 	{
 		global $conf;
 
-		$this->id = $id;
-
 		$sql = "SELECT g.rowid, g.entity, g.nom as name, g.note, g.datec, g.tms as datem";
 		$sql.= " FROM ".MAIN_DB_PREFIX."usergroup as g";
-		$sql.= " WHERE g.rowid = ".$this->id;
+		if ($groupname)
+		{
+			$sql.= " WHERE g.nom = '".$this->db->escape($groupname)."'";
+		}
+		else
+		{
+			$sql.= " WHERE g.rowid = ".$id;
+		}
 
 		dol_syslog(get_class($this)."::fetch sql=".$sql);
 		$result = $this->db->query($sql);
@@ -90,8 +96,8 @@ class UserGroup extends CommonObject
 				$this->id = $obj->rowid;
 				$this->ref = $obj->rowid;
 				$this->entity = $obj->entity;
-				$this->nom  = $obj->name;        // depecated
 				$this->name = $obj->name;
+				$this->nom = $obj->name; //Deprecated
 				$this->note = $obj->note;
 				$this->datec = $obj->datec;
 				$this->datem = $obj->datem;
@@ -169,21 +175,24 @@ class UserGroup extends CommonObject
 	}
 
 	/**
-	 * 	Return array of users id for group
+	 * 	Return array of users id for group this->id (or all if this->id not defined)
 	 *
-	 * 	@return		array of users
+	 * 	@param	string	$excludefilter		Filter to exclude
+	 * 	@return	array 						Array of users
 	 */
-	function listUsersForGroup()
+	function listUsersForGroup($excludefilter='')
 	{
 		global $conf, $user;
 
 		$ret=array();
 
-		$sql = "SELECT u.rowid, ug.entity as usergroup_entity";
-		$sql.= " FROM ".MAIN_DB_PREFIX."user as u,";
-		$sql.= " ".MAIN_DB_PREFIX."usergroup_user as ug";
-		$sql.= " WHERE ug.fk_user = u.rowid";
-		$sql.= " AND ug.fk_usergroup = ".$this->id;
+		$sql = "SELECT u.rowid";
+		if (! empty($this->id)) $sql.= ", ug.entity as usergroup_entity";
+		$sql.= " FROM ".MAIN_DB_PREFIX."user as u";
+		if (! empty($this->id)) $sql.= ", ".MAIN_DB_PREFIX."usergroup_user as ug";
+		$sql.= " WHERE 1 = 1";
+		if (! empty($this->id)) $sql.= " AND ug.fk_user = u.rowid";
+		if (! empty($this->id)) $sql.= " AND ug.fk_usergroup = ".$this->id;
 		if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
 		{
 			$sql.= " AND u.entity IS NOT NULL";
@@ -192,12 +201,13 @@ class UserGroup extends CommonObject
 		{
 			$sql.= " AND u.entity IN (0,".$conf->entity.")";
 		}
+		if (! empty($excludefilter)) $sql.=' AND ('.$excludefilter.')';
 
 		dol_syslog(get_class($this)."::listUsersForGroup sql=".$sql,LOG_DEBUG);
-		$result = $this->db->query($sql);
-		if ($result)
+		$resql = $this->db->query($sql);
+		if ($resql)
 		{
-			while ($obj = $this->db->fetch_object($result))
+			while ($obj = $this->db->fetch_object($resql))
 			{
 				if (! array_key_exists($obj->rowid, $ret))
 				{
@@ -205,11 +215,13 @@ class UserGroup extends CommonObject
 					$newuser->fetch($obj->rowid);
 					$ret[$obj->rowid]=$newuser;
 				}
-
-				$ret[$obj->rowid]->usergroup_entity[]=$obj->usergroup_entity;
+				if (! empty($obj->usergroup_entity))
+				{
+					$ret[$obj->rowid]->usergroup_entity[]=$obj->usergroup_entity;
+				}
 			}
 
-			$this->db->free($result);
+			$this->db->free($resql);
 
 			return $ret;
 		}

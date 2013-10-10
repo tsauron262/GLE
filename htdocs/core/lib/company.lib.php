@@ -3,6 +3,7 @@
  * Copyright (C) 2006		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
  * Copyright (C) 2007		Patrick Raguin			<patrick.raguin@gmail.com>
  * Copyright (C) 2010-2012	Regis Houssin			<regis.houssin@capnetworks.com>
+ * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,38 +43,32 @@ function societe_prepare_head($object)
     $head[$h][2] = 'card';
     $h++;
 
-    // TODO Remove tests on object->object. Functions must be called with a company object directly
-    if (($object->client==2 || $object->client==3
-    || (isset($object->object) && $object->object->client==2) || (isset($object->object) && $object->object->client==3)) && empty($conf->global->SOCIETE_DISABLE_PROSPECTS))
-    {
-        $head[$h][0] = DOL_URL_ROOT.'/comm/prospect/fiche.php?socid='.$object->id;
-        $head[$h][1] = $langs->trans("Prospect");
-        $head[$h][2] = 'prospect';
-        $h++;
-    }
-    if ($object->client==1 || $object->client==3 || (isset($object->object) && $object->object->client==1) || (isset($object->object) && $object->object->client==3))
+    if ($object->client==1 || $object->client==2 || $object->client==3)
     {
         $head[$h][0] = DOL_URL_ROOT.'/comm/fiche.php?socid='.$object->id;
-        $head[$h][1] = $langs->trans("Customer");
+        $head[$h][1] = '';
+        if (empty($conf->global->SOCIETE_DISABLE_PROSPECTS) && ($object->client==2 || $object->client==3)) $head[$h][1] .= $langs->trans("Prospect");
+        if (empty($conf->global->SOCIETE_DISABLE_PROSPECTS) && empty($conf->global->SOCIETE_DISABLE_CUSTOMERS) && $object->client==3) $head[$h][1] .= '/';
+        if (empty($conf->global->SOCIETE_DISABLE_CUSTOMERS) && ($object->client==1 || $object->client==3)) $head[$h][1] .= $langs->trans("Customer");
         $head[$h][2] = 'customer';
         $h++;
     }
-    if (! empty($conf->fournisseur->enabled) && ($object->fournisseur || (isset($object->object) && $object->object->fournisseur)) && ! empty($user->rights->fournisseur->lire))
+    if (! empty($conf->fournisseur->enabled) && $object->fournisseur && ! empty($user->rights->fournisseur->lire))
     {
         $head[$h][0] = DOL_URL_ROOT.'/fourn/fiche.php?socid='.$object->id;
         $head[$h][1] = $langs->trans("Supplier");
         $head[$h][2] = 'supplier';
         $h++;
     }
-    if (! empty($conf->agenda->enabled))
-    {
+    if (! empty($conf->agenda->enabled) && (!empty($user->rights->agenda->myactions->read) || !empty($user->rights->agenda->allactions->read) ))
+     {
     	$head[$h][0] = DOL_URL_ROOT.'/societe/agenda.php?socid='.$object->id;
     	$head[$h][1] = $langs->trans("Agenda");
     	$head[$h][2] = 'agenda';
     	$h++;
     }
     //show categorie tab
-    if (! empty($conf->categorie->enabled))
+    if (! empty($conf->categorie->enabled)  && ! empty($user->rights->categorie->lire))
     {
         $type = 2;
         if ($object->fournisseur) $type = 1;
@@ -92,10 +87,18 @@ function societe_prepare_head($object)
     if ($user->societe_id == 0)
     {
     	// Notes
-        $head[$h][0] = DOL_URL_ROOT.'/societe/note.php?socid='.$object->id;
+        $head[$h][0] = DOL_URL_ROOT.'/societe/note.php?id='.$object->id;
         $head[$h][1] = $langs->trans("Note");
         $head[$h][2] = 'note';
         $h++;
+
+        if (! empty($conf->commande->enabled) || ! empty($conf->propal->enabled) || ! empty($conf->facture->enabled) || ! empty($conf->fournisseur->enabled))
+        {
+	        $head[$h][0] = DOL_URL_ROOT.'/societe/consumption.php?socid='.$object->id;
+	        $head[$h][1] = $langs->trans("Referers");
+	        $head[$h][2] = 'consumption';
+	        $h++;
+        }
 
         // Attached files
         $head[$h][0] = DOL_URL_ROOT.'/societe/document.php?socid='.$object->id;
@@ -150,14 +153,6 @@ function societe_prepare_head2($object)
 	    $h++;
     }
 
-    if (empty($conf->global->SOCIETE_DISABLE_PARENTCOMPANY))
-    {
-	    $head[$h][0] = 'lien.php?socid='.$object->id;
-	    $head[$h][1] = $langs->trans("ParentCompany");
-	    $head[$h][2] = 'links';
-	    $h++;
-    }
-
     $head[$h][0] = 'commerciaux.php?socid='.$object->id;
     $head[$h][1] = $langs->trans("SalesRepresentative");
     $head[$h][2] = 'salesrepresentative';
@@ -182,7 +177,7 @@ function societe_admin_prepare_head($object)
     $head = array();
 
     $head[$h][0] = DOL_URL_ROOT.'/societe/admin/societe.php';
-    $head[$h][1] = $langs->trans("Miscellanous");
+    $head[$h][1] = $langs->trans("Miscellaneous");
     $head[$h][2] = 'general';
     $h++;
 
@@ -413,7 +408,9 @@ function show_projects($conf,$langs,$db,$object,$backtopage='')
         if (! empty($conf->projet->enabled) && $user->rights->projet->creer)
         {
             //$buttoncreate='<a class="butAction" href="'.DOL_URL_ROOT.'/projet/fiche.php?socid='.$object->id.'&action=create&amp;backtopage='.urlencode($backtopage).'">'.$langs->trans("AddProject").'</a>';
-			$buttoncreate='<a class="addnewrecord" href="'.DOL_URL_ROOT.'/projet/fiche.php?socid='.$object->id.'&amp;action=create&amp;backtopage='.urlencode($backtopage).'">'.$langs->trans("AddProject").' '.img_picto($langs->trans("AddProject"),'filenew').'</a>'."\n";
+			$buttoncreate='<a class="addnewrecord" href="'.DOL_URL_ROOT.'/projet/fiche.php?socid='.$object->id.'&amp;action=create&amp;backtopage='.urlencode($backtopage).'">'.$langs->trans("AddProject");
+			if (empty($conf->dol_optimize_smallscreen)) $buttoncreate.=' '.img_picto($langs->trans("AddProject"),'filenew');
+			$buttoncreate.='</a>'."\n";
         }
 
         print "\n";
@@ -500,7 +497,7 @@ function show_projects($conf,$langs,$db,$object,$backtopage='')
  */
 function show_contacts($conf,$langs,$db,$object,$backtopage='')
 {
-    global $user;
+    global $user,$conf;
     global $bc;
 
     $i=-1;
@@ -516,7 +513,9 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
     if ($user->rights->societe->contact->creer)
     {
     	$addcontact = (! empty($conf->global->SOCIETE_ADDRESSES_MANAGEMENT) ? $langs->trans("AddContact") : $langs->trans("AddContactAddress"));
-		$buttoncreate='<a class="addnewrecord" href="'.DOL_URL_ROOT.'/contact/fiche.php?socid='.$object->id.'&amp;action=create&amp;backtopage='.urlencode($backtopage).'">'.$addcontact.' '.img_picto($addcontact,'filenew').'</a>'."\n";
+		$buttoncreate='<a class="addnewrecord" href="'.DOL_URL_ROOT.'/contact/fiche.php?socid='.$object->id.'&amp;action=create&amp;backtopage='.urlencode($backtopage).'">'.$addcontact;
+		if (empty($conf->dol_optimize_smallscreen)) $buttoncreate.=' '.img_picto($addcontact,'filenew');
+		$buttoncreate.='</a>'."\n";
     }
 
     print "\n";
@@ -539,7 +538,7 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
     }
     print "</tr>";
 
-    $sql = "SELECT p.rowid, p.name, p.firstname, p.fk_pays, p.poste, p.phone, p.phone_mobile, p.fax, p.email, p.note ";
+    $sql = "SELECT p.rowid, p.lastname, p.firstname, p.fk_pays, p.poste, p.phone, p.phone_mobile, p.fax, p.email ";
     $sql .= " FROM ".MAIN_DB_PREFIX."socpeople as p";
     $sql .= " WHERE p.fk_soc = ".$object->id;
     $sql .= " ORDER by p.datec";
@@ -561,7 +560,7 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
 
             print '<td>';
             $contactstatic->id = $obj->rowid;
-            $contactstatic->name = $obj->name;
+            $contactstatic->lastname = $obj->lastname;
             $contactstatic->firstname = $obj->firstname;
             print $contactstatic->getNomUrl(1);
             print '</td>';
@@ -776,8 +775,8 @@ function show_actions_todo($conf,$langs,$db,$object,$objcon='',$noprint=0)
         $sql.= " a.fk_element, a.elementtype,";
         $sql.= " c.code as acode, c.libelle,";
         $sql.= " u.login, u.rowid";
-        if (get_class($object) == 'Adherent') $sql.= ", m.nom as name, m.prenom as firstname";
-        if (get_class($object) == 'Societe')  $sql.= ", sp.name, sp.firstname";
+        if (get_class($object) == 'Adherent') $sql.= ", m.lastname, m.firstname";
+        if (get_class($object) == 'Societe')  $sql.= ", sp.lastname, sp.firstname";
         $sql.= " FROM ".MAIN_DB_PREFIX."c_actioncomm as c, ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."actioncomm as a";
         if (get_class($object) == 'Adherent') $sql.= ", ".MAIN_DB_PREFIX."adherent as m";
         if (get_class($object) == 'Societe')  $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as sp ON a.fk_contact = sp.rowid";
@@ -814,7 +813,7 @@ function show_actions_todo($conf,$langs,$db,$object,$objcon='',$noprint=0)
 
                     $out.="<tr ".$bc[$var].">";
 
-                    $out.='<td width="120" align="left" nowrap="nowrap">'.dol_print_date($datep,'dayhour')."</td>\n";
+                    $out.='<td width="120" align="left" class="nowrap">'.dol_print_date($datep,'dayhour')."</td>\n";
 
                     // Picto warning
                     $out.='<td width="16">';
@@ -837,7 +836,7 @@ function show_actions_todo($conf,$langs,$db,$object,$objcon='',$noprint=0)
                     // Contact pour cette action
                     if (empty($objcon->id) && $obj->fk_contact > 0)
                     {
-                        $contactstatic->name=$obj->name;
+                        $contactstatic->lastname=$obj->lastname;
                         $contactstatic->firstname=$obj->firstname;
                         $contactstatic->id=$obj->fk_contact;
                         $out.='<td width="120">'.$contactstatic->getNomUrl(1,'',10).'</td>';
@@ -847,14 +846,14 @@ function show_actions_todo($conf,$langs,$db,$object,$objcon='',$noprint=0)
                         $out.='<td>&nbsp;</td>';
                     }
 
-                    $out.='<td width="80" nowrap="nowrap">';
+                    $out.='<td width="80" class="nowrap">';
                     $userstatic->id=$obj->fk_user_author;
                     $userstatic->login=$obj->login;
                     $out.=$userstatic->getLoginUrl(1);
                     $out.='</td>';
 
                     // Statut
-                    $out.='<td nowrap="nowrap" width="20">'.$actionstatic->LibStatut($obj->percent,3).'</td>';
+                    $out.='<td class="nowrap" width="20">'.$actionstatic->LibStatut($obj->percent,3).'</td>';
 
                     $out.="</tr>\n";
                     $i++;
@@ -915,8 +914,8 @@ function show_actions_done($conf,$langs,$db,$object,$objcon='',$noprint=0)
         $sql.= " a.fk_user_author, a.fk_contact,";
         $sql.= " c.code as acode, c.libelle,";
         $sql.= " u.login, u.rowid as user_id";
-        if (get_class($object) == 'Adherent') $sql.= ", m.nom as name, m.prenom as firstname";
-        if (get_class($object) == 'Societe')  $sql.= ", sp.name, sp.firstname";
+        if (get_class($object) == 'Adherent') $sql.= ", m.lastname, m.firstname";
+        if (get_class($object) == 'Societe')  $sql.= ", sp.lastname, sp.firstname";
         $sql.= " FROM ".MAIN_DB_PREFIX."c_actioncomm as c, ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."actioncomm as a";
         if (get_class($object) == 'Adherent') $sql.= ", ".MAIN_DB_PREFIX."adherent as m";
         if (get_class($object) == 'Societe')  $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."socpeople as sp ON a.fk_contact = sp.rowid";
@@ -952,7 +951,7 @@ function show_actions_done($conf,$langs,$db,$object,$objcon='',$noprint=0)
                 		'userid'=>$obj->user_id,
                 		'login'=>$obj->login,
                 		'contact_id'=>$obj->fk_contact,
-                		'name'=>$obj->name,
+                		'lastname'=>$obj->lastname,
                 		'firstname'=>$obj->firstname,
                 		'fk_element'=>$obj->fk_element,
                 		'elementtype'=>$obj->elementtype
@@ -1057,7 +1056,7 @@ function show_actions_done($conf,$langs,$db,$object,$objcon='',$noprint=0)
             $out.="<tr ".$bc[$var].">";
 
             // Champ date
-            $out.='<td width="120" nowrap="nowrap">';
+            $out.='<td width="120" class="nowrap">';
             if ($histo[$key]['date']) $out.=dol_print_date($histo[$key]['date'],'dayhour');
             else if ($histo[$key]['datestart']) $out.=dol_print_date($histo[$key]['datestart'],'dayhour');
             $out.="</td>\n";
@@ -1121,7 +1120,7 @@ function show_actions_done($conf,$langs,$db,$object,$objcon='',$noprint=0)
             // Contact pour cette action
             if (! empty($objcon->id) && isset($histo[$key]['contact_id']) && $histo[$key]['contact_id'] > 0)
             {
-                $contactstatic->name=$histo[$key]['name'];
+                $contactstatic->lastname=$histo[$key]['lastname'];
                 $contactstatic->firstname=$histo[$key]['firstname'];
                 $contactstatic->id=$histo[$key]['contact_id'];
                 $out.='<td width="120">'.$contactstatic->getNomUrl(1,'',10).'</td>';
@@ -1132,14 +1131,14 @@ function show_actions_done($conf,$langs,$db,$object,$objcon='',$noprint=0)
             }
 
             // Auteur
-            $out.='<td nowrap="nowrap" width="80">';
+            $out.='<td class="nowrap" width="80">';
             $userstatic->id=$histo[$key]['userid'];
             $userstatic->login=$histo[$key]['login'];
             $out.=$userstatic->getLoginUrl(1);
             $out.='</td>';
 
             // Statut
-            $out.='<td nowrap="nowrap" width="20">'.$actionstatic->LibStatut($histo[$key]['percent'],3).'</td>';
+            $out.='<td class="nowrap" width="20">'.$actionstatic->LibStatut($histo[$key]['percent'],3).'</td>';
 
             $out.="</tr>\n";
             $i++;
@@ -1168,7 +1167,7 @@ function show_subsidiaries($conf,$langs,$db,$object)
 
 	$i=-1;
 
-	$sql = "SELECT s.rowid, s.nom as name, s.address, s.cp as zip, s.ville as town, s.code_client, s.canvas";
+	$sql = "SELECT s.rowid, s.nom as name, s.address, s.zip, s.town, s.code_client, s.canvas";
 	$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 	$sql.= " WHERE s.parent = ".$object->id;
 	$sql.= " AND s.entity IN (".getEntity('societe', 1).")";

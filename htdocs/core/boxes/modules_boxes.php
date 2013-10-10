@@ -27,19 +27,20 @@
 /**
  *		Parent class of boxes
  */
-class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" boxes
+class ModeleBoxes    // Can't be abtract as it is instantiated to build "empty" boxes
 {
 	var $db;
 	var $error='';
 	var $max=5;
 	var $enabled=1;
-	
+
 	var $rowid;
 	var $id;
 	var $position;
 	var $box_order;
 	var $fk_user;
 	var $sourcefile;
+	var $class;
 	var $box_id;
 	var $note;
 
@@ -48,9 +49,10 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 	/**
 	 *	Constructor
 	 *
-	 *	@param	DoliDB		$db		Database hanlder
+	 *	@param	DoliDB	$db			Database handler
+     *  @param	string	$param		More parameters
 	 */
-	function __construct($db)
+	function __construct($db,$param='')
 	{
 		$this->db=$db;
 	}
@@ -163,10 +165,13 @@ class ModeleBoxes    // Can't be abtract as it is instanciated to build "empty" 
 			}
 			if ($conf->use_javascript_ajax)
 			{
-				print '</td><td class="nocellnopadd boxclose" nowrap="nowrap">';
+				print '</td><td class="nocellnopadd boxclose nowrap">';
 				// The image must have the class 'boxhandle' beause it's value used in DOM draggable objects to define the area used to catch the full object
-				print img_picto($langs->trans("MoveBox",$this->box_id),'grip','class="boxhandle" style="cursor:move;"');
-				print img_picto($langs->trans("Close",$this->box_id),'close','class="boxclose" style="cursor:pointer;" id="imgclose'.$this->box_id.'"');
+				print img_picto($langs->trans("MoveBox",$this->box_id),'grip','class="boxhandle hideonsmartphone" style="cursor:move;"');
+				print img_picto($langs->trans("Close",$this->box_id),'close','class="boxclose" rel="x:y" style="cursor:pointer;" id="imgclose'.$this->box_id.'"');
+				$label=$head['text'];
+				if (! empty($head['graph'])) $label.=' ('.$langs->trans("Graph").')';
+				print '<input type="hidden" id="boxlabelentry'.$this->box_id.'" value="'.dol_escape_htmltag($label).'">';
 				print '</td></tr></table>';
 			}
 			print '</td>';

@@ -196,7 +196,8 @@ if (! $error)
             elseif ($db->error && ! (! empty($_POST["db_create_database"]) && $db->connected))
             {
             	// Note: you may experience error here with message "No such file or directory" when mysql was installed for the first time but not yet launched.
-                print '<div class="error">'.$db->error.'</div>';
+                if ($db->error == "No such file or directory") print '<div class="error">'.$langs->trans("ErrorToConnectToMysqlCheckInstance").'</div>';
+                else print '<div class="error">'.$db->error.'</div>';
                 if (! $db->connected) print $langs->trans("BecauseConnectionFailedParametersMayBeWrong").'<br><br>';
                 //print '<a href="#" onClick="javascript: history.back();">';
                 print $langs->trans("ErrorGoBackAndCorrectParameters");
@@ -400,7 +401,7 @@ if (! $error && $db->connected && $action == "set")
             	require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
             	$srcroot=$main_dir.'/install/doctemplates';
             	$destroot=$main_data_dir.'/doctemplates';
-            	$docs=array('thirdparties' => 'thirdparty', 'proposals' => 'proposal', 'orders' => 'order', 'invoices' => 'invoice');
+            	$docs=array('thirdparties' => 'thirdparty', 'proposals' => 'proposal', 'orders' => 'order', 'invoices' => 'invoice', 'projects' => 'project', 'projects' => 'task_summary');
             	foreach($docs as $cursordir => $cursorfile)
             	{
             		$src=$srcroot.'/'.$cursordir.'/template_'.$cursorfile.'.odt';
@@ -458,7 +459,7 @@ if (! $error && $db->connected && $action == "set")
         print '<tr><td>';
         print $langs->trans("ConfFileReload");
         print '</td>';
-        print '<td>'.$langs->trans("OK").'</td></tr>';
+        print '<td><img src="../theme/eldy/img/tick.png" alt="Ok"></td></tr>';
 
 
         $userroot=isset($_POST["db_user_root"])?$_POST["db_user_root"]:"";
@@ -508,7 +509,7 @@ if (! $error && $db->connected && $action == "set")
                         print $langs->trans("UserCreation").' : ';
                         print $dolibarr_main_db_user;
                         print '</td>';
-                        print '<td>'.$langs->trans("OK").'</td></tr>';
+                        print '<td><img src="../theme/eldy/img/tick.png" alt="Ok"></td></tr>';
                     }
                     else
                     {
@@ -542,7 +543,7 @@ if (! $error && $db->connected && $action == "set")
                     print $langs->trans("UserCreation").' : ';
                     print $dolibarr_main_db_user;
                     print '</td>';
-                    print '<td>'.$langs->trans("Error").'</td>';
+                    print '<td><img src="../theme/eldy/img/error.png" alt="Error"></td>';
                     print '</tr>';
 
                     // Affiche aide diagnostique
@@ -576,7 +577,7 @@ if (! $error && $db->connected && $action == "set")
                     print $langs->trans("DatabaseCreation")." (".$langs->trans("User")." ".$userroot.") : ";
                     print $dolibarr_main_db_name;
                     print '</td>';
-                    print "<td>".$langs->trans("OK")."</td></tr>";
+                    print '<td><img src="../theme/eldy/img/tick.png" alt="Ok"></td></tr>';
 
                     $check1=$newdb->getDefaultCharacterSetDatabase();
                     $check2=$newdb->getDefaultCollationDatabase();
@@ -606,7 +607,7 @@ if (! $error && $db->connected && $action == "set")
                 print $langs->trans("DatabaseCreation")." (".$langs->trans("User")." ".$userroot.") : ";
                 print $dolibarr_main_db_name;
                 print '</td>';
-                print '<td>'.$langs->trans("Error").'</td>';
+                print '<td><img src="../theme/eldy/img/error.png" alt="Error"></td>';
                 print '</tr>';
 
                 // Affiche aide diagnostique
@@ -632,43 +633,35 @@ if (! $error && $db->connected && $action == "set")
 
             if ($db->connected == 1)
             {
+                dolibarr_install_syslog("etape1: connexion to server by user ".$conf->db->user." is ok", LOG_DEBUG);
+                print "<tr><td>";
+                print $langs->trans("ServerConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
+                print $dolibarr_main_db_host;
+                print "</td><td>";
+                print '<img src="../theme/eldy/img/tick.png" alt="Ok">';
+                print "</td></tr>";
+
                 // si acces serveur ok et acces base ok, tout est ok, on ne va pas plus loin, on a meme pas utilise le compte root.
                 if ($db->database_selected == 1)
                 {
-                    dolibarr_install_syslog("etape1: connexion to server by user ".$conf->db->user." is ok", LOG_DEBUG);
-                    print "<tr><td>";
-                    print $langs->trans("ServerConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
-                    print $dolibarr_main_db_host;
-                    print "</td><td>";
-                    print $langs->trans("OK");
-                    print "</td></tr>";
-
                     dolibarr_install_syslog("etape1: connexion to database : ".$conf->db->name.", by user : ".$conf->db->user." is ok", LOG_DEBUG);
                     print "<tr><td>";
                     print $langs->trans("DatabaseConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
                     print $dolibarr_main_db_name;
                     print "</td><td>";
-                    print $langs->trans("OK");
+                    print '<img src="../theme/eldy/img/tick.png" alt="Ok">';
                     print "</td></tr>";
 
                     $error = 0;
                 }
                 else
                 {
-                    dolibarr_install_syslog("etape1: connexion to server by user ".$conf->db->user." is ok", LOG_DEBUG);
-                    print "<tr><td>";
-                    print $langs->trans("ServerConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
-                    print $dolibarr_main_db_host;
-                    print "</td><td>";
-                    print $langs->trans("OK");
-                    print "</td></tr>";
-
                     dolibarr_install_syslog("etape1: connexion to database ".$conf->db->name.", by user : ".$conf->db->user." has failed", LOG_ERR);
                     print "<tr><td>";
                     print $langs->trans("DatabaseConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
                     print $dolibarr_main_db_name;
                     print '</td><td>';
-                    print $langs->trans("Error");
+                    print '<img src="../theme/eldy/img/error.png" alt="Error">';
                     print "</td></tr>";
 
                     // Affiche aide diagnostique
@@ -688,7 +681,7 @@ if (! $error && $db->connected && $action == "set")
                 print $langs->trans("ServerConnection")." (".$langs->trans("User")." ".$conf->db->user.") : ";
                 print $dolibarr_main_db_host;
                 print '</td><td>';
-                print '<font class="error">'.$db->error.'</div>';
+                print '<img src="../theme/eldy/img/error.png" alt="Error">';
                 print "</td></tr>";
 
                 // Affiche aide diagnostique
@@ -938,7 +931,7 @@ function write_conf_file($conffile)
 			print $langs->trans("SaveConfigurationFile");
 			print ' <strong>'.$conffile.'</strong>';
 			print "</td><td>";
-			print $langs->trans("OK");
+			print '<img src="../theme/eldy/img/tick.png" alt="Ok">';
 			print "</td></tr>";
 		}
 		else

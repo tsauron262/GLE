@@ -62,7 +62,7 @@ class CMailFile
 	var $css;
 	//! Defined css style for body background
 	var $styleCSS;
-	//! Defined bacckground directly in body tag
+	//! Defined background directly in body tag
 	var $bodyCSS;
 
 	// Image
@@ -85,8 +85,8 @@ class CMailFile
 	 *	CMailFile
 	 *
 	 *	@param 	string	$subject             Topic/Subject of mail
-	 *	@param 	string	$to                  Recipients emails (RFC 2822: "Nom prenom <email>[, ...]" ou "email[, ...]" ou "<email>[, ...]")
-	 *	@param 	string	$from                Sender email      (RFC 2822: "Nom prenom <email>[, ...]" ou "email[, ...]" ou "<email>[, ...]")
+	 *	@param 	string	$to                  Recipients emails (RFC 2822: "Nom firstname <email>[, ...]" ou "email[, ...]" ou "<email>[, ...]")
+	 *	@param 	string	$from                Sender email      (RFC 2822: "Nom firstname <email>[, ...]" ou "email[, ...]" ou "<email>[, ...]")
 	 *	@param 	string	$msg                 Message
 	 *	@param 	array	$filename_list       List of files to attach (full path of filename on file system)
 	 *	@param 	array	$mimetype_list       List of MIME type of attached files
@@ -106,9 +106,9 @@ class CMailFile
 
 		// We define end of line (RFC 821).
 		$this->eol="\r\n";
-		// We define end of line for header fields (RFC 822bis section 2.3 says header must contains \r\n). 
+		// We define end of line for header fields (RFC 822bis section 2.3 says header must contains \r\n).
 		$this->eol2="\r\n";
-		if (! empty($conf->global->MAIN_FIX_FOR_BUGGED_MTA)) 
+		if (! empty($conf->global->MAIN_FIX_FOR_BUGGED_MTA))
 		{
 			$this->eol="\n";
 			$this->eol2="\n";
@@ -256,7 +256,7 @@ class CMailFile
 				if (!empty($css))
 				{
 					$this->css = $css;
-					$this->styleCSS = $this->buildCSS();
+					$this->buildCSS();
 				}
 				$msg = $this->html;
 				$msg = $this->checkIfHTML($msg);
@@ -308,7 +308,7 @@ class CMailFile
 				if (!empty($css))
 				{
 					$this->css = $css;
-					$this->styleCSS = $this->buildCSS();
+					$this->buildCSS();
 				}
 				$msg = $this->html;
 				$msg = $this->checkIfHTML($msg);
@@ -551,7 +551,7 @@ class CMailFile
 	/**
 	 *  Write content of a SMTP request into a dump file (mode = all)
 	 *  Used for debugging.
-	 *  Note that to see full SMTP protocol, you can use tcpdump -w /tmp/smtp -s 2000 port 25" 
+	 *  Note that to see full SMTP protocol, you can use tcpdump -w /tmp/smtp -s 2000 port 25"
 	 *
 	 *  @return	void
 	 */
@@ -572,7 +572,7 @@ class CMailFile
 			}
 			elseif ($conf->global->MAIN_MAIL_SENDMODE == 'smtps')
 			{
-				fputs($fp, $this->smtps->log);
+				fputs($fp, $this->smtps->log);	// this->smtps->log is filled only if MAIN_MAIL_DEBUG was set to on
 			}
 
 			fclose($fp);
@@ -624,7 +624,7 @@ class CMailFile
             if ($this->css['bgcolor'])
             {
                 $this->styleCSS.= '  background-color: '.$this->css['bgcolor'].';';
-                $this->bodyCSS.= ' BGCOLOR="'.$this->css['bgcolor'].'"';
+                $this->bodyCSS.= ' bgcolor="'.$this->css['bgcolor'].'"';
             }
             if ($this->css['bgimage'])
             {
@@ -751,7 +751,7 @@ class CMailFile
 		{
 			$strContent = preg_replace("/\r\n/si", "\n", $strContent);
 		}
-		
+
         //$strContent = rtrim(chunk_split($strContent));    // Function chunck_split seems bugged
         $strContent = rtrim(wordwrap($strContent));
 
@@ -1020,7 +1020,7 @@ class CMailFile
 	/**
 	 * Return an address for SMTP protocol
 	 *
-	 * @param	string		$adresses		Example: 'John Doe <john@doe.com>' or 'john@doe.com'
+	 * @param	string		$address		Example: 'John Doe <john@doe.com>' or 'john@doe.com'
 	 * @param	int			$format			0=auto, 1=emails with <>, 2=emails without <>, 3=auto + label between "
 	 * @param	int			$encode			1=Encode name to RFC2822
 	 * @return	string						If format 0: '<john@doe.com>' or 'John Doe <john@doe.com>' or '=?UTF-8?B?Sm9obiBEb2U=?= <john@doe.com>'
@@ -1028,13 +1028,13 @@ class CMailFile
 	 *										If format 2: 'john@doe.com'
 	 *										If format 3: '<john@doe.com>' or '"John Doe" <john@doe.com>' or '"=?UTF-8?B?Sm9obiBEb2U=?=" <john@doe.com>'
 	 */
-	function getValidAddress($adresses,$format,$encode='')
+	function getValidAddress($address,$format,$encode='')
 	{
 		global $conf;
 
 		$ret='';
 
-		$arrayaddress=explode(',',$adresses);
+		$arrayaddress=explode(',',$address);
 
 		// Boucle sur chaque composant de l'adresse
 		foreach($arrayaddress as $val)

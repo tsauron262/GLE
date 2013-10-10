@@ -154,14 +154,14 @@ print "<br>\n";
 dol_htmloutput_mesg($message);
 
 // List of sending methods
-$listofmethods=(is_array($conf->sms_engine_modules)?$conf->sms_engine_modules:array());
+$listofmethods=(is_array($conf->modules_parts['sms'])?$conf->modules_parts['sms']:array());
 asort($listofmethods);
 
 if ($action == 'edit')
 {
 	$form=new Form($db);
 
-	if (! count($listofmethods)) print '<div class="warning">'.$langs->trans("NoSmsEngine",'<a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=sms_manager">DoliStore</a>').'</div>';
+	if (! count($listofmethods)) print '<div class="warning">'.$langs->trans("NoSmsEngine",'<a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=smsmanager">DoliStore</a>').'</div>';
 
 	print '<form method="post" action="'.$_SERVER["PHP_SELF"].'">';
 	print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
@@ -217,7 +217,7 @@ else
 {
 	$var=true;
 
-	if (! count($listofmethods)) print '<div class="warning">'.$langs->trans("NoSmsEngine",'<a href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=sms_manager">DoliStore</a>').'</div>';
+	if (! count($listofmethods)) print '<div class="warning">'.$langs->trans("NoSmsEngine",'<a target="_blank" href="http://www.dolistore.com/search.php?orderby=position&orderway=desc&search_query=smsmanager">DoliStore</a>').'</div>';
 
 	print '<table class="noborder" width="100%">';
 	print '<tr class="liste_titre"><td>'.$langs->trans("Parameter").'</td><td>'.$langs->trans("Value").'</td></tr>';

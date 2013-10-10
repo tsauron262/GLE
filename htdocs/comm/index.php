@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -87,15 +87,7 @@ llxHeader();
 
 print_fiche_titre($langs->trans("CustomerArea"));
 
-print '<table border="0" width="100%" class="notopnoleftnoright">';
-
-print '<tr>';
-if ((! empty($conf->propal->enabled) && $user->rights->propale->lire) ||
-    (! empty($conf->contrat->enabled) && $user->rights->contrat->lire) ||
-    (! empty($conf->commande->enabled) && $user->rights->commande->lire))
-{
-	print '<td valign="top" width="30%" class="notopnoleft">';
-}
+print '<div class="fichecenter"><div class="fichethirdleft">';
 
 // Recherche Propal
 if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
@@ -165,19 +157,19 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 			{
 				$obj = $db->fetch_object($resql);
 				$var=!$var;
-				print '<tr '.$bc[$var].'><td  nowrap="nowrap">';
+				print '<tr '.$bc[$var].'><td  class="nowrap">';
 				$propalstatic->id=$obj->rowid;
 				$propalstatic->ref=$obj->ref;
 				print $propalstatic->getNomUrl(1);
 				print '</td>';
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				$companystatic->id=$obj->socid;
 				$companystatic->name=$obj->name;
 				$companystatic->client=$obj->client;
 				$companystatic->canvas=$obj->canvas;
 				print $companystatic->getNomUrl(1,'customer',16);
 				print '</td>';
-				print '<td align="right" nowrap="nowrap">'.price($obj->total_ht).'</td></tr>';
+				print '<td align="right" class="nowrap">'.price($obj->total_ht).'</td></tr>';
 				$i++;
 				$total += $obj->total_ht;
 			}
@@ -232,15 +224,15 @@ if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 			{
 				$var=!$var;
 				$obj = $db->fetch_object($resql);
-				print '<tr '.$bc[$var].'><td nowrap="nowrap"><a href="../commande/fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$obj->ref.'</a></td>';
-				print '<td nowrap="nowrap">';
+				print '<tr '.$bc[$var].'><td class="nowrap"><a href="../commande/fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$obj->ref.'</a></td>';
+				print '<td class="nowrap">';
 				$companystatic->id=$obj->socid;
 				$companystatic->name=$obj->name;
 				$companystatic->client=$obj->client;
                 $companystatic->canvas=$obj->canvas;
 				print $companystatic->getNomUrl(1,'customer',16);
 				print '</td>';
-				print '<td align="right" nowrap="nowrap">'.price($obj->total_ttc).'</td></tr>';
+				print '<td align="right" class="nowrap">'.price($obj->total_ttc).'</td></tr>';
 				$i++;
 				$total += $obj->total_ttc;
 			}
@@ -256,18 +248,8 @@ if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 	}
 }
 
-if ((! empty($conf->propal->enabled) && $user->rights->propale->lire) ||
-    (! empty($conf->contrat->enabled) && $user->rights->contrat->lire) ||
-    (! empty($conf->commande->enabled) && $user->rights->commande->lire))
-{
-	print '</td>';
-	print '<td valign="top" width="70%" class="notopnoleftnoright">';
-}
-else
-{
-	print '<td valign="top" width="100%" class="notopnoleftnoright">';
-}
 
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
 $NBMAX=3;
@@ -313,11 +295,9 @@ if (! empty($conf->societe->enabled) && $user->rights->societe->lire)
 				$companystatic->client=$objp->client;
                 $companystatic->canvas=$objp->canvas;
 				print '<tr '.$bc[$var].'>';
-				print '<td nowrap="nowrap">'.$companystatic->getNomUrl(1,'customer',48).'</td>';
+				print '<td class="nowrap">'.$companystatic->getNomUrl(1,'customer',48).'</td>';
 				print '<td align="right" nowrap>';
-				if ($objp->client == 2 || $objp->client == 3) print $langs->trans("Prospect");
-				if ($objp->client == 3) print ' / ';
-				if ($objp->client == 1 || $objp->client == 3) print $langs->trans("Customer");
+				print $companystatic->getLibCustProspStatut();
 				print "</td>";
 				print '<td align="right" nowrap>'.dol_print_date($db->jdate($objp->tms),'day')."</td>";
 				print '</tr>';
@@ -371,7 +351,7 @@ if (! empty($conf->fournisseur->enabled) && $user->rights->societe->lire)
                 $companystatic->name=$objp->name;
                 $companystatic->canvas=$objp->canvas;
                 print '<tr '.$bc[$var].'>';
-				print '<td nowrap="nowrap">'.$companystatic->getNomUrl(1,'supplier',44).'</td>';
+				print '<td class="nowrap">'.$companystatic->getNomUrl(1,'supplier',44).'</td>';
 				print '<td align="right">'.dol_print_date($db->jdate($objp->dm),'day').'</td>';
 				print '</tr>';
 				$var=!$var;
@@ -501,16 +481,16 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 				print '<tr '.$bc[$var].'>';
 
 				// Ref
-				print '<td nowrap="nowrap" width="140">';
+				print '<td class="nowrap" width="140">';
 
 				$propalstatic->id=$obj->propalid;
 				$propalstatic->ref=$obj->ref;
 
 				print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-				print '<td class="nobordernopadding" nowrap="nowrap">';
+				print '<td class="nobordernopadding nowrap">';
 				print $propalstatic->getNomUrl(1);
 				print '</td>';
-				print '<td width="18" class="nobordernopadding" nowrap="nowrap">';
+				print '<td width="18" class="nobordernopadding nowrap">';
 				if ($db->jdate($obj->dfv) < ($now - $conf->propal->cloture->warning_delay)) print img_warning($langs->trans("Late"));
 				print '</td>';
 				print '<td width="16" align="center" class="nobordernopadding">';
@@ -544,11 +524,9 @@ if (! empty($conf->propal->enabled) && $user->rights->propal->lire)
 }
 
 
-print '</td></tr>';
-print '</table>';
+print '</div></div></div>';
 
 llxFooter();
 
 $db->close();
-
 ?>

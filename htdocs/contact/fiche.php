@@ -4,6 +4,7 @@
  * Copyright (C) 2004      Benoit Mortier       <benoit.mortier@opensides.be>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2007      Franky Van Liedekerke <franky.van.liedekerke@telenet.be>
+ * Copyright (C) 2013      Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/contact.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/company.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/doleditor.class.php';
 
 $langs->load("companies");
 $langs->load("users");
@@ -50,6 +52,9 @@ if ($user->societe_id) $socid=$user->societe_id;
 $object = new Contact($db);
 $extrafields = new ExtraFields($db);
 
+// fetch optionals attributes and labels
+$extralabels=$extrafields->fetch_name_optionals_label($object->table_element);
+
 // Get object canvas (By default, this is not defined, so standard usage of dolibarr)
 $object->getCanvas($id);
 $objcanvas=null;
@@ -62,11 +67,9 @@ if (! empty($canvas))
 }
 
 // Security check
-$result = restrictedArea($user, 'contact', $id, 'socpeople&societe', '', '', '', $objcanvas); // If we create a contact with no company (shared contacts), no check on write permission
+$result = restrictedArea($user, 'contact', $id, 'socpeople&societe', '', '', 'rowid', $objcanvas); // If we create a contact with no company (shared contacts), no check on write permission
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
-$hookmanager=new HookManager($db);
 $hookmanager->initHooks(array('contactcard'));
 
 
@@ -142,7 +145,7 @@ if (empty($reshook))
         $object->zip			= $_POST["zipcode"];
         $object->town			= $_POST["town"];
         $object->country_id		= $_POST["country_id"];
-        $object->state_id       = $_POST["departement_id"];
+        $object->state_id       = $_POST["state_id"];
         $object->email			= $_POST["email"];
         $object->phone_pro		= $_POST["phone_pro"];
         $object->phone_perso	= $_POST["phone_perso"];
@@ -151,20 +154,15 @@ if (empty($reshook))
         $object->jabberid		= $_POST["jabberid"];
 		$object->no_email		= $_POST["no_email"];
         $object->priv			= $_POST["priv"];
-        $object->note			= $_POST["note"];
+        $object->note_public	= GETPOST("note_public");
+        $object->note_private	= GETPOST("note_private");
 
         // Note: Correct date should be completed with location to have exact GM time of birth.
         $object->birthday = dol_mktime(0,0,0,$_POST["birthdaymonth"],$_POST["birthdayday"],$_POST["birthdayyear"]);
         $object->birthday_alert = $_POST["birthday_alert"];
 
-        // Get extra fields
-        foreach($_POST as $key => $value)
-        {
-        	if (preg_match("/^options_/",$key))
-        	{
-        		$object->array_options[$key]=GETPOST($key);
-        	}
-        }
+        // Fill array 'array_options' with data from add form
+		$ret = $extrafields->setOptionalsFromPost($extralabels,$object);
 
         if (! $_POST["lastname"])
         {
@@ -198,9 +196,9 @@ if (empty($reshook))
 
     if ($action == 'confirm_delete' && $confirm == 'yes' && $user->rights->societe->contact->supprimer)
     {
-        $result=$object->fetch($_GET["id"]);
+        $result=$object->fetch($id);
 
-        $object->old_name      = $_POST["old_name"];
+        $object->old_lastname      = $_POST["old_lastname"];
         $object->old_firstname = $_POST["old_firstname"];
 
         $result = $object->delete();
@@ -225,11 +223,13 @@ if (empty($reshook))
 
         if (! $error)
         {
-            $object->fetch($_POST["contactid"]);
+        	$contactid=GETPOST("contactid",'int');
+
+            $object->fetch($contactid);
 
             $object->oldcopy=dol_clone($object);
 
-            $object->old_name		= $_POST["old_name"];
+            $object->old_lastname	= $_POST["old_lastname"];
             $object->old_firstname	= $_POST["old_firstname"];
 
             $object->socid			= $_POST["socid"];
@@ -241,7 +241,7 @@ if (empty($reshook))
             $object->address		= $_POST["address"];
             $object->zip			= $_POST["zipcode"];
             $object->town			= $_POST["town"];
-            $object->state_id   	= $_POST["departement_id"];
+            $object->state_id   	= $_POST["state_id"];
             $object->country_id		= $_POST["country_id"];
 
             $object->email			= $_POST["email"];
@@ -252,22 +252,17 @@ if (empty($reshook))
             $object->jabberid		= $_POST["jabberid"];
 			$object->no_email		= $_POST["no_email"];
             $object->priv			= $_POST["priv"];
-            $object->note			= $_POST["note"];
+        	$object->note_public	= GETPOST("note_public");
+       		$object->note_private	= GETPOST("note_private");
 
-            // Get extra fields
-            foreach($_POST as $key => $value)
-            {
-            	if (preg_match("/^options_/",$key))
-            	{
-            		$object->array_options[$key]=GETPOST($key);
-            	}
-            }
+            // Fill array 'array_options' with data from add form
+			$ret = $extrafields->setOptionalsFromPost($extralabels,$object);
 
-            $result = $object->update($_POST["contactid"], $user);
+            $result = $object->update($contactid, $user);
 
             if ($result > 0)
             {
-                $object->old_name='';
+                $object->old_lastname='';
                 $object->old_firstname='';
                 $action = 'view';
             }
@@ -285,8 +280,6 @@ if (empty($reshook))
  *	View
  */
 
-// fetch optionals attributes and labels
-$extralabels=$extrafields->fetch_name_optionals_label('contact');
 
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
 llxHeader('',$langs->trans("ContactsAddresses"),$help_url);
@@ -309,11 +302,12 @@ if (is_object($objcanvas) && $objcanvas->displayCanvasExists($action))
     // -----------------------------------------
     if (empty($object->error) && $id)
  	{
-	     $object = new Contact($db);
-	     $object->fetch($id);
+ 		$object = new Contact($db);
+ 		$result=$object->fetch($id);
+		if ($result <= 0) dol_print_error('',$object->error);
  	}
-	$objcanvas->assign_values($action, $id);	// Set value for templates
-	$objcanvas->display_canvas($action);		// Show template
+   	$objcanvas->assign_values($action, $object->id, $object->ref);	// Set value for templates
+    $objcanvas->display_canvas($action);							// Show template
 }
 else
 {
@@ -326,7 +320,7 @@ else
     {
         if ($action == 'delete')
         {
-            $ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$_GET["id"],$langs->trans("DeleteContact"),$langs->trans("ConfirmDeleteContact"),"confirm_delete",'',0,1);
+            $ret=$form->form_confirm($_SERVER["PHP_SELF"]."?id=".$id,$langs->trans("DeleteContact"),$langs->trans("ConfirmDeleteContact"),"confirm_delete",'',0,1);
             if ($ret == 'html') print '<br>';
         }
     }
@@ -385,7 +379,7 @@ else
 							});
 
 							$("#copyaddressfromsoc").click(function() {
-								$(\'textarea[name="address"]\').text("'.dol_escape_js($objsoc->address).'");
+								$(\'textarea[name="address"]\').val("'.dol_escape_js($objsoc->address).'");
 								$(\'input[name="zipcode"]\').val("'.dol_escape_js($objsoc->zip).'");
 								$(\'input[name="town"]\').val("'.dol_escape_js($objsoc->town).'");
 								$(\'select[name="country_id"]\').val("'.dol_escape_js($objsoc->country_id).'");
@@ -512,23 +506,28 @@ else
             print $form->selectarray('priv',$selectarray,(isset($_POST["priv"])?$_POST["priv"]:$object->priv),0);
             print '</td></tr>';
 
-            // Note
-            print '<tr><td valign="top">'.$langs->trans("Note").'</td><td colspan="3" valign="top"><textarea name="note" cols="70" rows="'.ROWS_3.'">'.(isset($_POST["note"])?$_POST["note"]:$object->note).'</textarea></td></tr>';
+            // Note Public
+            print '<tr><td valign="top">'.$langs->trans("NotePublic").'</td>';
+            print '<td colspan="3" valign="top">';
+            $doleditor = new DolEditor('note_public', GETPOST('note_public'), '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+            print $doleditor->Create(1);
+            //print '<textarea name="note" cols="70" rows="'.ROWS_3.'">'.(isset($_POST["note"])?$_POST["note"]:$object->note).'</textarea>';
+            print '</td></tr>';
+
+            // Note Private
+            print '<tr><td valign="top">'.$langs->trans("NotePrivate").'</td>';
+            print '<td colspan="3" valign="top">';
+            $doleditor = new DolEditor('note_private', GETPOST('note_private'), '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+            print $doleditor->Create(1);
+            //print '<textarea name="note" cols="70" rows="'.ROWS_3.'">'.(isset($_POST["note"])?$_POST["note"]:$object->note).'</textarea>';
+            print '</td></tr>';
 
             // Other attributes
             $parameters=array('colspan' => ' colspan="3"');
             $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
             if (empty($reshook) && ! empty($extrafields->attribute_label))
             {
-            	foreach($extrafields->attribute_label as $key=>$label)
-            	{
-            		$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:(isset($object->array_options["options_".$key])?$object->array_options["options_".$key]:''));
-            		print '<tr><td';
-            		if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-            		print '>'.$label.'</td><td colspan="3">';
-            		print $extrafields->showInputField($key,$value);
-            		print '</td></tr>'."\n";
-            	}
+            	print $object->showOptionals($extrafields,'edit');
             }
 
             print "</table><br>";
@@ -587,8 +586,6 @@ else
             if (isset($_POST["country_id"]) || $object->country_id)
             {
 	            $tmparray=getCountry($object->country_id,'all');
-	            $object->pays_code    =	$tmparray['code'];
-	            $object->pays         =	$tmparray['label'];
 	            $object->country_code =	$tmparray['code'];
 	            $object->country      =	$tmparray['label'];
             }
@@ -609,11 +606,11 @@ else
 							});
 
 							$("#copyaddressfromsoc").click(function() {
-								$(\'textarea[name="address"]\').text("'.addslashes($objsoc->address).'");
-								$(\'input[name="zipcode"]\').val("'.addslashes($objsoc->zip).'");
-								$(\'input[name="town"]\').val("'.addslashes($objsoc->town).'");
-								$(\'select[name="country_id"]\').val("'.addslashes($objsoc->country_id).'");
-								$(\'select[name="state_id"]\').val("'.addslashes($objsoc->state_id).'");
+								$(\'textarea[name="address"]\').text("'.dol_escape_js($objsoc->address).'");
+								$(\'input[name="zipcode"]\').val("'.dol_escape_js($objsoc->zip).'");
+								$(\'input[name="town"]\').val("'.dol_escape_js($objsoc->town).'");
+								$(\'select[name="country_id"]\').val("'.dol_escape_js($objsoc->country_id).'");
+								$(\'select[name="state_id"]\').val("'.dol_escape_js($objsoc->state_id).'");
             				});
 						})'."\n";
 				print '</script>'."\n";
@@ -624,7 +621,7 @@ else
             print '<input type="hidden" name="id" value="'.$id.'">';
             print '<input type="hidden" name="action" value="update">';
             print '<input type="hidden" name="contactid" value="'.$object->id.'">';
-            print '<input type="hidden" name="old_name" value="'.$object->name.'">';
+            print '<input type="hidden" name="old_lastname" value="'.$object->lastname.'">';
             print '<input type="hidden" name="old_firstname" value="'.$object->firstname.'">';
             if (! empty($backtopage)) print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
 
@@ -635,7 +632,7 @@ else
             print $object->ref;
             print '</td></tr>';
 
-            // Name
+            // Lastname
             print '<tr><td width="20%" class="fieldrequired">'.$langs->trans("Lastname").' / '.$langs->trans("Label").'</td><td width="30%"><input name="lastname" type="text" size="20" maxlength="80" value="'.(isset($_POST["lastname"])?$_POST["lastname"]:$object->lastname).'"></td>';
             print '<td width="20%">'.$langs->trans("Firstname").'</td><td width="30%"><input name="firstname" type="text" size="20" maxlength="80" value="'.(isset($_POST["firstname"])?$_POST["firstname"]:$object->firstname).'"></td></tr>';
 
@@ -726,26 +723,30 @@ else
             print $form->selectarray('priv',$selectarray,$object->priv,0);
             print '</td></tr>';
 
-            // Note
-            print '<tr><td valign="top">'.$langs->trans("Note").'</td><td colspan="3">';
-            print '<textarea name="note" cols="70" rows="'.ROWS_3.'">';
-            print isset($_POST["note"])?$_POST["note"]:$object->note;
-            print '</textarea></td></tr>';
+            // Note Public
+            print '<tr><td valign="top">'.$langs->trans("NotePublic").'</td><td colspan="3">';
+            $doleditor = new DolEditor('note_public', $object->note_public, '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+            print $doleditor->Create(1);
+           // print '<textarea name="note" cols="70" rows="'.ROWS_3.'">';
+           // print isset($_POST["note"])?$_POST["note"]:$object->note;
+           // print '</textarea></td></tr>';
+           print '</td></tr>';
+
+           // Note Private
+           print '<tr><td valign="top">'.$langs->trans("NotePrivate").'</td><td colspan="3">';
+           $doleditor = new DolEditor('note_private', $object->note_private, '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+           print $doleditor->Create(1);
+           // print '<textarea name="note" cols="70" rows="'.ROWS_3.'">';
+           // print isset($_POST["note"])?$_POST["note"]:$object->note;
+           // print '</textarea></td></tr>';
+           print '</td></tr>';
 
             // Other attributes
             $parameters=array('colspan' => ' colspan="3"');
             $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
             if (empty($reshook) && ! empty($extrafields->attribute_label))
             {
-            	foreach($extrafields->attribute_label as $key=>$label)
-            	{
-            		$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$object->array_options["options_".$key]);
-            		print '<tr><td';
-            		if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-            		print '>'.$label.'</td><td colspan="3">';
-            		print $extrafields->showInputField($key,$value);
-            		print "</td></tr>\n";
-            	}
+            	print $object->showOptionals($extrafields,'edit');
             }
 
             $object->load_ref_elements();
@@ -813,9 +814,9 @@ else
 
         if ($action == 'create_user')
         {
-            // Full firstname and name separated with a dot : firstname.name
+            // Full firstname and lastname separated with a dot : firstname.lastname
             include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
-            $login=dol_buildlogin($object->nom,$object->prenom);
+            $login=dol_buildlogin($object->lastname,$object->firstname);
 
             $generated_password='';
             if (! $ldap_sid) // TODO ldap_sid ?
@@ -883,17 +884,17 @@ else
         dol_print_address($object->address,'gmap','contact',$object->id);
         print '</td></tr>';
 
-        // Zip Town
+        // Zip/Town
         print '<tr><td>'.$langs->trans("Zip").' / '.$langs->trans("Town").'</td><td colspan="3">';
-        print $object->cp;
-        if ($object->cp) print '&nbsp;';
-        print $object->ville.'</td></tr>';
+        print $object->zip;
+        if ($object->zip) print '&nbsp;';
+        print $object->town.'</td></tr>';
 
         // Country
         print '<tr><td>'.$langs->trans("Country").'</td><td colspan="3">';
         $img=picto_from_langcode($object->country_code);
         if ($img) print $img.' ';
-        print $object->pays;
+        print $object->country;
         print '</td></tr>';
 
         // State
@@ -939,9 +940,14 @@ else
         print $object->LibPubPriv($object->priv);
         print '</td></tr>';
 
-        // Note
-        print '<tr><td valign="top">'.$langs->trans("Note").'</td><td colspan="3">';
-        print nl2br($object->note);
+        // Note Public
+        print '<tr><td valign="top">'.$langs->trans("NotePublic").'</td><td colspan="3">';
+        print nl2br($object->note_public);
+        print '</td></tr>';
+
+        // Note Private
+        print '<tr><td valign="top">'.$langs->trans("NotePrivate").'</td><td colspan="3">';
+        print nl2br($object->note_private);
         print '</td></tr>';
 
         // Other attributes
@@ -949,13 +955,7 @@ else
         $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
         if (empty($reshook) && ! empty($extrafields->attribute_label))
         {
-        	foreach($extrafields->attribute_label as $key=>$label)
-        	{
-        		$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:(isset($object->array_options['options_'.$key])?$object->array_options['options_'.$key]:''));
-        		print '<tr><td>'.$label.'</td><td colspan="3">';
-        		print $extrafields->showOutputField($key,$value);
-        		print "</td></tr>\n";
-        	}
+        	print $object->showOptionals($extrafields);
         }
 
         $object->load_ref_elements();

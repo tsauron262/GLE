@@ -33,27 +33,29 @@ class box_comptes extends ModeleBoxes
 {
 	var $boxcode="currentaccounts";
 	var $boximg="object_bill";
-	var $boxlabel;
+	var $boxlabel="BoxCurrentAccounts";
 	var $depends = array("banque");     // Box active if module banque active
 
 	var $db;
 	var $param;
 	var $enabled = 1;
-	
+
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
-	
+
 	/**
 	 *  Constructor
+	 *
+	 *  @param  DoliDB	$db      	Database handler
+     *  @param	string	$param		More parameters
 	 */
-	function __construct()
+	function __construct($db,$param='')
 	{
-		global $conf, $langs, $user;
-		$langs->load("boxes");
+		global $conf, $user;
 
-		$this->boxlabel=$langs->transnoentitiesnoconv('BoxCurrentAccounts');
-		
+		$this->db = $db;
+
 		// disable module for such cases
 		$listofmodulesforexternal=explode(',',$conf->global->MAIN_MODULES_FOR_EXTERNAL);
 		if (! in_array('banque',$listofmodulesforexternal) && ! empty($user->societe_id)) $this->enabled=0;	// disabled for external users
@@ -77,7 +79,7 @@ class box_comptes extends ModeleBoxes
 		{
 			$sql = "SELECT rowid, ref, label, bank, number, courant, clos, rappro, url,";
 			$sql.= " code_banque, code_guichet, cle_rib, bic, iban_prefix,";
-			$sql.= " domiciliation, proprio, adresse_proprio,";
+			$sql.= " domiciliation, proprio, owner_address,";
 			$sql.= " account_number, currency_code,";
 			$sql.= " min_allowed, min_desired, comment";
 			$sql.= " FROM ".MAIN_DB_PREFIX."bank_account";

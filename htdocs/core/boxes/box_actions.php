@@ -32,7 +32,7 @@ class box_actions extends ModeleBoxes
 {
 	var $boxcode="lastactions";
 	var $boximg="object_action";
-	var $boxlabel;
+	var $boxlabel="BoxLastActions";
 	var $depends = array("agenda");
 
 	var $db;
@@ -41,17 +41,6 @@ class box_actions extends ModeleBoxes
 	var $info_box_head = array();
 	var $info_box_contents = array();
 
-
-	/**
-	 *  Constructor
-	 */
-	function __construct()
-	{
-		global $langs;
-		$langs->load("boxes");
-
-		$this->boxlabel=$langs->transnoentitiesnoconv("BoxLastActions");
-	}
 
 	/**
      *  Load data for box to show them later
@@ -112,7 +101,7 @@ class box_actions extends ModeleBoxes
 					'logo' => ("action"),
 					'url' => DOL_URL_ROOT."/comm/action/fiche.php?id=".$objp->id);
 
-					$this->info_box_contents[$i][1] = array('td' => 'align="left" nowrap="1"',
+					$this->info_box_contents[$i][1] = array('td' => 'align="left"',
 					'text' => dol_trunc($label,32),
 					'text2'=> $late,
 					'url' => DOL_URL_ROOT."/comm/action/fiche.php?id=".$objp->id);
@@ -125,7 +114,7 @@ class box_actions extends ModeleBoxes
 					'text' => dol_trunc($objp->nom,24),
 					'url' => DOL_URL_ROOT."/societe/soc.php?socid=".$objp->socid);
 
-					$this->info_box_contents[$i][4] = array('td' => 'align="left" nowrap="nowrap"',
+					$this->info_box_contents[$i][4] = array('td' => 'align="left" class="nowrap"',
 					'text' => dol_print_date($datelimite, "dayhour"));
 
 					$this->info_box_contents[$i][5] = array('td' => 'align="right"',

@@ -43,23 +43,24 @@ $confirm = GETPOST('confirm');
 $lineid  = GETPOST('lineid','int');
 
 // Security check
+$socid = GETPOST('socid','int');
+if ($user->societe_id) $socid=$user->societe_id;
 if ($user->societe_id > 0)
 {
 	unset($_GET["action"]);
 	$action='';
-	$socid = $user->societe_id;
 }
+$result = restrictedArea($user, 'agenda', $objectid, 'actioncomm&societe', 'myactions&allactions', 'fk_soc', 'id');
+
 
 $object = new ActionComm($db);
+
 
 /*
  * Actions
  */
 
-/*
- * Ajout d'un nouveau contact
- */
-
+// Add new nouveau contact
 if ($action == 'addcontact')
 {
 	$result = $object->fetch($id);
@@ -266,7 +267,7 @@ if ($id > 0 || ! empty($ref))
 			// Ligne ajout pour contact interne
 			print "<tr $bc[$var]>";
 
-			print '<td nowrap="nowrap">';
+			print '<td class="nowrap">';
 			print img_object('','user').' '.$langs->trans("Users");
 			print '</td>';
 
@@ -298,7 +299,7 @@ if ($id > 0 || ! empty($ref))
 				$var=!$var;
 				print "<tr $bc[$var]>";
 
-				print '<td nowrap="nowrap">';
+				print '<td class="nowrap">';
 				print img_object('','contact').' '.$langs->trans("ThirdPartyContacts");
 				print '</td>';
 

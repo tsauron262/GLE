@@ -87,13 +87,13 @@ $permission=($user->rights->projet->creer || $user->rights->projet->all->creer);
 
 if ($action == 'setnote_public' && ! empty($permission))
 {
-    $result=$object->update_note_public(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES));
+    $result=$object->update_note(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES),'_public');
     if ($result < 0) dol_print_error($db,$object->error);
 }
 
 else if ($action == 'setnote_private' && ! empty($permission))
 {
-    $result=$object->update_note(dol_html_entity_decode(GETPOST('note_private'), ENT_QUOTES));
+    $result=$object->update_note(dol_html_entity_decode(GETPOST('note_private'), ENT_QUOTES), '_private');
     if ($result < 0) dol_print_error($db,$object->error);
 }
 

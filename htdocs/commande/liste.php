@@ -5,6 +5,7 @@
  * Copyright (C) 2005      Marc Barilley / Ocebo  <marc@ocebo.com>
  * Copyright (C) 2005-2012 Regis Houssin          <regis.houssin@capnetworks.com>
  * Copyright (C) 2012      Juanjo Menent          <jmenent@2byte.es>
+ * Copyright (C) 2013      Christophe Battarel    <christophe.battarel@altairis.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +27,10 @@
  * 	\brief      Page to list orders
  */
 require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
-require_once DOL_DOCUMENT_ROOT . '/core/class/html.formother.class.php';
-require_once DOL_DOCUMENT_ROOT . '/commande/class/commande.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formfile.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
 
 $langs->load('orders');
 $langs->load('deliveries');
@@ -132,24 +134,31 @@ if ($sref) {
 if ($sall) {
     $sql.= " AND (c.ref LIKE '%" . $db->escape($sall) . "%' OR c.note LIKE '%" . $db->escape($sall) . "%')";
 }
-if ($viewstatut <> '') {
-    if ($viewstatut < 4 && $viewstatut > -3) {
-        $sql.= ' AND c.fk_statut =' . $viewstatut; // brouillon, validee, en cours, annulee
-        if ($viewstatut == 3) {
-            $sql.= ' AND c.facture = 0'; // need to create invoice
-        }
-    }
-    if ($viewstatut == 4) {
-        $sql.= ' AND c.facture = 1'; // invoice created
-    }
-    if ($viewstatut == -2) { // To process
-        //$sql.= ' AND c.fk_statut IN (1,2,3) AND c.facture = 0';
-        $sql.= " AND ((c.fk_statut IN (1,2)) OR (c.fk_statut = 3 AND c.facture = 0))";    // If status is 2 and facture=1, it must be selected
-    }
-    if ($viewstatut == -3) { // To bill
-        $sql.= ' AND c.fk_statut in (1,2,3)';
-        $sql.= ' AND c.facture = 0'; // invoice not created
-    }
+if ($viewstatut <> '')
+{
+	if ($viewstatut < 4 && $viewstatut > -3)
+	{
+		if ($viewstatut == 1 && empty($conf->expedition->enabled)) $sql.= ' AND c.fk_statut IN (1,2)';	// If module expedition disabled, we include order with status 'sending in process' into 'validated'
+		else $sql.= ' AND c.fk_statut = '.$viewstatut; // brouillon, validee, en cours, annulee
+		if ($viewstatut == 3)
+		{
+			$sql.= ' AND c.facture = 0'; // need to create invoice
+		}
+	}
+	if ($viewstatut == 4)
+	{
+		$sql.= ' AND c.facture = 1'; // invoice created
+	}
+	if ($viewstatut == -2)	// To process
+	{
+		//$sql.= ' AND c.fk_statut IN (1,2,3) AND c.facture = 0';
+		$sql.= " AND ((c.fk_statut IN (1,2)) OR (c.fk_statut = 3 AND c.facture = 0))";    // If status is 2 and facture=1, it must be selected
+	}
+	if ($viewstatut == -3)	// To bill
+	{
+		$sql.= ' AND c.fk_statut in (1,2,3)';
+		$sql.= ' AND c.facture = 0'; // invoice not created
+	}
 }
 if ($ordermonth > 0) {
     if ($orderyear > 0 && empty($day))
@@ -190,30 +199,34 @@ $sql.= $db->plimit($limit + 1, $offset);
 
 //print $sql;
 $resql = $db->query($sql);
-if ($resql) {
-    if ($socid) {
-        $soc = new Societe($db);
-        $soc->fetch($socid);
-        $title = $langs->trans('ListOfOrders') . ' - ' . $soc->nom;
-    } else {
-        $title = $langs->trans('ListOfOrders');
-    }
-    if (strval($viewstatut) == '0')
-        $title.=' - ' . $langs->trans('StatusOrderDraftShort');
-    if ($viewstatut == 1)
-        $title.=' - ' . $langs->trans('StatusOrderValidatedShort');
-    if ($viewstatut == 2)
-        $title.=' - ' . $langs->trans('StatusOrderOnProcessShort');
-    if ($viewstatut == 3)
-        $title.=' - ' . $langs->trans('StatusOrderToBillShort');
-    if ($viewstatut == 4)
-        $title.=' - ' . $langs->trans('StatusOrderProcessedShort');
-    if ($viewstatut == -1)
-        $title.=' - ' . $langs->trans('StatusOrderCanceledShort');
-    if ($viewstatut == -2)
-        $title.=' - ' . $langs->trans('StatusOrderToProcessShort');
-    if ($viewstatut == -3)
-        $title.=' - ' . $langs->trans('StatusOrderValidated') . ', ' . $langs->trans("StatusOrderSent") . ', ' . $langs->trans('StatusOrderToBill');
+if ($resql)
+{
+	if ($socid)
+	{
+		$soc = new Societe($db);
+		$soc->fetch($socid);
+		$title = $langs->trans('ListOfOrders') . ' - '.$soc->nom;
+	}
+	else
+	{
+		$title = $langs->trans('ListOfOrders');
+	}
+	if (strval($viewstatut) == '0')
+	$title.=' - '.$langs->trans('StatusOrderDraftShort');
+	if ($viewstatut == 1)
+	$title.=' - '.$langs->trans('StatusOrderValidatedShort');
+	if ($viewstatut == 2)
+	$title.=' - '.$langs->trans('StatusOrderOnProcessShort');
+	if ($viewstatut == 3)
+	$title.=' - '.$langs->trans('StatusOrderToBillShort');
+	if ($viewstatut == 4)
+	$title.=' - '.$langs->trans('StatusOrderProcessedShort');
+	if ($viewstatut == -1)
+	$title.=' - '.$langs->trans('StatusOrderCanceledShort');
+	if ($viewstatut == -2)
+	$title.=' - '.$langs->trans('StatusOrderToProcessShort');
+	if ($viewstatut == -3)
+	$title.=' - '.$langs->trans('StatusOrderValidated').', '.(empty($conf->expedition->enabled)?'':$langs->trans("StatusOrderSent").', ').$langs->trans('StatusOrderToBill');
 
     $param = '&socid=' . $socid . '&viewstatut=' . $viewstatut;
     if ($ordermonth)
@@ -266,79 +279,83 @@ if ($resql) {
         print '</td></tr>';
     }
 
-    print '<tr class="liste_titre">';
-    print_liste_field_titre($langs->trans('Ref'), $_SERVER["PHP_SELF"], 'c.ref', '', $param, 'width="25%"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('Company'), $_SERVER["PHP_SELF"], 's.nom', '', $param, '', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('RefCustomerOrder'), $_SERVER["PHP_SELF"], 'c.ref_client', '', $param, '', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('OrderDate'), $_SERVER["PHP_SELF"], 'c.date_commande', '', $param, 'align="right"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('DeliveryDate'), $_SERVER["PHP_SELF"], 'c.date_livraison', '', $param, 'align="right"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('Status'), $_SERVER["PHP_SELF"], 'c.fk_statut', '', $param, 'align="right"', $sortfield, $sortorder);
-    print '</tr>';
-    print '<tr class="liste_titre">';
-    print '<td class="liste_titre">';
-    print '<input class="flat" size="10" type="text" name="sref" value="' . $sref . '">';
-    print '</td><td class="liste_titre" align="left">';
-    print '<input class="flat" type="text" name="snom" value="' . $snom . '">';
-    print '</td><td class="liste_titre" align="left">';
-    print '<input class="flat" type="text" size="10" name="sref_client" value="' . $sref_client . '">';
-    print '</td><td class="liste_titre">&nbsp;';
-    print '</td><td class="liste_titre">&nbsp;';
-    print '</td><td align="right" class="liste_titre">';
-    print '<input type="image" class="liste_titre" name="button_search" src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/search.png"  value="' . dol_escape_htmltag($langs->trans("Search")) . '" title="' . dol_escape_htmltag($langs->trans("Search")) . '">';
-    print '</td></tr>';
+	print '<tr class="liste_titre">';
+	print_liste_field_titre($langs->trans('Ref'),$_SERVER["PHP_SELF"],'c.ref','',$param,'width="25%"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('Company'),$_SERVER["PHP_SELF"],'s.nom','',$param,'',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('RefCustomerOrder'),$_SERVER["PHP_SELF"],'c.ref_client','',$param,'',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('OrderDate'),$_SERVER["PHP_SELF"],'c.date_commande','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('DeliveryDate'),$_SERVER["PHP_SELF"],'c.date_livraison','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('AmountHT'),$_SERVER["PHP_SELF"],'c.total_ht','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('Status'),$_SERVER["PHP_SELF"],'c.fk_statut','',$param,'align="right"',$sortfield,$sortorder);
+	print '</tr>';
+	print '<tr class="liste_titre">';
+	print '<td class="liste_titre">';
+	print '<input class="flat" size="10" type="text" name="sref" value="'.$sref.'">';
+	print '</td><td class="liste_titre" align="left">';
+	print '<input class="flat" type="text" name="snom" value="'.$snom.'">';
+	print '</td><td class="liste_titre" align="left">';
+	print '<input class="flat" type="text" size="10" name="sref_client" value="'.$sref_client.'">';
+	print '</td><td class="liste_titre">&nbsp;';
+	print '</td><td class="liste_titre">&nbsp;';
+	print '</td><td class="liste_titre">&nbsp;';
+	print '</td><td align="right" class="liste_titre">';
+	print '<input type="image" class="liste_titre" name="button_search" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/search.png"  value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+	print '</td></tr>';
 
     $var = true;
     $total = 0;
     $subtotal = 0;
 
-    $generic_commande = new Commande($db);
-    while ($i < min($num, $limit)) {
-        $objp = $db->fetch_object($resql);
-        $var = !$var;
-        print '<tr ' . $bc[$var] . '>';
-        print '<td nowrap="nowrap">';
+	$generic_commande = new Commande($db);
+	while ($i < min($num,$limit))
+	{
+		$objp = $db->fetch_object($resql);
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td class="nowrap">';
 
         $generic_commande->id = $objp->rowid;
         $generic_commande->ref = $objp->ref;
 
-        print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-        print '<td class="nobordernopadding" nowrap="nowrap">';
-        print $generic_commande->getNomUrl(1, ($viewstatut != 2 ? 0 : $objp->fk_statut));
+		print '<table class="nobordernopadding"><tr class="nocellnopadd">';
+		print '<td class="nobordernopadding nowrap">';
+		print $generic_commande->getNomUrl(1,($viewstatut != 2?0:$objp->fk_statut));
+		print '</td>';
+
+		print '<td width="20" class="nobordernopadding nowrap">';
+		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && $db->jdate($objp->date_valid) < ($now - $conf->commande->client->warning_delay)) print img_picto($langs->trans("Late"),"warning");
+		print '</td>';
+
+		print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
+		$filename=dol_sanitizeFileName($objp->ref);
+		$filedir=$conf->commande->dir_output . '/' . dol_sanitizeFileName($objp->ref);
+		$urlsource=$_SERVER['PHP_SELF'].'?id='.$objp->rowid;
+		print $formfile->getDocumentsLink($generic_commande->element, $filename, $filedir);
+		print '</td>';
+		print '</tr></table>';
+
         print '</td>';
 
-        print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
-        if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && $db->jdate($objp->date_livraison) < ($now - $conf->commande->client->warning_delay))
-            print img_picto($langs->trans("Late"), "warning");
-        print '</td>';
+		// Company
+		$companystatic->id=$objp->socid;
+		$companystatic->nom=$objp->nom;
+		$companystatic->client=$objp->client;
+		print '<td>';
+		print $companystatic->getNomUrl(1,'customer');
 
-        print '<td width="16" align="right" class="nobordernopadding">';
-        $filename = dol_sanitizeFileName($objp->ref);
-        $filedir = $conf->commande->dir_output . '/' . dol_sanitizeFileName($objp->ref);
-        $urlsource = $_SERVER['PHP_SELF'] . '?id=' . $objp->rowid;
-        print $formfile->getDocumentsLink($generic_commande->element, $filename, $filedir);
-        print '</td></tr></table>';
-
-        print '</td>';
-
-        // Company
-        $companystatic->id = $objp->socid;
-        $companystatic->nom = $objp->nom;
-        $companystatic->client = $objp->client;
-        print '<td>';
-        print $companystatic->getNomUrl(1, 'customer');
-        print '&nbsp;<a href="' . DOL_URL_ROOT . '/commande/orderstoinvoice.php?socid=' . $companystatic->id . '">';
-
-        // If module invoices enabled and user with invoice creation permissions
-        if (!empty($conf->facture->enabled)) {
-            if ($user->rights->facture->creer) {
-
-                if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0)) {
-
-                    print img_picto($langs->trans("CreateInvoiceForThisCustomer") . ' : ' . $companystatic->nom, 'object_bill') . '</a>';
-                }
-            }
-        }
-        print '</td>';
+		// If module invoices enabled and user with invoice creation permissions
+		if (! empty($conf->facture->enabled) && ! empty($conf->global->ORDER_BILLING_ALL_CUSTOMER))
+		{
+			if ($user->rights->facture->creer)
+			{
+				if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0))
+				{
+					print '&nbsp;<a href="'.DOL_URL_ROOT.'/commande/orderstoinvoice.php?socid='.$companystatic->id.'">';
+					print img_picto($langs->trans("CreateInvoiceForThisCustomer").' : '.$companystatic->nom, 'object_bill', 'hideonsmrtphone').'</a>';
+				}
+			}
+		}
+		print '</td>';
 
         print '<td>' . $objp->ref_client . '</td>';
 
@@ -364,16 +381,31 @@ if ($resql) {
         print ' <a href="' . $_SERVER['PHP_SELF'] . '?deliveryyear=' . $y . '">' . $y . '</a>';
         print '</td>';
 
-        // Statut
-        print '<td align="right" nowrap="nowrap">' . $generic_commande->LibStatut($objp->fk_statut, $objp->facturee, 5) . '</td>';
+		// Amount HT
+		print '<td align="right" class="nowrap">'.price($objp->total_ht).'</td>';
+
+		// Statut
+		print '<td align="right" class="nowrap">'.$generic_commande->LibStatut($objp->fk_statut,$objp->facturee,5).'</td>';
 
         print '</tr>';
 
-        $total+=$objp->total_ht;
-        $subtotal+=$objp->total_ht;
-        $i++;
-    }
-    print '</table>';
+		$total+=$objp->total_ht;
+		$subtotal+=$objp->total_ht;
+		$i++;
+	}
+
+	if (! empty($conf->global->MAIN_SHOW_TOTAL_FOR_LIMITED_LIST))
+	{
+		$var=!$var;
+		print '<tr '.$bc[$var].'>';
+		print '<td class="nowrap" colspan="5">'.$langs->trans('TotalHT').'</td>';
+		// Total HT
+		print '<td align="right" class="nowrap">'.price($total).'</td>';
+		print '<td class="nowrap">&nbsp;</td>';
+		print '</tr>';
+	}
+
+	print '</table>';
 
     print '</form>';
 

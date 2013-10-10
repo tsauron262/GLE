@@ -104,10 +104,13 @@ print_barre_liste($langs->trans("Sessions"), $page, $_SERVER["PHP_SELF"],"",$sor
 $savehandler=ini_get("session.save_handler");
 $savepath=ini_get("session.save_path");
 $openbasedir=ini_get("open_basedir");
+$phparray=phpinfo_array();
+$suhosin=empty($phparray['suhosin']["suhosin.session.encrypt"]["local"])?'':$phparray['suhosin']["suhosin.session.encrypt"]["local"];
 
 print '<b>'.$langs->trans("SessionSaveHandler").'</b>: '.$savehandler.'<br>';
 print '<b>'.$langs->trans("SessionSavePath").'</b>: '.$savepath.'<br>';
 if ($openbasedir) print '<b>'.$langs->trans("OpenBaseDir").'</b>: '.$openbasedir.'<br>';
+if ($suhosin) print '<b>'.$langs->trans("SuhosinSessionEncrypt").'</b>: '.$suhosin.'<br>';
 print '<br>';
 
 if ($action == 'purge')
@@ -148,16 +151,16 @@ if ($savehandler == 'files')
 		print '<td>'.$sessionentry['login'].'</td>';
 
 		// ID
-		print '<td align="left" nowrap="nowrap">';
+		print '<td align="left" class="nowrap">';
 		if ("$key" == session_id()) print $form->textwithpicto($key,$langs->trans("YourSession"));
 		else print $key;
 		print '</td>';
 
 		// Date creation
-		print '<td align="left" nowrap="nowrap">'.dol_print_date($sessionentry['creation'],'%Y-%m-%d %H:%M:%S').'</td>';
+		print '<td align="left" class="nowrap">'.dol_print_date($sessionentry['creation'],'%Y-%m-%d %H:%M:%S').'</td>';
 
 		// Date modification
-		print '<td align="left" nowrap="nowrap">'.dol_print_date($sessionentry['modification'],'%Y-%m-%d %H:%M:%S').'</td>';
+		print '<td align="left" class="nowrap">'.dol_print_date($sessionentry['modification'],'%Y-%m-%d %H:%M:%S').'</td>';
 
 		// Age
 		print '<td>'.$sessionentry['age'].'</td>';

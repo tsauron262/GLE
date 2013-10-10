@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2001-2003 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2009 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2013 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,15 +23,16 @@
  *		\brief      Page d'affichage d'un releve
  */
 
-require 'pre.inc.php';
+require('../../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/core/lib/bank.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/compta/bank/class/account.class.php';
 
-$action=GETPOST('action', 'alpha');
-
-$langs->load("companies");
 $langs->load("banks");
+$langs->load("categories");
+$langs->load("companies");
 $langs->load("bills");
 
+$action=GETPOST('action', 'alpha');
 $id=GETPOST('account');
 $ref=GETPOST('ref');
 $dvid=GETPOST('dvid');
@@ -84,7 +85,7 @@ if ($id > 0 || ! empty($ref))
 	$acct->fetch($id, $ref);
 }
 
-if (! isset($num))
+if (empty($num))
 {
 	/*
 	 *	Vue liste tous releves confondus
@@ -280,10 +281,10 @@ else
 			print "<tr $bc[$var]>";
 
 			// Date operation
-			print '<td nowrap="nowrap" align="center">'.dol_print_date($db->jdate($objp->do),"day").'</td>';
+			print '<td class="nowrap" align="center">'.dol_print_date($db->jdate($objp->do),"day").'</td>';
 
 			// Date de valeur
-			print '<td align="center" valign="center" nowrap="nowrap">';
+			print '<td align="center" valign="center" class="nowrap">';
 			print '<a href="releve.php?action=dvprev&amp;num='.$num.'&amp;account='.$acct->id.'&amp;dvid='.$objp->rowid.'">';
 			print img_previous().'</a> ';
 			print dol_print_date($db->jdate($objp->dv),"day") .' ';
@@ -292,7 +293,7 @@ else
 			print "</td>\n";
 
 			// Num cheque
-			print '<td nowrap="nowrap">'.$objp->fk_type.' '.($objp->num_chq?$objp->num_chq:'').'</td>';
+			print '<td class="nowrap">'.$objp->fk_type.' '.($objp->num_chq?$objp->num_chq:'').'</td>';
 
 			// Libelle
 			print '<td valign="center"><a href="'.DOL_URL_ROOT.'/compta/bank/ligne.php?rowid='.$objp->rowid.'&amp;account='.$acct->id.'">';

@@ -88,8 +88,7 @@ $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentTheme").'</td><td colspan="2">'.$conf->theme.'</td></tr>'."\n";
 $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentMenuHandler").'</td><td colspan="2">';
-if (preg_match('/^smartphone/',$conf->smart_menu) && ! empty($conf->browser->phone)) print $conf->smart_menu;
-else print $conf->top_menu;
+print $conf->standard_menu;
 print '</td></tr>'."\n";
 print '</table>';
 print '<br>';
@@ -132,27 +131,27 @@ $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentUserLanguage").'</td><td>'.$langs->getDefaultLang().'</td></tr>'."\n";
 // Thousands
 $var=!$var;
-$thousand=$langs->trans("SeparatorThousand");
+$thousand=$langs->transnoentitiesnoconv("SeparatorThousand");
 if ($thousand == 'SeparatorThousand') $thousand=' ';	// ' ' does not work on trans method
 if ($thousand == 'None') $thousand='';
-print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentValueSeparatorThousand").'</td><td>'.($thousand==' '?$langs->trans("Space"):$thousand).'</td></tr>'."\n";
+print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentValueSeparatorThousand").'</td><td>'.($thousand==' '?$langs->transnoentitiesnoconv("Space"):$thousand).'</td></tr>'."\n";
 // Decimals
 $var=!$var;
-$dec=$langs->trans("SeparatorDecimal");
+$dec=$langs->transnoentitiesnoconv("SeparatorDecimal");
 print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentValueSeparatorDecimal").'</td><td>'.$dec.'</td></tr>'."\n";
 // Show results of functions to see if everything works
 $var=!$var;
-print '<tr '.$bc[$var].'><td width="300">&nbsp; => price2num(1233.56+1)</td><td>'.price2num(1233.56+1,'2').'</td></tr>';
+print '<tr '.$bc[$var].'><td width="300">&nbsp; => price2num(1233.56+1)</td><td>'.price2num(1233.56+1,'2').'</td></tr>'."\n";
 $var=!$var;
-print "<tr ".$bc[$var].'><td width=\"300\">&nbsp; => price2num('."'1".$thousand."234".$dec."56')</td><td>".price2num("1".$thousand."234".$dec."56",'2')."</td>";
+print "<tr ".$bc[$var].'><td width="300">&nbsp; => price2num('."'1".$thousand."234".$dec."56')</td><td>".price2num("1".$thousand."234".$dec."56",'2')."</td></tr>\n";
 if (($thousand != ',' && $thousand != '.') || ($thousand != ' '))
 {
 	$var=!$var;
-	print "<tr ".$bc[$var].'><td width=\"300\">&nbsp; => price2num('."'1 234.56')</td><td>".price2num("1 234.56",'2')."</td>";
+	print "<tr ".$bc[$var].'><td width="300">&nbsp; => price2num('."'1 234.56')</td><td>".price2num("1 234.56",'2')."</td>";
 	print "</tr>\n";
 }
 $var=!$var;
-print '<tr '.$bc[$var].'><td width="300">&nbsp; => price(1234.56)</td><td>'.price(1234.56).'</td>';
+print '<tr '.$bc[$var].'><td width="300">&nbsp; => price(1234.56)</td><td>'.price(1234.56).'</td></tr>'."\n";
 // Timezone
 $txt =$langs->trans("OSTZ").' (variable system TZ): '.(! empty($_ENV["TZ"])?$_ENV["TZ"]:$langs->trans("NotDefined")).'<br>'."\n";
 $txt.=$langs->trans("PHPTZ").' (php.ini date.timezone): '.(ini_get("date.timezone")?ini_get("date.timezone"):$langs->trans("NotDefined")).''."\n"; // date.timezone must be in valued defined in http://fr3.php.net/manual/en/timezones.europe.php
@@ -217,11 +216,11 @@ print '<br>';
 // Parameters in conf.php file (when a parameter start with ?, it is shown only if defined)
 $configfileparameters=array(
 		'dolibarr_main_url_root' => $langs->trans("URLRoot"),
-		'dolibarr_main_url_root_alt' => $langs->trans("URLRoot").' (alt)',
+		'?dolibarr_main_url_root_alt' => $langs->trans("URLRoot").' (alt)',
 		'dolibarr_main_document_root'=> $langs->trans("DocumentRootServer"),
-		'dolibarr_main_document_root_alt' => $langs->trans("DocumentRootServer").' (alt)',
+		'?dolibarr_main_document_root_alt' => $langs->trans("DocumentRootServer").' (alt)',
 		'dolibarr_main_data_root' => $langs->trans("DataRootServer"),
-		'separator' => '',
+		'separator1' => '',
 		'dolibarr_main_db_host' => $langs->trans("DatabaseServer"),
 		'dolibarr_main_db_port' => $langs->trans("DatabasePort"),
 		'dolibarr_main_db_name' => $langs->trans("DatabaseName"),
@@ -231,7 +230,7 @@ $configfileparameters=array(
 		'dolibarr_main_db_character_set' => $langs->trans("DBStoringCharset"),
 		'dolibarr_main_db_collation' => $langs->trans("DBSortingCollation"),
 		'?dolibarr_main_db_prefix' => $langs->trans("Prefix"),
-		'separator' => '',
+		'separator2' => '',
 		'dolibarr_main_authentication' => $langs->trans("AuthenticationMode"),
 		'separator'=> '',
 		'?dolibarr_main_auth_ldap_login_attribute' => 'dolibarr_main_auth_ldap_login_attribute',
@@ -242,7 +241,7 @@ $configfileparameters=array(
 		'?dolibarr_main_auth_ldap_admin_login' => 'dolibarr_main_auth_ldap_admin_login',
 		'?dolibarr_main_auth_ldap_admin_pass' => 'dolibarr_main_auth_ldap_admin_pass',
 		'?dolibarr_main_auth_ldap_debug' => 'dolibarr_main_auth_ldap_debug',
-		'separator' => '',
+		'separator3' => '',
 		'?dolibarr_lib_ADODB_PATH' => 'dolibarr_lib_ADODB_PATH',
 		'?dolibarr_lib_TCPDF_PATH' => 'dolibarr_lib_TCPDF_PATH',
 		'?dolibarr_lib_FPDF_PATH' => 'dolibarr_lib_FPDF_PATH',
@@ -258,7 +257,8 @@ $configfileparameters=array(
 		'?dolibarr_js_JQUERY_FLOT' => 'dolibarr_js_JQUERY_FLOT',
 		'?dolibarr_font_DOL_DEFAULT_TTF' => 'dolibarr_font_DOL_DEFAULT_TTF',
 		'?dolibarr_font_DOL_DEFAULT_TTF_BOLD' => 'dolibarr_font_DOL_DEFAULT_TTF_BOLD',
-		'separator' => '',
+		'separator4' => '',
+		'dolibarr_main_prod' => 'Production mode (Hide all error messages)',
 		'?dolibarr_mailing_limit_sendbyweb' => 'Limit nb of email sent by page',
 		'?dolibarr_strict_mode' => 'Strict mode is on/off',
 		'?dolibarr_pdf_force_fpdf' => 'Force fpdf usage to generate PDF'
@@ -278,19 +278,16 @@ foreach($configfileparameters as $key => $value)
 {
 	$ignore=0;
 
-	if ($key == 'dolibarr_main_url_root_alt' && empty(${$key})) $ignore=1;
-	if ($key == 'dolibarr_main_document_root_alt' && empty(${$key})) $ignore=1;
-
 	if (empty($ignore))
 	{
 		$newkey = preg_replace('/^\?/','',$key);
 
 		if (preg_match('/^\?/',$key) && empty(${$newkey})) continue;    // We discard parametes starting with ?
-		if ($newkey == 'separator' && $lastkeyshown == 'separator') continue;
+		if (strpos($newkey, 'separator') !== false && $lastkeyshown == 'separator') continue;
 
 		$var=!$var;
 		print "<tr ".$bc[$var].">";
-		if ($newkey == 'separator')
+		if (strpos($newkey, 'separator') !== false)
 		{
 			print '<td colspan="3">&nbsp;</td>';
 		}

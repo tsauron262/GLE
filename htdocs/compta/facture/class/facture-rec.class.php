@@ -3,6 +3,7 @@
  * Copyright (C) 2004-2012	Laurent Destailleur		<eldy@users.sourceforge.net>
  * Copyright (C) 2009-2012	Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2010-2011	Juanjo Menent			<jmenent@2byte.es>
+ * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +55,8 @@ class FactureRec extends Facture
 	var $remise;
 	var $tva;
 	var $total;
-	var $note;
+	var $note_private;
+	var $note_public;
 	var $db_table;
 	var $propalid;
 	var $fk_project;
@@ -93,7 +95,8 @@ class FactureRec extends Facture
 
 		// Clean parameters
 		$this->titre=trim($this->titre);
-
+		$this->usenewprice=empty($this->usenewprice)?0:$this->usenewprice;
+		
 		$this->db->begin();
 
 		// Charge facture modele
@@ -111,7 +114,8 @@ class FactureRec extends Facture
 			$sql.= ", datec";
 			$sql.= ", amount";
 			$sql.= ", remise";
-			$sql.= ", note";
+			$sql.= ", note_private";
+			$sql.= ", note_public";
 			$sql.= ", fk_user_author";
 			$sql.= ", fk_projet";
 			$sql.= ", fk_cond_reglement";
@@ -119,17 +123,18 @@ class FactureRec extends Facture
 			$sql.= ", usenewprice";
 			$sql.= ") VALUES (";
 			$sql.= "'".$this->titre."'";
-			$sql.= ", '".$facsrc->socid."'";
+			$sql.= ", ".$facsrc->socid;
 			$sql.= ", ".$conf->entity;
-			$sql.= ", ".$this->db->idate($now);
-			$sql.= ", '".$facsrc->amount."'";
-			$sql.= ", '".$facsrc->remise."'";
-			$sql.= ", '".$this->db->escape($this->note)."'";
+			$sql.= ", '".$this->db->idate($now)."'";
+			$sql.= ", ".(!empty($facsrc->amount)?$facsrc->amount:'0');
+			$sql.= ", ".(!empty($facsrc->remise)?$this->remise:'0');
+			$sql.= ", ".(!empty($this->note_private)?("'".$this->db->escape($this->note_private)."'"):"NULL");
+			$sql.= ", ".(!empty($this->note_public)?("'".$this->db->escape($this->note_public)."'"):"NULL");
 			$sql.= ", '".$user->id."'";
 			$sql.= ", ".(! empty($facsrc->fk_project)?"'".$facsrc->fk_project."'":"null");
 			$sql.= ", '".$facsrc->cond_reglement_id."'";
 			$sql.= ", '".$facsrc->mode_reglement_id."'";
-			$sql.= ", '".$this->usenewprice."'";
+			$sql.= ", ".$this->usenewprice;
 			$sql.= ")";
 
 			if ($this->db->query($sql))
@@ -201,7 +206,7 @@ class FactureRec extends Facture
 	{
 		$sql = 'SELECT f.titre,f.fk_soc,f.amount,f.tva,f.total,f.total_ttc,f.remise_percent,f.remise_absolue,f.remise';
 		$sql.= ', f.date_lim_reglement as dlr';
-		$sql.= ', f.note, f.note_public, f.fk_user_author';
+		$sql.= ', f.note_private, f.note_public, f.fk_user_author';
 		$sql.= ', f.fk_mode_reglement, f.fk_cond_reglement';
 		$sql.= ', p.code as mode_reglement_code, p.libelle as mode_reglement_libelle';
 		$sql.= ', c.code as cond_reglement_code, c.libelle as cond_reglement_libelle, c.libelle_facture as cond_reglement_libelle_doc';
@@ -249,7 +254,7 @@ class FactureRec extends Facture
 				$this->cond_reglement_doc     = $obj->cond_reglement_libelle_doc;
 				$this->fk_project             = $obj->fk_projet;
 				$this->fk_facture_source      = $obj->fk_facture_source;
-				$this->note                   = $obj->note;
+				$this->note_private           = $obj->note_private;
 				$this->note_public            = $obj->note_public;
 				$this->user_author            = $obj->fk_user_author;
 				$this->modelpdf               = $obj->model_pdf;
@@ -336,7 +341,6 @@ class FactureRec extends Facture
 				$line->total_ht         = $objp->total_ht;
 				$line->total_tva        = $objp->total_tva;
 				$line->total_ttc        = $objp->total_ttc;
-				$line->export_compta    = $objp->fk_export_compta;
 				$line->code_ventilation = $objp->fk_code_ventilation;
 				$line->rang 			= $objp->rang;
 				$line->special_code 	= $objp->special_code;
@@ -572,5 +576,28 @@ class FactureRec extends Facture
 		return $result;
 	}
 
+	
+	/**
+	 *  Initialise an instance with random values.
+	 *  Used to build previews or test instances.
+	 *	id must be 0 if object instance is a specimen.
+	 *
+	 *	@param	string		$option		''=Create a specimen invoice with lines, 'nolines'=No lines
+	 *  @return	void
+	 */
+	function initAsSpecimen($option='')
+	{
+		global $user,$langs,$conf;
+
+		$now=dol_now();
+		$arraynow=dol_getdate($now);
+		$nownotime=dol_mktime(0, 0, 0, $arraynow['mon'], $arraynow['mday'], $arraynow['year']);
+
+		parent::initAsSpecimen($option);
+
+		$this->usenewprice = 1;		
+		
+	}
+		
 }
 ?>

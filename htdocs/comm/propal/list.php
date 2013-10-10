@@ -3,7 +3,7 @@
  * Copyright (C) 2004-2011 Laurent Destailleur   <eldy@users.sourceforge.net>
  * Copyright (C) 2004      Eric Seigne           <eric.seigne@ryxeo.com>
  * Copyright (C) 2005      Marc Barilley / Ocebo <marc@ocebo.com>
- * Copyright (C) 2005-2012 Regis Houssin         <regis.houssin@capnetworks.com>
+ * Copyright (C) 2005-2013 Regis Houssin         <regis.houssin@capnetworks.com>
  * Copyright (C) 2006      Andre Cianfarani      <acianfa@free.fr>
  * Copyright (C) 2010-2011 Juanjo Menent         <jmenent@2byte.es>
  * Copyright (C) 2010-2011 Philippe Grand        <philippe.grand@atoo-net.com>
@@ -77,8 +77,6 @@ $result = restrictedArea($user, $module, $objectid, $dbtable);
 
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
-include_once DOL_DOCUMENT_ROOT.'/core/class/hookmanager.class.php';
-$hookmanager=new HookManager($db);
 $hookmanager->initHooks(array('propalcard'));
 
 
@@ -133,7 +131,7 @@ if (! $sortfield) $sortfield='p.datep';
 if (! $sortorder) $sortorder='DESC';
 $limit = $conf->liste_limit;
 
-$sql = 'SELECT s.nom, s.rowid, s.client, ';
+$sql = 'SELECT s.rowid, s.nom, s.client, ';
 $sql.= 'p.rowid as propalid, p.total_ht, p.ref, p.ref_client, p.fk_statut, p.fk_user_author, p.datep as dp, p.fin_validite as dfv,';
 if (! $user->rights->societe->client->voir && ! $socid) $sql .= " sc.fk_soc, sc.fk_user,";
 $sql.= ' u.login';
@@ -167,7 +165,7 @@ if ($search_societe)
 }
 if ($search_montant_ht)
 {
-	$sql.= " AND p.total_ht='".$db->escape(trim($search_montant_ht))."'";
+	$sql.= " AND p.total_ht='".$db->escape(price2num(trim($search_montant_ht)))."'";
 }
 if ($sall) $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR p.note LIKE '%".$db->escape($sall)."%' OR pd.description LIKE '%".$db->escape($sall)."%')";
 if ($socid) $sql.= ' AND s.rowid = '.$socid;
@@ -303,17 +301,17 @@ if ($result)
 		$now = dol_now();
 		$var=!$var;
 		print '<tr '.$bc[$var].'>';
-		print '<td nowrap="nowrap">';
+		print '<td class="nowrap">';
 
 		$objectstatic->id=$objp->propalid;
 		$objectstatic->ref=$objp->ref;
 
 		print '<table class="nobordernopadding"><tr class="nocellnopadd">';
-		print '<td class="nobordernopadding" nowrap="nowrap">';
+		print '<td class="nobordernopadding nowrap">';
 		print $objectstatic->getNomUrl(1);
 		print '</td>';
 
-		print '<td width="20" class="nobordernopadding" nowrap="nowrap">';
+		print '<td width="20" class="nobordernopadding nowrap">';
 		if ($objp->fk_statut == 1 && $db->jdate($objp->dfv) < ($now - $conf->propal->cloture->warning_delay)) print img_warning($langs->trans("Late"));
 		print '</td>';
 
@@ -324,14 +322,7 @@ if ($result)
 		print $formfile->getDocumentsLink($objectstatic->element, $filename, $filedir);
 		print '</td></tr></table>';
 
-		if ($objp->client == 1)
-		{
-			$url = DOL_URL_ROOT.'/comm/fiche.php?socid='.$objp->rowid;
-		}
-		else
-		{
-			$url = DOL_URL_ROOT.'/comm/prospect/fiche.php?socid='.$objp->rowid;
-		}
+		$url = DOL_URL_ROOT.'/comm/fiche.php?socid='.$objp->rowid;
 
 		// Company
 		$companystatic->id=$objp->rowid;
@@ -342,7 +333,7 @@ if ($result)
 		print '</td>';
 
 		// Customer ref
-		print '<td nowrap="nowrap">';
+		print '<td class="nowrap">';
 		print $objp->ref_client;
 		print '</td>';
 

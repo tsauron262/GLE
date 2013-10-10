@@ -69,7 +69,7 @@ $extrafields = new ExtraFields($db);
 llxHeaderVierge($langs->trans("MemberCard"));
 
 // fetch optionals attributes and labels
-$extralabels=$extrafields->fetch_name_optionals_label('member');
+$extralabels=$extrafields->fetch_name_optionals_label('adherent');
 if ($id > 0)
 {
 	$res=$object->fetch($id);
@@ -93,9 +93,9 @@ if ($id > 0)
 		print '<tr><td>'.$langs->trans("Company").'</td><td class="valeur">'.$object->societe.'&nbsp;</td></tr>';
 		print '<tr><td>'.$langs->trans("Address").'</td><td class="valeur">'.nl2br($object->address).'&nbsp;</td></tr>';
 		print '<tr><td>'.$langs->trans("Zip").' '.$langs->trans("Town").'</td><td class="valeur">'.$object->zip.' '.$object->town.'&nbsp;</td></tr>';
-		print '<tr><td>'.$langs->trans("Country").'</td><td class="valeur">'.$object->pays.'&nbsp;</td></tr>';
+		print '<tr><td>'.$langs->trans("Country").'</td><td class="valeur">'.$object->country.'&nbsp;</td></tr>';
 		print '<tr><td>'.$langs->trans("EMail").'</td><td class="valeur">'.$object->email.'&nbsp;</td></tr>';
-		print '<tr><td>'.$langs->trans("Birthday").'</td><td class="valeur">'.$object->naiss.'&nbsp;</td></tr>';
+		print '<tr><td>'.$langs->trans("Birthday").'</td><td class="valeur">'.$object->birth.'&nbsp;</td></tr>';
 
 		if (isset($object->photo) && $object->photo !='')
 		{

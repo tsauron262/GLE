@@ -94,7 +94,7 @@ if ($_REQUEST['action'] == 'confirm_valide' && $_REQUEST['confirm'] == 'yes' && 
 				$outputlangs = new Translate("",$conf);
 				$outputlangs->setDefaultLang($_REQUEST['lang_id']);
 			}
-			if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $fac, $fac->modelpdf, $outputlangs, $hookmanager);
+			if (empty($conf->global->MAIN_DISABLE_PDF_AUTOUPDATE)) facture_pdf_create($db, $fac, $fac->modelpdf, $outputlangs);
 		}
 
 		header('Location: fiche.php?id='.$paiement->id);
@@ -262,7 +262,7 @@ if ($resql)
 			// Expected to pay
 			print '<td align="right">'.price($objp->sc_amount).'</td>';
 			// Status
-			print '<td align="center">'.$socialcontrib->LibStatut($objp->fk_statut,2).'</td>';
+			print '<td align="center">'.$socialcontrib->getLibStatut(4).'</td>';
 			// Amount payed
 			print '<td align="right">'.price($objp->amount).'</td>';
 			print "</tr>\n";

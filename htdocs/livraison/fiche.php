@@ -4,6 +4,7 @@
  * Copyright (C) 2005		Simon TOSSER			<simon@kornog-computing.com>
  * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
  * Copyright (C) 2007		Franky Van Liedekerke	<franky.van.liedekerke@telenet.be>
+ * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +42,7 @@ if (! empty($conf->stock->enabled))
 $langs->load("sendings");
 $langs->load("bills");
 $langs->load('deliveries');
+$langs->load('orders');
 
 $action=GETPOST('action', 'alpha');
 $confirm=GETPOST('confirm', 'alpha');
@@ -154,6 +156,23 @@ if ($action == 'confirm_delete' && $confirm == 'yes' && $user->rights->expeditio
 	{
 		$db->rollback();
 	}
+}
+
+if ($action == 'setdate_livraison' && $user->rights->expedition->livraison->creer)
+{
+	$object = new Livraison($db);
+	$object->fetch($id);
+	$object->fetch_thirdparty();
+
+	//print "x ".$_POST['liv_month'].", ".$_POST['liv_day'].", ".$_POST['liv_year'];
+    $datedelivery=dol_mktime(GETPOST('liv_hour','int'), GETPOST('liv_min','int'), 0, GETPOST('liv_month','int'), GETPOST('liv_day','int'), GETPOST('liv_year','int'));
+
+    $object->fetch($id);
+    $result=$object->set_date_livraison($user,$datedelivery);
+    if ($result < 0)
+    {
+        $mesg='<div class="error">'.$object->error.'</div>';
+    }
 }
 
 /*
@@ -533,10 +552,46 @@ else
 			print '</tr>';
 
 			// Date delivery real / Received
-			// TODO Can edit this date, even if delivery validated.
-			print '<tr><td>'.$langs->trans("DateReceived").'</td>';
-			print '<td colspan="3">'.dol_print_date($delivery->date_delivery,'daytext')."</td>\n";
+			print '<tr><td height="10">';
+			print '<table class="nobordernopadding" width="100%"><tr><td>';
+			print $langs->trans('DateReceived');
+			print '</td>';
+
+			if ($action != 'editdate_livraison') print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editdate_livraison&amp;id='.$delivery->id.'">'.img_edit($langs->trans('SetDeliveryDate'),1).'</a></td>';
+			print '</tr></table>';
+			print '</td><td colspan="2">';
+			if ($action == 'editdate_livraison')
+			{
+				print '<form name="setdate_livraison" action="'.$_SERVER["PHP_SELF"].'?id='.$delivery->id.'" method="post">';
+				print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+				print '<input type="hidden" name="action" value="setdate_livraison">';
+				$form->select_date($delivery->date_delivery?$delivery->date_delivery:-1,'liv_',1,1,'',"setdate_livraison");
+				print '<input type="submit" class="button" value="'.$langs->trans('Modify').'">';
+				print '</form>';
+			}
+			else
+			{
+				print $delivery->date_delivery ? dol_print_date($delivery->date_delivery,'dayhourtext') : '&nbsp;';
+			}
+			print '</td>';
 			print '</tr>';
+
+			// Note Public
+            print '<tr><td>'.$langs->trans("NotePublic").'</td>';
+            print '<td colspan="3">';
+            print nl2br($delivery->note_public);
+            /*$doleditor = new DolEditor('note_public', $object->note_public, '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+            print $doleditor->Create(1);*/
+            print "</td></tr>";
+
+			// Note Private
+            print '<tr><td>'.$langs->trans("NotePrivate").'</td>';
+            print '<td colspan="3">';
+            print nl2br($delivery->note_private);
+            /*$doleditor = new DolEditor('note_pprivate', $object->note_private, '', 80, 'dolibarr_notes', 'In', 0, false, true, ROWS_3, 70);
+            print $doleditor->Create(1);*/
+            print "</td></tr>";
+
 
 			// Statut
 			print '<tr><td>'.$langs->trans("Status").'</td>';
@@ -694,6 +749,18 @@ else
 			$delallowed=$user->rights->expedition->livraison->supprimer;
 
 			$somethingshown=$formfile->show_documents('livraison',$deliveryref,$filedir,$urlsource,$genallowed,$delallowed,$delivery->modelpdf,1,0,0,28,0,'','','',$soc->default_lang);
+
+			/*
+		 	 * Linked object block (of linked shipment)
+		 	 */
+			if ($delivery->origin == 'expedition')
+			{
+				$shipment = new Expedition($db);
+				$shipment->fetch($delivery->origin_id);
+
+				$somethingshown=$shipment->showLinkedObjectBlock();
+			}
+
 			if ($genallowed && ! $somethingshown) $somethingshown=1;
 
 			print '</td><td valign="top" width="50%">';

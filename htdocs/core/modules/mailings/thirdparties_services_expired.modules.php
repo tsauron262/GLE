@@ -100,6 +100,7 @@ class mailing_thirdparties_services_expired extends MailingTargets
         $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contrat as c";
         $sql.= ", ".MAIN_DB_PREFIX."contratdet as cd, ".MAIN_DB_PREFIX."product as p";
         $sql.= " WHERE s.entity IN (".getEntity('societe', 1).")";
+        $sql.= " AND s.email NOT IN (SELECT email FROM ".MAIN_DB_PREFIX."mailing_cibles WHERE fk_mailing=".$mailing_id.")";
         $sql.= " AND s.rowid = c.fk_soc AND cd.fk_contrat = c.rowid AND s.email != ''";
         $sql.= " AND cd.statut= 4 AND cd.fk_product=p.rowid AND p.ref = '".$product."'";
         $sql.= " AND cd.date_fin_validite < '".$this->db->idate($now)."'";
@@ -122,7 +123,7 @@ class mailing_thirdparties_services_expired extends MailingTargets
                 {
                     $cibles[$j] = array(
 					'email' => $obj->email,
-					'name' => $obj->name,
+					'lastname' => $obj->lastname,
 					'other' =>
                     ('StartDate='.dol_print_date($this->db->jdate($obj->date_ouverture),'day')).';'.
                     ('EndDate='.dol_print_date($this->db->jdate($obj->date_fin_validite),'day')).';'.
@@ -175,11 +176,10 @@ class mailing_thirdparties_services_expired extends MailingTargets
      *	For example if this selector is used to extract 500 different
      *	emails from a text file, this function must return 500.
      *
-     *	@param	int		$filter		Filter
-     *	@param	string	$option		Option
+     *	@param	string	$sql		SQL request to use to count
      *	@return	int					Number of recipients
      */
-    function getNbOfRecipients($filter=1,$option='')
+    function getNbOfRecipients($sql='')
     {
         $now=dol_now();
 

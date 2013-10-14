@@ -47,9 +47,6 @@ require_once(DOL_DOCUMENT_ROOT . "/core/class/commonobject.class.php");
   \class      Project
   \brief      Classe permettant la gestion des projets
  */
-class Projet extends Project {
-    
-}
 class Project extends CommonObject {
 
     public $id;
@@ -2378,4 +2375,7 @@ class ProjectTask extends commonObject {
 
 }
 
+class Projet extends Project {
+    
+}
 ?>

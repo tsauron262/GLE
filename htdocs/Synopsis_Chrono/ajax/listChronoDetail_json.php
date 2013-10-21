@@ -44,7 +44,7 @@ if (!$sidx)
 
 
 $wh = "";
-$searchOn = $_REQUEST['_search'];
+$searchOn = ($_REQUEST['_search'] || $_REQUEST['_search2']);
 if ($searchOn == 'true') {
     $oper = "";
 //    $searchField = $_REQUEST['searchField'];
@@ -71,6 +71,7 @@ if ($searchOn == 'true') {
         $nom = sanitize_string($resPre->nom);
 //        if ($nom == $searchField) {
         if (isset($_REQUEST[sanitize_string($nom)])) {
+//            die($_REQUEST[sanitize_string($nom)]);
 //            die("cool");
             $searchField = sanitize_string($nom);
             $searchString = $_REQUEST[sanitize_string($nom)];

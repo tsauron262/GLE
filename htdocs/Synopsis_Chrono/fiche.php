@@ -259,7 +259,12 @@ $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/
 
 //launchRunningProcess($db,'Chrono',$_GET['id']);
 
-llxHeader($js, 'Fiche chrono');
+
+if (isset($_REQUEST['nomenu']))
+    top_htmlhead($js, 'Fiche chrono');
+else
+    llxHeader($js, 'Fiche chrono');
+
 print "<div class='titre'>Fiche chrono</div><br/>";
 
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/revision_merlot.class.php");
@@ -385,29 +390,29 @@ if ($id > 0) {
                       <script>
 jQuery(document).ready(function(){
 EOF;
-                        print "jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
+                        print "/*jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
                         print <<<EOF
         text:'',
         finish: function(){
 EOF;
-                        print " /*jQuery('#Chrono-" . $res->id . "_jDS').selectmenu({\n";
+                        print " jQuery('#Chrono-" . $res->id . "_jDS').selectmenu({\n";
                         print <<<EOF
                 style:'dropdown',
                 maxHeight: 300
-            });*/
+            });
         },
         el1_change: function(){
 EOF;
-                        print " /*jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
+                        print " jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
                         print <<<EOF
                 style:'dropdown',
                 maxHeight: 300
-            });*/
+            });
         },
 EOF;
                         print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
                         print <<<EOF
-    });
+    }*/);
 });
 
                       </script>
@@ -574,41 +579,42 @@ EOF;
             print '</td>';
         }
 
-        print '<tr><th class="ui-widget-header ui-state-default">Proposition comm.
+        if ($chr->model->hasPropal) {
+            print '<tr><th class="ui-widget-header ui-state-default">Proposition comm.
 		<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&action=editprop">' . img_edit("Editer proposition comm.", 1) . '</a>';
-        // print '<td colspan=1 class="ui-widget-content">';
-        $requete = "SELECT *
+            // print '<td colspan=1 class="ui-widget-content">';
+            $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono,
                        " . MAIN_DB_PREFIX . "propal
                  WHERE " . MAIN_DB_PREFIX . "Synopsis_Chrono.propalid = " . MAIN_DB_PREFIX . "propal.rowid
                    AND " . MAIN_DB_PREFIX . "Synopsis_Chrono.id = " . $chr->id;
-        // print "<table class='nobordernopadding' width=100%>";
-        if ($_REQUEST['action'] == 'editprop') {
-            print '<form name="editprop" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '" method="post">';
-            print '<input type="hidden" name="action" value="setprop">';
-            print "     <td class='ui-widget-content'><select name='prop'>";
-            print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
-            $idT = '';
-            if ($resql = $db->query($requete)) {
-                while ($res = $db->fetch_object($resql)) {
-                    $idT = $res->rowid;
+            // print "<table class='nobordernopadding' width=100%>";
+            if ($_REQUEST['action'] == 'editprop') {
+                print '<form name="editprop" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '" method="post">';
+                print '<input type="hidden" name="action" value="setprop">';
+                print "     <td class='ui-widget-content'><select name='prop'>";
+                print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
+                $idT = '';
+                if ($resql = $db->query($requete)) {
+                    while ($res = $db->fetch_object($resql)) {
+                        $idT = $res->rowid;
+                    }
                 }
-            }
-            $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ORDER BY `rowid` DESC";
-            $sql2 = $db->query($requete2);
-            while ($res = $db->fetch_object($sql2)) {
-                print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . "</option>";
-            }
-            print '<input type="submit" value="Modifier"/>';
-            print "</form>";
-        } else {
-            if ($resql = $db->query($requete)) {
-                while ($res = $db->fetch_object($resql)) {
-                    print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a></td>";
+                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ORDER BY `rowid` DESC";
+                $sql2 = $db->query($requete2);
+                while ($res = $db->fetch_object($sql2)) {
+                    print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . "</option>";
+                }
+                print '<input type="submit" value="Modifier"/>';
+                print "</form>";
+            } else {
+                if ($resql = $db->query($requete)) {
+                    while ($res = $db->fetch_object($resql)) {
+                        print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a></td>";
+                    }
                 }
             }
         }
-
         /* 	print '<tr><th class="ui-widget-header ui-state-default">Projet';
           $requete = "SELECT *
           FROM ".MAIN_DB_PREFIX."Synopsis_Chrono,
@@ -632,42 +638,43 @@ EOF;
         print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Statut';
         print '    <td  class="ui-widget-content" colspan="3">' . $chr->getLibStatut(4) . '</td>';
 
-
-        print '<tr><th class="ui-widget-header ui-state-default">Projet
+        if ($chr->model->hasProjet) {
+            print '<tr><th class="ui-widget-header ui-state-default">Projet
 		<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&action=editprojet">' . img_edit("Editer projet", 1) . '</a>
 		<td class=\'ui-widget-content\'>';
-        $requete = "SELECT *
+            $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono,
                        " . MAIN_DB_PREFIX . "Synopsis_projet
                  WHERE " . MAIN_DB_PREFIX . "Synopsis_Chrono.projetid = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
                    AND " . MAIN_DB_PREFIX . "Synopsis_Chrono.id = " . $chr->id;
-        // print "<table class='nobordernopadding' width=100%>";
-        if ($_REQUEST['action'] == 'editprojet') {
-            $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet ORDER BY `rowid` DESC";
-            $sql3 = $db->query($requete3);
-            print '<form name="editprojet" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '" method="post">';
-            print '<input type="hidden" name="action" value="setprojet">';
-            print "     <select name='projet'>";
-            print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
-            $idT = '';
-            if ($resql = $db->query($requete)) {
-                while ($res2 = $db->fetch_object($resql)) {
-                    $idT = $res2->rowid;
+            // print "<table class='nobordernopadding' width=100%>";
+            if ($_REQUEST['action'] == 'editprojet') {
+                $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet ORDER BY `rowid` DESC";
+                $sql3 = $db->query($requete3);
+                print '<form name="editprojet" action="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '" method="post">';
+                print '<input type="hidden" name="action" value="setprojet">';
+                print "     <select name='projet'>";
+                print "<OPTION value=''>S&eacute;lectionner-></OPTION>";
+                $idT = '';
+                if ($resql = $db->query($requete)) {
+                    while ($res2 = $db->fetch_object($resql)) {
+                        $idT = $res2->rowid;
+                    }
+                }
+                while ($res = $db->fetch_object($sql3)) {
+                    print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . " : " . $res->title . "</option>";
+                }
+                print '<input type="submit" value="Modifier"/>';
+                print "</form>";
+            } else {
+                if ($resql = $db->query($requete)) {
+                    while ($res = $db->fetch_object($resql)) {
+                        print "<a href='" . DOL_URL_ROOT . "/projet/fiche.php?id=" . $res->rowid . "'>" . $res->ref . " : " . $res->title . "</a>";
+                    }
                 }
             }
-            while ($res = $db->fetch_object($sql3)) {
-                print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . " : " . $res->title . "</option>";
-            }
-            print '<input type="submit" value="Modifier"/>';
-            print "</form>";
-        } else {
-            if ($resql = $db->query($requete)) {
-                while ($res = $db->fetch_object($resql)) {
-                    print "<a href='" . DOL_URL_ROOT . "/projet/fiche.php?id=" . $res->rowid . "'>" . $res->ref . " : " . $res->title . "</a>";
-                }
-            }
+            echo "</td>";
         }
-        echo "</td>";
 
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
         print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';

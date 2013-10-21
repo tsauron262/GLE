@@ -269,6 +269,8 @@ class modSynopsisChrono extends DolibarrModules
   `hasContact` tinyint(4) DEFAULT '0',
   `hasSociete` tinyint(4) DEFAULT '0',
   `hasRevision` tinyint(4) DEFAULT '0',
+  `hasPropal` tinyint(4) DEFAULT '0',
+  `hasProjet` tinyint(4) DEFAULT '0',
   `revision_model_refid` int(11) DEFAULT NULL,
   `modele` varchar(50) DEFAULT NULL,
   `date_create` date DEFAULT NULL,

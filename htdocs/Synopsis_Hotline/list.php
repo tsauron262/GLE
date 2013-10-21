@@ -45,9 +45,9 @@ if (isset($_REQUEST['obj'])) {
         $ch = new Chrono($db);
         $ch->model_refid = 100;
         $id = $ch->create();
-        $champ[1002] = date("d/m/Y");
+        $champ[1001] = date("d/m/Y");
         $ch->setDatas($id, $champ);
-        header('location: ../Synopsis_Chrono/fiche.php?id=' . $id . '&action=Modify');
+        header('location: ../Synopsis_Chrono/fiche.php?nomenu=true&id=' . $id . '&action=Modify');
     }
 }
 
@@ -60,7 +60,7 @@ llxHeader($js, "Appel Hotline");
 dol_fiche_head($head, 'hotline', $langs->trans("Suivie hotline"));
 
 
-print '<a href="' . $_SERVER['REQUEST_URI'] . '&create=true">Créer fiche hotline</a><br/><br/>  ';
+print "<input type='button' onclick=\"javascript: window.open('" . $_SERVER['REQUEST_URI'] . "&create=true','nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');".'" class="butAction" value = "Créer fiche hotline" /><br/><br/>  ';
 
 print '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 

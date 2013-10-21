@@ -48,6 +48,8 @@ if ($_REQUEST['action']=='add')
     $hasSoc = (preg_match('/on/i',$_REQUEST['hasSoc'])==1?1:0);
     $hasContact = (preg_match('/on/i',$_REQUEST['hasContact'])==1?1:0);
     $hasRevision = (preg_match('/on/i',$_REQUEST['hasRevision'])==1?1:0);
+    $hasPropal = (preg_match('/on/i',$_REQUEST['hasPropal'])==1?1:0);
+    $hasProjet = (preg_match('/on/i',$_REQUEST['hasProjet'])==1?1:0);
 
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_conf WHERE titre = '".$nom."'";
     $sql = $db->query($requete);
@@ -55,8 +57,8 @@ if ($_REQUEST['action']=='add')
         $msg = "Un Chrono du m&ecirc;me nom existe d&eacute;j&agrave;";
 
     } else {
-        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Chrono_conf (titre,description,modele,hasFile,hasSociete,hasRevision, hasContact, date_create)
-                         VALUES ('".$nom."','".$desc."','".$modeleRef."',".$hasFile.",".$hasSoc.",".$hasRevision.",".$hasContact.",now())";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Chrono_conf (titre,description,modele,hasFile,hasSociete,hasRevision, hasContact, hasPropal, hasProjet, date_create)
+                         VALUES ('".$nom."','".$desc."','".$modeleRef."',".$hasFile.",".$hasSoc.",".$hasRevision.",".$hasContact.",".$hasPropal.",".$hasProjet.",now())";
         $sql = $db->query($requete);
     }
 }
@@ -71,6 +73,9 @@ if ($_REQUEST['action']=='mod')
     $hasContact = (preg_match('/on/i',$_REQUEST['hasContact'])==1?1:0);
     $hasRevision = (preg_match('/on/i',$_REQUEST['hasRevision'])==1?1:0);
 
+    $hasPropal = (preg_match('/on/i',$_REQUEST['hasPropal'])==1?1:0);
+    $hasProjet = (preg_match('/on/i',$_REQUEST['hasProjet'])==1?1:0);
+    
     $reqeute = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_conf WHERE titre = '".$nom."' AND id <> ".$_REQUEST['id'];
     $sql = $db->query($reqeute);
     if ($db->num_rows($sql) > 0){
@@ -84,7 +89,9 @@ if ($_REQUEST['action']=='mod')
                            hasFile = ".$hasFile.",
                            hasSociete = ".$hasSoc.",
                            hasRevision = ".$hasRevision.",
-                           hasContact = ".$hasContact."
+                           hasContact = ".$hasContact.",
+                           hasPropal = ".$hasPropal.",
+                           hasProjet = ".$hasProjet."
                      WHERE id = ".$_REQUEST['id'];
         $sql = $db->query($requete);
     }
@@ -142,10 +149,12 @@ print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Attacher un fichier")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Lier &agrave; une soc.")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Lier &agrave; un contact")."</td>";
+print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Lier &agrave; une propal")."</td>";
+print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Lier &agrave; un projet")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Revision")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA;  border-right-color: #0073EA;' align=center rowspan=2>".$langs->trans("Action")."</td>";
 print "<tr class=\"liste_titre\">";
-print "<td style='border:1px Solid; border-left-color: #0073EA;' colspan=7>".$langs->trans("Description")."</td>";
+print "<td style='border:1px Solid; border-left-color: #0073EA;' colspan=9>".$langs->trans("Description")."</td>";
 print "</tr>";
 $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_conf ORDER BY titre";
 $sql = $db->query($requete);
@@ -169,6 +178,8 @@ while($res=$db->fetch_object($sql))
         print "<td align=center>".$langs->trans("Attacher un fichier")."</td>";
         print "<td align=center>".$langs->trans("Lier &agrave; une soc.")."</td>";
         print "<td align=center>".$langs->trans("Lier &agrave; un contact")."</td>";
+        print "<td align=center>".$langs->trans("Lier &agrave; une propal")."</td>";
+        print "<td align=center>".$langs->trans("Lier &agrave; un projet")."</td>";
         print "<td align=center>".$langs->trans("Revision")."</td>";
         print "<td align=center>".$langs->trans("Action")."</td>";
         print "</tr>";
@@ -179,6 +190,8 @@ while($res=$db->fetch_object($sql))
         print "<td align=center><input name='attachFile' type='checkbox' ".($res->hasFile==1?'Checked':'')."></input>";
         print "<td align=center><input name='hasSoc' type='checkbox' ".($res->hasSociete==1?'Checked':'')."></input>";
         print "<td align=center><input name='hasContact' type='checkbox' ".($res->hasContact==1?'Checked':'')."></input>";
+        print "<td align=center><input name='hasPropal' type='checkbox' ".($res->hasPropal==1?'Checked':'')."></input>";
+        print "<td align=center><input name='hasProjet' type='checkbox' ".($res->hasProjet==1?'Checked':'')."></input>";
         print "<td align=center><input name='hasRevision' type='checkbox' ".($res->hasRevision==1?'Checked':'')."></input>";
         print "<td class=' ".$classArr[$bool]."' align=center style='border-right: 1px Solid; border-bottom: 1px Solid;'><button onClick='location.href=\"Synopsis_Chrono.php?action=modify&id=".$res->id."\"' class='butAction'>Modifier</button><br/><button onClick='location.href=\"Synopsis_Chrono.php\"' class='butAction'>Annuler</button>";
         print "</table>";
@@ -193,11 +206,13 @@ while($res=$db->fetch_object($sql))
         print "<td class=' ".$classArr[$bool]."'>".($res->hasFile==1?"Avec Fichier":"Sans fichier")."</td>";
         print "<td class=' ".$classArr[$bool]."'>".($res->hasSociete==1?"Oui":"Non")."</td>";
         print "<td class=' ".$classArr[$bool]."'>".($res->hasContact==1?"Oui":"Non")."</td>";
+        print "<td class=' ".$classArr[$bool]."'>".($res->hasPropal==1?"Oui":"Non")."</td>";
+        print "<td class=' ".$classArr[$bool]."'>".($res->hasProjet==1?"Oui":"Non")."</td>";
         print "<td class=' ".$classArr[$bool]."'>".($res->hasRevision==1?"Oui":"Non")."</td>";
         print "<td class=' ".$classArr[$bool]."' align=center rowspan=2 style='border-right: 1px Solid; border-bottom: 1px Solid;'>";
         print "<button onClick='location.href=\"Synopsis_Chrono.php?action=modify&id=".$res->id."\"' class='butAction'>".img_edit("")."  Modifier</button>";
         print "<button onClick='location.href=\"Synopsis_Chrono_advMode.php?id=".$res->id."\"' class='butAction'>".img_edit("")."  Config. avanc&eacute;e</button>";
-        print "<tr><td class=' ".$classArr[$bool]."' style='border-left: 1px Solid; border-bottom: 1px Solid;' colspan=7>".$res->description."</td>";
+        print "<tr><td class=' ".$classArr[$bool]."' style='border-left: 1px Solid; border-bottom: 1px Solid;' colspan=9>".$res->description."</td>";
     }
 }
 print "</TABLE>";
@@ -217,15 +232,19 @@ if ($_REQUEST['action'] != 'modify'){
     print "<td align=center>".$langs->trans("Attacher un fichier")."</td>";
     print "<td align=center>".$langs->trans("Lier &agrave; une soc.")."</td>";
     print "<td align=center>".$langs->trans("Lier &agrave; un contact")."</td>";
+    print "<td align=center>".$langs->trans("Lier &agrave; une propal")."</td>";
+    print "<td align=center>".$langs->trans("Lier &agrave; un projet")."</td>";
     print "<td align=center>".$langs->trans("Revision")."</td>";
     print "</tr>";
     print "<tr>";
     print "<td class='ui-widget-content' align=center><input style='text-align:center; width:90%;' name='nom'></input>";
-    print "<td class='ui-widget-content' align=center><textarea name='desc' style='width: 400px; height: 80px;'></textarea>";
+    print "<td class='ui-widget-content' align=center><textarea name='desc' style='width: 250px; height: 80px;'></textarea>";
     print "<td class='ui-widget-content' align=center><input style='text-align:center; width:90%;'  name='modeleRef'></input>";
     print "<td class='ui-widget-content' align=center><input name='attachFile' type='checkbox'></input>";
     print "<td class='ui-widget-content' align=center><input name='hasSoc' type='checkbox'></input>";
     print "<td class='ui-widget-content' align=center><input name='hasContact' type='checkbox'></input>";
+    print "<td class='ui-widget-content' align=center><input name='hasPropal' type='checkbox'></input>";
+    print "<td class='ui-widget-content' align=center><input name='hasProjet' type='checkbox'></input>";
     print "<td class='ui-widget-content' align=center><input name='hasRevision' type='checkbox'></input>";
     print "</TABLE>";
 

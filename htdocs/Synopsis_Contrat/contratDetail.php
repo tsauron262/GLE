@@ -150,7 +150,7 @@ if ($id > 0) {
     $commercial_suivi->fetch($contrat->commercial_suivi_id);
 
     $head = contract_prepare_head($contrat);
-    $head = $contrat->getExtraHeadTab($head);
+//    $head = $contrat->getExtraHeadTab($head);
 
     $h = count($head);
     $head[$h][0] = DOL_URL_ROOT . '/Synopsis_Contrat/contratDetail.php?id=' . $idLigne;

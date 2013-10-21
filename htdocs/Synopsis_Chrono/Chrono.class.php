@@ -703,6 +703,8 @@ class ChronoRef {
     public $hasContact;
     public $hasSociete;
     public $hasRevision;
+    public $hasPropal;
+    public $hasProjet;
     public $modele;
     public $date_create;
     public $tms;
@@ -724,6 +726,8 @@ class ChronoRef {
             $this->hasContact = $res->hasContact;
             $this->hasSociete = $res->hasSociete;
             $this->hasRevision = $res->hasRevision;
+            $this->hasPropal = $res->hasPropal;
+            $this->hasProjet = $res->hasProjet;
             $this->modele = $res->modele;
             $this->date_create = $res->date_create;
             $this->tms = $res->tms;

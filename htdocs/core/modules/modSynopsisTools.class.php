@@ -118,7 +118,7 @@ class modSynopsisTools extends DolibarrModules
                             'titre'=>'Tools',
                             'mainmenu'=>'SynopsisTools',
                             'leftmenu'=>'0',        // To say if we can overwrite leftmenu
-                            'url'=>'/Synopsis_Tools/myAdmin.php',
+                            'url'=>'/Synopsis_Tools/index.php',
                             'langs'=>'',
                             'position'=>999,
                             'perms'=>'$user->rights->SynopsisTools->Global->read',

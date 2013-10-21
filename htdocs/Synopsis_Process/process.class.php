@@ -1420,6 +1420,386 @@ class process_element_type extends process {
 
 }
 
+
+class formulaire extends process {
+
+    public $db;
+    public $description;
+    public $label;
+    public $error;
+    public $id;
+    public $model_refid;
+    public $model;
+    public $statut;
+
+    public function formulaire($DB) {
+        $this->db = $DB;
+    }
+
+    public function add() {
+        $description = addslashes($this->description);
+        $label = addslashes($this->label);
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form WHERE label LIKE '" . $label . "'";
+        $sql = $this->db->query($requete);
+        if ($this->db->num_rows($sql) > 0) {
+            $this->error = "Un formulaire du m&ecirc;me non existe d&eacute;j&agrave;";
+            return -2;
+        } else {
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form (label, description, fk_statut) VALUES ('" . $label . "','" . $description . "',0)";
+            $sql = $this->db->query($requete);
+            if ($sql) {
+                return ($this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_Process_form"));
+            } else {
+                $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
+                return -1;
+            }
+        }
+    }
+
+    public function create() {
+        return ($this->add());
+    }
+
+    public function fetch($id) {
+        global $conf;
+        if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
+            $requete = "SELECT label,
+                           description,
+                           fk_statut
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form
+                     WHERE id = " . $id;
+            $sql = $this->db->query($requete);
+            $this->id = $id;
+            $ok = false;
+            if ($this->db->num_rows($sql) > 0) {
+                $ok = true;
+                $res = $this->db->fetch_object($sql);
+                $this->label = $res->label;
+                $this->description = $res->description;
+                $this->statut = $res->fk_statut;
+            }
+
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_model WHERE form_refid = " . $id . " ORDER BY rang ";
+            $sql = $this->db->query($requete);
+            $this->lignes = array();
+            if ($this->db->num_rows($sql) > 0) {
+                while ($res = $this->db->fetch_object($sql)) {
+                    $member = new formulaireModel($this->db);
+                    $member->fetch($res->id);
+                    $this->lignes[] = $member;
+                }
+            }
+            if ($ok) {
+                return($this->id);
+            } else {
+                $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
+                return(-1);
+            }
+        } else {
+            return -1;
+        }
+    }
+
+    public function toggleActive() {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form SET fk_statut = 1 WHERE id = " . $this->id;
+        if ($this->statut == 1)
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form SET fk_statut = 0 WHERE id = " . $this->id;
+        $sql = $this->db->query($requete);
+//var_dump($requete);
+        if ($sql)
+            return 1;
+        else {
+            $this->error = $this->db->lasterrno . " " . $this->db->lastqqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
+            return (-1);
+        }
+    }
+
+    public function getNomUrl($withpicto = 0, $option = 0) {
+        global $langs;
+
+        $result = '';
+        $urlOption = '';
+
+        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
+        if ($option == 6)
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
+        $lienfin = '</a>';
+
+        $picto = 'formulaire@Synopsis_Process';
+        $label = $langs->trans("Formulaire") . ': ' . $this->label;
+
+        if ($withpicto)
+            $result.=($lien . img_object($label, $picto, false, false) . $lienfin);
+        if ($withpicto && $option == 6)
+            $result.=($lien . img_object($label, $picto, false, false, "ABSMIDDLE", true) . $lienfin);
+        if ($withpicto && $withpicto != 2)
+            $result.=' ';
+        $result.=$lien . $this->label . $lienfin;
+        return $result;
+    }
+
+    private function testLabel($label) {
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form WHERE label = '" . $label . "' AND id <> " . $this->id;
+        $sql = $this->db->query($requete);
+        if ($this->db->num_rows($sql) > 0) {
+            return false;
+        } else {
+            return true;
+        }
+    }
+
+    public function cloneForm() {
+        $this->db->begin();
+        $tmp = new formulaire($this->db);
+        //1 Clone le formulaire de base
+        $tmp->description = $this->description;
+        $tmp->label = $this->label; //TODO
+
+        if (preg_match("/-clone\(([0-9]*)\)$/", $tmp->label, $arr)) {
+            $cnt = $arr[1] + 1;
+            $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '(' . $cnt . ')';
+            while ($this->testLabel($label) != true) {
+                $cnt++;
+                $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '(' . $cnt . ')';
+            }
+            $tmp->label = $label;
+        } else {
+            $label = $tmp->label . '-clone(1)';
+            if ($this->testLabel($label) != true) {
+                $cnt = 2;
+                $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '-clone(' . $cnt . ')';
+                while ($this->testLabel($label) != true) {
+                    $cnt++;
+                    $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '-clone(' . $cnt . ')';
+                }
+                $tmp->label = $label;
+            } else {
+                $tmp->label = $label;
+            }
+        }
+        $oldId = $this->id;
+        $newId = $tmp->create();
+        $step0 = false;
+        if ($newId > 0)
+            $step0 = true;
+        //2 Clone les éléments => " . MAIN_DB_PREFIX . "Synopsis_Process_form_model
+        $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_model WHERE form_refid = " . $oldId;
+        $sql1 = $this->db->query($requete1);
+        $step1 = true;
+        $step2 = true;
+        $step3 = true;
+        $step6 = true;
+        $step4 = true;
+        $step5 = true;
+        while ($res1 = $this->db->fetch_object($sql1)) {
+            $oldModel = $res1->id;
+            $type_refid = $res1->type_refid;
+            $label = ($res->label . "x" != "x" ? "'" . $res1->label . "'" : "NULL");
+            $description = ($res1->description . "x" != "x" ? "'" . $res1->description . "'" : "NULL");
+            $dflt = ($res1->dflt . "x" != "x" ? "'" . $res1->dflt . "'" : "NULL");
+            $src_refid = ($res1->src_refid > 0 ? $res1->src_refid : "NULL");
+            $form_refid = $newId;
+            $rang = ($res1->rang > 0 ? $res1->rang : "1");
+            $rights = ($res1->rights . "x" != "x" ? $res1->rights : "");
+            $requeteIns = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_model (type_refid,
+                                        label,
+                                        description,
+                                        dflt,
+                                        src_refid,
+                                        form_refid,
+                                        rang,
+                                        rights)
+                                VALUES ( " . $type_refid . " ,
+                                         " . $label . " ,
+                                         " . $description . " ,
+                                         " . $dflt . " ,
+                                         " . $src_refid . " ,
+                                         " . $form_refid . " ,
+                                         " . $rang . " ,
+                                         '" . $rights . "' )";
+            $sqlIns = $this->db->query($requeteIns);
+            if (!($sqlIns && $step1)) {
+                $step1 = false;
+            }
+            $newModel = $this->db->last_insert_id('" . MAIN_DB_PREFIX . "Synopsis_Process_form_model');
+            if ($newModel > 0) {
+                //3 Clone les parametres => " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop & " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value
+                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value WHERE model_refid = " . $oldModel;
+                $sql2 = $this->db->query($requete2);
+                while ($res2 = $this->db->fetch_object($sql2)) {
+                    $prop_refid = $res2->prop_refid;
+                    $model_refid = $newModel;
+                    $valeur = ($res2->valeur . "x" == "x" ? "NULL" : "'" . $res2->valeur . "'");
+                    $requeteIns2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value (
+                                                 prop_refid,
+                                                 model_refid,
+                                                 valeur)
+                                        VALUES ( " . $prop_refid . " ,
+                                                 " . $model_refid . " ,
+                                                 " . $valeur . " )\n";
+                    $sqlIns2 = $this->db->query($requeteIns2);
+                    if (!($sqlIns2 && $step2)) {
+                        $step2 = false;
+                    }
+                }
+                //4 Clone les styles => " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style & " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value
+                $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value WHERE model_refid = " . $oldModel;
+                $sql3 = $this->db->query($requete3);
+                while ($res3 = $this->db->fetch_object($sql3)) {
+                    $style_refid = $res3->style_refid;
+                    $valeur = ($res3->valeur . "x" == "x" ? "NULL" : "'" . $res3->valeur . "'");
+                    $model_refid = $newModel;
+                    $requeteIns3 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value (
+                                                  style_refid,
+                                                  valeur,
+                                                  model_refid)
+                                         VALUES ( " . $style_refid . " ,
+                                                  " . $valeur . " ,
+                                                  " . $model_refid . "
+                                                )";
+                    $sqlIns3 = $this->db->query($requeteIns3);
+                    if (!($sqlIns3 && $step3)) {
+                        $step3 = false;
+                    }
+                }
+                //5 Clone la class CSS =>  " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value
+                $requete4 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value WHERE model_refid = " . $oldModel;
+                $sql4 = $this->db->query($requete4);
+                while ($res4 = $this->db->fetch_object($sql4)) {
+                    $valeur = ($res4->valeur . "x" == "x" ? "NULL" : "'" . $res4->valeur . "'");
+                    $model_refid = $newModel;
+                    $requeteIns4 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value (
+                                                  model_refid,
+                                                 valeur)
+                                          VALUES ( " . $model_refid . " ,
+                                                   " . $valeur . " )";
+                    $sqlIns4 = $this->db->query($requeteIns4);
+                    if (!($sqlIns4 && $step4)) {
+                        $step4 = false;
+                    }
+                }
+                //6 Clone les params de fonction => " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value
+                $requete5 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value  WHERE model_refid = " . $oldModel;
+                $sql5 = $this->db->query($requete5);
+                while ($res5 = $this->db->fetch_object($sql5)) {
+                    $fct_refid = ($res5->fct_refid . 'x' != 'x' ? $res5->fct_refid : "NULL");
+                    $label = ($res5->label . "x" != 'x' ? $res5->label : "NULL");
+                    $valeur = ($res5->valeur . "x" != "x" ? "'" . $res5->valeur . "'" : "NULL");
+                    $model_refid = $newModel;
+                    $requeteIns5 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value (
+                                                 fct_refid,
+                                                 label,
+                                                 model_refid,
+                                                 valeur)
+                                         VALUES ( " . $fct_refid . " ,
+                                                 '" . $label . "' ,
+                                                 " . $model_refid . " ,
+                                                 " . $valeur . " )";
+                    $sqlIns5 = $this->db->query($requeteIns5);
+                    if (!($sqlIns5 && $step5)) {
+                        $step5 = false;
+                    }
+                }
+                //7 Clone les sources => " . MAIN_DB_PREFIX . "Synopsis_Process_form_src
+                if ($src_refid > 0) {
+                    $requete6 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_src WHERE id = " . $src_refid;
+                    $sql6 = $this->db->query($requete6);
+                    $res6 = $this->db->fetch_object($sql6);
+                    $requete_refid = ($res6->requete_refid . "x" == 'x' ? "NULL" : $res6->requete_refid);
+                    $fct_refid = ($res6->fct_refid . "x" == 'x' ? "NULL" : $res6->fct_refid);
+                    $global_refid = ($res6->global_refid . "x" == 'x' ? "NULL" : $res6->global_refid);
+                    $list_refid = ($res6->list_refid . "x" == 'x' ? "NULL" : $res6->list_refid);
+
+                    $requeteIns6 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_src (
+                                                 requete_refid,
+                                                 fct_refid,
+                                                 global_refid,
+                                                 list_refid)
+                                          VALUES ( " . $requete_refid . " ,
+                                                 " . $fct_refid . " ,
+                                                 " . $global_refid . " ,
+                                                 " . $list_refid . " )";
+                    $sqlIns6 = $this->db->query($requeteIns6);
+                    $newSrcId = $this->db->last_insert_id($sqlIns6);
+                    if ($newSrcId > 0) {
+                        $requeteUpdt6 = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form_model SET src_refid = " . $newSrcId . " WHERE id = " . $newModel;
+                        $sqlUpdt6 = $this->db->query($requeteUpdt6);
+                        if ($sqlUpdt6)
+                            $step6 = true;
+                        else
+                            $step6 = false;
+                    } else {
+                        $step6 = false;
+                    }
+                }
+            }
+        }
+//        var_dump($newId);
+//        var_dump($step0);
+//        var_dump($step1);
+//        var_dump($step2);
+//        var_dump($step3);
+//        var_dump($step4);
+//        var_dump($step5);
+//        var_dump($step6);
+//        exit;
+        if ($step0 && $step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $newId > 0) {
+            $this->db->commit();
+            return($newId);
+        } else {
+            $this->db->rollback();
+            return(-1);
+        }
+    }
+
+    public function getLibStatut($mode) {
+        return $this->LibStatut($this->statut, $mode);
+    }
+
+    private function LibStatut($status, $mode = 0) {
+        global $langs;
+        $langs->load('process');
+        if ($mode == 0) {
+            if ($status == 0)
+                return $langs->trans('formInactif');
+            if ($status == 1)
+                return $langs->trans('formActif');
+        }
+        if ($mode == 1) {
+            if ($status == 0)
+                return $langs->trans('formInactif');
+            if ($status == 1)
+                return $langs->trans('formActif');
+        }
+        if ($mode == 2) {
+            if ($status == 0)
+                return img_picto($langs->trans('formInactif'), 'statut5') . ' ' . $langs->trans('formInactif');
+            if ($status == 1)
+                return img_picto($langs->trans('formActif'), 'statut4') . ' ' . $langs->trans('formActif');
+        }
+        if ($mode == 3) {
+            if ($status == 0)
+                return img_picto($langs->trans('formInactif'), 'statut5');
+            if ($status == 1)
+                return img_picto($langs->trans('formActif'), 'statut4');
+        }
+        if ($mode == 4) {
+            if ($status == 0)
+                return img_picto($langs->trans('formInactif'), 'statut5') . ' ' . $langs->trans('formInactif');
+            if ($status == 1)
+                return img_picto($langs->trans('formActif'), 'statut4') . ' ' . $langs->trans('formActif');
+        }
+        if ($mode == 5) {
+            if ($status == 0)
+                return $langs->trans('formInactif') . ' ' . img_picto($langs->trans('formInactif'), 'statut5');
+            if ($status == 1)
+                return $langs->trans('formActif') . ' ' . img_picto($langs->trans('formActif'), 'statut4');
+        }
+        return $langs->trans('Unknown');
+    }
+
+}
+
 class formulaireModel extends formulaire {
 
     public $db;
@@ -2612,385 +2992,6 @@ class fct_values extends fct {
         } else {
             return -1;
         }
-    }
-
-}
-
-class formulaire extends process {
-
-    public $db;
-    public $description;
-    public $label;
-    public $error;
-    public $id;
-    public $model_refid;
-    public $model;
-    public $statut;
-
-    public function formulaire($DB) {
-        $this->db = $DB;
-    }
-
-    public function add() {
-        $description = addslashes($this->description);
-        $label = addslashes($this->label);
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form WHERE label LIKE '" . $label . "'";
-        $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql) > 0) {
-            $this->error = "Un formulaire du m&ecirc;me non existe d&eacute;j&agrave;";
-            return -2;
-        } else {
-            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form (label, description, fk_statut) VALUES ('" . $label . "','" . $description . "',0)";
-            $sql = $this->db->query($requete);
-            if ($sql) {
-                return ($this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_Process_form"));
-            } else {
-                $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
-                return -1;
-            }
-        }
-    }
-
-    public function create() {
-        return ($this->add());
-    }
-
-    public function fetch($id) {
-        global $conf;
-        if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
-            $requete = "SELECT label,
-                           description,
-                           fk_statut
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form
-                     WHERE id = " . $id;
-            $sql = $this->db->query($requete);
-            $this->id = $id;
-            $ok = false;
-            if ($this->db->num_rows($sql) > 0) {
-                $ok = true;
-                $res = $this->db->fetch_object($sql);
-                $this->label = $res->label;
-                $this->description = $res->description;
-                $this->statut = $res->fk_statut;
-            }
-
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_model WHERE form_refid = " . $id . " ORDER BY rang ";
-            $sql = $this->db->query($requete);
-            $this->lignes = array();
-            if ($this->db->num_rows($sql) > 0) {
-                while ($res = $this->db->fetch_object($sql)) {
-                    $member = new formulaireModel($this->db);
-                    $member->fetch($res->id);
-                    $this->lignes[] = $member;
-                }
-            }
-            if ($ok) {
-                return($this->id);
-            } else {
-                $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
-                return(-1);
-            }
-        } else {
-            return -1;
-        }
-    }
-
-    public function toggleActive() {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form SET fk_statut = 1 WHERE id = " . $this->id;
-        if ($this->statut == 1)
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form SET fk_statut = 0 WHERE id = " . $this->id;
-        $sql = $this->db->query($requete);
-//var_dump($requete);
-        if ($sql)
-            return 1;
-        else {
-            $this->error = $this->db->lasterrno . " " . $this->db->lastqqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
-            return (-1);
-        }
-    }
-
-    public function getNomUrl($withpicto = 0, $option = 0) {
-        global $langs;
-
-        $result = '';
-        $urlOption = '';
-
-        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
-        if ($option == 6)
-            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_Process/formBuilder.php?id=' . $this->id . '">';
-        $lienfin = '</a>';
-
-        $picto = 'formulaire@Synopsis_Process';
-        $label = $langs->trans("Formulaire") . ': ' . $this->label;
-
-        if ($withpicto)
-            $result.=($lien . img_object($label, $picto, false, false) . $lienfin);
-        if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, false, false, "ABSMIDDLE", true) . $lienfin);
-        if ($withpicto && $withpicto != 2)
-            $result.=' ';
-        $result.=$lien . $this->label . $lienfin;
-        return $result;
-    }
-
-    private function testLabel($label) {
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form WHERE label = '" . $label . "' AND id <> " . $this->id;
-        $sql = $this->db->query($requete);
-        if ($this->db->num_rows($sql) > 0) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
-    public function cloneForm() {
-        $this->db->begin();
-        $tmp = new formulaire($this->db);
-        //1 Clone le formulaire de base
-        $tmp->description = $this->description;
-        $tmp->label = $this->label; //TODO
-
-        if (preg_match("/-clone\(([0-9]*)\)$/", $tmp->label, $arr)) {
-            $cnt = $arr[1] + 1;
-            $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '(' . $cnt . ')';
-            while ($this->testLabel($label) != true) {
-                $cnt++;
-                $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '(' . $cnt . ')';
-            }
-            $tmp->label = $label;
-        } else {
-            $label = $tmp->label . '-clone(1)';
-            if ($this->testLabel($label) != true) {
-                $cnt = 2;
-                $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '-clone(' . $cnt . ')';
-                while ($this->testLabel($label) != true) {
-                    $cnt++;
-                    $label = preg_replace("/\(([0-9]*)\)$/", "", $tmp->label) . '-clone(' . $cnt . ')';
-                }
-                $tmp->label = $label;
-            } else {
-                $tmp->label = $label;
-            }
-        }
-        $oldId = $this->id;
-        $newId = $tmp->create();
-        $step0 = false;
-        if ($newId > 0)
-            $step0 = true;
-        //2 Clone les éléments => " . MAIN_DB_PREFIX . "Synopsis_Process_form_model
-        $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_model WHERE form_refid = " . $oldId;
-        $sql1 = $this->db->query($requete1);
-        $step1 = true;
-        $step2 = true;
-        $step3 = true;
-        $step6 = true;
-        $step4 = true;
-        $step5 = true;
-        while ($res1 = $this->db->fetch_object($sql1)) {
-            $oldModel = $res1->id;
-            $type_refid = $res1->type_refid;
-            $label = ($res->label . "x" != "x" ? "'" . $res1->label . "'" : "NULL");
-            $description = ($res1->description . "x" != "x" ? "'" . $res1->description . "'" : "NULL");
-            $dflt = ($res1->dflt . "x" != "x" ? "'" . $res1->dflt . "'" : "NULL");
-            $src_refid = ($res1->src_refid > 0 ? $res1->src_refid : "NULL");
-            $form_refid = $newId;
-            $rang = ($res1->rang > 0 ? $res1->rang : "1");
-            $rights = ($res1->rights . "x" != "x" ? $res1->rights : "");
-            $requeteIns = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_model (type_refid,
-                                        label,
-                                        description,
-                                        dflt,
-                                        src_refid,
-                                        form_refid,
-                                        rang,
-                                        rights)
-                                VALUES ( " . $type_refid . " ,
-                                         " . $label . " ,
-                                         " . $description . " ,
-                                         " . $dflt . " ,
-                                         " . $src_refid . " ,
-                                         " . $form_refid . " ,
-                                         " . $rang . " ,
-                                         '" . $rights . "' )";
-            $sqlIns = $this->db->query($requeteIns);
-            if (!($sqlIns && $step1)) {
-                $step1 = false;
-            }
-            $newModel = $this->db->last_insert_id('" . MAIN_DB_PREFIX . "Synopsis_Process_form_model');
-            if ($newModel > 0) {
-                //3 Clone les parametres => " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop & " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value
-                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value WHERE model_refid = " . $oldModel;
-                $sql2 = $this->db->query($requete2);
-                while ($res2 = $this->db->fetch_object($sql2)) {
-                    $prop_refid = $res2->prop_refid;
-                    $model_refid = $newModel;
-                    $valeur = ($res2->valeur . "x" == "x" ? "NULL" : "'" . $res2->valeur . "'");
-                    $requeteIns2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_prop_value (
-                                                 prop_refid,
-                                                 model_refid,
-                                                 valeur)
-                                        VALUES ( " . $prop_refid . " ,
-                                                 " . $model_refid . " ,
-                                                 " . $valeur . " )\n";
-                    $sqlIns2 = $this->db->query($requeteIns2);
-                    if (!($sqlIns2 && $step2)) {
-                        $step2 = false;
-                    }
-                }
-                //4 Clone les styles => " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style & " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value
-                $requete3 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value WHERE model_refid = " . $oldModel;
-                $sql3 = $this->db->query($requete3);
-                while ($res3 = $this->db->fetch_object($sql3)) {
-                    $style_refid = $res3->style_refid;
-                    $valeur = ($res3->valeur . "x" == "x" ? "NULL" : "'" . $res3->valeur . "'");
-                    $model_refid = $newModel;
-                    $requeteIns3 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_style_value (
-                                                  style_refid,
-                                                  valeur,
-                                                  model_refid)
-                                         VALUES ( " . $style_refid . " ,
-                                                  " . $valeur . " ,
-                                                  " . $model_refid . "
-                                                )";
-                    $sqlIns3 = $this->db->query($requeteIns3);
-                    if (!($sqlIns3 && $step3)) {
-                        $step3 = false;
-                    }
-                }
-                //5 Clone la class CSS =>  " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value
-                $requete4 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value WHERE model_refid = " . $oldModel;
-                $sql4 = $this->db->query($requete4);
-                while ($res4 = $this->db->fetch_object($sql4)) {
-                    $valeur = ($res4->valeur . "x" == "x" ? "NULL" : "'" . $res4->valeur . "'");
-                    $model_refid = $newModel;
-                    $requeteIns4 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_type_class_value (
-                                                  model_refid,
-                                                 valeur)
-                                          VALUES ( " . $model_refid . " ,
-                                                   " . $valeur . " )";
-                    $sqlIns4 = $this->db->query($requeteIns4);
-                    if (!($sqlIns4 && $step4)) {
-                        $step4 = false;
-                    }
-                }
-                //6 Clone les params de fonction => " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value
-                $requete5 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value  WHERE model_refid = " . $oldModel;
-                $sql5 = $this->db->query($requete5);
-                while ($res5 = $this->db->fetch_object($sql5)) {
-                    $fct_refid = ($res5->fct_refid . 'x' != 'x' ? $res5->fct_refid : "NULL");
-                    $label = ($res5->label . "x" != 'x' ? $res5->label : "NULL");
-                    $valeur = ($res5->valeur . "x" != "x" ? "'" . $res5->valeur . "'" : "NULL");
-                    $model_refid = $newModel;
-                    $requeteIns5 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_fct_value (
-                                                 fct_refid,
-                                                 label,
-                                                 model_refid,
-                                                 valeur)
-                                         VALUES ( " . $fct_refid . " ,
-                                                 '" . $label . "' ,
-                                                 " . $model_refid . " ,
-                                                 " . $valeur . " )";
-                    $sqlIns5 = $this->db->query($requeteIns5);
-                    if (!($sqlIns5 && $step5)) {
-                        $step5 = false;
-                    }
-                }
-                //7 Clone les sources => " . MAIN_DB_PREFIX . "Synopsis_Process_form_src
-                if ($src_refid > 0) {
-                    $requete6 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_src WHERE id = " . $src_refid;
-                    $sql6 = $this->db->query($requete6);
-                    $res6 = $this->db->fetch_object($sql6);
-                    $requete_refid = ($res6->requete_refid . "x" == 'x' ? "NULL" : $res6->requete_refid);
-                    $fct_refid = ($res6->fct_refid . "x" == 'x' ? "NULL" : $res6->fct_refid);
-                    $global_refid = ($res6->global_refid . "x" == 'x' ? "NULL" : $res6->global_refid);
-                    $list_refid = ($res6->list_refid . "x" == 'x' ? "NULL" : $res6->list_refid);
-
-                    $requeteIns6 = " INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Process_form_src (
-                                                 requete_refid,
-                                                 fct_refid,
-                                                 global_refid,
-                                                 list_refid)
-                                          VALUES ( " . $requete_refid . " ,
-                                                 " . $fct_refid . " ,
-                                                 " . $global_refid . " ,
-                                                 " . $list_refid . " )";
-                    $sqlIns6 = $this->db->query($requeteIns6);
-                    $newSrcId = $this->db->last_insert_id($sqlIns6);
-                    if ($newSrcId > 0) {
-                        $requeteUpdt6 = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Process_form_model SET src_refid = " . $newSrcId . " WHERE id = " . $newModel;
-                        $sqlUpdt6 = $this->db->query($requeteUpdt6);
-                        if ($sqlUpdt6)
-                            $step6 = true;
-                        else
-                            $step6 = false;
-                    } else {
-                        $step6 = false;
-                    }
-                }
-            }
-        }
-//        var_dump($newId);
-//        var_dump($step0);
-//        var_dump($step1);
-//        var_dump($step2);
-//        var_dump($step3);
-//        var_dump($step4);
-//        var_dump($step5);
-//        var_dump($step6);
-//        exit;
-        if ($step0 && $step1 && $step2 && $step3 && $step4 && $step5 && $step6 && $newId > 0) {
-            $this->db->commit();
-            return($newId);
-        } else {
-            $this->db->rollback();
-            return(-1);
-        }
-    }
-
-    public function getLibStatut($mode) {
-        return $this->LibStatut($this->statut, $mode);
-    }
-
-    private function LibStatut($status, $mode = 0) {
-        global $langs;
-        $langs->load('process');
-        if ($mode == 0) {
-            if ($status == 0)
-                return $langs->trans('formInactif');
-            if ($status == 1)
-                return $langs->trans('formActif');
-        }
-        if ($mode == 1) {
-            if ($status == 0)
-                return $langs->trans('formInactif');
-            if ($status == 1)
-                return $langs->trans('formActif');
-        }
-        if ($mode == 2) {
-            if ($status == 0)
-                return img_picto($langs->trans('formInactif'), 'statut5') . ' ' . $langs->trans('formInactif');
-            if ($status == 1)
-                return img_picto($langs->trans('formActif'), 'statut4') . ' ' . $langs->trans('formActif');
-        }
-        if ($mode == 3) {
-            if ($status == 0)
-                return img_picto($langs->trans('formInactif'), 'statut5');
-            if ($status == 1)
-                return img_picto($langs->trans('formActif'), 'statut4');
-        }
-        if ($mode == 4) {
-            if ($status == 0)
-                return img_picto($langs->trans('formInactif'), 'statut5') . ' ' . $langs->trans('formInactif');
-            if ($status == 1)
-                return img_picto($langs->trans('formActif'), 'statut4') . ' ' . $langs->trans('formActif');
-        }
-        if ($mode == 5) {
-            if ($status == 0)
-                return $langs->trans('formInactif') . ' ' . img_picto($langs->trans('formInactif'), 'statut5');
-            if ($status == 1)
-                return $langs->trans('formActif') . ' ' . img_picto($langs->trans('formActif'), 'statut4');
-        }
-        return $langs->trans('Unknown');
     }
 
 }

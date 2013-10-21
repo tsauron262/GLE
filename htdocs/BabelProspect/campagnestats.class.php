@@ -79,7 +79,7 @@ class CampagneStats extends Stats
 
         return $data;
     }
-  }
+  
   /**
    * Renvoie le nombre de Campagne par annee
    *

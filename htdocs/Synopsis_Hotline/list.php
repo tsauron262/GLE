@@ -43,9 +43,9 @@ if (isset($_REQUEST['obj'])) {
     }
     if (isset($_REQUEST['create']) && $_REQUEST['create']) {
         $ch = new Chrono($db);
-        $ch->model_refid = 11;
+        $ch->model_refid = 1000;
         $id = $ch->create();
-        $champ[58] = date("d/m/Y");
+        $champ[1002] = date("d/m/Y");
         $ch->setDatas($id, $champ);
         header('location: ../Synopsis_Chrono/fiche.php?id=' . $id . '&action=Modify');
     }

@@ -488,9 +488,9 @@ class modSynopsisProcess extends DolibarrModules {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global` (`id`, `global`, `label`, `description`) VALUES
 (1, \'$user->id\', \'ID Utilisateur\', \'ID Utilisateur\'),
-(2, \'$user->fullname\', \'Nom complet\', \'Nom complet de l\'\'utilisateur courant\'),
-(3, \'$user->nom\', \'Nom utilisateur\', \'Nom de l\'\'utilisateur courant\'),
-(4, \'$user->prenom\', \'Prénom Utilisateur\', \'Prénom de l\'\'utilisateur courant\'),
+(2, \'$user->getFullName($langs)\', \'Nom complet\', \'Nom complet de l\'\'utilisateur courant\'),
+(3, \'$user->lastname\', \'Nom utilisateur\', \'Nom de l\'\'utilisateur courant\'),
+(4, \'$user->firstname\', \'Prénom Utilisateur\', \'Prénom de l\'\'utilisateur courant\'),
 (5, \'$mysoc->nom\', \'Ma société - désignation\', \'Ma société - Nom commercial\');',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

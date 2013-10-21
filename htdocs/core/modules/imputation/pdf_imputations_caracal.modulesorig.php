@@ -130,9 +130,9 @@ class pdf_imputations_caracal extends ModelePDFImputations
                 $docxl->getProperties()->setCreator("GLE ++");
                 $docxl->getProperties()->setLastModifiedBy("GLE ++");
                 $docxl->getProperties()->setTitle("Imputations");
-                $docxl->getProperties()->setSubject("Imputations de ".utf8_encode($fuser->fullname));
-                $docxl->getProperties()->setDescription("Imputations de ".utf8_encode($fuser->fullname));
-                $docxl->getProperties()->setKeywords("Imputations ".utf8_encode($fuser->fullname." "));
+                $docxl->getProperties()->setSubject("Imputations de ".utf8_encode($fuser->getFullName($langs)));
+                $docxl->getProperties()->setDescription("Imputations de ".utf8_encode($fuser->getFullName($langs)));
+                $docxl->getProperties()->setKeywords("Imputations ".utf8_encode($fuser->getFullName($langs)." "));
                 $docxl->getProperties()->setCategory("Imputations");
 
 
@@ -172,7 +172,7 @@ class pdf_imputations_caracal extends ModelePDFImputations
                 $feuilxl->setCellValueByColumnAndRow(2, 1, 'Généré le ');
                 $feuilxl->setCellValueByColumnAndRow(3, 1, date('d/m/Y H:i'));
                 $feuilxl->setCellValueByColumnAndRow(2, 2, 'Intervenant');
-                $feuilxl->setCellValueByColumnAndRow(3, 2, utf8_encode($fuser->fullname));
+                $feuilxl->setCellValueByColumnAndRow(3, 2, utf8_encode($fuser->getFullName($langs)));
 
 
                 $ligne = 4;
@@ -427,7 +427,7 @@ class pdf_imputations_caracal extends ModelePDFImputations
                     $feuilxl->setCellValueByColumnAndRow(2, 1, 'Généré le ');
                     $feuilxl->setCellValueByColumnAndRow(3, 1, date('d/m/Y H:i'));
                     $feuilxl->setCellValueByColumnAndRow(2, 2, 'Intervenant');
-                    $feuilxl->setCellValueByColumnAndRow(3, 2, utf8_encode($fuser->fullname));
+                    $feuilxl->setCellValueByColumnAndRow(3, 2, utf8_encode($fuser->getFullName($langs)));
                     $ligne = 6;
 //Cartouche Projet
 
@@ -439,7 +439,7 @@ class pdf_imputations_caracal extends ModelePDFImputations
                     $statut = $proj->getLibStatut('1');
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($proj->user_resp_id);
-                    $resp = $tmpUser->fullname ." <".$tmpUser->email.">";
+                    $resp = $tmpUser->getFullName($langs) ." <".$tmpUser->email.">";
 
                     $ligne ++;
 

@@ -102,8 +102,8 @@ class plaquette {
         $text = preg_replace("/##LABEL##/",$this->label,$text);
         $text = preg_replace("/##Date##/",date('d/m/Y'),$text);
 
-        $text = preg_replace("/##MON_PRENOM##/",$user->prenom,$text);
-        $text = preg_replace("/##MON_NOM##/",$user->nom,$text);
+        $text = preg_replace("/##MON_PRENOM##/",$user->firstname,$text);
+        $text = preg_replace("/##MON_NOM##/",$user->lastname,$text);
         $text = preg_replace("/##MON_EMAIL##/",$user->email,$text);
         $text = preg_replace("/##MON_TELBUREAU##/",$user->office_phone,$text);
         $text = preg_replace("/##MON_FAX##/",$user->office_fax,$text);

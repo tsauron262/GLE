@@ -192,7 +192,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
                 $pdf->SetCreator("GLE " . GLE_VERSION);
-                $pdf->SetAuthor($user->fullname);
+                $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
@@ -1285,9 +1285,9 @@ Tél. : Soc-tel
 
 
 
-        $annexe = preg_replace('/User-fullname/', $user->fullname, $annexe);
-        $annexe = preg_replace('/User-nom/', $user->nom, $annexe);
-        $annexe = preg_replace('/User-prenom/', $user->prenom, $annexe);
+        $annexe = preg_replace('/User-fullname/', $user->getFullName($langs), $annexe);
+        $annexe = preg_replace('/User-nom/', $user->lastname, $annexe);
+        $annexe = preg_replace('/User-prenom/', $user->firstname, $annexe);
         $annexe = preg_replace('/User-email/', $user->email, $annexe);
         $annexe = preg_replace('/User-office_phone/', $user->office_phone, $annexe);
         $annexe = preg_replace('/User-user_mobile/', $user->user_mobile, $annexe);

@@ -194,9 +194,9 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
 //manque cp ville tel email fax nom prenom civilite
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Utilisateur";
 
-    print "<tr><td>User-fullname<td>Mon nom complet<td>" . $user->fullname;
-    print "<tr><td>User-nom<td>Mon nom<td>" . $user->nom;
-    print "<tr><td>User-prenom<td>Mon pr&eacute;nom<td>" . $user->prenom;
+    print "<tr><td>User-fullname<td>Mon nom complet<td>" . $user->getFullName($langs);
+    print "<tr><td>User-nom<td>Mon nom<td>" . $user->lastname;
+    print "<tr><td>User-prenom<td>Mon pr&eacute;nom<td>" . $user->firstname;
     print "<tr><td>User-email<td>Mon email<td>" . $user->email;
     print "<tr><td>User-office_phone<td>Mon t&eacute;l&eacute;phone<td>" . $user->office_phone;
     print "<tr><td>User-user_mobile<td>Mon mobile<td>" . $user->user_mobile;

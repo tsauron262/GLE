@@ -1437,7 +1437,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Factures'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . trim($tmpUser->prenom . ' ' . $tmpUser->nom) . "'
+                                                                    WHERE folder_name ='" . trim($tmpUser->firstname . ' ' . $tmpUser->lastname) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -1452,7 +1452,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Factures'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . trim($tmpUser->prenom . ' ' . $tmpUser->nom) . "'
+                                                                    WHERE folder_name ='" . trim($tmpUser->firstname . ' ' . $tmpUser->lastname) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -1640,7 +1640,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Factures'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . trim($tmpUser->prenom . ' ' . $tmpUser->nom) . "'
+                                                                    WHERE folder_name ='" . trim($tmpUser->firstname . ' ' . $tmpUser->lastname) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -1655,7 +1655,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Factures'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . trim($tmpUser->prenom . ' ' . $tmpUser->nom) . "'
+                                                                    WHERE folder_name ='" . trim($tmpUser->firstname . ' ' . $tmpUser->lastname) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -2371,7 +2371,7 @@ class InterfaceZimbraSync {
                                        WHERE folder_name='Actions'
                                          AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                                WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                                   AND folder_type_refid = (SELECT id
                                                                                              FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                             WHERE val='appointment'))";
@@ -2385,7 +2385,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Actions'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . $tmpUser->fullname . "'
+                                                                    WHERE folder_name ='" . $tmpUser->getFullName($langs) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -2400,7 +2400,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Actions'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . $tmpUser->fullname . "'
+                                                                    WHERE folder_name ='" . $tmpUser->getFullName($langs) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -2415,7 +2415,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Actions'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . $tmpUser->fullname . "'
+                                                                    WHERE folder_name ='" . $tmpUser->getFullName($langs) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -2430,7 +2430,7 @@ class InterfaceZimbraSync {
                                            WHERE folder_name='Actions'
                                              AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                                    WHERE folder_name ='" . $tmpUser->fullname . "'
+                                                                    WHERE folder_name ='" . $tmpUser->getFullName($langs) . "'
                                                                       AND folder_type_refid = (SELECT id
                                                                                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                                 WHERE val='appointment'))";
@@ -2629,7 +2629,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Actions'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";
@@ -2643,7 +2643,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Factures'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";
@@ -2867,7 +2867,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Commandes'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";
@@ -2920,7 +2920,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Actions'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";
@@ -3142,7 +3142,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Actions'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";
@@ -3155,7 +3155,7 @@ class InterfaceZimbraSync {
                                WHERE folder_name='Propales'
                                  AND folder_parent = ( SELECT max(folder_uid) as folder_uid
                                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
-                                                        WHERE folder_name ='" . trim($user->prenom . ' ' . $user->nom) . "'
+                                                        WHERE folder_name ='" . trim($user->firstname . ' ' . $user->lastname) . "'
                                                           AND folder_type_refid = (SELECT id
                                                                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type
                                                                                     WHERE val='appointment'))";

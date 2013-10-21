@@ -157,7 +157,7 @@ class pdf_contratGMAO_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf->SetTitle($contrat->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
                 $pdf->SetCreator("GLE ".GLE_VERSION);
-                $pdf->SetAuthor($user->fullname);
+                $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right

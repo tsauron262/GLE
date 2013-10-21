@@ -106,7 +106,7 @@ if (!is_file(ROOT_PATH . '/lib/confs/Conf.php')) {
 }
 $tmpUser = new User($db);
 $tmpUser->fetch($_COOKIE['userid']);
-$fullname = $tmpUser->fullname;
+$fullname = $tmpUser->getFullName($langs);
 
 //session_start();
 //if(!isset($_SESSION['fname'])) {

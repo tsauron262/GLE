@@ -298,7 +298,7 @@ switch ($action)
                                               $imgClose,
                                               $row[date_prisechargeF],
                                               $arrStatut[$row[fk_statut]],
-                                              utf8_encode($localUser->fullname),
+                                              utf8_encode($localUser->getFullName($langs)),
                                               utf8_encode($row[socname]));
             $i++;
         }

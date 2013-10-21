@@ -206,7 +206,7 @@ $feuilxl->mergeCells('D2:H2');
 $feuilxl->setCellValueByColumnAndRow(2, 1, 'Note de frais pour la période:');
 $feuilxl->setCellValueByColumnAndRow(6, 1, date('m-Y',$deplacement->tsperiode));
 $feuilxl->setCellValueByColumnAndRow(2, 2, 'De:');
-$feuilxl->setCellValueByColumnAndRow(3, 2, $fuser->fullname);
+$feuilxl->setCellValueByColumnAndRow(3, 2, $fuser->getFullName($langs));
 $feuilxl->setCellValueByColumnAndRow(2, 3, 'Seuil:');
 
 $tmpSeuil = $deplacement->getSeuil($tmpNbrKm);

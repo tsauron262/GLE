@@ -127,7 +127,7 @@ switch ($action) {
 
                         $xml .= "<user>";
                         $xml .="<userid>" . $res1->fk_user . '</userid>';
-                        $xml .="<username>" . $tmpUser->fullname . '</username>';
+                        $xml .="<username>" . $tmpUser->getFullName($langs) . '</username>';
                         $xml .="<percent>" . $res1->percent . '</percent>';
                         $xml .="<type>User</type>";
                         $xml .= "</user>";
@@ -159,7 +159,7 @@ switch ($action) {
 
                         $xml .= "<user>";
                         $xml .="<userid>" . $res1->fk_user . '</userid>';
-                        $xml .="<username>" . $tmpUser->fullname . '</username>';
+                        $xml .="<username>" . $tmpUser->getFullName($langs) . '</username>';
                         $xml .="<percent>" . $res1->percent . '</percent>';
                         $xml .="<type>User</type>";
                         $xml .= "</user>";

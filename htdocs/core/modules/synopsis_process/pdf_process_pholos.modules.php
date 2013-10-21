@@ -191,7 +191,7 @@ class pdf_process_pholos extends ModeleNumRefProcess
                 $pdf->SetTitle($com->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Order"));
                 $pdf->SetCreator("GLE ".GLE_VERSION);
-                $pdf->SetAuthor($user->fullname);
+                $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1,0);

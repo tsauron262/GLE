@@ -930,7 +930,7 @@ function top_menu($head, $title="", $target="")
         $text.='>';
     }
     $htmltext.='<u>'.$langs->trans("User").'</u>';
-    $htmltext.='<br><b>'.$langs->trans("Name").'</b>: '.$user->fullname;
+    $htmltext.='<br><b>'.$langs->trans("Name").'</b>: '.$user->getFullName($langs);
     $htmltext.='<br><b>'.$langs->trans("Login").'</b>: '.$user->login;
     $htmltext.='<br><b>'.$langs->trans("Administrator").'</b>: '.yn($user->admin);
     $htmltext.='<br><b>'.$langs->trans("Type").'</b>: '.($user->societe_id?$langs->trans("External"):$langs->trans("Internal"));

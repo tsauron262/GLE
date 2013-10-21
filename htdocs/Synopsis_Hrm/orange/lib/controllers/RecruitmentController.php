@@ -712,8 +712,8 @@ class RecruitmentController {
                 //cf http://127.0.0.1/GLE-1.1/main/htdocs//user/fiche.php?action=create&idmenu=402
 
 
-//                  $edituser->nom           = $_POST["nom"];
-//        $edituser->prenom        = $_POST["prenom"];
+//                  $edituser->lastname           = $_POST["nom"];
+//        $edituser->firstname        = $_POST["prenom"];
 //        $edituser->login         = $_POST["login"];
 //        $edituser->admin         = $_POST["admin"];
 //        $edituser->office_phone  = $_POST["office_phone"];
@@ -735,8 +735,8 @@ class RecruitmentController {
 //          password
 
 //
-//        $edituser->nom           = $_POST["nom"];
-//        $edituser->prenom        = $_POST["prenom"];
+//        $edituser->lastname           = $_POST["nom"];
+//        $edituser->firstname        = $_POST["prenom"];
 //        $edituser->login         = $_POST["login"];
 //        $edituser->admin         = $_POST["admin"];
 //        $edituser->office_phone  = $_POST["office_phone"];

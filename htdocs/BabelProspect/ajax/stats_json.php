@@ -61,8 +61,8 @@ switch ($action)
         {
             $tmpUser= new User($db);
             $tmpUser->fetch($res->user_id);
-            $fullname = $tmpUser->fullname;
-            if ($tmpUser->fullname . "x" == "x")
+            $fullname = $tmpUser->getFullName($langs);
+            if ($tmpUser->getFullName($langs) . "x" == "x")
             {
                 $fullname = " --- ";
             }
@@ -489,11 +489,11 @@ switch ($action)
 
             $fuser = new User($db); 
             $fuser->fetch($res->user_id);
-            $arrFullname[$res->user_id]=$fuser->fullname;
+            $arrFullname[$res->user_id]=$fuser->getFullName($langs);
             if (!in_array($res->user_id,$remColor))
             {
                 $color = array();
-                array_push($color, new bar_stack_key( $colorTpl[$i], $fuser->fullname, 9 ));
+                array_push($color, new bar_stack_key( $colorTpl[$i], $fuser->getFullName($langs), 9 ));
                 array_push($remColor,$res->user_id);
                 $remColor1[$res->user_id]=$colorTpl[$i];
                 $remColor2[$res->user_id]=$colorTpl1[$i];
@@ -670,7 +670,7 @@ switch ($action)
                             $fuser = new User($db);
                             $fuser->fetch($userid);
 
-                            array_push($arrRes,new OFC_Charts_Bar_Stack_Value($val1 * 1, $color[$key1],$fuser->fullname.'<br>  Nb action le #x_label# :<br>  #val#<br>  Total journalier: #total#' ) );
+                            array_push($arrRes,new OFC_Charts_Bar_Stack_Value($val1 * 1, $color[$key1],$fuser->getFullName($langs).'<br>  Nb action le #x_label# :<br>  #val#<br>  Total journalier: #total#' ) );
                             $totDay += $val1;
                         }
                     }

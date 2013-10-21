@@ -362,7 +362,7 @@ if ($_REQUEST['level'] == 1)
                 array_push($contactArr,array('source' => 'internal',
                                              'socid' => '-1',
                                              'id' => $tmpUser->id,
-                                             'nom' => $tmpUser->fullname,
+                                             'nom' => $tmpUser->getFullName($langs),
                                              "rowid" => -1,
                                              'code' => "SOCCOMMERCIAL",
                                              'libelle' => $langs->trans("SOCCOMMERCIAL"),

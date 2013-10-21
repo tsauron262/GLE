@@ -189,7 +189,7 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
                 $pdf->SetTitle($propale->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("CommercialProposal"));
                 $pdf->SetCreator("GLE ".GLE_VERSION);
-                $pdf->SetAuthor($user->fullname);
+                $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1,0);

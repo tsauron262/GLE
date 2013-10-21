@@ -189,7 +189,7 @@ $feuilxl->setCellValueByColumnAndRow(0, 2, 'Logo Babel');
 $feuilxl->setCellValueByColumnAndRow(2, 1, 'Note de frais pour le periode:');
 $feuilxl->setCellValueByColumnAndRow(5, 1, date('m-Y',$deplacement->tsperiode));
 $feuilxl->setCellValueByColumnAndRow(2, 2, 'De:');
-$feuilxl->setCellValueByColumnAndRow(3, 2, $fuser->fullname);
+$feuilxl->setCellValueByColumnAndRow(3, 2, $fuser->getFullName($langs));
 $feuilxl->setCellValueByColumnAndRow(3, 3, 'Seuil:');
 
 $tmpSeuil = $deplacement->getSeuil($tmpNbrKm);

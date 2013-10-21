@@ -151,7 +151,7 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
                 $pdf->SetTitle($contratGA->ref);
                 $pdf->SetSubject($outputlangs->transnoentities("Contract"));
                 $pdf->SetCreator("GLE ".GLE_VERSION);
-                $pdf->SetAuthor($user->fullname);
+                $pdf->SetAuthor($user->getFullName($langs));
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1,0);

@@ -59,7 +59,7 @@
         $subject="[Finance Commande] Nouveau message concernant la commande ".$commande->ref;
         $to = $tmpUser->email;
 
-        $msg = "Bonjour ".$tmpUser->fullname.",<br/><br/>";
+        $msg = "Bonjour ".$tmpUser->getFullName($langs).",<br/><br/>";
         $msg .= "La commande ".$commande->getNomUrl(1,6)." a &eacute;t&eacute; invalid&eacute;e financi&egrave;rement.";
 
         $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";

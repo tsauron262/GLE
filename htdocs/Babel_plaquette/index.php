@@ -416,10 +416,10 @@ EOF;
                 <td class='ui-widget-content'>Plaquette GLE
             <tr><th class='ui-widget-header ui-state-default'>Pr&eacute;nom</th>
                 <td class='ui-widget-content'>##MON_PRENOM##
-                <td class='ui-widget-content'><?php echo $user->prenom ?>
+                <td class='ui-widget-content'><?php echo $user->firstname ?>
             <tr><th class='ui-widget-header ui-state-default'>Nom</th>
                 <td class='ui-widget-content'>##MON_NOM##
-                <td class='ui-widget-content'><?php echo $user->nom ?>
+                <td class='ui-widget-content'><?php echo $user->lastname ?>
             <tr><th class='ui-widget-header ui-state-default'>Email</th>
                 <td class='ui-widget-content'>##MON_EMAIL##
                 <td class='ui-widget-content'><?php echo $user->email ?>

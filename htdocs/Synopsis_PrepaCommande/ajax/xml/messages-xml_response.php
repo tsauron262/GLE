@@ -59,7 +59,7 @@
         //CC Resp Tech et Resp logistique et financier
         $subject="[Nouveau message GLE] Nouveau message concernant la commande ".$commande->ref;
         $to = $tmpUser->email;
-        $msg = "Bonjour ".$tmpUser->fullname.", <br/><br/>";
+        $msg = "Bonjour ".$tmpUser->getFullName($langs).", <br/><br/>";
         if ($typeMsg)
         {
             switch($typeMsg)
@@ -78,7 +78,7 @@
                 break;
                 case 'intervention':{
                     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
-                    $msg = "Bonjour ".$tmpUser->fullname.", <br/><br/>";
+                    $msg = "Bonjour ".$tmpUser->getFullName($langs).", <br/><br/>";
                 }
                 break;
             }

@@ -220,7 +220,7 @@ switch($action)
                           "url"      => $dolibarr_main_url_root."/Synopsis_Ressources/resa.php?ressource_id=".$ressourceId,
                           "name"     => "Reservation",
                           "isOrg"    => "1",
-                          "desc"     => "Reservation par ".$user->prenom . " ".$user->nom. " pour ".$fuser->prenom . " ".$fuser->nom,
+                          "desc"     => "Reservation par ".$user->firstname . " ".$user->lastname. " pour ".$fuser->firstname . " ".$fuser->lastname,
                           "descHtml" => "R&eacute;servation par " .$user->getNomUrl(0,'iframe',1) . " pour " . $fuser->getNomUrl(0,'iframe',1)
                      );
            $zim->debug=false;
@@ -273,7 +273,7 @@ switch($action)
                       "url"      => $dolibarr_main_url_root."/Synopsis_Ressources/resa.php?ressource_id=".$ressourceId,
                       "isOrg"    => "1",
                           "l"    => $calId,
-                      "desc"     => utf8_encode("Réservation par ".$user->fullname . " pour ".$fuser->fullname),
+                      "desc"     => utf8_encode("Réservation par ".$user->getFullName($langs) . " pour ".$fuser->getFullName($langs)),
                       "descHtml" => "R&eacute;servation par " .$user->getNomUrl(0,'iframe',1) . " pour " . $fuser->getNomUrl(0,'iframe',1)
                  );
        //modify in zimbra

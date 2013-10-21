@@ -28,7 +28,7 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
         $soc = new Societe($db);
         $soc->fetch($_REQUEST['id']);
-        $filtre = "Société=" . ($soc->nom);
+        $filtre = "Société=" . urlencode($soc->nom);
         $head = societe_prepare_head($soc);
         $champ = array(1005 => $_REQUEST['id']);
     } else if ($_REQUEST['obj'] == "ctr") {

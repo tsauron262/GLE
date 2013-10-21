@@ -43,7 +43,7 @@ if (isset($_REQUEST['obj'])) {
     }
     if (isset($_REQUEST['create']) && $_REQUEST['create']) {
         $ch = new Chrono($db);
-        $ch->model_refid = 1000;
+        $ch->model_refid = 100;
         $id = $ch->create();
         $champ[1002] = date("d/m/Y");
         $ch->setDatas($id, $champ);

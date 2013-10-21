@@ -107,7 +107,6 @@ INSERT INTO `llx_Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`
 
 (1000, 'Objet', '', 100, 1, NULL, 'required', 1),
 (1001, 'Date / Heure', '', 100, 3, NULL, 'required', 1),
-(1003, 'Auteur', '', 100, 7, 2, '', 1),
 (1004, 'Contrat', '', 100, 6, 16, '', 1),
 (1005, 'Société', '', 100, 6, 17, '', 1);");
     return $this->_init($sql);

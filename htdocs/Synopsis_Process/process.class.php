@@ -2331,7 +2331,7 @@ class globalvar extends formulaireSource {
     }
 
     public function fetch($id) {
-        global $conf;
+        global $conf, $langs;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
             $conf->global->DOL_DOCUMENT_ROOT = DOL_DOCUMENT_ROOT;
@@ -2346,7 +2346,7 @@ class globalvar extends formulaireSource {
                 $this->label = $res->label;
                 $this->description = $res->description;
                 $eval = $this->globalvar;
-                eval("\$eval = \"$eval\";");
+                eval('$eval = '.$eval.";");
                 $this->glabalVarEval = $eval;
             }
         } else {

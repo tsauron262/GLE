@@ -100,15 +100,20 @@ class modSynopsisHotline extends DolibarrModules
   function init()
   {
         $this->remove();
-    $sql = array("INSERT INTO `llx_Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`) VALUES
+    $sql = array("INSERT IGNORE INTO `llx_Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`) VALUES
 (100, 'Appel', 'Fiche Hotline', 0, 0, 0, 0, NULL, 'Hot{yy}{mm}{000}', '2013-10-15', '2013-10-15 20:05:01', 1);
 ", "
-INSERT INTO `llx_Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`) VALUES
+INSERT IGNORE INTO `llx_Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`) VALUES
 
 (1000, 'Objet', '', 100, 1, NULL, 'required', 1),
 (1001, 'Date / Heure', '', 100, 3, NULL, 'required', 1),
-(1004, 'Contrat', '', 100, 6, 16, '', 1),
-(1005, 'Société', '', 100, 6, 17, '', 1);");
+(1004, 'Contrat', '', 100, 6, 1000, '', 1),
+(1005, 'Société', '', 100, 6, 1001, '', 1);",
+            "INSERT IGNORE INTO `llx_Synopsis_Process_form_requete` (`id`, `requete`, `requeteValue`, `params`, `limite`, `label`, `description`, `showFields`, `indexField`, `tableName`, `groupBy`, `orderBy`, `filter`, `OptGroup`, `OptGroupLabel`, `postTraitement`) VALUES
+
+(1000, 'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid\r\nORDER BY s.nom', 'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid AND [[indexField]] \r\nORDER BY s.nom                                                            ', 'a:1:{i:0;s:0:\"\";}', 10000, 'requete Contrat/Soc', 'contrat + soc', 'a:1:{i:0;s:3:\"ref\";}', 'rowid', 'llx_contrat', NULL, NULL, NULL, 'fk_soc', 'nom', 'a:1:{s:3:\"ref\";s:0:\"\";}'),
+
+(1001, 'SELECT rowid, nom FROM llx_societe', '            ', 'a:1:{i:0;s:0:\"\";}', 10000, 'Sociétés', 'Liste des sociétés', 'a:1:{i:0;s:3:\"nom\";}', 'rowid', '', NULL, NULL, NULL, '', '', 'a:1:{s:3:\"nom\";s:0:\"\";}');");
     return $this->_init($sql);
   }
 

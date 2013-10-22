@@ -24,6 +24,7 @@ class SynopsisRevisionPropal {
         $parameters = array('socid' => $socid);
         $oldRef = $propal->ref;
         $oldId = $propal->id;
+        $oldRefCli = $propal->ref_client;
         $object = $propal;
         $actionHook = 'confirm_clone';
         include_once(DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php');
@@ -55,7 +56,7 @@ class SynopsisRevisionPropal {
                 $newRef = $orgRef . "-" . $numRevision;
             }
 
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . " WHERE rowid = " . $result;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $result;
             $db->query($requete);
             $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $result . ", fk_statut = 3 WHERE rowid = " . $oldId;
             $db->query($requete);

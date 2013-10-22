@@ -1281,7 +1281,7 @@ if (is_dir($dir)) {
                         if (!$db->num_rows($sql) > 0) {
                             //Insert commande
                             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
-                                        (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_adresse_livraison,import_key)
+                                        (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
                                  VALUES (now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                             $sql = requeteWithCache($requete);
                             if ($sql) {
@@ -1305,8 +1305,8 @@ if (is_dir($dir)) {
                                 $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
                             if ($res->fk_mode_reglement != $modReg)
                                 $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
-                            if ($res->fk_adresse_livraison != $livAdd)
-                                $sqlUpt[] = " fk_adresse_livraison = '" . $livAdd . "'";
+                            if ($res->fk_delivery_address != $livAdd)
+                                $sqlUpt[] = " fk_delivery_address = '" . $livAdd . "'";
                             if (count($sqlUpt) > 0) {
                                 $updtStr = join(',', $sqlUpt);
                                 $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;

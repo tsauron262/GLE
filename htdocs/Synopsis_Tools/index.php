@@ -24,7 +24,7 @@ print "<div class='titre'>Outil GLE</div>";
 print "<br/>";
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
     print" <br/><br/><a href='myAdmin.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin</span></a>";
-    print" <br/><br/><a href='./Synopsis_MyAdmin/index.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet)</span></a>";
+    print" <br/><br/><a href='./Synopsis_MyAdmin/index.php'  target='_blank'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>PhpMyAdmin (Nouvelle onglet)</span></a>";
 }
 
 if (isset($user->rights->SynopsisPrepaCom->import->Admin))

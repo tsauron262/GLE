@@ -729,7 +729,13 @@ class Propal extends CommonObject
 
             if ($this->id)
             {
-                $this->ref='(PROV'.$this->id.')';
+                /*Mod drsi pas de ref prov dans les propal*/
+//                $this->ref='(PROV'.$this->id.')';
+                require_once DOL_DOCUMENT_ROOT ."/core/modules/propale/".$conf->global->PROPALE_ADDON.'.php';
+                $obj = $conf->global->PROPALE_ADDON;
+                $modPropale = new $obj;
+                $this->ref = $modPropale->getNextValue($objsoc,$this);
+                /*fmod drsi */
                 $sql = 'UPDATE '.MAIN_DB_PREFIX."propal SET ref='".$this->ref."' WHERE rowid=".$this->id;
 
                 dol_syslog(get_class($this)."::create sql=".$sql);

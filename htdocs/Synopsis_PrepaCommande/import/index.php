@@ -27,7 +27,7 @@
   print" <a href='config.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Configuration</span></a>";
   print "<br/>";
   print "<br/>";
-  print" <a href='testImport.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test d'import</span></a>";
+  print" <a href='testImport.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Import</span></a>";
   print "<br/>";
   print "<br/>";
   print" <a href='history.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Historique</span></a>";

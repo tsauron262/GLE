@@ -240,6 +240,16 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=SynPrepaImp',
+            'type' => 'left',
+            'titre' => 'Import',
+            'url' => '/Synopsis_PrepaCommande/import/testImport.php',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 3,
+            'perms' => '$user->rights->SynopsisPrepaCom->import->Admin',
+            'target' => '',
+            'user' => 0);
+        $r++;
 
         $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools',
             'type' => 'left',

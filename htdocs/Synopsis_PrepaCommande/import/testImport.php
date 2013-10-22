@@ -741,7 +741,7 @@ if (is_dir($dir)) {
                         $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
                         $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "socpeople
-                         WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND name = '" . $nomLivAdd . "')";
+                         WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND lastname = '" . $nomLivAdd . "')";
 //                        $requete = "SELECT *
 //                          FROM " . MAIN_DB_PREFIX . "societe_adresse_livraison
 //                         WHERE import_key = '" . $val['PcvLAdpID'] . "'";
@@ -757,7 +757,7 @@ if (is_dir($dir)) {
                                 , town = '" . $val['CliLAdrCity'] . "'
                                 , address = '" . $livAdresse . "'
                                 , fk_pays = " . ($paysGlobal . "x" != "x" ? $paysGlobal : NULL) . "
-                                , name = '" . $nomLivAdd . "'
+                                , lastname = '" . $nomLivAdd . "'
                             WHERE import_key= " . $val['PcvLAdpID'];
                             $sql = requeteWithCache($requete);
                             if ($sql) {

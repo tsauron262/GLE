@@ -23,7 +23,7 @@ $key = "ABQIAAAAENh_drcI93tG2EgxZCrmbxRi_j0U6kJrkFvY4-OX2XYmEAa76BRK1ueHpqfmxZCo
 
 require_once('../main.inc.php');
 if ($user->rights->GeoBI->GeoBI->Affiche != 1){  accessforbidden(); }
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_ville WHERE nom ='".preg_replace('/\ /',"-",$mysoc->ville)."'";
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_ville WHERE nom ='".preg_replace('/\ /',"-",$mysoc->town)."'";
 $sql = $db->query($requete);
 $res = $db->fetch_object($sql);
 $lat = ($res->latitude."x"=="x"?"43.533329":$res->latitude);

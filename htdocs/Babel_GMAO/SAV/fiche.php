@@ -143,10 +143,10 @@ $form =new Form($db);
         print '</td></tr>';
     }
 
-    print "<tr><th class='ui-state-default ui-widget-header' valign=\"top\">".$langs->trans('Address')."</td><td  class='ui-widget-content' colspan=\"3\">".nl2br($objsoc->adresse)."</td></tr>";
+    print "<tr><th class='ui-state-default ui-widget-header' valign=\"top\">".$langs->trans('Address')."</td><td  class='ui-widget-content' colspan=\"3\">".nl2br($objsoc->address)."</td></tr>";
 
-    print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Zip').'</td><td class="ui-widget-content">'.$objsoc->cp."</td>";
-    print '<th  class="ui-state-default ui-widget-header " >'.$langs->trans('Town').'</td><td class="ui-widget-content">'.$objsoc->ville."</td></tr>";
+    print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Zip').'</td><td class="ui-widget-content">'.$objsoc->zip."</td>";
+    print '<th  class="ui-state-default ui-widget-header " >'.$langs->trans('Town').'</td><td class="ui-widget-content">'.$objsoc->town."</td></tr>";
 
     // Country
     print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans("Country").'</td><td colspan="3"  class="ui-widget-content">';
@@ -155,7 +155,7 @@ $form =new Form($db);
     print '</td></tr>';
 
     // Phone
-    print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Phone').'</td><td class="ui-widget-content">'.dol_print_phone($objsoc->tel,$objsoc->pays_code).'</td>';
+    print '<tr><th class="ui-state-default ui-widget-header">'.$langs->trans('Phone').'</td><td class="ui-widget-content">'.dol_print_phone($objsoc->phone,$objsoc->pays_code).'</td>';
 
     // Fax
     print '<th class=" ui-state-default ui-widget-header ">'.$langs->trans('Fax').'</td><td class="ui-widget-content">'.dol_print_phone($objsoc->fax,$objsoc->pays_code).'</td></tr>';

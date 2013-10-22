@@ -196,12 +196,12 @@ if ($socid > 0)
     }
 
     print "<tr><td  class=\"ui-widget-header ui-state-default\" valign=\"top\">".$langs->trans('Address')."</td>
-                <td class=\"ui-widget-content\" colspan=\"3\">".nl2br($objsoc->adresse)."</td></tr>";
+                <td class=\"ui-widget-content\" colspan=\"3\">".nl2br($objsoc->address)."</td></tr>";
 
     print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Zip').'</td>
-               <td class="ui-widget-content">'.$objsoc->cp."</td>";
+               <td class="ui-widget-content">'.$objsoc->zip."</td>";
     print '<td class="ui-widget-header ui-state-default black">'.$langs->trans('Town').'</td>
-               <td class="ui-widget-content">'.$objsoc->ville."</td></tr>";
+               <td class="ui-widget-content">'.$objsoc->town."</td></tr>";
 
     // Country
     print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans("Country").'</td>
@@ -212,7 +212,7 @@ if ($socid > 0)
 
     // Phone
     print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Phone').'</td>
-               <td class="ui-widget-content">'.dol_print_phone($objsoc->tel,$objsoc->pays_code).'</td>';
+               <td class="ui-widget-content">'.dol_print_phone($objsoc->phone,$objsoc->pays_code).'</td>';
 
     // Fax
     print '<td class="ui-widget-header ui-state-default black">'.$langs->trans('Fax').'</td>

@@ -63,9 +63,9 @@
 
     print "<table width='450'>";
     print "<tr><th width=20%>Client<td>".utf8_encode($soc->getNomUrl(1));
-    print "<tr><th valign=top rowspan=2 width=20%>Adresse<td>".utf8_encode($soc->adresse);
-    print "<tr><td>".utf8_encode($soc->cp);
-    print " ".utf8_encode($soc->ville)."<br>";
+    print "<tr><th valign=top rowspan=2 width=20%>Adresse<td>".utf8_encode($soc->address);
+    print "<tr><td>".utf8_encode($soc->zip);
+    print " ".utf8_encode($soc->town)."<br>";
     $rowspan = 1;
     if ("x".$soc->email != "x")
     {
@@ -75,7 +75,7 @@
     {
         $rowspan++;
     }
-    print "<tr><th valign=top rowspan=3 width=20%>Communication<td>Tel: ".utf8_encode($soc->tel);
+    print "<tr><th valign=top rowspan=3 width=20%>Communication<td>Tel: ".utf8_encode($soc->phone);
     if ("x".$soc->fax != "x")
     {
         print "<tr><td>Fax: ".utf8_encode($soc->fax);

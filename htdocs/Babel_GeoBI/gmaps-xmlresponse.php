@@ -50,7 +50,7 @@
     } else {
         $soc = new Societe($db);
         $soc->fetch($socId);
-        $add = urlencode($soc->adresse_full .",".$soc->pays);
+        $add = urlencode($soc->address_full .",".$soc->pays);
         $param = '?address='.$add.'&sensor=true';
     //print $url.$param;
         $_curl = curl_init();
@@ -84,7 +84,7 @@
     }
     if ($xml->getElementsByTagName('status')->item(0)->nodeValue!='ZERO_RESULTS')
     {
-        $add = urlencode($soc->ville .",".$soc->pays);
+        $add = urlencode($soc->town .",".$soc->pays);
         $param = '?address='.$add.'&sensor=true';
     //print $url.$param;
         $_curl = curl_init();

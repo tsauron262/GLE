@@ -23,9 +23,9 @@ if($_REQUEST['socid'] > 0)
 {
     $soc = new Societe($db);
     $soc->fetch($_REQUEST['socid']);
-    $q = urlencode($soc->cp. " ".$soc->ville);
+    $q = urlencode($soc->zip. " ".$soc->town);
 }
-//print $soc->ville;
+//print $soc->town;
 $param = 'q='.$q."&placetype=city&country=FR&lang=fr&format=XML&style=FULL&indent=true&radius=1000";
 
 //print $url."?".$param;
@@ -69,7 +69,7 @@ if ($response)
     $q = urlencode('bras d\'or');
     if($_REQUEST['socid'] > 0)
     {
-        $q = urlencode(preg_replace('/^[0-9 ]*/','',$soc->adresse));
+        $q = urlencode(preg_replace('/^[0-9 ]*/','',$soc->address));
     }
     $param = 'name='.$q."&lang=fr&format=XML&lat=".$lat."&lng=".$long;
 //print $param;

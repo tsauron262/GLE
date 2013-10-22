@@ -121,10 +121,10 @@ print $soc->nom;
         print '</td></tr>';
     }
 
-    print "<tr><td valign=\"top\">".$langs->trans('Address')."</td><td colspan=\"3\">".nl2br($soc->adresse)."</td></tr>";
+    print "<tr><td valign=\"top\">".$langs->trans('Address')."</td><td colspan=\"3\">".nl2br($soc->address)."</td></tr>";
 
-    print '<tr><td width="25%">'.$langs->trans('Zip').'</td><td width="25%" colspan=3>'.$soc->cp."</td>";
-    print '<tr><td width="25%">'.$langs->trans('Town').'</td><td width="25%" colspan=3>'.$soc->ville."</td></tr>";
+    print '<tr><td width="25%">'.$langs->trans('Zip').'</td><td width="25%" colspan=3>'.$soc->zip."</td>";
+    print '<tr><td width="25%">'.$langs->trans('Town').'</td><td width="25%" colspan=3>'.$soc->town."</td></tr>";
 
     // Country
     print '<tr><td>'.$langs->trans("Country").'</td><td colspan="3">';
@@ -134,7 +134,7 @@ print $soc->nom;
 
     print '<tr><td>'.$langs->trans('State').'</td><td colspan="3">'.$soc->departement.'</td>';
 
-    print '<tr><td>'.$langs->trans('Phone').'</td><td colspan="3"><a href="tel:'.preg_replace("/[\Wa-zA-Z.,]*/","",$soc->tel).'">'.$gsm->dol_print_phone($soc->tel).'</a></td>';
+    print '<tr><td>'.$langs->trans('Phone').'</td><td colspan="3"><a href="tel:'.preg_replace("/[\Wa-zA-Z.,]*/","",$soc->phone).'">'.$gsm->dol_print_phone($soc->phone).'</a></td>';
     print '</TR><TR><td>'.$langs->trans('Fax').'</td><td colspan="3">'.dol_print_phone($soc->fax).'</td></tr>';
 
     print '<tr><td>'.$langs->trans('EMail').'</td><td colspan="3">';

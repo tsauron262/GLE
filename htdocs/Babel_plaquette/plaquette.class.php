@@ -109,7 +109,7 @@ class plaquette {
         $text = preg_replace("/##MON_FAX##/",$user->office_fax,$text);
         $text = preg_replace("/##MON_MOBILE##/",$user->user_mobile,$text);
         $text = preg_replace("/##MA_SOCIETE_EMAIL##/",$mysoc->email,$text);
-        $text = preg_replace("/##MA_SOCIETE_TEL##/",$mysoc->tel,$text);
+        $text = preg_replace("/##MA_SOCIETE_TEL##/",$mysoc->phone,$text);
         $text = preg_replace("/##MA_SOCIETE_FAX##/",$mysoc->fax,$text);
         $text = preg_replace("/##MA_SOCIETE_NOM##/",$mysoc->nom,$text);
 

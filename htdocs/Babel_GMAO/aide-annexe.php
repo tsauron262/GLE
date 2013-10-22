@@ -59,11 +59,11 @@
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Ma soci&eacute;t&eacute;";
 
     print "<tr><td>Mysoc-nom<td>Nom de ma soci&eacute;t&eacute;<td>".$mysoc->nom;
-    print "<tr><td>Mysoc-adresse_full<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->adresse_full;
-    print "<tr><td>Mysoc-adresse<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->adresse;
-    print "<tr><td>Mysoc-cp<td>Code postal de ma soci&eacute;t&eacute;<td>".$mysoc->cp;
-    print "<tr><td>Mysoc-ville<td>Ville de ma soci&eacute;t&eacute;<td>".$mysoc->ville;
-    print "<tr><td>Mysoc-tel<td>T&eacute;l&eacute;phone de ma soci&eacute;t&eacute;<td>".$mysoc->tel;
+    print "<tr><td>Mysoc-adresse_full<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->address_full;
+    print "<tr><td>Mysoc-adresse<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->address;
+    print "<tr><td>Mysoc-cp<td>Code postal de ma soci&eacute;t&eacute;<td>".$mysoc->zip;
+    print "<tr><td>Mysoc-ville<td>Ville de ma soci&eacute;t&eacute;<td>".$mysoc->town;
+    print "<tr><td>Mysoc-tel<td>T&eacute;l&eacute;phone de ma soci&eacute;t&eacute;<td>".$mysoc->phone;
     print "<tr><td>Mysoc-fax<td>Fax de ma soci&eacute;t&eacute;<td>".$mysoc->fax;
     print "<tr><td>Mysoc-email<td>Email de ma soci&eacute;t&eacute;<td>".$mysoc->email;
     print "<tr><td>Mysoc-url<td>URL de ma soci&eacute;t&eacute;<td>".$mysoc->url;

@@ -892,11 +892,11 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
                     $annexe = preg_replace('/User-office_fax/', $user->office_fax, $annexe);
 
                     $annexe = preg_replace('/Mysoc-nom/', $mysoc->nom, $annexe);
-                    $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->adresse_full, $annexe);
-                    $annexe = preg_replace('/Mysoc-adresse/', $mysoc->adresse, $annexe);
-                    $annexe = preg_replace('/Mysoc-cp/', $mysoc->cp, $annexe);
-                    $annexe = preg_replace('/Mysoc-ville/', $mysoc->ville, $annexe);
-                    $annexe = preg_replace('/Mysoc-tel/', $mysoc->tel, $annexe);
+                    $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address_full, $annexe);
+                    $annexe = preg_replace('/Mysoc-adresse/', $mysoc->address, $annexe);
+                    $annexe = preg_replace('/Mysoc-cp/', $mysoc->zip, $annexe);
+                    $annexe = preg_replace('/Mysoc-ville/', $mysoc->town, $annexe);
+                    $annexe = preg_replace('/Mysoc-tel/', $mysoc->phone, $annexe);
                     $annexe = preg_replace('/Mysoc-fax/', $mysoc->fax, $annexe);
                     $annexe = preg_replace('/Mysoc-email/', $mysoc->email, $annexe);
                     $annexe = preg_replace('/Mysoc-url/', $mysoc->url, $annexe);
@@ -1003,7 +1003,7 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
             $tmpSoc = new Societe($this->db);
             $tmpSoc->fetch($res->fk_soc);
             $res = $this->db->fetch_object($sql);
-            $tel = "\nTel: " . ($res->phone . "x" != "x" ? $res->phone : $tmpSoc->tel) . "        email : " . $res->email;
+            $tel = "\nTel: " . ($res->phone . "x" != "x" ? $res->phone : $tmpSoc->phone) . "        email : " . $res->email;
             $civilite = $res->civilite;
             if ($langs->trans("CivilityShort" . $res->civilite) != "CivilityShort" . $civilite)
                 $civilite = $langs->trans("CivilityShort" . $res->civilite);
@@ -1219,11 +1219,11 @@ Signature et cachet
         global $mysoc;
 
         $pdf->SetXY(3.5, 269);
-        $pdf->MultiCell(39, 4, utf8_decode($mysoc->adresse), 0, "L");
+        $pdf->MultiCell(39, 4, utf8_decode($mysoc->address), 0, "L");
         $pdf->SetXY(3.5, 273);
-        $pdf->MultiCell(39, 4, utf8_decode($mysoc->cp . " " . $mysoc->ville), 0, "L");
+        $pdf->MultiCell(39, 4, utf8_decode($mysoc->zip . " " . $mysoc->town), 0, "L");
         $pdf->SetXY(3.5, 278);
-        $pdf->MultiCell(39, 4, utf8_decode("Tél. : " . $mysoc->tel), 0, "L");
+        $pdf->MultiCell(39, 4, utf8_decode("Tél. : " . $mysoc->phone), 0, "L");
         $pdf->SetXY(3.5, 282);
         $pdf->MultiCell(39, 4, "Fax  : " . $mysoc->fax, 0, "L");
 

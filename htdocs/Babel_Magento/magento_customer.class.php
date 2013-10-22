@@ -138,12 +138,12 @@ class magento_customer extends magento_soap{
             $soc->capital=0;
         }
 
-        $soc->adresse=$street;
-        $soc->cp=$postcode;
-        $soc->ville=$city;
+        $soc->address=$street;
+        $soc->zip=$postcode;
+        $soc->town=$city;
         $soc->departement_id = $region;
         $soc->pays_id = $country_id;
-        $soc->tel = $telephone;
+        $soc->phone = $telephone;
         $soc->fax=$fax;
         $soc->email=$email;
         $soc->tva_intra=$taxvat;
@@ -171,9 +171,9 @@ class magento_customer extends magento_soap{
         $contact->phone = $telephone;
         $contact->phone_pro = $telephone;
         $contact->fax = $fax;
-        $contact->cp = $soc->cp;
-        $contact->ville = $soc->ville;
-        $contact->adresse=$soc->adresse;
+        $contact->cp = $soc->zip;
+        $contact->ville = $soc->town;
+        $contact->adresse=$soc->address;
         $contact->fk_pays=$soc->pays_id;
         $contact->birthday=$dob;
         $contact->note = $soc->note;
@@ -247,12 +247,12 @@ class magento_customer extends magento_soap{
             $soc->capital=0;
         }
 
-        $soc->adresse=$street;
-        $soc->cp=$postcode;
-        $soc->ville=$city;
+        $soc->address=$street;
+        $soc->zip=$postcode;
+        $soc->town=$city;
         $soc->departement_id = $region;
         $soc->pays_id = $country_id;
-        $soc->tel = $telephone;
+        $soc->phone = $telephone;
         $soc->fax=$fax;
         $soc->email=$email;
         $soc->tva_intra=$taxvat;
@@ -281,9 +281,9 @@ class magento_customer extends magento_soap{
         $contact->phone = $telephone;
         $contact->phone_pro = $telephone;
         $contact->fax = $fax;
-        $contact->cp = $soc->cp;
-        $contact->ville = $soc->ville;
-        $contact->adresse=$soc->adresse;
+        $contact->cp = $soc->zip;
+        $contact->ville = $soc->town;
+        $contact->adresse=$soc->address;
         $contact->fk_pays=$soc->pays_id;
         $contact->birthday=$dob;
         $contact->note = $soc->note;

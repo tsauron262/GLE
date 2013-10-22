@@ -357,12 +357,12 @@ switch($action)
                 $newsoc->code_client =-1;
                 $newsoc->code_fournisseur = 0;
                 $newsoc->nom = $lastname . " ". $firstname;
-                $newsoc->adresse = $address;
-                $newsoc->cp = $address;
-                $newsoc->ville = $ville;
+                $newsoc->address = $address;
+                $newsoc->zip = $address;
+                $newsoc->town = $ville;
                 $newsoc->pays_id = $pays_id;
                 $newsoc->departement_id = $departement_id;
-                $newsoc->tel = $tel;
+                $newsoc->phone = $tel;
                 $newsoc->email = $email;
                 $newsoc->note = $note;
                 $newsoc->tva_intra = $numTva;

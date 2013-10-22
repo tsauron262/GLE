@@ -441,7 +441,7 @@ EOF;
                 <td class='ui-widget-content'><?php echo $mysoc->email ?>
             <tr><th class='ui-widget-header ui-state-default'>Tel de ma soci&eacute;t&eacute;</th>
                 <td class='ui-widget-content'>##MA_SOCIETE_TEL##
-                <td class='ui-widget-content'><?php echo $mysoc->tel ?>
+                <td class='ui-widget-content'><?php echo $mysoc->phone ?>
             <tr><th class='ui-widget-header ui-state-default'>Fax de ma soci&eacute;t&eacute;</th>
                 <td class='ui-widget-content'>##MA_SOCIETE_FAX##
                 <td class='ui-widget-content'><?php echo $mysoc->fax ?>

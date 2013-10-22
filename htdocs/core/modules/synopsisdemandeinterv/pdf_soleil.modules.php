@@ -231,13 +231,13 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 $carac_emetteur = '';
                 if (defined("FAC_PDF_ADRESSE") && FAC_PDF_ADRESSE) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).FAC_PDF_ADRESSE;
                 else {
-                    $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$mysoc->adresse;
-                    $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$mysoc->cp.' '.$mysoc->ville;
+                    $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$mysoc->address;
+                    $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$mysoc->zip.' '.$mysoc->town;
                 }
                 $carac_emetteur .= "\n";
                 // Tel
                 if (defined("FAC_PDF_TEL") && FAC_PDF_TEL) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Phone").": ".FAC_PDF_TEL;
-                elseif ($mysoc->tel) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Phone").": ".$mysoc->tel;
+                elseif ($mysoc->phone) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Phone").": ".$mysoc->phone;
                 // Fax
                 if (defined("FAC_PDF_FAX") && FAC_PDF_FAX) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Fax").": ".FAC_PDF_FAX;
                 elseif ($mysoc->fax) $carac_emetteur .= ($carac_emetteur ? "\n" : '' ).$outputlangs->transnoentities("Fax").": ".$mysoc->fax;

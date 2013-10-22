@@ -525,12 +525,12 @@ if (is_dir($dir)) {
                             $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
                         if ($res->address != $socAdresse)
                             $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
-                        if ($res->cp != $val['CliFAdrZip'])
-                            $sqlUpt[] = " cp = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
-                        if ($res->ville != $val['CliFAdrCity'])
-                            $sqlUpt[] = " ville = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
-                        if ($res->tel != $val['MocTel'])
-                            $sqlUpt[] = " tel = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
+                        if ($res->zip != $val['CliFAdrZip'])
+                            $sqlUpt[] = " zip = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
+                        if ($res->town != $val['CliFAdrCity'])
+                            $sqlUpt[] = " town = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
+                        if ($res->phone != $val['MocTel'])
+                            $sqlUpt[] = " phone = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
                         if ($res->fk_pays != $paysGlobal)
                             $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
                         if ($res->tva_assuj != $assujTVA)
@@ -586,9 +586,9 @@ if (is_dir($dir)) {
                                      datea,
                                      siret,
                                      address,
-                                     cp,
-                                     ville,
-                                     tel,
+                                     zip,
+                                     town,
+                                     phone,
                                      fk_pays,
                                      client,
 " . //                                     titre,
@@ -753,8 +753,8 @@ if (is_dir($dir)) {
                             //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
                             $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
                             SET fk_soc = " . $socid . "
-                                , cp = '" . $val['CliLAdrZip'] . "'
-                                , ville = '" . $val['CliLAdrCity'] . "'
+                                , zip = '" . $val['CliLAdrZip'] . "'
+                                , town = '" . $val['CliLAdrCity'] . "'
                                 , address = '" . $livAdresse . "'
                                 , fk_pays = " . ($paysGlobal . "x" != "x" ? $paysGlobal : NULL) . "
                                 , name = '" . $nomLivAdd . "'
@@ -1899,7 +1899,7 @@ $mailContent = $mailHeader . "<tr><td style='font-size: small;>" . $mailContent 
 $mailFooter = "<div style='font-size: small;'>G&eacute;n&eacute;r&eacute; le " . date('d/m/Y') . " &agrave; " . date('H:i') . "</div>" . "\n";
 $mailFooter .= "<hr/>\n" . "\n";
 $mailFooter .= "<div><table border=0 width=700 cellpadding=20 style='border-collapse: collapse;'><tr><td><img height=100 src='" . DOL_URL_ROOT . "/theme/" . $conf->theme . "/Logo-72ppp.png'/></div>" . "\n";
-$mailFooter .= "<td valign=bottom><div style='font-size: small;'><b>Document strictement confidentiel</b><br>" . $mysoc->nom . '<br><em>' . $mysoc->address . '<br>' . $mysoc->cp . " " . $mysoc->ville . '</em><br>Tel: ' . $mysoc->tel . "<br>Mail: <a href='mailto:" . $mysoc->email . "'>" . $mysoc->email . "</a><br>Url: <a href='" . $mysoc->url . "'>" . $mysoc->url . "</a></div><br/>" . "\n";
+$mailFooter .= "<td valign=bottom><div style='font-size: small;'><b>Document strictement confidentiel</b><br>" . $mysoc->nom . '<br><em>' . $mysoc->address . '<br>' . $mysoc->zip . " " . $mysoc->town . '</em><br>Tel: ' . $mysoc->phone . "<br>Mail: <a href='mailto:" . $mysoc->email . "'>" . $mysoc->email . "</a><br>Url: <a href='" . $mysoc->url . "'>" . $mysoc->url . "</a></div><br/>" . "\n";
 $mailFooter .= "</table>" . "\n";
 $mailContent .= $mailFooter;
 

@@ -61,7 +61,7 @@ if ($resql)
 
         print "    <TD align='left'><A href='client_detail.php?client_id=".$res->rowid."'>".img_object($langs->trans("showCompany"),"company")."&nbsp;" .$soc->nom."</A>";
         $socStatut = $soc->statut_commercial;
-        print "    <TD align='center'>".$soc->ville;
+        print "    <TD align='center'>".$soc->town;
         print "</TR>";
     }
 }

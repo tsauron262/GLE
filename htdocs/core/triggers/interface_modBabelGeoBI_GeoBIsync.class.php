@@ -129,7 +129,7 @@ class InterfaceGeoBIsync
             case 'COMPANY_CREATE':
                 $iter = 0;
                 $url = 'http://maps.google.com/maps/api/geocode/xml';
-                $add = urlencode($soc->adresse_full .",".$soc->pays);
+                $add = urlencode($soc->address_full .",".$soc->pays);
                 $param = '?address='.$add.'&sensor=true';
                 $_curl = curl_init();
                 curl_setopt($_curl, CURLOPT_URL,$url.$param);
@@ -158,7 +158,7 @@ class InterfaceGeoBIsync
             }
             if ($xml->getElementsByTagName('status')->item(0)->nodeValue!='ZERO_RESULTS')
             {
-                $add = urlencode($soc->ville .",".$soc->pays);
+                $add = urlencode($soc->town .",".$soc->pays);
                 $param = '?address='.$add.'&sensor=true';
             //print $url.$param;
                 $_curl = curl_init();

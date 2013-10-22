@@ -60,14 +60,14 @@ if ($socid>0)
   if ($soc->check_codeclient() <> 0) print ' '.$langs->trans("WrongCustomerCode");
   print '</td><th  class="ui-widget-header ui-state-default">'.$langs->trans('Prefix').'</td><td class="ui-widget-content">'.utf8_encodeRien($soc->prefix_comm).'</td></tr>';
 
-    print "<tr><th class='ui-widget-header ui-state-default' valign=\"top\">".$langs->trans('Address')."</td><td class='ui-widget-content' colspan=\"3\">".utf8_encodeRien(nl2br($soc->adresse))."</td></tr>";
+    print "<tr><th class='ui-widget-header ui-state-default' valign=\"top\">".$langs->trans('Address')."</td><td class='ui-widget-content' colspan=\"3\">".utf8_encodeRien(nl2br($soc->address))."</td></tr>";
 
-    print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans('Zip').'</td><td class="ui-widget-content">'.$soc->cp."</td>";
-    print '<th class="ui-widget-header ui-state-default">'.$langs->trans('Town').'</td><td class="ui-widget-content">'.utf8_encodeRien($soc->ville)."</td></tr>";
+    print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans('Zip').'</td><td class="ui-widget-content">'.$soc->zip."</td>";
+    print '<th class="ui-widget-header ui-state-default">'.$langs->trans('Town').'</td><td class="ui-widget-content">'.utf8_encodeRien($soc->town)."</td></tr>";
 
     print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Country').'</td><td colspan="3" class="ui-widget-content">'.utf8_encodeRien($soc->pays).'</td>';
 
-    print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Phone').'</td><td class="ui-widget-content">'.dol_print_phone($soc->tel).'</td>';
+    print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Phone').'</td><td class="ui-widget-content">'.dol_print_phone($soc->phone).'</td>';
     print '<th  class="ui-widget-header ui-state-default">'.$langs->trans('Fax').'</td><td class="ui-widget-content">'.dol_print_phone($soc->fax).'</td></tr>';
 
     print '<tr><th  class="ui-widget-header ui-state-default">'.$langs->trans('Web').'</td><td colspan="3" class="ui-widget-content">';

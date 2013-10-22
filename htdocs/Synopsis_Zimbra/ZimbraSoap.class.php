@@ -5461,11 +5461,11 @@ class Zimbra {
                     if ("x" . $soc->address != "x") {
                         $socArr['contactDet'][$confPrefCat . "Street"] = iconv("ISO-8859-1", "UTF-8", $soc->addresss);
                     }
-                    if ("x" . $soc->cp != "x") {
-                        $socArr['contactDet'][$confPrefCat . "PostalCode"] = iconv("ISO-8859-1", "UTF-8", $soc->cp);
+                    if ("x" . $soc->zip != "x") {
+                        $socArr['contactDet'][$confPrefCat . "PostalCode"] = iconv("ISO-8859-1", "UTF-8", $soc->zip);
                     }
-                    if ("x" . $soc->ville != "x") {
-                        $socArr['contactDet'][$confPrefCat . "City"] = iconv("ISO-8859-1", "UTF-8", $soc->ville);
+                    if ("x" . $soc->town != "x") {
+                        $socArr['contactDet'][$confPrefCat . "City"] = iconv("ISO-8859-1", "UTF-8", $soc->town);
                     }
                     if ("x" . $soc->pays != "x" && $soc->pays_id > 0) {
                         $socArr['contactDet'][$confPrefCat . "Country"] = iconv("ISO-8859-1", "UTF-8", $soc->pays);
@@ -5477,8 +5477,8 @@ class Zimbra {
                         $socArr['contactDet']["notes"] = iconv("ISO-8859-1", "UTF-8", $soc->note);
                     }
                     if ("x" . $soc->phone_pro != "x") {
-                        $socArr['contactDet']["workPhone"] = iconv("ISO-8859-1", "UTF-8", $soc->tel);
-                        $socArr['contactDet']['companyPhone'] = iconv("ISO-8859-1", "UTF-8", $soc->tel);
+                        $socArr['contactDet']["workPhone"] = iconv("ISO-8859-1", "UTF-8", $soc->phone);
+                        $socArr['contactDet']['companyPhone'] = iconv("ISO-8859-1", "UTF-8", $soc->phone);
                     }
                     if ("x" . $soc->fax != "x") {
                         $socArr['contactDet'][$confPrefCat . "Fax"] = iconv("ISO-8859-1", "UTF-8", $soc->fax);
@@ -5951,11 +5951,11 @@ class Zimbra {
                     if ("x" . $soc->address != "x") {
                         $socArr['contactDet'][$confPrefCat . "Street"] = iconv("ISO-8859-1", "UTF-8", $soc->addresss);
                     }
-                    if ("x" . $soc->cp != "x") {
-                        $socArr['contactDet'][$confPrefCat . "PostalCode"] = iconv("ISO-8859-1", "UTF-8", $soc->cp);
+                    if ("x" . $soc->zip != "x") {
+                        $socArr['contactDet'][$confPrefCat . "PostalCode"] = iconv("ISO-8859-1", "UTF-8", $soc->zip);
                     }
-                    if ("x" . $soc->ville != "x") {
-                        $socArr['contactDet'][$confPrefCat . "City"] = iconv("ISO-8859-1", "UTF-8", $soc->ville);
+                    if ("x" . $soc->town != "x") {
+                        $socArr['contactDet'][$confPrefCat . "City"] = iconv("ISO-8859-1", "UTF-8", $soc->town);
                     }
                     if ("x" . $soc->pays != "x" && $soc->pays_id > 0) {
                         $socArr['contactDet'][$confPrefCat . "Country"] = iconv("ISO-8859-1", "UTF-8", $soc->pays);
@@ -5967,8 +5967,8 @@ class Zimbra {
                         $socArr['contactDet']["notes"] = iconv("ISO-8859-1", "UTF-8", $soc->note);
                     }
                     if ("x" . $soc->phone_pro != "x") {
-                        $socArr['contactDet']["workPhone"] = iconv("ISO-8859-1", "UTF-8", $soc->tel);
-                        $socArr['contactDet']['companyPhone'] = iconv("ISO-8859-1", "UTF-8", $soc->tel);
+                        $socArr['contactDet']["workPhone"] = iconv("ISO-8859-1", "UTF-8", $soc->phone);
+                        $socArr['contactDet']['companyPhone'] = iconv("ISO-8859-1", "UTF-8", $soc->phone);
                     }
                     if ("x" . $soc->fax != "x") {
                         $socArr['contactDet'][$confPrefCat . "Fax"] = iconv("ISO-8859-1", "UTF-8", $soc->fax);

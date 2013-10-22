@@ -248,9 +248,9 @@ if (! defined('NOREQUIRESOC'))
     $mysoc=new Societe($db);
     $mysoc->id=0;
     $mysoc->nom=$conf->global->MAIN_INFO_SOCIETE_NOM;
-    $mysoc->adresse=$conf->global->MAIN_INFO_SOCIETE_ADRESSE;
-    $mysoc->cp=$conf->global->MAIN_INFO_SOCIETE_CP;
-    $mysoc->ville=$conf->global->MAIN_INFO_SOCIETE_VILLE;
+    $mysoc->address=$conf->global->MAIN_INFO_SOCIETE_ADRESSE;
+    $mysoc->zip=$conf->global->MAIN_INFO_SOCIETE_CP;
+    $mysoc->town=$conf->global->MAIN_INFO_SOCIETE_VILLE;
     // Si dans MAIN_INFO_SOCIETE_PAYS on a un id de pays, on recupere code
     if (is_numeric($conf->global->MAIN_INFO_SOCIETE_PAYS))
     {
@@ -272,7 +272,7 @@ if (! defined('NOREQUIRESOC'))
     {
         $mysoc->pays_code=$conf->global->MAIN_INFO_SOCIETE_PAYS;
     }
-    $mysoc->tel=$conf->global->MAIN_INFO_SOCIETE_TEL;
+    $mysoc->phone=$conf->global->MAIN_INFO_SOCIETE_TEL;
     $mysoc->fax=$conf->global->MAIN_INFO_SOCIETE_FAX;
     $mysoc->url=$conf->global->MAIN_INFO_SOCIETE_WEB;
     // Anciens id prof
@@ -290,7 +290,7 @@ if (! defined('NOREQUIRESOC'))
     $mysoc->capital=$conf->global->MAIN_INFO_CAPITAL;
     $mysoc->forme_juridique_code=$conf->global->MAIN_INFO_SOCIETE_FORME_JURIDIQUE;
     $mysoc->email=$conf->global->MAIN_INFO_SOCIETE_MAIL;
-    $mysoc->adresse_full=$mysoc->adresse."\n".$mysoc->cp." ".$mysoc->ville;
+    $mysoc->address_full=$mysoc->address."\n".$mysoc->zip." ".$mysoc->town;
     $mysoc->logo=$conf->global->MAIN_INFO_SOCIETE_LOGO;
     $mysoc->logo_small=$conf->global->MAIN_INFO_SOCIETE_LOGO_SMALL;
     $mysoc->logo_mini=$conf->global->MAIN_INFO_SOCIETE_LOGO_MINI;

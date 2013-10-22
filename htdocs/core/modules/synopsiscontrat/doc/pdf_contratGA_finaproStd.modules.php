@@ -1186,7 +1186,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $head1 = 'ADRESSE DU LOCATAIRE : ';
         $head2 = 'ADRESSE  DU VENDEUR : ';
         $addr1 = utf8_encode($tmpFourn->nom."\n".$tmpFourn->adresse."\n".$tmpFourn->cp." ".$tmpFourn->ville);
-        $addr2 = utf8_encode($mysoc->nom."\n".$mysoc->adresse."\n".$mysoc->cp." ".$mysoc->ville);
+        $addr2 = utf8_encode($mysoc->nom."\n".$mysoc->address."\n".$mysoc->zip." ".$mysoc->town);
         $pdf->SetY($pdf->GetY()+5);
         $curY=$pdf->GetY();
         $pdf->SetX($this->marge_gauche*2);
@@ -1442,7 +1442,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->lasth=5;
         $this->writeHTML($html, 4, 0,$pdf);
         global $mysoc;
-        $html = $mysoc->nom . "\n". $mysoc->adresse . "\n". $mysoc->cp . " ".$mysoc->ville;
+        $html = $mysoc->nom . "\n". $mysoc->address . "\n". $mysoc->zip . " ".$mysoc->town;
 
         $pdf->SetFont('Vera','B',10);
         $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'C',0 );
@@ -1697,8 +1697,8 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             $carac_client = "\n " .$row->name . " ".$row->firstname;
 
             // Caracteristiques client
-            $carac_client.="\n".$tmpSoc->adresse;
-            $carac_client.="\n".$tmpSoc->cp . " " . $tmpSoc->ville."\n";
+            $carac_client.="\n".$tmpSoc->address;
+            $carac_client.="\n".$tmpSoc->zip . " " . $tmpSoc->town."\n";
 
 
             $pdf->SetFont('Vera','',11);

@@ -1586,7 +1586,7 @@ class Societe extends CommonObject
     {
         $contact_property = array();
 
-        $sql = "SELECT rowid, email, phone_mobile, lastlastname, firstname";
+        $sql = "SELECT rowid, email, phone_mobile, lastname, firstname";
         $sql.= " FROM ".MAIN_DB_PREFIX."socpeople";
         $sql.= " WHERE fk_soc = '".$this->id."'";
 
@@ -1624,7 +1624,7 @@ class Societe extends CommonObject
     {
         $contacts = array();
 
-        $sql = "SELECT rowid, lastlastname, firstname FROM ".MAIN_DB_PREFIX."socpeople WHERE fk_soc = '".$this->id."'";
+        $sql = "SELECT rowid, lastname, firstname FROM ".MAIN_DB_PREFIX."socpeople WHERE fk_soc = '".$this->id."'";
         $resql=$this->db->query($sql);
         if ($resql)
         {
@@ -1658,7 +1658,7 @@ class Societe extends CommonObject
     {
         $contact_property='';
 
-        $sql = "SELECT rowid, email, phone_mobile, lastlastname, firstname";
+        $sql = "SELECT rowid, email, phone_mobile, lastname, firstname";
         $sql.= " FROM ".MAIN_DB_PREFIX."socpeople";
         $sql.= " WHERE rowid = '".$rowid."'";
 

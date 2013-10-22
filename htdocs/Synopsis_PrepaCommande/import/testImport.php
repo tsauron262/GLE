@@ -17,7 +17,7 @@
  * Name : testImport.php
  * GLE-1.2
  */
-$maxFileImport = 1000;
+$maxFileImport = 20;
 $tempDeb = microtime(true);
 global $tabStat;
 $tabStat = array('c' => 0, 'd' => 0, 'pc' => 0, 'pd' => 0, 'pcd' => 0, 'ef' => 0);
@@ -710,7 +710,7 @@ if (is_dir($dir)) {
                         }
                     } else {
                         $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
-                                    (datec,fk_soc,civilite,name,firstname,phone,phone_mobile,import_key, fk_user_creat)
+                                    (datec,fk_soc,civilite,lastname,firstname,phone,phone_mobile,import_key, fk_user_creat)
                              VALUES (now()," . $socid . ",'" . $genre . "','" . $nom . "','" . $prenom . "','" . $val['PcvMocTel'] . "','" . $val['PcvMocPort'] . "'," . $socpeopleExternalId . ", NULL)";
                         $sql = requeteWithCache($requete);
                         if ($sql) {

@@ -205,8 +205,8 @@ class maj {
                 if ($tableDest == "llx_element_contact" && ($tableSrc == "llx_commande" || $tableSrc == "llx_expedition")) {
                     if ($cle == "rowid") {
                         $ok = false;
-                        if ($ligne['fk_adresse_livraison'] > 0) {
-                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_adresse_livraison'] . "'";
+                        if ($ligne['fk_delivery_address'] > 0) {
+                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_delivery_address'] . "'";
                             $result = $this->queryS($requete);
                             if ($this->dbS->num_rows($result) > 0) {
                                 $ligneT = $this->dbD->fetch_array($result);
@@ -215,7 +215,7 @@ class maj {
                                 $result = $this->queryD($requete);
                                 if ($this->dbD->num_rows($result) > 0) {
                                     $ligneT = $this->dbD->fetch_array($result);
-                                    $ligne['fk_adresse_livraison'] = $ligneT['rowid'];
+                                    $ligne['fk_delivery_address'] = $ligneT['rowid'];
                                     $ok = true;
                                 }
                             }

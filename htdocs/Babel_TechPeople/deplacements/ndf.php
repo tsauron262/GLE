@@ -78,7 +78,7 @@ if ($user->societe_id > 0)
 
 $sql = "SELECT s.nom, s.rowid as socid,";                       // Ou
 $sql.= " d.rowid, d.type, d.dated as dd, d.km, ";     // Comment
-$sql.= " u.name, u.firstname";                                  // Qui
+$sql.= " u.lastname, u.firstname";                                  // Qui
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", sc.fk_soc, sc.fk_user";
 $sql.= " FROM ".MAIN_DB_PREFIX."user as u, ".MAIN_DB_PREFIX."deplacement as d";
 $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on d.fk_soc = s.rowid";
@@ -106,7 +106,7 @@ if ($resql)
   print_liste_field_titre($langs->trans("Type"),"index.php","d.type","","&socid=$socid",'',$sortfield,$sortorder);
   print_liste_field_titre($langs->trans("Date"),"index.php","d.dated","","&socid=$socid",'',$sortfield,$sortorder);
   print_liste_field_titre($langs->trans("Company"),"index.php","s.nom","","&socid=$socid",'',$sortfield,$sortorder);
-  print_liste_field_titre($langs->trans("Person"),"index.php","u.name","","&socid=$socid",'',$sortfield,$sortorder);
+  print_liste_field_titre($langs->trans("Person"),"index.php","u.lastname","","&socid=$socid",'',$sortfield,$sortorder);
   print_liste_field_titre($langs->trans("FeesKilometersOrAmout"),"index.php","d.km","","&socid=$socid",'align="right"',$sortfield,$sortorder);
   print "</tr>\n";
 

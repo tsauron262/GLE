@@ -1,3 +1,11 @@
+POUR BIMP
+Révision contrat a partir de commande ?
+
+
+
+
+
+
 INSTALLATION SUR NEW VERSION DOLIBARR :{
     Renommer projet => 1projet
     renommer fichinter => 1fichinter
@@ -50,9 +58,9 @@ Zimbra
 
 MODIFICATION DU COEUR {
     - main.inc.php (Pour ajouter les hook synopsis + modif du path)
-    - societe.class.php (aj de $option = "customer"; ln 1244 pour arriver directement dans l'onglet client ou prospect)
-    - capsim : ajout du chrono dans la fiche propal
-    - 
+    - societe | societe.class.php (aj de $option = "customer"; ln 1244 pour arriver directement dans l'onglet client ou prospect)
+    - propal | capsim : ajout du chrono dans la fiche propal
+    - proopal | capsim : pas de ref brouillon propal.class
 }
 
 
@@ -70,14 +78,6 @@ Creation des vue pour install 2 avec base client commune : {
     CREATE VIEW gle2_societe_rib as SELECT * FROM gle1_societe_rib;
 }
 
-
-
-Capsim : 
-
-Modif coeur : main.inc.php rajouter le class path d'origine.
-Deplacer fichier projet vers synopsisprojet
-deplacer ficheir chrono vers synopsischrono
-Ajouter chrono a prop commerciale (habituellement dans onglet revision/Doc.indicable
 
 
 

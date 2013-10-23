@@ -35,7 +35,7 @@ print_barre_liste($langs->trans('PaymentsNdfp'), $page, 'payment.php', '', $sort
 <tr class="liste_titre">
             <?php print_liste_field_titre($langs->trans('Ref'),$_SERVER['PHP_SELF'],'p.rowid','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('PaymentDate'),$_SERVER['PHP_SELF'],'dp','','','align="center"',$sortfield,$sortorder); ?>
-            <?php print_liste_field_titre($langs->trans('User'),$_SERVER['PHP_SELF'],'u.name','','','',$sortfield,$sortorder); ?>
+            <?php print_liste_field_titre($langs->trans('User'),$_SERVER['PHP_SELF'],'u.lastname','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Type'),$_SERVER['PHP_SELF'],'payment_label','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Account'),$_SERVER['PHP_SELF'],' ba.label','','','align="left"',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Amount'),$_SERVER['PHP_SELF'],'p.amount','','','align="right"',$sortfield,$sortorder); ?>

@@ -80,14 +80,14 @@ if ($socid>0)
 ").'</td>';
     print '<td colspan="3"  class="ui-widget-content">';
 
-    $sql = "SELECT u.rowid, u.name, u.firstname";
+    $sql = "SELECT u.rowid, u.lastname, u.firstname";
     $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
     $sql .= " , ".MAIN_DB_PREFIX."element_element as elel";
     $sql .= " WHERE elel.fk_source =".$soc->id;
     $sql .= " AND elel.fk_target = u.rowid";
     $sql .= " AND elel.targettype = 'userTech'";
     $sql .= " AND elel.sourcetype = 'soc'";
-    $sql .= " ORDER BY u.name ASC ";
+    $sql .= " ORDER BY u.lastname ASC ";
 
     $resql = $db->query($sql);
     if ($resql)
@@ -151,9 +151,9 @@ if ($socid>0)
         $langs->load("users");
         $title=$langs->trans("ListOfUsers");
 
-        $sql = "SELECT u.rowid, u.name, u.firstname, u.login";
+        $sql = "SELECT u.rowid, u.lastname, u.firstname, u.login";
         $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
-        $sql .= " ORDER BY u.name ASC ";
+        $sql .= " ORDER BY u.lastname ASC ";
 
         $resql = $db->query($sql);
         if ($resql)

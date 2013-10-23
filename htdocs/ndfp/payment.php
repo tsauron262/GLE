@@ -114,7 +114,7 @@ else
             
         $sql = "SELECT p.rowid, p.fk_payment, p.amount, p.fk_user, p.datep as dp, p.payment_number, p.fk_bank,"; 
         $sql.= " c.code as payment_code, c.libelle as payment_label, ba.rowid as bid, ba.label, u.rowid as uid,";
-        $sql.= " u.name, u.firstname";
+        $sql.= " u.lastname, u.firstname";
         $sql.= " FROM ".MAIN_DB_PREFIX."ndfp_pay as p";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."bank as b ON p.fk_bank = b.rowid";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."bank_account as ba ON b.fk_account = ba.rowid";
@@ -136,7 +136,7 @@ else
         }
         if ($search_user)
         {
-            $sql.= ' AND u.name LIKE \'%'.$db->escape(trim($search_user)).'%\' OR u.firstname LIKE \'%'.$db->escape(trim($search_user)).'%\'';
+            $sql.= ' AND u.lastname LIKE \'%'.$db->escape(trim($search_user)).'%\' OR u.firstname LIKE \'%'.$db->escape(trim($search_user)).'%\'';
         }
                 
         if ($search_account)

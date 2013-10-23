@@ -153,7 +153,7 @@ else
         $pagenext = $page + 1;
                 
         $sql = "SELECT n.rowid, n.ref, n.tms, n.total_ht, n.total_ttc, n.fk_user, n.statut, n.fk_soc, n.dates, n.datee,"; 
-        $sql.= " u.rowid as uid, u.name, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, SUM(p.amount) AS already_paid";
+        $sql.= " u.rowid as uid, u.lastname, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, SUM(p.amount) AS already_paid";
         $sql.= " FROM ".MAIN_DB_PREFIX."ndfp as n";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user as u ON n.fk_user = u.rowid";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = n.fk_soc";
@@ -190,7 +190,7 @@ else
         }
         if ($search_user)
         {
-            $sql.= ' AND u.name LIKE \'%'.$db->escape(trim($search_user)).'%\' OR u.firstname LIKE \'%'.$db->escape(trim($search_user)).'%\'';
+            $sql.= ' AND u.lastname LIKE \'%'.$db->escape(trim($search_user)).'%\' OR u.firstname LIKE \'%'.$db->escape(trim($search_user)).'%\'';
         }
                 
         if ($search_ht_amount)

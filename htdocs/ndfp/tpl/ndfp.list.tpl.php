@@ -36,7 +36,7 @@ print_barre_liste($langs->trans('Ndfps'), $page, 'ndfp.php', '', $sortfield, $so
             <?php print_liste_field_titre($langs->trans('Ref'),$_SERVER['PHP_SELF'],'n.ref','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('DateStart'),$_SERVER['PHP_SELF'],'n.dates','','','align="center"',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('DateEnd'),$_SERVER['PHP_SELF'],"n.datee",'',"",'align="center"',$sortfield,$sortorder); ?>
-            <?php print_liste_field_titre($langs->trans('User'),$_SERVER['PHP_SELF'],'u.name','','','',$sortfield,$sortorder); ?>
+            <?php print_liste_field_titre($langs->trans('User'),$_SERVER['PHP_SELF'],'u.lastname','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Society'),$_SERVER['PHP_SELF'],'soc_name','','','',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Total_HT'),$_SERVER['PHP_SELF'],'n.total_ht','','','align="right"',$sortfield,$sortorder); ?>
             <?php print_liste_field_titre($langs->trans('Total_TTC'),$_SERVER['PHP_SELF'],'n.total_ttc','','','align="right"',$sortfield,$sortorder); ?>

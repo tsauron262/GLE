@@ -942,7 +942,7 @@ class NdfpPayment extends Paiement
         }
         
 		$sql = " SELECT n.rowid, p.fk_ndfp, n.statut, n.ref, n.fk_user, n.total_ttc, p.amount,";
-        $sql.= " u.rowid as uid, u.name, u.firstname";
+        $sql.= " u.rowid as uid, u.lastname, u.firstname";
 		$sql.= " FROM ".MAIN_DB_PREFIX."ndfp_pay_det AS p";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."ndfp AS n ON n.rowid = p.fk_ndfp";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user as u ON n.fk_user = u.rowid";

@@ -120,28 +120,28 @@ class Synopsis_Contrat extends Contrat {
     public function fetch_lines($byid = false) {
         if ($this->id > 0) {
             parent::fetch_lines();
-            $this->lines = array();
+//            $this->lines = array();
             $id = $this->id;
             $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat =" . $id;
             $result = $this->db->query($requete);
             $i = 100;
+            $tabLigne = array();
             while ($ligneDb = $this->db->fetch_object($result)) {
                 $ligne = new Synopsis_ContratLigne($this->db);
                 $ligne->fetch($ligneDb->rowid);
                 $ligne->rang = ($ligne->rang > 0) ? $ligne->rang : 100;
                 if ($byid)
-                    $this->lines[$ligne->rowid] = $ligne;
-                elseif (!isset($this->lines[$ligne->rang]))
-                    $this->lines[$ligne->rang] = $ligne;
+                    $ligne->rang = $ligne->rowid;;
+                if (!isset($tabLigne[$ligne->rang]))
+                    $tabLigne[$ligne->rang] = $ligne;
                 else {
                     $i++;
-                    $this->lines[$i] = $ligne;
+                    $tabLigne[$i] = $ligne;
                 }
             }
-            $ligne2 = $this->lines;
             $this->lines = array();
-            ksort($ligne2);
-            foreach ($ligne2 as $cle => $obj) {
+            ksort($tabLigne);
+            foreach ($tabLigne as $obj) {
                 $this->lines[] = $obj;
             }
         }

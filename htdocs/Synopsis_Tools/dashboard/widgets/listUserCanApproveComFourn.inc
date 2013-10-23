@@ -47,7 +47,7 @@ if ($resql)
       $table .= '<table class="liste" width="100%">';
       $table .= '<tr class="liste_titre"><td>'.$langs->trans("Status").'</td><td align="center">'.$langs->trans("Nb").'</td><td>&nbsp;</td>';
       $table .= "</tr>\n";
-      $sql = "SELECT u.name, u.firstname
+      $sql = "SELECT u.lastname, u.firstname
           FROM ".MAIN_DB_PREFIX."user as u,
                ".MAIN_DB_PREFIX."user_rights as ur
          WHERE u.rowid = ur.fk_user

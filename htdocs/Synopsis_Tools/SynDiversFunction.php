@@ -649,7 +649,7 @@ function convDur($duration)
         $out='';
 
         // On recherche les utilisateurs
-        $sql = "SELECT DISTINCT u.rowid, u.name as lastname, u.firstname, u.login, u.admin, u.entity";
+        $sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname, u.login, u.admin, u.entity";
         if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
         {
             $sql.= ", e.label";
@@ -681,7 +681,7 @@ function convDur($duration)
         if (is_array($exclude) && $excludeUsers) $sql.= " AND u.rowid NOT IN ('".$excludeUsers."')";
         if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
         $sql .= " AND statut = 1";
-        $sql.= " ORDER BY u.name ASC";
+        $sql.= " ORDER BY u.lastname ASC";
 
         dol_syslog(get_class($form)."::select_dolusers sql=".$sql);
         $resql=$form->db->query($sql);

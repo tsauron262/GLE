@@ -78,12 +78,12 @@ if ($socid>0)
     print '<tr><th  class="ui-widget-header ui-state-default" valign="top">'.$langs->trans("SalesRepresentatives").'</td>';
     print '<td colspan="3"  class="ui-widget-content">';
 
-    $sql = "SELECT u.rowid, u.name, u.firstname";
+    $sql = "SELECT u.rowid, u.lastname, u.firstname";
     $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
     $sql .= " , ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql .= " WHERE sc.fk_soc =".$soc->id;
     $sql .= " AND sc.fk_user = u.rowid";
-    $sql .= " ORDER BY u.name ASC ";
+    $sql .= " ORDER BY u.lastname ASC ";
 
     $resql = $db->query($sql);
     if ($resql)
@@ -145,9 +145,9 @@ if ($socid>0)
         $langs->load("users");
         $title=$langs->trans("ListOfUsers");
 
-        $sql = "SELECT u.rowid, u.name, u.firstname, u.login";
+        $sql = "SELECT u.rowid, u.lastname, u.firstname, u.login";
         $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
-        $sql .= " ORDER BY u.name ASC ";
+        $sql .= " ORDER BY u.lastname ASC ";
 
         $resql = $db->query($sql);
         if ($resql)

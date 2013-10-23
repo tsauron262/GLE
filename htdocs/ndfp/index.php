@@ -61,7 +61,7 @@ if (!$user->rights->ndfp->myactions->read && !$user->rights->ndfp->allactions->r
 else
 {
     $sql = " SELECT n.rowid, n.ref, n.tms, n.fk_user, n.statut, n.fk_soc, n.dates,"; 
-    $sql.= " u.rowid as uid, u.name, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, n.total_ht, n.total_ttc";
+    $sql.= " u.rowid as uid, u.lastname, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, n.total_ht, n.total_ttc";
     $sql.= " FROM ".MAIN_DB_PREFIX."ndfp as n";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user AS u ON n.fk_user = u.rowid";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe AS s ON s.rowid = n.fk_soc";   
@@ -140,7 +140,7 @@ else
     
     // Get all unpaid notes
     $sql = "SELECT n.rowid, n.ref, n.tms, n.fk_user, n.statut, n.fk_soc, n.dates,"; 
-    $sql.= " n.total_tva, n.total_ht, n.total_ttc, u.rowid as uid, u.name, u.firstname";
+    $sql.= " n.total_tva, n.total_ht, n.total_ttc, u.rowid as uid, u.lastname, u.firstname";
     $sql.= " FROM ".MAIN_DB_PREFIX."ndfp as n";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user AS u ON n.fk_user = u.rowid";
     $sql.= " WHERE n.statut = 1 AND n.entity = ".$conf->entity;
@@ -219,7 +219,7 @@ else
     
     // Get all draft notes   
     $sql = "SELECT n.rowid, n.ref, n.tms, n.total_ht, n.total_ttc, n.fk_user, n.statut, n.fk_soc, n.dates,"; 
-    $sql.= " u.rowid as uid, u.name, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, n.total_ht";
+    $sql.= " u.rowid as uid, u.lastname, u.firstname, s.nom AS soc_name, s.rowid AS soc_id, u.login, n.total_tva, n.total_ht";
     $sql.= " FROM ".MAIN_DB_PREFIX."ndfp as n";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."user as u ON n.fk_user = u.rowid";
     $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = n.fk_soc";  

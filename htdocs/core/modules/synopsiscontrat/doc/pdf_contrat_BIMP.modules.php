@@ -74,6 +74,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -92,7 +93,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
      */
     function write_file($contrat, $outputlangs = '') {
         global $user, $langs, $conf;
-        
+
         $afficherPrix = false;
 
         if (!is_object($outputlangs))
@@ -170,11 +171,10 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $rang++;
                     }
                 }
-                
-                
+
+
                 $pdf->SetAutoPageBreak(1, 0);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
@@ -196,10 +196,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-
 //                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
 //                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
-
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
                 $pdf->SetFont('', 'B', 12);
@@ -382,15 +380,15 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
-                    if($afficherPrix){
-                    //Prix
-                    $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
-                    $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
-                    //Data Prix
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encodeRien(price($val->total_ht) . EURO . "  pour " . $val->GMAO_Mixte['durVal'] . " mois")), 0, 'L', 1);
-                    $nextY = $pdf->getY();
-                    $pdf->SetXY($this->marge_gauche - 1, $nextY);
-                    $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
+                    if ($afficherPrix) {
+                        //Prix
+                        $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
+                        $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
+                        //Data Prix
+                        $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encodeRien(price($val->total_ht) . EURO . "  pour " . $val->GMAO_Mixte['durVal'] . " mois")), 0, 'L', 1);
+                        $nextY = $pdf->getY();
+                        $pdf->SetXY($this->marge_gauche - 1, $nextY);
+                        $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
                     }
 
 //                    //Date
@@ -418,8 +416,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $condition .= utf8_encodeRien(preg_replace("/\[\[Annexe:([\w]*)\]\]/", "Annexe " . $numAnnexe, $val->GMAO_Mixte['clause']));
                         $pdf->Link($this->marge_gauche + $col1, $nextY, $this->page_largeur - ($this->marge_droite + $this->marge_gauche), 2 * $hauteur_ligne, $arrAnnexe[$arr[1]]['lnk']);
                     } else {
-                        $sql = "SELECT annexe.rang FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` annexe, " . MAIN_DB_PREFIX . "product_extrafields prod WHERE `annexe_refid` = prod.`annexe`
-                                    AND prod.`rowid` = '" . $val->fk_product . "' 
+                        $sql = "SELECT annexe.rang FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` annexe, " . MAIN_DB_PREFIX . "product_extrafields prod WHERE `annexe_refid` = prod.`2annexe`
+                                    AND prod.`fk_object` = '" . $val->fk_product . "' 
                                     AND `contrat_refid` = '" . $contrat->id . "'";
                         $res = $this->db->query($sql);
                         $result = $this->db->fetch_object($res);
@@ -806,88 +804,10 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                 }
                 $this->_pagefoot($pdf, $outputlangs);
 
-                //Annexes
-//                $pdf->SetAutoPageBreak(0,1);
 
-                $requete = "SELECT *, IF(a.annexe != '', a.annexe, p.annexe) as annexeP
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p,
-                                   " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a
-                             WHERE p.id = a.annexe_refid
-                               AND a.contrat_refid = " . $contrat->id . "
-                          ORDER BY a.rang";
-//                die($requete);
-                $sql = $this->db->query($requete);
-                $i = 0;
-                $rang = 1;
-                while ($res = $this->db->fetch_object($sql)) {
-                    if (!$i == 0)
-                        $this->_pagefoot($pdf, $outputlangs);
-                    $pdf->AddPage();
-                    $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                    $i++;
-                    if ($arrAnnexe[$res->ref]['lnk'] > 0) {
-                        $pdf->SetLink($arrAnnexe[$res->ref]['lnk'], $this->marge_haute);
-                    }
-                    $pdf->SetFont('', '', 8);
-                    $pdf->SetXY($this->marge_gauche, $this->marge_haute);
-                    $pdf->SetFont('', 'B', 12);
-                    if ($res->afficheTitre == 1) {
-                        $pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien("Annexe " . $rang . " : " . $res->modeleName)), 0, 'L');
-                        $rang++;
-                    } else {
-                        $pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien($res->modeleName)), 0, 'L');
-                    }
-                    $pdf->SetFont('', '', 8);
-                    $pdf->SetXY($this->marge_gauche, $pdf->GetY() + 5);
-
-                    //Traitement annexe :>
-                    $annexe = $this->replaceWithAnnexe($res->annexeP, $contrat, $res->annexe_refid);
-
-
-
-//
-//                    $pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($annexe)));
-                    $tabLigneAnnexe = explode("\n", $annexe);
-                    foreach ($tabLigneAnnexe as $idL => $ligne) {
-                        $style = '';
-                        $titre = false;
-                        if (stripos($ligne, "<g>") > -1) {
-                            $ligne = str_replace("<g>", "", $ligne);
-                            $titre = true;
-                            $style .= 'B';
-                        }
-                        if (stripos($ligne, "<i>") > -1) {
-                            $ligne = str_replace("<i>", "", $ligne);
-                            $style .= 'I';
-                        }
-                        if (stripos($ligne, "<s>") > -1) {
-                            $ligne = str_replace("<s>", "", $ligne);
-                            $style .= 'U';
-                        }
-
-
-                        $nbCarac = strlen($ligne);
-                        $nbLn = 0;
-                        $maxCarac = 105;
-                        while ($nbCarac > $maxCarac) {
-                            $nbCarac = $nbCarac - $maxCarac;
-                            $nbLn++;
-                        }
-                        $yAfter = $pdf->getY() + (5 * $nbLn);
-                        if ($yAfter > 270 || ($titre && $yAfter > 250 && (count($tabLigneAnnexe)-3) > $idL)) {
-                            $this->_pagefoot($pdf, $outputlangs);
-                            $pdf->AddPage();
-                            $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                            $pdf->SetY($this->marge_haute);
-                        }
-
-                        $pdf->SetFont('', $style, 8);
-                        $pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
-                    }
-                }
-
-
-                $this->_pagefoot($pdf, $outputlangs);
+                require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
+                $classAnnexe = new annexe();
+                $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
 
 
 
@@ -955,7 +875,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $to = "Pas de client signataire désigné";
         }
         $modeReg = "Indéterminé";
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."c_paiement WHERE id = " . $this->contrat->modeReg_refid;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_paiement WHERE id = " . $this->contrat->modeReg_refid;
         $sql = $this->db->query($requete);
         if ($sql) {
             $res = $this->db->fetch_object($sql);
@@ -1014,9 +934,9 @@ Toute nouvelle installation de logiciels, de nouveaux postes ou de nouveaux pér
         $clause16 = "Nos tarifs s'entendent hors taxe et nos prestations sont payables telles que :
 
     ";
-        if($afficherPrix)
-            $clause16 .= "Total Ht : ".$this->contrat->total_ht;
-    $clause16 .= "Mode de paiement : " . $modeReg . " €
+        if ($afficherPrix)
+            $clause16 .= "Total Ht : " . $this->contrat->total_ht;
+        $clause16 .= "Mode de paiement : " . $modeReg . " €
     Condition de paiement :  " . $condReg . ".
 
 Fait en deux exemplaires
@@ -1116,10 +1036,10 @@ Signature et cachet
 
         // Logo
         $logo = false;
-        if (is_file($conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
-            $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo . "noalpha.png";
+        if (is_file($conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png")) {
+            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo . "noalpha.png";
         } else {
-            $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
+            $logo = $conf->mycompany->dir_output . '/logos' . '/' . $this->emetteur->logo;
         }
 
 //        $logo = $conf->mycompany->dir_output .'/logos' . '/' . $this->emetteur->logo;
@@ -1158,7 +1078,7 @@ Signature et cachet
 
         $pdf->SetFont('', 'B', 9);
         $pdf->SetTextColor(255, 63, 50);
-                $pdf->SetDrawColor(0, 0, 0);
+        $pdf->SetDrawColor(0, 0, 0);
         //Société
         global $mysoc;
 
@@ -1174,18 +1094,18 @@ Signature et cachet
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('', '', 7);
         $ligne = "SA OLYS";
-        if(defined('MAIN_INFO_CAPITAL'))
-            $ligne .= " au capital de ".MAIN_INFO_CAPITAL;
-        if(defined('MAIN_INFO_RCS'))
-            $ligne .= " - R.C.S. ".MAIN_INFO_RCS;
-        elseif(defined('MAIN_INFO_SIREN'))
-            $ligne .= " - R.C.S. ".MAIN_INFO_SIREN;
-        if(defined('MAIN_INFO_APE'))
-            $ligne .= " - APE ".MAIN_INFO_APE;
-        if(defined('MAIN_INFO_TVAINTRA'))
-            $ligne .= " - TVA/CEE ".MAIN_INFO_TVAINTRA;
-        $ligne .= "\n". "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
-        
+        if (defined('MAIN_INFO_CAPITAL'))
+            $ligne .= " au capital de " . MAIN_INFO_CAPITAL;
+        if (defined('MAIN_INFO_RCS'))
+            $ligne .= " - R.C.S. " . MAIN_INFO_RCS;
+        elseif (defined('MAIN_INFO_SIREN'))
+            $ligne .= " - R.C.S. " . MAIN_INFO_SIREN;
+        if (defined('MAIN_INFO_APE'))
+            $ligne .= " - APE " . MAIN_INFO_APE;
+        if (defined('MAIN_INFO_TVAINTRA'))
+            $ligne .= " - TVA/CEE " . MAIN_INFO_TVAINTRA;
+        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
+
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
 
@@ -1250,185 +1170,6 @@ Signature et cachet
         $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Dates"), 0, 'C', 1);
         $pdf->SetTextColor(0, 0, 60);
         $pdf->SetFont('', '', 6.5);
-    }
-
-    function replaceWithAnnexe($annexe, $contrat, $idAnnexe) {
-        global $mysoc, $user;
-        //Tritement des contact
-        $contacts = array();
-        foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-            foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
-            }
-            $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
-Mail : Contact-external-CUSTOMER-email
-Tél. : Soc-tel
-');
-            foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                $result = $val[$val0];
-                $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
-            }
-            $contacts[$val['code']][] = $tempStr;
-        }
-        foreach ($contacts as $typeContact => $val) {
-            $annexe = preg_replace('/Contacts-' . $typeContact . '/', implode("
-
-", $val), $annexe);
-        }
-
-
-
-
-
-
-
-
-        $annexe = preg_replace('/User-fullname/', $user->getFullName($langs), $annexe);
-        $annexe = preg_replace('/User-nom/', $user->lastname, $annexe);
-        $annexe = preg_replace('/User-prenom/', $user->firstname, $annexe);
-        $annexe = preg_replace('/User-email/', $user->email, $annexe);
-        $annexe = preg_replace('/User-office_phone/', $user->office_phone, $annexe);
-        $annexe = preg_replace('/User-user_mobile/', $user->user_mobile, $annexe);
-        $annexe = preg_replace('/User-office_fax/', $user->office_fax, $annexe);
-
-        $annexe = preg_replace('/Mysoc-nom/', $mysoc->nom, $annexe);
-        $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address_full, $annexe);
-        $annexe = preg_replace('/Mysoc-adresse/', $mysoc->address, $annexe);
-        $annexe = preg_replace('/Mysoc-cp/', $mysoc->zip, $annexe);
-        $annexe = preg_replace('/Mysoc-ville/', $mysoc->town, $annexe);
-        $annexe = preg_replace('/Mysoc-tel/', $mysoc->phone, $annexe);
-        $annexe = preg_replace('/Mysoc-fax/', $mysoc->fax, $annexe);
-        $annexe = preg_replace('/Mysoc-email/', $mysoc->email, $annexe);
-        $annexe = preg_replace('/Mysoc-url/', $mysoc->url, $annexe);
-        $annexe = preg_replace('/Mysoc-rcs/', $mysoc->rcs, $annexe);
-        $annexe = preg_replace('/Mysoc-siren/', $mysoc->siren, $annexe);
-        $annexe = preg_replace('/Mysoc-siret/', $mysoc->siret, $annexe);
-        $annexe = preg_replace('/Mysoc-ape/', $mysoc->ape, $annexe);
-        $annexe = preg_replace('/Mysoc-tva_intra/', $mysoc->tva_intra, $annexe);
-        $annexe = preg_replace('/Mysoc-capital/', $mysoc->capital, $annexe);
-
-        $annexe = preg_replace('/Soc-titre/', $contrat->societe->titre, $annexe);
-        $annexe = preg_replace('/Soc-nom/', $contrat->societe->nom, $annexe);
-        $annexe = preg_replace('/Soc-adresse_full/', $contrat->societe->adresse_full, $annexe);
-        $annexe = preg_replace('/Soc-adresse/', $contrat->societe->adresse, $annexe);
-        $annexe = preg_replace('/Soc-cp/', $contrat->societe->cp, $annexe);
-        $annexe = preg_replace('/Soc-ville/', $contrat->societe->ville, $annexe);
-        $annexe = preg_replace('/Soc-tel/', $contrat->societe->tel, $annexe);
-        $annexe = preg_replace('/Soc-fax/', $contrat->societe->fax, $annexe);
-        $annexe = preg_replace('/Soc-email/', $contrat->societe->email, $annexe);
-        $annexe = preg_replace('/Soc-url/', $contrat->societe->url, $annexe);
-        $annexe = preg_replace('/Soc-siren/', $contrat->societe->siren, $annexe);
-        $annexe = preg_replace('/Soc-siret/', $contrat->societe->siret, $annexe);
-        $annexe = preg_replace('/Soc-code_client/', $contrat->societe->code_client, $annexe);
-        $annexe = preg_replace('/Soc-note/', $contrat->societe->note, $annexe);
-        $annexe = preg_replace('/Soc-ref/', $contrat->societe->ref, $annexe);
-
-        $annexe = preg_replace('/Contrat-date_contrat/', $contrat->date_contrat, $annexe);
-        $annexe = preg_replace('/Contrat-date_fin/', dol_print_date($val->date_fin_validite), $annexe);
-        $annexe = preg_replace('/Contrat-ref/', $contrat->ref, $annexe);
-        $annexe = preg_replace('/Contrat-note_public/', $contrat->note_public, $annexe);
-
-        $annexe = preg_replace('/DateDuJour/', date('d/m/Y'), $annexe);
-
-
-        $sql2 = "SELECT lnCon.rowid FROM `" . MAIN_DB_PREFIX . "product_extrafields` prod, `" . MAIN_DB_PREFIX . "contratdet` lnCon
-				WHERE lnCon.`fk_product` = prod.fk_object 
-				    AND lnCon.`fk_contrat` = '" . $contrat->id . "' AND
-                                    prod.`2annexe` = '" . $idAnnexe . "'";
-        $res = $this->db->query($sql2);
-        //$result = $this->db->fetch_object($res);
-        $desc = "";
-        $dateFin = "";
-        $qte = 0;
-        $qte2 = 0;
-        $phraseDelai = "";
-        while ($result = $this->db->fetch_object($res)) {
-            $ligneContrat = new Synopsis_ContratLigne($this->db);
-            $ligneContrat->fetch($result->rowid);
-            //if (isset($result->date_fin_validite)) {
-            $sla = ($ligneContrat->SLA != '') ? " (" . $ligneContrat->SLA . ")" : "";
-            $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
-            $desc .= $ligneContrat->description . $sla . $serialNum . "\n\n";
-            $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
-            $qte += $ligneContrat->qte;
-            $qte2 += $ligneContrat->qte2;
-            if ($result->qty2 == "8")
-                $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
-            elseif ($result->qty2 > 0)
-                $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $result->qty) . " mois sur site (soit " . $result->qty . " visites par an).";
-        }
-
-
-        $annexe = preg_replace('/Ligne-date_fin/', $dateFin, $annexe);
-        $annexe = preg_replace('/Ligne-description/', html_entity_decode($desc), $annexe);
-        $annexe = preg_replace('/Ligne-phrase_delai/', utf8_encodeRien($phraseDelai), $annexe);
-        $annexe = preg_replace('/Ligne-qte/', $qte, $annexe);
-        $annexe = preg_replace('/Ligne-qte2/', $qte2, $annexe);
-
-
-
-        $arr['fullname'] = 'Nom complet';
-        $arr['cp'] = 'Code postal';
-        $arr['ville'] = 'Ville';
-        $arr['email'] = 'Email';
-        $arr['fax'] = utf8_encodeRien('N° fax');
-        $arr['tel'] = utf8_encodeRien('N° tel');
-        $arr['civilite'] = 'Civilit&eacute;';
-        $arr['nom'] = 'Nom';
-        $arr['prenom'] = 'Pr&eacute;om';
-
-
-
-
-
-        /*
-
-
-          Contact-external-SALESREPSIGN-fullname  Nom complet     M. PIROCHE
-          Contact-external-SALESREPSIGN-civilite  Civilité
-          Contact-external-SALESREPSIGN-nom   Nom     PIROCHE
-          Contact-external-SALESREPSIGN-prenom    Préom
-          Contact-external-SALESREPSIGN-cp    Code postal
-          Contact-external-SALESREPSIGN-ville     Ville
-          Contact-external-SALESREPSIGN-email     Email
-          Contact-external-SALESREPSIGN-tel   N° tel
-          Contact-external-SALESREPSIGN-fax   N° fax
-
-          Contact-internal-SALESREPFOLL-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-SALESREPFOLL-civilite  Civilité
-          Contact-internal-SALESREPFOLL-nom   Nom     LE FEVRE
-          Contact-internal-SALESREPFOLL-prenom    Préom   Jean-Marcéé
-          Contact-internal-SALESREPFOLL-cp    Code postal
-          Contact-internal-SALESREPFOLL-ville     Ville
-          Contact-internal-SALESREPFOLL-email     Email   tommy@drsi.fr
-          Contact-internal-SALESREPFOLL-tel   N° tel
-          Contact-internal-SALESREPFOLL-fax   N° fax
-
-          Contact-internal-TECHRESP-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-TECHRESP-civilite  Civilité
-          Contact-internal-TECHRESP-nom   Nom     LE FEVRE
-          Contact-internal-TECHRESP-prenom    Préom   Jean-Marcéé
-          Contact-internal-TECHRESP-cp    Code postal
-          Contact-internal-TECHRESP-ville     Ville
-          Contact-internal-TECHRESP-email     Email   tommy@drsi.fr
-          Contact-internal-TECHRESP-tel   N° tel
-          Contact-internal-TECHRESP-fax   N° fax
-
-          Contact-internal-SALESREPSIGN-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-SALESREPSIGN-civilite  Civilité
-          Contact-internal-SALESREPSIGN-nom   Nom     LE FEVRE
-          Contact-internal-SALESREPSIGN-prenom    Préom   Jean-Marcéé
-          Contact-internal-SALESREPSIGN-cp    Code postal
-          Contact-internal-SALESREPSIGN-ville     Ville
-          Contact-internal-SALESREPSIGN-email     Email   tommy@drsi.fr
-          Contact-internal-SALESREPSIGN-tel   N° tel
-          Contact-internal-SALESREPSIGN-fax   N° fax
-
-
-         */
-        return $annexe;
     }
 
 }

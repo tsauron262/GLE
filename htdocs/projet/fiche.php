@@ -465,7 +465,8 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
      */
     print '<div class="tabsAction">';
 
-    if ($_REQUEST['action'] != "edit") {
+    if ($_REQUEST['action'] != "edit" &&
+            ($projet->user_resp_id == $user->id || $user->rights->synopsisprojet->modAll)) {
         if ($user->rights->synopsisprojet->creer) {
             print '<a class="butAction" href="fiche.php?id=' . $projet->id . '&amp;action=edit">' . $langs->trans("Modify") . '</a>';
         }

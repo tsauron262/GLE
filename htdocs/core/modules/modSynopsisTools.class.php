@@ -108,6 +108,21 @@ class modSynopsisTools extends DolibarrModules
         $this->rights[$r][4] = 'Global'; // Famille
         $this->rights[$r][5] = 'adminBug'; // Droit
         $r ++;
+        
+        
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Voir toute les commande';
+        $this->rights[$r][3] = 1; // Default
+        $this->rights[$r][4] = 'Commande'; // Famille
+        $this->rights[$r][5] = 'viewAll'; // Droit
+        $r ++;
+        
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Voir en proirité mes commande';
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'Commande'; // Famille
+        $this->rights[$r][5] = 'defaultViewMy'; // Droit
+        $r ++;
 
 
 

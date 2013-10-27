@@ -47,14 +47,17 @@ $sall = GETPOST('sall');
 $socid = GETPOST('socid', 'int');
 $search_user=GETPOST('search_user','int');
 
-if (isset($_REQUEST['search_user']))
-    $search_sale = GETPOST('search_sale', 'int');
-else
+/* deb mod drsi */
+if (isset($user->rights->SynopsisTools) &&
+        !isset($user->rights->SynopsisTools->Commande->viewAll)
+        || (!$search_user && isset($user->rights->SynopsisTools->Commande->defaultViewMy) && $user->rights->SynopsisTools->Commande->defaultViewMy))
     $search_sale = $user->id;
+else
+    $search_sale = GETPOST('search_sale', 'int');
+/* fmod */
 
 // Security check
 $id = (GETPOST('orderid') ? GETPOST('orderid') : GETPOST('id', 'int'));
-if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'commande', $id, '');
 

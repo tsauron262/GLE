@@ -201,6 +201,9 @@ if ($_REQUEST["id"] > 0)
         $projet->fetch($task->projet_id);
         $projet->societe->fetch($projet->societe->id);
 
+        
+        $droitModif = ($task->user_creat->id == $user->id || $projet->user_resp_id == $user->id || $user->rights->synopsisprojet->modAll);
+
         $h=0;
         $head = array();
         $head[$h][0] = DOL_URL_ROOT.'/projet/tasks/task.php?id='.$task->id;
@@ -210,7 +213,7 @@ if ($_REQUEST["id"] > 0)
 
         dol_fiche_head($head, 'tasks', $langs->trans("Tasks"));
 
-        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'modify')
+        if ($droitModif && isset($_REQUEST['action']) && $_REQUEST['action'] == 'modify')
         {
             print '<form method="POST" action="task.php?id='.$task->id.'">';
             print '<input type="hidden" name="action" value="modtask">';
@@ -314,10 +317,10 @@ $task->user_creat->fetch($task->user_creat->id);
                 print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Couleur").'</th><td class="ui-widget-content" colspan="3"><input name="color" value="'.$task->color.'"></td></tr>';
 
             print "</table>";
-            print "<div class='tabsAction'>";
-            print "    <button class='butAction'>Modifier</button>";
-            print "    <button class='butAction' onClick='location.href=\"task.php?id=".$task->id."\"; return(false);'>Annuler</button>";
-            print "</div>";
+                print "<div class='tabsAction'>";
+                print "    <button class='butAction'>Modifier</button>";
+                print "    <button class='butAction' onClick='location.href=\"task.php?id=".$task->id."\"; return(false);'>Annuler</button>";
+                print "</div>";
             print "</form>";
 
 
@@ -442,9 +445,11 @@ $task->user_creat->fetch($task->user_creat->id);
             }
             print '</table></form><br />';
 
-            print "<div class='tabsAction'>";
-            print "<button class='butAction' onClick='location.href=\"task.php?action=modify&id=".$_REQUEST['id']."\"'>Modifier</button>";
-            print "</div>";
+            if($droitModif){
+                print "<div class='tabsAction'>";
+                print "<button class='butAction' onClick='location.href=\"task.php?action=modify&id=".$_REQUEST['id']."\"'>Modifier</button>";
+                print "</div>";
+            }
 
             print "<div id='accordion' style='width:60%;'>";
 

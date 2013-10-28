@@ -2445,7 +2445,7 @@ class requete extends formulaireSource {
             $requete = $this->requeteValue;
             if($requete."x" == "x"){
                 $requete = $this->requete;
-                if(stristr("where", $requete))
+                if(stripos($requete, "where"))
                         $requete .= " AND ";
                 else
                     $requete .= " WHERE ";

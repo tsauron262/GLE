@@ -1276,13 +1276,13 @@ class pdf_crabeCapsim extends ModelePDFFactures
 		$posy+=1;
 		$pdf->SetFont('','', $default_font_size - 2);
 
-		if ($object->ref_client)
-		{
-			$posy+=4;
-			$pdf->SetXY($posx,$posy);
-			$pdf->SetTextColor(0,0,60);
-			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("RefCustomer")." : " . $outputlangs->convToOutputCharset($object->ref_client), '', 'R');
-		}
+//		if ($object->ref_client)
+//		{
+//			$posy+=4;
+//			$pdf->SetXY($posx,$posy);
+//			$pdf->SetTextColor(0,0,60);
+//			$pdf->MultiCell(100, 3, $outputlangs->transnoentities("RefCustomer")." : " . $outputlangs->convToOutputCharset($object->ref_client), '', 'R');
+//		}
 
 		$objectidnext=$object->getIdReplacingInvoice('validated');
 		if ($object->type == 0 && $objectidnext)

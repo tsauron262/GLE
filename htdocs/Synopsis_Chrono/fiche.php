@@ -718,7 +718,7 @@ EOF;
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->fetch($res->type_subvaleur);
-                    $obj->getValues();
+                    $obj->getValue($res->value);
                     $html = "";
                     foreach ($obj->valuesArr as $key => $val) {
                         if ($res->valueIsSelected && $res->value == $key) {

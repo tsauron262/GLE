@@ -1012,64 +1012,6 @@ EOF;
         return ($html);
     }
 
-    public function displayExtraInfoCartouche() {
-
-        $html = "";
-        if ($this->qte > 0) {
-            $html .= "<tr><th class='ui-widget-header ui-state-default'>Intervention";
-            $html .= "    <td class='ui-widget-content'>" . $this->qte . " par mois ";
-        }
-        if ($this->hotline > 0) {
-            $html .= "<tr><th class='ui-widget-header ui-state-default'>Hotline";
-            $html .= "    <td class='ui-widget-content'>Oui";
-        }
-        if ($this->telemaintenance > 0) {
-            $html .= "<tr><th class='ui-widget-header ui-state-default'>T&eacute;l&eacute;maintenance";
-            $html .= "    <td class='ui-widget-content'>Oui";
-        }
-        if ($this->maintenance > 0) {
-            $html .= "<tr><th class='ui-widget-header ui-state-default'>Maintenance sur site";
-            $html .= "    <td class='ui-widget-content'>Oui";
-        }
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
-        $form = new Form($this->db);
-        global $langs;
-        if ($_REQUEST['action'] == "setCondReg") {
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
-                          SET condReg_refid =" . $_REQUEST['cond_reglement_id'] . "
-                        WHERE id = " . $this->id;
-            $sql = $this->db->query($requete);
-            if ($sql)
-                $this->condReg_refid = $_REQUEST['cond_reglement_id'];
-        }
-        if ($_REQUEST['action'] == "setModeReg") {
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_contrat_GMAO
-                          SET modeReg_refid =" . $_REQUEST['mode_reglement_id'] . "
-                        WHERE id = " . $this->id;
-//print $requete;
-            $sql = $this->db->query($requete);
-            if ($sql)
-                $this->modeReg_refid = $_REQUEST['mode_reglement_id'];
-        }
-        $html .= "<tr><th class='ui-widget-header ui-state-default'>Condition de r&egrave;glement";
-        if ($_REQUEST['action'] == 'changeCondReg') {
-            $html .= "    <td class='ui-widget-content'>" . $form->form_conditions_reglement("fiche.php?action=setCondReg&amp;id=" . $this->id, $this->condReg_refid, 'cond_reglement_id', 0, $display = false);
-        } else {
-            $html .= '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=changeCondReg&amp;id=' . $this->id . '">' . img_edit($langs->trans("Condition de r&egrave;glement")) . '</a></span>';
-            $html .= "    <td class='ui-widget-content'>" . $form->form_conditions_reglement("fiche.php?action=setCondReg&amp;id=&amp;id=" . $this->id, $this->condReg_refid, 'none', 0, $display = false);
-        }
-
-        $html .= "    <th class='ui-widget-header ui-state-default'>Mode de r&egrave;glement";
-        if ($_REQUEST['action'] == 'changeModeReg') {
-            $html .= "    <td class='ui-widget-content'>" . $form->form_modes_reglement("fiche.php?action=setModeReg&amp;id=" . $this->id, $this->modeReg_refid, 'mode_reglement_id', false);
-        } else {
-            $html .= '<span style="float:right;"><a href="' . $_SERVER["PHP_SELF"] . '?action=changeModeReg&amp;id=' . $this->id . '">' . img_edit($langs->trans("Mode de r&egrave;glement")) . '</a></span>';
-            $html .= "    <td class='ui-widget-content'>" . $form->form_modes_reglement("fiche.php?action=setModeReg&amp;id=" . $this->id, $this->modeReg_refid, 'none', false);
-        }
-
-        return $html;
-    }
-
     public function initDialog($mysoc, $objp = NULL) {
         global $user, $conf;
         $html = "";

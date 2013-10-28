@@ -2442,7 +2442,17 @@ class requete extends formulaireSource {
         $conf->global->DOL_DOCUMENT_ROOT = DOL_DOCUMENT_ROOT;
         $conf->global->DOL_URL_ROOT = DOL_URL_ROOT;
         if ($this->id > 0) {
-            $requete = vsprintf($this->requeteValue, $this->paramsArr);
+            $requete = $this->requeteValue;
+            if($requete."x" == "x"){
+                $requete = $this->requete;
+                if(stristr("where", $requete))
+                        $requete .= " AND ";
+                else
+                    $requete .= " WHERE ";
+                $requete .= "[[indexField]]";
+            }
+            $requete = vsprintf($requete, $this->paramsArr);
+            
 //           if(preg_match('/ WHERE/'))
 
             if ($this->tableName . "x" != 'x')
@@ -2451,7 +2461,6 @@ class requete extends formulaireSource {
                 $requete = preg_replace('/\[\[indexField\]\]/', $this->indexField . "='" . $val . "'", $requete);
             eval("\$requete = \"$requete\";");
             $sql = $this->db->query($requete);
-
 
             $arr = array();
             $arr2 = array();
@@ -2463,21 +2472,21 @@ class requete extends formulaireSource {
                     $index = $res->$indexField;
                     $arrTmp = array();
                     foreach ($this->showFieldsArr as $key => $val) {
-
+$result = $res->$val;
                         if ($this->postTraitementArr[$val] . "x" != "x") {
                             $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
-                            $result = $res->$val;
+                            
                             if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
-                                $fctTmp1 = $arrTmpMatch[1];
-                                $paramsArrTmp = explode(',', $arrTmpMatch[2]);
+                                $arrTmpMatch = explode("(", $fctTmp);
+                                $fctTmp1 = $arrTmpMatch[0];
+                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]","",str_replace($fctTmp1."(", "", $fctTmp)."[SUPPR]"));
                                 $result = call_user_func_array($fctTmp1, $paramsArrTmp);
                             }
-                            $arrTmp[] = $result;
-                        } else {
-                            $arrTmp[] = $res->$val;
                         }
+                            $arrTmp[] = $result;
                     }
                     $arr[$index] = join(' ', $arrTmp);
+                    $this->valuesArr[$index] = join(' ', $arrTmp);
 
                     if ($this->OptGroup . "x" != "x") {
                         $tmp = $this->OptGroup;
@@ -2534,8 +2543,9 @@ class requete extends formulaireSource {
                             $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
                             $result = $res->$val;
                             if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
-                                $fctTmp1 = $arrTmpMatch[1];
-                                $paramsArrTmp = explode(',', $arrTmpMatch[2]);
+                                $arrTmpMatch = explode("(", $fctTmp);
+                                $fctTmp1 = $arrTmpMatch[0];
+                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]","",str_replace($fctTmp1."(", "", $fctTmp)."[SUPPR]"));
                                 $result = call_user_func_array($fctTmp1, $paramsArrTmp);
                             }
                             $arrTmp[] = $result;
@@ -3078,6 +3088,13 @@ class formulaireType extends formulaire {
             return -1;
     }
 
+}
+
+function lien($url){
+    return "<a href='".DOL_URL_ROOT."/".$url."'>";
+}
+function finLien($nom){
+    return $nom."</a>";
 }
 
 ?>

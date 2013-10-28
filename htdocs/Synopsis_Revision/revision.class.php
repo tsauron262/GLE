@@ -35,7 +35,20 @@ class SynopsisRevisionPropal {
         $result = $object->createFromClone($socid, $hookmanager);
         if ($result > 0) {
             echo $oldRef; //.print_r($propal, true);
-            $tabT = explode("-", $oldRef);
+            $this->setLienRevision($oldRef, $oldId, $result);
+
+
+            header("Location: " . '../comm/propal.php?id=' . $result);
+            exit;
+        } else {
+            $mesg = $object->error;
+        }
+        print ($mesg . " Erreur" . $socid);
+    }
+    
+    private function setLienRevision($oldRef, $oldId, $newId){
+        global $conf, $db;
+        $tabT = explode("-", $oldRef);
 //        die($tabT[]);
             if (!isset($tabT[1]))
                 $tabT[1] = 0;
@@ -56,18 +69,10 @@ class SynopsisRevisionPropal {
                 $newRef = $orgRef . "-" . $numRevision;
             }
 
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $result;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $newId;
             $db->query($requete);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $result . ", fk_statut = 10 WHERE rowid = " . $oldId;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 10 WHERE rowid = " . $oldId;
             $db->query($requete);
-
-
-            header("Location: " . '../comm/propal.php?id=' . $result);
-            exit;
-        } else {
-            $mesg = $object->error;
-        }
-        print ($mesg . " Erreur" . $socid);
     }
 
     private static function alpha2num($a) {

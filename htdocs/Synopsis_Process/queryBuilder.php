@@ -276,7 +276,7 @@ if ($_REQUEST['action'] == "Create" || $forceCreate) {
     print "      <td class='ui-widget-content'>";
     print "      <textarea name='requeteValue'>";
     print $requeteObj->requeteValue;
-    print "      </textarea>";
+    print "</textarea>";
 
     print '  <tr>';
     print "      <th class='ui-widget-header ui-state-default'>Table de l'index pour la requete de valeur";

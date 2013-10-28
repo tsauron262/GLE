@@ -45,7 +45,7 @@
 
 require("./pre.inc.php");
 
-$langs->load("projectsSyn@projet");    
+$langs->load("project@projet");    
 if (!$user->rights->synopsisprojet->lire) accessforbidden();
 
 $socid = ( isset($_REQUEST["socid"]) && is_numeric($_REQUEST["socid"]) ? $_REQUEST["socid"] : 0 );

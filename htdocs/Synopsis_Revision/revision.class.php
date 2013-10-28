@@ -58,7 +58,7 @@ class SynopsisRevisionPropal {
 
             $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $result;
             $db->query($requete);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $result . ", fk_statut = 3 WHERE rowid = " . $oldId;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $result . ", fk_statut = 10 WHERE rowid = " . $oldId;
             $db->query($requete);
 
 

@@ -109,138 +109,114 @@ if (isset($_REQUEST["id"])) {
             $action = '';
         }
     }
-    else if ($action == 'send' && ! GETPOST('addfile') && ! GETPOST('removedfile') && ! GETPOST('cancel'))
-{
-	$langs->load('mails');
+    else if ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile') && !GETPOST('cancel')) {
+        $langs->load('mails');
 
-	if ($object->id > 0)
-	{
-		if ($_POST['sendto'])
-		{
-			// Le destinataire a ete fourni via le champ libre
-			$sendto = $_POST['sendto'];
-			$sendtoid = 0;
-		}
-		elseif ($_POST['receiver'] != '-1')
-		{
-			// Recipient was provided from combo list
-			if ($_POST['receiver'] == 'thirdparty')	// Id of third party
-			{
-				$sendto = $object->client->email;
-				$sendtoid = 0;
-			}
-			else	// Id du contact
-			{
-				$sendto = $object->client->contact_get_property($_POST['receiver'],'email');
-				$sendtoid = $_POST['receiver'];
-			}
-		}
+        if ($object->id > 0) {
+            if ($_POST['sendto']) {
+                // Le destinataire a ete fourni via le champ libre
+                $sendto = $_POST['sendto'];
+                $sendtoid = 0;
+            } elseif ($_POST['receiver'] != '-1') {
+                // Recipient was provided from combo list
+                if ($_POST['receiver'] == 'thirdparty') { // Id of third party
+                    $sendto = $object->client->email;
+                    $sendtoid = 0;
+                } else { // Id du contact
+                    $sendto = $object->client->contact_get_property($_POST['receiver'], 'email');
+                    $sendtoid = $_POST['receiver'];
+                }
+            }
 
-		if (dol_strlen($sendto))
-		{
-			$langs->load("commercial");
+            if (dol_strlen($sendto)) {
+                $langs->load("commercial");
 
-			$from = $_POST['fromname'] . ' <' . $_POST['frommail'] .'>';
-			$replyto = $_POST['replytoname']. ' <' . $_POST['replytomail'].'>';
-			$message = $_POST['message'];
-			$sendtocc = $_POST['sendtocc'];
-			$deliveryreceipt = $_POST['deliveryreceipt'];
+                $from = $_POST['fromname'] . ' <' . $_POST['frommail'] . '>';
+                $replyto = $_POST['replytoname'] . ' <' . $_POST['replytomail'] . '>';
+                $message = $_POST['message'];
+                $sendtocc = $_POST['sendtocc'];
+                $deliveryreceipt = $_POST['deliveryreceipt'];
 
-			if (dol_strlen($_POST['subject'])) $subject = $_POST['subject'];
-			else $subject = $langs->transnoentities('Propal').' '.$object->ref;
-			$actiontypecode='AC_PROP';
-			$actionmsg = $langs->transnoentities('MailSentBy').' '.$from.' '.$langs->transnoentities('To').' '.$sendto.".\n";
-			if ($message)
-			{
-				$actionmsg.=$langs->transnoentities('MailTopic').": ".$subject."\n";
-				$actionmsg.=$langs->transnoentities('TextUsedInTheMessageBody').":\n";
-				$actionmsg.=$message;
-			}
-			$actionmsg2=$langs->transnoentities('Action'.$actiontypecode);
+                if (dol_strlen($_POST['subject']))
+                    $subject = $_POST['subject'];
+                else
+                    $subject = $langs->transnoentities('Propal') . ' ' . $object->ref;
+                $actiontypecode = 'AC_PROP';
+                $actionmsg = $langs->transnoentities('MailSentBy') . ' ' . $from . ' ' . $langs->transnoentities('To') . ' ' . $sendto . ".\n";
+                if ($message) {
+                    $actionmsg.=$langs->transnoentities('MailTopic') . ": " . $subject . "\n";
+                    $actionmsg.=$langs->transnoentities('TextUsedInTheMessageBody') . ":\n";
+                    $actionmsg.=$message;
+                }
+                $actionmsg2 = $langs->transnoentities('Action' . $actiontypecode);
 
-			// Create form object
-			include_once DOL_DOCUMENT_ROOT.'/core/class/html.formmail.class.php';
-			$formmail = new FormMail($db);
+                // Create form object
+                include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
+                $formmail = new FormMail($db);
 
-			$attachedfiles=$formmail->get_attached_files();
-			$filepath = $attachedfiles['paths'];
-			$filename = $attachedfiles['names'];
-			$mimetype = $attachedfiles['mimes'];
+                $attachedfiles = $formmail->get_attached_files();
+                $filepath = $attachedfiles['paths'];
+                $filename = $attachedfiles['names'];
+                $mimetype = $attachedfiles['mimes'];
 
-			// Envoi de la propal
-			require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-			$mailfile = new CMailFile($subject,$sendto,$from,$message,$filepath,$mimetype,$filename,$sendtocc,'',$deliveryreceipt,-1);
-			if ($mailfile->error)
-			{
-				setEventMessage($mailfile->error, 'errors');
-			}
-			else
-			{
-				$result=$mailfile->sendfile();
-				if ($result)
-				{
-					// Initialisation donnees
-					$object->sendtoid		= $sendtoid;
-					$object->actiontypecode	= $actiontypecode;
-					$object->actionmsg		= $actionmsg;
-					$object->actionmsg2		= $actionmsg2;
-					$object->fk_element		= $object->id;
-					$object->elementtype	= $object->element;
+                // Envoi de la propal
+                require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+                $mailfile = new CMailFile($subject, $sendto, $from, $message, $filepath, $mimetype, $filename, $sendtocc, '', $deliveryreceipt, -1);
+                if ($mailfile->error) {
+                    setEventMessage($mailfile->error, 'errors');
+                } else {
+                    $result = $mailfile->sendfile();
+                    if ($result) {
+                        // Initialisation donnees
+                        $object->sendtoid = $sendtoid;
+                        $object->actiontypecode = $actiontypecode;
+                        $object->actionmsg = $actionmsg;
+                        $object->actionmsg2 = $actionmsg2;
+                        $object->fk_element = $object->id;
+                        $object->elementtype = $object->element;
 
-					// Appel des triggers
-					include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-					$interface=new Interfaces($db);
-					$result=$interface->run_triggers('PROPAL_SENTBYMAIL',$object,$user,$langs,$conf);
-					if ($result < 0) {
-						$error++; $this->errors=$interface->errors;
-					}
-					// Fin appel triggers
+                        // Appel des triggers
+                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                        $interface = new Interfaces($db);
+                        $result = $interface->run_triggers('PROPAL_SENTBYMAIL', $object, $user, $langs, $conf);
+                        if ($result < 0) {
+                            $error++;
+                            $this->errors = $interface->errors;
+                        }
+                        // Fin appel triggers
 
-					if (! $error)
-					{
-						// Redirect here
-						// This avoid sending mail twice if going out and then back to page
-						$mesg=$langs->trans('MailSuccessfulySent',$mailfile->getValidAddress($from,2),$mailfile->getValidAddress($sendto,2));
-						setEventMessage($mesg);
-						header('Location: '.$_SERVER["PHP_SELF"].'?id='.$object->id);
-						exit;
-					}
-					else
-					{
-						dol_print_error($db);
-					}
-				}
-				else
-				{
-					$langs->load("other");
-					if ($mailfile->error)
-					{
-						$mesg.=$langs->trans('ErrorFailedToSendMail',$from,$sendto);
-						$mesg.='<br>'.$mailfile->error;
-					}
-					else
-					{
-						$mesg.='No mail sent. Feature is disabled by option MAIN_DISABLE_ALL_MAILS';
-					}
-					setEventMessage($mesg, 'errors');
-				}
-			}
-		}
-		else
-		{
-			$langs->load("other");
-			setEventMessage($langs->trans('ErrorMailRecipientIsEmpty').'!', 'errors');
-			dol_syslog($langs->trans('ErrorMailRecipientIsEmpty'));
-		}
-	}
-	else
-	{
-		$langs->load("other");
-		setEventMessage($langs->trans('ErrorFailedToReadEntity',$langs->trans("Proposal")), 'errors');
-		dol_syslog($langs->trans('ErrorFailedToReadEntity',$langs->trans("Proposal")));
-	}
-}
-
+                        if (!$error) {
+                            // Redirect here
+                            // This avoid sending mail twice if going out and then back to page
+                            $mesg = $langs->trans('MailSuccessfulySent', $mailfile->getValidAddress($from, 2), $mailfile->getValidAddress($sendto, 2));
+                            setEventMessage($mesg);
+                            header('Location: ' . $_SERVER["PHP_SELF"] . '?id=' . $object->id);
+                            exit;
+                        } else {
+                            dol_print_error($db);
+                        }
+                    } else {
+                        $langs->load("other");
+                        if ($mailfile->error) {
+                            $mesg.=$langs->trans('ErrorFailedToSendMail', $from, $sendto);
+                            $mesg.='<br>' . $mailfile->error;
+                        } else {
+                            $mesg.='No mail sent. Feature is disabled by option MAIN_DISABLE_ALL_MAILS';
+                        }
+                        setEventMessage($mesg, 'errors');
+                    }
+                }
+            } else {
+                $langs->load("other");
+                setEventMessage($langs->trans('ErrorMailRecipientIsEmpty') . '!', 'errors');
+                dol_syslog($langs->trans('ErrorMailRecipientIsEmpty'));
+            }
+        } else {
+            $langs->load("other");
+            setEventMessage($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")), 'errors');
+            dol_syslog($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")));
+        }
+    }
 }
 
 /*
@@ -1754,7 +1730,13 @@ if ($action == 'create') {
 
 
 if (isset($_REQUEST["id"])) {
-
+// Send
+    if ($object->statut == 1 || $object->statut == 2) {
+        if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
+            print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
+        } else
+            print '<div class="inline-block divButAction"><a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a></div>';
+    }
 
 
 
@@ -1782,9 +1764,9 @@ if (isset($_REQUEST["id"])) {
                 $outputlangs = new Translate("", $conf);
                 $outputlangs->setDefaultLang($newlang);
             }
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-        $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-        
+            require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+            $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+
             $result = contrat_pdf_create($db, $object->id, $model);
             if ($result <= 0) {
                 dol_print_error($db, $result);
@@ -1811,7 +1793,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsis
         $formmail->withto = GETPOST("sendto") ? GETPOST("sendto") : $liste;
         $formmail->withtocc = $liste;
         $formmail->withtoccc = (!empty($conf->global->MAIN_EMAIL_USECCC) ? $conf->global->MAIN_EMAIL_USECCC : false);
-        $formmail->withtopic = $langs->trans('Contrat')." ".$object->ref;
+        $formmail->withtopic = $langs->trans('Contrat') . " " . $object->ref;
         $formmail->withfile = 2;
         $formmail->withbody = "Text mail";
         $formmail->withdeliveryreceipt = 1;
@@ -1909,54 +1891,54 @@ if ($conf->margin->enabled) {
     ?>
     <script type="text/javascript">
     <?php if ($action == 'editline') { ?>
-        $(document).ready(function() {
-          var idprod = $("input[name='idprod']").val();
-          var fournprice = $("input[name='fournprice']").val();
-          if (idprod > 0) {
-                  $.post('<?php echo DOL_URL_ROOT; ?>/fourn/ajax/getSupplierPrices.php', {'idprod': idprod}, function(data) {
-                    if (data.length > 0) {
-                      var options = '';
-                      var trouve=false;
-                      $(data).each(function() {
-                        options += '<option value="'+this.id+'" price="'+this.price+'"';
-                        if (fournprice > 0) {
-                                if (this.id == fournprice) {
-                                  options += ' selected';
-                                  $("#buying_price").val(this.price);
-                                  trouve = true;
+            $(document).ready(function() {
+                var idprod = $("input[name='idprod']").val();
+                var fournprice = $("input[name='fournprice']").val();
+                if (idprod > 0) {
+                    $.post('<?php echo DOL_URL_ROOT; ?>/fourn/ajax/getSupplierPrices.php', {'idprod': idprod}, function(data) {
+                        if (data.length > 0) {
+                            var options = '';
+                            var trouve = false;
+                            $(data).each(function() {
+                                options += '<option value="' + this.id + '" price="' + this.price + '"';
+                                if (fournprice > 0) {
+                                    if (this.id == fournprice) {
+                                        options += ' selected';
+                                        $("#buying_price").val(this.price);
+                                        trouve = true;
+                                    }
                                 }
+                                options += '>' + this.label + '</option>';
+                            });
+                            options += '<option value=null' + (trouve ? '' : ' selected') + '><?php echo $langs->trans("InputPrice"); ?></option>';
+                            $("#fournprice").html(options);
+                            if (trouve) {
+                                $("#buying_price").hide();
+                                $("#fournprice").show();
+                            }
+                            else {
+                                $("#buying_price").show();
+                            }
+                            $("#fournprice").change(function() {
+                                var selval = $(this).find('option:selected').attr("price");
+                                if (selval)
+                                    $("#buying_price").val(selval).hide();
+                                else
+                                    $('#buying_price').show();
+                            });
                         }
-                        options += '>'+this.label+'</option>';
-                      });
-                      options += '<option value=null'+(trouve?'':' selected')+'><?php echo $langs->trans("InputPrice"); ?></option>';
-                      $("#fournprice").html(options);
-                      if (trouve) {
-                        $("#buying_price").hide();
-                        $("#fournprice").show();
-                      }
-                      else {
-                        $("#buying_price").show();
-                      }
-                      $("#fournprice").change(function() {
-                        var selval = $(this).find('option:selected').attr("price");
-                        if (selval)
-                          $("#buying_price").val(selval).hide();
-                        else
-                          $('#buying_price').show();
-                      });
-                    }
-                    else {
-                      $("#fournprice").hide();
-                      $('#buying_price').show();
-                    }
-                  },
-                  'json');
+                        else {
+                            $("#fournprice").hide();
+                            $('#buying_price').show();
+                        }
+                    },
+                            'json');
                 }
-            else {
-              $("#fournprice").hide();
-              $('#buying_price').show();
-            }
-        });
+                else {
+                    $("#fournprice").hide();
+                    $('#buying_price').show();
+                }
+            });
     <?php } ?>
     </script>
 <?php } ?>

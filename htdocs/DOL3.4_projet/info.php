@@ -49,7 +49,7 @@ require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsis_project.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
 
-$langs->load("projectsSyn@projet");
+$langs->load("project@projet");
 
 if (!$user->rights->synopsisprojet->lire)
     accessforbidden();

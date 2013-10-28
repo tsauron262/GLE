@@ -52,7 +52,7 @@ if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
 
-$langs->load("projectsSyn@projet");
+$langs->load("project@projet");
 
 $projetid = '';
 if ($_GET["id"]) {

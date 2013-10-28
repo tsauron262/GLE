@@ -10,7 +10,7 @@
 require_once('pre.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
-$langs->load("projectsSyn@projet");
+$langs->load("project@projet");
 $userId = $user->id;
 if ($_REQUEST['userid'] > 0)
     $userId = $_REQUEST['userid'];

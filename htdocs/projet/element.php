@@ -54,7 +54,7 @@ require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.facture.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
 
-$langs->load("projectsSyn@projet");
+$langs->load("project@projet");
 $langs->load("companies");
 $langs->load("suppliers");
 if (isset($conf->facture->enabled))

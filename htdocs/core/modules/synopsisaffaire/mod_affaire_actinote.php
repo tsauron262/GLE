@@ -32,13 +32,13 @@
  */
 
 /**
-    \file       htdocs/includes/modules/synopsisaffaire/mod_affaire_actinote.php
+    \file       htdocs/core/modules/synopsisaffaire/mod_affaire_actinote.php
     \ingroup    affaire
     \brief      Fichier contenant la classe du modele de numerotation de reference de affaire actinote
     \version    $Id: mod_affaire_actinote.php,v 1.19 2008/07/05 14:20:10 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/includes/modules/synopsisaffaire/modules_affaire.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisaffaire/modules_affaire.php");
 
 
 /**

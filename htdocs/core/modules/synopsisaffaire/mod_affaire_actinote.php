@@ -71,7 +71,7 @@ class mod_affaire_actinote extends ModeleNumRefAffaire
 
         // Parametrage du prefix des factures
         $texte.= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte.= '<td align="right">'.$form->textwithhelp('<input type="text" class="flat" size="24" name="maskaffaire" value="'.$conf->global->AFFAIRE_ACTINOTE_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("Proposal"),$langs->transnoentities("Proposal"),$langs->transnoentities("Proposal")),1,1).'</td>';
+        $texte.= '<td align="right">'.$form->textwithpicto('<input type="text" class="flat" size="24" name="maskaffaire" value="'.$conf->global->AFFAIRE_ACTINOTE_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("Proposal"),$langs->transnoentities("Proposal"),$langs->transnoentities("Proposal")),1,1).'</td>';
 
         $texte.= '<td align="left" rowspan="2">&nbsp; <input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button"></td>';
 

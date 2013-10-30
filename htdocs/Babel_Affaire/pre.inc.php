@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -44,26 +47,26 @@ $langs->load("bills");
 $langs->load("orders");
 $langs->load("commercial");
 
-
-function llxHeader($head = "", $title="", $help_url='', $noscript = false)
-{
-  global $langs;
-
-  top_menu($head, $title,"",$noscript);
-
-  $menu = new Menu();
-
-  $menu->add(DOL_URL_ROOT."/projet/fiche.php?leftmenu=projects&action=create", $langs->trans("Customers"));
-
-  $menu->add(DOL_URL_ROOT."/projet/", $langs->trans("Projects"));
-  $menu->add_submenu(DOL_URL_ROOT."/projet/liste.php", $langs->trans("List"));
-
-  $menu->add(DOL_URL_ROOT."/projet/tasks/", $langs->trans("Tasks"));
-  $menu->add_submenu(DOL_URL_ROOT."/projet/tasks/mytasks.php", $langs->trans("Mytasks"));
-
-  $menu->add(DOL_URL_ROOT."/projet/activity/", $langs->trans("Activity"));
-  $menu->add_submenu(DOL_URL_ROOT."/projet/activity/myactivity.php", $langs->trans("MyActivity"));
-
-  left_menu($menu->liste, $help_url);
-}
+//
+//function llxHeader($head = "", $title="", $help_url='', $noscript = false)
+//{
+//  global $langs;
+//
+//  top_menu($head, $title,"",$noscript);
+//
+//  $menu = new Menu();
+//
+//  $menu->add(DOL_URL_ROOT."/projet/fiche.php?leftmenu=projects&action=create", $langs->trans("Customers"));
+//
+//  $menu->add(DOL_URL_ROOT."/projet/", $langs->trans("Projects"));
+//  $menu->add_submenu(DOL_URL_ROOT."/projet/liste.php", $langs->trans("List"));
+//
+//  $menu->add(DOL_URL_ROOT."/projet/tasks/", $langs->trans("Tasks"));
+//  $menu->add_submenu(DOL_URL_ROOT."/projet/tasks/mytasks.php", $langs->trans("Mytasks"));
+//
+//  $menu->add(DOL_URL_ROOT."/projet/activity/", $langs->trans("Activity"));
+//  $menu->add_submenu(DOL_URL_ROOT."/projet/activity/myactivity.php", $langs->trans("MyActivity"));
+//
+//  left_menu($menu->liste, $help_url);
+//}
 ?>

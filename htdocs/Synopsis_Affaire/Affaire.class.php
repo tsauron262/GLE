@@ -251,7 +251,7 @@ class Affaire extends CommonObject {
         global $db, $langs,$mysoc;
         $langs->load("Affaire");
 
-        $dir = DOL_DOCUMENT_ROOT . "/core/modules/Affaire/";
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisaffaire/";
 
         if (defined("AFFAIRE_ADDON") && AFFAIRE_ADDON)
         {

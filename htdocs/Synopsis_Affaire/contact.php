@@ -53,7 +53,7 @@ if ($_REQUEST['action']=='generatePdf' || $_REQUEST['action'] == 'builddoc')
     if ($result > 0 && $_REQUEST["id"] > 0)
     {
 
-        require_once(DOL_DOCUMENT_ROOT."/core/modules/Affaire/modules_affaire.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisaffaire/modules_affaire.php");
         affaireContact_pdf_create($db, $affaire->id, $_REQUEST['model']);
         header('location: contact.php?id='.$affaire->id."#documentAnchor");
     }

@@ -1564,7 +1564,7 @@ class modSynopsisProcess extends DolibarrModules {
 (3, \'Facture\', \'Facture\', 3, \'/compta/facture.php\', \'facid\', \'/compta/facture/class/facture.class.php\'),
 (4, \'Exp&eacute;dition\', \'Expedition\', 4, \'/expedition/fiche.php\', \'id\', \'/expedition/class/expedition.class.php\'),
 (5, \'Action co.\', \'ActionComm\', 5, \'/comm/action/fiche.php\', \'id\', \'/actioncomm.class.php\'),
-(6, \'Affaire\', \'Affaire\', 6, \'/Babel_Affaire/fiche.php\', \'id\', \'/Babel_Affaire/Affaire.class.php\'),
+(6, \'Affaire\', \'Affaire\', 6, \'/Synopsis_Affaire/fiche.php\', \'id\', \'/Synopsis_Affaire/Affaire.class.php\'),
 (7, \'Facture fournisseur\', \'FactureFournisseur\', 7, \'/fourn/facture/fiche.php\', \'facid\', \'/fourn/class/fournisseur.facture.class.php\'),
 (8, \'Commande fournisseur\', \'CommandeFournisseur\', 8, \'/fourn/commande/fiche.php\', \'id\', \'/fourn/class/fournisseur.commande.class.php\'),
 (9, \'Contrat\', \'Contrat\', 9, \'/contrat/fiche.php\', \'id\', \'/contrat/class/contrat.class.php\'),

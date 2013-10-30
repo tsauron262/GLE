@@ -65,8 +65,8 @@ function printHead($type, $id, $js = ''){
             break;
         case "Affaire": {
 
-                require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/Affaire.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/fct_affaire.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Affaire/Affaire.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Affaire/fct_affaire.php");
                 $obj = new Affaire($db);
                 $obj->fetch($id);
                 $head = affaire_prepare_head($obj);

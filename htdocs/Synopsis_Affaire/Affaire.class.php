@@ -37,14 +37,14 @@ class Affaire extends CommonObject {
     }
     public function create(){
         global $user;
-        $requete = "INSERT INTO `Babel_Affaire`
+        $requete = "INSERT INTO `Synopsis_Affaire`
                                 (`nom`,`description`,`date_creation`,`fk_user_create`,`statut`,`ref`)
                          VALUES
                                 ('".$this->nom."', '".$this->description."', now(),  ".$user->id.", 0, '".$this->ref."') ";
         $sql = $this->db->query($requete);
         if ($sql)
         {
-            $lastId = $this->db->last_insert_id('Babel_Affaire');
+            $lastId = $this->db->last_insert_id('Synopsis_Affaire');
             return($lastId);
         } else {
             return -1;
@@ -93,7 +93,7 @@ class Affaire extends CommonObject {
                            modelContactPDF_refid,
                            modelPNPDF_refid,
                            statut
-                      FROM Babel_Affaire
+                      FROM Synopsis_Affaire
                      WHERE id = ".$this->id;
         $sql = $this->db->query($requete);
         if ($sql)
@@ -195,7 +195,7 @@ class Affaire extends CommonObject {
 
     public function get_element_list($type){
         $array=array();
-        $requete = "SELECT element_id FROM Babel_Affaire_Element WHERE type='".$type."'";
+        $requete = "SELECT element_id FROM Synopsis_Affaire_Element WHERE type='".$type."'";
         $sql = $this->db->query($requete);
         if ($sql){
             while($res=$this->db->fetch_object($sql))
@@ -211,7 +211,7 @@ class Affaire extends CommonObject {
         global $langs;
 
         $result='';
-        $lien = '<a href="'.DOL_URL_ROOT.'/Babel_Affaire/fiche.php?id='.$this->id. $get_params .'">';
+        $lien = '<a href="'.DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$this->id. $get_params .'">';
         $lienfin='</a>';
 
         $picto='affaire';
@@ -225,7 +225,7 @@ class Affaire extends CommonObject {
 
     public function verifyNumRef()
     {
-        $sql = "SELECT rowid FROM Babel_Affaire";
+        $sql = "SELECT rowid FROM Synopsis_Affaire";
         $sql.= " WHERE ref = '".$this->ref."'";
 
         $result = $this->db->query($sql);
@@ -281,7 +281,7 @@ class Affaire extends CommonObject {
     public function isMemberOfGroup($id,$type)
     {
         $arr=array();
-        $requete = "SELECT * FROM Babel_Affaire_Element WHERE element_id=".$id." AND type LIKE '".$type."'";
+        $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE element_id=".$id." AND type LIKE '".$type."'";
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)){
             $arr[]=$res->affaire_refid;

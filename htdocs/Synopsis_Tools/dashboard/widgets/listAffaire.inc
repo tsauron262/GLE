@@ -7,7 +7,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT . '/Babel_Affaire/Affaire.class.php');
+require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Affaire/Affaire.class.php');
 
 // The get widget handler.
 function widget_listAffaire() {
@@ -23,9 +23,9 @@ function widget_listAffaire() {
     $table2 = '<p>';
 
 
-    if (isset($conf->global->MAIN_MODULE_BABELAFFAIRE)) {
+    if (isset($conf->global->MAIN_MODULE_SYNOPSISAFFAIRE)) {
         $sql = "SELECT *";
-        $sql .= " FROM Babel_Affaire as f";
+        $sql .= " FROM Synopsis_Affaire as f";
         $sql .= " ORDER BY f.date_creation DESC LIMIT 50";
         $resql = $db->query($sql);
         if ($resql) {

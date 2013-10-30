@@ -40,8 +40,8 @@
 
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/categories/categorie.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/fct_affaire.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/fct_affaire.php");
 
 $langs->load("categories");
 
@@ -122,9 +122,9 @@ $html = new Form($db);
     /*
     * Fiche categorie de produit
     */
-    require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 
-    require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/fct_affaire.php");
+    require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/fct_affaire.php");
 
 
     // Produit
@@ -169,7 +169,7 @@ function formCategory($db,$object,$type,$typeid)
     // Formulaire ajout dans une categorie
     print '<br>';
     print_fiche_titre($title);
-    print '<form method="post" action="'.DOL_URL_ROOT.'/Babel_Affaire/categorie.php?'.$nameId.'='.$object->id.'">';
+    print '<form method="post" action="'.DOL_URL_ROOT.'/Synopsis_Affaire/categorie.php?'.$nameId.'='.$object->id.'">';
     print '<input type="hidden" name="typeid" value="'.$typeid.'">';
     print '<table class="noborder" width="100%">';
     print '<tr class="liste_titre"><td>';
@@ -221,7 +221,7 @@ function formCategory($db,$object,$type,$typeid)
 //debug
                 if ($permission || true)
                 {
-                    print "<a href= '".DOL_URL_ROOT."/Babel_Affaire/categorie.php?".$nameId."=".$object->id."&amp;typeid=".$typeid."&amp;removecat=".$cat->id."'>";
+                    print "<a href= '".DOL_URL_ROOT."/Synopsis_Affaire/categorie.php?".$nameId."=".$object->id."&amp;typeid=".$typeid."&amp;removecat=".$cat->id."'>";
                     print img_delete($langs->trans("DeleteFromCat")).' ';
                     print $langs->trans("DeleteFromCat")."</a>";
                 } else {

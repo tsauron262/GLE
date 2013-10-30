@@ -19,7 +19,7 @@
 
 
 require_once('../../main.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 
 $langs->load("affaire");
 $langs->load("synopsisGene@Synopsis_Tools");
@@ -114,7 +114,7 @@ switch ($action)
     {
 
         $sql = "SELECT count(*) as cnt";
-        $sql .= " FROM Babel_Affaire  WHERE 1 =1 ";
+        $sql .= " FROM Synopsis_Affaire  WHERE 1 =1 ";
 
         $sql .= "  ".$wh;
         $result = $db->query($sql);
@@ -133,7 +133,7 @@ switch ($action)
 
 
         $sql = "SELECT *";
-        $sql .= " FROM Babel_Affaire WHERE 1 =1 ";
+        $sql .= " FROM Synopsis_Affaire WHERE 1 =1 ";
         $sql .= "  ".$wh."
                 ORDER BY $sidx $sord
                 LIMIT $start , $limit";

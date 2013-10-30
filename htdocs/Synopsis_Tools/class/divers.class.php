@@ -168,7 +168,7 @@ class synopsisHook {
                 }
                 break;
             case 'affaire': {
-//                    require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/Affaire.class.php");
+//                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Affaire/Affaire.class.php");
 //                    $obj = new Affaire($db);
                 }
                 break;

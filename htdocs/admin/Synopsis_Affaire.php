@@ -16,15 +16,15 @@
  */
 
 /**
-        \file       htdocs/admin/Babel_Affaire.php
+        \file       htdocs/admin/Synopsis_Affaire.php
         \ingroup    propale
         \brief      Page d'administration/configuration du module Affaire
         \version    $Id: propale.php,v 1.71 2008/07/05 14:20:05 eldy Exp $
 */
 
-require("./pre.inc.php");
+require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 
 $langs->load("admin");
 $langs->load("bills");

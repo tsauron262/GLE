@@ -18,7 +18,7 @@
   */
     require_once('pre.inc.php');
     require_once('fct_affaire.php');
-    require_once(DOL_DOCUMENT_ROOT.'/Babel_Affaire/Affaire.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Affaire/Affaire.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/expedition/class/expedition.class.php');
@@ -301,9 +301,9 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
 
     $contactstatic=new Contact($db);
 
-    $requete =" SELECT * FROM Babel_Affaire_Element WHERE affaire_refid =".$affaireid;
+    $requete =" SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
     $sql=$db->query($requete);
-    $arr['affaire']['SQL']='Babel_Affaire';
+    $arr['affaire']['SQL']='Synopsis_Affaire';
     $arr['affaire']['OBJ']='Affaire';
     $arr['affaire']['RIGHT']='affaire';
 

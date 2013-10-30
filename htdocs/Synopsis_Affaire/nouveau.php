@@ -48,7 +48,7 @@ $js .= '</script>';
 $msg = "";
 if ($_REQUEST['action'] == 'nouveau')
 {
-    require_once(DOL_DOCUMENT_ROOT.'/Babel_Affaire/Affaire.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Affaire/Affaire.class.php');
     $affaire = new Affaire($db);
     $ref = $affaire->getNextNumRef();
     $affaire->ref= $ref;
@@ -86,7 +86,7 @@ print "    <td class='ui-widget-content'><input type='text' name='nom' id='nom'>
 print "<tr><th class='ui-widget-header ui-state-default'>Ref.";
 print "    <td class='ui-widget-content'>(PROV-";
 
-require_once(DOL_DOCUMENT_ROOT.'/Babel_Affaire/Affaire.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Affaire/Affaire.class.php');
 $affaire = new Affaire($db);
 print $affaire->getNextNumRef();
 print ")";

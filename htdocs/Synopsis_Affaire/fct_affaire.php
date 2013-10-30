@@ -60,45 +60,45 @@ function affaire_prepare_head($affaire)
     $h = 0;
     $head = array();
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/fiche.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("Fiche");
     $head[$h][2] = 'index';
     $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/element.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/element.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("R&eacute;f&eacute;rents");
     $head[$h][2] = 'element';
     $h++;
     if ($affaire->statut < 2)
     {
-        $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/ajoutElements.php?id='.$affaire->id;
+        $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/ajoutElements.php?id='.$affaire->id;
         $head[$h][1] = $langs->trans("Ajout");
         $head[$h][2] = 'Ajout';
         $h++;
     }
 
-//    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/stats.php?id='.$affaire->id;
+//    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/stats.php?id='.$affaire->id;
 //    $head[$h][1] = $langs->trans("Stats");
 //    $head[$h][2] = 'Stats';
 //    $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/PN.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/PN.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("Fiche PN");
     $head[$h][2] = 'PN';
     $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/contact.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/contact.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("Contacts");
     $head[$h][2] = 'Contacts';
     $h++;
 
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/categorie.php?typeid=3&id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/categorie.php?typeid=3&id='.$affaire->id;
     $head[$h][1] = $langs->trans("Cat&eacute;gories");
     $head[$h][2] = 'Categorie';
     $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/relation.php?typeid=3&id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/relation.php?typeid=3&id='.$affaire->id;
     $head[$h][1] = $langs->trans("Relation");
     $head[$h][2] = 'Relation';
     $h++;
@@ -109,7 +109,7 @@ function affaire_prepare_head($affaire)
     $head[$h][2] = 'Calendrier';
     $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/Babel_Affaire/document.php?id='.$affaire->id;
+    $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Affaire/document.php?id='.$affaire->id;
     $head[$h][1] = $langs->trans("Documents");
     $head[$h][2] = 'document';
     $h++;

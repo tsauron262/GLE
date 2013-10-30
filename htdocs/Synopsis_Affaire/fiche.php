@@ -78,7 +78,7 @@ print_fiche_titre($langs->trans("Espace affaire"));
 
 if ($user->rights->affaire->valider && $_REQUEST['action']=="valid")
 {
-    $requete = "UPDATE Babel_Affaire SET statut = 1 WHERE id =".$affaireid;
+    $requete = "UPDATE Synopsis_Affaire SET statut = 1 WHERE id =".$affaireid;
     $sql=$db->query($requete);
     if (!$sql)
     {
@@ -87,7 +87,7 @@ if ($user->rights->affaire->valider && $_REQUEST['action']=="valid")
 }
 if ($user->rights->affaire->creer && $_REQUEST['action']=="cloture")
 {
-    $requete = "UPDATE Babel_Affaire SET statut = 4 WHERE id =".$affaireid;
+    $requete = "UPDATE Synopsis_Affaire SET statut = 4 WHERE id =".$affaireid;
     $sql=$db->query($requete);
     if (!$sql)
     {
@@ -100,7 +100,7 @@ if ($_REQUEST['action']=='modify')
 {
     $nom = preg_replace('/\'/','\\\'',$_REQUEST['nom']);
     $description = preg_replace('/\'/','\\\'',$_REQUEST['description']);
-    $requete = "UPDATE Babel_Affaire SET nom = '".$nom."', description='".$description."' WHERE id = ".$_REQUEST['id'];
+    $requete = "UPDATE Synopsis_Affaire SET nom = '".$nom."', description='".$description."' WHERE id = ".$_REQUEST['id'];
     $sql = $db->query($requete);
     if ($sql)
     {

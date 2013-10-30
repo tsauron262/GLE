@@ -23,7 +23,7 @@
   {
     //On recuepre le type et le eid
     $requete = "SELECT *
-                  FROM Babel_Affaire_Element
+                  FROM Synopsis_Affaire_Element
                  WHERE id = ".$id;
     $sql = $db->query($requete);
     $return = "";
@@ -65,7 +65,7 @@
 
     }
 
-     $requete = "DELETE FROM Babel_Affaire_Element
+     $requete = "DELETE FROM Synopsis_Affaire_Element
                        WHERE id = ".$id;
      $sql = $db->query($requete);
      if ($sql){

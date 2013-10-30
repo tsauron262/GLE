@@ -26,7 +26,7 @@
     $affaireId = $_REQUEST['id'];
 
     $xml = "<ajax-response>";
-    $requete = "INSERT INTO `Babel_Affaire_Element`
+    $requete = "INSERT INTO `Synopsis_Affaire_Element`
                             (`type`,`element_id`,`datea`,`fk_author`,`affaire_refid`)
                      VALUES
                             ('".$gid."', ".$eid.", now(), ".$user->id.", ".$affaireId.")";
@@ -792,7 +792,7 @@
     function insertDb($gid,$eid)
     {
         global $user, $affaireId,$db;
-        $requete = "INSERT INTO `Babel_Affaire_Element`
+        $requete = "INSERT INTO `Synopsis_Affaire_Element`
                                 (`type`,`element_id`,`datea`,`fk_author`,`affaire_refid`)
                          VALUES
                                 ('".$gid."', ".$eid.", now(), ".$user->id.", ".$affaireId.")";

@@ -98,7 +98,7 @@ switch ($type) {
             if (!$user->rights->affaire->lire)
                 accessforbidden();
             if ($user->societe_id > 0 && $id > 0) {
-                require_once(DOL_DOCUMENT_ROOT . "/Babel_Affaire/Affaire.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Affaire/Affaire.class.php");
                 $obj = new Affaire($db);
                 $obj->fetch((int) $id);
                 if ($user->societe_id != $obj->socid) {

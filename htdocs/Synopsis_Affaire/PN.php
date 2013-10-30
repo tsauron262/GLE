@@ -79,7 +79,7 @@ EOF;
     print '<ul>';
     print '    <li><a href="#fragment-1"><span>Vente</span></a></li>';
     print '    <li><a href="#fragment-2"><span>Achat</span></a></li>';
-    $requete = "SELECT * FROM Babel_Affaire_Element WHERE type='projet' AND affaire_refid=".$affaireid;
+    $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE type='projet' AND affaire_refid=".$affaireid;
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0)
     {
@@ -107,7 +107,7 @@ EOF;
         print '<div id="fragment-2a">';
         print "<table width=90% cellpadding=10>";
         print "<thead><tr><th width=28% class='titre' style='color: white;'>Titre</th><th width=18% class='titre' style='color: white;'>Co&ucirc;t Mat.<th width=18% class='titre' style='color: white;'>Co&ucirc;t Mat. Effectif<th width=18% class='titre' style='color: white;'>Co&ucirc;t RH<th width=18% class='titre' style='color: white;'>Co&ucirc;t RH Effectif</thead><tbody>";
-        $requete = "SELECT * FROM Babel_Affaire_Element WHERE type='projet' AND affaire_refid=".$affaireid;
+        $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE type='projet' AND affaire_refid=".$affaireid;
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0)
         {
@@ -207,7 +207,7 @@ EOF;
     print "</tr><tbody>";
     $requete = " SELECT *
                    FROM ".MAIN_DB_PREFIX."propal
-                  WHERE rowid in (SELECT element_id FROM Babel_Affaire_Element WHERE type='propale' AND affaire_refid = ".$affaireid.")
+                  WHERE rowid in (SELECT element_id FROM Synopsis_Affaire_Element WHERE type='propale' AND affaire_refid = ".$affaireid.")
                ORDER BY datep DESC";
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql))
@@ -331,7 +331,7 @@ EOF;
     //epart command
     $requete = "SELECT rowid, fk_soc, unix_timestamp(date_commande) as date_commandeU
                    FROM ".MAIN_DB_PREFIX."commande
-                  WHERE rowid in (SELECT element_id FROM Babel_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaireid.")
+                  WHERE rowid in (SELECT element_id FROM Synopsis_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaireid.")
                ORDER BY date_commande DESC";
     $sql= $db->query($requete);
     if ($db->num_rows($sql) > 0)
@@ -381,7 +381,7 @@ EOF;
     }
     $requete = "SELECT rowid, fk_soc, unix_timestamp(datef) as datefU
                    FROM ".MAIN_DB_PREFIX."facture
-                  WHERE rowid in (SELECT element_id FROM Babel_Affaire_Element WHERE type='facture' AND affaire_refid = ".$affaireid.")
+                  WHERE rowid in (SELECT element_id FROM Synopsis_Affaire_Element WHERE type='facture' AND affaire_refid = ".$affaireid.")
                ORDER BY datef DESC";
     $sql= $db->query($requete);
     if ($db->num_rows($sql) > 0)
@@ -472,7 +472,7 @@ EOF;
               LEFT JOIN Babel_li_fourn_co_fa ON Babel_li_fourn_co_fa.fk_commande=".MAIN_DB_PREFIX."commande_fournisseur.rowid
               LEFT JOIN ".MAIN_DB_PREFIX."facture_fourn ON Babel_li_fourn_co_fa.fk_facture = ".MAIN_DB_PREFIX."facture_fourn.rowid
                   WHERE ".MAIN_DB_PREFIX."commande_fournisseur.rowid in (SELECT element_id
-                                    FROM Babel_Affaire_Element
+                                    FROM Synopsis_Affaire_Element
                                    WHERE type='commande fournisseur'
                                      AND affaire_refid = ".$affaireid.") ";
     $sql = $db->query($requete);
@@ -532,12 +532,12 @@ EOF;
     $requete = " SELECT *
                    FROM ".MAIN_DB_PREFIX."facture_fourn
                   WHERE ".MAIN_DB_PREFIX."facture_fourn.rowid in (SELECT element_id
-                                    FROM Babel_Affaire_Element
+                                    FROM Synopsis_Affaire_Element
                                    WHERE type='facture fournisseur'
                                      AND affaire_refid = ".$affaireid.")
                     AND ".MAIN_DB_PREFIX."facture_fourn.rowid not in (SELECT fk_facture
                                                           FROM Babel_li_fourn_co_fa
-                                                         WHERE Babel_li_fourn_co_fa.fk_commande not in( SELECT rowid FROM Babel_Affaire_Element WHERE affaire_refid = ".$affaireid." AND type='commande fournisseur'))";
+                                                         WHERE Babel_li_fourn_co_fa.fk_commande not in( SELECT rowid FROM Synopsis_Affaire_Element WHERE affaire_refid = ".$affaireid." AND type='commande fournisseur'))";
 
     $sql = $db->query($requete);
     if($db->num_rows($sql)>0)

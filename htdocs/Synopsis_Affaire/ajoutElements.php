@@ -324,7 +324,7 @@ if ($id > 0 )
 
   print "<table width=100% >";
 
-  $requete = "SELECT * FROM Babel_Affaire_Element WHERE affaire_refid = ".$id." ORDER BY type";
+  $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid = ".$id." ORDER BY type";
   $sql = $db->query($requete);
 
   require_once(DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php');
@@ -528,7 +528,7 @@ if ($id > 0 )
    llxHeader($js,'Affaires - Ajout',"",1);
 
 
-    $requete = "SELECT * FROM Babel_Affaire";
+    $requete = "SELECT * FROM Synopsis_Affaire";
     $sql = $db->query($requete);
     print "<table>";
     while ($res = $db->fetch_object($sql))

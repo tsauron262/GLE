@@ -38,11 +38,11 @@
 */
 
 require('./pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/fct_affaire.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/fct_affaire.php");
 
 
 $langs->load('compta');
@@ -237,7 +237,7 @@ if ($affaireid > 0)
 
         // Affiche formulaire upload
         $formfile=new FormFile($db);
-        $formfile->form_attach_new_file(DOL_URL_ROOT.'/Babel_Affaire/document.php?id='.$affaire->id);
+        $formfile->form_attach_new_file(DOL_URL_ROOT.'/Synopsis_Affaire/document.php?id='.$affaire->id);
 
 
         // List of document
@@ -252,7 +252,7 @@ if ($affaireid > 0)
         print '</form>';
 
         //List de tous les documents
-        $requete = "SELECT * FROM Babel_Affaire_Element WHERE affaire_refid =".$affaireid;
+        $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
         //    print $requete;
         $sql=$db->query($requete);
         $filearray1=array();

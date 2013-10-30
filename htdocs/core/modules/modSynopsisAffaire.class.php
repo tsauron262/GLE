@@ -29,7 +29,7 @@
   */
 /*
  *
- * $Id: modBabelAffaire.class.php,v 1.5 2008/01/13 22:48:28 eldy Exp $
+ * $Id: modSynopsisAffaire.class.php,v 1.5 2008/01/13 22:48:28 eldy Exp $
  */
 
 /**
@@ -38,7 +38,7 @@
 */
 
 /**
-        \file       htdocs/core/modules/modBabelAffaire.class.php
+        \file       htdocs/core/modules/modSynopsisAffaire.class.php
         \ingroup    adherent
         \brief      Fichier de description et activation du module SSLCert
 */
@@ -51,23 +51,23 @@ include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
         \brief      Classe de description et activation du module Adherent
 */
 
-class modBabelAffaire extends DolibarrModules
+class modSynopsisAffaire extends DolibarrModules
 {
 
     /**
      *   \brief      Constructeur. Definit les noms, constantes et boites
      *   \param      DB      handler d'acces base
      */
-    function modBabelAffaire($DB)
+    function modSynopsisAffaire($DB)
     {
         $this->db = $DB;
         $this->numero = 226200 ;
 
-        $this->family = "OldGleModule";
+        $this->family = "Synopsis";
         $this->name = "Affaire";
         $this->description = "Gestion par affaire";
         $this->version = '0.1';            // 'development' or 'experimental' or 'dolibarr' or version
-        $this->const_name = 'MAIN_MODULE_BABELAFFAIRE';
+        $this->const_name = 'MAIN_MODULE_SYNOPSISAFFAIRE';
         $this->special = 0;
         $this->picto='affaire';
 
@@ -77,7 +77,7 @@ class modBabelAffaire extends DolibarrModules
 
         // Config pages
         //-------------
-        $this->config_page_url = array("Babel_Affaire.php");
+        $this->config_page_url = array("Synopsis_Affaire.php");
 
         // Dependances
         //------------
@@ -151,7 +151,7 @@ class modBabelAffaire extends DolibarrModules
                             'titre'=>'Affaire',
                             'mainmenu'=>'Affaire',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
-                            'url'=>'/Babel_Affaire/index.php',
+                            'url'=>'/Synopsis_Affaire/index.php',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>20,
                             'perms'=>'$user->rights->affaire->lire',
@@ -164,7 +164,7 @@ class modBabelAffaire extends DolibarrModules
                             'type'=>'left',
                             'titre'=>'Affaire',
                             'mainmenu'=>'Affaire',
-                            'url'=>'/Babel_Affaire/index.php',
+                            'url'=>'/Synopsis_Affaire/index.php',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>1,
                             'perms'=>'$user->rights->affaire->lire',

@@ -60,6 +60,7 @@
         $graph->image('cmapx','dot');
        $graph->saveParsedGraph('/tmp/log3.log');
     }
+    echo "ee";
 }
 
 function drawGraph($affaire)
@@ -72,7 +73,7 @@ function drawGraph($affaire)
          $graph->addNode(
            $affaire->nom,
            array(
-             'URL'   => DOL_URL_ROOT.'/Babel_Affaire/fiche.php?id='.$affaire->id,
+             'URL'   => DOL_URL_ROOT.'/Synopsis_Affaire/fiche.php?id='.$affaire->id,
              'label' => ''.$affaire->nom,
              'shape' => 'folder',
              'fontsize' => '16',
@@ -86,7 +87,7 @@ function drawGraph($affaire)
                     FROM ".MAIN_DB_PREFIX."commande,
                          ".MAIN_DB_PREFIX."co_pr
                    WHERE ".MAIN_DB_PREFIX."co_pr.fk_commande = ".MAIN_DB_PREFIX."commande.rowid
-                     AND ".MAIN_DB_PREFIX."commande.rowid in (SELECT element_id FROM Babel_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaire->id.")";
+                     AND ".MAIN_DB_PREFIX."commande.rowid in (SELECT element_id FROM Synopsis_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaire->id.")";
       $sql = $db->query($requete);
       while ($res=$db->fetch_object($sql))
       {

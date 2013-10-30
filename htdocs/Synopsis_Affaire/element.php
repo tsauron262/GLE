@@ -23,7 +23,7 @@
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
 require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Babel_Affaire/Affaire.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT."/expedition/class/expedition.class.php");
 require_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.facture.class.php");

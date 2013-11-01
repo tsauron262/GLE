@@ -17,7 +17,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -28,7 +30,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -39,7 +42,7 @@
 */
 
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/categories/categorie.class.php");
+require_once(DOL_DOCUMENT_ROOT."/categories/class/categorie.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/Affaire.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Affaire/fct_affaire.php");
 
@@ -188,7 +191,7 @@ function formCategory($db,$object,$type,$typeid)
 
 
     $c = new Categorie($db);
-    $cats = $c->containing($object->id,$type,$typeid);
+    $cats = $c->containing($object->id/*,$type*/,$typeid);
 
     if (sizeof($cats) > 0)
     {

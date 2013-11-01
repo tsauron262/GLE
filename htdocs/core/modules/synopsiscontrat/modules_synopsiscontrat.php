@@ -33,7 +33,7 @@
  */
 
 /**
-        \file       htdocs/includes/modules/deplacement/modules_deplacement.php
+        \file       htdocs/core/modules/deplacement/modules_deplacement.php
         \ingroup    deplacement
         \brief      Fichier contenant la classe mere de generation des deplacements en PDF
                     et la classe mere de numerotation des deplacements

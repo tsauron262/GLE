@@ -1,6 +1,6 @@
 <?php
 
-function printHead($type, $id, $js = ''){
+function printHead($type, $id, $js = '') {
     global $db, $langs;
     switch ($type) {
         case "Commande": {
@@ -173,7 +173,7 @@ function printHead($type, $id, $js = ''){
             break;
         case "Livraison": {
 
-                require_once(DOL_DOCUMENT_ROOT . "/livraison/livraison.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/livraison/class/livraison.class.php");
                 require_once(DOL_DOCUMENT_ROOT . "/core/lib/sendings.lib.php");
                 $obj = new Livraison($db);
                 $obj->fetch($id);
@@ -247,32 +247,26 @@ function printHead($type, $id, $js = ''){
             }
             break;
     }
-    
+
     llxHeader($js, $langs->trans('Process de la ' . $nomType));
 
     dol_fiche_head($head, 'process', $langs->trans($titreType));
 }
 
-
-
-
-
-
-function getNomSoc($socId){
+function getNomSoc($socId) {
     global $db;
     $soc = new societe($db);
     $soc->fetch($socId);
     return $soc->getNomUrl(1);
 }
-function getNomProjet($projetId){
+
+function getNomProjet($projetId) {
     global $db;
-include_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+    include_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
     $soc = new project($db);
     $soc->fetch($projetId);
     return $soc->getNomUrl(1);
 }
-
-
 
 class process extends CommonObject {
 
@@ -887,7 +881,8 @@ class processDet extends process {
                      WHERE id = " . $this->id;
         $sql = $this->db->query($requete);
         if ($sql)
-            return 1; else
+            return 1;
+        else
             return -1;
     }
 
@@ -1331,8 +1326,7 @@ class processDetValue extends processDet {
                 $this->valeurByModel[$res->model_refid] = $res;
                 $this->valeurToModel[$res->valeur] = $res->model_refid;
             }
-        }
-        else
+        } else
             die("erreur 456789412548");
     }
 
@@ -1419,7 +1413,6 @@ class process_element_type extends process {
     }
 
 }
-
 
 class formulaire extends process {
 
@@ -2018,6 +2011,10 @@ class formulaireSource extends formulaire {
         $this->db = $DB;
     }
 
+    public function getValuePlus($id) {
+        return $this->getValue($id);
+    }
+
     public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
@@ -2177,9 +2174,9 @@ class listform extends formulaireSource {
         $label = $langs->trans("Liste") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, false,false, 'ABSMIDDLE') . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, 'ABSMIDDLE') . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, false,false, false, true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, false, true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;
@@ -2346,7 +2343,7 @@ class globalvar extends formulaireSource {
                 $this->label = $res->label;
                 $this->description = $res->description;
                 $eval = $this->globalvar;
-                eval('$eval = '.$eval.";");
+                eval('$eval = ' . $eval . ";");
                 $this->glabalVarEval = $eval;
             }
         } else {
@@ -2372,6 +2369,103 @@ class globalvar extends formulaireSource {
             $this->valuesArr[$this->glabalVarEval] = $this->label;
             return ($this->valuesArr);
         }
+    }
+
+}
+
+class lien extends formulaireSource {
+
+    public $valuesArr = array();
+    public $socid = 0;
+
+    function lien($db) {
+        $this->db = $db;
+    }
+
+    function fetch($id) {
+        $this->id = $id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_lien WHERE rowid = " . $this->id;
+        $sql = $this->db->query($requete);
+        $result = $this->db->fetch_object($sql);
+        $this->table = $result->table;
+        $this->nomElem = $result->nomElem;
+        $this->champId = $result->champId;
+        $this->champVueSelect = $result->champVueSelect;
+        $this->ordre = $result->ordre;
+        $this->sqlFiltreSoc = $result->sqlFiltreSoc;
+        $idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
+        $this->tabVal = array();
+        $tabResult = $this->getElement_Element($this->nomElem, "productCli", null, $idChrono);
+        foreach ($tabResult as $val)
+            $this->tabVal[] = $val['s'];
+    }
+
+    function getElement_Element($a1, $a2, $a3, $a4) {
+        if ($this->ordre)
+            return getElementElement($a1, $a2, $a3, $a4);
+        else
+            $result = getElementElement($a2, $a1, $a4, $a3);
+        $tab = array();
+        foreach ($result as $ligne) {
+            $tab[] = array('s' => $ligne['d'], 'd' => $ligne['s']);
+        }
+        return $tab;
+    }
+
+    function getValuePlus($id) {
+        if ($this->id == 1) {
+            if (count($this->tabVal) > 0) {
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
+//            echo "Produit sous contrat<br/<br/>";
+                foreach ($this->tabVal as $result) {
+                    $contratdet = new Synopsis_ContratLigne($this->db);
+                    $contratdet->fetch($result);
+                    $html = "<br/>";
+                    $color = "";
+//            die($contratdet->date_fin_validite."|".time());
+                    $dtStr = date("c", $contratdet->date_fin_validite);
+                    $dateF = new DateTime($dtStr);
+                    $dtStr = date("c", time());
+                    $dateActu = new DateTime();
+                    $interval = date_diff($dateF, $dateActu);
+//            die($interval->format('%R%a days'));
+                    if ($interval->format('%R%a') > 0)
+                        $color = "red";
+                    elseif ($interval->format('%R%a') > -30)
+                        $color = "orange";
+                    $html .= "<div style='background-color:" . $color . ";'>";
+                    if ($contratdet->fk_product > 0) {
+                        $product = new Product($this->db);
+                        $product->fetch($contratdet->fk_product);
+                        $html .= $product->getNomUrl(1) . " " . $product->description;
+                        $html .= "<br/>";
+                    }
+                    $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
+                    $html .= "<br/>";
+                    $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . date("d M Y", $contratdet->date_fin_validite);
+                    $html .= "<br/>";
+                    $html .= "</div>";
+                    $this->valuesArr[] = $html;
+                }
+            }
+        }
+        return $this->valuesArr;
+    }
+
+    function getValues() {
+        $sup = "";
+        if ($this->sqlFiltreSoc != "" && $this->socid > 0)
+            $sup .= " WHERE " . str_replace("[id]", $this->socid, $this->sqlFiltreSoc);
+        $sql = $this->db->query("SELECT " . $this->champId . " as id, " . $this->champVueSelect . " as nom FROM " . $this->table . $sup);
+        while ($result = $this->db->fetch_object($sql))
+            $this->valuesArr[$result->id] = $result->nom;
+    }
+
+    function getValue($id) {
+        $sql = $this->db->query("SELECT " . $this->champId . " as id, " . $this->champVueSelect . " as nom FROM " . $this->table . " WHERE " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")");
+        if ($sql)
+            while ($result = $this->db->fetch_object($sql))
+                $this->valuesArr[$result->id] = $result->nom;
     }
 
 }
@@ -2419,6 +2513,14 @@ class requete extends formulaireSource {
                 $this->requete = str_replace("llx_", MAIN_DB_PREFIX, $res->requete);
                 $this->postTraitement = $res->postTraitement;
                 $this->requeteValue = str_replace("llx_", MAIN_DB_PREFIX, $res->requeteValue);
+                if ($this->requeteValue . "x" == "x") {
+                    $this->requeteValue = $this->requete;
+                    if (stripos($this->requeteValue, "where"))
+                        $this->requeteValue .= " AND ";
+                    else
+                        $this->requeteValue .= " WHERE ";
+                    $this->requeteValue .= "[[indexField]]";
+                }
                 $this->postTraitementArr = unserialize($res->postTraitement);
                 $this->OptGroup = $res->OptGroup;
                 $this->OptGroupLabel = $res->OptGroupLabel;
@@ -2443,16 +2545,16 @@ class requete extends formulaireSource {
         $conf->global->DOL_URL_ROOT = DOL_URL_ROOT;
         if ($this->id > 0) {
             $requete = $this->requeteValue;
-            if($requete."x" == "x"){
+            if ($requete . "x" == "x") {
                 $requete = $this->requete;
-                if(stripos($requete, "where"))
-                        $requete .= " AND ";
+                if (stripos($requete, "where"))
+                    $requete .= " AND ";
                 else
                     $requete .= " WHERE ";
                 $requete .= "[[indexField]]";
             }
             $requete = vsprintf($requete, $this->paramsArr);
-            
+
 //           if(preg_match('/ WHERE/'))
 
             if ($this->tableName . "x" != 'x')
@@ -2472,18 +2574,18 @@ class requete extends formulaireSource {
                     $index = $res->$indexField;
                     $arrTmp = array();
                     foreach ($this->showFieldsArr as $key => $val) {
-$result = $res->$val;
+                        $result = $res->$val;
                         if ($this->postTraitementArr[$val] . "x" != "x") {
                             $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
-                            
+
                             if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
                                 $arrTmpMatch = explode("(", $fctTmp);
                                 $fctTmp1 = $arrTmpMatch[0];
-                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]","",str_replace($fctTmp1."(", "", $fctTmp)."[SUPPR]"));
+                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]", "", str_replace($fctTmp1 . "(", "", $fctTmp) . "[SUPPR]"));
                                 $result = call_user_func_array($fctTmp1, $paramsArrTmp);
                             }
                         }
-                            $arrTmp[] = $result;
+                        $arrTmp[] = $result;
                     }
                     $arr[$index] = join(' ', $arrTmp);
                     $this->valuesArr[$index] = join(' ', $arrTmp);
@@ -2545,7 +2647,7 @@ $result = $res->$val;
                             if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
                                 $arrTmpMatch = explode("(", $fctTmp);
                                 $fctTmp1 = $arrTmpMatch[0];
-                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]","",str_replace($fctTmp1."(", "", $fctTmp)."[SUPPR]"));
+                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]", "", str_replace($fctTmp1 . "(", "", $fctTmp) . "[SUPPR]"));
                                 $result = call_user_func_array($fctTmp1, $paramsArrTmp);
                             }
                             $arrTmp[] = $result;
@@ -2682,9 +2784,9 @@ $result = $res->$val;
         $label = $langs->trans("Requ&ecirc;te") . ': ' . $this->label;
 
         if ($withpicto)
-            $result.=($lien . img_object($label, $picto, false,false, 'absmiddle') . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, false, 'absmiddle') . $lienfin);
         if ($withpicto && $option == 6)
-            $result.=($lien . img_object($label, $picto, false,fasle, false, true) . $lienfin);
+            $result.=($lien . img_object($label, $picto, false, fasle, false, true) . $lienfin);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
         $result.=$lien . $this->label . $lienfin;
@@ -3090,11 +3192,12 @@ class formulaireType extends formulaire {
 
 }
 
-function lien($url){
-    return "<a href='".DOL_URL_ROOT."/".$url."'>";
+function lien($url) {
+    return "<a href='" . DOL_URL_ROOT . "/" . $url . "'>";
 }
-function finLien($nom){
-    return $nom."</a>";
+
+function finLien($nom) {
+    return $nom . "</a>";
 }
 
 ?>

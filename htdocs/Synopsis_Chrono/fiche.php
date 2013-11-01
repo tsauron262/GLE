@@ -156,6 +156,11 @@ if ($action == 'modifier') {
             else
                 $dataArr[$arrTmp[1]] = addslashes($val);
         }
+        if (preg_match('/^ChronoLien-([0-9]*)$/', $key, $arrTmp)) {
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_lien WHERE rowid = " . $arrTmp[1];
+            $sql = $db->query($requete);
+            
+        }
     }
     $res1 = $chr->setDatas($chr->id, $dataArr);
 
@@ -381,8 +386,13 @@ if ($id > 0) {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
+                    $obj->socid = $chr->socid;
                     $obj->fetch($res->type_subvaleur);
                     $obj->getValues();
+                    if(isset($obj->tabVal[0])){
+                        $res->value = $obj->tabVal[0];
+                        $res->valueIsSelected = true;
+                    }
                     $extra_extraClass = "";
                     if ($obj->OptGroup . "x" != "x") {
                         $extra_extraClass = " double noSelDeco ";
@@ -434,6 +444,7 @@ EOF;
                         $html .= $res->value;
                     }
                     $remOpt = false;
+                    $html .= "<option value=''>S&eacute;lectionner</option>";
                     if ($obj->OptGroup . "x" != "x") {
                         $html = "<table><tr><td width=50%>" . $html;
                         foreach ($obj->valuesGroupArr as $key => $val) {
@@ -718,18 +729,18 @@ EOF;
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->fetch($res->type_subvaleur);
-                    $obj->getValue($res->value);
+                    $obj->getValuePlus($res->value);
                     $html = "";
                     foreach ($obj->valuesArr as $key => $val) {
-                        if ($res->valueIsSelected && $res->value == $key) {
+//                        if ($res->valueIsSelected && $res->value == $key) {
                             if ($obj->OptGroup . "x" != "x") {
                                 $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
-                                break;
+//                                break;
                             } else {
-                                $html = $val;
-                                break;
+                                $html .= $val."<br/>";
+//                                break;
                             }
-                        }
+//                        }
                     }
 
                     print $html;

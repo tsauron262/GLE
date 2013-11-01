@@ -114,7 +114,7 @@ switch ($action)
     {
 
         $sql = "SELECT count(*) as cnt";
-        $sql .= " FROM Synopsis_Affaire  WHERE 1 =1 ";
+        $sql .= " FROM llx_Synopsis_Affaire  WHERE 1 =1 ";
 
         $sql .= "  ".$wh;
         $result = $db->query($sql);
@@ -133,7 +133,7 @@ switch ($action)
 
 
         $sql = "SELECT *";
-        $sql .= " FROM Synopsis_Affaire WHERE 1 =1 ";
+        $sql .= " FROM llx_Synopsis_Affaire WHERE 1 =1 ";
         $sql .= "  ".$wh."
                 ORDER BY $sidx $sord
                 LIMIT $start , $limit";

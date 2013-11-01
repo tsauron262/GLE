@@ -24,7 +24,7 @@ $langs->load("sendings");
 
 require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
-require_once(DOL_DOCUMENT_ROOT."/livraison/livraison.class.php");
+require_once(DOL_DOCUMENT_ROOT."/livraison/class/livraison.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_GSM/gsm.class.php");
 if ($user->rights->BabelGSM->BabelGSM_com->AfficheLivraison !=1)
 {

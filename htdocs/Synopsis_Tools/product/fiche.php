@@ -261,7 +261,7 @@ if ($_POST["action"] == 'update' &&
                     //Ajoute les parametre extra
                     //1 detecte si y'a des parametres extra
                     require_once(DOL_DOCUMENT_ROOT . '/categories/template.class.php');
-                    require_once(DOL_DOCUMENT_ROOT . '/categories/categorie.class.php');
+                    require_once(DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php');
 
                     $c = new Categorie($db);
                     $cats = $c->containing($product->id, "product", 0);
@@ -1991,7 +1991,7 @@ EOF;
             if (USE_CAT) {
                 //Template
 //            require_once(DOL_DOCUMENT_ROOT . '/categories/template.class.php');
-                require_once(DOL_DOCUMENT_ROOT . '/categories/categorie.class.php');
+                require_once(DOL_DOCUMENT_ROOT . '/categories/class/categorie.class.php');
 
                 //Get Categories
                 $c = new Categorie($db);

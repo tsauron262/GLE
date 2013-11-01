@@ -30,7 +30,7 @@
  */
 
 /**
-        \file       htdocs/includes/modules/propale/modules_propale.php
+        \file       htdocs/core/modules/propale/modules_propale.php
         \ingroup    propaleGA
         \brief      Fichier contenant la classe mere de generation des propalesGA en PDF
                     et la classe mere de numerotation des propales

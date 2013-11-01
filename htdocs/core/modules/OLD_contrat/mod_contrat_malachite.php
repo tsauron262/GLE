@@ -29,7 +29,7 @@
  */
 
 /**
- \file       htdocs/includes/modules/contrat/mod_contrat_malachite.php
+ \file       htdocs/core/modules/contrat/mod_contrat_malachite.php
  \ingroup    commande
  \brief      Fichier contenant la classe du modele de numerotation de reference de contrat Malachite
  \version    $Id: mod_commande_malachite.php,v 1.9 2010 Jean-Marc LE FEVRE Exp $

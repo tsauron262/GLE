@@ -37,14 +37,14 @@ if ($type == 'Affaire' && $id > 0)
                        babel_affaire_template_value_view.id,
                        babel_affaire_template_value_view.description,
                        babel_affaire_template_value_view.affaire_id,
-                       Synopsis_Affaire.ref
+                       llx_Synopsis_Affaire.ref
                   FROM babel_affaire_template_value_view,
-                       Synopsis_Affaire
+                       llx_Synopsis_Affaire
                  WHERE type_affaire = 'date'
                    AND value_affaire <> ''
                    AND UNIX_TIMESTAMP(date_format(str_to_date(value_affaire, '%d/%m/%Y %H:%i'), '%Y-%m-%d %H:%i')) BETWEEN ".$start." AND ".$end."
-                   AND Synopsis_Affaire.id = babel_affaire_template_value_view.affaire_id";
-    if($id > 0) $requete .= " AND Synopsis_Affaire.id = ".$id;
+                   AND llx_Synopsis_Affaire.id = babel_affaire_template_value_view.affaire_id";
+    if($id > 0) $requete .= " AND llx_Synopsis_Affaire.id = ".$id;
     $requete .= " ORDER BY affaire_id";
 //print $requete;
     $sql = $db->query($requete);
@@ -66,7 +66,7 @@ if ($type == 'Affaire' && $id > 0)
         if($iter > 10) $iter = 0;
         $remAffaire = $res->affaire_id;
     }
-        $requete1 = "SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid = ".$id;
+        $requete1 = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid = ".$id;
         $sql1 = $db->query($requete1);
         while($res1=$db->fetch_object($sql1))
         {
@@ -610,14 +610,14 @@ if ($type == 'Affaire' && $id > 0)
                        babel_affaire_template_value_view.id,
                        babel_affaire_template_value_view.description,
                        babel_affaire_template_value_view.affaire_id,
-                       Synopsis_Affaire.ref
+                       llx_Synopsis_Affaire.ref
                   FROM babel_affaire_template_value_view,
-                       Synopsis_Affaire
+                       llx_Synopsis_Affaire
                  WHERE type_affaire = 'date'
                    AND value_affaire <> ''
                    AND UNIX_TIMESTAMP(date_format(str_to_date(value_affaire, '%d/%m/%Y %H:%i'), '%Y-%m-%d %H:%i')) BETWEEN ".$start." AND ".$end."
-                   AND Synopsis_Affaire.id = babel_affaire_template_value_view.affaire_id";
-    if($id > 0) $requete .= " AND Synopsis_Affaire.id = ".$id;
+                   AND llx_Synopsis_Affaire.id = babel_affaire_template_value_view.affaire_id";
+    if($id > 0) $requete .= " AND llx_Synopsis_Affaire.id = ".$id;
     $requete .= " ORDER BY affaire_id";
 //print $requete;
     $sql = $db->query($requete);

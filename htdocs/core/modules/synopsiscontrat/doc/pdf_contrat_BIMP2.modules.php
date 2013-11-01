@@ -7,7 +7,7 @@
  */
 
 /**
-  \file       htdocs/includes/modules/contrat/pdf_contrat_babel.modules.php
+  \file       htdocs/core/modules/contrat/pdf_contrat_babel.modules.php
   \ingroup    contrat
   \brief      Fichier de la classe permettant de generer les contrats au modele BIMP
   \author     Christian CONSTANTIN-BERTIN

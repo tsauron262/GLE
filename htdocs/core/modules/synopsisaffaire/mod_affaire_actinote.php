@@ -16,7 +16,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Babel-Services
   *
   * Author: Jean-Marc LE FEVRE <jm.lefevre@babel-services.com>
@@ -27,7 +29,8 @@
   *
   * Infos on http://www.babel-services.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -122,7 +125,7 @@ class mod_affaire_actinote extends ModeleNumRefAffaire
             return 0;
         }
 
-        $numFinal=get_next_value($db,$mask,'affaire','ref','',$objsoc->code_client,$propal->date);
+        $numFinal=get_next_value($db,$mask,'Synopsis_Affaire','ref','',$objsoc->code_client,$propal->date);
 
         return  $numFinal;
     }

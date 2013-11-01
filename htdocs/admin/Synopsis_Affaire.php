@@ -109,7 +109,7 @@ if ($handle)
             print '<td align="center">';
             if ($conf->global->AFFAIRE_ADDON == "$file")
             {
-                print img_tick($langs->trans("Activated"));
+                    print img_picto($langs->trans("Activated"),'switch_on');
             }
             else
             {

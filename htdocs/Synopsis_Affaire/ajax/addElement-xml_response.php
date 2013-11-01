@@ -26,7 +26,7 @@
     $affaireId = $_REQUEST['id'];
 
     $xml = "<ajax-response>";
-    $requete = "INSERT INTO `Synopsis_Affaire_Element`
+    $requete = "INSERT INTO `llx_Synopsis_Affaire_Element`
                             (`type`,`element_id`,`datea`,`fk_author`,`affaire_refid`)
                      VALUES
                             ('".$gid."', ".$eid.", now(), ".$user->id.", ".$affaireId.")";
@@ -323,7 +323,7 @@
                             $filter[$type][$res->fk_propale]=1;
                         }
                     }
-                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_commande = ".$prop->id;
+                    $requete = "SELECT fk_target as fk_facture FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'commande' AND targettype = 'facture' AND fk_source = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -421,7 +421,7 @@
             case 'livraison':
             {
                 //Commande
-                require_once(DOL_DOCUMENT_ROOT.'/livraison/livraison.class.php');
+                require_once(DOL_DOCUMENT_ROOT.'/livraison/class/livraison.class.php');
                 if ($eid > 0)
                 {
                     $prop = new Livraison($db);
@@ -492,7 +492,7 @@
                         $xmlArr[$gid] .= '</element>';
                     insertDb($gid,$eid);
                     //$xml .= "</group>";
-                    $requete = "SELECT * FROM Babel_li_fourn_co_fa WHERE fk_commande = ".$prop->id;
+                    $requete = "SELECT fk_target as fk_facture FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'order_supplier' AND targettype = 'invoice_supplier' AND fk_source = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -523,7 +523,7 @@
                         $xmlArr[$gid] .= '</element>';
                     insertDb($gid,$eid);
                     //$xml .= "</group>";
-                    $requete = "SELECT * FROM Babel_li_fourn_co_fa WHERE fk_facture = ".$prop->id;
+                    $requete = "SELECT fk_source as fk_commande FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'order_supplier' AND targettype = 'invoice_supplier' AND fk_target = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -556,7 +556,7 @@
                         $xmlArr[$gid] .= '</element>';
                     insertDb($gid,$eid);
                     //$xml .= "</group>";
-                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_fa WHERE fk_facture = ".$prop->id;
+                    $requete = "SELECT fk_source as fk_commande FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'commande' AND targettype = 'facture' AND fk_target = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -792,7 +792,7 @@
     function insertDb($gid,$eid)
     {
         global $user, $affaireId,$db;
-        $requete = "INSERT INTO `Synopsis_Affaire_Element`
+        $requete = "INSERT INTO `llx_Synopsis_Affaire_Element`
                                 (`type`,`element_id`,`datea`,`fk_author`,`affaire_refid`)
                          VALUES
                                 ('".$gid."', ".$eid.", now(), ".$user->id.", ".$affaireId.")";

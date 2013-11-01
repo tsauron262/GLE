@@ -1574,7 +1574,7 @@ class modSynopsisProcess extends DolibarrModules {
 (13, \'Contact\', \'Contact\', 13, \'/contact/fiche.php\', \'id\', \'/contact.class.php\'),
 (14, \'Demande intervention\', \'demandeInterv\', 14, \'/Synopsis_DemandeInterv/fiche.php\', \'id\', \'/Synopsis_DemandeInterv/demandeInterv.class.php\'),
 (15, \'Fiche intervention\', \'Fichinter\', 15, \'/fichinter/fiche.php\', \'id\', \'/fichinter/class/fichinter.class.php\'),
-(16, \'Livraison\', \'Livraison\', 16, \'/livraison/fiche.php\', \'id\', \'/livraison/livraison.class.php\'),
+(16, \'Livraison\', \'Livraison\', 16, \'/livraison/fiche.php\', \'id\', \'/livraison/class/livraison.class.php\'),
 (17, \'Paiement\', \'Paiement\', 17, \'/compta/paiement/fiche.php\', \'id\', \'/paiement.class.php\'),
 (18, \'Paiement fournisseur\', \'PaiementFourn\', 18, \'/fourn/paiement/fiche.php\', \'id\', \'/fourn/facture/paiementfourn.class.php\'),
 (19, \'Product\', \'Product\', 19, \'/product/fiche.php\', \'id\', \'/product/class/product.class.php\'),

@@ -7,7 +7,7 @@
 class maj {
 
     private $maxLigne = 500;
-    private $maxTime = 100;
+    private $maxTime = 500;
     private $maxErreur = 5;
     private $erreur = 0;
     private $tabNonImport = array();
@@ -51,6 +51,7 @@ class maj {
     }
 
     public function startMAj($tab, $update = false) {
+        set_time_limit($this->maxTime + 20);
         if (!$update) {
             $this->netoyerTables($tab);
 
@@ -195,7 +196,7 @@ class maj {
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE rowid = " . $ligne['fk_societe'];
                     $result = $this->queryD($requete);
                     $ligneT = $this->dbD->fetch_array($result);
-                    if ($ligne['nom'] . "x" == "x" && $ligne['adress'] == $ligneT['adress'] && $ligne['cp'] == $ligneT['cp'] && $ligne['ville'] == $ligneT['ville'] && $ligne['fk_pays'] == $ligneT['fk_pays'] && (is_null($ligne['tel']) || $ligne['tel'] == $ligneT['tel']) && (is_null($ligne['fax']) || $ligne['fax'] == $ligneT['fax'])) {//L'adresse est la meme que celle de la societe
+                    if ($ligne['label'] . "x" == "x" && $ligne['adress'] == $ligneT['address'] && $ligne['cp'] == $ligneT['zip'] && $ligne['ville'] == $ligneT['town'] && $ligne['fk_pays'] == $ligneT['fk_pays'] && (is_null($ligne['tel']) || $ligne['tel'] == $ligneT['phone']) && (is_null($ligne['fax']) || $ligne['fax'] == $ligneT['fax'])) {//L'adresse est la meme que celle de la societe
 //                        die("ok");
                         $importOff = true;
                     }
@@ -205,8 +206,8 @@ class maj {
                 if ($tableDest == "llx_element_contact" && ($tableSrc == "llx_commande" || $tableSrc == "llx_expedition")) {
                     if ($cle == "rowid") {
                         $ok = false;
-                        if ($ligne['fk_delivery_address'] > 0) {
-                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_delivery_address'] . "'";
+                        if ($ligne['fk_adresse_livraison'] > 0) {
+                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_adresse_livraison'] . "'";
                             $result = $this->queryS($requete);
                             if ($this->dbS->num_rows($result) > 0) {
                                 $ligneT = $this->dbD->fetch_array($result);
@@ -215,7 +216,7 @@ class maj {
                                 $result = $this->queryD($requete);
                                 if ($this->dbD->num_rows($result) > 0) {
                                     $ligneT = $this->dbD->fetch_array($result);
-                                    $ligne['fk_delivery_address'] = $ligneT['rowid'];
+                                    $ligne['fk_adresse_livraison'] = $ligneT['rowid'];
                                     $ok = true;
                                 }
                             }
@@ -230,14 +231,11 @@ class maj {
 
                 if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX . "propal" && $val == "99")//On vire les statue 99 sur les propal
                     $val = "3";
-                if ((($cle == "fk_projet")
-                        || ($cle == "fk_user_author")
-                        || ($cle == "fk_user_valid")
+                if ((($cle == "fk_projet") || ($cle == "fk_user_author") || ($cle == "fk_user_valid")
                         ) && $val == "0")//On remplace 0 par null
                     $val = NULL;
                 if (((0)//pour bimp user 20 n'existe plus
-                        || ($cle == "fk_user_author")
-                        || ($cle == "fk_user_valid")
+                        || ($cle == "fk_user_author") || ($cle == "fk_user_valid")
                         ) && $val == "20")//On remplace 0 par null
                     $val = NULL;
                 if ($cle == "description" && $tableDest == MAIN_DB_PREFIX . "propaldet")//Merde dans la description surement en rapport avec commandegroupe

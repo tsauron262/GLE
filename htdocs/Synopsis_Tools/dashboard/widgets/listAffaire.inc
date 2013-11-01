@@ -25,7 +25,7 @@ function widget_listAffaire() {
 
     if (isset($conf->global->MAIN_MODULE_SYNOPSISAFFAIRE)) {
         $sql = "SELECT *";
-        $sql .= " FROM Synopsis_Affaire as f";
+        $sql .= " FROM llx_Synopsis_Affaire as f";
         $sql .= " ORDER BY f.date_creation DESC LIMIT 50";
         $resql = $db->query($sql);
         if ($resql) {

@@ -78,7 +78,7 @@ print_fiche_titre($langs->trans("Espace affaire"));
 
 if ($user->rights->affaire->valider && $_REQUEST['action']=="valid")
 {
-    $requete = "UPDATE Synopsis_Affaire SET statut = 1 WHERE id =".$affaireid;
+    $requete = "UPDATE llx_Synopsis_Affaire SET statut = 1 WHERE id =".$affaireid;
     $sql=$db->query($requete);
     if (!$sql)
     {
@@ -87,7 +87,7 @@ if ($user->rights->affaire->valider && $_REQUEST['action']=="valid")
 }
 if ($user->rights->affaire->creer && $_REQUEST['action']=="cloture")
 {
-    $requete = "UPDATE Synopsis_Affaire SET statut = 4 WHERE id =".$affaireid;
+    $requete = "UPDATE llx_Synopsis_Affaire SET statut = 4 WHERE id =".$affaireid;
     $sql=$db->query($requete);
     if (!$sql)
     {
@@ -100,13 +100,13 @@ if ($_REQUEST['action']=='modify')
 {
     $nom = preg_replace('/\'/','\\\'',$_REQUEST['nom']);
     $description = preg_replace('/\'/','\\\'',$_REQUEST['description']);
-    $requete = "UPDATE Synopsis_Affaire SET nom = '".$nom."', description='".$description."' WHERE id = ".$_REQUEST['id'];
+    $requete = "UPDATE llx_Synopsis_Affaire SET nom = '".$nom."', description='".$description."' WHERE id = ".$_REQUEST['id'];
     $sql = $db->query($requete);
     if ($sql)
     {
         //1 detecte si y'a des parametres extra
         require_once(DOL_DOCUMENT_ROOT.'/categories/template.class.php');
-        require_once(DOL_DOCUMENT_ROOT.'/categories/categorie.class.php');
+        require_once(DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php');
 
         $c = new Categorie($db);
         $cats = $c->containing($_REQUEST['id'],"affaire",3);
@@ -191,7 +191,7 @@ if ($_REQUEST['action']=='modify')
     print_cartoucheAffaire($affaire,'index',$_REQUEST['action']);
 
     require_once(DOL_DOCUMENT_ROOT.'/categories/template.class.php');
-    require_once(DOL_DOCUMENT_ROOT.'/categories/categorie.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php');
 
     //Get Categories
     $c = new Categorie($db);

@@ -703,7 +703,7 @@ class Synopsis_Contrat extends Contrat {
 //                            array_push($this->linkedArray['pr'], $res->fk_propale);
 //                        }
 //                    }
-//                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "co_fa WHERE fk_commande = " . $arr[2];
+//                    $requete = "SELECT fk_target as fk_facture FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'commande' AND targettype = 'facture' AND fk_source = " . $arr[2];
 //                    if ($resql = $db->query($requete)) {
 //                        while ($res = $db->fetch_object($resql)) {
 //                            array_push($this->linkedArray['fa'], $res->fk_facture);

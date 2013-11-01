@@ -170,6 +170,29 @@ class modSynopsisAffaire extends DolibarrModules
                             'perms'=>'$user->rights->affaire->lire',
                             'target'=>'',
                             'user'=>0);
+        $par = $r;
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'r='.$par,
+                            'type'=>'left',
+                            'titre'=>'Nouveau',
+                            'mainmenu'=>'Affaire',
+                            'url'=>'/Synopsis_Affaire/nouveau.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'position'=>1,
+                            'perms'=>'$user->rights->affaire->creer',
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'r='.$par,
+                            'type'=>'left',
+                            'titre'=>'List',
+                            'mainmenu'=>'Affaire',
+                            'url'=>'/Synopsis_Affaire/list.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'position'=>1,
+                            'perms'=>'$user->rights->affaire->lire',
+                            'target'=>'',
+                            'user'=>0);
         $r++;
 
 
@@ -187,7 +210,7 @@ class modSynopsisAffaire extends DolibarrModules
 
         // Permissions
         $this->remove();
-        $this->dirs[0]=$conf->affaire->dir_output;
+        $this->dirs[0]=$conf->synopsisaffaire->dir_output;
         $sql = array();
         return $this->_init($sql);
     }

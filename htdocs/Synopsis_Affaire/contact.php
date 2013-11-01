@@ -23,7 +23,7 @@
     require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/expedition/class/expedition.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php');
-    require_once(DOL_DOCUMENT_ROOT.'/livraison/livraison.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/livraison/class/livraison.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
@@ -301,9 +301,9 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
 
     $contactstatic=new Contact($db);
 
-    $requete =" SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
+    $requete =" SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
     $sql=$db->query($requete);
-    $arr['affaire']['SQL']='Synopsis_Affaire';
+    $arr['affaire']['SQL']='llx_Synopsis_Affaire';
     $arr['affaire']['OBJ']='Affaire';
     $arr['affaire']['RIGHT']='affaire';
 
@@ -542,7 +542,7 @@ print "</table><br/><div style='width:500px'>";
 
 
         $filename=sanitize_string($affaire->ref);
-        $filedir = $conf->affaire->dir_output.'/'.sanitize_string($affaire->ref);
+        $filedir = $conf->synopsisaffaire->dir_output.'/'.sanitize_string($affaire->ref);
         $urlsource="contact.php?id=".$affaire->id;
 
         $genallowed = ($user->rights->affaire->lire );
@@ -553,7 +553,7 @@ print "</table><br/><div style='width:500px'>";
 
         $html = new Form($db);
         $formfile = new FormFile($db);
-        $filedir = $conf->affaire->dir_output.'/'.sanitize_string($affaire->ref);
+        $filedir = $conf->synopsisaffaire->dir_output.'/'.sanitize_string($affaire->ref);
         $somethingshown=$formfile->show_documents('affaireContact',$filename,$filedir,$urlsource,$genallowed,$delallowed,$affaire->modelContactPDF_refid);
 
 print "</div>";

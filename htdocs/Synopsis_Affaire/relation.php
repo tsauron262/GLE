@@ -87,7 +87,7 @@ function drawGraph($affaire)
                     FROM ".MAIN_DB_PREFIX."commande,
                          ".MAIN_DB_PREFIX."co_pr
                    WHERE ".MAIN_DB_PREFIX."co_pr.fk_commande = ".MAIN_DB_PREFIX."commande.rowid
-                     AND ".MAIN_DB_PREFIX."commande.rowid in (SELECT element_id FROM Synopsis_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaire->id.")";
+                     AND ".MAIN_DB_PREFIX."commande.rowid in (SELECT element_id FROM llx_Synopsis_Affaire_Element WHERE type='commande' AND affaire_refid = ".$affaire->id.")";
       $sql = $db->query($requete);
       while ($res=$db->fetch_object($sql))
       {

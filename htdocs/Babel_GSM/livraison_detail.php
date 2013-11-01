@@ -25,7 +25,7 @@ require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 require_once(DOL_DOCUMENT_ROOT."/livraison/mods/modules_livraison.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 if ($conf->produit->enabled) require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
-require_once(DOL_DOCUMENT_ROOT."/livraison/livraison.class.php");
+require_once(DOL_DOCUMENT_ROOT."/livraison/class/livraison.class.php");
 if ($conf->expedition_bon->enabled) require_once(DOL_DOCUMENT_ROOT."/expedition/class/expedition.class.php");
 if ($conf->commande->enabled) require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 if ($conf->propal->enabled) require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");

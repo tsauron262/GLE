@@ -220,7 +220,7 @@ if ($retourId>0)
             }
             if ($retour->element_type=='livraison')
             {
-                require_once(DOL_DOCUMENT_ROOT."/livraison/livraison.class.php");
+                require_once(DOL_DOCUMENT_ROOT."/livraison/class/livraison.class.php");
                 $obj = new Livraison($db);
                 $obj->fetch($retour->element_id);
                 $ref = $obj->getNomUrl(1);

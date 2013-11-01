@@ -228,7 +228,7 @@ switch ($type) {
             if (!$user->rights->expedition->livraison->lire)
                 accessforbidden();
             if ($user->societe_id > 0 && $id > 0) {
-                require_once(DOL_DOCUMENT_ROOT . "/livraison/livraison.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/livraison/class/livraison.class.php");
                 $obj = new Livraison($db);
                 $obj->fetch((int) $id);
                 if ($user->societe_id != $obj->socid) {

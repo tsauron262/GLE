@@ -324,14 +324,14 @@ if ($id > 0 )
 
   print "<table width=100% >";
 
-  $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid = ".$id." ORDER BY type";
+  $requete = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid = ".$id." ORDER BY type";
   $sql = $db->query($requete);
 
   require_once(DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/expedition/class/expedition.class.php');
-  require_once(DOL_DOCUMENT_ROOT.'/livraison/livraison.class.php');
+  require_once(DOL_DOCUMENT_ROOT.'/livraison/class/livraison.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
   require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
@@ -357,7 +357,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'commande':
@@ -367,7 +369,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'expedition':
@@ -377,7 +381,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'livraison':
@@ -387,7 +393,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'facture':
@@ -397,7 +405,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'facture fournisseur':
@@ -407,7 +417,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref_supplier;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'commande fournisseur':
@@ -417,7 +429,9 @@ if ($id > 0 )
             $type= $res->type;
             $ref = $obj->ref;
             $statut = $obj->getLibStatut(5);
-            $socHtml = $obj->societe->getNomUrl(1,'',12);
+            $soc = new Societe($db);
+            $soc->fetch($obj->socid);
+            $socHtml = $soc->getNomUrl(1,'',12);
         }
         break;
         case 'projet':
@@ -528,7 +542,7 @@ if ($id > 0 )
    llxHeader($js,'Affaires - Ajout',"",1);
 
 
-    $requete = "SELECT * FROM Synopsis_Affaire";
+    $requete = "SELECT * FROM llx_Synopsis_Affaire";
     $sql = $db->query($requete);
     print "<table>";
     while ($res = $db->fetch_object($sql))

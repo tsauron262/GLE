@@ -16,7 +16,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -27,7 +29,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  */
 
 /**
@@ -87,7 +90,7 @@ if ($_REQUEST['SynAction'] == 'dlZip')
     $affaire = new Affaire($db);
     if ($affaire->fetch($affaireid))
     {
-        $upload_dir = $conf->affaire->dir_output.'/'.sanitize_string($affaire->ref);
+        $upload_dir = $conf->synopsisaffaire->dir_output.'/'.sanitize_string($affaire->ref);
         if ($societe->fetch($affaire->socid))
         {
             $finalFileName = "doc_affaire_".sanitize_string($affaire->ref)."_".sanitize_string($societe->nom) ."-". date("Ymd-Hi", time()).".zip";
@@ -121,13 +124,13 @@ if ($_REQUEST['SynAction'] == 'dlZip')
  */
 
 // Envoi fichier
-if ($_POST["sendit"] && $conf->upload)
+if ($_POST["sendit"])
 {
     $affaire = new Affaire($db);
 
     if ($affaire->fetch($affaireid))
     {
-        $upload_dir = $conf->affaire->dir_output . "/" . sanitize_string($affaire->ref);
+        $upload_dir = $conf->synopsisaffaire->dir_output . "/" . sanitize_string($affaire->ref);
         if (! is_dir($upload_dir)) dol_mkdir($upload_dir);
         if (is_dir($upload_dir))
         {
@@ -146,9 +149,9 @@ if ($_POST["sendit"] && $conf->upload)
                 $result=$interface->run_triggers('ECM_UL_AFFAIRE',$affaire,$user,$langs,$conf);
                 if ($result < 0) { $error++; $this->errors=$interface->errors; }
 //                 Fin appel triggers
-                require_once(DOL_DOCUMENT_ROOT . "/ecm/class/ecmdirectory.class.php" );
-                $ecm = new EcmDirectory($db);
-                $ecm->create_assoc("affaire",$affaire, $tmpName,$user,$conf);
+//                require_once(DOL_DOCUMENT_ROOT . "/ecm/class/ecmdirectory.class.php" );
+//                $ecm = new EcmDirectory($db);
+//                $ecm->create_assoc("affaire",$affaire, $tmpName,$user,$conf);
             } else {
                 // Echec transfert (fichier depassant la limite ?)
                 $mesg = '<div class="error ui-state-error">'.$langs->trans("ErrorFileNotUploaded").'</div>';
@@ -170,7 +173,7 @@ if ($action=='delete')
           //decode decimal HTML entities added by web browser
           $tmpName = dol_unescapefile($tmpName );
 
-        $upload_dir = $conf->affaire->dir_output . "/" . sanitize_string($affaire->ref);
+        $upload_dir = $conf->synopsisaffaire->dir_output . "/" . sanitize_string($affaire->ref);
         $file = $upload_dir . '/' . urldecode($_GET['urlfile']);
         dol_delete_file($file);
         $mesg = '<div class="ok">'.$langs->trans("FileWasRemoved").'</div>';
@@ -195,7 +198,7 @@ if ($affaireid > 0)
 //    print "toto".$affaireid;
     if ($affaire->fetch($affaireid))
     {
-        $upload_dir = $conf->affaire->dir_output.'/'.sanitize_string($affaire->ref);
+        $upload_dir = $conf->synopsisaffaire->dir_output.'/'.sanitize_string($affaire->ref);
 
         $societe = new Societe($db);
         $societe->fetch($affaire->socid);
@@ -242,7 +245,7 @@ if ($affaireid > 0)
 
         // List of document
         $param='&id='.$affaire->id;
-        $formfile->list_of_documents($filearray,$affaire,'affaire',$param);
+        $formfile->list_of_documents($filearray,$affaire,'synopsisaffaire',$param);
         //Download all docs via zip
         print "<br>";
         print '<form action="?id='.$affaireid.'" method="POST">';
@@ -252,7 +255,7 @@ if ($affaireid > 0)
         print '</form>';
 
         //List de tous les documents
-        $requete = "SELECT * FROM Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
+        $requete = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
         //    print $requete;
         $sql=$db->query($requete);
         $filearray1=array();
@@ -343,7 +346,7 @@ if ($affaireid > 0)
                 break;
                 case 'livraison':
                 {
-                    require_once(DOL_DOCUMENT_ROOT.'/livraison/livraison.class.php');
+                    require_once(DOL_DOCUMENT_ROOT.'/livraison/class/livraison.class.php');
                     $obj=new Livraison($db);
                     $obj->fetch($res->element_id);
                     $upload_dir = $conf->livraison->dir_output.'/'.sanitize_string($obj->ref);

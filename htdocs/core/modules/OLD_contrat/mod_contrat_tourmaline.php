@@ -32,7 +32,7 @@
  */
 
 /**
-    \file       htdocs/includes/modules/contrat/mod_contrat_tourmaline.php
+    \file       htdocs/core/modules/contrat/mod_contrat_tourmaline.php
     \ingroup    facture
     \brief      Class filte of tourmaline numbering module for invoice
     \version    $Id: tourmaline.modules.php,v 1.15 2008/07/05 14:20:08 eldy Exp $
@@ -71,7 +71,7 @@ class mod_contrat_tourmaline extends ModeleNumRefContrat
 
         // Parametrage du prefix des factures
         $texte.= '<tr><td>'.$langs->trans("Mask").' ('.$langs->trans("InvoiceStandard").'):</td>';
-        $texte.= '<td align="right">'.$form->textwithhelp('<input type="text" class="flat" size="24" name="maskcontrat" value="'.$conf->global->CONTRAT_TOURMALINE_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("Contrat"),$langs->transnoentities("Contrat"),$langs->transnoentities("Contrat")),1,1).'</td>';
+        $texte.= '<td align="right">'.$form->textwithpicto('<input type="text" class="flat" size="24" name="maskcontrat" value="'.$conf->global->CONTRAT_TOURMALINE_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("Contrat"),$langs->transnoentities("Contrat"),$langs->transnoentities("Contrat")),1,1).'</td>';
 
         $texte.= '<td align="left" rowspan="2">&nbsp; <input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button"></td>';
 

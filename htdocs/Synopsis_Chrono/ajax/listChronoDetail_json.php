@@ -6,13 +6,12 @@
  * GLE-1.1
  */
 
-function searchtext($nom, $pref = ''){
-    $searchString = $_REQUEST[$nom] ;
-    $searchField=$pref.$nom;
+function searchtext($nom, $pref = '') {
+    $searchString = $_REQUEST[$nom];
+    $searchField = $pref . $nom;
     $oper = 'LIKE';
-    return  " AND " . $searchField . " ".$oper." '%".$searchString."%'";    
+    return " AND " . $searchField . " " . $oper . " '%" . $searchString . "%'";
 }
-
 
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
@@ -169,6 +168,7 @@ switch ($action) {
             $arrphpClass = array();
             $arrvalueIsChecked = array();
             $arrvalueIsSelected = array();
+            $tabLien = array();
             while ($resPre = $db->fetch_object($sqlPre)) {
                 $nom = sanitize_string($resPre->nom);
                 $arrPre[$resPre->id] = $resPre->id;
@@ -191,26 +191,60 @@ switch ($action) {
                     $arrvalueIsSelected[$nom] = true;
                 if ($res1->valueIsChecked == 1)
                     $arrvalueIsChecked[$nom] = true;
+                if ($resPre->type_valeur == 10){
+                    $tabLien[] = array("nom"=>$resPre->nom,"sub_valeur"=>$resPre->type_subvaleur);
+                }
             }
             $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_value_view
                      WHERE 1=1
                        AND chrono_conf_id = " . $id;
 //                       AND key_id IN (".join(",",$arrPre).")";
+            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE 1 ";
+            if ($_REQUEST['fk_societe'] > 0)
+                $requete1 .= searchtext('fk_societe');
             if (!$withRev) {
                 $requete .= " AND revision is NULL ";
             } else {
                 $requete .= " AND revision is NOT NULL ";
+                $requete1 .= "id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
                 // chrono_refid
-                $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
                 //print "123456789".$requete1;
-                $sql1 = $db->query($requete1);
-                $arrTmp = array();
-                while ($res1 = $db->fetch_object($sql1)) {
-                    $arrTmp[] = $res1->id;
-                }
-                $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
             }
+
+
+
+            $sql = $db->query($requete1);
+            $count = $db->num_rows($sql);
+
+            if ($count > 0) {
+                $total_pages = ceil($count / $limit);
+            } else {
+                $total_pages = 0;
+            }
+            if ($page > $total_pages)
+                $page = $total_pages;
+            $start = $limit * $page - $limit; // do not put $limit*($page - 1)
+            if ($start < 0)
+                $start = 0;
+
+
+
+
+
+//            $requete1 .= " LIMIT 0,100";
+//            $requete1 .= "      ORDER BY $sidx $sord";
+            if ($sidx == "chrono_id" && !$searchField){
+                $requete1 .= "      ORDER BY id $sord";
+                $requete1 .= "         LIMIT $start , $limit";
+            }
+            $sql1 = $db->query($requete1);
+            $arrTmp = array();
+            while ($res1 = $db->fetch_object($sql1)) {
+                $arrTmp[] = $res1->id;
+            }
+            $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
+//            $requete .="LIMIT 0, 1000";
 //die($requete);
 //print $requete;
             $sql = $db->query($requete);
@@ -223,12 +257,33 @@ switch ($action) {
                 $arrRef[$res->chrono_id] = $res->ref;
                 $arrStatut[$res->chrono_id] = $res->fk_statut;
                 $arrKey[$res->key_id] = $nom;
-
+$_REQUEST['chrono_id'] = $res->chrono_id;
                 //Si from requete ou from var ou from liste, substitue la valeur "id" par la valeur "reelle"
                 $val = parseValue($res->chrono_value, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
-
                 $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
                 $iter++;
+                if(!isset($tabLienTraiter[$res->chrono_id])){
+            foreach($tabLien as $lien){
+                    $val = parseValue("", $lien['sub_valeur'], 1, "Lien", 1, 0);
+
+                $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
+                $iter++;
+                $tabLienTraiter[$res->chrono_id] = true;
+            }
+                }
+//
+//            }
+//            foreach($tabLien as $lien){
+//                $nom = sanitize_string($res->nom);
+//                $arrRef[$res->chrono_id] = $res->ref;
+//                $arrStatut[$res->chrono_id] = $res->fk_statut;
+//                $arrKey[$res->key_id] = $nom;
+//
+//                //Si from requete ou from var ou from liste, substitue la valeur "id" par la valeur "reelle"
+//                $val = parseValue($res->chrono_value, 1, 1, "Lien", 1, 0);
+//
+//                $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
+//                $iter++;
             }
 
 //temp sql table
@@ -287,8 +342,7 @@ switch ($action) {
                             $dateUS = $date;
                         }
                         $insArr2[] = "'" . addslashes($dateUS) . "'";
-                    }
-                    else
+                    } else
                         $insArr2[] = "'" . addslashes($chrono_arr_value_by_key_name[$keyname]['value']) . "'";
                 }
                 $insStr2 = join(',', $insArr2);
@@ -308,19 +362,7 @@ switch ($action) {
 
             $sql = $db->query($requete);
             if ($sql) {
-                $count = $db->num_rows($sql);
                 $i = 0;
-
-                if ($count > 0) {
-                    $total_pages = ceil($count / $limit);
-                } else {
-                    $total_pages = 0;
-                }
-                if ($page > $total_pages)
-                    $page = $total_pages;
-                $start = $limit * $page - $limit; // do not put $limit*($page - 1)
-                if ($start < 0)
-                    $start = 0;
 
                 class general {
                     
@@ -331,8 +373,10 @@ switch ($action) {
                 $responce->total = $total_pages;
                 $responce->records = $i;
             }
-            $requete .= "      ORDER BY $sidx $sord";
-            $requete .= "         LIMIT $start , $limit";
+                $requete .= "      ORDER BY $sidx $sord";
+            if ($sidx != "chrono_id" || $searchField) {
+                $requete .= "         LIMIT $start , $limit";
+            }
 
             $sql = $db->query($requete);
             if ($sql) {
@@ -393,8 +437,12 @@ function parseValue($val, $hasSubValeur = false, $sourceIsOption = false, $phpCl
             $tmp = $phpClass;
             $obj = new $tmp($db);
             $obj->fetch($hasSubValeur);
-            $obj->getValues();
-            $html = "";
+            $obj->getValue($val);
+                    if(isset($obj->tabVal[0])){
+                        $val = $obj->tabVal[0];
+                        $valueIsSelected = true;
+                    }
+            $html = ""; 
             foreach ($obj->valuesArr as $key => $value) {
                 if ($valueIsSelected && $val == $key) {
 //            var_dump($obj->valuesArr);

@@ -16,14 +16,14 @@
  */
 
 /**
- \file       htdocs/includes/modules/contrat/pdf_contrat_babel.modules.php
+ \file       htdocs/core/modules/contrat/pdf_contrat_babel.modules.php
  \ingroup    contrat
  \brief      Fichier de la classe permettant de generer les contrats au modele babel
  \author        Laurent Destailleur
  \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/includes/modules/contrat/modules_contrat.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/contrat/modules_contrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
 

@@ -256,7 +256,7 @@ function seems_utf8($str) {
         else
             return false;# Does not match any model
         for ($j = 0; $j < $n; $j++) { # n bytes matching 10bbbbbb follow ?
-            if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
+            if (( ++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
                 return false;
         }
     }
@@ -423,9 +423,7 @@ function getTypeAndId($url = null, $request = null) {
     if (stripos($url, "compta/facture") != false) {
         $element_type = 'facture';
         @$element_id = $request['facid'];
-    } elseif (stripos($url, "societe/soc.php")
-            || stripos($url, "comm/fiche.php?socid=")
-            || stripos($url, "comm/prospect/fiche.php?socid=")) {
+    } elseif (stripos($url, "societe/soc.php") || stripos($url, "comm/fiche.php?socid=") || stripos($url, "comm/prospect/fiche.php?socid=")) {
         $element_type = 'societe';
         @$element_id = $request['socid'];
     } elseif (stripos($url, "product/fiche.php") != false) {
@@ -498,15 +496,47 @@ function getAdresseLivraisonComm($commId) {
     return $return;
 }
 
-function addElementElement($typeS, $typeD, $idS, $idD) {
+function getParaChaine($chaine, $delimite, $delimite2 = " ") {
+    $result = false;
+    $chaine = explode($delimite2, $chaine);
+    foreach ($chaine as $bouChaine)
+        if (stripos($bouChaine, $delimite) !== false)
+            $result = str_replace($delimite, "", $bouChaine);
+    return $result;
+}
+
+function addElementElement($typeS, $typeD, $idS, $idD, $ordre) {
     global $db;
+    if (!$ordre) {
+        $typeST = $typeD;
+        $idST = $idD;
+        $typeD = $typeS;
+        $idD = $idS;
+        $typeS = $typeST;
+        $idS = $idST;
+    }
     $req = "INSERT INTO " . MAIN_DB_PREFIX . "element_element (sourcetype, targettype, fk_source, fk_target) VALUES ('" . $typeS . "', '" . $typeD . "', " . $idS . ", " . $idD . ")";
     return $db->query($req);
 }
 
-function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
+function delElementElement($typeS, $typeD, $idS = null, $idD = null, $ordre = true) {
     global $db;
-    $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE sourcetype = '" . $typeS . "' AND targettype = '" . $typeD . "'";
+    if (!$ordre) {
+        $typeST = $typeD;
+        $idST = $idD;
+        $typeD = $typeS;
+        $idD = $idS;
+        $typeS = $typeST;
+        $idS = $idST;
+    }
+    if (!isset($typeS) && !isset($typeD))
+        die("Suppr tout probleme pas de type");
+    $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE 1";
+    if (isset($typeS))
+    $req .= " AND sourcetype = '" . $typeS . "'";        
+    if (isset($typeD))
+    $req .= " AND targettype = '" . $typeD . "'";
+    
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -514,8 +544,16 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null) {
     $db->query($req);
 }
 
-function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = null) {
+function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = null, $ordre = true) {
     global $db;
+    if (!$ordre) {
+        $typeST = $typeD;
+        $idST = $idD;
+        $typeD = $typeS;
+        $idD = $idS;
+        $typeS = $typeST;
+        $idS = $idST;
+    }
     $req = "SELECT * FROM " . MAIN_DB_PREFIX . "element_element WHERE ";
     $tabWhere = array("1");
     if ($typeS)
@@ -531,12 +569,23 @@ function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = nul
     $sql = $db->query($req);
     $tab = array();
     while ($result = $db->fetch_object($sql)) {
-        $tab[] = array("s" => $result->fk_source, "d" => $result->fk_target, "ts" => $result->sourcetype, "td" => $result->targettype);
+        if ($ordre)
+            $tab[] = array("s" => $result->fk_source, "d" => $result->fk_target, "ts" => $result->sourcetype, "td" => $result->targettype);
+        else
+            $tab[] = array("d" => $result->fk_source, "s" => $result->fk_target, "td" => $result->sourcetype, "ts" => $result->targettype);
     }
     return $tab;
 }
 
-function setElementElement($typeS, $typeD, $idS, $idD) {
+function setElementElement($typeS, $typeD, $idS, $idD, $ordre = true) {
+    if (!$ordre) {
+        $typeST = $typeD;
+        $idST = $idD;
+        $typeD = $typeS;
+        $idD = $idS;
+        $typeS = $typeST;
+        $idS = $idST;
+    }
     delElementElement($typeS, $typeD, $idS);
     return addElementElement($typeS, $typeD, $idS, $idD);
 }
@@ -555,9 +604,8 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
     if (defined('MOD_DEV_SYN_MAIL')) {
         $text = "OrigineTo = " . $to . "\n\n" . $text;
         $to = MOD_DEV_SYN_MAIL;
-    }
-    elseif($cc != '')
-        $ccAdmin .= ", ".$cc;
+    } elseif ($cc != '')
+        $ccAdmin .= ", " . $cc;
     if (!isset($to) || $to == '') {
         $text = "Pas de mail expediteur definit." . "\n\n" . $text;
         $to = $toReplay;
@@ -597,32 +645,32 @@ function php2js($var) {
     return FALSE;
 }
 
-
-function convDur($duration)
-{
+function convDur($duration) {
 
     // Initialisation
     $duration = abs($duration);
     $converted_duration = array();
 
     // Conversion en semaines
-    $converted_duration['weeks']['abs'] = floor($duration / (60*60*24*7));
-    $modulus = $duration % (60*60*24*7);
+    $converted_duration['weeks']['abs'] = floor($duration / (60 * 60 * 24 * 7));
+    $modulus = $duration % (60 * 60 * 24 * 7);
 
     // Conversion en jours
-    $converted_duration['days']['abs'] = floor($duration / (60*60*24));
-    $converted_duration['days']['rel'] = floor($modulus / (60*60*24));
-    $modulus = $modulus % (60*60*24);
+    $converted_duration['days']['abs'] = floor($duration / (60 * 60 * 24));
+    $converted_duration['days']['rel'] = floor($modulus / (60 * 60 * 24));
+    $modulus = $modulus % (60 * 60 * 24);
 
     // Conversion en heures
-    $converted_duration['hours']['abs'] = floor($duration / (60*60));
-    $converted_duration['hours']['rel'] = floor($modulus / (60*60));
-    $modulus = $modulus % (60*60);
+    $converted_duration['hours']['abs'] = floor($duration / (60 * 60));
+    $converted_duration['hours']['rel'] = floor($modulus / (60 * 60));
+    $modulus = $modulus % (60 * 60);
 
     // Conversion en minutes
     $converted_duration['minutes']['abs'] = floor($duration / 60);
     $converted_duration['minutes']['rel'] = floor($modulus / 60);
-    if ($converted_duration['minutes']['rel'] <10){$converted_duration['minutes']['rel'] ="0".$converted_duration['minutes']['rel']; } ;
+    if ($converted_duration['minutes']['rel'] < 10) {
+        $converted_duration['minutes']['rel'] = "0" . $converted_duration['minutes']['rel'];
+    };
     $modulus = $modulus % 60;
 
     // Conversion en secondes
@@ -633,119 +681,117 @@ function convDur($duration)
     return( $converted_duration);
 }
 
+function select_dolusersInGroup($form, $group, $selected = '', $htmlname = 'userid', $show_empty = 0, $exclude = '', $disabled = 0, $include = '', $enableonly = '', $force_entity = false) {
+    global $conf, $user, $langs;
 
-    function select_dolusersInGroup($form, $group, $selected='',$htmlname='userid',$show_empty=0,$exclude='',$disabled=0,$include='',$enableonly='',$force_entity=false)
-    {
-        global $conf,$user,$langs;
+    // If no preselected user defined, we take current user
+    if ($selected < -1 && empty($conf->global->SOCIETE_DISABLE_DEFAULT_SALESREPRESENTATIVE))
+        $selected = $user->id;
 
-        // If no preselected user defined, we take current user
-        if ($selected < -1 && empty($conf->global->SOCIETE_DISABLE_DEFAULT_SALESREPRESENTATIVE)) $selected=$user->id;
+    // Permettre l'exclusion d'utilisateurs
+    if (is_array($exclude))
+        $excludeUsers = implode("','", $exclude);
+    // Permettre l'inclusion d'utilisateurs
+    if (is_array($include))
+        $includeUsers = implode("','", $include);
 
-        // Permettre l'exclusion d'utilisateurs
-        if (is_array($exclude))	$excludeUsers = implode("','",$exclude);
-        // Permettre l'inclusion d'utilisateurs
-        if (is_array($include))	$includeUsers = implode("','",$include);
+    $out = '';
 
-        $out='';
-
-        // On recherche les utilisateurs
-        $sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname, u.login, u.admin, u.entity";
-        if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
-        {
-            $sql.= ", e.label";
-        }
-        $sql.= " FROM ".MAIN_DB_PREFIX ."user as u";
-        		$sql.= ", ".MAIN_DB_PREFIX."usergroup_user as ug2";
-        if (! empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && ! $user->entity)
-        {
-            $sql.= " LEFT JOIN ".MAIN_DB_PREFIX ."entity as e ON e.rowid=u.entity";
-            if ($force_entity) $sql.= " WHERE u.entity IN (0,".$force_entity.")";
-            else $sql.= " WHERE u.entity IS NOT NULL";
-        }
-        else
-        {
-        	if (! empty($conf->multicompany->transverse_mode))
-        	{
-        		$sql.= ", ".MAIN_DB_PREFIX."usergroup_user as ug";
-        		$sql.= " WHERE ug.fk_user = u.rowid";
-        		$sql.= " AND ug.entity = ".$conf->entity;
-        	}
-        	else
-        	{
-        		$sql.= " WHERE u.entity IN (0,".$conf->entity.")";
-        	}
-        }
-        		$sql.= " AND ug2.fk_user = u.rowid";
-        		$sql.= " AND ug2.fk_usergroup =".$group;
-        if (! empty($user->societe_id)) $sql.= " AND u.fk_societe = ".$user->societe_id;
-        if (is_array($exclude) && $excludeUsers) $sql.= " AND u.rowid NOT IN ('".$excludeUsers."')";
-        if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
-        $sql .= " AND statut = 1";
-        $sql.= " ORDER BY u.lastname ASC";
-
-        dol_syslog(get_class($form)."::select_dolusers sql=".$sql);
-        $resql=$form->db->query($sql);
-        if ($resql)
-        {
-            $num = $form->db->num_rows($resql);
-            $i = 0;
-            if ($num)
-            {
-                $out.= '<select class="flat" id="'.$htmlname.'" name="'.$htmlname.'"'.($disabled?' disabled="disabled"':'').'>';
-                if ($show_empty) $out.= '<option value="-1"'.($selected==-1?' selected="selected"':'').'>&nbsp;</option>'."\n";
-
-                $userstatic=new User($form->db);
-
-                while ($i < $num)
-                {
-                    $obj = $form->db->fetch_object($resql);
-
-                    $userstatic->id=$obj->rowid;
-                    $userstatic->lastname=$obj->lastname;
-                    $userstatic->firstname=$obj->firstname;
-
-                    $disableline=0;
-                    if (is_array($enableonly) && count($enableonly) && ! in_array($obj->rowid,$enableonly)) $disableline=1;
-
-                    if ((is_object($selected) && $selected->id == $obj->rowid) || (! is_object($selected) && $selected == $obj->rowid))
-                    {
-                        $out.= '<option value="'.$obj->rowid.'"';
-                        if ($disableline) $out.= ' disabled="disabled"';
-                        $out.= ' selected="selected">';
-                    }
-                    else
-                    {
-                        $out.= '<option value="'.$obj->rowid.'"';
-                        if ($disableline) $out.= ' disabled="disabled"';
-                        $out.= '>';
-                    }
-                    $out.= $userstatic->getFullName($langs);
-
-                    if (! empty($conf->multicompany->enabled) && empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && ! $user->entity)
-                    {
-                        if ($obj->admin && ! $obj->entity) $out.=" (".$langs->trans("AllEntities").")";
-                        else $out.=" (".$obj->label.")";
-                    }
-
-                    //if ($obj->admin) $out.= ' *';
-                    if (! empty($conf->global->MAIN_SHOW_LOGIN)) $out.= ' ('.$obj->login.')';
-                    $out.= '</option>';
-                    $i++;
-                }
-            }
-            else
-            {
-                $out.= '<select class="flat" name="'.$htmlname.'" disabled="disabled">';
-                $out.= '<option value="">'.$langs->trans("None").'</option>';
-            }
-            $out.= '</select>';
-        }
-        else
-        {
-            dol_print_error($form->db);
-        }
-
-        return $out;
+    // On recherche les utilisateurs
+    $sql = "SELECT DISTINCT u.rowid, u.lastname as lastname, u.firstname, u.login, u.admin, u.entity";
+    if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
+        $sql.= ", e.label";
     }
+    $sql.= " FROM " . MAIN_DB_PREFIX . "user as u";
+    $sql.= ", " . MAIN_DB_PREFIX . "usergroup_user as ug2";
+    if (!empty($conf->multicompany->enabled) && $conf->entity == 1 && $user->admin && !$user->entity) {
+        $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "entity as e ON e.rowid=u.entity";
+        if ($force_entity)
+            $sql.= " WHERE u.entity IN (0," . $force_entity . ")";
+        else
+            $sql.= " WHERE u.entity IS NOT NULL";
+    }
+    else {
+        if (!empty($conf->multicompany->transverse_mode)) {
+            $sql.= ", " . MAIN_DB_PREFIX . "usergroup_user as ug";
+            $sql.= " WHERE ug.fk_user = u.rowid";
+            $sql.= " AND ug.entity = " . $conf->entity;
+        } else {
+            $sql.= " WHERE u.entity IN (0," . $conf->entity . ")";
+        }
+    }
+    $sql.= " AND ug2.fk_user = u.rowid";
+    $sql.= " AND ug2.fk_usergroup =" . $group;
+    if (!empty($user->societe_id))
+        $sql.= " AND u.fk_societe = " . $user->societe_id;
+    if (is_array($exclude) && $excludeUsers)
+        $sql.= " AND u.rowid NOT IN ('" . $excludeUsers . "')";
+    if (is_array($include) && $includeUsers)
+        $sql.= " AND u.rowid IN ('" . $includeUsers . "')";
+    $sql .= " AND statut = 1";
+    $sql.= " ORDER BY u.lastname ASC";
+
+    dol_syslog(get_class($form) . "::select_dolusers sql=" . $sql);
+    $resql = $form->db->query($sql);
+    if ($resql) {
+        $num = $form->db->num_rows($resql);
+        $i = 0;
+        if ($num) {
+            $out.= '<select class="flat" id="' . $htmlname . '" name="' . $htmlname . '"' . ($disabled ? ' disabled="disabled"' : '') . '>';
+            if ($show_empty)
+                $out.= '<option value="-1"' . ($selected == -1 ? ' selected="selected"' : '') . '>&nbsp;</option>' . "\n";
+
+            $userstatic = new User($form->db);
+
+            while ($i < $num) {
+                $obj = $form->db->fetch_object($resql);
+
+                $userstatic->id = $obj->rowid;
+                $userstatic->lastname = $obj->lastname;
+                $userstatic->firstname = $obj->firstname;
+
+                $disableline = 0;
+                if (is_array($enableonly) && count($enableonly) && !in_array($obj->rowid, $enableonly))
+                    $disableline = 1;
+
+                if ((is_object($selected) && $selected->id == $obj->rowid) || (!is_object($selected) && $selected == $obj->rowid)) {
+                    $out.= '<option value="' . $obj->rowid . '"';
+                    if ($disableline)
+                        $out.= ' disabled="disabled"';
+                    $out.= ' selected="selected">';
+                }
+                else {
+                    $out.= '<option value="' . $obj->rowid . '"';
+                    if ($disableline)
+                        $out.= ' disabled="disabled"';
+                    $out.= '>';
+                }
+                $out.= $userstatic->getFullName($langs);
+
+                if (!empty($conf->multicompany->enabled) && empty($conf->multicompany->transverse_mode) && $conf->entity == 1 && $user->admin && !$user->entity) {
+                    if ($obj->admin && !$obj->entity)
+                        $out.=" (" . $langs->trans("AllEntities") . ")";
+                    else
+                        $out.=" (" . $obj->label . ")";
+                }
+
+                //if ($obj->admin) $out.= ' *';
+                if (!empty($conf->global->MAIN_SHOW_LOGIN))
+                    $out.= ' (' . $obj->login . ')';
+                $out.= '</option>';
+                $i++;
+            }
+        }
+        else {
+            $out.= '<select class="flat" name="' . $htmlname . '" disabled="disabled">';
+            $out.= '<option value="">' . $langs->trans("None") . '</option>';
+        }
+        $out.= '</select>';
+    } else {
+        dol_print_error($form->db);
+    }
+
+    return $out;
+}
 
 ?>

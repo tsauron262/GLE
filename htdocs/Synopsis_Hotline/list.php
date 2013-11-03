@@ -28,9 +28,10 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
         $soc = new Societe($db);
         $soc->fetch($_REQUEST['id']);
-        $filtre = "Société=" . urlencode($soc->nom);
+        $filtre = "fk_societe=" . urlencode($_REQUEST['id']);
         $head = societe_prepare_head($soc);
-        $champ = array(1005 => $_REQUEST['id']);
+        $champ = array();
+        $socid = $_REQUEST['id'];
     } else if ($_REQUEST['obj'] == "ctr") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php';
@@ -39,15 +40,17 @@ if (isset($_REQUEST['obj'])) {
         $ctr->fetch($_REQUEST['id']);
         $filtre = "Contrat=" . urlencode($ctr->ref);
         $head = contract_prepare_head($ctr);
-        $champ = array(1005 => $ctr->socid, 1004 => $_REQUEST['id']);
+        $socid = $ctr->socid;
+        $champ = array(1004 => $_REQUEST['id']);
     }
     if (isset($_REQUEST['create']) && $_REQUEST['create']) {
         $ch = new Chrono($db);
         $ch->model_refid = 100;
+        $ch->socid = $socid;
         $id = $ch->create();
         $champ[1001] = date("d/m/Y");
         $ch->setDatas($id, $champ);
-        header('location: ../Synopsis_Chrono/fiche.php?nomenu=true&id=' . $id . '&action=Modify');
+        header('location: ../Synopsis_Chrono/fiche-nomenu.php?id=' . $id . '&action=Modify');
     }
 }
 

@@ -41,7 +41,7 @@ if ($action == 'supprimer') {
         if ($res > 0) {
             header('Location: liste.php');
         } else {
-            header('Location: fiche.php?id=' . $id);
+            header('Location: ?id=' . $id);
         }
     }
 }
@@ -93,7 +93,7 @@ if ($action == 'Valider') {
         $res = $chr->validate();
     }
     if ($res > 0) {
-        header('location: fiche.php?id=' . $chr->id);
+        header('location: ?id=' . $chr->id);
     } else {
         $msg = "Erreur de mise &agrave; jour";
     }
@@ -103,7 +103,7 @@ if ($action == 'AskValider') {
     $chr->fetch($_REQUEST['id']);
     $res = $chr->attenteValidate();
     if ($res > 0) {
-        header('location: fiche.php?id=' . $chr->id);
+        header('location: ?id=' . $chr->id);
     } else {
         $msg = "Erreur de mise &agrave; jour";
     }
@@ -117,9 +117,9 @@ if ($action == 'ModifyAfterValid') {
         if ($chr->model->revision_model_refid > 0) {
             $res = $chr->revised();
             if ($res > 0) {
-                header("Location: fiche.php?id=" . $res);
+                header("Location: ?id=" . $res);
             } else {
-                header("Location: fiche.php?id=" . $_REQUEST['id']);
+                header("Location: ?id=" . $_REQUEST['id']);
             }
         }
     } else {
@@ -156,16 +156,27 @@ if ($action == 'modifier') {
             else
                 $dataArr[$arrTmp[1]] = addslashes($val);
         }
-        if (preg_match('/^ChronoLien-([0-9]*)$/', $key, $arrTmp)) {
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_lien WHERE rowid = " . $arrTmp[1];
-            $sql = $db->query($requete);
-            
+        if (preg_match('/^ChronoLien-([0-9]*)-([0-9a-zA-Z]*)-([0-9]*)$/', $key, $arrTmp)) {
+            $tabChronoValue[$arrTmp[1]][$arrTmp[2]][$val] = $val;
+        }
+        if (preg_match('/^ChronoLien-([0-9]*)-([0-9a-zA-Z]*)-([0-9a-zA-Z]*)$/', $key, $arrTmp)) {
+            $tabChronoValue[$arrTmp[1]][$arrTmp[2]][0] = 0;
         }
     }
     $res1 = $chr->setDatas($chr->id, $dataArr);
 
+//    print_r($tabChronoValue);die;
+    foreach ($tabChronoValue as $idLien => $tmpArray) {
+        foreach ($tmpArray as $nomElement => $tabVal) {
+            if ($nomElement != "") {
+                $objLien = new Lien($db);
+                $objLien->fetch($idLien, "type:".$nomElement);
+                $objLien->setValue($id, $tabVal);
+            }
+        }
+    }
     if ($res > 0) {
-        header('location:fiche.php?id=' . $id);
+        header('location:?id=' . $id);
     } else {
         $msg = "Erreur dans la mise &agrave; jour";
     }
@@ -265,12 +276,16 @@ $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/
 //launchRunningProcess($db,'Chrono',$_GET['id']);
 
 
-if (isset($_REQUEST['nomenu']))
-    top_htmlhead($js, 'Fiche chrono');
+$chr = new Chrono($db);
+if ($id > 0) {
+    $chr->fetch($id);
+if (isset($_REQUEST['nomenu'])){
+    top_htmlhead($js, 'Fiche '.$chr->model->titre);
+}
 else
-    llxHeader($js, 'Fiche chrono');
+    llxHeader($js, 'Fiche '.$chr->model->titre);
 
-print "<div class='titre'>Fiche chrono</div><br/>";
+//print "<div class='titre'>Fiche chrono</div><br/>";
 
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/revision_merlot.class.php");
 $conv = new revision_merlot($db);
@@ -278,9 +293,6 @@ $conv = new revision_merlot($db);
 if ($msg . "x" != 'x') {
     print "<div style='padding: 3px;'><span class='ui-icon ui-icon-info' style='float: left;'></span>" . $msg . "</div>";
 }
-$chr = new Chrono($db);
-if ($id > 0) {
-    $chr->fetch($id);
     $tmpChr = 'chrono' . $chr->model_refid;
     $rightChrono = $user->rights->chrono_user->$tmpChr;
 
@@ -293,9 +305,12 @@ if ($id > 0) {
 
     //saveHistoUser($chr->id, "chrono",$chr->ref);
 
-    $head = chrono_prepare_head($chr);
     $html = new Form($db);
-    dol_fiche_head($head, 'chrono', $langs->trans("Chrono"));
+    
+if (!isset($_REQUEST['nomenu'])){
+    $head = chrono_prepare_head($chr);
+    dol_fiche_head($head, 'chrono', $chr->model->titre);
+}
 
     if ($_GET['action'] == 'delete') {
         $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode($_GET["urlfile"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
@@ -303,7 +318,7 @@ if ($id > 0) {
     }
 
     if ($action == "Modify" && $user->rights->synopsischrono->Modifier) {
-        print "<form id='form' action='fiche.php?id=" . $chr->id . "' method=post>";
+        print "<form id='form' action='?id=" . $chr->id . "' method=post>";
         print "<input type='hidden' name='action' value='modifier'>";
         print "<input type='hidden' name='id' value='" . $chr->id . "'>";
         print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
@@ -387,9 +402,9 @@ if ($id > 0) {
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->socid = $chr->socid;
-                    $obj->fetch($res->type_subvaleur);
+                    $obj->fetch($res->type_subvaleur, $res->extraCss);
                     $obj->getValues();
-                    if(isset($obj->tabVal[0])){
+                    if (isset($obj->tabVal[0])) {
                         $res->value = $obj->tabVal[0];
                         $res->valueIsSelected = true;
                     }
@@ -502,7 +517,7 @@ EOF;
 
 
         print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
-        print "<button onClick='location.href=\"fiche.php?id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
+        print "<button onClick='location.href=\"?id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
         print "<button class='butAction'>Modifier</button>";
         print '</table>';
         print '</form>';
@@ -694,6 +709,7 @@ EOF;
 //Ajoute les extra key/Values
         $requete = "SELECT k.nom,
                            k.id,
+                           k.extraCss,
                            v.`value`,
                            t.nom as typeNom,
                            t.hasSubValeur,
@@ -728,18 +744,18 @@ EOF;
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
-                    $obj->fetch($res->type_subvaleur);
+                    $obj->fetch($res->type_subvaleur, $res->extraCss);
                     $obj->getValuePlus($res->value);
                     $html = "";
                     foreach ($obj->valuesArr as $key => $val) {
 //                        if ($res->valueIsSelected && $res->value == $key) {
-                            if ($obj->OptGroup . "x" != "x") {
-                                $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
+                        if ($obj->OptGroup . "x" != "x") {
+                            $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
 //                                break;
-                            } else {
-                                $html .= $val."<br/>";
+                        } else {
+                            $html .= $val . "<br/>";
 //                                break;
-                            }
+                        }
 //                        }
                     }
 
@@ -770,7 +786,7 @@ EOF;
 
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
             print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-            print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
+            print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
         } else if (($user->rights->synopsischrono->ModifierApresValide ) && $chr->statut > 0 && $chr->statut != 999) {
             print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
 
@@ -787,13 +803,13 @@ EOF;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 if ($res->id > 0) {
-                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $res->id . "\"'>R&eacute;vision précédente: " . $res->ref . "</button>";
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $res->id . "\"'>R&eacute;vision précédente: " . $res->ref . "</button>";
                 }
             }
 
 
             if ($chr->model->hasRevision == 1 && $chr->model->revision_model_refid > 0 && $chr->statut != 3)
-                print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
             else if ($chr->model->hasRevision == 1 && $chr->statut != 3)
                 print "<div class='ui-error error'>Pas de mod&egrave;le de r&eacute;visions !</div>";
             else if ($chr->model->hasRevision == 1 && $chr->statut == 3) {
@@ -808,7 +824,7 @@ EOF;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 if ($res->id > 0) {
-                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $res->id . "\"'>R&eacute;vision suivante: " . $res->ref . "</button>";
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $res->id . "\"'>R&eacute;vision suivante: " . $res->ref . "</button>";
                 }
 
 
@@ -819,10 +835,10 @@ EOF;
                 $sql = $db->query($requete);
                 $res = $db->fetch_object($sql);
                 if ($res->id > 0) {
-                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $res->id . "\"'>Derni&egrave;re r&eacute;vision: " . $res->ref . "</button>";
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $res->id . "\"'>Derni&egrave;re r&eacute;vision: " . $res->ref . "</button>";
                 }
             } else if ($chr->statut != 3)
-                print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=ModifyAfterValid\"'>Modifier</button>";
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>Modifier</button>";
         }
         $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def WHERE active=1 AND isValidationForAll = 1";
         $sql2 = $db->query($requete2);
@@ -839,7 +855,7 @@ EOF;
             //Validation totale
             if (!($user->rights->synopsischrono->Modifier || $rightChrono->modifier))
                 print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-            print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=Valider\"'>Valider</button>";
+            print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider\"'>Valider</button>";
         } else {
             //Si droit de validation partiel
             $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def WHERE active=1 AND isValidationForAll <> 1 AND isValidationRight=1";
@@ -857,7 +873,7 @@ EOF;
 
                 if (!($user->rights->synopsischrono->Modifier || $rightChrono->modifier))
                     print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-                print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=AskValider\"'>Demande de validation</button>";
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=AskValider\"'>Demande de validation</button>";
             }
         }
         if ($chr->statut == 999) {
@@ -899,8 +915,8 @@ EOF;
                         }
                     }
 
-                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=Valider&value=1&def=" . $res3->id . "\"'>" . $res3->label . "</button>";
-                    print "<button class='butAction' onClick='location.href=\"fiche.php?id=" . $chr->id . "&action=Valider&value=0\"'>Invalider</button>";
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=1&def=" . $res3->id . "\"'>" . $res3->label . "</button>";
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=0\"'>Invalider</button>";
 
                     $hasAllRight = true;
                 }
@@ -934,7 +950,7 @@ EOF;
                             }
                             print "</table>";
                         } else {
-                            print "<form method='POST' action='fiche.php?id=" . $_REQUEST['id'] . "&def=" . $res3->id . "&action=multiValider'>";
+                            print "<form method='POST' action='?id=" . $_REQUEST['id'] . "&def=" . $res3->id . "&action=multiValider'>";
                             print "<table width=80%>";
                             print "<tr><td align=left  width=20%>" . $res3->label;
                             print "<td align=right><textarea name='note'></textarea>";
@@ -945,7 +961,7 @@ EOF;
                             print "</table>";
                             print "</form>";
                         }
-//                              print "<button class='butAction' onClick='location.href=\"fiche.php?id=".$chr->id."&action=valider&def=".$res3->id."\"'>".$res3->label."</button>";
+//                              print "<button class='butAction' onClick='location.href=\"?id=".$chr->id."&action=valider&def=".$res3->id."\"'>".$res3->label."</button>";
                     } else {
                         if ($res3->validation . "x" != "x") {
                             print "<table width=80%>";
@@ -994,7 +1010,7 @@ EOF;
                     title: "Suppression de chrono",
                     buttons: {
                         OK: function(){
-                            location.href='fiche.php?action=supprimer&id='+chronoId
+                            location.href='?action=supprimer&id='+chronoId
                             jQuery('#delDialog').dialog('close');
                         },
                         Annuler: function(){

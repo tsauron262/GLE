@@ -57,7 +57,7 @@ class modSynopsisChrono extends DolibarrModules
 
         // Dependences
         $this->depends = array("modSynopsisProcess","modBanque");
-        $this->requiredby = array();
+        $this->requiredby = array("modSynopsisHotline");
 
         // Constantes
         $this->const = array();

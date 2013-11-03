@@ -2014,8 +2014,10 @@ class formulaireSource extends formulaire {
     public function getValuePlus($id) {
         return $this->getValue($id);
     }
+    
+    
 
-    public function fetch($id) {
+    public function fetch($id, $inut = null) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             $this->id = $id;
@@ -2077,7 +2079,7 @@ class listform extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id) {
+    public function fetch($id, $inut = null) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2327,7 +2329,7 @@ class globalvar extends formulaireSource {
         print $this->getValue($inut);
     }
 
-    public function fetch($id) {
+    public function fetch($id, $inut = null) {
         global $conf, $langs;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2382,7 +2384,7 @@ class lien extends formulaireSource {
         $this->db = $db;
     }
 
-    function fetch($id) {
+    function fetch($id, $cssClass) {
         $this->id = $id;
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_lien WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
@@ -2390,26 +2392,29 @@ class lien extends formulaireSource {
         $this->table = $result->table;
         $this->nomElem = $result->nomElem;
         $this->champId = $result->champId;
+        $this->where = $result->where;
         $this->champVueSelect = $result->champVueSelect;
         $this->ordre = $result->ordre;
+        $this->urlObj = $result->urlObj;
+        $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
         $idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
+
+        $this->nomElement = getParaChaine($cssClass, "type:");
         $this->tabVal = array();
-        $tabResult = $this->getElement_Element($this->nomElem, "productCli", null, $idChrono);
+        $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
         foreach ($tabResult as $val)
             $this->tabVal[] = $val['s'];
-    }
-
-    function getElement_Element($a1, $a2, $a3, $a4) {
-        if ($this->ordre)
-            return getElementElement($a1, $a2, $a3, $a4);
-        else
-            $result = getElementElement($a2, $a1, $a4, $a3);
-        $tab = array();
-        foreach ($result as $ligne) {
-            $tab[] = array('s' => $ligne['d'], 'd' => $ligne['s']);
-        }
-        return $tab;
+        $debReq = "SELECT " . $this->champId . " as id, " . 
+                $this->champVueSelect . " as nom "
+                . "FROM " . $this->table . " "
+                . "WHERE 1";
+        $this->reqValue = $debReq ." AND ". $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
+        if($this->where != "")
+            $debReq .= " AND ".$this->where;
+        if ($this->sqlFiltreSoc != "" && $this->socid > 0)
+            $debReq .= " AND " . str_replace("[id]", $this->socid, $this->sqlFiltreSoc);
+        $this->reqValues = $debReq;
     }
 
     function getValuePlus($id) {
@@ -2422,26 +2427,24 @@ class lien extends formulaireSource {
                     $contratdet->fetch($result);
                     $html = "<br/>";
                     $color = "";
-//            die($contratdet->date_fin_validite."|".time());
                     $dtStr = date("c", $contratdet->date_fin_validite);
                     $dateF = new DateTime($dtStr);
                     $dtStr = date("c", time());
                     $dateActu = new DateTime();
                     $interval = date_diff($dateF, $dateActu);
-//            die($interval->format('%R%a days'));
                     if ($interval->format('%R%a') > 0)
                         $color = "red";
                     elseif ($interval->format('%R%a') > -30)
                         $color = "orange";
                     $html .= "<div style='background-color:" . $color . ";'>";
+                    $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
+                    $html .= "<br/>";
                     if ($contratdet->fk_product > 0) {
                         $product = new Product($this->db);
                         $product->fetch($contratdet->fk_product);
                         $html .= $product->getNomUrl(1) . " " . $product->description;
                         $html .= "<br/>";
                     }
-                    $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
-                    $html .= "<br/>";
                     $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . date("d M Y", $contratdet->date_fin_validite);
                     $html .= "<br/>";
                     $html .= "</div>";
@@ -2449,22 +2452,56 @@ class lien extends formulaireSource {
                 }
             }
         }
+        else
+            $this->getValue($id);
         return $this->valuesArr;
+    }
+    function setValue($idChrono, $tabVal){
+        print_r($tabVal);
+        delElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
+        foreach($tabVal as $val){
+            if($val != 0)
+        addElementElement($this->nomElem, $this->nomElement, $val, $idChrono, $this->ordre);
+            
+        }
     }
 
     function getValues() {
         $sup = "";
-        if ($this->sqlFiltreSoc != "" && $this->socid > 0)
-            $sup .= " WHERE " . str_replace("[id]", $this->socid, $this->sqlFiltreSoc);
-        $sql = $this->db->query("SELECT " . $this->champId . " as id, " . $this->champVueSelect . " as nom FROM " . $this->table . $sup);
-        while ($result = $this->db->fetch_object($sql))
+        $i = 0;
+        $sql = $this->db->query($this->reqValues);
+        while ($result = $this->db->fetch_object($sql)){
             $this->valuesArr[$result->id] = $result->nom;
+            if(in_array($result->id, $this->tabVal)){
+                $i++;
+                    echo getLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+            }
+        } 
+                    echo getLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
+//                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
+                    echo  "<button class='ajLien-".$this->nomElement."'>Ajouter</button>";
+                    echo '<script>'
+                    . 'idIncr = 100;'
+                    . '$(".ajLien-'.$this->nomElement.'").click(function(){'
+                            . 'model = $(this).parent().find(".model").html();'
+                            . 'select = $(this).parent().find("select");'
+                            . 'selectId = select.val();'
+                            . 'idIncr++;'
+                            . 'selectNom = select.find("option:selected").text();'
+                            . '$(this).parent().prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", selectId).replace("replaceNom", selectNom)+"</div>");'
+                            . 'return false;'
+                            . '});'
+                            . '</script>';
     }
 
     function getValue($id) {
-        $sql = $this->db->query("SELECT " . $this->champId . " as id, " . $this->champVueSelect . " as nom FROM " . $this->table . " WHERE " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")");
+        $sql = $this->db->query($this->reqValue);
+//        die("jjjj");
         if ($sql)
             while ($result = $this->db->fetch_object($sql))
+                if($this->urlObj != "")
+                $this->valuesArr[$result->id] = lien($this->urlObj.$result->id).finLien($result->nom);
+                else
                 $this->valuesArr[$result->id] = $result->nom;
     }
 
@@ -2499,7 +2536,7 @@ class requete extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id) {
+    public function fetch($id, $inut = null) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2563,7 +2600,6 @@ class requete extends formulaireSource {
                 $requete = preg_replace('/\[\[indexField\]\]/', $this->indexField . "='" . $val . "'", $requete);
             eval("\$requete = \"$requete\";");
             $sql = $this->db->query($requete);
-
             $arr = array();
             $arr2 = array();
             $arr3 = array();
@@ -2626,7 +2662,7 @@ class requete extends formulaireSource {
         if ($this->id > 0) {
             $requete = vsprintf($this->requete, $this->paramsArr);
             $requete .= " LIMIT  " . $this->limit;
-            eval("\$requete = \"$requete\";");
+//            eval("\$requete = \"$requete\";");
             $sql = $this->db->query($requete);
 
 
@@ -2816,7 +2852,7 @@ class fct extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id) {
+    public function fetch($id, $inut = null) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $conf, $user, $langs, $mysoc, $societe;
@@ -3200,4 +3236,7 @@ function finLien($nom) {
     return $nom . "</a>";
 }
 
+        function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = ""){
+            return '<div class="'.$classDiv.'"><input type="hidden" name="ChronoLien-'.$id.'-'.$nomElement.'-'.$i.'" value="'.$idVal."\"/><button onclick='$(this).parent(\"div\").remove(); return false;' class='supprLien'>X</button><a href=\"\">".$text."</a></div>";
+        }
 ?>

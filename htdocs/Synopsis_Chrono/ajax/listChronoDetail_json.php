@@ -100,7 +100,7 @@ if ($searchOn == 'true') {
 //            $searchString = $arr[3].'-'.$arr[2].'-'.$arr[1];
 //        }
 //    }.
-
+        $searchString = addslashes($searchString);
         if (isset($searchField)) {
             if ($_REQUEST['searchOper'] == 'eq') {
                 $oper = '=';
@@ -191,8 +191,8 @@ switch ($action) {
                     $arrvalueIsSelected[$nom] = true;
                 if ($res1->valueIsChecked == 1)
                     $arrvalueIsChecked[$nom] = true;
-                if ($resPre->type_valeur == 10){
-                    $tabLien[] = array("nom"=>$resPre->nom,"sub_valeur"=>$resPre->type_subvaleur);
+                if ($resPre->type_valeur == 10) {
+                    $tabLien[] = array("nom" => $resPre->nom, "sub_valeur" => $resPre->type_subvaleur);
                 }
             }
             $requete = "SELECT *
@@ -234,7 +234,7 @@ switch ($action) {
 
 //            $requete1 .= " LIMIT 0,100";
 //            $requete1 .= "      ORDER BY $sidx $sord";
-            if ($sidx == "chrono_id" && !$searchField){
+            if ($sidx == "chrono_id" && !$searchField) {
                 $requete1 .= "      ORDER BY id $sord";
                 $requete1 .= "         LIMIT $start , $limit";
             }
@@ -257,19 +257,20 @@ switch ($action) {
                 $arrRef[$res->chrono_id] = $res->ref;
                 $arrStatut[$res->chrono_id] = $res->fk_statut;
                 $arrKey[$res->key_id] = $nom;
-$_REQUEST['chrono_id'] = $res->chrono_id;
+                $_REQUEST['chrono_id'] = $res->chrono_id;
                 //Si from requete ou from var ou from liste, substitue la valeur "id" par la valeur "reelle"
-                $val = parseValue($res->chrono_value, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
+                $val = parseValue($res->chrono_value, $res->extraCss, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
                 $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
                 $iter++;
-                if(!isset($tabLienTraiter[$res->chrono_id])){
-            foreach($tabLien as $lien){
-                    $val = parseValue("", $lien['sub_valeur'], 1, "Lien", 1, 0);
+                if (!isset($tabLienTraiter[$res->chrono_id])) {
+                    foreach ($tabLien as $lien) {
+                        $lien['nom'] = str_replace(" ", "_", $lien['nom']);
+                        $val = parseValue("", $res->extraCss, $lien['sub_valeur'], 1, "Lien", 1, 0);
 
-                $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
-                $iter++;
-                $tabLienTraiter[$res->chrono_id] = true;
-            }
+                        $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
+                        $iter++;
+                        $tabLienTraiter[$res->chrono_id] = true;
+                    }
                 }
 //
 //            }
@@ -373,7 +374,7 @@ $_REQUEST['chrono_id'] = $res->chrono_id;
                 $responce->total = $total_pages;
                 $responce->records = $i;
             }
-                $requete .= "      ORDER BY $sidx $sord";
+            $requete .= "      ORDER BY $sidx $sord";
             if ($sidx != "chrono_id" || $searchField) {
                 $requete .= "         LIMIT $start , $limit";
             }
@@ -410,7 +411,7 @@ $_REQUEST['chrono_id'] = $res->chrono_id;
                             else
                                 $arr[] = (strtotime($res->$keyname) > 0 ? date('Y-m-d', strtotime($res->$keyname)) : "");
                         } else {
-                            $arr[] = htmlspecialchars($res->$keyname);
+                            $arr[] = $res->$keyname;
                         }
                     }
                     $arr[] = $chrono->getLibStatut(6);
@@ -427,7 +428,7 @@ $_REQUEST['chrono_id'] = $res->chrono_id;
         break;
 }
 
-function parseValue($val, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false) {
+function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false) {
     global $db;
     //Synopsis_Chrono_key_type_valeur
     if ($hasSubValeur) {
@@ -436,13 +437,14 @@ function parseValue($val, $hasSubValeur = false, $sourceIsOption = false, $phpCl
             require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
             $tmp = $phpClass;
             $obj = new $tmp($db);
-            $obj->fetch($hasSubValeur);
+            $obj->fetch($hasSubValeur, $extraCss);
             $obj->getValue($val);
-                    if(isset($obj->tabVal[0])){
-                        $val = $obj->tabVal[0];
-                        $valueIsSelected = true;
-                    }
-            $html = ""; 
+            if (isset($obj->tabVal[0])) {
+                $val = $obj->tabVal[0];
+                $valueIsSelected = true;
+                $aSuppr = true;
+            }
+            $html = "";
             foreach ($obj->valuesArr as $key => $value) {
                 if ($valueIsSelected && $val == $key) {
 //            var_dump($obj->valuesArr);

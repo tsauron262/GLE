@@ -89,20 +89,6 @@ class maj {
             $this->infoL("Finit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " . $this->erreur . " errerus");
     }
 
-//    private function netoyeDet($table, $table2 = null, $prefTab = null) {
-//        if ($prefTab)
-//            $nomTable = $prefTab . $table;
-//        else
-//            $nomTable = MAIN_DB_PREFIX . $table;
-//        if ($table2)
-//            $nomTable2 = $table2;
-//        else
-//            $nomTable2 = $nomTable . "det";
-//        $requete = "DELETE FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
-//        $this->queryS($requete);
-////        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
-////        $this->queryS($requete);
-//    }
 
     private function setTabNonImport($table, $table2 = null, $prefTab = null) {
         global $db;

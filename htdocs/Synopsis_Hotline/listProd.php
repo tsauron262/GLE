@@ -31,6 +31,7 @@ if (isset($_REQUEST['obj'])) {
         $filtre = "fk_societe=" . urlencode($_REQUEST['id']);
         $head = societe_prepare_head($soc);
         $champ = array(1005 => $_REQUEST['id']);
+        $socid = $_REQUEST['id'];
     } else if ($_REQUEST['obj'] == "ctr") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php';
@@ -43,11 +44,12 @@ if (isset($_REQUEST['obj'])) {
     }
     if (isset($_REQUEST['create']) && $_REQUEST['create']) {
         $ch = new Chrono($db);
-        $ch->model_refid = 100;
+        $ch->model_refid = 101;
+        $ch->socid = $socid;
         $id = $ch->create();
         $champ[1001] = date("d/m/Y");
         $ch->setDatas($id, $champ);
-        header('location: ../Synopsis_Chrono/fiche.php?nomenu=true&id=' . $id . '&action=Modify');
+        header('location: ../Synopsis_Chrono/fiche-nomenu.php?id=' . $id . '&action=Modify');
     }
 }
 
@@ -60,7 +62,7 @@ llxHeader($js, "Appel Hotline");
 dol_fiche_head($head, 'productCli', $langs->trans("Suivie hotline"));
 
 
-print "<input type='button' onclick=\"javascript: window.open('" . $_SERVER['REQUEST_URI'] . "&create=true','nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');".'" class="butAction" value = "Créer fiche hotline" /><br/><br/>  ';
+print "<input type='button' onclick=\"javascript: window.open('" . $_SERVER['REQUEST_URI'] . "&create=true','nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');".'" class="butAction" value = "Créer fiche produit" /><br/><br/>  ';
 
 print '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 

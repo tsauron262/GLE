@@ -14,8 +14,15 @@
  */
 require_once('../main.inc.php');
 
-global $oldPref;
+global $oldPref, $nbIframeMax, $nbIframe, $nbErreur;
 $oldPref = "llx_";
+
+$nbIframeMax = 4;
+
+
+
+$nbIframe = 0;
+$nbErreur = 0;
 
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Importation de données");
@@ -77,51 +84,149 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
 //    $requete = "SELECT * FROM llx_Synopsis_Chrono";
     $requete = "SELECT * FROM llx_Synopsis_Chrono_value";
+    $tabFusion = array();
     $sql = $db->query($requete);
     while ($result = $db->fetch_object($sql)) {
         if (isset($tabChrono[$result->chrono_refid][$result->key_id])) {
-            if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value)
+            if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value) {
                 supprLigneChronoValue($result->id);
-            else {
-                if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null)
+                continue;
+            } else {
+                if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null) {
                     supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id']);
-                elseif ($result->value == null || $result->value == "")
+                    continue;
+                } elseif ($result->value == null || $result->value == "") {
                     supprLigneChronoValue($result->id);
-                else
-                    echo "<br/>gros gros gros probléme deux clef pour meme champ diferent." .$tabChrono[$result->chrono_refid][$result->key_id]['val']."  |  ". $result->value;
+                    continue;
+                } else {
+                    $tabDay = explode("-", $result->value);
+                    $tabHour = explode(":", $result->value);
+                    if (isset($tabDay[2]) && isset($tabHour[2])) {
+                        $dateF = new DateTime($tabChrono[$result->chrono_refid][$result->key_id]['val']);
+                        $dateActu = new DateTime($result->value);
+                        $interval = date_diff($dateF, $dateActu);
+                        if ($interval->format('%R%a') > -2 && $interval->format('%R%a') < 2) {
+                            supprLigneChronoValue($result->id);
+                            continue;
+                        }
+                    }
+                }
             }
+            echo "<br/>gros gros gros probléme deux clef pour meme champ diferent." . $tabChrono[$result->chrono_refid][$result->key_id]['val'] . "  |  " . $result->value;
             continue;
         }
         $tabChrono[$result->chrono_refid][$result->key_id] = array('val' => $result->value, 'id' => $result->id);
-        if ($result->key_id == "1011" && stripos($result->value, "clients mac") === false && stripos($result->value, "Postes Apple") === false && stripos($result->value, "clients pc") === false && stripos($result->value, "Serveur mac") === false && stripos($result->value, "NC") === false) {
+        if ($result->key_id == "1011" && stripos($result->value, "clients mac") === false && stripos($result->value, "Postes clients Mac") === false && stripos($result->value, "Postes Apple") === false && stripos($result->value, "clients pc") === false && stripos($result->value, "Serveur mac") === false && stripos($result->value, "Postes Mac") === false && stripos($result->value, "Postes clients Apple") === false && stripos($result->value, "NC") === false) {
             if (!isset($tabSN[$result->value]))//Tous vas bien c'est la premiere fois que on a cette sn
                 $tabSN[$result->value] = $result->chrono_refid;
-            elseif ($tabChrono[$tabSN[$result->value]][1010] == $tabChrono[$result->chrono_refid][1010])//Identique que un autre fusion
-                $tabFusion[$tabSN[$result->value]][] = $result->chrono_refid;
-            else //Meme num de serie mais pas meme product //probleme
-                echo lienFusion($tabSN[$result->value], $result->chrono_refid) . "<br/>" . $result->value . "probléme" . $tabSN[$result->value] . "|" . $result->chrono_refid . "||||" . $tabChrono[$tabSN[$result->value]][1010] . "|" . $tabChrono[$result->chrono_refid][1010];
+            else {
+                $oldId = $tabSN[$result->value];
+                $newId = $result->chrono_refid;
+                $idOldProd = $tabChrono[$oldId][1010]['val'];
+                $idNewProd = $tabChrono[$result->chrono_refid][1010]['val'];
+                $tabProdIgnore = array(0, 559, 561, 560);
+                if ($oldId == $newId)
+                    die("Oups");
+                if ($idOldProd == $idNewProd)//Identique que un autre fusion
+                    $tabFusion[$oldId][$newId] = $newId;
+                elseif (in_array($idNewProd, $tabProdIgnore))
+                    $tabFusion[$oldId][$newId] = $newId;
+                elseif (in_array($idOldProd, $tabProdIgnore))
+                    $tabFusion[$newId][$oldId] = $oldId;
+                else { //Meme num de serie mais pas meme product //probleme
+                    echo "<br/>" . $result->value . "probléme" . $oldId . "|" . $newId . "||||" . $idOldProd . "|" . $idNewProd;
+                    echo lienFusion($oldId, $newId);
+                }
+            }
         }
     }
-
     foreach ($tabFusion as $idMettre => $tabIdFaible) {
         $sql = $db->query("SELECT * FROM llx_Synopsis_Chrono WHERE id = " . $idMettre);
         $chrono_maitre = $db->fetch_object($sql);
         foreach ($tabIdFaible as $idFaible) {
             $sql = $db->query("SELECT * FROM llx_Synopsis_Chrono WHERE id = " . $idFaible);
             $chrono_faible = $db->fetch_object($sql);
-            if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe)
-                echo lienFusion($idMettre, $idFaible) . "<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc ";
-            elseif ($idMettre == $idFaible)
+            if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
+                echo "<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe;
+                echo lienFusion($idMettre, $idFaible);
+            } elseif ($idMettre == $idFaible)
                 echo("<br/><br/>Meme id " . $idMettre);
             else
                 fusionChrono($idMettre, $idFaible);
         }
     }
-} else {
-    echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
-    echo "<br/>";
-    echo '<form action=""><input type="hidden" name="action" value="majChrono"/><input type="submit" value="MAJ Chrono" class="butAction"/></form>';
 }
+else if (isset($_GET['action']) && $_GET['action'] == "verif") {
+    $sql = $db->query("SELECT * FROM llx_Synopsis_Chrono_key WHERE type_valeur = 10");
+    while ($result = $db->fetch_object($sql)) {
+        $tabValOk = array();
+        $sql2 = $db->query("SELECT * FROM llx_Synopsis_Chrono_lien WHERE rowid = " . $result->type_subvaleur);
+        $result2 = $db->fetch_object($sql2);
+        if ($result2->sqlFiltreSoc != "") {
+            $champId = $result2->champId;
+            $sqlChrono = $db->query("SELECT * FROM llx_Synopsis_Chrono WHERE model_refid = " . $result->model_refid);
+            while ($resultChrono = $db->fetch_object($sqlChrono)) {
+                $idSoc = $resultChrono->fk_societe;
+                if (!isset($tabSoc[$idSoc])) {
+                    $tabSoc[$idSoc] = array();
+                    $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));
+                    while ($result4 = $db->fetch_object($sql4)) {
+                        $tabSoc[$idSoc][] = $result4->$champId;
+                    }
+                }
+                if (!isset($tabValOK)) {
+                    $tabValOK = array();
+                    $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table);
+                    while ($result4 = $db->fetch_object($sql4)) {
+                        $tabValOK[] = $result4->$champId;
+                    }
+                }
+
+                $tabLien = getElementElement($result2->nomElem, getParaChaine($result->extraCss, "type:"), null, $resultChrono->id);
+                foreach ($tabLien as $lien) {
+                    if (!in_array($lien['s'], $tabValOK)) {
+                        $tabSuppr['elementElement'][$result2->nomElem][$lien['s']] = $lien['s'];
+                        erreur("Lien vers element existant plus." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . "</br>");
+                    }
+                }
+                foreach ($tabLien as $lien) {
+                    if (!in_array($lien['s'], $tabSoc[$idSoc]) && !isset($tabSuppr['elementElement'][$result2->nomElem][$lien['s']]))
+                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . "</br>");
+                }
+            }
+        }
+    }
+    if (isset($tabSuppr['elementElement']))
+        foreach ($tabSuppr['elementElement'] as $element => $tabValSuppr)
+            foreach ($tabValSuppr as $idSuppr)
+                delElementElement($element, null, $idSuppr);
+
+    $sqlValueChronoSansParent = $db->query("SELECT * FROM `llx_Synopsis_Chrono_value` WHERE `chrono_refid` NOT IN (SELECT id FROM llx_Synopsis_Chrono)");
+    while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
+        erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
+
+
+    netoyeDet("propal");
+    netoyeDet("commande");
+    netoyeDet("contrat");
+    netoyeDet("propal");
+    netoyeDet("usergroup", MAIN_DB_PREFIX . "usergroup_user");
+    netoyeDet("user", MAIN_DB_PREFIX . "usergroup_user");
+    netoyeDet("user", MAIN_DB_PREFIX . "user_rights");
+//        netoyeDet("product", "babel_categorie_product", "babel_");
+
+
+    if ($nbErreur == 0)
+        echo "Succés";
+    else
+        echo "Finit avec des erreurs";
+}
+
+echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
+echo "<br/>";
+echo '<form action=""><input type="hidden" name="action" value="majChrono"/><input type="submit" value="MAJ Chrono" class="butAction"/></form>';
+echo "<br/>";
+echo '<form action=""><input type="hidden" name="action" value="verif"/><input type="submit" value="Vérif général" class="butAction"/></form>';
 
 
 
@@ -166,7 +271,7 @@ function getTab() {
 //        ),
 //        array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
 //            array('rowid', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
-//            array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */'fax', /* 'email', 'jabberid', 'priv', */'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
+//            array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */ 'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */ 'fax', /* 'email', 'jabberid', 'priv', */ 'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
 //        ),
 ////        array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "element_contact",
 ////            array( '$%4', 'fk_societe', '$%102', 'rowid', 'external_id'),
@@ -222,7 +327,7 @@ function getTab() {
 //        ),
 //        array($oldPref . "commandedet", MAIN_DB_PREFIX . "commandedet",
 //            array('rowid', 'fk_commande', 'fk_product', 'description', 'tva_tx', 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva', 'total_ttc', 'info_bits', /* 'marge_tx', 'marque_tx', */ 'special_code', 'rang', /* 'finance_ok', 'logistique_ok', 'logistique_date_dispo', 'coef', 'external_id', 'pu_achat_ht', 'propaldet_refid' */),
-//            array('rowid', 'fk_commande', /* 'fk_parent_line', */ 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc', /* 'product_type', 'date_start', 'date_end', */'info_bits', /* 'marge_tx', 'marque_tx', */ 'special_code', 'rang', /* 'import_key' */)
+//            array('rowid', 'fk_commande', /* 'fk_parent_line', */ 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc', /* 'product_type', 'date_start', 'date_end', */ 'info_bits', /* 'marge_tx', 'marque_tx', */ 'special_code', 'rang', /* 'import_key' */)
 //        ),
 //        array($oldPref . "commande_fournisseur", MAIN_DB_PREFIX . "commande_fournisseur",
 //            array(),
@@ -254,11 +359,11 @@ function getTab() {
 //        ),
 //        array($oldPref . "propal", MAIN_DB_PREFIX . "propal",
 //            array('rowid', 'ref', 'ref_client', 'fk_soc', 'fk_projet', 'tms', 'datec', 'datep', 'fin_validite', 'date_valid', 'date_cloture', 'fk_user_author', 'fk_user_valid', 'fk_user_cloture', 'fk_statut', 'price', 'remise_percent', 'remise_absolue', 'remise'/* , 'date_abandon', 'fk_user_abandon', 'accompte_ht' */, 'total_ht', 'tva', 'total', 'fk_cond_reglement', 'fk_mode_reglement', 'note', 'note_public', 'model_pdf', 'date_livraison', 'fk_adresse_livraison'/* , 'date_demandeValid', 'isFinancement', 'isLocation', 'date_devis_fourn', 'fournisseur_refid', 'tva_tx_fin_refid', 'revision', 'orig_ref' */),
-//            array('rowid', 'ref', /* 'entity', 'ref_ext', 'ref_int', */'ref_client', 'fk_soc', 'fk_projet', 'tms', 'datec', 'datep', 'fin_validite', 'date_valid', 'date_cloture', 'fk_user_author', 'fk_user_valid', 'fk_user_cloture', 'fk_statut', 'price', 'remise_percent', 'remise_absolue', 'remise', 'total_ht', 'tva', /* 'localtax1', 'localtax2', */'total', /* 'fk_account', 'fk_currency', */ 'fk_cond_reglement', 'fk_mode_reglement', 'note_private', 'note_public', 'model_pdf', 'date_livraison', /* 'fk_availability', 'fk_demand_reason', 'import_key', 'extraparams', */ 'fk_delivery_address')
+//            array('rowid', 'ref', /* 'entity', 'ref_ext', 'ref_int', */ 'ref_client', 'fk_soc', 'fk_projet', 'tms', 'datec', 'datep', 'fin_validite', 'date_valid', 'date_cloture', 'fk_user_author', 'fk_user_valid', 'fk_user_cloture', 'fk_statut', 'price', 'remise_percent', 'remise_absolue', 'remise', 'total_ht', 'tva', /* 'localtax1', 'localtax2', */ 'total', /* 'fk_account', 'fk_currency', */ 'fk_cond_reglement', 'fk_mode_reglement', 'note_private', 'note_public', 'model_pdf', 'date_livraison', /* 'fk_availability', 'fk_demand_reason', 'import_key', 'extraparams', */ 'fk_delivery_address')
 //        ),
 //        array($oldPref . "propaldet", MAIN_DB_PREFIX . "propaldet",
 //            array('rowid', 'fk_propal', 'fk_product', 'description', 'fk_remise_except', 'tva_tx', 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', 'total_ttc', 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang'/* , 'coef', 'dureeLoc' */),
-//            array('rowid', 'fk_propal', /* 'fk_parent_line', */'fk_product', 'description', 'fk_remise_except', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx'*, */ 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc'/* , 'product_type', 'date_start', 'date_end' */, 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang')
+//            array('rowid', 'fk_propal', /* 'fk_parent_line', */ 'fk_product', 'description', 'fk_remise_except', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx'*, */ 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc'/* , 'product_type', 'date_start', 'date_end' */, 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang')
 //        ),
 ////        array("Babel_Chrono", MAIN_DB_PREFIX."Synopsis_Chrono",
 ////            array(),
@@ -298,7 +403,7 @@ function getTab() {
 //        ),
 //        array($oldPref . "facturedet", MAIN_DB_PREFIX . "facturedet",
 //            array('rowid', 'fk_facture', 'fk_product', 'description', 'tva_taux', 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'subprice', 'price', 'total_ht', 'total_tva', 'total_ttc', 'product_type', 'date_start', 'date_end', 'info_bits', 'fk_code_ventilation', 'fk_export_compta', 'special_code', 'rang'/* ,              'durSav', 'coef', 'lineFromComId', 'lineFromPropId' */),
-//            array('rowid', 'fk_facture'/* , 'fk_parent_line' */, 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'subprice', 'price', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */'total_ttc', 'product_type', 'date_start', 'date_end', 'info_bits', 'fk_code_ventilation', 'fk_export_compta', 'special_code', 'rang'/* , 'import_key' */)
+//            array('rowid', 'fk_facture'/* , 'fk_parent_line' */, 'fk_product', 'description', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx', */ 'qty', 'remise_percent', 'remise', 'fk_remise_except', 'subprice', 'price', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc', 'product_type', 'date_start', 'date_end', 'info_bits', 'fk_code_ventilation', 'fk_export_compta', 'special_code', 'rang'/* , 'import_key' */)
 //        ),
 //        array($oldPref . "societe_remise_except", MAIN_DB_PREFIX . "societe_remise_except",
 //            array(),
@@ -337,8 +442,8 @@ function getTab() {
 //            array()
 //        ),
 //        array("babel_product", MAIN_DB_PREFIX . "product",
-//            array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
-//            array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
+//            array('rowid', 'ref', 'datec', 'tms', 'label', 'description', 'note', 'price', 'price_ttc', 'price_base_type', 'tva_tx', /* 'price_loc', 'price_loc_ttc', */ 'fk_user_author', /* 'envente', 'nbvente', */ 'fk_product_type', 'duration', /* 'stock_propale', 'stock_commande', */ 'seuil_stock_alerte', /* 'stock_loc', */ 'barcode', 'fk_barcode_type', 'partnumber', 'weight', 'weight_units', 'volume', 'volume_units', 'canvas', /* 'magento_id', 'magento_product', 'magento_type', 'magento_sku', 'magento_cat', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', */ 'external_id', /* 'qteTempsPerDuree', 'qteTktPerDuree' */),
+//            array('rowid', 'ref', /* 'entity', 'ref_ext', */ 'datec', 'tms', /* 'virtual', 'fk_parent', */ 'label', 'description', 'note', /* 'customcode', 'fk_country', */ 'price', 'price_ttc', /* 'price_min', 'price_min_ttc', */ 'price_base_type', 'tva_tx', /* 'recuperableonly', 'localtax1_tx', 'localtax2_tx', */ 'fk_user_author', /* 'tosell', 'tobuy', */ 'fk_product_type', 'duration', 'seuil_stock_alerte', 'barcode', 'fk_barcode_type', /* 'accountancy_code_sell', 'accountancy_code_buy', */ 'partnumber', 'weight', 'weight_units', /* 'length', 'length_units', 'surface', 'surface_units', */ 'volume', 'volume_units', /* 'stock', 'pmp', */ 'canvas', /* 'finished', 'hidden', */ 'import_key')
 //        ),
 //        array("babel_product", MAIN_DB_PREFIX . "product_extrafields",
 //            array('rowid', 'durSav', 'isSAV', 'durValid', 'reconductionAuto', 'VisiteSurSite', 'SLA', 'Maintenance', 'TeleMaintenance', 'Hotline', 'PrixAchatHT', 'qte', 'clause', 'qteTempsPerDuree', 'qteTktPerDuree', 'annexe'),
@@ -369,7 +474,7 @@ function getTab() {
 //            array()
 //        ),
 //        array($oldPref . "contrat", MAIN_DB_PREFIX . "contrat",
-//            array('rowid', 'ref', 'tms', 'datec', 'date_contrat', 'statut'/* , 'modelPdf' */, 'mise_en_service', 'fin_validite', 'date_cloture', 'fk_soc', 'fk_projet', 'fk_commercial_signature', 'fk_commercial_suivi', 'fk_user_author', 'fk_user_mise_en_service', 'fk_user_cloture', 'note', 'note_public', 'linkedTo', /* , 'date_valid', 'is_financement', 'cessionnaire_refid', 'fournisseur_refid', 'tva_tx', 'line_order', 'warned', */'type'), // 'prorata', 'facturation_freq', 'condReg_refid', 'modeReg_refid'),
+//            array('rowid', 'ref', 'tms', 'datec', 'date_contrat', 'statut'/* , 'modelPdf' */, 'mise_en_service', 'fin_validite', 'date_cloture', 'fk_soc', 'fk_projet', 'fk_commercial_signature', 'fk_commercial_suivi', 'fk_user_author', 'fk_user_mise_en_service', 'fk_user_cloture', 'note', 'note_public', 'linkedTo', /* , 'date_valid', 'is_financement', 'cessionnaire_refid', 'fournisseur_refid', 'tva_tx', 'line_order', 'warned', */ 'type'), // 'prorata', 'facturation_freq', 'condReg_refid', 'modeReg_refid'),
 //            array('rowid', 'ref'/* , 'entity' */, 'tms', 'datec', 'date_contrat', 'statut', 'mise_en_service', 'fin_validite', 'date_cloture', 'fk_soc', 'fk_projet', 'fk_commercial_signature', 'fk_commercial_suivi', 'fk_user_author', 'fk_user_mise_en_service', 'fk_user_cloture', 'note_private', 'note_public', 'import_key', 'extraparams')
 //        ),
 //        array($oldPref . "contratdet", MAIN_DB_PREFIX . "contratdet",
@@ -432,10 +537,10 @@ function getTab() {
 ////            array( '$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
 ////            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
 ////        ),
-//        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_product_serial_cont",
-//            array(),
-//            array()
-//        ),
+        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_product_serial_cont",
+            array(),
+            array()
+        ),
         array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX . "Synopsis_Chrono",
             array("contratdet_refid", "$%101", "$%1"),
             array("id", "model_refid", "fk_user_author")
@@ -464,11 +569,25 @@ function getTab() {
 }
 
 function lienFusion($id1, $id2) {
+    global $nbIframeMax, $nbIframe;
     echo "<br/>";
-    echo '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id1 . '">Prod 1</a>';
+    $lien = DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id1;
+    echo '<a href="' . $lien . '">Prod 1</a>';
+    if ($nbIframe < $nbIframeMax) {
+        $nbIframe++;
+        echo '<iframe width="600" height="600" src="' . $lien . '&nomenu=true"></iframe>';
+    }
     echo '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id1 . '"/><input type="hidden" name="id2" value="' . $id2 . '"/><input type="submit" value="Garder 1" class="butAction"/></form>';
-    echo '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id2 . '">Prod 2</a>';
+    $lien = DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id2;
+
+    echo '<a href="' . $lien . '">Prod 2</a>';
     echo '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id2 . '"/><input type="hidden" name="id2" value="' . $id1 . '"/><input type="submit" value="Garder 2" class="butAction"/></form>';
+    if ($nbIframe < $nbIframeMax) {
+        $nbIframe++;
+        echo '<iframe width="600" height="600" src="' . $lien . '&nomenu=true"></iframe>';
+        echo "<br/><br/>";
+    }
+    echo "<br/><br/>";
 }
 
 function supprLigneChronoValue($id) {
@@ -483,6 +602,36 @@ function fusionChrono($idMaitre, $idFaible) {
     $db->query("DELETE FROM llx_Synopsis_Chrono WHERE id=" . $idFaible);
     $db->query("DELETE FROM llx_Synopsis_Chrono_value WHERE chrono_refid=" . $idFaible);
     echo "<br/>FUSION OK :" . $idMaitre . "|" . $idFaible;
+}
+
+function erreur($text) {
+    global $nbErreur;
+    echo $text;
+    echo "<br/>";
+    $nbErreur++;
+}
+
+function netoyeDet($table, $table2 = null, $prefTab = null) {
+    global $db;
+    if ($prefTab)
+        $nomTable = $prefTab . $table;
+    else
+        $nomTable = MAIN_DB_PREFIX . $table;
+    if ($table2)
+        $nomTable2 = $table2;
+    else
+        $nomTable2 = $nomTable . "det";
+    $requete = "DELETE FROM " . $nomTable2 . " WHERE fk_" . $table . " NOT IN (SELECT DISTINCT(rowid) FROM " . $nomTable . " WHERE 1);";
+    $result = $db->query($requete);
+    if (!$result)
+        echo "requete incorrecte" . $requete;
+//        else echo mysqli_affected_rows($db).$requete;
+    if ($db->affected_rows($result) > 0)
+        echo $db->affected_rows($result) . " lignes supprimé dans la table " . $table . "</br></br>";
+//        else
+//            echo "Pas de suppressio";
+//        $requete = "DELETE FROM ".MAIN_DB_PREFIX."propaldet WHERE fk_propal NOT IN (SELECT DISTINCT(rowid) FROM ".MAIN_DB_PREFIX."propal WHERE 1);";
+//        $this->queryS($requete);
 }
 
 ?>

@@ -170,7 +170,7 @@ if ($action == 'modifier') {
         foreach ($tmpArray as $nomElement => $tabVal) {
             if ($nomElement != "") {
                 $objLien = new Lien($db);
-                $objLien->fetch($idLien, "type:".$nomElement);
+                $objLien->fetch($idLien, "type:" . $nomElement);
                 $objLien->setValue($id, $tabVal);
             }
         }
@@ -232,7 +232,7 @@ EOF;
         $js .= <<< EOF
           jQuery(document).ready(function(){
             jQuery('#socid').change(function(){
-              var socid = jQuery(this).find(':selected').val();
+              socid = jQuery(this).find(':selected').val();
               if (socid > 0)
               {
                     jQuery.ajax({
@@ -279,20 +279,19 @@ $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/
 $chr = new Chrono($db);
 if ($id > 0) {
     $chr->fetch($id);
-if (isset($_REQUEST['nomenu'])){
-    top_htmlhead($js, 'Fiche '.$chr->model->titre);
-}
-else
-    llxHeader($js, 'Fiche '.$chr->model->titre);
+    if (isset($_REQUEST['nomenu'])) {
+        top_htmlhead($js, 'Fiche ' . $chr->model->titre);
+    } else
+        llxHeader($js, 'Fiche ' . $chr->model->titre);
 
 //print "<div class='titre'>Fiche chrono</div><br/>";
 
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/revision_merlot.class.php");
-$conv = new revision_merlot($db);
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/revision_merlot.class.php");
+    $conv = new revision_merlot($db);
 
-if ($msg . "x" != 'x') {
-    print "<div style='padding: 3px;'><span class='ui-icon ui-icon-info' style='float: left;'></span>" . $msg . "</div>";
-}
+    if ($msg . "x" != 'x') {
+        print "<div style='padding: 3px;'><span class='ui-icon ui-icon-info' style='float: left;'></span>" . $msg . "</div>";
+    }
     $tmpChr = 'chrono' . $chr->model_refid;
     $rightChrono = $user->rights->chrono_user->$tmpChr;
 
@@ -306,11 +305,11 @@ if ($msg . "x" != 'x') {
     //saveHistoUser($chr->id, "chrono",$chr->ref);
 
     $html = new Form($db);
-    
-if (!isset($_REQUEST['nomenu'])){
-    $head = chrono_prepare_head($chr);
-    dol_fiche_head($head, 'chrono', $chr->model->titre);
-}
+
+    if (!isset($_REQUEST['nomenu'])) {
+        $head = chrono_prepare_head($chr);
+        dol_fiche_head($head, 'chrono', $chr->model->titre);
+    }
 
     if ($_GET['action'] == 'delete') {
         $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode($_GET["urlfile"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
@@ -357,8 +356,10 @@ if (!isset($_REQUEST['nomenu'])){
                 print '    <td  class="ui-widget-content" colspan="3"><div id="contactSociete">' . $tmpContact . '</div></td>';
         }
 
-        print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
-        print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea></td>';
+        if ($chr->model->hasDescription) {
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
+            print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea></td>';
+        }
 
 //Ajoute les extra key/Values
         $requete = "SELECT k.nom,
@@ -437,7 +438,7 @@ EOF;
 EOF;
                         print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
                         print <<<EOF
-    }*/);
+    });*/
 });
 
                       </script>
@@ -521,6 +522,39 @@ EOF;
         print "<button class='butAction'>Modifier</button>";
         print '</table>';
         print '</form>';
+
+        echo '<script>'
+        . '$( document ).ready(function() {'
+        . 'idIncr = 100;'
+        . '$(".ajLien").click(function(){'
+        . 'model = $(this).parent().find(".model").html();'
+        . 'select = $(this).parent().find("select");'
+        . 'selectId = select.val();'
+        . 'idIncr++;'
+        . 'selectNom = select.find("option:selected").text();'
+        . '$(this).parent().prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", selectId).replace("replaceNom", selectNom)+"</div>");'
+        . 'return false;'
+        . '});'
+        . '$(".addChrono").click(function(){ '
+        . 'parent = $(this).parent();'
+        . 'model = $(this).parent().find(".model").html();'
+        . 'model_refid = $(this).attr("id").replace("addChrono", "");'
+        . 'socid = $("#socid").parent().find("select").val();'
+        . 'jQuery.ajax({
+                      url:"ajax/addChrono.php",
+                      type:"POST",
+                      datatype:"xml",
+                      data:"model="+model_refid+"&socid="+socid,
+                      success: function(msg){'
+        . 'idIncr++;'
+        . 'parent.prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", msg).replace("replaceNom", "Nouvellement crée")+"</div>");
+                                popChrono(msg);'
+        . '}
+                    });'
+        . 'return false;'
+        . '});'
+        . '});'
+        . '</script>';
     } else {
         print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
@@ -554,16 +588,18 @@ EOF;
         }
         $chr->user_author->fetch($chr->user_author->id);
 
-        print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Cr&eacute;er le';
-        print '    <td  class="ui-widget-content" colspan="1">' . date('d/m/Y \&\a\g\r\a\v\e\; H:i', $chr->date) . '</td>';
-        print '    <th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Par';
-        print '    <td  class="ui-widget-content" colspan="1">' . $chr->user_author->getNomUrl(1) . '</td>';
-        if ($chr->user_modif_id > 0) {
-            $chr->user_modif->fetch($chr->user_modif->id);
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Derni&egrave;re modification le';
-            print '    <td  class="ui-widget-content" colspan="1">' . date('d/m/Y \&\a\g\r\a\v\e\; H:i', $chr->date_modif) . '</td>';
+        if ($chr->model->hasSuivie) {
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Cr&eacute;er le';
+            print '    <td  class="ui-widget-content" colspan="1">' . date('d/m/Y \&\a\g\r\a\v\e\; H:i', $chr->date) . '</td>';
             print '    <th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Par';
-            print '    <td  class="ui-widget-content" colspan="1">' . $chr->user_modif->getNomUrl(1) . '</td>';
+            print '    <td  class="ui-widget-content" colspan="1">' . $chr->user_author->getNomUrl(1) . '</td>';
+            if ($chr->user_modif_id > 0) {
+                $chr->user_modif->fetch($chr->user_modif->id);
+                print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Derni&egrave;re modification le';
+                print '    <td  class="ui-widget-content" colspan="1">' . date('d/m/Y \&\a\g\r\a\v\e\; H:i', $chr->date_modif) . '</td>';
+                print '    <th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Par';
+                print '    <td  class="ui-widget-content" colspan="1">' . $chr->user_modif->getNomUrl(1) . '</td>';
+            }
         }
 
         if ($chr->validation_number > 0 && $chr->statut != 2 && $chr->statut != 3) {
@@ -661,8 +697,10 @@ EOF;
 
 
 
-        print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Statut';
-        print '    <td  class="ui-widget-content" colspan="3">' . $chr->getLibStatut(4) . '</td>';
+        if ($chr->model->hasStatut) {
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Statut';
+            print '    <td  class="ui-widget-content" colspan="3">' . $chr->getLibStatut(4) . '</td>';
+        }
 
         if ($chr->model->hasProjet) {
             print '<tr><th class="ui-widget-header ui-state-default">Projet
@@ -701,11 +739,11 @@ EOF;
             }
             echo "</td>";
         }
-
+        if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
-        print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
-        print '    <td  class="ui-widget-content" colspan="3">' . $chr->description . '</td>';
-
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
+            print '    <td  class="ui-widget-content" colspan="3">' . $chr->description . '</td>';
+        }
 //Ajoute les extra key/Values
         $requete = "SELECT k.nom,
                            k.id,
@@ -850,139 +888,141 @@ EOF;
             if ($hasRight)
                 break;
         }
-        if (($user->rights->synopsischrono->Valider || $hasRight) && $chr->statut == 0) {
+        if ($chr->model->hasStatut) {
+            if (($user->rights->synopsischrono->Valider || $hasRight) && $chr->statut == 0) {
 
-            //Validation totale
-            if (!($user->rights->synopsischrono->Modifier || $rightChrono->modifier))
-                print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-            print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider\"'>Valider</button>";
-        } else {
-            //Si droit de validation partiel
-            $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def WHERE active=1 AND isValidationForAll <> 1 AND isValidationRight=1";
-            $sql2 = $db->query($requete2);
-            $hasRight = false;
-            while ($res2 = $db->fetch_object($sql2)) {
-                $tmp = $res2->code;
-                if ($rightChrono->$tmp)
-                    $hasRight = true;
-                if ($hasRight)
-                    break;
-            }
-
-            if ($hasRight && $chr->statut == 0) {
-
+                //Validation totale
                 if (!($user->rights->synopsischrono->Modifier || $rightChrono->modifier))
                     print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
-                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=AskValider\"'>Demande de validation</button>";
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider\"'>Valider</button>";
+            } else {
+                //Si droit de validation partiel
+                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def WHERE active=1 AND isValidationForAll <> 1 AND isValidationRight=1";
+                $sql2 = $db->query($requete2);
+                $hasRight = false;
+                while ($res2 = $db->fetch_object($sql2)) {
+                    $tmp = $res2->code;
+                    if ($rightChrono->$tmp)
+                        $hasRight = true;
+                    if ($hasRight)
+                        break;
+                }
+
+                if ($hasRight && $chr->statut == 0) {
+
+                    if (!($user->rights->synopsischrono->Modifier || $rightChrono->modifier))
+                        print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
+                    print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=AskValider\"'>Demande de validation</button>";
+                }
             }
-        }
-        if ($chr->statut == 999) {
-            print '<tr><th align=right class="ui-state-default" nowrap colspan=4 >';
-            $requete3 = "SELECT *
+            if ($chr->statut == 999) {
+                print '<tr><th align=right class="ui-state-default" nowrap colspan=4 >';
+                $requete3 = "SELECT *
                                  FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def
                                 WHERE isValidationForAll = 1
                                   AND active=1
                                   AND isValidationRight=1 ";
-            $sql3 = $db->query($requete3);
-            $hasAllRight = false;
-            while ($res3 = $db->fetch_object($sql3)) {
-                $tmp = $res3->code;
-                if ($rightChrono->$tmp) {
-                    $requete4 = "SELECT d.label, d.id, M.user_refid,M.tms, d.code, M.validation
+                $sql3 = $db->query($requete3);
+                $hasAllRight = false;
+                while ($res3 = $db->fetch_object($sql3)) {
+                    $tmp = $res3->code;
+                    if ($rightChrono->$tmp) {
+                        $requete4 = "SELECT d.label, d.id, M.user_refid,M.tms, d.code, M.validation
                                          FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def as d
                                     LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Chrono_Multivalidation as M ON M.right_refid = d.id AND M.validation_number " . ($chr->validation_number > 0 ? " = " . $chr->validation_number : "IS NULL") . " AND M.chrono_refid = " . $id . "
                                         WHERE isValidationForAll <> 1
                                           AND isValidationRight=1";
-                    $sql4 = $db->query($requete4);
-                    $html = new Form($db);
+                        $sql4 = $db->query($requete4);
+                        $html = new Form($db);
 
-                    while ($res4 = $db->fetch_object($sql4)) {
-                        $tmp = $res4->code;
-                        if ($res4->validation . "x" != "x") {
-                            print "<table width=80%>";
-                            print "<tr><td align=left  width=20%>" . $res4->label;
-                            print "<td align=right>";
-                            $tmpUser = new User($db);
-                            $tmpUser->fetch($res4->user_refid);
-                            if ($res4->validation == 1) {
-                                print img_tick("Valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res4->tms));
-                            } else {
-                                print img_error("Non valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res4->tms));
+                        while ($res4 = $db->fetch_object($sql4)) {
+                            $tmp = $res4->code;
+                            if ($res4->validation . "x" != "x") {
+                                print "<table width=80%>";
+                                print "<tr><td align=left  width=20%>" . $res4->label;
+                                print "<td align=right>";
+                                $tmpUser = new User($db);
+                                $tmpUser->fetch($res4->user_refid);
+                                if ($res4->validation == 1) {
+                                    print img_tick("Valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res4->tms));
+                                } else {
+                                    print img_error("Non valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res4->tms));
+                                }
+                                print "</table>";
                             }
-                            print "</table>";
                         }
+
+                        print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=1&def=" . $res3->id . "\"'>" . $res3->label . "</button>";
+                        print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=0\"'>Invalider</button>";
+
+                        $hasAllRight = true;
                     }
-
-                    print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=1&def=" . $res3->id . "\"'>" . $res3->label . "</button>";
-                    print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Valider&value=0\"'>Invalider</button>";
-
-                    $hasAllRight = true;
                 }
-            }
-            if (!$hasAllRight) {
-                $requete3 = "SELECT d.label, d.id, M.user_refid,M.tms, d.code, M.validation, M.note
+                if (!$hasAllRight) {
+                    $requete3 = "SELECT d.label, d.id, M.user_refid,M.tms, d.code, M.validation, M.note
                                      FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def as d
                                 LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Chrono_Multivalidation as M ON M.right_refid = d.id AND M.validation_number " . ($chr->validation_number > 0 ? " = " . $chr->validation_number : "IS NULL") . " AND M.chrono_refid = " . $id . "
                                     WHERE isValidationForAll <> 1
                                       AND isValidationRight=1";
-                $sql3 = $db->query($requete3);
-                $html = new Form($db);
+                    $sql3 = $db->query($requete3);
+                    $html = new Form($db);
 
-                while ($res3 = $db->fetch_object($sql3)) {
-                    $tmp = $res3->code;
-                    if ($rightChrono->$tmp) {
-                        $value = '';
-                        if ($res3->validation . "x" != "x") {
-                            print "<table width=80%>";
-                            print "<tr><td align=left  width=20%>" . $res3->label;
-                            print "<td align=right class='black' style='font-weight: normal;'>" . nl2br($res3->note);
-                            print "<td align=right>";
-                            $tmpUser = new User($db);
-                            $tmpUser->fetch($res3->user_refid);
-                            if ($res3->validation == 1) {
-                                print img_tick("Valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                    while ($res3 = $db->fetch_object($sql3)) {
+                        $tmp = $res3->code;
+                        if ($rightChrono->$tmp) {
+                            $value = '';
+                            if ($res3->validation . "x" != "x") {
+                                print "<table width=80%>";
+                                print "<tr><td align=left  width=20%>" . $res3->label;
+                                print "<td align=right class='black' style='font-weight: normal;'>" . nl2br($res3->note);
+                                print "<td align=right>";
+                                $tmpUser = new User($db);
+                                $tmpUser->fetch($res3->user_refid);
+                                if ($res3->validation == 1) {
+                                    print img_tick("Valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                                } else {
+                                    print img_error("Non valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                                }
+                                print "</table>";
                             } else {
-                                print img_error("Non valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                                print "<form method='POST' action='?id=" . $_REQUEST['id'] . "&def=" . $res3->id . "&action=multiValider'>";
+                                print "<table width=80%>";
+                                print "<tr><td align=left  width=20%>" . $res3->label;
+                                print "<td align=right><textarea name='note'></textarea>";
+                                print "<td align=right>";
+                                print $html->selectyesno($res3->code, $value, 1, 'required');
+                                print "<td align=right width=100>";
+                                print "<button class='butAction'>OK</button>";
+                                print "</table>";
+                                print "</form>";
                             }
-                            print "</table>";
-                        } else {
-                            print "<form method='POST' action='?id=" . $_REQUEST['id'] . "&def=" . $res3->id . "&action=multiValider'>";
-                            print "<table width=80%>";
-                            print "<tr><td align=left  width=20%>" . $res3->label;
-                            print "<td align=right><textarea name='note'></textarea>";
-                            print "<td align=right>";
-                            print $html->selectyesno($res3->code, $value, 1, 'required');
-                            print "<td align=right width=100>";
-                            print "<button class='butAction'>OK</button>";
-                            print "</table>";
-                            print "</form>";
-                        }
 //                              print "<button class='butAction' onClick='location.href=\"?id=".$chr->id."&action=valider&def=".$res3->id."\"'>".$res3->label."</button>";
-                    } else {
-                        if ($res3->validation . "x" != "x") {
-                            print "<table width=80%>";
-                            print "<tr><td align=left  width=20%>" . $res3->label;
-                            print "<td align=right>" . nl2br($res3->note);
-                            print "<td align=right>";
-                            $tmpUser = new User($db);
-                            $tmpUser->fetch($res3->user_refid);
-                            if ($res3->validation == 1) {
-                                print img_tick("Valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
-                            } else {
-                                print img_error("Non valider");
-                                print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
-                            }
-                            print "</table>";
                         } else {
-                            print "<table width=80%>";
-                            print "<tr><td align=left  width=20%>" . $res3->label;
-                            print "    <td align=right>En attente de validation";
-                            print "</table>";
+                            if ($res3->validation . "x" != "x") {
+                                print "<table width=80%>";
+                                print "<tr><td align=left  width=20%>" . $res3->label;
+                                print "<td align=right>" . nl2br($res3->note);
+                                print "<td align=right>";
+                                $tmpUser = new User($db);
+                                $tmpUser->fetch($res3->user_refid);
+                                if ($res3->validation == 1) {
+                                    print img_tick("Valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                                } else {
+                                    print img_error("Non valider");
+                                    print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
+                                }
+                                print "</table>";
+                            } else {
+                                print "<table width=80%>";
+                                print "<tr><td align=left  width=20%>" . $res3->label;
+                                print "    <td align=right>En attente de validation";
+                                print "</table>";
+                            }
                         }
                     }
                 }

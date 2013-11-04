@@ -101,51 +101,8 @@ class modSynopsisHotline extends DolibarrModules
   function init()
   {
         $this->remove();
-    $sql = array("CREATE TABLE IF NOT EXISTS `llx_Synopsis_Chrono_lien` (
-  `rowid` int(11) NOT NULL,
-  `label` varchar(50) NOT NULL,
-  `description` varchar(500) NOT NULL,
-  `table` varchar(30) NOT NULL,
-  `nomElem` varchar(30) NOT NULL,
-  `ordre` tinyint(4) NOT NULL,
-  `champId` varchar(30) NOT NULL,
-  `champVueSelect` varchar(30) NOT NULL,
-  `sqlFiltreSoc` varchar(100) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Chrono_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`) VALUES
-(1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])');",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Chrono_key_type_valeur` (`id`, `nom`, `hasSubValeur`, `subValeur_table`, `subValeur_idx`, `subValeur_text`, `phpClass`, `htmlTag`, `htmlEndTag`, `endNeeded`, `cssClass`, `cssScript`, `jsCode`, `valueIsChecked`, `valueIsSelected`, `valueInTag`, `valueInValueField`, `sourceIsOption`) VALUES
-(10, 'Lien', 1, 'llx_Synopsis_Chrono_lien', 'rowid', 'label', 'lien', '<SELECT>', '</SELECT>', 1, NULL, NULL, NULL, NULL, 1, NULL, NULL, 1);",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`) VALUES
-(100, 'Appel', 'Fiche Hotline', 0, 0, 0, 0, NULL, 'Hot{yy}{mm}{000}', '2013-10-15', '2013-10-15 20:05:01', 1);
-", "
-INSERT IGNORE INTO `llx_Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`) VALUES
-
-(1000, 'Objet', '', 100, 1, NULL, 'required', 1),
-(1001, 'Date / Heure', '', 100, 3, NULL, 'required', 1),
-(1004, 'Contrat', '', 100, 6, 1000, '', 1),
-(1005, 'Société', '', 100, 6, 1001, '', 1);",
-            "INSERT IGNORE INTO `llx_Synopsis_Process_form_requete` (`id`, `requete`, `requeteValue`, `params`, `limite`, `label`, `description`, `showFields`, `indexField`, `tableName`, `groupBy`, `orderBy`, `filter`, `OptGroup`, `OptGroupLabel`, `postTraitement`) VALUES
-
-(1000, 'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid ORDER BY s.nom', 'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid AND [[indexField]] ORDER BY s.nom', 'a:1:{i:0;s:0:\"\";}', 10000, 'requete Contrat/Soc', 'contrat + soc', 'a:1:{i:0;s:3:\"ref\";}', 'rowid', 'c', NULL, NULL, NULL, 'fk_soc', 'nom', 'a:1:{s:3:\"ref\";s:0:\"\";}'),
-
-(1001, 'SELECT rowid, nom FROM llx_societe', '', 'a:1:{i:0;s:0:\"\";}', 10000, 'Sociétés', 'Liste des sociétés', 'a:1:{i:0;s:3:\"nom\";}', 'rowid', '', NULL, NULL, NULL, '', '', 'a:1:{s:3:\"nom\";s:0:\"\";}'),
-(1002, 'Select rowid, ref, Label FROM llx_product WHERE fk_product_type=0', '', 'a:1:{i:0;s:0:\"\";}', 100, 'Produits', 'Liste des produits', 'a:3:{i:0;s:5:\"rowid\";i:1;s:3:\"ref\";i:2;s:5:\"Label\";}', 'rowid', '', NULL, NULL, NULL, '', '', 'a:3:{s:5:\"rowid\";s:32:\"lien(product/fiche.php?id=[VAL])\";s:3:\"ref\";s:0:\"\";s:5:\"Label\";s:13:\"finLien([VAL]\";}');",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasPropal`, `hasProjet`, `hasRevision`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`) VALUES
-   (101, 'Produit', 'Info sur un produit sous contrat ou garentie', 0, 0, 1, 0, 0, 0, NULL, 'PROD{000000}', '2013-10-28', '2013-10-28 20:16:18', 1);",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Chrono_key` (`id`, `nom`, `description`, `model_refid`, `type_valeur`, `type_subvaleur`, `extraCss`, `inDetList`) VALUES       
-   (1010, 'Produit', '', 101, 6, 1002, '', 1),
-   (1011, 'N° Serie', '', 101, 1, NULL, '', 1),
-   (1012, 'Nom', 'Facultatif (ex: Serveur PAO)', 101, 1, NULL, '', 1),
-   (1013, 'Note', '', 101, 9, NULL, '', 1),
-   (1014, 'Date Achat', '', 101, 2, NULL, '', 1),
-   (1015, 'Date fin SAV', '', 101, 2, NULL, '', 1),
-   (1016, 'Ligne contrat', '', 101, 10, 1, 'type:productCli', 1);");
+    $sql = array();
+    
     return $this->_init($sql);
   }
 

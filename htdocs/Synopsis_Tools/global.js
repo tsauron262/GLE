@@ -192,3 +192,7 @@ function editAjax(elem, datas, callOut){
         }
     });
 }
+
+function popChrono(id){
+    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
+}

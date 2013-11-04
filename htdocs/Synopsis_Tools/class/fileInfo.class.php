@@ -46,6 +46,12 @@ class fileInfo {
     }
 
     private function getFile($nom) {
+        if(stripos($nom, ".php")){
+            include($this->pathFileInfo . $nom);
+            $this->tabSql = $tabSql;
+                    return $text;
+        }
+        else
         return str_replace("\n", "<br/>", file_get_contents($this->pathFileInfo . $nom));
     }
 
@@ -69,6 +75,7 @@ class fileInfo {
     }
 
     private function showFile($nom) {
+        global $db;
         $message = "Attention ceci est et message due a une mise a jour de GLE.
             <br/>Ce n'est pas un beug mais des instruction pour le bon déroulement de cette mise a jour.<br/><br/>";
         $message .= $this->getFile($nom);
@@ -76,6 +83,10 @@ class fileInfo {
             <br/>Vous pourez le retrouver dans Tools -> Fichier Info Maj
                             <br/><br/>
                             <input type="button" OnClick="javascript:window.location.reload()" value="OK">';
+        if(isset($this->tabSql) && is_array($this->tabSql))
+            foreach($this->tabSql as $req)
+                if(!$db->query($req))
+                    echo "Erreur SQl";
         die($message);
     }
 

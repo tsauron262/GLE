@@ -774,12 +774,16 @@ class modSynopsisProcess extends DolibarrModules {
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=16 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete` (`id`, `requete`, `requeteValue`, `params`, `limite`, `label`, `description`, `showFields`, `indexField`, `tableName`, `groupBy`, `orderBy`, `filter`, `OptGroup`, `OptGroupLabel`, `postTraitement`) VALUES
-(1, \'SELECT lastname, firstname FROM '.MAIN_DB_PREFIX.'socpeople where name like \'\'%%%s\'\' order by name\', \'SELECT lastname, firstname FROM '.MAIN_DB_PREFIX.'socpeople where name like \'\'%%%s\'\' AND [[indexField]] order by name \', \'a\', 100, \'test query\', \'tezst query\', \'lastname, firstname\', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(9, \'SELECT * FROM '.MAIN_DB_PREFIX.'user\', \'SELECT * FROM '.MAIN_DB_PREFIX.'user WHERE [[indexField]]\', NULL, 100, \'reqUser\', \'reqUser\', \'a:2:{i:0;s:4:"name";i:1;s:9:"firstname";}\', \'rowid\', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(10, \'SELECT rowid, lastname, firstname FROM '.MAIN_DB_PREFIX.'user WHERE rowid <> %s AND name like \'\'%%%s%%\'\' order by name\', \'SELECT rowid, lastname, firstname FROM '.MAIN_DB_PREFIX.'user WHERE rowid <> %s AND [[indexField]] AND name like \'\'%%%s%%\'\' order by name                                                            \', \'a:2:{i:0;s:13:"".$user->id."";i:1;s:1:"a";}\', 50, \'req14\', \'test\', \'N;\', \'rowid\', \'\', NULL, NULL, NULL, \'rowid\', \'rowid\', \'N;\'),
-(11, \'SELECT '.MAIN_DB_PREFIX.'propal.rowid, ref, fk_soc, '.MAIN_DB_PREFIX.'societe.nom, '.MAIN_DB_PREFIX.'propal.total_ht FROM '.MAIN_DB_PREFIX.'propal, '.MAIN_DB_PREFIX.'societe where '.MAIN_DB_PREFIX.'societe.rowid = fk_soc order by '.MAIN_DB_PREFIX.'societe.nom, '.MAIN_DB_PREFIX.'propal.datec \', \'SELECT '.MAIN_DB_PREFIX.'propal.rowid, ref, fk_soc, '.MAIN_DB_PREFIX.'societe.nom, '.MAIN_DB_PREFIX.'propal.total_ht FROM '.MAIN_DB_PREFIX.'propal, '.MAIN_DB_PREFIX.'societe WHERE '.MAIN_DB_PREFIX.'societe.rowid = fk_soc AND [[indexField]] order by '.MAIN_DB_PREFIX.'societe.nom, '.MAIN_DB_PREFIX.'propal.datec  , '.MAIN_DB_PREFIX.'propal.ref     \', \'a:1:{i:0;s:0:"";}\', 100, \'requete propal/soc\', \'Toutes les propositions commerciales par société\', \'a:2:{i:0;s:3:"ref";i:1;s:8:"total_ht";}\', \'rowid\', \''.MAIN_DB_PREFIX.'propal\', NULL, NULL, NULL, \'fk_soc\', \'nom\', \'a:2:{s:3:"ref";s:0:"";s:8:"total_ht";s:14:"price([VAL],1,";}\'),
-(12, \'SELECT p.rowid, p.ref, p.fk_soc, s.nom  FROM ' . MAIN_DB_PREFIX . 'projet as p, '.MAIN_DB_PREFIX.'societe as s where s.rowid = p.fk_soc order by s.nom, p.dateo \', \'SELECT p.rowid, p.ref, p.fk_soc, s.nom  FROM  ' . MAIN_DB_PREFIX . 'projet as p, '.MAIN_DB_PREFIX.'societe as s WHERE s.rowid = fk_soc AND [[indexField]] order by s.nom, p.dateo  , p.ref                   \', \'a:1:{i:0;s:0:"";}\', 100, \'requete projet/soc\', \'Toutes les projets par société\', \'a:1:{i:0;s:5:"rowid";}\', \'ref\', \'p\', NULL, NULL, NULL, \'rowid\', \'rowid\', \'a:1:{s:3:"ref";s:0:"";}\'),
-(15, \'SELECT concat(ref,\'\' - \'\',title) as texte FROM ' . MAIN_DB_PREFIX . 'projet ORDER BY ref desc\', \'                                             \', \'a:1:{i:0;s:0:"";}\', 1000, \'req_projet\', \'liste des projets\', \'N;\', \'texte\', \'\', NULL, NULL, NULL, \'texte\', \'texte\', \'N;\');',
+(1, \'SELECT lastname, firstname FROM llx_socpeople where name like \'\'%%%s\'\' order by name\', \'SELECT lastname, firstname FROM llx_socpeople where name like \'\'%%%s\'\' AND [[indexField]] order by name \', \'a\', 100, \'test query\', \'tezst query\', \'lastname, firstname\', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(9, \'SELECT * FROM llx_user\', \'SELECT * FROM llx_user WHERE [[indexField]]\', NULL, 100, \'reqUser\', \'reqUser\', \'a:2:{i:0;s:4:"name";i:1;s:9:"firstname";}\', \'rowid\', NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(10, \'SELECT rowid, lastname, firstname FROM llx_user WHERE rowid <> %s AND name like \'\'%%%s%%\'\' order by name\', \'SELECT rowid, lastname, firstname FROM llx_user WHERE rowid <> %s AND [[indexField]] AND name like \'\'%%%s%%\'\' order by name\', \'a:2:{i:0;s:13:"".$user->id."";i:1;s:1:"a";}\', 50, \'req14\', \'test\', \'N;\', \'rowid\', \'\', NULL, NULL, NULL, \'rowid\', \'rowid\', \'N;\'),
+(11, \'SELECT llx_propal.rowid, ref, fk_soc, llx_societe.nom, llx_propal.total_ht FROM llx_propal, llx_societe where llx_societe.rowid = fk_soc order by llx_societe.nom, llx_propal.datec \', \'SELECT llx_propal.rowid, ref, fk_soc, llx_societe.nom, llx_propal.total_ht FROM llx_propal, llx_societe WHERE llx_societe.rowid = fk_soc AND [[indexField]] order by llx_societe.nom, llx_propal.datec  , llx_propal.ref     \', \'a:1:{i:0;s:0:"";}\', 100, \'requete propal/soc\', \'Toutes les propositions commerciales par société\', \'a:2:{i:0;s:3:"ref";i:1;s:8:"total_ht";}\', \'rowid\', \'llx_propal\', NULL, NULL, NULL, \'fk_soc\', \'nom\', \'a:2:{s:3:"ref";s:0:"";s:8:"total_ht";s:14:"price([VAL],1,";}\'),
+(12, \'SELECT p.rowid, p.ref, p.fk_soc, s.nom  FROM llx_projet as p, llx_societe as s where s.rowid = p.fk_soc order by s.nom, p.dateo \', \'SELECT p.rowid, p.ref, p.fk_soc, s.nom  FROM  llx_projet as p, llx_societe as s WHERE s.rowid = fk_soc AND [[indexField]] order by s.nom, p.dateo  , p.ref\', \'a:1:{i:0;s:0:"";}\', 100, \'requete projet/soc\', \'Toutes les projets par société\', \'a:1:{i:0;s:5:"rowid";}\', \'ref\', \'p\', NULL, NULL, NULL, \'rowid\', \'rowid\', \'a:1:{s:3:"ref";s:0:"";}\'),
+(15, \'SELECT concat(ref,\'\' - \'\',title) as texte FROM llx_projet ORDER BY ref desc\', \'\', \'a:1:{i:0;s:0:"";}\', 1000, \'req_projet\', \'liste des projets\', \'N;\', \'texte\', \'\', NULL, NULL, NULL, \'texte\', \'texte\', \'N;\'),
+(1000, \'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid ORDER BY s.nom\', \'SELECT c.rowid, c.ref, fk_soc, s.nom FROM llx_contrat c, llx_societe s WHERE c.fk_soc = s.rowid AND [[indexField]] ORDER BY s.nom\', \'a:1:{i:0;s:0:"";}\', 10000, \'requete Contrat/Soc\', \'contrat + soc\', \'a:1:{i:0;s:3:"ref";}\', \'rowid\', \'c\', NULL, NULL, NULL, \'fk_soc\', \'nom\', \'a:1:{s:3:"ref";s:0:"";}\'),
+(1001, \'SELECT rowid, nom FROM llx_societe\', \'\', \'a:1:{i:0;s:0:"";}\', 10000, \'Sociétés\', \'Liste des sociétés\', \'a:1:{i:0;s:3:"nom";}\', \'rowid\', \'\', NULL, NULL, NULL, \'\', \'\', \'a:1:{s:3:"nom";s:0:"";}\'),
+(1002, \'Select rowid, ref, Label FROM llx_product WHERE fk_product_type=0\', \'\', \'a:1:{i:0;s:0:"";}\', 100, \'Produits\', \'Liste des produits\', \'a:3:{i:0;s:5:"rowid";i:1;s:3:"ref";i:2;s:5:"Label";}\', \'rowid\', \'\', NULL, NULL, NULL, \'\', \'\', \'a:3:{s:5:"rowid";s:32:"lien(product/fiche.php?id=[VAL])";s:3:"ref";s:0:"";s:5:"Label";s:13:"finLien([VAL]";}\');
+',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `requete_refid` int(11) DEFAULT NULL,
@@ -1922,7 +1926,28 @@ class modSynopsisProcess extends DolibarrModules {
 (201, 'PREPACOM_DEVAL_FINANCE'),
 (200, 'PREPACOM_DISPO_PROD'),
 (199, 'PREPACOM_INDISPO_PROD'),
-(198, 'PREPACOM_UPDATE_STATUT');");
+(198, 'PREPACOM_UPDATE_STATUT');",
+                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Process_lien` (
+  `rowid` int(11) NOT NULL,
+  `label` varchar(50) NOT NULL,
+  `description` varchar(500) NOT NULL,
+  `table` varchar(30) NOT NULL,
+  `nomElem` varchar(30) NOT NULL,
+  `where` varchar(80) NOT NULL,
+  `ordre` tinyint(4) NOT NULL,
+  `champId` varchar(30) NOT NULL,
+  `champVueSelect` varchar(30) NOT NULL,
+  `sqlFiltreSoc` varchar(100) NOT NULL,
+  `urlObj` varchar(150) NOT NULL,
+  PRIMARY KEY (`rowid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;",
+        
+        "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`) VALUES
+(1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id='),
+(2, 'Appel', '', 'llx_Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
+(3, 'ProduitCli', '', 'llx_Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
+(4, 'Licence', '', 'llx_Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'ref', '', 'Synopsis_Chrono/fiche.php?id='),
+(5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=');");
 
         $retour = $this->_init($sql);
         

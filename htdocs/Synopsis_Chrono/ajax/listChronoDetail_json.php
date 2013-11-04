@@ -243,6 +243,7 @@ switch ($action) {
             while ($res1 = $db->fetch_object($sql1)) {
                 $arrTmp[] = $res1->id;
             }
+            if(isset($arrTmp[0])){
             $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
 //            $requete .="LIMIT 0, 1000";
 //die($requete);
@@ -286,6 +287,7 @@ switch ($action) {
 //                $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
 //                $iter++;
             }
+    }
 
 //temp sql table
 

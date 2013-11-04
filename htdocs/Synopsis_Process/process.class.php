@@ -2014,8 +2014,6 @@ class formulaireSource extends formulaire {
     public function getValuePlus($id) {
         return $this->getValue($id);
     }
-    
-    
 
     public function fetch($id, $inut = null) {
         global $conf;
@@ -2386,7 +2384,7 @@ class lien extends formulaireSource {
 
     function fetch($id, $cssClass) {
         $this->id = $id;
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_lien WHERE rowid = " . $this->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_lien WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
         $result = $this->db->fetch_object($sql);
         $this->table = $result->table;
@@ -2401,20 +2399,21 @@ class lien extends formulaireSource {
         $idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
 
         $this->nomElement = getParaChaine($cssClass, "type:");
-        $this->tabVal = array();
+        $this->tabVal = array("'imposs'");
         $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
         foreach ($tabResult as $val)
             $this->tabVal[] = $val['s'];
-        $debReq = "SELECT " . $this->champId . " as id, " . 
+        $debReq = "SELECT " . $this->champId . " as id, " .
                 $this->champVueSelect . " as nom "
                 . "FROM " . $this->table . " "
                 . "WHERE 1";
-        $this->reqValue = $debReq ." AND ". $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
-        if($this->where != "")
-            $debReq .= " AND ".$this->where;
+        $this->reqValue = $debReq . " AND " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
+        if ($this->where != "")
+            $debReq .= " AND " . $this->where;
         if ($this->sqlFiltreSoc != "" && $this->socid > 0)
             $debReq .= " AND " . str_replace("[id]", $this->socid, $this->sqlFiltreSoc);
         $this->reqValues = $debReq;
+        $this->typeChrono = getParaChaine($this->where, "model_refid = ", "AND");
     }
 
     function getValuePlus($id) {
@@ -2423,6 +2422,7 @@ class lien extends formulaireSource {
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {
+                    if($result > 0){
                     $contratdet = new Synopsis_ContratLigne($this->db);
                     $contratdet->fetch($result);
                     $html = "<br/>";
@@ -2449,20 +2449,20 @@ class lien extends formulaireSource {
                     $html .= "<br/>";
                     $html .= "</div>";
                     $this->valuesArr[] = $html;
+                    }
                 }
             }
-        }
-        else
+        } else
             $this->getValue($id);
         return $this->valuesArr;
     }
-    function setValue($idChrono, $tabVal){
+
+    function setValue($idChrono, $tabVal) {
         print_r($tabVal);
         delElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
-        foreach($tabVal as $val){
-            if($val != 0)
-        addElementElement($this->nomElem, $this->nomElement, $val, $idChrono, $this->ordre);
-            
+        foreach ($tabVal as $val) {
+            if ($val != 0)
+                addElementElement($this->nomElem, $this->nomElement, $val, $idChrono, $this->ordre);
         }
     }
 
@@ -2470,28 +2470,19 @@ class lien extends formulaireSource {
         $sup = "";
         $i = 0;
         $sql = $this->db->query($this->reqValues);
-        while ($result = $this->db->fetch_object($sql)){
+        while ($result = $this->db->fetch_object($sql)) {
+            $result->nom = dol_trunc($result->nom, 70);
             $this->valuesArr[$result->id] = $result->nom;
-            if(in_array($result->id, $this->tabVal)){
+            if (in_array($result->id, $this->tabVal)) {
                 $i++;
-                    echo getLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+                echo getLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
             }
-        } 
-                    echo getLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
+        }
+        echo getLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
 //                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
-                    echo  "<button class='ajLien-".$this->nomElement."'>Ajouter</button>";
-                    echo '<script>'
-                    . 'idIncr = 100;'
-                    . '$(".ajLien-'.$this->nomElement.'").click(function(){'
-                            . 'model = $(this).parent().find(".model").html();'
-                            . 'select = $(this).parent().find("select");'
-                            . 'selectId = select.val();'
-                            . 'idIncr++;'
-                            . 'selectNom = select.find("option:selected").text();'
-                            . '$(this).parent().prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", selectId).replace("replaceNom", selectNom)+"</div>");'
-                            . 'return false;'
-                            . '});'
-                            . '</script>';
+        if ($this->typeChrono > 0)
+            echo "<button class='addChrono' id='addChrono" . $this->typeChrono . "'>Créer</button>";
+        echo "<button class='ajLien'>Ajouter</button>";
     }
 
     function getValue($id) {
@@ -2499,10 +2490,10 @@ class lien extends formulaireSource {
 //        die("jjjj");
         if ($sql)
             while ($result = $this->db->fetch_object($sql))
-                if($this->urlObj != "")
-                $this->valuesArr[$result->id] = lien($this->urlObj.$result->id).finLien($result->nom);
+                if ($this->urlObj != "")
+                    $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
                 else
-                $this->valuesArr[$result->id] = $result->nom;
+                    $this->valuesArr[$result->id] = $result->nom;
     }
 
 }
@@ -2577,81 +2568,83 @@ class requete extends formulaireSource {
     }
 
     public function getValue($val) {
-        global $langs, $user, $mysoc, $societe, $conf;
-        $conf->global->DOL_DOCUMENT_ROOT = DOL_DOCUMENT_ROOT;
-        $conf->global->DOL_URL_ROOT = DOL_URL_ROOT;
-        if ($this->id > 0) {
-            $requete = $this->requeteValue;
-            if ($requete . "x" == "x") {
-                $requete = $this->requete;
-                if (stripos($requete, "where"))
-                    $requete .= " AND ";
-                else
-                    $requete .= " WHERE ";
-                $requete .= "[[indexField]]";
-            }
-            $requete = vsprintf($requete, $this->paramsArr);
+        if ($val != '' && $val > 0) {
+            global $langs, $user, $mysoc, $societe, $conf;
+            $conf->global->DOL_DOCUMENT_ROOT = DOL_DOCUMENT_ROOT;
+            $conf->global->DOL_URL_ROOT = DOL_URL_ROOT;
+            if ($this->id > 0) {
+                $requete = $this->requeteValue;
+                if ($requete . "x" == "x") {
+                    $requete = $this->requete;
+                    if (stripos($requete, "where"))
+                        $requete .= " AND ";
+                    else
+                        $requete .= " WHERE ";
+                    $requete .= "[[indexField]]";
+                }
+                $requete = vsprintf($requete, $this->paramsArr);
 
 //           if(preg_match('/ WHERE/'))
 
-            if ($this->tableName . "x" != 'x')
-                $requete = preg_replace('/\[\[indexField\]\]/', $this->tableName . "." . $this->indexField . "='" . $val . "'", $requete);
-            else
-                $requete = preg_replace('/\[\[indexField\]\]/', $this->indexField . "='" . $val . "'", $requete);
-            eval("\$requete = \"$requete\";");
-            $sql = $this->db->query($requete);
-            $arr = array();
-            $arr2 = array();
-            $arr3 = array();
+                if ($this->tableName . "x" != 'x')
+                    $requete = preg_replace('/\[\[indexField\]\]/', $this->tableName . "." . $this->indexField . "='" . $val . "'", $requete);
+                else
+                    $requete = preg_replace('/\[\[indexField\]\]/', $this->indexField . "='" . $val . "'", $requete);
+                eval("\$requete = \"$requete\";");
+                $sql = $this->db->query($requete);
+                $arr = array();
+                $arr2 = array();
+                $arr3 = array();
 
-            if ($sql) {
-                while ($res = $this->db->fetch_object($sql)) {
-                    $indexField = $this->indexField;
-                    $index = $res->$indexField;
-                    $arrTmp = array();
-                    foreach ($this->showFieldsArr as $key => $val) {
-                        $result = $res->$val;
-                        if ($this->postTraitementArr[$val] . "x" != "x") {
-                            $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
+                if ($sql) {
+                    while ($res = $this->db->fetch_object($sql)) {
+                        $indexField = $this->indexField;
+                        $index = $res->$indexField;
+                        $arrTmp = array();
+                        foreach ($this->showFieldsArr as $key => $val) {
+                            $result = $res->$val;
+                            if ($this->postTraitementArr[$val] . "x" != "x") {
+                                $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
 
-                            if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
-                                $arrTmpMatch = explode("(", $fctTmp);
-                                $fctTmp1 = $arrTmpMatch[0];
-                                $paramsArrTmp = explode(',', str_replace(")[SUPPR]", "", str_replace($fctTmp1 . "(", "", $fctTmp) . "[SUPPR]"));
-                                $result = call_user_func_array($fctTmp1, $paramsArrTmp);
+                                if (preg_match('/^([\w\W]*)\(([\w\W]*)\)$/', $fctTmp, $arrTmpMatch)) {
+                                    $arrTmpMatch = explode("(", $fctTmp);
+                                    $fctTmp1 = $arrTmpMatch[0];
+                                    $paramsArrTmp = explode(',', str_replace(")[SUPPR]", "", str_replace($fctTmp1 . "(", "", $fctTmp) . "[SUPPR]"));
+                                    $result = call_user_func_array($fctTmp1, $paramsArrTmp);
+                                }
                             }
+                            $arrTmp[] = $result;
                         }
-                        $arrTmp[] = $result;
-                    }
-                    $arr[$index] = join(' ', $arrTmp);
-                    $this->valuesArr[$index] = join(' ', $arrTmp);
+                        $arr[$index] = join(' ', $arrTmp);
+                        $this->valuesArr[$index] = join(' ', $arrTmp);
 
-                    if ($this->OptGroup . "x" != "x") {
-                        $tmp = $this->OptGroup;
-                        $tmp2 = $this->OptGroupLabel;
-                        $arr2[$res->$tmp]['data'][$index] = join(' ', $arrTmp);
-                        $arr2[$res->$tmp]['label'] = $res->$tmp2;
-                        $arr3[$index]['label'] = $res->$tmp2;
-                        //var_dump($arr3);
+                        if ($this->OptGroup . "x" != "x") {
+                            $tmp = $this->OptGroup;
+                            $tmp2 = $this->OptGroupLabel;
+                            $arr2[$res->$tmp]['data'][$index] = join(' ', $arrTmp);
+                            $arr2[$res->$tmp]['label'] = $res->$tmp2;
+                            $arr3[$index]['label'] = $res->$tmp2;
+                            //var_dump($arr3);
+                        }
                     }
-                }
-                $this->valueArr = $arr;
-                if ($this->OptGroup . "x" != "x") {
+                    $this->valueArr = $arr;
+                    if ($this->OptGroup . "x" != "x") {
 //           var_dump($arr);
 //           var_dump($arr2);
 //           var_dump($arr3);
 
-                    $this->valueGroupArr = $arr2;
-                    $this->valueGroupArrDisplay = $arr3;
+                        $this->valueGroupArr = $arr2;
+                        $this->valueGroupArrDisplay = $arr3;
+                    }
+                    return ($arr);
+                } else {
+                    $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
+                    return -1;
                 }
-                return ($arr);
             } else {
-                $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
+                $this->error = "Pas d'id!";
                 return -1;
             }
-        } else {
-            $this->error = "Pas d'id!";
-            return -1;
         }
     }
 
@@ -2676,7 +2669,7 @@ class requete extends formulaireSource {
                     $index = $res->$indexField;
                     $arrTmp = array();
                     foreach ($this->showFieldsArr as $key => $val) {
-
+                        $res->$val = dol_trunc($res->$val, 60);
                         if ($this->postTraitementArr[$val] . "x" != "x") {
                             $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
                             $result = $res->$val;
@@ -3236,7 +3229,8 @@ function finLien($nom) {
     return $nom . "</a>";
 }
 
-        function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = ""){
-            return '<div class="'.$classDiv.'"><input type="hidden" name="ChronoLien-'.$id.'-'.$nomElement.'-'.$i.'" value="'.$idVal."\"/><button onclick='$(this).parent(\"div\").remove(); return false;' class='supprLien'>X</button><a href=\"\">".$text."</a></div>";
-        }
+function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "") {
+    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='$(this).parent(\"div\").remove(); return false;' class='supprLien'>X</button><a href=\"\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
+}
+
 ?>

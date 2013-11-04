@@ -12,6 +12,12 @@ function searchtext($nom, $pref = '') {
     $oper = 'LIKE';
     return " AND " . $searchField . " " . $oper . " '%" . $searchString . "%'";
 }
+function searchint($nom, $pref = '') {
+    $searchString = $_REQUEST[$nom];
+    $searchField = $pref . $nom;
+    $oper = '=';
+    return " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+}
 
 require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
@@ -202,7 +208,7 @@ switch ($action) {
 //                       AND key_id IN (".join(",",$arrPre).")";
             $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE 1 ";
             if ($_REQUEST['fk_societe'] > 0)
-                $requete1 .= searchtext('fk_societe');
+                $requete1 .= searchint('fk_societe');
             if (!$withRev) {
                 $requete .= " AND revision is NULL ";
             } else {
@@ -216,7 +222,7 @@ switch ($action) {
 
             $sql = $db->query($requete1);
             $count = $db->num_rows($sql);
-
+            
             if ($count > 0) {
                 $total_pages = ceil($count / $limit);
             } else {

@@ -2416,6 +2416,20 @@ class lien extends formulaireSource {
         $this->reqValues = $debReq;
         $this->typeChrono = getParaChaine($this->where, "model_refid = ", "AND");
     }
+    
+    function displayForm(){
+    $this->getValues();
+    print '<select>';
+    foreach($this->valuesArr as $id => $val)
+         print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
+    print '</select>';
+    }
+    
+    function displayValue(){
+    $this->getValue($inut);
+        foreach($this->valuesArr as $id => $val)
+            print $val."<br/>";
+    }
 
     function getValuePlus($id) {
         if ($this->id == 1) {
@@ -3232,8 +3246,8 @@ function finLien($nom) {
     return $nom . "</a>";
 }
 
-function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "") {
-    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='$(this).parent(\"div\").remove(); return false;' class='supprLien'>X</button><a href=\"\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
+function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "$(this).parent(\"div\").fadeOut(); ") {
+    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
 }
 
 ?>

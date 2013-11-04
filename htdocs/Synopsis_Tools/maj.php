@@ -80,7 +80,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
     
     
-    $maj->ajoutDroitGr(array(1,2,3,4,5,6,7,8,9,10,11,12,13), array(80000, 80001, 80002, 80004, 80005));
+    $maj->ajoutDroitGr(array(1,2,3,4,5,6,7,8,9,10,11,12,13), array(80000, 80001, 80002, 80003, 80004, 80005));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";

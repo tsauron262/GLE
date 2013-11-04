@@ -532,25 +532,23 @@ EOF;
         . 'selectId = select.val();'
         . 'idIncr++;'
         . 'selectNom = select.find("option:selected").text();'
-        . '$(this).parent().prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", selectId).replace("replaceNom", selectNom)+"</div>");'
+        . 'addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());'
+        . ''
         . 'return false;'
         . '});'
+        . ''
+        . ''
+        . ''
         . '$(".addChrono").click(function(){ '
-        . 'parent = $(this).parent();'
-        . 'model = $(this).parent().find(".model").html();'
-        . 'model_refid = $(this).attr("id").replace("addChrono", "");'
-        . 'socid = $("#socid").parent().find("select").val();'
-        . 'jQuery.ajax({
-                      url:"ajax/addChrono.php",
-                      type:"POST",
-                      datatype:"xml",
-                      data:"model="+model_refid+"&socid="+socid,
-                      success: function(msg){'
-        . 'idIncr++;'
-        . 'parent.prepend("<div>"+model.replace("replaceId", idIncr).replace("replaceValue", msg).replace("replaceNom", "Nouvellement crée")+"</div>");
-                                popChrono(msg);'
-        . '}
-                    });'
+            . 'parent = $(this).parent();'
+            . 'model = $(this).parent().find(".model").html();'
+            . 'model_refid = $(this).attr("id").replace("addChrono", "");'
+            . 'socid = $("#socid").parent().find("select").val();'
+            . 'ajaxAddChrono(model_refid, socid, function(valReturn){
+                   idIncr++;'
+                . 'addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);'
+                . 'popChrono(valReturn);
+               });'
         . 'return false;'
         . '});'
         . '});'

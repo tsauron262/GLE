@@ -1,22 +1,22 @@
-$(window).load(function(){
+$(window).load(function() {
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
-    if($("div.tmenudiv").is(':visible')){
-        $(window).resize(function(){
+    if ($("div.tmenudiv").is(':visible')) {
+        $(window).resize(function() {
             traiteScroll(heightDif);
         });
         traiteScroll(heightDif);
     }
-    
+
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
-    
-    
-    ajNoteAjax();   
-    
-    
-    var datas = 'url='+window.location;
+
+
+    ajNoteAjax();
+
+
+    var datas = 'url=' + window.location;
     datas += '&type=consigne';
     editAjax(jQuery('.consigne.editable'), datas);
-    
+
     //    $(".ui-search-toolbar input").keypress(function(e) {
     //	//alert(e.keyCode);
     //	if(e.keyCode == 13) {
@@ -25,58 +25,58 @@ $(window).load(function(){
     //        else
     //		alert('Enter oser    was pressed.'+e.keyCode );
     //    });
-    
-    $(".ui-search-toolbar input").focusout(function(){
-        setTimeout(function(){
+
+    $(".ui-search-toolbar input").focusout(function() {
+        setTimeout(function() {
             var e = jQuery.Event("keypress", {
                 keyCode: 13
             });
-            $(".ui-search-toolbar input").trigger(e);   
+            $(".ui-search-toolbar input").trigger(e);
         }, 500);
     });
 });
 
-function dialogConfirm(url, titre, yes, no, id){
+function dialogConfirm(url, titre, yes, no, id) {
     if (confirm(titre)) {
         window.location = url;
-    } 
+    }
 }
 
-function traiteScroll(heightDif){
+function traiteScroll(heightDif) {
     coef = 1;
-    scrollY  = $(window).scrollTop() * coef - 100;
-    if($(".fiche").scrollTop()> scrollY)
-        scrollY  = $(".fiche").scrollTop();
-    if($(".tabBar").scrollTop()> scrollY)
-        scrollY  = $(".tabBar").scrollTop();
-    height =parseInt(window.innerHeight);
+    scrollY = $(window).scrollTop() * coef - 100;
+    if ($(".fiche").scrollTop() > scrollY)
+        scrollY = $(".fiche").scrollTop();
+    if ($(".tabBar").scrollTop() > scrollY)
+        scrollY = $(".tabBar").scrollTop();
+    height = parseInt(window.innerHeight);
     var i = 0;
     var j = 0;
     var h = 0;
-    $(".fiche").parent().parent().children("td").each(function(){
-        i = i+1;//Nb d'element dans parent dans div principale'
+    $(".fiche").parent().parent().children("td").each(function() {
+        i = i + 1;//Nb d'element dans parent dans div principale'
     });
-    $(".fiche").parent().children("div").each(function(){
-        h = h+1;
+    $(".fiche").parent().children("div").each(function() {
+        h = h + 1;
     });
     //    if(height > 560 && i < 3)
-    hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight())+30;
-    if(height > hauteurMenu && i < 3 && h == 1){//On active le scroll 2
+    hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
+    if (height > hauteurMenu && i < 3 && h == 1) {//On active le scroll 2
         $(".fiche").addClass("reglabe");
         heightNew = ($(".fiche").innerHeight() - heightDif) - 20;
-        if(heightNew > 300){//On active le scroll 3 (le scroll 2 ne doit plus étre utile
+        if (heightNew > 300) {//On active le scroll 3 (le scroll 2 ne doit plus étre utile
             $(".tabBar").height(heightNew);
             $(".tabBar").addClass("reglabe2");
             $(".tabBar").scrollTop(scrollY);
         }
-        else{//On désactive le scroll 3 (le scroll 2 doit prendre le relai)
+        else {//On désactive le scroll 3 (le scroll 2 doit prendre le relai)
             $(".tabBar").removeClass("reglabe2");
             $(".tabBar").height('auto');
             $(".fiche").scrollTop(scrollY);
         }
-    //        alert(heightAv+" "+heightAp);
+        //        alert(heightAv+" "+heightAp);
     }
-    else{//On desactive les scroll2 et 3
+    else {//On desactive les scroll2 et 3
         $(".fiche").removeClass("reglabe");
         $(".tabBar").removeClass("reglabe2");
         $(".tabBar").height('auto');
@@ -86,33 +86,33 @@ function traiteScroll(heightDif){
 }
 
 
-function ajNoteAjax(){
+function ajNoteAjax() {
     fermable = true;
-    var datas = 'url='+window.location;
-    datas = datas+'&type=note';
+    var datas = 'url=' + window.location;
+    datas = datas + '&type=note';
     jQuery.ajax({
-        url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
-        data:datas,
-        datatype:"xml",
-        type:"POST",
+        url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/note_ajax.php',
+        data: datas,
+        datatype: "xml",
+        type: "POST",
         cache: false,
-        success:function(msg){
-            if(msg != "0"){
+        success: function(msg) {
+            if (msg != "0") {
                 //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 //                $('.tabBar').append(htmlDiv);
                 classEdit = "";
-                if(msg.indexOf("[1]") > -1){
+                if (msg.indexOf("[1]") > -1) {
                     classEdit = "editable";
                     msg = msg.replace("[1]", "");
                 }
-                var htmlDiv  = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="'+classEdit+'" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
+                var htmlDiv = '<div class="noteAjax"><div class="note">Note (publique) :<br><div class="' + classEdit + '" id="notePublicEdit" title="Editer">' + msg + '</div></div></div>';
                 $('.fiche').append(htmlDiv);
                 //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
                 //                $('a#note').append(htmlDiv);
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
                 $('a#note, .noteAjax').hover(shownNote, hideNote);
                 $('a#note').addClass("lienNote");
-                
+
                 //                $(".controlBut").click(function(){
                 //                    if($(this).val() == "<"){
                 //                        $(this).val(">");
@@ -122,33 +122,33 @@ function ajNoteAjax(){
                 //                    }     
                 //                    shownHideNote();   
                 //                })
-                
-                editAjax(jQuery('#notePublicEdit'), datas, function(){
+
+                editAjax(jQuery('#notePublicEdit'), datas, function() {
                     hideNote()
-                    });
-                
+                });
+
             }
         }
     });
-    
-    
-    
-    function shownHideNote(){
+
+
+
+    function shownHideNote() {
         $(".noteAjax .note").animate({
             width: 'toggle'
         });
     }
-    function shownNote(){
+    function shownNote() {
         $(".noteAjax .note").slideDown({
             width: 'toggle'
         });
         fermer = false;
     }
-    function hideNote(){
-        if(fermable){
+    function hideNote() {
+        if (fermable) {
             fermer = true;
-            setTimeout(function(){
-                if(fermer)
+            setTimeout(function() {
+                if (fermer)
                     $(".noteAjax .note").slideUp({
                         width: 'toggle'
                     });
@@ -158,30 +158,30 @@ function ajNoteAjax(){
 }
 
 
-function editAjax(elem, datas, callOut){
-    elem.click(function(){
-        if(fermable){
+function editAjax(elem, datas, callOut) {
+    elem.click(function() {
+        if (fermable) {
             fermable = false;
             var text = jQuery(elem).html().split('<br>').join('\n');
-            if(text == "Cliquez pour éditer")
+            if (text == "Cliquez pour éditer")
                 text = '';
-            $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">'+text+"</textarea>");
+            $(elem).html('<textarea class="editableTextarea" style="width:99%;height:99%; background:none;">' + text + "</textarea>");
             $(elem).removeClass('editable');
             $(elem).find(".editableTextarea").focus();
-            $(elem).find(".editableTextarea").val($(".editableTextarea").val()+"\n");
-            $(elem).find(".editableTextarea").focusout(function(){
+            $(elem).find(".editableTextarea").val($(".editableTextarea").val() + "\n");
+            $(elem).find(".editableTextarea").focusout(function() {
                 fermable = true;
-                if(callOut)
+                if (callOut)
                     callOut();
-                datas = datas+'&note='+$(".editableTextarea").val();
+                datas = datas + '&note=' + $(".editableTextarea").val();
                 jQuery.ajax({
-                    url:DOL_URL_ROOT+'/Synopsis_Tools/ajax/note_ajax.php',
-                    data:datas,
-                    datatype:"xml",
-                    type:"POST",
+                    url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/note_ajax.php',
+                    data: datas,
+                    datatype: "xml",
+                    type: "POST",
                     cache: false,
-                    success:function(msg){
-                        if(msg.indexOf("[1]") > -1){
+                    success: function(msg) {
+                        if (msg.indexOf("[1]") > -1) {
                             msg = msg.replace("[1]", "");
                         }
                         $(elem).html(msg);
@@ -193,6 +193,39 @@ function editAjax(elem, datas, callOut){
     });
 }
 
-function popChrono(id){
-    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
+function popChrono(id) {
+    popChrono(id, function() {
+    });
+}
+function popChrono(id, callBack) {
+//    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
+    $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><iframe src='" + DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id + "'></iframe></div>");
+    $(".fullScreen span").click(function() {
+        $(this).parent().remove();
+        callBack();
+    });
+
+}
+function addLienHtml(idIncr, id, nom, model, cible) {
+    cible.prepend("<div>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+}
+function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
+    champSup = '';
+    valSup = '';
+    for (var i = 0; i < tabChamp.length; i++) {
+        if (tabChamp[i]) {
+            champSup = champSup + "-" + (i);
+            valSup = valSup + "-" + tabChamp[i];
+        }
+    }
+    champSup = "&champSup=" + champSup + "&champSupVal=" + valSup;
+    jQuery.ajax({
+        url: "../Synopsis_Chrono/ajax/addChrono.php",
+        type: "POST",
+        datatype: "xml",
+        data: "model=" + model_refid + "&socid=" + socid + champSup,
+        success: function(msg) {
+            callBack(msg);
+        }
+    });
 }

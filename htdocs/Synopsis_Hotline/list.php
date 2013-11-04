@@ -21,6 +21,7 @@ $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
 
 
 $id = $_REQUEST['id'];
+$model = $_REQUEST['model'];
 
 $nomDiv = "gridChronoDet";
 if (isset($_REQUEST['obj'])) {
@@ -41,29 +42,37 @@ if (isset($_REQUEST['obj'])) {
         $filtre = "Contrat=" . urlencode($ctr->ref);
         $head = contract_prepare_head($ctr);
         $socid = $ctr->socid;
-        $champ = array(1004 => $_REQUEST['id']);
+        $ctrId = $_REQUEST['id'];
     }
-    if (isset($_REQUEST['create']) && $_REQUEST['create']) {
-        $ch = new Chrono($db);
-        $ch->model_refid = 100;
-        $ch->socid = $socid;
-        $id = $ch->create();
+    if ($model == 100){
+        if(isset($ctrId))
+        $champ[1004] = $ctrId;
         $champ[1001] = date("d/m/Y");
-        $ch->setDatas($id, $champ);
-        header('location: ../Synopsis_Chrono/fiche-nomenu.php?id=' . $id . '&action=Modify');
+        $titre = "Appel Hotline";
+        $nomOnglet = "hotline";
+    }
+    elseif ($model == 101){
+        $titre = "Produit Client";
+        $nomOnglet = "productCli";
+    }
+    
+    
+    $champJs = "tabChamp = new Array();";
+    foreach ($champ as $id => $val){
+        $champJs .= "tabChamp[".$id."]=\"".$val."\";";
     }
 }
 
 if ($filtre != "")
     $filtre = "&_search2=true&" . $filtre;
-$js .= tabChronoDetail(100, $nomDiv, $filtre);
+$js .= tabChronoDetail($model, $nomDiv, $filtre);
 
 
-llxHeader($js, "Appel Hotline");
-dol_fiche_head($head, 'hotline', $langs->trans("Suivie hotline"));
+llxHeader($js, $titre);
+dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
 
 
-print "<input type='button' onclick=\"javascript: window.open('" . $_SERVER['REQUEST_URI'] . "&create=true','nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');".'" class="butAction" value = "Créer fiche hotline" /><br/><br/>  ';
+print "<input type='button'onclick='".$champJs." ajaxAddChrono(".$model.", ".$socid.", tabChamp, function(id){popChrono(id, function(){ $(\".ui-icon-refresh\").trigger(\"click\");}); });' class='butAction' value = 'Créer ".$titre."' /><br/><br/>";
 
 print '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 

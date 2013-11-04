@@ -57,10 +57,13 @@ function chrono_prepare_head($objsoc)
     $head[$h][2] = 'chrono';
     $h++;
 
+    if ($objsoc->model->hasSuivie == 1)
+    {
     $head[$h][0] = DOL_URL_ROOT.'/Synopsis_Chrono/info.php?id='.$objsoc->id;
     $head[$h][1] = $langs->trans("Info");
     $head[$h][2] = 'info';
     $h++;
+    }
 
 
     if ($objsoc->model->hasFile == 1)

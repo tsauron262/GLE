@@ -444,7 +444,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
             if (isset($obj->tabVal[0])) {
                 $val = $obj->tabVal[0];
                 $valueIsSelected = true;
-                $aSuppr = true;
+//                die("ok");
             }
             $html = "";
             foreach ($obj->valuesArr as $key => $value) {
@@ -453,7 +453,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
                     if ($obj->OptGroup . "x" != "x") {
                         $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $value;
                     } else {
-                        $html = $value;
+                        $html .= $value;
                     }
                 }
             }

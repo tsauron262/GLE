@@ -2399,7 +2399,7 @@ class lien extends formulaireSource {
         $idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
 
         $this->nomElement = getParaChaine($cssClass, "type:");
-        $this->tabVal = array("'imposs'");
+        $this->tabVal = array();
         $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
         foreach ($tabResult as $val)
             $this->tabVal[] = $val['s'];
@@ -2407,7 +2407,8 @@ class lien extends formulaireSource {
                 $this->champVueSelect . " as nom "
                 . "FROM " . $this->table . " "
                 . "WHERE 1";
-        $this->reqValue = $debReq . " AND " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
+        if(count($this->tabVal) > 0)
+            $this->reqValue = $debReq . " AND " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
         if ($this->where != "")
             $debReq .= " AND " . $this->where;
         if ($this->sqlFiltreSoc != "" && $this->socid > 0)
@@ -2486,6 +2487,7 @@ class lien extends formulaireSource {
     }
 
     function getValue($id) {
+        if($this->reqValue != ""){
         $sql = $this->db->query($this->reqValue);
 //        die("jjjj");
         if ($sql)
@@ -2494,6 +2496,7 @@ class lien extends formulaireSource {
                     $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
                 else
                     $this->valuesArr[$result->id] = $result->nom;
+        }
     }
 
 }

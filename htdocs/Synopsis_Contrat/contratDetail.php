@@ -472,24 +472,38 @@ if ($id > 0) {
         print "</td></tr>";
     }
 
-    if ($hasProd2) {
-        print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produit</th>';
-        print '<td width="75%" colspan="3" class="ui-widget-content">';
-        print $product2->getNomUrl(1);
-        print "    </td>";
-    }
-    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont WHERE element_id = " . $idLigne;
-    $sqlsn = $db->query($requete);
-    if ($db->num_rows($sqlsn) > 0) {
-        $ressn = $db->fetch_object($sqlsn);
-        print '<tr><th width="25%" class="ui-widget-header ui-state-default">Num de s&eacute;rie</th>';
-        print '<td width="75%" colspan="3" class="ui-widget-content">';
-        print $ressn->serial_number;
-        print "    </td>";
-    }
+//    if ($hasProd2) {
+//        print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produit</th>';
+//        print '<td width="75%" colspan="3" class="ui-widget-content">';
+//        print $product2->getNomUrl(1);
+//        print "    </td>";
+//    }
+//    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont WHERE element_id = " . $idLigne;
+//    $sqlsn = $db->query($requete);
+//    if ($db->num_rows($sqlsn) > 0) {
+//        $ressn = $db->fetch_object($sqlsn);
+//        print '<tr><th width="25%" class="ui-widget-header ui-state-default">Num de s&eacute;rie</th>';
+//        print '<td width="75%" colspan="3" class="ui-widget-content">';
+//        print $ressn->serial_number;
+//        print "    </td>";
+//    }
     // Clause
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Clause contractuelle</th>';
     print '<td colspan="3" class="ui-widget-content">' . $ligne->GMAO_Mixte['clause'];
+    
+    
+    // ProductCli
+    $_REQUEST['chrono_id'] = $_REQUEST['id'];
+    $lien = new lien($db);
+    $lien->socid = $contrat->socid;
+    $lien->fetch(3, "type:contratdet");
+//        $prodHtml .= $val."<br/>";
+//    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produits concerné</th>';
+//    print '<td colspan="3" class="ui-widget-content">';
+//    $lien->displayValue();
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produits concerné</th>';
+    print '<td colspan="3" class="ui-widget-content">';
+    $lien->displayForm();
 
 
 

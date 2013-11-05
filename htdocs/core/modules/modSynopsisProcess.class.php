@@ -184,135 +184,171 @@ class modSynopsisProcess extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-
-        $this->menu[$r] = array('fk_menu' => 'r=1',
+        
+        
+        
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools',
             'type' => 'left',
-            'titre' => 'Config',
-            'mainmenu' => 'Process',
+            'titre' => 'Process',
+            'leftmenu' => 'Process',
+            'mainmenu' => 'SynopsisTools',
             'url' => '/Synopsis_Process/index.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 1,
+            'perms' => '$user->rights->process->lire',
+            'target' => '',
+            'user' => 0);
+        $r++;
+        
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=Process',
+            'type' => 'left',
+            'titre' => 'Liste',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/liste.php',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 1,
+            'perms' => '$user->rights->process->lire',
+            'target' => '',
+            'user' => 0);
+        $r++;
+
+        $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=Process',
+            'type' => 'left',
+            'titre' => 'Config',
+            'leftmenu' => 'ConfigProcess',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/index.php',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 2,
             'perms' => '$user->rights->process->configurer',
             'target' => '',
             'user' => 0);
-        $fkMen1 = $r;
+        $fkMen1 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcess';
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen1,
+        $this->menu[$r] = array('fk_menu' => ''.$fkMen1,
             'type' => 'left',
             'titre' => 'Formulaires',
-            'mainmenu' => 'Process',
+            'leftmenu' => 'ConfigProcessForm',
+            'mainmenu' => 'SynopsisTools',
             'url' => '/Synopsis_Process/listForm.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 3,
             'perms' => '$user->rights->process->configurer',
             'target' => '',
             'user' => 0);
-        $fkMen2 = $r;
+        $fkMen2 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcessForm';
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen2,
+        $this->menu[$r] = array('fk_menu' => $fkMen2,
             'type' => 'left',
             'titre' => 'Ajouter un formulaire',
-            'mainmenu' => 'Process',
+            'mainmenu' => 'SynopsisTools',
             'url' => '/Synopsis_Process/formBuilder.php?action=Create',
-            'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 2,
-            'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
-            'target' => '',
-            'user' => 0);
-        $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen1,
-            'type' => 'left',
-            'titre' => 'Liste des requ&ecirc;tes',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/listQuery.php',
-            'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 5,
-            'perms' => '$user->rights->process->configurer',
-            'target' => '',
-            'user' => 0);
-        $fkMen2 = $r;
-        $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen2,
-            'type' => 'left',
-            'titre' => 'Ajouter une requ&ecirc;te',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/queryBuilder.php?action=Create',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 4,
             'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
             'target' => '',
             'user' => 0);
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen1,
+        $this->menu[$r] = array('fk_menu' => $fkMen1,
             'type' => 'left',
-            'titre' => 'Liste des listes',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/listList.php',
+            'titre' => 'Liste des requ&ecirc;tes',
+            'mainmenu' => 'SynopsisTools',
+            'leftmenu' => 'ConfigProcessReq',
+            'url' => '/Synopsis_Process/listQuery.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 7,
+            'position' => 5,
             'perms' => '$user->rights->process->configurer',
             'target' => '',
             'user' => 0);
-        $fkMen2 = $r;
+        $fkMen2 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcessReq';
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen2,
+        $this->menu[$r] = array('fk_menu' => $fkMen2,
             'type' => 'left',
-            'titre' => 'Ajouter une liste',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/listBuilder.php?action=Create',
+            'titre' => 'Ajouter une requ&ecirc;te',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/queryBuilder.php?action=Create',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 6,
             'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
             'target' => '',
             'user' => 0);
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen1,
+        $this->menu[$r] = array('fk_menu' => $fkMen1,
             'type' => 'left',
-            'titre' => 'Liste des process',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/listProcess.php',
+            'titre' => 'Liste des listes',
+            'mainmenu' => 'SynopsisTools',
+            'leftmenu' => 'ConfigProcessListe',
+            'url' => '/Synopsis_Process/listList.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 9,
+            'position' => 7,
             'perms' => '$user->rights->process->configurer',
             'target' => '',
             'user' => 0);
-        $fkMen2 = $r;
+        $fkMen2 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcessListe';
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen2,
+        $this->menu[$r] = array('fk_menu' => $fkMen2,
             'type' => 'left',
-            'titre' => 'Ajouter un process',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/processBuilder.php?action=Create',
+            'titre' => 'Ajouter une liste',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/listBuilder.php?action=Create',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 8,
             'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
             'target' => '',
             'user' => 0);
         $r++;
-
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen1,
+        $this->menu[$r] = array('fk_menu' => $fkMen1,
             'type' => 'left',
-            'titre' => 'Liste des fonctions',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/listFct.php',
+            'titre' => 'Liste des process',
+            'mainmenu' => 'SynopsisTools',
+            'leftmenu' => 'ConfigProcessProc',
+            'url' => '/Synopsis_Process/listProcess.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 11,
+            'position' => 9,
             'perms' => '$user->rights->process->configurer',
             'target' => '',
             'user' => 0);
-        $fkMen2 = $r;
+        $fkMen2 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcessProc';
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$fkMen2,
+        $this->menu[$r] = array('fk_menu' => $fkMen2,
             'type' => 'left',
-            'titre' => 'Ajouter une fonction',
-            'mainmenu' => 'Process',
-            'url' => '/Synopsis_Process/fctBuilder.php?action=Create',
+            'titre' => 'Ajouter un process',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/processBuilder.php?action=Create',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 10,
             'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
             'target' => '',
             'user' => 0);
         $r++;
+
+        $this->menu[$r] = array('fk_menu' => $fkMen1,
+            'type' => 'left',
+            'titre' => 'Liste des fonctions',
+            'mainmenu' => 'SynopsisTools',
+            'leftmenu' => 'ConfigProcessFunc',
+            'url' => '/Synopsis_Process/listFct.php',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 11,
+            'perms' => '$user->rights->process->configurer',
+            'target' => '',
+            'user' => 0);
+        $fkMen2 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcessFunc';
+        $r++;
+        $this->menu[$r] = array('fk_menu' => $fkMen2,
+            'type' => 'left',
+            'titre' => 'Ajouter une fonction',
+            'mainmenu' => 'SynopsisTools',
+            'url' => '/Synopsis_Process/fctBuilder.php?action=Create',
+            'langs' => 'synopsisGene@Synopsis_Tools',
+            'position' => 12,
+            'perms' => '$user->rights->process->configurer && $user->rights->process->creer',
+            'target' => '',
+            'user' => 0);
+        $r++;
+        
+        
+        
 
         $this->menu[$r] = array('fk_menu' => 'r=0',
             'type' => 'left',

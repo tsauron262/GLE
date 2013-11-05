@@ -745,7 +745,7 @@ class Fichinter extends CommonObject {
             $ligne->qte = $qte;
             $ligne->pu_ht = $pu_ht;
             $ligne->isForfait = $isForfait;
-            if ($isForfait == 1) {
+            if ($ligne->isForfait == 1) {
                 $ligne->total_ht = floatval($ligne->qte) * floatval($pu_ht);
             } else {
                 $ligne->total_ht = floatval(($ligne->qte . "x" == "x" ? 1 : $ligne->qte)) * floatval($ligne->duration) * floatval($pu_ht) / 3600;
@@ -1114,6 +1114,8 @@ class FichinterLigne {
             $sql .= ",total_ttc = " . preg_replace('/,/', '.', $total_ttc);
         if ($this->isForfait . "x" != "x")
             $sql .= ",isForfait = " . $this->isForfait;
+        else
+            $sql .= ",isForfait = 0";
         if ($this->comLigneId > 0)
             $sql .= ",fk_commandedet =  " . $this->comLigneId;
         //else $sql .= ",fk_commandedet =  NULL ";

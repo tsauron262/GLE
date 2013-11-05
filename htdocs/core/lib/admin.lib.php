@@ -719,12 +719,14 @@ function activateModule($value,$withdeps=1)
     {
         return $langs->trans("ErrorModuleRequireJavascript");
     }
-
+/* deb mod drsi 
     $result=$objMod->init();
     if ($result <= 0) $ret=$objMod->error;
 
     if (! $ret && $withdeps)
     {
+ * Fin mod drsi
+ */
         if (isset($objMod->depends) && is_array($objMod->depends) && ! empty($objMod->depends))
         {
             // Activation des modules dont le module depend
@@ -756,7 +758,12 @@ function activateModule($value,$withdeps=1)
             	}
             }
         }
-    }
+        /* deb mod drsi */
+        
+    $result=$objMod->init();
+    if ($result <= 0) $ret=$objMod->error;
+    /*Fin mod drsi 
+    }*/
 
     return $ret;
 }

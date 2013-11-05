@@ -34,6 +34,49 @@ $(window).load(function() {
             $(".ui-search-toolbar input").trigger(e);
         }, 500);
     });
+
+
+    idIncr = 100;
+    $(".formAjax .ajLien").click(function() {
+        firstParent = $(this);
+        parent = firstParent.parent();
+        model = parent.find(".model").html();
+        select = parent.find("select");
+        selectId = select.val();
+        idIncr++;
+        selectNom = select.find("option:selected").text();
+        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+            if (ok == "ok")
+                addLienHtml(idIncr, selectId, selectNom, model, parent);
+        });
+        return false;
+    });
+    $(".formAjax .addChrono").click(function() {
+        firstParent = $(this);
+        parent = firstParent.parent();
+        model = parent.find(".model").html();
+        addChrono(this, $("#socid").val(), function(valReturn) {
+            ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+            if (ok == "ok"){
+            idIncr = idIncr + 1;
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            popChrono(valReturn, function() {
+            });
+        }
+            });
+        });
+        return false;
+    });
+    $("#chronoTable .addChrono").click(function() {
+        socid = $("#socid").parent().find("select").val();
+        addChrono(this, socid, function(valReturn) {
+            idIncr = idIncr + 1;
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            popChrono(valReturn, function() {
+            });
+        });
+        return false;
+    });
 });
 
 function dialogConfirm(url, titre, yes, no, id) {
@@ -227,5 +270,44 @@ function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
         success: function(msg) {
             callBack(msg);
         }
+    });
+}
+
+function ajaxManipElementElement(action, sourcetype, targettype, idsource, idtarget, ordre, callBack) {
+    jQuery.ajax({
+        url: "../Synopsis_Tools/ajax/manipElementElement.php",
+        type: "POST",
+        datatype: "xml",
+        data: "action=" + action + "&sourcetype=" + sourcetype + "&targettype=" + targettype + "&idsource=" + idsource + "&idtarget=" + idtarget + "&ordre=" + ordre,
+        success: function(msg) {
+            callBack(msg);
+        }
+    });
+}
+function addChrono(element, socid, callBack) {
+    parent = $(element).parent();
+    model = $(element).parent().find(".model").html();
+    model_refid = $(element).attr("id").replace("addChrono", "");
+    ajaxAddChrono(model_refid, socid, new Array(), callBack);
+}
+
+function supprLigne(element) {
+    firstParent = $(element).parent();
+    parent = firstParent.parent();
+    callBack = function(ok) {
+        if (ok == "ok")
+            firstParent.fadeOut();
+    };
+    if (parent.hasClass("formAjax"))
+        ajaxManipElementElement("rm", parent.find(".sourcetype").val(), parent.find(".targettype").val(), firstParent.find("input").val(), parent.find(".targetid").val(), parent.find(".ordre").val(), callBack);
+    else
+        cacherSuppr(firstParent);
+    return false;
+}
+
+
+function cacherSuppr(element) {
+    element.fadeOut(function() {
+        element.remove();
     });
 }

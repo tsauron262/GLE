@@ -164,24 +164,24 @@ class modSynopsisChrono extends DolibarrModules
 
         $this->menus = array();            // List of menus to add
         $r=0;
-        $this->menu[$r]=array(
-                            'type'=>'top',
-                            'titre'=>'Chrono',
-                            'mainmenu'=>'Chrono',
-                            'leftmenu'=>'0',        // To say if we can overwrite leftmenu
-                            'url'=>'/Synopsis_Chrono/index.php',
-                            'langs' => 'synopsisGene@Synopsis_Tools',
-                            'position'=>130,
-                            'perms'=>'$user->rights->synopsischrono->read',
-                            'target'=>'',
-                            'user'=>0);
+//        $this->menu[$r]=array(
+//                            'type'=>'top',
+//                            'titre'=>'Chrono',
+//                            'mainmenu'=>'Process',
+//                            'leftmenu'=>'0',        // To say if we can overwrite leftmenu
+//                            'url'=>'/Synopsis_Chrono/index.php',
+//                            'langs' => 'synopsisGene@Synopsis_Tools',
+//                            'position'=>130,
+//                            'perms'=>'$user->rights->synopsischrono->read',
+//                            'target'=>'',
+//                            'user'=>0);
         $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=>"r=".$s,
+        $this->menu[$r]=array('fk_menu'=> 'fk_mainmenu=Process',
                             'type'=>'left',
                             'titre'=>'Chrono',
-                            'mainmenu'=>'Chrono',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
+                            'mainmenu'=>'Process',
+                            'leftmenu'=>'Chrono',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Chrono/index.php?leftmenu=chrono',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>1,
@@ -190,45 +190,42 @@ class modSynopsisChrono extends DolibarrModules
                             'user'=>0);
         $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'r='.$s,
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
                             'type'=>'left',
                             'titre'=>'Liste',
-                            'mainmenu'=>'Chrono',
+                            'mainmenu'=>'Process',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Chrono/liste.php?leftmenu=chrono',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>1,
                             'perms'=>'$user->rights->synopsischrono->read',
                             'target'=>'',
-                            'user'=>0,
-                            'constraints'=>array( 0 => '$leftmenu==chrono' ));
+                            'user'=>0);
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'r='.$s,
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
                             'type'=>'left',
                             'titre'=>'Liste d&eacute;tails',
-                            'mainmenu'=>'Chrono',
+                            'mainmenu'=>'Process',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Chrono/listDetail.php?leftmenu=chrono',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>1,
                             'perms'=>'$user->rights->synopsischrono->read',
                             'target'=>'',
-                            'user'=>0,
-                            'constraints'=>array( 0 => '$leftmenu==chrono' ));
+                            'user'=>0);
 
         $r++;
-        $this->menu[$r]=array('fk_menu'=>'r='.$s,
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=Process,fk_leftmenu=Chrono',
                             'type'=>'left',
                             'titre'=>'Nouveau',
-                            'mainmenu'=>'Chrono',
+                            'mainmenu'=>'Process',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Chrono/nouveau.php?leftmenu=chrono',
                             'langs' => 'synopsisGene@Synopsis_Tools',
                             'position'=>2,
                             'perms'=>'$user->rights->synopsischrono->Generer',
                             'target'=>'',
-                            'user'=>0,
-                            'constraints'=>array( 0 => '$leftmenu==chrono' ));
+                            'user'=>0);
         $r++;
     }
    /**
@@ -237,7 +234,7 @@ class modSynopsisChrono extends DolibarrModules
     */
   function init()
   {
-    $sql = array("CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
+    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process' WHERE Titre = 'Process' AND type ='top'", "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

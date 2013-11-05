@@ -2396,11 +2396,11 @@ class lien extends formulaireSource {
         $this->urlObj = $result->urlObj;
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
-        $idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
+        $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
 
         $this->nomElement = getParaChaine($cssClass, "type:");
         $this->tabVal = array();
-        $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
+        $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $this->idChrono, $this->ordre);
         foreach ($tabResult as $val)
             $this->tabVal[] = $val['s'];
         $debReq = "SELECT " . $this->champId . " as id, " .
@@ -2418,11 +2418,18 @@ class lien extends formulaireSource {
     }
     
     function displayForm(){
+    print '<div class="formAjax">';
+    print '<input type="hidden" id="socid" value="'.$this->socid.'"/>';
+    print '<input type="hidden" name="sourcetype" class="sourcetype" value="'.$this->nomElem.'"/>';
+    print '<input type="hidden" name="targettype" class="targettype" value="'.$this->nomElement.'"/>';
+    print '<input type="hidden" name="targetid" class="targetid" value="'.$this->idChrono.'"/>';
+    print '<input type="hidden" name="ordre" class="ordre" value="'.$this->ordre.'"/>';
     $this->getValues();
     print '<select>';
     foreach($this->valuesArr as $id => $val)
          print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
     print '</select>';
+    print '</div>';
     }
     
     function displayValue(){
@@ -3246,8 +3253,8 @@ function finLien($nom) {
     return $nom . "</a>";
 }
 
-function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "$(this).parent(\"div\").fadeOut(); ") {
-    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
+function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
+    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$idVal."\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
 }
 
 ?>

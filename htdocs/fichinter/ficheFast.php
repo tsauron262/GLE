@@ -303,6 +303,8 @@ if ($_REQUEST["id"] > 0) {
         $htmlStr .= '</tr><tr>';
         $htmlStr .= '<th width="25%" class="ui-widget-header ui-state-default">Dur&eacute;e</th>
             <td class="ui-widget-content" colspan="1"><input type="text" class="heures" name="' . $prefId . 'duree" value="' . $prestation->duree . '"/></td>
+                <th width="25%" class="ui-widget-header ui-state-default">Forfait</th>
+            <td class="ui-widget-content" colspan="1"><input type="checkbox" name="' . $prefId . 'forfait" class="" ' . ($prestation->isForfait ? 'checked="checked"' : '') . '/></td>
         </tr>';
         $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
@@ -457,6 +459,9 @@ $htmlStr = '<tr>
         <tr>
             <th width="25%" class="ui-widget-header ui-state-default">Dur&eacute;e</th>
             <td class="ui-widget-content" colspan="1"><input type="text" name="\'+prefId+\'duree" class="heures-supprjs" value="0"/></td>
+
+            <th width="25%" class="ui-widget-header ui-state-default">Forfait</th>
+            <td class="ui-widget-content" colspan="1"><input type="checkbox" name="\'+prefId+\'forfait" class=""/></td>
         </tr>';
 $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
@@ -690,6 +695,27 @@ if (get_magic_quotes_gpc()) { // Si les magic quotes sont activés, on les désa
 function saveForm() {
     global $db, $fichinter;
     $_POST = addslashes_r($_POST);
+
+    for ($i = 1; $i < 5; $i++) {
+        $_POST['date' . $i] = str_replace(array("-", "h", "/", "\\", " "), ":", $_POST['date' . $i]);
+        $tab = explode(":", $_POST['date' . $i]);
+        $result = "";
+        if (!isset($tab[1]))
+            $result .= "00:";
+        else {
+            if ($tab[0] < 10)
+                $result .= "0";
+            $result .= intval($tab[0]) . ":";
+        }
+        if (!isset($tab[1]))
+            $result .= "00";
+        else {
+            if ($tab[1] < 10)
+                $result .="0";
+            $result .= intval($tab[1]);
+        }
+        $_POST['date' . $i] = $result;  
+    }
 //    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
@@ -721,8 +747,6 @@ function saveForm() {
             if ($res->prix_ht > 0) {
                 $pu_ht = $res->prix_ht;
             }
-            //toujours 1
-            $isForfait = 1;
         } else {
             $requete = "SELECT prix_ht
                           FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
@@ -735,11 +759,10 @@ function saveForm() {
             }
         }
 
-
         if (!isset($_POST['presta' . $i . "_rowid"]) || $_POST['presta' . $i . "_rowid"] == 0) {
             if (stripos($_POST['supprPresta'], 'presta' . $i . '_') === false)
                 $fichinter->addline(
-                        $fichinter->id, $_POST['presta' . $i . "_descPrest"], date("Y-m-d"), $_POST['presta' . $i . "_duree"], $_POST['presta' . $i . "_fk_typeinterv"], 1, $pu_ht, $_POST['typeInter'], $_REQUEST['comLigneId'], (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0), $_POST['presta' . $i . "_fk_prod"]
+                        $fichinter->id, $_POST['presta' . $i . "_descPrest"], date("Y-m-d"), $_POST['presta' . $i . "_duree"], $_POST['presta' . $i . "_fk_typeinterv"], 1, $pu_ht, ($_POST['presta' . $i . "_forfait"] == "on"), $_REQUEST['comLigneId'], (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0), $_POST['presta' . $i . "_fk_prod"]
                 );
         }
         else {
@@ -751,9 +774,9 @@ function saveForm() {
                 $fichinterline->fk_typeinterv = $_POST['presta' . $i . "_fk_typeinterv"];
                 $fichinterline->fk_contratdet = (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0);
                 $fichinterline->typeIntervProd = $_POST['presta' . $i . "_fk_prod"];
+                $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
                 $result = $fichinterline->update();
-            }
-            else
+            } else
                 $fichinterline->delete_line();
         }
     }
@@ -826,8 +849,7 @@ function mysqlToArray($data, $db) {
             $tab[] = $row;
         }
         return $tab;
-    }
-    else
+    } else
         return false;
 }
 

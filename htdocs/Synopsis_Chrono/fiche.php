@@ -536,21 +536,6 @@ EOF;
         . ''
         . 'return false;'
         . '});'
-        . ''
-        . ''
-        . ''
-        . '$(".addChrono").click(function(){ '
-            . 'parent = $(this).parent();'
-            . 'model = $(this).parent().find(".model").html();'
-            . 'model_refid = $(this).attr("id").replace("addChrono", "");'
-            . 'socid = $("#socid").parent().find("select").val();'
-            . 'ajaxAddChrono(model_refid, socid, new Array(), function(valReturn){
-                   idIncr++;'
-                . 'addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);'
-                . 'popChrono(valReturn);
-               });'
-        . 'return false;'
-        . '});'
         . '});'
         . '</script>';
     } else {

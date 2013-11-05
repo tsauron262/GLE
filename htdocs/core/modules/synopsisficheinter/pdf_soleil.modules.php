@@ -309,7 +309,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                     require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
                     $contact = new Contact($this->db);
                     $contact->fetch($contactFound);
-                    $contactStr = $contact->nom . " " . $contact->prenom;
+                    $contactStr = $contact->firstname . " " . $contact->lastname;
                 }
                 $pdf->SetXY($this->marge_gauche + 3.4 + 0.9, 47);
                 $pdf->MultiCell(32.6, 3.75, $contactStr, 0, 'L', 0);
@@ -399,7 +399,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);
                 $pdf->SetXY(67.5, 11.5);
-                $tmpName = $fichinter->user_creation->prenom . " " . $fichinter->user_creation->nom;
+                $tmpName = $fichinter->user_creation->firstname . " " . $fichinter->user_creation->lastname;
                 $pdf->MultiCell(90, 4, $tmpName, 0, 'L', 0);
 
 

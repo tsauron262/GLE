@@ -505,7 +505,7 @@ function getParaChaine($chaine, $delimite, $delimite2 = " ") {
     return $result;
 }
 
-function addElementElement($typeS, $typeD, $idS, $idD, $ordre) {
+function addElementElement($typeS, $typeD, $idS, $idD, $ordre = 1) {
     global $db;
     if (!$ordre) {
         $typeST = $typeD;

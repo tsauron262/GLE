@@ -58,6 +58,9 @@ else
 
 // Security check
 $id = (GETPOST('orderid') ? GETPOST('orderid') : GETPOST('id', 'int'));
+/* deb mod drsi */
+if($user->societe_id > 0)
+    /*fin mod drsi */
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'commande', $id, '');
 

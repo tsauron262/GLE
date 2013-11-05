@@ -1,5 +1,5 @@
 <?php
-
+include("./liste.php");die;
 /* Copyright (C) 2002-2003 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2009 Regis Houssin        <regis@dolibarr.fr>
@@ -53,7 +53,7 @@ $pagenext = $page + 1;
 if (!$sortorder)
     $sortorder = "DESC";
 if (!$sortfield)
-    $sortfield = "fd.date";
+    $sortfield = "f.datei";
 if ($page == -1) {
     $page = 0;
 }

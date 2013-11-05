@@ -3254,7 +3254,7 @@ function finLien($nom) {
 }
 
 function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
-    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$idVal."\" onclick='popChrono(" . $idVal . "); return false;'>" . $text . "</a></div>";
+    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$idVal."\" onclick='popChrono(" . $idVal . ", function(){}); return false;'>" . $text . "</a></div>";
 }
 
 ?>

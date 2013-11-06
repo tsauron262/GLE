@@ -82,7 +82,7 @@ $js = preg_replace('/;$/', '', $js);
 $js .= '";';
 
 
-
+/* Mod drsi ne sert a rie a priori est prend enormement de ressource
 $requete = "SELECT d.element_refid, e.classFile, e.type
               FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet as d,
                    " . MAIN_DB_PREFIX . "Synopsis_Process as p,
@@ -90,9 +90,10 @@ $requete = "SELECT d.element_refid, e.classFile, e.type
              WHERE e.id = p.typeElement_refid
                AND d.process_refid = p.id";
 $sql = $db->query($requete);
+ */
 $js .= 'var elemRess = "';
 $js .= "-1:" . preg_replace("/'/", "\\'", utf8_decode(utf8_encode(html_entity_decode("S&eacute;lection ->")))) . ";";
-
+/*
 while ($res = $db->fetch_object($sql)) {
     require_once(DOL_DOCUMENT_ROOT . "" . $res->classFile);
     $tmp = $res->type;
@@ -100,10 +101,9 @@ while ($res = $db->fetch_object($sql)) {
     $tmpObj->fetch($res->element_refid);
     $js .= $res->element_refid . ":" . preg_replace("/'/", "\\'", utf8_decode(utf8_encode($tmpObj->ref))) . ";";
 }
-
+Fin mod drsi */
 $js = preg_replace('/;$/', '', $js);
 $js .= '";';
-
 
 
 $js .= 'var gridimgpath = "' . $imgPath . '/images/";';

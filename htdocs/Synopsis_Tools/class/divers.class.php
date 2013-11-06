@@ -3,6 +3,7 @@
 include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 class synopsisHook {
+    static $timeDeb = 0;
 
     function synopsisHook() {
         global $conf, $db;
@@ -74,6 +75,7 @@ class synopsisHook {
     }
 
     static function getHeader() {
+        self::$timeDeb = microtime(true);
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
         $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/global.js"></script>';
@@ -94,6 +96,10 @@ class synopsisHook {
                 dashboard::getDashboard();
             }
         }
+        $time= (microtime(true)-self::$timeDeb);
+        if($time > 2)
+            dol_syslog("Pages lente ".$time." s", 4);
+        echo "<div>". $time . " s</div>";
     }
 
     public static function getObj($type) {

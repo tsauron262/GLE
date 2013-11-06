@@ -85,6 +85,16 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
+    $finReq = "`llx_Synopsis_Chrono_value` WHERE `chrono_refid` NOT IN (SELECT id FROM llx_Synopsis_Chrono)";
+    $sqlValueChronoSansParent = $db->query("SELECT * FROM " . $finReq);
+    while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
+        erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
+    $delSansParent = $db->query("DELETE FROM " . $finReq);
+    if ($db->affected_rows($delSansParent) > 0)
+        echo $db->affected_rows($delSansParent) . " lignes supprimé dans la table chrono_value</br></br>";
+
+
+
 //    $requete = "SELECT * FROM llx_Synopsis_Chrono";
     $requete = "SELECT * FROM llx_Synopsis_Chrono_value";
     $tabFusion = array();
@@ -92,14 +102,14 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     while ($result = $db->fetch_object($sql)) {
         if (isset($tabChrono[$result->chrono_refid][$result->key_id])) {
             if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value) {
-                supprLigneChronoValue($result->id);
+                supprLigneChronoValue($result->id, "identique ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
                 continue;
             } else {
                 if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null) {
-                    supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id']);
+                    supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id'], "1er null ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
                     continue;
                 } elseif ($result->value == null || $result->value == "") {
-                    supprLigneChronoValue($result->id);
+                    supprLigneChronoValue($result->id, "deuxieme null ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
                     continue;
                 } else {
                     $tabDay = explode("-", $result->value);
@@ -109,7 +119,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
                         $dateActu = new DateTime($result->value);
                         $interval = date_diff($dateF, $dateActu);
                         if ($interval->format('%R%a') > -2 && $interval->format('%R%a') < 2) {
-                            supprLigneChronoValue($result->id);
+                            supprLigneChronoValue($result->id, "date moins de 24h de diff ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
                             continue;
                         }
                     }
@@ -208,11 +218,6 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
             foreach ($tabValSuppr as $idSuppr)
                 delElementElement($element, null, $idSuppr);
 
-    $sqlValueChronoSansParent = $db->query("SELECT * FROM `llx_Synopsis_Chrono_value` WHERE `chrono_refid` NOT IN (SELECT id FROM llx_Synopsis_Chrono)");
-    while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
-        erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
-
-
     netoyeDet("propal");
     netoyeDet("commande");
     netoyeDet("contrat");
@@ -224,13 +229,14 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     $sql = $db->query("SELECT * FROM llx_socpeople");
     $tabFusion = array();
     while ($result = $db->fetch_object($sql)) {
-        if (isset($tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]))
-            $tabFusion[$tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]][$result->rowid] = true;
-        elseif (isset($tab[$result->fk_soc][$result->zip][$result->town])) {
+        $clef = $result->fk_soc.$result->zip.$result->town.$result->poste.$result->phone.$result->phone_perso.$result->phone_mobile.$result->fax.$result->emil;
+        if (isset($tab[$clef][$result->lastname])) {
+            $tabFusion[$tab[$clef][$result->lastname]][$result->rowid] = true;
+        } elseif (isset($tab[$clef])) {
 //            $soc = new Societe($db);
 //            $soc->fetch($result->fk_soc);
 //            if (stripos($result->lastname, $soc->name) !== false) {
-//                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+//                foreach ($tab[$clef] as $name => $id)
 //                    if (stripos($name, $soc->name) !== false) {
 //                        $tabFusion[$id][$result->rowid] = true;
 //                        break;
@@ -238,33 +244,34 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
 //            } else {
 //                $tabNom = explode(" - ", $result->lastname);
 //                if (isset($tabNom))
-//                    foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+//                    foreach ($tab[$clef] as $name => $id)
 //                        if (stripos($name, $tabNom[0]) !== false) {
 //                            $tabFusion[$id][$result->rowid] = true;
 //                            break;
 //                        }
 //            }
             $tabNom = explode(" - ", $result->lastname);
-            if (isset($tabNom[1])){
-                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id) {
+            if (isset($tabNom[1])) {
+                foreach ($tab[$clef] as $name => $id) {
                     $tabFusion[$id][$result->rowid] = true;
                     break;
                 }
+            } else {
+                $tab[$clef][$result->lastname] = $result->rowid;
             }
-            else
-                $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
         } else {
-            $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
+            $tab[$clef][$result->lastname] = $result->rowid;
         }
     }
     $nbFusion = 0;
-    foreach ($tabFusion as $idM => $tab)
+    foreach ($tabFusion as $idM => $tab){
         foreach ($tab as $idF => $inut) {
             $db->query("UPDATE llx_element_contact SET fk_socpeople =" . $idM . " WHERE fk_socpeople = " . $idF);
             $db->query("DELETE FROM llx_socpeople WHERE rowid = " . $idF);
-//            die("DELETE FROM llc_socpeople WHERE rowid = ".$idF);
+            echo "contact  ".$idM. " et ".$idF." fusionné. </br>";
             $nbFusion++;
         }
+    }
     echo $nbFusion . " Contact fusionné.<br/>";
 
 
@@ -638,10 +645,10 @@ function lienFusion($id1, $id2) {
     echo "<br/><br/>";
 }
 
-function supprLigneChronoValue($id) {
+function supprLigneChronoValue($id, $text) {
     global $db;
     $db->query("DELETE FROM llx_Synopsis_Chrono_value WHERE id =" . $id);
-    echo "<br/>1 ligne supprimer<br/>";
+    echo "<br/>1 ligne supprimer ".$text."<br/>";
 }
 
 function fusionChrono($idMaitre, $idFaible) {

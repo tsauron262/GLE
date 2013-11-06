@@ -262,11 +262,13 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
 
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
     $process = new process($db);
-    $res1 = $process->fetch($process_id);
+    $processDet = new processDet($db);  
+    $res1 = $process->fetch($process_id, false);
     $process->getGlobalRights();
-    $processDet = false;
     if ($processDetId > 0)
-        $processDet = $process->detail[$processDetId];
+        $processDet->fetch($processDetId);
+    else
+        $processDet = false;
 
     if ($element_id && $process->typeElement)
         $element_obj = $process->typeElement->fetch_element($element_id);
@@ -415,7 +417,7 @@ EOF;
             if ($processDetId > 0) {
                 $js .= "var processDetId = " . $processDetId . ";";
                 $js .= "var processId = " . $process->id . ";";
-                $js .= "var validation_number = " . ($process->detail[$processDetId]->validation_number > 0 ? $process->detail[$processDetId]->validation_number : 1) . ";";
+                $js .= "var validation_number = " . ($processDet->validation_number > 0 ? $processDet->validation_number : 1) . ";";
                 if ($element_id > 0)
                     $js .= "var element_refid = " . $element_id . ";";
             }
@@ -480,7 +482,7 @@ EOF;
     }
 
 
-    print "<div class='titre'>" . $process->label . ' - ' . $form->label . ($processDetId > 0 ? ' - ' . $process->detail[$processDetId]->ref : "") . "</div>";
+    print "<div class='titre'>" . $process->label . ' - ' . $form->label . ($processDetId > 0 ? ' - ' . $processDet->ref : "") . "</div>";
 //$eval = preg_replace('/\$/','\\\$',$process->pretraitement);
     $eval = $process->pretraitement;
 
@@ -500,11 +502,11 @@ EOF;
         print "    <th class='ui-widget-header ui-state-default'>Nom du formulaire</th>";
         print "    <td class='ui-widget-content'>" . ($process->formulaire ? $process->formulaire->getNomUrl(1) : '') . "</td>";
         print "<tr><th class='ui-widget-header ui-state-default'>R&eacute;f&eacute;rence</th>";
-        print "    <td class='ui-widget-content' colspan=1>" . ($process->detail[$processDetId] ? $process->detail[$processDetId]->getNomUrl(1) : "") . "</td>";
+        print "    <td class='ui-widget-content' colspan=1>" . ($processDet ? $processDet->getNomUrl(1) : "") . "</td>";
         print "    <th class='ui-widget-header ui-state-default'>Statut</th>";
-        print "    <td class='ui-widget-content' colspan=1>" . ($process->detail[$processDetId] ? $process->detail[$processDetId]->getLibStatut(4) : "") . "</td>";
-        if ($process->detail[$processDetId]->isRevised) {
-            $arrNextPrev = $process->detail[$processDetId]->getPrevNextRev();
+        print "    <td class='ui-widget-content' colspan=1>" . ($processDet ? $processDet->getLibStatut(4) : "") . "</td>";
+        if ($processDet->isRevised) {
+            $arrNextPrev = $processDet->getPrevNextRev();
             $prev = $arrNextPrev['prev'];
             $next = $arrNextPrev['next'];
             $procNext = new processDet($db);
@@ -527,7 +529,7 @@ EOF;
             }
         }
 
-        if ($process->typeElement && $element_id > 0 && ($process->detail[$processDetId]->validation_number > 1 || $process->detail[$processDetId]->statut > 0 )) {
+        if ($process->typeElement && $element_id > 0 && ($processDet->validation_number > 1 || $processDet->statut > 0 )) {
             print "<tr><th class='ui-widget-header ui-state-default'>El&eacute;ment</th>";
             print "    <td class='ui-widget-content' colspan=1>" . $process->typeElement->getNomUrl_byProcessDet($element_id, 1) . "</td>";
             print "    <th class='ui-widget-header ui-state-default'>Suivi validation</th>";
@@ -536,7 +538,7 @@ EOF;
             print "<tr><th class='ui-widget-header ui-state-default'>El&eacute;ment</th>";
             print "    <td class='ui-widget-content' colspan=3>" . $process->typeElement->getNomUrl_byProcessDet($element_id, 1) . "</td>";
         }
-        if ($process->detail[$processDetId]->fk_statut > 0) {
+        if ($processDet->fk_statut > 0) {
             print "<tr><th class='ui-widget-header ui-state-default'>R&eacute;sum&eacute;</th>";
             print "    <td class='ui-widget-content' colspan=3><a href='formDatas.php?processDetId=" . $processDetId . "'><table><tr><td><span class='ui-icon ui-icon-extlink'></span></td><td>Afficher</table></a>";
         }
@@ -667,8 +669,8 @@ EOF;
                         if ($lignes->type->valueInValueField == 1) {
                             if ($processDetId) {
                                 $tmp = false;
-                                if ($process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur . "x" != "x") {
-                                    print " value='" . $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur . "' ";
+                                if ($processDet->valeur->valeur[$htmlName]->valeur . "x" != "x") {
+                                    print " value='" . $processDet->valeur->valeur[$htmlName]->valeur . "' ";
                                 }
                             } else {
                                 if ($lignes->dflt . "x" != "x") {
@@ -686,7 +688,7 @@ EOF;
                             //TODO si valeur du formulaire
                             if ($processDetId) {
                                 $tmp = false;
-                                if ($process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur > 0) {
+                                if ($processDet->valeur->valeur[$htmlName]->valeur > 0) {
                                     print " checked ";
                                 }
                             } else {
@@ -705,7 +707,7 @@ EOF;
                             //TODO si valeur du formulaire
                             if ($processDetId) {
                                 $tmp = false;
-                                if ($process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur == $jtmp) {
+                                if ($processDet->valeur->valeur[$htmlName]->valeur == $jtmp) {
                                     print " checked ";
                                 }
                             } else {
@@ -771,7 +773,7 @@ EOF;
                                                     }
 
                                                     if ($processDetId > 0) {
-                                                        $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
+                                                        $valCompare = $processDet->valeur->valeur[$htmlName]->valeur;
                                                     }
                                                     if ($valCompare == $key1OptGrp) {
                                                         print "<OPTION SELECTED value='" . $key1OptGrp . "'>" . $val1OptGrp . "</OPTION>";
@@ -791,8 +793,8 @@ EOF;
                                                         $valCompare = getGlobalVar($arr[1]);
                                                     }
                                                 }
-                                                if ($processDetId > 0 && $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur . "x" != "x") {
-                                                    $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
+                                                if ($processDetId > 0 && $processDet->valeur->valeur[$htmlName]->valeur . "x" != "x") {
+                                                    $valCompare = $processDet->valeur->valeur[$htmlName]->valeur;
                                                 }
 
                                                 if ($valCompare == $key) {
@@ -817,7 +819,7 @@ EOF;
                                             }
 
                                             if ($processDetId > 0) {
-                                                $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
+                                                $valCompare = $processDet->valeur->valeur[$htmlName]->valeur;
                                             }
                                             if ($valCompare == $key) {
                                                 print "<option SELECTED value='" . $key . "'>" . $val . "</option>";
@@ -840,7 +842,7 @@ EOF;
                                             }
 
                                             if ($processDetId > 0) {
-                                                $valCompare = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
+                                                $valCompare = $processDet->valeur->valeur[$htmlName]->valeur;
                                             }
                                             if ($valCompare == $key) {
                                                 print "<option SELECTED value='" . $key . "'>" . $val . "</option>";
@@ -866,8 +868,8 @@ EOF;
                                 $valDisplay = $lignes->dflt;
                             }
                         }
-                        if ($processDetId > 0 && $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur . "x" != "x") {
-                            $valDisplay = $process->detail[$processDetId]->valeur->valeur[$htmlName]->valeur;
+                        if ($processDetId > 0 && $processDet->valeur->valeur[$htmlName]->valeur . "x" != "x") {
+                            $valDisplay = $processDet->valeur->valeur[$htmlName]->valeur;
                         }
                         print $valDisplay;
                     }
@@ -944,19 +946,19 @@ EOF;
             $hasModRight = true;
         }
         print "<table width=100%>";
-        if (!($processDetId > 0 && $process->detail[$processDetId]->fk_statut == 999))
+        if (!($processDetId > 0 && $processDet->fk_statut == 999))
             print "<tr><td align=center class='ui-state-default'>";
-        if ($process->detail[$processDetId]->fk_statut == 0 && $hasModRight) {
+        if ($processDet->fk_statut == 0 && $hasModRight) {
             print "<button id='saveButton' class='butAction' >Sauvegarder</button><button class='butActionDelete' onClick='jQuery(\"#formProcess\")[0].reset();return (false);'>Reset</button>";
         }
-        if ($process->detail[$processDetId]->fk_statut == 0)
+        if ($processDet->fk_statut == 0)
             print "<button id='askValid' class='butAction'>Demande de validation</button>";
-        if ($process->detail[$processDetId]->fk_statut == 3 && $process->revision_model_refid > 0)
+        if ($processDet->fk_statut == 3 && $process->revision_model_refid > 0)
             print "<button id='revButton' class='butAction' >R&eacute;viser</button>";
-        else if ($process->detail[$processDetId]->fk_statut == 3 && $hasModRight)
+        else if ($processDet->fk_statut == 3 && $hasModRight)
             print "<button id='modAfterValidButton' class='butAction' >Modifier</button>";
 //Bouton de validation
-        if ($processDetId > 0 && $process->detail[$processDetId]->fk_statut == 999) {
+        if ($processDetId > 0 && $processDet->fk_statut == 999) {
             //Cas 1/ droit de valider tous :> valid tout
             //Cas 2/ droit de valider par role :> valid 1
             //Cas 3/ droit de valider tous + valider par role
@@ -987,7 +989,7 @@ EOF;
                                                FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet_validation,
                                                     " . MAIN_DB_PREFIX . "Synopsis_Process_rights_def as d
                                               WHERE processdet_refid = " . $processDetId . "
-                                                AND validation_number=" . $process->detail[$processDetId]->validation_number . "
+                                                AND validation_number=" . $processDet->validation_number . "
                                                 AND validation_type_refid = d.id
                                                 AND d.isValidationForAll <> 1
                                                 AND d.isValidationRight = 1";
@@ -1041,7 +1043,7 @@ EOF;
                         $requeteValue = "SELECT *
                                            FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet_validation
                                           WHERE processdet_refid = " . $processDetId . "
-                                            AND validation_number=" . $process->detail[$processDetId]->validation_number . "
+                                            AND validation_number=" . $processDet->validation_number . "
                                             AND validation_type_refid = " . $res->id;
                         $sqlValue = $db->query($requeteValue);
                         if ($db->num_rows($sqlValue) > 0)

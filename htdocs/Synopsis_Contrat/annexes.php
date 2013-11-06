@@ -415,5 +415,6 @@ if ($id > 0) {
     //1 les annexes séléctionnés + num + rang
     //2 les annexes modèles
     //Bouton ajouter un modele d'annexe
+    llxFooter();
 }
 ?>

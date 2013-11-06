@@ -511,7 +511,7 @@ class process extends CommonObject {
         return($res->id);
     }
 
-    public function fetch($id) {
+    public function fetch($id, $withLigne = true) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             $this->id = $id;
@@ -553,12 +553,14 @@ class process extends CommonObject {
                     $result = $form->fetch($this->formulaire_refid);
                     $this->formulaire = $form;
                 }
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet WHERE process_refid = " . $this->id;
-                $sql = $this->db->query($requete);
-                while ($res = $this->db->fetch_object($sql)) {
-                    $ligne = new processDet($this->db);
-                    $ligne->fetch($res->id);
-                    $this->detail[$res->id] = $ligne;
+                if($withLigne){
+                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet WHERE process_refid = " . $this->id;
+                    $sql = $this->db->query($requete);
+                    while ($res = $this->db->fetch_object($sql)) {
+                        $ligne = new processDet($this->db);
+                        $ligne->fetch($res->id);
+                        $this->detail[$res->id] = $ligne;
+                    }
                 }
                 global $user;
                 $this->getRights($user);

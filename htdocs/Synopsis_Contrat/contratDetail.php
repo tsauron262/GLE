@@ -555,4 +555,5 @@ EOF;
 EOF;
 }
 print '<br>';
+llxFooter();
 ?>

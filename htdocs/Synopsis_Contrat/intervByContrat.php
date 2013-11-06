@@ -194,7 +194,7 @@ print '</div>';
 
 
 
-$requete = "SELECT b.name, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
+$requete = "SELECT b.lastname, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
                    " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
                    " . MAIN_DB_PREFIX . "user as b

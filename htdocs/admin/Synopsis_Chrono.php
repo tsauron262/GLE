@@ -163,7 +163,7 @@ print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Revision")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Description")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Statut")."</td>";
-print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Suivie")."</td>";
+print "<td style='border:1px Solid; border-top-color: #0073EA; '>".$langs->trans("Suivi")."</td>";
 print "<td style='border:1px Solid; border-top-color: #0073EA;  border-right-color: #0073EA;' align=center rowspan=2>".$langs->trans("Action")."</td>";
 print "<tr class=\"liste_titre\">";
 print "<td style='border:1px Solid; border-left-color: #0073EA;' colspan=12>".$langs->trans("Description")."</td>";
@@ -193,6 +193,9 @@ while($res=$db->fetch_object($sql))
         print "<td align=center>".$langs->trans("Lier &agrave; une propal")."</td>";
         print "<td align=center>".$langs->trans("Lier &agrave; un projet")."</td>";
         print "<td align=center>".$langs->trans("Revision")."</td>";
+        print "<td align=center>".$langs->trans("Description")."</td>";
+        print "<td align=center>".$langs->trans("Statut")."</td>";
+        print "<td align=center>".$langs->trans("Suivi")."</td>";
         print "<td align=center>".$langs->trans("Action")."</td>";
         print "</tr>";
         print "<tr>";
@@ -253,6 +256,9 @@ if ($_REQUEST['action'] != 'modify'){
     print "<td align=center>".$langs->trans("Lier &agrave; une propal")."</td>";
     print "<td align=center>".$langs->trans("Lier &agrave; un projet")."</td>";
     print "<td align=center>".$langs->trans("Revision")."</td>";
+    print "<td align=center>".$langs->trans("Description")."</td>";
+    print "<td align=center>".$langs->trans("Statut")."</td>";
+    print "<td align=center>".$langs->trans("Suivi")."</td>";
     print "</tr>";
     print "<tr>";
     print "<td class='ui-widget-content' align=center><input style='text-align:center; width:90%;' name='nom'></input>";

@@ -533,10 +533,10 @@ function delElementElement($typeS, $typeD, $idS = null, $idD = null, $ordre = tr
         die("Suppr tout probleme pas de type");
     $req = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE 1";
     if (isset($typeS))
-    $req .= " AND sourcetype = '" . $typeS . "'";        
+        $req .= " AND sourcetype = '" . $typeS . "'";
     if (isset($typeD))
-    $req .= " AND targettype = '" . $typeD . "'";
-    
+        $req .= " AND targettype = '" . $typeD . "'";
+
     if (isset($idS))
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
@@ -607,7 +607,7 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
     } elseif ($cc != '')
         $ccAdmin .= ", " . $cc;
     if (!isset($to) || $to == '') {
-        $text = "Pas de mail expediteur definit." . "\n\n" . $text;
+        $text = "Pas de mail destinataire définit." . "\n\n" . $text;
         $to = $toReplay;
     }
 //    if (!$headers) {
@@ -616,16 +616,13 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
 //        $headers .= 'From: Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
 //        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
 //        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
-//        $text = str_replace("\n", "<br/>", $text);
 //    }
-    if (isset($to) && $to != ''){
+    $text = str_replace("\n", "<br/>", $text);
+    if (isset($to) && $to != '') {
 //        mail($to, $sujet, $text, $headers);
-                require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
-    $mailfile = new CMailFile($sujet,$to,
-            'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>',
-            $text, array(), array(), array(),
-            $ccAdmin, "", 0, 1);
-    $mailfile->sendfile();
+        require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+        $mailfile = new CMailFile($sujet, $to, 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>', $text, array(), array(), array(), $ccAdmin, "", 0, 1);
+        $mailfile->sendfile();
     }
 }
 

@@ -227,24 +227,32 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
         if (isset($tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]))
             $tabFusion[$tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]][$result->rowid] = true;
         elseif (isset($tab[$result->fk_soc][$result->zip][$result->town])) {
-            $soc = new Societe($db);
-            $soc->fetch($result->fk_soc);
-            if (stripos($result->lastname, $soc->name) !== false) {
-                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
-                    if (stripos($name, $soc->name) !== false) {
-                        $tabFusion[$id][$result->rowid] = true;
-                        break;
-                    }
-            } else {
-                $tabNom = explode(" - ", $result->lastname);
-                if (isset($tabNom))
-                    foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
-                        if (stripos($name, $tabNom[0]) !== false) {
-                            $tabFusion[$id][$result->rowid] = true;
-                            break;
-                        }
+//            $soc = new Societe($db);
+//            $soc->fetch($result->fk_soc);
+//            if (stripos($result->lastname, $soc->name) !== false) {
+//                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+//                    if (stripos($name, $soc->name) !== false) {
+//                        $tabFusion[$id][$result->rowid] = true;
+//                        break;
+//                    }
+//            } else {
+//                $tabNom = explode(" - ", $result->lastname);
+//                if (isset($tabNom))
+//                    foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+//                        if (stripos($name, $tabNom[0]) !== false) {
+//                            $tabFusion[$id][$result->rowid] = true;
+//                            break;
+//                        }
+//            }
+            $tabNom = explode(" - ", $result->lastname);
+            if (isset($tabNom[1])){
+                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id) {
+                    $tabFusion[$id][$result->rowid] = true;
+                    break;
+                }
             }
-            $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
+            else
+                $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
         } else {
             $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
         }

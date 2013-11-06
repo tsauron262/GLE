@@ -78,9 +78,9 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`) AND targettype = 'productCli'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
-    
-    
-    $maj->ajoutDroitGr(array(1,2,3,4,5,6,7,8,9,10,11,12,13), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
+
+
+    $maj->ajoutDroitGr(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
@@ -230,27 +230,34 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
             $soc = new Societe($db);
             $soc->fetch($result->fk_soc);
             if (stripos($result->lastname, $soc->name) !== false) {
-                foreach($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
-                if (stripos($result->lastname, $soc->name) !== false) {
-                    $tabFusion[$id][$result->rowid] = true;
-                    break;
-                }
+                foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+                    if (stripos($name, $soc->name) !== false) {
+                        $tabFusion[$id][$result->rowid] = true;
+                        break;
+                    }
+            } else {
+                $tabNom = explode(" - ", $result->lastname);
+                if (isset($tabNom))
+                    foreach ($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+                        if (stripos($name, $tabNom[0]) !== false) {
+                            $tabFusion[$id][$result->rowid] = true;
+                            break;
+                        }
             }
             $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
-        }
-        else{
+        } else {
             $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
         }
     }
     $nbFusion = 0;
-    foreach($tabFusion as $idM => $tab)
-        foreach($tab as $idF=>$inut){
-            $db->query("UPDATE llx_element_contact SET fk_socpeople =".$idM." WHERE fk_socpeople = ".$idF);
-            $db->query("DELETE FROM llx_socpeople WHERE rowid = ".$idF);
+    foreach ($tabFusion as $idM => $tab)
+        foreach ($tab as $idF => $inut) {
+            $db->query("UPDATE llx_element_contact SET fk_socpeople =" . $idM . " WHERE fk_socpeople = " . $idF);
+            $db->query("DELETE FROM llx_socpeople WHERE rowid = " . $idF);
 //            die("DELETE FROM llc_socpeople WHERE rowid = ".$idF);
             $nbFusion++;
         }
-        echo $nbFusion. " Contact fusionné.<br/>";
+    echo $nbFusion . " Contact fusionné.<br/>";
 
 
     if ($nbErreur == 0)

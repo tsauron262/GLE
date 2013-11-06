@@ -735,13 +735,19 @@ if (is_dir($dir)) {
                     $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
                     $livAdd = NULL;
                     $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
+                    $soc = new Societe($db);
+                    $soc->fetch($socid);
                     if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
 
 
                         $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
                         $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "socpeople
-                         WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND lastname = '" . $nomLivAdd . "')";
+                         WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND lastname = '" . $nomLivAdd . "') ||"
+                                . "(fk_soc = " . $socid . "
+                                AND zip = '" . $val['CliLAdrZip'] . "'
+                                AND town = '" . $val['CliLAdrCity'] . "'
+                                AND address = '" . $livAdresse . "')";
 //                        $requete = "SELECT *
 //                          FROM " . MAIN_DB_PREFIX . "societe_adresse_livraison
 //                         WHERE import_key = '" . $val['PcvLAdpID'] . "'";
@@ -771,23 +777,24 @@ if (is_dir($dir)) {
                             //Si modif
                         } else {
                             $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe_adresse_livraison (fk_societe, cp, ville, address, fk_pays, label,import_key)
-//                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
-//                            $sql = requeteWithCache($requete);
-//                            if ($sql) {
-//                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
-//                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
-//                            } else {
-//                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-//                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
-//                            }
-                            $livAdd = $db->last_insert_id('".MAIN_DB_PREFIX."societe_adresse_livraison');
+                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key)
+                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
+                            $sql = requeteWithCache($requete);
+                            if ($sql) {
+                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
+                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+                            } else {
+                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
+                            }
+                            $livAdd = $db->last_insert_id(MAIN_DB_PREFIX."socpeople");
+//die($livAdd);
                         }
                     } else {
                         $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
                         $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
                     }
-//                    }
+                    
                     /*
                       +--------------------------------------------------------------------------------------------------------------+
                       |                                                                                                              |
@@ -1324,25 +1331,42 @@ if (is_dir($dir)) {
                                 $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
                             }
                         }
+                        
+                        
+                    if ($comId > 0 && $livAdd > 0) {
+                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $livAdd . " AND fk_c_type_contact IN (102) AND element_id = " . $comId;
+                            $requete = "SELECT *" . $finReq;
+                            $sql = requeteWithCache($requete);
+//                            die($requete);
+                            if ($db->num_rows($sql) < 1) {
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                   VALUES (" . $livAdd . ",102," . $comId . ",4,now() )";
+                                $sql = requeteWithCache($requete);
+                            }
+//print $requete;
+                        }
+//                    }
+                        
+                        
                         /*
                          * A voir drsi drsi drsi
                          */
-//                        if ($comId > 0 && $socContact > 0) {
-//                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
-//                            $requete = "SELECT *" . $finReq;
-//                            $sql = requeteWithCache($requete);
-//                            if ($db->num_rows($sql) < 2) {
-//                                $requete = "DELETE" . $finReq;
-//                                $sql = requeteWithCache($requete);
-//                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
-//                                   VALUES (" . $socContact . ",100," . $comId . ",4,now() )";
-//                                $sql = requeteWithCache($requete);
-//                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
-//                                   VALUES (" . $socContact . ",101," . $comId . ",4,now() )";
-//                                $sql = requeteWithCache($requete);
-//                            }
-////print $requete;
-//                        }
+                        if ($comId > 0 && $socContact > 0) {
+                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
+                            $requete = "SELECT *" . $finReq;
+                            $sql = requeteWithCache($requete);
+                            if ($db->num_rows($sql) < 2) {
+                                $requete = "DELETE" . $finReq;
+                                $sql = requeteWithCache($requete);
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                   VALUES (" . $socContact . ",100," . $comId . ",4,now() )";
+                                $sql = requeteWithCache($requete);
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                   VALUES (" . $socContact . ",101," . $comId . ",4,now() )";
+                                $sql = requeteWithCache($requete);
+                            }
+//print $requete;
+                        }
 
                         /*
                           +--------------------------------------------------------------------------------------------------------------+

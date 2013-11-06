@@ -80,7 +80,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
     
     
-    $maj->ajoutDroitGr(array(1,2,3,4,5,6,7,8,9,10,11,12,13), array(80000, 80001, 80002, 80003, 80004, 80005));
+    $maj->ajoutDroitGr(array(1,2,3,4,5,6,7,8,9,10,11,12,13), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
@@ -172,14 +172,13 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
                 $idSoc = $resultChrono->fk_societe;
                 if (!$idSoc > 0)
                     die("kkkk");
-                if (!isset($tabSoc[$idSoc]) && $idSoc >0) {
-                    if($idSoc > 0){
-                    $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));
-                    while ($result4 = $db->fetch_object($sql4)) {
-                        $tabSoc[$idSoc][] = $result4->$champId;
-                    }
-                    }
-                    else
+                if (!isset($tabSoc[$idSoc]) && $idSoc > 0) {
+                    if ($idSoc > 0) {
+                        $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));
+                        while ($result4 = $db->fetch_object($sql4)) {
+                            $tabSoc[$idSoc][] = $result4->$champId;
+                        }
+                    } else
                         $tabSoc[$idSoc] = array();
                 }
                 if (!isset($tabValOK)) {
@@ -222,6 +221,36 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     netoyeDet("user", MAIN_DB_PREFIX . "usergroup_user");
     netoyeDet("user", MAIN_DB_PREFIX . "user_rights");
 //        netoyeDet("product", "babel_categorie_product", "babel_");
+    $sql = $db->query("SELECT * FROM llx_socpeople");
+    $tabFusion = array();
+    while ($result = $db->fetch_object($sql)) {
+        if (isset($tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]))
+            $tabFusion[$tab[$result->fk_soc][$result->zip][$result->town][$result->lastname]][$result->rowid] = true;
+        elseif (isset($tab[$result->fk_soc][$result->zip][$result->town])) {
+            $soc = new Societe($db);
+            $soc->fetch($result->fk_soc);
+            if (stripos($result->lastname, $soc->name) !== false) {
+                foreach($tab[$result->fk_soc][$result->zip][$result->town] as $name => $id)
+                if (stripos($result->lastname, $soc->name) !== false) {
+                    $tabFusion[$id][$result->rowid] = true;
+                    break;
+                }
+            }
+            $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
+        }
+        else{
+            $tab[$result->fk_soc][$result->zip][$result->town][$result->lastname] = $result->rowid;
+        }
+    }
+    $nbFusion = 0;
+    foreach($tabFusion as $idM => $tab)
+        foreach($tab as $idF=>$inut){
+            $db->query("UPDATE llx_element_contact SET fk_socpeople =".$idM." WHERE fk_socpeople = ".$idF);
+            $db->query("DELETE FROM llx_socpeople WHERE rowid = ".$idF);
+//            die("DELETE FROM llc_socpeople WHERE rowid = ".$idF);
+            $nbFusion++;
+        }
+        echo $nbFusion. " Contact fusionné.<br/>";
 
 
     if ($nbErreur == 0)
@@ -278,13 +307,9 @@ function getTab() {
             array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', */ 'civilite', 'lastname', 'firstname', 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', 'birthday', 'poste', 'phone', 'phone_perso', 'phone_mobile', 'fax', 'email', 'jabberid', 'priv', 'fk_user_creat', 'fk_user_modif', 'note_private', /* 'default_lang', 'canvas', */ 'import_key')
         ),
         array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "socpeople",
-            array('rowid', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
+            array('rowid+100000', 'datec', 'tms', 'fk_societe', 'label', 'address', 'cp', 'ville', 'fk_pays', 'tel', 'fax', 'fk_user_creat', 'fk_user_modif', 'note', 'external_id'),
             array('rowid', 'datec', 'tms', 'fk_soc', /* 'entity', 'civilite', */ 'lastname', /* 'firstname', */ 'address', 'zip', 'town', /* 'fk_departement', */ 'fk_pays', /* 'birthday', 'poste', */ 'phone', /* 'phone_perso', 'phone_mobile', */ 'fax', /* 'email', 'jabberid', 'priv', */ 'fk_user_creat', 'fk_user_modif', 'note_private'/* , 'default_lang', 'canvas' */, 'import_key')
         ),
-//        array($oldPref . "societe_adresse_livraison", MAIN_DB_PREFIX . "element_contact",
-//            array( '$%4', 'fk_societe', '$%102', 'rowid', 'external_id'),
-//            array( 'statut',  'element_id', 'fk_c_type_contact', 'fk_socpeople')
-//        ),
         array($oldPref . "element_contact", MAIN_DB_PREFIX . "element_contact",
             array('rowid', 'datecreate', 'statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople'/* , 'inPDF' */),
             array('rowid', 'datecreate', 'statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople')
@@ -538,7 +563,7 @@ function getTab() {
             array()
         ),
         array($oldPref . "commande", MAIN_DB_PREFIX . "element_contact",
-            array('$%4', 'rowid', '$%102', 'fk_adresse_livraison'),
+            array('$%4', 'rowid', '$%102', 'fk_adresse_livraison+100000'),
             array('statut', 'element_id', 'fk_c_type_contact', 'fk_socpeople')
         ),
 //        array($oldPref . "expedition", MAIN_DB_PREFIX . "element_contact",

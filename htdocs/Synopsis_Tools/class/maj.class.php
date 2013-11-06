@@ -189,30 +189,30 @@ class maj {
 //                    $this->tabException['adresseLivraison'][$val] = $ligne['external_id'];
                     $val = NULL;
                 }
-                if ($tableDest == "llx_element_contact" && ($tableSrc == "llx_commande" || $tableSrc == "llx_expedition")) {
-                    if ($cle == "rowid") {
-                        $ok = false;
-                        if ($ligne['fk_adresse_livraison'] > 0) {
-                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_adresse_livraison'] . "'";
-                            $result = $this->queryS($requete);
-                            if ($this->dbS->num_rows($result) > 0) {
-                                $ligneT = $this->dbD->fetch_array($result);
-
-                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = '" . $ligneT['external_id'] . "'";
-                                $result = $this->queryD($requete);
-                                if ($this->dbD->num_rows($result) > 0) {
-                                    $ligneT = $this->dbD->fetch_array($result);
-                                    $ligne['fk_adresse_livraison'] = $ligneT['rowid'];
-                                    $ok = true;
-                                }
-                            }
-                        }
-                        if (!$ok)
-                            $importOff = true;
-                    }
-//                    elseif ($cle == "external_id")
-//                        break;
-                }
+//                if ($tableDest == "llx_element_contact" && ($tableSrc == "llx_commande" || $tableSrc == "llx_expedition")) {
+//                    if ($cle == "rowid") {
+//                        $ok = false;
+//                        if ($ligne['fk_adresse_livraison'] > 0) {
+//                            $requete = "SELECT * FROM llx_societe_adresse_livraison WHERE rowid = '" . $ligne['fk_adresse_livraison'] . "'";
+//                            $result = $this->queryS($requete);
+//                            if ($this->dbS->num_rows($result) > 0) {
+//                                $ligneT = $this->dbD->fetch_array($result);
+//
+//                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = '" . $ligneT['external_id'] . "'";
+//                                $result = $this->queryD($requete);
+//                                if ($this->dbD->num_rows($result) > 0) {
+//                                    $ligneT = $this->dbD->fetch_array($result);
+//                                    $ligne['fk_adresse_livraison'] = $ligneT['rowid'];
+//                                    $ok = true;
+//                                }
+//                            }
+//                        }
+//                        if (!$ok)
+//                            $importOff = true;
+//                    }
+////                    elseif ($cle == "external_id")
+////                        break;
+//                }
 
 
                 if ($cle == "fk_statut" && $tableDest == MAIN_DB_PREFIX . "propal" && $val == "99")//On vire les statue 99 sur les propal

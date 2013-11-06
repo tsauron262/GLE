@@ -729,7 +729,7 @@ function select_dolusersInGroup($form, $group, $selected = '', $htmlname = 'user
     if (is_array($include) && $includeUsers)
         $sql.= " AND u.rowid IN ('" . $includeUsers . "')";
     $sql .= " AND statut = 1";
-    $sql.= " ORDER BY u.lastname ASC";
+    $sql.= " ORDER BY u.firstname ASC";
 
     dol_syslog(get_class($form) . "::select_dolusers sql=" . $sql);
     $resql = $form->db->query($sql);

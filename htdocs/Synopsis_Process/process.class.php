@@ -290,6 +290,8 @@ class process extends CommonObject {
     private $arrRightValid = array();
     public $valideAction;
     public $reviseAction;
+    
+    private static $cache = array();
 
     public function process($DB) {
         $this->db = $DB;
@@ -511,7 +513,7 @@ class process extends CommonObject {
         return($res->id);
     }
 
-    public function fetch($id, $withLigne = true) {
+    public function fetch($id, $inut = true) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             $this->id = $id;
@@ -549,11 +551,19 @@ class process extends CommonObject {
 
                 $this->formulaire_refid = $res->formulaire_refid;
                 if ($this->formulaire_refid > 0) {
-                    $form = new Formulaire($this->db);
-                    $result = $form->fetch($this->formulaire_refid);
-                    $this->formulaire = $form;
+                    if(isset(self::$cache[$this->id]['formulaire'][$this->formulaire_refid]))
+                        $this->formulaire = self::$cache[$this->id]['formulaire'][$this->formulaire_refid];
+                    else{
+                        $form = new Formulaire($this->db);
+                        $result = $form->fetch($this->formulaire_refid);
+                        $this->formulaire = $form;
+                        self::$cache[$this->id]['formulaire'][$this->formulaire_refid] = $this->formulaire;
+                    }
                 }
-                if($withLigne){
+                if(isset(self::$cache[$this->id]['lignes'])){
+                    $this->detail = self::$cache[$this->id]['lignes'];
+                }
+                else{
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet WHERE process_refid = " . $this->id;
                     $sql = $this->db->query($requete);
                     while ($res = $this->db->fetch_object($sql)) {
@@ -561,6 +571,7 @@ class process extends CommonObject {
                         $ligne->fetch($res->id);
                         $this->detail[$res->id] = $ligne;
                     }
+                    self::$cache[$this->id]['lignes'] = $this->detail;
                 }
                 global $user;
                 $this->getRights($user);

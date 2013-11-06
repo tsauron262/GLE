@@ -610,16 +610,23 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
         $text = "Pas de mail expediteur definit." . "\n\n" . $text;
         $to = $toReplay;
     }
-    if (!$headers) {
-        $headers = 'MIME-Version: 1.0' . "\r\n";
-        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
-        $headers .= 'From: Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
-        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
-        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
-        $text = str_replace("\n", "<br/>", $text);
+//    if (!$headers) {
+//        $headers = 'MIME-Version: 1.0' . "\r\n";
+//        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
+//        $headers .= 'From: Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
+//        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
+//        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
+//        $text = str_replace("\n", "<br/>", $text);
+//    }
+    if (isset($to) && $to != ''){
+//        mail($to, $sujet, $text, $headers);
+                require_once DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php';
+    $mailfile = new CMailFile($sujet,$to,
+            'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>',
+            $text, array(), array(), array(),
+            $ccAdmin, "", 0, 1);
+    $mailfile->sendfile();
     }
-    if (isset($to) && $to != '')
-        mail($to, $sujet, $text, $headers);
 }
 
 function utf8_encodeRien($str) {

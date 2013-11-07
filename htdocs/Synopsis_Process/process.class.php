@@ -2580,11 +2580,18 @@ class requete extends formulaireSource {
                 $this->requeteValue = str_replace("llx_", MAIN_DB_PREFIX, $res->requeteValue);
                 if ($this->requeteValue . "x" == "x") {
                     $this->requeteValue = $this->requete;
+                    $tabReq1 = explode(" ORDER BY ", $this->requete);
+                    $tabReq2 = explode(" GROUP BY ", $tabReq1[0]);
+                    $this->requeteValue = $tabReq2[0];
                     if (stripos($this->requeteValue, "where"))
                         $this->requeteValue .= " AND ";
                     else
                         $this->requeteValue .= " WHERE ";
                     $this->requeteValue .= "[[indexField]]";
+                    if(isset($tabReq2[1]))
+                        $this->requeteValue .= " GROUP BY ".$tabReq2[1];
+                    if(isset($tabReq2[1]))
+                        $this->requeteValue .= " ORDER BY ".$tabReq2[1];
                 }
                 $this->postTraitementArr = unserialize($res->postTraitement);
                 $this->OptGroup = $res->OptGroup;

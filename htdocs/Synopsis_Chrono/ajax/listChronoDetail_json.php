@@ -12,6 +12,7 @@ function searchtext($nom, $pref = '') {
     $oper = 'LIKE';
     return " AND " . $searchField . " " . $oper . " '%" . $searchString . "%'";
 }
+
 function searchint($nom, $pref = '') {
     $searchString = $_REQUEST[$nom];
     $searchField = $pref . $nom;
@@ -49,6 +50,7 @@ if (!$sidx)
 
 
 $wh = "";
+$wh1 = "";
 $searchOn = ($_REQUEST['_search'] || $_REQUEST['_search2']);
 if ($searchOn == 'true') {
     $oper = "";
@@ -58,10 +60,30 @@ if ($searchOn == 'true') {
 
 
     if ($_REQUEST['fk_statut'] > 0) {
-        $searchString = $_REQUEST['fk_statut'];
-        $searchField = 'fk_statut';
-        $oper = '=';
-        $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
+        $searchStringT = $_REQUEST['fk_statut'];
+        $searchFieldT = 'fk_statut';
+        $operT = '=';
+        $wh .= " AND " . $searchFieldT . " " . $operT . " '" . $searchStringT . "'";
+    }
+    
+    if ($_REQUEST['fkprojet'] != "") {
+        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."projet p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE projetid = p.rowid AND (p.ref LIKE \"%".$_REQUEST['fkprojet']."%\" OR p.title LIKE \"%".$_REQUEST['fkprojet']."%\"))";
+        $searchFieldT = 'id';
+        $operT = 'IN';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
+    }
+    
+    if ($_REQUEST['propal'] != "") {
+        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."propal p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE propalid = p.rowid AND (p.ref LIKE \"%".$_REQUEST['propal']."%\"))";
+        $searchFieldT = 'id';
+        $operT = 'IN';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
+    }
+    if ($_REQUEST['soc'] != "") {
+        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."societe p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%".$_REQUEST['soc']."%\"))";
+        $searchFieldT = 'id';
+        $operT = 'IN';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
 
 
@@ -206,7 +228,7 @@ switch ($action) {
                      WHERE 1=1
                        AND chrono_conf_id = " . $id;
 //                       AND key_id IN (".join(",",$arrPre).")";
-            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE model_refid = ".$id." ";
+            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE model_refid = " . $id . " ";
             if ($_REQUEST['fk_societe'] > 0)
                 $requete1 .= searchint('fk_societe');
             if (!$withRev) {
@@ -218,26 +240,17 @@ switch ($action) {
                 // chrono_refid
                 //print "123456789".$requete1;
             }
-
-
-
-            $sql = $db->query($requete1);
-//            die($requete1);
-            $count = $db->num_rows($sql);
             
-            if ($count > 0) {
-                $total_pages = ceil($count / $limit);
-            } else {
-                $total_pages = 0;
-            }
-            if ($page > $total_pages)
-                $page = $total_pages;
+            $requete1 .= $wh1;
+
+
+
+
+
+
             $start = $limit * $page - $limit; // do not put $limit*($page - 1)
             if ($start < 0)
                 $start = 0;
-
-
-
 
 
 //            $requete1 .= " LIMIT 0,100";
@@ -247,40 +260,52 @@ switch ($action) {
                 $requete1 .= "         LIMIT $start , $limit";
             }
             $sql1 = $db->query($requete1);
+            
+            
+            $count = $db->num_rows($sql1);
+
+            if ($count > 0) {
+                $total_pages = ceil($count / $limit);
+            } else {
+                $total_pages = 0;
+            }
+            if ($page > $total_pages)
+                $page = $total_pages;
+            
             $arrTmp = array();
             while ($res1 = $db->fetch_object($sql1)) {
                 $arrTmp[] = $res1->id;
             }
-            if(isset($arrTmp[0])){
-            $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
+                $iter = 0;
+                $arrRef = array();
+                $arrValue = array();
+                $arrStatut = array();
+            if (isset($arrTmp[0])) {
+                $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
 //            $requete .="LIMIT 0, 1000";
 //die($requete);
 //print $requete;
-            $sql = $db->query($requete);
-            $iter = 0;
-            $arrRef = array();
-            $arrValue = array();
-            $arrStatut = array();
-            while ($res = $db->fetch_object($sql)) {
-                $nom = sanitize_string($res->nom);
-                $arrRef[$res->chrono_id] = $res->ref;
-                $arrStatut[$res->chrono_id] = $res->fk_statut;
-                $arrKey[$res->key_id] = $nom;
-                $_REQUEST['chrono_id'] = $res->chrono_id;
-                //Si from requete ou from var ou from liste, substitue la valeur "id" par la valeur "reelle"
-                $val = parseValue($res->chrono_value, $res->extraCss, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
-                $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
-                $iter++;
-                if (!isset($tabLienTraiter[$res->chrono_id])) {
-                    foreach ($tabLien as $lien) {
-                        $lien['nom'] = str_replace(" ", "_", $lien['nom']);
-                        $val = parseValue("", $res->extraCss, $lien['sub_valeur'], 1, "Lien", 1, 0);
+                $sql = $db->query($requete);
+                while ($res = $db->fetch_object($sql)) {
+                    $nom = sanitize_string($res->nom);
+                    $arrRef[$res->chrono_id] = $res->ref;
+                    $arrStatut[$res->chrono_id] = $res->fk_statut;
+                    $arrKey[$res->key_id] = $nom;
+                    $_REQUEST['chrono_id'] = $res->chrono_id;
+                    //Si from requete ou from var ou from liste, substitue la valeur "id" par la valeur "reelle"
+                    $val = parseValue($res->chrono_value, $res->extraCss, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
+                    $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
+                    $iter++;
+                    if (!isset($tabLienTraiter[$res->chrono_id])) {
+                        foreach ($tabLien as $lien) {
+                            $lien['nom'] = str_replace(" ", "_", $lien['nom']);
+                            $val = parseValue("", $res->extraCss, $lien['sub_valeur'], 1, "Lien", 1, 0);
 
-                        $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
-                        $iter++;
-                        $tabLienTraiter[$res->chrono_id] = true;
+                            $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
+                            $iter++;
+                            $tabLienTraiter[$res->chrono_id] = true;
+                        }
                     }
-                }
 //
 //            }
 //            foreach($tabLien as $lien){
@@ -294,8 +319,8 @@ switch ($action) {
 //
 //                $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
 //                $iter++;
+                }
             }
-    }
 
 //temp sql table
 
@@ -424,8 +449,41 @@ switch ($action) {
                             $arr[] = $res->$keyname;
                         }
                     }
-                    $arr[] = $chrono->getLibStatut(6);
-                    $arr[] = count_files($conf->synopsischrono->dir_output . "/" . $chrono->id);
+                    if ($chrono->model->hasSociete){
+                        $html = "";
+                        if ($chrono->socid > 0) {
+                            require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
+                            $obj = new Societe($db);
+                            $obj->fetch($chrono->socid);
+                            $html = $obj->getNomUrl(1);
+                        }
+                        $arr[] = $html;
+                    }
+                    if ($chrono->model->hasPropal){
+                        $html = "";
+                        if ($chrono->propalid > 0) {
+                            require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                            $obj = new Propal($db);
+                            $obj->fetch($chrono->propalid);
+                            $html = $obj->getNomUrl(1);
+                        }
+                        $arr[] = $html;
+                    }
+                    if ($chrono->model->hasProjet) {
+                        $html = "";
+                        if ($chrono->projetid > 0) {
+                            require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+                            $obj = new Project($db);
+                            $obj->fetch($chrono->projetid);
+                            $html = $obj->getNomUrl(1);
+                        }
+                        $arr[] = $html;
+                    }
+                    if ($chrono->model->hasStatut)
+                        $arr[] = $chrono->getLibStatut(6);
+                    if ($chrono->model->hasFile)
+                        $arr[] = count_files($conf->synopsischrono->dir_output . "/" . $chrono->id);
+
                     $responce->rows[$i]['cell'] = $arr;
                     $i++;
                 }

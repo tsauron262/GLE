@@ -147,7 +147,7 @@ EOF;
 //            "name" => str_replace("'", "`", $res->nom),
                 "name" => sanitize_string($res->nom),
                 "index" => sanitize_string($res->nom),
-                "width" => 150,
+                "width" => 130,
                 'hidden' => false,
                 "search" => true,
                 "align" => $align,
@@ -185,13 +185,30 @@ EOF;
 
             $i++;
         }
+        if ($chronoRef->hasSociete) {
+            $i++;
+            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "right", "search" => true, "sortable"=>false);
+        }
+        if ($chronoRef->hasPropal){
+            $i++;
+            $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "right", "search" => true, "sortable"=>false);
+        }
+        if ($chronoRef->hasProjet){
+            $i++;
+            $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "right", "search" => true, "sortable"=>false);
+        }
+        if ($chronoRef->hasStatut){
+            $i++;
         $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right", "stype" => 'select', 'searchoptionspp' => "{sopt:['eq','ne']}", 'searchoptions' => "{value: statutRess}", 'formoptions' => '{ elmprefix:"*  " }');
-        $i++;
-        $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false);
+        }
+        if ($chronoRef->hasFile){
+            $i++;
+        $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false, "sortable"=>false);
+        }
 
 
         $arr2 = array(
-            url => DOL_URL_ROOT."/Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . "&withRev=1&chrono_refid='+row_id+'",
+            url => DOL_URL_ROOT . "/Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . "&withRev=1&chrono_refid='+row_id+'",
             datatype => "json",
             height => "100%",
             rowNum => 20,
@@ -203,7 +220,7 @@ EOF;
         $subGrid = $htmlOld->listjqGrid_subGrid($arr2);
 
         $arr = array(
-            url => DOL_URL_ROOT."/Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . $optionSearch,
+            url => DOL_URL_ROOT . "/Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . $optionSearch,
             caption => '<span style="padding:4px; font-size: 16px; ">Chrono ' . addslashes($chronoRef->titre) . "</span>",
             sortname => 'chrono_id',
             sortorder => "desc",
@@ -233,7 +250,7 @@ EOF;
             height => 470,
             colModel => $colModelArr,
             subGrid => true,
-            subGridUrl => DOL_URL_ROOT."Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . "&withRev=1",
+            subGridUrl => DOL_URL_ROOT . "Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . "&withRev=1",
             subGridRowExpanded => 'function(subgrid_id, row_id) {
                 var subgrid_table_id;
                 subgrid_table_id = subgrid_id+"_t";
@@ -278,4 +295,5 @@ EOF;
 
     return $js;
 }
+
 ?>

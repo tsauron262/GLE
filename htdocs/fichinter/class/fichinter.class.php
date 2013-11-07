@@ -140,7 +140,7 @@ class Fichinter extends CommonObject {
         if ($this->fk_contrat > 0)
             $sql .= ", " . $this->fk_contrat;
         if ($this->date > 0)
-            $sql.= ", '" . $this->date . "'";
+            $sql.= ", '" . $this->db->idate($this->date) . "'";
         $sql.= ")";
         $sqlok = 0;
         dol_syslog("Fichinter::create sql=" . $sql);
@@ -192,7 +192,7 @@ class Fichinter extends CommonObject {
          *  Insertion dans la base
          */
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter SET ";
-        $sql .= " datei = '" . $this->date."'";
+        $sql .= " datei = '" . $this->db->idate($this->date)."'";
         $sql .= ", description  = '" . addslashes($this->description) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
@@ -247,7 +247,7 @@ class Fichinter extends CommonObject {
                 $tmpSoc->fetch($obj->fk_soc);
                 $this->societe = $tmpSoc;
                 $this->statut = $obj->fk_statut;
-                $this->date = $obj->di;
+                $this->date = $this->db->jdate($obj->di);
                 $this->di = $obj->di;
                 $this->duree = $obj->duree;
                 $this->projetidp = $obj->fk_projet;
@@ -481,8 +481,8 @@ class Fichinter extends CommonObject {
 
                 $this->id = $obj->rowid;
 
-                $this->date_creation = $obj->datec;
-                $this->date_validation = $obj->datev;
+                $this->date_creation = $this->db->jdate($obj->datec);
+                $this->date_validation = $this->db->jdate($obj->datev);
 
                 $cuser = new User($this->db);
                 if ($obj->fk_user_author > 0)
@@ -691,29 +691,30 @@ class Fichinter extends CommonObject {
 
     function set_note_private($user, $description) {
         global $langs, $conf;
-        if ($user->rights->synopsisficheinter->creer) {
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter ";
-            $sql.= " SET note_private = '" . addslashes($description) . "'";
-            $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
-
-            if ($this->db->query($sql)) {
-                $this->note_private = $description;
-                // Appel des triggers
-                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
-                $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('FICHEINTER_SETDESCRIPTION2', $this, $user, $langs, $conf);
-                if ($result < 0) {
-                    $error++;
-                    $this->errors = $interface->errors;
-                }
-                // Fin appel triggers
-                return 1;
-            } else {
-                $this->error = $this->db->error();
-                dol_syslog("Fichinter::set_description Erreur SQL");
-                return -1;
-            }
-        }
+        $this->update_note($description, "_private");
+//        if ($user->rights->synopsisficheinter->creer) {
+//            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter ";
+//            $sql.= " SET note_private = '" . addslashes($description) . "'";
+//            $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
+//
+//            if ($this->db->query($sql)) {
+//                $this->note_private = $description;
+//                // Appel des triggers
+//                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+//                $interface = new Interfaces($this->db);
+//                $result = $interface->run_triggers('FICHEINTER_SETDESCRIPTION2', $this, $user, $langs, $conf);
+//                if ($result < 0) {
+//                    $error++;
+//                    $this->errors = $interface->errors;
+//                }
+//                // Fin appel triggers
+//                return 1;
+//            } else {
+//                $this->error = $this->db->error();
+//                dol_syslog("Fichinter::set_description Erreur SQL");
+//                return -1;
+//            }
+//        }
     }
 
     /**

@@ -39,7 +39,7 @@
     \version    $Id: mod_pacific.php,v 1.5 2008/07/08 23:02:17 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 
 /**
     \class      mod_pacific

@@ -257,7 +257,7 @@ class demandeInterv extends CommonObject {
                 $tmpSoc->fetch($obj->fk_soc);
                 $this->societe = $tmpSoc;
                 $this->statut = $obj->fk_statut;
-                $this->date = $obj->di;
+                $this->date = $this->db->jdate($obj->di);
                 $this->duree = $obj->duree;
                 $this->projetidp = $obj->fk_projet;
                 $this->note_public = $obj->note_public;

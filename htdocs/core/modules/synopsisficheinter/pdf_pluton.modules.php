@@ -40,7 +40,7 @@
   \brief      Fichier de la classe permettant de generer les fiches d'intervention au modele pluton
   \version    $Id: pdf_pluton.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 require_once(DOL_DOCUMENT_ROOT . "/lib/company.lib.php");
 
 /**

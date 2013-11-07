@@ -80,7 +80,7 @@ if ($_POST['action'] == 'update' && $user->rights->synopsisficheinter->creer)
 
     $db->begin();
 
-    $res=$fichinter->update_note($_POST["note_private"],$user);
+    $res=$fichinter->update_note($_POST["note_private"],'_private');
     if ($res < 0)
     {
         $mesg='<div class="error ui-state-error">'.$fichinter->error.'</div>';

@@ -37,7 +37,7 @@
  \version    $Id: pdf_soleil.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 

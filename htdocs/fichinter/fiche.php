@@ -59,7 +59,7 @@ $afficherLigneContrat = false;
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
@@ -1191,7 +1191,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($db->jdate($fichinter->date), 'day');
+        print dol_print_date($fichinter->date, 'day');
     }
     $fichinter->info($fichinter->id);
     print '    </td>';
@@ -1301,7 +1301,7 @@ EOF;
             $doleditor = new DolEditor('description2', $fichinter->note_private, 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="12">' . dol_htmlentitiesbr_decode($fichinter->note_private) . '</textarea>';
+            print '<textarea name="description2" wrap="soft" cols="70" rows="12">' . dol_htmlentitiesbr_decode($fichinter->note_private) . '</textarea>';
         }
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
@@ -1946,7 +1946,7 @@ EOF;
             print '<a class="butAction" ';
             if ($conf->use_javascript_ajax) {
                 $url = $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '&action=confirm_validate&confirm=yes';
-                print 'href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . dol_escape_js($langs->trans('ConfirmValidateIntervention')) . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'validate\')"';
+                print 'href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . dol_escape_js(str_replace("<b></b>", $fichinter->ref, $langs->trans('ConfirmValidateIntervention'))) . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'validate\')"';
             } else {
                 print 'href="fiche.php?id=' . $_REQUEST["id"] . '&action=validate"';
             }

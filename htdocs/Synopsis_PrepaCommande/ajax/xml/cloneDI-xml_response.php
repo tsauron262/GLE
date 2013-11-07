@@ -26,6 +26,9 @@
     $di->fetch($id);
     $di->author = $user->id;
     $di->fetch_lines();
+    
+    if($di->date < date(time()))
+        $di->date = date(time());
 
     $res = $di->create();
     if ($res)

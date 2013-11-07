@@ -54,7 +54,7 @@
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 if ($conf->projet->enabled)

@@ -38,7 +38,7 @@
 	\version    $Id: mod_arctic.php,v 1.10 2008/07/05 14:20:09 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisfichinter.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
 
 /**
 	\class      mod_arctic

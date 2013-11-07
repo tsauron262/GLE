@@ -32,7 +32,7 @@
  */
 
 /**
-        \file       htdocs/core/modules/synopsisficheinter/modules_synopsisfichinter.php
+        \file       htdocs/core/modules/synopsisficheinter/modules_synopsisficheinter.php
         \ingroup    ficheinter
         \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
                     et la classe mere de numerotation des fiches interventions

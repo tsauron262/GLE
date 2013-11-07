@@ -206,14 +206,15 @@ switch ($action) {
                      WHERE 1=1
                        AND chrono_conf_id = " . $id;
 //                       AND key_id IN (".join(",",$arrPre).")";
-            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE 1 ";
+            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as c WHERE model_refid = ".$id." ";
             if ($_REQUEST['fk_societe'] > 0)
                 $requete1 .= searchint('fk_societe');
             if (!$withRev) {
                 $requete .= " AND revision is NULL ";
+                $requete1 .= " AND revision is NULL ";
             } else {
                 $requete .= " AND revision is NOT NULL ";
-                $requete1 .= "id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
+                $requete1 .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
                 // chrono_refid
                 //print "123456789".$requete1;
             }
@@ -221,6 +222,7 @@ switch ($action) {
 
 
             $sql = $db->query($requete1);
+//            die($requete1);
             $count = $db->num_rows($sql);
             
             if ($count > 0) {

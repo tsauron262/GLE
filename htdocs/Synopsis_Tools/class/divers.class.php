@@ -99,7 +99,7 @@ class synopsisHook {
         $time= (microtime(true)-self::$timeDeb);
         if($time > 2)
             dol_syslog("Pages lente ".$time." s", 4);
-        echo "<div>". $time . " s</div>";
+        echo "</div><div>". $time . " s</div>";
     }
 
     public static function getObj($type) {

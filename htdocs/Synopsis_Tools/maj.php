@@ -38,6 +38,24 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 
 
+if (isset($_GET['action']) && $_GET['action'] == "sauvBdd") {
+    include(DOL_DOCUMENT_ROOT . "/conf/conf.php");
+    if ($dolibarr_main_db_port == "")
+        $dolibarr_main_db_port = "3306";
+    $date = date("Ymd-H\hi");
+    $dir = DOL_DATA_ROOT . "/bdd/";
+    if (!is_dir($dir))
+        mkdir($dir);
+    $backup = $dir . $date . "_" . $dolibarr_main_db_name . ".sql";
+    $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P $dolibarr_main_db_port --user=" . $dolibarr_main_db_user . " --password=$dolibarr_main_db_pass $dolibarr_main_db_name > $backup";
+    echo "Votre base est en cours de sauvegarde.......<br/>";
+    $result = "inc";
+    $retour = system($command, $result);
+    if (!$result)
+        echo "Sauvegarde OK !!!!<br/>";
+    else
+        echo "Il y a eu une erreur !!!" . $result . "|" . $command;
+}
 if (isset($_GET['action']) && $_GET['action'] == "import") {
     $dbD = $db;
 //$dbS = getDoliDBInstance($conf->db->type, "127.0.0.1", "root", "roland2007", "gle1main", $Hconf->dbport);
@@ -102,14 +120,14 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     while ($result = $db->fetch_object($sql)) {
         if (isset($tabChrono[$result->chrono_refid][$result->key_id])) {
             if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == $result->value) {
-                supprLigneChronoValue($result->id, "identique ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
+                supprLigneChronoValue($result->id, "identique " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
                 continue;
             } else {
                 if ($tabChrono[$result->chrono_refid][$result->key_id]['val'] == null) {
-                    supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id'], "1er null ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
+                    supprLigneChronoValue($tabChrono[$result->chrono_refid][$result->key_id]['id'], "1er null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
                     continue;
                 } elseif ($result->value == null || $result->value == "") {
-                    supprLigneChronoValue($result->id, "deuxieme null ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
+                    supprLigneChronoValue($result->id, "deuxieme null " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
                     continue;
                 } else {
                     $tabDay = explode("-", $result->value);
@@ -119,7 +137,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
                         $dateActu = new DateTime($result->value);
                         $interval = date_diff($dateF, $dateActu);
                         if ($interval->format('%R%a') > -2 && $interval->format('%R%a') < 2) {
-                            supprLigneChronoValue($result->id, "date moins de 24h de diff ".$tabChrono[$result->chrono_refid][$result->key_id]['id']."|".$result->id);
+                            supprLigneChronoValue($result->id, "date moins de 24h de diff " . $tabChrono[$result->chrono_refid][$result->key_id]['id'] . "|" . $result->id);
                             continue;
                         }
                     }
@@ -229,7 +247,7 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     $sql = $db->query("SELECT * FROM llx_socpeople");
     $tabFusion = array();
     while ($result = $db->fetch_object($sql)) {
-        $clef = $result->fk_soc.$result->zip.$result->town.$result->poste.$result->phone.$result->phone_perso.$result->phone_mobile.$result->fax.$result->emil;
+        $clef = $result->fk_soc . $result->zip . $result->town . $result->poste . $result->phone . $result->phone_perso . $result->phone_mobile . $result->fax . $result->emil;
         if (isset($tab[$clef][$result->lastname])) {
             $tabFusion[$tab[$clef][$result->lastname]][$result->rowid] = true;
         } elseif (isset($tab[$clef])) {
@@ -264,11 +282,11 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
         }
     }
     $nbFusion = 0;
-    foreach ($tabFusion as $idM => $tab){
+    foreach ($tabFusion as $idM => $tab) {
         foreach ($tab as $idF => $inut) {
             $db->query("UPDATE llx_element_contact SET fk_socpeople =" . $idM . " WHERE fk_socpeople = " . $idF);
             $db->query("DELETE FROM llx_socpeople WHERE rowid = " . $idF);
-            echo "contact  ".$idM. " et ".$idF." fusionné. </br>";
+            echo "contact  " . $idM . " et " . $idF . " fusionné. </br>";
             $nbFusion++;
         }
     }
@@ -281,8 +299,12 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
         echo "Finit avec des erreurs";
 }
 
-echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
+echo '<form action=""><input type="hidden" name="action" value="sauvBdd"/><input type="submit" value="Sauv BDD" class="butAction"/></form>';
 echo "<br/>";
+if (defined('IMPORT_BDD_HOST')) {
+    echo '<form action=""><input type="hidden" name="action" value="import"/><input type="submit" value="Importer" class="butAction"/></form>';
+    echo "<br/>";
+}
 echo '<form action=""><input type="hidden" name="action" value="majChrono"/><input type="submit" value="MAJ Chrono" class="butAction"/></form>';
 echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="verif"/><input type="submit" value="Vérif général" class="butAction"/></form>';
@@ -648,7 +670,7 @@ function lienFusion($id1, $id2) {
 function supprLigneChronoValue($id, $text) {
     global $db;
     $db->query("DELETE FROM llx_Synopsis_Chrono_value WHERE id =" . $id);
-    echo "<br/>1 ligne supprimer ".$text."<br/>";
+    echo "<br/>1 ligne supprimer " . $text . "<br/>";
 }
 
 function fusionChrono($idMaitre, $idFaible) {

@@ -56,7 +56,7 @@ class modSynopsisTools extends DolibarrModules
 
         // Dependences
         $this->depends = array();
-        $this->requiredby = array();
+        $this->requiredby = array("modSynopsisProcess");
 
         // Constantes
         $this->const = array();
@@ -155,7 +155,7 @@ class modSynopsisTools extends DolibarrModules
         $r++;
         $this->menu[$r]=array('fk_menu'=>"r=".$s,
                             'type'=>'left',
-                            'titre'=>'Importation',
+                            'titre'=>'Impor/Export/Verif',
                             'mainmenu'=>'SynopsisTools',
                             'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/maj.php',

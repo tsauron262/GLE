@@ -76,7 +76,7 @@ class modSynopsisProcess extends DolibarrModules {
 
         // Dependances
         //------------
-        $this->depends = array();
+        $this->depends = array("modSynopsisTools");
         $this->requiredby = array("modSynopsisChrono");
         $this->langfiles = array("process");
 

@@ -1247,7 +1247,7 @@ if (is_dir($dir)) {
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
                                 $ref = $val['PcvCode'];
-                                $sql = requeteWithCache("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . "propal WHERE import_key = '" . $val['PcvID'] . "' ORDER BY rowid DESC");
+                                $sql = requeteWithCache("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . "propal WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
                                 if ($db->num_rows($sql) > 0) {
                                     $result = $db->fetch_object($sql);
                                     $oldRef = $result->ref;

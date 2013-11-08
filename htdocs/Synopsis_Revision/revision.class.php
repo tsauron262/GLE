@@ -60,9 +60,7 @@ class SynopsisRevisionPropal {
                 $tmp = $conf->global->PROPAL_REVISION_MODEL;
                 $revMod = new $tmp($db);
                 $numRevision = $tabT[1];
-                echo "|" . $numRevision;
                 $numRevision++;
-                echo "|" . $numRevision;
                 $newRef = $orgRef . "-" . $revMod->convert_revision($numRevision);
             } else {
                 $numRevision = intval($tabT[1]) + 1;
@@ -71,8 +69,10 @@ class SynopsisRevisionPropal {
 
             $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $newId;
             $db->query($requete);
+            echo($requete);
             $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 10 WHERE rowid = " . $oldId;
             $db->query($requete);
+            echo($requete);
     }
 
     private static function alpha2num($a) {

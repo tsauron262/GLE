@@ -513,7 +513,7 @@ class process extends CommonObject {
         return($res->id);
     }
 
-    public function fetch($id, $inut = true) {
+    public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             $this->id = $id;
@@ -2028,7 +2028,7 @@ class formulaireSource extends formulaire {
         return $this->getValue($id);
     }
 
-    public function fetch($id, $inut = null) {
+    public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             $this->id = $id;
@@ -2090,7 +2090,7 @@ class listform extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id, $inut = null) {
+    public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2340,7 +2340,7 @@ class globalvar extends formulaireSource {
         print $this->getValue($inut);
     }
 
-    public function fetch($id, $inut = null) {
+    public function fetch($id) {
         global $conf, $langs;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2390,12 +2390,13 @@ class lien extends formulaireSource {
 
     public $valuesArr = array();
     public $socid = 0;
+    public $cssClassM;
 
     function lien($db) {
         $this->db = $db;
     }
 
-    function fetch($id, $cssClass) {
+    function fetch($id) {
         $this->id = $id;
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_lien WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);
@@ -2411,7 +2412,7 @@ class lien extends formulaireSource {
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
         $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
 
-        $this->nomElement = getParaChaine($cssClass, "type:");
+        $this->nomElement = getParaChaine($this->cssClassM, "type:");
         $this->tabVal = array();
         $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $this->idChrono, $this->ordre);
         foreach ($tabResult as $val)
@@ -2564,7 +2565,7 @@ class requete extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id, $inut = null) {
+    public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $langs, $user, $mysoc, $societe, $conf;
@@ -2889,7 +2890,7 @@ class fct extends formulaireSource {
         $this->db = $DB;
     }
 
-    public function fetch($id, $inut = null) {
+    public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             global $conf, $user, $langs, $mysoc, $societe;

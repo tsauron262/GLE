@@ -170,7 +170,8 @@ if ($action == 'modifier') {
         foreach ($tmpArray as $nomElement => $tabVal) {
             if ($nomElement != "") {
                 $objLien = new Lien($db);
-                $objLien->fetch($idLien, "type:" . $nomElement);
+                $objLien->cssClassM = "type:" . $nomElement;
+                $objLien->fetch($idLien);
                 $objLien->setValue($id, $tabVal);
             }
         }
@@ -403,7 +404,8 @@ if ($id > 0) {
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->socid = $chr->socid;
-                    $obj->fetch($res->type_subvaleur, $res->extraCss);
+                    $obj->cssClassM = $res->extraCss;
+                    $obj->fetch($res->type_subvaleur);
                     $obj->getValues();
                     if (isset($obj->tabVal[0])) {
                         $res->value = $obj->tabVal[0];

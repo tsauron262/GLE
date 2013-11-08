@@ -496,7 +496,8 @@ if ($id > 0) {
     $_REQUEST['chrono_id'] = $_REQUEST['id'];
     $lien = new lien($db);
     $lien->socid = $contrat->socid;
-    $lien->fetch(3, "type:contratdet");
+    $lien->cssClassM = "type:contratdet";
+    $lien->fetch(3);
 //        $prodHtml .= $val."<br/>";
 //    print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produits concerné</th>';
 //    print '<td colspan="3" class="ui-widget-content">';

@@ -67,7 +67,7 @@ class ModeleNumRefChrono
     /**     \brief      Renvoi un exemple de numerotation
      *      \return     string      Example
      */
-    function getExample()
+    function getExample($mask,$modelId)
     {
         global $langs;
         $langs->load("contracts");
@@ -87,7 +87,7 @@ class ModeleNumRefChrono
     /**     \brief      Renvoi prochaine valeur attribuee
      *      \return     string      Valeur
      */
-    function getNextValue()
+    function getNextValue($objsoc,$chrono,$mask)
     {
         global $langs;
         return $langs->trans("NotAvailable");

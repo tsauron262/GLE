@@ -736,8 +736,8 @@ class demandeInterv extends CommonObject {
 
                 $this->id = $obj->rowid;
 
-                $this->date_creation = $obj->datec;
-                $this->date_validation = $obj->datev;
+                $this->date_creation = $this->db->jdate($obj->datec);
+                $this->date_validation = $this->db->jdate($obj->datev);
 
                 $cuser = new User($this->db);
                 $cuser->fetch($obj->fk_user_author);

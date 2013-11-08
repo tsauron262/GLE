@@ -19,7 +19,7 @@ class Affaire extends CommonObject {
     public function Affaire($DB) {
         $this->db=$DB;
         global $langs;
-        $langs->load("affaire");
+        $langs->load("affaire@Synopsis_Affaire");
         $this->labelstatut[0]=$langs->trans("AffaireStatusDraft");
         $this->labelstatut[1]=$langs->trans("AffaireStatusValidated");
         $this->labelstatut[2]=$langs->trans("AffaireStatusSigned");
@@ -41,7 +41,7 @@ class Affaire extends CommonObject {
                                 (`nom`,`description`,`date_creation`,`fk_user_create`,`statut`,`ref`)
                          VALUES
                                 ('".$this->nom."', '".$this->description."', now(),  ".$user->id.", 0, '".$this->ref."') ";
-        die ($requete);$sql = $this->db->query($requete);
+        $sql = $this->db->query($requete);
         if ($sql)
         {
             $lastId = $this->db->last_insert_id('llx_Synopsis_Affaire');
@@ -147,7 +147,7 @@ class Affaire extends CommonObject {
     private function LibStatut($statut=0,$mode=1)
     {
         global $langs;
-        $langs->load("affaire");
+        $langs->load("affaire@Synopsis_Affaire");
         if ($mode == 0)
         {
             return $this->labelstatut[$statut];
@@ -250,7 +250,7 @@ class Affaire extends CommonObject {
     function getNextNumRef()
     {
         global $db, $langs,$mysoc;
-        $langs->load("Affaire");
+        $langs->load("affaire@Synopsis_Affaire");
 
         $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisaffaire/";
 

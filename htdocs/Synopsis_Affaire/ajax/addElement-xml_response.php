@@ -175,13 +175,13 @@
         $xml .= "<KO>".$requete. "<br/>".$db->lasterrno . "<br/>".$db->lastqueryerror."</KO>";
     }
     //$xml .= join()
-    foreach($xmlArr as $key => $val)
-    {
-        $xml .= "<group id='".$key."'>";
-        $xml .= $val;
-        $xml .= "</group>";
-
-    }
+//    foreach($xmlArr as $key => $val)
+//    {
+//        $xml .= "<group id='".$key."'>";
+//        $xml .= $val;
+//        $xml .= "</group>";
+//
+//    }
     if ( stristr($_SERVER["HTTP_ACCEPT"],"application/xhtml+xml") ) {
         header("Content-type: application/xhtml+xml;charset=utf-8");
     } else {
@@ -300,19 +300,21 @@
                 {
                     $prop = new Commande($db);
                     $prop->fetch($eid);
+                    $soc = new Societe($db);
+                    $soc->fetch($prop->socid);
                     //$xml .= "<group id='".$gid."'>";
                         $xmlArr[$gid] .= '<element>';
                         $xmlArr[$gid] .= "  <rowid>".$prop->id."</rowid>";
                         $xmlArr[$gid] .= "  <ref><![CDATA[".$prop->ref."]]></ref>";
                         $xmlArr[$gid] .= "  <amount><![CDATA[".price($prop->total_ht)."]]></amount>";
                         $xmlArr[$gid] .= "  <statut><![CDATA[".$prop->getLibStatut(5)."]]></statut>";
-                        $xmlArr[$gid] .= "  <soc><![CDATA[".$prop->societe->getNomUrl(1)."]]></soc>";
+                        $xmlArr[$gid] .= "  <soc><![CDATA[".$soc->getNomUrl(1)."]]></soc>";
                         $xmlArr[$gid] .= "  <type><![CDATA[".$gid."]]></type>";
                         $xmlArr[$gid] .= '</element>';
                     insertDb($gid,$eid);
                     //$xml .= "</group>";
                     //Lauch recurs
-                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_pr WHERE fk_commande = ".$prop->id;
+                    $requete = "SELECT fk_source as fk_propale FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'propal' AND targettype = 'commande' AND fk_target = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -334,7 +336,7 @@
                             $filter[$type][$res->fk_facture]=1;
                         }
                     }
-                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_liv WHERE fk_commande = ".$prop->id;
+                    $requete = "SELECT fk_target as fk_livraison FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'commande' AND targettype = 'expedition' AND fk_source = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -345,7 +347,7 @@
                             $filter[$type][$res->fk_livraison]=1;
                         }
                     }
-                    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."co_exp WHERE fk_commande = ".$prop->id;
+                    $requete = "SELECT fk_target as fk_expedition FROM " . MAIN_DB_PREFIX . "element_element as fk_facture WHERE sourcetype = 'commande' AND targettype = 'expedition' AND fk_source = ".$prop->id;
                     $sql = $db->query($requete);
                     while ($res=$db->fetch_object($sql))
                     {
@@ -369,13 +371,15 @@
                 {
                     $prop = new Expedition($db);
                     $prop->fetch($eid);
+                    $soc = new Societe($db);
+                    $soc->fetch($prop->socid);
                     //$xml .= "<group id='".$gid."'>";
                         $xmlArr[$gid] .= '<element>';
                         $xmlArr[$gid] .= "  <rowid>".$prop->id."</rowid>";
                         $xmlArr[$gid] .= "  <ref><![CDATA[".$prop->ref."]]></ref>";
                         $xmlArr[$gid] .= "  <amount><![CDATA[".price($prop->total_ht)."]]></amount>";
                         $xmlArr[$gid] .= "  <statut><![CDATA[".$prop->getLibStatut(5)."]]></statut>";
-                        $xmlArr[$gid] .= "  <soc><![CDATA[".$prop->societe->getNomUrl(1)."]]></soc>";
+                        $xmlArr[$gid] .= "  <soc><![CDATA[".$psoc->getNomUrl(1)."]]></soc>";
                         $xmlArr[$gid] .= "  <type><![CDATA[".$gid."]]></type>";
                         $xmlArr[$gid] .= '</element>';
                     insertDb($gid,$eid);

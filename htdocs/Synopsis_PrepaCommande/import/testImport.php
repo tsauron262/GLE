@@ -242,6 +242,8 @@ $mailSumUpContent = array('nbFile' => 0, 'nbLine' => 0, 'nbLigneModif' => 0, 'co
 $fileArray = array();
 $imported = "/imported/";
 
+$premiereDesc = true;
+
 global $langs, $conf;
 
 $webContent = "";
@@ -1402,10 +1404,16 @@ if (is_dir($dir)) {
                             //Les lignes de commandes
 //Prix Achat
                             if ($typeLigne == "propal") {
-                                if ($val['PlvCode'])
+                                if ($val['PlvCode']){
                                     $prodType = getProdType($val['PlvCode']);
+                                    $premiereDesc = true;
+                                }
+                                elseif($premiereDesc && $val['PlvLib'] != ""){
+                                    $prodType = 5;
+                                    $premiereDesc = false;
+                                }
                                 else
-                                    $prodType = 3;
+                                    $prodType = 11;
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
                                        (fk_propal,
                                         fk_product,

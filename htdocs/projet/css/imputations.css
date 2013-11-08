@@ -20,7 +20,7 @@
 
 /* ----- */
 #struct_main select,
-#struct_main input,
+#struct_main input
 {
     border: 1px solid #555;
     color: #666666;

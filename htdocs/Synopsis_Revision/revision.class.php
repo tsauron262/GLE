@@ -35,7 +35,7 @@ class SynopsisRevisionPropal {
         $result = $object->createFromClone($socid, $hookmanager);
         if ($result > 0) {
             echo $oldRef; //.print_r($propal, true);
-            $this->setLienRevision($oldRef, $oldId, $result);
+            self::setLienRevision($oldRef, $oldId, $result);
 
 
             header("Location: " . '../comm/propal.php?id=' . $result);
@@ -46,7 +46,7 @@ class SynopsisRevisionPropal {
         print ($mesg . " Erreur" . $socid);
     }
     
-    private function setLienRevision($oldRef, $oldId, $newId){
+    public static function setLienRevision($oldRef, $oldId, $newId){
         global $conf, $db;
         $tabT = explode("-", $oldRef);
 //        die($tabT[]);

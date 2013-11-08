@@ -317,6 +317,7 @@ $mailHeader .= "</table>" . "\n";
 $mailHeader .= "<table  border=0 width=700 cellpadding=10 style='border-collapse: collapse;'>" . "\n";
 $mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=3>Les commandes ajout&eacute;es / modifi&eacute;es" . "</td>" . "\n";
 
+$tabImportOK = array('commande' => array(), 'propal' => array());
 
 $cntFile = -2;
 if (is_dir($dir)) {
@@ -345,7 +346,7 @@ if (is_dir($dir)) {
                     $ligneNum = 0;
                     $arrDesc = array();
                     $arrConvNumcol2Nomcol = array();
-                    $mailSumUpContent['nbFile']++;
+                    $mailSumUpContent['nbFile'] ++;
                     foreach ($lines as $key => $val) {
                         if (!strlen($val) > 10)
                             continue;
@@ -436,12 +437,17 @@ if (is_dir($dir)) {
                     if ($val["PcvCode"] == 'Fin') {  //8sens export cas 2
                         break;
                     }
+
+                    if (strpos($val["PcvCode"], "CL") !== false)//C'est une commande
+                        $typeLigne = "commande";
+                    else
+                        $typeLigne = "propal";
                     $paysGlobal = processPays($val['PysCode']);
                     $externalUserId = $val['PcvGPriID'];
                     $internalUserId = processUser($externalUserId);
-                    $mailSumUpContent['nbLine']++;
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  Commande:" . $val["PcvCode"] . "</th>";
-                    $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  Commande:" . $val["PcvCode"] . "</th>" . "\n";
+                    $mailSumUpContent['nbLine'] ++;
+                    $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
+                    $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
 
                     /*
                       +--------------------------------------------------------------------------------------------------------------+
@@ -473,113 +479,118 @@ if (is_dir($dir)) {
                       +--------------------------------------------------------------------------------------------------------------+
                      */
 
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Soci&eacute;t&eacute;";
-                    $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;'>Soci&eacute;t&eacute;</th>" . "\n";
-                    $nomSoc = $val["CliLib"];
-                    $codSoc = $val["CliCode"];
-                    $socid = "";
-                    $assujTVA = 0;
-                    $typeEnt = 0;
+                    if (isset($tabImportOK['soc'][$val["CliCode"]])) {
+                        $socid = $tabImportOK['soc'][$val['CliCode']]['socid'];
+                        $livAdd = $tabImportOK['soc'][$val['CliCode']]['livAdd'];
+                        $socContact = $tabImportOK['soc'][$val['CliCode']]['socContact'];
+                    } else {
+                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Soci&eacute;t&eacute;";
+                        $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;'>Soci&eacute;t&eacute;</th>" . "\n";
+                        $nomSoc = $val["CliLib"];
+                        $codSoc = $val["CliCode"];
+                        $socid = "";
+                        $assujTVA = 0;
+                        $typeEnt = 0;
 
-                    switch ($val['CliCategEnu']) {
-                        case "PME": {
-                                $typeEnt = "8";
-                            }
-                            break;
-                        case "Educ": {
-                                $typeEnt = "5";
-                            }
-                            break;
-                        case "PARTICULIER": {
-                                $typeEnt = "8";
-                            }
-                            break;
-                        case "PARTICULIER": {
-                                $typeEnt = "8";
-                            }
-                            break;
-                    }
+                        switch ($val['CliCategEnu']) {
+                            case "PME": {
+                                    $typeEnt = "8";
+                                }
+                                break;
+                            case "Educ": {
+                                    $typeEnt = "5";
+                                }
+                                break;
+                            case "PARTICULIER": {
+                                    $typeEnt = "8";
+                                }
+                                break;
+                            case "PARTICULIER": {
+                                    $typeEnt = "8";
+                                }
+                                break;
+                        }
 
-                    if ($val['TyvCode'] == "FR" || $val['TyvCode'] == "CP") {
-                        $assujTVA = 1;
-                    }
-                    $tmpSoc = "";
+                        if ($val['TyvCode'] == "FR" || $val['TyvCode'] == "CP") {
+                            $assujTVA = 1;
+                        }
+                        $tmpSoc = "";
 
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
-                    $sql = requeteWithCache($requete);
+                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
+                        $sql = requeteWithCache($requete);
 
-                    $socAdresse = $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'];
+                        $socAdresse = $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'];
 
-                    if ($db->num_rows($sql) > 0) {
-                        $res = fetchWithCache($sql);
-                        $socid = $res->rowid;
+                        if ($db->num_rows($sql) > 0) {
+                            $res = fetchWithCache($sql);
+                            $socid = $res->rowid;
 
 
 
-                        $sqlUpt = array();
-                        if ($res->nom != $nomSoc)
-                            $sqlUpt[] = " nom = '" . $nomSoc . "'";
-                        if ($res->siret == 'NULL')
-                            $res->siret = '';
-                        if ($res->siret . "x" != $val['CliSIRET'] . "x")
-                            $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
-                        if ($res->address != $socAdresse)
-                            $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
-                        if ($res->zip != $val['CliFAdrZip'])
-                            $sqlUpt[] = " zip = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
-                        if ($res->town != $val['CliFAdrCity'])
-                            $sqlUpt[] = " town = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
-                        if ($res->phone != $val['MocTel'])
-                            $sqlUpt[] = " phone = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
-                        if ($res->fk_pays != $paysGlobal)
-                            $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
-                        if ($res->tva_assuj != $assujTVA)
-                            $sqlUpt[] = " tva_assuj = " . $assujTVA;
-                        if ($secteurActiv && $secteurActiv != $res->ref_int)
-                            $sqlUpt[] = " ref_int = " . $secteurActiv;
-                        if ($typeEnt != $res->fk_typent)
-                            $sqlUpt[] = " fk_typent = " . $typeEnt;
+                            $sqlUpt = array();
+                            if ($res->nom != $nomSoc)
+                                $sqlUpt[] = " nom = '" . $nomSoc . "'";
+                            if ($res->siret == 'NULL')
+                                $res->siret = '';
+                            if ($res->siret . "x" != $val['CliSIRET'] . "x")
+                                $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
+                            if ($res->address != $socAdresse)
+                                $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
+                            if ($res->zip != $val['CliFAdrZip'])
+                                $sqlUpt[] = " zip = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
+                            if ($res->town != $val['CliFAdrCity'])
+                                $sqlUpt[] = " town = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
+                            if ($res->phone != $val['MocTel'])
+                                $sqlUpt[] = " phone = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
+                            if ($res->fk_pays != $paysGlobal)
+                                $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
+                            if ($res->tva_assuj != $assujTVA)
+                                $sqlUpt[] = " tva_assuj = " . $assujTVA;
+                            if ($secteurActiv && $secteurActiv != $res->ref_int)
+                                $sqlUpt[] = " ref_int = " . $secteurActiv;
+                            if ($typeEnt != $res->fk_typent)
+                                $sqlUpt[] = " fk_typent = " . $typeEnt;
 //            if ($res->titre != $val['CliTitleEnu'] )
 //                $sqlUpt[] = " titre = '".$val['CliTitleEnu'] ."'";
 
-                        if (count($sqlUpt) > 0) {
-                            //Creation de la societe ou mise à jour si code client exist
-                            $updtStr = join(',', $sqlUpt);
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = " . $codSoc;
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>" . "\n";
-                                /*
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                  |                                                                                                              |
-                                  |                                         Les commerciaux de la societe                                        |
-                                  |                                                                                                              |
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                 */
-                                $tmpSoc = new Societe($db);
-                                $tmpSoc->fetch($socid);
-                                if ($internalUserId > 0)
-                                    $tmpSoc->add_commercial($user, $internalUserId);
+                            if (count($sqlUpt) > 0) {
+                                //Creation de la societe ou mise à jour si code client exist
+                                $updtStr = join(',', $sqlUpt);
+                                $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = " . $codSoc;
+                                $sql = requeteWithCache($requete);
+                                if ($sql) {
+                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>" . "\n";
+                                    /*
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                      |                                                                                                              |
+                                      |                                         Les commerciaux de la societe                                        |
+                                      |                                                                                                              |
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                     */
+                                    $tmpSoc = new Societe($db);
+                                    $tmpSoc->fetch($socid);
+                                    if ($internalUserId > 0)
+                                        $tmpSoc->add_commercial($user, $internalUserId);
 
-                                // Appel des triggers
-                                $interface = new Interfaces($db);
-                                $result = $interface->run_triggers('COMPANY_MODIFY', $tmpSoc, $user, $langs, $conf);
-                                if ($result < 0) {
-                                    $error++;
-                                    $errors = $interface->errors;
+                                    // Appel des triggers
+                                    $interface = new Interfaces($db);
+                                    $result = $interface->run_triggers('COMPANY_MODIFY', $tmpSoc, $user, $langs, $conf);
+                                    if ($result < 0) {
+                                        $error++;
+                                        $errors = $interface->errors;
+                                    }
+                                } else {
+                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; KO " . $requete . "</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; KO</td>" . "\n";
                                 }
                             } else {
-                                $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; KO " . $requete . "</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; KO</td>" . "\n";
+                                $webContent .= "<td  class='ui-widget-content'>Pas de modification soci&eacute;t&eacute;</td>";
+                                $mailContent .= "<td style='background-color: #FFF;'>Pas de modification soci&eacute;t&eacute;</td>" . "\n";
                             }
                         } else {
-                            $webContent .= "<td  class='ui-widget-content'>Pas de modification soci&eacute;t&eacute;</td>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Pas de modification soci&eacute;t&eacute;</td>" . "\n";
-                        }
-                    } else {
 
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe
+                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe
                                     (nom,
                                      code_client,
                                      datec,
@@ -592,7 +603,7 @@ if (is_dir($dir)) {
                                      fk_pays,
                                      client,
 " . //                                     titre,
-                                "                                    import_key,
+                                    "                                    import_key,
                                     tva_assuj,
                                     " . ($secteurActiv ? "ref_int," : "") . "
                                     fk_typent
@@ -608,49 +619,49 @@ if (is_dir($dir)) {
                                      " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL") . ",
                                      1,
                                     "//'".$val['CliTitleEnu']."',
-                                . $val['AdpGAdrID'] . ",
+                                    . $val['AdpGAdrID'] . ",
                                     " . $assujTVA . ",
                                     " . ($secteurActiv ? $secteurActiv . "," : "") . "
                                     " . $typeEnt
-                                . ")";
-                        $sql = requeteWithCache($requete);
-                        $requete = "nnnnnnnnnnnnnimp";
+                                    . ")";
+                            $sql = requeteWithCache($requete);
+                            $requete = "nnnnnnnnnnnnnimp";
 //echo $requete;
-                        if ($sql) {
-                            /*
-                              +--------------------------------------------------------------------------------------------------------------+
-                              |                                                                                                              |
-                              |                                         Les commerciaux de la societe                                        |
-                              |                                                                                                              |
-                              +--------------------------------------------------------------------------------------------------------------+
-                             */
-                            /*
-                              PcvFree5 => string(19) 5 Dossier suivi par
-                              PcvGPriID => string(15) ID représentant
-                              PriCode => string(18) Code collaborateur
-                              PriLib => string(21) Libellé collaborateur
-                             */
+                            if ($sql) {
+                                /*
+                                  +--------------------------------------------------------------------------------------------------------------+
+                                  |                                                                                                              |
+                                  |                                         Les commerciaux de la societe                                        |
+                                  |                                                                                                              |
+                                  +--------------------------------------------------------------------------------------------------------------+
+                                 */
+                                /*
+                                  PcvFree5 => string(19) 5 Dossier suivi par
+                                  PcvGPriID => string(15) ID représentant
+                                  PriCode => string(18) Code collaborateur
+                                  PriLib => string(21) Libellé collaborateur
+                                 */
 
-                            $socid = $db->last_insert_id("" . MAIN_DB_PREFIX . "societe");
-                            $tmpSoc = new Societe($db);
-                            $tmpSoc->fetch($socid);
-                            if ($internalUserId > 0)
-                                $tmpSoc->add_commercial($user, $internalUserId);
-                            // Appel des triggers
-                            $interface = new Interfaces($db);
-                            $result = $interface->run_triggers('COMPANY_CREATE', $tmpSoc, $user, $langs, $conf);
-                            if ($result < 0) {
-                                $error++;
-                                $errors = $interface->errors;
+                                $socid = $db->last_insert_id("" . MAIN_DB_PREFIX . "societe");
+                                $tmpSoc = new Societe($db);
+                                $tmpSoc->fetch($socid);
+                                if ($internalUserId > 0)
+                                    $tmpSoc->add_commercial($user, $internalUserId);
+                                // Appel des triggers
+                                $interface = new Interfaces($db);
+                                $result = $interface->run_triggers('COMPANY_CREATE', $tmpSoc, $user, $langs, $conf);
+                                if ($result < 0) {
+                                    $error++;
+                                    $errors = $interface->errors;
+                                }
+                                // Fin appel triggers
+                                $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; OK";
+                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; OK</td>" . "\n";
+                            } else {
+                                $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; KO " . $requete;
+                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; KO</td>" . "\n";
                             }
-                            // Fin appel triggers
-                            $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; OK";
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; OK</td>" . "\n";
-                        } else {
-                            $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; KO " . $requete;
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; KO</td>" . "\n";
                         }
-                    }
 
 
 //                    if ($internalUserId > 0)
@@ -659,105 +670,105 @@ if (is_dir($dir)) {
 //                        else
 //                            echo "Erreur pas de societe";
 
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         Les contacts de la societe                                           |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         Les contacts de la societe                                           |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
 
-                    $genre = $val["PrsTitleEnu"];
-                    $prenom = $val['PrsPrenom'];
-                    $nom = $val['PrsName'];
-                    $socpeopleExternalId = $val['PcvPCopID'];
+                        $genre = $val["PrsTitleEnu"];
+                        $prenom = $val['PrsPrenom'];
+                        $nom = $val['PrsName'];
+                        $socpeopleExternalId = $val['PcvPCopID'];
 
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Contact de la soci&eacute;t&eacute;</th>";
-                    $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Contact de la soci&eacute;t&eacute;</th>" . "\n";
+                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Contact de la soci&eacute;t&eacute;</th>";
+                        $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Contact de la soci&eacute;t&eacute;</th>" . "\n";
 
 
-                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
-                    $sql = requeteWithCache($requete);
-                    $res = fetchWithCache($sql);
-                    $socContact = false;
-                    if ($db->num_rows($sql) > 0) {
-                        $sqlUpt = array();
-                        $socContact = $res->rowid;
-                        if ($socContact < 1) {
-                            print_r($res);
-                            die("Probléme societe" . $socContact . $requete);
-                        }
-                        if ($res->phone != $val['PcvMocTel'])
-                            $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
-                        if ($res->phone_mobile != $val['PcvMocPort'])
-                            $sqlUpt[] = " phone_mobile = '" . $val['PcvMocPort'] . "'";
-                        if ($res->civilite != $genre)
-                            $sqlUpt[] = " civilite = '" . $genre . "'";
-                        if (count($sqlUpt) > 0) {
-                            $updtStr = join(',', $sqlUpt);
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople SET " . $updtStr . " WHERE rowid =" . $socContact;
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour contact OK";
-                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact OK</td>" . "\n";
+                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
+                        $sql = requeteWithCache($requete);
+                        $res = fetchWithCache($sql);
+                        $socContact = false;
+                        if ($db->num_rows($sql) > 0) {
+                            $sqlUpt = array();
+                            $socContact = $res->rowid;
+                            if ($socContact < 1) {
+                                print_r($res);
+                                die("Probléme societe" . $socContact . $requete);
+                            }
+                            if ($res->phone != $val['PcvMocTel'])
+                                $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
+                            if ($res->phone_mobile != $val['PcvMocPort'])
+                                $sqlUpt[] = " phone_mobile = '" . $val['PcvMocPort'] . "'";
+                            if ($res->civilite != $genre)
+                                $sqlUpt[] = " civilite = '" . $genre . "'";
+                            if (count($sqlUpt) > 0) {
+                                $updtStr = join(',', $sqlUpt);
+                                $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople SET " . $updtStr . " WHERE rowid =" . $socContact;
+                                $sql = requeteWithCache($requete);
+                                if ($sql) {
+                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour contact OK";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact KO</td>" . "\n";
+                                }
                             } else {
-                                $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact KO</td>" . "\n";
+                                $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour contact n&eacute;cessaire";
+                                $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour contact n&eacute;cessaire</td>" . "\n";
                             }
                         } else {
-                            $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour contact n&eacute;cessaire";
-                            $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour contact n&eacute;cessaire</td>" . "\n";
-                        }
-                    } else {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
+                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
                                     (datec,fk_soc,civilite,lastname,firstname,phone,phone_mobile,import_key, fk_user_creat)
                              VALUES (now()," . $socid . ",'" . $genre . "','" . $nom . "','" . $prenom . "','" . $val['PcvMocTel'] . "','" . $val['PcvMocPort'] . "'," . $socpeopleExternalId . ", NULL)";
-                        $sql = requeteWithCache($requete);
-                        if ($sql) {
-                            $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation contact OK";
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact OK</td>" . "\n";
-                        } else {
-                            $webContent .= "<td class='KOtd error  ui-widget-content'>Cr&eacute;ation contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact KO</td>" . "\n";
+                            $sql = requeteWithCache($requete);
+                            if ($sql) {
+                                $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation contact OK";
+                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact OK</td>" . "\n";
+                            } else {
+                                $webContent .= "<td class='KOtd error  ui-widget-content'>Cr&eacute;ation contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact KO</td>" . "\n";
+                            }
+                            $socContact = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
                         }
-                        $socContact = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
-                    }
 
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         Adresse de livraison                                                 |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         Adresse de livraison                                                 |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
 
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
-                    $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
-                    $livAdd = NULL;
-                    $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
-                    $soc = new Societe($db);
-                    $soc->fetch($socid);
-                    if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
+                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
+                        $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
+                        $livAdd = NULL;
+                        $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
+                        $soc = new Societe($db);
+                        $soc->fetch($socid);
+                        if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
 
 
-                        $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                        $requete = "SELECT *
+                            $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                            $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "socpeople
                          WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND lastname = '" . $nomLivAdd . "') ||"
-                                . "(fk_soc = " . $socid . "
+                                    . "(fk_soc = " . $socid . "
                                 AND zip = '" . $val['CliLAdrZip'] . "'
                                 AND town = '" . $val['CliLAdrCity'] . "'
                                 AND address = '" . $livAdresse . "')";
 //                        $requete = "SELECT *
 //                          FROM " . MAIN_DB_PREFIX . "societe_adresse_livraison
 //                         WHERE import_key = '" . $val['PcvLAdpID'] . "'";
-                        $sql = requeteWithCache($requete);
-                        $res = fetchWithCache($sql);
-                        if ($db->num_rows($sql) > 0) {
-                            $livAdd = $res->rowid;
-                            //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
-                            //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
+                            $sql = requeteWithCache($requete);
+                            $res = fetchWithCache($sql);
+                            if ($db->num_rows($sql) > 0) {
+                                $livAdd = $res->rowid;
+                                //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
+                                //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
+                                $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
                             SET fk_soc = " . $socid . "
                                 , zip = '" . $val['CliLAdrZip'] . "'
                                 , town = '" . $val['CliLAdrCity'] . "'
@@ -765,36 +776,38 @@ if (is_dir($dir)) {
                                 , fk_pays = " . ($paysGlobal . "x" != "x" ? $paysGlobal : NULL) . "
                                 , lastname = '" . $nomLivAdd . "'
                             WHERE import_key= " . $val['PcvLAdpID'];
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
-                                $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK" . "\n";
-                            } else {
-                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO" . "\n";
-                            }
+                                $sql = requeteWithCache($requete);
+                                if ($sql) {
+                                    $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
+                                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK" . "\n";
+                                } else {
+                                    $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO" . "\n";
+                                }
 
-                            //Si modif
-                        } else {
-                            $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key)
-                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
-                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+                                //Si modif
                             } else {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
-                            }
-                            $livAdd = $db->last_insert_id(MAIN_DB_PREFIX."socpeople");
+                                $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key)
+                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
+                                $sql = requeteWithCache($requete);
+                                if ($sql) {
+                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
+                                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+                                } else {
+                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
+                                }
+                                $livAdd = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
 //die($livAdd);
+                            }
+                        } else {
+                            $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
+                            $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
                         }
-                    } else {
-                        $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
-                        $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
+
+                        $tabImportOK['soc'][$val["CliCode"]] = array('socid' => $socid, 'livAdd' => $livAdd, 'socContact' => $socContact);
                     }
-                    
                     /*
                       +--------------------------------------------------------------------------------------------------------------+
                       |                                                                                                              |
@@ -942,73 +955,8 @@ if (is_dir($dir)) {
                     }
 
                     if ($socid > 0) {
-
-                        /*
-                          +--------------------------------------------------------------------------------------------------------------+
-                          |                                                                                                              |
-                          |                                         La commande                                                          |
-                          |                                                                                                              |
-                          +--------------------------------------------------------------------------------------------------------------+
-                         */
-                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Commande</td>";
-                        $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>Commande</th>" . "\n";
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE ref = '" . $val['PcvCode'] . "'";
-                        $sql = requeteWithCache($requete);
-                        $res = fetchWithCache($sql);
-                        //Creer la commande
-                        $comId = false;
-
                         $condReg = false;
                         $modReg = false;
-//            if (preg_match('/^Ch/',$val['PcvModRegl']))
-//            {
-//                $modReg = 7;
-//            } else if (preg_match('/^Vi/',$val['PcvModRegl']))
-//            {
-//                $modReg = 2;
-//            } else if (preg_match('/^Pre/',$val['PcvModRegl']))
-//            {
-//                $modReg = 3;
-//            } else if (preg_match('/^Tr/',$val['PcvModRegl']))
-//            {
-//                $modReg = 8;
-//            } else if (preg_match('/^TI/',$val['PcvModRegl']))
-//            {
-//                $modReg = 1;
-//            } else if (preg_match('/^Ca/',$val['PcvModRegl']))
-//            {
-//                $modReg = 6;
-//            } else if (preg_match('/^CB/',$val['PcvModRegl']))
-//            {
-//                $modReg = 6;
-//            } else if (preg_match('/^Fa/',$val['PcvModRegl']))
-//            {
-//                $modReg = 10;
-//            } else if (preg_match('/^Es/',$val['PcvModRegl']))
-//            {
-//                $modReg = 4;
-//            } else {
-//                $modReg = 0;
-//            }
-//            if (preg_match('/30/',$val['PcvModRegl'])){
-//                if (preg_match('/net/',$val['PcvModRegl']))
-//                {
-//                    $condReg = 2;
-//                } else {
-//                    $condReg = 3;
-//                }
-//            }
-//            if (preg_match('/60/',$val['PcvModRegl'])){
-//                if (preg_match('/net/',$val['PcvModRegl']))
-//                {
-//                    $condReg = 4;
-//                } else {
-//                    $condReg = 5;
-//                }
-//            }
-//
-//
-//            if(!$condReg) $condReg = 1;
 
                         switch ($val['PcvGRgmID']) {
                             default: {
@@ -1283,57 +1231,117 @@ if (is_dir($dir)) {
                                 break;
                         }
 
-                        $mode = ""; //pour les trigger
 
-                        if (!$db->num_rows($sql) > 0) {
-                            //Insert commande
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         La commande                                                          |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
+                        
+                        if ($typeLigne == "propal") {
+                            if (isset($tabImportOK['propal'][$val['PcvCode']]))
+                                $comId = $tabImportOK['propal'][$val['PcvCode']];
+                            else {
+                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
+                                $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
+                                $ref = $val['PcvCode'];
+                                $sql = requeteWithCache("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . "propal WHERE import_key = '" . $val['PcvID'] . "' ORDER BY rowid DESC");
+                                if ($db->num_rows($sql) > 0) {
+                                    $result = $db->fetch_object($sql);
+                                    $oldRef = $result->ref;
+                                    $oldId = $result->rowid;
+                                    $ref = $tabRef[0] . "-Temp";
+                                }
+                                //Insert commande
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
+                                        (datec,ref, fk_user_author, fk_soc,fk_cond_reglement, datep, fk_mode_reglement,fk_delivery_address,import_key)
+                                 VALUES (now(),'" . $ref . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
+                                $sql = requeteWithCache($requete);
+                                $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
+                                if (isset($oldRef)) {
+                                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+                                    SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId);
+                                }
+                                if ($sql) {
+                                    $mode = "PROPAL_CREATE";
+                                    $tabImportOK['propal'][$val['PcvCode']] = $comId;
+                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
+                                }
+                            }
+                        } else {
+                            if (isset($tabImportOK['commande'][$val['PcvCode']]))
+                                $comId = $tabImportOK['commande'][$val['PcvCode']];
+                            else {
+                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
+                                $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
+                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE ref = '" . $val['PcvCode'] . "'";
+                                $sql = requeteWithCache($requete);
+                                $res = fetchWithCache($sql);
+                                //Creer la commande
+                                $comId = false;
+
+
+                                $mode = ""; //pour les trigger
+
+                                if (!$db->num_rows($sql) > 0) {
+                                    //Insert commande
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
                                         (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
                                  VALUES (now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $mode = "ORDER_CREATE";
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
-                            } else {
-                                $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
-                            }
-                            $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
-                        } else {
-                            //Updatecommande
-                            $comId = $res->rowid;
-                            $sqlUpt = array();
-                            if ($res->fk_user_author != $internalUserId && $internalUserId > 0)
-                                $sqlUpt[] = " fk_user_author = '" . $internalUserId . "'";
-                            if ($res->fk_soc != $socid)
-                                $sqlUpt[] = " fk_soc = '" . $socid . "'";
-                            if ($res->fk_cond_reglement != $condReg)
-                                $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
-                            if ($res->fk_mode_reglement != $modReg)
-                                $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
-                            if ($res->fk_delivery_address != $livAdd)
-                                $sqlUpt[] = " fk_delivery_address = '" . $livAdd . "'";
-                            if (count($sqlUpt) > 0) {
-                                $updtStr = join(',', $sqlUpt);
-                                $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $mode = "ORDER_MODIFY";
-                                    $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
+                                    $sql = requeteWithCache($requete);
+                                    $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
+                                    if ($sql) {
+                                        $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                        $mode = "ORDER_CREATE";
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
+                                    }
                                 } else {
-                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
+                                    //Updatecommande
+                                    $comId = $res->rowid;
+                                    $sqlUpt = array();
+                                    if ($res->fk_user_author != $internalUserId && $internalUserId > 0)
+                                        $sqlUpt[] = " fk_user_author = '" . $internalUserId . "'";
+                                    if ($res->fk_soc != $socid)
+                                        $sqlUpt[] = " fk_soc = '" . $socid . "'";
+                                    if ($res->fk_cond_reglement != $condReg)
+                                        $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
+                                    if ($res->fk_mode_reglement != $modReg)
+                                        $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
+                                    if ($res->fk_delivery_address != $livAdd)
+                                        $sqlUpt[] = " fk_delivery_address = '" . $livAdd . "'";
+                                    if (count($sqlUpt) > 0) {
+                                        $updtStr = join(',', $sqlUpt);
+                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
+                                        $sql = requeteWithCache($requete);
+                                        if ($sql) {
+                                            $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                            $mode = "ORDER_MODIFY";
+                                            $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
+                                        } else {
+                                            $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
+                                        }
+                                    } else {
+                                        $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                        $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
+                                    }
                                 }
-                            } else {
-                                $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
-                                $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
                             }
                         }
-                        
-                        
-                    if ($comId > 0 && $livAdd > 0) {
+
+                        if ($comId > 0 && $livAdd > 0) {
                             $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $livAdd . " AND fk_c_type_contact IN (102) AND element_id = " . $comId;
                             $requete = "SELECT *" . $finReq;
                             $sql = requeteWithCache($requete);
@@ -1345,9 +1353,8 @@ if (is_dir($dir)) {
                             }
 //print $requete;
                         }
-//                    }
-                        
-                        
+
+
                         /*
                          * A voir drsi drsi drsi
                          */
@@ -1394,83 +1401,20 @@ if (is_dir($dir)) {
                             $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Ligne de commande</td>" . "\n";
                             //Les lignes de commandes
 //Prix Achat
-                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE import_key = " . $val['PlvID'];
-                            $sql1 = requeteWithCache($requete);
-                            $res1 = fetchWithCache($sql1);
-                            if ($db->num_rows($sql1) > 0) {
-                                //Update
-                                $sqlUpt = array();
-
-                                if ($prodId && $res1->fk_product != $prodId)
-                                    $sqlUpt[] = " fk_product = '" . $prodId . "'";
-                                if ($res1->buy_price_ht != $val['PlvPA'])
-                                    $sqlUpt[] = " buy_price_ht = '" . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . "'";
-                                if ($res1->description != $val['PlvLib'])
-                                    $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
-                                if ($val['PlvQteUV'] == '')
-                                    $val['PlvQteUV'] = 0;
-                                if ($res1->qty != $val['PlvQteUV'])
-                                    $sqlUpt[] = " qty = '" . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvQteUV'] < 0 ? abs($val['PlvQteUV']) : 0))) . "'";
-                                if ($val['PlvQteUV'] < 0) {
-                                    $val['PlvPUNet'] = - $val['PlvPUNet'];
-                                    $val['PlvQteUV'] = - $val['PlvQteUV'];
-                                }
-                                if ($val['PlvPUNet'] == '')
-                                    $val['PlvPUNet'] = 0;
-                                if ($res1->subprice != $val['PlvPUNet'])
-                                    $sqlUpt[] = " subprice = '" . preg_replace('/,/', '.', ($val['PlvPUNet']) > 0 ? $val['PlvPUNet'] : 0) . "'";
-                                if ($res1->total_ht != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
-                                    $sqlUpt[] = " total_ht = qty * subprice ";
-                                if ($res1->rang != $val['PlvNumLig'])
-                                    $sqlUpt[] = " rang = " . $val['PlvNumLig'];
-                                if ($res1->tva_tx != $val['TaxTaux'])
-                                    $sqlUpt[] = " tva_tx = '" . preg_replace('/,/', '.', $val['TaxTaux']) . "'";
-                                if ($res1->total_ttc != $totalCom_ttc)
-                                    $sqlUpt[] = " total_ttc = '" . $totalCom_ttc . "'";
-                                if ($res1->total_tva != $totalCom_tva)
-                                    $sqlUpt[] = " total_tva = '" . $totalCom_tva . "'";
-                                if ($val['PlvCode'])
-                                    $prodType = getProdType($val['PlvCode']);
-                                else
-                                    $prodType = 5;
-                                if ($res1->product_type != $prodType)
-                                    $sqlUpt[] = " product_type = '" . $prodType . "'";
-
-
-                                $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
-                                if (count($sqlUpt) > 0) {
-                                    $updtStr = join(',', $sqlUpt);
-                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "commandedet SET " . $updtStr . " WHERE rowid = " . $res1->rowid;
-//                        print $requete;
-                                    $sql = requeteWithCache($requete);
-                                    if ($sql) {
-                                        $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ligne commande OK</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
-                                        if ($mode != 'ORDER_CREATE')
-                                            $mode = "ORDER_MODIFY";
-                                    } else {
-                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
-                                    }
-                                } else {
-                                    $webContent .= "<td  class='ui-widget-content'>Pas de modification ligne commande</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification ligne commande</td>" . "\n";
-                                }
-                            } else {
-                                //Insert
+                            if ($typeLigne == "propal") {
                                 if ($val['PlvCode'])
                                     $prodType = getProdType($val['PlvCode']);
                                 else
                                     $prodType = 3;
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
-                                       (fk_commande,
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
+                                       (fk_propal,
                                         fk_product,
                                         description,
                                         qty,
                                         subprice,
                                         rang,
                                         total_ht,
-                                        import_key,
+                                        special_code,
                                         tva_tx,
                                         total_tva,
                                         total_ttc,
@@ -1502,103 +1446,114 @@ if (is_dir($dir)) {
                                     $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
                                     $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
                                 }
-                            }
-                            /*
-                              +--------------------------------------------------------------------------------------------------------------+
-                              |                                                                                                              |
-                              |                                         Update total commande                                                |
-                              |                                                                                                              |
-                              +--------------------------------------------------------------------------------------------------------------+
-                             */
-
-                            $com = new Synopsis_Commande($db);
-                            $com->fetch($comId);
-                            $com->update_price();
-                            $com->setStatut(0);
-                            $com->valid($user);
-                            if ($mode . "x" != "x") {
-                                $interface = new Interfaces($db);
-                                $result = $interface->run_triggers($mode, $com, $user, $langs, $conf);
-                                if ($result < 0) {
-                                    $error++;
-//                                    $this->errors = $interface->errors;
-                                }
-                            }
-
-
-//                            $mailSumUpContent['commande'][] = $com;
-                            $societe = new Societe($db);
-                            $societe->fetch($com->socid);
-                            $mailHeader .= "<tr><td>\n" . $com->getNomUrl(1, 6) . "\n</td>" . "\n";
-                            $mailHeader .= "    <td>\n" . ($societe->id ? $societe->getNomUrl(1, 6) : '-') . "\n</td>" . "\n";
-                            $mailHeader .= "    <td aligne='right' nowrap>\n" . price($com->total_ht) . "&euro;\n</td>" . "\n";
-
-                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Groupe de commande</td>";
-                            $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Groupe de commande</td>" . "\n";
-                            /*
-                              +--------------------------------------------------------------------------------------------------------------+
-                              |                                                                                                              |
-                              |                                         Les groupes des commandes                                            |
-                              |                                                                                                              |
-                              +--------------------------------------------------------------------------------------------------------------+
-                             */
-
-                            $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                            $requete = "SELECT *" . $finReq;
-                            $sqlGr = requeteWithCache($requete);
-                            if ($val['AffCode'] . "x" == "x") {
-                                if ($db->num_rows($sqlGr) > 0) {
-                                    //Verifier par rapport à la référence. => supression
-                                    $requete = "DELETE" . $finReq;
-                                    $sql = requeteWithCache($requete);
-                                    if ($sql) {
-                                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
-                                    } else {
-                                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
-                                    }
-                                }
                             } else {
-                                //Recupere le groupeId
-                                $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
-                                $sql = requeteWithCache($requete);
-                                $res = fetchWithCache($sql);
-                                if (!$res) {
-                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
-                                    $sql = requeteWithCache($requete);
-                                    $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
-                                    if ($sql) {
-                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
+                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE import_key = " . $val['PlvID'];
+                                $sql1 = requeteWithCache($requete);
+                                $res1 = fetchWithCache($sql1);
+                                if ($db->num_rows($sql1) > 0) {
+                                    //Update
+                                    $sqlUpt = array();
+
+                                    if ($prodId && $res1->fk_product != $prodId)
+                                        $sqlUpt[] = " fk_product = '" . $prodId . "'";
+                                    if ($res1->buy_price_ht != $val['PlvPA'])
+                                        $sqlUpt[] = " buy_price_ht = '" . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . "'";
+                                    if ($res1->description != $val['PlvLib'])
+                                        $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
+                                    if ($val['PlvQteUV'] == '')
+                                        $val['PlvQteUV'] = 0;
+                                    if ($res1->qty != $val['PlvQteUV'])
+                                        $sqlUpt[] = " qty = '" . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvQteUV'] < 0 ? abs($val['PlvQteUV']) : 0))) . "'";
+                                    if ($val['PlvQteUV'] < 0) {
+                                        $val['PlvPUNet'] = - $val['PlvPUNet'];
+                                        $val['PlvQteUV'] = - $val['PlvQteUV'];
+                                    }
+                                    if ($val['PlvPUNet'] == '')
+                                        $val['PlvPUNet'] = 0;
+                                    if ($res1->subprice != $val['PlvPUNet'])
+                                        $sqlUpt[] = " subprice = '" . preg_replace('/,/', '.', ($val['PlvPUNet']) > 0 ? $val['PlvPUNet'] : 0) . "'";
+                                    if ($res1->total_ht != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
+                                        $sqlUpt[] = " total_ht = qty * subprice ";
+                                    if ($res1->rang != $val['PlvNumLig'])
+                                        $sqlUpt[] = " rang = " . $val['PlvNumLig'];
+                                    if ($res1->tva_tx != $val['TaxTaux'])
+                                        $sqlUpt[] = " tva_tx = '" . preg_replace('/,/', '.', $val['TaxTaux']) . "'";
+                                    if ($res1->total_ttc != $totalCom_ttc)
+                                        $sqlUpt[] = " total_ttc = '" . $totalCom_ttc . "'";
+                                    if ($res1->total_tva != $totalCom_tva)
+                                        $sqlUpt[] = " total_tva = '" . $totalCom_tva . "'";
+                                    if ($val['PlvCode'])
+                                        $prodType = getProdType($val['PlvCode']);
+                                    else
+                                        $prodType = 5;
+                                    if ($res1->product_type != $prodType)
+                                        $sqlUpt[] = " product_type = '" . $prodType . "'";
+
+
+                                    $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
+                                    if (count($sqlUpt) > 0) {
+                                        $updtStr = join(',', $sqlUpt);
+                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "commandedet SET " . $updtStr . " WHERE rowid = " . $res1->rowid;
+//                        print $requete;
+                                        $sql = requeteWithCache($requete);
+                                        if ($sql) {
+                                            $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ligne commande OK</td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
+                                            if ($mode != 'ORDER_CREATE')
+                                                $mode = "ORDER_MODIFY";
+                                        } else {
+                                            $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
+                                        }
                                     } else {
-                                        $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
+                                        $webContent .= "<td  class='ui-widget-content'>Pas de modification ligne commande</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification ligne commande</td>" . "\n";
                                     }
                                 } else {
-                                    $grpId = $res->id;
-                                    $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
-                                }
+                                    //Insert
+                                    if ($val['PlvCode'])
+                                        $prodType = getProdType($val['PlvCode']);
+                                    else
+                                        $prodType = 3;
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
+                                       (fk_commande,
+                                        fk_product,
+                                        description,
+                                        qty,
+                                        subprice,
+                                        rang,
+                                        total_ht,
+                                        import_key,
+                                        tva_tx,
+                                        total_tva,
+                                        total_ttc,
+                                        buy_price_ht,
+                                        product_type)
+                                VALUES (" . $comId . ",
+                                        " . ($prodId > 0 ? $prodId : "NULL") . ",
+                                        '" . $val['PlvLib'] . "',
+                                        " . preg_replace('/,/', '.', $val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvPUNet'] < 0 ? abs($val['PlvPUNet']) : 0)) . ",
+                                        " . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? ($val['PlvPUNet'] > 0 ? $val['PlvPUNet'] : ($val['PlvPUNet'] < 0 ? $val['PlvPUNet'] : 0)) : ($val['PlvQteUV'] < 0 ? -1 * ($val['PlvPUNet'] > 0 ? $val['PlvPUNet'] : ($val['PlvPUNet'] < 0 ? $val['PlvPUNet'] : 0)) : 0))) . ",
+                                        " . $val['PlvNumLig'] . ",
+                                        " . preg_replace('/,/', '.', ($val['PlvQteUV'] != 0 ? floatval($val['PlvQteUV']) : 0) * ($val['PlvPUNet'] != 0 ? floatval($val['PlvPUNet']) : 0)) . ",
+                                        " . $val['PlvID'] . ",
+                                        " . preg_replace('/,/', '.', $val['TaxTaux']) . ",
+                                        " . ($totalCom_tva > 0 ? $totalCom_tva : 0) . ",
+                                        " . ($totalCom_ttc > 0 ? $totalCom_ttc : 0) . ",
+                                        " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
+                                        " . $prodType . ")";
 
-                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
-                                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
-                                //efface la ref
-                                $lnDet = fetchWithCache($sqlGr);
-                                if (!$lnDet || $lnDet->commande_group_refid != $grpId || $lnDet->command_refid != $com->id) {
-                                    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                                    $sql = requeteWithCache($requete);
-                                    //ajoute la ref dans le groupe
-                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
-                                            (commande_group_refid,refCommande,command_refid )
-                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
+
                                     $sql = requeteWithCache($requete);
                                     if ($sql) {
-                                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                                        $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
+                                        if ($mode != 'ORDER_CREATE')
+                                            $mode = "ORDER_MODIFY";
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ligne commande OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande OK</td>" . "\n";
                                     } else {
-                                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                                        $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
                                     }
                                 }
                             }
@@ -1639,6 +1594,117 @@ if (is_dir($dir)) {
             }
         }
         closedir($dh);
+
+
+        /*
+          +--------------------------------------------------------------------------------------------------------------+
+          |                                                                                                              |
+          |                                         Update total commande                                                |
+          |                                                                                                              |
+          +--------------------------------------------------------------------------------------------------------------+
+         */
+
+        foreach ($tabImportOK['commande'] as $ref => $id) {
+            $com = new Synopsis_Commande($db);
+            $com->fetch($id);
+            $com->update_price();
+            $com->setStatut(0);
+            $com->valid($user);
+            if ($mode . "x" != "x") {
+                $interface = new Interfaces($db);
+                $result = $interface->run_triggers($mode, $com, $user, $langs, $conf);
+                if ($result < 0) {
+                    $error++;
+//                                    $this->errors = $interface->errors;
+                }
+            }
+
+
+//                            $mailSumUpContent['commande'][] = $com;
+            $societe = new Societe($db);
+            $societe->fetch($com->socid);
+            $mailHeader .= "<tr><td>\n" . $com->getNomUrl(1, 6) . "\n</td>" . "\n";
+            $mailHeader .= "    <td>\n" . ($societe->id ? $societe->getNomUrl(1, 6) : '-') . "\n</td>" . "\n";
+            $mailHeader .= "    <td aligne='right' nowrap>\n" . price($com->total_ht) . "&euro;\n</td>" . "\n";
+
+            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Groupe de commande</td>";
+            $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Groupe de commande</td>" . "\n";
+            /*
+              +--------------------------------------------------------------------------------------------------------------+
+              |                                                                                                              |
+              |                                         Les groupes des commandes                                            |
+              |                                                                                                              |
+              +--------------------------------------------------------------------------------------------------------------+
+             */
+
+            $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+            $requete = "SELECT *" . $finReq;
+            $sqlGr = requeteWithCache($requete);
+            if ($val['AffCode'] . "x" == "x") {
+                if ($db->num_rows($sqlGr) > 0) {
+                    //Verifier par rapport à la référence. => supression
+                    $requete = "DELETE" . $finReq;
+                    $sql = requeteWithCache($requete);
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                    }
+                }
+            } else {
+                //Recupere le groupeId
+                $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
+                $sql = requeteWithCache($requete);
+                $res = fetchWithCache($sql);
+                if (!$res) {
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
+                    $sql = requeteWithCache($requete);
+                    $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
+                    }
+                } else {
+                    $grpId = $res->id;
+                    $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
+                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
+                }
+
+                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
+                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
+                //efface la ref
+                $lnDet = fetchWithCache($sqlGr);
+                if (!$lnDet || $lnDet->commande_group_refid != $grpId || $lnDet->command_refid != $com->id) {
+                    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                    $sql = requeteWithCache($requete);
+                    //ajoute la ref dans le groupe
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
+                                            (commande_group_refid,refCommande,command_refid )
+                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
+                    $sql = requeteWithCache($requete);
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                    }
+                }
+            }
+        }
+
+        foreach ($tabImportOK['propal'] as $ref => $id) {
+            $propal = new Propal($db);
+            $propal->fetch($id);
+            $propal->update_price();
+            $propal->setStatut(0);
+            $propal->valid($user);
+        }
     }
 } else {
     $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";
@@ -1696,6 +1762,89 @@ EOF;
 
 
 $remCatGlob = false;
+
+/*
+  +--------------------------------------------------------------------------------------------------------------+
+  |                                                                                                              |
+  |                                         Send Mail                                                            |
+  |                                                                                                              |
+  +--------------------------------------------------------------------------------------------------------------+
+ */
+
+//$arrCom = array();
+//foreach ($mailSumUpContent['commande'] as $key => $val) {
+//    $arrCom[$val->id] = $val;
+//}
+//foreach ($arrCom as $key => $val) {
+//    
+//}
+$mailHeader .= "</table>\n<table width=700 border=1 cellpadding=20 style='border-collapse: collapse;'>" . "\n";
+$mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=2>Le d&eacute;tail de l'importation" . "</td>";
+
+$mailContent = $mailHeader . "<tr><td style='font-size: small;>" . $mailContent . "</table>\n";
+$mailFooter = "<div style='font-size: small;'>G&eacute;n&eacute;r&eacute; le " . date('d/m/Y') . " &agrave; " . date('H:i') . "</div>" . "\n";
+$mailFooter .= "<hr/>\n" . "\n";
+$mailFooter .= "<div><table border=0 width=700 cellpadding=20 style='border-collapse: collapse;'><tr><td><img height=100 src='" . DOL_URL_ROOT . "/theme/" . $conf->theme . "/Logo-72ppp.png'/></div>" . "\n";
+$mailFooter .= "<td valign=bottom><div style='font-size: small;'><b>Document strictement confidentiel</b><br>" . $mysoc->nom . '<br><em>' . $mysoc->address . '<br>' . $mysoc->zip . " " . $mysoc->town . '</em><br>Tel: ' . $mysoc->phone . "<br>Mail: <a href='mailto:" . $mysoc->email . "'>" . $mysoc->email . "</a><br>Url: <a href='" . $mysoc->url . "'>" . $mysoc->url . "</a></div><br/>" . "\n";
+$mailFooter .= "</table>" . "\n";
+$mailContent .= $mailFooter;
+
+if (!isset($conf->global->BIMP_MAIL_TO) || !isset($conf->global->BIMP_MAIL_FROM)) {
+    $webContent .= "<div style='color: #FF000;'>La fonction mail n'est pas configur&eacute;e</div>";
+} else {
+    $mailFileArr = array();
+    $mailFileMimeArr = array();
+    $mailFileMimeNameArr = array();
+    foreach ($fileArray as $key => $val) {
+        $mailFileArr[] = $dir . "/" . $val;
+        $mailFileMimeArr[] = "text/plain";
+        $mailFileMimeNameArr[] = $val;
+    }
+
+    sendMail('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "GLE <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
+}
+
+
+/*
+  +--------------------------------------------------------------------------------------------------------------+
+  |                                                                                                              |
+  |                                         Save Historic                                                        |
+  |                                                                                                              |
+  +--------------------------------------------------------------------------------------------------------------+
+ */
+
+//foreach ($fileArray as $key => $val) {
+//    $requete = "INSERT INTO BIMP_import_history (webContent, mailContent,datec,filename)
+//                     VALUES ('" . addslashes($webContent) . "','" . addslashes($mailContent) . "',now(),'" . $val . "')";
+//    $sql = requeteWithCache($requete);
+//}
+/*
+  +--------------------------------------------------------------------------------------------------------------+
+  |                                                                                                              |
+  |                                         Display                                                              |
+  |                                                                                                              |
+  +--------------------------------------------------------------------------------------------------------------+
+ */
+
+
+if ($displayHTML) {
+    if ($cntFile == $maxFileImport)
+        print "Import partielle trop de fichier. Merci de relancer l'import.";
+    print $webContent;
+}
+print "<br/><br/>Temps import : " . (microtime(true) - $tempDeb) . "s.";
+print "<br/><br/>Req direct : " . $tabStat['d'] . ". Parcours " . $tabStat['pd'];
+print "<br/><br/>Req cache : " . $tabStat['c'] . ". Parcours " . $tabStat['pc'] . ". Parcours direct pour cache " . $tabStat['pcd'];
+print "<br/><br/>Cache suppr : " . $tabStat['ef'];
+
+/*
+  +--------------------------------------------------------------------------------------------------------------+
+  |                                                                                                              |
+  |                                         Remove file "isrunning"                                              |
+  |                                                                                                              |
+  +--------------------------------------------------------------------------------------------------------------+
+ */
+unlink($dir . "temp/.importRunning");
 
 function updateCategorie($ref, $prodId, $val) {
     if ($ref . 'x' != "x" && $prodId > 0) {
@@ -1901,95 +2050,10 @@ function updateCategorie($ref, $prodId, $val) {
     }
 }
 
-/*
-  +--------------------------------------------------------------------------------------------------------------+
-  |                                                                                                              |
-  |                                         Send Mail                                                            |
-  |                                                                                                              |
-  +--------------------------------------------------------------------------------------------------------------+
- */
-
-//$arrCom = array();
-//foreach ($mailSumUpContent['commande'] as $key => $val) {
-//    $arrCom[$val->id] = $val;
-//}
-//foreach ($arrCom as $key => $val) {
-//    
-//}
-$mailHeader .= "</table>\n<table width=700 border=1 cellpadding=20 style='border-collapse: collapse;'>" . "\n";
-$mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=2>Le d&eacute;tail de l'importation" . "</td>";
-
-$mailContent = $mailHeader . "<tr><td style='font-size: small;>" . $mailContent . "</table>\n";
-$mailFooter = "<div style='font-size: small;'>G&eacute;n&eacute;r&eacute; le " . date('d/m/Y') . " &agrave; " . date('H:i') . "</div>" . "\n";
-$mailFooter .= "<hr/>\n" . "\n";
-$mailFooter .= "<div><table border=0 width=700 cellpadding=20 style='border-collapse: collapse;'><tr><td><img height=100 src='" . DOL_URL_ROOT . "/theme/" . $conf->theme . "/Logo-72ppp.png'/></div>" . "\n";
-$mailFooter .= "<td valign=bottom><div style='font-size: small;'><b>Document strictement confidentiel</b><br>" . $mysoc->nom . '<br><em>' . $mysoc->address . '<br>' . $mysoc->zip . " " . $mysoc->town . '</em><br>Tel: ' . $mysoc->phone . "<br>Mail: <a href='mailto:" . $mysoc->email . "'>" . $mysoc->email . "</a><br>Url: <a href='" . $mysoc->url . "'>" . $mysoc->url . "</a></div><br/>" . "\n";
-$mailFooter .= "</table>" . "\n";
-$mailContent .= $mailFooter;
-
-if (!isset($conf->global->BIMP_MAIL_TO) || !isset($conf->global->BIMP_MAIL_FROM)) {
-    $webContent .= "<div style='color: #FF000;'>La fonction mail n'est pas configur&eacute;e</div>";
-} else {
-    $mailFileArr = array();
-    $mailFileMimeArr = array();
-    $mailFileMimeNameArr = array();
-    foreach ($fileArray as $key => $val) {
-        $mailFileArr[] = $dir . "/" . $val;
-        $mailFileMimeArr[] = "text/plain";
-        $mailFileMimeNameArr[] = $val;
-    }
-
-    sendMail('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "GLE <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
-}
-
-
-/*
-  +--------------------------------------------------------------------------------------------------------------+
-  |                                                                                                              |
-  |                                         Save Historic                                                        |
-  |                                                                                                              |
-  +--------------------------------------------------------------------------------------------------------------+
- */
-
-//foreach ($fileArray as $key => $val) {
-//    $requete = "INSERT INTO BIMP_import_history (webContent, mailContent,datec,filename)
-//                     VALUES ('" . addslashes($webContent) . "','" . addslashes($mailContent) . "',now(),'" . $val . "')";
-//    $sql = requeteWithCache($requete);
-//}
-/*
-  +--------------------------------------------------------------------------------------------------------------+
-  |                                                                                                              |
-  |                                         Display                                                              |
-  |                                                                                                              |
-  +--------------------------------------------------------------------------------------------------------------+
- */
-
-
-if ($displayHTML) {
-    if ($cntFile == $maxFileImport)
-        print "Import partielle trop de fichier. Merci de relancer l'import.";
-    print $webContent;
-}
-print "<br/><br/>Temps import : " . (microtime(true) - $tempDeb) . "s.";
-print "<br/><br/>Req direct : " . $tabStat['d'] . ". Parcours " . $tabStat['pd'];
-print "<br/><br/>Req cache : " . $tabStat['c'] . ". Parcours " . $tabStat['pc'] . ". Parcours direct pour cache " . $tabStat['pcd'];
-print "<br/><br/>Cache suppr : " . $tabStat['ef'];
-
-/*
-  +--------------------------------------------------------------------------------------------------------------+
-  |                                                                                                              |
-  |                                         Remove file "isrunning"                                              |
-  |                                                                                                              |
-  +--------------------------------------------------------------------------------------------------------------+
- */
-unlink($dir . "temp/.importRunning");
-
 function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
     global $mysoc;
     global $langs;
-    $mail = new CMailFile($subject, $to, $from, $msg,
-                    $filename_list, $mimetype_list, $mimefilename_list,
-                    $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
+    $mail = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
     $res = $mail->sendfile();
     if ($res) {
         return (1);
@@ -2050,15 +2114,13 @@ function processUser($import_key) {
             if ($db->num_rows($sql) > 0) {
                 $res = fetchWithCache($sql);
                 $remUserArray[$import_key] = $res->rowid;
-            }
-            else
+            } else
                 $remUserArray[$import_key] = false;
             return $remUserArray[$import_key];
         } else {
             return $remUserArray[$import_key];
         }
-    }
-    else
+    } else
         die("Pas d'id pour l'user");
 }
 
@@ -2067,7 +2129,7 @@ function fetchWithCache($result) {
     $tabRequete = $tabRequeteP;
     $resultStr = get_resource_id($result);
     if (isset($tabRequete[$resultStr]['result'])) {
-        $tabStat['pc']++;
+        $tabStat['pc'] ++;
         $tabRequete[$resultStr]['index'] = $tabRequete[$resultStr]['index'] + 1;
         $index = $tabRequete[$resultStr]['index'];
         if (isset($tabRequete[$resultStr]['result'][$index]))
@@ -2076,7 +2138,7 @@ function fetchWithCache($result) {
             return false;
     }
     else {
-        $tabStat['pd']++;
+        $tabStat['pd'] ++;
         return $db->fetch_object($result);
     }
 }
@@ -2092,7 +2154,7 @@ function requeteWithCache($requete) {
     $noCache = true;
 
     if ($noCache) {
-        $tabStat['d']++;
+        $tabStat['d'] ++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL NO CACHE : " . $requete);
@@ -2129,19 +2191,19 @@ function requeteWithCache($requete) {
 
     if ($tabSuppr && isset($tabRequete[$tabSuppr])) {
         $tabRequete[$tabSuppr] = array();
-        $tabStat['ef']++;
+        $tabStat['ef'] ++;
     }
 
 
 
     if (isset($tabRequete[$tab][$requete])) {
-        $tabStat['c']++;
+        $tabStat['c'] ++;
         $result = $tabRequete[$tab][$requete];
         $strResult = get_resource_id($result);
         $tabRequete[$strResult]['index'] = -1;
         $result->data_seek(0);
     } else {
-        $tabStat['d']++;
+        $tabStat['d'] ++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL : " . $requete);
@@ -2150,7 +2212,7 @@ function requeteWithCache($requete) {
             $tabRequete[$strResult]['result'] = array();
             $i = 0;
             while ($obj = $db->fetch_object($result)) {
-                $tabStat['pcd']++;
+                $tabStat['pcd'] ++;
 //            $tabRequete[$tab][$requete]['result'][$i] = $obj;
 //            $tabRequete[$tab][$requete]['count'] = $i;
 //            $tabRequete[$tab][$requete]['sql'] = $result;

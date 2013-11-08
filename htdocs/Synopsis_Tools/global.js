@@ -236,16 +236,16 @@ function editAjax(elem, datas, callOut) {
     });
 }
 
-function popChrono(id) {
-    popChrono(id, function() {
-    });
-}
+
 function popChrono(id, callBack) {
 //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
     $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id + "'></iframe></div>");
 
+    $("#id-container").hide();
+    
     $(".fullScreen span.fermer").click(function() {
-        $(this).parent().remove();
+        $("#id-container").show();
+        cacherSuppr($(this).parent());
         callBack();
     });
     $(".fullScreen span.petit").click(function() {

@@ -1699,6 +1699,7 @@ if (is_dir($dir)) {
         }
 
         foreach ($tabImportOK['propal'] as $ref => $id) {
+            require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
             $propal = new Propal($db);
             $propal->fetch($id);
             $propal->update_price();

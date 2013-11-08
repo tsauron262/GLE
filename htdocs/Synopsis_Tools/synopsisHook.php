@@ -61,14 +61,17 @@ $conf->global->devMailTo = 'tommy@drsi.fr';
 
 
 $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
-$tabTypeLigne = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+$tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 if (is_object($langs)) {
     foreach ($tabProductType as $idT => $val)
         $tabProductType[$idT] = $langs->trans($val);
-    foreach ($tabTypeLigne as $idT => $val)
-        $tabTypeLigne[$idT] = $langs->trans($val);
+    foreach ($tabTypeLigneSimple as $idT => $val)
+        $tabTypeLigneSimple[$idT] = $langs->trans($val);
 }
-$tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
+//$tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
+$tabTypeLigne = $tabProductType;
+foreach ($tabTypeLigneSimple as $id => $val)
+    $tabTypeLigne[$id+100] = $val;
 global $tabProductType, $tabTypeLigne;
 
 $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";

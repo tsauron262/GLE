@@ -1409,11 +1409,11 @@ if (is_dir($dir)) {
                                     $premiereDesc = true;
                                 }
                                 elseif($premiereDesc && $val['PlvLib'] != ""){
-                                    $prodType = 5;
+                                    $prodType = 100;
                                     $premiereDesc = false;
                                 }
                                 else
-                                    $prodType = 11;
+                                    $prodType = 106;
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
                                        (fk_propal,
                                         fk_product,

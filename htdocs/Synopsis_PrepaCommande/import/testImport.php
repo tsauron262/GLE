@@ -1252,7 +1252,7 @@ if (is_dir($dir)) {
                                     $result = $db->fetch_object($sql);
                                     $oldRef = $result->ref;
                                     $oldId = $result->rowid;
-                                    $ref = $tabRef[0] . "-Temp";
+                                    $ref = $oldRef . "-Temp";
                                 }
                                 //Insert commande
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
@@ -1429,8 +1429,8 @@ if (is_dir($dir)) {
                                         " . preg_replace('/,/', '.', ($val['PlvQteUV'] != 0 ? floatval($val['PlvQteUV']) : 0) * ($val['PlvPUNet'] != 0 ? floatval($val['PlvPUNet']) : 0)) . ",
                                         " . $val['PlvID'] . ",
                                         " . preg_replace('/,/', '.', $val['TaxTaux']) . ",
-                                        " . ($totalCom_tva > 0 ? $totalCom_tva : 0) . ",
-                                        " . ($totalCom_ttc > 0 ? $totalCom_ttc : 0) . ",
+                                        " . ($totalCom_tva != 0 ? $totalCom_tva : 0) . ",
+                                        " . ($totalCom_ttc != 0 ? $totalCom_ttc : 0) . ",
                                         " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
                                         " . $prodType . ")";
 
@@ -1538,9 +1538,9 @@ if (is_dir($dir)) {
                                         " . preg_replace('/,/', '.', ($val['PlvQteUV'] != 0 ? floatval($val['PlvQteUV']) : 0) * ($val['PlvPUNet'] != 0 ? floatval($val['PlvPUNet']) : 0)) . ",
                                         " . $val['PlvID'] . ",
                                         " . preg_replace('/,/', '.', $val['TaxTaux']) . ",
-                                        " . ($totalCom_tva > 0 ? $totalCom_tva : 0) . ",
-                                        " . ($totalCom_ttc > 0 ? $totalCom_ttc : 0) . ",
-                                        " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : "NULL") . ",
+                                        " . ($totalCom_tva != 0 ? $totalCom_tva : 0) . ",
+                                        " . ($totalCom_ttc != 0 ? $totalCom_ttc : 0) . ",
+                                        " . ($val['PlvPA'] != 0 ? $val['PlvPA'] : "NULL") . ",
                                         " . $prodType . ")";
 
 

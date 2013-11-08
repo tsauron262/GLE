@@ -69,10 +69,8 @@ class SynopsisRevisionPropal {
 
             $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $newId;
             $db->query($requete);
-            echo($requete);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 10 WHERE rowid = " . $oldId;
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 3 WHERE rowid = " . $oldId;
             $db->query($requete);
-            echo($requete);
     }
 
     private static function alpha2num($a) {

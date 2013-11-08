@@ -245,6 +245,9 @@ switch ($action) {
 
 
 
+            
+            $sql1 = $db->query($requete1);//Juste pour le nb de ligne
+            $count = $db->num_rows($sql1);
 
 
 
@@ -260,9 +263,6 @@ switch ($action) {
                 $requete1 .= "         LIMIT $start , $limit";
             }
             $sql1 = $db->query($requete1);
-            
-            
-            $count = $db->num_rows($sql1);
 
             if ($count > 0) {
                 $total_pages = ceil($count / $limit);
@@ -407,12 +407,14 @@ switch ($action) {
                 $responce = new general();
                 $responce->page = $page;
                 $responce->total = $total_pages;
-                $responce->records = $i;
             }
             $requete .= "      ORDER BY $sidx $sord";
             if ($sidx != "chrono_id" || $searchField) {
+                $responce->records = $i;
                 $requete .= "         LIMIT $start , $limit";
             }
+            else
+                $responce->records = $count;
 
             $sql = $db->query($requete);
             if ($sql) {
@@ -455,7 +457,7 @@ switch ($action) {
                             require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
                             $obj = new Societe($db);
                             $obj->fetch($chrono->socid);
-                            $html = $obj->getNomUrl(1);
+                            $html = $obj->getNomUrl(1, '', 20);
                         }
                         $arr[] = $html;
                     }
@@ -465,7 +467,7 @@ switch ($action) {
                             require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
                             $obj = new Propal($db);
                             $obj->fetch($chrono->propalid);
-                            $html = $obj->getNomUrl(1);
+                            $html = $obj->getNomUrl(1, '', 30);
                         }
                         $arr[] = $html;
                     }
@@ -475,7 +477,7 @@ switch ($action) {
                             require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
                             $obj = new Project($db);
                             $obj->fetch($chrono->projetid);
-                            $html = $obj->getNomUrl(1);
+                            $html = $obj->getNomUrl(1, '', 30);
                         }
                         $arr[] = $html;
                     }

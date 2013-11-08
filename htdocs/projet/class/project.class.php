@@ -861,9 +861,10 @@ class Project extends CommonObject {
             $lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
+        $label = $this->ref ."-".$this->title;
         if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' . $this->title, 'project') . $lienfin . ' ');
-        $result.=$lien . ($maxlen ? dol_trunc($this->title, $maxlen) : $this->title) . $lienfin;
+            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' . $label, 'project') . $lienfin . ' ');
+        $result.=$lien . ($maxlen ? dol_trunc($label, $maxlen) : $label) . $lienfin;
         return $result;
     }
 

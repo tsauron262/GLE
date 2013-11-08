@@ -187,15 +187,15 @@ EOF;
         }
         if ($chronoRef->hasSociete) {
             $i++;
-            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "right", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
         }
         if ($chronoRef->hasPropal){
             $i++;
-            $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "right", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "left", "search" => true, "sortable"=>false);
         }
         if ($chronoRef->hasProjet){
             $i++;
-            $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "right", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
         }
         if ($chronoRef->hasStatut){
             $i++;

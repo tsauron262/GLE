@@ -1249,13 +1249,14 @@ if (is_dir($dir)) {
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
                                 $ref = $val['PcvCode'];
-                                $sql = requeteWithCache("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . "propal WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
-                                if ($db->num_rows($sql) > 0) {
-                                    $result = $db->fetch_object($sql);
-                                    $oldRef = $result->ref;
-                                    $oldId = $result->rowid;
-                                    $ref = $oldRef . "-Temp";
+                                
+                                $result = SynopsisRevisionPropal::convertRef($ref, "propal");
+                                if($result){
+                                    $oldRef = $ref;
+                                    $ref = $result[1];
+                                    $oldId = $result[0];
                                 }
+                                
                                 //Insert commande
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
                                         (datec,ref, fk_user_author, fk_soc,fk_cond_reglement, datep, fk_mode_reglement,fk_delivery_address,import_key)

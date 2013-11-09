@@ -173,7 +173,9 @@ if ($id > 0) {
                 print "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
             }
             print "</select>";
-            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS)'>Tout ajouter au contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 0)'>Tout ajouter au contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tout ajouter a un nouveau contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 1)'>Tout ajouter pour renouveler contrat</button>";
             print '<img class="imgLoad" style="display:none;" src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">';
         }
         print '</td></tr>';
@@ -200,32 +202,57 @@ function boucleAttendreResult(nbResultT){
 }
    
 
-function ajoutContratAll(tabLigne)
+function ajoutContratAll(tabLigne, idContrat, renouveler)
 {
-    $(".imgLoad").show();
-    $(".butAjoutContratAll").attr('disabled', 'disabled');
-    for(var i=0; i<tabLigne.length;i++){
-        pId = tabLigne[i][0];
-        ligneId = tabLigne[i][1];
-        jQuery.ajax({
-               url:"ajax/xml/addProdToContrat-xml_response.php",
-               data:"id="+comId+"&contratId="+jQuery('#fk_contratT').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId,
-               datatype:"xml",
-               type:"POST",
-               cache:false,
-               success:function(msg){
-                nbResult++;
-                   if(!jQuery(msg).find('OK').length > 0)
-                        ok = false;
-               },
-               error:function(msg){
-               nbResult++;
-                 ok =false;
-               }
-        }); 
-    }
-    boucleAttendreResult(tabLigne.length);
+var lignesStr = Array();
+for(i=0;i < tabLigne.length;i++){
+    lignesStr.push(tabLigne[i][1]);
 }
+    jQuery.ajax({
+           url:"ajax/xml/addProdToContrat-xml_response.php",
+           data:"id="+comId+"&contratId="+idContrat+"&tabElem="+lignesStr.join("-")+"&renouveler="+renouveler,
+           datatype:"xml",
+           type:"POST",
+           cache:false,
+           success:function(msg){
+            id = $(msg).find("ajax-response").text();
+            if(id > 0)
+                location.href=DOL_URL_ROOT+"/contrat/fiche.php?id="+id;
+           },
+           error:function(msg){
+           nbResult++;
+             ok =false;
+           }
+    }); 
+}
+
+//function ajoutContratAll(tabLigne)
+//{
+//    $(".imgLoad").show();
+//    $(".butAjoutContratAll").attr('disabled', 'disabled');
+//    for(var i=0; i<tabLigne.length;i++){
+//        pId = tabLigne[i][0];
+//        ligneId = tabLigne[i][1];
+//        jQuery.ajax({
+//               url:"ajax/xml/addProdToContrat-xml_response.php",
+//               data:"id="+comId+"&contratId="+jQuery('#fk_contratT').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId,
+//               datatype:"xml",
+//               type:"POST",
+//               cache:false,
+//               success:function(msg){
+//                nbResult++;
+//                   if(!jQuery(msg).find('OK').length > 0)
+//                        ok = false;
+//               },
+//               error:function(msg){
+//               nbResult++;
+//                 ok =false;
+//               }
+//        }); 
+//    }
+//    boucleAttendreResult(tabLigne.length);
+//}
+
 function createContrat2(pId,ligneId)
 {
 //    //TODO ajoute la ligne, ouvre la page

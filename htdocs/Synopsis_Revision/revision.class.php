@@ -1,6 +1,62 @@
 <?php
 
-class SynopsisRevisionPropal {
+class SynopsisRevision {
+
+    static function alpha2num($a) {
+        if ($a == "0")
+            $a = "A";
+        $r = 0;
+        $l = strlen($a);
+        for ($i = 0; $i < $l; $i++) {
+            $r += pow(26, $i) * (ord($a[$l - $i - 1]) - 0x40);
+        }
+        return $r - 1;
+    }
+    
+    static function updateRef($id, $oldRef, $table){
+        global $db;
+        $result = self::convertRef($oldRef, $table);
+        $db->query("UPDATE ". MAIN_DB_PREFIX . $table ." set ref ='".$result."' WHERE rowid=".$id);
+    }
+
+    static function convertRef($oldRef, $table) {
+        $oldRef = self::getRefMax($oldRef, $table);
+        if ($oldRef) {
+            $tabT = explode("-", $oldRef[1]);
+            if (!isset($tabT[1]))
+                $tabT[1] = 0;
+            if (!is_numeric($tabT[1]))
+                $tabT[1] = self::alpha2num($tabT[1]);
+            $orgRef = $tabT[0];
+            if ($conf->global->PROPAL_REVISION_MODEL . "x" != 'x' && is_file(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/" . $conf->global->PROPAL_REVISION_MODEL . ".class.php")) {
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/" . $conf->global->PROPAL_REVISION_MODEL . ".class.php");
+                $tmp = $conf->global->PROPAL_REVISION_MODEL;
+                $revMod = new $tmp($db);
+                $numRevision = $tabT[1];
+                $numRevision++;
+                $newRef = $orgRef . "-" . $revMod->convert_revision($numRevision);
+            } else {
+                $numRevision = intval($tabT[1]) + 1;
+                $newRef = $orgRef . "-" . $numRevision;
+            }
+            return $newRef;
+        }
+        return false;
+    }
+
+    static function getRefMAx($ref, $table) {
+        global $db;
+        $sql = $db->query("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . $table . " WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
+        if ($db->num_rows($sql) > 0) {
+            $result = $db->fetch_object($sql);
+            return array($result->id, $result->ref);
+        }
+        return false;
+    }
+
+}
+
+class SynopsisRevisionPropal extends SynopsisRevision {
 
     function SynopsisRevisionPropal($propal) {
         global $db;
@@ -45,43 +101,17 @@ class SynopsisRevisionPropal {
         }
         print ($mesg . " Erreur" . $socid);
     }
-    
-    public static function setLienRevision($oldRef, $oldId, $newId){
+
+    public static function setLienRevision($oldRef, $oldId, $newId) {
         global $conf, $db;
-        $tabT = explode("-", $oldRef);
+
+        $newRef = self::convertRef($oldRef);
 //        die($tabT[]);
-            if (!isset($tabT[1]))
-                $tabT[1] = 0;
-            if (!is_numeric($tabT[1]))
-                $tabT[1] = self::alpha2num($tabT[1]);
-            $orgRef = $tabT[0];
-            if ($conf->global->PROPAL_REVISION_MODEL . "x" != 'x' && is_file(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/" . $conf->global->PROPAL_REVISION_MODEL . ".class.php")) {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/modele/" . $conf->global->PROPAL_REVISION_MODEL . ".class.php");
-                $tmp = $conf->global->PROPAL_REVISION_MODEL;
-                $revMod = new $tmp($db);
-                $numRevision = $tabT[1];
-                $numRevision++;
-                $newRef = $orgRef . "-" . $revMod->convert_revision($numRevision);
-            } else {
-                $numRevision = intval($tabT[1]) + 1;
-                $newRef = $orgRef . "-" . $numRevision;
-            }
 
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '".$oldRefCli."' WHERE rowid = " . $newId;
-            $db->query($requete);
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 3 WHERE rowid = " . $oldId;
-            $db->query($requete);
-    }
-
-    private static function alpha2num($a) {
-        if ($a == "0")
-            $a = "A";
-        $r = 0;
-        $l = strlen($a);
-        for ($i = 0; $i < $l; $i++) {
-            $r += pow(26, $i) * (ord($a[$l - $i - 1]) - 0x40);
-        }
-        return $r - 1;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '" . $oldRefCli . "' WHERE rowid = " . $newId;
+        $db->query($requete);
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 3 WHERE rowid = " . $oldId;
+        $db->query($requete);
     }
 
     public function getPropalPrec() {

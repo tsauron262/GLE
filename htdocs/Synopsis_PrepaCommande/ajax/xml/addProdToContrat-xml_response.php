@@ -18,16 +18,44 @@
  * GLE-1.2
  */
 $resXml = "";
+
+
 require_once('../../../main.inc.php');
-require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php";
+require_once DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php";
+
+global $user;
+
 //id="+comId+"&contratId="+jQuery('#fk_contrat').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId
 $commId = $_REQUEST['id'];
-$contratId = $_REQUEST['contratId'];
-$comLigneId = $_REQUEST['comLigneId'];
 
-$contrat = new Synopsis_Contrat($db);
-$contrat->fetch($contratId);
-$result = $contrat->addLigneCommande($commId, $comLigneId);
+    $contrat = new Synopsis_Contrat($db);
+if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
+    $contratId = $_REQUEST['contratId'];
+    $contrat->fetch($contratId);
+    if($_REQUEST['renouveler']){
+//        $oldId = $contrat->id;
+//        $contrat->ref = "Temp";
+//        $contrat->create($user);
+        $contrat->renouvellement($user);
+    }
+        
+}
+ else {
+     $commande = new Commande($db);
+     $commande->fetch($commId);
+     $contrat->socid = $commande->socid;
+     $contrat->commercial_signature_id = 1;
+     $contrat->commercial_suivi_id = 1;
+     $contrat->date_contrat = dol_now();
+     $contrat->create($user);
+     $contrat->initRefPlus();
+}
+
+
+$tabLigne = explode("-", $_REQUEST['tabElem']);
+foreach($tabLigne as $comLigneId)
+    $result = $contrat->addLigneCommande($commId, $comLigneId);
 
 
 
@@ -38,7 +66,7 @@ $result = $contrat->addLigneCommande($commId, $comLigneId);
 //".MAIN_DB_PREFIX."Synopsis_contrat_GMAO
 //}
 if ($result) {
-    $resXml = "<OK>OK</OK>";
+    $resXml = $contrat->id;
 } else {
     $resXml = "<KO>KO</KO>";
 }

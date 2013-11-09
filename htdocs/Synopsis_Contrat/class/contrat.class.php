@@ -33,6 +33,26 @@ class Synopsis_Contrat extends Contrat {
         $res = $this->db->fetch_object($sql);
         return($res->extraparams);
     }
+    
+    public function renouvellement($user){
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Revision/revision.class.php");
+//        $oldContrat = new Contrat($this->db);
+//        $oldContrat->fetch($oldId);
+        $this->create($user);
+        $this->ref = SynopsisRevision::convertRef($this->ref, "contrat");
+        $this->majRef();
+    }
+    
+    public function majRef(){
+        $this->db->query("UPDATE ". MAIN_DB_PREFIX . "contrat set ref ='".$this->ref."' WHERE rowid=".$this->id);
+    }
+    
+    public function initRefPlus(){
+        $soc = new Societe($this->db);
+        $soc->fetch($this->socid);
+        $this->ref = $this->getNextNumRef($soc);
+        $this->majRef();
+    }
 
     public function fetch($id, $ref = '') {
         $ret = parent::fetch($id, $ref);

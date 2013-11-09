@@ -29,36 +29,33 @@ global $user;
 //id="+comId+"&contratId="+jQuery('#fk_contrat').find(':selected').val()+"&prodId="+pId+"&comLigneId="+ligneId
 $commId = $_REQUEST['id'];
 
-    $contrat = new Synopsis_Contrat($db);
+$contrat = new Synopsis_Contrat($db);
 if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
     $contratId = $_REQUEST['contratId'];
     $contrat->fetch($contratId);
-    if($_REQUEST['renouveler']){
-//        $oldId = $contrat->id;
-//        $contrat->ref = "Temp";
-//        $contrat->create($user);
-        $contrat->renouvellement($user);
-    }
-        
-}
- else {
-     $commande = new Commande($db);
-     $commande->fetch($commId);
-     $contrat->socid = $commande->socid;
-     $contrat->commercial_signature_id = 1;
-     $contrat->commercial_suivi_id = 1;
-     $contrat->date_contrat = dol_now();
-     $contrat->create($user);
-     $contrat->initRefPlus();
+if ($_REQUEST['renouveler'])
+    $contrat->renouvellementPart1($user);
+} else {
+    $commande = new Commande($db);
+    $commande->fetch($commId);
+    $contrat->socid = $commande->socid;
+    $contrat->commercial_signature_id = 1;
+    $contrat->commercial_suivi_id = 1;
+    $contrat->date_contrat = dol_now();
+    $contrat->create($user);
 }
 
 
 $tabLigne = explode("-", $_REQUEST['tabElem']);
-foreach($tabLigne as $comLigneId)
+foreach ($tabLigne as $comLigneId)
     $result = $contrat->addLigneCommande($commId, $comLigneId);
 
 
 
+if ($_REQUEST['renouveler'])
+    $contrat->renouvellementPart2();
+elseif (!isset($_REQUEST['contratId']) || $_REQUEST['contratId'] == 0)
+    $contrat->initRefPlus();
 
 
 //print $requete;

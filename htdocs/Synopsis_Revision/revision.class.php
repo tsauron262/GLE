@@ -1,6 +1,8 @@
 <?php
 
 class SynopsisRevision {
+    
+    static $separateur = "&#150;";
 
     static function alpha2num($a) {
         if ($a == "0")
@@ -20,9 +22,10 @@ class SynopsisRevision {
     }
 
     static function convertRef($oldRef, $table) {
+        global $conf;
         $oldRef = self::getRefMax($oldRef, $table);
         if ($oldRef) {
-            $tabT = explode("-", $oldRef[1]);
+            $tabT = explode(self::$separateur, $oldRef[1]);
             if (!isset($tabT[1]))
                 $tabT[1] = 0;
             if (!is_numeric($tabT[1]))
@@ -34,10 +37,10 @@ class SynopsisRevision {
                 $revMod = new $tmp($db);
                 $numRevision = $tabT[1];
                 $numRevision++;
-                $newRef = $orgRef . "-" . $revMod->convert_revision($numRevision);
+                $newRef = $orgRef . self::$separateur . $revMod->convert_revision($numRevision);
             } else {
                 $numRevision = intval($tabT[1]) + 1;
-                $newRef = $orgRef . "-" . $numRevision;
+                $newRef = $orgRef . self::$separateur . $numRevision;
             }
             return $newRef;
         }
@@ -46,6 +49,8 @@ class SynopsisRevision {
 
     static function getRefMAx($ref, $table) {
         global $db;
+        $tabT = explode(self::$separateur, $ref);
+        $ref = $tabT[0];
         $sql = $db->query("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . $table . " WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
         if ($db->num_rows($sql) > 0) {
             $result = $db->fetch_object($sql);
@@ -105,7 +110,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
     public static function setLienRevision($oldRef, $oldId, $newId) {
         global $conf, $db;
 
-        $newRef = self::convertRef($oldRef);
+        $newRef = self::convertRef($oldRef, "propal");
 //        die($tabT[]);
 
         $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '" . $oldRefCli . "' WHERE rowid = " . $newId;

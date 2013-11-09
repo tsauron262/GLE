@@ -204,6 +204,8 @@ function boucleAttendreResult(nbResultT){
 
 function ajoutContratAll(tabLigne, idContrat, renouveler)
 {
+    $(".imgLoad").show();
+    $(".butAjoutContratAll").attr('disabled', 'disabled');
 var lignesStr = Array();
 for(i=0;i < tabLigne.length;i++){
     lignesStr.push(tabLigne[i][1]);

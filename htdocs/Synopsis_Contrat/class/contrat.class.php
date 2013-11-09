@@ -33,26 +33,128 @@ class Synopsis_Contrat extends Contrat {
         $res = $this->db->fetch_object($sql);
         return($res->extraparams);
     }
-    
-    public function renouvellement($user){
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Revision/revision.class.php");
-//        $oldContrat = new Contrat($this->db);
-//        $oldContrat->fetch($oldId);
+
+    public function renouvellementPart1($user) {
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+
         $oldRef = $this->ref;
+        $this->oldId = $this->id;
         $this->ref .= "Temp";
         $this->create($user);
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();
     }
-    
-    public function majRef(){
-        $this->db->query("UPDATE ". MAIN_DB_PREFIX . "contrat set ref ='".$this->ref."' WHERE rowid=".$this->id);
+
+    public function renouvellementPart2() {
+        global $user;
+        $tabOldIdOk = array();
+        $oldContrat = new Contrat($this->db);
+        $oldContrat->fetch($this->oldId);
+        $oldContrat->fetch_lines();
+        $this->fetch_lines();
+        foreach ($oldContrat->lines as $oldLigne) {//enreg info old ligne
+            $idS = $oldLigne->id;
+            foreach ($this->lines as $newLigne) {
+                if(!isset($tabOldIdOk[$idS]) && $oldLigne->fk_product == $newLigne->fk_product) {
+                    $idD = $newLigne->id;
+                    $tabOldIdOk[$idS] = $idS;
+                    $tab = getElementElement("contratdet", null, $idS);
+                    foreach ($tab as $lien)
+                        addElementElement($lien['ts'], $lien['td'], $idD, $lien['d']);
+                    $tab = getElementElement("contratdet", null, $idS, null, 0);
+                    foreach ($tab as $lien)
+                        addElementElement($lien['ts'], $lien['td'], $idD, $lien['d'], 0);
+//                    $newLigne = new Synopsis_ContratLigne();
+                    $newLigne->description = $oldLigne->description;
+                    $newLigne->update($user);
+                }
+            }
+        }
     }
-    
-    public function initRefPlus(){
+
+    public function majRef() {
+        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "contrat set ref ='" . $this->ref . "' WHERE rowid=" . $this->id);
+//        die("UPDATE " . MAIN_DB_PREFIX . "contrat set ref ='" . $this->ref . "' WHERE rowid=" . $this->id);
+    }
+
+    function getNextNumRef($soc) {
+        global $db, $langs, $conf;
+        $langs->load("contract");
+
+        $dir = DOL_DOCUMENT_ROOT . "/core/modules/contract";
+
+        if (empty($conf->global->CONTRACT_ADDON)) {
+            $conf->global->CONTRACT_ADDON = 'mod_contract_serpis';
+        }
+
+        $file = $conf->global->CONTRACT_ADDON . ".php";
+
+        // Chargement de la classe de numerotation
+        $classname = $conf->global->CONTRACT_ADDON;
+
+        $result = include_once $dir . '/' . $file;
+        if ($result) {
+            $obj = new $classname();
+            $numref = "";
+            if (isset($this->prefRef))
+                $obj->prefix = $this->prefRef;
+            $numref = $obj->getNextValue($soc, $this);
+
+            if ($numref != "") {
+                return $numref;
+            } else {
+                dol_print_error($db, get_class($this) . "::getNextValue " . $obj->error);
+                return "";
+            }
+        } else {
+            print $langs->trans("Error") . " " . $langs->trans("Error_CONTRACT_ADDON_NotDefined");
+            return "";
+        }
+    }
+
+    public function initRefPlus() {
+        global $conf;
+        $pref = "CS";
+        $oldPref = "CT";
+        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = false;
+        $this->fetch_lines();
+        foreach ($this->lines as $ligne) {
+            if ($ligne->GMAO_Mixte['isSAV'])
+                $isSav = true;
+            if ($ligne->GMAO_Mixte['maintenance'])
+                $isMaint = true;
+            if ($ligne->GMAO_Mixte['telemaintenance'])
+                $isTeleMaint = true;
+            if ($ligne->GMAO_Mixte['hotline'])
+                $isHotline = true;
+
+            $prod = new Product($this->db);
+            $prod->fetch($ligne->fk_product);
+            if (stripos($prod->ref, "YO1sante") !== false)
+                $isMed = true;
+            if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
+                $is8h = true;
+//            else echo $ligne->GMAO_Mixte['SLA']."|";
+        }
+        if ($isSav)
+            $pref = "SAV";
+        if ($isMaint)
+            $pref = "MAI";
+        if ($isTeleMaint)
+            $pref = "TEL";
+        if ($isHotline)
+            $pref = "HL";
+        if ($isHotline && $is8h)
+            $pref = "CD8";
+        if ($isMed)
+            $pref = "CMED";
+        $this->prefRef = substr($pref, 0, 2);
+        if (isset($conf->global->CONTRACT_MAGRE_MASK))
+            $conf->global->CONTRACT_MAGRE_MASK = str_replace($oldPref, $pref, $conf->global->CONTRACT_MAGRE_MASK);
         $soc = new Societe($this->db);
         $soc->fetch($this->socid);
         $this->ref = $this->getNextNumRef($soc);
+//        $this->ref = str_replace($oldPref, $pref ."-". $oldPref, $this->ref);
         $this->majRef();
     }
 
@@ -2270,7 +2372,6 @@ class Synopsis_ContratLigne extends ContratLigne {
                 'isSAV' => $objp->GMAO_isSAV,
                 'fk_prod' => $objp->GMAO_fk_prod,
                 'reconductionAuto' => $objp->GMAO_reconductionAuto,
-                'maintenance' => $objp->GMAO_maintenance,
                 'serial_number' => $objp->GMAO_serial_number,
                 'ddebprev' => $objp->GMAO_ddebprev,
                 "clause" => $objp->GMAO_clause,

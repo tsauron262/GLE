@@ -38,8 +38,10 @@ class Synopsis_Contrat extends Contrat {
         require_once(DOL_DOCUMENT_ROOT."/Synopsis_Revision/revision.class.php");
 //        $oldContrat = new Contrat($this->db);
 //        $oldContrat->fetch($oldId);
+        $oldRef = $this->ref;
+        $this->ref .= "Temp";
         $this->create($user);
-        $this->ref = SynopsisRevision::convertRef($this->ref, "contrat");
+        $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();
     }
     

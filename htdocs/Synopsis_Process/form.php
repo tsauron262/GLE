@@ -184,7 +184,29 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
             }
         }
     }
-    //Valeur si pas de name
+    
+    
+    //Valeur avec le label
+    $requete = "SELECT m.label as valeur, m.id 
+        FROM `llx_Synopsis_Process_form_model` m, `llx_Synopsis_Process` p 
+        WHERE m.form_refid = p.`formulaire_refid` AND p.`id` = ".$process_id;
+        
+    if (count($arrSkip) > 0)
+        $requete .= "    AND m.id NOT IN (" . join(',', $arrSkip) . ")";
+    $sql = $db->query($requete);
+    while ($res = $db->fetch_object($sql)) {
+        $res->valeur = SynSanitize($res->valeur);
+        $arrVal[$res->valeur] = "";
+        foreach ($_REQUEST as $key => $val) {
+//            print $key.$val."<br/>".$res->valeur;
+            if ($res->valeur == $key) {
+                $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->id);
+                continue;
+            }
+        }
+    }
+    
+        //Valeur si pas de name
     $requete = "  SELECT CONCAT('inpt',m.id) as valeur,
                          m.id
                     FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_model as m,
@@ -202,13 +224,14 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
     while ($res = $db->fetch_object($sql)) {
         $arrVal[$res->valeur] = "";
         foreach ($_REQUEST as $key => $val) {
-//            print $val."<br/>";
+//            print $key.$val."<br/>".$res->valeur;
             if ($res->valeur == $key) {
                 $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->id);
                 continue;
             }
         }
     }
+//            die;
 
     //Valeur des fonctions
     foreach ($process->formulaire->lignes as $key => $ligne) {
@@ -262,7 +285,7 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
 
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
     $process = new process($db);
-    $processDet = new processDet($db);  
+    $processDet = new processDet($db);
     $res1 = $process->fetch($process_id, false);
     $process->getGlobalRights();
     if ($processDetId > 0)
@@ -368,13 +391,15 @@ EOF;
                 jQuery(this).attr('disabled','true');
                 if(jQuery(this).attr('type')=='text'){
                     var val = jQuery(this).val();
-                    jQuery(this).replaceWith("<div style='display: inline-block; min-height: 1em; min-width: 100px; padding: 3px 7px;opacity: 0.85' class='ui-widget-header ui-corner-all ui-state-hover'>"+val+"</div>");
+                    var classElem = jQuery(this).attr("class");
+                    jQuery(this).replaceWith("<div style='display: inline-block; min-height: 1em; min-width: 100px; padding: 3px 7px;opacity: 0.85' class='ui-widget-header ui-corner-all ui-state-hover "+classElem+"'>"+val+"</div>");
                 }
             });
             jQuery('#formProcess').find('textarea').each(function(){
                 jQuery(this).attr('disabled','true');
                 var val = jQuery(this).val();
-                jQuery(this).replaceWith("<div style='display: inline-block; min-height: 5em; min-width: 200px; padding: 3px 7px;opacity: 0.85' class='ui-widget-header ui-corner-all ui-state-hover'>"+val+"</div>");
+                var classElem = jQuery(this).attr("class");
+                jQuery(this).replaceWith("<div style='display: inline-block; min-height: 5em; min-width: 200px; padding: 3px 7px;opacity: 0.85' class='ui-widget-header ui-corner-all ui-state-hover "+classElem+"'>"+val+"</div>");
             });
             jQuery('#formProcess').find('SELECT').each(function(){
                 jQuery(this).attr("disabled", "disabled");
@@ -529,14 +554,13 @@ EOF;
             }
         }
 
-        if ($process->typeElement && $element_id > 0 && ($processDet->validation_number > 1 || $processDet->statut > 0 )) {
+        if ($process->typeElement && $element_id > 0) {
             print "<tr><th class='ui-widget-header ui-state-default'>El&eacute;ment</th>";
-            print "    <td class='ui-widget-content' colspan=1>" . $process->typeElement->getNomUrl_byProcessDet($element_id, 1) . "</td>";
-            print "    <th class='ui-widget-header ui-state-default'>Suivi validation</th>";
-            print "    <td class='ui-widget-content' colspan=1><a href='" . DOL_URL_ROOT . "/Synopsis_Process/historyValidation.php?filterProcess=" . $processDetId . "'><table><tr><td><span class='ui-icon ui-icon-extlink'></span></td><td>Suivi</td></table></a></td>";
-        } else if ($process->typeElement && $element_id > 0) {
-            print "<tr><th class='ui-widget-header ui-state-default'>El&eacute;ment</th>";
-            print "    <td class='ui-widget-content' colspan=3>" . $process->typeElement->getNomUrl_byProcessDet($element_id, 1) . "</td>";
+            print "    <td class='ui-widget-content' colspan=1>" . str_replace(".php?", ".php?vueValid=true&", $process->typeElement->getNomUrl_byProcessDet($element_id, 1)) . "</td>";
+            if ($processDet->validation_number > 1 || $processDet->statut > 0) {
+                print "    <th class='ui-widget-header ui-state-default'>Suivi validation</th>";
+                print "    <td class='ui-widget-content' colspan=1><a href='" . DOL_URL_ROOT . "/Synopsis_Process/historyValidation.php?filterProcess=" . $processDetId . "'><table><tr><td><span class='ui-icon ui-icon-extlink'></span></td><td>Suivi</td></table></a></td>";
+            }
         }
         if ($processDet->fk_statut > 0) {
             print "<tr><th class='ui-widget-header ui-state-default'>R&eacute;sum&eacute;</th>";
@@ -1006,7 +1030,7 @@ EOF;
                                 print "<td align=right class='ui-widget-content'>" . $resValue->note;
                                 print "<td align=center class='ui-widget-content' colspan=2>";
                                 if ($resValue->valeur == 1) {
-                                    print img_tick() . " Valider le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
+                                    print img_picto($langs->trans("Active"), 'tick') . " Valider le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
                                 } else {
                                     print img_error() . " Refuser le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
                                 }
@@ -1058,7 +1082,7 @@ EOF;
                             print "<td align=right class='ui-widget-content'>" . $resValue->note;
                             print "<td align=center class='ui-widget-content' colspan=2>";
                             if ($resValue->valeur == 1) {
-                                print img_tick() . " Valider le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
+                                print img_picto($langs->trans("Active"), 'tick') . " Valider le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
                             } else {
                                 print img_error() . " Refuser le " . date('d/m/Y', strtotime($resValue->dateValid)) . " par " . $tmpUser->getNomUrl(1);
                             }

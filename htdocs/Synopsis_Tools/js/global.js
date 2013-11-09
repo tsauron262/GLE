@@ -277,7 +277,7 @@ function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     }
     champSup = "&champSup=" + champSup + "&champSupVal=" + valSup;
     jQuery.ajax({
-        url: "../Synopsis_Chrono/ajax/addChrono.php",
+        url: DOL_URL_ROOT + "/Synopsis_Chrono/ajax/addChrono.php",
         type: "POST",
         datatype: "xml",
         data: "model=" + model_refid + "&socid=" + socid + champSup,
@@ -289,7 +289,7 @@ function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
 
 function ajaxManipElementElement(action, sourcetype, targettype, idsource, idtarget, ordre, callBack) {
     jQuery.ajax({
-        url: "../Synopsis_Tools/ajax/manipElementElement.php",
+        url: DOL_URL_ROOT + "/Synopsis_Tools/ajax/manipElementElement.php",
         type: "POST",
         datatype: "xml",
         data: "action=" + action + "&sourcetype=" + sourcetype + "&targettype=" + targettype + "&idsource=" + idsource + "&idtarget=" + idtarget + "&ordre=" + ordre,

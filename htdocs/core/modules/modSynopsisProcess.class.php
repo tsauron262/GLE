@@ -66,6 +66,15 @@ class modSynopsisProcess extends DolibarrModules {
         $this->special = 0;
         $this->picto = 'process@Synopsis_Process';
 
+
+
+        $this->const[$r][0] = "PROCESS_ADDON";
+        $this->const[$r][1] = "chaine";
+        $this->const[$r][2] = "Demantoide";
+        $this->const[$r][3] = 'Nom du gestionnaire de numerotation des propales';
+        $this->const[$r][4] = 0;
+        $r++;
+
         // Dir
         //----
         $this->dirs = array();
@@ -184,9 +193,9 @@ class modSynopsisProcess extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-        
-        
-        
+
+
+
         $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools',
             'type' => 'left',
             'titre' => 'Process',
@@ -199,7 +208,7 @@ class modSynopsisProcess extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-        
+
         $this->menu[$r] = array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=Process',
             'type' => 'left',
             'titre' => 'Liste',
@@ -225,7 +234,7 @@ class modSynopsisProcess extends DolibarrModules {
             'user' => 0);
         $fkMen1 = 'fk_mainmenu=SynopsisTools,fk_leftmenu=ConfigProcess';
         $r++;
-        $this->menu[$r] = array('fk_menu' => ''.$fkMen1,
+        $this->menu[$r] = array('fk_menu' => '' . $fkMen1,
             'type' => 'left',
             'titre' => 'Formulaires',
             'leftmenu' => 'ConfigProcessForm',
@@ -346,9 +355,9 @@ class modSynopsisProcess extends DolibarrModules {
             'target' => '',
             'user' => 0);
         $r++;
-        
-        
-        
+
+
+
 
         $this->menu[$r] = array('fk_menu' => 'r=0',
             'type' => 'left',
@@ -362,7 +371,7 @@ class modSynopsisProcess extends DolibarrModules {
             'user' => 0);
         $s = $r;
         $r++;
-        $this->menu[$r] = array('fk_menu' => 'r='.$s,
+        $this->menu[$r] = array('fk_menu' => 'r=' . $s,
             'type' => 'left',
             'titre' => 'Liste',
             'mainmenu' => 'Process',
@@ -429,9 +438,10 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `trigger_refid` (`trigger_refid`),
   KEY `formulaire_refid` (`formulaire_refid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
-            'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process` (`id`, `label`, `description`, `fk_statut`, `bloquant`, `formulaire_refid`, `pretraitement`, `posttraitement`, `validAction`, `askValidAction`, `reviseAction`, `PROCESS_MASK`, `ADDON_PDF`, `PROCESS_ADDON`, `typeElement_refid`, `trigger_refid`, `revision_model_refid`) VALUES
-(1, \'TR15\', \'FICHE ANALYSE FAISABILITE\', 1, 1, 1, \'\', \'\', \'\', \'\', \'\', \'{yy}TR15{0000@1}\', \'\', \'demantoide\', 1, 49, 2),
-(2, \'FORM_TEST\', \'TESTONS CES PROCESS\', NULL, 0, 1, \'\', \'\', \'\', \'\', \'\', \'FORM/{00000@}\', \'pholos\', \'demantoide\', 1, 47, 1);',
+            "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_Process` (`id`, `label`, `description`, `fk_statut`, `bloquant`, `formulaire_refid`, `pretraitement`, `posttraitement`, `validAction`, `askValidAction`, `reviseAction`, `PROCESS_MASK`, `ADDON_PDF`, `PROCESS_ADDON`, `typeElement_refid`, `trigger_refid`, `revision_model_refid`) VALUES
+(1, 'TR15', 'FICHE ANALYSE FAISABILITE', NULL, 1, 1, '', '', '', '', '', '{yy}TR15{0000@1}', '', 'demantoide', 1, 49, 2),
+(2, 'FORM_TEST', 'TESTONS CES PROCESS', NULL, 0, 1, '', '', '', '', '', 'FORM/{00000@}', 'pholos', 'demantoide', 1, 47, 1),
+(3, 'Validation Propal', 'Process de validation des propal', NULL, 1, 3, '', '', '', '', '', 'VALID{0000}', '', 'demantoide', 1, 48, NULL);",
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ref` varchar(50) DEFAULT NULL,
@@ -484,7 +494,8 @@ class modSynopsisProcess extends DolibarrModules {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form` (`id`, `label`, `description`, `fk_statut`) VALUES
 (1, \'Form-TR15\', \'Formulaire TR15\', 1),
-(2, \'FORM_TEST\', \'FORMULAIRE DE TEST\', 1);',
+(2, \'FORM_TEST\', \'FORMULAIRE DE TEST\', 1),
+(3, \'Validation Propale\', \'Validation après accord client\', 1);',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fct` longtext,
@@ -502,9 +513,9 @@ class modSynopsisProcess extends DolibarrModules {
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=6 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct` (`id`, `fct`, `params`, `label`, `description`, `class`, `fileClass`, `printVarInsteadOdReturn`, `VarToBePrinted`, `paramsForHtmlName`, `paramsForHtmlSelect`, `postTraitementValue`) VALUES
 (1, \'form_conditions_reglement\', \'PHP_SELF||SELECTED||ID||SHOW_EMPTY\', \'Conditions Reglement\', \'Conditions Reglement\', \'form\', \'/core/class/html.form.class.php\', 0, \'\', \'ID\', \'SELECTED\', \'\'),
-(2, \'select_users\', \'SELECTED||ID||SHOWEMPTY||EXCLUDE||DISABLED||DISPLAY\', \'Utilisateurs\', \'Liste des utilisateurs\', \'form\', \'/core/class/html.form.class.php\', 1, \'tmpReturn\', \'ID\', \'SELECTED\', \'$requete = "SELECT * FROM '.MAIN_DB_PREFIX.'user WHERE rowid=[[valeur]]";\n$sql = $db->query($requete);\n$res = $db->fetch_object($sql);\nreturn($res->name." ".$res->firstname);\'),
+(2, \'select_users\', \'SELECTED||ID||SHOWEMPTY||EXCLUDE||DISABLED||DISPLAY\', \'Utilisateurs\', \'Liste des utilisateurs\', \'form\', \'/core/class/html.form.class.php\', 1, \'tmpReturn\', \'ID\', \'SELECTED\', \'$requete = "SELECT * FROM ' . MAIN_DB_PREFIX . 'user WHERE rowid=[[valeur]]";\n$sql = $db->query($requete);\n$res = $db->fetch_object($sql);\nreturn($res->name." ".$res->firstname);\'),
 (3, \'selectyesno\', \'ID||SELECTED||OPTION||CLASS\', \'Oui/Non\', \'Choix Oui / Non\', \'form\', \'/core/class/html.form.class.php\', NULL, NULL, \'ID\', \'SELECTED\', NULL),
-(4, \'fct_select_users\', \'SELECTED||ID||SHOWEMPTY||EXCLUDE||DISABLED||DISPLAY\', \'Utilisateurs\', \'Liste des utilisateurs\', \'user_fct\', \'/' . MAIN_DB_PREFIX . 'Synopsis_Process/user_fct.class.php\', 1, \'tmpReturn\', \'ID\', \'SELECTED\', \'$requete = "SELECT * FROM '.MAIN_DB_PREFIX.'user WHERE rowid=[[valeur]]";\n$sql = $this->db->query($requete);\n$res = $this->db->fetch_object($sql);\nreturn($res->name." ".$res->firstname);\');',
+(4, \'fct_select_users\', \'SELECTED||ID||SHOWEMPTY||EXCLUDE||DISABLED||DISPLAY\', \'Utilisateurs\', \'Liste des utilisateurs\', \'user_fct\', \'/' . MAIN_DB_PREFIX . 'Synopsis_Process/user_fct.class.php\', 1, \'tmpReturn\', \'ID\', \'SELECTED\', \'$requete = "SELECT * FROM ' . MAIN_DB_PREFIX . 'user WHERE rowid=[[valeur]]";\n$sql = $this->db->query($requete);\n$res = $this->db->fetch_object($sql);\nreturn($res->name." ".$res->firstname);\');',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fct_refid` int(11) DEFAULT NULL,
@@ -568,7 +579,7 @@ class modSynopsisProcess extends DolibarrModules {
 (37, \'FNC\', \'FNC\', 4),
 (38, \'Codir\', \'Codir\', 4),
 (36, \'Audit\', \'Audit\', 4);',
-            'CREATE TABLE IF NOT EXISTS `'.MAIN_DB_PREFIX.'Synopsis_Process_form_model` (
+            'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_model` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type_refid` int(20) DEFAULT NULL,
   `label` varchar(500) DEFAULT NULL,
@@ -737,8 +748,8 @@ class modSynopsisProcess extends DolibarrModules {
 (241, 17, '', '', '', NULL, 1, 166, NULL),
 (242, 18, '', '', '', NULL, 1, 167, ''),
 (243, 11, 'Analyse stratégique prestation pour le CLIENT  / concurrence : ', '', '', NULL, 1, 168, ''),
-(370, 11, '', '".'".($element_obj->fk_project? getNomProjet($element_obj->fk_project) : "")."'."', '', NULL, 1, 17, NULL),
-(368, 11, '', '".'".($element_obj->socid? getNomSoc($element_obj->socid) : "")."'."', '', NULL, 1, 22, NULL),
+(370, 11, '', '" . '".($element_obj->fk_project? getNomProjet($element_obj->fk_project) : "")."' . "', '', NULL, 1, 17, NULL),
+(368, 11, '', '" . '".($element_obj->socid? getNomSoc($element_obj->socid) : "")."' . "', '', NULL, 1, 22, NULL),
 (366, 4, '', '', '', NULL, 1, 203, NULL),
 (365, 18, '', '', '', NULL, 1, 202, NULL),
 (364, 9, '', '', '', 2, 1, 201, NULL),
@@ -785,11 +796,12 @@ class modSynopsisProcess extends DolibarrModules {
 (322, 16, '', '', '', NULL, 1, 23, NULL),
 (321, 15, '', '', '', NULL, 1, 12, NULL),
 (320, 18, '', '', '', NULL, 1, 11, ''),
-(319, 11, '".'".($element_obj?$element_obj->getNomUrl(1): "")."'."', '', '', NULL, 1, 10, NULL),
+(319, 11, '" . '".($element_obj?$element_obj->getNomUrl(1): "")."' . "', '', '', NULL, 1, 10, NULL),
 (318, 18, '', '', '', NULL, 1, 9, ''),
 (317, 17, '', '', '', NULL, 1, 8, NULL),
 (371, 22, '', '', '', NULL, 2, 1, NULL),
-(372, 6, '', '', '', NULL, 2, 2, NULL);",
+(372, 6, '', '', '', NULL, 2, 2, NULL),
+(373, 4, 'Précision', '', '', NULL, 3, 1, '');",
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `requete` longtext,
@@ -1037,7 +1049,8 @@ class modSynopsisProcess extends DolibarrModules {
 (310, 318, \'ui-widget-content\'),
 (311, 320, \'ui-widget-content\'),
 (312, 369, \'\'),
-(313, 23, \'\');',
+(313, 23, \'\'),
+(314, 373, \'champGr\');',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type_refid` int(11) DEFAULT NULL,
@@ -1963,7 +1976,7 @@ class modSynopsisProcess extends DolibarrModules {
 (200, 'PREPACOM_DISPO_PROD'),
 (199, 'PREPACOM_INDISPO_PROD'),
 (198, 'PREPACOM_UPDATE_STATUT');",
-                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Process_lien` (
+            "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Process_lien` (
   `rowid` int(11) NOT NULL,
   `label` varchar(50) NOT NULL,
   `description` varchar(500) NOT NULL,
@@ -1977,8 +1990,7 @@ class modSynopsisProcess extends DolibarrModules {
   `urlObj` varchar(150) NOT NULL,
   PRIMARY KEY (`rowid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;",
-        
-        "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`) VALUES
+            "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`) VALUES
 (1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id='),
 (2, 'Appel', '', 'llx_Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
 (3, 'ProduitCli', '', 'llx_Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
@@ -1986,7 +1998,7 @@ class modSynopsisProcess extends DolibarrModules {
 (5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=');");
 
         $retour = $this->_init($sql);
-        
+
         include_once("../Synopsis_Process/process.class.php");
         process::majTabsProcess($this->db);
 

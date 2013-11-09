@@ -129,7 +129,7 @@ class ModeleNumRefProcess
     /**     \brief      Renvoi prochaine valeur attribuee
      *      \return     string      Valeur
      */
-    function getNextValue()
+    function getNextValue($objsoc,$process)
     {
         global $langs;
         return $langs->trans("NotAvailable");

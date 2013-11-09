@@ -26,12 +26,12 @@ $langs->load("synopsisGene@Synopsis_Tools");
 $langs->load('companies');
 $langs->load('commercial');
 
- $user_id = $_REQUEST['userId'];
+// $user_id = $_REQUEST['userId'];
 
  $action = $_REQUEST['action'];
 
-$user->fetch($user_id);
-$user->getrights();
+//$user->fetch($user_id);
+//$user->getrights();
 $page = $_REQUEST['page']; // get the requested page
 $limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
 $sidx = $_REQUEST['sidx']; // get index row - i.e. user click to sort

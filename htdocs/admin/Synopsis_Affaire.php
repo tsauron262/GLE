@@ -122,7 +122,7 @@ if ($handle)
             // Info
             $htmltooltip='';
             $htmltooltip.='<b>'.$langs->trans("Version").'</b>: '.$module->getVersion().'<br>';
-            $facture->type=0;
+//    prob        $facture->type=0;
             $nextval=$module->getNextValue($mysoc,$propale);
             if ("$nextval" != $langs->trans("NotAvailable"))    // Keep " on nextval
             {

@@ -328,6 +328,7 @@ class process extends CommonObject {
                          VALUES (" . $type_id . "," . $this->id . "," . $element_id . "," . $processDetId . ")";
         $sql = $this->db->query($requete);
         if ($sql) {
+            synopsisHook::reloadPage();
             return 1;
         } else {
             $this->error = $this->db->lasterrno . " " . $this->db->lastqueryerror . " " . $this->db->lasterror . " " . $this->db->error;
@@ -811,7 +812,7 @@ class process extends CommonObject {
 
     private function LibStatut($status, $mode = 0) {
         global $langs;
-        $langs->load('process');
+        $langs->load('process@Synopsis_Process');
         if ($mode == 0) {
             if ($status == 0)
                 return $langs->trans('processInactif');
@@ -1201,7 +1202,7 @@ class processDet extends process {
 
     private function LibStatut($status, $mode = 0) {
         global $langs;
-        $langs->load('process');
+        $langs->load('process@Synopsis_Process');
         if ($mode == 0) {
             if ($status == 0)
                 return $langs->trans('processDetBrouillon');
@@ -1764,7 +1765,7 @@ class formulaire extends process {
 
     private function LibStatut($status, $mode = 0) {
         global $langs;
-        $langs->load('process');
+        $langs->load('process@Synopsis_Process');
         if ($mode == 0) {
             if ($status == 0)
                 return $langs->trans('formInactif');

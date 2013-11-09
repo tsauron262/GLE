@@ -3,16 +3,13 @@
 include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
 class synopsisHook {
+
     static $timeDeb = 0;
+    private static $reload = false;
 
     function synopsisHook() {
         global $conf, $db;
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
-            $tab = getTypeAndId();
-            if ($tab[0] == "projet")
-                $tab[0] = "project";
-            launchRunningProcess($db, $tab[0], $tab[1]);
-        }
+
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
             include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/fileInfo.class.php");
@@ -21,8 +18,22 @@ class synopsisHook {
         }
     }
 
+    public static function reloadPage() {
+        ob_start();
+        self::$reload = true;
+    }
+
     function initRightsSyn() {
-        global $conf, $user;
+        global $conf, $user, $db;
+
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
+            $tab = getTypeAndId();
+            if ($tab[0] == "projet")
+                $tab[0] = "project";
+            launchRunningProcess($db, $tab[0], $tab[1]);
+        }
+
         if (isset($conf->global->MAIN_MODULE_SYNOPSISPROJET)) {
             @$conf->projet = $conf->synopsisprojet;
             @$user->rights->projet = $user->rights->synopsisprojet;
@@ -42,6 +53,10 @@ class synopsisHook {
         $tabElem = getTypeAndId();
         $element_type = $tabElem[0];
         $element_id = $tabElem[1];
+
+        if (self::$reload)
+            header("Location: " . $_SERVER['PHP_SELF']."?".(isset($_REQUEST['id'])? "id=".$_REQUEST['id'] : ""));
+
         if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
             histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto();
@@ -75,11 +90,15 @@ class synopsisHook {
     }
 
     static function getHeader() {
-        self::$timeDeb = microtime(true);
-        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/global.css" />' . "\n";
-        $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
-        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/global.js"></script>';
 
+        self::$timeDeb = microtime(true);
+        $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
+        $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
+        $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
+
+        $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
+        if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
+            $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
         $nameFile = DOL_DATA_ROOT . "/special.css";
         if (is_file($nameFile)) {
             $css = file_get_contents($nameFile);
@@ -89,17 +108,17 @@ class synopsisHook {
     }
 
     static function footer() {
-        global $conf;
+        global $conf, $db;
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
             if (stripos($_SERVER['REQUEST_URI'], "index.php") != false) {
                 dashboard::getDashboard();
             }
         }
-        $time= (microtime(true)-self::$timeDeb);
-        if($time > 2)
-            dol_syslog("Pages lente ".$time." s", 4);
-        echo "</div><div>". $time . " s</div>";
+        $time = (microtime(true) - self::$timeDeb);
+        if ($time > 2)
+            dol_syslog("Pages lente " . $time . " s", 4);
+        echo "</div><div>" . $time . " s</div>";
     }
 
     public static function getObj($type) {
@@ -269,7 +288,7 @@ class consigneCommande {
                 $id_comm = $element_id;
             } elseif ($element_type == "FI" || $element_type == "DI") {
                 $id_comm = $obj->fk_commande;
-            }elseif ($element_type == "expedition") {
+            } elseif ($element_type == "expedition") {
                 $id_comm = $obj->origin_id;
             }
 
@@ -537,7 +556,7 @@ class histoNavigation {
                 return ("&nbsp;&nbsp;<span href='#' title='" . $res->element_type . " " . $res->ref . " (supprimer)' class='vsmenu ui-widget-error' style='font-size: 8.5px;'><del>" . dol_trunc($res->ref, 25) . "</del></span>");
             }
         } else {
-            dol_syslog("objet Incorect ".$res->element_type, LOG_WARNING);
+            dol_syslog("objet Incorect " . $res->element_type, LOG_WARNING);
 //            die("objet Incorect");
             return (false);
         }

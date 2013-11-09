@@ -154,19 +154,37 @@ function getTypeContrat_noLoad($id) {
 }
 
 function launchRunningProcess($db, $type_str, $element_id) {
-    global $conf;
+    global $conf, $user;
     if ($element_id != '') {
         if ($conf->global->MAIN_MODULE_SYNOPSISPROCESS) {
             require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
             $arrProcess = getRunningProcess($db, $type_str, $element_id);
             $blocking = false;
             foreach ($arrProcess as $processId => $arrTmp) {
+
                 if ($arrTmp['bloquant'] == 1) {
                     $extra = "";
                     if ($arrTmp['processdet'] > 0) {
                         $extra = "&processDetId=" . $arrTmp['processdet'];
                         $tmp = new processDet($db);
                         $tmp->fetch($arrTmp['processdet']);
+
+
+                        if (isset($_REQUEST['vueValid'])) {
+                            if ($user->rights->process->valider)
+                                continue;
+
+                            $process = new Process($db);
+                            $process->fetch($tmp->process_refid);
+                            $process->getGlobalRights($user);
+                            $tmpNomProcc = 'process' . $tmp->process_refid;
+                            if($user->rights->process_user->$tmpNomProcc->valider 
+                                    || $user->rights->process_user->$tmpNomProcc->validerTech
+                                    || $user->rights->process_user->$tmpNomProcc->validerDir
+                                    || $user->rights->process_user->$tmpNomProcc->validerCom)
+                                continue;
+                        }
+
                         if ((!$tmp->statut > 0) || $tmp->statut == 999)
                             $blocking = true;
                         //var_dump($blocking);
@@ -256,7 +274,7 @@ function seems_utf8($str) {
         else
             return false;# Does not match any model
         for ($j = 0; $j < $n; $j++) { # n bytes matching 10bbbbbb follow ?
-            if (( ++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
+            if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
                 return false;
         }
     }

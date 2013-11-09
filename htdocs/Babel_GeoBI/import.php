@@ -449,7 +449,7 @@ EOF;
         {
             $rechercher = "<span><a href='import.php?socid=".$res->rowid."'>Rechercher</a></span>";
             $ajuster = "<span><a href='import.php?socid=".$res->rowid."&id=". $res->graphId."'>Ajuster</a></span>";
-            print '<tr class="ui-widget-content"><td>'.($res->lat .'x' != 'x'?img_tick()." ".$ajuster:img_error(). " ".$rechercher).'<td>'.$res->nom."<td>".$res->address." ".$res->cp." ".$res->ville.'<td>'.$res->countryCode.'<td><a href="view.php?socid='.$res->rowid.'&id='. $res->graphId.'">Voir</a>';
+            print '<tr class="ui-widget-content"><td>'.($res->lat .'x' != 'x'?img_picto($langs->trans("Active"),'tick')." ".$ajuster:img_error(). " ".$rechercher).'<td>'.$res->nom."<td>".$res->address." ".$res->cp." ".$res->ville.'<td>'.$res->countryCode.'<td><a href="view.php?socid='.$res->rowid.'&id='. $res->graphId.'">Voir</a>';
         }
         print "</table>";
         print "</div>";

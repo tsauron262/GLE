@@ -25,7 +25,7 @@ if (!$user->rights->process->configurer) {
     accessforbidden();
 }
 global $langs;
-$langs->load('process');
+$langs->load('process@Synopsis_Process');
 $langs->load("process@Synopsis_Process");
 
 //    Interface Creation
@@ -722,7 +722,7 @@ function activatePdf(str){
 
 
                         // Info
-                        $facture->type = 0;
+//                        $facture->type = 0;
                         $nextval = $module->getNextValue($mysoc, $process);
                         if ("$nextval" != $langs->trans("NotAvailable")) {    // Keep " on nextval
                             $htmltooltip.='<b>' . $langs->trans("NextValue") . '</b>: ';

@@ -211,7 +211,45 @@ class modSynopsisAffaire extends DolibarrModules
         // Permissions
         $this->remove();
         $this->dirs[0]=$conf->synopsisaffaire->dir_output;
-        $sql = array();
+        $sql = array("CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nom` varchar(255) DEFAULT NULL,
+  `description` longtext,
+  `date_creation` timestamp NULL DEFAULT NULL,
+  `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `fk_user_create` int(11) DEFAULT NULL,
+  `statut` int(11) NOT NULL DEFAULT '0',
+  `ref` varchar(75) DEFAULT NULL,
+  `entity` INT NOT NULL DEFAULT  '1',
+  PRIMARY KEY (`id`),
+  KEY `fk_user_create` (`fk_user_create`))",
+                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_Element` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` varchar(255) DEFAULT NULL,
+  `element_id` int(11) DEFAULT NULL,
+  `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `datea` timestamp NULL DEFAULT NULL,
+  `fk_author` int(11) DEFAULT NULL,
+  `affaire_refid` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uniqIdx_Affaire_Element` (`type`,`element_id`,`affaire_refid`),
+  KEY `fk_author` (`fk_author`),
+  KEY `affaire_refid` (`affaire_refid`))",
+                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_key` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `affaire_refid` int(11) DEFAULT NULL,
+  `nom` varchar(50) DEFAULT NULL,
+  `description` longtext,
+  PRIMARY KEY (`id`),
+  KEY `affaire_refid` (`affaire_refid`))",
+                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_value` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `affaire_refid` int(11) DEFAULT NULL,
+  `value` longtext,
+  `key_id` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `key_id` (`key_id`),
+  KEY `template_refid` (`affaire_refid`))");
         return $this->_init($sql);
     }
     /**

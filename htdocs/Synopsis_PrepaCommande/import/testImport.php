@@ -1600,6 +1600,109 @@ if (is_dir($dir)) {
 //                $webContent = '';
                 $mailContent = '';
             }
+
+            foreach ($tabImportOK['commande'] as $ref => $id) {
+                $com = new Synopsis_Commande($db);
+                $com->fetch($id);
+                $com->update_price();
+                $com->setStatut(0);
+                $com->valid($user);
+                if ($mode . "x" != "x") {
+                    $interface = new Interfaces($db);
+                    $result = $interface->run_triggers($mode, $com, $user, $langs, $conf);
+                    if ($result < 0) {
+                        $error++;
+//                                    $this->errors = $interface->errors;
+                    }
+                }
+
+
+//                            $mailSumUpContent['commande'][] = $com;
+                $societe = new Societe($db);
+                $societe->fetch($com->socid);
+                $mailHeader .= "<tr><td>\n" . $com->getNomUrl(1, 6) . "\n</td>" . "\n";
+                $mailHeader .= "    <td>\n" . ($societe->id ? $societe->getNomUrl(1, 6) : '-') . "\n</td>" . "\n";
+                $mailHeader .= "    <td aligne='right' nowrap>\n" . price($com->total_ht) . "&euro;\n</td>" . "\n";
+
+                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Groupe de commande</td>";
+                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Groupe de commande</td>" . "\n";
+                /*
+                  +--------------------------------------------------------------------------------------------------------------+
+                  |                                                                                                              |
+                  |                                         Les groupes des commandes                                            |
+                  |                                                                                                              |
+                  +--------------------------------------------------------------------------------------------------------------+
+                 */
+
+                $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                $requete = "SELECT *" . $finReq;
+                $sqlGr = requeteWithCache($requete);
+                if ($val['AffCode'] . "x" == "x") {
+                    if ($db->num_rows($sqlGr) > 0) {
+                        //Verifier par rapport à la référence. => supression
+                        $requete = "DELETE" . $finReq;
+                        $sql = requeteWithCache($requete);
+                        if ($sql) {
+                            $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
+                        } else {
+                            $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
+                        }
+                    }
+                } else {
+                    //Recupere le groupeId
+                    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
+                    $sql = requeteWithCache($requete);
+                    $res = fetchWithCache($sql);
+                    if (!$res) {
+                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
+                        $sql = requeteWithCache($requete);
+                        $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
+                        if ($sql) {
+                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
+                        } else {
+                            $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
+                        }
+                    } else {
+                        $grpId = $res->id;
+                        $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
+                    }
+
+                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
+                    $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
+                    //efface la ref
+                    $lnDet = fetchWithCache($sqlGr);
+                    if (!$lnDet || $lnDet->commande_group_refid != $grpId || $lnDet->command_refid != $com->id) {
+                        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
+                        $sql = requeteWithCache($requete);
+                        //ajoute la ref dans le groupe
+                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
+                                            (commande_group_refid,refCommande,command_refid )
+                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
+                        $sql = requeteWithCache($requete);
+                        if ($sql) {
+                            $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
+                        } else {
+                            $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                            $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
+                        }
+                    }
+                }
+            }
+
+            foreach ($tabImportOK['propal'] as $ref => $id) {
+                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                $propal = new Propal($db);
+                $propal->fetch($id);
+                $propal->update_price();
+                $propal->setStatut(0);
+                $propal->valid($user);
+            }
         }
         closedir($dh);
 
@@ -1611,109 +1714,6 @@ if (is_dir($dir)) {
           |                                                                                                              |
           +--------------------------------------------------------------------------------------------------------------+
          */
-
-        foreach ($tabImportOK['commande'] as $ref => $id) {
-            $com = new Synopsis_Commande($db);
-            $com->fetch($id);
-            $com->update_price();
-            $com->setStatut(0);
-            $com->valid($user);
-            if ($mode . "x" != "x") {
-                $interface = new Interfaces($db);
-                $result = $interface->run_triggers($mode, $com, $user, $langs, $conf);
-                if ($result < 0) {
-                    $error++;
-//                                    $this->errors = $interface->errors;
-                }
-            }
-
-
-//                            $mailSumUpContent['commande'][] = $com;
-            $societe = new Societe($db);
-            $societe->fetch($com->socid);
-            $mailHeader .= "<tr><td>\n" . $com->getNomUrl(1, 6) . "\n</td>" . "\n";
-            $mailHeader .= "    <td>\n" . ($societe->id ? $societe->getNomUrl(1, 6) : '-') . "\n</td>" . "\n";
-            $mailHeader .= "    <td aligne='right' nowrap>\n" . price($com->total_ht) . "&euro;\n</td>" . "\n";
-
-            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Groupe de commande</td>";
-            $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Groupe de commande</td>" . "\n";
-            /*
-              +--------------------------------------------------------------------------------------------------------------+
-              |                                                                                                              |
-              |                                         Les groupes des commandes                                            |
-              |                                                                                                              |
-              +--------------------------------------------------------------------------------------------------------------+
-             */
-
-            $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-            $requete = "SELECT *" . $finReq;
-            $sqlGr = requeteWithCache($requete);
-            if ($val['AffCode'] . "x" == "x") {
-                if ($db->num_rows($sqlGr) > 0) {
-                    //Verifier par rapport à la référence. => supression
-                    $requete = "DELETE" . $finReq;
-                    $sql = requeteWithCache($requete);
-                    if ($sql) {
-                        $webContent .= "<td  class='ui-widget-content'>Effacement de la liaison commande - groupe OK</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe OK</td>" . "\n";
-                    } else {
-                        $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
-                    }
-                }
-            } else {
-                //Recupere le groupeId
-                $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
-                $sql = requeteWithCache($requete);
-                $res = fetchWithCache($sql);
-                if (!$res) {
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
-                    $sql = requeteWithCache($requete);
-                    $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
-                    if ($sql) {
-                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation du groupe de commande OK</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande OK</td>" . "\n";
-                    } else {
-                        $webContent .= "<td class='KOtd error ui-widget-content'>Cr&eacute;ation du groupe de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation du groupe de commande KO</td>" . "\n";
-                    }
-                } else {
-                    $grpId = $res->id;
-                    $webContent .= "<td  class='ui-widget-content'>Pas de modification du groupe de commande</td>";
-                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification du groupe de commande</td>" . "\n";
-                }
-
-                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Liaison Commande / groupe</td>";
-                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Liaison Commande / groupe</td>" . "\n";
-                //efface la ref
-                $lnDet = fetchWithCache($sqlGr);
-                if (!$lnDet || $lnDet->commande_group_refid != $grpId || $lnDet->command_refid != $com->id) {
-                    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
-                    $sql = requeteWithCache($requete);
-                    //ajoute la ref dans le groupe
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet
-                                            (commande_group_refid,refCommande,command_refid )
-                                     VALUES (" . $grpId . ",'" . $com->ref . "'," . $com->id . ")";
-                    $sql = requeteWithCache($requete);
-                    if ($sql) {
-                        $webContent .= "<td  class='ui-widget-content'>Liaison commande - groupe OK</td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe OK</td>" . "\n";
-                    } else {
-                        $webContent .= "<td class='KOtd error ui-widget-content'>Liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                        $mailContent .= "<td style='background-color: #FFF;'>Liaison commande - groupe KO</td>" . "\n";
-                    }
-                }
-            }
-        }
-
-        foreach ($tabImportOK['propal'] as $ref => $id) {
-            require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-            $propal = new Propal($db);
-            $propal->fetch($id);
-            $propal->update_price();
-            $propal->setStatut(0);
-            $propal->valid($user);
-        }
     }
 } else {
     $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";

@@ -54,7 +54,7 @@ class SynopsisRevision {
         $sql = $db->query("SELECT ref, rowid FROM " . MAIN_DB_PREFIX . $table . " WHERE ref LIKE '" . $ref . "%' ORDER BY rowid DESC");
         if ($db->num_rows($sql) > 0) {
             $result = $db->fetch_object($sql);
-            return array($result->id, $result->ref);
+            return array($result->rowid, $result->ref);
         }
         return false;
     }

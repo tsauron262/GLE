@@ -319,12 +319,13 @@ $mailHeader .= "</table>" . "\n";
 $mailHeader .= "<table  border=0 width=700 cellpadding=10 style='border-collapse: collapse;'>" . "\n";
 $mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=3>Les commandes ajout&eacute;es / modifi&eacute;es" . "</td>" . "\n";
 
-$tabImportOK = array('commande' => array(), 'propal' => array());
 
 $cntFile = -2;
 if (is_dir($dir)) {
     if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false && $cntFile <= $maxFileImport) {
+
+            $tabImportOK = array('commande' => array(), 'propal' => array());
             $File = array();
             $cntFile++;
             if ($file == ".." || $file == '.')
@@ -348,7 +349,7 @@ if (is_dir($dir)) {
                     $ligneNum = 0;
                     $arrDesc = array();
                     $arrConvNumcol2Nomcol = array();
-                    $mailSumUpContent['nbFile'] ++;
+                    $mailSumUpContent['nbFile']++;
                     foreach ($lines as $key => $val) {
                         if (!strlen($val) > 10)
                             continue;
@@ -447,7 +448,7 @@ if (is_dir($dir)) {
                     $paysGlobal = processPays($val['PysCode']);
                     $externalUserId = $val['PcvGPriID'];
                     $internalUserId = processUser($externalUserId);
-                    $mailSumUpContent['nbLine'] ++;
+                    $mailSumUpContent['nbLine']++;
                     $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
                     $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
 
@@ -1241,33 +1242,31 @@ if (is_dir($dir)) {
                           |                                                                                                              |
                           +--------------------------------------------------------------------------------------------------------------+
                          */
-                        
+
                         if ($typeLigne == "propal") {
                             if (isset($tabImportOK['propal'][$val['PcvCode']]))
                                 $comId = $tabImportOK['propal'][$val['PcvCode']];
                             else {
-                                require_once(DOL_DOCUMENT_ROOT."/Synopsis_Revision/revision.class.php");
+                                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
                                 $ref = $val['PcvCode'];
-                                
-                                $result = SynopsisRevisionPropal::convertRef($ref, "propal");
-                                if($result){
+
+                                $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
+                                if ($result) {
                                     $oldRef = $ref;
-                                    $ref = $result[1];
+                                    $ref = "TEMP(" . $val['PcvCode'] . ")";
                                     $oldId = $result[0];
                                 }
-                                
+
                                 //Insert commande
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
                                         (datec,ref, fk_user_author, fk_soc,fk_cond_reglement, datep, fk_mode_reglement,fk_delivery_address,import_key)
                                  VALUES (now(),'" . $ref . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                 $sql = requeteWithCache($requete);
                                 $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
-                                if (isset($oldRef)) {
-                                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+                                if (isset($oldRef))
                                     SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId);
-                                }
                                 if ($sql) {
                                     $mode = "PROPAL_CREATE";
                                     $tabImportOK['propal'][$val['PcvCode']] = $comId;
@@ -1406,11 +1405,10 @@ if (is_dir($dir)) {
                             //Les lignes de commandes
 //Prix Achat
                             if ($typeLigne == "propal") {
-                                if ($val['PlvCode']){
+                                if ($val['PlvCode']) {
                                     $prodType = getProdType($val['PlvCode']);
                                     $premiereDesc = true;
-                                }
-                                elseif($premiereDesc && $val['PlvLib'] != ""){
+                                } elseif ($premiereDesc && $val['PlvLib'] != "") {
                                     $prodType = 100;
                                     $premiereDesc = false;
                                 }
@@ -1709,7 +1707,7 @@ if (is_dir($dir)) {
         }
 
         foreach ($tabImportOK['propal'] as $ref => $id) {
-            require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
             $propal = new Propal($db);
             $propal->fetch($id);
             $propal->update_price();
@@ -2140,7 +2138,7 @@ function fetchWithCache($result) {
     $tabRequete = $tabRequeteP;
     $resultStr = get_resource_id($result);
     if (isset($tabRequete[$resultStr]['result'])) {
-        $tabStat['pc'] ++;
+        $tabStat['pc']++;
         $tabRequete[$resultStr]['index'] = $tabRequete[$resultStr]['index'] + 1;
         $index = $tabRequete[$resultStr]['index'];
         if (isset($tabRequete[$resultStr]['result'][$index]))
@@ -2149,7 +2147,7 @@ function fetchWithCache($result) {
             return false;
     }
     else {
-        $tabStat['pd'] ++;
+        $tabStat['pd']++;
         return $db->fetch_object($result);
     }
 }
@@ -2165,7 +2163,7 @@ function requeteWithCache($requete) {
     $noCache = true;
 
     if ($noCache) {
-        $tabStat['d'] ++;
+        $tabStat['d']++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL NO CACHE : " . $requete);
@@ -2202,19 +2200,19 @@ function requeteWithCache($requete) {
 
     if ($tabSuppr && isset($tabRequete[$tabSuppr])) {
         $tabRequete[$tabSuppr] = array();
-        $tabStat['ef'] ++;
+        $tabStat['ef']++;
     }
 
 
 
     if (isset($tabRequete[$tab][$requete])) {
-        $tabStat['c'] ++;
+        $tabStat['c']++;
         $result = $tabRequete[$tab][$requete];
         $strResult = get_resource_id($result);
         $tabRequete[$strResult]['index'] = -1;
         $result->data_seek(0);
     } else {
-        $tabStat['d'] ++;
+        $tabStat['d']++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL : " . $requete);
@@ -2223,7 +2221,7 @@ function requeteWithCache($requete) {
             $tabRequete[$strResult]['result'] = array();
             $i = 0;
             while ($obj = $db->fetch_object($result)) {
-                $tabStat['pcd'] ++;
+                $tabStat['pcd']++;
 //            $tabRequete[$tab][$requete]['result'][$i] = $obj;
 //            $tabRequete[$tab][$requete]['count'] = $i;
 //            $tabRequete[$tab][$requete]['sql'] = $result;

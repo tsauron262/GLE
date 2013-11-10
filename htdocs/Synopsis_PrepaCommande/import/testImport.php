@@ -1246,6 +1246,7 @@ if (is_dir($dir)) {
                             if (isset($tabImportOK['propal'][$val['PcvCode']]))
                                 $comId = $tabImportOK['propal'][$val['PcvCode']];
                             else {
+                                require_once(DOL_DOCUMENT_ROOT."/Synopsis_Revision/revision.class.php");
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
                                 $ref = $val['PcvCode'];

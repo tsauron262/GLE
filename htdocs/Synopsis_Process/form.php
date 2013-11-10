@@ -45,9 +45,9 @@ if (!$user->rights->process->lire) {
         $process->getGlobalRights();
         $tmp = "process" . $process_id;
         if (!$user->rights->process_user->$tmp->voir)
-            accessforbidden("Un process bloque l'acc&egrave;s &agrave; cet &eacute;l&eacute;ment.");
+            accessforbidden("Un process bloque l'acc&egrave;s &agrave; cet &eacute;l&eacute;ment. 1");
     } else {
-        accessforbidden("Un process bloque l'acc&egrave;s &agrave; cet &eacute;l&eacute;ment.");
+        accessforbidden("Un process bloque l'acc&egrave;s &agrave; cet &eacute;l&eacute;ment. id inc");
     }
 }
 
@@ -304,9 +304,7 @@ function displayForm($db, $displayHead = true, $process_id, $element_id = false,
     $hasModRight = false;
     if ($element_id) {
         $tmp = 'process' . $process->id;
-        if ($user->rights->process->modifier) {
-            $hasModRight = true;
-        } else if ($user->process_user->$tmp->modifier) {
+        if ($user->rights->process->modifier || $user->rights->process_user->$tmp->modifier) {
             $hasModRight = true;
         }
     }
@@ -964,9 +962,7 @@ EOF;
         $process->getGlobalRights();
         $hasModRight = false;
         $tmp = 'process' . $process->id;
-        if ($user->rights->process->modifier) {
-            $hasModRight = true;
-        } else if ($user->process_user->$tmp->modifier) {
+        if ($user->rights->process->modifier || $user->rights->process_user->$tmp->modifier) {
             $hasModRight = true;
         }
         print "<table width=100%>";

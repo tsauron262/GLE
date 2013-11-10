@@ -290,7 +290,6 @@ class process extends CommonObject {
     private $arrRightValid = array();
     public $valideAction;
     public $reviseAction;
-    
     private static $cache = array();
 
     public function process($DB) {
@@ -552,19 +551,18 @@ class process extends CommonObject {
 
                 $this->formulaire_refid = $res->formulaire_refid;
                 if ($this->formulaire_refid > 0) {
-                    if(isset(self::$cache[$this->id]['formulaire'][$this->formulaire_refid]))
+                    if (isset(self::$cache[$this->id]['formulaire'][$this->formulaire_refid]))
                         $this->formulaire = self::$cache[$this->id]['formulaire'][$this->formulaire_refid];
-                    else{
+                    else {
                         $form = new Formulaire($this->db);
                         $result = $form->fetch($this->formulaire_refid);
                         $this->formulaire = $form;
                         self::$cache[$this->id]['formulaire'][$this->formulaire_refid] = $this->formulaire;
                     }
                 }
-                if(isset(self::$cache[$this->id]['lignes'])){
+                if (isset(self::$cache[$this->id]['lignes'])) {
                     $this->detail = self::$cache[$this->id]['lignes'];
-                }
-                else{
+                } else {
                     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Processdet WHERE process_refid = " . $this->id;
                     $sql = $this->db->query($requete);
                     while ($res = $this->db->fetch_object($sql)) {
@@ -973,14 +971,13 @@ class processDet extends process {
                                AND isValidationForAll <> 1";
                 $sql = $this->db->query($requete);
                 $statutAllOk = true;
+                $statutRefuser = false;
                 while ($res = $this->db->fetch_object($sql)) {
                     if ($res->valeur . "x" == "0x") {
-                        $updateStatut = true;
-                        $statutAllOk = false;
+                        $statutRefuser = true;
                     } else if ($res->valeur . "x" == "1x") {
-                        $updateStatut = true;
+                        
                     } else {
-                        $updateStatut = false;
                         $statutAllOk = false;
                     }
                 }
@@ -989,21 +986,19 @@ class processDet extends process {
             //  Za) Si oui => valid
             //  2b) Si non => continue
             //Valider
-            if ($updateStatut) {
                 $requete = false;
                 if ($statutAllOk)
                     $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 3 WHERE id = " . $this->id;
-                else {
+                elseif ($statutRefuser) {
                     //TODO si Revision => nouvelle révision
                     //Sinon :> retour brouillon
                     $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 0, validation_number=validation_number+1 WHERE id = " . $this->id;
+                } else {
+                    return (1);
                 }
                 if ($requete)
                     $sql = $this->db->query($requete);
                 return (2);
-            } else {
-                return (1);
-            }
         } else {
             return -1;
         }
@@ -2422,7 +2417,7 @@ class lien extends formulaireSource {
                 $this->champVueSelect . " as nom "
                 . "FROM " . $this->table . " "
                 . "WHERE 1";
-        if(count($this->tabVal) > 0)
+        if (count($this->tabVal) > 0)
             $this->reqValue = $debReq . " AND " . $this->champId . " IN (" . implode(",", $this->tabVal) . ")";
         if ($this->where != "")
             $debReq .= " AND " . $this->where;
@@ -2431,26 +2426,26 @@ class lien extends formulaireSource {
         $this->reqValues = $debReq;
         $this->typeChrono = getParaChaine($this->where, "model_refid = ", "AND");
     }
-    
-    function displayForm(){
-    print '<div class="formAjax">';
-    print '<input type="hidden" id="socid" value="'.$this->socid.'"/>';
-    print '<input type="hidden" name="sourcetype" class="sourcetype" value="'.$this->nomElem.'"/>';
-    print '<input type="hidden" name="targettype" class="targettype" value="'.$this->nomElement.'"/>';
-    print '<input type="hidden" name="targetid" class="targetid" value="'.$this->idChrono.'"/>';
-    print '<input type="hidden" name="ordre" class="ordre" value="'.$this->ordre.'"/>';
-    $this->getValues();
-    print '<select>';
-    foreach($this->valuesArr as $id => $val)
-         print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
-    print '</select>';
-    print '</div>';
+
+    function displayForm() {
+        print '<div class="formAjax">';
+        print '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
+        print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElem . '"/>';
+        print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElement . '"/>';
+        print '<input type="hidden" name="targetid" class="targetid" value="' . $this->idChrono . '"/>';
+        print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
+        $this->getValues();
+        print '<select>';
+        foreach ($this->valuesArr as $id => $val)
+            print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
+        print '</select>';
+        print '</div>';
     }
-    
-    function displayValue(){
-    $this->getValue($inut);
-        foreach($this->valuesArr as $id => $val)
-            print $val."<br/>";
+
+    function displayValue() {
+        $this->getValue($inut);
+        foreach ($this->valuesArr as $id => $val)
+            print $val . "<br/>";
     }
 
     function getValuePlus($id) {
@@ -2459,33 +2454,33 @@ class lien extends formulaireSource {
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {
-                    if($result > 0){
-                    $contratdet = new Synopsis_ContratLigne($this->db);
-                    $contratdet->fetch($result);
-                    $html = "<br/>";
-                    $color = "";
-                    $dtStr = date("c", $contratdet->date_fin_validite);
-                    $dateF = new DateTime($dtStr);
-                    $dtStr = date("c", time());
-                    $dateActu = new DateTime();
-                    $interval = date_diff($dateF, $dateActu);
-                    if ($interval->format('%R%a') > 0)
-                        $color = "red";
-                    elseif ($interval->format('%R%a') > -30)
-                        $color = "orange";
-                    $html .= "<div style='background-color:" . $color . ";'>";
-                    $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
-                    $html .= "<br/>";
-                    if ($contratdet->fk_product > 0) {
-                        $product = new Product($this->db);
-                        $product->fetch($contratdet->fk_product);
-                        $html .= $product->getNomUrl(1) . " " . $product->description;
+                    if ($result > 0) {
+                        $contratdet = new Synopsis_ContratLigne($this->db);
+                        $contratdet->fetch($result);
+                        $html = "<br/>";
+                        $color = "";
+                        $dtStr = date("c", $contratdet->date_fin_validite);
+                        $dateF = new DateTime($dtStr);
+                        $dtStr = date("c", time());
+                        $dateActu = new DateTime();
+                        $interval = date_diff($dateF, $dateActu);
+                        if ($interval->format('%R%a') > 0)
+                            $color = "red";
+                        elseif ($interval->format('%R%a') > -30)
+                            $color = "orange";
+                        $html .= "<div style='background-color:" . $color . ";'>";
+                        $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
                         $html .= "<br/>";
-                    }
-                    $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . date("d M Y", $contratdet->date_fin_validite);
-                    $html .= "<br/>";
-                    $html .= "</div>";
-                    $this->valuesArr[] = $html;
+                        if ($contratdet->fk_product > 0) {
+                            $product = new Product($this->db);
+                            $product->fetch($contratdet->fk_product);
+                            $html .= $product->getNomUrl(1) . " " . $product->description;
+                            $html .= "<br/>";
+                        }
+                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . date("d M Y", $contratdet->date_fin_validite);
+                        $html .= "<br/>";
+                        $html .= "</div>";
+                        $this->valuesArr[] = $html;
                     }
                 }
             }
@@ -2523,15 +2518,15 @@ class lien extends formulaireSource {
     }
 
     function getValue($id) {
-        if($this->reqValue != ""){
-        $sql = $this->db->query($this->reqValue);
+        if ($this->reqValue != "") {
+            $sql = $this->db->query($this->reqValue);
 //        die("jjjj");
-        if ($sql)
-            while ($result = $this->db->fetch_object($sql))
-                if ($this->urlObj != "")
-                    $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
-                else
-                    $this->valuesArr[$result->id] = $result->nom;
+            if ($sql)
+                while ($result = $this->db->fetch_object($sql))
+                    if ($this->urlObj != "")
+                        $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
+                    else
+                        $this->valuesArr[$result->id] = $result->nom;
         }
     }
 
@@ -2590,10 +2585,10 @@ class requete extends formulaireSource {
                     else
                         $this->requeteValue .= " WHERE ";
                     $this->requeteValue .= "[[indexField]]";
-                    if(isset($tabReq2[1]))
-                        $this->requeteValue .= " GROUP BY ".$tabReq2[1];
-                    if(isset($tabReq2[1]))
-                        $this->requeteValue .= " ORDER BY ".$tabReq2[1];
+                    if (isset($tabReq2[1]))
+                        $this->requeteValue .= " GROUP BY " . $tabReq2[1];
+                    if (isset($tabReq2[1]))
+                        $this->requeteValue .= " ORDER BY " . $tabReq2[1];
                 }
                 $this->postTraitementArr = unserialize($res->postTraitement);
                 $this->OptGroup = $res->OptGroup;
@@ -3276,7 +3271,7 @@ function finLien($nom) {
 }
 
 function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
-    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='".$supprAction."return false;' class='supprLien'>X</button><a href=\"".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$idVal."\" onclick='popChrono(" . $idVal . ", function(){}); return false;'>" . $text . "</a></div>";
+    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='" . $supprAction . "return false;' class='supprLien'>X</button><a href=\"" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.php?id=" . $idVal . "\" onclick='popChrono(" . $idVal . ", function(){}); return false;'>" . $text . "</a></div>";
 }
 
 ?>

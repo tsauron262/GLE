@@ -1251,6 +1251,7 @@ if (is_dir($dir)) {
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
                                 $ref = $val['PcvCode'];
+                                $oldRef = false;
 
                                 $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
                                 if ($result) {
@@ -1265,7 +1266,7 @@ if (is_dir($dir)) {
                                  VALUES (now(),'" . $ref . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                 $sql = requeteWithCache($requete);
                                 $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
-                                if (isset($oldRef))
+                                if (isset($oldRef) && $oldRef)
                                     SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId);
                                 if ($sql) {
                                     $mode = "PROPAL_CREATE";
@@ -1720,6 +1721,7 @@ if (is_dir($dir)) {
 }
 
 echo $webContent;
+$webContent = '';
 
 
 //  var_dump($arrayImport);

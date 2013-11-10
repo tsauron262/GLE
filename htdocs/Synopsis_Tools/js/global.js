@@ -125,6 +125,7 @@ function traiteScroll(heightDif) {
         $(".tabBar").height('auto');
         $(window).scrollTop(scrollY);
     }
+        $("#id-right").width("99%");
 //    document.body.scrollTop = scrollY;
 }
 

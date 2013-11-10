@@ -67,6 +67,10 @@ div.fiche.reglabe{
     padding-right: 5px;
 }
 
+#id-container{
+    clear: both;
+}
+
 
 /* Pour le menu a onglet des fiche */
 div.tabs a.tab:link{

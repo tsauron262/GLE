@@ -160,41 +160,42 @@ function launchRunningProcess($db, $type_str, $element_id) {
             require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
             $arrProcess = getRunningProcess($db, $type_str, $element_id);
             $blocking = false;
-            foreach ($arrProcess as $processId => $arrTmp) {
+            foreach ($arrProcess as $processId => $arrTmp1) {
+                foreach ($arrTmp1 as $arrTmp) {
+                    if ($arrTmp['bloquant'] == 1) {
+                        $extra = "";
+                        if ($arrTmp['processdet'] > 0) {
+                            $extra = "&processDetId=" . $arrTmp['processdet'];
+                            $tmp = new processDet($db);
+                            $tmp->fetch($arrTmp['processdet']);
 
-                if ($arrTmp['bloquant'] == 1) {
-                    $extra = "";
-                    if ($arrTmp['processdet'] > 0) {
-                        $extra = "&processDetId=" . $arrTmp['processdet'];
-                        $tmp = new processDet($db);
-                        $tmp->fetch($arrTmp['processdet']);
 
+                            if (isset($_REQUEST['vueValid'])) {
+                                if ($user->rights->process->valider)
+                                    continue;
 
-                        if (isset($_REQUEST['vueValid'])) {
-                            if ($user->rights->process->valider)
-                                continue;
+                                $process = new Process($db);
+                                $process->fetch($tmp->process_refid);
+                                $process->getGlobalRights($user);
+                                $tmpNomProcc = 'process' . $tmp->process_refid;
+                                if ($user->rights->process_user->$tmpNomProcc->valider
+                                        || $user->rights->process_user->$tmpNomProcc->validerTech
+                                        || $user->rights->process_user->$tmpNomProcc->validerDir
+                                        || $user->rights->process_user->$tmpNomProcc->validerCom)
+                                    continue;
+                            }
 
-                            $process = new Process($db);
-                            $process->fetch($tmp->process_refid);
-                            $process->getGlobalRights($user);
-                            $tmpNomProcc = 'process' . $tmp->process_refid;
-                            if($user->rights->process_user->$tmpNomProcc->valider 
-                                    || $user->rights->process_user->$tmpNomProcc->validerTech
-                                    || $user->rights->process_user->$tmpNomProcc->validerDir
-                                    || $user->rights->process_user->$tmpNomProcc->validerCom)
-                                continue;
-                        }
-
-                        if ((!$tmp->statut > 0) || $tmp->statut == 999)
+                            if ((!$tmp->statut > 0) || $tmp->statut == 999)
+                                $blocking = true;
+                            //var_dump($blocking);
+                        } else {
+                            $extra = '&type=' . $arrTmp['type'];
                             $blocking = true;
-                        //var_dump($blocking);
-                    } else {
-                        $extra = '&type=' . $arrTmp['type'];
-                        $blocking = true;
-                    }
-                    if ($blocking) {
-                        header('location:' . DOL_URL_ROOT . "/Synopsis_Process/form.php?process_id=" . $processId . "&id=" . $_GET['id'] . $extra);
-                        exit();
+                        }
+                        if ($blocking) {
+                            header('location:' . DOL_URL_ROOT . "/Synopsis_Process/form.php?process_id=" . $processId . "&id=" . $_GET['id'] . $extra);
+                            exit();
+                        }
                     }
                 }
             }
@@ -218,7 +219,7 @@ function getRunningProcess($db, $type_str, $element_id) {
         $sql = $db->query($requete);
         $arr = array();
         while ($res = $db->fetch_object($sql)) {
-            $arr[$res->process_refid] = array('bloquant' => $res->bloquant, "label" => $res->label, "processdet" => $res->processdet_refid, "process" => $res->process_refid, "type" => $res->type_refid);
+            $arr[$res->process_refid][] = array('bloquant' => $res->bloquant, "label" => $res->label, "processdet" => $res->processdet_refid, "process" => $res->process_refid, "type" => $res->type_refid);
         }
         return($arr);
     } else {

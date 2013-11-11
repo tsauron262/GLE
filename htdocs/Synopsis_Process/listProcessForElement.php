@@ -317,24 +317,26 @@ if ($id > 0 && $type . "x" != "x") {
         $html .= "    <th class='ui-widget-header ui-state-default'>Der. modif. le";
         $html .= "    <th class='ui-widget-header ui-state-default'>Statut";
         $iter = 0;
-        foreach ($arrProcess as $key => $val) {
-            $tmp = new Process($db);
-            $tmp->fetch($val['process']);
-            $tmp->getGlobalRights();
-            $tmp = "process" . $val['process'];
-            if (!($user->rights->process->lire || $user->rights->process_user->$tmp->voir))
-                continue;
-            $iter++;
-            $html .= "<tr><td class='ui-widget-content'>";
-            $pDet = new processDet($db);
-            $pDet->fetch($val['processdet']);
-            $html .= $pDet->getNomUrl(1);
-            $html .= "    <td class='ui-widget-content'>";
-            $html .= date('d/m/Y h:i', strtotime($pDet->date_create));
-            $html .= "    <td class='ui-widget-content'>";
-            $html .= date('d/m/Y h:i', strtotime($pDet->date_modify));
-            $html .= "    <td class='ui-widget-content'>";
-            $html .= $pDet->getLibStatut(4);
+        foreach ($arrProcess as $key => $tabTemp) {
+            foreach ($tabTemp as $val) {
+                $tmp = new Process($db);
+                $tmp->fetch($val['process']);
+                $tmp->getGlobalRights();
+                $tmp = "process" . $val['process'];
+                if (!($user->rights->process->lire || $user->rights->process_user->$tmp->voir))
+                    continue;
+                $iter++;
+                $html .= "<tr><td class='ui-widget-content'>";
+                $pDet = new processDet($db);
+                $pDet->fetch($val['processdet']);
+                $html .= $pDet->getNomUrl(1);
+                $html .= "    <td class='ui-widget-content'>";
+                $html .= date('d/m/Y h:i', strtotime($pDet->date_create));
+                $html .= "    <td class='ui-widget-content'>";
+                $html .= date('d/m/Y h:i', strtotime($pDet->date_modify));
+                $html .= "    <td class='ui-widget-content'>";
+                $html .= $pDet->getLibStatut(4);
+            }
         }
         $html .= "</table>";
         if ($iter == 0) {
@@ -345,7 +347,6 @@ if ($id > 0 && $type . "x" != "x") {
     } else {
         print "<div class='ui-state-highlight'>Pas de process dans cette " . $nomType . "</div>";
     }
-    
 } else {
     accessforbidden();
 }

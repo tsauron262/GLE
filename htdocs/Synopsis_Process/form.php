@@ -1014,12 +1014,11 @@ EOF;
                                                 AND d.isValidationForAll <> 1
                                                 AND d.isValidationRight = 1";
                             $sqlValue = $db->query($requeteValue);
-                            if ($db->num_rows($sqlValue) > 0)
-                                $resValue = $db->fetch_object($sqlValue);
 
                             $formHtml = new Form($db);
                             $code = $res->code;
-                            if ($resValue) {
+                            if ($db->num_rows($sqlValue) > 0)
+                            while ($resValue = $db->fetch_object($sqlValue)) {
                                 print "<tr style='line-height:40px;'><th class='ui-widget-header ui-state-default'>" . $resValue->label;
                                 $tmpUser = new User($db);
                                 $tmpUser->fetch($resValue->user_refid);

@@ -932,17 +932,15 @@ class processDet extends process {
     public function validate($valeur = false) {
         //1 Si droit de valider general => valider ou droit de valider le process
         global $user;
-        $updateStatut = false;
-        $statutAllOk = false;
+                $statutAllOk = true;
+                $statutRefuser = false;
 
         if ($this->id > 0 && $this->process_refid) {
             $tmp = 'process' . $this->process_refid;
 
             if ($user->rights->process->valider || $user->rights->process_user->$tmp->valider) {
-                $statutAllOk = true;
-                $statutRefuser = false;
-                if ($valeur == 1)
-                    $statutAllOk = true;
+//                if ($valeur == 1)
+//                    $statutAllOk = true;
                 $requete = "SELECT v.valeur
                               FROM " . MAIN_DB_PREFIX . "Synopsis_Process_rights_def as d
                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Processdet_validation as v ON v.processdet_refid = " . $this->id . "  AND v.validation_type_refid = d.id AND v.validation_number=" . $this->validation_number . "
@@ -957,8 +955,7 @@ class processDet extends process {
                         $statutRefuser = true;
                         $statutAllOk = false;
                     } else if ($res->valeur . "x" == "1x") {
-                        $updateStatut = true;
-                $statutAllOk = true;
+                        
                     } else {
                         $statutRefuser = true;
                         $statutAllOk = false;

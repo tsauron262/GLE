@@ -41,6 +41,8 @@
  */
 $activeLigneContrat = false;
 
+$afficherExtraDi = false;
+
 if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
@@ -1030,83 +1032,84 @@ EOF;
 
         print '</td></tr>';
 //Extra Field
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key WHERE  (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND active = 1 ORDER BY rang,label";
-        $sql = $db->query($requete);
-        $modulo = false;
-        while ($res = $db->fetch_object($sql)) {
-            $colspan = 1;
-            $modulo = !$modulo;
-            if ($res->fullLine == 1) {
-                $colspan = 3;
-                $modulo = true;
-            }
-            if ($modulo) {
-                print "<tr>";
-            }
-            if ($res->fullLine == 1) {
+        if ($afficherExtraDi) {
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key WHERE  (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND active = 1 ORDER BY rang,label";
+            $sql = $db->query($requete);
+            $modulo = false;
+            while ($res = $db->fetch_object($sql)) {
+                $colspan = 1;
                 $modulo = !$modulo;
-            }
-            print "<th valign='top' class='ui-widget-header ui-state-default'>" . $res->label;
-            switch ($res->type) {
-                case "date": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='datePicker'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='date'>";
-                    }
-                    break;
-                case "textarea": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><textarea name='extraKey-" . $res->id . "'></textarea>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='comment'>";
-                    }
-                    break;
-                default:
-                case "text": {
-                        print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><input type="text" name="extraKey-' . $res->id . '">';
-                        print "<input type='hidden' name='type-" . $res->id . "' value='text'>";
-                    }
-                    break;
-                case "datetime": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>";
-                    }
-                    break;
-                case "checkbox": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='checkbox'  name='extraKey-" . $res->id . "'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>";
-                    }
-                    break;
-                case "3stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
-                        print starratingPhp("extraKey-" . $res->id, $res->extra_value, 3, $iter = 1);
-                        print "<input type='hidden' name='type-" . $res->id . "' value='3stars'>";
-                    }
-                    break;
-                case "5stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
-                        print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
-                        print "<input type='hidden' name='type-" . $res->id . "' value='5stars'>";
-                    }
-                    break;
-                case "radio": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-                        print "<input type='hidden' name='action' value='editExtra'>";
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
-                        $sql1 = $db->query($requete);
-                        if ($db->num_rows($sql1) > 0) {
-                            print "<table width=100%>";
-                            while ($res1 = $db->fetch_object($sql1)) {
-                                print "<tr><td width=100%>" . $res1->label . "<td>";
-                                print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
-                            }
-                            print "</table>";
+                if ($res->fullLine == 1) {
+                    $colspan = 3;
+                    $modulo = true;
+                }
+                if ($modulo) {
+                    print "<tr>";
+                }
+                if ($res->fullLine == 1) {
+                    $modulo = !$modulo;
+                }
+                print "<th valign='top' class='ui-widget-header ui-state-default'>" . $res->label;
+                switch ($res->type) {
+                    case "date": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='datePicker'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='date'>";
                         }
-                        print "<input type='hidden' name='type-" . $res->id . "' value='radio'>";
-                    }
-                    break;
+                        break;
+                    case "textarea": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><textarea name='extraKey-" . $res->id . "'></textarea>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='comment'>";
+                        }
+                        break;
+                    default:
+                    case "text": {
+                            print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><input type="text" name="extraKey-' . $res->id . '">';
+                            print "<input type='hidden' name='type-" . $res->id . "' value='text'>";
+                        }
+                        break;
+                    case "datetime": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='text' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>";
+                        }
+                        break;
+                    case "checkbox": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><input type='checkbox'  name='extraKey-" . $res->id . "'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>";
+                        }
+                        break;
+                    case "3stars": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
+//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
+                            print starratingPhp("extraKey-" . $res->id, $res->extra_value, 3, $iter = 1);
+                            print "<input type='hidden' name='type-" . $res->id . "' value='3stars'>";
+                        }
+                        break;
+                    case "5stars": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
+//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
+                            print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
+                            print "<input type='hidden' name='type-" . $res->id . "' value='5stars'>";
+                        }
+                        break;
+                    case "radio": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
+                            print "<input type='hidden' name='action' value='editExtra'>";
+                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                            $sql1 = $db->query($requete);
+                            if ($db->num_rows($sql1) > 0) {
+                                print "<table width=100%>";
+                                while ($res1 = $db->fetch_object($sql1)) {
+                                    print "<tr><td width=100%>" . $res1->label . "<td>";
+                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
+                                }
+                                print "</table>";
+                            }
+                            print "<input type='hidden' name='type-" . $res->id . "' value='radio'>";
+                        }
+                        break;
+                }
             }
-        }
-        print <<<EOF
+            print <<<EOF
 <script>
 jQuery(document).ready(function(){
         jQuery.datepicker.setDefaults(jQuery.extend({showMonthAfterYear: false,
@@ -1124,7 +1127,7 @@ jQuery(document).ready(function(){
 });
 </script>
 EOF;
-
+        }
         /*
          * Ajouter une ligne
          */
@@ -1497,103 +1500,103 @@ EOF;
         if ($res->fullLine == 1) {
             $modulo = !$modulo;
         }
-
-        print '<th class="ui-widget-header ui-state-default">' . $res->label;
-        if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra-' . $res->id) {
-            switch ($res->type) {
-                case "date": {
-                        print "<td  colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='datePicker'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='date'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "textarea": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print "&nbsp;&nbsp;<textarea name='extraKey-" . $res->id . "'>" . $res->extra_value . "</textarea>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='comment'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                default:
-                case "text": {
-                        print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $demandeInterv->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
-                        print "<input type='hidden' name='type-" . $res->id . "' value='text'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "datetime": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "checkbox": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print "<input type='checkbox' " . ($res->extra_value == 1 ? 'CHECKED' : "") . "  name='extraKey-" . $res->id . "'>";
-                        print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "3stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
-                        print starratingPhp("extraKey-" . $res->id, $res->extra_value, 3, $iter = 1);
-                        print "<input type='hidden' name='type-" . $res->id . "' value='3stars'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "5stars": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
-                        print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
-                        print "<input type='hidden' name='type-" . $res->id . "' value='5stars'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
-                    }
-                    break;
-                case "radio": {
-                        print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-                        print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                        print "<form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
-                        $sql1 = $db->query($requete);
-                        if ($db->num_rows($sql1) > 0) {
-                            print "<table width=100%>";
-                            while ($res1 = $db->fetch_object($sql1)) {
-                                print "<tr><td width=100%>" . $res1->label . "<td>";
-                                print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
-                            }
-                            print "</table>";
+        if ($afficherExtraDi) {
+            print '<th class="ui-widget-header ui-state-default">' . $res->label;
+            if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra-' . $res->id) {
+                switch ($res->type) {
+                    case "date": {
+                            print "<td  colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='datePicker'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='date'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
-                        print "<input type='hidden' name='type-" . $res->id . "' value='radio'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></form>";
-                    }
-                    break;
-            }
-        } else {
-            print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $_REQUEST['id'] . '&action=editExtra-' . $res->id . '#anchor' . $res->id . '">' . img_edit($langs->trans('Editer'), 1) . '</a>';
-            if ($res->type == 'checkbox') {
-                print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
-                print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                print ($res->extra_value == 1 ? 'Oui' : 'Non') . '</td>';
-            } else if ($res->type == 'radio') {
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
-                $sql1 = $db->query($requete);
-                $res1 = $db->fetch_object($sql1);
-                print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
-                print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                if (isset($res1))
-                    print $res1->label . '</td>';
+                        break;
+                    case "textarea": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print "&nbsp;&nbsp;<textarea name='extraKey-" . $res->id . "'>" . $res->extra_value . "</textarea>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='comment'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    default:
+                    case "text": {
+                            print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $demandeInterv->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
+                            print "<input type='hidden' name='type-" . $res->id . "' value='text'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    case "datetime": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print "&nbsp;&nbsp;<input type='text' value='" . $res->extra_value . "' name='extraKey-" . $res->id . "' class='dateTimePicker'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='datetime'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    case "checkbox": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print "<input type='checkbox' " . ($res->extra_value == 1 ? 'CHECKED' : "") . "  name='extraKey-" . $res->id . "'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='checkbox'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    case "3stars": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
+                            print starratingPhp("extraKey-" . $res->id, $res->extra_value, 3, $iter = 1);
+                            print "<input type='hidden' name='type-" . $res->id . "' value='3stars'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    case "5stars": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>&nbsp;&nbsp;";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+//                    print "<input type='checkbox' ".($res->extra_value==1?'CHECKED':"")."  name='extraKey-".$res->id."'>";
+                            print starratingPhp("extraKey-" . $res->id, $res->extra_value, 5, $iter = 1);
+                            print "<input type='hidden' name='type-" . $res->id . "' value='5stars'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                        }
+                        break;
+                    case "radio": {
+                            print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
+                            print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                            print "<form action='fiche.php?id=" . $demandeInterv->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
+                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                            $sql1 = $db->query($requete);
+                            if ($db->num_rows($sql1) > 0) {
+                                print "<table width=100%>";
+                                while ($res1 = $db->fetch_object($sql1)) {
+                                    print "<tr><td width=100%>" . $res1->label . "<td>";
+                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
+                                }
+                                print "</table>";
+                            }
+                            print "<input type='hidden' name='type-" . $res->id . "' value='radio'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></form>";
+                        }
+                        break;
+                }
             } else {
-                print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
-                print '<a name="anchor' . $res->id . '"></a>'; // ancre
-                print $res->extra_value . '</td>';
+                print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $_REQUEST['id'] . '&action=editExtra-' . $res->id . '#anchor' . $res->id . '">' . img_edit($langs->trans('Editer'), 1) . '</a>';
+                if ($res->type == 'checkbox') {
+                    print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
+                    print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                    print ($res->extra_value == 1 ? 'Oui' : 'Non') . '</td>';
+                } else if ($res->type == 'radio') {
+                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
+                    $sql1 = $db->query($requete);
+                    $res1 = $db->fetch_object($sql1);
+                    print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
+                    print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                    if (isset($res1))
+                        print $res1->label . '</td>';
+                } else {
+                    print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
+                    print '<a name="anchor' . $res->id . '"></a>'; // ancre
+                    print $res->extra_value . '</td>';
+                }
             }
         }
-    }
 
-    print <<<EOF
+        print <<<EOF
 <script>
 jQuery(document).ready(function(){
         jQuery.datepicker.setDefaults(jQuery.extend({showMonthAfterYear: false,
@@ -1611,7 +1614,7 @@ jQuery(document).ready(function(){
 });
 </script>
 EOF;
-
+    }
     print "</table><br>";
 //var_dump($conf->format_date_short);
 

@@ -234,7 +234,7 @@ class modSynopsisChrono extends DolibarrModules
     */
   function init()
   {
-    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process' WHERE Titre = 'Process' AND type ='top'", "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
+    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/liste.php' WHERE Titre = 'Process' AND type ='top'", "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

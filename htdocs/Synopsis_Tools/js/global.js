@@ -61,7 +61,7 @@ $(window).load(function() {
                     idIncr = idIncr + 1;
                     addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
                     popChrono(valReturn, function() {
-                    });
+                        });
                 }
             });
         });
@@ -73,10 +73,22 @@ $(window).load(function() {
             idIncr = idIncr + 1;
             addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
             popChrono(valReturn, function() {
-            });
+                });
         });
         return false;
     });
+    
+    
+    
+//    $(".nonactif").hide();
+    
+    $(".syntab li").click(function(){
+        $(".syntab li").removeClass("actif");
+        $(this).addClass("actif");
+        $(".syntabelem").fadeOut();
+        $(".syntabelem."+$(this).attr("id").replace("#", "")).fadeIn();
+    });
+    $(".syntab .default").click();
 });
 
 function dialogConfirm(url, titre, yes, no, id) {
@@ -117,7 +129,7 @@ function traiteScroll(heightDif) {
             $(".tabBar").height('auto');
             $(".fiche").scrollTop(scrollY);
         }
-        //        alert(heightAv+" "+heightAp);
+    //        alert(heightAv+" "+heightAp);
     }
     else {//On desactive les scroll2 et 3
         $(".fiche").removeClass("reglabe");
@@ -125,7 +137,7 @@ function traiteScroll(heightDif) {
         $(".tabBar").height('auto');
         $(window).scrollTop(scrollY);
     }
-        $("#id-right").width("99%");
+    $("#id-right").width("99%");
 //    document.body.scrollTop = scrollY;
 }
 
@@ -239,7 +251,7 @@ function editAjax(elem, datas, callOut) {
 
 
 function popChrono(id, callBack) {
-//    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
+    //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
     $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id + "'></iframe></div>");
 
     $("#id-container").hide();
@@ -251,13 +263,13 @@ function popChrono(id, callBack) {
     });
     $(".fullScreen span.petit").click(function() {
         if($("iframe.fullScreen").size() == 0)
-        $("body").append("<iframe src='" + document.location.href + "' class='fullScreen'></iframe>");
-    else
-        $("iframe.fullScreen").fadeIn();
+            $("body").append("<iframe src='" + document.location.href + "' class='fullScreen'></iframe>");
+        else
+            $("iframe.fullScreen").fadeIn();
         $("body").append("<div class='bottomObj'><span>Chrono</span></div>");
-//        $(this).parent().fadeOut();
+        //        $(this).parent().fadeOut();
         $(".bottomObj").click(function() {
-//            $("div.fullScreen").fadeIn();
+            //            $("div.fullScreen").fadeIn();
             $("iframe.fullScreen").fadeOut();
             cacherSuppr($(this));
         });

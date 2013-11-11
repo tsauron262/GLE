@@ -2448,6 +2448,10 @@ class lien extends formulaireSource {
     function getValuePlus($id) {
         if ($this->id == 1) {
             if (count($this->tabVal) > 0) {
+print "<ul class='syntab'>";
+print "<li id='#actif' class='default'>Service Actif</li>";
+print "<li id='#nonactif'>Service non actif</li>";
+print "</ul>";
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {
@@ -2465,7 +2469,7 @@ class lien extends formulaireSource {
                             $color = "red";
                         elseif ($interval->format('%R%a') > -30)
                             $color = "orange";
-                        $html .= "<div style='background-color:" . $color . ";'>";
+                        $html .= "<div style='background-color:" . $color . ";' class='".($contratdet->statut == 4 ? "actif" : "nonactif")." syntabelem'>";
                         $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
                         $html .= "<br/>";
                         if ($contratdet->fk_product > 0) {

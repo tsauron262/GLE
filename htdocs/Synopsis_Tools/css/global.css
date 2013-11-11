@@ -202,3 +202,16 @@ div.bodyline{
 div.champGr{
     width: 99%;
 }
+
+.syntab .actif{
+    color: blue;
+}
+.syntab{
+    height: 15px;
+}
+.syntab li{
+    cursor: pointer;
+    float:left;
+    padding: 10px 5px;
+    display: block;
+}

@@ -69,11 +69,12 @@ class Synopsis_Contrat extends Contrat {
                     $tabOldIdOk[$idS] = $idS;
                     $tab = getElementElement("contratdet", null, $idS);
                     foreach ($tab as $lien)
+                        if($lien['td'] != "commandedet")
                         addElementElement($lien['ts'], $lien['td'], $idD, $lien['d']);
                     $tab = getElementElement("contratdet", null, $idS, null, 0);
                     foreach ($tab as $lien)
+                        if($lien['td'] != "commandedet")
                         addElementElement($lien['ts'], $lien['td'], $idD, $lien['d'], 0);
-//                    $newLigne = new Synopsis_ContratLigne();
                     $newLigne->description = $oldLigne->description;
                     $newLigne->update($user);
                 }
@@ -1125,7 +1126,7 @@ class Synopsis_Contrat extends Contrat {
 
             $db->free($result);
         } else {
-            dol_print_error($db);
+            dol_print_error($db, "sql");
         }
 
         if ($object->statut > 0) {

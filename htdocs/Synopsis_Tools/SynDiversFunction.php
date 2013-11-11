@@ -585,6 +585,7 @@ function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = nul
         $req .= " AND fk_source = " . $idS;
     if (isset($idD))
         $req .= " AND fk_target = " . $idD;
+//    echo $req;
     $sql = $db->query($req);
     $tab = array();
     while ($result = $db->fetch_object($sql)) {

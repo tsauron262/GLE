@@ -374,7 +374,8 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col2, $hauteur_ligne * 2, "", 0, 'L', 1);
                     $pdf->setXY($this->marge_gauche + $col1, $nextY);
 
-                    $pdf->MultiCell($col2 - 1, $hauteur_ligne, max_size(traiteStr($val->description . ($val->serial_number . "x" == "x" ? "" : " (SN: " . $val->serial_number . ")")), 150), 0, 'L', 1);
+                    $productCli = $val->getInfoProductCli("", 60);
+                    $pdf->MultiCell($col2 - 1, $hauteur_ligne, max_size($val->description, 70) . max_size($productCli, 170), 0, 'L', 1);
                     $nextY = $nextY + $hauteur_ligne * 2;
                     $pdf->SetFont('', '', 8);
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
@@ -785,7 +786,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                     $pdf->MultiCell($col + 15, $hauteur_ligne2, utf8_encodeRien($desc), 0, 'L', 1);
                     $pdf->SetXY($init + $col + 15, $nextY);
-                    $pdf->MultiCell($col - 5, $hauteur_ligne, traiteStr($val->serial_number), 0, 'C', 1);
+                    $pdf->MultiCell($col - 5, $hauteur_ligne, $val->getInfoProductCli("SN", 60), 0, 'C', 1);
                     $pdf->SetXY($init + $col + $col + 10, $nextY);
                     $pdf->MultiCell($col - $decal_type - 5, $hauteur_ligne, utf8_encodeRien($type), 0, 'C', 1);
                     $pdf->SetXY($init + $col + $col + $col + 5 - $decal_type, $nextY);

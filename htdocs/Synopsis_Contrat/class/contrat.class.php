@@ -34,15 +34,24 @@ class Synopsis_Contrat extends Contrat {
         return($res->extraparams);
     }
 
-    public function renouvellementPart1($user) {
+    public function renouvellementPart1($user, $commId) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
 
+        $commande = new Commande($this->db);
+        $commande->fetch($commId);
+        $this->date_contrat = $commande->date;
+        
+        $this->cloture($user);
+        
         $oldRef = $this->ref;
         $this->oldId = $this->id;
         $this->ref .= "Temp";
         $this->create($user);
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();
+        
+        $this->validate($user);
+        
     }
 
     public function renouvellementPart2() {
@@ -70,6 +79,9 @@ class Synopsis_Contrat extends Contrat {
                 }
             }
         }
+        
+        foreach($this->lines as $ligne)
+            $this->active_line($user, $ligne->id, $this->date_contrat, $ligne->date_fin_validite);
     }
 
     public function majRef() {
@@ -2402,6 +2414,37 @@ class Synopsis_ContratLigne extends ContratLigne {
                 $dsc = "Hotline " . ($nbExiste + 1) . " / " . $qte . " Contrat : " . $result->ref;
         }
         return $dsc;
+    }
+    
+    
+    function getInfoProductCli($opt = "", $size = 200){
+        $elems = getElementElement("contratdet", "productCli", $this->id);
+                $htmlT = "";
+                foreach ($elems as $elem) {
+                    $html = "\n";
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1010");
+                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+                        $result = $this->db->fetch_object($sql);
+                        $prod = new Product($this->db);
+                        $prod->fetch($result->value);
+                        $html .= $prod->libelle . " ";
+                    }
+
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1012");
+                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+                        $result = $this->db->fetch_object($sql);
+                        $html .= "(".$result->value . ") ";
+                    }
+
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1011");
+                    if ($this->db->num_rows($sql) > 0) {
+                        $result = $this->db->fetch_object($sql);
+                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
+                        $html .= ($result->value != "") ? $result->value : "";
+                    }
+                    $htmlT .= dol_trunc($html, $size);
+                }
+                return $htmlT;
     }
 
 }

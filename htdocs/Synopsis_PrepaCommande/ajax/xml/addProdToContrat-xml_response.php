@@ -33,8 +33,8 @@ $contrat = new Synopsis_Contrat($db);
 if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
     $contratId = $_REQUEST['contratId'];
     $contrat->fetch($contratId);
-if ($_REQUEST['renouveler'])
-    $contrat->renouvellementPart1($user);
+    if ($_REQUEST['renouveler'])
+        $contrat->renouvellementPart1($user, $commId);
 } else {
     $commande = new Commande($db);
     $commande->fetch($commId);

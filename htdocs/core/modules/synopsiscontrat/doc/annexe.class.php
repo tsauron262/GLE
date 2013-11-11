@@ -160,8 +160,10 @@ Tél. : Soc-tel
                 $ligneContrat->fetch($result->rowid);
                 //if (isset($result->date_fin_validite)) {
                 $sla = ($ligneContrat->SLA != '') ? " (" . $ligneContrat->SLA . ")" : "";
-                $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
-                $desc .= $ligneContrat->description . $sla . $serialNum . "\n\n";
+
+
+//                $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
+                $desc .= $ligneContrat->description . $sla . $serialNum . $ligneContrat->getInfoProductCli() . "\n\n";
                 $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
                 $qte += $ligneContrat->qte;
                 $qte2 += $ligneContrat->qte2;
@@ -301,7 +303,6 @@ Tél. : Soc-tel
          */
         return $annexe;
     }
-
 }
 
 ?>

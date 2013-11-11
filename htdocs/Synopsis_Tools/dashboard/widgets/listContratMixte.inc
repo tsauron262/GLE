@@ -42,7 +42,7 @@ function widget_listContratMixte() {
         if ($socid) {
             $sql .= " AND f.fk_soc = " . $socid;
         }
-        $sql .= " ORDER BY cd.date_fin_validite ASC";
+        $sql .= " GROUP BY c.ref ORDER BY cd.date_fin_validite ASC";
         $sql .= " LIMIT 50";
         $resql = $db->query($sql);
         if ($resql) {

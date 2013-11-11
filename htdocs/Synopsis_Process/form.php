@@ -174,11 +174,11 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
     $arrVal = array();
     $arrSkip = array();
     while ($res = $db->fetch_object($sql)) {
-        $arrVal[$res->valeur] = "";
+//        $arrVal[$res->valeur] = "";
         foreach ($_REQUEST as $key => $val) {
 //            print $val."<br/>";
             if ($res->valeur == $key) {
-                $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->id);
+                $arrVal[$res->valeur] = array('val' => $_REQUEST[$res->valeur], 'model' => $res->id);
                 $arrSkip[$res->id] = $res->id;
                 continue;
             }
@@ -196,11 +196,11 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql)) {
         $res->valeur = SynSanitize($res->valeur);
-        $arrVal[$res->valeur] = "";
+//        $arrVal[$res->valeur] = "";
         foreach ($_REQUEST as $key => $val) {
 //            print $key.$val."<br/>".$res->valeur;
             if ($res->valeur == $key) {
-                $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->id);
+                $arrVal[$res->valeur] = array('val' => $_REQUEST[$res->valeur], 'model' => $res->id);
                 continue;
             }
         }
@@ -222,11 +222,11 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
         $requete .= "    AND m.id NOT IN (" . join(',', $arrSkip) . ")";
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql)) {
-        $arrVal[$res->valeur] = "";
+//        $arrVal[$res->valeur] = "";
         foreach ($_REQUEST as $key => $val) {
 //            print $key.$val."<br/>".$res->valeur;
             if ($res->valeur == $key) {
-                $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->id);
+                $arrVal[$res->valeur] = array('val' => $_REQUEST[$res->valeur], 'model' => $res->id);
                 continue;
             }
         }
@@ -250,7 +250,7 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
             $sql = $db->query($requete);
             die($requete);
             while ($res = $db->fetch_object($sql)) {
-                $arrVal[$res->valeur] = array(val => $_REQUEST[$res->valeur], model => $res->model_refid);
+                $arrVal[$res->valeur] = array('val' => $_REQUEST[$res->valeur], 'model' => $res->model_refid);
             }
         }
     }

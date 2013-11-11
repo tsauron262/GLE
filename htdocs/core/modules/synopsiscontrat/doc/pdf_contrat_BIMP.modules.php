@@ -210,7 +210,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 $this->clauseDefault($pdf, 0, 20);
                 $pdf->SetFont('', '', 8);
 
-                $this->_pagefoot($pdf, $outputlangs);
+                $this->_pagefoot($pdf, $contrat, $outputlangs);
                 //Page 3 ligne par 3 lignes
                 $i = 3;
                 $init = 39;
@@ -232,7 +232,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 //                            $pdf->Line($this->marge_gauche - 1 ,$nextY,$this->page_largeur - $this->marge_droite + 2,$nextY);
 //                            $pdf->Line($this->marge_gauche +$col1, $this->marge_haute , $this->marge_gauche +$col1 ,$pdf->getY());
                         } else {
-                            $this->_pagefoot($pdf, $outputlangs);
+                            $this->_pagefoot($pdf, $contrat, $outputlangs);
                             $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
                             $pdf->Line($this->marge_gauche + $col1, $this->marge_haute, $this->marge_gauche + $col1, $nextY);
                         }
@@ -477,7 +477,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     if ($i == 3) {
                         $pdf->Line($this->marge_gauche - 1, $this->page_hauteur - $this->marge_basse - 1, $this->page_largeur - $this->marge_droite + 2, $this->page_hauteur - $this->marge_basse - 1);
                         $pdf->Line($this->marge_gauche + $col1, $this->marge_haute, $this->marge_gauche + $col1, $this->page_hauteur - $this->marge_basse - 1);
-                        $this->_pagefoot($pdf, $outputlangs);
+                        $this->_pagefoot($pdf, $contrat, $outputlangs);
                     }
                     $nextY = $pdf->getY();
                 }
@@ -486,7 +486,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 if ($i != 3) {
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
                     $pdf->Line($this->marge_gauche + $col1, $this->marge_haute, $this->marge_gauche + $col1, $pdf->getY());
-                    $this->_pagefoot($pdf, $outputlangs);
+                    $this->_pagefoot($pdf, $contrat, $outputlangs);
                 }
 
                 $needExtGarPage = false;
@@ -554,7 +554,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien("Du " . dol_print_date($val->date_ouverture) . " au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                         $nextY = $pdf->getY();
                     }
-                    $this->_pagefoot($pdf, $outputlangs);
+                    $this->_pagefoot($pdf, $contrat, $outputlangs);
                 }
 
                 $init = $this->marge_gauche - 1;
@@ -633,7 +633,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
 
                     if ($nextY > 274) {
-                        $this->_pagefoot($pdf, $outputlangs);
+                        $this->_pagefoot($pdf, $contrat, $outputlangs);
 
                         $pdf->AddPage();
                         $this->_pagehead($pdf, $contrat, 1, $outputlangs);
@@ -802,12 +802,12 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
 
                     $nextY = $pdf->getY();
                 }
-                $this->_pagefoot($pdf, $outputlangs);
+                $this->_pagefoot($pdf, $contrat, $outputlangs);
 
 
                 require_once DOL_DOCUMENT_ROOT . '/core/modules/synopsiscontrat/doc/annexe.class.php';
-                $classAnnexe = new annexe();
-                $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
+                $classAnnexe = new annexe($pdf, $this, $outputlangs);
+                $classAnnexe->getAnnexeContrat($contrat);
 
 
 
@@ -1073,7 +1073,7 @@ Signature et cachet
      *   \param      pdf     objet PDF
      */
 
-    function _pagefoot(&$pdf, $outputlangs) {
+    function _pagefoot(&$pdf, $contrat, $outputlangs) {
 
 
         $pdf->SetFont('', 'B', 9);
@@ -1118,7 +1118,7 @@ Signature et cachet
         $pdf->SetXY(192, 292);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
 
-        //return pdf_pagefoot($pdf,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
+        //return pdf_pagefoot($pdf, $contrat,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
     }
 
     function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {
@@ -1141,7 +1141,7 @@ Signature et cachet
 
     function getHeadExtensionsGarenties(&$pdf, $outputlangs, $contrat, $hauteur_ligne, $init, $suite = false) {
         if ($suite)
-            $this->_pagefoot($pdf, $outputlangs);
+            $this->_pagefoot($pdf, $contrat, $outputlangs);
         $pdf->AddPage();
         $this->_pagehead($pdf, $contrat, 1, $outputlangs);
         $nextY = $this->marge_haute;

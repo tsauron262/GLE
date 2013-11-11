@@ -2,7 +2,7 @@
 
 class SynopsisRevision {
     
-    static $separateur = "&#150;";
+    static $separateur = "–";
 
     static function alpha2num($a) {
         if ($a == "0")

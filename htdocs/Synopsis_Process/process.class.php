@@ -939,8 +939,8 @@ class processDet extends process {
             $tmp = 'process' . $this->process_refid;
 
             if ($user->rights->process->valider || $user->rights->process_user->$tmp->valider) {
-                $updateStatut = true;
-                $statutAllOk = false;
+                $statutAllOk = true;
+                $statutRefuser = false;
                 if ($valeur == 1)
                     $statutAllOk = true;
                 $requete = "SELECT v.valeur
@@ -949,16 +949,18 @@ class processDet extends process {
                              WHERE isValidationRight = 1
                                AND active = 1
                                AND isValidationForAll <> 1";
+//                die($requete);
                 $sql = $this->db->query($requete);
                 $statutAllOk = true;
                 while ($res = $this->db->fetch_object($sql)) {
                     if ($res->valeur . "x" == "0x") {
-                        $updateStatut = true;
+                        $statutRefuser = true;
                         $statutAllOk = false;
                     } else if ($res->valeur . "x" == "1x") {
                         $updateStatut = true;
+                $statutAllOk = true;
                     } else {
-                        $updateStatut = false;
+                        $statutRefuser = true;
                         $statutAllOk = false;
                     }
                 }
@@ -970,8 +972,6 @@ class processDet extends process {
                                AND active = 1
                                AND isValidationForAll <> 1";
                 $sql = $this->db->query($requete);
-                $statutAllOk = true;
-                $statutRefuser = false;
                 while ($res = $this->db->fetch_object($sql)) {
                     if ($res->valeur . "x" == "0x") {
                         $statutRefuser = true;

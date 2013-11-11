@@ -11,120 +11,180 @@
  * @author minijean
  */
 class annexe {
-    function annexe(){
-        
+
+    function annexe($pdf, $model, $outputlangs) {
+        $this->pdf = $pdf;
+        $this->model = $model;
+        $this->outputlangs = $outputlangs;
+        $this->db = $model->db;
+        $this->rang = 0;
+        $this->i = 0;
     }
-    
-    function getAnnexe($contrat, $pdf, $model, $outputlangs){
-            $this->db = $model->db;
-                $requete = "SELECT *, IF(a.annexe != '', a.annexe, p.annexe) as annexeP
+
+    function getAnnexeCGV($object) {
+        $this->element = $object;
+        $requete = "SELECT *, annexe as annexeP
+                              FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf
+                             WHERE ref LIKE  '%C%'";
+//                die($requete);
+        $sql = $this->db->query($requete);
+        while ($res = $this->db->fetch_object($sql)) {
+            $this->getOneAnnexe($res);
+        }
+        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+    }
+
+    function getAnnexeContrat($contrat) {
+        $this->element = $contrat;
+        $requete = "SELECT *, IF(a.annexe != '', a.annexe, p.annexe) as annexeP
                               FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p,
                                    " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
                                AND a.contrat_refid = " . $contrat->id . "
                           ORDER BY a.rang";
 //                die($requete);
-                $sql = $model->db->query($requete);
-                $i = 0;
-                $rang = 1;
-                while ($res = $model->db->fetch_object($sql)) {
-                    if (!$i == 0)
-                        $model->_pagefoot($pdf, $outputlangs);
-                    $pdf->AddPage();
-                    $model->_pagehead($pdf, $contrat, 1, $outputlangs);
-                    $i++;
-                    if ($arrAnnexe[$res->ref]['lnk'] > 0) {
-                        $pdf->SetLink($arrAnnexe[$res->ref]['lnk'], $model->marge_haute);
-                    }
-                    $pdf->SetFont('', '', 8);
-                    $pdf->SetXY($model->marge_gauche, $model->marge_haute);
-                    $pdf->SetFont('', 'B', 12);
-                    if ($res->afficheTitre == 1) {
-                        $pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien("Annexe " . $rang . " : " . $res->modeleName)), 0, 'L');
-                        $rang++;
-                    } else {
-                        $pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien($res->modeleName)), 0, 'L');
-                    }
-                    $pdf->SetFont('', '', 8);
-                    $pdf->SetXY($model->marge_gauche, $pdf->GetY() + 5);
+        $sql = $this->db->query($requete);
+        while ($res = $this->db->fetch_object($sql)) {
+            $this->getOneAnnexe($res);
+        }
 
-                    //Traitement annexe :>
-                    $annexe = $this->replaceWithAnnexe($res->annexeP, $contrat, $res->annexe_refid);
-
-
-
-//
-//                    $pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($annexe)));
-                    $tabLigneAnnexe = explode("\n", $annexe);
-                    foreach ($tabLigneAnnexe as $idL => $ligne) {
-                        $style = '';
-                        $titre = false;
-                        if (stripos($ligne, "<g>") > -1) {
-                            $ligne = str_replace("<g>", "", $ligne);
-                            $titre = true;
-                            $style .= 'B';
-                        }
-                        if (stripos($ligne, "<i>") > -1) {
-                            $ligne = str_replace("<i>", "", $ligne);
-                            $style .= 'I';
-                        }
-                        if (stripos($ligne, "<s>") > -1) {
-                            $ligne = str_replace("<s>", "", $ligne);
-                            $style .= 'U';
-                        }
-
-
-                        $nbCarac = strlen($ligne);
-                        $nbLn = 0;
-                        $maxCarac = 105;
-                        while ($nbCarac > $maxCarac) {
-                            $nbCarac = $nbCarac - $maxCarac;
-                            $nbLn++;
-                        }
-                        $yAfter = $pdf->getY() + (5 * $nbLn);
-                        if ($yAfter > 270 || ($titre && $yAfter > 250 && (count($tabLigneAnnexe)-3) > $idL)) {
-                            $model->_pagefoot($pdf, $outputlangs);
-                            $pdf->AddPage();
-                            $model->_pagehead($pdf, $contrat, 1, $outputlangs);
-                            $pdf->SetY($model->marge_haute);
-                        }
-
-                        $pdf->SetFont('', $style, 8);
-                        $pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
-                    }
-                }
-
-
-                $model->_pagefoot($pdf, $outputlangs);
-
+        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
     }
-    
-        function replaceWithAnnexe($annexe, $contrat, $idAnnexe) {
-        global $mysoc, $user;
-        //Tritement des contact
-        $contacts = array();
-        foreach ($contrat->list_all_valid_contacts() as $key => $val) {
-            foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
+
+    function getOneAnnexe($res) {
+//        if (!$this->i == 0)
+        $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+        $this->pdf->AddPage();
+        $this->model->_pagehead($this->pdf, $this->element, 0, $this->outputlangs);
+        $this->i++;
+        if ($arrAnnexe[$res->ref]['lnk'] > 0) {
+            $this->pdf->SetLink($arrAnnexe[$res->ref]['lnk'], $this->model->marge_haute);
+        }
+        $this->pdf->SetFont('', '', 8);
+        $this->pdf->SetXY($this->model->marge_gauche, $this->model->marge_haute + $this->model->hauteurHeader);
+        $this->pdf->SetFont('', 'B', 12);
+        if ($res->afficheTitre == 1) {
+            $this->rang++;
+            $this->pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien("Annexe " . $this->rang . " : " . $res->modeleName)), 0, 'L');
+        } else {
+            $this->pdf->multicell(155, 7, utf8_encodeRien(utf8_encodeRien($res->modeleName)), 0, 'L');
+        }
+        $this->pdf->SetFont('', '', 8);
+        $this->pdf->SetXY($this->model->marge_gauche, $this->pdf->GetY() + 5);
+
+        //Traitement annexe :>
+        $annexe = $res->annexeP;
+        $annexe = $this->replaceWithAnnexe($res->annexeP, $this->element, $res->annexe_refid);
+//
+//                    $this->pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($annexe)));
+        $tabLigneAnnexe = explode("\n", $annexe);
+        foreach ($tabLigneAnnexe as $idL => $ligne) {
+            $style = '';
+            $titre = false;
+            if (stripos($ligne, "<g>") > -1) {
+                $ligne = str_replace("<g>", "", $ligne);
+                $titre = true;
+                $style .= 'B';
             }
-            $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
+            if (stripos($ligne, "<i>") > -1) {
+                $ligne = str_replace("<i>", "", $ligne);
+                $style .= 'I';
+            }
+            if (stripos($ligne, "<s>") > -1) {
+                $ligne = str_replace("<s>", "", $ligne);
+                $style .= 'U';
+            }
+
+
+            $nbCarac = strlen($ligne);
+            $nbLn = 0;
+            $maxCarac = 105;
+            while ($nbCarac > $maxCarac) {
+                $nbCarac = $nbCarac - $maxCarac;
+                $nbLn++;
+            }
+            $yAfter = $this->pdf->getY() + (5 * $nbLn);
+            if ($yAfter > 270 || ($titre && $yAfter > 250 && (count($tabLigneAnnexe) - 3) > $idL)) {
+                $this->model->_pagefoot($this->pdf, $this->element, $this->outputlangs);
+                $this->pdf->AddPage();
+                $this->model->_pagehead($this->pdf, $this->element, 0, $this->outputlangs);
+                $this->pdf->SetY($this->model->marge_haute + $this->model->hauteurHeader);
+            }
+
+            $this->pdf->SetFont('', $style, 8);
+            $this->pdf->multicell(155, 5, utf8_encodeRien(utf8_encodeRien($ligne)), 0, 'L');
+        }
+    }
+
+    function replaceWithAnnexe($annexe, $contrat, $idAnnexe) {
+        global $mysoc, $user;
+
+        if (stripos(get_class($contrat), "contrat") !== false) {
+            //Tritement des contact
+            $contacts = array();
+            foreach ($contrat->list_all_valid_contacts() as $key => $val) {
+                foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+                    $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
+                    $annexe = preg_replace('/' . $code . "/", $val[$val0], $annexe);
+                }
+                $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
 Mail : Contact-external-CUSTOMER-email
 Tél. : Soc-tel
 ');
-            foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
-                $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
-                $result = $val[$val0];
-                $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
+                foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
+                    $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;
+                    $result = $val[$val0];
+                    $tempStr = preg_replace('/' . $code . "/", $result, $tempStr);
+                }
+                $contacts[$val['code']][] = $tempStr;
             }
-            $contacts[$val['code']][] = $tempStr;
-        }
-        foreach ($contacts as $typeContact => $val) {
-            $annexe = preg_replace('/Contacts-' . $typeContact . '/', implode("
+            foreach ($contacts as $typeContact => $val) {
+                $annexe = preg_replace('/Contacts-' . $typeContact . '/', implode("
 
 ", $val), $annexe);
-        }
+            }
 
+            $sql2 = "SELECT lnCon.rowid FROM `" . MAIN_DB_PREFIX . "product_extrafields` prod, `" . MAIN_DB_PREFIX . "contratdet` lnCon
+				WHERE lnCon.`fk_product` = prod.fk_object 
+				    AND lnCon.`fk_contrat` = '" . $contrat->id . "' AND
+                                    prod.`2annexe` = '" . $idAnnexe . "'";
+            $res = $this->db->query($sql2);
+            //$result = $this->db->fetch_object($res);
+            $desc = "";
+            $dateFin = "";
+            $qte = 0;
+            $qte2 = 0;
+            $phraseDelai = "";
+            while ($result = $this->db->fetch_object($res)) {
+                $ligneContrat = new Synopsis_ContratLigne($this->db);
+                $ligneContrat->fetch($result->rowid);
+                //if (isset($result->date_fin_validite)) {
+                $sla = ($ligneContrat->SLA != '') ? " (" . $ligneContrat->SLA . ")" : "";
+                $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
+                $desc .= $ligneContrat->description . $sla . $serialNum . "\n\n";
+                $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
+                $qte += $ligneContrat->qte;
+                $qte2 += $ligneContrat->qte2;
+                if ($result->qty2 == "8")
+                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
+                elseif ($result->qty2 > 0)
+                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $result->qty) . " mois sur site (soit " . $result->qty . " visites par an).";
+            }
+
+
+            $annexe = preg_replace('/Ligne-date_fin/', $dateFin, $annexe);
+            $annexe = preg_replace('/Ligne-description/', html_entity_decode($desc), $annexe);
+            $annexe = preg_replace('/Ligne-phrase_delai/', utf8_encodeRien($phraseDelai), $annexe);
+            $annexe = preg_replace('/Ligne-qte/', $qte, $annexe);
+            $annexe = preg_replace('/Ligne-qte2/', $qte2, $annexe);
+
+
+            $annexe = preg_replace('/Contrat-date_contrat/', $contrat->date_contrat, $annexe);
+            $annexe = preg_replace('/Contrat-date_fin/', dol_print_date($val->date_fin_validite), $annexe);
+            $annexe = preg_replace('/Contrat-ref/', $contrat->ref, $annexe);
+            $annexe = preg_replace('/Contrat-note_public/', $contrat->note_public, $annexe);
+        }
+        $socid = $contrat->socid;
 
 
 
@@ -156,63 +216,27 @@ Tél. : Soc-tel
         $annexe = preg_replace('/Mysoc-tva_intra/', $mysoc->tva_intra, $annexe);
         $annexe = preg_replace('/Mysoc-capital/', $mysoc->capital, $annexe);
 
-        $annexe = preg_replace('/Soc-titre/', $contrat->societe->titre, $annexe);
-        $annexe = preg_replace('/Soc-nom/', $contrat->societe->nom, $annexe);
-        $annexe = preg_replace('/Soc-adresse_full/', $contrat->societe->adresse_full, $annexe);
-        $annexe = preg_replace('/Soc-adresse/', $contrat->societe->adresse, $annexe);
-        $annexe = preg_replace('/Soc-cp/', $contrat->societe->cp, $annexe);
-        $annexe = preg_replace('/Soc-ville/', $contrat->societe->ville, $annexe);
-        $annexe = preg_replace('/Soc-tel/', $contrat->societe->tel, $annexe);
-        $annexe = preg_replace('/Soc-fax/', $contrat->societe->fax, $annexe);
-        $annexe = preg_replace('/Soc-email/', $contrat->societe->email, $annexe);
-        $annexe = preg_replace('/Soc-url/', $contrat->societe->url, $annexe);
-        $annexe = preg_replace('/Soc-siren/', $contrat->societe->siren, $annexe);
-        $annexe = preg_replace('/Soc-siret/', $contrat->societe->siret, $annexe);
-        $annexe = preg_replace('/Soc-code_client/', $contrat->societe->code_client, $annexe);
-        $annexe = preg_replace('/Soc-note/', $contrat->societe->note, $annexe);
-        $annexe = preg_replace('/Soc-ref/', $contrat->societe->ref, $annexe);
+        $societe = new Societe($this->db);
+        $societe->fetch($socid);
 
-        $annexe = preg_replace('/Contrat-date_contrat/', $contrat->date_contrat, $annexe);
-        $annexe = preg_replace('/Contrat-date_fin/', dol_print_date($val->date_fin_validite), $annexe);
-        $annexe = preg_replace('/Contrat-ref/', $contrat->ref, $annexe);
-        $annexe = preg_replace('/Contrat-note_public/', $contrat->note_public, $annexe);
+        $annexe = preg_replace('/Soc-titre/', $societe->titre, $annexe);
+        $annexe = preg_replace('/Soc-nom/', $societe->nom, $annexe);
+        $annexe = preg_replace('/Soc-adresse_full/', $societe->adresse_full, $annexe);
+        $annexe = preg_replace('/Soc-adresse/', $societe->adresse, $annexe);
+        $annexe = preg_replace('/Soc-cp/', $societe->cp, $annexe);
+        $annexe = preg_replace('/Soc-ville/', $societe->ville, $annexe);
+        $annexe = preg_replace('/Soc-tel/', $societe->tel, $annexe);
+        $annexe = preg_replace('/Soc-fax/', $societe->fax, $annexe);
+        $annexe = preg_replace('/Soc-email/', $societe->email, $annexe);
+        $annexe = preg_replace('/Soc-url/', $societe->url, $annexe);
+        $annexe = preg_replace('/Soc-siren/', $societe->siren, $annexe);
+        $annexe = preg_replace('/Soc-siret/', $societe->siret, $annexe);
+        $annexe = preg_replace('/Soc-code_client/', $societe->code_client, $annexe);
+        $annexe = preg_replace('/Soc-note/', $societe->note, $annexe);
+        $annexe = preg_replace('/Soc-ref/', $societe->ref, $annexe);
 
         $annexe = preg_replace('/DateDuJour/', date('d/m/Y'), $annexe);
 
-
-        $sql2 = "SELECT lnCon.rowid FROM `" . MAIN_DB_PREFIX . "product_extrafields` prod, `" . MAIN_DB_PREFIX . "contratdet` lnCon
-				WHERE lnCon.`fk_product` = prod.fk_object 
-				    AND lnCon.`fk_contrat` = '" . $contrat->id . "' AND
-                                    prod.`2annexe` = '" . $idAnnexe . "'";
-        $res = $this->db->query($sql2);
-        //$result = $this->db->fetch_object($res);
-        $desc = "";
-        $dateFin = "";
-        $qte = 0;
-        $qte2 = 0;
-        $phraseDelai = "";
-        while ($result = $this->db->fetch_object($res)) {
-            $ligneContrat = new Synopsis_ContratLigne($this->db);
-            $ligneContrat->fetch($result->rowid);
-            //if (isset($result->date_fin_validite)) {
-            $sla = ($ligneContrat->SLA != '') ? " (" . $ligneContrat->SLA . ")" : "";
-            $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
-            $desc .= $ligneContrat->description . $sla . $serialNum . "\n\n";
-            $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
-            $qte += $ligneContrat->qte;
-            $qte2 += $ligneContrat->qte2;
-            if ($result->qty2 == "8")
-                $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
-            elseif ($result->qty2 > 0)
-                $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $result->qty) . " mois sur site (soit " . $result->qty . " visites par an).";
-        }
-
-
-        $annexe = preg_replace('/Ligne-date_fin/', $dateFin, $annexe);
-        $annexe = preg_replace('/Ligne-description/', html_entity_decode($desc), $annexe);
-        $annexe = preg_replace('/Ligne-phrase_delai/', utf8_encodeRien($phraseDelai), $annexe);
-        $annexe = preg_replace('/Ligne-qte/', $qte, $annexe);
-        $annexe = preg_replace('/Ligne-qte2/', $qte2, $annexe);
 
 
 
@@ -279,7 +303,5 @@ Tél. : Soc-tel
     }
 
 }
-
-
 
 ?>

@@ -35,48 +35,7 @@ $(window).load(function() {
         }, 500);
     });
 
-
-    idIncr = 100;
-    $(".formAjax .ajLien").click(function() {
-        firstParent = $(this);
-        parent = firstParent.parent();
-        model = parent.find(".model").html();
-        select = parent.find("select");
-        selectId = select.val();
-        idIncr++;
-        selectNom = select.find("option:selected").text();
-        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
-            if (ok == "ok")
-                addLienHtml(idIncr, selectId, selectNom, model, parent);
-        });
-        return false;
-    });
-    $(".formAjax .addChrono").click(function() {
-        firstParent = $(this);
-        parent = firstParent.parent();
-        model = parent.find(".model").html();
-        addChrono(this, $("#socid").val(), function(valReturn) {
-            ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
-                if (ok == "ok") {
-                    idIncr = idIncr + 1;
-                    addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
-                    popChrono(valReturn, function() {
-                        });
-                }
-            });
-        });
-        return false;
-    });
-    $("#chronoTable .addChrono").click(function() {
-        socid = $("#socid").parent().find("select").val();
-        addChrono(this, socid, function(valReturn) {
-            idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
-            popChrono(valReturn, function() {
-                });
-        });
-        return false;
-    });
+initFormChrono();
     
     
     
@@ -338,3 +297,47 @@ function cacherSuppr(element) {
         element.remove();
     });
 }
+
+function initFormChrono(){
+    idIncr = 100;
+    $(".formAjax .ajLien").click(function() {
+        firstParent = $(this);
+        parent = firstParent.parent();
+        model = parent.find(".model").html();
+        select = parent.find("select");
+        selectId = select.val();
+        idIncr++;
+        selectNom = select.find("option:selected").text();
+        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+            if (ok == "ok")
+                addLienHtml(idIncr, selectId, selectNom, model, parent);
+        });
+        return false;
+    });
+    $(".formAjax .addChrono").click(function() {
+        firstParent = $(this);
+        parent = firstParent.parent();
+        model = parent.find(".model").html();
+        addChrono(this, $("#socid").val(), function(valReturn) {
+            ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+                if (ok == "ok") {
+                    idIncr = idIncr + 1;
+                    addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+                    popChrono(valReturn, function() {
+                        });
+                }
+            });
+        });
+        return false;
+    });
+    $("#chronoTable .addChrono").click(function() {
+        socid = $("#socid").parent().find("select").val();
+        addChrono(this, socid, function(valReturn) {
+            idIncr = idIncr + 1;
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            popChrono(valReturn, function() {
+                });
+        });
+        return false;
+    });
+    }

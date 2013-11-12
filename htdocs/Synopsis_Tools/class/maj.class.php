@@ -19,6 +19,25 @@ class maj {
         $this->timeDeb = microtime(true);
     }
 
+    public static function sauvBdd() {
+        include(DOL_DOCUMENT_ROOT . "/conf/conf.php");
+        if ($dolibarr_main_db_port == "")
+            $dolibarr_main_db_port = "3306";
+        $date = date("Ymd-H\hi");
+        $dir = DOL_DATA_ROOT . "/bdd/";
+        if (!is_dir($dir))
+            mkdir($dir);
+        $backup = $dir . $date . "_" . $dolibarr_main_db_name . ".sql";
+        $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P $dolibarr_main_db_port --user=" . $dolibarr_main_db_user . " --password=$dolibarr_main_db_pass $dolibarr_main_db_name > $backup";
+        echo "Votre base est en cours de sauvegarde.......<br/>";
+        $result = "inc";
+        $retour = system($command, $result);
+        if (!$result)
+            echo "Sauvegarde OK !!!!<br/>";
+        else
+            echo "Il y a eu une erreur !!!" . $result . "|" . $command;
+    }
+
     public function req($req) {
         $this->queryD($req);
     }
@@ -88,7 +107,6 @@ class maj {
         else
             $this->infoL("Finit !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! " . $this->erreur . " errerus");
     }
-
 
     private function setTabNonImport($table, $table2 = null, $prefTab = null) {
         global $db;

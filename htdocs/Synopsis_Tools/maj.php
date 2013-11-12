@@ -14,6 +14,8 @@
  */
 require_once('../main.inc.php');
 
+include_once("./class/maj.class.php");
+
 global $oldPref, $nbIframeMax, $nbIframe, $nbErreur;
 $oldPref = "llx_";
 
@@ -39,22 +41,7 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 
 if (isset($_GET['action']) && $_GET['action'] == "sauvBdd") {
-    include(DOL_DOCUMENT_ROOT . "/conf/conf.php");
-    if ($dolibarr_main_db_port == "")
-        $dolibarr_main_db_port = "3306";
-    $date = date("Ymd-H\hi");
-    $dir = DOL_DATA_ROOT . "/bdd/";
-    if (!is_dir($dir))
-        mkdir($dir);
-    $backup = $dir . $date . "_" . $dolibarr_main_db_name . ".sql";
-    $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P $dolibarr_main_db_port --user=" . $dolibarr_main_db_user . " --password=$dolibarr_main_db_pass $dolibarr_main_db_name > $backup";
-    echo "Votre base est en cours de sauvegarde.......<br/>";
-    $result = "inc";
-    $retour = system($command, $result);
-    if (!$result)
-        echo "Sauvegarde OK !!!!<br/>";
-    else
-        echo "Il y a eu une erreur !!!" . $result . "|" . $command;
+    maj::sauvBdd();
 }
 if (isset($_GET['action']) && $_GET['action'] == "import") {
     $dbD = $db;
@@ -67,7 +54,6 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     else
         die("Les info de la base a importé sont incorrecte");
 
-    include_once("./class/maj.class.php");
     $maj = new maj($dbS, $dbD);
     $maj->req("DELETE FROM `" . MAIN_DB_PREFIX . "product_lang`");
     $maj->startMaj(getTab());
@@ -79,7 +65,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         array($oldPref . "contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
             array('rowid', 'condReg_refid', 'modeReg_refid'),
             array('id', 'condReg_refid', 'modeReg_refid')
-        )), true);
+            )), true);
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
 
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "commandedet` SET `product_type`= 106 WHERE `fk_product` is null AND `total_ttc` = 0");
@@ -458,19 +444,19 @@ function getTab() {
 //            array(),
 //            array()
 //        ),
-        array("Babel_Processdet", MAIN_DB_PREFIX."Synopsis_Processdet",
+        array("Babel_Processdet", MAIN_DB_PREFIX . "Synopsis_Processdet",
             array(),
             array()
         ),
-        array("Babel_Processdet_active", MAIN_DB_PREFIX."Synopsis_Processdet_active",
+        array("Babel_Processdet_active", MAIN_DB_PREFIX . "Synopsis_Processdet_active",
             array(),
             array()
         ),
-        array("Babel_Processdet_validation", MAIN_DB_PREFIX."Synopsis_Processdet_validation",
+        array("Babel_Processdet_validation", MAIN_DB_PREFIX . "Synopsis_Processdet_validation",
             array(),
             array()
         ),
-        array("Babel_Processdet_value", MAIN_DB_PREFIX."Synopsis_Processdet_value",
+        array("Babel_Processdet_value", MAIN_DB_PREFIX . "Synopsis_Processdet_value",
             array(),
             array()
         ),

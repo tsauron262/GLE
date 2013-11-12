@@ -1325,7 +1325,7 @@ EOF;
         print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
         print '</form>';
     } else {
-        print dol_print_date($db->jdate($demandeInterv->date), 'day');
+        print dol_print_date($demandeInterv->date, 'day');
     }
     print '</td>';
     print '</tr>';
@@ -1791,7 +1791,7 @@ EOF;
 
                 // Date d'intervention
                 print '<td>';
-                $html->select_date($db->jdate($objp->date_intervention), 'di', 0, 0, 0, "date_intervention");
+                $html->select_date($objp->date_intervention, 'di', 0, 0, 0, "date_intervention");
                 print '</td>';
 
                 // Duration

@@ -160,7 +160,7 @@ class demandeInterv extends CommonObject {
         if ($this->fk_contrat > 0)
             $sql .= ", " . $this->fk_contrat;
         if ($this->date > 0)
-            $sql.= ", '" . date('Y-m-d', $this->date) . "'";
+            $sql.= ", '" . $this->db->idate($this->date) . "'";
         $sql.= ")";
         $sqlok = 0;
         dol_syslog("demandeInterv::create sql=" . $sql);
@@ -1248,7 +1248,7 @@ class demandeIntervLigne {
         $sql.= ')';
         $sql.= " VALUES (" . $this->fk_demandeInterv . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
-        $sql.= " " . $this->datei . ",";
+        $sql.= " " . $this->db->idate($this->datei) . ",";
         $sql.= " " . $this->duration . ",";
         $sql.= ' ' . $rangToUse . ",";
         $sql.= ' ' . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL') . ",";

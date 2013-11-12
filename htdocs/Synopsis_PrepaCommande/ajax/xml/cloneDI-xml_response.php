@@ -35,6 +35,7 @@
     foreach($di->lignes as $key=>$val)
     {
         $val->fk_demandeInterv = $res;
+        $val->datei = $di->date;
         $val->insert();
     }
 

@@ -153,7 +153,7 @@ function projet_pdf_create($db, $id, $modele='', $outputlangs='')
             projet_delete_preview($db, $id);
 
             global $user,$langs, $conf;
-            require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/contratMixte.class.php");
+            require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contratMixte.class.php");
             $contrat=getContratObj($id);
             $contrat->fetch($id);
 

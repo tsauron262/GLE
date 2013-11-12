@@ -16,7 +16,7 @@
 $langs->load("synopsisGene@Synopsis_Tools");
 
  $processid = $_GET['process_id'];
-$filejs = 'js/BabelProcess.js';
+$filejs = 'js/SynopsisProcess.js';
 $line = file_get_contents($filejs);
 llxHeader("","Process");
 

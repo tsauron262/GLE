@@ -105,7 +105,7 @@ if ($contratLn->GMAO_Mixte['fk_prod']) {
 //$type = 2;
 
 
-$js = "<script src='" . DOL_URL_ROOT . "/Babel_GMAO/js/contratMixte-fiche.js' type='text/javascript'></script>";
+$js = "<script src='" . DOL_URL_ROOT . "/Synopsis_Contrat/js/contratMixte-fiche.js' type='text/javascript'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js .= "<script>";
 $js .= '    var yearRange = "' . $dateRange . '";';

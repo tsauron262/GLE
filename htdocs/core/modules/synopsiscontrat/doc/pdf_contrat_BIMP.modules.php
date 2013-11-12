@@ -109,7 +109,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (!is_object($contrat)) {
                 $id = $contrat;
-                require_once(DOL_DOCUMENT_ROOT . "/Babel_GMAO/contratMixte.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contratMixte.class.php");
                 $contrat = getContratObj($id);
                 $contrat->fetch($id);
                 $contrat->fetch_lines(true);

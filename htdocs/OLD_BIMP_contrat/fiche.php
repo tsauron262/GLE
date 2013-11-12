@@ -588,7 +588,7 @@ if ($_REQUEST["id"] > 0) {
             }
             break;
         case '7': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratMixte-fiche.js"></script>' . "\n";
+                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Contrat/js/contratMixte-fiche.js"></script>' . "\n";
             }
             break;
         case '5': {

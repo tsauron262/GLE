@@ -133,7 +133,7 @@ jQuery(function() {
     jQuery('#delDialog').dialog({
         modal: true,
         autoOpen: false,
-        title: 'Confirmation',
+        title: 'Confirmation'
     });
 
 
@@ -160,7 +160,7 @@ jQuery(function() {
                 cache: true,
                 fx: {
                     height: 'toggle'
-                },
+                }
             });
         },
         buttons: {
@@ -171,32 +171,32 @@ jQuery(function() {
                 if (jQuery('#addForm').validate({
                     rules: {
                         addDur: {
-                            sup1: true,
+                            sup1: true
                         },
                         dateDebadd: {
-                            FRDate: true,
+                            FRDate: true
                         },
                         addPrice: {
-                            currency: true,
+                            currency: true
                         },
                         addDesc: {
-                            required: true,
+                            required: true
                         }
                     },
                     messages: {
                         addPrice: {
-                            currency: "<br/><span style='font-size: 9px;'> Le prix n'est pas au bon format</span>",
+                            currency: "<br/><span style='font-size: 9px;'> Le prix n'est pas au bon format</span>"
                         },
                         addDesc: {
-                            required: "<br/><span style='font-size: 9px;'> Ce champs est requis</span>",
-                        },
+                            required: "<br/><span style='font-size: 9px;'> Ce champs est requis</span>"
+                        }
                     }
                 }).form()){
                     var data = "";
                     var data = jQuery('#addForm').serialize();
                     data.replace(/p_idContratprod_add=&/,"").replace(/p_idprod_add=&/,"");
 
-                    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+                    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
 
                     jQuery.ajax({
                         url: href,
@@ -262,19 +262,19 @@ jQuery(function() {
                     rules:{
                         renewDate: {
                             FRDate: true,
-                            required: true,
+                            required: true
                         },
                         renewDurr: {
                             sup1: true,
-                            required: true,
+                            required: true
 
                         }
-                    },
+                    }
                 }).form()){
                     var data = jQuery('#renewContratForm').serialize();
 
                     jQuery.ajax({
-                        url: DOL_URL_ROOT+'/Babel_GMAO/ajax/contratMixte_fiche_ajax.php',
+                        url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php',
                         datatype: 'xml',
                         type: 'POST',
                         cache: false,
@@ -296,7 +296,7 @@ jQuery(function() {
             },
             "Tout � non":function(){
                 jQuery('#renewContratForm').find(".chkBoxRenew").attr('checked','');
-            },
+            }
         }
     });
 
@@ -308,7 +308,7 @@ jQuery(function() {
         buttons: {
             "Ajouter": function(){
                 jQuery.ajax({
-                    url: DOL_URL_ROOT+'/Babel_GMAO/ajax/contratMixte_fiche_ajax.php',
+                    url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php',
                     datatype: 'xml',
                     type: 'POST',
                     cache: false,
@@ -323,7 +323,7 @@ jQuery(function() {
             },
             "Annuler": function(){
                 jQuery(this).dialog("close");
-            },
+            }
         }
     });
     /* jQuery('#dateDebEff').datepicker({dateFormat: 'dd/mm/yy',
@@ -350,9 +350,9 @@ jQuery(function() {
                     constrainInput: true,
                     gotoCurrent: true
             });*/
-jQuery('.ui-state-default').click(function(){
+    jQuery('.ui-state-default').click(function(){
     
-});
+        });
     jQuery('#modDialog').bind('dialogopen', function(e,u){
         //get data from ajax
         jQuery('#moddialogTab').tabs({
@@ -360,20 +360,21 @@ jQuery('.ui-state-default').click(function(){
             cache: true,
             fx: {
                 height: 'toggle'
-            },
+            }
         });
         jQuery.ajax({
-            url: DOL_URL_ROOT+'/Babel_GMAO/ajax/contratMixte_fiche_ajax.php',
+            url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php',
             datatype: 'xml',
             data: 'action=getLineDet&idContrat='+g_idContrat+'&idLigneContrat='+g_idLigne+'&userId='+userId,
             success: function(msg){
                 jQuery.ajax({
-            url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/getFormProdCli.php?id='+g_idLigne,
-            datatype: 'html',
-            success: function(msg){
-                jQuery('div#productCli').html(msg);
-                initFormChrono();
-            }});
+                    url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/getFormProdCli.php?id='+g_idLigne,
+                    datatype: 'html',
+                    success: function(msg){
+                        jQuery('div#productCli').html(msg);
+                        initFormChrono();
+                    }
+                });
                 jQuery('#modPuHT').val(jQuery(msg).find('totalht').text());
 
                 jQuery('#nbTicketmod').val(jQuery(msg).find('qteTkt').text());
@@ -483,7 +484,7 @@ jQuery('.ui-state-default').click(function(){
                 if (remIter > 0){
                     var type='mod';
                     jQuery.ajax({
-                        url: DOL_URL_ROOT+"/Babel_GMAO/ajax/listCommandeDet-xml_response.php",
+                        url: DOL_URL_ROOT+"/Synopsis_Contrat/ajax/listCommandeDet-xml_response.php",
                         data: "id="+jQuery(msg).find('commande').text(),
                         datatype:"xml",
                         type: "POST",
@@ -503,10 +504,10 @@ jQuery('.ui-state-default').click(function(){
                             });
                             longHtml += "</SELECT></span>";
                             jQuery('#'+type+'commandeDet').replaceWith(longHtml);
-                            jQuery('#'+type+'commandeDet').find('SELECT').selectmenu({
-                                style: 'dropdown', 
-                                maxHeight: 300
-                            });
+                        //                        jQuery('#'+type+'commandeDet').find('SELECT').selectmenu({
+                        //                            style: 'dropdown', 
+                        //                            maxHeight: 300
+                        //                        });
                         }
                     });
                 } else {
@@ -517,111 +518,111 @@ jQuery('.ui-state-default').click(function(){
                 
                 
                 
-                    var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
-//                if (fkProd > 0) {
-                    jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
-                    var retId = 'ajdynfieldp_idprod_mod';
-                    var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1';
-                    if (fkProd + "x" != "x")
-                        param = param + '&prodId=' + fkProd;
-                    $('#search_p_idprod_mod').bind('keyup',function(){
-                        param12 = param+"&keysearch="+jQuery(this).val();
-                        getResult1(url, param12, retId);
-                    });
-                    desc = jQuery(msg).find('product2').text();
-                    jQuery('#search_p_idprod_mod').val(desc)
+                var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+                //                if (fkProd > 0) {
+                jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
+                var retId = 'ajdynfieldp_idprod_mod';
+                var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1';
+                if (fkProd + "x" != "x")
+                    param = param + '&prodId=' + fkProd;
+                $('#search_p_idprod_mod').bind('keyup',function(){
+                    param12 = param+"&keysearch="+jQuery(this).val();
+                    getResult1(url, param12, retId);
+                });
+                desc = jQuery(msg).find('product2').text();
+                jQuery('#search_p_idprod_mod').val(desc)
                 
-                    getResult1(url, param+"&keysearch="+desc, retId);
+                getResult1(url, param+"&keysearch="+desc, retId);
                                  
-//                }
+                //                }
                 
                 
                 
                 var fkProd2 = jQuery(msg).find('fk_contrat_prod').text();
-//                if (fkProd2 + "x" != "x") {
-                    jQuery('#modClauseProdCont').replaceWith('<div id="modClauseProdCont" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('contratClause').text()+'</div>');
+                //                if (fkProd2 + "x" != "x") {
+                jQuery('#modClauseProdCont').replaceWith('<div id="modClauseProdCont" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('contratClause').text()+'</div>');
 
-                    var retId2 = 'p_idContratprod_mod';
-                    var param2 = 'htmlname=p_idContratprod_mod&price_level=&type=2&mode=1&status=1';
-                    if (fkProd2 + "x" != "x")
-                        param2 = param2 + '&prodId=' + fkProd2;
-                    $('#search_p_idContratprod_mod').bind('keyup',function(){
-                        param22 = param2+"&keysearch="+jQuery(this).val();
-                        getResult1(url, param22, retId2);
-                    });
-                    desc = jQuery(msg).find('product').text();
-                    jQuery('#search_p_idContratprod_mod').val(desc)
+                var retId2 = 'p_idContratprod_mod';
+                var param2 = 'htmlname=p_idContratprod_mod&price_level=&type=2&mode=1&status=1';
+                if (fkProd2 + "x" != "x")
+                    param2 = param2 + '&prodId=' + fkProd2;
+                $('#search_p_idContratprod_mod').bind('keyup',function(){
+                    param22 = param2+"&keysearch="+jQuery(this).val();
+                    getResult1(url, param22, retId2);
+                });
+                desc = jQuery(msg).find('product').text();
+                jQuery('#search_p_idContratprod_mod').val(desc)
                 
-                    getResult1(url, param2+"&keysearch="+desc, retId2);
-//                }
+                getResult1(url, param2+"&keysearch="+desc, retId2);
+            //                }
                     
                     
-//                    jQuery.ajax({
-//                        datatype: "html",
-//                        url: url,
-//                        data: param,
-//                        error: function(XMLHttpRequest, textStatus, errorThrown){
-//                            console.log(XMLHttpRequest);
-//                            console.log(textStatus);
-//                            console.log(errorThrown);
-//                        },
-//                        success: function(data){
-//                            var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
-//                            var curId = 'keysearchp_idContratprod_mod';
-//                            var retId = 'ajdynfieldp_idContratprod_mod';
-//                            var tmpHtml = jQuery('<div></div>');
-//                            tmpHtml.html(data);
-//                            var tmp = tmpHtml.find('select').parent().html();
-//                            if (tmp == null) {
-//                                jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '"></div>'));
-//                            } else {
-//                                jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '">' + tmp + '</div>'));
-//                            //                                        jQuery("#" + retId).find('SELECT').selectmenu({
-//                            //                                            style: 'dropdown',
-//                            //                                            width: 458
-//                            //                                        });
-//                            }
-//                        }
-//                    });
-//                } else {
-//                    //TODO reinit form
-//                    if (jQuery(msg).find('fk_product').text() + "x" != "x") {
-//
-//                        jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
-//                        var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
-//                        var curId = 'keysearchp_idprod_mod';
-//                        var retId = 'ajdynfieldp_idprod_mod';
-//                        var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1&prodId=' + jQuery(msg).find('fk_product').text();
-//                        jQuery.ajax({
-//                            datatype: "html",
-//                            url: url,
-//                            data: param,
-//                            error: function(XMLHttpRequest, textStatus, errorThrown){
-//                                console.log(XMLHttpRequest);
-//                                console.log(textStatus);
-//                                console.log(errorThrown);
-//                            },
-//                            success: function(data){
-//                                var tmpHtml = jQuery('<div></div>');
-//                                tmpHtml.html(data);
-//                                var tmp = tmpHtml.find('select').parent().html();
-//                                if (tmp == null) {
-//                                    jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '"></div>'));
-//
-//                                }
-//                                else {
-//                                    jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '">' + tmp + '</div>'));
-//                                //                                            jQuery("#" + retId).find('SELECT').selectmenu({
-//                                //                                                style: 'dropdown',
-//                                //                                                width: 458
-//                                //                                            });
-//                                }
-//                            }
-//                        });
-//                    } else {
-//                    //TODO reinit form
-//                    }
-//                }
+            //                    jQuery.ajax({
+            //                        datatype: "html",
+            //                        url: url,
+            //                        data: param,
+            //                        error: function(XMLHttpRequest, textStatus, errorThrown){
+            //                            console.log(XMLHttpRequest);
+            //                            console.log(textStatus);
+            //                            console.log(errorThrown);
+            //                        },
+            //                        success: function(data){
+            //                            var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+            //                            var curId = 'keysearchp_idContratprod_mod';
+            //                            var retId = 'ajdynfieldp_idContratprod_mod';
+            //                            var tmpHtml = jQuery('<div></div>');
+            //                            tmpHtml.html(data);
+            //                            var tmp = tmpHtml.find('select').parent().html();
+            //                            if (tmp == null) {
+            //                                jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '"></div>'));
+            //                            } else {
+            //                                jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '">' + tmp + '</div>'));
+            //                            //                                        jQuery("#" + retId).find('SELECT').selectmenu({
+            //                            //                                            style: 'dropdown',
+            //                            //                                            width: 458
+            //                            //                                        });
+            //                            }
+            //                        }
+            //                    });
+            //                } else {
+            //                    //TODO reinit form
+            //                    if (jQuery(msg).find('fk_product').text() + "x" != "x") {
+            //
+            //                        jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
+            //                        var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
+            //                        var curId = 'keysearchp_idprod_mod';
+            //                        var retId = 'ajdynfieldp_idprod_mod';
+            //                        var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1&prodId=' + jQuery(msg).find('fk_product').text();
+            //                        jQuery.ajax({
+            //                            datatype: "html",
+            //                            url: url,
+            //                            data: param,
+            //                            error: function(XMLHttpRequest, textStatus, errorThrown){
+            //                                console.log(XMLHttpRequest);
+            //                                console.log(textStatus);
+            //                                console.log(errorThrown);
+            //                            },
+            //                            success: function(data){
+            //                                var tmpHtml = jQuery('<div></div>');
+            //                                tmpHtml.html(data);
+            //                                var tmp = tmpHtml.find('select').parent().html();
+            //                                if (tmp == null) {
+            //                                    jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '"></div>'));
+            //
+            //                                }
+            //                                else {
+            //                                    jQuery("#" + retId).replaceWith(jQuery('<div id="' + retId + '">' + tmp + '</div>'));
+            //                                //                                            jQuery("#" + retId).find('SELECT').selectmenu({
+            //                                //                                                style: 'dropdown',
+            //                                //                                                width: 458
+            //                                //                                            });
+            //                                }
+            //                            }
+            //                        });
+            //                    } else {
+            //                    //TODO reinit form
+            //                    }
+            //                }
                 
                 
                 
@@ -635,7 +636,7 @@ jQuery('.ui-state-default').click(function(){
 });
 function activateLine(obj,idContrat,idLigne)
 {
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery('#activateDialog').dialog('option', 'buttons',
     {
         "Annuler": function() {
@@ -666,7 +667,7 @@ function activateLine(obj,idContrat,idLigne)
                     }
                 }
             });
-        },
+        }
     }
     );
     jQuery('#activateDialog').dialog('open');
@@ -675,7 +676,7 @@ function activateLine(obj,idContrat,idLigne)
 
 function unactivateLine(obj,idContrat,idLigne)
 {
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery('#unactivateDialog').dialog('option', 'buttons',
     {
         "Annuler": function() {
@@ -702,7 +703,7 @@ function unactivateLine(obj,idContrat,idLigne)
                     }
                 }
             });
-        },
+        }
     }
     );
     jQuery('#unactivateDialog').dialog('open');
@@ -711,7 +712,7 @@ function unactivateLine(obj,idContrat,idLigne)
 
 function closeLine(obj,idContrat,idLigne)
 {
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery('#closeLineDialog').dialog('option', 'buttons',
     {
         "Annuler": function() {
@@ -733,7 +734,7 @@ function closeLine(obj,idContrat,idLigne)
                     }
                 }
             });
-        },
+        }
     }
     );
     jQuery('#closeLineDialog').dialog('open');
@@ -750,7 +751,7 @@ function editLine(obj,idContrat,idLigne)
     g_idLigne = idLigne;
     g_obj = obj;
 
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery('#modDialog').dialog('option',
         'buttons',
         {
@@ -761,25 +762,25 @@ function editLine(obj,idContrat,idLigne)
                 if (jQuery('#modForm').validate({
                     rules: {
                         modDur: {
-                            sup1: true,
+                            sup1: true
                         },
                         dateDebmod: {
-                            FRDate: true,
+                            FRDate: true
                         },
                         modPrice: {
-                            currency: true,
+                            currency: true
                         },
                         modDesc: {
-                            required: true,
+                            required: true
                         }
                     },
                     messages: {
                         modPrice: {
-                            currency: "<br/><span style='font-size: 9px;'> Le prix n'est pas au bon format</span>",
+                            currency: "<br/><span style='font-size: 9px;'> Le prix n'est pas au bon format</span>"
                         },
                         modDesc: {
-                            required: "<br/><span style='font-size: 9px;'> Ce champs est requis</span>",
-                        },
+                            required: "<br/><span style='font-size: 9px;'> Ce champs est requis</span>"
+                        }
                     }
                 }).form()){
                     var data = "";
@@ -787,7 +788,7 @@ function editLine(obj,idContrat,idLigne)
                     data.replace(/p_idContratprod_mod=&/,"").replace(/p_idprod_mod=&/,"");
                     data += "&lineid="+g_idLigne;
 
-                    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+                    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
 
                     jQuery.ajax({
                         url: href,
@@ -826,7 +827,7 @@ function reorderLine()
         }
     });
     jQuery.ajax({
-        url:DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php",
+        url:DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php",
         data: "action=sortLine&data="+data.toString(),
         datatype: "xml",
         success: function(msg){
@@ -845,7 +846,7 @@ function reorderLine()
 function deleteLine(obj,idContrat,idLigne)
 {
     console.log(jQuery('#delDialog'));
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery('#delDialog').dialog('option',
         'buttons',
         {
@@ -864,7 +865,7 @@ function deleteLine(obj,idContrat,idLigne)
                         updateStatutPanel(idContrat);
                     }
                 });
-            },
+            }
         });
     jQuery('#delDialog-content').replaceWith('<div id="delDialog-content" style="padding: 10px;"><span style="float: left; " class="ui-icon ui-icon-alert"></span><span style="margin-top: 10px; margin-left: 10px;">&Ecirc;tes vous sur de vouloir supprimer cette ligne&nbsp;?</span></div>');
     jQuery('#delDialog').dialog('open');
@@ -872,7 +873,7 @@ function deleteLine(obj,idContrat,idLigne)
 
 function updateStatutPanel(idContrat)
 {
-    var href=DOL_URL_ROOT+"/Babel_GMAO/ajax/contratMixte_fiche_ajax.php";
+    var href=DOL_URL_ROOT+"/Synopsis_Contrat/ajax/contratMixte_fiche_ajax.php";
     jQuery.ajax({
         url: href,
         data: "id="+idContrat+"&action=getStatut",

@@ -127,7 +127,7 @@ function getContratObj($id) {
                 }
                 break;
             case 7: {
-                    require_once(DOL_DOCUMENT_ROOT . "/Babel_GMAO/contratMixte.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contratMixte.class.php");
                     $isSAV = true;
                     $isMaintenance = true;
                     $isTicket = true;

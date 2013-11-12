@@ -19,7 +19,7 @@
 
 require_once("../../main.inc.php");
 //require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/Babel_Chrono/Chrono.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Chrono/Chrono.class.php');
 
 
 // The get widget handler.
@@ -41,7 +41,7 @@ function widget_listChronoModele1() {
    $model = 1;
 
 //    $table .= print_r($user->rights,1);
-    if ($conf->global->MAIN_MODULE_BABELCHRONO && ($user->rights->Chrono->Global->Afficher || $user->rights->chrono_user->chrono1->voir))
+    if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO && ($user->rights->Chrono->Global->Afficher || $user->rights->chrono_user->chrono1->voir))
     {
         $requete = "SELECT value
                       FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings,".MAIN_DB_PREFIX."Synopsis_dashboard_widget
@@ -51,7 +51,7 @@ function widget_listChronoModele1() {
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
 
-        $sql = " SELECT * FROM Babel_Chrono as p
+        $sql = " SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono as p
                   WHERE fk_statut IN (".$res->value.")
                                          AND model_refid = ".$model;
         $sql .= " ORDER BY p.date_create DESC LIMIT 50";

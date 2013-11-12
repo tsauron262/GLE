@@ -1822,7 +1822,7 @@ class Synopsis_Contrat extends Contrat {
           if (seekId > 0){
 
               jQuery.ajax({
-                  url: DOL_URL_ROOT+"/Babel_GMAO/ajax/listCommandeDet-xml_response.php",
+                  url: DOL_URL_ROOT+"/Synopsis_Contrat/ajax/listCommandeDet-xml_response.php",
                   data: "id="+seekId,
                   datatype:"xml",
                   type: "POST",

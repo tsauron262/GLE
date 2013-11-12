@@ -17,7 +17,7 @@
  * Name : contratTkt_fiche_ajax.php
  * GLE-1.2
  */
-require("./pre.inc.php");
+require("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php');
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/functions.lib.php');
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/price.lib.php');
@@ -26,7 +26,7 @@ if ($conf->projet->enabled)
 if ($conf->propal->enabled)
     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
 if ($conf->contrat->enabled)
-    require_once(DOL_DOCUMENT_ROOT . "/Babel_GMAO/contratMixte.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contratMixte.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 
 $langs->load("contracts");

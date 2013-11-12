@@ -2127,30 +2127,33 @@ EOF;
 
 
         $html .= "<div id='" . $type . "produit'>";
-        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
-        $html .= '<tr>';
-        $html .= '<th colspan="4" class="ui-widget-header">Recherche de produits</th></tr>';
-        $html .= '<tr>';
-        $html .= '<th colspan=1 class="ui-state-default ui-widget-header">Produit</th>';
-        $html .= '<td class="ui-widget-content" width=175>';
-        // multiprix
-        $filter = "0";
-        if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
-            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
-        else
-            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
-        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
-            $html .= '<br>';
-        $html .= '<td class="ui-widget-content">';
-        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
-
-
-        $html .= '</td>';
-        $html .= '<tr>';
-        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Num&eacute;ro de s&eacute;rie';
-        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 300px" name="' . $type . 'serial" id="' . $type . 'serial">';
-        $html .= "</table>";
+        
+        $html .= "<div id='productCli'></div>";
         $html .= "</div>";
+//        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
+//        $html .= '<tr>';
+//        $html .= '<th colspan="4" class="ui-widget-header">Recherche de produits</th></tr>';
+//        $html .= '<tr>';
+//        $html .= '<th colspan=1 class="ui-state-default ui-widget-header">Produit</th>';
+//        $html .= '<td class="ui-widget-content" width=175>';
+//        // multiprix
+//        $filter = "0";
+//        if (isset($conf->global->PRODUIT_MULTIPRICES) && $conf->global->PRODUIT_MULTIPRICES == 1)
+//            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, $this->societe->price_level, 1, true, false, false);
+//        else
+//            $html .= $this->returnSelect_produits('', 'p_idprod_' . $type, $filter, $conf->produit->limit_size, false, 1, true, true, false);
+//        if (!$conf->global->PRODUIT_USE_SEARCH_TO_SELECT)
+//            $html .= '<br>';
+//        $html .= '<td class="ui-widget-content">';
+//        $html .= '<div class="nocellnopadd" id="ajdynfieldp_idprod_' . $type . '"></div>';
+//
+//
+//        $html .= '</td>';
+//        $html .= '<tr>';
+//        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Num&eacute;ro de s&eacute;rie';
+//        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 300px" name="' . $type . 'serial" id="' . $type . 'serial">';
+//        $html .= "</table>";
+//        $html .= "</div>";
 
         $html .= "<div id='" . $type . "price'>";
         $html .= '<table style="width: 870px; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';

@@ -1,4 +1,5 @@
 .fullScreen{
+    z-index:1110;
     position: fixed;
     top: 0;
     left: 0;
@@ -13,13 +14,12 @@ div.fullScreen{
 iframe.fullScreen{
     width: 100%;
     height: 100%;
-    z-index: 20;
+    z-index: 1120;
 
 }
 div.fullScreen iframe{
     width: 100%;
     height: 100%;
-    z-index:10;
 }
 div.fullScreen  span{
     float: right;
@@ -34,7 +34,7 @@ div.bottomObj{
     padding: 10px 25px;
     cursor:  pointer;
     border: solid black 2px;
-    z-index:30;
+    z-index:1030;
     background-image: url(../../Synopsis_Tools/img/bgGrisTrans.png);
 }
 

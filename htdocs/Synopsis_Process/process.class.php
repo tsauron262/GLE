@@ -2508,15 +2508,32 @@ print "</ul>";
             $this->valuesArr[$result->id] = $result->nom;
             if (in_array($result->id, $this->tabVal)) {
                 $i++;
-                echo getLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+                echo $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
             }
         }
-        echo getLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
+        echo $this->getOneLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
 //                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
         if ($this->typeChrono > 0)
             echo "<button class='addChrono' id='addChrono" . $this->typeChrono . "'>Créer</button>";
         echo "<button class='ajLien'>Ajouter</button>";
     }
+    
+    function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
+        $html = '<div class="' . $classDiv . '">'
+                . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
+                . "<button onclick='" . $supprAction . "return false;' class='supprLien'>X</button>";
+        if ($this->urlObj != ""){
+            $html .= "<a href=\"" . DOL_URL_ROOT ."/". $this->urlObj. $idVal . "\" ";
+            if ($this->typeChrono > 0)
+                $html .= "onclick='popChrono(" . $idVal . ", function(){}); return false;'";
+            else
+                $html .= "onclick='return confirm(\"Ceci va quiter la page sans enregistrer. Continuer ?\");'";
+            $html .= ">" . $text . "</a>";
+        }
+        else $html .= $text;
+       $html .= "</div>";
+       return $html;
+}
 
     function getValue($id) {
         if ($this->reqValue != "") {
@@ -3271,8 +3288,5 @@ function finLien($nom) {
     return $nom . "</a>";
 }
 
-function getLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
-    return '<div class="' . $classDiv . '"><input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/><button onclick='" . $supprAction . "return false;' class='supprLien'>X</button><a href=\"" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.php?id=" . $idVal . "\" onclick='popChrono(" . $idVal . ", function(){}); return false;'>" . $text . "</a></div>";
-}
 
 ?>

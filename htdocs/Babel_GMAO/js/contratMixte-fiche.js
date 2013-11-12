@@ -350,7 +350,9 @@ jQuery(function() {
                     constrainInput: true,
                     gotoCurrent: true
             });*/
-
+jQuery('.ui-state-default').click(function(){
+    
+});
     jQuery('#modDialog').bind('dialogopen', function(e,u){
         //get data from ajax
         jQuery('#moddialogTab').tabs({
@@ -365,6 +367,13 @@ jQuery(function() {
             datatype: 'xml',
             data: 'action=getLineDet&idContrat='+g_idContrat+'&idLigneContrat='+g_idLigne+'&userId='+userId,
             success: function(msg){
+                jQuery.ajax({
+            url: DOL_URL_ROOT+'/Synopsis_Contrat/ajax/getFormProdCli.php?id='+g_idLigne,
+            datatype: 'html',
+            success: function(msg){
+                jQuery('div#productCli').html(msg);
+                initFormChrono();
+            }});
                 jQuery('#modPuHT').val(jQuery(msg).find('totalht').text());
 
                 jQuery('#nbTicketmod').val(jQuery(msg).find('qteTkt').text());

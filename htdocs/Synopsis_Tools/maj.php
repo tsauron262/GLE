@@ -40,6 +40,30 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 
 
+if (isset($_GET['action']) && $_GET['action'] == "majFile") {
+    $repl1 = "-";
+    $repl2 = "–";
+    echo "majFichier<br/><br/>";
+    $dir = DOL_DATA_ROOT . "/propale/";
+    $dataDir = opendir($dir);
+    while ($Entry = readdir($dataDir)) {
+        if (is_dir($dir . $Entry) && $Entry != "." && $Entry != "..") {
+            $oldDir = $Entry;
+            $newdir = str_replace($repl1, $repl2, $oldDir);
+            $dataDir2 = opendir($dir . $oldDir . "/");
+            while ($Entry2 = readdir($dataDir2)) {
+                if (is_file($dir . $oldDir  . "/". $Entry2)) {
+                    $oldFile = $dir . $oldDir  . "/". $Entry2;
+                    $newFile = $dir . $oldDir  . "/". str_replace($oldDir, $newdir, $Entry2);
+                    rename($oldFile, $newFile);
+                    echo "Fichier " . $oldFile . " renomer en " . $newFile . "<br/>";
+                }
+            }
+            rename($dir  . "/". $oldDir, $dir  . "/". $newdir);
+            echo "Dossier " . $oldDir . " renomer en " . $newdir . "<br/>";
+        }
+    }
+}
 if (isset($_GET['action']) && $_GET['action'] == "sauvBdd") {
     maj::sauvBdd();
 }
@@ -294,6 +318,8 @@ if (defined('IMPORT_BDD_HOST')) {
 echo '<form action=""><input type="hidden" name="action" value="majChrono"/><input type="submit" value="MAJ Chrono" class="butAction"/></form>';
 echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="verif"/><input type="submit" value="Vérif général" class="butAction"/></form>';
+echo "<br/>";
+echo '<form action=""><input type="hidden" name="action" value="majFile"/><input type="submit" value="Migration fichiers" class="butAction"/></form>';
 
 
 

@@ -456,15 +456,6 @@ if ($action == 'add' && $user->rights->contrat->creer) {
         setEventMessage($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Description")), 'errors');
         $error++;
     }
-} else if ($action == 'addline' && $user->rights->contrat->creer) {
-    if (!GETPOST('qty')) {
-        setEventMessage($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Qty")), 'errors');
-        $error++;
-    }
-    if ((GETPOST('price_ht') == '' || !GETPOST('dp_desc')) && !GETPOST('idprod')) {
-        setEventMessage($langs->trans("ErrorFieldRequired", $langs->transnoentitiesnoconv("Description")), 'errors');
-        $error++;
-    }
 
     if (!$error) {
         $ret = $object->fetch($id);

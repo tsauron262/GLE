@@ -79,9 +79,12 @@ class Synopsis_Contrat extends Contrat {
                 }
             }
         }
-
+//        $this->activeAllLigne();
+    }
+    
+    public function activeAllLigne(){
         foreach ($this->lines as $ligne)
-            $this->active_line($user, $ligne->id, $this->date_contrat, $ligne->date_fin_validite);
+            $this->active_line($user, $ligne->id, $this->date_contrat, $ligne->date_fin_validite);        
     }
 
     public function majRef() {

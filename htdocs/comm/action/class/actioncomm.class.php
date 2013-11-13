@@ -203,6 +203,7 @@ class ActionComm extends CommonObject
         $sql.= (! empty($this->elementtype)?"'".$this->elementtype."'":"null").",";
         $sql.= $conf->entity;
         $sql.= ")";
+        
 
         dol_syslog(get_class($this)."::add sql=".$sql);
         $resql=$this->db->query($sql);

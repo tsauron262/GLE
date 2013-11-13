@@ -308,7 +308,7 @@ class demandeInterv extends CommonObject {
      *        \param        user        User qui valide
      *        \return        int            <0 si ko, >0 si ok
      */
-    function valid($user, $outputdir) {
+    function valid($user, $outputdir = "") {
         global $langs, $conf;
 
         $this->db->begin();
@@ -369,7 +369,7 @@ class demandeInterv extends CommonObject {
         }
     }
 
-    function invalid($user, $outputdir) {
+    function invalid($user, $outputdir = "") {
         global $langs, $conf;
 
         $this->db->begin();
@@ -530,6 +530,22 @@ class demandeInterv extends CommonObject {
         dol_syslog("demandeInterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
+            require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
+            $action = new ActionComm($this->db);
+            $action->datep = $this->db->jdate(date("Y-m-d", $this->date)." 08:00:00");
+            $action->datef = $this->db->jdate(date("Y-m-d", $this->date)." 18:00:00");
+            $action->type_id = 50;
+            $action->percentage = -1;
+            $soc = new Societe($this->db);
+            $soc->fetch($this->socid);
+            $action->societe = $soc;
+            $action->label = "DI : ".$this->ref;
+            $action->note = $this->getNomUrl(1);
+            $action->usertodo = $user;
+            $action->add($user);
+            
+//            die("ok");
+            
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
@@ -563,7 +579,7 @@ class demandeInterv extends CommonObject {
      *  \return int
      * <0 si ko, >0 si ok
      */
-    function cloture($user, $outputdir) {
+    function cloture($user, $outputdir = "") {
         global $langs, $conf;
 
         $this->db->begin();

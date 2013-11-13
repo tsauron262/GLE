@@ -441,7 +441,8 @@ class modSynopsisProcess extends DolibarrModules {
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_Process` (`id`, `label`, `description`, `fk_statut`, `bloquant`, `formulaire_refid`, `pretraitement`, `posttraitement`, `validAction`, `askValidAction`, `reviseAction`, `PROCESS_MASK`, `ADDON_PDF`, `PROCESS_ADDON`, `typeElement_refid`, `trigger_refid`, `revision_model_refid`) VALUES
 (1, 'TR15', 'FICHE ANALYSE FAISABILITE', NULL, 1, 1, '', '', '', '', '', '{yy}TR15{0000@1}', '', 'demantoide', 1, 49, 2),
 (2, 'FORM_TEST', 'TESTONS CES PROCESS', NULL, 0, 1, '', '', '', '', '', 'FORM/{00000@}', 'pholos', 'demantoide', 1, 47, 1),
-(3, 'Validation Propal', 'Process de validation des propal', NULL, 1, 3, '', '', '', '', '', 'VALID{0000}', '', 'demantoide', 1, 48, NULL);",
+(3, 'Validation Propal', 'Process de validation des propal', NULL, 1, 3, '', '', '', '', '', 'VALID{0000}', '', 'demantoide', 1, 48, NULL),
+(4, 'Calendrier DI', 'Proposition de date pour les DI de contrat', 0, 1, 4, 'require_once(DOL_DOCUMENT_ROOT.\"/Synopsis_Contrat/class/autoDi.class.php\");\r\n$autoDi = new autoDi($process->typeElement->element->id, true);', '', 'require_once(DOL_DOCUMENT_ROOT.\"/Synopsis_Contrat/class/autoDi.class.php\"); $autoDi = new autoDi($element_id); $autoDi->creerFi();', '', '', 'CALDI{00000}', '', 'demantoide', 9, 23, NULL);",
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ref` varchar(50) DEFAULT NULL,
@@ -495,7 +496,8 @@ class modSynopsisProcess extends DolibarrModules {
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process_form` (`id`, `label`, `description`, `fk_statut`) VALUES
 (1, \'Form-TR15\', \'Formulaire TR15\', 1),
 (2, \'FORM_TEST\', \'FORMULAIRE DE TEST\', 1),
-(3, \'Validation Propale\', \'Validation après accord client\', 1);',
+(3, \'Validation Propale\', \'Validation après accord client\', 1),
+(4, \'Calendrier DI\', \'Validation des dates DI proposé.\', 1);',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fct` longtext,
@@ -593,7 +595,7 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `type_refid` (`type_refid`),
   KEY `src_refid` (`src_refid`),
   KEY `form_refid` (`form_refid`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=373 ;',
+);',
             "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_Process_form_model` (`id`, `type_refid`, `label`, `description`, `dflt`, `src_refid`, `form_refid`, `rang`, `rights`) VALUES
 (1, 15, '', '', '', NULL, 1, 4, ''),
 (2, 17, '', '', '', NULL, 1, 5, NULL),
@@ -801,7 +803,8 @@ class modSynopsisProcess extends DolibarrModules {
 (317, 17, '', '', '', NULL, 1, 8, NULL),
 (371, 22, '', '', '', NULL, 2, 1, NULL),
 (372, 6, '', '', '', NULL, 2, 2, NULL),
-(373, 4, 'Précision', '', '', NULL, 3, 1, '');",
+(373, 4, 'Précision', '', '', NULL, 3, 1, ''),
+(374, 11, '', '', '', NULL, 4, 1, NULL);",
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `requete` longtext,

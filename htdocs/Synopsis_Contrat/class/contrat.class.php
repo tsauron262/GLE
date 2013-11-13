@@ -40,18 +40,17 @@ class Synopsis_Contrat extends Contrat {
         $commande = new Commande($this->db);
         $commande->fetch($commId);
         $this->date_contrat = $commande->date;
-        
+
         $this->cloture($user);
-        
+
         $oldRef = $this->ref;
         $this->oldId = $this->id;
         $this->ref .= "Temp";
         $this->create($user);
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();
-        
+
         $this->validate($user);
-        
     }
 
     public function renouvellementPart2() {
@@ -64,24 +63,24 @@ class Synopsis_Contrat extends Contrat {
         foreach ($oldContrat->lines as $oldLigne) {//enreg info old ligne
             $idS = $oldLigne->id;
             foreach ($this->lines as $newLigne) {
-                if(!isset($tabOldIdOk[$idS]) && $oldLigne->fk_product == $newLigne->fk_product) {
+                if (!isset($tabOldIdOk[$idS]) && $oldLigne->fk_product == $newLigne->fk_product) {
                     $idD = $newLigne->id;
                     $tabOldIdOk[$idS] = $idS;
                     $tab = getElementElement("contratdet", null, $idS);
                     foreach ($tab as $lien)
-                        if($lien['td'] != "commandedet")
-                        addElementElement($lien['ts'], $lien['td'], $idD, $lien['d']);
+                        if ($lien['td'] != "commandedet")
+                            addElementElement($lien['ts'], $lien['td'], $idD, $lien['d']);
                     $tab = getElementElement("contratdet", null, $idS, null, 0);
                     foreach ($tab as $lien)
-                        if($lien['td'] != "commandedet")
-                        addElementElement($lien['ts'], $lien['td'], $idD, $lien['d'], 0);
+                        if ($lien['td'] != "commandedet")
+                            addElementElement($lien['ts'], $lien['td'], $idD, $lien['d'], 0);
                     $newLigne->description = $oldLigne->description;
                     $newLigne->update($user);
                 }
             }
         }
-        
-        foreach($this->lines as $ligne)
+
+        foreach ($this->lines as $ligne)
             $this->active_line($user, $ligne->id, $this->date_contrat, $ligne->date_fin_validite);
     }
 
@@ -2127,7 +2126,7 @@ EOF;
 
 
         $html .= "<div id='" . $type . "produit'>";
-        
+
         $html .= "<div id='productCli'></div>";
         $html .= "</div>";
 //        $html .= '<table style="width: 870px; border: 1px Solid; border-collapse: collapse;margin-top: 20px;" cellpadding=10 >';
@@ -2398,6 +2397,13 @@ class Synopsis_ContratLigne extends ContratLigne {
                 "qteTktPerDuree" => $objp->GMAO_qteTktPerDuree,
             );
         }
+
+
+
+        $this->tabProdCli = array();
+        $tabR = getElementElement("contratdet", "productCli", $this->id);
+        foreach ($tabR as $elem)
+            $this->tabProdCli[] = $elem['d'];
     }
 
     public function getTitreInter() {
@@ -2419,36 +2425,41 @@ class Synopsis_ContratLigne extends ContratLigne {
         }
         return $dsc;
     }
-    
-    
-    function getInfoProductCli($opt = "", $size = 200){
+
+    function getInfoOneProductCli($idProdCli, $opt = "", $size = 200) {
+        $html = "\n";
+        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1010");
+        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+            $result = $this->db->fetch_object($sql);
+            if ($result->value > 0) {
+                $prod = new Product($this->db);
+                $prod->fetch($result->value);
+                $html .= $prod->libelle . " ";
+            }
+        }
+//
+//                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
+//                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+//                        $result = $this->db->fetch_object($sql);
+//                        $html .= "(".$result->value . ") ";
+//                    }
+//
+//                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
+//                    if ($this->db->num_rows($sql) > 0) {
+//                        $result = $this->db->fetch_object($sql);
+//                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
+//                        $html .= ($result->value != "") ? $result->value : "";
+//                    }
+        return dol_trunc($html, $size);
+    }
+
+    function getInfoProductCli($opt = "", $size = 200) {
         $elems = getElementElement("contratdet", "productCli", $this->id);
-                $htmlT = "";
-                foreach ($elems as $elem) {
-                    $html = "\n";
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1010");
-                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
-                        $result = $this->db->fetch_object($sql);
-                        $prod = new Product($this->db);
-                        $prod->fetch($result->value);
-                        $html .= $prod->libelle . " ";
-                    }
-
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1012");
-                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
-                        $result = $this->db->fetch_object($sql);
-                        $html .= "(".$result->value . ") ";
-                    }
-
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $elem['d'] . " AND key_id = 1011");
-                    if ($this->db->num_rows($sql) > 0) {
-                        $result = $this->db->fetch_object($sql);
-                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
-                        $html .= ($result->value != "") ? $result->value : "";
-                    }
-                    $htmlT .= dol_trunc($html, $size);
-                }
-                return $htmlT;
+        $htmlT = "";
+        foreach ($elems as $elem) {
+            $htmlT .= $this->getInfoOneProductCli($elem['d'], $opt, $size);
+        }
+        return $htmlT;
     }
 
 }

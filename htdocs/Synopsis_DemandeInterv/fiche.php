@@ -1663,7 +1663,7 @@ EOF;
                 print '<a name="' . $objp->rowid . '"></a>'; // ancre pour retourner sur la ligne
                 print nl2br($objp->description);
                 print "<td width='150'>" . $objp->typeinterv . "</td>";
-                print '<td width="150">' . dol_print_date($db->jdate($objp->date_intervention), 'day') . '</td>';
+                print '<td width="150">' . dol_print_date($objp->date_intervention, 'day') . '</td>';
                 print '<td width="150">' . ConvertSecondToTime($objp->duree) . '</td>';
                 if ($objp->fk_commandedet > 0) {
                     $requete = "SELECT fk_product FROM " . MAIN_DB_PREFIX . "commandedet WHERE rowid = " . $objp->fk_commandedet;

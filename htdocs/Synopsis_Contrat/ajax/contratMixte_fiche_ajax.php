@@ -325,23 +325,23 @@ switch ($action) {
 //print $requete;
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
-                    if ($isSav == 1 && $serial . "x" != "x") {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratSAV')";
-                        $result1 = $db->query($requete);
-                    } else if ($isTkt && $serial . "x" != "x") {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratTkt')";
-                        $result1 = $db->query($requete);
-                    } else if ($isMnt && $serial . "x" != "x") {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratMnt')";
-                        $result1 = $db->query($requete);
-                    } else if ($serial . "x" != "x") {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contrat')";
-                        $result1 = $db->query($requete);
-                    }
+//                    if ($isSav == 1 && $serial . "x" != "x") {
+//                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratSAV')";
+//                        $result1 = $db->query($requete);
+//                    } else if ($isTkt && $serial . "x" != "x") {
+//                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratTkt')";
+//                        $result1 = $db->query($requete);
+//                    } else if ($isMnt && $serial . "x" != "x") {
+//                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratMnt')";
+//                        $result1 = $db->query($requete);
+//                    } else if ($serial . "x" != "x") {
+//                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                         VALUES (" . $contrat->newContractLigneId . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contrat')";
+//                        $result1 = $db->query($requete);
+//                    }
                     $xml .= "<OK>OK</OK>";
                     $xml .= "<OKtext><![CDATA[<div>" . returnNewLine($contrat->newContractLigneId, $_REQUEST['p_idprod']) . "</div>]]></OKtext>";
                 } else {
@@ -547,7 +547,7 @@ switch ($action) {
 //         $date_start='', $date_end='', $tvatx,
 //         $date_debut_reel='', $date_fin_reel='')
                 $result = $contrat->updateline(
-                        $_REQUEST['lineid'], utf8_encodeRien($description), $pu_ht, $qte, ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $tva_tx); /* ,'','',
+                        $_REQUEST['lineid'], utf8_encodeRien($description), $pu_ht, $qte, ($_REQUEST["premise"] > 0 ? $_REQUEST["premise"] : 0), $date_start, $date_end, $tva_tx, 0, 0, $date_start); /* ,'','',
                   ($prodid>0?$prodid:0),
                   $commandeDetId
                   ); */
@@ -586,91 +586,91 @@ switch ($action) {
                     }
                     $result1 = $db->query($requete);
                     $totalSAV = $basicSAV + $durVal;
-                    if ($serial . "x" != "x") {
-                        $requete = "SELECT *
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                     WHERE element_id = " . $_REQUEST['lineid'] . "
-                                       AND element_type LIKE 'contrat%'";
-                        $sql = $db->query($requete);
-                        if ($db->num_rows($sql) > 0) {
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                           SET serial_number = '" . $serial . "',
-                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
-                                               fk_user_author = " . $user->id . "
-                                         WHERE element_id = " . $_REQUEST['lineid'] . "
-                                           AND element_type = 'contratSAV'";
-                            $result1 = $db->query($requete);
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratSAV')";
-                            $result1 = $db->query($requete);
-                        }
-                    } else if ($isTkt && $serial . "x" != "x") {
-                        $requete = "SELECT *
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                     WHERE element_id = " . $_REQUEST['lineid'] . "
-                                       AND element_type LIKE 'contrat%'";
-                        $sql = $db->query($requete);
-                        if ($db->num_rows($sql) > 0) {
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                           SET serial_number = '" . $serial . "',
-                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
-                                               fk_user_author = " . $user->id . "
-                                         WHERE element_id = " . $_REQUEST['lineid'] . "
-                                           AND element_type LIKE 'contrat%'";
-                            $result1 = $db->query($requete);
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratTkt')";
-                            $result1 = $db->query($requete);
-//print $requete."\n";
-                        }
-                    } else if ($isMnt && $serial . "x" != "x") {
-                        $requete = "SELECT COUNT(*) as cnt
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                     WHERE element_id = " . $_REQUEST['lineid'] . "
-                                       AND element_type LIKE 'contrat%'";
-                        $sql = $db->query($requete);
-                        if ($db->num_rows($sql) > 0) {
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                           SET serial_number = '" . $serial . "',
-                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
-                                               fk_user_author = " . $user->id . "
-                                         WHERE element_id = " . $_REQUEST['lineid'] . "
-                                           AND element_type = 'contratMnt'";
-                            $result1 = $db->query($requete);
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratMnt')";
-                            $result1 = $db->query($requete);
-                        }
-                    } else if ($serial . "x" != "x") {
-                        $requete = "SELECT *
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                     WHERE element_id = " . $_REQUEST['lineid'] . "
-                                       AND element_type LIKE 'contrat%'";
-                        $sql = $db->query($requete);
-                        if ($db->num_rows($sql) > 0) {
-                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                           SET serial_number = '" . $serial . "',
-                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
-                                               fk_user_author = " . $user->id . "
-                                         WHERE element_id = " . $_REQUEST['lineid'] . "
-                                           AND element_type = 'contrat'";
-                            $result1 = $db->query($requete);
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
-                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contrat')";
-                            $result1 = $db->query($requete);
-                        }
-                    }
-                    //TODO effacement du Serial
-                    if ('x' . $serial == "x") {
-                        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
-                                          WHERE element_id = " . $_REQUEST['lineid'] . "
-                                            AND element_type LIKE 'contrat%'";
-                        $result1 = $db->query($requete);
-                    }
+//                    if ($serial . "x" != "x") {
+//                        $requete = "SELECT *
+//                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                     WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                       AND element_type LIKE 'contrat%'";
+//                        $sql = $db->query($requete);
+//                        if ($db->num_rows($sql) > 0) {
+//                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                           SET serial_number = '" . $serial . "',
+//                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
+//                                               fk_user_author = " . $user->id . "
+//                                         WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                           AND element_type = 'contratSAV'";
+//                            $result1 = $db->query($requete);
+//                        } else {
+//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratSAV')";
+//                            $result1 = $db->query($requete);
+//                        }
+//                    } else if ($isTkt && $serial . "x" != "x") {
+//                        $requete = "SELECT *
+//                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                     WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                       AND element_type LIKE 'contrat%'";
+//                        $sql = $db->query($requete);
+//                        if ($db->num_rows($sql) > 0) {
+//                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                           SET serial_number = '" . $serial . "',
+//                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
+//                                               fk_user_author = " . $user->id . "
+//                                         WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                           AND element_type LIKE 'contrat%'";
+//                            $result1 = $db->query($requete);
+//                        } else {
+//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratTkt')";
+//                            $result1 = $db->query($requete);
+////print $requete."\n";
+//                        }
+//                    } else if ($isMnt && $serial . "x" != "x") {
+//                        $requete = "SELECT COUNT(*) as cnt
+//                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                     WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                       AND element_type LIKE 'contrat%'";
+//                        $sql = $db->query($requete);
+//                        if ($db->num_rows($sql) > 0) {
+//                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                           SET serial_number = '" . $serial . "',
+//                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
+//                                               fk_user_author = " . $user->id . "
+//                                         WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                           AND element_type = 'contratMnt'";
+//                            $result1 = $db->query($requete);
+//                        } else {
+//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contratMnt')";
+//                            $result1 = $db->query($requete);
+//                        }
+//                    } else if ($serial . "x" != "x") {
+//                        $requete = "SELECT *
+//                                      FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                     WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                       AND element_type LIKE 'contrat%'";
+//                        $sql = $db->query($requete);
+//                        if ($db->num_rows($sql) > 0) {
+//                            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                           SET serial_number = '" . $serial . "',
+//                                               date_fin_SAV = date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH),
+//                                               fk_user_author = " . $user->id . "
+//                                         WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                           AND element_type = 'contrat'";
+//                            $result1 = $db->query($requete);
+//                        } else {
+//                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont (element_id, serial_number, date_creation, date_fin_SAV, fk_user_author,element_type)
+//                                             VALUES (" . $_REQUEST['lineid'] . ", '" . $serial . "',now(),date_add('" . $date_start . "', INTERVAL " . $totalSAV . " MONTH)," . $user->id . ",'contrat')";
+//                            $result1 = $db->query($requete);
+//                        }
+//                    }
+//                    //TODO effacement du Serial
+//                    if ('x' . $serial == "x") {
+//                        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_product_serial_cont
+//                                          WHERE element_id = " . $_REQUEST['lineid'] . "
+//                                            AND element_type LIKE 'contrat%'";
+//                        $result1 = $db->query($requete);
+//                    }
 
                     $xml .= "<OK>OK</OK>";
                     $xml .= "<OKtext><![CDATA[<div>" . returnNewLine($_REQUEST['lineid'], $_REQUEST['p_idprod']) . "</div>]]></OKtext>";

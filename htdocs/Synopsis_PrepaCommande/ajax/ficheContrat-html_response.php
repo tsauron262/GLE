@@ -160,8 +160,8 @@ if ($id > 0) {
         $tabLigneIdS[] = array($res->fk_product, $res->rowid);
     }
     print $longHtml;
-            print '<img class="imgLoad" style="display:none;" src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">';
-                print "<tr><td><button onClick='createContrat(" . 0 . ")' class='butAction'>Cr&eacute;er nouveau contrat manuellement</button>";
+            print '<tr><td><img class="imgLoad" style="display:none;" src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">';
+                print "<button onClick='createContrat(" . 0 . ")' class='butAction'>Cr&eacute;er nouveau contrat manuellement</button>";
             print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tous ajouter a un nouveau contrat</button>";
     if ($touCreer) {
         print '<tr><td colspan="3">';

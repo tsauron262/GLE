@@ -791,8 +791,8 @@ if (is_dir($dir)) {
                                 //Si modif
                             } else {
                                 $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key)
-                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ")";
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key, fk_user_creat)
+                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ", null)";
                                 $sql = requeteWithCache($requete);
                                 if ($sql) {
                                     $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";

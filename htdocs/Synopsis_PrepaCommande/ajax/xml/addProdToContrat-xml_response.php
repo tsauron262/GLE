@@ -45,8 +45,12 @@ if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
     $contrat->create($user);
 }
 
-
+if(isset($_REQUEST['tabElem']))
 $tabLigne = explode("-", $_REQUEST['tabElem']);
+elseif(isset($_REQUEST['comLigneId']))
+    $tabLigne = array($_REQUEST['comLigneId']);
+else
+    die("Rien a ajouter !!! ");
 foreach ($tabLigne as $comLigneId)
     $result = $contrat->addLigneCommande($commId, $comLigneId);
 

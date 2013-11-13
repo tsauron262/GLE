@@ -50,7 +50,7 @@ class Synopsis_Contrat extends Contrat {
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();
 
-        $this->validate($user);
+//        $this->validate($user);
     }
 
     public function renouvellementPart2() {

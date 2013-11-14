@@ -1,45 +1,51 @@
 <?php
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-        
+
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+
 class autoDi {
 
-    function autoDi($idContrat, $display = false) {
+    public $display = false;
+
+    function autoDi($processDet = null, $idContrat = null) {
         global $db;
         $this->db = $db;
+        $this->processDet = $processDet;
+
+        if (!$idContrat)
+            $idContrat = $processDet->element_refid;
+
+
         $this->idContrat = $idContrat;
-        $this->display = $display;
-        
-        
         $this->contrat = new Synopsis_Contrat($this->db);
         $this->contrat->fetch($this->idContrat);
         $this->contrat->fetch_lines();
-        
-        $tabT = getElementElement("soc", "userTech", $this->contrat->socid);
-        $this->idTech = (isset($tabT[0]['d'])? $tabT[0]['d'] : 0);
 
+        $tabT = getElementElement("soc", "userTech", $this->contrat->socid);
+        $this->idTech = (isset($tabT[0]['d']) ? $tabT[0]['d'] : 0);
+    }
+
+    function verif() {
+        $this->display = true;
         $this->getTabSecteur();
     }
 
     function getTabSecteur() {
         $this->tabType = array('visite', 'tele');
         $tabDatePrise = array();
-//      
-        if($this->idTech == 0)
-            die("Attention !!!!!!! Finalisation impossible : Pas de technicien définit pour le client <br/>");
-
-
         $tabSite = array();
+//      
+
         foreach ($this->contrat->lines as $lignes) {
             foreach ($this->tabType as $type) {
-            $nbVisite = 0;
+                $nbVisite = 0;
                 if ($type == 'visite')
                     $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn'];
                 if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance'] && $lignes->qty > 1)
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
                     if (count($lignes->tabProdCli) == 0)
-                        die("Attention !!!!!!! Finalisation impossible : Pas de produit client en lien avec ligne contrat ".$lignes->id.".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Clicker ici pour réparer</a>");
+                        die("Attention !!!!!!! Finalisation impossible : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Clicker ici pour réparer</a>");
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
                         if (!isset($tabSite[$site]))
@@ -51,102 +57,112 @@ class autoDi {
                 }
             }
         }
-        
-        if(!isset($lignes))
-            die("Pas de ligne ds le contrat");
-        $ligneFak = $lignes;
 
-
-        foreach ($tabSite as $numSite => $site) {
-            foreach ($this->tabType as $type) {
-                $nbVisiteSite = $site[$type]['visiteMax'];
-                foreach ($site[$type]['prod'] as $prod) {
-                    $nbVisiteProd = $prod['nbVisite'];
-                    for ($i = 0; $i < $nbVisiteProd; $i++) {
-                        $numVisite = round($i * $nbVisiteSite / $nbVisiteProd, 0, PHP_ROUND_HALF_DOWN);
-                        $tabSite[$numSite][$type]['tabVisite'][$numVisite]['prod'][] = $prod;
-                    }
-                }
-                ksort($tabSite[$numSite][$type]['tabVisite']);
+        if (count($tabSite) == 0) { //Aucune visite.
+            if ($this->processDet) {
+                $this->processDet->validate("1");
+                $this->processDet->fetch($this->processDet->id);
+                $this->contrat->activeAllLigne();
             }
-        }
+        } else {
+
+            if ($this->idTech == 0)
+                die("Attention !!!!!!! Finalisation impossible : Pas de technicien définit pour le client <br/>");
+
+            if (!isset($lignes))
+                die("Pas de ligne ds le contrat");
+            $ligneFak = $lignes;
 
 
-
-        foreach ($tabSite as $numSite => $site) {
-            foreach ($this->tabType as $type) {
-                $this->sortie("SITE " . ($numSite + 1) . ": " . $type . "<br/><br/>");
-                foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
-                    $delai = round(365 / count($site[$type]['tabVisite']) * $numVisiste);
-                    $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
-                    $decale = 0;
-                    for ($i = 0; $i < 100; $i++) {
-                        if (date_format($date, "w") != 0 && date_format($date, "w") != "6"
-                                && !isset($tabDatePrise[date_format($date, "d-m-Y")])) {
-                            $requete = "SELECT * FROM `" . MAIN_DB_PREFIX . "actioncomm` WHERE `datep` <= '" . date_format($date, "Y-m-d") . " 23:59:59' AND `datep2` >= '" . date_format($date, "Y-m-d") . "' AND fk_user_action =".$this->idTech;
-                            $sql = $this->db->query($requete);
-                            if ($this->db->num_rows($sql) == 0){
-                                $tabDatePrise[date_format($date, "d-m-Y")] = date_format($date, "d-m-Y");
-                                break;
-                            }
+            foreach ($tabSite as $numSite => $site) {
+                foreach ($this->tabType as $type) {
+                    $nbVisiteSite = $site[$type]['visiteMax'];
+                    foreach ($site[$type]['prod'] as $prod) {
+                        $nbVisiteProd = $prod['nbVisite'];
+                        for ($i = 0; $i < $nbVisiteProd; $i++) {
+                            $numVisite = round($i * $nbVisiteSite / $nbVisiteProd, 0, PHP_ROUND_HALF_DOWN);
+                            $tabSite[$numSite][$type]['tabVisite'][$numVisite]['prod'][] = $prod;
                         }
-                        $decale++;
-                        $date = date_add($date, date_interval_create_from_date_string("1 day"));
                     }
-
-                    $tabSite[$numSite][$type]['tabVisite'][$numVisiste]['date'] = date_format($date, "Y-m-d");
-                    $this->sortie("Visite " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . " le " . date_format($date, "d-m-Y") . (($decale > 0) ? " Decaler de " . $decale . " jours" : "") . "<br/>");
-                    foreach ($visite['prod'] as $prod){
-                        $this->sortie(" - Matériel a visiter : " . $ligneFak->getInfoOneProductCli($prod['idProd']) . "<br/>");
-                    }
+                    ksort($tabSite[$numSite][$type]['tabVisite']);
                 }
-                $this->sortie("<br/><br/>");
+            }
+
+
+
+            foreach ($tabSite as $numSite => $site) {
+                foreach ($this->tabType as $type) {
+                    $this->sortie("SITE " . ($numSite + 1) . ": " . $type . "<br/><br/>");
+                    foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
+                        $delai = round(365 / count($site[$type]['tabVisite']) * $numVisiste);
+                        $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
+                        $decale = 0;
+                        for ($i = 0; $i < 100; $i++) {
+                            if (date_format($date, "w") != 0 && date_format($date, "w") != "6"
+                                    && !isset($tabDatePrise[date_format($date, "d-m-Y")])) {
+                                $requete = "SELECT * FROM `" . MAIN_DB_PREFIX . "actioncomm` WHERE `datep` <= '" . date_format($date, "Y-m-d") . " 23:59:59' AND `datep2` >= '" . date_format($date, "Y-m-d") . "' AND fk_user_action =" . $this->idTech;
+                                $sql = $this->db->query($requete);
+                                if ($this->db->num_rows($sql) == 0) {
+                                    $tabDatePrise[date_format($date, "d-m-Y")] = date_format($date, "d-m-Y");
+                                    break;
+                                }
+                            }
+                            $decale++;
+                            $date = date_add($date, date_interval_create_from_date_string("1 day"));
+                        }
+
+                        $tabSite[$numSite][$type]['tabVisite'][$numVisiste]['date'] = date_format($date, "Y-m-d");
+                        $this->sortie("Visite " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . " le " . date_format($date, "d-m-Y") . (($decale > 0) ? " Decaler de " . $decale . " jours" : "") . "<br/>");
+                        foreach ($visite['prod'] as $prod) {
+                            $this->sortie(" - Matériel a visiter : " . $ligneFak->getInfoOneProductCli($prod['idProd']) . "<br/>");
+                        }
+                    }
+                    $this->sortie("<br/><br/>");
+                }
             }
         }
         $this->tabSite = $tabSite;
 //        $this->creerFi();
-        
     }
-    
-    function sortie($str){
-        if($this->display)
+
+    function sortie($str) {
+        if ($this->display)
             echo $str;
     }
-    
-    function creerFi(){
+
+    function creerFi() {
         $ligneFak = new Synopsis_ContratLigne($this->db);
         $tabSite = $this->tabSite;
 //        echo "<pre>";
 //        print_r($tabSite);
         global $user;
-        foreach($tabSite as $numSite => $site){
-            
+        foreach ($tabSite as $numSite => $site) {
+
             foreach ($this->tabType as $type) {
                 foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                     $di = new demandeInterv($this->db);
                     $di->date = $visite['date'];
                     $di->socid = $this->contrat->socid;
                     $di->author = $user->id;
-                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance")." ".($numVisiste+1)."/".count($site[$type]['tabVisite']);
+                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']);
                     $newId = $di->create();
                     $tech = new User($this->db);
                     $tech->fetch($this->idTech);
                     $di->fetch($newId);
                     $di->preparePrisencharge($tech);
-                    if($type == "visite")
-                    $di->addline($newId, "Déplacement ", $visite['date'], "3600", 4, 1, 50);
-                    
-                    foreach($visite['prod'] as $prod){
+                    if ($type == "visite")
+                        $di->addline($newId, "Déplacement ", $visite['date'], "3600", 4, 1, 50);
+
+                    foreach ($visite['prod'] as $prod) {
                         $product = new Product($this->db);
                         $product->fetch($prod['fkProdContrat']);
-                        $di->addline($newId, $product->libelle." \n Matériel a suivre ".$ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], "3600", 1, 1, 95);
+                        $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], "3600", 1, 1, 95);
                     }
                     $di->valid($user);
                 }
-                
             }
         }
-        
+
         $this->contrat->activeAllLigne();
     }
 

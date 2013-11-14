@@ -726,6 +726,7 @@ class Fichinter extends CommonObject {
      *        \return        int                 >0 si ok, <0 si ko
      */
     function addline($fichinterid, $desc, $date_intervention, $duration, $typeinterv, $qte = 1, $pu_ht = 0, $isForfait = 0, $fk_commandedet = false, $fk_contratdet = false, $typeIntervProd) {
+        global $user;
         dol_syslog("Fichinter::Addline $fichinterid, $desc, $date_intervention, $duration");
 
         if ($this->statut == 0) {
@@ -742,6 +743,8 @@ class Fichinter extends CommonObject {
             $ligne->fk_commandedet = $fk_commandedet;
             $ligne->fk_contratdet = $fk_contratdet;
             $ligne->typeIntervProd = $typeIntervProd;
+            
+            $this->getTauxHUser($typeinterv, $user);
 
             $ligne->qte = $qte;
             $ligne->pu_ht = $pu_ht;
@@ -764,6 +767,10 @@ class Fichinter extends CommonObject {
                 return -1;
             }
         }
+    }
+    
+    function getTauxHUser($typeInter, $user){
+        
     }
 
     /**

@@ -325,11 +325,7 @@ if ($resql) {
         $htmlTab .= '<td align="center">' . ($prevuEuro == 0 ? 0 : price(($prevuEuro - $realEuro) / $prevuEuro * 100)) . " %" . '</td>';
         $htmlTab .= '<td align="center">' . ($vendu == 0 ? 0 : price(($vendu - $realEuro) / $vendu * 100)) . " %" . '</td>';
 
-
-
-
-
-
+        $htmlTab .=  '<td align="center">' . $di->getLibStatut(2) . ' </td>';
 
 
 
@@ -356,6 +352,7 @@ if ($resql) {
     $htmlTot .= '<td align="center">Total réalisé</td>';
     $htmlTot .= '<td align="center">Dif réalisé prévue</td>';
     $htmlTot .= '<td align="center">Dif réalisé vendue</td>';
+    $htmlTot .= '<td align="center">Statut</td>';
     $htmlTot .= "</tr><tr class=\"liste_titre\"><td></td><td></td><td></td><td></td>";
     if (empty($socid))
     $htmlTot .= "<td></td>";
@@ -364,6 +361,7 @@ if ($resql) {
     $htmlTot .= '<td align="center">' . price($totReel) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';
     $htmlTot .= '<td align="center">' . ($totPrev == 0 ? 0 : price(($totPrev - $totReel) / $totPrev * 100)) . " %" . '</td>';
     $htmlTot .= '<td align="center">' . ($totVendu == 0 ? 0 : price(($totVendu - $totReel) / $totVendu * 100)) . " %" . '</td>';
+    $htmlTot .= '<td align="center"></td>';
     $htmlTot .= '</tr>';
 
 

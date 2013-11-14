@@ -34,12 +34,19 @@ $(window).load(function() {
             $(".ui-search-toolbar input").trigger(e);
         }, 500);
     });
-
-initFormChrono();
+    
+    
+    if ((navigator.appName).search(/Safari.+/) != -1){
+        $(".formdoc a").each(function(){
+            if($(this).attr('href').search(/.pdf/i) >= 0)
+                $(this).attr("target", "");
+        });
+    }
+    initFormChrono();
     
     
     
-//    $(".nonactif").hide();
+    //    $(".nonactif").hide();
     
     $(".syntab li").click(function(){
         $(".syntab li").removeClass("actif");
@@ -340,4 +347,4 @@ function initFormChrono(){
         });
         return false;
     });
-    }
+}

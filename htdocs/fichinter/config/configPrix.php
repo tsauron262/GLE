@@ -137,7 +137,7 @@ $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common
     llxHeader($js,"Config. des prix interventions");
 
 
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1 AND rowid != 1";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user WHERE statut = 1";
         if ($conf->global->FIRSTNAME_BEFORE_NAME){
             $requete .= " ORDER BY firstname, lastname ";
         } else {
@@ -154,9 +154,9 @@ $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common
     {
         if ($conf->global->FIRSTNAME_BEFORE_NAME)
         {
-           print "<li class=''><a href='#' onClick='showUserPrice(".$res->rowid.");'>".$res->firstname." ".$res->name."</a></li>";
+           print "<li class=''><a href='#' onClick='showUserPrice(".$res->rowid.");'>".$res->firstname." ".$res->lastname."</a></li>";
         } else {
-            print "<li class=''><a href='#' onClick='showUserPrice(".$res->rowid.");'>".$res->name." ".$res->firstname."</a></li>";
+            print "<li class=''><a href='#' onClick='showUserPrice(".$res->rowid.");'>".$res->lastname." ".$res->firstname."</a></li>";
         }
     }
     print "</ul>";

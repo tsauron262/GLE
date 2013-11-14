@@ -657,6 +657,14 @@ function getTab() {
         array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
             array("element_id", "date_fin_SAV", "$%1015"),
             array("chrono_refid", "value", "key_id")
+        ),
+        array("Babel_User_PrixTypeInterv", MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv",
+            array(),
+            array()
+        ),
+        array("Babel_User_PrixDepInterv", MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv",
+            array(),
+            array()
         )
     );
 }

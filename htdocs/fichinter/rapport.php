@@ -281,6 +281,7 @@ if ($resql) {
     print '<td align="center">Date</td>';
     print '<td align="center">' . $langs->trans("Duration") . '</td>';
     print '<td align="center">Prix HT</td>';
+    print '<td align="center">Statut</td>';
     print "</tr>\n";
     $var = true;
     $DureeTotal = 0;
@@ -311,6 +312,7 @@ if ($resql) {
         else
             print '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm</td>';
         print '<td align="center">' . $objp->total_ht . ' &euro;</td>';
+        print '<td align="center">' . $di->getLibStatut(2) . ' </td>';
 
         $DureeTotal += $objp->duree;
         print "</tr>\n";

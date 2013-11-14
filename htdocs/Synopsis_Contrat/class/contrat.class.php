@@ -133,9 +133,9 @@ class Synopsis_Contrat extends Contrat {
 
     public function initRefPlus() {
         global $conf;
-        $pref = "CHM";
-        $oldPref = "CHM";
-        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = false;
+        $pref = "CS4";
+        $oldPref = "CT";
+        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
             if ($ligne->GMAO_Mixte['isSAV'])
@@ -151,16 +151,20 @@ class Synopsis_Contrat extends Contrat {
             $prod->fetch($ligne->fk_product);
             if (stripos($prod->ref, "YO1sante") !== false)
                 $isMed = true;
+            if (stripos($prod->ref, "fpr") !== false)
+                $fpr = true;
             if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
                 $is8h = true;
 //            else echo $ligne->GMAO_Mixte['SLA']."|";
         }
-        if ($isSav)
-            $pref = "SAV";
-        if ($isMaint)
-            $pref = "MAI";
-        if ($isTeleMaint)
-            $pref = "TEL";
+//        if ($isSav)
+//            $pref = "SAV";
+//        if ($isMaint)
+//            $pref = "MAI";
+//        if ($isTeleMaint)
+//            $pref = "TEL";
+        if ($fpr)
+            $pref = "CHM";
         if ($isHotline)
             $pref = "HL";
         if ($isHotline && $is8h)

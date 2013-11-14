@@ -93,6 +93,9 @@ class synopsisHook {
 
         self::$timeDeb = microtime(true);
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
+        $cssSoc = "/Synopsis_Tools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
+        if (is_file(DOL_DOCUMENT_ROOT . $cssSoc))
+        $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc .'" />' . "\n";
         $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 

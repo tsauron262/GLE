@@ -178,7 +178,7 @@ EOF;
 print "<div id='createDIDialog' class='cntDIDial'>";
 print "<form>";
 print "<div id='tabsDialog'>";
-print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment2'>D&eacute;tails</a></li><li><a href='#fragment3'>Plus</a></li></ul>";
+print "<ul><li><a href='#fragment1'>Interventions</a></li><li><a href='#fragment2'>D&eacute;tails</a></li><li><a href='#fragment3' class='newDiOngletPlus'>Plus</a></li></ul>";
 print "<div id='fragment1'>";
 print "<table cellpadding=10 width=100%><tr><th class='ui-widget-header ui-state-default'>Date Intervention</td>";
 print "<td class='ui-widget-content' colspan=1>";
@@ -296,21 +296,24 @@ jQuery(document).ready(function(){
 //                $(this).find("#qte"+id).val(1);
                 desc = $('#desc');
                 forfait = $(this).find("#isForfait"+id);
+                duree = $(this).find("#duri"+id);
                 qte = $(this).find("#qte"+id);
+                    duree.val(qte.val());
+                    qte.val(1);
                 i=0;
                 $(this).find("a").each(function(){
                     i++;
 //                    if(i == 2){
                         if($(this).html() == "FPR50"){
                             forfait.attr('checked', true);
-                            desc.html("Installation comprenant : ");
+//                            desc.html("Installation comprenant : ");
                         }
                         if($(this).html() == "FPR30")
-                            desc.html("Intervention comprenant : ");
+//                            desc.html("Intervention comprenant : ");
                         if($(this).html().match("FD.*")){
 //                            desc.html("Déplacement comprenant : ");
                             forfait.attr('checked', true);
-                            qte.val(1);
+//                            qte.val(1);
                             
                         }
 //                    }

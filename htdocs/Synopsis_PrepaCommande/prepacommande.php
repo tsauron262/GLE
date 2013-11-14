@@ -161,6 +161,8 @@ jQuery(document).ready(function(){
     });
     
     function traiteHash(hash){
+        if(hash == "")
+        hash = "part1a";
         hash2 = hash.slice(0,hash.length-1);
         $("#"+hash2).click();
         changePage(hash);

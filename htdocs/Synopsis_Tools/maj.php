@@ -642,6 +642,10 @@ function getTab() {
             array("contratdet_refid", "$%contratdet", "contratdet_refid", "$%productCli"),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
+        array($oldPref."contrat", MAIN_DB_PREFIX . "element_element",
+            array("linkedTo", "$%commande", "rowid", "$%contrat"),
+            array('fk_source', 'sourcetype', 'fk_target', 'targettype')
+        ),
         array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
             array("element_id", "serial_number", "$%1011"),
             array("chrono_refid", "value", "key_id")

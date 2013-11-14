@@ -23,7 +23,7 @@ if (isset($_POST['action']) && $_POST['action'] == "send") {
 }
 if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
     
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['resolu'];
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['id'];
     $sql = $db->query($requete);
     $obj = $db->fetch_object($sql);
     
@@ -37,7 +37,25 @@ if (isset($_GET['action']) && $_GET['action'] == "setResolu") {
     mailSyn($userT->email, "Bug Gle résolu", $message);
     
     
-    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['resolu'];
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 1 where rowid = " . $_GET['id'];
+    $db->query($requete);
+}
+if (isset($_GET['action']) && $_GET['action'] == "setAnnuler") {
+    
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['id'];
+    $sql = $db->query($requete);
+    $obj = $db->fetch_object($sql);
+    
+    
+    $message = 'Bonjour votre bug signalé sur GLE est passé au statut Annulé. '."\n\n"
+            .'Message : '.$obj->text;
+
+    $userT = new User($db);
+    $userT->fetch($obj->fk_user);
+    mailSyn($userT->email, "Bug Gle Annulé", $message);
+    
+    
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 2 where rowid = " . $_GET['id'];
     $db->query($requete);
 }
 
@@ -79,14 +97,20 @@ function getBug($user) {
         $html .= "<td>" . str_replace("\n", "<br/>", $data->text) . "</td>";
 
         $html .= "<td>";
-        if ($data->resolu)
+        
+            $pictoS = img_picto($langs->trans("Annulé"), 'delete');
+        if ($data->resolu == 1)
             $picto = img_picto($langs->trans("Résolu"), 'on');
+        elseif ($data->resolu == 2)
+            $picto = $pictoS;
         else
             $picto = img_picto($langs->trans("Non traité"), 'off');
         if ($user->rights->SynopsisTools->Global->adminBug && !$data->resolu)
-            $html .= '<a href="?action=setResolu&resolu=' . $data->rowid . '">' . $picto . '</a>';
+            $html .= '<a href="?action=setResolu&id=' . $data->rowid . '"> ' . $picto . ' </a>';
         else
             $html .= $picto;
+        if ($user->rights->SynopsisTools->Global->adminBug && !$data->resolu == 2)
+            $html .= ' <a href="?action=setAnnuler&id=' . $data->rowid . '"> ' . $pictoS . ' </a>';
         $html .= "</td>";
         $html .= "</tr>";
     }

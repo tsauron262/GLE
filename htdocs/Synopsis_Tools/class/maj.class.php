@@ -189,6 +189,8 @@ class maj {
                     $importOff = true;
                 if ($cle == "rowid" && isset($this->tabNonImport[$tableSrc][$val]))//On ignore les ligne du tableau tabNonImport
                     $importOff = true;
+                if ($tableSrc == "llx_contrat" && $tableDest == "llx_element_element" && $cle == "linkedTo")
+                    $val = str_replace ("c", "", $val);
                 if (($newCle == "fk_source" || $newCle == "fk_target") &&
                         $tableDest == MAIN_DB_PREFIX . "element_element" && !($val > 0))//La ligne ne sert a rien
                     $importOff = true;

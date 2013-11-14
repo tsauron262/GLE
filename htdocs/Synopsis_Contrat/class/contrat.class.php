@@ -37,6 +37,8 @@ class Synopsis_Contrat extends Contrat {
     public function renouvellementPart1($user, $commId) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
 
+        $this->commId = $commId;
+        
         $commande = new Commande($this->db);
         $commande->fetch($commId);
         $this->date_contrat = $commande->date;
@@ -80,6 +82,7 @@ class Synopsis_Contrat extends Contrat {
             }
         }
 //        $this->activeAllLigne();
+        addElementElement("commande", "contrat", $this->commId, $this->id);
     }
     
     public function activeAllLigne(){
@@ -130,8 +133,8 @@ class Synopsis_Contrat extends Contrat {
 
     public function initRefPlus() {
         global $conf;
-        $pref = "CS";
-        $oldPref = "CT";
+        $pref = "CHM";
+        $oldPref = "CHM";
         $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {

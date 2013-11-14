@@ -1280,7 +1280,7 @@ if (is_dir($dir)) {
                             }
                         } else {
                             if (isset($tabImportOK['commande'][$val['PcvCode']]))
-                                $comId = $tabImportOK['commande'][$val['PcvCode']];
+                                $comId = $tabImportOK['commande'][$val['PcvCode']]['id'];
                             else {
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
@@ -1301,7 +1301,7 @@ if (is_dir($dir)) {
                                     $sql = requeteWithCache($requete);
                                     $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
                                     if ($sql) {
-                                        $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                        $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
                                         $mode = "ORDER_CREATE";
                                         $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
                                         $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
@@ -1328,7 +1328,7 @@ if (is_dir($dir)) {
                                         $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
                                         $sql = requeteWithCache($requete);
                                         if ($sql) {
-                                            $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                            $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
                                             $mode = "ORDER_MODIFY";
                                             $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
                                             $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
@@ -1337,7 +1337,7 @@ if (is_dir($dir)) {
                                             $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
                                         }
                                     } else {
-                                        $tabImportOK['commande'][$val['PcvCode']] = $comId;
+                                        $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
                                         $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
                                         $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
                                     }
@@ -1602,7 +1602,9 @@ if (is_dir($dir)) {
                 $mailContent = '';
             }
 
-            foreach ($tabImportOK['commande'] as $ref => $id) {
+            foreach ($tabImportOK['commande'] as $ref => $tabT) {
+                $id = $tabT['id'];
+                $codeAff = $tabT['codeAff'];
                 $com = new Synopsis_Commande($db);
                 $com->fetch($id);
                 $com->update_price();
@@ -1638,7 +1640,7 @@ if (is_dir($dir)) {
                 $finReq = " FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grpdet WHERE refCommande = '" . $com->ref . "'";
                 $requete = "SELECT *" . $finReq;
                 $sqlGr = requeteWithCache($requete);
-                if ($val['AffCode'] . "x" == "x") {
+                if ($codeAff . "x" == "x") {
                     if ($db->num_rows($sqlGr) > 0) {
                         //Verifier par rapport à la référence. => supression
                         $requete = "DELETE" . $finReq;
@@ -1651,13 +1653,15 @@ if (is_dir($dir)) {
                             $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
                         }
                     }
+                    else
+                        $webContent .= ("pas de groupe commande");
                 } else {
                     //Recupere le groupeId
-                    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $val['AffCode'] . "'";
+                    $requete = "SELECT id FROM " . MAIN_DB_PREFIX . "Synopsis_commande_grp WHERE nom ='" . $codeAff . "'";
                     $sql = requeteWithCache($requete);
                     $res = fetchWithCache($sql);
                     if (!$res) {
-                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $val['AffCode'] . "',now())";
+                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_commande_grp (nom, datec) VALUES ('" . $codeAff . "',now())";
                         $sql = requeteWithCache($requete);
                         $grpId = $db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_commande_grp');
                         if ($sql) {

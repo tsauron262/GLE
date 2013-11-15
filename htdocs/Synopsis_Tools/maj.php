@@ -52,14 +52,14 @@ if (isset($_GET['action']) && $_GET['action'] == "majFile") {
             $newdir = str_replace($repl1, $repl2, $oldDir);
             $dataDir2 = opendir($dir . $oldDir . "/");
             while ($Entry2 = readdir($dataDir2)) {
-                if (is_file($dir . $oldDir  . "/". $Entry2)) {
-                    $oldFile = $dir . $oldDir  . "/". $Entry2;
-                    $newFile = $dir . $oldDir  . "/". str_replace($oldDir, $newdir, $Entry2);
+                if (is_file($dir . $oldDir . "/" . $Entry2)) {
+                    $oldFile = $dir . $oldDir . "/" . $Entry2;
+                    $newFile = $dir . $oldDir . "/" . str_replace($oldDir, $newdir, $Entry2);
                     rename($oldFile, $newFile);
                     echo "Fichier " . $oldFile . " renomer en " . $newFile . "<br/>";
                 }
             }
-            rename($dir  . "/". $oldDir, $dir  . "/". $newdir);
+            rename($dir . "/" . $oldDir, $dir . "/" . $newdir);
             echo "Dossier " . $oldDir . " renomer en " . $newdir . "<br/>";
         }
     }
@@ -79,7 +79,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         die("Les info de la base a importé sont incorrecte");
 
     $maj = new maj($dbS, $dbD);
-    $maj->req("DELETE FROM `" . MAIN_DB_PREFIX . "product_lang`");
+    $maj->req("DELETE FROM '" . MAIN_DB_PREFIX . "product_lang'");
     $maj->startMaj(getTab());
     $maj->startMaj(array(// Modification de certaine table
         array("babel_categorie_association", MAIN_DB_PREFIX . "categorie",
@@ -91,7 +91,6 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
             array('id', 'condReg_refid', 'modeReg_refid')
             )), true);
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
-
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "commandedet` SET `product_type`= 106 WHERE `fk_product` is null AND `total_ttc` = 0");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE element_type = 'prepaCom'");
@@ -113,7 +112,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
-    $finReq = "`llx_Synopsis_Chrono_value` WHERE `chrono_refid` NOT IN (SELECT id FROM llx_Synopsis_Chrono)";
+    $finReq = "'llx_Synopsis_Chrono_value' WHERE 'chrono_refid' NOT IN (SELECT id FROM llx_Synopsis_Chrono)";
     $sqlValueChronoSansParent = $db->query("SELECT * FROM " . $finReq);
     while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
         erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
@@ -642,7 +641,7 @@ function getTab() {
             array("contratdet_refid", "$%contratdet", "contratdet_refid", "$%productCli"),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
-        array($oldPref."contrat", MAIN_DB_PREFIX . "element_element",
+        array($oldPref . "contrat", MAIN_DB_PREFIX . "element_element",
             array("linkedTo", "$%commande", "rowid", "$%contrat"),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
@@ -665,7 +664,11 @@ function getTab() {
         array("Babel_User_PrixDepInterv", MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv",
             array(),
             array()
-        )
+        ),
+        array($oldPref . "actioncomm", MAIN_DB_PREFIX . "actioncomm",
+            array('id', 'datec', 'datep', 'datep2', 'datea', 'datea2', 'tms', 'fk_action', 'label', /* 'fk_projet', */ 'fk_soc', 'fk_contact', 'fk_parent', 'fk_user_action', 'fk_user_done', 'fk_user_author', 'fk_user_mod', 'priority', 'punctual', 'percent', 'durationp', 'durationa', 'note', /* 'propalrowid', 'fk_commande', 'fk_facture' */),
+            array('id', 'datec', 'datep', 'datep2', 'datea', 'datea2', 'tms', 'fk_action', 'label', 'fk_soc', 'fk_contact', 'fk_parent', 'fk_user_action', 'fk_user_done', 'fk_user_author', 'fk_user_mod', 'priority', 'punctual', 'percent', 'durationp', 'durationa', 'note')
+        ),
     );
 }
 

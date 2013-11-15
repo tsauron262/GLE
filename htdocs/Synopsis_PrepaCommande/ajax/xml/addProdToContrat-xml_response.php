@@ -42,8 +42,8 @@ if (isset($_REQUEST['contratId']) && $_REQUEST['contratId'] > 0) {
     $contrat->commercial_signature_id = 1;
     $contrat->commercial_suivi_id = 1;
     $contrat->date_contrat = dol_now();
-    $contrat->extraparams = 7;
     $contrat->create($user);
+    $contrat->setExtraParametersSimple(7);
 }
 
 if(isset($_REQUEST['tabElem']))

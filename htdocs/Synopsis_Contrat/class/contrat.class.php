@@ -48,9 +48,9 @@ class Synopsis_Contrat extends Contrat {
         $oldRef = $this->ref;
         $this->oldId = $this->id;
         $this->ref .= "Temp";
-        $this->extraparams = 7;
         $this->create($user);
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
+        $this->setExtraParametersSimple(7);
         $this->majRef();
 
 //        $this->validate($user);
@@ -84,6 +84,12 @@ class Synopsis_Contrat extends Contrat {
         }
 //        $this->activeAllLigne();
         addElementElement("commande", "contrat", $this->commId, $this->id);
+    }
+    
+    public function setExtraParametersSimple($extra = ""){
+        if($extra)
+            $this->extraparams = $extra;
+        $this->db->query("UPDATE ".MAIN_DB_PREFIX."contrat SET extraparams = '".$this->extraparams."' WHERE rowid = ".$this->id);
     }
     
     public function activeAllLigne(){

@@ -74,7 +74,7 @@
             if (preg_match('/^desci([0-9]*)/',$key,$arr))
             {
                  $desc = utf8_encodeRien($val);
-                 $datei = "'".date('Y-m-d',convertDate($_REQUEST['datei'.$arr[1]]))."'";
+                 $datei = convertDate($_REQUEST['datei'.$arr[1]]);
                  $duration = ConvertTime2Seconds($_REQUEST['duri'.$arr[1]],$_REQUEST['durmini'.$arr[1]]);
                  $typeInter = $_REQUEST['typeInterv'.$arr[1]];
                  $isForfait = (isset($_REQUEST['isForfait'.$arr[1]]) && ($_REQUEST['isForfait'.$arr[1]] =='On' ||$_REQUEST['isForfait'.$arr[1]]=='on' ||$_REQUEST['isForfait'.$arr[1]]=='ON'?1:0));

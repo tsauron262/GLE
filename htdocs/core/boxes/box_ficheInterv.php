@@ -91,7 +91,7 @@ class box_ficheInterv extends ModeleBoxes {
                            ".MAIN_DB_PREFIX."fichinter.ref,
                            ".MAIN_DB_PREFIX."societe.nom,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           ".MAIN_DB_PREFIX."fichinter.datec,
+                           ".MAIN_DB_PREFIX."fichinter.datei,
                            ".MAIN_DB_PREFIX."fichinter.fk_statut
                       FROM ".MAIN_DB_PREFIX."fichinter
                  LEFT JOIN ".MAIN_DB_PREFIX."societe ON ".MAIN_DB_PREFIX."fichinter.fk_soc = ".MAIN_DB_PREFIX."societe.rowid
@@ -126,7 +126,7 @@ class box_ficheInterv extends ModeleBoxes {
                     'url' => DOL_URL_ROOT."/comm/fiche.php?socid=".$objp->socid);
 
                     $this->info_box_contents[$i][2] = array('align' => 'right',
-                    'text' => dol_print_date($objp->datec,'day'),
+                    'text' => dol_print_date($objp->datei,'day'),
                     );
 
                     $this->info_box_contents[$i][3] = array(

@@ -540,7 +540,7 @@ class demandeInterv extends CommonObject {
             $soc->fetch($this->socid);
             $action->societe = $soc;
             $action->label = $this->description." DI : ".$this->ref;
-            $action->note = $this->description."DI ".$this->getNomUrl(1);
+            $action->note = $this->description."<br/>".$this->getNomUrl(1);
             $action->usertodo = $user;
             $action->add($user);
             

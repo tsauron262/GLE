@@ -250,8 +250,21 @@
         });
         jQuery('.validFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^validFI-/,"");
-            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes';
+            jQuery.ajax({
+                url: DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes',
+                data: "",
+                datatype: "xml",
+                type: "POST",
+                cache: false,
+                success: function(msg) {
+                    $("div#part9c").click();
+                }
+            });
         });
+//        jQuery('.validFI').click(function(){
+//            var id = jQuery(this).attr('id').replace(/^validFI-/,"");
+//            location.href=DOL_URL_ROOT+'/fichinter/fiche.php?id='+id+'&action=confirm_validate&confirm=yes';
+//        });
         jQuery('.rafraichePrixFI').click(function(){
             var id = jQuery(this).attr('id').replace(/^rafraichePrixFI-/,"");
             location.href=DOL_URL_ROOT+'/fichinter/fiche.php?action=rafraichePrixFI&id='+id;

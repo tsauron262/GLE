@@ -66,8 +66,11 @@ class autoDi {
             }
         } else {
 
-            if ($this->idTech == 0)
-                die("Attention !!!!!!! Finalisation impossible : Pas de technicien définit pour le client <br/>");
+            if ($this->idTech == 0){
+                $tabT = getElementElement("commande", "contrat", null, $this->contrat->id);
+                $lien = (isset($tabT[0]['s'])? "<a href='".DOL_URL_ROOT."/Synopsis_PrepaCommande/prepacommande.php?id=".$tabT[0]['s']."&mainmenu=commercial&leftmenu=orders#pppart6a'>Coriger</a>" : "");
+                die("Attention !!!!!!! Finalisation imposible : Pas de technicien définit pour le client ".$lien."<br/>");
+            }
 
             if (!isset($lignes))
                 die("Pas de ligne ds le contrat");
@@ -92,7 +95,7 @@ class autoDi {
 
             foreach ($tabSite as $numSite => $site) {
                 foreach ($this->tabType as $type) {
-                    $this->sortie("SITE " . ($numSite + 1) . ": " . $type . "<br/><br/>");
+                    $this->sortie("<h2>SITE " . ($numSite + 1) . ": " . $type . "</h2><br/>");
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                         $delai = round(365 / count($site[$type]['tabVisite']) * $numVisiste);
                         $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
@@ -112,7 +115,7 @@ class autoDi {
                         }
 
                         $tabSite[$numSite][$type]['tabVisite'][$numVisiste]['date'] = date_format($date, "Y-m-d");
-                        $this->sortie("Visite " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . " le " . date_format($date, "d-m-Y") . (($decale > 0) ? " Decaler de " . $decale . " jours" : "") . "<br/>");
+                        $this->sortie("<br/><h3>Visite " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . " le " . date_format($date, "d-m-Y") . (($decale > 0) ? " Decaler de " . $decale . " jours" : "") . "</h3><br/>");
                         foreach ($visite['prod'] as $prod) {
                             $this->sortie(" - Matériel a visiter : " . $ligneFak->getInfoOneProductCli($prod['idProd']) . "<br/>");
                         }
@@ -131,6 +134,7 @@ class autoDi {
     }
 
     function creerFi() {
+        $this->getTabSecteur();
         $ligneFak = new Synopsis_ContratLigne($this->db);
         $tabSite = $this->tabSite;
 //        echo "<pre>";

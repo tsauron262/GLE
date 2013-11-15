@@ -83,7 +83,7 @@ if ($socid>0)
     $sql .= " , ".MAIN_DB_PREFIX."societe_commerciaux as sc";
     $sql .= " WHERE sc.fk_soc =".$soc->id;
     $sql .= " AND sc.fk_user = u.rowid";
-    $sql .= " ORDER BY u.lastname ASC ";
+    $sql .= " ORDER BY u.firstname ASC ";
 
     $resql = $db->query($sql);
     if ($resql)
@@ -99,7 +99,7 @@ if ($socid>0)
           {
             print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
-            print stripslashes($obj->firstname)." " .stripslashes($obj->name)."\n";
+            print stripslashes($obj->firstname)." " .stripslashes($obj->lastname)."\n";
             print '</a><br>';
             $i++;
           }
@@ -107,7 +107,7 @@ if ($socid>0)
           {
             print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
             print img_object($langs->trans("ShowUser"),"user").' ';
-            print utf8_encodeRien($obj->firstname." " .$obj->name."\n");
+            print utf8_encodeRien($obj->firstname." " .$obj->lastname."\n");
             print '</a>&nbsp;';
             if ($user->rights->SynopsisPrepaCom->all->AssocierCom)
             {
@@ -147,7 +147,7 @@ if ($socid>0)
 
         $sql = "SELECT u.rowid, u.lastname, u.firstname, u.login";
         $sql .= " FROM ".MAIN_DB_PREFIX."user as u";
-        $sql .= " ORDER BY u.lastname ASC ";
+        $sql .= " ORDER BY u.firstname ASC ";
 
         $resql = $db->query($sql);
         if ($resql)
@@ -174,7 +174,7 @@ if ($socid>0)
                 print "<tr $bc[$var]><td>";
                 print '<a href="'.DOL_URL_ROOT.'/user/fiche.php?id='.$obj->rowid.'">';
                 print img_object($langs->trans("ShowUser"),"user").' ';
-                print stripslashes($obj->firstname)." " .stripslashes($obj->name)."\n";
+                print stripslashes($obj->firstname)." " .stripslashes($obj->lastname)."\n";
                 print '</a>';
                 print '</td><td>'.utf8_encodeRien($obj->login).'</td>';
                 print '<td><a href="'.DOL_URL_ROOT.'/societe/commerciaux.php?socid='.$socid.'&amp;commid='.$obj->rowid.'">'.$langs->trans("Add").'</a></td>';

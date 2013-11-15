@@ -112,7 +112,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
-    $finReq = "'llx_Synopsis_Chrono_value' WHERE 'chrono_refid' NOT IN (SELECT id FROM llx_Synopsis_Chrono)";
+    $finReq = "llx_Synopsis_Chrono_value WHERE chrono_refid NOT IN (SELECT id FROM llx_Synopsis_Chrono)";
     $sqlValueChronoSansParent = $db->query("SELECT * FROM " . $finReq);
     while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
         erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);

@@ -66,9 +66,9 @@ class Synopsis_Contrat extends Contrat {
         foreach ($oldContrat->lines as $oldLigne) {//enreg info old ligne
             $idS = $oldLigne->id;
             foreach ($this->lines as $newLigne) {
-                if (!isset($tabOldIdOk[$idS]) && $oldLigne->fk_product == $newLigne->fk_product) {
+                if (!isset($tabOldIdOk[$newLigne->id]) && $oldLigne->fk_product == $newLigne->fk_product) {
                     $idD = $newLigne->id;
-                    $tabOldIdOk[$idS] = $idS;
+                    $tabOldIdOk[$idD] = $idD;
                     $tab = getElementElement("contratdet", null, $idS);
                     foreach ($tab as $lien)
                         if ($lien['td'] != "commandedet")
@@ -79,6 +79,7 @@ class Synopsis_Contrat extends Contrat {
                             addElementElement($lien['ts'], $lien['td'], $idD, $lien['d'], 0);
                     $newLigne->description = $oldLigne->description;
                     $newLigne->update($user);
+                    continue;
                 }
             }
         }

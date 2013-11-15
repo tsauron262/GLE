@@ -102,10 +102,41 @@ while ($res = $db->fetch_object($sql)) {
     $totalSAV++;
     $total_ht += $res->total_ht;
 }
+$requete = "SELECT *
+              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+             WHERE fk_contrat = " . $contratid;
+$sql = $db->query($requete);
+
+while ($res = $db->fetch_object($sql)) {
+//    $anneeMoi = date('Ym', strtotime($res->datei));
+//    if (!isset($arrResByStatut[$res->fk_statut])) {
+//        $arrResByStatut[$res->fk_statut] = 0;
+//        $arrResByStatutDur[$res->fk_statut] = 0;
+//        $arrResByStatutTotHT[$res->fk_statut] = 0;
+//    }
+//    if (!isset($arrResByDate[$anneeMoi])) {
+//        $arrResByDate[$anneeMoi] = 0;
+//        $arrResByDateDur[$anneeMoi] = 0;
+//        $arrResByDateTotHT[$anneeMoi] = 0;
+//    }
+//    $arrResByStatut[$res->fk_statut]++;
+//    $arrResByStatutDur[$res->fk_statut] += $res->duree;
+//    $arrResByStatutTotHT[$res->fk_statut] += $res->total_ht;
+//
+//    if (date('U', strtotime($res->datei)) > 0) {
+//        $arrResByDate[$anneeMoi]++;
+//        $arrRemDate[$anneeMoi] = date('m/Y', strtotime($res->datei));
+//        $arrResByDateDur[$anneeMoi] += $res->duree;
+//        $arrResByDateTotHT[$anneeMoi] += $res->total_ht;
+//    }
+    $totalSAV++;
+    $total_ht2 += $res->total_ht;
+}
 
 
 $contrat->fetch_lines();
 print "<table class='border' width='100%'><tr><td> Date contrat <td>".dol_print_date($contrat->date_contrat)."
+    <td>Prevue <td> ".$total_ht2." &euro;
     <tr><td>Vendue <td> ".$contrat->total_ht." &euro;";
 print "<td>Réaliser <td> ".$total_ht." &euro;</tr></table><br/><br/>";
 

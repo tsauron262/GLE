@@ -48,6 +48,7 @@ class Synopsis_Contrat extends Contrat {
         $oldRef = $this->ref;
         $this->oldId = $this->id;
         $this->ref .= "Temp";
+        $this->extraparams = 7;
         $this->create($user);
         $this->ref = SynopsisRevision::convertRef($oldRef, "contrat");
         $this->majRef();

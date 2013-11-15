@@ -27,7 +27,16 @@ class autoDi {
 
     function verif() {
         $this->display = true;
-        $this->getTabSecteur();
+        if ($this->processDet->statut != 3)
+            $this->getTabSecteur();
+        else {
+            $sql = $this->db->query("SELECT rowid FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat =" . $this->idContrat);
+            while ($ligne = $this->db->fetch_object($sql)) {
+                $di = new demandeInterv($this->db);
+                $di->fetch($ligne->rowid);
+                echo("<br/>".$di->getNomUrl(1) . " : ". dol_print_date($di->date, 'day') . " ". $di->description);
+            }
+        }
     }
 
     function getTabSecteur() {
@@ -66,10 +75,10 @@ class autoDi {
             }
         } else {
 
-            if ($this->idTech == 0){
+            if ($this->idTech == 0) {
                 $tabT = getElementElement("commande", "contrat", null, $this->contrat->id);
-                $lien = (isset($tabT[0]['s'])? "<a href='".DOL_URL_ROOT."/Synopsis_PrepaCommande/prepacommande.php?id=".$tabT[0]['s']."&mainmenu=commercial&leftmenu=orders#pppart6a'>Coriger</a>" : "");
-                die("Attention !!!!!!! Finalisation imposible : Pas de technicien définit pour le client ".$lien."<br/>");
+                $lien = (isset($tabT[0]['s']) ? "<a href='" . DOL_URL_ROOT . "/Synopsis_PrepaCommande/prepacommande.php?id=" . $tabT[0]['s'] . "&mainmenu=commercial&leftmenu=orders#pppart6a'>Coriger</a>" : "");
+                die("Attention !!!!!!! Finalisation imposible : Pas de technicien définit pour le client " . $lien . "<br/>");
             }
 
             if (!isset($lignes))
@@ -148,6 +157,7 @@ class autoDi {
                     $di->date = $visite['date'];
                     $di->socid = $this->contrat->socid;
                     $di->author = $user->id;
+                    $di->fk_contrat = $this->idContrat;
                     $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']);
                     $newId = $di->create();
                     $tech = new User($this->db);

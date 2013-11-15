@@ -105,9 +105,10 @@ function printHead($type, $id, $js = '') {
                 require_once(DOL_DOCUMENT_ROOT . "/core/lib/contract.lib.php");
                 $obj = new Contrat($db);
                 $obj->fetch($id);
+                $langs->load("contracts");
                 $head = contract_prepare_head($obj);
-                $titreType = "Invoice";
-                $nomType = "facture";
+                $titreType = "Contrat";
+                $nomType = "contract";
             }
 
             break;

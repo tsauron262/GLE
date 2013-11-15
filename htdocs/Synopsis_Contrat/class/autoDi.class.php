@@ -165,12 +165,12 @@ class autoDi {
                     $di->fetch($newId);
                     $di->preparePrisencharge($tech);
                     if ($type == "visite")
-                        $di->addline($newId, "Déplacement ", $visite['date'], "3600", 4, 1, 50);
+                        $di->addline($newId, "Déplacement ", $visite['date'], "3600", 4, 1, 50,1);
 
                     foreach ($visite['prod'] as $prod) {
                         $product = new Product($this->db);
                         $product->fetch($prod['fkProdContrat']);
-                        $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], "3600", 1, 1, 95);
+                        $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], "7200", 1, 1, 95);
                     }
                     $di->valid($user);
                 }

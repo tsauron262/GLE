@@ -69,9 +69,9 @@ class PropaleStats extends Stats
                 //Mod drsi
 //		$this->where.= " fk_statut > 0";
 		$this->where.= " fk_statut > 0 AND fk_statut != 3";
-                //f mod drsi
                 
-		$this->where.= " AND p.fk_soc = s.rowid AND p.entity = ".$conf->entity;
+		$this->where.= /*" AND p.fk_soc = s.rowid*/" AND p.entity = ".$conf->entity;
+                //f mod drsi
 		if (!$user->rights->societe->client->voir && !$user->societe_id) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 		if($this->socid)
 		{

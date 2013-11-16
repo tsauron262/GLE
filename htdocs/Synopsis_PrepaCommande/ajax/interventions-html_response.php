@@ -305,10 +305,10 @@ jQuery(document).ready(function(){
                     i++;
 //                    if(i == 2){
                         if($(this).html() == "FPR50"){
-                            forfait.attr('checked', true);
+                            forfait.attr('checked', false);
 //                            desc.html("Installation comprenant : ");
                         }
-                        if($(this).html() == "FPR30")
+//                        if($(this).html() == "FPR30")
 //                            desc.html("Intervention comprenant : ");
                         if($(this).html().match("FD.*")){
 //                            desc.html("Déplacement comprenant : ");

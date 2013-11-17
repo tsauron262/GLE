@@ -105,7 +105,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`)");
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`) AND targettype = 'productCli'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
-
+    $maj->req("update `" . MAIN_DB_PREFIX . "societe` set status = 1");
 
     $maj->ajoutDroitGr(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {

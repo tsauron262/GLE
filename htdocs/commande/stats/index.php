@@ -270,7 +270,7 @@ print '<div class="fichecenter"><div class="fichethirdleft">';
 	print '</table>';
 	print '</form>';
 	print '<br><br>';
-}
+//}Mod drsi fmod drsi
 
 print '<table class="border" width="100%">';
 print '<tr height="24">';

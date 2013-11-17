@@ -79,7 +79,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         die("Les info de la base a importé sont incorrecte");
 
     $maj = new maj($dbS, $dbD);
-    $maj->req("DELETE FROM '" . MAIN_DB_PREFIX . "product_lang'");
+    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "product_lang");
     $maj->startMaj(getTab());
     $maj->startMaj(array(// Modification de certaine table
         array("babel_categorie_association", MAIN_DB_PREFIX . "categorie",

@@ -276,10 +276,10 @@ class demandeInterv extends CommonObject {
 
                 $this->db->free($resql);
                 return $this->id;
-            } else {
-                $this->error = $this->db->error();
-                dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
-                return -2;
+//            } else {
+//                $this->error = $this->db->error();
+//                dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
+//                return -2;
             }
         } else {
             $this->error = $this->db->error();

@@ -1225,6 +1225,11 @@ class Form
         {
             $sql.= " AND p.tosell = ".$status;
         }
+        // mod drsi
+        if(is_array($filtertype))
+            $sql .= " AND p.fk_product_type IN (".implode(",", $filtertype).")";
+        else
+        //fmod drsi
         if (strval($filtertype) != '') $sql.=" AND p.fk_product_type=".$filtertype;
         // Add criteria on ref/label
         if ($filterkey && $filterkey != '')

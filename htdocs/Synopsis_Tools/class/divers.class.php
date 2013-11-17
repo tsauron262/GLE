@@ -111,7 +111,7 @@ class synopsisHook {
     }
 
     static function footer() {
-        global $conf, $db;
+        global $conf, $db, $logLongTime;
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
             if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT."/index.php") !== false) {
@@ -119,7 +119,7 @@ class synopsisHook {
             }
         }
         $time = (microtime(true) - self::$timeDeb);
-        if ($time > 2)
+        if ($time > 2 && (!isset($logLongTime) || !$logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4);
         echo "</div><div>" . $time . " s</div>";
     }

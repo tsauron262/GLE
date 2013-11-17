@@ -1861,6 +1861,10 @@ print "<br/><br/>Cache suppr : " . $tabStat['ef'];
  */
 unlink($dir . "temp/.importRunning");
 
+global $logLongTime;
+$logLongTime = false;
+llxFooter();
+
 function updateCategorie($ref, $prodId, $val) {
     if ($ref . 'x' != "x" && $prodId > 0) {
         global $remCatGlob, $db;

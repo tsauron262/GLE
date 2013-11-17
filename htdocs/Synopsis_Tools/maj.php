@@ -322,8 +322,8 @@ echo '<form action=""><input type="hidden" name="action" value="majFile"/><input
 
 
 
-
-
+global $logLongTime;
+$logLongTime = false;
 llxFooter();
 
 function getTab() {

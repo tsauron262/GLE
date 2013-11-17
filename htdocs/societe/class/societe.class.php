@@ -404,7 +404,7 @@ class Societe extends CommonObject
         $this->zip			= $this->zip?trim($this->zip):trim($this->zip);
         $this->town			= $this->town?trim($this->town):trim($this->town);
         $this->state_id		= trim($this->state_id);
-        $this->country_id	= ($this->country_id > 0)?$this->country_id:$this->country_id;
+        $this->country_id	= ($this->country_id > 0)?$this->country_id:0;
         $this->phone		= trim($this->phone?$this->phone:$this->tel);
         $this->phone		= preg_replace("/\s/","",$this->phone);
         $this->phone		= preg_replace("/\./","",$this->phone);
@@ -1515,22 +1515,22 @@ class Societe extends CommonObject
         }
         if ($mode == 2)
         {
-            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut6').' '.$langs->trans("ActivityCeased");
+            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut8').' '.$langs->trans("ActivityCeased");
             if ($statut==1) return img_picto($langs->trans("InActivity"),'statut4').' '.$langs->trans("InActivity");
         }
         if ($mode == 3)
         {
-            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut6');
+            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut8');
             if ($statut==1) return img_picto($langs->trans("InActivity"),'statut4');
         }
         if ($mode == 4)
         {
-            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut6').' '.$langs->trans("ActivityCeased");
+            if ($statut==0) return img_picto($langs->trans("ActivityCeased"),'statut8').' '.$langs->trans("ActivityCeased");
             if ($statut==1) return img_picto($langs->trans("InActivity"),'statut4').' '.$langs->trans("InActivity");
         }
         if ($mode == 5)
         {
-            if ($statut==0) return $langs->trans("ActivityCeased").' '.img_picto($langs->trans("ActivityCeased"),'statut6');
+            if ($statut==0) return $langs->trans("ActivityCeased").' '.img_picto($langs->trans("ActivityCeased"),'statut8');
             if ($statut==1) return $langs->trans("InActivity").' '.img_picto($langs->trans("InActivity"),'statut4');
         }
     }

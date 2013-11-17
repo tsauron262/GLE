@@ -107,7 +107,7 @@ function test_sql_and_script_inject($val, $type)
     }
     // For XSS Injection done by adding javascript closing html tags like with onmousemove, etc... (closing a src or href tag with not cleaned param)
     if ($type == 1) $sql_inj += preg_match('/"/i', $val);		// We refused " in GET parameters value
-    if ($type == 2) $sql_inj += preg_match('/[\s;"]/', $val);	// PHP_SELF is an url and must match url syntax
+    if ($type == 2) $sql_inj += preg_match('/[;"]/', $val);		// PHP_SELF is a file system path. It can contains spaces. 
     return $sql_inj;
 }
 
@@ -124,16 +124,15 @@ function analyse_sql_and_script(&$var, $type)
     {
         foreach ($var as $key => $value)
         {
-            if($key != "requete" && $key != "requeteValue")
-                if (analyse_sql_and_script($value,$type))
-                {
-                    $var[$key] = $value;
-                }
-                else
-                {
-                    print 'Access refused by SQL/Script injection protection in main.inc.php';
-                    exit;
-                }
+            if (analyse_sql_and_script($value,$type))
+            {
+                $var[$key] = $value;
+            }
+            else
+			{
+                print 'Access refused by SQL/Script injection protection in main.inc.php (type='.htmlentities($type).' key='.htmlentities($key).' value='.htmlentities($value).' page='.htmlentities($_SERVER["REQUEST_URI"]).')';
+                exit;
+            }
         }
         return true;
     }

@@ -121,7 +121,7 @@ function getBug($user) {
 
 function bug($user, $text, $adresse) {
     global $db;
-    $message = "<a href='" . $adresse . "'>Adresse : " . $adresse . "</a>
+    $message = "<a href='" . $adresse . "'>Adresse : " . dol_trunc($adresse, 80) . "</a>
         \n Utlisateur : " . $user->getNomUrl() . "
         \n Message : " . $text;
 
@@ -136,7 +136,7 @@ print '<form method="post">
     <input type="hidden" name="action" value="send"/>
     <input type="hidden" name="oldUrl" value="' . $_SERVER["HTTP_REFERER"] . '"/>
      Décrivez brièvement les conditions du bogue svp <br/><br/>
-    <textarea name="text" style="width:801px; height:300px"></textarea><br/><br/>
+    <textarea name="text" style="width:770px; height:300px"></textarea><br/><br/>
     <input type="submit" class="butAction" name="valider" value="Envoyer"/>
     </form>';
 

@@ -61,7 +61,7 @@ if ($_REQUEST['renouveler'])
     $contrat->renouvellementPart2();
 elseif (!isset($_REQUEST['contratId']) || $_REQUEST['contratId'] == 0){
     $contrat->initRefPlus();
-        addElementElement("commande", "contrat", $tcommId, $contrat->id);
+        addElementElement("commande", "contrat", $commId, $contrat->id);
 }
 
 

@@ -429,7 +429,7 @@ switch ($action) {
 
                     //hasRev => 1 si oui, rien sinon
                     if (!$withRev) {
-                        $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE orig_ref = '" . $chrono->ref . "' AND revision > 0";
+                        $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE orig_ref = '" . addslashes($chrono->ref) . "' AND revision > 0";
 //                        die($requete1);
                         $sql1 = $db->query($requete1);
                         $hasRev = false;

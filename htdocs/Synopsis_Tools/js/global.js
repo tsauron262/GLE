@@ -6,17 +6,17 @@ $(window).load(function() {
         });
         traiteScroll(heightDif);
     }
-
+    
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
-
-
+    
+    
     ajNoteAjax();
-
-
+    
+    
     var datas = 'url=' + window.location;
     datas += '&type=consigne';
     editAjax(jQuery('.consigne.editable'), datas);
-
+    
     //    $(".ui-search-toolbar input").keypress(function(e) {
     //	//alert(e.keyCode);
     //	if(e.keyCode == 13) {
@@ -25,7 +25,7 @@ $(window).load(function() {
     //        else
     //		alert('Enter oser    was pressed.'+e.keyCode );
     //    });
-
+    
     $(".ui-search-toolbar input").focusout(function() {
         setTimeout(function() {
             var e = jQuery.Event("keypress", {
@@ -134,7 +134,7 @@ function ajNoteAjax() {
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
                 $('a#note, .noteAjax').hover(shownNote, hideNote);
                 $('a#note').addClass("lienNote");
-
+                
                 //                $(".controlBut").click(function(){
                 //                    if($(this).val() == "<"){
                 //                        $(this).val(">");
@@ -144,17 +144,17 @@ function ajNoteAjax() {
                 //                    }     
                 //                    shownHideNote();   
                 //                })
-
+                
                 editAjax(jQuery('#notePublicEdit'), datas, function() {
                     hideNote()
                 });
-
+            
             }
         }
     });
-
-
-
+    
+    
+    
     function shownHideNote() {
         $(".noteAjax .note").animate({
             width: 'toggle'
@@ -219,7 +219,7 @@ function editAjax(elem, datas, callOut) {
 function popChrono(id, callBack) {
     //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
     $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id + "'></iframe></div>");
-
+    
     $("#id-container").hide();
     
     $(".fullScreen span.fermer").click(function() {
@@ -243,7 +243,7 @@ function popChrono(id, callBack) {
 
 }
 function addLienHtml(idIncr, id, nom, model, cible) {
-    cible.prepend("<div>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+    cible.prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
 }
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';
@@ -305,46 +305,107 @@ function cacherSuppr(element) {
     });
 }
 
+function addLienAj(firstParent){
+    parent = firstParent.parent();
+    model = parent.find(".model").html();
+    select = parent.find("select");
+    selectId = select.val();
+    idIncr++;
+    selectNom = select.find("option:selected").text();
+    ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+        if (ok == "ok")
+            addLienHtml(idIncr, selectId, selectNom, model, parent);
+    });    
+}
+
+function addChronoAj(firstParent){
+    parent = firstParent.parent();
+    model = parent.find(".model").html();
+    addChrono(firstParent, $("#socid").val(), function(valReturn) {
+        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+            if (ok == "ok") {
+                idIncr = idIncr + 1;
+                addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+                popChrono(valReturn, function() {
+                    });
+            }
+        });
+    });
+}
+
 function initFormChrono(){
     idIncr = 100;
-    $(".formAjax .ajLien").click(function() {
-        firstParent = $(this);
-        parent = firstParent.parent();
-        model = parent.find(".model").html();
-        select = parent.find("select");
-        selectId = select.val();
-        idIncr++;
-        selectNom = select.find("option:selected").text();
-        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
-            if (ok == "ok")
-                addLienHtml(idIncr, selectId, selectNom, model, parent);
+    $(".formAjax .addLien").click(function() {
+        addLienAj($(this));
+        return false;
+    });
+    $(".formAjax .changeLien").click(function() {
+        $(this).parent().find("div.elem").each(function(){
+            if(!$(this).hasClass("model"))
+                $(this).remove();
         });
+        addLienAj($(this));
         return false;
     });
     $(".formAjax .addChrono").click(function() {
-        firstParent = $(this);
-        parent = firstParent.parent();
-        model = parent.find(".model").html();
-        addChrono(this, $("#socid").val(), function(valReturn) {
-            ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
-                if (ok == "ok") {
-                    idIncr = idIncr + 1;
-                    addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
-                    popChrono(valReturn, function() {
-                        });
-                }
-            });
+        addChronoAj($(this));
+        return false;
+    });
+    $(".formAjax .changeChrono").click(function() {
+        $(this).parent().find("div.elem").each(function(){
+            if(!$(this).hasClass("model"))
+                $(this).remove();
         });
+        addChronoAj($(this));
         return false;
     });
     $("#chronoTable .addChrono").click(function() {
+        parent = $(this).parent();
+        model = parent.find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
             addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
-            popChrono(valReturn, function() {
-                });
+            popChrono(valReturn, function() {});
         });
+        return false;
+    });
+    $("#chronoTable .changeChrono").click(function() {
+        $(this).parent().find("div.elem").each(function(){
+            if(!$(this).hasClass("model"))
+                $(this).remove();
+        });
+        parent = $(this).parent();
+        model = parent.find(".model").html();
+        socid = $("#socid").parent().find("select").val();
+        addChrono(this, socid, function(valReturn) {
+            idIncr = idIncr + 1;
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            popChrono(valReturn, function() {});
+        });
+        return false;
+    });
+    
+    $("#chronoTable .addLien").click(function(){
+        model = $(this).parent().find(".model").html();
+        select = $(this).parent().find("select");
+        selectId = select.val();
+        idIncr++;
+        selectNom = select.find("option:selected").text();
+        addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
+        return false;
+    });
+    $("#chronoTable .changeLien").click(function(){
+        $(this).parent().find("div.elem").each(function(){
+            if(!$(this).hasClass("model"))
+                $(this).remove();
+        });
+        model = $(this).parent().find(".model").html();
+        select = $(this).parent().find("select");
+        selectId = select.val();
+        idIncr++;
+        selectNom = select.find("option:selected").text();
+        addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
         return false;
     });
 }

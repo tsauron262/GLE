@@ -358,8 +358,13 @@ if ($id > 0) {
         }
 
         if ($chr->model->hasDescription) {
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
-            print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea></td>';
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">'.$chr->model->nomDescription;
+            print '<td  class="ui-widget-content" colspan="3">';
+            if($chr->model->typeDescription == 2)
+                print '<textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea>';
+            else
+                print '<input type="text" name="description" class="required" value="'.$chr->description.'"/>';
+            print '</td>';
         }
 
 //Ajoute les extra key/Values
@@ -527,17 +532,6 @@ EOF;
 
         echo '<script>'
         . '$( document ).ready(function() {'
-        . 'idIncr = 100;'
-        . '$(".ajLien").click(function(){'
-        . 'model = $(this).parent().find(".model").html();'
-        . 'select = $(this).parent().find("select");'
-        . 'selectId = select.val();'
-        . 'idIncr++;'
-        . 'selectNom = select.find("option:selected").text();'
-        . 'addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());'
-        . ''
-        . 'return false;'
-        . '});'
         . '});'
         . '</script>';
     } else {
@@ -726,7 +720,7 @@ EOF;
         }
         if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Description';
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">'.$chr->model->nomDescription;
             print '    <td  class="ui-widget-content" colspan="3">' . $chr->description . '</td>';
         }
 //Ajoute les extra key/Values

@@ -135,9 +135,13 @@ EOF;
         $sql = $db->query($requete);
         $colModelArr = array();
         $colModelArr[0] = array('name' => "id", "index" => "id", "width" => 0, 'hidden' => true, "search" => false, "align" => "left", "key" => true, "hidedlg" => true);
-        $colModelArr[1] = array('name' => "ref", "index" => "ref", "width" => 80, "align" => "left");
+        $colModelArr[1] = array('name' => "Réf", "index" => "ref", "width" => 80, "align" => "left");
         $colModelArr[2] = array('name' => "hasRev", "index" => "hasRev", 'hidden' => true, "search" => false, "hidedlg" => true);
         $i = 3;
+        if ($chronoRef->hasDescription) {
+            $colModelArr[$i] = array('name' => $chronoRef->nomDescription, "index" => "description", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
+            $i++;
+        }
         while ($res = $db->fetch_object($sql)) {
             $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur WHERE id = " . $res->type_valeur;
             $sql1 = $db->query($requete1);

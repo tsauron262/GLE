@@ -58,7 +58,7 @@ $js .= "<style type='text/css'>body { position: static; }                 .ui-da
 .ui-pg-selbox { min-width:50px; }
 </style>
         <script type='text/javascript'>";
-$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_conf ORDER BY titre ASC";
+$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_conf WHERE active = 1 ORDER BY titre ASC";
 $sql = $db->query($requete);
 $js .= 'var typeRess = "';
 $js .= "-1:" . preg_replace("/'/", "\\'", "Sélection ->") . ";";

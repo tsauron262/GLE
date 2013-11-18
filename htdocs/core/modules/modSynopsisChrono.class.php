@@ -234,6 +234,7 @@ class modSynopsisChrono extends DolibarrModules
     */
   function init()
   {
+        $this->remove();
     $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/liste.php' WHERE Titre = 'Process' AND type ='top'", "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,
@@ -276,22 +277,25 @@ class modSynopsisChrono extends DolibarrModules
   `hasSuivie` tinyint(4) NOT NULL DEFAULT '1',
   `hasDescription` tinyint(4) NOT NULL DEFAULT '1',
   `hasStatut` tinyint(4) NOT NULL DEFAULT '1',
+  `nomDescription` varchar(50) NOT NULL,
+  `typeDescription` int(11) NOT NULL,
   PRIMARY KEY (`id`));",
-        "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `hasPropal`, `hasProjet`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`, `hasSuivie`, `hasDescription`, `hasStatut`) VALUES
-(1, 'Document indiçable', 'Document indiçable', 1, 0, 0, 1, 0, 0, 2, '{yy}I{0000@1}-A', '2011-03-17', '2011-11-25 14:03:14', 1, 1, 1, 1),
-(2, 'Document départ', 'Courrier, mail, documents ...', 1, 0, 0, 0, 0, 0, NULL, '{yy}D{0000@1} ', '2011-03-17', '2012-01-09 15:28:37', 1, 1, 1, 1),
-(3, 'Procédures', 'Documents de procédures AQ', 1, 0, 0, 1, 0, 0, 2, 'PR{0000}-A', '2011-04-26', '2012-01-09 15:29:05', 1, 1, 1, 1),
-(4, 'Instructions', 'Documents d instructions AQ', 1, 0, 0, 1, 0, 0, 2, 'IN{0000}-A', '2011-04-26', '2012-01-09 15:28:50', 1, 1, 1, 1),
-(5, 'Trames', 'Trames de fichiers', 1, 0, 0, 1, 0, 0, 2, 'TR{0000}-A', '2011-04-27', '2012-08-16 11:41:18', 1, 1, 1, 1),
-(6, 'FNC', 'Fiches de non conformité', 1, 0, 0, 0, 0, 0, NULL, '{yy}FNC{0000@1}', '2011-04-27', '2011-04-27 10:31:31', 1, 1, 1, 1),
-(7, 'ACP', 'Actions correctives et préventives', 1, 0, 0, 0, 0, 0, NULL, '{yy}ACP{0000@1}', '2011-05-06', '2011-05-06 06:46:50', 1, 1, 1, 1),
-(8, 'Synthèses affaires', '', 1, 0, 0, 0, 0, 0, NULL, '{yy}SA{0000@1}', '2012-06-20', '2012-06-20 12:01:08', 1, 1, 1, 1),
-(9, 'Audit', 'Chrono des audits', 0, 0, 0, 0, 0, 0, NULL, '{yy}AU{0000@1}', '2012-08-16', '2012-08-16 11:40:59', 1, 1, 1, 1),
-(10, 'Fiches d''anomalie', 'Anomalies modèles et outils de simulation', 1, 0, 0, 0, 0, 0, NULL, '{yy}FA{0000@1}', '2012-10-04', '2012-10-04 11:52:17', 1, 1, 1, 1),
-(100, 'Appel', 'Fiche Hotline', 0, 0, 1, 0, 0, 0, NULL, 'Hot{yy}{mm}{000}', '2013-10-15', '2013-11-04 00:11:44', 1, 0, 1, 0),
-(101, 'Produit', 'Info sur un produit sous contrat ou garentie', 0, 0, 1, 0, 0, 0, NULL, 'PROD{000000}', '2013-10-28', '2013-11-04 00:01:25', 1, 0, 0, 0),
-(102, 'Licence', '', 0, 0, 0, 0, 0, 0, NULL, 'LIC-{0000}', '2013-11-03', '2013-11-04 00:11:36', 1, 0, 1, 0),
-(103, 'Compte Utilisateur', '', 0, 0, 1, 0, 0, 0, NULL, 'USER{00000}', '2013-11-03', '2013-11-04 00:11:32', 1, 0, 1, 0);",
+        "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Chrono_conf` (`id`, `titre`, `description`, `hasFile`, `hasContact`, `hasSociete`, `hasRevision`, `hasPropal`, `hasProjet`, `revision_model_refid`, `modele`, `date_create`, `tms`, `active`, `hasSuivie`, `hasDescription`, `hasStatut`, `nomDescription`, `typeDescription`) VALUES
+(1, 'Document indiçable', 'Document indiçable', 1, 0, 0, 1, 0, 0, 2, '{yy}I{0000@1}-A', '2011-03-17', '2013-11-18 03:46:10', 0, 1, 1, 1, 'Description', 2),
+(2, 'Document départ', 'Courrier, mail, documents ...', 1, 0, 0, 0, 0, 0, NULL, '{yy}D{0000@1} ', '2011-03-17', '2013-11-18 03:46:06', 0, 1, 1, 1, 'Description', 2),
+(3, 'Procédures', 'Documents de procédures AQ', 1, 0, 0, 1, 0, 0, 2, 'PR{0000}-A', '2011-04-26', '2013-11-18 03:46:01', 0, 1, 1, 1, 'Description', 2),
+(4, 'Instructions', 'Documents d instructions AQ', 1, 0, 0, 1, 0, 0, 2, 'IN{0000}-A', '2011-04-26', '2013-11-18 03:45:56', 0, 1, 1, 1, 'Description', 2),
+(5, 'Trames', 'Trames de fichiers', 1, 0, 0, 1, 0, 0, 2, 'TR{0000}-A', '2011-04-27', '2013-11-18 03:45:49', 0, 1, 1, 1, 'Description', 2),
+(6, 'FNC', 'Fiches de non conformité', 1, 0, 0, 0, 0, 0, NULL, '{yy}FNC{0000@1}', '2011-04-27', '2013-11-18 03:45:42', 0, 1, 1, 1, 'Description', 2),
+(7, 'ACP', 'Actions correctives et préventives', 1, 0, 0, 0, 0, 0, NULL, '{yy}ACP{0000@1}', '2011-05-06', '2013-11-18 03:45:38', 0, 1, 1, 1, 'Description', 2),
+(8, 'Synthèses affaires', '', 1, 0, 0, 0, 0, 0, NULL, '{yy}SA{0000@1}', '2012-06-20', '2013-11-18 03:45:32', 0, 1, 1, 1, 'Description', 2),
+(9, 'Audit', 'Chrono des audits', 0, 0, 0, 0, 0, 0, NULL, '{yy}AU{0000@1}', '2012-08-16', '2013-11-18 03:45:27', 0, 1, 1, 1, 'Description', 2),
+(10, 'Fiches d''anomalie', 'Anomalies modèles et outils de simulation', 1, 0, 0, 0, 0, 0, NULL, '{yy}FA{0000@1}', '2012-10-04', '2013-11-18 03:45:22', 0, 1, 1, 1, 'Description', 2),
+(100, 'Appel', 'Fiche Hotline', 0, 0, 1, 0, 0, 0, NULL, 'Hot{yy}{mm}{000}', '2013-10-15', '2013-11-18 00:57:45', 1, 0, 1, 0, 'Description', 2),
+(101, 'Produit', 'Info sur un produit sous contrat ou garentie', 0, 0, 1, 0, 0, 0, NULL, 'PROD{000000}', '2013-10-28', '2013-11-18 03:06:59', 1, 0, 1, 0, 'NomB', 1),
+(102, 'Licence', '', 0, 0, 0, 0, 0, 0, NULL, 'LIC-{0000}', '2013-11-03', '2013-11-18 01:04:56', 1, 0, 1, 0, 'Nom', 1),
+(103, 'Compte Utilisateur', '', 0, 0, 1, 0, 0, 0, NULL, 'USER{00000}', '2013-11-03', '2013-11-18 00:57:45', 1, 0, 1, 0, 'Description', 2),
+(104, 'Site', '', 0, 0, 1, 0, 0, 0, NULL, 'Site{0000}', '2013-11-18', '2013-11-18 01:03:21', 1, 0, 1, 0, 'Nom', 1);",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_form_fct_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fct_refid` int(11) DEFAULT NULL,
@@ -371,7 +375,6 @@ class modSynopsisChrono extends DolibarrModules
 (1004, 'Contrat', '', 100, 6, 1000, '', 1),
 (1010, 'Produit', '', 101, 6, 1002, '', 1),
 (1011, 'N° Serie', '', 101, 1, NULL, '', 1),
-(1012, 'Nom', 'Facultatif (ex: Serveur PAO)', 101, 1, NULL, '', 1),
 (1013, 'Note', '', 101, 9, NULL, '', 1),
 (1014, 'Date Achat', '', 101, 2, NULL, '', 1),
 (1015, 'Date fin SAV', '', 101, 2, NULL, '', 1),
@@ -383,7 +386,8 @@ class modSynopsisChrono extends DolibarrModules
 (1023, 'Produit', '', 103, 10, 3, 'type:compteUser', 1),
 (1024, 'Poste', '', 102, 10, 3, 'type:licence', 1),
 (1025, 'Licence', '', 101, 10, 4, 'type:productCli', 1),
-(1026, 'Compte Utilisateur', '', 101, 10, 5, 'type:productCli', 1);",
+(1026, 'Compte Utilisateur', '', 101, 10, 5, 'type:productCli', 1),
+(1027, 'Site', '', 101, 10, 6, 'type:productCli', 1);",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_key_type_valeur` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,

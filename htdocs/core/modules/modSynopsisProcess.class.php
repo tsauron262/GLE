@@ -1988,21 +1988,22 @@ class modSynopsisProcess extends DolibarrModules {
   `where` varchar(80) NOT NULL,
   `ordre` tinyint(4) NOT NULL,
   `champId` varchar(30) NOT NULL,
-  `champVueSelect` varchar(30) NOT NULL,
+  `champVueSelect` varchar(100) NOT NULL,
   `sqlFiltreSoc` varchar(100) NOT NULL,
   `urlObj` varchar(150) NOT NULL,
-  PRIMARY KEY (`rowid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;",
-            "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`) VALUES
-(1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id='),
-(2, 'Appel', '', 'llx_Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
-(3, 'ProduitCli', '', 'llx_Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id='),
-(4, 'Licence', '', 'llx_Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'ref', '', 'Synopsis_Chrono/fiche.php?id='),
-(5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'ref', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=');");
+  `hasMultiValue` tinyint(4) NOT NULL,
+  PRIMARY KEY (`rowid`));",
+            "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`, `hasMultiValue`) VALUES
+(1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id=', 1),
+(2, 'Appel', '', 'llx_Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(3, 'ProduitCli', '', 'llx_Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(4, 'Licence', '', 'llx_Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'Synopsis_Chrono/fiche.php?id=', 1),
+(5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(6, 'Site', '', 'llx_Synopsis_Chrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 0);");
 
         $retour = $this->_init($sql);
 
-        include_once("../Synopsis_Process/process.class.php");
+        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
         process::majTabsProcess($this->db);
 
         return $retour;
@@ -2015,7 +2016,7 @@ class modSynopsisProcess extends DolibarrModules {
     function remove() {
 //        $sql = array('DROP TABLE ' . MAIN_DB_PREFIX . 'Synopsis_Process, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_fct, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_global, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_list_members, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_model, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_requete, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_src, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_class_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_prop_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style, ' . MAIN_DB_PREFIX . 'Synopsis_Process_form_type_style_value, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights, ' . MAIN_DB_PREFIX . 'Synopsis_Process_rights_def, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element, ' . MAIN_DB_PREFIX . 'Synopsis_Process_type_element_trigger, '. MAIN_DB_PREFIX . 'Synopsis_revision_model, '. MAIN_DB_PREFIX .'Synopsis_trigger');
         $sql = array();
-        include_once("../Synopsis_Process/process.class.php");
+        include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
         process::deleteTabsProcess($this->db);
 
         return $this->_remove($sql);

@@ -933,8 +933,8 @@ class processDet extends process {
     public function validate($valeur = false) {
         //1 Si droit de valider general => valider ou droit de valider le process
         global $user;
-                $statutAllOk = true;
-                $statutRefuser = false;
+        $statutAllOk = true;
+        $statutRefuser = false;
 
         if ($this->id > 0 && $this->process_refid) {
             $tmp = 'process' . $this->process_refid;
@@ -942,27 +942,26 @@ class processDet extends process {
             if ($user->rights->process->valider || $user->rights->process_user->$tmp->valider) {
                 if ($valeur == 1)
                     $statutAllOk = true;
-                else{
-                $requete = "SELECT v.valeur
+                else {
+                    $requete = "SELECT v.valeur
                               FROM " . MAIN_DB_PREFIX . "Synopsis_Process_rights_def as d
                          LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Processdet_validation as v ON v.processdet_refid = " . $this->id . "  AND v.validation_type_refid = d.id AND v.validation_number=" . $this->validation_number . "
                              WHERE isValidationRight = 1
                                AND active = 1
                                AND isValidationForAll <> 1";
 //                die($requete);
-                $sql = $this->db->query($requete);
-                $statutAllOk = true;
-                while ($res = $this->db->fetch_object($sql)) {
-                    if ($res->valeur . "x" == "0x") {
-                        $statutRefuser = true;
-                    } else if ($res->valeur . "x" == "1x") {
-                        $statutAllOk = false;
-                        
-                    } else {
-                        $statutRefuser = true;
-                        $statutAllOk = false;
+                    $sql = $this->db->query($requete);
+                    $statutAllOk = true;
+                    while ($res = $this->db->fetch_object($sql)) {
+                        if ($res->valeur . "x" == "0x") {
+                            $statutRefuser = true;
+                        } else if ($res->valeur . "x" == "1x") {
+                            $statutAllOk = false;
+                        } else {
+                            $statutRefuser = true;
+                            $statutAllOk = false;
+                        }
                     }
-                }
                 }
             } else {
                 $requete = "SELECT v.valeur
@@ -986,19 +985,19 @@ class processDet extends process {
             //  Za) Si oui => valid
             //  2b) Si non => continue
             //Valider
-                $requete = false;
-                if ($statutAllOk)
-                    $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 3 WHERE id = " . $this->id;
-                elseif ($statutRefuser) {
-                    //TODO si Revision => nouvelle révision
-                    //Sinon :> retour brouillon
-                    $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 0, validation_number=validation_number+1 WHERE id = " . $this->id;
-                } else {
-                    return (1);
-                }
-                if ($requete)
-                    $sql = $this->db->query($requete);
-                return (2);
+            $requete = false;
+            if ($statutAllOk)
+                $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 3 WHERE id = " . $this->id;
+            elseif ($statutRefuser) {
+                //TODO si Revision => nouvelle révision
+                //Sinon :> retour brouillon
+                $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 0, validation_number=validation_number+1 WHERE id = " . $this->id;
+            } else {
+                return (1);
+            }
+            if ($requete)
+                $sql = $this->db->query($requete);
+            return (2);
         } else {
             return -1;
         }
@@ -2387,6 +2386,7 @@ class lien extends formulaireSource {
     public $valuesArr = array();
     public $socid = 0;
     public $cssClassM;
+    public $hasMultiValue = ture;
 
     function lien($db) {
         $this->db = $db;
@@ -2401,6 +2401,7 @@ class lien extends formulaireSource {
         $this->nomElem = $result->nomElem;
         $this->champId = $result->champId;
         $this->where = $result->where;
+        $this->hasMultiValue = $result->hasMultiValue;
         $this->champVueSelect = $result->champVueSelect;
         $this->ordre = $result->ordre;
         $this->urlObj = $result->urlObj;
@@ -2451,10 +2452,10 @@ class lien extends formulaireSource {
     function getValuePlus($id) {
         if ($this->id == 1) {
             if (count($this->tabVal) > 0) {
-print "<ul class='syntab'>";
-print "<li id='#actif' class='default'>Service Actif</li>";
-print "<li id='#nonactif'>Service non actif</li>";
-print "</ul>";
+                print "<ul class='syntab'>";
+                print "<li id='#actif' class='default'>Service Actif</li>";
+                print "<li id='#nonactif'>Service non actif</li>";
+                print "</ul>";
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {
@@ -2472,7 +2473,7 @@ print "</ul>";
                             $color = "red";
                         elseif ($interval->format('%R%a') > -30)
                             $color = "orange";
-                        $html .= "<div style='background-color:" . $color . ";' class='".($contratdet->statut == 4 ? "actif" : "nonactif")." syntabelem'>";
+                        $html .= "<div style='background-color:" . $color . ";' class='" . ($contratdet->statut == 4 ? "actif" : "nonactif") . " syntabelem'>";
                         $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
                         $html .= "<br/>";
                         if ($contratdet->fk_product > 0) {
@@ -2511,43 +2512,51 @@ print "</ul>";
             $this->valuesArr[$result->id] = $result->nom;
             if (in_array($result->id, $this->tabVal)) {
                 $i++;
-                echo $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+                if($this->hasMultiValue || $i == 1)
+                    echo $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
             }
         }
         echo $this->getOneLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
 //                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
+        if($this->hasMultiValue)
+            $actionChrono = "add";
+        else
+            $actionChrono = "change";
         if ($this->typeChrono > 0)
-            echo "<button class='addChrono' id='addChrono" . $this->typeChrono . "'>Créer</button>";
-        echo "<button class='ajLien'>Ajouter</button>";
+            echo "<button class='".$actionChrono."Chrono' id='addChrono" . $this->typeChrono . "'>Créer</button>";
+        echo "<button class='".$actionChrono."Lien'>Ajouter</button>";
     }
-    
+
     function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
-        $html = '<div class="' . $classDiv . '">'
+        $html = '<div class="' . $classDiv . ' elem">'
                 . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien'>X</button>";
-        if ($this->urlObj != ""){
-            $html .= "<a href=\"" . DOL_URL_ROOT ."/". $this->urlObj. $idVal . "\" ";
+        if ($this->urlObj != "") {
+            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)
                 $html .= "onclick='popChrono(" . $idVal . ", function(){}); return false;'";
             else
                 $html .= "onclick='return confirm(\"Ceci va quiter la page sans enregistrer. Continuer ?\");'";
             $html .= ">" . $text . "</a>";
         }
-        else $html .= $text;
-       $html .= "</div>";
-       return $html;
-}
+        else
+            $html .= $text;
+        $html .= "</div>";
+        return $html;
+    }
 
     function getValue($id) {
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
 //        die("jjjj");
             if ($sql)
-                while ($result = $this->db->fetch_object($sql))
+                while ($result = $this->db->fetch_object($sql)) {
+                    $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
                         $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
                     else
                         $this->valuesArr[$result->id] = $result->nom;
+                }
         }
     }
 
@@ -3290,6 +3299,5 @@ function lien($url) {
 function finLien($nom) {
     return $nom . "</a>";
 }
-
 
 ?>

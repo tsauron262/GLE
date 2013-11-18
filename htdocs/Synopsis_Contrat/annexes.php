@@ -38,6 +38,8 @@ if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'contrat', $_REQUEST['id'], 'contrat');
 
+$typeAnnexe = 1;
+
 $form = new Form($db);
 $html = new Form($db);
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'DeleteAnnexe') {
@@ -46,20 +48,6 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'DeleteAnnexe') {
     $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe WHERE contrat_refid = " . $id . " AND annexe_refid = " . $idAnnexe;
     $sql = $db->query($requete);
     header('location:annexes.php?id=' . $id);
-}
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'chgSrvAction') {
-    $idL = $_REQUEST['Link'];
-    $i = 0;
-    $idL = str_replace("c", "", $idL, $i);
-    if ($i) {
-        delElementElement("commande", "contrat", NULL, $_REQUEST['id']);
-        addElementElement("commande", "contrat", $idL, $_REQUEST['id']);
-    }
-    $idL = str_replace("f", "", $idL, $i);
-    if ($i) {
-        delElementElement("contrat", "facture", $_REQUEST['id']);
-        addElementElement("contrat", "facture", $_REQUEST['id'], $idL);
-    }
 }
 
 
@@ -180,14 +168,14 @@ if ($id > 0) {
 
 //    $nbofservices = sizeof($contrat->lines);
 
-    $author = new User($db);
-    $author->fetch($contrat->user_author_id);
+//    $author = new User($db);
+//    $author->fetch($contrat->user_author_id);
 
-    $commercial_signature = new User($db);
-    $commercial_signature->fetch($contrat->commercial_signature_id);
-
-    $commercial_suivi = new User($db);
-    $commercial_suivi->fetch($contrat->commercial_suivi_id);
+//    $commercial_signature = new User($db);
+//    $commercial_signature->fetch($contrat->commercial_signature_id);
+//
+//    $commercial_suivi = new User($db);
+//    $commercial_suivi->fetch($contrat->commercial_suivi_id);
 
     $head = contract_prepare_head($contrat);
 //        $head = $contrat->getExtraHeadTab($head);
@@ -196,6 +184,82 @@ if ($id > 0) {
 
     dol_fiche_head($head, $hselected, $langs->trans("Contract"));
 
+
+    infoContrat($contrat);
+    
+    
+    //2 colonnes
+    print '<div class="demo">';
+    print "<table width=100% cellpadding=15>";
+    print "<tr><th class='ui-widget-header ui-state-default'>Annexes s&eacute;l&eacute;ctionn&eacute;es</th>";
+    print "    <th class='ui-widget-header ui-state-default'>Annexes disponibles</th>";
+    print "<tr><td class='ui-widget-content' style='padding: 0px;' valign=top>";
+    $requete = "SELECT p.modeleName,
+                           p.id,
+                           p.ref
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a,
+                           " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p
+                     WHERE a.annexe_refid = p.id AND p.type = ".$typeAnnexe."
+                       AND contrat_refid = " . $contrat->id . "
+                  ORDER BY a.rang";
+    $sql = $db->query($requete);
+    print '<ul id="sortable">';
+    $i = 1;
+    while ($res = $db->fetch_object($sql)) {
+        print "<li class='ui-widget-content' id='modele_" . $res->id . "'>Annexe " . $i . ": " . $res->modeleName . " (ref:" . $res->ref . ")";
+        print "<table style='float:right'><tr>
+                              <td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?modForContrat=true&action=Modify&modele=" . $res->id . "&id=" . $contrat->id . "\"' title='Modifier'></span>
+                              <td><span class='ui-icon ui-icon-trash' title='Effacer' onClick='location.href=\"annexes.php?action=DeleteAnnexe&modele=" . $res->id . "&id=" . $contrat->id . "\"'></span>
+                              <td><span class='ui-icon ui-icon-triangle-2-n-s'  title='D&eacute;placer'></span></table>";
+        $i++;
+    }
+    print "</ul>";
+    print "    <td class='ui-widget-content' style='padding: 0px;' valign=top>";
+
+    $requete = "SELECT p.modeleName,
+                           p.id,
+                           p.ref
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p
+                     WHERE type = ".$typeAnnexe." AND p.id NOT IN (SELECT annexe_refid FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe WHERE contrat_refid =" . $contrat->id . ")
+                  ORDER BY p.modeleName";
+    $sql = $db->query($requete);
+    print '<ul id="draggable">';
+    $i = 1;
+    while ($res = $db->fetch_object($sql)) {
+        print "<li class='ui-widget-content' id='modele_" . $res->id . "'>Mod&egrave;le " . $res->modeleName . " ref: " . $res->ref;
+        print "<table style='float:right;'><tr><td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?action=Modify&modele=" . $res->id . "&id=" . $contrat->id . "\"' title='Modifier'></span></table>";
+        $i++;
+    }
+    print "</ul>";
+
+    print "<tr><th class='ui-widget-header' colspan=2 align=right><button class='butAction' onClick='location.href=\"annexeModele.php?id=" . $contrat->id . "&typeAnnexe=".$typeAnnexe."\"'>Ajouter un mod&egrave;le</button>";
+    print "</table>";
+    print "</div>";
+    //1 les annexes séléctionnés + num + rang
+    //2 les annexes modèles
+    //Bouton ajouter un modele d'annexe
+    llxFooter();
+}
+
+function infoContrat($contrat) {
+    global $langs, $db;
+
+
+
+    if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'chgSrvAction') {
+        $idL = $_REQUEST['Link'];
+        $i = 0;
+        $idL = str_replace("c", "", $idL, $i);
+        if ($i) {
+            delElementElement("commande", "contrat", NULL, $_REQUEST['id']);
+            addElementElement("commande", "contrat", $idL, $_REQUEST['id']);
+        }
+        $idL = str_replace("f", "", $idL, $i);
+        if ($i) {
+            delElementElement("contrat", "facture", $_REQUEST['id']);
+            addElementElement("contrat", "facture", $_REQUEST['id'], $idL);
+        }
+    }
 
 
     /*
@@ -227,7 +291,7 @@ if ($id > 0) {
     //Type contrat
     print '    <th class="ui-widget-header ui-state-default">' . $langs->trans("Type") . '</th>
                    <td colspan="1" class="ui-widget-content" id="typePanel">';
-        $arrTmpType = $contrat->getTypeContrat();
+    $arrTmpType = $contrat->getTypeContrat();
     print $arrTmpType['Nom'];
     print "</td></tr>";
 
@@ -285,6 +349,15 @@ if ($id > 0) {
             }
         }
 
+        $selected = 0;
+        if (isset($tabLiked[0]['d'])) {
+            if ($tabLiked[0]['d'] == $_REQUEST['id'])
+                $selected = $tabLiked[0]['s'];
+            if ($tabLiked[0]['s'] == $_REQUEST['id'])
+                $selected = $tabLiked[0]['d'];
+        }
+        echo $selected;
+
         print '<td>';
         print "<FORM action='?action=chgSrvAction&id=" . $_REQUEST['id'] . "' method='POST'>";
         print '<SELECT name="Link">';
@@ -292,7 +365,7 @@ if ($id > 0) {
         foreach ($optgroup as $key => $val) {
             print '<optgroup label="' . $optgroupName[$key] . '">';
             foreach ($val as $key1 => $val1) {
-                print '<option value="' . $key1 . '">' . $val1 . '</option>';
+                print '<option value="' . $key1 . '" ' . (stripos($key1, $selected) !== false ? 'selected="selected"' : '') . '>' . $val1 . '</option>';
             }
             print "</optgroup>";
         }
@@ -307,7 +380,6 @@ if ($id > 0) {
 //                {
         $contrat->getHtmlLinked($tabLiked);
     }
-
     //ajoute le lien vers les propal / commande / facture
 //        foreach($contrat->linkedArray as $key=>$val)
     if (0) {
@@ -364,57 +436,6 @@ if ($id > 0) {
     print "<br/>";
     print "<br/>";
     print "<br/>";
-
-    //2 colonnes
-    print '<div class="demo">';
-    print "<table width=100% cellpadding=15>";
-    print "<tr><th class='ui-widget-header ui-state-default'>Annexes s&eacute;l&eacute;ctionn&eacute;es</th>";
-    print "    <th class='ui-widget-header ui-state-default'>Annexes disponibles</th>";
-    print "<tr><td class='ui-widget-content' style='padding: 0px;' valign=top>";
-    $requete = "SELECT p.modeleName,
-                           p.id,
-                           p.ref
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a,
-                           " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p
-                     WHERE a.annexe_refid = p.id
-                       AND contrat_refid = " . $contrat->id . "
-                  ORDER BY a.rang";
-    $sql = $db->query($requete);
-    print '<ul id="sortable">';
-    $i = 1;
-    while ($res = $db->fetch_object($sql)) {
-        print "<li class='ui-widget-content' id='modele_" . $res->id . "'>Annexe " . $i . ": " . $res->modeleName . " (ref:" . $res->ref . ")";
-        print "<table style='float:right'><tr>
-                              <td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?modForContrat=true&action=Modify&modele=" . $res->id . "&id=" . $contrat->id . "\"' title='Modifier'></span>
-                              <td><span class='ui-icon ui-icon-trash' title='Effacer' onClick='location.href=\"annexes.php?action=DeleteAnnexe&modele=" . $res->id . "&id=" . $contrat->id . "\"'></span>
-                              <td><span class='ui-icon ui-icon-triangle-2-n-s'  title='D&eacute;placer'></span></table>";
-        $i++;
-    }
-    print "</ul>";
-    print "    <td class='ui-widget-content' style='padding: 0px;' valign=top>";
-
-    $requete = "SELECT p.modeleName,
-                           p.id,
-                           p.ref
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p
-                     WHERE p.id NOT IN (SELECT annexe_refid FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe WHERE contrat_refid =" . $contrat->id . ")
-                  ORDER BY p.modeleName";
-    $sql = $db->query($requete);
-    print '<ul id="draggable">';
-    $i = 1;
-    while ($res = $db->fetch_object($sql)) {
-        print "<li class='ui-widget-content' id='modele_" . $res->id . "'>Mod&egrave;le " . $res->modeleName . " ref: " . $res->ref;
-        print "<table style='float:right;'><tr><td><span class='ui-icon ui-icon-arrowreturnthick-1-n' onClick='location.href=\"annexeModele.php?action=Modify&modele=" . $res->id . "&id=" . $contrat->id . "\"' title='Modifier'></span></table>";
-        $i++;
-    }
-    print "</ul>";
-
-    print "<tr><th class='ui-widget-header' colspan=2 align=right><button class='butAction' onClick='location.href=\"annexeModele.php?id=" . $contrat->id . "\"'>Ajouter un mod&egrave;le</button>";
-    print "</table>";
-    print "</div>";
-    //1 les annexes séléctionnés + num + rang
-    //2 les annexes modèles
-    //Bouton ajouter un modele d'annexe
-    llxFooter();
 }
+
 ?>

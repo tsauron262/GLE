@@ -100,7 +100,9 @@ if ($_REQUEST['action']=='mod')
                            hasProjet = ".$hasProjet.",
                            hasDescription = ".$hasDescription.",
                            hasStatut = ".$hasStatut.",
-                           hasSuivie = ".$hasSuivie."
+                           hasSuivie = ".$hasSuivie.",
+                           nomDescription = '".$_REQUEST['nomDescription']."',
+                           typeDescription = '".$_REQUEST['typeDescription']."'
                      WHERE id = ".$_REQUEST['id'];
         $sql = $db->query($requete);
     }
@@ -196,6 +198,8 @@ while($res=$db->fetch_object($sql))
         print "<td align=center>".$langs->trans("Description")."</td>";
         print "<td align=center>".$langs->trans("Statut")."</td>";
         print "<td align=center>".$langs->trans("Suivi")."</td>";
+        print "<td align=center>".$langs->trans("Label champ desc")."</td>";
+        print "<td align=center>".$langs->trans("Type champ desc")."</td>";
         print "<td align=center>".$langs->trans("Action")."</td>";
         print "</tr>";
         print "<tr>";
@@ -211,6 +215,8 @@ while($res=$db->fetch_object($sql))
         print "<td align=center><input name='hasDescription' type='checkbox' ".($res->hasDescription==1?'Checked':'')."></input>";
         print "<td align=center><input name='hasStatut' type='checkbox' ".($res->hasStatut==1?'Checked':'')."></input>";
         print "<td align=center><input name='hasSuivie' type='checkbox' ".($res->hasSuivie==1?'Checked':'')."></input>";
+        print "<td align=center><input style='text-align:center; width:90%;'  name='nomDescription' value='".$res->nomDescription."'></input>";
+        print "<td align=center><input style='text-align:center; width:50%;'  name='typeDescription' value='".$res->typeDescription."'></input>";
         print "<td class=' ".$classArr[$bool]."' align=center style='border-right: 1px Solid; border-bottom: 1px Solid;'><button onClick='location.href=\"Synopsis_Chrono.php?action=modify&id=".$res->id."\"' class='butAction'>Modifier</button><br/><button onClick='location.href=\"Synopsis_Chrono.php\"' class='butAction'>Annuler</button>";
         print "</table>";
         print "<table class=\"noborder\" width=\"100%\" cellpadding=5>";

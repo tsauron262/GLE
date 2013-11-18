@@ -50,6 +50,7 @@ $js = <<< EOF
 
 EOF;
 $id = $_REQUEST["id"];
+$typeAnnexe = $_REQUEST['typeAnnexe'];
 
 if ($_REQUEST['action'] == 'newModele') {
     $modeleName = addslashes($_REQUEST['modeleName']);
@@ -61,7 +62,7 @@ if ($_REQUEST['action'] == 'newModele') {
     if ($db->num_rows($sql) > 0) {
         $msg = "Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;e";
     } else {
-        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf (modeleName, annexe,ref,afficheTitre) VALUES ('" . $modeleName . "','" . $annexe . "','" . $ref . "'," . $afficheTitre . ")";
+        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf (modeleName, annexe,ref,afficheTitre,type) VALUES ('" . $modeleName . "','" . $annexe . "','" . $ref . "'," . $afficheTitre . ", ".$typeAnnexe.")";
         $sql = $db->query($requete);
         if ($sql && $id > 0) {
             header('Location:annexes.php?id=' . $id);
@@ -102,8 +103,8 @@ if ($_REQUEST['action'] == 'modifyModele') {
             $sql = false;
         } else {
             $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf
-                                        (modeleName, annexe, ref, afficheTitre)
-                                 VALUES ('" . $modeleName . "','" . $annexe . "','" . $ref . "'," . $afficheTitre . ")";
+                                        (modeleName, annexe, ref, afficheTitre, type)
+                                 VALUES ('" . $modeleName . "','" . $annexe . "','" . $ref . "'," . $afficheTitre . ", ".$typeAnnexe.")";
             $sql = $db->query($requete);
         }
     } else if (isset($_REQUEST['modForContrat']) && $_REQUEST['modForContrat']) {
@@ -173,6 +174,7 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
     print "<form name='form' id='form'  method='POST' action='annexeModele.php?modele=" . $res->id . "&action=modifyModele" . ($id > 0 ? "&id=" . $id : "") . "'>";
     print "<table width=100% cellpadding=15>";
     print "<input type='hidden' name='modForContrat' value='" . (isset($_REQUEST['modForContrat']) && $_REQUEST['modForContrat']) . "'/>";
+    print "<input type='hidden' name='typeAnnexe' value='" . $typeAnnexe . "'/>";
     if (!isset($_REQUEST['modForContrat']) || !$_REQUEST['modForContrat']) {
         print "<tr><th class='ui-widget-header ui-state-default'>Nom du mod&egrave;le";
         print "    <td class='ui-widget-content'><input class='required' name='modeleName' value='" . $res->modeleName . "'>";
@@ -186,10 +188,49 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
     print "<tr><th valign=top class='ui-widget-header ui-state-default'>Aide";
     print "    <td class='ui-widget-content'>";
     print "<br/><a href='aide-annexe.php?id=" . $contrat->id . "' target='_blank'><table><tr><td><span class='ui-icon ui-icon-extlink'></span></td><td>Ouvrir dans une nouvelle fen&ecirc;tre</table></a><br/><br/>";
-    print "<table width=100%>";
+    
     //require_once('Var_Dump.php');
+    getHelp($contrat, $user, $mysoc);
+//        require_once('Var_Dump.php');
+//        Var_Dump::Display($contrat->societe);
+
+
+    print "<tr><th align=right colspan=2 class='ui-widget-header'>";
+    if ($id > 0)
+        print "<button name='cancel' class='butAction'>Annuler</button>";
+    print "<button class='butAction'>Modifier</button>";
+    print "<button name='clone' value='1' class='butAction'>Cloner</button>";
+    print "<button name='effacer' value='1' class='butActionDelete'>Effacer</button>";
+    print "</table>";
+} else {
+    print "<div class='titre'>Nouveau mod&egrave;le d'annexe</div>";
+    if ($msg . "x" != "x") {
+        print "<div class='error ui-state-error'>" . $msg . "</div>";
+    }
+
+    print "<form name='form' id='form'  method='POST' action='annexeModele.php?action=newModele" . ($id > 0 ? "&id=" . $id : "") . "'>";
+    print "<input type='hidden' name='typeAnnexe' value='" . $typeAnnexe . "'/>";
+    print "<table width=100% cellpadding=15>";
+    print "<tr><th class='ui-widget-header ui-state-default'>Nom du mod&egrave;le";
+    print "    <td class='ui-widget-content'><input class='required' name='modeleName' value='" . $_REQUEST["modeleName"] . "'>";
+    print "<tr><th class='ui-widget-header ui-state-default'>Ref";
+    print "    <td class='ui-widget-content'><input class='required' name='ref' value='" . $_REQUEST["ref"] . "'>";
+    print "<tr><th class='ui-widget-header ui-state-default'>Affiche le titre";
+    print "    <td class='ui-widget-content'><input name='afficheTitre' type='checkbox'  " . ($_REQUEST["afficheTitre"] . "x" != "x" ? 'CHECKED' : "") . ">";
+    print "<tr><th class='ui-widget-header ui-state-default'>Contenu";
+    print "    <td class='ui-widget-content'><textarea style='width: 100%; min-height: 8em;' class='required'  name='annexe'>" . $_REQUEST["annexe"] . "</textarea>";
+    print "<tr><th align=right colspan=2 class='ui-widget-header'><button class='butAction'>Valider</button>";
+    print "</table>";
+    getHelp($contrat, $user, $mysoc);
+}
+
+
+llxfooter();
+
+function getHelp($contrat, $user, $mysoc){
     $remCode = array();
     $lastType = false;
+    print "<table width=100%>";
     print "<tr><th class='ui-widget-header'>Variable Annexe<th class='ui-widget-header'>Libelle<th class='ui-widget-header'>Example";
 //manque cp ville tel email fax nom prenom civilite
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Utilisateur";
@@ -279,37 +320,5 @@ if ($_REQUEST['action'] == "Modify" || $_REQUEST['action'] == "modifyModele") {
     }
 
     print "</table>";
-//        require_once('Var_Dump.php');
-//        Var_Dump::Display($contrat->societe);
-
-
-    print "<tr><th align=right colspan=2 class='ui-widget-header'>";
-    if ($id > 0)
-        print "<button name='cancel' class='butAction'>Annuler</button>";
-    print "<button class='butAction'>Modifier</button>";
-    print "<button name='clone' value='1' class='butAction'>Cloner</button>";
-    print "<button name='effacer' value='1' class='butActionDelete'>Effacer</button>";
-    print "</table>";
-} else {
-    print "<div class='titre'>Nouveau mod&egrave;le d'annexe</div>";
-    if ($msg . "x" != "x") {
-        print "<div class='error ui-state-error'>" . $msg . "</div>";
-    }
-
-    print "<form name='form' id='form'  method='POST' action='annexeModele.php?action=newModele" . ($id > 0 ? "&id=" . $id : "") . "'>";
-    print "<table width=100% cellpadding=15>";
-    print "<tr><th class='ui-widget-header ui-state-default'>Nom du mod&egrave;le";
-    print "    <td class='ui-widget-content'><input class='required' name='modeleName' value='" . $_REQUEST["modeleName"] . "'>";
-    print "<tr><th class='ui-widget-header ui-state-default'>Ref";
-    print "    <td class='ui-widget-content'><input class='required' name='ref' value='" . $_REQUEST["ref"] . "'>";
-    print "<tr><th class='ui-widget-header ui-state-default'>Affiche le titre";
-    print "    <td class='ui-widget-content'><input name='afficheTitre' type='checkbox'  " . ($_REQUEST["afficheTitre"] . "x" != "x" ? 'CHECKED' : "") . ">";
-    print "<tr><th class='ui-widget-header ui-state-default'>Contenu";
-    print "    <td class='ui-widget-content'><textarea style='width: 100%; min-height: 8em;' class='required'  name='annexe'>" . $_REQUEST["annexe"] . "</textarea>";
-    print "<tr><th align=right colspan=2 class='ui-widget-header'><button class='butAction'>Valider</button>";
-    print "</table>";
 }
-
-
-llxfooter();
 ?>

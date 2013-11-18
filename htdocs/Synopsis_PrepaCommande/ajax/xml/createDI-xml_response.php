@@ -33,12 +33,15 @@
     $societe = new Societe($db);
     $societe->fetch($com->socid);
     $di->ref=$di->getNextNumRef($societe);
-    $di->fk_user_prisencharge=$_REQUEST['userid'];
+//    $di->fk_user_prisencharge=$_REQUEST['userid'];
+    $tech = new User($db);
+    $tech->fetch($_REQUEST['userid']);
     $di->author=$user->id;
     $di->description=utf8_encodeRien($_REQUEST['desc']);
     $di->modelpdf='soleil';
 
     $diId = $di->create();
+    $di->preparePrisencharge($tech);
 
     if ($diId > 0){
 

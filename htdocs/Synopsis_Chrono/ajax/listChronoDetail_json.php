@@ -65,22 +65,22 @@ if ($searchOn == 'true') {
         $operT = '=';
         $wh .= " AND " . $searchFieldT . " " . $operT . " '" . $searchStringT . "'";
     }
-    
+
     if ($_REQUEST['fkprojet'] != "") {
-        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."projet p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE projetid = p.rowid AND (p.ref LIKE \"%".$_REQUEST['fkprojet']."%\" OR p.title LIKE \"%".$_REQUEST['fkprojet']."%\"))";
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "projet p, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE projetid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['fkprojet'] . "%\" OR p.title LIKE \"%" . $_REQUEST['fkprojet'] . "%\"))";
         $searchFieldT = 'id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
-    
+
     if ($_REQUEST['propal'] != "") {
-        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."propal p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE propalid = p.rowid AND (p.ref LIKE \"%".$_REQUEST['propal']."%\"))";
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";
         $searchFieldT = 'id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
     if ($_REQUEST['soc'] != "") {
-        $searchStringT = "(SELECT id FROM ".MAIN_DB_PREFIX."societe p, ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%".$_REQUEST['soc']."%\"))";
+        $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "societe p, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE fk_societe = p.rowid AND (p.nom LIKE \"%" . $_REQUEST['soc'] . "%\"))";
         $searchFieldT = 'id';
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
@@ -240,13 +240,13 @@ switch ($action) {
                 // chrono_refid
                 //print "123456789".$requete1;
             }
-            
+
             $requete1 .= $wh1;
 
 
 
-            
-            $sql1 = $db->query($requete1);//Juste pour le nb de ligne
+
+            $sql1 = $db->query($requete1); //Juste pour le nb de ligne
             $count = $db->num_rows($sql1);
 
 
@@ -271,15 +271,15 @@ switch ($action) {
             }
             if ($page > $total_pages)
                 $page = $total_pages;
-            
+
             $arrTmp = array();
             while ($res1 = $db->fetch_object($sql1)) {
                 $arrTmp[] = $res1->id;
             }
-                $iter = 0;
-                $arrRef = array();
-                $arrValue = array();
-                $arrStatut = array();
+            $iter = 0;
+            $arrRef = array();
+            $arrValue = array();
+            $arrStatut = array();
             if (isset($arrTmp[0])) {
                 $requete .= " AND chrono_id IN (" . join(",", $arrTmp) . ") ";
 //            $requete .="LIMIT 0, 1000";
@@ -324,7 +324,7 @@ switch ($action) {
 
 //temp sql table
 
-            $requete = "CREATE TEMPORARY TABLE tempchronovalue (id int(11) NOT NULL, `chrono_id` INT(11) DEFAULT NULL, `ref` VARCHAR(150) DEFAULT NULL, `fk_statut` int(11) DEFAULT NULL,";
+            $requete = "CREATE TEMPORARY TABLE tempchronovalue (id int(11) NOT NULL, `chrono_id` INT(11) DEFAULT NULL, `ref` VARCHAR(150) DEFAULT NULL, `fk_statut` int(11) DEFAULT NULL";
             $requeteArr = array();
             foreach ($arrCreateTable as $key => $val) {
                 if ($val == 'datetime')
@@ -332,12 +332,13 @@ switch ($action) {
                 else
                     $requeteArr[] .= "`" . $key . "` VARCHAR(100) DEFAULT NULL";
             }
-            $requete .= join(',', $requeteArr);
+            if (count($requeteArr) > 0)
+                $requete .= "," . join(',', $requeteArr);
             $requete .= ")ENGINE=MyISAM DEFAULT CHARSET=utf8";
             $sql = $db->query($requete);
 //Insert datas
 
-            $insArr = array();
+            $insArr = array("id", "chrono_id,ref", "fk_statut");
             $insStr = "";
             $insStr2 = "";
             foreach ($arrKeyName as $key => $val) {
@@ -351,9 +352,9 @@ switch ($action) {
             $i = 0;
 
             foreach ($arrValue as $chrono_id => $chrono_arr_value_by_key_name) {
-                $insArr2 = array();
                 $chrono_ref = $arrRef[$chrono_id];
                 $fk_statut = $arrStatut[$chrono_id];
+                $insArr2 = array($i, $chrono_id, "'" . addslashes($chrono_ref) . "'", $fk_statut);
                 foreach ($arrKeyName as $keyid => $keyname) {
                     if ($arrCreateTable[$keyname] == 'datetime') {
                         $date = $chrono_arr_value_by_key_name[$keyname]['value'];
@@ -383,8 +384,8 @@ switch ($action) {
                 }
                 $insStr2 = join(',', $insArr2);
                 $requete = "INSERT INTO tempchronovalue
-                            (id,chrono_id,ref,fk_statut," . $insStr . ")
-                     VALUES (" . $i . "," . $chrono_id . ",'" . addslashes($chrono_ref) . "','" . $fk_statut . "'," . $insStr2 . ")";
+                            (" . $insStr . ")
+                     VALUES (" . $insStr2 . ")";
 //print $requete;
                 $sql = $db->query($requete);
                 $i++;
@@ -441,6 +442,9 @@ switch ($action) {
                         $arr[] = ('<div class="hasRev">0</div>');
                     }
 
+                    if ($chrono->model->hasDescription)
+                        $arr[] = $chrono->description;
+
                     foreach ($arrKeyName as $keyid => $keyname) {
                         if ($arrCreateTable[$keyname] == 'datetime') {
                             if ($arrhasTime[$keyname])
@@ -451,7 +455,7 @@ switch ($action) {
                             $arr[] = $res->$keyname;
                         }
                     }
-                    if ($chrono->model->hasSociete){
+                    if ($chrono->model->hasSociete) {
                         $html = "";
                         if ($chrono->socid > 0) {
                             require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
@@ -461,7 +465,7 @@ switch ($action) {
                         }
                         $arr[] = $html;
                     }
-                    if ($chrono->model->hasPropal){
+                    if ($chrono->model->hasPropal) {
                         $html = "";
                         if ($chrono->propalid > 0) {
                             require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");

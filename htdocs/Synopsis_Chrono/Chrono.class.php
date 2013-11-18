@@ -301,7 +301,7 @@ class Chrono extends CommonObject {
 
     private function LibStatut($statut, $mode) {
         global $langs;
-$langs->load("chrono@Synopsis_Chrono");
+        $langs->load("chrono@Synopsis_Chrono");
 
         if ($mode == 0) {
             if ($statut == 0)
@@ -703,6 +703,9 @@ class ChronoRef {
     public $hasContact;
     public $hasSociete;
     public $hasRevision;
+    public $hasDescription;
+    public $nomDescription;
+    public $typeDescription;
     public $hasPropal;
     public $hasProjet;
     public $modele;
@@ -727,6 +730,9 @@ class ChronoRef {
             $this->hasSociete = $res->hasSociete;
             $this->hasRevision = $res->hasRevision;
             $this->hasDescription = $res->hasDescription;
+            $this->typeDescription = $res->typeDescription;
+            $this->nomDescription = $res->nomDescription;
+            $this->hasMultipleValue = $res->hasMultipleValue;
             $this->hasStatut = $res->hasStatut;
             $this->hasSuivie = $res->hasSuivie;
             $this->hasPropal = $res->hasPropal;

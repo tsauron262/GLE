@@ -49,6 +49,7 @@ class fileInfo {
         if(stripos($nom, ".php")){
             include($this->pathFileInfo . $nom);
             $this->tabSql = $tabSql;
+            $this->php = $php;
                     return $text;
         }
         else
@@ -86,7 +87,9 @@ class fileInfo {
         if(isset($this->tabSql) && is_array($this->tabSql))
             foreach($this->tabSql as $req)
                 if(!$db->query($req))
-                    echo "Erreur SQl";
+                    echo "Erreur SQl : ".$req."<br/>";
+        if(isset($this->php))
+            eval($this->php);
         die($message);
     }
 

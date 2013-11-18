@@ -38,7 +38,7 @@ print "<div class='titre'>Chrono - d&eacute;tails :  ";
 
 //1 liste des type de chrono disponible
 print "<SELECT name='typeChrono' id='typeChrono'>";
-$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_conf ORDER BY titre";
+$requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_conf where active=1 ORDER BY titre";
 $sql = $db->query($requete);
 print "<OPTION value='-1'>S&eacute;letionner-></OPTION>";
 while ($res = $db->fetch_object($sql)) {

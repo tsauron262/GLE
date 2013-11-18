@@ -141,9 +141,9 @@ class Synopsis_Contrat extends Contrat {
 
     public function initRefPlus() {
         global $conf;
-        $pref = "CS4";
+        $pref = "CHM";
         $oldPref = "CT";
-        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = false;
+        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
             if ($ligne->GMAO_Mixte['isSAV'])
@@ -159,6 +159,10 @@ class Synopsis_Contrat extends Contrat {
             $prod->fetch($ligne->fk_product);
             if (stripos($prod->ref, "YO1sante") !== false)
                 $isMed = true;
+            if (stripos($prod->ref, "FPR77") !== false)
+                $isMed = true;
+            if (stripos($prod->ref, "FCR04") !== false)
+                $isMed8 = true;
             if (stripos($prod->ref, "fpr") !== false)
                 $fpr = true;
             if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
@@ -171,14 +175,20 @@ class Synopsis_Contrat extends Contrat {
 //            $pref = "MAI";
 //        if ($isTeleMaint)
 //            $pref = "TEL";
-        if ($fpr)
-            $pref = "CHM";
+//        if ($fpr)
+//            $pref = "CHM";
         if ($isHotline)
             $pref = "HL";
+        if ($isHotline && $isTeleMaint)
+            $pref = "CT";
+        if ($suivie)
+            $pref = "CS4";
         if ($isHotline && $is8h)
             $pref = "CD8";
         if ($isMed)
             $pref = "CMED";
+        if ($isMed8)
+            $pref = "CMED8";
         $this->prefRef = substr($pref, 0, 2);
         if (isset($conf->global->CONTRACT_MAGRE_MASK))
             $conf->global->CONTRACT_MAGRE_MASK = str_replace($oldPref, $pref, $conf->global->CONTRACT_MAGRE_MASK);
@@ -787,7 +797,7 @@ class Synopsis_Contrat extends Contrat {
                 switch ($elem['ts']) {
                     case 'commande':
                         print 'la commande<td>';
-                        print '<td align="right"><a href="' . $_SERVER["PHP_SELF"] . '?action=chSrc&amp;id=' . $id . '">' . img_edit($langs->trans("Change la source")) . '</a>';
+                        print '<td align="right"><a href="' . $_SERVER["PHP_SELF"] . '?action=chSrc&amp;id=' . $this->id . '">' . img_edit($langs->trans("Change la source")) . '</a>';
                         require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
                         $comm = new Commande($db);
                         $comm->fetch($val1);

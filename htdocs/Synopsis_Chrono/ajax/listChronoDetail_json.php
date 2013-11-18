@@ -384,7 +384,7 @@ switch ($action) {
                 $insStr2 = join(',', $insArr2);
                 $requete = "INSERT INTO tempchronovalue
                             (id,chrono_id,ref,fk_statut," . $insStr . ")
-                     VALUES (" . $i . "," . $chrono_id . ",'" . $chrono_ref . "','" . $fk_statut . "'," . $insStr2 . ")";
+                     VALUES (" . $i . "," . $chrono_id . ",'" . addslashes($chrono_ref) . "','" . $fk_statut . "'," . $insStr2 . ")";
 //print $requete;
                 $sql = $db->query($requete);
                 $i++;

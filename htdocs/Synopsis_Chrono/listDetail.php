@@ -24,7 +24,7 @@ $id = $_REQUEST['id'];
 
 $nomDiv = "gridChronoDet";
 
-$js .= tabChronoDetail($id, $nomDiv, "&Lier_a_un_contrat=Pathologie&_search2=true");
+$js .= tabChronoDetail($id, $nomDiv, "");
 
 
 llxHeader($js, "Chrono - d&eacute;tails");

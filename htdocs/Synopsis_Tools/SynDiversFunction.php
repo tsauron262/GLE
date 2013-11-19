@@ -1,7 +1,7 @@
 <?php
 
 function sanitize_string($str, $newstr = '_') {
-    $forbidden_chars_to_underscore = array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=");
+    $forbidden_chars_to_underscore = array(" ", "'", "/", "\\", ":", "*", "?", "\"", "<", ">", "|", "[", "]", ",", ";", "=", "(", ")");
     //$forbidden_chars_to_remove=array("(",")");
     $forbidden_chars_to_remove = array();
 

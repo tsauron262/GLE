@@ -60,6 +60,10 @@ $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
 $conf->global->devMailTo = 'tommy@drsi.fr';
 
 
+//Key chrono
+define('CHRONO_KEY_SITE_DUREE_DEP', 1029);
+
+
 $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
 $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
 if (is_object($langs)) {

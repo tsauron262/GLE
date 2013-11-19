@@ -34,7 +34,7 @@ class autoDi {
             while ($ligne = $this->db->fetch_object($sql)) {
                 $di = new demandeInterv($this->db);
                 $di->fetch($ligne->rowid);
-                echo("<br/>".$di->getNomUrl(1) . " : ". dol_print_date($di->date, 'day') . " ". $di->description);
+                echo("<br/>" . $di->getNomUrl(1) . " : " . dol_print_date($di->date, 'day') . " " . $di->description);
             }
         }
     }
@@ -57,9 +57,9 @@ class autoDi {
                         die("Attention !!!!!!! Finalisation impossible : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a>");
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
-                        $tabT = getElementElement("productCli", "site", $prod);
-                        if(isset($tabT[0]))
-                            $site = $tabT[0]['d'];
+                        $tabT = getElementElement("site", "productCli", null, $prod);
+                        if (isset($tabT[0]))
+                            $site = $tabT[0]['s'];
                         if (!isset($tabSite[$site]))
                             $tabSite[$site] = array('visite' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()), 'tele' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()));
                         $tabSite[$site][$type]['prod'][] = array('idProd' => $prod, 'nbVisite' => $nbVisite, 'fkProdContrat' => $lignes->fk_product);
@@ -106,8 +106,15 @@ class autoDi {
 
 
             foreach ($tabSite as $numSite => $site) {
+                $nomSite = ($numSite + 1);
+                if ($numSite > 5)
+                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $numSite);
+                if ($this->db->num_rows($sql) > 0) {
+                    $result = $this->db->fetch_object($sql);
+                    $nomSite = $result->description;
+                }
                 foreach ($this->tabType as $type) {
-                    $this->sortie("<h2>SITE " . ($numSite + 1) . ": " . $type . "</h2><br/>");
+                    $this->sortie("<h2>SITE " . $nomSite . ": " . $type . "</h2><br/>");
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                         $delai = round(365 / count($site[$type]['tabVisite']) * $numVisiste);
                         $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
@@ -153,7 +160,21 @@ class autoDi {
 //        print_r($tabSite);
         global $user;
         foreach ($tabSite as $numSite => $site) {
-
+            $nomSite = ($numSite + 1);
+            $dureeDep = 0;
+            $dureeInt = 2;
+            if ($numSite > 5){
+                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $numSite);
+            if ($this->db->num_rows($sql) > 0) {
+                $result = $this->db->fetch_object($sql);
+                $nomSite = $result->description;
+                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $numSite . " AND key_id = " . CHRONO_KEY_SITE_DUREE_DEP);
+                if ($this->db->num_rows($sql) > 0) {
+                    $result = $this->db->fetch_object($sql);
+                    $dureeDep = $result->value;
+                }
+            }
+            }
             foreach ($this->tabType as $type) {
                 foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                     $di = new demandeInterv($this->db);
@@ -161,22 +182,28 @@ class autoDi {
                     $di->socid = $this->contrat->socid;
                     $di->author = $user->id;
                     $di->fk_contrat = $this->idContrat;
-                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']);
+                    $textSite = (count($tabSite) > 1 ? " SITE : ".$nomSite : "");
+                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']). $textSite;
                     $newId = $di->create();
                     $tech = new User($this->db);
                     $tech->fetch($this->idTech);
                     $di->fetch($newId);
                     $di->preparePrisencharge($tech);
-                    $nbHeure = 2;
-                    if ($type == "visite"){
-                        $di->addline($newId, "Déplacement ", $visite['date'], "3600", 4, 1, 50,1);
-                        $nbHeure = 5;
+                    if ($type == "visite") {
+                        if ($dureeDep == 0)
+                            $dureeDep = 1;
+                        $dureeInt = 5;
+                        $idType = 20;
+                        $di->addline($newId, "Déplacement ", $visite['date'], ("3600" * $dureeDep), 4, 1, 50, 1);
+                    }
+                    else{
+                        $idType = 21;                        
                     }
 
                     foreach ($visite['prod'] as $prod) {
                         $product = new Product($this->db);
                         $product->fetch($prod['fkProdContrat']);
-                        $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], (3600*$nbHeure), 1, 1, 95);
+                        $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], (3600 * $dureeInt), $idType, 1, 95);
                     }
                     $di->valid($user);
                 }

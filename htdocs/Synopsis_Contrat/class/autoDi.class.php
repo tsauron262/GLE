@@ -57,6 +57,9 @@ class autoDi {
                         die("Attention !!!!!!! Finalisation impossible : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a>");
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
+                        $tabT = getElementElement("productCli", "site", $prod);
+                        if(isset($tabT[0]))
+                            $site = $tabT[0]['d'];
                         if (!isset($tabSite[$site]))
                             $tabSite[$site] = array('visite' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()), 'tele' => array('prod' => array(), 'visiteMax' => 0, 'tabVisite' => array()));
                         $tabSite[$site][$type]['prod'][] = array('idProd' => $prod, 'nbVisite' => $nbVisite, 'fkProdContrat' => $lignes->fk_product);

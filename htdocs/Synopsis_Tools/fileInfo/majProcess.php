@@ -2,6 +2,7 @@
 $tabSql = array("DROP table ".MAIN_DB_PREFIX."Synopsis_Process_lien",
         "DROP table ".MAIN_DB_PREFIX."Synopsis_Chrono_conf",
         "DROP table ".MAIN_DB_PREFIX."Synopsis_Chrono_key",
+        "DROP table ".MAIN_DB_PREFIX."Synopsis_Process",
         "ALTER TABLE  `".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf` ADD  `type` INT NOT NULL DEFAULT  '1'");
     
 $text = "Maj de test";

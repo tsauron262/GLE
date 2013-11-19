@@ -439,10 +439,10 @@ class modSynopsisProcess extends DolibarrModules {
   KEY `formulaire_refid` (`formulaire_refid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=3 ;',
             'INSERT IGNORE INTO `' . MAIN_DB_PREFIX . 'Synopsis_Process` (`id`, `label`, `description`, `fk_statut`, `bloquant`, `formulaire_refid`, `pretraitement`, `posttraitement`, `validAction`, `askValidAction`, `reviseAction`, `PROCESS_MASK`, `ADDON_PDF`, `PROCESS_ADDON`, `typeElement_refid`, `trigger_refid`, `revision_model_refid`) VALUES
-(1, "TR15", "FICHE ANALYSE FAISABILITE", NULL, 1, 1, "", "", "", "", "", "{yy}TR15{0000@1}", "", "demantoide", 1, 49, 2),
-(2, "FORM_TEST", "TESTONS CES PROCESS", NULL, 0, 1, "", "", "", "", "", "FORM/{00000@}", "pholos", "demantoide", 1, 47, 1),
-(3, "Validation Propal", "Process de validation des propal", NULL, 1, 3, "", "", "", "", "", "VALID{0000}", "", "demantoide", 1, 48, NULL),
-(4, "Calendrier DI", "Proposition de date pour les DI de contrat", 0, 1, 4, "require_once(DOL_DOCUMENT_ROOT.\'/Synopsis_Contrat/class/autoDi.class.php\');\r\n$autoDi = new autoDi($process->typeElement->element->id, true);", "", "require_once(DOL_DOCUMENT_ROOT.\'/Synopsis_Contrat/class/autoDi.class.php\'); $autoDi = new autoDi($element_id); $autoDi->creerFi();", "", "", "CALDI{00000}", "", "demantoide", 9, 23, NULL);',
+(1, \'TR15\', \'FICHE ANALYSE FAISABILITE\', NULL, 1, 1, \'\', \'\', \'\', \'\', \'\', \'{yy}TR15{0000@1}\', \'\', \'demantoide\', 1, 49, 2),
+(2, \'FORM_TEST\', \'TESTONS CES PROCESS\', NULL, 0, 1, \'\', \'\', \'\', \'\', \'\', \'FORM/{00000@}\', \'pholos\', \'demantoide\', 1, 47, 1),
+(3, \'Validation Propal\', \'Process de validation des propal\', 1, 1, 3, \'\', \'\', \'\', \'\', \'\', \'VALID{0000}\', \'\', \'demantoide\', 1, 48, NULL),
+(4, \'Calendrier DI\', \'Proposition de date pour les DI de contrat\', 1, 1, 4, \'\', \'require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/autoDi.class.php");\n$autoDi = new autoDi($processDet);\n$autoDi->verif();\', \'require_once(DOL_DOCUMENT_ROOT.\'\'/Synopsis_Contrat/class/autoDi.class.php\'\'); $autoDi = new autoDi(NULL, $element_id); $autoDi->creerFi();\', \'\', \'\', \'CALDI{00000}\', \'\', \'demantoide\', 9, 23, NULL);',
             'CREATE TABLE IF NOT EXISTS `' . MAIN_DB_PREFIX . 'Synopsis_Processdet` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ref` varchar(50) DEFAULT NULL,
@@ -2000,7 +2000,6 @@ class modSynopsisProcess extends DolibarrModules {
 (4, 'Licence', '', 'llx_Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'Synopsis_Chrono/fiche.php?id=', 1),
 (5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
 (6, 'Site', '', 'llx_Synopsis_Chrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 0);");
-
         $retour = $this->_init($sql);
 
         include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");

@@ -387,7 +387,10 @@ class modSynopsisChrono extends DolibarrModules
 (1024, 'Poste', '', 102, 10, 3, 'type:licence', 1),
 (1025, 'Licence', '', 101, 10, 4, 'type:productCli', 1),
 (1026, 'Compte Utilisateur', '', 101, 10, 5, 'type:productCli', 1),
-(1027, 'Site', '', 101, 10, 6, 'type:productCli', 1);",
+(1027, 'Site', '', 101, 10, 6, 'type:productCli', 1),
+(1028, 'Technicien', '', 104, 6, 9, '', 1),
+(1029, 'Durée déplacement (en h)', '', 104, 1, NULL, '', 1),
+(1030, 'Produits', '', 104, 10, 3, 'type:site', 1);",
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono_key_type_valeur` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(50) DEFAULT NULL,

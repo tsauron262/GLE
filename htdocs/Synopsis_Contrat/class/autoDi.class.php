@@ -116,6 +116,8 @@ class autoDi {
                 foreach ($this->tabType as $type) {
                     $this->sortie("<h2>SITE " . $nomSite . ": " . $type . "</h2><br/>");
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
+                        if($type == "tele")
+                            $visite = $visite + 0.5;
                         $delai = round(365 / count($site[$type]['tabVisite']) * $numVisiste);
                         $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
                         $decale = 0;
@@ -192,7 +194,7 @@ class autoDi {
                     if ($type == "visite") {
                         if ($dureeDep == 0)
                             $dureeDep = 1;
-                        $dureeInt = 5;
+                        $dureeInt = 4;
                         $idType = 20;
                         $di->addline($newId, "Déplacement ", $visite['date'], ("3600" * $dureeDep), 4, 1, 50, 1);
                     }

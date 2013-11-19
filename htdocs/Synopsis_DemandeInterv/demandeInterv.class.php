@@ -691,7 +691,7 @@ class demandeInterv extends CommonObject {
         $result = $this->db->query($sql);
         if ($result) {
             $num = $this->db->num_rows($result);
-            if ($num > 0) {
+            if ($num > 0 || $this->ref == "") {
                 $this->ref = $this->getNextNumRef($this->soc);
             }
         }

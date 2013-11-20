@@ -178,9 +178,9 @@ switch ($action) {
                             //Tickets
                             $tickets = ($_REQUEST['nbTicketMNTadd'] . "x" != "x" ? $_REQUEST['nbTicketMNTadd'] : 0);
                             //télémaintenance
-                            $telemaintenance = ($_REQUEST['telemaintenanceadd'] == "on" ? 1 : false);
+                            $telemaintenance = ($_REQUEST['telemaintenanceadd'] == "on" ? 1 : ($_REQUEST['telemaintenanceadd'] > 0 ? $_REQUEST['telemaintenanceadd'] : false));
                             //Hotline
-                            $hotline = ($_REQUEST['hotlineadd'] == "on" ? 1 : false);
+                            $hotline = ($_REQUEST['hotlineadd'] == "on" ? 1 : ($_REQUEST['hotlineadd'] > 0 ? $_REQUEST['hotlineadd'] : false));
                             $qte = 1;
                             //durValidite
                             $durSAV = ($_REQUEST['DurValMntadd'] > 0 ? $_REQUEST['DurValMntadd'] : 0);
@@ -408,7 +408,7 @@ switch ($action) {
             //produitContrat
             $contratprodid = ($_REQUEST['p_idContratprod_mod'] > 0 ? $_REQUEST['p_idContratprod_mod'] : false);
             //Prix
-            $pu_ht = ($_REQUEST["modPuHT"] > 0 ? $_REQUEST['modPuHT'] : 0);
+            $pu_ht = $_REQUEST['modPuHT'];
             //SLA
             $sla = utf8_encodeRien(addslashes(($_REQUEST["modSLA"] . "x" == "x" ? "" : $_REQUEST['modSLA'])));
             //Reconductionauto
@@ -454,9 +454,9 @@ switch ($action) {
                             //Tickets
                             $tickets = ($_REQUEST['nbTicketMNTmod'] . "x" != "x" ? $_REQUEST['nbTicketMNTmod'] : 0);
                             //télémaintenance
-                            $telemaintenance = ($_REQUEST['telemaintenancemod'] == "on" ? 1 : false);
+                            $telemaintenance = ($_REQUEST['telemaintenancemod'] == "on" ? 1 : ($_REQUEST['telemaintenancemod'] > 0 ? $_REQUEST['telemaintenancemod'] : false));
                             //Hotline
-                            $hotline = ($_REQUEST['hotlinemod'] == "on" ? 1 : false);
+                            $hotline = ($_REQUEST['hotlinemod'] == "on" ? 1 : ($_REQUEST['hotlinemod'] > 0 ? $_REQUEST['hotlinemod'] : false));
 //                            $qte = 1;
                             //durValidite
                             $durSAV = ($_REQUEST['DurValMntmod'] > 0 ? $_REQUEST['DurValMntmod'] : 0);
@@ -906,7 +906,7 @@ switch ($action) {
                     $xml .= "<isMnt>0</isMnt>";
                 }
                 //  Ticket
-                if ($res->qty != 0 && $res->GMAO_maintenance == 0 && $res->GMAO_isSAV == 0) {
+                if ($res->GMAO_qteTempsPerDuree != 0 && $res->GMAO_maintenance == 0 && $res->GMAO_isSAV == 0) {
                     $xml .= "<isTkt>1</isTkt>";
                     $xml .= "<qteTkt><![CDATA[" . $res->GMAO_qte . "]]></qteTkt>";
                 } else {

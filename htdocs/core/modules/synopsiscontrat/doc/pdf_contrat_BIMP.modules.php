@@ -75,6 +75,10 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
 
 
+
+
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -283,59 +287,57 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 //$this->debug .= print_r($val->prodContrat,1);
 //                    file_put_contents('/tmp/debugBIMPpdf.txt',print_r($val->prodContrat,1));
                     //Table
-                    $type = "Libre";
+                    $type = "Autre";
                     $pdf->setfillcolor(250, 250, 250);
                     $extraDataType = "";
                     $libelleContrat = $val->prodContrat->libelle;
-                    if ($val->type == 3) {
-                        $pdf->setfillcolor(255, 231, 227);
-                        $type = "Maintenance";
-                    } else if ($val->type == 4) {
-                        $pdf->setfillcolor(223, 255, 232);
-                        $type = "SAV";
-                    } else if ($val->type == 2) {
-                        $pdf->setfillcolor(209, 221, 255);
-                        $type = "Ticket";
-                    }
                     if ($val->prodContrat->extra_Type_PDF) {
                         $type = $val->prodContrat->extra_Type_PDF;
                     }
                     if ($val->prodContrat->extra_Designation_PDF) {
                         $libelleContrat = $val->prodContrat->extra_Designation_PDF;
                     }
-                    if ($val->prodContrat->extra_Couleur_PDF) {
-                        $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
-                        $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
-                    }
 
 
                     if ($val->type == 3) {
-                        if ($val->GMAO_Mixte['telemaintenance'] > 0) {
-                            if ($val->GMAO_Mixte['nbVisiteAn'] > 0)
-                                $extraDataType = $val->GMAO_Mixte['nbVisiteAn'] . " intervention(s) de télémaintenance";
-                            else if ($val->GMAO_Mixte['nbVisiteAn'] < 0)
-                                $extraDataType = "Nb interventions de télémaintenance illimités";
+                        $pdf->setfillcolor(255, 231, 227);
+                        $type = "Maintenance";
+                        if ($val->GMAO_Mixte['nbVisiteAn'] > 0) {
+                            $extraDataType = $val->GMAO_Mixte['nbVisiteAn'] * $val->qty . " visite(s) par an";
+                            $type = "Visites";
+                        } else if ($val->GMAO_Mixte['nbVisiteAn'] < 0) {
+                            $extraDataType = "Nb visite(s) illimités";
+                            $type = "Visites";
+                        } else if ($val->GMAO_Mixte['telemaintenance'] > 0) {
+                            $extraDataType = $val->GMAO_Mixte['telemaintenance'] * $val->qty . " intervention(s) de télémaintenance";
                             $type = "Télémaintenance";
-                        }
-                        elseif ($val->GMAO_Mixte['hotline'] > 0) {
-                            if ($val->GMAO_Mixte['nbVisiteAn'] > 0)
-                                $extraDataType = $val->GMAO_Mixte['nbVisiteAn'] . " appel(s)";
-                            else if ($val->GMAO_Mixte['nbVisiteAn'] < 0)
-                                $extraDataType = "Nb appels illimités";
-                            $type = "Hot-line";
+                        } else if ($val->GMAO_Mixte['telemaintenance'] < 0) {
+                            $extraDataType = "Nb interventions de télémaintenance illimités";
+                            $type = "Télémaintenance";
                         } elseif ($val->GMAO_Mixte['hotline'] > 0) {
-                            if ($val->GMAO_Mixte['nbVisiteAn'] > 0)
-                                $extraDataType = $val->GMAO_Mixte['nbVisiteAn'] . " visite(s) par an";
-                            else if ($val->GMAO_Mixte['nbVisiteAn'] < 0)
-                                $extraDataType = "Nb visite(s) illimités";
+                            $extraDataType = $val->GMAO_Mixte['hotline'] * $val->qty . " appel(s)";
+                            $type = "Hot-line";
+                        } else if ($val->GMAO_Mixte['hotline'] < 0) {
+                            $extraDataType = "Nb appels illimités";
+                            $type = "Hot-line";
                         }
                     } else if ($val->type == 4) {
+                        $type = "SAV";
+                        $pdf->setfillcolor(223, 255, 232);
                         $extraDataType = "Extension de " . $val->GMAO_Mixte['durVal'] . " mois";
                     } else if ($val->type == 2) {
+                        $pdf->setfillcolor(209, 221, 255);
+                        $type = "Ticket";
                         if ($val->GMAO_Mixte['tickets'] > 0)
                             $extraDataType = " Lot de  " . $val->GMAO_Mixte['tickets'] . " tickets";
                         else
                             $extraDataType = " Nb tickets illimités";
+                    }
+
+
+                    if ($val->prodContrat->extra_Couleur_PDF) {
+                        $color = $this->hex2RGB($val->prodContrat->extra_Couleur_PDF, false);
+                        $pdf->setfillcolor($color['red'], $color['green'], $color['blue']);
                     }
 
 
@@ -899,7 +901,7 @@ d'une part
 Et,";
 
         $clause3 = utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom);
-        $clause4 = "Sis " . utf8_encodeRien($this->contrat->societe->address."\n".$this->contrat->societe->zip." ".$this->contrat->societe->town) . "
+        $clause4 = "Sis " . utf8_encodeRien($this->contrat->societe->address . "\n" . $this->contrat->societe->zip . " " . $this->contrat->societe->town) . "
 Représenté(e) légalement par
 " . utf8_encodeRien($to) . "        Fonction : " . $poste . $tel . "
 

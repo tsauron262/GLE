@@ -408,16 +408,18 @@ jQuery(function() {
                 var isTkt = jQuery(msg).find('isTkt').text();
                 var isMnt = jQuery(msg).find('isMnt').text();
                 var isSAV = jQuery(msg).find('isSAV').text();
-                if (Hotline == 1){
-                    jQuery('#hotlinemod').attr('checked',true);
-                } else {
-                    jQuery('#hotlinemod').attr('checked',false);
-                }
-                if (TeleMaintenance == 1){
-                    jQuery('#telemaintenancemod').attr('checked',true);
-                } else {
-                    jQuery('#telemaintenancemod').attr('checked',false);
-                }
+                    jQuery('#hotlinemod').val(Hotline);
+                    jQuery('#telemaintenancemod').val(TeleMaintenance);
+//                if (Hotline == 1){
+//                    jQuery('#hotlinemod').attr('checked',true);
+//                } else {
+//                    jQuery('#hotlinemod').attr('checked',false);
+//                }
+//                if (TeleMaintenance == 1){
+//                    jQuery('#telemaintenancemod').attr('checked',true);
+//                } else {
+//                    jQuery('#telemaintenancemod').attr('checked',false);
+//                }
                 if (reconductionAuto == 1)
                 {
                     jQuery('#modrecondAuto').attr('checked',true);

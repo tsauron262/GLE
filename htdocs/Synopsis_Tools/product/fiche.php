@@ -149,8 +149,8 @@ if ($_POST["action"] == 'add' && $user->rights->produit->creer) {
                 $product->array_options['options_2dureeVal'] = ($_REQUEST['dureeMNT'] > 0 ? $_REQUEST['dureeMNT'] : 0);
                 $product->array_options['options_2visiteSurSite'] = ($_REQUEST['visite'] > 0 ? $_REQUEST['visite'] : 0);
                 $product->array_options['options_2maintenance'] = 1;
-                $product->array_options['options_2teleMaintenance'] = ($_REQUEST['telemaintenance'] . "x" == "x" ? 0 : 1);
-                $product->array_options['options_2hotline'] = ($_REQUEST['hotline'] . "x" == "x" ? 0 : 1);
+                $product->array_options['options_2teleMaintenance'] = $_REQUEST['telemaintenance'];
+                $product->array_options['options_2hotline'] = $_REQUEST['hotline'];
                 $product->array_options['options_2qte'] = ($_REQUEST['qteMNT'] . "x" == "x" ? 0 : $_REQUEST['qteMNT']);
                 $product->array_options['options_2qtePerDuree'] = $_REQUEST['qteTktPerDuree'];
                 $product->array_options['options_2timePerDuree'] = (intval($_REQUEST['qteTempsPerDureeH']) * 3600 + intval($_REQUEST['qteTempsPerDureeM']) * 60);
@@ -241,8 +241,8 @@ if ($_POST["action"] == 'update' &&
                 $product->array_options['options_2dureeVal'] = ($_REQUEST['dureeMNT'] > 0 ? $_REQUEST['dureeMNT'] : 0);
                 $product->array_options['options_2visiteSurSite'] = ($_REQUEST['visite'] <> 0 ? $_REQUEST['visite'] : 0);
                 $product->array_options['options_2maintenance'] = 1;
-                $product->array_options['options_2teleMaintenance'] = ($_REQUEST['telemaintenance'] . "x" == "x" ? 0 : 1);
-                $product->array_options['options_2hotline'] = ($_REQUEST['hotline'] . "x" == "x" ? 0 : 1);
+                $product->array_options['options_2teleMaintenance'] = $_REQUEST['telemaintenance'];
+                $product->array_options['options_2hotline'] = $_REQUEST['hotline'];
                 $product->array_options['options_2qte'] = ($_REQUEST['qteMNT'] . "x" == "x" ? 0 : $_REQUEST['qteMNT']);
                 $product->array_options['options_2qtePerDuree'] = $_REQUEST['qteTktPerDuree'];
                 $product->array_options['options_2timePerDuree'] = (intval($_REQUEST['qteTempsPerDureeH']) * 3600 + intval($_REQUEST['qteTempsPerDureeM']) * 60);
@@ -1492,14 +1492,6 @@ EOF;
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Reconduction automatique") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">OUI';
                 }
-                //Nombre de visite mensuel
-                if ($product->array_options['options_2visiteSurSite'] > 0) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite sur site (par an)") . '</th>
-                               <td ' . $colspan . ' class="ui-widget-content">OUI ' . $product->array_options['options_2visiteSurSite'];
-                } else {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite sur site") . '</th>
-                               <td ' . $colspan . ' class="ui-widget-content">NON';
-                }
                 //Le SLA ou « Contrat de niveau de service » : référence au temps de délivrance et/ou à la performance (du service) tel que déﬁni dans le contrat.
                 if ($product->array_options['options_2SLA'] . "x" != "x") {
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("SLA") . '</th>
@@ -1511,15 +1503,29 @@ EOF;
                     print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Maintenance") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">OUI';
                 }
+                //Nombre de visite mensuel
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite sur site (par an)") . '</th>
+                               <td ' . $colspan . ' class="ui-widget-content">';
+                if ($product->array_options['options_2visiteSurSite'] > 0) {
+                    print 'OUI ' . $product->array_options['options_2visiteSurSite'];
+                } else {
+                    print 'NON';
+                }
                 //Télémaintenance
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance") . '</th>
+                               <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2teleMaintenance'] > 0) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance") . '</th>
-                               <td ' . $colspan . ' class="ui-widget-content">OUI';
+                    print 'OUI '.$product->array_options['options_2teleMaintenance'];
+                }else {
+                    print 'NON';
                 }
                 //Accès à la hotline
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
+                               <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2hotline'] > 0) {
-                    print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
-                               <td ' . $colspan . ' class="ui-widget-content">OUI';
+                    print 'OUI '.$product->array_options['options_2hotline'];
+                }else {
+                    print 'NON';
                 }
 //                if ($product->array_options['options_2qte'] > 0) {
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
@@ -1816,6 +1822,7 @@ EOF;
                 print "<ul><li><span><a href='#MNT'>Maintenance</a></span></li>";
                 print "    <li><span><a href='#SAV'>SAV</a></span></li>";
                 print "    <li><span><a href='#TKT'>Ticket</a></span></li>";
+                print "    <li><span><a href='#OSER'>Autre</a></span></li>";
                 print "</ul>";
                 print "<div id='MNT'>";
                 print "<table width=100% cellpadding=10>";
@@ -1826,10 +1833,10 @@ EOF;
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="visite" value="' . $product->array_options['options_2visiteSurSite'] . '">';
                 //Télémaintenance
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance") . '</th>
-                           <td class="ui-widget-content"><input style="text-align:center;" type="checkbox" ' . ($product->array_options['options_2teleMaintenance'] > 0 ? 'checked' : '') . ' name="telemaintenance">';
+                           <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="telemaintenance" value="' . $product->array_options['options_2teleMaintenance'] . '">';
                 //Accès à la hotline
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
-                           <td class="ui-widget-content"><input type="checkbox" ' . ($product->array_options['options_2hotline'] > 0 ? 'checked' : '') . ' name="hotline">';
+                           <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="hotline" value="' . $product->array_options['options_2hotline'] . '">';
                 //Tkt
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Duree appel max avant interv. <br/><em><small>(en min)</small></em>") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="' . $product->array_options['options_2qte'] . '" name="qteMNT">';
@@ -1864,6 +1871,10 @@ EOF;
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" value="' . $product->array_options['options_2qte'] . '" name="qteTKT">';
                 print "</table>";
                 print "</div>";
+                print "<div id='OSER'>";
+                print "<table width=100% cellpadding=10>";
+                print "</table>";
+                print "</div>";
                 print "</div>";
                 print "</tr>";
                 //Reconduction
@@ -1884,7 +1895,8 @@ jQuery(document).ready(function(){
             jQuery('#typeProd').val(b.panel.id);
         },
 EOF;
-                print 'selected: ' . ($product->array_options['options_2isSav'] ? 1 : ($product->array_options['options_2maintenance'] ? 0 : 2)) . ' ';
+                print 'selected: ' . ($product->array_options['options_2isSav'] ? 1 : ($product->array_options['options_2maintenance'] ? 0 : ($product->array_options['options_2dureeVal'] ? 2 : 3))) . ' ';
+                
                 print <<<EOF
     });
 });

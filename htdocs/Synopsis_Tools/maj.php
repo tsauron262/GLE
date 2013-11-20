@@ -106,6 +106,9 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`) AND targettype = 'productCli'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
     $maj->req("update `" . MAIN_DB_PREFIX . "societe` set status = 1");
+    $maj->req("update `llx_product_extrafields` set `2hotline` = 0, `2teleMaintenance` = 0 where `2visiteSurSite` > 0;");
+    $maj->req("update `llx_product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
+    $maj->req("update `llx_product_extrafields` set `2hotline` = -1 where `2hotline` > 0");
 
     $maj->ajoutDroitGr(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
@@ -597,10 +600,10 @@ function getTab() {
             array("di_refid", 'fi_refid', '$%DI', '$%FI'),
             array("fk_source", "fk_target", 'sourcetype', "targettype")
         ),
-        array("Babel_contrat_annexe", MAIN_DB_PREFIX . "Synopsis_contrat_annexe",
-            array(),
-            array()
-        ),
+//        array("Babel_contrat_annexe", MAIN_DB_PREFIX . "Synopsis_contrat_annexe",
+//            array(),
+//            array()
+//        ),
         array("Babel_contrat_annexePdf", MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf",
             array(),
             array()

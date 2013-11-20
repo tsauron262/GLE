@@ -231,6 +231,10 @@ function getHelp($contrat, $user, $mysoc){
     $remCode = array();
     $lastType = false;
     print "<table width=100%>";
+    print "<tr><th class='ui-widget-header ui-state-hover'>Style<th class='ui-widget-header'>Ajouter en debut de ligne";
+    print "<tr><td>Gras<td>&#139;g&#155;";
+    print "<tr><td>Italic<td>&#139;i&#155;";
+    print "<tr><td>Souligner<td>&#139;s&#155;";
     print "<tr><th class='ui-widget-header'>Variable Annexe<th class='ui-widget-header'>Libelle<th class='ui-widget-header'>Example";
 //manque cp ville tel email fax nom prenom civilite
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Utilisateur";
@@ -285,6 +289,12 @@ function getHelp($contrat, $user, $mysoc){
     print "<tr><td>Contrat-date_contrat<td>Date contrat<td>" . date('d/m/Y', $contrat->date_contrat);
     print "<tr><td>Contrat-ref<td>Ref contrat<td>" . $contrat->ref;
     print "<tr><td>Contrat-note_public<td>Note public contrat<td>" . $contrat->note_public;
+    
+    print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Ligne contrat";
+    print "<tr><td>Ligne-date_fin<td>Date de fin de validit&eacute; de la ligne<td>";
+    print "<tr><td>Ligne-description<td>Description de la ligne<td>";
+    print "<tr><td>Ligne-phrase_delai<td>Phrase stipulant le nombre de visite par an<td>";
+    print "<tr><td>Ligne-qte<td>Quantité<td>";
 
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Autre";
     print "<tr><td>DateDuJour<td>Date du jour<td>" . date('d/m/Y');

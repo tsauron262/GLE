@@ -146,8 +146,8 @@ class Synopsis_Contrat extends Contrat {
         $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
-            if(stripos($ligne->description, "suivi") !== false)
-                    $suivie = true;
+            if (stripos($ligne->description, "suivi") !== false)
+                $suivie = true;
             if ($ligne->GMAO_Mixte['isSAV'])
                 $isSav = true;
             if ($ligne->GMAO_Mixte['maintenance'])
@@ -993,15 +993,28 @@ class Synopsis_Contrat extends Contrat {
         $lien->cssClassM = "type:contratdet";
         $lien->fetch(3);
         $lien->displayForm();
-        if($ligne->GMAO_Mixte['nbVisiteAn'] > 0){
-        echo "</td><td>";
-        echo "Nb Visite par An : ";
-        echo $ligne->GMAO_Mixte['nbVisiteAn'];
+        if ($ligne->GMAO_Mixte['nbVisiteAn'] > 0) {
+            echo "</td><td>";
+            echo "Nb Visite sur site : ";
+            echo $ligne->GMAO_Mixte['nbVisiteAn'] * $ligne->qty;
         }
-        if($ligne->GMAO_Mixte['SLA'] != ""){
-        echo "</td><td>";
-        echo "SLA : ";
-        echo $ligne->GMAO_Mixte['SLA'];
+        if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
+            echo "</td><td>";
+            echo "Nb Télémaintenance : ";
+            echo $ligne->GMAO_Mixte['telemaintenance'] * $ligne->qty;
+        }
+        if ($ligne->GMAO_Mixte['hotline'] <> 0) {
+            echo "</td><td>";
+            echo "Nb Appelle : ";
+            if ($ligne->GMAO_Mixte['hotline'] < 0)
+                echo "illimité";
+            else
+            echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;
+        }
+        if ($ligne->GMAO_Mixte['SLA'] != "") {
+            echo "</td><td>";
+            echo "SLA : ";
+            echo $ligne->GMAO_Mixte['SLA'];
         }
         echo "</td></tr>";
         echo "</table>";
@@ -1525,8 +1538,8 @@ class Synopsis_Contrat extends Contrat {
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
-                            " . ($tmpProd->array_options['options_2hotline'] ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
-                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 2))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
+                            " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance']  <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 5))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);
 
         if ($sql && $sql1)
@@ -2261,6 +2274,9 @@ EOF;
         $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-content">SAV';
         $html .= '</th><td colspan=2 class="ui-widget-content"><input id="SaVtype' . $type . '" name="type' . $type . '" value="SaV" type="radio"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-content">Autre';
+        $html .= '</th><td colspan=2 class="ui-widget-content"><input id="Othertype' . $type . '" name="type' . $type . '" value="Other" type="radio"></td>';
 
         $html .= "</table>";
         $html .= "<div>";
@@ -2442,7 +2458,7 @@ class Synopsis_ContratLigne extends ContratLigne {
                 'telemaintenance' => $objp->GMAO_telemaintenance,
                 'maintenance' => $objp->GMAO_maintenance,
                 'SLA' => $objp->GMAO_sla,
-                'nbVisiteAn' => $objp->GMAO_nbVisite * intval(($this->qty > 0 ? $this->qty : 1)),
+                'nbVisiteAn' => $objp->GMAO_nbVisite,
                 'isSAV' => $objp->GMAO_isSAV,
                 'fk_prod' => $objp->GMAO_fk_prod,
                 'reconductionAuto' => $objp->GMAO_reconductionAuto,
@@ -2497,18 +2513,18 @@ class Synopsis_ContratLigne extends ContratLigne {
             }
         }
 
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
-                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
-                        $result = $this->db->fetch_object($sql);
-                        $html .= "(".$result->value . ") ";
-                    }
+        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
+        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+            $result = $this->db->fetch_object($sql);
+            $html .= "(" . $result->value . ") ";
+        }
 
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
-                    if ($this->db->num_rows($sql) > 0) {
-                        $result = $this->db->fetch_object($sql);
-                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
-                        $html .= ($result->value != "") ? $result->value : "";
-                    }
+        $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
+        if ($this->db->num_rows($sql) > 0) {
+            $result = $this->db->fetch_object($sql);
+            $html .= ($result->value != "" && $opt != "SN") ? " SN : " : "";
+            $html .= ($result->value != "") ? $result->value : "";
+        }
         return dol_trunc($html, $size);
     }
 

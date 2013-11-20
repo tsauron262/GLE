@@ -112,7 +112,7 @@ class pdf_propaleGA_jaune extends ModelePDFPropalesGA
         $outputlangs->load("propal");
         $outputlangs->load("products");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->PROPALEGA->dir_output)
         {

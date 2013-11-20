@@ -69,7 +69,7 @@ if ($_REQUEST['action']=='generatePdf' || $_REQUEST['action'] == 'builddoc')
         require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_contratGMAO.php");
         contratGMAO_pdf_create($db, $contrat->id, $_REQUEST['model']);
     } else {
-        require_once(DOL_DOCUMENT_ROOT."/core/modules/contrat/modules_contrat.php");
+        require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
         contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
     }
     header('location: fiche.php?id='.$contrat->id."#documentAnchor");

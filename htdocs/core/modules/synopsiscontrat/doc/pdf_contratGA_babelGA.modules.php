@@ -10,7 +10,8 @@
   *
   * Infos on http://www.finapro.fr
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
@@ -25,6 +26,7 @@
 require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_contratGA.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 
 /**
@@ -97,7 +99,7 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
         $outputlangs->load("contratGA");
         $outputlangs->load("products");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->CONTRATGA->dir_output)
         {
@@ -133,16 +135,10 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
             {
                 $nblignes = sizeof($contratGA->lignes);
                 // Protection et encryption du pdf
-                if ($conf->global->PDF_SECURITY_ENCRYPTION)
-                {
-                    $pdf=new FPDI_Protection('L','mm',$this->format);
-                    $pdfrights = array('print'); // Ne permet que l'impression du document
-                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
-                } else  {
-                    $pdf=new FPDI('L','mm',$this->format);
-                }
+                
+                $pdf = pdf_getInstance($this->format);
+
+                $pdf1 = pdf_getInstance($this->format);
                 $pdf->Open();
                 $pdf->AddPage();
 
@@ -156,12 +152,12 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(1,0);
 
-                $pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
-                $pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
+                //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
+                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contratGA, 1, $outputlangs,0);
-                $pdf->SetFont('Arial', '', 8);
+                $pdf->SetFont(''/*'Arial'*/, '', 8);
 
 
 //Affiche le header avec les infos basic du contratGA
@@ -231,26 +227,26 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
                 $this->_pagefoot($pdf,$outputlangs);
                 $pdf->AliasNbPages();
                 $pdf->Close();
-                $this->file = $file;$pdf->Output($file);
+                $this->file = $file;$pdf->Output($file, 'f');
 
 
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error=$langs->trans("ErrorConstantNotDefined","CONTRACT_OUTPUTDIR");
-            $langs->setPhpLang();    // On restaure langue session
+            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error=$langs->trans("ErrorUnknown");
-        $langs->setPhpLang();    // On restaure langue session
+        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 
@@ -275,7 +271,7 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
         $outputlangs->load("companies");
 
         $pdf->SetTextColor(0, 0, 60);
-        $pdf->SetFont('Arial', 'B', 13);
+        $pdf->SetFont(''/*'Arial'*/, 'B', 13);
 
         $posy = $this->marge_haute;
 
@@ -296,7 +292,7 @@ class pdf_contratGA_babelGA extends ModeleSynopsiscontratGA
                 $pdf->Image($logo, $this->marge_gauche, $posy, 0, 24);
             } else {
                 $pdf->SetTextColor(200, 0, 0);
-                $pdf->SetFont('Arial', 'B', 8);
+                $pdf->SetFont(''/*'Arial'*/, 'B', 8);
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound", $logo), 0, 'L');
                 $pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToModuleSetup"), 0, 'L');
             }

@@ -138,7 +138,7 @@ class pdf_pluton extends ModelePDFFicheinter {
         $outputlangs->load("companies");
         $outputlangs->load("interventions");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->fichinter->dir_output) {
             // If $fichinter is id instead of object

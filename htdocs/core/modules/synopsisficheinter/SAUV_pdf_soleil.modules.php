@@ -99,7 +99,7 @@ class pdf_soleil extends ModelePDFFicheinter
         $outputlangs->load("companies");
         $outputlangs->load("interventions");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->fichinter->dir_output)
         {

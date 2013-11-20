@@ -13,13 +13,14 @@
   */
  /**
   *
-  * Name : pdf_contratGMAO_courrierBIMPAutoPrelevement.modules.php
+  * Name : pdf_contrat_courrierBIMPavenant.modules.php
   * GLE-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/contrat/modules_contrat.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 //TODO  addresse livraison lié au contrat
 //TODO filtre sur statuts ???
@@ -32,7 +33,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
+class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -41,7 +42,7 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contratGMAO_courrierBIMPAutoPrelevement($db)
+    function pdf_contrat_courrierBIMPavenant($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -89,7 +90,7 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
         $outputlangs->load("bills");
         $outputlangs->load("contrat");
         $outputlangs->load("products");
-//        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
         if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
@@ -114,7 +115,7 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_AutoPrelev.pdf";
+                $file = $dir ."/Courrier_avenant_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -132,24 +133,27 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $pdf="";
                 $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
-                if ($conf->global->PDF_SECURITY_ENCRYPTION)
-                {
-                    $pdf=new FPDI_Protection('P','mm',$this->format);
-                    $pdfrights = array('print'); // Ne permet que l'impression du document
-                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
-                } else  {
+//                if ($conf->global->PDF_SECURITY_ENCRYPTION)
+//                {
+//                    $pdf=new FPDI_Protection('P','mm',$this->format);
+//                    $pdfrights = array('print'); // Ne permet que l'impression du document
+//                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
+//                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
+//                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
+//                } else  {
+//
+//                    $pdf=new FPDI('P','mm',$this->format);
+//                }
+//                $pdf1=new FPDI('P','mm',$this->format);
+                $pdf = pdf_getInstance($this->format);
 
-                    $pdf=new FPDI('P','mm',$this->format);
-                }
-                $pdf1=new FPDI('P','mm',$this->format);
+                $pdf1 = pdf_getInstance($this->format);
 
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont('Arial', '', 8);
+                $pdf1->SetFont('', '', 8);
 
                 $pdf->SetDrawColor(128,128,128);
 
@@ -163,42 +167,106 @@ class pdf_contratGMAO_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(0,0);
 
-                $pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
-                $pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
+//                $pdf->AddFont('BI', 'BI', 'BI.php');
+//                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->SetFont('', 'B', 12);
 
-                $pagecountTpl=$pdf->setSourceFile(DOL_DOCUMENT_ROOT.'/core/modules/synopsiscontrat/AUTORISATIONPRELEVEMENT.pdf');
+//Encart societe
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
+                $pdf->SetFont('', '', 11);
+                $pdf->SetX($this->marge_gauche + 100);
 
-                $tplidx=$pdf->importPage(1,"/MediaBox");
-                $pdf->useTemplate($tplidx, 0, 0,0,0,true);
+//representant légal : signataire contrat
+                $requete = "SELECT fk_socpeople
+                              FROM ".MAIN_DB_PREFIX."c_type_contact as c,
+                                   ".MAIN_DB_PREFIX."element_contact as e
+                             WHERE c.element = 'contrat'
+                               AND c.source = 'external'
+                               AND c.code = 'SALESREPSIGN'
+                               AND e.statut = 4
+                               AND e.fk_c_type_contact = c.rowid
+                               AND e.element_id = ".$contrat->id;
+                $sql = $this->db->query($requete);
+                $contact = "";
+                if ($sql && $this->db->num_rows($sql) > 0)
+                {
+                    $res = $this->db->fetch_object($sql);
+                    require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+                    $tmpcontact = new Contact($this->db);
+                    $tmpcontact->fetch($res->fk_socpeople);
+                    $contact = $tmpcontact->lastname." ".$tmpcontact->firstname;
+                }
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contact,0,'L');
+                $pdf->SetX($this->marge_gauche + 100);
+//addresse :> add de la société
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town,0,'L');
+
+//Date
+                $pdf->SetFont('', '', 10);
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
+
+//Objet
+                $pdf->SetFont('', 'U', 10);
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
+                $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
+                $pdf->SetFont('', '', 10);
+                $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Avenant à votre contrat ".$contrat->ref),0,'L');
+                $remY = $pdf->GetY();
+                $pdf->SetFont('', 'U', 10);
+                $pdf->SetXY($this->marge_gauche,$remY);
+                $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
+                $pdf->SetFont('', '', 10);
+                $pdf->SetXY($this->marge_gauche + 23,$remY);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_decode($contrat->societe->code_client),0,'L');
+
+//Madame, Monsieur
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 90);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous trouverez ci-joint l'avenant correspondant à votre contrat
+N° ").$contrat->ref.".",0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 118);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 143);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
+Direction Technique
+"),0,'L');
+
 
                 $this->_pagefoot($pdf,$outputlangs);
 
                 $pdf->AliasNbPages();
                 $pdf->Close();
 
-                $this->file = $file;$pdf->Output($file);
+                $this->file = $file;$pdf->Output($file, 'f');
 
-                $langs->setPhpLang();    // On restaure langue session
+//                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error=$langs->trans("ErrorConstantNotDefined","CONTRACT_OUTPUTDIR");
-            $langs->setPhpLang();    // On restaure langue session
+            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error=$langs->trans("ErrorUnknown");
-        $langs->setPhpLang();    // On restaure langue session
+        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 

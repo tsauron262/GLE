@@ -130,7 +130,7 @@ class pdf_process_pholos extends ModeleNumRefProcess
         $outputlangs->load("products");
         $outputlangs->load("orders");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->commande->dir_output)
         {

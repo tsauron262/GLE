@@ -133,7 +133,7 @@ class pdf_propaleGA_finaproGAStd extends ModelePDFPropalesGA
         $outputlangs->load("propal");
         $outputlangs->load("products");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->PROPALEGA->dir_output)
         {

@@ -95,7 +95,7 @@ class pdf_imputations_caracal extends ModelePDFImputations
         $outputlangs->load("dict");
         $outputlangs->load("projects");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
         if ($conf->imputations->dir_output)
         {
             // Definition de l'objet $projet (pour compatibilite ascendante)

@@ -107,7 +107,7 @@ function contratGMAO_pdf_create($db, $id, $modele = '', $outputlangs = '') {
     $modelisok = 0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
-    $file = "pdf_contratGMAO_" . $modele . ".modules.php";
+    $file = "pdf_contrat_" . $modele . ".modules.php";
 
     if ($modele && file_exists($dir . $file))
         $modelisok = 1;
@@ -132,7 +132,7 @@ function contratGMAO_pdf_create($db, $id, $modele = '', $outputlangs = '') {
 
     // Charge le modele
     if ($modelisok) {
-        $classname = "pdf_contratGMAO_" . $modele;
+        $classname = "pdf_contrat_" . $modele;
         require_once($dir . $file);
 
 

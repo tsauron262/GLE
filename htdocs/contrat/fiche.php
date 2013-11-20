@@ -89,7 +89,7 @@ if (isset($_REQUEST["id"])) {
         $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
         contrat_pdf_create($db, $object->id, $model);
 //    } else {
-//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/contrat/modules_contrat.php");
+//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 //        contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
 //    }
         header('location: fiche.php?id=' . $object->id . "#documentAnchor");
@@ -1723,6 +1723,7 @@ if ($action == 'create') {
 if (isset($_REQUEST["id"])) {
 // Send
     if ($object->statut == 1 || $object->statut == 2) {
+        print "<br/><br/>";
         if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
             print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
         } else
@@ -1862,7 +1863,7 @@ if (isset($_REQUEST["id"])) {
 //} else {
 //    $somethingshown = $formfile->show_documents('contrat', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
 //}
-        $somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, $genallowed, $genallowed); //, $contrat->modelPdf);
+        $somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, $genallowed, $genallowed, "BIMP2"); //, $contrat->modelPdf);
     }
 }
 /*

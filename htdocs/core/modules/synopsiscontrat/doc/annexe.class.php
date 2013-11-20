@@ -203,7 +203,7 @@ Tél. : Soc-tel
         $annexe = preg_replace('/User-office_fax/', $user->office_fax, $annexe);
 
         $annexe = preg_replace('/Mysoc-nom/', $mysoc->nom, $annexe);
-        $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address_full, $annexe);
+        $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address."\n".$mysoc->zip." ".$mysoc->town, $annexe);
         $annexe = preg_replace('/Mysoc-adresse/', $mysoc->address, $annexe);
         $annexe = preg_replace('/Mysoc-cp/', $mysoc->zip, $annexe);
         $annexe = preg_replace('/Mysoc-ville/', $mysoc->town, $annexe);

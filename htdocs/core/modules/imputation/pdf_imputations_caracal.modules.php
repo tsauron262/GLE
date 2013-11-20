@@ -92,7 +92,7 @@ class pdf_imputations_caracal extends ModeleImputations {
         $outputlangs->load("dict");
         $outputlangs->load("projects");
 //        $conf->imputations->dir_output = DOL_DOCUMENT_ROOT . "/imputation/";
-//        $outputlangs->setPhpLang();
+//        //$outputlangs->setPhpLang();
         if ($conf->imputations->dir_output) {
             // Definition de l'objet $projet (pour compatibilite ascendante)
             $ref = sanitize_string("Imputations-" . date('Y') . "-" . $fuser->login);

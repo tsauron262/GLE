@@ -13,13 +13,14 @@
   */
  /**
   *
-  * Name : pdf_contratGMAO_courrierBIMPresiliation.modules.php
+  * Name : pdf_contrat_courrierBIMPsignature.modules.php
   * GLE-1.2
   */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/contrat/modules_contrat.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 //TODO  addresse livraison lié au contrat
 //TODO filtre sur statuts ???
@@ -32,7 +33,7 @@ require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
+class pdf_contrat_courrierBIMPsignature extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -41,7 +42,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contratGMAO_courrierBIMPresiliation($db)
+    function pdf_contrat_courrierBIMPsignature($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -89,7 +90,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
         $outputlangs->load("bills");
         $outputlangs->load("contrat");
         $outputlangs->load("products");
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
         if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
@@ -114,7 +115,7 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_resiliation_".date("d_m_Y")."_" . $propref . ".pdf";
+                $file = $dir ."/Courrier_signature_".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -132,24 +133,15 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
                 $pdf="";
                 $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
-                if ($conf->global->PDF_SECURITY_ENCRYPTION)
-                {
-                    $pdf=new FPDI_Protection('P','mm',$this->format);
-                    $pdfrights = array('print'); // Ne permet que l'impression du document
-                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
-                } else  {
+                $pdf = pdf_getInstance($this->format);
 
-                    $pdf=new FPDI('P','mm',$this->format);
-                }
-                $pdf1=new FPDI('P','mm',$this->format);
+                $pdf1 = pdf_getInstance($this->format);
 
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont('Arial', '', 8);
+                $pdf1->SetFont(''/*'Arial'*/, '', 8);
 
                 $pdf->SetDrawColor(128,128,128);
 
@@ -163,17 +155,17 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(0,0);
 
-                $pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
-                $pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
+                //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
+                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                $pdf->SetFont('Arial', 'B', 12);
+                $pdf->SetFont(''/*'Arial'*/, 'B', 12);
 
 //Encart societe
                 $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
-                $pdf->SetFont('Arial', '', 11);
+                $pdf->SetFont(''/*'Arial'*/, '', 11);
                 $pdf->SetX($this->marge_gauche + 100);
 
 //representant légal : signataire contrat
@@ -194,30 +186,30 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
                     require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
                     $tmpcontact = new Contact($this->db);
                     $tmpcontact->fetch($res->fk_socpeople);
-                    $contact = $tmpcontact->fullname;
+                    $contact = $tmpcontact->lastname." ".$tmpcontact->firstname;
                 }
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contact,0,'L');
                 $pdf->SetX($this->marge_gauche + 100);
 //addresse :> add de la société
-                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->adresse_full,0,'L');
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town,0,'L');
 
 //Date
-                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
                 $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
 
 //Objet
-                $pdf->SetFont('Arial', 'U', 10);
+                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
-                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Résiliation du contrat ".$contrat->ref),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Signature de votre contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
-                $pdf->SetFont('Arial', 'U', 10);
+                $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
                 $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
-                $pdf->SetFont('Arial', '', 10);
+                $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 23,$remY);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_decode($contrat->societe->code_client),0,'L');
 
@@ -226,19 +218,23 @@ class pdf_contratGMAO_courrierBIMPresiliation extends ModeleSynopsiscontrat
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous avez souhaité résilier votre contrat N° ".$contrat->ref).".",0,'L');
-
-                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 109);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Nous en prenons bonne note."),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous avez souscrit un contrat de services et nous vous en remercions."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Sachez que vous pouvez réactiver votre contrat à tout moment, ceci sur simple
-demande de devis."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Restant à votre disposition, nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Merci de parapher chaque page et de nous retourner les différents exemplaires ci-joints
+dûment remplis et signés, afin de finaliser votre dossier."),0,'J');
 
-                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+27);
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Si vous optez pour le prélèvement automatique, merci de compléter et de signer l'autorisation de prélèvement ci-jointe et de nous la retourner accompagnée de votre RIB."),0,'J');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
+
+                $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
 Direction Technique
 "),0,'L');
@@ -249,25 +245,25 @@ Direction Technique
                 $pdf->AliasNbPages();
                 $pdf->Close();
 
-                $this->file = $file;$pdf->Output($file);
+                $this->file = $file;$pdf->Output($file, 'f');
 
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error=$langs->trans("ErrorConstantNotDefined","CONTRACT_OUTPUTDIR");
-            $langs->setPhpLang();    // On restaure langue session
+            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error=$langs->trans("ErrorUnknown");
-        $langs->setPhpLang();    // On restaure langue session
+        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 

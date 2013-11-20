@@ -104,7 +104,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
         $outputlangs->load("interventions");
         $outputlangs->load('synopsisGene@Synopsis_Tools');
 
-//        $outputlangs->setPhpLang();
+//        //$outputlangs->setPhpLang();
 
         if ($conf->synopsisdemandeinterv->dir_output)
         {

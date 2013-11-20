@@ -103,7 +103,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
         $outputlangs->load("bills");
         $outputlangs->load("contrat");
         $outputlangs->load("products");
-//        $outputlangs->setPhpLang();
+//        //$outputlangs->setPhpLang();
         if ($conf->synopsiscontrat->dir_output) {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
             if (!is_object($contrat)) {
@@ -892,7 +892,7 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
                     $annexe = preg_replace('/User-office_fax/', $user->office_fax, $annexe);
 
                     $annexe = preg_replace('/Mysoc-nom/', $mysoc->nom, $annexe);
-                    $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address_full, $annexe);
+                    $annexe = preg_replace('/Mysoc-adresse_full/', $mysoc->address."\n".$mysoc->zip." ".$mysoc->town, $annexe);
                     $annexe = preg_replace('/Mysoc-adresse/', $mysoc->address, $annexe);
                     $annexe = preg_replace('/Mysoc-cp/', $mysoc->zip, $annexe);
                     $annexe = preg_replace('/Mysoc-ville/', $mysoc->town, $annexe);
@@ -909,7 +909,7 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
 
                     $annexe = preg_replace('/Soc-titre/', $contrat->societe->titre, $annexe);
                     $annexe = preg_replace('/Soc-nom/', $contrat->societe->nom, $annexe);
-                    $annexe = preg_replace('/Soc-adresse_full/', $contrat->societe->adresse_full, $annexe);
+                    $annexe = preg_replace('/Soc-adresse_full/', $contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town, $annexe);
                     $annexe = preg_replace('/Soc-adresse/', $contrat->societe->adresse, $annexe);
                     $annexe = preg_replace('/Soc-cp/', $contrat->societe->cp, $annexe);
                     $annexe = preg_replace('/Soc-ville/', $contrat->societe->ville, $annexe);
@@ -960,23 +960,23 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
                 $this->file = $file;
                 $pdf->Output($file, 'F');
 
-//                $langs->setPhpLang();    // On restaure langue session
+//                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-//                $langs->setPhpLang();    // On restaure langue session
+//                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
-//            $langs->setPhpLang();    // On restaure langue session
+//            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error = $langs->trans("ErrorUnknown");
-//        $langs->setPhpLang();    // On restaure langue session
+//        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 
@@ -1041,7 +1041,7 @@ d'une part
 Et,";
 
         $clause3 = utf8_encode($this->contrat->societe->titre) . " " . utf8_encode($this->contrat->societe->nom);
-        $clause4 = "Sis " . utf8_encode($this->contrat->societe->adresse_full) . "
+        $clause4 = "Sis " . utf8_encode($this->contrat->societe->address."\n".$this->contrat->societe->zip." ".$this->contrat->societe->town) . "
 Représenté(e) légalement par
 " . $to . "        Fonction : " . $poste . $tel . "
 

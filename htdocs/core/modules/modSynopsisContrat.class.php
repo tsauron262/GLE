@@ -100,8 +100,7 @@ class modSynopsisContrat extends DolibarrModules {
     function init() {
         global $conf;
         $sql = array(
-            "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE nom = '" . $this->const[0][2] . "' AND entity = " . $conf->entity,
-            "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity) VALUES('" . $this->const[0][2] . "','contratGMAO'," . $conf->entity . ")",
+            "DELETE FROM " . MAIN_DB_PREFIX . "document_model WHERE type = 'synopsiscontrat' AND entity = " . $conf->entity,
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (
   `annexe_refid` int(11) DEFAULT NULL,
   `contrat_refid` int(11) DEFAULT NULL,
@@ -201,7 +200,10 @@ class modSynopsisContrat extends DolibarrModules {
   KEY `fk_user_author` (`fk_user_author`)
 )");
 //    $this->dirs[0] = $conf->chrono->dir_output;
-
+$tabModel = array("Bimp" => "Modèle BIMP", "courrierBIMPavenant" => "BIMP Courrier - Avenant", "courrierBIMPconfirmation" => "BIMP Courrier - Confirmation", "courrierBIMPrenouvellement" => "BIMP Courrier - Renouvellement", "courrierBIMPresiliation" => "BIMP Courrier - Resiliation", "courrierBIMPsignature" => "BIMP Courrier - Signature", "courrierBIMPresiliationAvoir" => "BIMP Courrier - Resiliation & avoir", "courrierBIMPAutoPrelevement" => "BIMP Courrier - Prelevement automatique");
+        foreach($tabModel as $result => $nom){
+            $sql[] = "INSERT INTO " . MAIN_DB_PREFIX . "document_model (nom, type, entity, libelle) VALUES('" . $result . "','synopsiscontrat'," . $conf->entity . ", '".$nom."')";
+        }
         return $this->_init($sql);
     }
 

@@ -190,23 +190,23 @@ $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
                 $this->file = $file;
                 $pdf->Output($file, 'F');
 
-//                //$langs->setPhpLang();    // On restaure langue session
+//                ////$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error = $langs->trans("ErrorCanNotCreateDir", $dir);
-                //$langs->setPhpLang();    // On restaure langue session
+                ////$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error = $langs->trans("ErrorConstantNotDefined", "CONTRACT_OUTPUTDIR");
-            //$langs->setPhpLang();    // On restaure langue session
+            ////$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error = $langs->trans("ErrorUnknown");
-        //$langs->setPhpLang();    // On restaure langue session
+        ////$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
 
@@ -271,7 +271,7 @@ d'une part
 Et,";
 
         $clause3 = utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom);
-        $clause4 = "Sis " . utf8_encodeRien($this->contrat->societe->adresse_full) . "
+        $clause4 = "Sis " . utf8_encodeRien($this->contrat->societe->address."\n".$this->contrat->societe->zip." ".$this->contrat->societe->town) . "
 Représenté(e) légalement par
 " . utf8_encodeRien($to) . "        Fonction : " . $poste . $tel . "
 

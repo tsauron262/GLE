@@ -98,7 +98,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
         $outputlangs->load("companies");
         $outputlangs->load("interventions");
 
-//        $outputlangs->setPhpLang();
+//        //$outputlangs->setPhpLang();
         if ($conf->synopsisficheinter->dir_output) {
             // If $fichinter is id instead of object
             if (!is_object($fichinter)) {

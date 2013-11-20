@@ -59,7 +59,7 @@
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Ma soci&eacute;t&eacute;";
 
     print "<tr><td>Mysoc-nom<td>Nom de ma soci&eacute;t&eacute;<td>".$mysoc->nom;
-    print "<tr><td>Mysoc-adresse_full<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->address_full;
+    print "<tr><td>Mysoc-adresse_full<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->address."<br/>".$mysoc->zip." ".$mysoc->town;
     print "<tr><td>Mysoc-adresse<td>Adresse de ma soci&eacute;t&eacute;<td>".$mysoc->address;
     print "<tr><td>Mysoc-cp<td>Code postal de ma soci&eacute;t&eacute;<td>".$mysoc->zip;
     print "<tr><td>Mysoc-ville<td>Ville de ma soci&eacute;t&eacute;<td>".$mysoc->town;
@@ -79,7 +79,7 @@
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Client";
     print "<tr><td>Soc-titre<td>Titre de la soci&eacute;t&eacute; du client<td>".$contrat->societe->titre;
     print "<tr><td>Soc-nom<td>Nom de la soci&eacute;t&eacute; du client<td>".$contrat->societe->nom;
-    print "<tr><td>Soc-adresse_full<td>Adresse de la soci&eacute;t&eacute; du client<td>".$contrat->societe->adresse_full;
+    print "<tr><td>Soc-adresse_full<td>Adresse de la soci&eacute;t&eacute; du client<td>".$contrat->societe->address."<br/>".$contrat->societe->zip." ".$contrat->societe->town;
     print "<tr><td>Soc-adresse<td>Adresse de la soci&eacute;t&eacute; du client<td>".$contrat->societe->adresse;
     print "<tr><td>Soc-cp<td>Code postal de la soci&eacute;t&eacute; du client<td>".$contrat->societe->cp;
     print "<tr><td>Soc-ville<td>Ville de la soci&eacute;t&eacute; du client<td>".$contrat->societe->ville;

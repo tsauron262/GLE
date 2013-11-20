@@ -23,7 +23,7 @@
  \version    $Id: pdf_contrat_babel.modules.php,v 1.121 2008/08/07 07:47:38 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/contrat/modules_contrat.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
 require_once(DOL_DOCUMENT_ROOT."/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/lib/company.lib.php");
 
@@ -97,7 +97,7 @@ class pdf_contrat_babel extends ModeleSynopsiscontrat
         $outputlangs->load("contrat");
         $outputlangs->load("products");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->contrat->dir_output)
         {

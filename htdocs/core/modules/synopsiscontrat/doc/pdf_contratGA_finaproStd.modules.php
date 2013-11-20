@@ -26,6 +26,7 @@
 require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsiscontrat/modules_contratGA.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
+require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 
 
 /**
@@ -91,7 +92,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $outputlangs->load("contrat");
         $outputlangs->load("products");
 
-        $outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
 
         if ($conf->CONTRATGA->dir_output)
         {
@@ -126,16 +127,10 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             {
                 $nblignes = sizeof($contratGA->lignes);
                 // Protection et encryption du pdf
-                if ($conf->global->PDF_SECURITY_ENCRYPTION)
-                {
-                    $pdf=new FPDI_Protection('P','mm',$this->format);
-                    $pdfrights = array('print'); // Ne permet que l'impression du document
-                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
-                } else  {
-                    $pdf=new FPDI('P','mm',$this->format);
-                }
+                
+                $pdf = pdf_getInstance($this->format);
+
+                $pdf1 = pdf_getInstance($this->format);
                 $pdf->Open();
 //                $pdf->AddPage();
 
@@ -188,26 +183,26 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
                 $pdf->AliasNbPages();
                 $pdf->Close();
-                $this->file = $file;$pdf->Output($file);
+                $this->file = $file;$pdf->Output($file, 'f');
 
 
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur
             } else {
                 $this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
-                $langs->setPhpLang();    // On restaure langue session
+                //$langs->setPhpLang();    // On restaure langue session
                 return 0;
             }
         } else {
             $this->error=$langs->trans("ErrorConstantNotDefined","CONTRATGA->dir_output");
-            $langs->setPhpLang();    // On restaure langue session
+            //$langs->setPhpLang();    // On restaure langue session
             return 0;
         }
 
         $this->error=$langs->trans("ErrorUnknown");
-        $langs->setPhpLang();    // On restaure langue session
+        //$langs->setPhpLang();    // On restaure langue session
         return 0;   // Erreur par defaut
     }
     private $iter =1;

@@ -183,10 +183,10 @@ class Synopsis_Contrat extends Contrat {
             $pref = "HL";
         if ($isHotline && $isTeleMaint)
             $pref = "CT";
-        if ($suivie)
-            $pref = "CS4";
         if ($isHotline && $is8h)
             $pref = "CD8";
+        if ($suivie)
+            $pref = "CS4";
         if ($isMed)
             $pref = "CMED";
         if ($isMed8)

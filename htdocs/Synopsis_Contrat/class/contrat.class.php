@@ -146,6 +146,8 @@ class Synopsis_Contrat extends Contrat {
         $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
+            if(stripos($ligne->description, "suivi") !== false)
+                    $suivie = true;
             if ($ligne->GMAO_Mixte['isSAV'])
                 $isSav = true;
             if ($ligne->GMAO_Mixte['maintenance'])
@@ -1523,7 +1525,7 @@ class Synopsis_Contrat extends Contrat {
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),0,
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
-                            " . ($tmpProd->array_options['options_2hotline'] ? 1 : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? 1 : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
+                            " . ($tmpProd->array_options['options_2hotline'] ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] > 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
                             " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 2))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);
 
@@ -1999,16 +2001,18 @@ EOF;
 
                     jQuery('#nbTicketadd').val(qte);
                     jQuery('#nbTicketMNTadd').val(qteMNT);
-                    if (Hotline == 1){
-                        jQuery('#hotlineadd').attr('checked',true);
-                    } else {
-                        jQuery('#hotlineadd').attr('checked',false);
-                    }
-                    if (TeleMaintenance == 1){
-                        jQuery('#telemaintenanceadd').attr('checked',true);
-                    } else {
-                        jQuery('#telemaintenanceadd').attr('checked',false);
-                    }
+                    jQuery('#hotlineadd').val(Hotline);
+                    jQuery('#telemaintenanceadd').val(TeleMaintenance);
+//                    if (Hotline == 1){
+//                        jQuery('#hotlineadd').attr('checked',true);
+//                    } else {
+//                        jQuery('#hotlineadd').attr('checked',false);
+//                    }
+//                    if (TeleMaintenance == 1){
+//                        jQuery('#telemaintenanceadd').attr('checked',true);
+//                    } else {
+//                        jQuery('#telemaintenanceadd').attr('checked',false);
+//                    }
                     if (reconductionAuto == 1)
                     {
                         jQuery('#addrecondAuto').attr('checked',true);
@@ -2107,17 +2111,18 @@ EOF;
 
                     jQuery('#nbTicketmod').val(qte);
                     jQuery('#nbTicketMNTmod').val(qteMNT);
-
-                    if (Hotline == 1){
-                        jQuery('#hotlinemod').attr('checked',true);
-                    } else {
-                        jQuery('#hotlinemod').attr('checked',false);
-                    }
-                    if (TeleMaintenance == 1){
-                        jQuery('#telemaintenancemod').attr('checked',true);
-                    } else {
-                        jQuery('#telemaintenancemod').attr('checked',false);
-                    }
+                    jQuery('#hotlinemod').val(Hotline);
+                    jQuery('#telemaintenancemod').val(TeleMaintenance);
+//                    if (Hotline == 1){
+//                        jQuery('#hotlinemod').attr('checked',true);
+//                    } else {
+//                        jQuery('#hotlinemod').attr('checked',false);
+//                    }
+//                    if (TeleMaintenance == 1){
+//                        jQuery('#telemaintenancemod').attr('checked',true);
+//                    } else {
+//                        jQuery('#telemaintenancemod').attr('checked',false);
+//                    }
                     if (reconductionAuto == 1)
                     {
                         jQuery('#modrecondAuto').attr('checked',true);
@@ -2268,10 +2273,10 @@ EOF;
         $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbVisite' . $type . '" name="nbVisite' . $type . '"></td>';
         $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>T&eacute;l&eacute;maintenance';
-        $html .= '</th><td class="ui-widget-content" colspan=2><input type=checkbox id="telemaintenance' . $type . '" name="telemaintenance' . $type . '"></td>';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input type=text id="telemaintenance' . $type . '" name="telemaintenance' . $type . '"></td>';
         $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Hotline';
-        $html .= '</th><td class="ui-widget-content" colspan=2><input type=checkbox name="hotline' . $type . '" id="hotline' . $type . '"></td>';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input type=text name="hotline' . $type . '" id="hotline' . $type . '"></td>';
         $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Dur&eacute;e validit&eacute;<br/>(en mois)';
         $html .= '</th><td class="ui-widget-content" colspan=2><input id="DurValMnt' . $type . '" name="DurValMnt' . $type . '"></td>';

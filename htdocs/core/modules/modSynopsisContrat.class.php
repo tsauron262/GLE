@@ -116,6 +116,7 @@ class modSynopsisContrat extends DolibarrModules {
   `ref` varchar(50) DEFAULT NULL,
   `annexe` longtext,
   `afficheTitre` tinyint(1) DEFAULT NULL,
+  `type` int(10) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=39 ;",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_contrat_GA` (

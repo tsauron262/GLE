@@ -3,6 +3,8 @@
 if(isset($_REQUEST['action']) && $_REQUEST['action'] == "save")
     $textSave = $_REQUEST['text'];
 $_REQUEST['text'] = "";
+$_POST['text'] = "";
+$_GET['text'] = "";
 /*
  * GLE by Synopsis et DRSI
  *

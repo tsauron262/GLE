@@ -38,7 +38,7 @@ class Synopsis_Contrat extends Contrat {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
 
         $this->commId = $commId;
-        
+
         $commande = new Commande($this->db);
         $commande->fetch($commId);
         $this->date_contrat = $commande->date;
@@ -86,17 +86,17 @@ class Synopsis_Contrat extends Contrat {
 //        $this->activeAllLigne();
         addElementElement("commande", "contrat", $this->commId, $this->id);
     }
-    
-    public function setExtraParametersSimple($extra = ""){
-        if($extra)
+
+    public function setExtraParametersSimple($extra = "") {
+        if ($extra)
             $this->extraparams = $extra;
-        $this->db->query("UPDATE ".MAIN_DB_PREFIX."contrat SET extraparams = '".$this->extraparams."' WHERE rowid = ".$this->id);
+        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "contrat SET extraparams = '" . $this->extraparams . "' WHERE rowid = " . $this->id);
     }
-    
-    public function activeAllLigne(){
+
+    public function activeAllLigne() {
         global $user;
         foreach ($this->lines as $ligne)
-            $this->active_line($user, $ligne->id, $ligne->date_ouverture_prevue, $ligne->date_fin_validite);        
+            $this->active_line($user, $ligne->id, $ligne->date_ouverture_prevue, $ligne->date_fin_validite);
     }
 
     public function majRef() {
@@ -978,6 +978,31 @@ class Synopsis_Contrat extends Contrat {
         }
         $restant = $tickets - $consomme;
         return(array('restant' => $restant, 'consomme' => $consomme));
+    }
+
+    function lignePlus($object) {
+        $ligne = new Synopsis_ContratLigne($this->db);
+        $ligne->fetch($object->rowid);
+        echo "<table width='100%'><tr class='impair'><td>";
+        echo "<span>Materiel : </span>";
+        $_REQUEST['chrono_id'] = $object->rowid;
+        $lien = new lien($this->db);
+        $lien->socid = $this->socid;
+        $lien->cssClassM = "type:contratdet";
+        $lien->fetch(3);
+        $lien->displayForm();
+        if($ligne->GMAO_Mixte['nbVisiteAn'] > 0){
+        echo "</td><td>";
+        echo "Nb Visite par An : ";
+        echo $ligne->GMAO_Mixte['nbVisiteAn'];
+        }
+        if($ligne->GMAO_Mixte['SLA'] != ""){
+        echo "</td><td>";
+        echo "SLA : ";
+        echo $ligne->GMAO_Mixte['SLA'];
+        }
+        echo "</td></tr>";
+        echo "</table>";
     }
 
     function display1Line($object, $objL) {
@@ -2466,19 +2491,19 @@ class Synopsis_ContratLigne extends ContratLigne {
                 $html .= $prod->libelle . " ";
             }
         }
-//
-//                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
-//                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
-//                        $result = $this->db->fetch_object($sql);
-//                        $html .= "(".$result->value . ") ";
-//                    }
-//
-//                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
-//                    if ($this->db->num_rows($sql) > 0) {
-//                        $result = $this->db->fetch_object($sql);
-//                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
-//                        $html .= ($result->value != "") ? $result->value : "";
-//                    }
+
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1012");
+                    if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+                        $result = $this->db->fetch_object($sql);
+                        $html .= "(".$result->value . ") ";
+                    }
+
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
+                    if ($this->db->num_rows($sql) > 0) {
+                        $result = $this->db->fetch_object($sql);
+                        $html .= ($result->value != ""  && $opt != "SN") ? " SN : " : "";
+                        $html .= ($result->value != "") ? $result->value : "";
+                    }
         return dol_trunc($html, $size);
     }
 

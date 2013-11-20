@@ -2430,13 +2430,14 @@ class lien extends formulaireSource {
 
     function displayForm() {
         print '<div class="formAjax">';
+        print '<span class="showFormChrono editable">'. img_edit().'</span>';
         print '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
         print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElem . '"/>';
         print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElement . '"/>';
         print '<input type="hidden" name="targetid" class="targetid" value="' . $this->idChrono . '"/>';
         print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
         $this->getValues();
-        print '<select>';
+        print '<select class ="chronoForm">';
         foreach ($this->valuesArr as $id => $val)
             print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
         print '</select>';
@@ -2523,14 +2524,14 @@ class lien extends formulaireSource {
         else
             $actionChrono = "change";
         if ($this->typeChrono > 0)
-            echo "<button class='".$actionChrono."Chrono' id='addChrono" . $this->typeChrono . "'>Créer</button>";
-        echo "<button class='".$actionChrono."Lien'>Ajouter</button>";
+            echo "<button class='".$actionChrono."Chrono chronoForm' id='addChrono" . $this->typeChrono . "'>Créer</button>";
+        echo "<button class='".$actionChrono."Lien chronoForm'>Ajouter</button>";
     }
 
     function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
         $html = '<div class="' . $classDiv . ' elem">'
                 . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
-                . "<button onclick='" . $supprAction . "return false;' class='supprLien'>X</button>";
+                . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
         if ($this->urlObj != "") {
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)

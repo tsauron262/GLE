@@ -74,151 +74,153 @@ $object = new Synopsis_Contrat($db);
 
 
 /*
- * Deb mod drsi
+ * Deb mod drsi les action     generer pdf    -    suprimer fichier       - envoyer par mail
  */
-if (isset($_REQUEST["id"])) {
-    $object->fetch($_REQUEST["id"]);
-    $object->fetch_lines();
-    $contrat = $object;
-    if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
-//    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 6 || $contrat->typeContrat == 5)) {
+if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+    if (isset($_REQUEST["id"])) {
+        $object->fetch($_REQUEST["id"]);
+        $object->fetch_lines();
+        $contratSyn = new Synopsis_Contrat($db);
+        $contratSyn->fetch($object->id);
+        if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
+//    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($object->typeContrat == 6 || $object->typeContrat == 5)) {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
-//        contratGA_pdf_create($db, $contrat->id, $_REQUEST['model']);
-//    } else {//if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4)) {
-        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-        $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-        contrat_pdf_create($db, $object->id, $model);
+//        contratGA_pdf_create($db, $object->id, $_REQUEST['model']);
+//    } else {//if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($object->typeContrat == 7 || $object->typeContrat == 2 || $object->typeContrat == 3 || $object->typeContrat == 4)) {
+            require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+            $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+            contrat_pdf_create($db, $object->id, $model);
 //    } else {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-//        contrat_pdf_create($db, $contrat->id, $_REQUEST['model']);
+//        contrat_pdf_create($db, $object->id, $_REQUEST['model']);
 //    }
-        header('location: fiche.php?id=' . $object->id . "#documentAnchor");
-    }// Remove file in doc form
-    else if ($action == 'remove_file') {
-        if ($object->id > 0) {
-            require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            header('location: fiche.php?id=' . $object->id . "#documentAnchor");
+        }// Remove file in doc form
+        else if ($action == 'remove_file') {
+            if ($object->id > 0) {
+                require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
-            $langs->load("other");
-            $upload_dir = $conf->synopsiscontrat->dir_output;
-            $file = $upload_dir . '/' . GETPOST('file');
-            $ret = dol_delete_file($file, 0, 0, 0, $object);
-            if ($ret)
-                setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
-            else
-                setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
-            $action = '';
-        }
-    }
-    else if ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile') && !GETPOST('cancel')) {
-        $langs->load('mails');
-
-        if ($object->id > 0) {
-            if ($_POST['sendto']) {
-                // Le destinataire a ete fourni via le champ libre
-                $sendto = $_POST['sendto'];
-                $sendtoid = 0;
-            } elseif ($_POST['receiver'] != '-1') {
-                // Recipient was provided from combo list
-                if ($_POST['receiver'] == 'thirdparty') { // Id of third party
-                    $sendto = $object->client->email;
-                    $sendtoid = 0;
-                } else { // Id du contact
-                    $sendto = $object->client->contact_get_property($_POST['receiver'], 'email');
-                    $sendtoid = $_POST['receiver'];
-                }
-            }
-
-            if (dol_strlen($sendto)) {
-                $langs->load("commercial");
-
-                $from = $_POST['fromname'] . ' <' . $_POST['frommail'] . '>';
-                $replyto = $_POST['replytoname'] . ' <' . $_POST['replytomail'] . '>';
-                $message = $_POST['message'];
-                $sendtocc = $_POST['sendtocc'];
-                $deliveryreceipt = $_POST['deliveryreceipt'];
-
-                if (dol_strlen($_POST['subject']))
-                    $subject = $_POST['subject'];
+                $langs->load("other");
+                $upload_dir = $conf->synopsiscontrat->dir_output;
+                $file = $upload_dir . '/' . GETPOST('file');
+                $ret = dol_delete_file($file, 0, 0, 0, $object);
+                if ($ret)
+                    setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
                 else
-                    $subject = $langs->transnoentities('Propal') . ' ' . $object->ref;
-                $actiontypecode = 'AC_PROP';
-                $actionmsg = $langs->transnoentities('MailSentBy') . ' ' . $from . ' ' . $langs->transnoentities('To') . ' ' . $sendto . ".\n";
-                if ($message) {
-                    $actionmsg.=$langs->transnoentities('MailTopic') . ": " . $subject . "\n";
-                    $actionmsg.=$langs->transnoentities('TextUsedInTheMessageBody') . ":\n";
-                    $actionmsg.=$message;
-                }
-                $actionmsg2 = $langs->transnoentities('Action' . $actiontypecode);
+                    setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
+                $action = '';
+            }
+        }
+        else if ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile') && !GETPOST('cancel')) {
+            $langs->load('mails');
 
-                // Create form object
-                include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
-                $formmail = new FormMail($db);
-
-                $attachedfiles = $formmail->get_attached_files();
-                $filepath = $attachedfiles['paths'];
-                $filename = $attachedfiles['names'];
-                $mimetype = $attachedfiles['mimes'];
-
-                // Envoi de la propal
-                require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-                $mailfile = new CMailFile($subject, $sendto, $from, $message, $filepath, $mimetype, $filename, $sendtocc, '', $deliveryreceipt, -1);
-                if ($mailfile->error) {
-                    setEventMessage($mailfile->error, 'errors');
-                } else {
-                    $result = $mailfile->sendfile();
-                    if ($result) {
-                        // Initialisation donnees
-                        $object->sendtoid = $sendtoid;
-                        $object->actiontypecode = $actiontypecode;
-                        $object->actionmsg = $actionmsg;
-                        $object->actionmsg2 = $actionmsg2;
-                        $object->fk_element = $object->id;
-                        $object->elementtype = $object->element;
-
-                        // Appel des triggers
-                        include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
-                        $interface = new Interfaces($db);
-                        $result = $interface->run_triggers('PROPAL_SENTBYMAIL', $object, $user, $langs, $conf);
-                        if ($result < 0) {
-                            $error++;
-                            $this->errors = $interface->errors;
-                        }
-                        // Fin appel triggers
-
-                        if (!$error) {
-                            // Redirect here
-                            // This avoid sending mail twice if going out and then back to page
-                            $mesg = $langs->trans('MailSuccessfulySent', $mailfile->getValidAddress($from, 2), $mailfile->getValidAddress($sendto, 2));
-                            setEventMessage($mesg);
-                            header('Location: ' . $_SERVER["PHP_SELF"] . '?id=' . $object->id);
-                            exit;
-                        } else {
-                            dol_print_error($db);
-                        }
-                    } else {
-                        $langs->load("other");
-                        if ($mailfile->error) {
-                            $mesg.=$langs->trans('ErrorFailedToSendMail', $from, $sendto);
-                            $mesg.='<br>' . $mailfile->error;
-                        } else {
-                            $mesg.='No mail sent. Feature is disabled by option MAIN_DISABLE_ALL_MAILS';
-                        }
-                        setEventMessage($mesg, 'errors');
+            if ($object->id > 0) {
+                if ($_POST['sendto']) {
+                    // Le destinataire a ete fourni via le champ libre
+                    $sendto = $_POST['sendto'];
+                    $sendtoid = 0;
+                } elseif ($_POST['receiver'] != '-1') {
+                    // Recipient was provided from combo list
+                    if ($_POST['receiver'] == 'thirdparty') { // Id of third party
+                        $sendto = $object->client->email;
+                        $sendtoid = 0;
+                    } else { // Id du contact
+                        $sendto = $object->client->contact_get_property($_POST['receiver'], 'email');
+                        $sendtoid = $_POST['receiver'];
                     }
+                }
+
+                if (dol_strlen($sendto)) {
+                    $langs->load("commercial");
+
+                    $from = $_POST['fromname'] . ' <' . $_POST['frommail'] . '>';
+                    $replyto = $_POST['replytoname'] . ' <' . $_POST['replytomail'] . '>';
+                    $message = $_POST['message'];
+                    $sendtocc = $_POST['sendtocc'];
+                    $deliveryreceipt = $_POST['deliveryreceipt'];
+
+                    if (dol_strlen($_POST['subject']))
+                        $subject = $_POST['subject'];
+                    else
+                        $subject = $langs->transnoentities('Propal') . ' ' . $object->ref;
+                    $actiontypecode = 'AC_PROP';
+                    $actionmsg = $langs->transnoentities('MailSentBy') . ' ' . $from . ' ' . $langs->transnoentities('To') . ' ' . $sendto . ".\n";
+                    if ($message) {
+                        $actionmsg.=$langs->transnoentities('MailTopic') . ": " . $subject . "\n";
+                        $actionmsg.=$langs->transnoentities('TextUsedInTheMessageBody') . ":\n";
+                        $actionmsg.=$message;
+                    }
+                    $actionmsg2 = $langs->transnoentities('Action' . $actiontypecode);
+
+                    // Create form object
+                    include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
+                    $formmail = new FormMail($db);
+
+                    $attachedfiles = $formmail->get_attached_files();
+                    $filepath = $attachedfiles['paths'];
+                    $filename = $attachedfiles['names'];
+                    $mimetype = $attachedfiles['mimes'];
+
+                    // Envoi de la propal
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
+                    $mailfile = new CMailFile($subject, $sendto, $from, $message, $filepath, $mimetype, $filename, $sendtocc, '', $deliveryreceipt, -1);
+                    if ($mailfile->error) {
+                        setEventMessage($mailfile->error, 'errors');
+                    } else {
+                        $result = $mailfile->sendfile();
+                        if ($result) {
+                            // Initialisation donnees
+                            $object->sendtoid = $sendtoid;
+                            $object->actiontypecode = $actiontypecode;
+                            $object->actionmsg = $actionmsg;
+                            $object->actionmsg2 = $actionmsg2;
+                            $object->fk_element = $object->id;
+                            $object->elementtype = $object->element;
+
+                            // Appel des triggers
+                            include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                            $interface = new Interfaces($db);
+                            $result = $interface->run_triggers('PROPAL_SENTBYMAIL', $object, $user, $langs, $conf);
+                            if ($result < 0) {
+                                $error++;
+                                $this->errors = $interface->errors;
+                            }
+                            // Fin appel triggers
+
+                            if (!$error) {
+                                // Redirect here
+                                // This avoid sending mail twice if going out and then back to page
+                                $mesg = $langs->trans('MailSuccessfulySent', $mailfile->getValidAddress($from, 2), $mailfile->getValidAddress($sendto, 2));
+                                setEventMessage($mesg);
+                                header('Location: ' . $_SERVER["PHP_SELF"] . '?id=' . $object->id);
+                                exit;
+                            } else {
+                                dol_print_error($db);
+                            }
+                        } else {
+                            $langs->load("other");
+                            if ($mailfile->error) {
+                                $mesg.=$langs->trans('ErrorFailedToSendMail', $from, $sendto);
+                                $mesg.='<br>' . $mailfile->error;
+                            } else {
+                                $mesg.='No mail sent. Feature is disabled by option MAIN_DISABLE_ALL_MAILS';
+                            }
+                            setEventMessage($mesg, 'errors');
+                        }
+                    }
+                } else {
+                    $langs->load("other");
+                    setEventMessage($langs->trans('ErrorMailRecipientIsEmpty') . '!', 'errors');
+                    dol_syslog($langs->trans('ErrorMailRecipientIsEmpty'));
                 }
             } else {
                 $langs->load("other");
-                setEventMessage($langs->trans('ErrorMailRecipientIsEmpty') . '!', 'errors');
-                dol_syslog($langs->trans('ErrorMailRecipientIsEmpty'));
+                setEventMessage($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")), 'errors');
+                dol_syslog($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")));
             }
-        } else {
-            $langs->load("other");
-            setEventMessage($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")), 'errors');
-            dol_syslog($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")));
         }
     }
 }
-
 /*
  * f mod drsi
  */
@@ -751,39 +753,42 @@ if (!empty($conf->global->MAIN_DISABLE_CONTACTS_TAB) && $user->rights->contrat->
  * View
  */
 
-/* Mod drsi */
+/* Mod drsi    Script pour les lignes
+ */
 $header = '';
-if (isset($_REQUEST["id"])) {
-    $type = 7;
-    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
-    switch ($type) {
-        case '2': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratTkt-fiche.js"></script>' . "\n";
-            }
-            break;
-        case '3': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratMnt-fiche.js"></script>' . "\n";
-            }
-            break;
-        case '4': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratSAV-fiche.js"></script>' . "\n";
-            }
-            break;
-        case '7': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Contrat/js/contratMixte-fiche.js"></script>' . "\n";
-            }
-            break;
-        case '5': {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GA/js/contratLoc-fiche.js"></script>' . "\n";
-            }
-            break;
-        default: {
-                $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/contrat/js/contrat-fiche.js"></script>' . "\n";
-            }
-            break;
-    }
+if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+    if (isset($_REQUEST["id"])) {
 
-    $header .= '<script>
+        $type = 7;
+        $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
+        switch ($type) {
+            case '2': {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratTkt-fiche.js"></script>' . "\n";
+                }
+                break;
+            case '3': {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratMnt-fiche.js"></script>' . "\n";
+                }
+                break;
+            case '4': {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GMAO/js/contratSAV-fiche.js"></script>' . "\n";
+                }
+                break;
+            case '7': {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Contrat/js/contratMixte-fiche.js"></script>' . "\n";
+                }
+                break;
+            case '5': {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Babel_GA/js/contratLoc-fiche.js"></script>' . "\n";
+                }
+                break;
+            default: {
+                    $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/contrat/js/contrat-fiche.js"></script>' . "\n";
+                }
+                break;
+        }
+
+        $header .= '<script>
                     userId = "' . $user->id . '";
                         idContratCurrent = "' . $id . '";
                     $(document).ready(function(){ 
@@ -820,11 +825,11 @@ if (isset($_REQUEST["id"])) {
                             });
                         });
             });</script>';
-
-    $object->fetch($id);
-    global $mysoc;
-    $tab = $object->initDialog($mysoc);
-    $header .= $tab[1];
+        $object->fetch($id);
+        global $mysoc;
+        $tab = $object->initDialog($mysoc);
+        $header .= $tab[1];
+    }
 }
 llxHeader($header, $langs->trans("ContractCard"), "Contrat");
 print $tab[0];
@@ -1599,6 +1604,11 @@ if ($action == 'create') {
                 print '</form>';
             }
 
+            /* deb mod drsi */
+            if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT))
+                print $contratSyn->lignePlus($objp);
+            /* fin mod drsi */
+
             print '</td>'; // End td if line is 1
 
             print '</tr>';
@@ -1716,123 +1726,125 @@ if ($action == 'create') {
 
 
 /*
- * deb mod drsi
+ * deb mod drsi    Bouton envoyer par mail        form envoy mail         for genere doc
  */
 
 
-if (isset($_REQUEST["id"])) {
+if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+    if (isset($_REQUEST["id"])) {
 // Send
-    if ($object->statut == 1 || $object->statut == 2) {
-        print "<br/><br/>";
-        if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
-            print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
-        } else
-            print '<div class="inline-block divButAction"><a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a></div>';
-    }
-
-
-
-
-    /*
-     * Action presend
-     *
-     */
-    if ($action == 'presend') {
-        $ref = dol_sanitizeFileName($object->ref);
-        include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
-        $fileparams = dol_most_recent_file($conf->propal->dir_output . '/' . $ref, preg_quote($ref, '/'));
-        $file = $fileparams['fullname'];
-
-        // Build document if it not exists
-        if (!$file || !is_readable($file)) {
-            // Define output language
-            $outputlangs = $langs;
-            $newlang = '';
-            if ($conf->global->MAIN_MULTILANGS && empty($newlang) && !empty($_REQUEST['lang_id']))
-                $newlang = $_REQUEST['lang_id'];
-            if ($conf->global->MAIN_MULTILANGS && empty($newlang))
-                $newlang = $object->client->default_lang;
-            if (!empty($newlang)) {
-                $outputlangs = new Translate("", $conf);
-                $outputlangs->setDefaultLang($newlang);
-            }
-            require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
-            $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-
-            $result = contrat_pdf_create($db, $object->id, $model);
-            if ($result <= 0) {
-                dol_print_error($db, $result);
-                exit;
-            }
-            $fileparams = dol_most_recent_file($conf->synopsiscontrat->dir_output . '/' . $ref, preg_quote($ref, '/'));
-            $file = $fileparams['fullname'];
+        print "<br/>";
+        if ($object->statut == 1 || $object->statut == 2) {
+            print "<br/>";
+            if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
+                print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
+            } else
+                print '<div class="inline-block divButAction"><a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a></div>';
         }
 
-        print '<br>';
-        print_titre($langs->trans('SendContratByMail'));
 
-        // Create form object
-        include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
-        $formmail = new FormMail($db);
-        $formmail->fromtype = 'user';
-        $formmail->fromid = $user->id;
-        $formmail->fromname = $user->getFullName($langs);
-        $formmail->frommail = $user->email;
-        $formmail->withfrom = 1;
-        $liste = array();
-        foreach ($object->thirdparty->thirdparty_and_contact_email_array(1) as $key => $value)
-            $liste[$key] = $value;
-        $formmail->withto = GETPOST("sendto") ? GETPOST("sendto") : $liste;
-        $formmail->withtocc = $liste;
-        $formmail->withtoccc = (!empty($conf->global->MAIN_EMAIL_USECCC) ? $conf->global->MAIN_EMAIL_USECCC : false);
-        $formmail->withtopic = $langs->trans('Contrat') . " " . $object->ref;
-        $formmail->withfile = 2;
-        $formmail->withbody = "Text mail";
-        $formmail->withdeliveryreceipt = 1;
-        $formmail->withcancel = 1;
 
-        // Tableau des substitutions
-        $formmail->substit['__PROPREF__'] = $object->ref;
-        $formmail->substit['__SIGNATURE__'] = $user->signature;
-        $formmail->substit['__PERSONALIZED__'] = '';
-        $formmail->substit['__CONTACTCIVNAME__'] = '';
 
-        //Find the good contact adress
-        $custcontact = '';
-        $contactarr = array();
-        $contactarr = $object->liste_contact(-1, 'external');
+        /*
+         * Action presend
+         *
+         */
+        if ($action == 'presend') {
+            $ref = dol_sanitizeFileName($object->ref);
+            include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+            $fileparams = dol_most_recent_file($conf->propal->dir_output . '/' . $ref, preg_quote($ref, '/'));
+            $file = $fileparams['fullname'];
 
-        if (is_array($contactarr) && count($contactarr) > 0) {
-            foreach ($contactarr as $contact) {
-                if ($contact['libelle'] == $langs->trans('TypeContact_propal_external_CUSTOMER')) {
-                    $contactstatic = new Contact($db);
-                    $contactstatic->fetch($contact['id']);
-                    $custcontact = $contactstatic->getFullName($langs, 1);
+            // Build document if it not exists
+            if (!$file || !is_readable($file)) {
+                // Define output language
+                $outputlangs = $langs;
+                $newlang = '';
+                if ($conf->global->MAIN_MULTILANGS && empty($newlang) && !empty($_REQUEST['lang_id']))
+                    $newlang = $_REQUEST['lang_id'];
+                if ($conf->global->MAIN_MULTILANGS && empty($newlang))
+                    $newlang = $object->client->default_lang;
+                if (!empty($newlang)) {
+                    $outputlangs = new Translate("", $conf);
+                    $outputlangs->setDefaultLang($newlang);
+                }
+                require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_synopsiscontrat.php");
+                $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+
+                $result = contrat_pdf_create($db, $object->id, $model);
+                if ($result <= 0) {
+                    dol_print_error($db, $result);
+                    exit;
+                }
+                $fileparams = dol_most_recent_file($conf->synopsiscontrat->dir_output . '/' . $ref, preg_quote($ref, '/'));
+                $file = $fileparams['fullname'];
+            }
+
+            print '<br>';
+            print_titre($langs->trans('SendContratByMail'));
+
+            // Create form object
+            include_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
+            $formmail = new FormMail($db);
+            $formmail->fromtype = 'user';
+            $formmail->fromid = $user->id;
+            $formmail->fromname = $user->getFullName($langs);
+            $formmail->frommail = $user->email;
+            $formmail->withfrom = 1;
+            $liste = array();
+            foreach ($object->thirdparty->thirdparty_and_contact_email_array(1) as $key => $value)
+                $liste[$key] = $value;
+            $formmail->withto = GETPOST("sendto") ? GETPOST("sendto") : $liste;
+            $formmail->withtocc = $liste;
+            $formmail->withtoccc = (!empty($conf->global->MAIN_EMAIL_USECCC) ? $conf->global->MAIN_EMAIL_USECCC : false);
+            $formmail->withtopic = $langs->trans('Contrat') . " " . $object->ref;
+            $formmail->withfile = 2;
+            $formmail->withbody = "Text mail";
+            $formmail->withdeliveryreceipt = 1;
+            $formmail->withcancel = 1;
+
+            // Tableau des substitutions
+            $formmail->substit['__PROPREF__'] = $object->ref;
+            $formmail->substit['__SIGNATURE__'] = $user->signature;
+            $formmail->substit['__PERSONALIZED__'] = '';
+            $formmail->substit['__CONTACTCIVNAME__'] = '';
+
+            //Find the good contact adress
+            $custcontact = '';
+            $contactarr = array();
+            $contactarr = $object->liste_contact(-1, 'external');
+
+            if (is_array($contactarr) && count($contactarr) > 0) {
+                foreach ($contactarr as $contact) {
+                    if ($contact['libelle'] == $langs->trans('TypeContact_propal_external_CUSTOMER')) {
+                        $contactstatic = new Contact($db);
+                        $contactstatic->fetch($contact['id']);
+                        $custcontact = $contactstatic->getFullName($langs, 1);
+                    }
+                }
+
+                if (!empty($custcontact)) {
+                    $formmail->substit['__CONTACTCIVNAME__'] = $custcontact;
                 }
             }
 
-            if (!empty($custcontact)) {
-                $formmail->substit['__CONTACTCIVNAME__'] = $custcontact;
+            // Tableau des parametres complementaires
+            $formmail->param['action'] = 'send';
+            $formmail->param['models'] = 'contrat_send';
+            $formmail->param['id'] = $object->id;
+            $formmail->param['returnurl'] = $_SERVER["PHP_SELF"] . '?id=' . $object->id;
+
+
+            // Init list of files
+            if (GETPOST("mode") == 'init') {
+                $formmail->clear_attached_files();
+                $formmail->add_attached_files($file, basename($file), dol_mimetype($file));
             }
-        }
 
-        // Tableau des parametres complementaires
-        $formmail->param['action'] = 'send';
-        $formmail->param['models'] = 'contrat_send';
-        $formmail->param['id'] = $object->id;
-        $formmail->param['returnurl'] = $_SERVER["PHP_SELF"] . '?id=' . $object->id;
+            $formmail->show_form();
 
-
-        // Init list of files
-        if (GETPOST("mode") == 'init') {
-            $formmail->clear_attached_files();
-            $formmail->add_attached_files($file, basename($file), dol_mimetype($file));
-        }
-
-        $formmail->show_form();
-
-        print '<br>';
-    } else {
+            print '<br>';
+        } else {
 
 
 
@@ -1842,28 +1854,29 @@ if (isset($_REQUEST["id"])) {
 
 
 
-        $filename = sanitize_string($contrat->ref);
-        $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
-        $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $contrat->id;
+            $filename = sanitize_string($object->ref);
+            $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($object->ref);
+            $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $object->id;
 
-        $genallowed = $user->rights->synopsiscontrat->generate;
+            $genallowed = $user->rights->synopsiscontrat->generate;
 
-        require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-        $html = new Form($db);
-        $formfile = new FormFile($db);
-//if ($contrat->typeContrat == 6 || $contrat->typeContrat == 5) {
-//    $filedir = $conf->CONTRATGA->dir_output . '/' . sanitize_string($contrat->ref);
-//    $somethingshown = $formfile->show_documents('contratGA', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
-//} else if ($contrat->typeContrat == 7 || $contrat->typeContrat == 2 || $contrat->typeContrat == 3 || $contrat->typeContrat == 4) {
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
+            $html = new Form($db);
+            $formfile = new FormFile($db);
+//if ($object->typeContrat == 6 || $object->typeContrat == 5) {
+//    $filedir = $conf->CONTRATGA->dir_output . '/' . sanitize_string($object->ref);
+//    $somethingshown = $formfile->show_documents('contratGA', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelPdf);
+//} else if ($object->typeContrat == 7 || $object->typeContrat == 2 || $object->typeContrat == 3 || $object->typeContrat == 4) {
 //
-//    $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($contrat->ref);
+//    $filedir = $conf->synopsiscontrat->dir_output . '/' . sanitize_string($object->ref);
 //    print "<div style='width: 600px'>";
-//    $somethingshown = $formfile->show_documents('contratGMAO', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
+//    $somethingshown = $formfile->show_documents('contratGMAO', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelPdf);
 //    print "</div>";
 //} else {
-//    $somethingshown = $formfile->show_documents('contrat', $filename, $filedir, $urlsource, $genallowed, $delallowed, $contrat->modelPdf);
+//    $somethingshown = $formfile->show_documents('contrat', $filename, $filedir, $urlsource, $genallowed, $delallowed, $object->modelPdf);
 //}
-        $somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, $genallowed, $genallowed, "BIMP2"); //, $contrat->modelPdf);
+            $somethingshown = $formfile->show_documents('synopsiscontrat', $filename, $filedir, $urlsource, $genallowed, $genallowed, "BIMP2"); //, $object->modelPdf);
+        }
     }
 }
 /*
@@ -1924,7 +1937,7 @@ if ($conf->margin->enabled) {
                             $('#buying_price').show();
                         }
                     },
-                            'json');
+                    'json');
                 }
                 else {
                     $("#fournprice").hide();

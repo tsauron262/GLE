@@ -334,6 +334,17 @@ function addChronoAj(firstParent){
 }
 
 function initFormChrono(){
+    $(".showFormChrono").each(function(){
+        $(this).parent().find(".chronoForm").hide();
+        $(this).click(function(){
+            $(this).parent().find(".chronoForm").show();
+            $(this).remove();
+        });
+    });
+    
+    
+    
+    
     idIncr = 100;
     $(".formAjax .addLien").click(function() {
         addLienAj($(this));

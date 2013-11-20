@@ -252,55 +252,6 @@ Tél. : Soc-tel
         $arr['nom'] = 'Nom';
         $arr['prenom'] = 'Pr&eacute;om';
 
-
-
-
-
-        /*
-
-
-          Contact-external-SALESREPSIGN-fullname  Nom complet     M. PIROCHE
-          Contact-external-SALESREPSIGN-civilite  Civilité
-          Contact-external-SALESREPSIGN-nom   Nom     PIROCHE
-          Contact-external-SALESREPSIGN-prenom    Préom
-          Contact-external-SALESREPSIGN-cp    Code postal
-          Contact-external-SALESREPSIGN-ville     Ville
-          Contact-external-SALESREPSIGN-email     Email
-          Contact-external-SALESREPSIGN-tel   N° tel
-          Contact-external-SALESREPSIGN-fax   N° fax
-
-          Contact-internal-SALESREPFOLL-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-SALESREPFOLL-civilite  Civilité
-          Contact-internal-SALESREPFOLL-nom   Nom     LE FEVRE
-          Contact-internal-SALESREPFOLL-prenom    Préom   Jean-Marcéé
-          Contact-internal-SALESREPFOLL-cp    Code postal
-          Contact-internal-SALESREPFOLL-ville     Ville
-          Contact-internal-SALESREPFOLL-email     Email   tommy@drsi.fr
-          Contact-internal-SALESREPFOLL-tel   N° tel
-          Contact-internal-SALESREPFOLL-fax   N° fax
-
-          Contact-internal-TECHRESP-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-TECHRESP-civilite  Civilité
-          Contact-internal-TECHRESP-nom   Nom     LE FEVRE
-          Contact-internal-TECHRESP-prenom    Préom   Jean-Marcéé
-          Contact-internal-TECHRESP-cp    Code postal
-          Contact-internal-TECHRESP-ville     Ville
-          Contact-internal-TECHRESP-email     Email   tommy@drsi.fr
-          Contact-internal-TECHRESP-tel   N° tel
-          Contact-internal-TECHRESP-fax   N° fax
-
-          Contact-internal-SALESREPSIGN-fullname  Nom complet     Jean-Marcéé LE FEVRE
-          Contact-internal-SALESREPSIGN-civilite  Civilité
-          Contact-internal-SALESREPSIGN-nom   Nom     LE FEVRE
-          Contact-internal-SALESREPSIGN-prenom    Préom   Jean-Marcéé
-          Contact-internal-SALESREPSIGN-cp    Code postal
-          Contact-internal-SALESREPSIGN-ville     Ville
-          Contact-internal-SALESREPSIGN-email     Email   tommy@drsi.fr
-          Contact-internal-SALESREPSIGN-tel   N° tel
-          Contact-internal-SALESREPSIGN-fax   N° fax
-
-
-         */
         return $annexe;
     }
 }

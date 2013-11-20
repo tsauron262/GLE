@@ -42,7 +42,7 @@ if ($projetid == '')
 $socid = 0;
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid);
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
 
 
 $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";

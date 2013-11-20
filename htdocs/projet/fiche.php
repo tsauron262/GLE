@@ -66,7 +66,7 @@ if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add"
 // SecuritrestrictedAreay check
 if ($user->societe_id)
     $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid);
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
 
 
 /*

@@ -64,7 +64,7 @@ if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add"
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid);
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
 
 // Get parameters
 $page=$_GET["page"];

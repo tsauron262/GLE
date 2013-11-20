@@ -44,10 +44,10 @@ print "<ul>";
 print "<li><a href='#glob'>Global</a></li>";
 print "<li><a href='#trig'>Trigger</a></li>";
 print "</ul>";
-print "<div id='trig'>";
+print "<div id='trig'>1";
 //Drag Drop
 print "</div>";
-print "<div id='glob'>";
+print "<div id='glob'>2";
 print "</div>";
 print "</div>";
 

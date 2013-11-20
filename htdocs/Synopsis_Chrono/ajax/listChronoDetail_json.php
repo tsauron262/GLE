@@ -75,8 +75,14 @@ if ($searchOn == 'true') {
 
     if ($_REQUEST['propal'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";
-        $searchFieldT = 'id';
+        $searchFieldT = 'propalid';
         $operT = 'IN';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
+    }
+    if ($_REQUEST['fk_propal'] != "") {
+        $searchStringT = $_REQUEST['fk_propal'];
+        $searchFieldT = 'propalid';
+        $operT = '=';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
     if ($_REQUEST['soc'] != "") {
@@ -471,7 +477,7 @@ switch ($action) {
                             require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
                             $obj = new Propal($db);
                             $obj->fetch($chrono->propalid);
-                            $html = $obj->getNomUrl(1, '', 30);
+                            $html = $obj->getNomUrl(1, '');
                         }
                         $arr[] = $html;
                     }

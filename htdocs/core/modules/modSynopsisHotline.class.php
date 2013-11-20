@@ -88,10 +88,6 @@ class modSynopsisHotline extends DolibarrModules
         //------
 
         
-        //Ajout onglet dans fiche utilisateur
-        $this->tabs = array('thirdparty:+hotline:Hotline:@monmodule:/Synopsis_Hotline/list.php?obj=soc&model=100&id=__ID__',
-            'contract:+hotline:Hotline:@monmodule:/Synopsis_Hotline/list.php?obj=ctr&model=100&id=__ID__',
-            'thirdparty:+productCli:Parc:@monmodule:/Synopsis_Hotline/list.php?obj=soc&model=101&id=__ID__');
   }
 
    /**

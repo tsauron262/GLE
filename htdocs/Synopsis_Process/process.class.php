@@ -304,7 +304,7 @@ class process extends CommonObject {
         $i = -1;
         while ($res = $db->fetch_object($sql)) {
             $i++;
-            $typeD = str_replace(array("commande", "facture"), array("order", "invoice"), strtolower($res->type));
+            $typeD = str_replace(array("commande", "facture", "contrat"), array("order", "invoice", "contract"), strtolower($res->type));
             $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISPROCESS_TABS_" . $i . "',1,'" . $typeD . ":+process:Process:@monmodule:/Synopsis_Process/listProcessForElement.php?type=" . $res->type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
             $sql2 = $db->query($requete3);
@@ -2633,6 +2633,7 @@ class requete extends formulaireSource {
                 $this->description = $res->description;
                 $this->showFields = $res->showFields;
                 $this->showFieldsArr = unserialize($res->showFields);
+//                print_r($this->showFieldsArr); echo "|"; print_r($res);
             }
         } else {
             return -1;

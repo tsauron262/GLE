@@ -951,6 +951,9 @@ class ActionComm extends CommonObject
                     $dateend=$this->db->jdate($obj->datep2);
                     $duration=$obj->durationp;
                     $event['summary']=$obj->label.($obj->socname?" (".$obj->socname.")":"");
+                    //Mod drsi pour lien ds agenda externe
+                    $obj->note = htmlToAgenda($obj->note);
+                    //fin mod rdsi
                     $event['desc']=$obj->note;
                     $event['startdate']=$datestart;
                     $event['duration']=$duration;	// Not required with type 'journal'

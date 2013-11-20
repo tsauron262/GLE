@@ -7,6 +7,13 @@
  * Name : queryBuilder.php
  * GLE-1.2
  */
+
+
+$req1 = $_REQUEST['requete'];
+$req2 = $_REQUEST['requeteValue'];
+$_POST['requete'] = '';
+$_POST['requeteValue'] = '';
+
 require_once('pre.inc.php');
 require_once('process.class.php');
 
@@ -22,12 +29,12 @@ if ($_REQUEST['action'] == 'update') {
     $requeteObj->OptGroup = $_REQUEST['OptGroup'];
     $requeteObj->OptGroupLabel = $_REQUEST['OptGroupLabel'];
     $requeteObj->description = $_REQUEST['description'];
-    $requeteObj->requete = $_REQUEST['requete'];
+    $requeteObj->requete = $req1;
     $requeteObj->indexField = $_REQUEST['index'];
     $requeteObj->showFields = $_REQUEST['affiche'];
     $requeteObj->limit = $_REQUEST['limite'];
     $requeteObj->params = $_REQUEST['params'];
-    $requeteObj->requeteValue = $_REQUEST['requeteValue'];
+    $requeteObj->requeteValue = $req2;
     $requeteObj->tableName = $_REQUEST['tableName'];
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^postTrait-([\w]*)$/', $key, $arr)) {
@@ -52,7 +59,7 @@ if ($_REQUEST['action'] == 'update') {
 }
 if ($_REQUEST['action'] == 'add') {
     $requeteObj = new requete($db);
-    $requeteObj->requete = $_REQUEST['requete'];
+    $requeteObj->requete = $req1;
     $requeteObj->description = $_REQUEST['description'];
     $requeteObj->label = $_REQUEST['label'];
     $res = $requeteObj->add();
@@ -121,7 +128,7 @@ if ($_REQUEST['action'] == "Create" || $forceCreate) {
     print "      <td align=center class='ui-widget-content'><textarea name='description' class='required'>" . $_REQUEST['description'] . "</textarea>";
     print '  <tr>';
     print "      <th class='ui-widget-header ui-state-default'>Requ&ecirc;te";
-    print "      <td align=center class='ui-widget-content'><textarea name='requete' class='required'>" . $_REQUEST['requete'] . "</textarea>";
+    print "      <td align=center class='ui-widget-content'><textarea name='requete' class='required'>" . $req1 . "</textarea>";
     print '  <tr>';
     print "      <th class='ui-widget-header' colspan=2><button class='butAction'>Ajouter</button>";
     print "</table></form>";

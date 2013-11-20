@@ -345,7 +345,7 @@ if ($id > 0 && $type . "x" != "x") {
             print $html;
         }
     } else {
-        print "<div class='ui-state-highlight'>Pas de process dans cette " . $nomType . "</div>";
+        print "<div class='ui-state-highlight'>Pas de process dans cette " . $type . "</div>";
     }
 } else {
     accessforbidden();

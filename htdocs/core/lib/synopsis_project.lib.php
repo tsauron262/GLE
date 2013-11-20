@@ -159,6 +159,7 @@ function synopsis_project_prepare_head($projet)
     $head[$h][1] = $langs->trans("Info");
     $head[$h][2] = 'info';
     $h++;
+    complete_head_from_modules($conf,$langs,$projet,$head,$h,'project');
 
 
     return $head;

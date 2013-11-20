@@ -580,7 +580,7 @@ function activatePdf(str){
             print "</div>";
 
             print "</div>";
-            print "<tr><td colspan=4 class='ui-widget-content' align='center'><button id='Modifier' class='butAction'>Modifier</button><button onClick='location.href=\"processBuilder.php?id=" . $process->id . "\"' class='butAction'>Annuler</button></td>";
+            print "<tr><td colspan=4 class='ui-widget-content' align='center'><button id='Modifier' class='butAction'>Modifier</button><button onClick='location.href=\"processBuilder.php?id=" . $process->id . "\"; return false;' class='butAction'>Annuler</button></td>";
             print "</table>";
             print "</div>";
         } else {

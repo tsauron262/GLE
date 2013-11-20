@@ -8,6 +8,15 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
+function htmlToAgenda($str) {
+    $tag = "a";
+    $str = preg_replace("%(<$tag.*?<img)(.*?)(<\/$tag.*?>)%is", "", $str);
+    $str = str_replace("<a href=\"", "http://" . $_SERVER['HTTP_HOST'], $str);
+    $str = str_replace("\">", "\n", $str);
+    $str = str_replace("</a>", "", $str);
+    return $str;
+}
+
 function boxToWidget($file, $title) {
     // A widget object as per jquery.dashboard.js.
     global $db, $user, $langs;

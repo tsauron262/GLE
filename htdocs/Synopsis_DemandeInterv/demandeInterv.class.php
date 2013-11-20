@@ -518,13 +518,13 @@ class demandeInterv extends CommonObject {
         }
     }
 
-    function preparePrisencharge($user, $outputdir = "") {
-        global $langs, $conf;
+    function preparePrisencharge($userT, $outputdir = "") {
+        global $langs, $conf, $user;
 
         $this->db->begin();
 
         $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
-        $sql.= " SET fk_user_prisencharge=" . $user->id;
+        $sql.= " SET fk_user_prisencharge=" . $userT->id;
         $sql.= " WHERE rowid = " . $this->id . " AND fk_statut < 2";
 
         dol_syslog("demandeInterv::valid sql=" . $sql);
@@ -541,7 +541,7 @@ class demandeInterv extends CommonObject {
             $action->societe = $soc;
             $action->label = $this->description." DI : ".$this->ref;
             $action->note = $this->description."<br/>".$this->getNomUrl(1);
-            $action->usertodo = $user;
+            $action->usertodo = $userT;
             $action->add($user);
             
 //            die("ok");
@@ -549,7 +549,7 @@ class demandeInterv extends CommonObject {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_PRISENCHARGE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('DEMANDEINTERV_PRISENCHARGE', $this, $userT, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;

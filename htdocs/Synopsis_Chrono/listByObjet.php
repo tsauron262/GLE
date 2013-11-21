@@ -57,7 +57,7 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
         $projet = new Project($db);
         $projet->fetch($_REQUEST['id']);
-        $filtre = "fkprojet=" . $projet->id;
+        $filtre = "fk_projet=" . $projet->id;
         $head = synopsis_project_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasProjet` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));

@@ -72,6 +72,12 @@ if ($searchOn == 'true') {
         $operT = 'IN';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
+    if ($_REQUEST['fk_projet'] != "") {
+        $searchStringT = $_REQUEST['fk_projet'];
+        $searchFieldT = 'projetid';
+        $operT = '=';
+        $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
+    }
 
     if ($_REQUEST['propal'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";

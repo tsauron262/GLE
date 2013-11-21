@@ -103,6 +103,8 @@ class htmlOld {
 
 function tabChronoDetail($id, $nomDiv, $optionSearch = "") {
     global $db, $user;
+    
+    $width = 1200;
 
 
     $htmlOld = new htmlOld();
@@ -216,7 +218,7 @@ EOF;
             datatype => "json",
             height => "100%",
             rowNum => 20,
-            width => 1087,
+            width => ($width-5),
             sortname => 'id',
             sortorder => "desc",
             colModel => $colModelArr
@@ -250,7 +252,7 @@ EOF;
             }",
             mtype => "POST",
             viewrecords => true,
-            width => "1300",
+            width => $width,
             height => 470,
             colModel => $colModelArr,
             subGrid => true,

@@ -220,3 +220,7 @@ div.champGr{
 .showFormChrono{
     float: left;
 }
+
+.ui-jqgrid-bdiv{
+    padding: 0px;
+}

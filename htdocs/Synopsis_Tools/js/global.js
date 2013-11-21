@@ -248,7 +248,7 @@ function addLienHtml(idIncr, id, nom, model, cible) {
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';
     valSup = '';
-    for (var i = 0; i < tabChamp.length; i++) {
+    for (var i in tabChamp) {
         if (tabChamp[i]) {
             champSup = champSup + "-" + (i);
             valSup = valSup + "-" + tabChamp[i];

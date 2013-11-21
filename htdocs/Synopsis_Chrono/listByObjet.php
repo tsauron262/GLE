@@ -29,6 +29,7 @@ $js = $html = $html2 = "";
 //$tabModel = array(100, 101);
 
 $tabModel = array();
+    $champ = array();
 if (isset($_REQUEST['obj'])) {
     if ($_REQUEST['obj'] == "soc") {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
@@ -36,7 +37,6 @@ if (isset($_REQUEST['obj'])) {
         $soc->fetch($_REQUEST['id']);
         $filtre = "fk_societe=" . urlencode($_REQUEST['id']);
         $head = societe_prepare_head($soc);
-        $champ = array();
         $socid = $_REQUEST['id'];
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasSociete` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
         while ($result = $db->fetch_object($sql))
@@ -58,6 +58,7 @@ if (isset($_REQUEST['obj'])) {
         $projet = new Project($db);
         $projet->fetch($_REQUEST['id']);
         $filtre = "fk_projet=" . $projet->id;
+        $champ['fk_projet'] = $projet->id;
         $head = synopsis_project_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasProjet` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
@@ -70,6 +71,7 @@ if (isset($_REQUEST['obj'])) {
         $projet = new Propal($db);
         $projet->fetch($_REQUEST['id']);
         $filtre = "fk_propal=" . $projet->id;
+        $champ['fk_propal'] = $projet->id;
         $head = propal_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasPropal` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
@@ -84,7 +86,6 @@ if ($filtre != "")
 
 foreach ($tabModel as $model => $nomModel) {
     $nomDiv = "gridChronoDet" . $model;
-    $champ = array();
     if ($model == 100) {
         if (isset($ctrId))
             $champ[1004] = $ctrId;
@@ -102,9 +103,8 @@ foreach ($tabModel as $model => $nomModel) {
 
     $champJs = "tabChamp = new Array();";
     foreach ($champ as $id => $val) {
-        $champJs .= "tabChamp[" . $id . "]=\"" . $val . "\";";
+        $champJs .= "tabChamp[\"" . $id . "\"]=\"" . $val . "\";";
     }
-
     $js .= tabChronoDetail($model, $nomDiv, $filtre);
 
 
@@ -119,13 +119,13 @@ foreach ($tabModel as $model => $nomModel) {
 
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 
-    if ($id > 0 && ($user->rights->synopsischrono->read || $user->rights->chrono_user->$tmp->voir)) {
+    if (($user->rights->synopsischrono->read || $user->rights->chrono_user->$tmp->voir)) {
 
         $html .= '<table id="' . $nomDiv . '" class="scroll ui-widget " cellpadding="0" cellspacing="0"></table>';
         $html .= '<div id="' . $nomDiv . 'Pager" class="scroll" style="text-align:center;"></div>';
         $html .= "<br/>";
         $html .= "<br/>";
-    } else if ($id > 0) {
+    } else{
         $html .= "<br/>";
         $html .= "Vous ne disposez pas des droits pour voir ce chrono";
         $html .= "<br/>";

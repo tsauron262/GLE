@@ -31,17 +31,21 @@ if (isset($_REQUEST['model']) && $_REQUEST['model'] > 0) {
     $ch->model_refid = $_REQUEST['model'];
     if (isset($_REQUEST['socid']))
         $ch->socid = $_REQUEST['socid'];
-    $id = $ch->create();
 
     if (isset($_REQUEST['champSup'])) {
         $tabChamp = explode("-", $_REQUEST['champSup']);
         $tabChampVal = explode("-", $_REQUEST['champSupVal']);
         foreach ($tabChamp as $idT => $champ)
-            if ($champ > 0)
-            $champTab[$champ] = $tabChampVal[$idT];
-        if (isset($champTab))
-            $ch->setDatas($id, $champTab);
+            if (is_int($champ) && $champ > 0)
+                $champTab[$champ] = $tabChampVal[$idT];
+            elseif ($champ == "fk_propal")
+                $ch->propalid = $tabChampVal[$idT];
+            elseif ($champ == "fk_projet")
+                $ch->projetid = $tabChampVal[$idT];
     }
+    $id = $ch->create();
+    if (isset($champTab))
+        $ch->setDatas($id, $champTab);
 
     echo $id;
 }

@@ -2120,17 +2120,17 @@ class listform extends formulaireSource {
         $conf->global->DOL_DOCUMENT_ROOT = DOL_DOCUMENT_ROOT;
         $conf->global->DOL_URL_ROOT = DOL_URL_ROOT;
         if ($this->id > 0) {
-            $this->valueArr = array();
+            $this->valuesArr = array();
 //            require_once('Var_Dump.php');
 //            var_dump::display($this->lignes);
             foreach ($this->lignes as $key => $val) {
                 if ($val->valeur == $value) {
-                    $this->valueArr[$val->valeur] = $val->label;
+                    $this->valuesArr[$val->valeur] = $val->label;
                 } else if ($val->label == $value) {
-                    $this->valueArr[$val->label] = $val->valeur;
+                    $this->valuesArr[$val->label] = $val->valeur;
                 }
             }
-            return ($this->valueArr);
+            return ($this->valuesArr);
         }
     }
 

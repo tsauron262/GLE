@@ -234,6 +234,15 @@ function popChrono(id, callBack) {
         cacherSuppr($(this).parent());
         callBack();
     });
+    var i = 0;
+    $(".fullScreen iframe").on("load", function(){
+        i++;
+        if(i > 1){
+            $("#id-container").show();
+            cacherSuppr($(this).parent());
+            callBack();
+        }
+    });
     $(".fullScreen span.petit").click(function() {
         if($("iframe.fullScreen").size() == 0)
             $("body").append("<iframe src='" + document.location.href + "' class='fullScreen'></iframe>");

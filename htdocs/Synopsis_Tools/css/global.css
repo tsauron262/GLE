@@ -224,3 +224,10 @@ div.champGr{
 th.ui-state-default{
     padding: 0px!important;
 }
+
+span.timePage {
+    position: absolute;
+    bottom: 5px;
+    left: 5px;
+    font-size: 0.8em;
+}

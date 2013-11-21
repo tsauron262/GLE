@@ -78,7 +78,7 @@ function traiteScroll(heightDif) {
         i = i + 1;//Nb d'element dans parent dans div principale'
     });
     $(".fiche").parent().children("div").each(function() {
-        h = h + 1;
+        h = h + 1; //nb element div ds fiche
     });
     //    if(height > 560 && i < 3)
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
@@ -109,8 +109,8 @@ function traiteScroll(heightDif) {
         $(".tabBar").height('auto');
         $(window).scrollTop(scrollY);
     }
-    $("#id-right").width("99%");
-        $("div#id-right").width("auto");
+    $("#id-right").width("98%");
+    $("div#id-right").width("99%");
 //    document.body.scrollTop = scrollY;
 }
 

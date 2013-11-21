@@ -520,7 +520,7 @@ class CMailFile
 	function encodetorfc2822($stringtoencode)
 	{
 		global $conf;
-		return '=?'.$conf->file->character_set_client.'?B?'.base64_encode($stringtoencode).'?=';
+		return $stringtoencode;//mod drsi  fmoddrsi    '=?'.$conf->file->character_set_client.'?B?'.base64_encode($stringtoencode).'?=';
 	}
 
 	/**

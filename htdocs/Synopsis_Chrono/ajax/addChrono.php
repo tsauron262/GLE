@@ -36,7 +36,7 @@ if (isset($_REQUEST['model']) && $_REQUEST['model'] > 0) {
         $tabChamp = explode("-", $_REQUEST['champSup']);
         $tabChampVal = explode("-", $_REQUEST['champSupVal']);
         foreach ($tabChamp as $idT => $champ)
-            if (is_int($champ) && $champ > 0)
+            if (is_int($idT) && $idT > 0)
                 $champTab[$champ] = $tabChampVal[$idT];
             elseif ($champ == "fk_propal")
                 $ch->propalid = $tabChampVal[$idT];

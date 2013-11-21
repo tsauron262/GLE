@@ -218,7 +218,7 @@ EOF;
             datatype => "json",
             height => "100%",
             rowNum => 20,
-            width => ($width-5),
+            width => ($width-50),
             sortname => 'id',
             sortorder => "desc",
             colModel => $colModelArr

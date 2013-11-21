@@ -221,6 +221,6 @@ div.champGr{
     float: left;
 }
 
-.ui-jqgrid-bdiv{
-    padding: 0px;
+th.ui-state-default{
+    padding: 0px!important;
 }

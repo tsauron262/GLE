@@ -88,10 +88,16 @@ function traiteScroll(heightDif) {
         if (heightNew > 300) {//On active le scroll 3 (le scroll 2 ne doit plus étre utile
             $(".tabBar").height(heightNew);
             $(".tabBar").addClass("reglabe2");
+            if($(".ui-tabs-nav").innerHeight() > 10 ){
+                heightNew2 = heightNew - $(".ui-tabs-nav").innerHeight() - 32;
+                $(".ui-tabs-panel").height(heightNew2);
+                $(".ui-tabs-panel").addClass("reglabe2");
+                $(".ui-tabs-panel").scrollTop(scrollY);
+            }
             $(".tabBar").scrollTop(scrollY);
         }
         else {//On désactive le scroll 3 (le scroll 2 doit prendre le relai)
-            $(".tabBar").removeClass("reglabe2");
+            $(".reglabe2").removeClass("reglabe2");
             $(".tabBar").height('auto');
             $(".fiche").scrollTop(scrollY);
         }
@@ -99,11 +105,12 @@ function traiteScroll(heightDif) {
     }
     else {//On desactive les scroll2 et 3
         $(".fiche").removeClass("reglabe");
-        $(".tabBar").removeClass("reglabe2");
+        $(".reglabe2").removeClass("reglabe2");
         $(".tabBar").height('auto');
         $(window).scrollTop(scrollY);
     }
     $("#id-right").width("99%");
+        $("div#id-right").width("auto");
 //    document.body.scrollTop = scrollY;
 }
 

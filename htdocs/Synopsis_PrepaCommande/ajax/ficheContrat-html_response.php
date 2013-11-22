@@ -162,7 +162,7 @@ if ($id > 0) {
     print $longHtml;
             print '<tr><td><img class="imgLoad" style="display:none;" src="'.DOL_URL_ROOT."/theme/".$conf->theme."/img/working.gif".'">';
                 print "<button onClick='createContrat(" . 0 . ")' class='butAction'>Cr&eacute;er nouveau contrat manuellement</button>";
-            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tous ajouter a un nouveau contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tout ajouter a un nouveau contrat</button>";
     if ($touCreer) {
         print '<tr><td colspan="3">';
         $requete = "SELECT *
@@ -175,8 +175,8 @@ if ($id > 0) {
                 print "<option value='" . $res2->rowid . "'>" . $res2->ref . "</option>";
             }
             print "</select>";
-            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 0)'>Tous ajouter au contrat</button>";
-            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 1)'>Tous ajouter pour renouveler contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 0)'>Tout ajouter au contrat</button>";
+            print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, jQuery(\"#fk_contratT\").find(\":selected\").val(), 1)'>Tout ajouter pour renouveler contrat</button>";
         }
         print '</td></tr>';
     }

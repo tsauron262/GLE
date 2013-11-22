@@ -489,12 +489,11 @@ function initFormChrono(){
         return false;
     });
     $("#chronoTable .addChrono").click(function() {
-        parent = $(this).parent();
-        model = parent.find(".model").html();
+        model = $(this).parent().find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, $(this).parent());
             popChrono(valReturn, function() {});
         });
         return false;

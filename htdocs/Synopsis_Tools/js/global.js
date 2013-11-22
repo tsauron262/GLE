@@ -4,6 +4,11 @@ $(window).load(function() {
         $(window).resize(function() {
             traiteScroll(heightDif);
         });
+        $("a").click(function(){
+            setTimeout(function(){
+                traiteScroll(heightDif);
+            }, 500);
+        });
         traiteScroll(heightDif);
     }
     
@@ -52,7 +57,7 @@ $(window).load(function() {
         $(".syntab li").removeClass("actif");
         $(this).addClass("actif");
         $(".syntabelem").fadeOut();
-        $(".syntabelem."+$(this).attr("id").replace("#", "")).fadeIn();
+        $(".syntabelem."+$(this).find("a").attr("href").replace("#", "")).fadeIn();
     });
     $(".syntab .default").click();
 });
@@ -63,55 +68,152 @@ function dialogConfirm(url, titre, yes, no, id) {
     }
 }
 
+function initScroll(){
+    scrollY = $(window).scrollTop();
+    $(".reglabe, .reglabe2").each(function(){
+        scrollY += $(this).scrollTop();
+        $(this).height('auto');
+        if($(this).attr("old-width"))
+            $(this).width($(this).attr("old-width"));            
+        else
+            $(this).width('auto');
+        if($(this).attr("old-padding-right"))
+            $(this).css("padding-right", $(this).attr("old-padding-right")+"px");
+        $(this).removeClass("reglabe");
+        $(this).removeClass("reglabe2");
+    });
+    $(window).scrollTop(scrollY);
+    return scrollY;
+}
+
 function traiteScroll(heightDif) {
-    coef = 1;
-    scrollY = $(window).scrollTop() * coef - 100;
-    if ($(".fiche").scrollTop() > scrollY)
-        scrollY = $(".fiche").scrollTop();
-    if ($(".tabBar").scrollTop() > scrollY)
-        scrollY = $(".tabBar").scrollTop();
-    height = parseInt(window.innerHeight);
-    var i = 0;
-    var j = 0;
-    var h = 0;
-    $(".fiche").parent().parent().children("td").each(function() {
-        i = i + 1;//Nb d'element dans parent dans div principale'
-    });
-    $(".fiche").parent().children("div").each(function() {
-        h = h + 1; //nb element div ds fiche
-    });
-    //    if(height > 560 && i < 3)
+    scrollY = initScroll();
+    //    alert("ee");
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
-    if (height > hauteurMenu && i < 3 && h == 1) {//On active le scroll 2
-        $(".fiche").addClass("reglabe");
-        heightNew = ($(".fiche").innerHeight() - heightDif) - 20;
-        if (heightNew > 300) {//On active le scroll 3 (le scroll 2 ne doit plus étre utile
-            $(".tabBar").height(heightNew);
-            $(".tabBar").addClass("reglabe2");
-            if($(".ui-tabs-nav").innerHeight() > 10 ){
-                heightNew2 = heightNew - $(".ui-tabs-nav").innerHeight() - 32;
-                $(".ui-tabs-panel").height(heightNew2);
-                $(".ui-tabs-panel").addClass("reglabe2");
-                $(".ui-tabs-panel").scrollTop(scrollY);
+    height = parseInt(window.innerHeight);
+    grandeTaille = parseInt($("body").innerHeight());
+    minimuAGagne = grandeTaille - height;
+    appli = false;
+    newTaille = 0;
+    elem = null;
+    if(hauteurMenu < height && (1 || minimuAGagne > 0)){
+        $("div").each(function(){
+            taille = $(this).height();
+            newTailleT = taille - minimuAGagne - 5;
+            reductionVisibilite = height/newTailleT;
+            nbPages = taille / newTailleT;
+            if($(this).is(":visible") & newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
+                newTaille = newTailleT;
+                elem = $(this);
+                appli = true;
             }
-            $(".tabBar").scrollTop(scrollY);
+        });
+        
+        if(appli){
+            if(!$(elem).attr("old-width"))
+                $(elem).attr("old-width", $(elem).css("width"));
+            oldPadding = parseInt($(elem).css("padding-right").replace("px", ""));
+            if(!$(elem).attr("old-padding-right"))
+                $(elem).attr("old-padding-right", oldPadding);
+            else
+                oldPadding = parseInt($(elem).attr("old-padding-right"));
+            
+            $(elem).addClass("reglabe2");
+            $(elem).height(newTaille);
+            if($(elem).is(".fiche"))
+                $(elem).css("margin-right", "0");
+            $(elem).width($(elem).width()-17);
+            $(elem).css("padding-right", (oldPadding+15)+"px");
+            
+            //Test
+            if(parseInt($("body").innerHeight()) > height)
+                initScroll();
         }
-        else {//On désactive le scroll 3 (le scroll 2 doit prendre le relai)
-            $(".reglabe2").removeClass("reglabe2");
-            $(".tabBar").height('auto');
-            $(".fiche").scrollTop(scrollY);
-        }
-    //        alert(heightAv+" "+heightAp);
     }
-    else {//On desactive les scroll2 et 3
-        $(".fiche").removeClass("reglabe");
-        $(".reglabe2").removeClass("reglabe2");
-        $(".tabBar").height('auto');
-        $(window).scrollTop(scrollY);
+}
+
+
+//function traiteScroll2(heightDif) {
+//    coef = 1;
+//    scrollY = $(window).scrollTop() * coef;
+//    //    if ($(".fiche").scrollTop() > scrollY)
+//    //        scrollY = $(".fiche").scrollTop();
+//    //    if ($(".tabBar").scrollTop() > scrollY)
+//    //        scrollY = $(".tabBar").scrollTop();
+//    $(".reglabe, .reglabe2").each(function(){
+//        scrollY += $(this).scrollTop();
+//    });
+//    
+//    $(".reglabe, .reglabe2").height('auto');
+//    $(".reglabe").removeClass("reglabe");
+//    $(".reglabe2").removeClass("reglabe2");
+//    $(".tabBar").height('auto');
+//    $(window).scrollTop(scrollY);
+//    //    alert("ee");
+//    height = parseInt(window.innerHeight);
+//    var i = 0;
+//    var j = 0;
+//    var h = 0;
+//    $(".fiche").parent().parent().children("td").each(function() {
+//        i = i + 1;//Nb d'element dans parent dans div principale'
+//    });
+//    $(".fiche").parent().children("div").each(function() {
+//        h = h + 1; //nb element div ds fiche
+//    });
+//    //    if(height > 560 && i < 3)
+//    hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
+//    if (height > hauteurMenu && i < 3 && h == 1) {//On active le scroll 2
+//        heightDif = $(".fiche").innerHeight() - $(".tabBar").height();
+//        $(".fiche").addClass("reglabe");
+//        heightNew = ($(".fiche").innerHeight() - heightDif) - 20;
+//        if (heightNew > 400) {//On active le scroll 3 (le scroll 2 ne doit plus étre utile
+//            tailleGr = $(".tabBar").innerHeight();
+//            $(".tabBar").find(".ui-tabs").children(".ui-tabs-panel").each(function(){
+//                elem2 = $(this);
+//                //            heightNew2 = heightNew - (findPos(elem2).y - findPos($(".tabBar")).y)-20;
+//                heightDif2 = tailleGr - elem2.innerHeight();
+//                heightNew2 = heightNew - heightDif2 -10;
+//                //                alert(elem2.innerHeight());
+//                if(heightNew2 > 300 ){
+//                    elem2.height(heightNew2);
+//                    elem2.addClass("reglabe2");
+//                    elem2.scrollTop(scrollY);
+//                }
+//                elem2.find("div").resize(function() {
+//                    alert("44");
+//                });
+//            });
+//            $(".tabBar").height(heightNew);
+//            $(".tabBar").addClass("reglabe2");
+//            $(".tabBar").scrollTop(scrollY);
+//        }
+//        else {//On désactive le scroll 3 (le scroll 2 doit prendre le relai)
+//            $(".reglabe2").removeClass("reglabe2");
+//            $(".tabBar").height('auto');
+//            $(".fiche").scrollTop(scrollY);
+//        }
+//    //        alert(heightAv+" "+heightAp);
+//    }
+//    else {//On desactive les scroll2 et 3
+//    }
+//    $("#id-right").width("98%");
+//    $("div#id-right").width("99%");
+////    document.body.scrollTop = scrollY;
+//}
+
+function findPos(el) {
+    var _x = 0;
+    var _y = 0;
+    el = $(el);
+    while( el && typeof(el.offset()) == "object" && !isNaN( el.offset().left ) && !isNaN( el.offset().top ) ) {
+        _x += el.position().left + el.parent().scrollLeft();
+        _y += el.position().top + el.parent().scrollTop();
+        el = el.parent();
     }
-    $("#id-right").width("98%");
-    $("div#id-right").width("99%");
-//    document.body.scrollTop = scrollY;
+    return {
+        y: _y, 
+        x: _x
+    };
 }
 
 

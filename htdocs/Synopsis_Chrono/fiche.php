@@ -318,10 +318,10 @@ if ($id > 0) {
     }
 
     if ($action == "Modify" && $user->rights->synopsischrono->Modifier) {
+        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<form id='form' action='?id=" . $chr->id . "' method=post>";
         print "<input type='hidden' name='action' value='modifier'>";
         print "<input type='hidden' name='id' value='" . $chr->id . "'>";
-        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
                      <td colspan=1 class=" ui-widget-content" >' . $chr->getNomUrl(1) . '</td>
                      <th colspan=1 class=" ui-widget-header ui-state-default" >Type</th>
@@ -523,12 +523,12 @@ EOF;
             print '</td>';
         }
 
-
-        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
+//
+//        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
+        print '</table></div><div class="divButAction">';
         print "<button onClick='location.href=\"?id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
         print "<button class='butAction'>Modifier</button>";
-        print '</table>';
-        print '</form>';
+        print '</div></form>';
 
         echo '<script>'
         . '$( document ).ready(function() {'
@@ -800,7 +800,7 @@ EOF;
             }
             print '</td>';
         }
-
+        print '</table></div><div class="divButAction">';
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
             print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
             print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
@@ -1014,7 +1014,7 @@ EOF;
         }
 
 
-        print '</table>';
+        print '</div>';
 
         print "<div id='delDialog'>" . img_error('') . " &Ecirc;tes vous sur de vouloir supprimer ce chrono ?</div>";
         print "<script>";

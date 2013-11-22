@@ -2453,10 +2453,32 @@ class lien extends formulaireSource {
     function getValuePlus($id) {
         if ($this->id == 1) {
             if (count($this->tabVal) > 0) {
-                print "<ul class='syntab'>";
-                print "<li id='#actif' class='default'>Service Actif</li>";
-                print "<li id='#nonactif'>Service non actif</li>";
-                print "</ul>";
+$js =<<<EOF
+<script>
+jQuery(document).ready(function(){
+    jQuery('#tabsA').tabs({
+        cache: true,
+        spinner: 'Chargement ...',
+        fx: {opacity: 'toggle' }
+    })
+});
+</script>
+EOF;
+print "<div id='tabsA'>";
+print "<ul class='syntab'>";
+print "<li><a href='#actif' class='default'>Service Actif</a></li>";
+print "<li><a href='#nonactif'>Service non actif</a></li>";
+print "</ul>";
+print "<div id='nonactif'>";
+print "</div>";
+print "<div id='actif'>";
+//Drag Drop
+print "</div>";
+print "".$js;
+//                print "<ul class='syntab'>";
+//                print "<li id='#actif' class='default'>Service Actif</li>";
+//                print "<li id='#nonactif'>Service non actif</li>";
+//                print "</ul>";
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {

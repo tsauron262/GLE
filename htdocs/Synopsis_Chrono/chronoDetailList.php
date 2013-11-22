@@ -231,8 +231,8 @@ EOF;
             sortname => 'chrono_id',
             sortorder => "desc",
             datatype => 'json',
-            rowNum => 30,
-            rowList => "[30,50,100]",
+            rowNum => 25,
+            rowList => "[25,50,100]",
             beforeRequest => "function(){
                 jQuery('#" . $nomDiv . "').find('.ui-jqgrid-titlebar').addClass('ui-state-default');
             }",
@@ -253,7 +253,7 @@ EOF;
             mtype => "POST",
             viewrecords => true,
             width => $width,
-            height => 470,
+            height => 575,
             colModel => $colModelArr,
             subGrid => true,
             subGridUrl => DOL_URL_ROOT . "Synopsis_Chrono/ajax/listChronoDetail_json.php?userId=" . $user->id . "&id=" . $id . "&withRev=1",

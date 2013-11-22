@@ -278,8 +278,8 @@ EOF;
 $jqgridJs .= <<<EOF
 
                       ],
-            rowNum:30,
-            rowList:[30,50,100],
+            rowNum:25,
+            rowList:[25,50,100],
             imgpath: gridimgpath,
             pager: jQuery('#gridListProspectPager'),
             sortname: 'c.date_create',
@@ -323,7 +323,7 @@ $jqgridJs .= <<<EOF
             mtype: "POST",
             viewrecords: true,
             autowidth: true,
-            height: 500,
+            height: 575,
             sortorder: "desc",
             //multiselect: true,
             caption: "<span style='padding:4px; font-size: 16px; '>Chrono</span>",

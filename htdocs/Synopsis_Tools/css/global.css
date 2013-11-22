@@ -202,7 +202,7 @@ div.bodyline{
 div.champGr{
     width: 99%;
 }
-
+/*
 .syntab .actif{
     color: blue;
 }
@@ -214,7 +214,7 @@ div.champGr{
     float:left;
     padding: 10px 5px;
     display: block;
-}
+}*/
 
 
 .showFormChrono{
@@ -224,10 +224,18 @@ div.champGr{
 th.ui-state-default{
     padding: 0px!important;
 }
+tr.ui-widget-content td{
+    padding: 0 1px;
+}
 
 span.timePage {
     position: fixed;
     bottom: 5px;
     left: 5px;
     font-size: 0.8em;
+}
+
+.divButAction{
+    text-align: right;
+    margin: 20px;
 }

@@ -410,7 +410,7 @@ function supprLigne(element) {
             firstParent.fadeOut();
     };
     if (parent.hasClass("formAjax"))
-        ajaxManipElementElement("rm", parent.find(".sourcetype").val(), parent.find(".targettype").val(), firstParent.find("input").val(), parent.find(".targetid").val(), parent.find(".ordre").val(), callBack);
+        ajaxManipElementElement("rm", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), firstParent.find("input").val(), $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), callBack);
     else
         cacherSuppr(firstParent);
     return false;
@@ -425,12 +425,12 @@ function cacherSuppr(element) {
 
 function addLienAj(firstParent){
     parent = firstParent.parent();
-    model = parent.find(".model").html();
-    select = parent.find("select");
+    model = $(parent).find(".model").html();
+    select = $(parent).find("select");
     selectId = select.val();
     idIncr++;
     selectNom = select.find("option:selected").text();
-    ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), selectId, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+    ajaxManipElementElement("add", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), selectId, $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), function(ok) {
         if (ok == "ok")
             addLienHtml(idIncr, selectId, selectNom, model, parent);
     });    
@@ -438,9 +438,9 @@ function addLienAj(firstParent){
 
 function addChronoAj(firstParent){
     parent = firstParent.parent();
-    model = parent.find(".model").html();
+    model = $(parent).find(".model").html();
     addChrono(firstParent, $("#socid").val(), function(valReturn) {
-        ajaxManipElementElement("add", parent.find(".sourcetype").val(), parent.find(".targettype").val(), valReturn, parent.find(".targetid").val(), parent.find(".ordre").val(), function(ok) {
+        ajaxManipElementElement("add", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), valReturn, $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), function(ok) {
             if (ok == "ok") {
                 idIncr = idIncr + 1;
                 addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
@@ -489,11 +489,12 @@ function initFormChrono(){
         return false;
     });
     $("#chronoTable .addChrono").click(function() {
-        model = $(this).parent().find(".model").html();
+        parent = $(this).parent();
+        model = $(parent).find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, $(this).parent());
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
             popChrono(valReturn, function() {});
         });
         return false;
@@ -504,7 +505,7 @@ function initFormChrono(){
                 $(this).remove();
         });
         parent = $(this).parent();
-        model = parent.find(".model").html();
+        model = $(parent).find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;

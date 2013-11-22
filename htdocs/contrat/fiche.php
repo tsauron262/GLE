@@ -799,6 +799,8 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                             var id = $(this).parent().attr("href");
                             var nId = id;
                             id = id.split("&");
+                            id2 = id[0].split("?id=");
+                            idCt = id2[1];
                             for ( var i=0;i<id.length;i++) 
                                 if(id[i].indexOf("ligne") > -1 || id[i].indexOf("rowid") > -1)
                                     nId = id[i].split("=")[1];
@@ -818,10 +820,10 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                                 location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
                             });
                             elem.find(".haut").click(function(){
-                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk=427&newRang="+(j-1)+"&oldRang="+j;
+                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j-1)+"&oldRang="+j;
                             });
                             elem.find(".bas").click(function(){
-                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk=427&newRang="+(j+1)+"&oldRang="+j;
+                                location.href = DOL_URL_ROOT+"/Synopsis_Tools/ajax/order.php?type=contratdet&idElem="+nId+"&idFk="+idCt+"&newRang="+(j+1)+"&oldRang="+j;
                             });
                         });
             });</script>';

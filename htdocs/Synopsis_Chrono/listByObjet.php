@@ -123,8 +123,6 @@ foreach ($tabModel as $model => $nomModel) {
 
         $html .= '<table id="' . $nomDiv . '" class="scroll ui-widget " cellpadding="0" cellspacing="0"></table>';
         $html .= '<div id="' . $nomDiv . 'Pager" class="scroll" style="text-align:center;"></div>';
-        $html .= "<br/>";
-        $html .= "<br/>";
     } else{
         $html .= "<br/>";
         $html .= "Vous ne disposez pas des droits pour voir ce chrono";

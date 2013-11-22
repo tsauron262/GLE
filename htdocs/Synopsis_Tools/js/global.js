@@ -96,7 +96,7 @@ function traiteScroll(heightDif) {
     appli = false;
     newTaille = 0;
     elem = null;
-    if(hauteurMenu < height && (1 || minimuAGagne > 0)){
+    if(hauteurMenu < height && (0 || minimuAGagne > 0)){
         $("div").each(function(){
             taille = $(this).height();
             newTailleT = taille - minimuAGagne - 5;
@@ -126,8 +126,8 @@ function traiteScroll(heightDif) {
             $(elem).css("padding-right", (oldPadding+15)+"px");
             
             //Test
-            if(parseInt($("body").innerHeight()) > height)
-                initScroll();
+//            if(parseInt($("body").innerHeight()) > height)
+//                initScroll();
         }
     }
 }

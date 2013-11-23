@@ -41,12 +41,12 @@ $(window).load(function() {
     });
     
     
-//    if ((navigator.appName).search(/Safari.+/) != -1){
-        $(".formdoc a").each(function(){
-            if($(this).attr('href').search(/.pdf/i) >= 0)
-                $(this).attr("target", "");
-        });
-//    }
+    //    if ((navigator.appName).search(/Safari.+/) != -1){
+    $(".formdoc a").each(function(){
+        if($(this).attr('href').search(/.pdf/i) >= 0)
+            $(this).attr("target", "");
+    });
+    //    }
     initFormChrono();
     
     
@@ -125,9 +125,9 @@ function traiteScroll(heightDif) {
             $(elem).width($(elem).width()-17);
             $(elem).css("padding-right", (oldPadding+15)+"px");
             
-            //Test
-//            if(parseInt($("body").innerHeight()) > height)
-//                initScroll();
+        //Test
+        //            if(parseInt($("body").innerHeight()) > height)
+        //                initScroll();
         }
     }
 }
@@ -348,8 +348,12 @@ function popChrono(id, callBack) {
     $(".fullScreen span.petit").click(function() {
         if($("iframe.fullScreen").size() == 0){
             $("body").append("<iframe class='fullScreen'></iframe>");
-            $("iframe.fullScreen").attr("src", document.location.href);
-    }
+            if(document.location.href.indexOf("?") > 0)
+                src = document.location.href+"&inut";
+            else
+                src = document.location.href+"?inut";
+            $("iframe.fullScreen").attr("src", src);
+        }
         else
             $("iframe.fullScreen").fadeIn();
         $("body").append("<div class='bottomObj'><span>Chrono</span></div>");
@@ -363,7 +367,7 @@ function popChrono(id, callBack) {
 
 }
 function addLienHtml(idIncr, id, nom, model, cible) {
-    $(cible).prepend("<div class='elem'>" + $(model).replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+    $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
 }
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';

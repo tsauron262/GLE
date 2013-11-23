@@ -1,4 +1,17 @@
 $(window).load(function() {
+    $("div.eventAbss").hover(function(){
+        elem = this;
+        setTimeout(function(){
+            $(elem).css("z-index", "1000");
+        }, 500);
+    },function(){
+        setTimeout(function(){
+            $("div.eventAbss").css("z-index", "");
+        }, 500);
+    });
+    
+    
+    
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible')) {
         $(window).resize(function() {
@@ -41,12 +54,12 @@ $(window).load(function() {
     });
     
     
-//    if ((navigator.appName).search(/Safari.+/) != -1){
-        $(".formdoc a").each(function(){
-            if($(this).attr('href').search(/.pdf/i) >= 0)
-                $(this).attr("target", "");
-        });
-//    }
+    //    if ((navigator.appName).search(/Safari.+/) != -1){
+    $(".formdoc a").each(function(){
+        if($(this).attr('href').search(/.pdf/i) >= 0)
+            $(this).attr("target", "");
+    });
+    //    }
     initFormChrono();
     
     
@@ -97,12 +110,13 @@ function traiteScroll(heightDif) {
     newTaille = 0;
     elem = null;
     if(hauteurMenu < height && (0 || minimuAGagne > 0)){
-        $("div").each(function(){
-            taille = $(this).height();
+        $("#id-right div").each(function(){
+            taille = $(this).innerHeight();
             newTailleT = taille - minimuAGagne - 5;
             reductionVisibilite = height/newTailleT;
             nbPages = taille / newTailleT;
-            if($(this).is(":visible") & newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
+            if($(this).is(":visible")
+                && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
                 newTaille = newTailleT;
                 elem = $(this);
                 appli = true;
@@ -125,9 +139,9 @@ function traiteScroll(heightDif) {
             $(elem).width($(elem).width()-17);
             $(elem).css("padding-right", (oldPadding+15)+"px");
             
-            //Test
-//            if(parseInt($("body").innerHeight()) > height)
-//                initScroll();
+        //Test
+        //            if(parseInt($("body").innerHeight()) > height)
+        //                initScroll();
         }
     }
 }
@@ -346,8 +360,14 @@ function popChrono(id, callBack) {
         }
     });
     $(".fullScreen span.petit").click(function() {
-        if($("iframe.fullScreen").size() == 0)
-            $("body").append("<iframe src='" + document.location.href + "' class='fullScreen'></iframe>");
+        if($("iframe.fullScreen").size() == 0){
+            $("body").append("<iframe class='fullScreen'></iframe>");
+            if(document.location.href.indexOf("?") > 0)
+                src = document.location.href+"&inut";
+            else
+                src = document.location.href+"?inut";
+            $("iframe.fullScreen").attr("src", src);
+        }
         else
             $("iframe.fullScreen").fadeIn();
         $("body").append("<div class='bottomObj'><span>Chrono</span></div>");
@@ -397,7 +417,7 @@ function ajaxManipElementElement(action, sourcetype, targettype, idsource, idtar
     });
 }
 function addChrono(element, socid, callBack) {
-    parent = $(element).parent();
+    parentDiv = $(element).parent();
     model = $(element).parent().find(".model").html();
     model_refid = $(element).attr("id").replace("addChrono", "");
     ajaxAddChrono(model_refid, socid, new Array(), callBack);
@@ -405,13 +425,13 @@ function addChrono(element, socid, callBack) {
 
 function supprLigne(element) {
     firstParent = $(element).parent();
-    parent = $(firstParent).parent();
+    parentDiv = $(firstParent).parent();
     callBack = function(ok) {
         if (ok == "ok")
             $(firstParent).fadeOut();
     };
-    if ($(parent).hasClass("formAjax"))
-        ajaxManipElementElement("rm", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), $(firstParent).find("input").val(), $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), callBack);
+    if ($(parentDiv).hasClass("formAjax"))
+        ajaxManipElementElement("rm", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(firstParent).find("input").val(), $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), callBack);
     else
         cacherSuppr(firstParent);
     return false;
@@ -425,26 +445,26 @@ function cacherSuppr(element) {
 }
 
 function addLienAj(firstParent){
-    parent = $(firstParent).parent();
-    model = $(parent).find(".model").html();
-    select = $(parent).find("select");
+    parentDiv = $(firstParent).parent();
+    model = $(parentDiv).find(".model").html();
+    select = $(parentDiv).find("select");
     selectId = $(select).val();
     idIncr++;
     selectNom = $(select).find("option:selected").text();
-    ajaxManipElementElement("add", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), selectId, $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), function(ok) {
+    ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), selectId, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
         if (ok == "ok")
-            addLienHtml(idIncr, selectId, selectNom, model, parent);
+            addLienHtml(idIncr, selectId, selectNom, model, parentDiv);
     });    
 }
 
 function addChronoAj(firstParent){
-    parent = $(firstParent).parent();
-    model = $(parent).find(".model").html();
+    parentDiv = $(firstParent).parent();
+    model = $(parentDiv).find(".model").html();
     addChrono(firstParent, $("#socid").val(), function(valReturn) {
-        ajaxManipElementElement("add", $(parent).find(".sourcetype").val(), $(parent).find(".targettype").val(), valReturn, $(parent).find(".targetid").val(), $(parent).find(".ordre").val(), function(ok) {
+        ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), valReturn, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
             if (ok == "ok") {
                 idIncr = idIncr + 1;
-                addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+                addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
                 popChrono(valReturn, function() {
                     });
             }
@@ -490,12 +510,12 @@ function initFormChrono(){
         return false;
     });
     $("#chronoTable .addChrono").click(function() {
-        parent = $(this).parent();
-        model = $(parent).find(".model").html();
+        parentDiv = $(this).parent();
+        model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
             popChrono(valReturn, function() {});
         });
         return false;
@@ -505,12 +525,12 @@ function initFormChrono(){
             if(!$(this).hasClass("model"))
                 $(this).remove();
         });
-        parent = $(this).parent();
-        model = $(parent).find(".model").html();
+        parentDiv = $(this).parent();
+        model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parent);
+            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
             popChrono(valReturn, function() {});
         });
         return false;

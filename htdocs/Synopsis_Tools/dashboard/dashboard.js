@@ -138,7 +138,7 @@ $(function() {
     if ('x'+dashtype == "x"){
         alert('missing dashtype');
     }
-    jQuery('body').prepend('<div id="addWidgetDialog"><table width=100% cellpadding=5>\
+    jQuery('body').append('<div id="addWidgetDialog"><table width="100%" cellpadding="5">\
                                                          <tr><th width=50% class="ui-state-default ui-widget-header">Disponible\
                                                              <th width=50% class="ui-state-default ui-widget-header">Ajouter\
                                                          <tr><td class="ui-widget-content" valign="top">\

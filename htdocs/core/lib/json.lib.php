@@ -252,7 +252,7 @@ function dol_json_decode($json, $assoc=false)
 
 			foreach ($array as $key => $value)
 			{
-				$object->{$key} = $value;
+				@$object->{$key} = $value;
 			}
 
 			return $object;

@@ -318,8 +318,8 @@ if ($id > 0) {
     }
 
     if ($action == "Modify" && $user->rights->synopsischrono->Modifier) {
-        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<form id='form' action='?id=" . $chr->id . "' method=post>";
+        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<input type='hidden' name='action' value='modifier'>";
         print "<input type='hidden' name='id' value='" . $chr->id . "'>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>

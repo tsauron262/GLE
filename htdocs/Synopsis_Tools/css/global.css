@@ -34,7 +34,7 @@ div.bottomObj{
     padding: 10px 25px;
     cursor:  pointer;
     border: solid black 2px;
-    z-index:1030;
+    z-index:1130;
     background-image: url(../../Synopsis_Tools/img/bgGrisTrans.png);
 }
 

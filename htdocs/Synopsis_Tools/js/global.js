@@ -346,8 +346,10 @@ function popChrono(id, callBack) {
         }
     });
     $(".fullScreen span.petit").click(function() {
-        if($("iframe.fullScreen").size() == 0)
-            $("body").append("<iframe src='" + document.location.href + "' class='fullScreen'></iframe>");
+        if($("iframe.fullScreen").size() == 0){
+            $("body").append("<iframe class='fullScreen'></iframe>");
+            $("iframe.fullScreen").attr("src", document.location.href);
+    }
         else
             $("iframe.fullScreen").fadeIn();
         $("body").append("<div class='bottomObj'><span>Chrono</span></div>");
@@ -361,7 +363,7 @@ function popChrono(id, callBack) {
 
 }
 function addLienHtml(idIncr, id, nom, model, cible) {
-    $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+    $(cible).prepend("<div class='elem'>" + $(model).replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
 }
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';

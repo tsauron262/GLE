@@ -54,7 +54,7 @@ function dol_json_encode($elements)
 	//var_dump($num);
 
 	// determine type
-	if (is_numeric(key($elements)))
+	if (is_array($elements) && is_numeric(key($elements)))/* deb mod drsi fmod drsi */
 	{
 		// indexed (list)
 		$output = '[';

@@ -61,7 +61,7 @@ function printMenu($tabUser, $date) {
     echo "<span class='nbGroup'></span>";
 
 
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
     echo "<div class='listUser'><table><tr>";
     $i = 0;
     while ($result = $db->fetch_object($sql)) {
@@ -192,7 +192,7 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
         $minuteDeb = date('H', $debu) * 60 + date('i', $debu);
         $minuteDur = $duree / 60;
         print '<div id="event_' . $i . '" class="event eventAbss" style="top:' . (($minuteDeb * $coefx) + $constx) . '%; height:' . (($minuteDur > $minHeight ? $minuteDur : $minHeight) * $coefx) . '%; left:' . $coefy . '%;">';
-        print "<a href='/gle_dev/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label;
+        print "<a href='".DOL_URL_ROOT."/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label;
         print "<br/>" . date("H:i", $debuV) . " - " . date("H:i", $finV) . "</a>";
         print "<br/>" . $result->note;
         print '</div>';

@@ -30,6 +30,8 @@ $(window).load(function() {
             $('.listUser').fadeOut();
         }, 500);
     });
+    
+//    $(".dateVue").val("2010/01/01");
 });
 
 function initNbUser(){

@@ -1,28 +1,31 @@
 <?php
 
 require_once('../../main.inc.php');
-llxHeader('<script type="text/javascript" src="'.DOL_URL_ROOT.'/Synopsis_Tools/agenda/agenda.js"></script>
-    <link rel="stylesheet" type="text/css" href="'.DOL_URL_ROOT.'/Synopsis_Tools/agenda/agenda.css" />');
+llxHeader('<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/agenda/agenda.js"></script>
+    <link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/agenda/agenda.css" />');
 
-$date = new DateTime("2013-11-18");
+if (isset($_REQUEST['date'])) {
+    $tabT = explode("/", $_REQUEST['date']);
+    if (isset($tabT[2]))
+    $date = new DateTime($tabT[2] . "/" . $tabT[1] . "/" . $tabT[0]);
+}
+if (!isset($date))
+    $date = new DateTime();
 
 $tabUser = getTabUser();
 
-printMenu($tabUser);
-
+printMenu($tabUser, $date);
 
 //Une semaine
 if (isset($_REQUEST['vueSemaine']))
-printSemaine($date, $tabUser);
+    printSemaine($date, $tabUser);
 
 elseif (isset($_REQUEST['vueJour']))
-printPeriode($date, $tabUser, $nbJours = 1);
+    printPeriode($date, $tabUser, $nbJours = 1);
 
-    //Un mois
+//Un mois
 else//if (isset($_REQUEST['vueMois']))
     printMois($date, $tabUser);
-
-
 
 function getTabUser() {
     global $user;
@@ -32,12 +35,12 @@ function getTabUser() {
             $tabUser[] = $val;
         }
     }
-    if(count($tabUser) == 0)
+    if (count($tabUser) == 0)
         $tabUser[] = $user->id;
     return $tabUser;
 }
 
-function printMenu($tabUser) {
+function printMenu($tabUser, $date) {
     global $db;
 
     $js = "var tabGroup = new Array();";
@@ -73,6 +76,9 @@ function printMenu($tabUser) {
         }
     }
     echo "</tr></table></div>";
+
+
+    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
 
     echo "<input type='submit' class='butAction' name='vueJour' value='Vue jour'/>";
     echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
@@ -186,9 +192,9 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
         $minuteDeb = date('H', $debu) * 60 + date('i', $debu);
         $minuteDur = $duree / 60;
         print '<div id="event_' . $i . '" class="event eventAbss" style="top:' . (($minuteDeb * $coefx) + $constx) . '%; height:' . (($minuteDur > $minHeight ? $minuteDur : $minHeight) * $coefx) . '%; left:' . $coefy . '%;">';
-        print $result->label;
-        print "<br/><a href='/gle_dev/comm/action/fiche.php?id=" . $result->id . "'>" . date("H:i", $debuV) . " - " . date("H:i", $finV) . "</a>";
-        print $result->note;
+        print "<a href='/gle_dev/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label;
+        print "<br/>" . date("H:i", $debuV) . " - " . date("H:i", $finV) . "</a>";
+        print "<br/>" . $result->note;
         print '</div>';
         $coefy = $coefy + 2;
     }

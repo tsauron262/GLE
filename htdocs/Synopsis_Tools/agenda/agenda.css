@@ -1,7 +1,10 @@
 div.eventAbss{
     position: absolute;
     border: solid black 1px;
-    background: green;
+    background: #C8D8F6;
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3) 0%, rgba(40, 40, 40, 0.3) 100%);
+    background-image: -webkit-gradient( linear, left top, left bottom, color-stop(0, rgba(255,255,255,.3)), color-stop(1, rgba(40,40,40,.3)) );;
+    border-radius: 6px;
 }
 div.calendarSyn{
     position: relative;

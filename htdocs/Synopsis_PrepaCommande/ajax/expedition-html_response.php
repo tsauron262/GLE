@@ -50,6 +50,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
     $to = '';
 //    $requete = "SELECT email FROM BIMP_site as s , BIMP_site_commande as sc WHERE sc.site_id = s.id AND  fk_commande = " . $_REQUEST['id'];
     $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
+    $tabEntrep = array_merge($tabEntrep, getElementElement('comm', 'entrepot2', $commande->id));
     if (isset($tabEntrep[0])) {
         $idEntr = $tabEntrep[0]['d'];
         $requete = "SELECT description as email FROM " . MAIN_DB_PREFIX . "entrepot WHERE rowid = " . $idEntr;
@@ -77,17 +78,21 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
     $subject = "[Preparation Matériel] Nouveau message concernant le matériel de la commande " . $commande->ref;
 
     $msg = "Bonjour,<br/><br/>";
-    $msg .= "Le mat&eacute;riel de la commande " . $commande->getNomUrl(1, 6) . " vous a &eacute;t&eacute; exp&eacute;di&eacute;.";
+    $msg .= "Le mat&eacute;riel de la commande " . $commande->getNomUrl(1) . " vous a &eacute;t&eacute; exp&eacute;di&eacute;.";
 
     $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
     $from = $conf->global->BIMP_MAIL_FROM;
     $addr_cc = $conf->global->BIMP_MAIL_GESTPROD;
 
-    require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
-    sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
-    $msg = "Le mail a &eacute;t&eacute; envoy&eacute;";
+//    require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
+//    $result = sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
+    
+    $result = mailSyn($to, $subject, $msg);
+    if($result)
+        $msg = "Le mail a &eacute;t&eacute; envoy&eacute;".$to;
     $tabExpe = getElementElement("commande", "shipping", $commande->id);
-    foreach ($elem as $tabExpe)
+    $tabExp = array();
+    foreach ($tabExpe as $elem)
         $tabExp[] = $elem['d'];
     $requete = "UPDATE " . MAIN_DB_PREFIX . "expedition SET fk_statut = 2 WHERE fk_statut = 1 AND  rowid in (" . implode(", ", $tabExp) . ")";
     $sql = $db->query($requete);
@@ -143,7 +148,7 @@ if ($_REQUEST["id"] > 0) {
         // Date de prepa
         print '<tr><th height="10"  class="ui-widget-header ui-state-default">';
         print $langs->trans('DeliveryDate');
-        print '<a href="#" onClick="changeDateLivraison();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
+        print '<a href="#pppart7a" onClick="changeDateLivraison();">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
         print '</th><td colspan="2"  class="ui-widget-content">';
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_livraison') {
             //print '<form name="setdate_livraison" action="'.$_SERVER["PHP_SELF"].'?id='.$commande->id.'" method="post">';
@@ -160,7 +165,7 @@ if ($_REQUEST["id"] > 0) {
         for ($i = 0; $i < 3; $i++) {
             print '<tr><th height="10"  class="ui-widget-header ui-state-default">';
             print $langs->trans('D&eacute;poser &agrave;');
-            print '<a href="#" onClick="changeSiteDepot(' . $i . ');">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
+            print '<a href="#pppart7a" onClick="changeSiteDepot(' . $i . ');">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
             print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
             $tabEntrep = getElementElement('comm', 'entrepot' . $i, $commande->id);
             $idEntr = 0;

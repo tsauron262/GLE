@@ -107,9 +107,10 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         print ($mesg . " Erreur" . $socid);
     }
 
-    public static function setLienRevision($oldRef, $oldId, $newId) {
+    public static function setLienRevision($oldRef, $oldId, $newId, $newRef = null) {
         global $conf, $db;
 
+        if(!isset($newRef))
         $newRef = self::convertRef($oldRef, "propal");
 //        die($tabT[]);
 

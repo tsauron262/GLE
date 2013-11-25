@@ -81,6 +81,10 @@ EOF;
 
 $msg="";
 
+if ($_REQUEST["action"] == 'setMailFrom')
+{
+    dolibarr_set_const($db, "BIMP_MAIL_FROM",$_REQUEST["value"]);
+}
 if ($_REQUEST["action"] == 'setMailGestProd')
 {
     dolibarr_set_const($db, "BIMP_MAIL_GESTPROD",$_REQUEST["value"]);

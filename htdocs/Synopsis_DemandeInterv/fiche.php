@@ -122,7 +122,13 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_PrisEnCharge' 
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->id = $_REQUEST["id"];
     $demandeInterv->fetch($_REQUEST["id"]);
-    $result = $demandeInterv->prisencharge($user, $conf->synopsisdemandeinterv->outputdir);
+    if(isset($_REQUEST['fk_user'])){
+        $tech = new User($db);
+        $tech->fetch($_REQUEST['fk_user']);
+    }
+    else
+        $tech = $user;
+    $result = $demandeInterv->prisencharge($tech, $conf->synopsisdemandeinterv->outputdir);
     if ($result >= 0 && "x" . $_REQUEST['model'] != "x") {
         if ($_REQUEST['lang_id']) {
             $outputlangs = new Translate("", $conf);
@@ -2050,6 +2056,16 @@ EOF;
             print '  onClick="dialogConfirm(\'' . $url . '\',\'' . $langs->trans("ConfirmPrisEnChargeDI") . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'Prise En Charge\')"';
             print '>' . $langs->trans('PrisEnCharge') . '</button>';
         }
+        
+        
+        if ($demandeInterv->statut == 1 && $user->rights->synopsisdemandeinterv->prisencharge && $demandeInterv->fk_user_prisencharge) {
+            print '<button class="butAction " ';
+            $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&action=confirm_PrisEnCharge&confirm=yes&fk_user='.$demandeInterv->fk_user_prisencharge;
+            print '  onClick="dialogConfirm(\'' . $url . '\',\'' . $langs->trans("ConfirmPrisEnChargeDI") . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'Prise En Charge\')"';
+            print '>' . $langs->trans('PrisEnChargeTech') . '</button>';
+        }
+        
+        
         if ($demandeInterv->statut > 0 && $demandeInterv->statut < 3 && $user->rights->synopsisdemandeinterv->edit_after_validation) {
             print '<button class="butAction" ';
             $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&action=modification&confirm=yes';

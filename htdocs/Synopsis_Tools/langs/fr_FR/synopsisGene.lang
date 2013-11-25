@@ -286,6 +286,7 @@ AntarcticNumRefModelError=Activation impossible
 DICard=Fiche DI
 ConfirmPrisEnChargeDI=Confirmer la prise en charge de la DI ?
 PrisEnCharge=Prise en charge
+PrisEnChargeTech=Prise en charge par le Tech
 ConfirmClotureDI=Confirmer la clôture de la demande d'intertvention?
 createFI=Créer une FI
 ConfirmClotureDIJS=Confirmer la clôture de la demande d\'intertvention?

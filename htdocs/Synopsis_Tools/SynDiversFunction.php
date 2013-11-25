@@ -628,6 +628,10 @@ function asPosition($str) {
 }
 
 function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
+    global $dolibarr_main_url_root;
+    $sujet = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $sujet);
+    $text = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $text);
+    
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {

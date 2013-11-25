@@ -1250,13 +1250,24 @@ if (is_dir($dir)) {
                                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
-                                $ref = $val['PcvCode'];
+                                $ref = $val['PcvFree8'];
                                 $oldRef = false;
+
+                                $tabRef = explode("-", $ref);
+                                if (isset($tabRef[1])) {
+                                    $newRef = $ref;
+                                    $oldRef = $tabRef[0];
+                                    $result = SynopsisRevisionPropal::getRefMax($oldRef, "propal");
+                                    if ($result) {
+                                        $oldId = $result[0];
+                                    }
+                                }
 
                                 $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
                                 if ($result) {
                                     $oldRef = $ref;
-                                    $ref = "TEMP(" . $val['PcvCode'] . ")";
+                                    $ref = "TEMP(" . $val['PcvFree8'] . ")";
+                                    $newRef = null;
                                     $oldId = $result[0];
                                 }
 
@@ -1267,7 +1278,7 @@ if (is_dir($dir)) {
                                 $sql = requeteWithCache($requete);
                                 $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
                                 if (isset($oldRef) && $oldRef)
-                                    SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId);
+                                    SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId, $newRef);
                                 if ($sql) {
                                     $mode = "PROPAL_CREATE";
                                     $tabImportOK['propal'][$val['PcvCode']] = $comId;
@@ -1301,7 +1312,7 @@ if (is_dir($dir)) {
                                     $sql = requeteWithCache($requete);
                                     $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
                                     if ($sql) {
-                                        $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
+                                        $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                         $mode = "ORDER_CREATE";
                                         $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
                                         $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
@@ -1328,7 +1339,7 @@ if (is_dir($dir)) {
                                         $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
                                         $sql = requeteWithCache($requete);
                                         if ($sql) {
-                                            $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
+                                            $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                             $mode = "ORDER_MODIFY";
                                             $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
                                             $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
@@ -1337,7 +1348,7 @@ if (is_dir($dir)) {
                                             $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
                                         }
                                     } else {
-                                        $tabImportOK['commande'][$val['PcvCode']] = array('id'=>$comId, 'codeAff'=>$val['AffCode']);
+                                        $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
                                         $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
                                         $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
                                     }

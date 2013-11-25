@@ -3,18 +3,18 @@
 require_once('../../main.inc.php');
 llxHeader();
 
-$date = new DateTime("2013-11-19");
+$date = new DateTime("2013-10-30");
 
 $tabUser = array(1);
 
 //Un mois
-printMois($date, $tabUser);
+//printMois($date, $tabUser);
 
 //Une semaine
 //    printSemaine($date, $tabUser);
 
-//$tabUser = array(1,2,34,5,6,8,9,7,4,5,6,7);
-//printPeriode($date, $tabUser, $nbJours = 1);
+$tabUser = array(1,2,34,5,6,8,9,7,4,5,6,7);
+printPeriode($date, $tabUser, $nbJours = 1);
 
 function printSemaine($date, $tabUser){
         $jSem = date_format($date, "w");
@@ -62,6 +62,7 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
     $minHeight = 5;
     $sql = $db->query("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ((datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep > '" . date('Y-m-d 00:00:00', $date) . "') || (datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $date) . "')) AND fk_user_action = " . $userId . " order by duree DESC ");
     print '<div class="calendarSyn">';
+        print "<img src='".DOL_URL_ROOT."/Synopsis_Tools/agenda/img/bgAgenda.jpg' class='bgAgenda'/>";
     if ($printUser) {
         $user = new User($db);
         $user->fetch($userId);

@@ -5,7 +5,7 @@ div.eventAbss{
 }
 div.calendarSyn{
     position: relative;
-    height: 600px;
+    height: 400px;
     width: 200px;
     float: left;
     border: solid black 1px;
@@ -20,6 +20,12 @@ div.oneDay{
 div.contentOneDay{
     float: left;
     border: solid black 2px;
+}
+img.bgAgenda{
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    z-index: -1;
 }
 
 

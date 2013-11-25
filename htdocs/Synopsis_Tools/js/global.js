@@ -1,17 +1,4 @@
 $(window).load(function() {
-    $("div.eventAbss").hover(function(){
-        elem = this;
-        setTimeout(function(){
-            $(elem).css("z-index", "1000");
-        }, 500);
-    },function(){
-        setTimeout(function(){
-            $("div.eventAbss").css("z-index", "");
-        }, 500);
-    });
-    
-    
-    
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
     if ($("div.tmenudiv").is(':visible')) {
         $(window).resize(function() {
@@ -382,7 +369,7 @@ function popChrono(id, callBack) {
 }
 function addLienHtml(idIncr, id, nom, model, cible) {
     if(id > 0)
-    $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+        $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
 }
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';

@@ -120,7 +120,7 @@ function printPeriode($date, $tabUser, $nbJours = 7, $cssPlus = "") {
         echo $tabJSem[$jSem] . " " . dol_print_date($date2, "daytext");
         print "<div class='oneDay'>";
         foreach ($tabUser as $user) {
-            printOneDayOneUser($user, $date2, $printUser);
+            printOneDayOneUser($user, $date2, $printUser, false, ($jSem == 0 || $jSem == 6)? "bgAgendaFe" : "bgAgenda");
         }
         print "</div></div>";
         if ($jSem == 0)
@@ -129,7 +129,7 @@ function printPeriode($date, $tabUser, $nbJours = 7, $cssPlus = "") {
     }
 }
 
-function printOneDayOneUser($userId, $date, $printUser = false, $printDate = false) {
+function printOneDayOneUser($userId, $date, $printUser = false, $printDate = false, $bg = "bgAgenda") {
     global $db;
     $heureDebJ = "08";
     $heureFinJ = "18";
@@ -140,7 +140,7 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
     $minHeight = 60;
     $sql = $db->query("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ((datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep > '" . date('Y-m-d 00:00:00', $date) . "') || (datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $date) . "')) AND fk_user_action = " . $userId . " order by duree DESC ");
     print '<div class="calendarSyn">';
-    print "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/agenda/img/bgAgenda.jpg' class='bgAgenda'/>";
+    print "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/agenda/img/".$bg.".jpg' class='bgAgenda'/>";
     if ($printUser) {
         $user = new User($db);
         $user->fetch($userId);

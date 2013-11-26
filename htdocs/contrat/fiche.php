@@ -1125,7 +1125,27 @@ if ($action == 'create') {
 
         // Date
         print '<tr><td>' . $langs->trans("Date") . '</td>';
-        print '<td colspan="3">' . dol_print_date($object->date_contrat, "dayhour") . "</td></tr>\n";
+        /* deb mod drsi */
+        print '<td colspan="3">' . dol_print_date($object->date_contrat, "dayhour") . "\n";
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+            echo "<span class='editDate editable'>".img_edit($langs->trans("setDate"))."</span>";
+            echo "<div class='hide editDateDiv'>";
+            $form->form_date(DOL_URL_ROOT."/Synopsis_Contrat/ajax/modDateContrat.php?id=495", $object->date_contrat, "date_contrat");
+            echo "</div></td></tr>";
+            echo "<tr><td>Total HT</td><td>" . $object->total_ht . " &euro;" . "</td>";
+            echo "<td>Total TTC</td><td>" . $object->total_ttc . " &euro;" . "</td></tr>";
+            //condition de reglement
+            if (isset($_REQUEST['modPaiement'])) {
+                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Conditions de paiement") . '</th>';
+                print '    <td class="ui-widget-content">';
+                $form->select_conditions_paiements($com->cond_reglement_id, 'condid', -1, 0, $display = true);
+                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Mode de paiement") . '</th>';
+                print '    <td class="ui-widget-content">';
+                $form->select_types_paiements($com->mode_reglement_id, 'paiementtype', "", 0, 0, 0, $display = true);
+            }
+        }
+        /* fin mod drsi */
 
         // Projet
         if (!empty($conf->projet->enabled)) {
@@ -1145,22 +1165,6 @@ if ($action == 'create') {
             }
             print "</td></tr>";
         }
-
-        /* deb mod drsi */
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
-            echo "<tr><td>Total HT</td><td>" . $object->total_ht . " &euro;" . "</td>";
-            echo "<td>Total TTC</td><td>" . $object->total_ttc . " &euro;" . "</td></tr>";
-            //condition de reglement
-            if (isset($_REQUEST['modPaiement'])) {
-                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Conditions de paiement") . '</th>';
-                print '    <td class="ui-widget-content">';
-                $form->select_conditions_paiements($com->cond_reglement_id, 'condid', -1, 0, $display = true);
-                print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Mode de paiement") . '</th>';
-                print '    <td class="ui-widget-content">';
-                $form->select_types_paiements($com->mode_reglement_id, 'paiementtype', "", 0, 0, 0, $display = true);
-            }
-        }
-        /* fin mod drsi */
 
         // Other attributes
         $parameters = array('colspan' => ' colspan="3"');

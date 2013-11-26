@@ -1009,7 +1009,7 @@ class Synopsis_Contrat extends Contrat {
             if ($ligne->GMAO_Mixte['hotline'] < 0)
                 echo "illimité";
             else
-            echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;
+                echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;
         }
         if ($ligne->GMAO_Mixte['SLA'] != "") {
             echo "</td><td>";
@@ -1414,6 +1414,35 @@ class Synopsis_Contrat extends Contrat {
         return $return;
     }
 
+    public function setDateContrat($date) {
+        $this->fetch_lines();
+        $dureeMax = 0;
+        $tmpProd = new Product($this->db);
+        foreach ($this->lines as $ligne) {
+            $duree = 12;
+            if (isset($ligne->fk_product) && $ligne->fk_product > 0) {
+                $tmpProd->fetch($ligne->fk_product);
+                $tmpProd->fetch_optionals($ligne->fk_product);
+                if ($isSAV && $tmpProd->array_options['options_2dureeSav'] > 0)
+                    $duree = $tmpProd->array_options['options_2dureeSav'];
+                elseif ($tmpProd->array_options['options_2dureeVal'] > 0)
+                    $duree = $tmpProd->array_options['options_2dureeVal'];
+            }
+            if ($duree > $dureeMax)
+                $dureeMax = $duree;
+            $query = "UPDATE " . MAIN_DB_PREFIX . "contratdet SET date_ouverture_prevue = '" . $date . "'";
+            if ($ligne->date_ouverture)
+                $query .= ", date_ouverture = '" . $date . "', date_fin_validite = date_add('" . $date . "',INTERVAL " . $duree . " MONTH)";
+
+            $sql = $this->db->query($query . " WHERE rowid = " . $ligne->id);
+        }
+        $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $date . "'";
+        if ($this->mise_en_service)
+            $query .= ", mise_en_service = '" . $date . "', fin_validite = date_add('" . $date . "',INTERVAL " . $dureeMax . " MONTH)";
+        $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
+//        echo $query . " WHERE rowid = " . $this->id;
+    }
+
     public function addLigneCommande($commId, $comLigneId) {
         global $user, $langs, $conf;
         $contratId = $this->id;
@@ -1536,9 +1565,9 @@ class Synopsis_Contrat extends Contrat {
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
-                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),".$tmpProd->array_options['options_2reconductionAuto'].",
+                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now()," . $tmpProd->array_options['options_2reconductionAuto'] . ",
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
-                            " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance']  <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
+                            " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
                             " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 5))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
         $sql1 = $db->query($requete2);
 

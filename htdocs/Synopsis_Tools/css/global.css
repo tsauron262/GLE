@@ -1,6 +1,9 @@
 div.clear{
     clear: both;
 }
+div.hide{
+    display: none;
+}
 
 
 

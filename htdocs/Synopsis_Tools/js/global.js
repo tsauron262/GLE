@@ -60,6 +60,11 @@ $(window).load(function() {
         $(".syntabelem."+$(this).find("a").attr("href").replace("#", "")).fadeIn();
     });
     $(".syntab .default").click();
+    
+    $(".editDate").click(function(){
+        $(".editDateDiv").fadeIn();
+        $(this).fadeOut();
+    });
 });
 
 function dialogConfirm(url, titre, yes, no, id) {

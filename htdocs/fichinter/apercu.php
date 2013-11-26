@@ -1,3 +1,5 @@
+
+
 <?php
 /* Copyright (C) 2002-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2005 Laurent Destailleur  <eldy@users.sourceforge.net>
@@ -124,8 +126,8 @@ if ($_GET["id"] > 0) {
             * Documents
                 */
                 $fichinterref = sanitize_string($fichinter->ref);
-                $dir_output = $conf->fichinter->dir_output . "/";
-                $filepath = $dir_output . $fichinterref . "/";
+                $dir_output = $conf->ficheinter->dir_output . "/";
+                $filepath = $dir_output ."/". $fichinterref . "/";
                 $file = $filepath . $fichinterref . ".pdf";
                 $filedetail = $filepath . $fichinterref . "-detail.pdf";
                 $relativepath = "${fichinterref}/${fichinterref}.pdf";
@@ -137,7 +139,7 @@ if ($_GET["id"] > 0) {
                 $fileimagebis = $file.".png.0";     // Si PDF de plus d'1 page
 
                 $var=true;
-
+                
                 // Si fichier PDF existe
                 if (file_exists($file))
                 {

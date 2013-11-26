@@ -84,6 +84,7 @@ function printMenu($tabUser, $date) {
     echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
     echo "<input type='submit' class='butAction' name='vueMois' value='Vue mois'/>";
     echo "</form>";
+    echo "<br/><br/>";
 }
 
 function printSemaine($date, $tabUser) {

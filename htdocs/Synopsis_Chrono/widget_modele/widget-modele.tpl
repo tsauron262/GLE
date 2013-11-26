@@ -17,8 +17,7 @@
   * GLE-1.2
   */
 
-require_once("../../../main.inc.php");
-//require_once("../../main.inc.php");
+require_once("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Chrono/Chrono.class.php');
 
 
@@ -43,9 +42,9 @@ function widget_listChronoModele[MARK1]() {
     if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO && ($user->rights->synopsischrono->read || $user->rights->chrono_user->chrono[MARK1]->voir))
     {
         $requete = "SELECT value
-                      FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings,".MAIN_DB_PREFIX."Synopsis_dashboard_widget
-                     WHERE module_id = ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.id
-                       AND ".MAIN_DB_PREFIX."Synopsis_dashboard_widget.module = 'listChronoModele[MARK1]'
+                      FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_settings,".MAIN_DB_PREFIX."Synopsis_Dashboard_widget
+                     WHERE module_id = ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget.id
+                       AND ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget.module = 'listChronoModele[MARK1]'
                        AND user_id = ".$user->id;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
@@ -53,7 +52,7 @@ function widget_listChronoModele[MARK1]() {
         $sql = " SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono as p
                   WHERE 1=1";
         if ($res->value."x" != "x")
-            $sql = "    AND fk_statut IN (".$res->value.")";
+            $sql .= "    AND fk_statut IN (".$res->value.")";
         $sql .= "   AND model_refid = ".$model;
         $sql .= " ORDER BY p.date_create DESC LIMIT 50";
 
@@ -127,10 +126,10 @@ function widget_listChronoModele[MARK1]() {
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
         'settings' => true,
-        'reload' => false,
+        'reload' => true,
         'fullscreen' => utf8_encode($table2),
-        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Common/jquery/dashboard/widgets/scripts/fullscreen.js',
-        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Common/jquery/dashboard/widgets/scripts/initFullscreen.js',
+        'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
+        'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
       );
 
     }else {
@@ -151,14 +150,14 @@ function widget_listChronoModele[MARK1]_settings() {
   global $user,$db;
   $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
   $type = "listChronoModele[MARK1]";
-  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = '".$type."'";
+  $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget WHERE module = '".$type."'";
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);
   $typeId = $res->id;
 
   if ($c)
   {
-      $requete= "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
+      $requete= "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_settings WHERE module_id = ".$typeId." AND user_id = ".$user->id;
       $sql = $db->query($requete);
       $c = explode(',',$c);
       $c1 = array();
@@ -168,13 +167,13 @@ function widget_listChronoModele[MARK1]_settings() {
         $c1[] = $val;
       }
       $c = join(',',$c1);
-      $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
+      $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Dashboard_settings (module_id,user_id,value) VALUES (".$typeId.",".$user->id.",'".$c."')";
       $sql = $db->query($requete);
       $c = explode(',',$c);
 
   } else {
     $c = array();
-    $requete = "SELECT * FROM  ".MAIN_DB_PREFIX."Synopsis_dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
+    $requete = "SELECT * FROM  ".MAIN_DB_PREFIX."Synopsis_Dashboard_settings WHERE module_id = ".$typeId. " AND user_id = ".$user->id;
     $sql = $db->query($requete);
     if ($sql)
     {

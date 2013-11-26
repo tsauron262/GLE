@@ -10,7 +10,7 @@ require_once("../../main.inc.php");
 
 //require_once(DOL_DOCUMENT_ROOT."/boxes.php");
 // The get widget handler.
-function widget_boxDemandeInterv() {
+function widget_boxDemandeInterv2() {
     global $langs, $user;
     $langs->load("boxes");
     $tabValue = getValSetting();
@@ -20,8 +20,8 @@ function widget_boxDemandeInterv() {
         $_REQUEST['lien_commande'] = true;
     if (in_array(12, $tabValue))
         $_REQUEST['lien_contrat'] = true;
-//        $_REQUEST['next'] = true;
-    return boxToWidget("box_synopsisDemandeInterv.php", "DI - " . $langs->trans("BoxLastDemandeInterv"), true);
+    $_REQUEST['next'] = true;
+    return boxToWidget("box_synopsisDemandeInterv.php", "DI - " . $langs->trans("BoxNextDemandeInterv"), true);
 }
 
 // The widget settings handler.
@@ -39,7 +39,7 @@ function widget_boxDemandeInterv() {
 //}
 function getValSetting() {
     global $db, $user;
-    $type = "boxDemandeInterv";
+    $type = "boxDemandeInterv2";
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard_widget WHERE module = '" . $type . "'";
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
@@ -55,7 +55,7 @@ function getValSetting() {
     return $c;
 }
 
-function widget_boxDemandeInterv_settings() {
+function widget_boxDemandeInterv2_settings() {
     // Get the saved settings.
     global $user, $db;
 
@@ -64,7 +64,7 @@ function widget_boxDemandeInterv_settings() {
         foreach ($GLOBALS['_POST']['settings'] as $val)
             $c .= $val . ",";
 //    $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
-    $type = "boxDemandeInterv";
+    $type = "boxDemandeInterv2";
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard_widget WHERE module = '" . $type . "'";
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);

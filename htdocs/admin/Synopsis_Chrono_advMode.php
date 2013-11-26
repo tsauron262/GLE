@@ -49,7 +49,7 @@ $id = $_REQUEST['id'];
     $widgetTxt = file_get_contents(DOL_DOCUMENT_ROOT."/Synopsis_Chrono/widget_modele/widget-modele.tpl");
     $widgetTxt = preg_replace('/\[MARK1\]/',$id,$widgetTxt);
     $widgetTxt = preg_replace('/\[MARK2\]/',utf8_encode($titre),$widgetTxt);
-    $newFile = DOL_DOCUMENT_ROOT."/Synopsis_Common/jquery/dashboard/widgets/listChronoModele".$id.".inc";
+    $newFile = DOL_DOCUMENT_ROOT."/Synopsis_Tools/dashboard/widgets/listChronoModele".$id.".inc";
     if(is_file($newFile))
     {
         unlink ($newFile);
@@ -58,7 +58,7 @@ $id = $_REQUEST['id'];
     $res = file_put_contents($newFilet,$widgetTxt);
     $res = file_put_contents($newFile,$widgetTxt);
     //2 active le widget
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_dashboard_widget WHERE module = 'listChronoModele".$id."'";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget WHERE module = 'listChronoModele".$id."'";
     $sql = $db->query($requete);
     if ($db->num_rows($sql) > 0)
     {
@@ -66,17 +66,17 @@ $id = $_REQUEST['id'];
         $sql2 = true;
         $sql3 = true;
     } else {
-        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
+        $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget (nom, module, active) VALUES ('".addslashes('Chrono - Derniers chronos ('.$titre.')')."','listChronoModele".$id."',1)";
         $sql1 = $db->query($requete);
-        $newId = $db->last_insert_id("".MAIN_DB_PREFIX."Synopsis_dashboard_widget");
+        $newId = $db->last_insert_id("".MAIN_DB_PREFIX."Synopsis_Dashboard_widget");
         $sql2 = false;
         $sql3 = false;
         //3 page chrono (46) et page principale (4)
         if ($newId > 0)
         {
-            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Dashboard_module (module_refid, type_refid) VALUES (".$newId.",4)";
             $sql2 = $db->query($requete);
-            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
+            $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_Dashboard_module (module_refid, type_refid) VALUES (".$newId.",46)";
             $sql3 = $db->query($requete);
         }
     }

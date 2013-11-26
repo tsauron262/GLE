@@ -1,6 +1,6 @@
 <?php
 /*
-  * GLE by Synopsis
+  * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
   * Licence : Artistic Licence v2.0
@@ -8,7 +8,7 @@
   * Version 1.2
   * Created on : 2 mars 2011
   *
-  * Infos on http://www.synopsis-erp.com
+  * Infos on http://www.finapro.fr
   *
   */
  /**
@@ -18,20 +18,19 @@
   */
 
 require_once("../../main.inc.php");
-//require_once("../../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Chrono/Chrono.class.php');
 
 
 // The get widget handler.
-function widget_listChronoModele14() {
+function widget_listChronoModele100() {
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user;
-    $socid = 0; if ($user->societe_id > 0)
+    if ($user->societe_id > 0)
     {
       $socid = $user->societe_id;
     }
     $langs->load("chrono");
-    $model = 14;
+    $model = 100;
 
     $chrono=new Chrono($db);
     $chrono->model_refid = $model;
@@ -40,19 +39,21 @@ function widget_listChronoModele14() {
     $table2 = '</p>';
 
 //    $table .= print_r($user->rights,1);
-    if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO && ($user->rights->Chrono->Global->Afficher || $user->rights->chrono_user->chrono14->voir))
+    if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO && ($user->rights->synopsischrono->read || $user->rights->chrono_user->chrono100->voir))
     {
         $requete = "SELECT value
                       FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_settings,".MAIN_DB_PREFIX."Synopsis_Dashboard_widget
                      WHERE module_id = ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget.id
-                       AND ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget.module = 'listChronoModele14'
+                       AND ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget.module = 'listChronoModele100'
                        AND user_id = ".$user->id;
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
 
         $sql = " SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono as p
-                  WHERE fk_statut IN (".$res->value.")
-                                         AND model_refid = ".$model;
+                  WHERE 1=1";
+        if ($res->value."x" != "x")
+            $sql .= "    AND fk_statut IN (".$res->value.")";
+        $sql .= "   AND model_refid = ".$model;
         $sql .= " ORDER BY p.date_create DESC LIMIT 50";
 
 //$table .= $sql;
@@ -120,20 +121,20 @@ function widget_listChronoModele14() {
         $table .="</p>";
         $table2 .="</p>";
       return array(
-        'title' => 'Chrono - Derniers chronos (test2)',
-        'content' => $table,
+        'title' => 'Chrono - Derniers chronos (Appel)',
+        'content' => utf8_encode($table),
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
         'settings' => true,
-        'reload' => false,
-        'fullscreen' => $table2,
+        'reload' => true,
+        'fullscreen' => utf8_encode($table2),
         'fullscreenScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
         'fullscreenInitScript' => DOL_URL_ROOT.'/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
       );
 
     }else {
       return array(
-        'title' => 'Chrono - Derniers chronos (test2)',
+        'title' => 'Chrono - Derniers chronos (Appel)',
         'content' => 'Vous ne possedez pas les droits requis pour ce module',
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
@@ -144,11 +145,11 @@ function widget_listChronoModele14() {
 }
 
 // The widget settings handler.
-function widget_listChronoModele14_settings() {
+function widget_listChronoModele100_settings() {
   // Get the saved settings.
   global $user,$db;
   $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
-  $type = "listChronoModele14";
+  $type = "listChronoModele100";
   $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Dashboard_widget WHERE module = '".$type."'";
   $sql = $db->query($requete);
   $res = $db->fetch_object($sql);

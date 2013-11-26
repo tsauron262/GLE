@@ -17,7 +17,7 @@ function htmlToAgenda($str) {
     return $str;
 }
 
-function boxToWidget($file, $title) {
+function boxToWidget($file, $title, $setting = false) {
     // A widget object as per jquery.dashboard.js.
     global $db, $user, $langs;
     if ($user->societe_id > 0) {
@@ -53,7 +53,7 @@ function boxToWidget($file, $title) {
         'content' => $table,
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
-        'settings' => false,
+        'settings' => $setting,
         'fullscreen' => $table2,
         'fullscreenScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/fullscreen.js',
         'fullscreenInitScript' => DOL_URL_ROOT . '/Synopsis_Tools/dashboard/widgets/scripts/initFullscreen.js',
@@ -655,7 +655,7 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
 //        mail($to, $sujet, $text, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
         $mailfile = new CMailFile($sujet, $to, 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>', $text, array(), array(), array(), $ccAdmin, "", 0, 1);
-        $mailfile->sendfile();
+        return $mailfile->sendfile();
     }
 }
 

@@ -22,8 +22,10 @@
     $html = new Form($db);
     $xml ="";
     $socid = $_REQUEST['socid'];
+    ob_start();
     $html->select_contacts($socid,'','contactid',1,'',false);
-    $formContact = $html->tmpReturn;
+    $formContact = ob_get_clean();
+//    $formContact = $html->tmpReturn;
     $xml .= "<contactsList><![CDATA[ $formContact ]]></contactsList>";
 
     if ( stristr($_SERVER["HTTP_ACCEPT"],"application/xhtml+xml") ) {

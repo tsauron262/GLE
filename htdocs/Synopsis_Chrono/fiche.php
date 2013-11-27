@@ -208,10 +208,10 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
 }
 if ($action == "Modify" || $action == "ModifyAfterValid") {
     $js = "<script>";
-    if ($conf->global->COMPANY_USE_SEARCH_TO_SELECT) {
         $js .= <<< EOF
+   alert("1");
           function ajax_updater_postFct(socid)
-          {
+          { alert("2");
               if (socid > 0)
               {
                     jQuery.ajax({
@@ -221,41 +221,20 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
                       data:"socid="+socid,
                       success: function(msg){
                             jQuery('#contactSociete').replaceWith("<div id='contactSociete'>"+jQuery(msg).find('contactsList').text()+"</div>");
-                            jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
+//                            jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
                       }
                     });
               } else {
                 jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
               }
           }
-EOF;
-    } else {
-        $js .= <<< EOF
           jQuery(document).ready(function(){
             jQuery('#socid').change(function(){
               socid = jQuery(this).find(':selected').val();
-              if (socid > 0)
-              {
-                    jQuery.ajax({
-                      url:"ajax/contactSoc-xml_response.php",
-                      type:"POST",
-                      datatype:"xml",
-                      data:"socid="+socid,
-                      success: function(msg){
-                          jQuery('#contactSociete').replaceWith("<div id='contactSociete'>"+jQuery(msg).find('contactsList').text()+"</div>");
-                          jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
-                      }
-                    });
-              } else {
-                jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
-              }
-            });
+                ajax_updater_postFct(socid);
           });
-EOF;
-    }
+          
 
-    $js .= <<< EOF
-      jQuery(document).ready(function(){
         jQuery.validator.addMethod(
             'required',
             function(value, element) {
@@ -264,18 +243,25 @@ EOF;
             '<br/>Ce champs est requis'
         );
         jQuery('.datepicker').datepicker({ showTime : false});
-        jQuery('.datetimepicker').datepicker({ showTime : false});
+        jQuery('.datetimepicker').each(function(){
+        date = $(this).attr("value");
+            $(this).datetimepicker({ showTime : true}).datepicker( "setDate" , date);
+        });
 
         jQuery('#form').validate();
       });
 EOF;
     $js .= "</script>";
 }
+//$js .=  ajax_combobox("contactid");
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
+$js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js"></script>' . "\n";
 
+//$js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 //launchRunningProcess($db,'Chrono',$_GET['id']);
-
+define('REQUIRE_JQUERY_TIMEPICKER', true);
+define('REQUIRE_JQUERY_MULTISELECT', true);
 
 $chr = new Chrono($db);
 if ($id > 0) {
@@ -339,9 +325,10 @@ if ($id > 0) {
             print '    <th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">';
             print $langs->trans('Contact') . '</th>';
             $tmpContact = "";
+            ob_start();
             if ($chr->socid > 0) {
                 if ($chr->contactid > 0) {
-                    $html->select_contacts($chr->socid, $chr->contactid, 'contactid', 1, '', false);
+                    $html->select_contacts($chr->socid, $chr->contactid, 'contactid', 1, '', false, '', 0, 'dolibarrcombobox');
                     $tmpContact = $html->tmpReturn;
                 } else {
                     $html->select_contacts($chr->socid, '', 'contactid', 1, '', false);
@@ -351,6 +338,7 @@ if ($id > 0) {
                 $html->select_contacts(-1, $chr->contactid, 'contactid', 1, '', false);
                 $tmpContact = $html->tmpReturn;
             }
+            $tmpContact = ob_get_clean();
             if ($chr->model->hasSociete == 1)
                 print '    <td  class="ui-widget-content" colspan="1"><div id="contactSociete">' . $tmpContact . '</div></td>';
             else
@@ -358,12 +346,12 @@ if ($id > 0) {
         }
 
         if ($chr->model->hasDescription) {
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">'.$chr->model->nomDescription;
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '<td  class="ui-widget-content" colspan="3">';
-            if($chr->model->typeDescription == 2)
+            if ($chr->model->typeDescription == 2)
                 print '<textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea>';
             else
-                print '<input type="text" name="description" class="required" value="'.$chr->description.'"/>';
+                print '<input type="text" name="description" class="required" value="' . $chr->description . '"/>';
             print '</td>';
         }
 
@@ -423,29 +411,32 @@ if ($id > 0) {
                       <script>
 jQuery(document).ready(function(){
 EOF;
-                        print "/*jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
+                        print "jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
                         print <<<EOF
         text:'',
         finish: function(){
 EOF;
-                        print " jQuery('#Chrono-" . $res->id . "_jDS').selectmenu({\n";
-                        print <<<EOF
-                style:'dropdown',
-                maxHeight: 300
-            });
+                        print " jQuery('#Chrono-" . $res->id . "_jDS').each(function(){
+                            var select = $(this);
+                            $(select).combobox({
+                                selected: function(event, ui) {
+                                    select.find('option[value=\"'+$(this).val()+'\"]').attr('selected', 'selected');
+                                    select.change();
+                                }
+                            });
+      });
         },
-        el1_change: function(){
-EOF;
-                        print " jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
+        el1_change: function(){";
+                        print " /*jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
                         print <<<EOF
                 style:'dropdown',
                 maxHeight: 300
-            });
+            });*/
         },
 EOF;
                         print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
                         print <<<EOF
-    });*/
+    });
 });
 
                       </script>
@@ -467,10 +458,12 @@ EOF;
                         $html .= $res->value;
                     }
                     $remOpt = false;
+
                     $html .= "<option value=''>S&eacute;lectionner</option>";
                     if ($obj->OptGroup . "x" != "x") {
                         $html = "<table><tr><td width=50%>" . $html;
                         foreach ($obj->valuesGroupArr as $key => $val) {
+                            $val['label'] = str_replace(" ", "_", $val['label']);
                             $html .= "<OPTGROUP label='" . $val['label'] . "'>";
                             foreach ($val['data'] as $key1 => $val1) {
                                 $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key1 ? "SELECTED" : "") . " value='" . $key1 . "'>" . $val1 . "</OPTION>";
@@ -501,6 +494,13 @@ EOF;
                 $tag = preg_replace('/>$/', "", $res->htmlTag);
                 $html = "";
                 $html .= $tag;
+
+                if ($res->cssClass == 'datetimepicker') {
+                    if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $res->value, $arr)) {
+//                        $res->value = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
+                    }
+                }
+
                 if ($res->extraCss . $res->cssClass . "x" != "x") {
                     $html .= " class='" . $res->cssClass . " " . $res->extraCss . "' ";
                 }
@@ -720,7 +720,7 @@ EOF;
         }
         if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">'.$chr->model->nomDescription;
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '    <td  class="ui-widget-content" colspan="3">' . $chr->description . '</td>';
         }
 //Ajoute les extra key/Values

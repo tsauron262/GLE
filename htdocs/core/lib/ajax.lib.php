@@ -309,19 +309,21 @@ function ajax_combobox($htmlname, $event=array(), $minLengthToAutocomplete=0)
 	global $conf;
 
 	if (! empty($conf->browser->phone)) return '';	// combobox disabled for smartphones (does not works)
-
+//Mod drsi pour appeler aprés
 	$msg = '<script type="text/javascript">
     $(function() {
     	$("#'.$htmlname.'").combobox({
     		minLengthToAutocomplete : '.$minLengthToAutocomplete.',
     		selected : function(event,ui) {
-    			var obj = '.json_encode($event).';
-    			$.each(obj, function(key,values) {
-    				if (values.method.length) {
-    					getMethod(values);
-    				}
-				});
-			}
+                    if(window.ajax_updater_postFct)
+                        ajax_updater_postFct($(this).val());
+                    var obj = '.json_encode($event).';
+                    $.each(obj, function(key,values) {
+                            if (values.method.length) {
+                                    getMethod(values);
+                            }
+                            });
+                    }
 		});
 
 		function getMethod(obj) {

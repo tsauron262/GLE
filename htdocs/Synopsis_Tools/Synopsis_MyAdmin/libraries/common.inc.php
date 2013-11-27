@@ -2,7 +2,11 @@
 $temp = $_SERVER["QUERY_STRING"];
 $_SERVER["QUERY_STRING"] = "";
 $temp2 = $_POST;
-$_POST = "";
+$_POST = array();
+$temp3 = $_GET;
+$_GET = array();
+$temp4 = $_REQUEST;
+$_REQUEST = array();
 
 include_once("../../main.inc.php");
 if ($user->rights->SynopsisTools->Global->phpMyAdmin != 1)
@@ -14,7 +18,9 @@ if ($user->rights->SynopsisTools->Global->phpMyAdmin != 1)
 session_write_close();
 
 $_SERVER["QUERY_STRING"] = $temp;
+$_REQUEST = $temp4;
 $_POST = $temp2;
+$_GET = $temp3;
 /* vim: set expandtab sw=4 ts=4 sts=4: */
 /**
  * Misc stuff and REQUIRED by ALL the scripts.

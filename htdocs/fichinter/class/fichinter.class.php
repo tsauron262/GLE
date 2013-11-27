@@ -291,6 +291,20 @@ class Fichinter extends CommonObject {
         }
     }
 
+    
+    
+    function devalid($user, $outputdir) {
+        global $langs, $conf;
+
+        $this->db->begin();
+
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_fichinter";
+        $sql.= " SET fk_statut = 0, date_valid=now(), fk_user_valid=" . $user->id;
+        $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 1";
+
+        dol_syslog("Fichinter::devalid sql=" . $sql);
+        $resql = $this->db->query($sql);
+    }
     /**
      *        \brief        Valide une fiche intervention
      *        \param        user        User qui valide

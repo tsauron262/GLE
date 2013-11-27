@@ -88,7 +88,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'modification' && $_REQ
     $demandeInterv->id = $_REQUEST["id"];
     $demandeInterv->fetch($_REQUEST["id"]);
     $result = $demandeInterv->invalid($user, $conf->synopsisdemandeinterv->outputdir);
-    if ($result >= 0 && "x" . $_REQUEST['model'] != "x") {
+    if ($result >= 0) {
         if ($_REQUEST['lang_id']) {
             $outputlangs = new Translate("", $conf);
             $outputlangs->setDefaultLang($_REQUEST['lang_id']);
@@ -105,7 +105,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_validate' && $
     $demandeInterv->id = $_REQUEST["id"];
     $demandeInterv->fetch($_REQUEST["id"]);
     $result = $demandeInterv->valid($user, $conf->synopsisdemandeinterv->outputdir);
-    if ($result >= 0 && "x" . $_REQUEST['model'] != "x") {
+    if ($result >= 0) {
         if ($_REQUEST['lang_id']) {
             $outputlangs = new Translate("", $conf);
             $outputlangs->setDefaultLang($_REQUEST['lang_id']);

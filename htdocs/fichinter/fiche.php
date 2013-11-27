@@ -94,12 +94,21 @@ if ((isset($_REQUEST["action"]) && $_REQUEST["action"] != 'create' && $_REQUEST[
     return;
 }
 
+if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_devalidate' && $_REQUEST['confirm'] == 'yes') {
+    $fichinter = new Fichinter($db);
+    $fichinter->id = $_REQUEST["id"];
+    $fichinter->fetch($_REQUEST["id"]);
+    $result = $fichinter->devalid($user, $conf->fichinter->outputdir);    
+}
+    
+    
+
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
     $fichinter = new Fichinter($db);
     $fichinter->id = $_REQUEST["id"];
     $fichinter->fetch($_REQUEST["id"]);
     $result = $fichinter->valid($user, $conf->fichinter->outputdir);
-    if ($result >= 0 && "x" . $_REQUEST['model'] != "x") {
+    if ($result >= 0) {
         if ($_REQUEST['lang_id']) {
             $outputlangs = new Translate("", $conf);
             $outputlangs->setDefaultLang($_REQUEST['lang_id']);
@@ -1951,6 +1960,17 @@ EOF;
                 print 'href="fiche.php?id=' . $_REQUEST["id"] . '&action=validate"';
             }
             print '>' . $langs->trans("Valid") . '</a>';
+        }
+        
+        if (($fichinter->statut == 1) && $user->rights->synopsisficheinter->creer && $user->rights->synopsisficheinter->modifAfterValid) {
+            print '<a class="butAction" ';
+            if ($conf->use_javascript_ajax) {
+                $url = $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '&action=confirm_devalidate&confirm=yes';
+                print 'href="#" onClick="dialogConfirm(\'' . $url . '\',\'' . dol_escape_js(str_replace("<b></b>", $fichinter->ref, $langs->trans('ConfirmDeValidateIntervention'))) . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'validate\')"';
+            } else {
+                print 'href="fiche.php?id=' . $_REQUEST["id"] . '&action=devalidate"';
+            }
+            print '>' . $langs->trans("DeValid") . '</a>';
         }
 
         // Delete

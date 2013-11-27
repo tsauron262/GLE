@@ -298,6 +298,9 @@ BoxLastDemandeInterv = Mes dernières demande d'intervention
 BoxLastFicheInterv = Mes dernières fiche d'intervention
 BoxTitlefichinter = Mes dernières fiche d'intervention
 
+DeValid = Dévalider
+ConfirmDeValidateIntervention = Confirmer la dévalidation de la FI ?
+
 
 
 

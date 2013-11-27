@@ -168,9 +168,9 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
     // Positionne modele sur le nom du modele de facture e utiliser
     if (! strlen($modele))
     {
-        if ($conf->global->DEMANDEINTERV_ADDON_PDF)
+        if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF)
         {
-            $modele = $conf->global->DEMANDEINTERV_ADDON_PDF;
+            $modele = $conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF;
         }
         else
         {

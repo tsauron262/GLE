@@ -249,8 +249,8 @@ switch ($action)
                                                   ($hasRev?'<div class="hasRev">1</div>':'<div class="hasRev">0</div>'),
                                                   utf8_encode($chrono->getNomUrl(1)),
                                                   htmlspecialchars($chrono->model->titre),
-                                                  $obj->date_create,
-                                                  $obj->tms,
+                                                  ($obj->date_create? $obj->date_create : ""),
+                                                  ($obj->tms? $obj->tms : ""),
                                                   $chrono->getLibStatut(4)
                                                  );
             $responce->rows[$i]['cell'][] = count_files($conf->synopsischrono->dir_output . "/" . $chrono->id);

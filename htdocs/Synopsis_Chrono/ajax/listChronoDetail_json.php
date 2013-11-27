@@ -455,7 +455,7 @@ switch ($action) {
                     }
 
                     if ($chrono->model->hasDescription)
-                        $arr[] = $chrono->description;
+                        $arr[] = ($chrono->description ? $chrono->description : '');
 
                     foreach ($arrKeyName as $keyid => $keyname) {
                         if ($arrCreateTable[$keyname] == 'datetime') {

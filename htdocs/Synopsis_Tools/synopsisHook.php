@@ -47,6 +47,8 @@ $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
 $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
 $conf->global->MAIN_MODULE_ORANGEHRM = "1";
 
+$conf->global->MAIN_MODULES_FOR_EXTERNAL .=',fiche inter +,synopsisficheinter,demande d\'intervention,synopsisdemandeinterv';
+
 $conf->global->PRODUIT_CONFIRM_DELETE_LINE = "1";
 
 define('PREF_BDD_ORIG', 'llx_');

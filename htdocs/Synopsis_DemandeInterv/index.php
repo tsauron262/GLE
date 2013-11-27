@@ -56,7 +56,7 @@ $page = isset($_GET["page"]) ? $_GET["page"] : "";
 $demandeIntervid = isset($_GET["id"]) ? $_GET["id"] : '';
 if ($user->societe_id)
     $socid = $user->societe_id;
-//$result = restrictedArea($user, 'demandeInterv', $demandeIntervid,'');
+//$result = restrictedArea($user, 'Synopsis_demandeInterv', $demandeIntervid,'');
 
 if (!$sortorder)
     $sortorder = "";

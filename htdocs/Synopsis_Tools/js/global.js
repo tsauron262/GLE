@@ -96,6 +96,7 @@ function traiteScroll(heightDif) {
     //    alert("ee");
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
     height = parseInt(window.innerHeight);
+    width = parseInt(window.innerWidth);
     grandeTaille = parseInt($("body").innerHeight());
     minimuAGagne = grandeTaille - height;
     appli = false;
@@ -104,7 +105,7 @@ function traiteScroll(heightDif) {
     if(hauteurMenu < height && (0 || minimuAGagne > 0)){
         $("#id-right div").each(function(){
             taille = $(this).innerHeight();
-            newTailleT = taille - minimuAGagne - 20;
+            newTailleT = taille - minimuAGagne - 5;
             reductionVisibilite = height/newTailleT;
             nbPages = taille / newTailleT;
             if($(this).is(":visible")
@@ -131,9 +132,9 @@ function traiteScroll(heightDif) {
             $(elem).width($(elem).width()-17);
             $(elem).css("padding-right", (oldPadding+15)+"px");
             
-        //Test
-        //            if(parseInt($("body").innerHeight()) > height)
-        //                initScroll();
+            //Test
+            if(parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
+                initScroll();
         }
     }
 }

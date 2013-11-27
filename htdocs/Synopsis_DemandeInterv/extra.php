@@ -42,7 +42,7 @@ $demandeIntervid = isset($_REQUEST["id"])?$_REQUEST["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Synopsis_demandeInterv');
 
 $html = new Form($db);
 $formfile = new FormFile($db);

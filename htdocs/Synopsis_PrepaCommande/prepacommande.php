@@ -39,6 +39,9 @@ $langs->load("synopsisGene@Synopsis_Tools");
 $langs->load('deliveries');
 $langs->load('products');
 
+if($user->societe_id)
+    header("Location: ".DOL_URL_ROOT."/commande/fiche.php?id=".$_REQUEST['id']);
+
 if (!$user->rights->commande->lire)
     accessforbidden();
 if (!$user->rights->SynopsisPrepaCom->all->Afficher)

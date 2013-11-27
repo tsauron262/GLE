@@ -74,18 +74,18 @@ $arrRemDate = array();
 $result = array();
 for ($i = 0; $i < 2; $i++) {
     if ($i == 0)
-        $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter
-             WHERE fk_contrat = " . $contratid;
+        $table = "fichinter";
     else
+        $table = "demandeInterv";
         $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+              FROM " . MAIN_DB_PREFIX . "Synopsis_".$table . "
              WHERE fk_contrat = " . $contratid;
     $sql = $db->query($requete);
 
     $totalSAV = 0;
     $total_ht = 0;
     $html = "";
+    $arrResByStatut = $arrResByStatut = $arrResByStatutTotHT = $arrResByDate = $arrResByDateDur = $arrResByDateTotHT = array();
     while ($res = $db->fetch_object($sql)) {
         $anneeMoi = date('Ym', strtotime($res->datei));
         if (!isset($arrResByStatut[$res->fk_statut])) {
@@ -156,10 +156,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
-              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+              FROM " . MAIN_DB_PREFIX ."Synopsis_".$table.  "det as fd,
+                   " . MAIN_DB_PREFIX ."Synopsis_".$table. " as f,
                    " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as b
-             WHERE fd.fk_fichinter = f.rowid
+             WHERE fd.fk_".$table." = f.rowid
                AND b.id = fd.fk_typeinterv
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.rang";
@@ -194,10 +194,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.lastname, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
-              FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+              FROM " . MAIN_DB_PREFIX ."Synopsis_".$table. "det as fd,
+                   " . MAIN_DB_PREFIX ."Synopsis_".$table. " as f,
                    " . MAIN_DB_PREFIX . "user as b
-             WHERE fd.fk_fichinter = f.rowid
+             WHERE fd.fk_".$table." = f.rowid
                AND b.rowid = f.fk_user_author
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.firstname";
@@ -210,7 +210,7 @@ for ($i = 0; $i < 2; $i++) {
         }
         $arrResByTypeInterv[$res->fk_user_author]["duree"]+=$res->duree;
         $arrResByTypeInterv[$res->fk_user_author]["total_ht"]+=$res->total_ht;
-        $arrLabelInterv[$res->fk_user_author] = $res->firstname . " " . $res->name;
+        $arrLabelInterv[$res->fk_user_author] = $res->firstname . " " . $res->lastname;
     }
 
 

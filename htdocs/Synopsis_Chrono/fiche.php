@@ -209,9 +209,8 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
 if ($action == "Modify" || $action == "ModifyAfterValid") {
     $js = "<script>";
         $js .= <<< EOF
-   alert("1");
           function ajax_updater_postFct(socid)
-          { alert("2");
+          {
               if (socid > 0)
               {
                     jQuery.ajax({

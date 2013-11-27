@@ -234,7 +234,7 @@ if ($modecompta != 'CREANCES-DETTES') {
 	if ($date_start && $date_end) {
 	    $sql.= " AND p.datep >= '".$db->idate($date_start)."' AND p.datep <= '".$db->idate($date_end)."'";
 	}
-    $sql.= " GROUP BY rowidx, lastname, firstname";
+    $sql.= " GROUP BY rowidx, name, firstname";
     $sql.= " ORDER BY rowidx";
 
     $result = $db->query($sql);

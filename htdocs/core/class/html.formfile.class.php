@@ -696,7 +696,10 @@ class FormFile
 					{
 						print '<td align="center">';
 						$tmp=explode('.',$file['name']);
-						$minifile=$tmp[0].'_mini.'.$tmp[1];
+                                                /* deb mod drsi */
+                                                $ext = $tmp[count($tmp)-1];
+						$minifile=str_replace(".".$ext, "", $file['name']).'_mini.'.$ext;
+                                                /* fmod drsi */
 						if (image_format_supported($file['name']) > 0) print '<img border="0" height="'.$maxheightmini.'" src="'.DOL_URL_ROOT.'/viewimage.php?modulepart='.$modulepart.'&file='.urlencode($relativepath.'thumbs/'.$minifile).'" title="">';
 						else print '&nbsp;';
 						print '</td>';

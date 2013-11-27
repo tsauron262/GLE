@@ -1832,6 +1832,8 @@ class Synopsis_Contrat extends Contrat {
 
     public function displayDialog($type = 'add', $mysoc = null, $objp = null) {
         global $conf, $form;
+        
+        $form = new Form($this->db);
 
 
         $html = '<div id="' . $type . 'Line" class="ui-state-default ui-corner-all" style="">';
@@ -1881,8 +1883,14 @@ class Synopsis_Contrat extends Contrat {
         $html .= '</tr>' . "\n";
         $html .= '<tr>' . "\n";
         $html .= '<th class="ui-widget-header ui-state-default" width=150 colspan=1>Date de d&eacute;but' . "\n";
-        $html .= '<td class="ui-widget-content" colspan=2><input type="text" style="width: 100px" name="dateDeb' . $type . '" id="dateDeb' . $type . '">' . "\n";
-        $html .= '</td>' . "\n";
+        
+        $html .= '<td class="ui-widget-content" colspan=2>';
+        
+        ob_start();
+        $html .= $form->select_date('', 'dateDeb' . $type);
+        $html .= ob_get_clean();
+//        $html .= '<input type="text" class="datepicker" style="width: 100px" name="dateDeb' . $type . '" id="dateDeb' . $type . '">';
+        $html .= "\n" .'</td>' . "\n";
         $html .= '</tr>' . "\n";
         $html .= '<tr>' . "\n";
         $html .= '<th class="ui-widget-header ui-state-default" colspan=1>SLA' . "\n";

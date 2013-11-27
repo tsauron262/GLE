@@ -104,7 +104,7 @@ function traiteScroll(heightDif) {
     if(hauteurMenu < height && (0 || minimuAGagne > 0)){
         $("#id-right div").each(function(){
             taille = $(this).innerHeight();
-            newTailleT = taille - minimuAGagne - 5;
+            newTailleT = taille - minimuAGagne - 20;
             reductionVisibilite = height/newTailleT;
             nbPages = taille / newTailleT;
             if($(this).is(":visible")

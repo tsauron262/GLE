@@ -842,7 +842,7 @@ switch ($action) {
                 //  Description
                 $xml .= "<description><![CDATA[" . utf8_encodeRien($res->description) . "]]></description>";
                 //  date debut
-                $xml .= "<dateDeb><![CDATA[" . date('d/m/Y', $res->GMAO_ddeb) . "]]></dateDeb>";
+                $xml .= "<dateDeb><![CDATA[" . $res->date_ouverture_prevue . "]]></dateDeb>";
                 //  SLA
                 $xml .= "<SLA><![CDATA[" . utf8_encodeRien($res->GMAO_sla) . "]]></SLA>";
                 //  reconduction auto

@@ -51,8 +51,6 @@
   \ingroup    ficheinter
   \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
-
-
 $afficherLigneContrat = false;
 
 
@@ -98,10 +96,10 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_devalidate' &&
     $fichinter = new Fichinter($db);
     $fichinter->id = $_REQUEST["id"];
     $fichinter->fetch($_REQUEST["id"]);
-    $result = $fichinter->devalid($user, $conf->fichinter->outputdir);    
+    $result = $fichinter->devalid($user, $conf->fichinter->outputdir);
 }
-    
-    
+
+
 
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_validate' && $_REQUEST['confirm'] == 'yes') {
     $fichinter = new Fichinter($db);
@@ -160,6 +158,15 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
     }
 }
 
+
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'remove_file') {
+	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
+    $filedir = $conf->synopsisficheinter->dir_output . "/" . $fichinter->ref;
+    $file = $filedir . '/' . GETPOST('file', 'alpha'); // Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
+    $result = dol_delete_file($file);
+    //if ($result >= 0) $mesg=$langs->trans("FileWasRemoced");
+}
+
 if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
 
     $fichinter = new Fichinter($db);
@@ -180,7 +187,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
         if ($result > 0) {
             if (isset($_REQUEST['fk_contratdet']))
                 addElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet'], $result);
-            
+
             $_REQUEST["id"] = $result;      // Force raffraichissement sur fiche venant d'etre creee
             $fichinterid = $result;
         } else {
@@ -312,18 +319,18 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
         $fk_typeinterv = (isset($_REQUEST["fk_typeinterv"]) ? $_REQUEST["fk_typeinterv"] : "");
         $pu_ht = 0;
 
-       /* $resultT = getElementElement("contratdet", "fichinter", null, $_REQUEST['id']);
-        if(isset($resultT[0]['s'])){
-            $contradet = $resultT[0]['s'];
-//            die("ok".$contradet);
-            $requete = "SELECT `price_ht` as prix_ht FROM `llx_contratdet` WHERE `rowid` = ".$contradet;
-            $sql = $db->query($requete);
-            $res = $db->fetch_object($sql);
-            if ($res->prix_ht > 0) {
-                $pu_ht = $res->prix_ht;
-            }
-        }
-        else*/if (preg_match('/dep-([0-9]*)/', $fk_typeinterv, $arr)) {
+        /* $resultT = getElementElement("contratdet", "fichinter", null, $_REQUEST['id']);
+          if(isset($resultT[0]['s'])){
+          $contradet = $resultT[0]['s'];
+          //            die("ok".$contradet);
+          $requete = "SELECT `price_ht` as prix_ht FROM `llx_contratdet` WHERE `rowid` = ".$contradet;
+          $sql = $db->query($requete);
+          $res = $db->fetch_object($sql);
+          if ($res->prix_ht > 0) {
+          $pu_ht = $res->prix_ht;
+          }
+          }
+          else */if (preg_match('/dep-([0-9]*)/', $fk_typeinterv, $arr)) {
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht
@@ -682,7 +689,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
          */
         $dsc = '';
         if (isset($_REQUEST['fk_contratdet'])) {
-            require_once DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php";
+            require_once DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php";
             $ln = new Synopsis_ContratLigne($db);
             $ln->fetch($_REQUEST['fk_contratdet']);
             $dsc = $ln->getTitreInter();
@@ -697,7 +704,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             $doleditor = new DolEditor('description', '', 280, 'dol_notes', 'In', true);
             $doleditor->Create();
         } else {
-            print '<textarea name="description" wrap="soft" cols="70" rows="12">'.$dsc.'</textarea>';
+            print '<textarea name="description" wrap="soft" cols="70" rows="12">' . $dsc . '</textarea>';
         }
 
         print '</td></tr>';
@@ -1874,7 +1881,7 @@ EOF;
 
         print '<td align="center" valign="middle" colspan="4"><input type="submit" class="button" value="' . $langs->trans('Add') . '" name="addligne"></td>';
         print '</tr>';
-        if ($fichinter->fk_contrat > 0  && $afficherLigneContrat) {
+        if ($fichinter->fk_contrat > 0 && $afficherLigneContrat) {
             $requete = "SELECT fk_contratdet FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet WHERE fk_fichinter = " . $fichinter->id . " AND fk_contratdet is not null";
             $sql = $db->query($requete);
             $arrTmp = array();
@@ -1961,7 +1968,7 @@ EOF;
             }
             print '>' . $langs->trans("Valid") . '</a>';
         }
-        
+
         if (($fichinter->statut == 1) && $user->rights->synopsisficheinter->creer && $user->rights->synopsisficheinter->modifAfterValid) {
             print '<a class="butAction" ';
             if ($conf->use_javascript_ajax) {
@@ -2004,7 +2011,7 @@ EOF;
     print "<br>\n";
     $somethingshown = $formfile->show_documents('synopsisficheinter', $filename, $filedir, $urlsource, $genallowed, $delallowed, $fichinter->modelpdf);
 
-die($fichinter->modelpdf);
+    die($fichinter->modelpdf);
     print "</td><td>";
     print "&nbsp;</td>";
     print "</tr></table>\n";

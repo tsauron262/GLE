@@ -220,6 +220,15 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
           {
               if (socid > 0)
               {
+                    valueStr = jQuery('#socid').find('option[value='+socid+']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_");
+                    $("select.double").each(function(){
+                        select = $(this);
+                        $(this).find('option[value='+valueStr+']').each(function(){
+                            $(this).attr("selected", "selected");
+                            $(select).val(valueStr);
+                            $(select).change();
+                        });
+                    });
                     jQuery.ajax({
                         url:"ajax/contactSoc-xml_response.php",
                       type:"POST",
@@ -468,9 +477,13 @@ EOF;
                     $html .= "<option value=''>S&eacute;lectionner</option>";
                     if ($obj->OptGroup . "x" != "x") {
                         $html = "<table><tr><td width=50%>" . $html;
+                            $html .= "<OPTGROUP label=' '>";
+                            $html .= "<OPTION value='0'></OPTION>";
                         foreach ($obj->valuesGroupArr as $key => $val) {
                             $val['label'] = str_replace(" ", "_", $val['label']);
+                            $val['label'] = str_replace("'", "_", $val['label']);
                             $html .= "<OPTGROUP label='" . $val['label'] . "'>";
+                            $html .= "<OPTION value='0'></OPTION>";
                             foreach ($val['data'] as $key1 => $val1) {
                                 $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key1 ? "SELECTED" : "") . " value='" . $key1 . "'>" . $val1 . "</OPTION>";
                             }

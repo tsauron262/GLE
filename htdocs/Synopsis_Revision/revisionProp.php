@@ -11,6 +11,10 @@ $langs->load('compta');
 
 $id = isset($_GET["id"]) ? $_GET["id"] : '';
 
+
+if($user->societe_id)
+    header("Location: ".DOL_URL_ROOT."/comm/propal.php?id=".$id);
+
 // Security check
 if ($user->societe_id)
     $socid = $user->societe_id;

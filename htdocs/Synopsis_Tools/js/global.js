@@ -65,6 +65,8 @@ $(window).load(function() {
         $(".editDateDiv").fadeIn();
         $(this).fadeOut();
     });
+    
+    
 });
 
 function dialogConfirm(url, titre, yes, no, id) {
@@ -104,15 +106,17 @@ function traiteScroll(heightDif) {
     elem = null;
     if(hauteurMenu < height && (0 || minimuAGagne > 0)){
         $("#id-right div").each(function(){
-            taille = $(this).innerHeight();
-            newTailleT = taille - minimuAGagne - 5;
-            reductionVisibilite = height/newTailleT;
-            nbPages = taille / newTailleT;
-            if($(this).is(":visible")
-                && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
-                newTaille = newTailleT;
-                elem = $(this);
-                appli = true;
+            if(!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")){
+                taille = $(this).innerHeight();
+                newTailleT = taille - minimuAGagne - 5;
+                reductionVisibilite = height/newTailleT;
+                nbPages = taille / newTailleT;
+                if($(this).is(":visible")
+                    && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
+                    newTaille = newTailleT;
+                    elem = $(this);
+                    appli = true;
+                }
             }
         });
         
@@ -333,8 +337,16 @@ function editAjax(elem, datas, callOut) {
 
 
 function popChrono(id, callBack) {
+    popIFrame(DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id, callBack);
+}
+function popAddContact(id, callBack) {
+    popIFrame(DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=" + id, callBack);
+}
+
+
+function popIFrame(urlIF, callBack) {
     //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
-    $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id + "'></iframe></div>");
+    $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + urlIF + "'></iframe></div>");
     
     $("#id-container").hide();
     
@@ -344,7 +356,7 @@ function popChrono(id, callBack) {
         callBack();
     });
     var i = 0;
-    $(".fullScreen iframe").on("load", function(){
+    $(".fullScreen iframe").load(function(){
         i++;
         if(i > 1){
             $("#id-container").show();

@@ -216,7 +216,7 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
 if ($action == "Modify" || $action == "ModifyAfterValid") {
     $js = "<script>";
         $js .= <<< EOF
-          function ajax_updater_postFct(socid)
+          function ajax_updater_postFct(socid, valueSelected)
           {
               if (socid > 0)
               {
@@ -236,7 +236,19 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
                       data:"socid="+socid,
                       success: function(msg){
                             jQuery('#contactSociete').replaceWith("<div id='contactSociete'>"+jQuery(msg).find('contactsList').text()+"</div>");
-//                            jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
+//                          jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
+                            if(valueSelected == 'old'){
+                                idMax = 0;
+                                jQuery('#contactSociete').find('option').each(function(){
+                                    id = parseInt($(this).attr("value"));
+                                    if(id > idMax)
+                                    idMax = id;
+                                });
+                                jQuery('#contactSociete').find('option[value="'+idMax+'"]').attr("selected", "selected");
+                            }
+                            else if(valueSelected != null){
+                                jQuery('#contactSociete').find('option[value="'+valueSelected+'"]').attr("selected", "selected");
+                            }
                       }
                     });
               } else {
@@ -247,7 +259,14 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
             jQuery('#socid').change(function(){
               socid = jQuery(this).find(':selected').val();
                 ajax_updater_postFct(socid);
-          });
+            });
+        
+            $(".addContact").click(function(){
+                socid = $("select#socid").val();
+                popAddContact(socid, function(){
+                    ajax_updater_postFct(socid, 'old');
+                });
+            });    
           
 
         jQuery.validator.addMethod(
@@ -354,10 +373,7 @@ if ($id > 0) {
                 $tmpContact = $html->tmpReturn;
             }
             $tmpContact = ob_get_clean();
-            if ($chr->model->hasSociete == 1)
-                print '    <td  class="ui-widget-content" colspan="1"><div id="contactSociete">' . $tmpContact . '</div></td>';
-            else
-                print '    <td  class="ui-widget-content" colspan="3"><div id="contactSociete">' . $tmpContact . '</div></td>';
+                print '    <td  class="ui-widget-content" colspan="'.(($chr->model->hasSociete == 1)? 1 : 3) .'"><span class="addContact editable" style="float: left; padding : 3px 15px 0 0;">'.img_picto($langs->trans("Create"),'filenew').'</span><div id="contactSociete">' . $tmpContact . '</div></td>';
         }
 
         if ($chr->model->hasDescription) {
@@ -559,30 +575,25 @@ EOF;
                      <td colspan=1 class=" ui-widget-content" >' . $chr->getNomUrl(1) . '</td>
                      <th colspan=1 class=" ui-widget-header ui-state-default" >Type</th>
                      <td colspan=1 class=" ui-widget-content" >' . $chr->model->titre . '</td>';
-        if ($chr->societe && $chr->model->hasSociete == 1) {
-            if ($chr->contact && $chr->model->hasContact == 1) {
+        $hasSoc = $chr->socid && $chr->model->hasSociete == 1;
+        $hasCont = $chr->contact && $chr->model->hasContact == 1;
+        
+        if($hasSoc || $hasCont)
+            echo "<tr/>";
+        
+        if ($hasSoc) {
+            $societe = new Societe($db);
+            $societe->fetch($chr->socid);
                 // Societe
-                print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="1">' . $chr->societe->getNomUrl(1) . '</td>';
-            } else {
-                // Societe
-                print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="3">' . $chr->societe->getNomUrl(1) . '</td>';
-            }
+                print '<th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
+                print '    <td  class="ui-widget-content" colspan="'.($hasCont? 1 : 3).'">' . $societe->getNomUrl(1) . '</td>';
         }
 
-        if ($chr->contact && $chr->model->hasContact == 1) {
-            if ($chr->societe && $chr->model->hasSociete == 1) {
+        if ($hasCont) {
                 // Contact
                 print '<th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">';
                 print $langs->trans('Contact') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="1">' . $chr->contact->getNomUrl(1) . '</td>';
-            } else {
-                // Contact
-                print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">';
-                print $langs->trans('Contact') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="3">' . $chr->contact->getNomUrl(1) . '</td>';
-            }
+                print '    <td  class="ui-widget-content" colspan="' .($hasSoc? 1 : 3). '">' . $chr->contact->getNomUrl(1) . '</td>';
         }
         $chr->user_author->fetch($chr->user_author->id);
 

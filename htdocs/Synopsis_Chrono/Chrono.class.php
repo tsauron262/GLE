@@ -51,11 +51,7 @@ class Chrono extends CommonObject {
                 $this->socid = $res->fk_societe;
                 $this->statut = $res->fk_statut;
                 $this->validation_number = $res->validation_number;
-                if ($this->socid > 0) {
-                    $soc = new Societe($this->db);
-                    $soc->fetch($this->socid);
-                    $this->societe = $soc;
-                }
+                
                 $this->user_author_id = $res->fk_user_author;
                 if ($this->user_author_id > 0) {
                     $tmpUser = new User($this->db);
@@ -89,6 +85,13 @@ class Chrono extends CommonObject {
                     $this->model->fetch($res->model_refid);
                     $this->mask = $this->model->modele;
                 }
+                
+                if ($this->socid > 0 && $this->mode->hasSociete) {
+                    $soc = new Societe($this->db);
+                    $soc->fetch($this->socid);
+                    $this->societe = $soc;
+                }
+                
                 global $user;
                 $this->getRights($user);
                 return($id);

@@ -82,9 +82,14 @@ if ($id > 0 || ! empty($ref))
         if ($object->source == 0)
         {
             // Propale
+            /*Mod drsi */
+            $tabT = getElementElement("propal", "commande", Null, $object->id);
+            if(isset($tabT[0])){
             $propal = new Propal($db);
-            $propal->fetch($object->propale_id);
+            $propal->fetch($tabT[0]['s']);
             print ' -> <a href="'.DOL_URL_ROOT.'/comm/propal.php?id='.$propal->id.'">'.$propal->ref.'</a>';
+            }
+            /*f mod drsi */
         }
         print "</td></tr>";
 

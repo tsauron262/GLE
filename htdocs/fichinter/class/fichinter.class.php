@@ -304,6 +304,15 @@ class Fichinter extends CommonObject {
 
         dol_syslog("Fichinter::devalid sql=" . $sql);
         $resql = $this->db->query($sql);
+        if ($resql) {
+                $this->db->commit();
+                return 1;
+            } else {
+                $this->db->rollback();
+                $this->error = join(',', $this->errors);
+                dol_syslog("Fichinter::update " . $this->error, LOG_ERR);
+                return -1;
+            }
     }
     /**
      *        \brief        Valide une fiche intervention

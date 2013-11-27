@@ -1565,7 +1565,7 @@ class Synopsis_Contrat extends Contrat {
                             isSAV, SLA, durValid,
                             hotline, telemaintenance, maintenance,
                             type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
-                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now()," . $tmpProd->array_options['options_2reconductionAuto'] . ",
+                     VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),'" . $tmpProd->array_options['options_2reconductionAuto'] . "',
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
                             " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
                             " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 5))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";

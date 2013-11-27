@@ -39,6 +39,13 @@ if ($action == 'supprimer') {
     if ($user->rights->synopsischrono->Supprimer || $rightChrono->supprimer) {
         $res = $chr->supprimer($id);
         if ($res > 0) {
+            if($chr->propalid)
+                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=propal&id=".$chr->propalid);
+            elseif($chr->projetid)
+                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=project&id=".$chr->projetid);
+            elseif($chr->socid)
+                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=soc&id=".$chr->socid);
+            else
             header('Location: liste.php');
         } else {
             header('Location: ?id=' . $id);

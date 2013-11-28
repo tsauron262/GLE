@@ -34,10 +34,10 @@
 
 /**
         \file       htdocs/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php
-        \ingroup    demandeInterv
+        \ingroup    synopsisdemandeinterv
         \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
                     et la classe mere de numerotation des fiches interventions
-        \version    $Id: modules_demandeInterv.php,v 1.24 2008/07/12 12:45:31 eldy Exp $
+        \version    $Id: modules_synopsisdemandeinterv.php,v 1.24 2008/07/12 12:45:31 eldy Exp $
 */
 
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/functions.lib.php');
@@ -45,17 +45,17 @@ require_once(DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php');
 
 
 /**
-        \class      ModeleSynopsis_demandeinterv
+        \class      Modelesynopsisdemandeinterv
         \brief      Classe mere des modeles de fiche intervention
 */
-class ModeleSynopsisdemandeinterv extends CommonDocGenerator
+class Modelesynopsisdemandeinterv extends CommonDocGenerator
 {
     public $error='';
 
     /**
         \brief      Constructeur
      */
-    function ModeleSynopsisdemandeinterv()
+    function Modelesynopsisdemandeinterv()
     {
 
     }
@@ -75,7 +75,7 @@ class ModeleSynopsisdemandeinterv extends CommonDocGenerator
 	{
 		global $conf;
 
-		$type='demandeInterv';
+		$type='synopsisdemandeinterv';
 		$liste=array();
 
 		include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
@@ -88,11 +88,11 @@ class ModeleSynopsisdemandeinterv extends CommonDocGenerator
 
 
 /**
-        \class      ModeleNumRefdemandeInterv
+        \class      ModeleNumRefsynopsisdemandeinterv
         \brief      Classe mere des modeles de numerotation des references de fiches d'intervention
 */
 
-class ModeleNumRefdemandeInterv
+class ModeleNumRefsynopsisdemandeinterv
 {
     var $error='';
 
@@ -102,7 +102,7 @@ class ModeleNumRefdemandeInterv
     function info()
     {
         global $langs;
-        $langs->load("demandeInterv");
+        $langs->load("synopsisdemandeinterv");
         return $langs->trans("NoDescription");
     }
 
@@ -112,7 +112,7 @@ class ModeleNumRefdemandeInterv
     function getExample()
     {
         global $langs;
-        $langs->load("demandeInterv");
+        $langs->load("synopsisdemandeinterv");
         return $langs->trans("NoExample");
     }
 
@@ -151,17 +151,17 @@ class ModeleNumRefdemandeInterv
 
 
 /**
-        \brief      Cree une fiche intervention sur disque en fonction du modele de demandeInterv_ADDON_PDF
+        \brief      Cree une fiche intervention sur disque en fonction du modele de SYNOPSISDEMANDEINTERV_ADDON_PDF
         \param        db              objet base de donnee
-        \param        object            Object demandeInterv
+        \param        object            Object synopsisdemandeinterv
         \param        modele            force le modele e utiliser ('' par defaut)
         \param        outputlangs        objet lang a utiliser pour traduction
         \return     int             0 si KO, 1 si OK
 */
-function demandeInterv_create($db, $object, $modele='', $outputlangs='')
+function synopsisdemandeinterv_create($db, $object, $modele='', $outputlangs='')
 {
     global $conf,$langs;
-    $langs->load("demandeInterv");
+    $langs->load("synopsisdemandeinterv");
 
     $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/";
 
@@ -174,8 +174,8 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
         }
         else
         {
-            dol_syslog("Error ".$langs->trans("Error_DEMANDEINTERV_ADDON_PDF_NotDefined"), LOG_ERR);
-            print "Error ".$langs->trans("Error_DEMANDEINTERV_ADDON_PDF_NotDefined");
+            dol_syslog("Error ".$langs->trans("Error_SYNOPSISDEMANDEINTERV_ADDON_PDF_NotDefined"), LOG_ERR);
+            print "Error ".$langs->trans("Error_SYNOPSISDEMANDEINTERV_ADDON_PDF_NotDefined");
             return 0;
         }
     }
@@ -189,7 +189,7 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
 
         $obj = new $classname($db);
 
-        dol_syslog("demandeInterv_create build PDF", LOG_DEBUG);
+        dol_syslog("SYNOPSISDEMANDEINTERV_create build PDF", LOG_DEBUG);
         if ($obj->write_file($object,$outputlangs) > 0)
         {
             return 1;
@@ -213,22 +213,22 @@ function demandeInterv_create($db, $object, $modele='', $outputlangs='')
    \param        propalid    id de la propal e effacer
    \param     propalref reference de la propal si besoin
 */
-function demandeInterv_delete_preview($db, $demandeIntervid, $demandeIntervref='')
+function synopsisdemandeinterv_delete_preview($db, $synopsisdemandeintervid, $synopsisdemandeintervref='')
 {
     global $langs,$conf;
 
-    if (!$demandeIntervref)
+    if (!$synopsisdemandeintervref)
   {
-    $demandeInterv = new demandeInterv($db,"",$demandeIntervid);
-    $demandeInterv->fetch($demandeIntervid);
-    $demandeIntervref = $demandeInterv->ref;
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db,"",$synopsisdemandeintervid);
+    $synopsisdemandeinterv->fetch($synopsisdemandeintervid);
+    $synopsisdemandeintervref = $synopsisdemandeinterv->ref;
    }
 
    if ($conf->synopsisdemandeinterv->dir_output)
    {
-    $demandeIntervref = sanitize_string($demandeIntervref);
-    $dir = $conf->synopsisdemandeinterv->dir_output . "/" . $demandeIntervref ;
-    $file = $dir . "/" . $demandeIntervref . ".pdf.png";
+    $synopsisdemandeintervref = sanitize_string($synopsisdemandeintervref);
+    $dir = $conf->synopsisdemandeinterv->dir_output . "/" . $synopsisdemandeintervref ;
+    $file = $dir . "/" . $synopsisdemandeintervref . ".pdf.png";
     $multiple = $file . ".";
 
     if ( file_exists( $file ) && is_writable( $file ) )

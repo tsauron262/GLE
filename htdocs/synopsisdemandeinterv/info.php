@@ -31,25 +31,25 @@
  */
 
 /**
-    \file       htdocs/synopsis_demandeinterv/info.php
-    \ingroup    demandeInterv
+    \file       htdocs/synopsisdemandeinterv/info.php
+    \ingroup    synopsisdemandeinterv
     \brief      Page d'affichage des infos d'une fiche d'intervention
     \version    $Id: info.php,v 1.4 2008/02/25 20:03:26 eldy Exp $
 */
 
 require('./pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
 
 $langs->load('companies');
 
-$demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';
+$synopsisdemandeintervid = isset($_GET["id"])?$_GET["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Synopsis_demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid, 'synopsisdemandeinterv');
 
 
 /*
@@ -58,19 +58,19 @@ $result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Syno
 
 llxHeader();
 
-$demandeInterv = new demandeInterv($db);
-$demandeInterv->fetch($_GET['id']);
+$synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+$synopsisdemandeinterv->fetch($_GET['id']);
 
 $societe = new Societe($db);
-$societe->fetch($demandeInterv->socid);
+$societe->fetch($synopsisdemandeinterv->socid);
 
-$head = demandeInterv_prepare_head($demandeInterv);
+$head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
 dol_fiche_head($head, 'info', $langs->trans('DI'));
 
-$demandeInterv->info($demandeInterv->id);
+$synopsisdemandeinterv->info($synopsisdemandeinterv->id);
 
 print '<table width="100%"><tr><td>';
-dol_print_object_info($demandeInterv);
+dol_print_object_info($synopsisdemandeinterv);
 print '</td></tr></table>';
 
 print '</div>';

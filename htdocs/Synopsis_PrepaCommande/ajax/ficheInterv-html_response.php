@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : demandeInterv-html_response.php
+  * Name : synopsisdemandeinterv-html_response.php
   * GLE-1.2
   */
 
@@ -26,7 +26,7 @@
   require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
   require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
   require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+  require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
   $com = new Synopsis_Commande($db);
   $html = new Form($db);
   $res=$com->fetch($id);
@@ -107,14 +107,14 @@
 //        $requete1 = "SELECT * FROM Babel_li_interv WHERE fi_refid = ".$res->rowid;
         $tabDI = $fi->getDI();
         foreach($tabDI as $idDI){
-            $di = new DemandeInterv($db);
+            $di = new Synopsisdemandeinterv($db);
             $di->fetch($idDI);
             $diStr .= $di->getNomUrl(1)."<br/>";            
         }
 //        $sql1 = $db->query($requete1);
 //        while ($res1=$db->fetch_object($sql1))
 //        {
-//            $di = new DemandeInterv($db);
+//            $di = new Synopsisdemandeinterv($db);
 //            $di->fetch($res1->di_refid);
 //            $diStr .= $di->getNomUrl(1)."<br/>";
 //        }

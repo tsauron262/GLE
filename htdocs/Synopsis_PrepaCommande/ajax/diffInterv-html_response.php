@@ -27,7 +27,7 @@ require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
 require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 $com = new Synopsis_Commande($db);
 $html = new Form($db);
 $res=$com->fetch($id);
@@ -43,11 +43,11 @@ foreach($arrGrp as $key=>$commandeMember)
 if ($res>0)
 {
       $requete =  "SELECT label
-                     FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv
+                     FROM ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv
                     WHERE id in 
                         (SELECT fk_typeinterv 
-                            FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as d, 
-                                ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as dt WHERE dt.fk_demandeInterv=d.rowid AND fk_commande IN (".join(',',$arrGrpCom)."))
+                            FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv as d, 
+                                ".MAIN_DB_PREFIX."synopsisdemandeintervdet as dt WHERE dt.fk_synopsisdemandeinterv=d.rowid AND fk_commande IN (".join(',',$arrGrpCom)."))
                        OR id in 
                        (SELECT fk_typeinterv FROM 
                             ".MAIN_DB_PREFIX."Synopsis_fichinter as f, 
@@ -65,11 +65,11 @@ if ($res>0)
                        dt.duree,
                        dt.total_ht,
                        t.label
-                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv as d,
-                       ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t,
-                       ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as dt
+                  FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv as d,
+                       ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t,
+                       ".MAIN_DB_PREFIX."synopsisdemandeintervdet as dt
                  WHERE d.fk_commande IN (".join(',',$arrGrpCom).")
-                   AND dt.fk_demandeinterv = d.rowid
+                   AND dt.fk_synopsisdemandeinterv = d.rowid
                    AND dt.fk_typeinterv = t.id ";
       $sql = $db->query($requete);
       $arr=array();
@@ -84,7 +84,7 @@ if ($res>0)
                        ft.total_ht,
                        t.label
                   FROM ".MAIN_DB_PREFIX."Synopsis_fichinter as f,
-                       ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t,
+                       ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t,
                        ".MAIN_DB_PREFIX."Synopsis_fichinterdet as ft
                  WHERE f.fk_commande IN (".join(',',$arrGrpCom).")
                    AND ft.fk_fichinter = f.rowid

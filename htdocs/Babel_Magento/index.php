@@ -30,9 +30,9 @@
  */
 
 /**
-        \file       htdocs/synopsis_demandeinterv/index.php
+        \file       htdocs/synopsisdemandeinterv/index.php
         \brief      Page accueil espace fiches interventions
-        \ingroup    demandeInterv
+        \ingroup    synopsisdemandeinterv
         \version    $Id: index.php,v 1.40 2008/04/09 18:13:50 eldy Exp $
 */
 
@@ -46,7 +46,7 @@ $langs->load("synopsisGene@Synopsis_Tools");
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-//$result = restrictedArea($user, 'demandeInterv', $demandeIntervid,'');
+//$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid,'');
 
 
 

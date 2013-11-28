@@ -1,7 +1,11 @@
 
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_fichinter` AS (select `llx_Synopsis_fichinter`.`rowid` AS `rowid`,`llx_Synopsis_fichinter`.`fk_soc` AS `fk_soc`,`llx_Synopsis_fichinter`.`fk_projet` AS `fk_projet`,`llx_Synopsis_fichinter`.`fk_contrat` AS `fk_contrat`,`llx_Synopsis_fichinter`.`ref` AS `ref`,1 AS `entity`,`llx_Synopsis_fichinter`.`tms` AS `tms`,`llx_Synopsis_fichinter`.`datec` AS `datec`,`llx_Synopsis_fichinter`.`date_valid` AS `date_valid`,`llx_Synopsis_fichinter`.`datei` AS `datei`,`llx_Synopsis_fichinter`.`fk_user_author` AS `fk_user_author`,`llx_Synopsis_fichinter`.`fk_user_valid` AS `fk_user_valid`,`llx_Synopsis_fichinter`.`fk_statut` AS `fk_statut`,`llx_Synopsis_fichinter`.`duree` AS `duree`,`llx_Synopsis_fichinter`.`description` AS `description`,`llx_Synopsis_fichinter`.`note_private` AS `note_private`,`llx_Synopsis_fichinter`.`note_public` AS `note_public`,`llx_Synopsis_fichinter`.`model_pdf` AS `model_pdf`,'' AS `extraparams` from `llx_Synopsis_fichinter` where 1);
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_fichinter` AS (select `rowid` AS `rowid`,`fk_soc` AS `fk_soc`,`fk_projet` AS `fk_projet`,`fk_contrat` AS `fk_contrat`,`ref` AS `ref`,1 AS `entity`,`tms` AS `tms`,`datec` AS `datec`,`date_valid` AS `date_valid`,`datei` AS `datei`,`fk_user_author` AS `fk_user_author`,`fk_user_valid` AS `fk_user_valid`,`fk_statut` AS `fk_statut`,`duree` AS `duree`,`description` AS `description`,`note_private` AS `note_private`,`note_public` AS `note_public`,`model_pdf` AS `model_pdf`,'' AS `extraparams` from `llx_Synopsis_fichinter` where 1);
 
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW llx_Synopsis_fichinter as (SELECT f.`rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `fk_commande`, `ref`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, `total_ht`, `total_tva`, `total_ttc`, `natureInter`, `entity` FROM llx_fichinter f, llx_synopsisfichinter sf WHERE f.rowid = sf.rowid)
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW llx_Synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` FROM llx_fichinterdet f, llx_synopsisfichinterdet sf WHERE f.rowid = sf.rowid)
 
 BIMP
 INSERT INTO  `synopsis_bimp`.`llx_document_model` (
@@ -42,7 +46,7 @@ INSTALLATION SUR NEW VERSION DOLIBARR :{
     /core/modules/demendeInterv
     /core/modules/fichinter *
 
-    /core/lib/demandeInterv.lib.php
+    /core/lib/synopsisdemandeinterv.lib.php
     /core/lib/task.class.php //Louche pas de class ici normalement
 
     /fichinter *

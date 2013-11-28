@@ -222,8 +222,6 @@ Cloturer=Clôturé
 Prefix=Préfixe
 
 
-intervention=Fiche Interv.
-DI=Demande Interv.
 Delivered=Livré
 Canceled=Annulé
 
@@ -259,17 +257,21 @@ PDFcontratGAfinaproStdDescription=Modèle standard finapro
 
 
 
+Module22229Name = Demandes Interventions
+Module8745Name = Fiche Intervention
 
-
-DI=Demande d'interv.
-DIs=Demandes d'interventions
+DI=Demande Intervention
+DIs=Demandes Intervention
 NewDI=Nouvelle DI
-AddDI=Créer demande  d'interventions
-ListOfDIs=Liste des demandes d'interventions
+AddDI=Créer demande  d'intervention
+ListOfDIs=Liste des demandes d'intervention
 ListOfMyDIs=Liste de mes DI
 LastInterventions=Les %s dernières demandes
 AllDI=Toutes les DI
 ConfirmModifDI=Êtes vous sur de vouloir modifier cette DI ?
+
+intervention=Fiche Intervention
+
 
 CreateDraftDI=Créer brouillon
 CustomerDoesNotHavePrefix=Le client n'a pas de préfixe de défini
@@ -291,10 +293,10 @@ ConfirmClotureDI=Confirmer la clôture de la demande d'intertvention?
 createFI=Créer une FI
 ConfirmClotureDIJS=Confirmer la clôture de la demande d\'intertvention?
 
-BoxLastDemandeIntervContrat = Mes dernières demande d'intervention Contrat
-BoxLastDemandeIntervCommande = Mes dernières demande d'intervention Commande
-BoxNextDemandeInterv = Mes prochaines demande d'intervention
-BoxLastDemandeInterv = Mes dernières demande d'intervention
+BoxLastsynopsisdemandeintervContrat = Mes dernières demande d'intervention Contrat
+BoxLastsynopsisdemandeintervCommande = Mes dernières demande d'intervention Commande
+BoxNextsynopsisdemandeinterv = Mes prochaines demande d'intervention
+BoxLastsynopsisdemandeinterv = Mes dernières demande d'intervention
 BoxLastFicheInterv = Mes dernières fiche d'intervention
 BoxTitlefichinter = Mes dernières fiche d'intervention
 

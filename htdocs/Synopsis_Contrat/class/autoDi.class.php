@@ -1,7 +1,7 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 
 class autoDi {
 
@@ -30,9 +30,9 @@ class autoDi {
         if ($this->processDet->statut != 3)
             $this->getTabSecteur();
         else {
-            $sql = $this->db->query("SELECT rowid FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat =" . $this->idContrat);
+            $sql = $this->db->query("SELECT rowid FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat =" . $this->idContrat);
             while ($ligne = $this->db->fetch_object($sql)) {
-                $di = new demandeInterv($this->db);
+                $di = new Synopsisdemandeinterv($this->db);
                 $di->fetch($ligne->rowid);
                 echo("<br/>" . $di->getNomUrl(1) . " : " . dol_print_date($di->date, 'day') . " " . $di->description);
             }
@@ -177,7 +177,7 @@ class autoDi {
             }
             foreach ($this->tabType as $type) {
                 foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
-                    $di = new demandeInterv($this->db);
+                    $di = new Synopsisdemandeinterv($this->db);
                     $di->date = $visite['date'];
                     $di->socid = $this->contrat->socid;
                     $di->author = $user->id;

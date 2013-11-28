@@ -184,7 +184,7 @@ if ($action=='delete')
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
         $interface=new Interfaces($db);
         $interface->texte=$tmpName;
-        $result=$interface->run_triggers('ECM_UL_DEL_NDF',$demandeInterv,$user,$langs,$conf);
+        $result=$interface->run_triggers('ECM_UL_DEL_NDF',$synopsisdemandeinterv,$user,$langs,$conf);
         if ($result < 0) { $error++; $this->errors=$interface->errors; }
 
     }

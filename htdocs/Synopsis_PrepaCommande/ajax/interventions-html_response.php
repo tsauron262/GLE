@@ -24,7 +24,7 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 
 $form = new Form($db);
 
@@ -39,7 +39,7 @@ if ($arrGrp && count($arrGrp) > 0)
         $arrGrpCom[$commandeMember->id] = $commandeMember->id;
     }
 $requete = "SELECT *
-                FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet
+                FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet
                WHERE fk_commandedet IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande IN (" . join(",", $arrGrpCom) . " ))";
 $sql = $db->query($requete);
 $arrDi = array();
@@ -112,7 +112,7 @@ if ($cnt > 0) {
 }
 print "<div class='titre'>Interventions attribu&eacute;es</div>";
 $requete = "SELECT *
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                  FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv
                  WHERE fk_commande IN (" . join(",", $arrGrpCom) . ")";
 $sql = $db->query($requete);
 print "<table cellpadding=15 width=100%>";
@@ -120,7 +120,7 @@ print "<tr><th class='ui-widget-header ui-state-default'>Ref<th class='ui-widget
 $tmpUser = new User($db);
 $tmpProd = new Product($db);
 while ($res = $db->fetch_object($sql)) {
-    $di = new DemandeInterv($db);
+    $di = new Synopsisdemandeinterv($db);
     $di->fetch($res->rowid);
     print "<tr class='droppable2' rel='" . $res->fk_user_prisencharge . "' id='" . $res->rowid . "'><td align=left class='ui-widget-content'  nowrap>" . $di->getNomUrl(1) . "";
     if ($res->fk_user_prisencharge > 0) {
@@ -133,8 +133,8 @@ while ($res = $db->fetch_object($sql)) {
     print "    <td class='ui-widget-content' align=center>";
     $requete = " SELECT c.*
                        FROM " . MAIN_DB_PREFIX . "commandedet c,
-                           " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet d
-                      WHERE c.rowid = d.fk_commandedet AND d.fk_demandeInterv = " . $res->rowid;
+                           " . MAIN_DB_PREFIX . "synopsisdemandeintervdet d
+                      WHERE c.rowid = d.fk_commandedet AND d.fk_synopsisdemandeinterv = " . $res->rowid;
     $sql1 = $db->query($requete);
     if ($db->num_rows($sql1) > 0) {
         print "<table width=100%>";
@@ -164,7 +164,7 @@ print <<<EOF
 <script>
 jQuery(document).ready(function(){
     jQuery('#addDI').click(function(){
-        location.href=DOL_URL_ROOT+"/Synopsis_DemandeInterv/fiche.php?action=create&socid="+socId+"&fk_commande="+comId;
+        location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&socid="+socId+"&fk_commande="+comId;
     });
 
 });
@@ -202,7 +202,7 @@ print "</div>";
 print "<div id='fragment3'>";
 print "<table cellpadding=10 width=100%>";
 $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key
+                      FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key
                      WHERE (isQuality is NULL OR isQuality <> 1)
                        AND isInMainPanel = 1
                        AND active = 1
@@ -250,7 +250,7 @@ while ($res = $db->fetch_object($sql)) {
             break;
         case "radio": {
                 print "<td colspan=2 valign='middle' class='ui-widget-content'>";
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $res->id;
                 $sql1 = $db->query($requete);
                 if ($db->num_rows($sql1) > 0) {
                     print "<table width=100%>";
@@ -674,7 +674,7 @@ jQuery(document).ready(function(){
 
 //
 //function createDI(pId){
-//    location.href=DOL_URL_ROOT+"/Synopsis_DemandeInterv/fiche.php?action=create&comLigneId="+pId;
+//    location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&comLigneId="+pId;
 //}
 function reinitAutoPrice()
 {
@@ -912,7 +912,7 @@ EOF;
 
 print "<div style='display:none;'>";
 print "<select id='templateTypeInterv' class='typeInterv' name='templateTypeInterv'>";
-$requete = " SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+$requete = " SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql)) {
     if ($res->default == 1) {

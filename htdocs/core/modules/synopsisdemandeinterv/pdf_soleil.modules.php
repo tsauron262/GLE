@@ -35,7 +35,7 @@
 
 /**
  \file       htdocs/core/modules/synopsisdemandeinterv/pdf_soleil.modules.php
- \ingroup    demandeInterv
+ \ingroup    synopsisdemandeinterv
  \brief      Fichier de la classe permettant de generer les fiches d'intervention au modele Soleil
  \version    $Id: pdf_soleil.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
@@ -50,7 +50,7 @@ require_once(DOL_DOCUMENT_ROOT.'/core/lib/pdf.lib.php');
  \brief      Classe permettant de generer les fiches d'intervention au modele Soleil
  */
 
-class pdf_soleil extends ModeleSynopsisdemandeinterv
+class pdf_soleil extends Modelesynopsisdemandeinterv
 {
 
     /**
@@ -90,10 +90,10 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
 
     /**
     \brief      Fonction generant la fiche d'intervention sur le disque
-    \param        demandeInterv        Object demandeInterv
+    \param        synopsisdemandeinterv        Object synopsisdemandeinterv
     \return        int             1=ok, 0=ko
     */
-    function write_file($demandeInterv,$outputlangs='')
+    function write_file($synopsisdemandeinterv,$outputlangs='')
     {
         global $user,$langs,$conf,$mysoc;
 
@@ -108,19 +108,19 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
 
         if ($conf->synopsisdemandeinterv->dir_output)
         {
-            // If $demandeInterv is id instead of object
-            if (! is_object($demandeInterv))
+            // If $synopsisdemandeinterv is id instead of object
+            if (! is_object($synopsisdemandeinterv))
             {
-                $id = $demandeInterv;
-                $demandeInterv = new demandeInterv($this->db);
-                $result=$demandeInterv->fetch($id);
+                $id = $synopsisdemandeinterv;
+                $synopsisdemandeinterv = new Synopsisdemandeinterv($this->db);
+                $result=$synopsisdemandeinterv->fetch($id);
                 if ($result < 0)
                 {
-                    dol_print_error($this->db,$demandeInterv->error);
+                    dol_print_error($this->db,$synopsisdemandeinterv->error);
                 }
             }
 
-            $fichref = sanitize_string($demandeInterv->ref);
+            $fichref = sanitize_string($synopsisdemandeinterv->ref);
             $dir = $conf->synopsisdemandeinterv->dir_output;
             if (! preg_match('/specimen/i',$fichref)) $dir.= "/" . $fichref;
             $file = $dir . "/" . $fichref . ".pdf";
@@ -158,7 +158,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 $pdf->SetAutoPageBreak(1,0);
 
                 //Affiche le filigrane brouillon - Print Draft Watermark
-                if($demandeInterv->statut==0 && (! empty($conf->global->DEMANDEINTERV_DRAFT_WATERMARK)) )
+                if($synopsisdemandeinterv->statut==0 && (! empty($conf->global->SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK)) )
                 {
                     $watermark_angle=atan($this->page_hauteur/$this->page_largeur);
                     $watermark_x=5;
@@ -170,7 +170,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                     $pdf->_out(sprintf('q %.5F %.5F %.5F %.5F %.2F %.2F cm 1 0 0 1 %.2F %.2F cm',cos($watermark_angle),sin($watermark_angle),-sin($watermark_angle),cos($watermark_angle),$watermark_x*$pdf->k,($pdf->h-$watermark_y)*$pdf->k,-$watermark_x*$pdf->k,-($pdf->h-$watermark_y)*$pdf->k));
                     //print watermark
                     $pdf->SetXY($watermark_x,$watermark_y);
-                    $pdf->Cell($watermark_width,25,clean_html($conf->global->DEMANDEINTERV_DRAFT_WATERMARK),0,2,"C",0);
+                    $pdf->Cell($watermark_width,25,clean_html($conf->global->SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK),0,2,"C",0);
                     //antirotate
                     $pdf->_out('Q');
                 }
@@ -258,19 +258,19 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 */
                 $pdf->SetTextColor(0,0,0);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'B',12);
-                $demandeInterv->fetch_client();
+                $synopsisdemandeinterv->fetch_client();
                 $pdf->SetXY(102,42);
-                $pdf->MultiCell(86,5, $demandeInterv->client->nom);
+                $pdf->MultiCell(86,5, $synopsisdemandeinterv->client->nom);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'B',11);
                 $pdf->SetXY(102,$pdf->GetY());
-                $pdf->MultiCell(66,5, $demandeInterv->client->adresse . "\n" . $demandeInterv->client->cp . " " . $demandeInterv->client->ville);
+                $pdf->MultiCell(66,5, $synopsisdemandeinterv->client->adresse . "\n" . $synopsisdemandeinterv->client->cp . " " . $synopsisdemandeinterv->client->ville);
                 $pdf->rect(100, 40, 100, 40);
 
 
                 $pdf->SetTextColor(200,0,0);
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'B',14);
-                $pdf->Text(11, 88, "Date : " . dol_print_date($demandeInterv->date,'day'));
-                $pdf->Text(11, 94, $langs->trans("Demande d'intervention")." : ".$demandeInterv->ref);
+                $pdf->Text(11, 88, "Date : " . dol_print_date($synopsisdemandeinterv->date,'day'));
+                $pdf->Text(11, 94, $langs->trans("Demande d'intervention")." : ".$synopsisdemandeinterv->ref);
 
                 $pdf->SetFillColor(220,220,220);
                 $pdf->SetTextColor(0,0,0);
@@ -288,27 +288,27 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'', 10);
 
                 $pdf->SetXY (10, $tab_top + 8 );
-                $pdf->writeHTMLCell(190, 4, 10, $tab_top + 8, dol_htmlentitiesbr($demandeInterv->description), 0, 'J', 0);
+                $pdf->writeHTMLCell(190, 4, 10, $tab_top + 8, dol_htmlentitiesbr($synopsisdemandeinterv->description), 0, 'J', 0);
 
-                //dol_syslog("desc=".dol_htmlentitiesbr($demandeInterv->description));
-                $num = sizeof($demandeInterv->lignes);
+                //dol_syslog("desc=".dol_htmlentitiesbr($synopsisdemandeinterv->description));
+                $num = sizeof($synopsisdemandeinterv->lignes);
                 $i=0;
                 $y = $pdf->GetY()+10;
                 if ($num)
                 {
                     while ($i < $num)
                     {
-                        $demandeIntervligne = $demandeInterv->lignes[$i];
+                        $synopsisdemandeintervligne = $synopsisdemandeinterv->lignes[$i];
 
-                        $valide = $demandeIntervligne->id ? $demandeIntervligne->fetch($demandeIntervligne->id) : 0;
+                        $valide = $synopsisdemandeintervligne->id ? $synopsisdemandeintervligne->fetch($synopsisdemandeintervligne->id) : 0;
                         if ($valide>0)
                         {
                             $pdf->SetXY (10 +$this->marge_gauche, $y);
-                            $pdf->MultiCell(60, 4, preg_replace('/<br[ ]*\/?>/',"\n",$langs->transnoentities("Date")." : ".dol_print_date($demandeIntervligne->datei,'day')." - ".$langs->transnoentities("Duration")." : ".ConvertSecondToTime($demandeIntervligne->duration)), 0, 'J', 0);
+                            $pdf->MultiCell(60, 4, preg_replace('/<br[ ]*\/?>/',"\n",$langs->transnoentities("Date")." : ".dol_print_date($synopsisdemandeintervligne->datei,'day')." - ".$langs->transnoentities("Duration")." : ".ConvertSecondToTime($synopsisdemandeintervligne->duration)), 0, 'J', 0);
                             $pdf->SetXY (70 + $this->marge_gauche, $y);
-                            $pdf->MultiCell(30, 4, $demandeIntervligne->typeInterv, 0, 'L', 0);
+                            $pdf->MultiCell(30, 4, $synopsisdemandeintervligne->typeInterv, 0, 'L', 0);
                             $pdf->SetXY (100 + $this->marge_gauche, $y);
-                            $pdf->MultiCell(90,4,preg_replace('/<br[ ]*\/?>/',"\n",$demandeIntervligne->desc,1), 0, 'L', 0);
+                            $pdf->MultiCell(90,4,preg_replace('/<br[ ]*\/?>/',"\n",$synopsisdemandeintervligne->desc,1), 0, 'L', 0);
                             $y = $pdf->GetY();
                         }
                         $i++;
@@ -332,7 +332,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
 
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'', 9);   // On repositionne la police par defaut
 
-                $this->_pagefoot($pdf,$demandeInterv,$outputlangs);
+                $this->_pagefoot($pdf,$synopsisdemandeinterv,$outputlangs);
                 $pdf->AliasNbPages();
 
                 $pdf->Close();
@@ -352,7 +352,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
         }
         else
         {
-            $this->error=$langs->trans("ErrorConstantNotDefined","DEMANDEINTERV_OUTPUTDIR");
+            $this->error=$langs->trans("ErrorConstantNotDefined","SYNOPSISDEMANDEINTERV_OUTPUTDIR");
             return 0;
         }
         $this->error=$langs->trans("ErrorUnknown");
@@ -365,7 +365,7 @@ class pdf_soleil extends ModeleSynopsisdemandeinterv
     */
     function _pagefoot(&$pdf,$object,$outputlangs)
     {
-        return pdf_pagefoot($pdf,$outputlangs,'DEMANDEINTERV_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object);
+        return pdf_pagefoot($pdf,$outputlangs,'SYNOPSISDEMANDEINTERV_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche,$this->page_hauteur,$object);
     }
 
 }

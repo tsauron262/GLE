@@ -32,25 +32,25 @@
 /*
  *
  * $Id: apercu.php,v 1.5 2008/01/29 19:03:36 eldy Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsis_demandeinterv/apercu.php,v $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisdemandeinterv/apercu.php,v $
  */
 
 /**
-        \file        htdocs/synopsis_demandeinterv/apercu.php
-        \ingroup    demandeInterv
+        \file        htdocs/synopsisdemandeinterv/apercu.php
+        \ingroup    synopsisdemandeinterv
         \brief        Page de l'onglet apercu d'une fiche d'intervention
         \version    $Revision: 1.5 $
 */
 
 require("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
 
 if (!$user->rights->synopsisdemandeinterv->lire)
     accessforbidden();
 
 $langs->load('interventions');
 
-require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
 
 if ($conf->projet->enabled)
 {
@@ -78,15 +78,15 @@ $html = new Form($db);
 /* *************************************************************************** */
 
 if ($_GET["id"] > 0) {
-    $demandeInterv = new demandeInterv($db);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
 
-    if ( $demandeInterv->fetch($_GET["id"], $user->societe_id) > 0)
+    if ( $synopsisdemandeinterv->fetch($_GET["id"], $user->societe_id) > 0)
         {
-        $soc = new Societe($db, $demandeInterv->socid);
-        $soc->fetch($demandeInterv->socid);
+        $soc = new Societe($db, $synopsisdemandeinterv->socid);
+        $soc->fetch($synopsisdemandeinterv->socid);
 
 
-        $head = demandeInterv_prepare_head($demandeInterv);
+        $head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
     dol_fiche_head($head, 'preview', $langs->trans("DI"));
 
 
@@ -95,9 +95,9 @@ if ($_GET["id"] > 0) {
         */
         $sql = 'SELECT s.nom, s.rowid, fi.fk_projet, fi.ref, fi.description, fi.fk_statut,';
         $sql.= ' fi.fk_user_author, fi.fk_user_valid, fi.datec, fi.date_valid';
-        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."Synopsis_demandeInterv as fi";
+        $sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."synopsisdemandeinterv as fi";
         $sql.= ' WHERE fi.fk_soc = s.rowid';
-        $sql.= ' AND fi.rowid = '.$demandeInterv->id;
+        $sql.= ' AND fi.rowid = '.$synopsisdemandeinterv->id;
         if ($socid) $sql .= ' AND s.rowid = '.$socid;
 
         $result = $db->query($sql);
@@ -115,7 +115,7 @@ if ($_GET["id"] > 0) {
 
             // Ref
             print '<tr><td  class=\'ui-widget-header ui-state-default\' width="18%">'.$langs->trans("Ref")."</td>";
-            print '<td colspan="2" class=\'ui-widget-content\'>'.$demandeInterv->ref.'</td>';
+            print '<td colspan="2" class=\'ui-widget-content\'>'.$synopsisdemandeinterv->ref.'</td>';
 
             $nbrow=4;
                 print '<td rowspan="'.$nbrow.'" valign="top" width="50%">';
@@ -123,16 +123,16 @@ if ($_GET["id"] > 0) {
                 /*
             * Documents
                 */
-                $demandeIntervref = sanitize_string($demandeInterv->ref);
+                $synopsisdemandeintervref = sanitize_string($synopsisdemandeinterv->ref);
                 $dir_output = $conf->synopsisdemandeinterv->dir_output . "/";
-                $filepath = $dir_output . $demandeIntervref . "/";
-                $file = $filepath . $demandeIntervref . ".pdf";
-                $filedetail = $filepath . $demandeIntervref . "-detail.pdf";
-                $relativepath = "${demandeIntervref}/${demandeIntervref}.pdf";
-                $relativepathdetail = "${demandeIntervref}/${demandeIntervref}-detail.pdf";
+                $filepath = $dir_output . $synopsisdemandeintervref . "/";
+                $file = $filepath . $synopsisdemandeintervref . ".pdf";
+                $filedetail = $filepath . $synopsisdemandeintervref . "-detail.pdf";
+                $relativepath = "${synopsisdemandeintervref}/${synopsisdemandeintervref}.pdf";
+                $relativepathdetail = "${synopsisdemandeintervref}/${synopsisdemandeintervref}-detail.pdf";
 
         // Chemin vers png apercus
-                $relativepathimage = "${demandeIntervref}/${demandeIntervref}.pdf.png";
+                $relativepathimage = "${synopsisdemandeintervref}/${synopsisdemandeintervref}.pdf.png";
                 $fileimage = $file.".png";          // Si PDF d'1 page
                 $fileimagebis = $file.".png.0";     // Si PDF de plus d'1 page
 
@@ -147,16 +147,16 @@ if ($_GET["id"] > 0) {
 
                     print "<tr $bc[$var]><td>".$langs->trans("DI")." PDF</td>";
 
-                    print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=demandeInterv&file='.urlencode($relativepath).'">'.$demandeInterv->ref.'.pdf</a></td>';
+                    print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=synopsisdemandeinterv&file='.urlencode($relativepath).'">'.$synopsisdemandeinterv->ref.'.pdf</a></td>';
                     print '<td align="right">'.filesize($file). ' bytes</td>';
                     print '<td align="right">'.dol_print_date(filemtime($file),'day').'</td>';
                     print '</tr>';
 
                     // Si fichier detail PDF existe
-                    if (file_exists($filedetail)) { // demandeInterv detaillee supplementaire
+                    if (file_exists($filedetail)) { // synopsisdemandeinterv detaillee supplementaire
                         print "<tr $bc[$var]><td>Demande d'intervention d&eacute;taill&eacute;e</td>";
 
-                        print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=demandeInterv&file='.urlencode($relativepathdetail).'">'.$demandeInterv->ref.'-detail.pdf</a></td>';
+                        print '<td><a href="'.DOL_URL_ROOT . '/document.php?modulepart=synopsisdemandeinterv&file='.urlencode($relativepathdetail).'">'.$synopsisdemandeinterv->ref.'-detail.pdf</a></td>';
                         print '<td align="right">'.filesize($filedetail). ' bytes</td>';
                         print '<td align="right">'.dol_print_date(filemtime($filedetail),'day').'</td>';
                         print '</tr>';
@@ -217,12 +217,12 @@ if ($_GET["id"] > 0) {
 
                 // Statut
                 print '<tr><td class=\'ui-widget-header ui-state-default\'>'.$langs->trans("Status").'</td>';
-                print "<td colspan=\"2\"  class='ui-widget-content'>".$demandeInterv->getLibStatut(4)."</td>\n";
+                print "<td colspan=\"2\"  class='ui-widget-content'>".$synopsisdemandeinterv->getLibStatut(4)."</td>\n";
                 print '</tr>';
 
                 // Date
                 print '<tr><td class=\'ui-widget-header ui-state-default\'>'.$langs->trans("Date").'</td>';
-                print "<td colspan=\"2\" class='ui-widget-content' >".dol_print_date($demandeInterv->date,"day")."</td>\n";
+                print "<td colspan=\"2\" class='ui-widget-content' >".dol_print_date($synopsisdemandeinterv->date,"day")."</td>\n";
                 print '</tr>';
 
                 print '</table>';
@@ -232,14 +232,14 @@ if ($_GET["id"] > 0) {
         }
     } else {
     // Intervention non trouvee
-    print $langs->trans("ErrordemandeIntervNotFound",$_GET["id"]);
+    print $langs->trans("ErrorsynopsisdemandeintervNotFound",$_GET["id"]);
     }
 }
 
 // Si fichier png PDF d'1 page trouve
 if (file_exists($fileimage))
     {
-    print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercudemandeInterv&file='.urlencode($relativepathimage).'"></center>';
+    print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercusynopsisdemandeinterv&file='.urlencode($relativepathimage).'"></center>';
     }
 // Si fichier png PDF de plus d'1 page trouve
 elseif (file_exists($fileimagebis))
@@ -252,7 +252,7 @@ elseif (file_exists($fileimagebis))
 
             if (file_exists($dir_output.$preview))
       {
-        print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercudemandeInterv&file='.urlencode($preview).'"><p></center>';
+        print '<center><img src="'.DOL_URL_ROOT . '/viewimage.php?modulepart=apercusynopsisdemandeinterv&file='.urlencode($preview).'"><p></center>';
       }
         }
     }

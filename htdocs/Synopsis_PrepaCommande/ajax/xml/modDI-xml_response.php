@@ -19,7 +19,7 @@
     require_once('../../../main.inc.php');
     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
     require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
-    require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
     $id = $_REQUEST['id'];
     $com = new Synopsis_Commande($db);
     $com->fetch($id);
@@ -29,7 +29,7 @@
 
 
     if ($diId > 0){
-        $di = new demandeInterv($db);
+        $di = new Synopsisdemandeinterv($db);
         $di->fetch($diId);
         //2 create intervDet
         $xmlStr .= "<OK>OK</OK>";
@@ -45,7 +45,7 @@
                  $pu_ht = $_REQUEST['pu_ht'.$arr[1]];
                  $qte = $_REQUEST['qte'.$arr[1]];
                  $fk_commandedet = $arr[1];
-                 //    function addline($demandeIntervid, $desc, $date_intervention, $duration,$typeinterv,$qte=1,$pu_ht=0,$isForfait=0,$fk_commandedet=false,$fk_contratdet=false)
+                 //    function addline($synopsisdemandeintervid, $desc, $date_intervention, $duration,$typeinterv,$qte=1,$pu_ht=0,$isForfait=0,$fk_commandedet=false,$fk_contratdet=false)
                  $di->addline($diId, $desc,$datei,$duration,$typeInter,$qte,$pu_ht,$isForfait,$fk_commandedet,false);
             }
         }

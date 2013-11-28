@@ -15,15 +15,15 @@
  */
 
 /**
-        \file       htdocs/admin/Synopsis_DemandeInterv.php
-        \ingroup    demandeInterv
-        \brief      Page d'administration/configuration du module demandeInterv
-        \version    $Id: demandeInterv.php,v 1.38 2008/07/05 15:31:30 eldy Exp $
+        \file       htdocs/admin/synopsisdemandeinterv.php
+        \ingroup    synopsisdemandeinterv
+        \brief      Page d'administration/configuration du module synopsisdemandeinterv
+        \version    $Id: synopsisdemandeinterv.php,v 1.38 2008/07/05 15:31:30 eldy Exp $
 */
 
 require("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
 
 $langs->load("admin");
 $langs->load("bills");
@@ -47,16 +47,16 @@ if ($_POST["action"] == 'updateMask')
     if ($maskconst) dolibarr_set_const($db,$maskconst,$maskvalue);
 }
 
-if ($_POST["action"] == 'set_DEMANDEINTERV_DRAFT_WATERMARK')
+if ($_POST["action"] == 'set_SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK')
 {
-    dolibarr_set_const($db, "DEMANDEINTERV_DRAFT_WATERMARK",trim($_POST["DEMANDEINTERV_DRAFT_WATERMARK"]));
+    dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK",trim($_POST["SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK"]));
 }
 
 if ($_GET["action"] == 'specimen')
 {
     $modele=$_GET["module"];
 
-    $inter = new demandeInterv($db);
+    $inter = new Synopsisdemandeinterv($db);
     $inter->initAsSpecimen();
 
     // Charge le modele
@@ -70,7 +70,7 @@ if ($_GET["action"] == 'specimen')
 
         if ($obj->write_file($inter,$langs) > 0)
         {
-            header("Location: ".DOL_URL_ROOT."/document.php?modulepart=demandeInterv&file=SPECIMEN.pdf");
+            header("Location: ".DOL_URL_ROOT."/document.php?modulepart=synopsisdemandeinterv&file=SPECIMEN.pdf");
             return;
         }
     }
@@ -82,7 +82,7 @@ if ($_GET["action"] == 'specimen')
 
 if ($_GET["action"] == 'set')
 {
-    $type='demandeInterv';
+    $type='synopsisdemandeinterv';
     $sql = "INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type) VALUES ('".$_GET["value"]."','".$type."')";
     if ($db->query($sql))
     {
@@ -92,7 +92,7 @@ if ($_GET["action"] == 'set')
 
 if ($_GET["action"] == 'del')
 {
-    $type='demandeInterv';
+    $type='synopsisdemandeinterv';
     $sql = "DELETE FROM ".MAIN_DB_PREFIX."document_model";
     $sql .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
     if ($db->query($sql))
@@ -105,15 +105,15 @@ if ($_GET["action"] == 'setdoc')
 {
     $db->begin();
 
-    if (dolibarr_set_const($db, "DEMANDEINTERV_ADDON_PDF",$_GET["value"]))
+    if (dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_ADDON_PDF",$_GET["value"]))
     {
         // La constante qui a ete lue en avant du nouveau set
         // on passe donc par une variable pour avoir un affichage coherent
-        $conf->global->DEMANDEINTERV_ADDON_PDF = $_GET["value"];
+        $conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF = $_GET["value"];
     }
 
     // On active le modele
-    $type='demandeInterv';
+    $type='synopsisdemandeinterv';
     $sql_del = "DELETE FROM ".MAIN_DB_PREFIX."document_model";
     $sql_del .= "  WHERE nom = '".$_GET["value"]."' AND type = '".$type."'";
     $result1=$db->query($sql_del);
@@ -134,14 +134,14 @@ if ($_GET["action"] == 'setmod')
     // \todo Verifier si module numerotation choisi peut etre active
     // par appel methode canBeActivated
 
-    dolibarr_set_const($db, "DEMANDEINTERV_ADDON",$_GET["value"]);
+    dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_ADDON",$_GET["value"]);
 }
 
 // defini les constantes du modele arctic
-if ($_POST["action"] == 'updateMatrice') dolibarr_set_const($db, "DEMANDEINTERV_NUM_MATRICE",$_POST["matrice"]);
-if ($_POST["action"] == 'updatePrefix') dolibarr_set_const($db, "DEMANDEINTERV_NUM_PREFIX",$_POST["prefix"]);
-if ($_POST["action"] == 'setOffset') dolibarr_set_const($db, "DEMANDEINTERV_NUM_DELTA",$_POST["offset"]);
-if ($_POST["action"] == 'setNumRestart') dolibarr_set_const($db, "DEMANDEINTERV_NUM_RESTART_BEGIN_YEAR",$_POST["numrestart"]);
+if ($_POST["action"] == 'updateMatrice') dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_NUM_MATRICE",$_POST["matrice"]);
+if ($_POST["action"] == 'updatePrefix') dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_NUM_PREFIX",$_POST["prefix"]);
+if ($_POST["action"] == 'setOffset') dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_NUM_DELTA",$_POST["offset"]);
+if ($_POST["action"] == 'setNumRestart') dolibarr_set_const($db, "SYNOPSISDEMANDEINTERV_NUM_RESTART_BEGIN_YEAR",$_POST["numrestart"]);
 
 
 /*
@@ -158,7 +158,7 @@ print_fiche_titre($langs->trans("InterventionsSetup"),$linkback,'setup');
 print "<br>";
 
 
-print_titre($langs->trans("demandeIntervNumberingModules"));
+print_titre($langs->trans("synopsisdemandeintervNumberingModules"));
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre">';
@@ -197,7 +197,7 @@ if ($handle)
 
             print '<td align="center">';
 //            print $className;
-            if ($conf->global->DEMANDEINTERV_ADDON == $className)
+            if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON == $className)
             {
                 print img_picto($langs->trans("Activated"), 'switch_on');
             }
@@ -207,12 +207,12 @@ if ($handle)
             }
             print '</td>';
 
-                $demandeInterv=new demandeInterv($db);
-                $demandeInterv->initAsSpecimen();
+                $synopsisdemandeinterv=new Synopsisdemandeinterv($db);
+                $synopsisdemandeinterv->initAsSpecimen();
 
                 // Info
                 $htmltooltip='';
-            $nextval=$module->getNextValue($mysoc,$demandeInterv);
+            $nextval=$module->getNextValue($mysoc,$synopsisdemandeinterv);
             if ($nextval != $langs->trans("NotAvailable"))
             {
                 $htmltooltip='<b>'.$langs->trans("NextValue").'</b>: '.$nextval;
@@ -235,7 +235,7 @@ print '</table><br>';
 print_titre($langs->trans("TemplatePDFInterventions"));
 
 // Defini tableau def des modeles
-$type='demandeInterv';
+$type='synopsisdemandeinterv';
 $def = array();
 $sql = "SELECT nom";
 $sql.= " FROM ".MAIN_DB_PREFIX."document_model";
@@ -292,7 +292,7 @@ while (($file = readdir($handle))!==false)
         if (in_array($name, $def))
         {
             print "<td align=\"center\">\n";
-            if ($conf->global->DEMANDEINTERV_ADDON_PDF != "$name")
+            if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF != "$name")
             {
                 print '<a href="'.$_SERVER["PHP_SELF"].'?action=del&amp;value='.$name.'">';
                 print img_picto($langs->trans("Disable"), 'switch_off');
@@ -313,7 +313,7 @@ while (($file = readdir($handle))!==false)
 
         // Defaut
         print "<td align=\"center\">";
-        if ($conf->global->DEMANDEINTERV_ADDON_PDF == "$name")
+        if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF == "$name")
         {
             print img_picto($langs->trans("Default"), 'switch_on');
         }
@@ -363,10 +363,10 @@ $var=true;
 //Use draft Watermark
 $var=!$var;
 print "<form method=\"post\" action=\"".$_SERVER["PHP_SELF"]."\">";
-print "<input type=\"hidden\" name=\"action\" value=\"set_DEMANDEINTERV_DRAFT_WATERMARK\">";
+print "<input type=\"hidden\" name=\"action\" value=\"set_SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK\">";
 print '<tr '.$bc[$var].'><td colspan="2">';
 print $langs->trans("WatermarkOnDraftInterventionCards").'<br>';
-print '<input size="50" class="flat" type="text" name="DEMANDEINTERV_DRAFT_WATERMARK" value="'.$conf->global->DEMANDEINTERV_DRAFT_WATERMARK.'">';
+print '<input size="50" class="flat" type="text" name="SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK" value="'.$conf->global->SYNOPSISDEMANDEINTERV_DRAFT_WATERMARK.'">';
 print '</td><td align="right">';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print "</td></tr>\n";

@@ -19,14 +19,14 @@
     require_once('../../../main.inc.php');
     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
     require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
-    require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
     $id = $_REQUEST['id'];
     $com = new Synopsis_Commande($db);
     $com->fetch($id);
 
     $xmlStr = "<ajax-response>";
     //1 create DI principale
-    $di = new demandeInterv($db);
+    $di = new Synopsisdemandeinterv($db);
     $di->socid = $com->socid;
     $di->fk_commande = $id;
     $di->date = convertDate($_REQUEST['datei']);
@@ -45,7 +45,7 @@
 
     if ($diId > 0){
 
-        $demandeIntervid=$diId;
+        $synopsisdemandeintervid=$diId;
         foreach($_REQUEST as $key=>$val){
             if (preg_match('/^extraKey-([0-9]*)/',$key,$arr))
             {
@@ -60,9 +60,9 @@
                         $valExtraKey = 0;
                     }
                 }
-                $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                $requete = "INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                                         ( interv_refid,extra_key_refid,extra_value,typeI)
-                                 VALUES ( ".$demandeIntervid.",'".$idExtraKey."','".addslashes(utf8_encodeRien($val))."','DI')";
+                                 VALUES ( ".$synopsisdemandeintervid.",'".$idExtraKey."','".addslashes(utf8_encodeRien($val))."','DI')";
                 $sql = $db->query($requete);
                 //print $requete;
             }
@@ -84,7 +84,7 @@
                  $pu_ht = $_REQUEST['pu_ht'.$arr[1]];
                  $qte = $_REQUEST['qte'.$arr[1]];
                  $fk_commandedet = $arr[1];
-                 //    function addline($demandeIntervid, $desc, $date_intervention, $duration,$typeinterv,$qte=1,$pu_ht=0,$isForfait=0,$fk_commandedet=false,$fk_contratdet=false)
+                 //    function addline($synopsisdemandeintervid, $desc, $date_intervention, $duration,$typeinterv,$qte=1,$pu_ht=0,$isForfait=0,$fk_commandedet=false,$fk_contratdet=false)
                  $di->addline($diId, $desc,$datei,$duration,$typeInter,$qte,$pu_ht,$isForfait,$fk_commandedet,false);
             }
         }

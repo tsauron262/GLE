@@ -747,10 +747,10 @@
             case 'DI':
             {
                 //Commande
-                require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
+                require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
                 if ($eid > 0)
                 {
-                    $prop = new demandeInterv($db);
+                    $prop = new Synopsisdemandeinterv($db);
                     $prop->fetch($eid);
                     //$xml .= "<group id='".$gid."'>";
                         $xmlArr[$gid] .= '<element>';

@@ -43,7 +43,7 @@
  */
 include_once(DOL_DOCUMENT_ROOT . "/core/boxes/modules_boxes.php");
 
-class box_synopsisNextDemandeInterv extends ModeleBoxes {
+class box_synopsisNextsynopsisdemandeinterv extends ModeleBoxes {
 
     public $boxcode = "lastficheInterv";
     public $boximg = "object_fichinter";
@@ -61,7 +61,7 @@ class box_synopsisNextDemandeInterv extends ModeleBoxes {
         global $langs;
         $langs->load("boxes");
 
-        $this->boxlabel = $langs->trans("BoxLastDemandeInterv");
+        $this->boxlabel = $langs->trans("BoxLastsynopsisdemandeinterv");
     }
 
     /**
@@ -71,10 +71,10 @@ class box_synopsisNextDemandeInterv extends ModeleBoxes {
     function loadBox($max = 5) {
         global $user, $langs, $db;
 
-        include_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-        $DIStatic = new demandeInterv($db);
+        include_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+        $DIStatic = new Synopsisdemandeinterv($db);
 
-        $text = $langs->trans("BoxNextDemandeInterv", $max);
+        $text = $langs->trans("BoxNextsynopsisdemandeinterv", $max);
         $this->info_box_head = array(
             'text' => "" . $text,
             'limit' => strlen($text)
@@ -90,7 +90,7 @@ class box_synopsisNextDemandeInterv extends ModeleBoxes {
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
                            DI.datei,
                            DI.fk_statut
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv DI
+                      FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv DI
                  LEFT JOIN " . MAIN_DB_PREFIX . "societe ON DI.fk_soc = " . MAIN_DB_PREFIX . "societe.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "commande c ON DI.fk_commande = c.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "user tech ON DI.fk_user_prisencharge = tech.rowid
@@ -115,12 +115,12 @@ class box_synopsisNextDemandeInterv extends ModeleBoxes {
                 while ($i < $num) {
                     $objp = $db->fetch_object($result);
 
-                    $picto = 'demandeInterv@Synopsis_DemandeInterv';
+                    $picto = 'synopsisdemandeinterv@synopsisdemandeinterv';
 
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                         'logo' => $picto,
                         'text' => ($objp->ref ? $objp->ref : "-"),
-                        'url' => DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $objp->diid);
+                        'url' => DOL_URL_ROOT . "/synopsisdemandeinterv/fiche.php?id=" . $objp->diid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                         'text' => $objp->nom,

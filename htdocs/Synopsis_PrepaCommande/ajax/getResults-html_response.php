@@ -60,11 +60,11 @@ $vendu = $res->tht;
 //Prevu en euro et en temps
 $requete = "SELECT SUM(interdet.duree) as durTot ,
                    SUM(interdet.total_ht) as totHT
-              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv inter,
-                   " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet interdet,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv t
+              FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv inter,
+                   " . MAIN_DB_PREFIX . "synopsisdemandeintervdet interdet,
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv t
              WHERE t.id=interdet.fk_typeinterv
-               AND interdet.fk_demandeinterv = inter.rowid
+               AND interdet.fk_synopsisdemandeinterv = inter.rowid
                AND t.inTotalRecap=1
                AND fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
 $sql = $db->query($requete);
@@ -77,7 +77,7 @@ $requete = "SELECT SUM(interdet.duree) as durTot ,
                    SUM(interdet.total_ht) as totHT
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter inter,
                    " . MAIN_DB_PREFIX . "Synopsis_fichinterdet interdet,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv t
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv t
              WHERE t.id=interdet.fk_typeinterv
                AND interdet.fk_fichinter = inter.rowid
                AND t.inTotalRecap=1
@@ -132,12 +132,12 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par cat&eacute;
 
 //table avec le dispatch
 $requete = "SELECT SUM(dt.total_ht) as tht, t.label
-              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as d,
-                   " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet as dt,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t
+              FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv as d,
+                   " . MAIN_DB_PREFIX . "synopsisdemandeintervdet as dt,
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
         " AND t.id = dt.fk_typeinterv
-               AND dt.fk_demandeInterv = d.rowid
+               AND dt.fk_synopsisdemandeinterv = d.rowid
           GROUP BY t.id";
 $sql = $db->query($requete);
 while ($res = $db->fetch_object($sql)) {
@@ -153,7 +153,7 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=2>Par cat&eacute;
 $requete = "SELECT SUM(dt.total_ht) as tht, t.label
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as d,
                   " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as dt,
-                  " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t
+                  " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE d.fk_commande  IN (" . join(',', $arrGrpCom) . ") " .
         " AND t.id = dt.fk_typeinterv
                AND dt.`fk_fichinter` = d.rowid

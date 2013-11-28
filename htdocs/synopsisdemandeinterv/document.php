@@ -35,14 +35,14 @@
  */
 
 /**
-  \file       htdocs/synopsis_demandeinterv/document.php
-  \ingroup    demandeInterv
+  \file       htdocs/synopsisdemandeinterv/document.php
+  \ingroup    synopsisdemandeinterv
   \brief      Page de gestion des documents attachees a une di
   \version    $Id: document.php,v 1.43 2008/07/10 17:11:05 eldy Exp $
  */
 require('./pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 
@@ -61,7 +61,7 @@ if ($user->societe_id) {
     $action = '';
     $socid = $user->societe_id;
 }
-$result = restrictedArea($user, 'synopsisdemandeinterv', $id, 'Synopsis_demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $id, 'synopsisdemandeinterv');
 
 // Get parameters
 $page = $_GET["page"];
@@ -88,12 +88,12 @@ if ($_REQUEST['SynAction'] == 'dlZip') {
     unlink($zipFilename);
     $zipFilename .= ".zip";
     $societe = new Societe($db);
-    $demandeInterv = new demandeInterv($db);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
 
-    if ($demandeInterv->fetch($id)) {
-        $upload_dir = $conf->synopsisdemandeinterv->dir_output . '/' . sanitize_string($demandeInterv->ref);
-        if ($societe->fetch($demandeInterv->socid)) {
-            $finalFileName = "doc_demandeInterv_" . sanitize_string($demandeInterv->ref) . "_" . sanitize_string($societe->nom) . "-" . date("Ymd-Hi", time()) . ".zip";
+    if ($synopsisdemandeinterv->fetch($id)) {
+        $upload_dir = $conf->synopsisdemandeinterv->dir_output . '/' . sanitize_string($synopsisdemandeinterv->ref);
+        if ($societe->fetch($synopsisdemandeinterv->socid)) {
+            $finalFileName = "doc_synopsisdemandeinterv_" . sanitize_string($synopsisdemandeinterv->ref) . "_" . sanitize_string($societe->nom) . "-" . date("Ymd-Hi", time()) . ".zip";
             $filearray = dol_dir_list($upload_dir, "files", 0, '', '\.meta$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_ASC : SORT_DESC), 1);
             $zip = new ZipArchive();
             if ($zip->open($zipFilename, ZIPARCHIVE::CREATE) === TRUE) {
@@ -123,10 +123,10 @@ if ($_REQUEST['SynAction'] == 'dlZip') {
 // Envoi fichier
 if ($_POST["sendit"] && !empty($conf->global->MAIN_UPLOAD_DOC)) {
 	require_once(DOL_DOCUMENT_ROOT."/core/lib/images.lib.php");
-    $demandeInterv = new demandeInterv($db);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
 
-    if ($demandeInterv->fetch($id)) {
-        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/" . sanitize_string($demandeInterv->ref);
+    if ($synopsisdemandeinterv->fetch($id)) {
+        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/" . sanitize_string($synopsisdemandeinterv->ref);
         if (!is_dir($upload_dir))
             dol_mkdir($upload_dir);
         if (is_dir($upload_dir)) {
@@ -141,7 +141,7 @@ if ($_POST["sendit"] && !empty($conf->global->MAIN_UPLOAD_DOC)) {
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($db);
                 $interface->texte = $tmpName;
-                $result = $interface->run_triggers('ECM_UL_DEMANDEINTERV', $demandeInterv, $user, $langs, $conf);
+                $result = $interface->run_triggers('ECM_UL_synopsisdemandeinterv', $synopsisdemandeinterv, $user, $langs, $conf);
 
                 if (image_format_supported($upload_dir . "/" . $_FILES['userfile']['name']) == 1) {
                     // Create small thumbs for company (Ratio is near 16/9)
@@ -168,15 +168,15 @@ if ($_POST["sendit"] && !empty($conf->global->MAIN_UPLOAD_DOC)) {
 
 // Delete
 if ($action == 'delete') {
-    $demandeInterv = new demandeInterv($db);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
 
     $id = $_GET["id"];
-    if ($demandeInterv->fetch($id)) {
+    if ($synopsisdemandeinterv->fetch($id)) {
         $tmpName = $_FILES['userfile']['name'];
         //decode decimal HTML entities added by web browser
         $tmpName = dol_unescapefile($tmpName);
 
-        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/" . sanitize_string($demandeInterv->ref);
+        $upload_dir = $conf->synopsisdemandeinterv->dir_output . "/" . sanitize_string($synopsisdemandeinterv->ref);
         $file = $upload_dir . '/' . urldecode($_GET['urlfile']);
         dol_delete_file($file);
         $mesg = '<div class="ok">' . $langs->trans("FileWasRemoved") . '</div>';
@@ -184,7 +184,7 @@ if ($action == 'delete') {
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
         $interface = new Interfaces($db);
         $interface->texte = $tmpName;
-        $result = $interface->run_triggers('ECM_UL_DEL_DEMANDEINTERV', $demandeInterv, $user, $langs, $conf);
+        $result = $interface->run_triggers('ECM_UL_DEL_synopsisdemandeinterv', $synopsisdemandeinterv, $user, $langs, $conf);
         if ($result < 0) {
             $error++;
             $this->errors = $interface->errors;
@@ -200,14 +200,14 @@ if ($action == 'delete') {
 llxHeader();
 
 if ($id > 0) {
-    $demandeInterv = new demandeInterv($db);
-    if ($demandeInterv->fetch($id)) {
-        $upload_dir = $conf->synopsisdemandeinterv->dir_output . '/' . sanitize_string($demandeInterv->ref);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    if ($synopsisdemandeinterv->fetch($id)) {
+        $upload_dir = $conf->synopsisdemandeinterv->dir_output . '/' . sanitize_string($synopsisdemandeinterv->ref);
 
         $societe = new Societe($db);
-        $societe->fetch($demandeInterv->socid);
+        $societe->fetch($synopsisdemandeinterv->socid);
 
-        $head = demandeInterv_prepare_head($demandeInterv);
+        $head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
         dol_fiche_head($head, 'documents', $langs->trans('DI'));
 
 
@@ -223,7 +223,7 @@ if ($id > 0) {
 
         // Ref
         print '<tr><td width="30%" class="ui-widget-header ui-state-default">' . $langs->trans('Ref') . '</td>
-                   <td colspan="3" class="ui-widget-content">' . $demandeInterv->ref . '</td></tr>';
+                   <td colspan="3" class="ui-widget-content">' . $synopsisdemandeinterv->ref . '</td></tr>';
 
         // Societe
         print '<tr><td class="ui-widget-header ui-state-default">' . $langs->trans('Company') . '</td>
@@ -244,17 +244,17 @@ if ($id > 0) {
 
         // Affiche formulaire upload
         $formfile = new FormFile($db);
-        $formfile->form_attach_new_file(DOL_URL_ROOT . '/Synopsis_DemandeInterv/document.php?id=' . $demandeInterv->id);
+        $formfile->form_attach_new_file(DOL_URL_ROOT . '/synopsisdemandeinterv/document.php?id=' . $synopsisdemandeinterv->id);
 
 
         // List of document
-//        $param='&id='.$demandeInterv->id;
-        $formfile->list_of_documents($filearray, $demandeInterv, 'synopsisdemandeinterv', $param);
+//        $param='&id='.$synopsisdemandeinterv->id;
+        $formfile->list_of_documents($filearray, $synopsisdemandeinterv, 'synopsisdemandeinterv', $param);
 
         //Download all docs via zip
         print "<br>";
         print '<form action="?id=' . $id . '" method="POST">';
-        print '<input type="hidden" name="demandeInterv_id" value="' . $id . '"/>';
+        print '<input type="hidden" name="synopsisdemandeinterv_id" value="' . $id . '"/>';
         print '<input type="hidden" name="SynAction" value="dlZip"/>';
         print '<input class="button" type="submit" value="' . $langs->trans('DownloadZip') . '"/>';
         print '</form>';

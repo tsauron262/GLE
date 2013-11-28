@@ -721,30 +721,30 @@ class InterfaceZimbraSync {
                 case 'FICHEINTER_DELETE':
                     $this->deleteElement($object, MAIN_DB_PREFIX.'fichinter', $zim);
                     break;
-                case 'DEMANDEINTERV_CREATE':
+                case 'SYNOPSISDEMANDEINTERV_CREATE':
                     $this->DIAction($object, $zim);
                     break;
-                case 'DEMANDEINTERV_UPDATE':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_UPDATE':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
-                case 'DEMANDEINTERV_VALIDATE':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_VALIDATE':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
-                case 'DEMANDEINTERV_PRISENCHARGE':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_PRISENCHARGE':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
-                case 'DEMANDEINTERV_CLOTURE':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_CLOTURE':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
-                case 'DEMANDEINTERV_DELETE':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_DELETE':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     break;
-                case 'DEMANDEINTERV_SETDELIVERY':
-                    $this->deleteElement($object, MAIN_DB_PREFIX.'Synopsis_demandeInterv', $zim);
+                case 'SYNOPSISDEMANDEINTERV_SETDELIVERY':
+                    $this->deleteElement($object, MAIN_DB_PREFIX.'synopsisdemandeinterv', $zim);
                     $this->DIAction($object, $zim);
                     break;
                 //new
@@ -2168,7 +2168,7 @@ class InterfaceZimbraSync {
                         array_push($whichUser, $object->user_cloture->id);
                     }
                     foreach ($whichUser as $key => $val) {
-                        $zim->Synopsis_Zimbra_GetDemandeInterventionUserById($val, $object->id);
+                        $zim->Synopsis_Zimbra_GetsynopsisdemandeinterventionUserById($val, $object->id);
                     }
                 }
                 break;
@@ -3527,29 +3527,29 @@ class InterfaceZimbraSync {
 
     function DIAction($object, $zim) {
         $db = $this->db;
-        $requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_contrat,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datec,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.date_valid,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_author,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_user_valid,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_statut,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.description,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_private,
-                           ".MAIN_DB_PREFIX."Synopsis_demandeInterv.note_public,
+        $requete = "SELECT ".MAIN_DB_PREFIX."synopsisdemandeinterv.rowid,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_soc,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_contrat,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.datec,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.date_valid,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.datei,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_user_author,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_user_valid,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_statut,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.description,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.note_private,
+                           ".MAIN_DB_PREFIX."synopsisdemandeinterv.note_public,
                            ".MAIN_DB_PREFIX."societe.nom as socname,
                            ".MAIN_DB_PREFIX."societe.rowid as socid
-                      FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv, ".MAIN_DB_PREFIX."societe
-                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc
-                       AND ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid = " . $object->id;
+                      FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv, ".MAIN_DB_PREFIX."societe
+                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_soc
+                       AND ".MAIN_DB_PREFIX."synopsisdemandeinterv.rowid = " . $object->id;
         $resql = $db->query($requete);
         $id = 0;
         $typeId = false;
         if ($resql) {
             while ($res = $db->fetch_object($resql)) {
-                $url = $this->dolibarr_main_url_root . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid;
+                $url = $this->dolibarr_main_url_root . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid;
                 if ($res->datec) {
                     //get Loc Zimbra
                     $requeteLocZim = "SELECT folder_type_refid as ftid,
@@ -3568,7 +3568,7 @@ class InterfaceZimbraSync {
                         $zimLoc = $zimRes->fid;
                         $typeId = $zimRes->ftid;
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datec, "Créat. la DI  " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
+                                $res->datec, "Créat. la DI  " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Cr&eacute;ation de la demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."synopsisdemandeinterv", 1, //all day
                                 "", 1, //loc géo
                                 $zimLoc, //loc zimbra
                                 $url, $soc->id, $res);
@@ -3576,7 +3576,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->datei) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
+                                $res->datei, "DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Demande d'intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."synopsisdemandeinterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra
@@ -3585,7 +3585,7 @@ class InterfaceZimbraSync {
                     }
                     if ($res->date_valid) {
                         $arrRes = $zim->Babel_pushDateArr(
-                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."Synopsis_demandeInterv", 1, //all day
+                                $res->date_valid, "Valid. de la DI " . "" . $res->rowid . "" . " (" . $res->socname . ")", "Validation de la demande intervention " . $res->rowid . "<BR><P>" . $res->note . "<BR><P>" . $res->note_public, $res->rowid, $id, MAIN_DB_PREFIX."synopsisdemandeinterv", 1, //all day
                                 "", //loc géo
                                 1, //is org
                                 $zimLoc, //loc zimbra

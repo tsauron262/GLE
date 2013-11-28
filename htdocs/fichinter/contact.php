@@ -182,7 +182,7 @@ if ($id > 0)
         $soc->fetch($fichinter->socid);
 
 
-        $head = Synopsis_fichinter_prepare_head($fichinter);
+        $head = synopsisfichinter_prepare_head($fichinter);
         dol_fiche_head($head, 'contact', $langs->trans("InterventionCard"));
 
 

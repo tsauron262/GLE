@@ -32,27 +32,27 @@
  */
 
 /**
-        \file       htdocs/synopsis_demandeinterv/contact.php
-        \ingroup    demandeInterv
+        \file       htdocs/synopsisdemandeinterv/contact.php
+        \ingroup    synopsisdemandeinterv
         \brief      Onglet de gestion des contacts de fiche d'intervention
         \version    $Id: contact.php,v 1.9 2008/02/25 20:03:26 eldy Exp $
 */
 
 require ("./pre.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/class/html.formcompany.class.php');
 
 $langs->load("interventions");
 $langs->load("sendings");
 $langs->load("companies");
 
-$demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';
+$synopsisdemandeintervid = isset($_GET["id"])?$_GET["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Synopsis_demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid, 'synopsisdemandeinterv');
 
 $formcompany = new FormCompany($db);
 
@@ -64,43 +64,43 @@ if (isset($_POST["action"]) && $_POST["action"] == 'addcontact' && $user->rights
 {
 
     $result = 0;
-    $demandeInterv = new demandeInterv($db);
-    $result = $demandeInterv->fetch($_GET["id"]);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    $result = $synopsisdemandeinterv->fetch($_GET["id"]);
 
     if ($result > 0 && $_GET["id"] > 0)
     {
-        $result = $demandeInterv->add_contact($_POST["contactid"], $_POST["type"], $_POST["source"]);
+        $result = $synopsisdemandeinterv->add_contact($_POST["contactid"], $_POST["type"], $_POST["source"]);
     }
 
     if ($result >= 0)
     {
-        Header("Location: contact.php?id=".$demandeInterv->id);
+        Header("Location: contact.php?id=".$synopsisdemandeinterv->id);
         exit;
     }
     else
     {
-        if ($demandeInterv->error == 'DB_ERROR_RECORD_ALREADY_EXISTS')
+        if ($synopsisdemandeinterv->error == 'DB_ERROR_RECORD_ALREADY_EXISTS')
         {
             $langs->load("errors");
             $mesg = '<div class="error ui-state-error">'.$langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType").'</div>';
         }
         else
         {
-            $mesg = '<div class="error ui-state-error">'.$demandeInterv->error.'</div>';
+            $mesg = '<div class="error ui-state-error">'.$synopsisdemandeinterv->error.'</div>';
         }
     }
 }
 // modification d'un contact. On enregistre le type
 if (isset($_POST["action"]) && $_POST["action"] == 'updateligne' && $user->rights->synopsisdemandeinterv->creer)
 {
-    $demandeInterv = new demandeInterv($db);
-    if ($demandeInterv->fetch($_GET["id"]))
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    if ($synopsisdemandeinterv->fetch($_GET["id"]))
     {
-        $contact = $demandeInterv->detail_contact($_POST["elrowid"]);
+        $contact = $synopsisdemandeinterv->detail_contact($_POST["elrowid"]);
         $type = $_POST["type"];
         $statut = $contact->statut;
 
-        $result = $demandeInterv->update_contact($_POST["elrowid"], $statut, $type);
+        $result = $synopsisdemandeinterv->update_contact($_POST["elrowid"], $statut, $type);
         if ($result >= 0)
         {
             $db->commit();
@@ -118,14 +118,14 @@ if (isset($_POST["action"]) && $_POST["action"] == 'updateligne' && $user->right
 // bascule du statut d'un contact
 if (isset($_GET["action"]) && $_GET["action"] == 'swapstatut' && $user->rights->synopsisdemandeinterv->creer)
 {
-    $demandeInterv = new demandeInterv($db);
-    if ($demandeInterv->fetch($_GET["id"]))
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    if ($synopsisdemandeinterv->fetch($_GET["id"]))
     {
-        $contact = $demandeInterv->detail_contact($_GET["ligne"]);
+        $contact = $synopsisdemandeinterv->detail_contact($_GET["ligne"]);
         $id_type_contact = $contact->fk_c_type_contact;
         $statut = ($contact->statut == 4) ? 5 : 4;
 
-        $result = $demandeInterv->update_contact($_GET["ligne"], $statut, $id_type_contact);
+        $result = $synopsisdemandeinterv->update_contact($_GET["ligne"], $statut, $id_type_contact);
         if ($result >= 0)
         {
             $db->commit();
@@ -143,13 +143,13 @@ if (isset($_GET["action"]) && $_GET["action"] == 'swapstatut' && $user->rights->
 // Efface un contact
 if (isset($_GET["action"]) && $_GET["action"] == 'deleteline' && $user->rights->synopsisdemandeinterv->creer)
 {
-    $demandeInterv = new demandeInterv($db);
-    $demandeInterv->fetch($_GET["id"]);
-    $result = $demandeInterv->delete_contact($_GET["lineid"]);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    $synopsisdemandeinterv->fetch($_GET["id"]);
+    $result = $synopsisdemandeinterv->delete_contact($_GET["lineid"]);
 
     if ($result >= 0)
     {
-        Header("Location: contact.php?id=".$demandeInterv->id);
+        Header("Location: contact.php?id=".$synopsisdemandeinterv->id);
         exit;
     }
     else {
@@ -174,14 +174,14 @@ if (isset($mesg)) print $mesg;
 $id = $_GET["id"];
 if ($id > 0)
 {
-    $demandeInterv = New demandeInterv($db);
-    if ($demandeInterv->fetch($_GET['id']) > 0)
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    if ($synopsisdemandeinterv->fetch($_GET['id']) > 0)
     {
-        $soc = new Societe($db, $demandeInterv->socid);
-        $soc->fetch($demandeInterv->socid);
+        $soc = new Societe($db, $synopsisdemandeinterv->socid);
+        $soc->fetch($synopsisdemandeinterv->socid);
 
 
-        $head = demandeInterv_prepare_head($demandeInterv);
+        $head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
         dol_fiche_head($head, 'contact', $langs->trans("DI"));
 
 
@@ -193,15 +193,15 @@ if ($id > 0)
         // Ref
         print '<tr><td width="25%" class="ui-state-default ui-widget-header">'.$langs->trans("Ref").'</td>
                    <td colspan="3"  class="ui-widget-content">';
-        print $demandeInterv->ref;
+        print $synopsisdemandeinterv->ref;
         print "</td></tr>";
 
         // Customer
-        if ( is_null($demandeInterv->client) )
-            $demandeInterv->fetch_client();
+        if ( is_null($synopsisdemandeinterv->client) )
+            $synopsisdemandeinterv->fetch_client();
 
         print "<tr><td class='ui-state-default ui-widget-header'>".$langs->trans("Company")."</td>";
-        print '<td colspan="3" class="ui-widget-content">'.$demandeInterv->client->getNomUrl(1).'</td></tr>';
+        print '<td colspan="3" class="ui-widget-content">'.$synopsisdemandeinterv->client->getNomUrl(1).'</td></tr>';
         print "</table>";
 
         print '</div>';
@@ -245,12 +245,12 @@ if ($id > 0)
 
             print '<td colspan="1">';
             // On recupere les id des users deja selectionnes
-            //$userAlreadySelected = $demandeInterv->getListContactId('internal');     // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
+            //$userAlreadySelected = $synopsisdemandeinterv->getListContactId('internal');     // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
             $html->select_users($user->id,'contactid',0/*,$userAlreadySelected*/);
             //var_dump($html);
             print '</td>';
             print '<td>';
-            $formcompany->selectTypeContact($demandeInterv, '', 'type','internal');
+            $formcompany->selectTypeContact($synopsisdemandeinterv, '', 'type','internal');
             print '</td>';
             print '<td align="right" colspan="3" ><input type="submit" class="button" value="'.$langs->trans("Add").'"></td>';
             print '</tr>';
@@ -271,18 +271,18 @@ if ($id > 0)
             print '</td>';
 
             print '<td colspan="1">';
-            $selectedCompany = isset($_GET["newcompany"])?$_GET["newcompany"]:$demandeInterv->client->id;
-            $selectedCompany = $formcompany->selectCompaniesForNewContact($demandeInterv, 'id', $selectedCompany, $htmlname = 'newcompany');
+            $selectedCompany = isset($_GET["newcompany"])?$_GET["newcompany"]:$synopsisdemandeinterv->client->id;
+            $selectedCompany = $formcompany->selectCompaniesForNewContact($synopsisdemandeinterv, 'id', $selectedCompany, $htmlname = 'newcompany');
             print '</td>';
 
             print '<td colspan="1">';
             // On recupere les id des contacts deja selectionnes
-            //$contactAlreadySelected = $demandeInterv->getListContactId('external');    // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
+            //$contactAlreadySelected = $synopsisdemandeinterv->getListContactId('external');    // On ne doit pas desactiver un contact deja selectionne car on doit pouvoir le seclectionner une deuxieme fois pour un autre type
             $nbofcontacts=$html->select_contacts($selectedCompany, $selected = '', $htmlname = 'contactid',0/*,$contactAlreadySelected*/);
             if ($nbofcontacts == 0) print $langs->trans("NoContactDefined");
             print '</td>';
             print '<td>';
-            $formcompany->selectTypeContact($demandeInterv, '', 'type','external');
+            $formcompany->selectTypeContact($synopsisdemandeinterv, '', 'type','external');
             print '</td>';
             print '<td align="right" colspan="3" ><input type="submit" class="button" value="'.$langs->trans("Add").'"';
             if (! $nbofcontacts) print ' disabled="true"';
@@ -309,7 +309,7 @@ if ($id > 0)
 
         foreach(array('internal','external') as $source)
         {
-            $tab = $demandeInterv->liste_contact(-1,$source);
+            $tab = $synopsisdemandeinterv->liste_contact(-1,$source);
             $num=sizeof($tab);
 
             $i = 0;
@@ -363,17 +363,17 @@ if ($id > 0)
                 // Statut
                 print '<td align="center">';
                 // Activation desativation du contact
-                if ($demandeInterv->statut >= 0) print '<a href="contact.php?id='.$demandeInterv->id.'&amp;action=swapstatut&amp;ligne='.$tab[$i]['rowid'].'">';
+                if ($synopsisdemandeinterv->statut >= 0) print '<a href="contact.php?id='.$synopsisdemandeinterv->id.'&amp;action=swapstatut&amp;ligne='.$tab[$i]['rowid'].'">';
                 print $contactstatic->LibStatut($tab[$i]['status'],3);
-                if ($demandeInterv->statut >= 0) print '</a>';
+                if ($synopsisdemandeinterv->statut >= 0) print '</a>';
                 print '</td>';
 
                 // Icon update et delete
                 print '<td align="center" nowrap>';
-                if ($demandeInterv->statut < 5 && $user->rights->synopsisdemandeinterv->creer)
+                if ($synopsisdemandeinterv->statut < 5 && $user->rights->synopsisdemandeinterv->creer)
                 {
                     print '&nbsp;';
-                    print '<a href="contact.php?id='.$demandeInterv->id.'&amp;action=deleteline&amp;lineid='.$tab[$i]['rowid'].'">';
+                    print '<a href="contact.php?id='.$synopsisdemandeinterv->id.'&amp;action=deleteline&amp;lineid='.$tab[$i]['rowid'].'">';
                     print img_delete();
                     print '</a>';
                 }

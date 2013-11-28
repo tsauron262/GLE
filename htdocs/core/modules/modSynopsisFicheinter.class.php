@@ -79,7 +79,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 
         // Dependances
         $this->depends = array("modSociete", "modCommercial");
-        $this->requiredby = array("moddemandeInterv");
+        $this->requiredby = array("modsynopsisdemandeinterv");
 
         // Constantes
         $this->const = array();
@@ -171,7 +171,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'titre' => 'Fiche inter',
             'mainmenu' => 'synopsisficheinter',
             'leftmenu' => '1', // To say if we can overwrite leftmenu
-            'url' => '/Synopsis_DemandeInterv/index.php?leftmenu=ficheinter&filtreUser=true',
+            'url' => '/synopsisdemandeinterv/index.php?leftmenu=ficheinter&filtreUser=true',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 110,
             'perms' => '$user->rights->synopsisficheinter->lire',
@@ -296,7 +296,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'AllDI',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/Synopsis_DemandeInterv/index.php?leftmenu=ficheinter',
+            'url' => '/synopsisdemandeinterv/index.php?leftmenu=ficheinter',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 4,
             'perms' => '$user->rights->synopsisdemandeinterv->lire',
@@ -310,7 +310,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'ListOfMyDIs',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/Synopsis_DemandeInterv/index.php?leftmenu=ficheinter&filtreUser=true',
+            'url' => '/synopsisdemandeinterv/index.php?leftmenu=ficheinter&filtreUser=true',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 5,
             'perms' => '$user->rights->synopsisdemandeinterv->lire',
@@ -323,7 +323,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'NewDI',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/Synopsis_DemandeInterv/fiche.php?action=create&leftmenu=ficheinter',
+            'url' => '/synopsisdemandeinterv/fiche.php?action=create&leftmenu=ficheinter',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 5,
             'perms' => '$user->rights->synopsisdemandeinterv->creer',
@@ -336,7 +336,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Rapport DI',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/Synopsis_DemandeInterv/rapport.php?leftmenu=ficheinter',
+            'url' => '/synopsisdemandeinterv/rapport.php?leftmenu=ficheinter',
             'langs' => 'synopsisGene@Synopsis_Tools',
             'position' => 6,
             'perms' => '$user->rights->synopsisdemandeinterv->lire',
@@ -454,7 +454,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`rowid`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
   `active` tinyint(4) default NULL,
@@ -466,7 +466,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
   `active` tinyint(4) default NULL,
@@ -479,7 +479,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
 
-        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` (`id`, `label`, `active`, `rang`, `default`, `isDeplacement`, `inTotalRecap`, `decountTkt`) VALUES
+        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (`id`, `label`, `active`, `rang`, `default`, `isDeplacement`, `inTotalRecap`, `decountTkt`) VALUES
 (1, 'Prestation', 1, 1, 1, NULL, 1, NULL),
 (2, 'Impondérable', 1, 6, NULL, NULL, 1, NULL),
 (3, 'Avant-vente', 1, 10, NULL, NULL, 1, NULL),
@@ -502,7 +502,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (20, 'Visite contrat', 1, 9, NULL, NULL, 1, NULL),
 (21, 'Télémaintenance contrat', 1, 8, NULL, NULL, 1, 1);";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_key` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
   `type` varchar(50) default NULL,
@@ -515,7 +515,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key` (`id`, `label`, `type`, `active`, `description`, `isQuality`, `rang`, `isInMainPanel`, `fullLine`) VALUES
+        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_key` (`id`, `label`, `type`, `active`, `description`, `isQuality`, `rang`, `isInMainPanel`, `fullLine`) VALUES
 (13, 'Total bons', 'text', 1, NULL, NULL, 6, NULL, 0),
 (14, 'Bon remis', 'text', 1, NULL, NULL, 1, NULL, 0),
 (15, 'Total pièce', 'text', 1, NULL, NULL, 1, NULL, 0),
@@ -540,7 +540,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (35, 'Forfait', 'checkbox', 1, NULL, NULL, 11, 1, 1),
 (36, 'Description non imprimable', 'text', 1, NULL, NULL, 2, NULL, 0);";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_value` (
   `id` int(11) NOT NULL auto_increment,
   `interv_refid` int(11) default NULL,
   `extra_key_refid` int(11) default NULL,
@@ -549,7 +549,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(150) default NULL,
   `value` int(11) default NULL,
@@ -558,7 +558,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   UNIQUE KEY `uniq_extra_choice_interv` (`label`,`value`,`key_refid`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice` (`id`, `label`, `value`, `key_refid`) VALUES
+        $sql[] = "INSERT IGNORE INTO `" . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice` (`id`, `label`, `value`, `key_refid`) VALUES
 (8, 'Contrat 8H', 1, 34),
 (9, 'Contrat Hotline', 2, 34),
 (10, 'Contrat SAV+', 3, 34),
@@ -566,7 +566,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (7, 'Service Commercial', 2, 20),
 (11, 'Contrat de suivie', 4, 34);";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv` (
   `id` int(11) NOT NULL auto_increment,
   `user_refid` int(11) default NULL,
   `fk_product` int(11) default NULL,
@@ -574,7 +574,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `user_refid` int(11) default NULL,
   `typeInterv_refid` int(11) default NULL,

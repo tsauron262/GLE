@@ -31,23 +31,23 @@
  */
 
 /**
-        \file       htdocs/synopsis_demandeinterv/note.php
-        \ingroup    demandeInterv
+        \file       htdocs/synopsisdemandeinterv/note.php
+        \ingroup    synopsisdemandeinterv
         \brief      Fiche d'information sur une fiche d'intervention
         \version    $Id: note.php,v 1.7 2008/02/25 20:03:26 eldy Exp $
 */
 
 require('./pre.inc.php');
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
 
 $langs->load('companies');
 
-$demandeIntervid = isset($_GET["id"])?$_GET["id"]:'';
+$synopsisdemandeintervid = isset($_GET["id"])?$_GET["id"]:'';
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Synopsis_demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid, 'synopsisdemandeinterv');
 
 
 /******************************************************************************/
@@ -56,15 +56,15 @@ $result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Syno
 
 if ($_POST["action"] == 'update_public' && $user->rights->synopsisdemandeinterv->creer)
 {
-    $demandeInterv = new demandeInterv($db);
-    $demandeInterv->fetch($_GET['id']);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    $synopsisdemandeinterv->fetch($_GET['id']);
 
     $db->begin();
 
-    $res=$demandeInterv->update_note_public($_POST["note_public"],$user);
+    $res=$synopsisdemandeinterv->update_note_public($_POST["note_public"],$user);
     if ($res < 0)
     {
-        $mesg='<div class="error ui-state-error">'.$demandeInterv->error.'</div>';
+        $mesg='<div class="error ui-state-error">'.$synopsisdemandeinterv->error.'</div>';
         $db->rollback();
     }
     else
@@ -75,15 +75,15 @@ if ($_POST["action"] == 'update_public' && $user->rights->synopsisdemandeinterv-
 
 if ($_POST['action'] == 'update' && $user->rights->synopsisdemandeinterv->creer)
 {
-    $demandeInterv = new demandeInterv($db);
-    $demandeInterv->fetch($_GET['id']);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    $synopsisdemandeinterv->fetch($_GET['id']);
 
     $db->begin();
 
-    $res=$demandeInterv->update_note($_POST["note_private"],$user);
+    $res=$synopsisdemandeinterv->update_note($_POST["note_private"],$user);
     if ($res < 0)
     {
-        $mesg='<div class="error ui-state-error">'.$demandeInterv->error.'</div>';
+        $mesg='<div class="error ui-state-error">'.$synopsisdemandeinterv->error.'</div>';
         $db->rollback();
     }
     else
@@ -106,19 +106,19 @@ if ($_GET['id'])
 {
     if ($mesg) print $mesg;
 
-    $demandeInterv = new demandeInterv($db);
-    if ( $demandeInterv->fetch($_GET['id']) )
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    if ( $synopsisdemandeinterv->fetch($_GET['id']) )
     {
         $societe = new Societe($db);
-        if ( $societe->fetch($demandeInterv->socid) )
+        if ( $societe->fetch($synopsisdemandeinterv->socid) )
         {
-            $head = demandeInterv_prepare_head($demandeInterv);
+            $head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
             dol_fiche_head($head, 'note', $langs->trans('DI'));
 
             print '<table class="border" width="100%">';
 
             print '<tr><td class="ui-widget-header ui-state-default" width="25%">'.$langs->trans('Ref').'</td>
-                       <td colspan="3" class="ui-widget-content">'.$demandeInterv->ref.'</td></tr>';
+                       <td colspan="3" class="ui-widget-content">'.$synopsisdemandeinterv->ref.'</td></tr>';
 
             // Societe
             print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Company').'</td>
@@ -127,7 +127,7 @@ if ($_GET['id'])
             // Date
             print '<tr><td class="ui-widget-header ui-state-default">'.$langs->trans('Date').'</td>
                        <td colspan="3" class="ui-widget-content">';
-            print dol_print_date($db->jdate($demandeInterv->date),'day');
+            print dol_print_date($db->jdate($synopsisdemandeinterv->date),'day');
             print '</td>';
             print '</tr>';
 
@@ -136,13 +136,13 @@ if ($_GET['id'])
             print '<td valign="top" colspan="3" class="ui-widget-content">';
             if ($_GET["action"] == 'edit')
             {
-                print '<form method="post" action="note.php?id='.$demandeInterv->id.'">';
+                print '<form method="post" action="note.php?id='.$synopsisdemandeinterv->id.'">';
                 print '<input type="hidden" name="action" value="update_public">';
-                print '<textarea name="note_public" cols="80" rows="8">'.$demandeInterv->note_public."</textarea><br>";
+                print '<textarea name="note_public" cols="80" rows="8">'.$synopsisdemandeinterv->note_public."</textarea><br>";
                 print '<input type="submit" class="button" value="'.$langs->trans("Save").'">';
                 print '</form>';
             }  else {
-                print ($demandeInterv->note_public?nl2br($demandeInterv->note_public):"&nbsp;");
+                print ($synopsisdemandeinterv->note_public?nl2br($synopsisdemandeinterv->note_public):"&nbsp;");
             }
             print "</td></tr>";
 
@@ -153,13 +153,13 @@ if ($_GET['id'])
                 print '<td valign="top" colspan="3" class="ui-widget-content">';
                 if ($_GET["action"] == 'edit')
                 {
-                    print '<form method="post" action="note.php?id='.$demandeInterv->id.'">';
+                    print '<form method="post" action="note.php?id='.$synopsisdemandeinterv->id.'">';
                     print '<input type="hidden" name="action" value="update">';
-                    print '<textarea name="note_private" cols="80" rows="8">'.$demandeInterv->note_private."</textarea><br>";
+                    print '<textarea name="note_private" cols="80" rows="8">'.$synopsisdemandeinterv->note_private."</textarea><br>";
                     print '<input type="submit" class="button" value="'.$langs->trans("Save").'">';
                     print '</form>';
                 } else  {
-                    print ($demandeInterv->note_private?nl2br($demandeInterv->note_private):"&nbsp;");
+                    print ($synopsisdemandeinterv->note_private?nl2br($synopsisdemandeinterv->note_private):"&nbsp;");
                 }
                 print "</td></tr>";
             }
@@ -174,7 +174,7 @@ if ($_GET['id'])
             print '<div class="tabsAction">';
             if ($user->rights->synopsisdemandeinterv->creer && $_GET['action'] <> 'edit')
             {
-                print '<a class="butAction" href="note.php?id='.$demandeInterv->id.'&amp;action=edit">'.$langs->trans('Modify').'</a>';
+                print '<a class="butAction" href="note.php?id='.$synopsisdemandeinterv->id.'&amp;action=edit">'.$langs->trans('Modify').'</a>';
             }
             print '</div>';
         }

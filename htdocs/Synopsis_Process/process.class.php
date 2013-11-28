@@ -148,13 +148,13 @@ function printHead($type, $id, $js = '') {
             }
 
             break;
-        case "demandeInterv": {
+        case "synopsisdemandeinterv": {
 
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/demandeInterv.lib.php");
-                $obj = new demandeInterv($db);
+                require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsisdemandeinterv.lib.php");
+                $obj = new Synopsisdemandeinterv($db);
                 $obj->fetch($id);
-                $head = demandeInterv_prepare_head($obj);
+                $head = synopsisdemandeinterv_prepare_head($obj);
                 $titreType = "Invoice";
                 $nomType = "facture";
             }

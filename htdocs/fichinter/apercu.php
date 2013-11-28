@@ -88,7 +88,7 @@ if ($_GET["id"] > 0) {
         $soc->fetch($fichinter->socid);
 
 
-        $head = Synopsis_fichinter_prepare_head($fichinter);
+        $head = synopsisfichinter_prepare_head($fichinter);
     dol_fiche_head($head, 'preview', $langs->trans("InterventionCard"));
 
 
@@ -97,7 +97,7 @@ if ($_GET["id"] > 0) {
         */
         $sql = 'SELECT s.nom, s.rowid, fi.fk_projet, fi.ref, fi.description, fi.fk_statut, fi.datei as di,';
         $sql.= ' fi.fk_user_author, fi.fk_user_valid, fi.datec, fi.date_valid';
-        $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'Synopsis_fichinter as fi';
+        $sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s, '.MAIN_DB_PREFIX.'fichinter as fi';
         $sql.= ' WHERE fi.fk_soc = s.rowid';
         $sql.= ' AND fi.rowid = '.$fichinter->id;
         if ($socid) $sql .= ' AND s.rowid = '.$socid;

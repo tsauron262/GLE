@@ -6,6 +6,11 @@ div.hide{
 }
 
 
+.butAction{
+    font-size: 12px;
+}
+
+
 
 .fullScreen{
     z-index:1110;

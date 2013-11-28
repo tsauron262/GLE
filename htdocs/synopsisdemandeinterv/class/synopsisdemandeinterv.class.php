@@ -33,24 +33,24 @@
 /*
  */
 
-/**        \file       htdocs/synopsis_demandeinterv/demandeInterv.class.php
-  \ingroup    demandeInterv
+/**        \file       htdocs/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php
+  \ingroup    synopsisdemandeinterv
   \brief      Fichier de la classe des gestion des fiches interventions
-  \version    $Id: demandeInterv.class.php,v 1.58 2008/07/12 12:45:30 eldy Exp $
+  \version    $Id: synopsisdemandeinterv.class.php,v 1.58 2008/07/12 12:45:30 eldy Exp $
  */
 require_once(DOL_DOCUMENT_ROOT . "/core/class/commonobject.class.php");
 
 /**
- *     \class      demandeInterv
+ *     \class      synopsisdemandeinterv
  *    \brief      Classe des gestion des fiches interventions
  */
-class demandeInterv extends CommonObject {
+class Synopsisdemandeinterv extends CommonObject {
 
     public $db;
-    public $element = 'demandeInterv';
-    public $table_element = 'Synopsis_demandeInterv';
-    public $fk_element = 'fk_demandeInterv';
-    public $table_element_line = 'Synopsis_demandeIntervdet';
+    public $element = 'synopsisdemandeinterv';
+    public $table_element = 'synopsisdemandeinterv';
+    public $fk_element = 'fk_synopsisdemandeinterv';
+    public $table_element_line = 'synopsisdemandeintervdet';
     public $id;
     public $socid;        // Id client
     public $client;        // Objet societe client (a charger par fetch_client)
@@ -74,7 +74,7 @@ class demandeInterv extends CommonObject {
      *    \param      DB            Handler acces base de donnees
      *    \param      socid            Id societe
      */
-    function demandeInterv($DB, $socid = "") {
+    function Synopsisdemandeinterv($DB, $socid = "") {
         global $langs;
 
         $this->db = $DB;
@@ -115,17 +115,17 @@ class demandeInterv extends CommonObject {
 
     function create() {
         global $user, $langs, $conf;
-        dol_syslog("demandeInterv.class::create ref=" . $this->ref);
+        dol_syslog("synopsisdemandeinterv.class::create ref=" . $this->ref);
         if (!is_numeric($this->duree)) {
             $this->duree = 0;
         }
         if ($this->socid <= 0) {
             $this->error = 'ErrorBadParameterForFunc';
-            dol_syslog("demandeInterv::create " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::create " . $this->error, LOG_ERR);
             return -1;
         }
-//    $demandeInterv->fk_user_prisencharge = $_POST["userid"];
-//    $demandeInterv->fk_commande = $_POST["comLigneId"];
+//    $synopsisdemandeinterv->fk_user_prisencharge = $_POST["userid"];
+//    $synopsisdemandeinterv->fk_commande = $_POST["comLigneId"];
 
         $this->db->begin();
 
@@ -136,7 +136,7 @@ class demandeInterv extends CommonObject {
         $this->verifyNumRef();
         $this->statut = 0;
 
-        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_demandeInterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisdemandeinterv (fk_soc, datec, ref, fk_user_author, description, model_pdf";
         if ($this->projet_id)
             $sql.= ", fk_projet";
         if ($this->fk_user_prisencharge > 0)
@@ -163,15 +163,15 @@ class demandeInterv extends CommonObject {
             $sql.= ", '" . $this->db->idate($this->date) . "'";
         $sql.= ")";
         $sqlok = 0;
-        dol_syslog("demandeInterv::create sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::create sql=" . $sql);
         $result = $this->db->query($sql);
         if ($result) {
-            $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "Synopsis_demandeInterv");
+            $this->id = $this->db->last_insert_id("" . MAIN_DB_PREFIX . "synopsisdemandeinterv");
             $this->db->commit();
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_CREATE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_CREATE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -180,7 +180,7 @@ class demandeInterv extends CommonObject {
             return $this->id;
         } else {
             $this->error = $this->db->error();
-            dol_syslog("demandeInterv::create " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::create " . $this->error, LOG_ERR);
             $this->db->rollback();
             return -1;
         }
@@ -203,21 +203,21 @@ class demandeInterv extends CommonObject {
         /*
          *  Insertion dans la base
          */
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv SET ";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv SET ";
         $sql .= " datei = " . $this->db->idate($this->date);
         $sql .= ", description  = '" . addslashes($this->description) . "'";
         $sql .= ", duree = " . $this->duree;
         $sql .= ", fk_projet = " . $this->projet_id;
         $sql .= " WHERE rowid = " . $id;
 
-        dol_syslog("demandeInterv::update sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::update sql=" . $sql);
         if (!$this->db->query($sql)) {
             $this->error = $this->db->error();
-            dol_syslog("demandeInterv::update error " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update error " . $this->error, LOG_ERR);
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_UPDATE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_UPDATE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -237,10 +237,10 @@ class demandeInterv extends CommonObject {
     function fetch($rowid) {
         $sql = "SELECT ref, description, fk_soc, fk_statut,fk_user_prisencharge, fk_user_author, fk_contrat, fk_commande, total_ht, total_tva, total_ttc, ";
         $sql.= " datei as di, duree, fk_projet, note_public, note_private, model_pdf";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " WHERE rowid=" . $rowid;
 
-        dol_syslog("demandeInterv::fetch sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::fetch sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             if ($this->db->num_rows($resql) > 0) {
@@ -278,12 +278,12 @@ class demandeInterv extends CommonObject {
                 return $this->id;
 //            } else {
 //                $this->error = $this->db->error();
-//                dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
+//                dol_syslog("synopsisdemandeinterv::fetch error " . $this->error, LOG_ERR);
 //                return -2;
             }
         } else {
             $this->error = $this->db->error();
-            dol_syslog("demandeInterv::fetch error " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::fetch error " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -313,18 +313,18 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_statut = 1, date_valid=now(), fk_user_valid=" . $user->id;
         $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 //die($sql);
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
 
         if ($resql) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_VALIDATE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_VALIDATE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -358,13 +358,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -374,18 +374,18 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_statut = 0, date_valid=now(), fk_user_valid=" . $user->id;
         $sql.= " WHERE rowid = " . $this->id . " ";
 
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
 
         if ($resql) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_INVALIDATE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_INVALIDATE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -400,13 +400,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -416,17 +416,17 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_user_target=" . $user->id;
         $sql.= " WHERE rowid = " . $this->id . " ";
 
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_ATTRIB', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_ATTRIB', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -439,13 +439,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -465,17 +465,17 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_statut = 2, date_prisencharge=now(), fk_user_prisencharge=" . $user->id;
         $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 1";
 
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_PRISENCHARGE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_PRISENCHARGE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -507,13 +507,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -523,11 +523,11 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_user_prisencharge=" . $userT->id;
         $sql.= " WHERE rowid = " . $this->id . " AND fk_statut < 2";
 
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
@@ -535,7 +535,7 @@ class demandeInterv extends CommonObject {
             $action->datep = $this->db->jdate(date("Y-m-d", $this->date)." 08:00:00");
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date)." 18:00:00");
             $action->type_id = 50;
-            $action->elementtype = "DI";
+            $action->elementtype = "synopsisdemandeinterv";
             $action->fk_element = $this->id;
             $action->percentage = -1;
             $soc = new Societe($this->db);
@@ -551,7 +551,7 @@ class demandeInterv extends CommonObject {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_PRISENCHARGE', $this, $userT, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_PRISENCHARGE', $this, $userT, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -564,13 +564,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -586,17 +586,17 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " SET fk_statut = 3, date_cloture=now(), fk_user_cloture=" . $user->id;
         $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 2";
 
-        dol_syslog("demandeInterv::valid sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
-            $result = $interface->run_triggers('DEMANDEINTERV_CLOTURE', $this, $user, $langs, $conf);
+            $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_CLOTURE', $this, $user, $langs, $conf);
             if ($result < 0) {
                 $error++;
                 $this->errors = $interface->errors;
@@ -609,13 +609,13 @@ class demandeInterv extends CommonObject {
             } else {
                 $this->db->rollback();
                 $this->error = join(',', $this->errors);
-                dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+                dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
                 return -1;
             }
         } else {
             $this->db->rollback();
             $this->error = $this->db->lasterror();
-            dol_syslog("demandeInterv::update " . $this->error, LOG_ERR);
+            dol_syslog("synopsisdemandeinterv::update " . $this->error, LOG_ERR);
             return -1;
         }
     }
@@ -687,7 +687,7 @@ class demandeInterv extends CommonObject {
      *      \param        soc                      objet societe
      */
     function verifyNumRef() {
-        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $sql.= " WHERE ref = '" . $this->ref . "'";
 
         $result = $this->db->query($sql);
@@ -701,7 +701,7 @@ class demandeInterv extends CommonObject {
 
     /**
      *      \brief      Renvoie la reference de fiche intervention suivante non utilisee en fonction du module
-     *                  de numerotation actif defini dans demandeInterv_ADDON
+     *                  de numerotation actif defini dans SYNOPSISDEMANDEINTERV_ADDON
      *      \param        soc                      objet societe
      *      \return     string              reference libre pour la fiche intervention
      */
@@ -709,11 +709,11 @@ class demandeInterv extends CommonObject {
         global $db, $langs, $conf;
         $langs->load("interventions");
         $dir = DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/";
-        if ($conf->global->DEMANDEINTERV_ADDON . "x" != "x") {
-            $file = "mod_" . $conf->global->DEMANDEINTERV_ADDON . ".php";
+        if ($conf->global->SYNOPSISDEMANDEINTERV_ADDON . "x" != "x") {
+            $file = "mod_" . $conf->global->SYNOPSISDEMANDEINTERV_ADDON . ".php";
 
             // Chargement de la classe de numerotation
-            $classname = "mod_" . $conf->global->DEMANDEINTERV_ADDON;
+            $classname = "mod_" . $conf->global->SYNOPSISDEMANDEINTERV_ADDON;
             require_once($dir . $file);
 
             $obj = new $classname();
@@ -724,11 +724,11 @@ class demandeInterv extends CommonObject {
             if ($numref != "") {
                 return $numref;
             } else {
-                dol_print_error($db, "demandeInterv::getNextNumRef " . $obj->error);
+                dol_print_error($db, "synopsisdemandeinterv::getNextNumRef " . $obj->error);
                 return "";
             }
         } else {
-            print $langs->trans("Error") . " " . $langs->trans("Error_DEMANDEINTERV_ADDON_NotDefined");
+            print $langs->trans("Error") . " " . $langs->trans("Error_SYNOPSISDEMANDEINTERV_ADDON_NotDefined");
             return "";
         }
     }
@@ -743,7 +743,7 @@ class demandeInterv extends CommonObject {
         $sql.= ", f.fk_user_author, f.fk_user_valid";
         $sql.= ", f.fk_user_target, f.fk_user_prisencharge";
         $sql.= ", f.fk_user_cloture ";
-        $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as f";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f";
         $sql.= " WHERE f.rowid = " . $id;
 
         $result = $this->db->query($sql);
@@ -802,13 +802,13 @@ class demandeInterv extends CommonObject {
                 $numprojet = $this->db->num_rows($sqlres);
                 if ($numprojet > 0) {
                     $this->projetidp = $project_id;
-                    $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'Synopsis_demandeInterv SET fk_projet = ' . $project_id;
+                    $sql = 'UPDATE ' . MAIN_DB_PREFIX . 'synopsisdemandeinterv SET fk_projet = ' . $project_id;
                     $sql .= ' WHERE rowid = ' . $this->id . ' AND fk_statut = 0 ;';
                     $this->db->query($sql);
                 }
             } else {
 
-                dol_syslog("demandeInterv::set_project Erreur SQL");
+                dol_syslog("synopsisdemandeinterv::set_project Erreur SQL");
             }
         }
     }
@@ -822,20 +822,20 @@ class demandeInterv extends CommonObject {
 
         $this->db->begin();
 
-        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE fk_demandeInterv = " . $this->id;
-        dol_syslog("demandeInterv::delete sql=" . $sql);
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE fk_synopsisdemandeinterv = " . $this->id;
+        dol_syslog("synopsisdemandeinterv::delete sql=" . $sql);
         if ($this->db->query($sql)) {
-            $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE rowid = " . $this->id;
-            dol_syslog("demandeInterv::delete sql=" . $sql);
+            $sql = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE rowid = " . $this->id;
+            dol_syslog("synopsisdemandeinterv::delete sql=" . $sql);
             if ($this->db->query($sql)) {
 
                 // Remove directory with files
-                $demandeIntervref = sanitize_string($this->ref);
+                $synopsisdemandeintervref = sanitize_string($this->ref);
                 if ($conf->synopsisdemandeinterv->dir_output) {
-                    $dir = $conf->synopsisdemandeinterv->dir_output . "/" . $demandeIntervref;
-                    $file = $conf->synopsisdemandeinterv->dir_output . "/" . $demandeIntervref . "/" . $demandeIntervref . ".pdf";
+                    $dir = $conf->synopsisdemandeinterv->dir_output . "/" . $synopsisdemandeintervref;
+                    $file = $conf->synopsisdemandeinterv->dir_output . "/" . $synopsisdemandeintervref . "/" . $synopsisdemandeintervref . ".pdf";
                     if (file_exists($file)) {
-                        demandeInterv_delete_preview($this->db, $this->id, $this->ref);
+                        synopsisdemandeinterv_delete_preview($this->db, $this->id, $this->ref);
 
                         if (!dol_delete_file($file)) {
                             $this->error = $langs->trans("ErrorCanNotDeleteFile", $file);
@@ -854,7 +854,7 @@ class demandeInterv extends CommonObject {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('DEMANDEINTERV_DELETE', $this, $user, $langs, $conf);
+                $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_DELETE', $this, $user, $langs, $conf);
                 if ($result < 0) {
                     $error++;
                     $this->errors = $interface->errors;
@@ -882,7 +882,7 @@ class demandeInterv extends CommonObject {
     function set_date_delivery($user, $date_delivery) {
         global $langs, $conf;
         if ($user->rights->synopsisdemandeinterv->creer) {
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv ";
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . $this->db->idate($date_delivery);
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
@@ -891,7 +891,7 @@ class demandeInterv extends CommonObject {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('DEMANDEINTERV_SETDELIVERY', $this, $user, $langs, $conf);
+                $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_SETDELIVERY', $this, $user, $langs, $conf);
                 if ($result < 0) {
                     $error++;
                     $this->errors = $interface->errors;
@@ -900,7 +900,7 @@ class demandeInterv extends CommonObject {
                 return 1;
             } else {
                 $this->error = $this->db->error();
-                dol_syslog("demandeInterv::set_date_delivery Erreur SQL");
+                dol_syslog("synopsisdemandeinterv::set_date_delivery Erreur SQL");
                 return -1;
             }
         }
@@ -915,7 +915,7 @@ class demandeInterv extends CommonObject {
     function set_description($user, $description) {
         global $langs, $conf;
         if ($user->rights->synopsisdemandeinterv->creer) {
-            $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv ";
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET description = '" . addslashes($description) . "'";
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
@@ -924,7 +924,7 @@ class demandeInterv extends CommonObject {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('DEMANDEINTERV_SETDESCRIPTION', $this, $user, $langs, $conf);
+                $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_SETDESCRIPTION', $this, $user, $langs, $conf);
                 if ($result < 0) {
                     $error++;
                     $this->errors = $interface->errors;
@@ -933,7 +933,7 @@ class demandeInterv extends CommonObject {
                 return 1;
             } else {
                 $this->error = $this->db->error();
-                dol_syslog("demandeInterv::set_description Erreur SQL");
+                dol_syslog("synopsisdemandeinterv::set_description Erreur SQL");
                 return -1;
             }
         }
@@ -941,22 +941,22 @@ class demandeInterv extends CommonObject {
 
     /**
      *      \brief         Ajout d'une ligne d'intervention, en base
-     *         \param        demandeIntervid            Id de la fiche d'intervention
+     *         \param        synopsisdemandeintervid            Id de la fiche d'intervention
      *         \param        desc                  Description de la ligne
      *    \param      date_intervention   Date de l'intervention
      *    \param      duration            Duree de l'intervention
      *        \return        int                 >0 si ok, <0 si ko
      */
-    function addline($demandeIntervid, $desc, $date_intervention, $duration, $typeinterv, $qte = 1, $pu_ht = 0, $isForfait = 0, $fk_commandedet = false, $fk_contratdet = false) {
-        dol_syslog("demandeInterv::Addline $demandeIntervid, $desc, $date_intervention, $duration");
+    function addline($synopsisdemandeintervid, $desc, $date_intervention, $duration, $typeinterv, $qte = 1, $pu_ht = 0, $isForfait = 0, $fk_commandedet = false, $fk_contratdet = false) {
+        dol_syslog("synopsisdemandeinterv::Addline $synopsisdemandeintervid, $desc, $date_intervention, $duration");
 
         if ($this->statut == 0) {
             $this->db->begin();
 
             // Insertion ligne
-            $ligne = new demandeIntervLigne($this->db);
+            $ligne = new SynopsisdemandeintervLigne($this->db);
 
-            $ligne->fk_demandeInterv = $demandeIntervid;
+            $ligne->fk_synopsisdemandeinterv = $synopsisdemandeintervid;
             $ligne->desc = $desc;
             $ligne->datei = $date_intervention;
             $ligne->duration = $duration;
@@ -1037,7 +1037,7 @@ class demandeInterv extends CommonObject {
         $nbp = 5;
         $xnbp = 0;
         while ($xnbp < $nbp) {
-            $ligne = new demandeIntervLigne($this->db);
+            $ligne = new SynopsisdemandeintervLigne($this->db);
             $ligne->desc = $langs->trans("Description") . " " . $xnbp;
             $ligne->qty = 1;
             $ligne->subprice = 100;
@@ -1062,10 +1062,10 @@ class demandeInterv extends CommonObject {
      */
     function fetch_lines() {
         $sql = 'SELECT rowid';
-        $sql.= '  FROM ' . MAIN_DB_PREFIX . 'Synopsis_demandeIntervdet';
-        $sql.= ' WHERE fk_demandeInterv = ' . $this->id;
+        $sql.= '  FROM ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
+        $sql.= ' WHERE fk_synopsisdemandeinterv = ' . $this->id;
 
-        dol_syslog("demandeInterv::fetch_lines sql=" . $sql);
+        dol_syslog("synopsisdemandeinterv::fetch_lines sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             $num = $this->db->num_rows($resql);
@@ -1073,11 +1073,11 @@ class demandeInterv extends CommonObject {
             while ($i < $num) {
                 $objp = $this->db->fetch_object($resql);
 
-                $demandeIntervligne = new demandeIntervLigne($this->db);
-                $demandeIntervligne->id = $objp->rowid;
-                $demandeIntervligne->fetch($objp->rowid);
-                //               var_dump($demandeIntervligne);
-                $this->lignes[$i] = $demandeIntervligne;
+                $synopsisdemandeintervligne = new SynopsisdemandeintervLigne($this->db);
+                $synopsisdemandeintervligne->id = $objp->rowid;
+                $synopsisdemandeintervligne->fetch($objp->rowid);
+                //               var_dump($synopsisdemandeintervligne);
+                $this->lignes[$i] = $synopsisdemandeintervligne;
 
                 $i++;
             }
@@ -1095,13 +1095,13 @@ class demandeInterv extends CommonObject {
         $result = '';
         $urlOption = '';
 
-        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_DemandeInterv/fiche.php?id=' . $this->id . '">';
+        $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/fiche.php?id=' . $this->id . '">';
         if ($option == 6)
-            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/Synopsis_DemandeInterv/fiche.php?id=' . $this->id . '">';
+            $lien = '<a href="' . DOL_URL_ROOT . $urlOption . '/synopsisdemandeinterv/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        $picto = 'demandeInterv@Synopsis_DemandeInterv';
-        $label = $langs->trans("DIs") . ': ' . $this->ref;
+        $picto = 'synopsisdemandeinterv@synopsisdemandeinterv';
+        $label = $langs->trans("DI") . ': ' . $this->ref;
 
         if ($withpicto)
             $result.=($lien . img_object($label, $picto) . $lienfin);
@@ -1116,16 +1116,16 @@ class demandeInterv extends CommonObject {
 }
 
 /**
-  \class      demandeIntervLigne
+  \class      synopsisdemandeintervLigne
   \brief      Classe permettant la gestion des lignes d'intervention
  */
-class demandeIntervLigne {
+class synopsisdemandeintervLigne {
 
     public $db;
     public $error;
-    // From ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet
+    // From ".MAIN_DB_PREFIX."synopsisdemandeintervdet
     public $rowid;
-    public $fk_demandeInterv;
+    public $fk_synopsisdemandeinterv;
     public $desc;              // Description ligne
     public $datei;           // Date intervention
     public $duration;        // Duree de l'intervention
@@ -1138,7 +1138,7 @@ class demandeIntervLigne {
      *      \brief     Constructeur d'objets ligne d'intervention
      *      \param     DB      handler d'acces base de donnee
      */
-    function demandeIntervLigne($DB) {
+    function synopsisdemandeintervLigne($DB) {
         $this->db = $DB;
     }
 
@@ -1151,7 +1151,7 @@ class demandeIntervLigne {
                             ft.fk_typeinterv,
                             t.label as typeInterv,
                             t.isDeplacement,
-                            ft.fk_demandeInterv,
+                            ft.fk_synopsisdemandeinterv,
                             ft.description,
                             ft.duree,
                             ft.rang,
@@ -1168,16 +1168,16 @@ class demandeIntervLigne {
                             ft.date as dateiunformated,
                             c.fk_product as fk_product1,';
         $sql.= '            ft.date as datei ';
-        $sql.= '       FROM ' . MAIN_DB_PREFIX . 'Synopsis_demandeIntervdet as ft';
-        $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t ON ft.fk_typeinterv=t.id";
+        $sql.= '       FROM ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet as ft';
+        $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t ON ft.fk_typeinterv=t.id";
         $sql .= " LEFT JOIN " . MAIN_DB_PREFIX . "commandedet as c ON c.rowid = ft.fk_commandedet";
         $sql.= '      WHERE ft.rowid = ' . $rowid;
-        dol_syslog("demandeIntervLigne::fetch sql=" . $sql);
+        dol_syslog("synopsisdemandeintervLigne::fetch sql=" . $sql);
         $result = $this->db->query($sql);
         if ($result) {
             $objp = $this->db->fetch_object($result);
             $this->rowid = $objp->rowid;
-            $this->fk_demandeInterv = $objp->fk_demandeInterv;
+            $this->fk_synopsisdemandeinterv = $objp->fk_synopsisdemandeinterv;
             $this->datei = $objp->datei;
             $this->fk_typeinterv = $objp->fk_typeinterv;
             $this->isDeplacement = $objp->isDeplacement;
@@ -1217,14 +1217,14 @@ class demandeIntervLigne {
      */
     function insert() {
         global $user, $langs, $conf;
-        dol_syslog("demandeIntervLigne::insert rang=" . $this->rang);
+        dol_syslog("synopsisdemandeintervLigne::insert rang=" . $this->rang);
         $this->db->begin();
 
         $rangToUse = $this->rang;
         if (!$rangToUse > 0) {
             // Recupere rang max de la ligne d'intervention dans $rangmax
-            $sql = 'SELECT max(rowid) as max FROM ' . MAIN_DB_PREFIX . 'Synopsis_demandeIntervdet';
-            $sql.= ' WHERE fk_demandeInterv =' . $this->fk_demandeInterv;
+            $sql = 'SELECT max(rowid) as max FROM ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
+            $sql.= ' WHERE fk_synopsisdemandeinterv =' . $this->fk_synopsisdemandeinterv;
             $resql = $this->db->query($sql);
             if ($resql) {
                 $rangToUse = 0;
@@ -1253,8 +1253,8 @@ class demandeIntervLigne {
         $total_tva = 0.196 * $this->total_ht;
 
         // Insertion dans base de la ligne
-        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'Synopsis_demandeIntervdet';
-        $sql.= ' (fk_demandeInterv, description, date, duree, rang,fk_typeinterv, isForfait ';
+        $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
+        $sql.= ' (fk_synopsisdemandeinterv, description, date, duree, rang,fk_typeinterv, isForfait ';
         if ($this->qte > 0)
             $sql .= ',qte ';
         if ($this->pu_ht != 0 && $this->pu_ht != '')
@@ -1264,7 +1264,7 @@ class demandeIntervLigne {
         if ($this->fk_contratdet > 0)
             $sql .= ',fk_contratdet ';
         $sql.= ')';
-        $sql.= " VALUES (" . $this->fk_demandeInterv . ",";
+        $sql.= " VALUES (" . $this->fk_synopsisdemandeinterv . ",";
         $sql.= " '" . addslashes($this->desc) . "',";
         $sql.= " " . $this->db->idate($this->datei) . ",";
         $sql.= " " . $this->duration . ",";
@@ -1281,7 +1281,7 @@ class demandeIntervLigne {
             $sql .= ', ' . $this->fk_contratdet;
 
         $sql.= ')';
-        dol_syslog("demandeIntervLigne::insert sql=" . $sql);
+        dol_syslog("synopsisdemandeintervLigne::insert sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             $result = $this->update_total();
@@ -1291,7 +1291,7 @@ class demandeIntervLigne {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('DEMANDEINTERV_INSERTLINE', $this, $user, $langs, $conf);
+                $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_INSERTLINE', $this, $user, $langs, $conf);
                 if ($result < 0) {
                     $error++;
                     $this->errors = $interface->errors;
@@ -1304,7 +1304,7 @@ class demandeIntervLigne {
             }
         } else {
             $this->error = $this->db->error() . " sql=" . $sql;
-            dol_syslog("demandeIntervLigne::insert Error " . $this->error);
+            dol_syslog("synopsisdemandeintervLigne::insert Error " . $this->error);
             $this->db->rollback();
             return -1;
         }
@@ -1330,7 +1330,7 @@ class demandeIntervLigne {
 
 
         // Mise a jour ligne en base
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet SET";
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
         $sql.= ",date=" . $this->db->idate($this->datei);
         $sql.= ",duree=" . $this->duration;
@@ -1359,7 +1359,7 @@ class demandeIntervLigne {
         $sql.= ",rang='" . $this->rang . "'";
         $sql.= " WHERE rowid = " . $this->rowid;
 
-        dol_syslog("demandeIntervLigne::update sql=" . $sql);
+        dol_syslog("synopsisdemandeintervLigne::update sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
             $result = $this->update_total();
@@ -1368,7 +1368,7 @@ class demandeIntervLigne {
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
-                $result = $interface->run_triggers('DEMANDEINTERV_UPDATELINE', $this, $user, $langs, $conf);
+                $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_UPDATELINE', $this, $user, $langs, $conf);
                 if ($result < 0) {
                     $error++;
                     $this->errors = $interface->errors;
@@ -1381,26 +1381,26 @@ class demandeIntervLigne {
             }
         } else {
             $this->error = $this->db->error();
-            dol_syslog("demandeIntervLigne::update Error " . $this->error);
+            dol_syslog("synopsisdemandeintervLigne::update Error " . $this->error);
             $this->db->rollback();
             return -1;
         }
     }
 
     /**
-     *      \brief                   Mise a jour duree total dans table ".MAIN_DB_PREFIX."demandeInterv
+     *      \brief                   Mise a jour duree total dans table ".MAIN_DB_PREFIX."synopsisdemandeinterv
      *      \return        int        <0 si ko, >0 si ok
      */
     function update_total() {
         global $user, $langs, $conf;
 //        $sql = "SELECT SUM(duree) as total_duration";
-//        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet";
-//        $sql.= " WHERE fk_demandeInterv=".$this->fk_demandeInterv;
+//        $sql.= " FROM ".MAIN_DB_PREFIX."synopsisdemandeintervdet";
+//        $sql.= " WHERE fk_synopsisdemandeinterv=".$this->fk_synopsisdemandeinterv;
         $result = 1;
-        $requete = "SELECT sum(total_ht) as sht, sum(total_tva) as stva, sum(total_ttc) as sttc, sum(duree) as sdur FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE fk_demandeInterv = " . $this->fk_demandeInterv;
+        $requete = "SELECT sum(total_ht) as sht, sum(total_tva) as stva, sum(total_ttc) as sttc, sum(duree) as sdur FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE fk_synopsisdemandeinterv = " . $this->fk_synopsisdemandeinterv;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_demandeInterv SET total_ht = " . (($res->sht > 0) ? $res->sht : 0) . ", total_tva = " . (($res->stva > 0) ? $res->stva : 0) . " , total_ttc = " . (($res->sttc > 0) ? $res->sttc : 0) . ", duree = " . (($res->sdur > 0) ? $res->sdur : 0) . " WHERE rowid = " . $this->fk_demandeInterv;
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv SET total_ht = " . (($res->sht > 0) ? $res->sht : 0) . ", total_tva = " . (($res->stva > 0) ? $res->stva : 0) . " , total_ttc = " . (($res->sttc > 0) ? $res->sttc : 0) . ", duree = " . (($res->sdur > 0) ? $res->sdur : 0) . " WHERE rowid = " . $this->fk_synopsisdemandeinterv;
         $sql = $this->db->query($requete);
         if ($sql) {
             $result = 1;
@@ -1410,7 +1410,7 @@ class demandeIntervLigne {
         // Appel des triggers
         include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
         $interface = new Interfaces($this->db);
-        $result = $interface->run_triggers('DEMANDEINTERV_UPDATETOTAL', $this, $user, $langs, $conf);
+        $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_UPDATETOTAL', $this, $user, $langs, $conf);
         if ($result < 0) {
             $error++;
             $this->errors = $interface->errors;
@@ -1419,7 +1419,7 @@ class demandeIntervLigne {
         }
         // Fin appel triggers
         return($result);
-//        dol_syslog("demandeIntervLigne::update_total sql=".$sql);
+//        dol_syslog("synopsisdemandeintervLigne::update_total sql=".$sql);
 //        $resql=$this->db->query($sql);
 //        if ($resql)
 //        {
@@ -1427,18 +1427,18 @@ class demandeIntervLigne {
 //            $total_duration=0;
 //            if ($obj) $total_duration = $obj->total_duration;
 //
-//            $sql = "UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
+//            $sql = "UPDATE ".MAIN_DB_PREFIX."synopsisdemandeinterv";
 //            $sql.= " SET duree = ".$total_duration;
-//            $sql.= " WHERE rowid = ".$this->fk_demandeInterv;
+//            $sql.= " WHERE rowid = ".$this->fk_synopsisdemandeinterv;
 //
-//            dol_syslog("demandeIntervLigne::update_total sql=".$sql);
+//            dol_syslog("synopsisdemandeintervLigne::update_total sql=".$sql);
 //            $resql=$this->db->query($sql);
 //            if ($resql)
 //            {
 //                // Appel des triggers
 //                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
 //                $interface=new Interfaces($this->db);
-//                $result=$interface->run_triggers('DEMANDEINTERV_UPDATETOTAL',$this,$user,$langs,$conf);
+//                $result=$interface->run_triggers('SYNOPSISDEMANDEINTERV_UPDATETOTAL',$this,$user,$langs,$conf);
 //                if ($result < 0) { $error++; $this->errors=$interface->errors; }
 //                // Fin appel triggers
 //                $this->db->commit();
@@ -1447,7 +1447,7 @@ class demandeIntervLigne {
 //            else
 //            {
 //                $this->error=$this->db->error();
-//                dol_syslog("demandeIntervLigne::update_total Error ".$this->error);
+//                dol_syslog("synopsisdemandeintervLigne::update_total Error ".$this->error);
 //                $this->db->rollback();
 //                return -2;
 //            }
@@ -1455,7 +1455,7 @@ class demandeIntervLigne {
 //        else
 //        {
 //            $this->error=$this->db->error();
-//            dol_syslog("demandeIntervLigne::update Error ".$this->error);
+//            dol_syslog("synopsisdemandeintervLigne::update Error ".$this->error);
 //            $this->db->rollback();
 //            return -1;
 //        }
@@ -1468,12 +1468,12 @@ class demandeIntervLigne {
     function delete_line() {
         global $user, $langs, $conf;
         if ($this->statut == 0) {
-            dol_syslog("demandeIntervLigne::delete_line lineid=" . $this->rowid);
+            dol_syslog("synopsisdemandeintervLigne::delete_line lineid=" . $this->rowid);
             $this->db->begin();
 
-            $sql = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet WHERE rowid = " . $this->rowid;
+            $sql = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE rowid = " . $this->rowid;
             $resql = $this->db->query($sql);
-            dol_syslog("demandeIntervLigne::delete_line sql=" . $sql);
+            dol_syslog("synopsisdemandeintervLigne::delete_line sql=" . $sql);
 
             if ($resql) {
                 $result = $this->update_total();
@@ -1482,7 +1482,7 @@ class demandeIntervLigne {
                     //APpel Trigger
                     include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                     $interface = new Interfaces($this->db);
-                    $result = $interface->run_triggers('DEMANDEINTERV_DELETELINE', $this, $user, $langs, $conf);
+                    $result = $interface->run_triggers('SYNOPSISDEMANDEINTERV_DELETELINE', $this, $user, $langs, $conf);
                     if ($result < 0) {
                         $error++;
                         $this->errors = $interface->errors;
@@ -1496,7 +1496,7 @@ class demandeIntervLigne {
                 }
             } else {
                 $this->error = $this->db->error() . " sql=" . $sql;
-                dol_syslog("demandeIntervLigne::delete_line Error " . $this->error);
+                dol_syslog("synopsisdemandeintervLigne::delete_line Error " . $this->error);
                 $this->db->rollback();
                 return -1;
             }

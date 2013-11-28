@@ -21,8 +21,8 @@
     require_once('../../../main.inc.php');
 
     $id = $_REQUEST['id'];
-    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
-    $di = new demandeInterv($db);
+    require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
+    $di = new Synopsisdemandeinterv($db);
     $di->fetch($id);
     $res = $di->valid($user, $conf->synopsisdemandeinterv->dir_output);
 

@@ -335,7 +335,7 @@ if ($id > 0 )
   require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php');
   require_once(DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php');
   require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+  require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
   require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
   require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
   require_once(DOL_DOCUMENT_ROOT."/Babel_TechPeople/deplacements/deplacement.class.php");
@@ -446,7 +446,7 @@ if ($id > 0 )
         break;
         case 'DI':
         {
-            $obj=new DemandeInterv($db);
+            $obj=new Synopsisdemandeinterv($db);
             $obj->fetch($res->element_id);
             $type= $res->type;
             $ref = $obj->ref;

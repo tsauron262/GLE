@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * $Id: pre.inc.php,v 1.6 2005/04/19 10:40:38 rodolphe Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsis_demandeinterv/pre.inc.php,v $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisdemandeinterv/pre.inc.php,v $
  *
  */
 /*

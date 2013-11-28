@@ -10,7 +10,7 @@ require_once("../../main.inc.php");
 
 //require_once(DOL_DOCUMENT_ROOT."/boxes.php");
 // The get widget handler.
-function widget_boxDemandeInterv2() {
+function widget_boxsynopsisdemandeinterv() {
     global $langs, $user;
     $langs->load("boxes");
     $tabValue = getValSetting();
@@ -20,12 +20,12 @@ function widget_boxDemandeInterv2() {
         $_REQUEST['lien_commande'] = true;
     if (in_array(12, $tabValue))
         $_REQUEST['lien_contrat'] = true;
-    $_REQUEST['next'] = true;
-    return boxToWidget("box_synopsisDemandeInterv.php", "DI - " . $langs->trans("BoxNextDemandeInterv"), true);
+//        $_REQUEST['next'] = true;
+    return boxToWidget("box_synopsisdemandeinterv.php", "DI - " . $langs->trans("BoxLastsynopsisdemandeinterv"), true);
 }
 
 // The widget settings handler.
-//function widget_boxDemandeInterv_settings() {
+//function widget_boxsynopsisdemandeinterv_settings() {
 //    return(array('markup' => '<div>Aucune option pour ce module</div>'));
 //}
 //// A silly little helper function for the form.
@@ -39,7 +39,7 @@ function widget_boxDemandeInterv2() {
 //}
 function getValSetting() {
     global $db, $user;
-    $type = "boxDemandeInterv2";
+    $type = "boxsynopsisdemandeinterv";
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard_widget WHERE module = '" . $type . "'";
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
@@ -55,7 +55,7 @@ function getValSetting() {
     return $c;
 }
 
-function widget_boxDemandeInterv2_settings() {
+function widget_boxsynopsisdemandeinterv_settings() {
     // Get the saved settings.
     global $user, $db;
 
@@ -64,7 +64,7 @@ function widget_boxDemandeInterv2_settings() {
         foreach ($GLOBALS['_POST']['settings'] as $val)
             $c .= $val . ",";
 //    $c = $GLOBALS['_POST']['settings'] ? $GLOBALS['_POST']['settings']['filter'] : false;
-    $type = "boxDemandeInterv2";
+    $type = "boxsynopsisdemandeinterv";
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard_widget WHERE module = '" . $type . "'";
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);

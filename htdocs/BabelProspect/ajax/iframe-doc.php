@@ -444,10 +444,10 @@ if (empty($action) || $action == 'file_manager' || preg_match('/refresh/i',$acti
                         $ecmdir->jqtreePropal('fichinter');
                     }
                 break;
-                case MAIN_DB_PREFIX.'Synopsis_demandeInterv':
-                    if ($conf->global->ECM_SHOWDEMANDEINTERV == "true" && $user->rights->ecm->showdemandeInterv){
+                case MAIN_DB_PREFIX.'synopsisdemandeinterv':
+                    if ($conf->global->ECM_SHOWsynopsisdemandeinterv == "true" && $user->rights->ecm->showsynopsisdemandeinterv){
                         $ecmdir->currentTable = $sqlTable;
-                        $ecmdir->jqtreePropal('demandeInterv');
+                        $ecmdir->jqtreePropal('synopsisdemandeinterv');
                     }
                 break;
                 case '".MAIN_DB_PREFIX."livraison':

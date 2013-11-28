@@ -525,7 +525,7 @@ if ($id > 0) {
     print <<<EOF
     jQuery(document).ready(function(){
         jQuery('#NouvDI').click(function(){
-            location.href=DOL_URL_ROOT+"/Synopsis_DemandeInterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
+            location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });
         jQuery('#supprLigne').click(function(){
             jQuery('#delDialog').dialog('open');

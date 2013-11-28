@@ -112,7 +112,7 @@ if ($_GET['id'])
         $societe = new Societe($db);
         if ( $societe->fetch($fichinter->socid) )
         {
-            $head = Synopsis_fichinter_prepare_head($fichinter);
+            $head = synopsisfichinter_prepare_head($fichinter);
             dol_fiche_head($head, 'note', $langs->trans('InterventionCard'));
 
             print '<table cellpadding=15 class="border" width="100%">';

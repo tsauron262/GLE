@@ -34,9 +34,9 @@ if($typeObj == "FI"){
         $table = "fichinter";
 }
 else{
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
-        $fi = new demandeInterv($db);
-        $table = "demandeInterv";
+        require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+        $fi = new Synopsisdemandeinterv($db);
+        $table = "synopsisdemandeinterv";
 }
 
   switch($action)
@@ -115,7 +115,7 @@ else{
 
         $SQL = "SELECT t.label as type, t.isDeplacement, fd.date, fd.description, fd.total_ht, ".($typeObj=="FI" ?"fk_depProduct, " : "")."fd.fk_typeinterv, fd.duree
                   FROM ".MAIN_DB_PREFIX."Synopsis_".$table."det as fd
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
+             LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
                  WHERE fd.fk_".$table." = ".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";

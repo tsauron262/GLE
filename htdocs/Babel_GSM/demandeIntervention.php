@@ -20,7 +20,7 @@ require ("./main.inc.php");
 
 require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
 require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT."/Babel_GSM/gsm.class.php");
 if ($user->rights->BabelGSM->BabelGSM_tech->AfficheIntervention !=1)
 {
@@ -35,13 +35,13 @@ $gsm->MainInit();
 
 print '<TABLE  width="100%" class="nobordernopadding">';
 //Liste les propal, le montant total HT, le status Fichinter
-$requete = "SELECT ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid," .
-        "          ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc," .
-        "          concat_ws('/',day(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei),month(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei),year(".MAIN_DB_PREFIX."Synopsis_demandeInterv.datei)) as dateFi" .
-        "     FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv ";
+$requete = "SELECT ".MAIN_DB_PREFIX."synopsisdemandeinterv.rowid," .
+        "          ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_soc," .
+        "          concat_ws('/',day(".MAIN_DB_PREFIX."synopsisdemandeinterv.datei),month(".MAIN_DB_PREFIX."synopsisdemandeinterv.datei),year(".MAIN_DB_PREFIX."synopsisdemandeinterv.datei)) as dateFi" .
+        "     FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv ";
 if ($_GET["societe_id"] && $_GET["societe_id"] > 0)
 {
-    $requete .= " WHERE ".MAIN_DB_PREFIX."Synopsis_demandeInterv.fk_soc = ".$_GET['societe_id'];
+    $requete .= " WHERE ".MAIN_DB_PREFIX."synopsisdemandeinterv.fk_soc = ".$_GET['societe_id'];
 }
 $requete .= " ORDER BY datei," .
         "          fk_statut," .
@@ -63,9 +63,9 @@ if ($resql)
             $pair=true;
             print "<TR class='impair'>";
         }
-        $fi = new demandeInterv($db,$res->fk_soc);
+        $fi = new Synopsisdemandeinterv($db,$res->fk_soc);
         $fi->fetch($res->rowid);
-        print "    <TD align='left'><A href='demandeInterv_detail.php?intervention_id=".$res->rowid."'>".img_object($langs->trans("showIntervention"),"intervention")."&nbsp;" .$fi->ref."</A>";
+        print "    <TD align='left'><A href='synopsisdemandeinterv_detail.php?intervention_id=".$res->rowid."'>".img_object($langs->trans("showIntervention"),"intervention")."&nbsp;" .$fi->ref."</A>";
         $soc = new Societe($db);
         $soc->fetch($res->fk_soc);
         $socname = $soc->nom;

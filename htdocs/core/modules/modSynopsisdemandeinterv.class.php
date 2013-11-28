@@ -34,39 +34,39 @@
  */
 
 /**
-        \defgroup   demandeInterv     Module intervention cards
+        \defgroup   synopsisdemandeinterv     Module intervention cards
         \brief      Module to manage intervention cards
-        \version    $Id: moddemandeInterv.class.php,v 1.33 2008/02/25 16:30:48 eldy Exp $
+        \version    $Id: modsynopsisdemandeinterv.class.php,v 1.33 2008/02/25 16:30:48 eldy Exp $
 */
 
 /**
-        \file       htdocs/core/modules/moddemandeInterv.class.php
-        \ingroup    demandeInterv
-        \brief      Fichier de description et activation du module demandeInterv
+        \file       htdocs/core/modules/modsynopsisdemandeinterv.class.php
+        \ingroup    synopsisdemandeinterv
+        \brief      Fichier de description et activation du module synopsisdemandeinterv
 */
 
 include_once(DOL_DOCUMENT_ROOT ."/core/modules/DolibarrModules.class.php");
 
 
 /**
-        \class      moddemandeInterv
-        \brief      Classe de description et activation du module demandeInterv
+        \class      modsynopsisdemandeinterv
+        \brief      Classe de description et activation du module synopsisdemandeinterv
 */
 
-class modSynopsisDemandeInterv  extends DolibarrModules
+class modsynopsisdemandeinterv  extends DolibarrModules
 {
 
    /**
     *   \brief      Constructeur. Definit les noms, constantes et boites
     *   \param      DB      handler d'acces base
     */
-  function modSynopsisDemandeInterv($DB)
+  function modsynopsisdemandeinterv($DB)
   {
     $this->db = $DB ;
     $this->numero = 22229 ;
 
     $this->family = "Synopsis";
-    $this->name = "Demande d'intervention";
+    $this->name = "synopsisdemandeinterv";
     $this->description = "Gestion des demandes d'intervention";
 
 //    $this->revision = explode(" ","$Revision: 0.1 $");
@@ -74,16 +74,16 @@ class modSynopsisDemandeInterv  extends DolibarrModules
 
     $this->const_name = 'MAIN_MODULE_SYNOPSISDEMANDEINTERV';
     $this->special = 0;
-    $this->picto = "demandeInterv@Synopsis_DemandeInterv";
+    $this->picto = "synopsisdemandeinterv@synopsisdemandeinterv";
 
     // Dir
     $this->dirs = array();
 
     // Config pages
-    $this->config_page_url = array("Synopsis_DemandeInterv.php");
+    $this->config_page_url = array("synopsisdemandeinterv.php");
 
     // Dependances
-    $this->depends = array("modSociete","modCommercial","modFicheinter");
+    $this->depends = array("modSociete","modCommercial","modSynopsisFicheinter");
     $this->requiredby = array();
 
     // Constantes
@@ -103,7 +103,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
     // Boites
     $this->boxes = array();
     $r=0;
-    $this->boxes[$r][1] = "box_demandeInterv.php";
+    $this->boxes[$r][1] = "box_synopsisdemandeinterv.php";
     $r++;
 
     // Permissions
@@ -181,7 +181,7 @@ class modSynopsisDemandeInterv  extends DolibarrModules
             "INSERT INTO ".MAIN_DB_PREFIX."document_model (nom, type) VALUES('".$this->const[0][2]."','synopsisdemandeinterv')",
             );
         
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_demandeInterv` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisdemandeinterv` (
   `rowid` int(11) NOT NULL auto_increment,
   `fk_soc` int(11) NOT NULL,
   `fk_projet` int(11) default '0',
@@ -211,12 +211,12 @@ class modSynopsisDemandeInterv  extends DolibarrModules
   `dateStat` int(11) NOT NULL,
   PRIMARY KEY  (`rowid`),
   UNIQUE KEY `ref` (`ref`),
-  KEY `idx_demandeInterv_fk_soc` (`fk_soc`)
+  KEY `idx_synopsisdemandeinterv_fk_soc` (`fk_soc`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=2280 ;";
         
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet` (
+        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisdemandeintervdet` (
   `rowid` int(11) NOT NULL auto_increment,
-  `fk_demandeInterv` int(11) default NULL,
+  `fk_synopsisdemandeinterv` int(11) default NULL,
   `date` date default NULL,
   `description` text,
   `duree` int(11) default NULL,

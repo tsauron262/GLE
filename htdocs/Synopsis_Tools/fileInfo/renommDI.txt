@@ -1,0 +1,15 @@
+suppr table 
+dashboard S
+Synopsis_Process_type_element
+Synopsis_trigger
+
+renommer 
+table di
+table didet
+champ fk_di
+
+deinstall reinstall
+di
+fi
+dashboard
+process

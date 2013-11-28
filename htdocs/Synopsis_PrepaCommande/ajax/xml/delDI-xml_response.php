@@ -20,9 +20,9 @@
 
     require_once('../../../main.inc.php');
     $id = $_REQUEST['id']; // commande
-    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet WHERE fk_demandeInterv = ".$id;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."synopsisdemandeintervdet WHERE fk_synopsisdemandeinterv = ".$id;
     $sql = $db->query($requete);
-    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE rowid = ".$id;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE rowid = ".$id;
     $sql = $db->query($requete);
     $xmlStr = "<ajax-response>";
     if ($sql){

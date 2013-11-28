@@ -76,7 +76,7 @@ for ($i = 0; $i < 2; $i++) {
     if ($i == 0)
         $table = "fichinter";
     else
-        $table = "demandeInterv";
+        $table = "synopsisdemandeinterv";
         $requete = "SELECT *
               FROM " . MAIN_DB_PREFIX . "Synopsis_".$table . "
              WHERE fk_contrat = " . $contratid;
@@ -158,7 +158,7 @@ for ($i = 0; $i < 2; $i++) {
     $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
               FROM " . MAIN_DB_PREFIX ."Synopsis_".$table.  "det as fd,
                    " . MAIN_DB_PREFIX ."Synopsis_".$table. " as f,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as b
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as b
              WHERE fd.fk_".$table." = f.rowid
                AND b.id = fd.fk_typeinterv
                AND f.fk_contrat = " . $contratid . "
@@ -238,7 +238,7 @@ for ($i = 0; $i < 2; $i++) {
 
 
 $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+              FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv
              WHERE fk_contrat = " . $contratid;
 
 $contrat->fetch_lines();

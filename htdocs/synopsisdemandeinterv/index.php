@@ -34,14 +34,14 @@
  */
 
 /**
-  \file       htdocs/synopsis_demandeinterv/index.php
+  \file       htdocs/synopsisdemandeinterv/index.php
   \brief      Page accueil espace fiches interventions
-  \ingroup    demandeInterv
+  \ingroup    synopsisdemandeinterv
   \version    $Id: index.php,v 1.40 2008/04/09 18:13:50 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 $langs->load("companies");
@@ -53,10 +53,10 @@ $socid = isset($_GET["socid"]) ? $_GET["socid"] : "";
 $page = isset($_GET["page"]) ? $_GET["page"] : "";
 
 // Security check
-$demandeIntervid = isset($_GET["id"]) ? $_GET["id"] : '';
+$synopsisdemandeintervid = isset($_GET["id"]) ? $_GET["id"] : '';
 if ($user->societe_id)
     $socid = $user->societe_id;
-//$result = restrictedArea($user, 'Synopsis_demandeInterv', $demandeIntervid,'');
+//$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid,'');
 
 if (!$sortorder)
     $sortorder = "";
@@ -83,7 +83,7 @@ llxHeader();
 $sql = "SELECT s.nom,s.rowid as socid, f.ref, f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid)
     $sql .= ", sc.fk_soc, sc.fk_user";
-$sql.= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as f ";
+$sql.= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f ";
 if (!$user->rights->societe->client->voir && !$socid)
     $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
 $sql.= " WHERE f.fk_soc = s.rowid ";
@@ -101,7 +101,7 @@ $result = $db->query($sql);
 if ($result) {
     $num = $db->num_rows($result);
 
-    $demandeInterv_static = new demandeInterv($db);
+    $synopsisdemandeinterv_static = new Synopsisdemandeinterv($db);
 
     $urlparam = "&amp;socid=$socid";
     if ($filtreUser)
@@ -125,12 +125,12 @@ if ($result) {
         $objp = $db->fetch_object($result);
         $var = !$var;
         print "<tr $bc[$var]>";
-        print "<td><a href=\"fiche.php?id=" . $objp->fichid . "\">" . img_object($langs->trans("Show"), "demandeInterv@Synopsis_DemandeInterv") . ' ' . $objp->ref . "</a></td>\n";
+        print "<td><a href=\"fiche.php?id=" . $objp->fichid . "\">" . img_object($langs->trans("Show"), "synopsisdemandeinterv@synopsisdemandeinterv") . ' ' . $objp->ref . "</a></td>\n";
         print '<td><a href="' . DOL_URL_ROOT . '/comm/fiche.php?socid=' . $objp->socid . '">' . img_object($langs->trans("ShowCompany"), "company") . ' ' . dol_trunc($objp->nom, 44) . "</a></td>\n";
         print '<td>' . nl2br($objp->description) . '</td>';
         print '<td align="center">' . dol_print_date($db->jdate($objp->dp), 'day') . "</td>\n";
         print '<td align="right">' . ConvertSecondToTime($objp->duree) . '</td>';
-        print '<td align="right">' . $demandeInterv_static->LibStatut($objp->fk_statut, 5) . '</td>';
+        print '<td align="right">' . $synopsisdemandeinterv_static->LibStatut($objp->fk_statut, 5) . '</td>';
 
         print "</tr>\n";
         $total += $objp->duree;

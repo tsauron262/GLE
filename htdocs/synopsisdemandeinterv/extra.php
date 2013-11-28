@@ -19,30 +19,30 @@
 
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/demandeInterv.lib.php");
+require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 if ($conf->projet->enabled)
 {
     require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 }
-if (defined($conf->global->DEMANDEINTERV_ADDON_PDF) && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->DEMANDEINTERV_ADDON_PDF.".php"))
+if (defined($conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF) && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php"))
 {
-    require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->DEMANDEINTERV_ADDON_PDF.".php");
+    require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/mod_".$conf->global->SYNOPSISDEMANDEINTERV_ADDON_PDF.".php");
 }
 
 $langs->load("companies");
 $langs->load("interventions");
 
 // Get parameters
-$demandeIntervid = isset($_REQUEST["id"])?$_REQUEST["id"]:'';
+$synopsisdemandeintervid = isset($_REQUEST["id"])?$_REQUEST["id"]:'';
 
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'synopsisdemandeinterv', $demandeIntervid, 'Synopsis_demandeInterv');
+$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid, 'synopsisdemandeinterv');
 
 $html = new Form($db);
 $formfile = new FormFile($db);
@@ -66,7 +66,7 @@ llxHeader($js);
                 $type = $_REQUEST['type-'.$idExtraKey];
                 //Y'a quelque chose ?
                 $requete = "DELETE
-                              FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                              FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                              WHERE interv_refid = ".$_REQUEST['id']. "
                                AND typeI = 'FI'
                                AND extra_key_refid= ".$idExtraKey;
@@ -74,23 +74,23 @@ llxHeader($js);
                 if ($type == 'checkbox')
                 {
                     if($val == 'On' || $val =='on' || $val=='ON'){
-                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                                                  (interv_refid,extra_key_refid,extra_value,typeI)
                                           VALUES (".$_REQUEST['id'].",".$idExtraKey.",1,'FI')";
                           $sql = $db->query($requete);
                     } else {
-                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                         $requete = "INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                                                  (interv_refid,extra_key_refid,extra_value,typeI)
                                           VALUES (".$_REQUEST['id'].",".$idExtraKey.",0,'FI')";
                          $sql = $db->query($requete);
                     }
                 } else if($type=='3stars' && $_REQUEST['extraKey-'.$idExtraKey]."x" =="x"){
-                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (".$_REQUEST['id'].",".$idExtraKey.",NULL,'FI')";
                       $sql = $db->query($requete);
                 } else {
-                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value
+                     $requete = "INSERT INTO ".MAIN_DB_PREFIX."synopsisfichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (".$_REQUEST['id'].",".$idExtraKey.",'".addslashes($val)."','FI')";
                       $sql = $db->query($requete);
@@ -103,18 +103,18 @@ if ($_REQUEST["id"] > 0) {
     /*
     * Affichage en mode visu
     */
-    $demandeInterv = new demandeInterv($db);
-    $result=$demandeInterv->fetch($_REQUEST["id"]);
+    $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+    $result=$synopsisdemandeinterv->fetch($_REQUEST["id"]);
     if (! $result > 0)
     {
         dol_print_error($db);
         exit;
     }
-    $demandeInterv->fetch_client();
+    $synopsisdemandeinterv->fetch_client();
 
     if ($mesg) print $mesg."<br>";
 
-    $head = demandeInterv_prepare_head($demandeInterv);
+    $head = synopsisdemandeinterv_prepare_head($synopsisdemandeinterv);
 
     dol_fiche_head($head, 'extra', $langs->trans("InterventionCard"));
 
@@ -123,7 +123,7 @@ if ($_REQUEST["id"] > 0) {
     */
     if ($_REQUEST['action'] == 'delete')
     {
-        $html->form_confirm($_SERVER["PHP_SELF"].'?id='.$demandeInterv->id, $langs->trans('DeleteIntervention'), $langs->trans('ConfirmDeleteIntervention'), 'confirm_delete');
+        $html->form_confirm($_SERVER["PHP_SELF"].'?id='.$synopsisdemandeinterv->id, $langs->trans('DeleteIntervention'), $langs->trans('ConfirmDeleteIntervention'), 'confirm_delete');
         print '<br>';
     }
 
@@ -136,42 +136,42 @@ if ($_REQUEST["id"] > 0) {
 
     // Ref
     print '<tr><th class="ui-widget-header ui-state-default" width="25%">'.$langs->trans("Ref").'</th>
-               <td colspan=3 class="ui-widget-content">'.$demandeInterv->ref.'</td></tr>';
+               <td colspan=3 class="ui-widget-content">'.$synopsisdemandeinterv->ref.'</td></tr>';
 
     // Societe
     print "<tr><th class='ui-widget-header ui-state-default'>".$langs->trans("Company")."</th>
-               <td colspan=3 class='ui-widget-content'>".$demandeInterv->client->getNomUrl(1)."</td></tr>";
+               <td colspan=3 class='ui-widget-content'>".$synopsisdemandeinterv->client->getNomUrl(1)."</td></tr>";
 
 //Ref contrat ou commande
-    if ($demandeInterv->fk_contrat > 0)
+    if ($synopsisdemandeinterv->fk_contrat > 0)
     {
         print "<tr><th class='ui-widget-header ui-state-default'>Contrat</th>";
         require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
         $contrat=new Contrat($db);
-        $contrat->fetch($demandeInterv->fk_contrat);
+        $contrat->fetch($synopsisdemandeinterv->fk_contrat);
         print "    <td class='ui-widget-content'>".$contrat->getNomUrl(1)."</td> ";
-    } else if ($demandeInterv->fk_commande > 0){
+    } else if ($synopsisdemandeinterv->fk_commande > 0){
         print "<tr><th class='ui-widget-header ui-state-default'>Commande</th>";
         require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
         $com=new Commande($db);
-        $com->fetch($demandeInterv->fk_commande);
+        $com->fetch($synopsisdemandeinterv->fk_commande);
         print "<td colspan=3 class='ui-widget-content'>".$com->getNomUrl(1);
 
     }
     // Date
     print '<tr><th class="ui-widget-header ui-state-default">';
     print $langs->trans('Date');
-    if ($_REQUEST['action'] != 'editdate_delivery' && $demandeInterv->brouillon) print '<a href="'.$_SERVER["PHP_SELF"].'?action=editdate_delivery&amp;id='.$demandeInterv->id.'">'.img_edit($langs->trans('SetDateCreate'),1).'</a>';
+    if ($_REQUEST['action'] != 'editdate_delivery' && $synopsisdemandeinterv->brouillon) print '<a href="'.$_SERVER["PHP_SELF"].'?action=editdate_delivery&amp;id='.$synopsisdemandeinterv->id.'">'.img_edit($langs->trans('SetDateCreate'),1).'</a>';
     print '</th><td colspan="3" class="ui-widget-content">';
     if ($_REQUEST['action'] == 'editdate_delivery')
     {
-        print '<form name="editdate_delivery" action="'.$_SERVER["PHP_SELF"].'?id='.$demandeInterv->id.'" method="post">';
+        print '<form name="editdate_delivery" action="'.$_SERVER["PHP_SELF"].'?id='.$synopsisdemandeinterv->id.'" method="post">';
         print '<input type="hidden" name="action" value="setdate_delivery">';
-        $html->select_date($demandeInterv->date,'liv_','','','',"editdate_delivery");
+        $html->select_date($synopsisdemandeinterv->date,'liv_','','','',"editdate_delivery");
         print '<input type="submit" class="button" value="'.$langs->trans('Modify').'">';
         print '</form>';
     } else {
-        print dol_print_date($db->jdate($demandeInterv->date),'day');
+        print dol_print_date($db->jdate($synopsisdemandeinterv->date),'day');
     }
     print '</td>';
     print '</tr></table><br><br/>';
@@ -188,8 +188,8 @@ if ($_REQUEST["id"] > 0) {
                        k.type,
                        k.id,
                        v.extra_value, description
-                  FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key as k
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = ".$demandeInterv->id." AND typeI = 'FI'
+                  FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_key as k
+             LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = ".$synopsisdemandeinterv->id." AND typeI = 'FI'
                  WHERE k.active = 1 AND (isQuality <> 1 OR isQuality IS NULL) AND (isInMainPanel <> 1 OR isInMainPanel IS NULL)";
     $sql = $db->query($requete);
     while ($res=$db->fetch_object($sql))
@@ -249,7 +249,7 @@ if ($_REQUEST["id"] > 0) {
                 case "radio":
                 {
                     print "<td colspan=2 valign='middle' class='ui-widget-content'>";
-                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
+                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = ".$res->id;
                     $sql1 = $db->query($requete);
                     if ($db->num_rows($sql1)> 0)
                     {
@@ -272,7 +272,7 @@ if ($_REQUEST["id"] > 0) {
 //            {
 //                print '    <td colspan=3 class="ui-widget-content">'.($res->extra_value==1?'Oui':'Non').'</td></tr>';
 //            } else if($res->type=='radio'){
-//                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id." AND value = ".$res->extra_value;
+//                $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = ".$res->id." AND value = ".$res->extra_value;
 //                $sql1 = $db->query($requete);
 //                $res1 = $db->fetch_object($sql1);
 //                print '    <td colspan=3 class="ui-widget-content">'.$res1->label.'</td></tr>';

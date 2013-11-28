@@ -25,7 +25,7 @@ $langs->load("synopsisGene@Synopsis_Tools");
 
 // Security check
 if ($user->societe_id) $socid=$user->societe_id;
-//$result = restrictedArea($user, 'demandeInterv', $demandeIntervid,'');
+//$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid,'');
 
 $header .= '<link href="css/magento.css"  type="text/css" rel="stylesheet" ></link>';
 $header .= " <script > jQuery(document).ready(function(){ jQuery('select').selectmenu({style: 'dropdown', maxHeight: 300 }); });  </script>\n";

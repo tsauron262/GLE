@@ -520,15 +520,23 @@ function getTab() {
             array(),
             array()
         ),
-        array($oldPref . "fichinter", MAIN_DB_PREFIX . "Synopsis_fichinter",
-            array(),
-            array()
+        array($oldPref . "fichinter", MAIN_DB_PREFIX . "fichinter",
+            array('rowid', 'fk_soc', 'fk_projet', 'fk_contrat', 'ref', 'tms', 'datec', 'date_valid', 'datei', 'fk_user_author', 'fk_user_valid', 'fk_statut', 'duree', 'description', 'note_private', 'note_public', 'model_pdf'),
+            array('rowid', 'fk_soc', 'fk_projet', 'fk_contrat', 'ref', 'tms', 'datec', 'date_valid', 'datei', 'fk_user_author', 'fk_user_valid', 'fk_statut', 'duree', 'description', 'note_private', 'note_public', 'model_pdf')
         ),
-        array($oldPref . "fichinterdet", MAIN_DB_PREFIX . "Synopsis_fichinterdet",
-            array(),
-            array()
+        array($oldPref . "fichinter", MAIN_DB_PREFIX . "synopsisfichinter",
+            array('rowid', 'fk_commande', 'total_ht', 'total_tva', 'total_ttc', 'natureInter'),
+            array('rowid', 'fk_commande', 'total_ht', 'total_tva', 'total_ttc', 'natureInter')
         ),
-        array("Babel_Interv_extra_value", MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value",
+        array($oldPref . "fichinterdet", MAIN_DB_PREFIX . "fichinterdet",
+            array('rowid', 'fk_fichinter', 'date', 'description', 'duree', 'rang'),
+            array('rowid', 'fk_fichinter', 'date', 'description', 'duree', 'rang')
+        ),
+        array($oldPref . "fichinterdet", MAIN_DB_PREFIX . "synopsisfichinterdet",
+            array('rowid', 'fk_typeinterv', 'fk_depProduct', 'tx_tva', 'pu_ht', 'qte', 'total_ht', 'total_tva', 'total_ttc', 'fk_contratdet', 'fk_commandedet', 'isForfait'),
+            array('rowid', 'fk_typeinterv', 'fk_depProduct', 'tx_tva', 'pu_ht', 'qte', 'total_ht', 'total_tva', 'total_ttc', 'fk_contratdet', 'fk_commandedet', 'isForfait')
+        ),
+        array("Babel_Interv_extra_value", MAIN_DB_PREFIX . "synopsisfichinter_extra_value",
             array(),
             array()
         ),
@@ -584,13 +592,13 @@ function getTab() {
             array('fk_commande_ligne', '$%commandedet', 'rowid', '$%contratdet'),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
-        array("Babel_demandeInterv", MAIN_DB_PREFIX . "Synopsis_demandeInterv",
+        array("Babel_demandeInterv", MAIN_DB_PREFIX . "synopsisdemandeinterv",
             array(),
             array()
         ),
-        array("Babel_demandeIntervdet", MAIN_DB_PREFIX . "Synopsis_demandeIntervdet",
-            array(),
-            array()
+        array("Babel_demandeIntervdet", MAIN_DB_PREFIX . "synopsisdemandeintervdet",
+            array('rowid', 'fk_demandeInterv', 'date', 'description', 'duree', 'rang', 'fk_typeinterv', 'tx_tva', 'pu_ht', 'qte', 'total_ht', 'total_tva', 'total_ttc', 'fk_contratdet', 'fk_commandedet', 'isForfait'),
+            array('rowid', 'fk_synopsisdemandeinterv', 'date', 'description', 'duree', 'rang', 'fk_typeinterv', 'tx_tva', 'pu_ht', 'qte', 'total_ht', 'total_tva', 'total_ttc', 'fk_contratdet', 'fk_commandedet', 'isForfait')
         ),
         array($oldPref . "co_exp", MAIN_DB_PREFIX . "element_element",
             array("fk_commande", 'fk_expedition', '$%commande', '$%shipping'),
@@ -660,11 +668,11 @@ function getTab() {
             array("element_id", "date_fin_SAV", "$%1015"),
             array("chrono_refid", "value", "key_id")
         ),
-        array("Babel_User_PrixTypeInterv", MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv",
+        array("Babel_User_PrixTypeInterv", MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv",
             array(),
             array()
         ),
-        array("Babel_User_PrixDepInterv", MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv",
+        array("Babel_User_PrixDepInterv", MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv",
             array(),
             array()
         ),

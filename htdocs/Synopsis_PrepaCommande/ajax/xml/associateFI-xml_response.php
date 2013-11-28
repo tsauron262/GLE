@@ -19,7 +19,7 @@
   require_once("../../../main.inc.php");
   $comId = $_REQUEST['id'];
   $fid = $_REQUEST['fid'];
-  $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande =".$comId . " WHERE rowid = ".$fid;
+  $requete = "UPDATE ".MAIN_DB_PREFIX."synopsisfichinter SET fk_commande =".$comId . " WHERE rowid = ".$fid;
   $sql = $db->query($requete);
 //DI ??
   $res="error";

@@ -639,7 +639,7 @@ function getTypeAndId($url = null, $request = null) {
     } elseif (stripos($url, "fichinter/") != false) {
         $element_type = 'FI';
         @$element_id = $request['id'];
-    } elseif (stripos($url, "Synopsis_DemandeInterv/") != false) {
+    } elseif (stripos($url, "synopsisdemandeinterv/") != false) {
         $element_type = 'DI';
         @$element_id = $request['id'];
     } elseif (stripos($url, "contrat/") != false) {

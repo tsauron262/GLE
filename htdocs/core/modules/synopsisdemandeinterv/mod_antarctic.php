@@ -44,7 +44,7 @@ require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/modules_syn
     \class      mod_arctic
     \brief      Classe du modele de numerotation de reference de fiche intervention Arctic
 */
-class mod_antarctic extends ModeleNumRefdemandeInterv
+class mod_antarctic extends ModeleNumRefsynopsisdemandeinterv
 {
     var $version='dolibarr';        // 'development', 'experimental', 'dolibarr'
     var $error = '';
@@ -71,12 +71,12 @@ class mod_antarctic extends ModeleNumRefdemandeInterv
         $texte = $langs->trans('GenericNumRefModelDesc')."<br>\n";
         $texte.= '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
         $texte.= '<input type="hidden" name="action" value="updateMask">';
-        $texte.= '<input type="hidden" name="maskconst" value="DEMANDEINTERV_ANTARTIC_MASK">';
+        $texte.= '<input type="hidden" name="maskconst" value="SYNOPSISDEMANDEINTERV_ANTARTIC_MASK">';
         $texte.= '<table class="nobordernopadding" width="100%">';
 
         // Parametrage du prefix des factures
         $texte.= '<tr><td>'.$langs->trans("Mask").':</td>';
-        $texte.= '<td align="right">'.$form->textwithtooltip('<input type="text" class="flat" size="24" name="maskvalue" value="'.$conf->global->demandeInterv_ANTARTIC_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("InterventionCard"),$langs->transnoentities("InterventionCard"),$langs->transnoentities("InterventionCard")),1,1).'</td>';
+        $texte.= '<td align="right">'.$form->textwithtooltip('<input type="text" class="flat" size="24" name="maskvalue" value="'.$conf->global->SYNOPSISDEMANDEINTERV_ANTARTIC_MASK.'">',$langs->trans("GenericMaskCodes",$langs->transnoentities("InterventionCard"),$langs->transnoentities("InterventionCard"),$langs->transnoentities("InterventionCard")),1,1).'</td>';
 
         $texte.= '<td align="left" rowspan="2">&nbsp; <input type="submit" class="button" value="'.$langs->trans("Modify").'" name="Button"></td>';
 
@@ -109,17 +109,17 @@ class mod_antarctic extends ModeleNumRefdemandeInterv
 
     /**        \brief      Renvoi prochaine valeur attribuee
     *          \param      objsoc      Objet societe
-    *          \param      demandeInterv    Object demandeInterv
+    *          \param      synopsisdemandeinterv    Object synopsisdemandeinterv
     *          \return     string      Valeur
     */
-    function getNextValue($objsoc=0,$demandeInterv='')
+    function getNextValue($objsoc=0,$synopsisdemandeinterv='')
     {
         global $db,$conf;
 
         require_once(DOL_DOCUMENT_ROOT ."/core/lib/functions2.lib.php");
 
         // On defini critere recherche compteur
-        $mask=$conf->global->DEMANDEINTERV_ANTARTIC_MASK;
+        $mask=$conf->global->SYNOPSISDEMANDEINTERV_ANTARTIC_MASK;
 
         if (! $mask)
         {
@@ -127,7 +127,7 @@ class mod_antarctic extends ModeleNumRefdemandeInterv
             return 0;
         }
 
-        $numFinal=get_next_value($db,$mask,'demandeInterv','ref','',$objsoc->code_client,$demandeInterv->date);
+        $numFinal=get_next_value($db,$mask,'synopsisdemandeinterv','ref','',$objsoc->code_client,$synopsisdemandeinterv->date);
 
         return  $numFinal;
   }

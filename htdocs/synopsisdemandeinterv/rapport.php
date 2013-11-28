@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * $Id: rapport.php,v 1.12 2007/06/22 08:44:46 hregis Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsis_demandeinterv/rapport.php,v $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisdemandeinterv/rapport.php,v $
  *
  */
 /*
@@ -36,7 +36,7 @@
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 $html = new Form($db);
 if ($user->societe_id > 0) {
     $socidUser = $user->societe_id;
@@ -98,7 +98,7 @@ $sql = "SELECT s.nom,
                f.fk_statut,
                f.duree";
 $sql .= " FROM " . MAIN_DB_PREFIX . "societe as s,
-               " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as f ";
+               " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f ";
 $sql .= "WHERE f.fk_soc = s.rowid";
 
 if ($filterUser) {
@@ -139,7 +139,7 @@ if(isset($_REQUEST['statut']) && $_REQUEST['statut']> 0)
 $sql .= " ORDER BY $sortfield $sortorder ";
 
 $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "Synopsis_demandeInterv as f ";
+$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f ";
 $requete .= " WHERE (f.fk_soc = s.rowid";
 
 $requete .= " AND datei >= '$start' AND datei < '$end'";
@@ -223,7 +223,7 @@ if ($resql) {
 
         $var = !$var;
         $htmlTab .= "<tr $bc[$var]>";
-        $di = new DemandeInterv($db);
+        $di = new Synopsisdemandeinterv($db);
         $di->fetch($objp->fichid);
 
 
@@ -249,13 +249,13 @@ if ($resql) {
 
 
 
-        $demandeInterv = new demandeInterv($db);
-        $demandeInterv->id = $objp->fichid;
-        $demandeInterv->fetch($objp->fichid);
-        if ($demandeInterv->fk_commande) {
+        $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+        $synopsisdemandeinterv->id = $objp->fichid;
+        $synopsisdemandeinterv->fetch($objp->fichid);
+        if ($synopsisdemandeinterv->fk_commande) {
             require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
             $com = new Commande($db);
-            $com->fetch($demandeInterv->fk_commande);
+            $com->fetch($synopsisdemandeinterv->fk_commande);
 //        $com->fetch_group_lines(0, 0, 0, 0, 1);//Groupe commande
             $arrGrpCom = array($com->id => $com->id);
 //        $arrGrp = $com->listGroupMember(true);
@@ -286,11 +286,11 @@ if ($resql) {
 //Prevu en euro et en temps
             $requete = "SELECT SUM(det.duree) as durTot ,
                    SUM(det.total_ht) as totHT
-              FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv di,
-                   " . MAIN_DB_PREFIX . "Synopsis_demandeIntervdet as det,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t
+              FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv di,
+                   " . MAIN_DB_PREFIX . "synopsisdemandeintervdet as det,
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE t.id=det.fk_typeinterv
-               AND det.fk_demandeinterv = di.rowid
+               AND det.fk_synopsisdemandeinterv = di.rowid
                AND t.inTotalRecap=1
                AND fk_commande  IN (" . join(',', $arrGrpCom) . ") ";
             $sql = $db->query($requete);
@@ -305,7 +305,7 @@ if ($resql) {
                    SUM(det.total_ht) as totHT
               FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as inter,
                    " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as det,
-                   " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as t
+                   " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as t
              WHERE t.id=det.fk_typeinterv
                AND det.fk_fichinter = inter.rowid
                AND t.inTotalRecap=1

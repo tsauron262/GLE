@@ -286,8 +286,8 @@ if ($affaireid > 0)
                 break;
                 case 'DI':
                 {
-                    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
-                    $obj=new demandeInterv($db);
+                    require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
+                    $obj=new Synopsisdemandeinterv($db);
                     $obj->fetch($res->element_id);
                     $upload_dir = $conf->synopsisdemandeinterv->dir_output.'/'.sanitize_string($obj->ref);
                     $filearrayt['DI'][sanitize_string($obj->ref)]=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_ASC:SORT_DESC),1);

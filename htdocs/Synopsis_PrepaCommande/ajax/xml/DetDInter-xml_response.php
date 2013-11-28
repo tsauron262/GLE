@@ -25,9 +25,9 @@
   if ($id > 0)
   {
     $requete = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet as ft
-             LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
-                 WHERE fk_demandeInterv = ".$id. "
+                  FROM ".MAIN_DB_PREFIX."synopsisdemandeintervdet as ft
+             LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv AND t.active=1
+                 WHERE fk_synopsisdemandeinterv = ".$id. "
               ORDER BY ft.rang ";
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql))

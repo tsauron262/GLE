@@ -100,7 +100,7 @@ class gsm
             if ($user->rights->BabelGSM->BabelGSM_tech->AfficheIntervention )
             {
                 $html .= "       <LI onClick='DisplayDet(\"intervention\")' class='menu'>".img_object("intervention","intervention")."Fiche intervention";
-                $html .= "       <LI onClick='DisplayDet(\"demandeIntervention\")' class='menu'>".img_object("intervention","intervention")."Demande intervention";
+                $html .= "       <LI onClick='DisplayDet(\"synopsisdemandeintervention\")' class='menu'>".img_object("intervention","intervention")."Demande intervention";
             }
             if ($user->rights->BabelGSM->BabelGSM_com->AfficheContrat )
             {

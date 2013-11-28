@@ -20,7 +20,6 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->societe->creer;
         $table = MAIN_DB_PREFIX . "societe";
         $nomId = "socid";
-        $nomChampNote = "note";
     }
     if (stripos($url, '/commande/') !== false || stripos($url, '/Synopsis_PrepaCommande/prepacommande.php') !== false) {
         $table = MAIN_DB_PREFIX . "commande";
@@ -28,7 +27,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit2 = $user->rights->commande->creer;
     }
     if (stripos($url, '/fichinter/') !== false) {
-        $table = MAIN_DB_PREFIX . "Synopsis_fichinter";
+        $table = MAIN_DB_PREFIX . "fichinter";
         $droit1 = $user->rights->synopsisficheinter->lire;
         $droit2 = $user->rights->synopsisficheinter->creer;
     }
@@ -39,13 +38,13 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit1 = $user->rights->contrat->lire;
         $droit2 = $user->rights->contrat->creer;
     }
-    if (stripos($url, '/Synopsis_DemandeInterv/') !== false) {
-        $table = MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+    if (stripos($url, '/synopsisdemandeinterv/') !== false) {
+        $table = MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $droit1 = $user->rights->synopsisdemandeinterv->lire;
         $droit2 = $user->rights->synopsisdemandeinterv->creer;
     }
-    if (stripos($url, '/Synopsis_DemandeInterv/') !== false) {
-        $table = MAIN_DB_PREFIX . "Synopsis_demandeInterv";
+    if (stripos($url, '/synopsisdemandeinterv/') !== false) {
+        $table = MAIN_DB_PREFIX . "synopsisdemandeinterv";
         $droit1 = $user->rights->synopsisdemandeinterv->lire;
         $droit2 = $user->rights->synopsisdemandeinterv->creer;
     }

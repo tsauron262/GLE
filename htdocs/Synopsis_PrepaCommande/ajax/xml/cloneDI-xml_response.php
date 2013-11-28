@@ -21,8 +21,8 @@
     require_once('../../../main.inc.php');
 
     $id = $_REQUEST['id'];
-    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
-    $di = new demandeInterv($db);
+    require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
+    $di = new Synopsisdemandeinterv($db);
     $di->fetch($id);
     $di->author = $user->id;
     $di->fetch_lines();
@@ -34,7 +34,7 @@
     if ($res)
     foreach($di->lignes as $key=>$val)
     {
-        $val->fk_demandeInterv = $res;
+        $val->fk_synopsisdemandeinterv = $res;
         $val->datei = $di->date;
         $val->insert();
     }

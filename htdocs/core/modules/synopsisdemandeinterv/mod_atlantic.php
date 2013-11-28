@@ -46,7 +46,7 @@ require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisdemandeinterv/modules_syn
         \brief      Classe du modele de numerotation de reference de fiche intervention atlantic
 */
 
-class mod_atlantic extends ModeleNumRefdemandeInterv
+class mod_atlantic extends ModeleNumRefsynopsisdemandeinterv
 {
     var $prefix='DI';
     var $error='';
@@ -93,7 +93,7 @@ class mod_atlantic extends ModeleNumRefdemandeInterv
         $fayymm='';
 
         $sql = "SELECT MAX(ref)";
-        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
+        $sql.= " FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv";
         $resql=$db->query($sql);
         if ($resql)
         {
@@ -113,17 +113,17 @@ class mod_atlantic extends ModeleNumRefdemandeInterv
 
     /**        \brief      Renvoi prochaine valeur attribuee
     *          \param      objsoc      Objet societe
-    *          \param      demandeInterv    Object demandeInterv
+    *          \param      synopsisdemandeinterv    Object synopsisdemandeinterv
     *          \return     string      Valeur
     */
-    function getNextValue($objsoc=0,$demandeInterv='')
+    function getNextValue($objsoc=0,$synopsisdemandeinterv='')
     {
         global $db;
 
         // D'abord on recupere la valeur max (reponse immediate car champ indexe)
         $posindice=8;
         $sql = "SELECT MAX(0+SUBSTRING(ref,".$posindice.")) as max";
-        $sql.= " FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv";
+        $sql.= " FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv";
         $sql.= " WHERE ref like '".$this->prefix."%'";
 
         $resql=$db->query($sql);
@@ -135,7 +135,7 @@ class mod_atlantic extends ModeleNumRefdemandeInterv
         }
 
         //$date=time();
-        $date=$demandeInterv->date;
+        $date=$synopsisdemandeinterv->date;
         $yymm = utf8_decode(strftime("%y%m",$date));
         $num = sprintf("%04s",$max+1);
 

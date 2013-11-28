@@ -32,7 +32,7 @@
     require_once(DOL_DOCUMENT_ROOT.'/Babel_SSLCert/SSLCert.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/domain/domain.class.php');
     require_once(DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php');
-    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_DemandeInterv/demandeInterv.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php');
 
   //liste tous les contacts de tous les eléments
     $langs->load('affaires');

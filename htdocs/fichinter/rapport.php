@@ -163,7 +163,7 @@ $sql .= " ORDER BY $sortfield $sortorder ";
 
 
 $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "Synopsis_fichinter as f ";
+$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
 $requete .= " WHERE f.fk_soc = s.rowid";
 
 //    $requete .= " AND datei >= '$start' AND datei < '$end'" ;
@@ -186,7 +186,7 @@ while ($respre1 = $db->fetch_object($sqlpre1)) {
 }
 $selSoc .= "</select>";
 
-$req = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv` WHERE `active` = 1";
+$req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` WHERE `active` = 1";
 $sqlpre11 = $db->query($req);
 $selectHtml2 = '<select name="typeInter">';
 $selectHtml2 .= "<option value=''>S&eacute;lectioner -></option>";

@@ -960,9 +960,9 @@ class Synopsis_Contrat extends Contrat {
 
 
         $requete = "SELECT fd.rowid, fd.duree
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter as f,
+                      FROM " . MAIN_DB_PREFIX . "fichinter as f,
                            " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as fd,
-                           " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as b
+                           " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as b
                      WHERE b.id = fd.fk_typeinterv
                        AND fd.fk_fichinter = f.rowid
                        AND b.decountTkt = 1
@@ -2522,7 +2522,7 @@ class Synopsis_ContratLigne extends ContratLigne {
         $dsc = '';
         $requete = "SELECT nbVisite as nb, ref, qte, qty, GMAO.* FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` GMAO, " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cdet WHERE c.rowid = cdet.fk_contrat AND cdet.rowid = contratdet_refid AND contratdet_refid = " . $_REQUEST['fk_contratdet'];
         $sql = $this->db->query($requete);
-        $tabExiste = getElementElement("contratdet", "demandeInterv", $_REQUEST['fk_contratdet']);
+        $tabExiste = getElementElement("contratdet", "synopsisdemandeinterv", $_REQUEST['fk_contratdet']);
         $nbExiste = count($tabExiste);
         $tabExiste = getElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet']);
         $nbExiste += count($tabExiste);

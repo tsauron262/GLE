@@ -269,21 +269,21 @@ global $langs;
             case 'FICHEINTER_DELETE':
                 delAffaireElement('FI',$object->id);
             break;
-            case 'DEMANDEINTERV_CREATE':
+            case 'SYNOPSISDEMANDEINTERV_CREATE':
                 addAffaireElement('DI',$object);
             break;
-            case 'DEMANDEINTERV_UPDATE':
+            case 'SYNOPSISDEMANDEINTERV_UPDATE':
             break;
-            case 'DEMANDEINTERV_VALIDATE':
+            case 'SYNOPSISDEMANDEINTERV_VALIDATE':
             break;
-            case 'DEMANDEINTERV_PRISENCHARGE':
+            case 'SYNOPSISDEMANDEINTERV_PRISENCHARGE':
             break;
-            case 'DEMANDEINTERV_CLOTURE':
+            case 'SYNOPSISDEMANDEINTERV_CLOTURE':
             break;
-            case 'DEMANDEINTERV_DELETE':
+            case 'SYNOPSISDEMANDEINTERV_DELETE':
                 delAffaireElement('DI',$object->id);
             break;
-            case 'DEMANDEINTERV_SETDELIVERY':
+            case 'SYNOPSISDEMANDEINTERV_SETDELIVERY':
             break;
         //new
             case 'CAMPAGNEPROSPECT_CREATE':

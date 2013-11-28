@@ -64,14 +64,14 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
     $requete1 = false;
     $requete2 = false;
     if ($_REQUEST['fk_contrat'] > 0){
-        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."fichinter SET fk_contrat = ".$_REQUEST['fk_contrat']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
+        $requete = "UPDATE ".MAIN_DB_PREFIX."fichinter SET fk_contrat = NULL WHERE rowid = ".$fichinterid;
     }
     if ($_REQUEST['fk_commande'] > 0){
-        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."synopsisfichinter SET fk_commande = ".$_REQUEST['fk_commande']." WHERE rowid = ".$fichinterid;
     } else {
-        $requete1 = "UPDATE ".MAIN_DB_PREFIX."Synopsis_fichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
+        $requete1 = "UPDATE ".MAIN_DB_PREFIX."synopsisfichinter SET fk_commande = NULL WHERE rowid = ".$fichinterid;
     }
 //    if ($_REQUEST['fk_ref'] > 0){
         $fichInter->setDI($_REQUEST['fk_ref']);
@@ -103,8 +103,8 @@ if ($_REQUEST['action'] == "changeSrc" && $user->rights->synopsisficheinter->rat
  /*
 *$requete = "SELECT *
  *                 FROM Babel_li_interv,
-  *                     ".MAIN_DB_PREFIX."Synopsis_demandeInterv
-   *              WHERE di_refid = ".MAIN_DB_PREFIX."Synopsis_demandeInterv.rowid
+  *                     ".MAIN_DB_PREFIX."synopsisdemandeinterv
+   *              WHERE di_refid = ".MAIN_DB_PREFIX."synopsisdemandeinterv.rowid
     *               AND fi_refid = ".$fichinter->id;
 */
 /*
@@ -118,7 +118,7 @@ $fichinter->fetch($_GET['id']);
 $societe = new Societe($db);
 $societe->fetch($fichinter->socid);
 
-$head = Synopsis_fichinter_prepare_head($fichinter);
+$head = synopsisfichinter_prepare_head($fichinter);
 dol_fiche_head($head, 'info', $langs->trans('InterventionCard'));
 if ($msg)
 {
@@ -178,7 +178,7 @@ if($user->rights->synopsisficheinter->rattacher){
 
 
 //print "<td class='ui-widget-content' rowspan=2><button class='ui-button'>Modifier</button>";
-$requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_demandeInterv WHERE fk_soc =".$fichinter->fk_soc;
+$requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_soc =".$fichinter->fk_soc;
     print "<tr><th class='ui-state-default ui-widget-header'>La demande d invervention ";
     $sql = $db->query($requete);
     print "<td class='ui-widget-content'><SELECT name='fk_ref' id='fk_ref'>";

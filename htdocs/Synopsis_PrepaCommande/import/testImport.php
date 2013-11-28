@@ -168,7 +168,7 @@ $remArrayComLigne = array(); // array contenant les commandes importer dans le f
 //liste des utilisateurs dans configPrix.php
 //note public => onClick => modify
 //accent prob dans date => fiche interv => idem dans qualité et surment index.php => liste FI decembre
-//rapport.php => DemandeInterv => prenom / nom dans le menu déroulant
+//rapport.php => synopsisdemandeinterv => prenom / nom dans le menu déroulant
 //Vendu par gamme => valign=top
 //Modif modele Einstein
 //PrepaCommande champs intervenant => pas trier dans le bon ordre (prenom nom)

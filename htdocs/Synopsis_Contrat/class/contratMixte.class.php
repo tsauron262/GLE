@@ -1685,11 +1685,11 @@ EOF;
         print "<div class='titre'>R&eacute;sum&eacute;</div>";
         print '<div id="tabs">';
         print "<table cellpadding=15 width=600>";
-        $requete = "SELECT count(rowid) as sDI FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat = " . $this->id;
+        $requete = "SELECT count(rowid) as sDI FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat = " . $this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumDI = ($res->sDI > 0 ? $res->sDI : 0);
-        $requete = "SELECT count(rowid) as sFI FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter WHERE fk_contrat = " . $this->id;
+        $requete = "SELECT count(rowid) as sFI FROM " . MAIN_DB_PREFIX . "fichinter WHERE fk_contrat = " . $this->id;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $sumFI = ($res->sFI > 0 ? $res->sFI : 0);
@@ -1760,18 +1760,18 @@ EOF;
 
         //Par statut d'intervention
 
-        $requete = " SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat = " . $this->id . " ORDER by fk_statut";
+        $requete = " SELECT DISTINCT fk_statut FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat = " . $this->id . " ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
             $this->sumDInterByStatut[$res->fk_statut] = 0;
         }
 
-        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat = " . $this->id . " ORDER by fk_statut";
+        $requete = " SELECT DISTINCT ifnull(fk_user_target, fk_user_prisencharge) as fk_user FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat = " . $this->id . " ORDER by fk_statut";
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
             $this->sumDInterByUser[$res->fk_user] = 0;
         }
-        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat = " . $this->id . " GROUP BY fk_contrat";
+        $requete = "SELECT min(datei) as mini, max(datei) as maxi FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat = " . $this->id . " GROUP BY fk_contrat";
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
         $mini = strtotime($res->mini);
@@ -1790,7 +1790,7 @@ EOF;
             $this->sumDInterCal[$i] = 0;
         }
 
-        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv WHERE fk_contrat = " . $this->id . ' ORDER BY datei DESC';
+        $requete = "SELECT fk_statut, datei, ifnull(fk_user_target, fk_user_prisencharge) as fk_user  FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv WHERE fk_contrat = " . $this->id . ' ORDER BY datei DESC';
         $sql = $this->db->query($requete);
         $this->totalDInter = 0;
         while ($res = $this->db->fetch_object($sql)) {

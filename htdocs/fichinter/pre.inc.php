@@ -35,7 +35,7 @@ require("../main.inc.php");
 
 $langs->load("interventions");
 
-function Synopsis_fichinter_prepare_head($fichinter)
+function synopsisfichinter_prepare_head($fichinter)
 {
   global $langs, $conf, $user, $db;
   $langs->load("fichinter");

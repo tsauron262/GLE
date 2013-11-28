@@ -198,12 +198,12 @@ switch ($type) {
         }
         break;
 
-    case 'demandeInterv': {
+    case 'synopsisdemandeinterv': {
             if (!$user->rights->synopsisdemandeinterv->lire)
                 accessforbidden();
             if ($user->societe_id > 0 && $id > 0) {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-                $obj = new demandeInterv($db);
+                require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+                $obj = new Synopsisdemandeinterv($db);
                 $obj->fetch((int) $id);
                 if ($user->societe_id != $obj->socid) {
                     accessforbidden();

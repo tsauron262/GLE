@@ -610,9 +610,9 @@ function reinit_Intervention($zim,$db)
     $db->query($requete);
     $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger
                       WHERE type_event_refid = (SELECT id FROM ".MAIN_DB_PREFIX."Synopsis_Zimbra_trigger_type WHERE val='appointment')
-                        AND event_table_link='".MAIN_DB_PREFIX."Synopsis_demandeInterv'";
+                        AND event_table_link='".MAIN_DB_PREFIX."synopsisdemandeinterv'";
     $db->query($requete);
-    $zim->Synopsis_Zimbra_GetDemandeIntervention();
+    $zim->Synopsis_Zimbra_Getsynopsisdemandeintervention();
     $zim->Synopsis_Zimbra_GetIntervention();
 }
 
@@ -772,7 +772,7 @@ function reinit_CalUtilisateur($zim,$db)
                 $zim->Synopsis_Zimbra_GetLivraisonUser($res->rowid,$apptFoldId);
                 $zim->Synopsis_Zimbra_GetExpeditionUser($res->rowid,$apptFoldId);
                 $zim->Synopsis_Zimbra_GetInterventionUser($res->rowid,$apptFoldId);
-                $zim->Synopsis_Zimbra_GetDemandeInterventionUser($res->rowid,$apptFoldId);
+                $zim->Synopsis_Zimbra_GetsynopsisdemandeinterventionUser($res->rowid,$apptFoldId);
                 $zim->Synopsis_Zimbra_GetActionComUser($res->rowid,$apptFoldId);
             }
         }

@@ -131,25 +131,25 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
 
             //Y'a quelque chose ?
             $requete = "DELETE
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
+                          FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                          WHERE interv_refid = " . $_REQUEST['id'] . "
                            AND typeI = 'FI'
                            AND extra_key_refid= " . $idExtraKey;
             $sql = $db->query($requete);
             if ($type == 'checkbox') {
                 if ($val == 'On' || $val == 'on' || $val == 'ON') {
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",1,'FI')";
                     $sql = $db->query($requete);
                 } else {
-                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                              (interv_refid,extra_key_refid,extra_value,typeI)
                                       VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",0,'FI')";
                     $sql = $db->query($requete);
                 }
             } else {
-                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                          (interv_refid,extra_key_refid,extra_value,typeI)
                                   VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",'" . addslashes($val) . "','FI')";
                 $sql = $db->query($requete);
@@ -334,7 +334,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
             $fk_typeinterv = 4;
             $typeIntervProd = $arr[1];
             $requete = "SELECT prix_ht
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+                          FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND fk_product = " . $typeIntervProd;
             $sql = $db->query($requete);
@@ -346,7 +346,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
             $isForfait = 1;
         } else {
             $requete = "SELECT prix_ht
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
+                          FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv
                          WHERE user_refid = " . $fichinter->user_creation->id . "
                            AND typeInterv_refid = " . $fk_typeinterv;
             $sql = $db->query($requete);
@@ -421,7 +421,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
         $fichinterline->fk_typeinterv = 4;
         $fichinterline->typeIntervProd = $arr[1];
         $requete = "SELECT prix_ht
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+                      FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv
                      WHERE user_refid = " . $fichinter->user_creation->id . "
                        AND fk_product = " . $fichinterline->typeIntervProd;
         $sql = $db->query($requete);
@@ -434,7 +434,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
         $fichinterline->isForfait = 1;
     } else {
         $requete = "SELECT prix_ht
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixTypeInterv
+                      FROM " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixTypeInterv
                      WHERE user_refid = " . $fichinter->user_creation->id . "
                        AND typeInterv_refid = " . $fichinterline->fk_typeinterv;
         $sql = $db->query($requete);
@@ -712,7 +712,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         /*
           //Extra Field
           $requete = "SELECT *
-          FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_key
+          FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_key
           WHERE active = 1
           AND (isQuality is NULL or isQuality <> 1)
           AND isInMainPanel = 1
@@ -774,7 +774,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
           break;
           case "radio": {
           print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'>";
-          $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+          $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = " . $res->id;
           $sql1 = $db->query($requete);
           if ($db->num_rows($sql1) > 0) {
           print "<table width=100%>";
@@ -828,7 +828,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         $societe = new Societe($db);
         $societe->fetch($socid);
 
-        print "<form name='demandeInterv' action=\"fiche.php\" method=\"post\">";
+        print "<form name='synopsisdemandeinterv' action=\"fiche.php\" method=\"post\">";
         print "<input type='hidden' name='action' value='add'>";
         print "<input type='hidden' name='comLigneId' value='" . $_REQUEST['comLigneId'] . "'>";
         print "<input type='hidden' name='fk_commande' value='" . $res->rowid . "'>";
@@ -859,7 +859,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         if ($_REQUEST['datei'] && preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", $_REQUEST['datei'], $arr)) {
             $tmpDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]);
         }
-        $html->select_date($db->jdate($tmpDate), "p", '', '', '', 'demandeInterv');
+        $html->select_date($db->jdate($tmpDate), "p", '', '', '', 'synopsisdemandeinterv');
         print "</td></tr>";
 
 
@@ -912,7 +912,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print '</td></tr>';
 //Extra Field
         $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key
+                      FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key
                      WHERE active = 1
                        AND (isQuality is NULL OR isQuality <> 1)
                        AND isInMainPanel = 1
@@ -977,7 +977,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                     break;
                 case "radio": {
                         print "<td colspan='" . $colspan . "'  valign='middle' class='ui-widget-content'>";
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id;
+                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $res->id;
                         $sql1 = $db->query($requete);
                         if ($db->num_rows($sql1) > 0) {
                             print "<table width=100%>";
@@ -1058,7 +1058,7 @@ EOF;
         }
         print '</td>';
         print "<td><SELECT name='fk_typeinterv'>";
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
         $sql3 = $db->query($requete);
         print "<OPTION value='-1'>Selectionner-></OPTION>";
         $dfltPrice = 0;
@@ -1136,7 +1136,7 @@ EOF;
     if ($mesg)
         print $mesg . "<br>";
 
-    $head = Synopsis_fichinter_prepare_head($fichinter);
+    $head = synopsisfichinter_prepare_head($fichinter);
 
     dol_fiche_head($head, 'card', $langs->trans("InterventionCard"));
 
@@ -1338,12 +1338,12 @@ EOF;
         $tabDI = $fichinter->getDI();
         if (count($tabDI) > 0) {
             $requete = "SELECT *
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                  FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv
                  WHERE rowid IN (" . implode(",", $tabDI) . ")";
             print "<table class='nobordernopadding' width=100%>";
             if ($resql = $db->query($requete)) {
                 while ($res = $db->fetch_object($resql)) {
-                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_DemandeInterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'demandeInterv@Synopsis_DemandeInterv') . " " . $res->ref . "</a></td></tr>";
+                    print "<tr><td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/synopsisdemandeinterv/fiche.php?id=" . $res->rowid . "'>" . img_object('', 'synopsisdemandeinterv@synopsisdemandeinterv') . " " . $res->ref . "</a></td></tr>";
                 }
             }
             print "</table>";
@@ -1358,8 +1358,8 @@ EOF;
                        k.id,
                        v.extra_value,
                        k.fullLine
-                  FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_key as k
-             LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $fichinter->id . " AND typeI = 'FI'
+                  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key as k
+             LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $fichinter->id . " AND typeI = 'FI'
                  WHERE k.active = 1
                    AND isInMainPanel = 1
                    AND (isQuality <> 1 OR isQuality is NULL)
@@ -1436,9 +1436,9 @@ EOF;
                 case "radio": {
                         print "<td colspan='" . $colspan . "' valign='middle' class='ui-widget-content'><form action='fiche.php?id=" . $fichinter->id . "#anchor" . $res->id . "' method='POST'><input type='hidden' name='action' value='editExtra'>";
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
-//                    print "<form action='fiche.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter_extra_values_choice WHERE key_refid = ".$res->id;
+//                    print "<form action='fiche.php?id=".$fichinter->id."' method='POST'><input type='hidden' name='action' value='editExtra'>";                    $requete= "SELECT * FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_values_choice WHERE key_refid = ".$res->id;
                         $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice
+                          FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice
                          WHERE key_refid = " . $res->id;
 
                         $sql1 = $db->query($requete);
@@ -1464,7 +1464,7 @@ EOF;
                 print '<a name="anchor' . $res->id . '"></a>'; // ancre
                 print ($res->extra_value == 1 ? 'Oui' : 'Non');
             } else if ($res->type == 'radio') {
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_values_choice WHERE key_refid = " . $res->id . " AND value = '" . $res->extra_value . "'";
                 $sql1 = $db->query($requete);
                 $res1 = $db->fetch_object($sql1);
                 print '    <td colspan="' . $colspan . '" class="ui-widget-content">';
@@ -1501,11 +1501,11 @@ EOF;
      * Lignes d'intervention
      */
     print '<table class="noborder" width="100%">';
-//    $sql = 'SELECT ft.rowid, ft.description, ft.fk_demandeInterv, ft.duree, ft.rang, t.id as typeId, t.label as typeinterv';
+//    $sql = 'SELECT ft.rowid, ft.description, ft.fk_synopsisdemandeinterv, ft.duree, ft.rang, t.id as typeId, t.label as typeinterv';
 //    $sql.= ', ft.date as date_intervention, qte, pu_ht, total_ht, fk_commandedet, fk_contratdet, isForfait';
-//    $sql.= ' FROM '.MAIN_DB_PREFIX.'Synopsis_demandeIntervdet as ft';
-//    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_fichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv ";
-//    $sql.= ' WHERE ft.fk_demandeInterv = ' . $demandeIntervid;
+//    $sql.= ' FROM '.MAIN_DB_PREFIX.'synopsisdemandeintervdet as ft';
+//    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON t.id = ft.fk_typeinterv ";
+//    $sql.= ' WHERE ft.fk_synopsisdemandeinterv = ' . $synopsisdemandeintervid;
 //    $sql.= ' ORDER BY ft.rang ASC, ft.rowid';
 
 
@@ -1525,7 +1525,7 @@ EOF;
                    isForfait';
     $sql.= ', ft.date as date_intervention';
     $sql.= ' FROM ' . MAIN_DB_PREFIX . 'Synopsis_fichinterdet as ft';
-    $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
+    $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv ";
     $sql.= ' WHERE ft.fk_fichinter = ' . $fichinterid;
     $sql.= ' ORDER BY ft.rang ASC, ft.rowid';
     $resql = $db->query($sql);
@@ -1655,7 +1655,7 @@ EOF;
                     print '<textarea name="desc" cols="70" class="flat" rows="' . ROWS_2 . '">' . preg_replace('/<br[ ]*\/?>/i', '', $objp->description) . '</textarea>';
                 }
                 print '</td>';
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER by rang";
+                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 ORDER by rang";
                 $sql1 = $db->query($requete);
                 print "<td><SELECT name='fk_typeinterv'>";
                 print "<OPTION value='-1'>Selectionner-></OPTION>";
@@ -1667,7 +1667,7 @@ EOF;
 					  " . MAIN_DB_PREFIX . "product.ref,
 					  " . MAIN_DB_PREFIX . "product.rowid
 				     FROM " . MAIN_DB_PREFIX . "product,
-					  " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+					  " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv
 				    WHERE user_refid = " . $fichinter->user_creation->id . " AND " . MAIN_DB_PREFIX . "product.rowid = fk_product";
                             $sql2 = $db->query($requete1);
                             if ($db->num_rows($sql2) > 0) {
@@ -1827,7 +1827,7 @@ EOF;
             print '<textarea style="width: 100%!important; height: 2em!important;" class="flat" cols="70" name="np_desc" rows="' . ROWS_2 . '"></textarea>';
         }
         print '</td>';
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_fichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE active = 1 ORDER BY rang";
         $sql1 = $db->query($requete);
         print "<td><SELECT id='addfk_typeinterv' name='fk_typeinterv'>";
         print "<OPTION value='-1'>Selectionner-></OPTION>";
@@ -1839,7 +1839,7 @@ EOF;
 				  " . MAIN_DB_PREFIX . "product.ref,
 				  " . MAIN_DB_PREFIX . "product.rowid
 			     FROM " . MAIN_DB_PREFIX . "product,
-				  " . MAIN_DB_PREFIX . "Synopsis_fichinter_User_PrixDepInterv
+				  " . MAIN_DB_PREFIX . "synopsisfichinter_User_PrixDepInterv
 			    WHERE user_refid = " . $fichinter->user_creation->id . " AND " . MAIN_DB_PREFIX . "product.rowid = fk_product";
                     $sql2 = $db->query($requete1);
                     if ($db->num_rows($sql2) > 0) {

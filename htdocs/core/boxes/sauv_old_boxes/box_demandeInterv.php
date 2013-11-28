@@ -31,22 +31,22 @@
   */
 /*
  *
- * $Id: box_demandeInterv.php,v 1.34 2008/05/30 07:06:37 ywarnier Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_demandeInterv.php,v $
+ * $Id: box_synopsisdemandeinterv.php,v 1.34 2008/05/30 07:06:37 ywarnier Exp $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/core/boxes/box_synopsisdemandeinterv.php,v $
  */
 
 /**
-    \file       htdocs/core/boxes/box_demandeInterv.php
-    \ingroup    demandeInterv
-    \brief      Module de generation de l'affichage de la box demandeInterv
+    \file       htdocs/core/boxes/box_synopsisdemandeinterv.php
+    \ingroup    synopsisdemandeinterv
+    \brief      Module de generation de l'affichage de la box synopsisdemandeinterv
 */
 
 include_once(DOL_DOCUMENT_ROOT."/core/boxes/modules_boxes.php");
 
 
-class box_demandeInterv extends ModeleBoxes {
+class box_synopsisdemandeinterv extends ModeleBoxes {
 
-    public $boxcode="lastdemandeInterv";
+    public $boxcode="lastsynopsisdemandeinterv";
     public $boximg="object_intervention";
     public $boxlabel;
     public $depends = array("");
@@ -60,12 +60,12 @@ class box_demandeInterv extends ModeleBoxes {
     /**
      *      \brief      Constructeur de la classe
      */
-    function box_demandeInterv()
+    function box_synopsisdemandeinterv()
     {
         global $langs;
         $langs->load("boxes");
 
-        $this->boxlabel=$langs->trans("BoxLastDemandeInterv");
+        $this->boxlabel=$langs->trans("BoxLastsynopsisdemandeinterv");
     }
 
     /**
@@ -76,27 +76,27 @@ class box_demandeInterv extends ModeleBoxes {
     {
         global $user, $langs, $db;
 
-        include_once(DOL_DOCUMENT_ROOT."/Babel_demandeInterv/demandeInterv.class.php");
-        $demandeIntervtatic=new demandeInterv($db);
+        include_once(DOL_DOCUMENT_ROOT."/Babel_synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+        $synopsisdemandeintervtatic=new Synopsisdemandeinterv($db);
 
-        $text = html_entity_decode($langs->trans("BoxTitleDemandeInterv",$max));
+        $text = html_entity_decode($langs->trans("BoxTitlesynopsisdemandeinterv",$max));
         $this->info_box_head = array(
                 'text' => $text,
                 'limit'=> strlen($text)
             );
 
-        if ($user->rights->demandeInterv->lire)
+        if ($user->rights->synopsisdemandeinterv->lire)
         {
-            $sql = "SELECT Babel_demandeInterv.rowid as diid,
-                           Babel_demandeInterv.ref,
+            $sql = "SELECT Babel_synopsisdemandeinterv.rowid as diid,
+                           Babel_synopsisdemandeinterv.ref,
                            ".MAIN_DB_PREFIX."societe.nom,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           Babel_demandeInterv.datec,
-                           Babel_demandeInterv.fk_statut
-                      FROM Babel_demandeInterv
-                 LEFT JOIN ".MAIN_DB_PREFIX."societe ON Babel_demandeInterv.fk_soc = ".MAIN_DB_PREFIX."societe.rowid
-                     WHERE (Babel_demandeInterv.fk_statut < 3
-                           AND (Babel_demandeInterv.fk_user_author = ".$user->id." OR Babel_demandeInterv.fk_user_prisencharge = ".$user->id."  OR Babel_demandeInterv.fk_user_cloture = ".$user->id."  OR Babel_demandeInterv.fk_user_valid = ".$user->id." OR Babel_demandeInterv.fk_user_target = ".$user->id." )
+                           Babel_synopsisdemandeinterv.datec,
+                           Babel_synopsisdemandeinterv.fk_statut
+                      FROM Babel_synopsisdemandeinterv
+                 LEFT JOIN ".MAIN_DB_PREFIX."societe ON Babel_synopsisdemandeinterv.fk_soc = ".MAIN_DB_PREFIX."societe.rowid
+                     WHERE (Babel_synopsisdemandeinterv.fk_statut < 3
+                           AND (Babel_synopsisdemandeinterv.fk_user_author = ".$user->id." OR Babel_synopsisdemandeinterv.fk_user_prisencharge = ".$user->id."  OR Babel_synopsisdemandeinterv.fk_user_cloture = ".$user->id."  OR Babel_synopsisdemandeinterv.fk_user_valid = ".$user->id." OR Babel_synopsisdemandeinterv.fk_user_target = ".$user->id." )
                            )
                     ORDER BY datei desc";
             $sql.= $db->plimit($max, 0);
@@ -119,7 +119,7 @@ class box_demandeInterv extends ModeleBoxes {
                     $this->info_box_contents[$i][0] = array('align' => 'left',
                     'logo' => $picto,
                     'text' => ($objp->ref?$objp->ref:"-"),
-                    'url' => DOL_URL_ROOT."/Babel_demandeInterv/fiche.php?id=".$objp->diid);
+                    'url' => DOL_URL_ROOT."/Babel_synopsisdemandeinterv/fiche.php?id=".$objp->diid);
 
                     $this->info_box_contents[$i][1] = array('align' => 'left',
                     'text' => $objp->nom,
@@ -133,7 +133,7 @@ class box_demandeInterv extends ModeleBoxes {
                     $this->info_box_contents[$i][3] = array(
                     'align' => 'right',
                     'width' => 18,
-                    'text' => $demandeIntervtatic->LibStatut($objp->fk_statut,3));
+                    'text' => $synopsisdemandeintervtatic->LibStatut($objp->fk_statut,3));
 
                     $i++;
                 }

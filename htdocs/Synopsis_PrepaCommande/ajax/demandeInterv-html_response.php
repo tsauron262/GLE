@@ -14,7 +14,7 @@
  */
 /**
  *
- * Name : demandeInterv-html_response.php
+ * Name : synopsisdemandeinterv-html_response.php
  * GLE-1.2
  */
 //liste les demandes d'interv et le statut
@@ -28,7 +28,7 @@ require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
 $com = new Synopsis_Commande($db);
 $html = new Form($db);
 $res = $com->fetch($id);
@@ -45,10 +45,10 @@ if ($res > 0) {
     $com->fetch_group_lines(0, 0, 0, 0, 1);
 
     $requete = "SELECT fk_user_target, fk_user_prisencharge , datei, duree, description, fk_statut, note_private, note_public, rowid
-                FROM " . MAIN_DB_PREFIX . "Synopsis_demandeInterv
+                FROM " . MAIN_DB_PREFIX . "synopsisdemandeinterv
                WHERE fk_commande IN (" . join(',', $arrGrpCom) . ")";
     if ($DiId > 0) {
-        $requete .= " AND " . MAIN_DB_PREFIX . "Synopsis_demandeInterv.rowid = " . $DiId;
+        $requete .= " AND " . MAIN_DB_PREFIX . "synopsisdemandeinterv.rowid = " . $DiId;
     }
     $requete .= "
             ORDER BY fk_user_prisencharge, fk_user_target, datei DESC";
@@ -57,7 +57,7 @@ if ($res > 0) {
     $rem = -10;
     $num = $db->num_rows($sql);
     while ($res = $db->fetch_object($sql)) {
-        $di = new DemandeInterv($db);
+        $di = new Synopsisdemandeinterv($db);
         $di->fetch($res->rowid);
 //        $rem = $res->fk_user_prisencharge;
         $tmpUser = new User($db);
@@ -214,7 +214,7 @@ function cloneDi(id){
 
                 jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
                 jQuery.ajax({
-                    url: "ajax/demandeInterv-html_response.php",
+                    url: "ajax/synopsisdemandeinterv-html_response.php",
                     data: "id="+comId,
                     cache: false,
                     datatype: "html",
@@ -314,7 +314,7 @@ function cloneDi(id){
                         var datei=jQuery('#datei').val();
                         var userid = jQuery('#userid').find(':selected').val();
                         var comLigneId = jQuery('#comLigneId').find(':selected').val();
-                        location.href=DOL_URL_ROOT+'/Synopsis_DemandeInterv/fiche.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
+                        location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?action=create&datei='+datei+"&comLigneId="+comLigneId+"&userid="+userid;
                     }
                 },
                 Annuler: function(){
@@ -364,7 +364,7 @@ function cloneDi(id){
 //                                    jQuery('#attrDIDial').dialog( "destroy" );
                                     jQuery('#attrDIDial').remove();
                                     jQuery.ajax({
-                                        url: "ajax/demandeInterv-html_response.php",
+                                        url: "ajax/synopsisdemandeinterv-html_response.php",
                                         data: "id="+comId,
                                         cache: false,
                                         datatype: "html",
@@ -448,7 +448,7 @@ function cloneDi(id){
         });
         jQuery('.modDI').click(function(){
             var id = jQuery(this).attr('id').replace(/^modDI-/,"");
-            location.href=DOL_URL_ROOT+'/Synopsis_DemandeInterv/fiche.php?id='+id;
+            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?id='+id;
         });
         jQuery('.cloneDI').click(function(){
             var id = jQuery(this).attr('id').replace(/^cloneDI-/,"");

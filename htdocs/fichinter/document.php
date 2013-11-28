@@ -138,7 +138,7 @@ if ($object->id)
 		//if ($result >= 0) $mesg=$langs->trans("FileWasRemoced");
 	}
 
-	$head=Synopsis_fichinter_prepare_head($object, $user);
+	$head=synopsisfichinter_prepare_head($object, $user);
 
 	dol_fiche_head($head, 'documents',  $langs->trans("InterventionCard"), 0, 'intervention');
 

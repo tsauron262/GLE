@@ -203,9 +203,9 @@ if ($object->id) {
         'facture',
         'commande',
         array('contract', 'contrat', 'contracts'),
-        array('synopsisdemandeinterv', 'Synopsis_demandeInterv', 'synopsisdemandeinterv', 'Demande Inter'),
+        array('synopsisdemandeinterv', 'synopsisdemandeinterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
-        array('synopsisficheinter', 'Synopsis_fichinter', 'synopsisficheinter', 'Fiche Inter'),
+        array('synopsisficheinter', 'fichinter', 'synopsisficheinter', 'Fiche Inter'),
         array('synopsisprojet', 'Synopsis_projet', 'synopsisprojet', 'au Projet'),
         array('propal', 'propal', 'propale'),
         array('expedition', 'expedition', 'expedition/sending', 'à l\'expedition')

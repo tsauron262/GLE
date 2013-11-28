@@ -73,7 +73,7 @@ var eventsMenu = {
             location.href=DOL_URL_ROOT+'/fichinter/fiche.php?action=create&socid='+socId;
         },
         'reserver': function(t) {
-            location.href=DOL_URL_ROOT+'/Synopsis_DemandeInterv/fiche.php?action=create&socid='+socId;
+            location.href=DOL_URL_ROOT+'/synopsisdemandeinterv/fiche.php?action=create&socid='+socId;
         }
     }
 };

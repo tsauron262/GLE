@@ -114,7 +114,7 @@ $js.=<<<EOF
         part6a: "tech-html_response.php",
         part7a: "expedition-html_response.php",
         part9a: "interventions-html_response.php",
-        part9b: "demandeInterv-html_response.php",
+        part9b: "synopsisdemandeinterv-html_response.php",
         part9c: "ficheInterv-html_response.php",
         part9d: "dispoEquipe-html_response.php",
         part9e: "ramification-html_response.php",

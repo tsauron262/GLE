@@ -497,7 +497,7 @@ $formfile = new FormFile($db);
 <?php
 
 
-//function demandeInterv_prepare_head($obj)
+//function synopsisdemandeinterv_prepare_head($obj)
 //{
 //  global $langs, $conf, $user;
 //  $langs->load("ndf");

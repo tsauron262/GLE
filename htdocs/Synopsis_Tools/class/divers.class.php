@@ -174,8 +174,8 @@ class synopsisHook {
                 }
                 break;
             case 'DI': {
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_DemandeInterv/demandeInterv.class.php");
-                    $obj = new DemandeInterv($db);
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+                    $obj = new Synopsisdemandeinterv($db);
                 }
                 break;
             case 'contrat': {

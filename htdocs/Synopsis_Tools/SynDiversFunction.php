@@ -8,6 +8,173 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
+
+function show_actions_par_type($type, $idElement, $object, $done = false, $objcon = '', $noprint = 0) {
+    global $conf, $langs, $db, $bc, $user;
+
+    // Check parameters
+    if (!is_object($object))
+        dol_print_error('', 'BadParameter Soc');
+
+    $now = dol_now('tzuser');
+    $out = '';
+
+    if (!empty($conf->agenda->enabled)) {
+        require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+        require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
+        $actionstatic = new ActionComm($db);
+        $userstatic = new User($db);
+        $contactstatic = new Contact($db);
+
+        $out.="\n";
+        $out.='<table width="100%" class="noborder">';
+        $out.='<tr class="liste_titre">';
+        $out.='<td colspan="2">';
+        if (get_class($object) == 'Societe')
+            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/listactions.php?socid=' . $object->id . '&amp;status='. ($done ? 'done' : 'todo'). '">';
+        
+        if ($done)
+        $out.=$langs->trans("ActionsDoneShort");
+        else
+        $out.=$langs->trans("ActionsToDoShort");
+        if (get_class($object) == 'Societe')
+            $out.='</a>';
+        $out.='</td>';
+        $out.='<td colspan="5" align="right">';
+        $permok = $user->rights->agenda->myactions->create;
+        if (($object->id || $objcon->id) && $permok) {
+            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/fiche.php?action=create';
+            if (get_class($object) == 'Societe')
+                $out.='&amp;socid=' . $object->id;
+            $out.=(!empty($objcon->id) ? '&amp;contactid=' . $objcon->id : '') . '&amp;backtopage=1&amp;percentage=-1">';
+            $out.=$langs->trans("AddAnAction") . ' ';
+            $out.=img_picto($langs->trans("AddAnAction"), 'filenew');
+            $out.="</a>";
+        }
+        $out.='</td>';
+        $out.='</tr>';
+
+        $sql = "SELECT a.id, a.label,";
+        $sql.= " a.datep as dp,";
+        $sql.= " a.datea as da,";
+        $sql.= " a.percent,";
+        $sql.= " a.fk_user_author, a.fk_contact,";
+        $sql.= " a.fk_element, a.elementtype,";
+        $sql.= " c.code as acode, c.libelle,";
+        $sql.= " u.login, u.rowid";
+        if (get_class($object) == 'Adherent')
+            $sql.= ", m.lastname, m.firstname";
+        if (get_class($object) == 'Societe')
+            $sql.= ", sp.lastname, sp.firstname";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "c_actioncomm as c, " . MAIN_DB_PREFIX . "user as u, " . MAIN_DB_PREFIX . "actioncomm as a";
+        if (get_class($object) == 'Adherent')
+            $sql.= ", " . MAIN_DB_PREFIX . "adherent as m";
+        if (get_class($object) == 'Societe')
+            $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "socpeople as sp ON a.fk_contact = sp.rowid";
+        $sql.= " WHERE u.rowid = a.fk_user_author";
+        $sql.= " AND a.entity IN (" . getEntity('agenda', 1) . ")";
+        if (get_class($object) == 'Adherent') {
+            $sql.= " AND a.fk_element = m.rowid AND a.elementtype = 'member'";
+            if (!empty($object->id))
+                $sql.= " AND a.fk_element = " . $object->id;
+        }
+        if (get_class($object) == 'Societe' && $object->id)
+            $sql.= " AND a.fk_soc = " . $object->id;
+        if (!empty($objcon->id))
+            $sql.= " AND a.fk_contact = " . $objcon->id;
+        $sql.= " AND c.id=a.fk_action";
+        if ($done)
+            $sql.= " AND (a.percent = 100 OR (a.percent = -1 AND a.datep <= '" . $db->idate($now) . "'))";
+        else
+            $sql.= " AND ((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > '" . $db->idate($now) . "'))";
+        $sql.= " AND elementtype = '" . $type . "' AND fk_element ";
+        if(is_array($idElement)){
+            $idElement = implode(",", $idElement);
+            $sql .= "IN (".$idElement.")";
+        }            
+        else 
+            $sql .= "=".$idElement;
+        $sql.= " ORDER BY a.datep DESC, a.id DESC";
+
+        dol_syslog("company.lib::show_actions_todo sql=" . $sql);
+        $result = $db->query($sql);
+        if ($result) {
+            $i = 0;
+            $num = $db->num_rows($result);
+            $var = true;
+
+            if ($num) {
+                while ($i < $num) {
+                    $var = !$var;
+
+                    $obj = $db->fetch_object($result);
+
+                    $datep = $db->jdate($obj->dp);
+
+                    $out.="<tr " . $bc[$var] . ">";
+
+                    $out.='<td width="120" align="left" class="nowrap">' . dol_print_date($datep, 'dayhour') . "</td>\n";
+
+                    // Picto warning
+                    $out.='<td width="16">';
+                    if ($obj->percent >= 0 && $datep && $datep < ($now - ($conf->global->MAIN_DELAY_ACTIONS_TODO * 60 * 60 * 24)))
+                        $out.=' ' . img_warning($langs->trans("Late"));
+                    else
+                        $out.='&nbsp;';
+                    $out.='</td>';
+
+                    $actionstatic->type_code = $obj->acode;
+                    $transcode = $langs->trans("Action" . $obj->acode);
+                    $libelle = ($transcode != "Action" . $obj->acode ? $transcode : $obj->libelle);
+                    //$actionstatic->libelle=$libelle;
+                    $actionstatic->libelle = $obj->label;
+                    $actionstatic->id = $obj->id;
+                    //$out.='<td width="140">'.$actionstatic->getNomUrl(1,16).'</td>';
+                    // Title of event
+                    //$out.='<td colspan="2">'.dol_trunc($obj->label,40).'</td>';
+                    $out.='<td colspan="2">' . $actionstatic->getNomUrl(1, 40) . '</td>';
+
+                    // Contact pour cette action
+                    if (empty($objcon->id) && $obj->fk_contact > 0) {
+                        $contactstatic->lastname = $obj->lastname;
+                        $contactstatic->firstname = $obj->firstname;
+                        $contactstatic->id = $obj->fk_contact;
+                        $out.='<td width="120">' . $contactstatic->getNomUrl(1, '', 10) . '</td>';
+                    } else {
+                        $out.='<td>&nbsp;</td>';
+                    }
+
+                    $out.='<td width="80" class="nowrap">';
+                    $userstatic->id = $obj->fk_user_author;
+                    $userstatic->login = $obj->login;
+                    $out.=$userstatic->getLoginUrl(1);
+                    $out.='</td>';
+
+                    // Statut
+                    $out.='<td class="nowrap" width="20">' . $actionstatic->LibStatut($obj->percent, 3) . '</td>';
+
+                    $out.="</tr>\n";
+                    $i++;
+                }
+            } else {
+                // Aucun action a faire
+            }
+            $db->free($result);
+        } else {
+            dol_print_error($db);
+        }
+        $out.="</table>\n";
+
+        $out.="<br>\n";
+    }
+
+    if ($noprint)
+        return $out;
+    else
+        print $out;
+}
+
+
 function htmlToAgenda($str) {
     $tag = "a";
     $str = preg_replace("%(<$tag.*?<img)(.*?)(<\/$tag.*?>)%is", "", $str);

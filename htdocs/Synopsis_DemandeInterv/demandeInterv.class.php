@@ -535,6 +535,8 @@ class demandeInterv extends CommonObject {
             $action->datep = $this->db->jdate(date("Y-m-d", $this->date)." 08:00:00");
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date)." 18:00:00");
             $action->type_id = 50;
+            $action->elementtype = "DI";
+            $action->fk_element = $this->id;
             $action->percentage = -1;
             $soc = new Societe($this->db);
             $soc->fetch($this->socid);

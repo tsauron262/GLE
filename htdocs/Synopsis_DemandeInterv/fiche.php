@@ -122,7 +122,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_PrisEnCharge' 
     $demandeInterv = new demandeInterv($db);
     $demandeInterv->id = $_REQUEST["id"];
     $demandeInterv->fetch($_REQUEST["id"]);
-    if(isset($_REQUEST['fk_user'])){
+    if (isset($_REQUEST['fk_user'])) {
         $tech = new User($db);
         $tech->fetch($_REQUEST['fk_user']);
     }
@@ -2056,16 +2056,16 @@ EOF;
             print '  onClick="dialogConfirm(\'' . $url . '\',\'' . $langs->trans("ConfirmPrisEnChargeDI") . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'Prise En Charge\')"';
             print '>' . $langs->trans('PrisEnCharge') . '</button>';
         }
-        
-        
+
+
         if ($demandeInterv->statut == 1 && $user->rights->synopsisdemandeinterv->prisencharge && $demandeInterv->fk_user_prisencharge) {
             print '<button class="butAction " ';
-            $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&action=confirm_PrisEnCharge&confirm=yes&fk_user='.$demandeInterv->fk_user_prisencharge;
+            $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&action=confirm_PrisEnCharge&confirm=yes&fk_user=' . $demandeInterv->fk_user_prisencharge;
             print '  onClick="dialogConfirm(\'' . $url . '\',\'' . $langs->trans("ConfirmPrisEnChargeDI") . '\',\'' . $langs->trans("Yes") . '\',\'' . $langs->trans("No") . '\',\'Prise En Charge\')"';
             print '>' . $langs->trans('PrisEnChargeTech') . '</button>';
         }
-        
-        
+
+
         if ($demandeInterv->statut > 0 && $demandeInterv->statut < 3 && $user->rights->synopsisdemandeinterv->edit_after_validation) {
             print '<button class="butAction" ';
             $url = $_SERVER["PHP_SELF"] . '?id=' . $demandeInterv->id . '&action=modification&confirm=yes';
@@ -2108,6 +2108,15 @@ EOF;
     print "</td><td>";
     print "&nbsp;</td>";
     print "</tr></table>\n";
+
+    $societe = new Societe($db);
+    $societe->fetch($demandeInterv->socid);
+
+    echo "<br/>";
+    echo "<br/>";
+    show_actions_par_type('DI', $demandeInterv->id, $societe);
+    echo "<br/>";
+    show_actions_par_type('DI', $demandeInterv->id, $societe, true);
 }
 
 
@@ -2126,7 +2135,6 @@ if (isset($demandeInterv->fk_commande) && $demandeInterv->fk_commande > 0) {
 
 $db->close();
 
-llxFooter('$Date: 2008/07/15 00:57:37 $ - $Revision: 1.100 $');
 print <<<EOF
 
 <script>
@@ -2138,6 +2146,30 @@ print <<<EOF
     });
 </script>
 EOF;
+
+
+print <<<EOF
+<style>
+    .showDetail{ cursor: pointer;}
+</style>
+EOF;
+print "<script>";
+print <<<EOF
+    jQuery(document).ready(function(){
+        jQuery('.showDetail').click(function(){
+            jQuery('.showDetail').parent().find('table').css('display','none')
+            jQuery(this).parent().find('table').css('display','block');
+        });
+        jQuery("#jsContrat li").dblclick(function(){
+            var id = jQuery(this).attr('id');
+            location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
+        });
+    });
+EOF;
+
+print "</script>";
+
+llxFooter('$Date: 2008/07/15 00:57:37 $ - $Revision: 1.100 $');
 
 function starratingPhp($name, $value, $max = 5, $iter = 1) {
     $ret = '<div id="starrating">';
@@ -2180,24 +2212,4 @@ function sec2time($sec) {
     return ($returnstring);
 }
 
-print <<<EOF
-<style>
-    .showDetail{ cursor: pointer;}
-</style>
-EOF;
-print "<script>";
-print <<<EOF
-    jQuery(document).ready(function(){
-        jQuery('.showDetail').click(function(){
-            jQuery('.showDetail').parent().find('table').css('display','none')
-            jQuery(this).parent().find('table').css('display','block');
-        });
-        jQuery("#jsContrat li").dblclick(function(){
-            var id = jQuery(this).attr('id');
-            location.href=DOL_URL_ROOT+'/Synopsis_Contrat/contratDetail.php?id='+id;
-        });
-    });
-EOF;
-
-print "</script>";
 ?>

@@ -291,7 +291,7 @@ class Synopsisdemandeinterv extends CommonObject {
     private function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
         global $mysoc;
         global $langs;
-        require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
+        require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
         $mail = new CMailFile($subject, $to, $from, $msg,
                         $filename_list, $mimetype_list, $mimefilename_list,
                         $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);

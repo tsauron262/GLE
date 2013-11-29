@@ -58,7 +58,7 @@ if ($sql) {
     
     
 
-    require_once(DOL_DOCUMENT_ROOT . '/Synopsis_Tools/class/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
 //    sendMail($subject, $to, $from, utf8_encodeRien($msg), array(), array(), array(), $addr_cc, '', 0, $msgishtml = 1, $from);
     mailSyn($to, $subject, utf8_encodeRien($msg), $addr_cc);
 }

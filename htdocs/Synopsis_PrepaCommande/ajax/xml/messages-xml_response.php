@@ -93,7 +93,7 @@
         //$addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE.", ".$conf->global->BIMP_MAIL_GESTFINANCIER.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-    require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Tools/class/CMailFile.class.php');
+    require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
     sendMail(utf8_encodeRien($subject),$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,$msgishtml=1,$from);
 
 

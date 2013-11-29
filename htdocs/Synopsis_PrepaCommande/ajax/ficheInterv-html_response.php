@@ -25,7 +25,7 @@
   require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
   require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
   require_once(DOL_DOCUMENT_ROOT."/core/class/html.form.class.php");
-  require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
+  require_once(DOL_DOCUMENT_ROOT."/synopsisfichinter/class/synopsisfichinter.class.php");
   require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
   $com = new Synopsis_Commande($db);
   $html = new Form($db);
@@ -56,7 +56,7 @@
     $rem = -10;
     while($res=$db->fetch_object($sql))
     {
-        $fi = new FichInter($db);
+        $fi = new Synopsisfichinter($db);
         $fi->fetch($res->rowid);
 //        $rem = $res->fk_user_prisencharge;
         $tmpUser = new User($db);

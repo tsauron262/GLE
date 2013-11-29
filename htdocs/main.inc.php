@@ -193,7 +193,9 @@ require_once("master.inc.php");
 
 
 /*Mod drsi*/
-include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/synopsisHook.php");
+include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
+$synopsisHook = new synopsisHook();
+global $synopsisHook;
 /*FMod Drsi*/
 
 // Activate end of page function

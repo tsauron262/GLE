@@ -1,19 +1,20 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php');
+require_once(DOL_DOCUMENT_ROOT . '/synopsisfichinter/class/synopsisfichinter.class.php');
 
-class pdf_soleil extends ModeleSynopsisficheinter {
+class pdf_bimp extends ModelePDFFicheinter {
 
     /**
       \brief      Constructeur
       \param        db        Handler acces base de donnees
      */
-    function pdf_soleil($db = 0) {
+    function pdf_bimp($db = 0) {
         global $conf, $langs, $mysoc;
 
         $this->db = $db;
-        $this->name = 'pluton';
-        $this->description = "Modele de fiche d'intervention standard";
+        $this->name = 'bimp';
+        $this->description = "Modele de fiche d'intervention BIMP";
 
         // Dimension page pour format A4
         $this->type = 'pdf';
@@ -99,22 +100,27 @@ class pdf_soleil extends ModeleSynopsisficheinter {
         $outputlangs->load("interventions");
 
 //        //$outputlangs->setPhpLang();
-        if ($conf->synopsisficheinter->dir_output) {
+        if ($conf->ficheinter->dir_output) {
             // If $fichinter is id instead of object
             if (!is_object($fichinter)) {
                 $id = $fichinter;
-                $fichinter = new Fichinter($this->db);
+                $fichinter = new Synopsisfichinter($this->db);
                 $result = $fichinter->fetch($id);
                 if ($result < 0) {
                     dol_print_error($this->db, $fichinter->error);
                 }
+            }
+            else{
+                $Nfichinter = new Synopsisfichinter($this->db);
+                $result = $Nfichinter->fetch($fichinter->id);
+                $fichinter = $Nfichinter;
             }
             $fichinter->info($fichinter->id);
             $fichinter->fetch_extra();
             $fichinter->fetch_lines();
 
             $fichref = sanitize_string($fichinter->ref);
-            $dir = $conf->synopsisficheinter->dir_output;
+            $dir = $conf->ficheinter->dir_output;
             if (!preg_match('/specimen/i', $fichref))
                 $dir.= "/" . $fichref;
             $file = $dir . "/" . $fichref . ".pdf";
@@ -222,7 +228,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 }
 
 
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP11.pdf');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP11.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 //                $pdf->SetDrawColor(0,0,255);
@@ -503,38 +509,38 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //x1 42 y1 180.8
                 if ($fichinter->extraArr[$this->isIntervTermineIdx] == 1) {
                     //termine
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 21.3, 155.4, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 21.3, 155.4, 3.6, 3.6);
                 } else {
                     //en cours
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 21.3, 160.3, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 21.3, 160.3, 3.6, 3.6);
                 }
 
                 //Attente client
                 if ($fichinter->extraArr[$this->attenteClientIdx] . "x" != "x") {
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 26.7, 173, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 26.7, 173, 3.6, 3.6);
                 }
                 /*  if ($fichinter->extraArr[$this->miseEnRelationIdx] == 'Direction Technique') {
                   //Dir Tech
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 37.5, 241.7, 4.8, 4.3);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 37.5, 241.7, 4.8, 4.3);
                   }
 
                   if ($fichinter->extraArr[$this->miseEnRelationIdx] == 'Service Commercial') {
                   //Service Commercial
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 37.5, 246.6, 4.8, 4.3);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 37.5, 246.6, 4.8, 4.3);
                   }
                  */
                 /*
                   //Installation
                   if ($fichinter->extraArr[$this->isInstallationIdx] == 1)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 83.3, 35.5, 3.6, 3.6);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 83.3, 35.5, 3.6, 3.6);
 
                   //Instervention
                   if ($fichinter->extraArr[$this->isInterventionIdx] == 1)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 107.8, 35.5, 3.6, 3.6);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 107.8, 35.5, 3.6, 3.6);
 
                   //Temps passé
                   if ($isTempsPasse)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 92.1, 19.6, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 92.1, 19.6, 4, 4);
 
                   //Forfait
                   $isForfait = false;
@@ -543,38 +549,38 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                   }
 
                   if ($isForfait)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 128.7, 19.6, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 128.7, 19.6, 4, 4);
 
                   //ss garantie
                   if ($isSousGarantie)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 150.7, 19.6, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 150.7, 19.6, 4, 4);
 
                   //Formation
                   if ($isFormation)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 168, 35.5, 3.6, 3.6);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 168, 35.5, 3.6, 3.6);
 
                   //Avant vente
                   if ($isAvantVente)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 191.3, 35.5, 3.6, 3.6);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 191.3, 35.5, 3.6, 3.6);
 
                   //Contrat
                   if ($isContrat)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 177.3, 19.6, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 177.3, 19.6, 4, 4);
 
                   //Telemaintenance
                   if ($isTelemaint)
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 133.1, 35.5, 3.6, 3.6);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 133.1, 35.5, 3.6, 3.6);
                  */
 
                 $type = $fichinter->extraArr[35];
                 if ($type == 3)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 92, 20.6, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 92, 20.6, 4, 4);
                 if ($type == 1)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 117.4, 20.6, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 117.4, 20.6, 4, 4);
                 if ($type == 2)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 139.3, 20.6, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 139.3, 20.6, 4, 4);
                 if ($type == 4)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 165.2, 20.6, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 165.2, 20.6, 4, 4);
 
 
 
@@ -583,54 +589,54 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 $natureI = $fichinter->natureInter;
                 //Contrat
                 if ($natureI == 1)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 42.1, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 42.1, 35.5, 3.6, 3.6);
 
                 elseif ($natureI == 2)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 71.15, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 71.15, 35.5, 3.6, 3.6);
 
                 elseif ($natureI == 3)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 101.75, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 101.75, 35.5, 3.6, 3.6);
 
                 elseif ($natureI == 3)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 141.85, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 141.85, 35.5, 3.6, 3.6);
 
                 elseif ($natureI == 6)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 171.9, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 171.9, 35.5, 3.6, 3.6);
                 elseif ($natureI == 5)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 191.4, 35.5, 3.6, 3.6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 191.4, 35.5, 3.6, 3.6);
 
 
 
                 /*
                   if ($fichinter->extraArr[$this->recontactComIdx] == 1) {
                   //Contact client
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 118, 254, 4.5, 4.5);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 118, 254, 4.5, 4.5);
                   }
 
                   //non oui moyen
                   //Non
                   if ($fichinter->extraArr[$this->techALheureIdx] == "Non")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 267.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 267.5, 4, 4);
                   if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Non")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 273.7, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 273.7, 4, 4);
                   if ($fichinter->extraArr[$this->satisfactionIdx] == "Non")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 279.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 279.5, 4, 4);
 
                   //Moyen
                   if ($fichinter->extraArr[$this->techALheureIdx] == "Moyen")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 267.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 267.5, 4, 4);
                   if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Moyen")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 273.7, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 273.7, 4, 4);
                   if ($fichinter->extraArr[$this->satisfactionIdx] == "Moyen")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 279.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 279.5, 4, 4);
 
                   //Oui
                   if ($fichinter->extraArr[$this->techALheureIdx] == "Oui")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 267.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 267.5, 4, 4);
                   if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Oui")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 273.7, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 273.7, 4, 4);
                   if ($fichinter->extraArr[$this->satisfactionIdx] == "Oui")
-                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 279.5, 4, 4);
+                  $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 279.5, 4, 4);
                  */
 
 
@@ -682,7 +688,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //                        $tplidx = $pdf->importPage(3, "/MediaBox");
 //                        $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-                        $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP12.pdf');
+                        $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP12.pdf');
                         $tplidx = $pdf->importPage(1, "/MediaBox");
                         $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
@@ -690,7 +696,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                         $this->AddPage($pdf);
 //                        $tplidx = $pdf->importPage(1, "/MediaBox");
 //                        $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                        $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP11.pdf');
+                        $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP11.pdf');
                         $tplidx = $pdf->importPage(1, "/MediaBox");
                         $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
                         $newArr = array();
@@ -705,7 +711,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
                 if ($pageVide) {
 //                    $tplidx = $pdf->importPage(3, "/MediaBox");
 //                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP12.pdf');
+                    $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP12.pdf');
                     
                     $tplidx = $pdf->importPage(1, "/MediaBox");
                     $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
@@ -715,7 +721,7 @@ class pdf_soleil extends ModeleSynopsisficheinter {
 //                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 //                    $tplidx = $pdf->importPage(2, "/MediaBox");
 //                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP11.pdf');
+                    $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP11.pdf');
                     $tplidx = $pdf->importPage(1, "/MediaBox");
                     $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
                 } else {

@@ -74,11 +74,11 @@ $arrRemDate = array();
 $result = array();
 for ($i = 0; $i < 2; $i++) {
     if ($i == 0)
-        $table = "fichinter";
+        $table = "Synopsis_fichinter";
     else
         $table = "synopsisdemandeinterv";
         $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "Synopsis_".$table . "
+              FROM " . MAIN_DB_PREFIX . "".$table . "
              WHERE fk_contrat = " . $contratid;
     $sql = $db->query($requete);
 
@@ -156,10 +156,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
-              FROM " . MAIN_DB_PREFIX ."Synopsis_".$table.  "det as fd,
-                   " . MAIN_DB_PREFIX ."Synopsis_".$table. " as f,
+              FROM " . MAIN_DB_PREFIX ."".$table.  "det as fd,
+                   " . MAIN_DB_PREFIX ."".$table. " as f,
                    " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as b
-             WHERE fd.fk_".$table." = f.rowid
+             WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = f.rowid
                AND b.id = fd.fk_typeinterv
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.rang";
@@ -194,10 +194,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.lastname, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
-              FROM " . MAIN_DB_PREFIX ."Synopsis_".$table. "det as fd,
-                   " . MAIN_DB_PREFIX ."Synopsis_".$table. " as f,
+              FROM " . MAIN_DB_PREFIX ."".$table. "det as fd,
+                   " . MAIN_DB_PREFIX ."".$table. " as f,
                    " . MAIN_DB_PREFIX . "user as b
-             WHERE fd.fk_".$table." = f.rowid
+             WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = f.rowid
                AND b.rowid = f.fk_user_author
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.firstname";

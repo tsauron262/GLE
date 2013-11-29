@@ -8,7 +8,7 @@ class synopsisHook {
     private static $reload = false;
 
     function synopsisHook() {
-        global $conf, $db;
+        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user;
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -16,6 +16,75 @@ class synopsisHook {
             $fileInfo = new fileInfo($db);
             $fileInfo->showNewFile();
         }
+
+
+
+        date_default_timezone_set('Europe/Paris');
+
+        ini_set('display_errors', 1);
+
+        $builddoc = (isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
+        $viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
+        $modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
+
+        if (($modDev == 2 && !$builddoc && !$viewDoc) || ($modDev == 1))
+            error_reporting(E_ALL);
+        else
+            error_reporting(E_ALL ^ (E_NOTICE));
+
+        ini_set('upload_max_filesize', 10000);
+        ini_set('post_max_size', 10000);
+
+
+        setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
+
+
+        include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
+
+        $conf->global->MAIN_MAX_DECIMALS_TOT = 5;
+        $conf->global->MAIN_MAX_DECIMALS_UNIT = 5;
+        $conf->global->MAIN_MAX_DECIMALS_SHOWN = 2;
+
+        $conf->global->MAIN_APPLICATION_TITLE = "GLE";
+        $conf->global->MAIN_MENU_USE_JQUERY_ACCORDION = 0;
+        $conf->global->MAIN_MODULE_MULTICOMPANY = "1";
+        $conf->global->MAIN_MODULE_ORANGEHRM = "1";
+
+        $conf->global->MAIN_MODULES_FOR_EXTERNAL .=',synopsisficheinter,synopsisdemandeinterv';
+
+        $conf->global->PRODUIT_CONFIRM_DELETE_LINE = "1";
+
+        define('PREF_BDD_ORIG', 'llx_');
+
+
+        $conf->global->STOCK_CALCULATE_ON_VALIDATE_ORDER = false;
+
+//$conf->global->PROJET_ADDON = "mod_projet_tourmaline";
+
+
+        $conf->global->devMailTo = 'tommy@drsi.fr';
+
+
+//Key chrono
+        define('CHRONO_KEY_SITE_DUREE_DEP', 1029);
+
+
+        $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
+        $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+        if (is_object($langs)) {
+            foreach ($tabProductType as $idT => $val)
+                $tabProductType[$idT] = $langs->trans($val);
+            foreach ($tabTypeLigneSimple as $idT => $val)
+                $tabTypeLigneSimple[$idT] = $langs->trans($val);
+        }
+//$tabTypeLigne = array_merge($tabProductType, $tabTypeLigne);
+        $tabTypeLigne = $tabProductType;
+        foreach ($tabTypeLigneSimple as $id => $val)
+            $tabTypeLigne[$id + 100] = $val;
+
+        $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
+
+        $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
     }
 
     public static function reloadPage() {
@@ -42,7 +111,7 @@ class synopsisHook {
         }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)) {
-            @$conf->ficheinter = $conf->synopsisficheinter;
+//            @$conf->ficheinter = $conf->synopsisficheinter;
             @$user->rights->ficheinter = $user->rights->synopsisficheinter;
         }
     }
@@ -55,7 +124,7 @@ class synopsisHook {
         $element_id = $tabElem[1];
 
         if (self::$reload)
-            header("Location: " . $_SERVER['PHP_SELF']."?".(isset($_REQUEST['id'])? "id=".$_REQUEST['id'] : ""));
+            header("Location: " . $_SERVER['PHP_SELF'] . "?" . (isset($_REQUEST['id']) ? "id=" . $_REQUEST['id'] : ""));
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISHISTO)) {
             histoNavigation::saveHisto($element_type, $element_id);
@@ -95,7 +164,7 @@ class synopsisHook {
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
         $cssSoc = "/Synopsis_Tools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
         if (is_file(DOL_DOCUMENT_ROOT . $cssSoc))
-        $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc .'" />' . "\n";
+            $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc . '" />' . "\n";
         $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 
@@ -114,7 +183,7 @@ class synopsisHook {
         global $conf, $db, $logLongTime;
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
-            if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT."/index.php") !== false) {
+            if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php") !== false) {
                 dashboard::getDashboard();
             }
         }

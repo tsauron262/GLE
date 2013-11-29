@@ -34,14 +34,14 @@
  */
 
 /**
-  \file       htdocs/fichinter/liste.php
+  \file       htdocs/synopsisfichinter/liste.php
   \brief      Page accueil espace fiches interventions
   \ingroup    ficheinter
   \version    $Id: liste.php,v 1.40 2008/04/09 18:13:50 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 $langs->load("companies");
@@ -102,7 +102,7 @@ $result = $db->query($sql);
 if ($result) {
     $num = $db->num_rows($result);
 
-    $fichinter_static = new Fichinter($db);
+    $fichinter_static = new Synopsisfichinter($db);
 
     $urlparam = "&amp;socid=$socid";
     

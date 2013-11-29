@@ -35,19 +35,19 @@
  */
 
 /**
-  \file       htdocs/core/modules/synopsisficheinter/pdf_pluton.modules.php
+  \file       htdocs/core/modules/fichinter/pdf_pluton.modules.php
   \ingroup    ficheinter
   \brief      Fichier de la classe permettant de generer les fiches d'intervention au modele pluton
   \version    $Id: pdf_pluton.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/modules_fichinter.php");
 require_once(DOL_DOCUMENT_ROOT . "/lib/company.lib.php");
 
 /**
   \class      pdf_pluton
   \brief      Classe permettant de generer les fiches d'intervention au modele pluton
  */
-class pdf_pluton extends ModeleSynopsisficheinter {
+class pdf_pluton extends ModelePDFFicheinter {
 
     /**
       \brief      Constructeur
@@ -110,8 +110,6 @@ class pdf_pluton extends ModeleSynopsisficheinter {
         $this->emetteur = $mysoc;
         if (!$this->emetteur->code_pays)
             $this->emetteur->code_pays = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
-
-
 
 
 
@@ -195,11 +193,8 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                 $isSousGarantie = false;
                 $isFormation = false;
                 $totDeplacementHT = 0;
-                $totDeplacementTva = 0;
                 $totFPR30 = 0;
                 $totFPR40 = 0;
-                $totFPR30Tva = 0;
-                $totFPR40Tva = 0;
                 $totTempsFPR30 = 0;
                 $totTempsFPR40 = 0;
                 $pu_fpr40 = 0;
@@ -225,13 +220,11 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                             $intervHasFPR40 = true;
                             $FPR40arr[$key] = $val;
                             $totFPR40+=$val->total_ht;
-                            $totFPR40Tva+=$val->total_ht * $val->total_tva;
                             $totTempsFPR40+=$val->duration;
                             $pu_fpr40 = $val->pu_ht;
                         } else if ($res1->ref == 'FPR30') {
                             $totTempsFPR30+=$val->duration;
                             $totFPR30+=$val->total_ht;
-                            $totFPR30Tva+=$val->total_tva;
                             $intervHasFPR30 = true;
                             $FPR30arr[$key] = $val;
                             $isTempsPasse = true;
@@ -249,12 +242,11 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                     }
                     if ($val->fk_typeinterv == 4) {
                         $totDeplacementHT+= $val->total_ht;
-                        $totDeplacementTva+= $val->total_tva;
                     }
                 }
 
 
-                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/core/modules/synopsisficheinter/RapportIntervBIMP2.pdf');
+                $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP2.pdf');
 //
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
@@ -357,17 +349,13 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                 $totTpsPasse = ($totTempsFPR30 > 0 ? $totTempsFPR30 : "");
                 if ($totTpsPasse > 0)
                     $totTpsPasse = $this->sec2time($totTpsPasse);
-                elseif ($affZoneGauche)
+                elseif($affZoneGauche)
                     $totTpsPasse = $this->sec2time($total_duree);
                 $totTpsPasse = str_replace("min", "m", $totTpsPasse);
                 $pdf->MultiCell(16.6, 4.4, $totTpsPasse, 1, 'C', 0);
                 $pdf->SetXY($this->marge_gauche + 2 + 18.1, 97.5);
                 $totalMO = $total_ht - $totDeplacementHT;
                 $totalMO = ($pu_fpr30 > 0 ? price($totalMO) : "");
-                //Mod tysauron
-                $totalMO = $totFPR30;
-                $totalMOTva = $totFPR30Tva;
-                //F mod
                 $pdf->MultiCell(16.6, 4.4, $totalMO, 1, 'C', 0);
                 $pdf->SetXY($this->marge_gauche + 2 + 18.1, 103.5);
                 $totDeplacementHT = ($pu_fpr30 > 0 ? price($totDeplacementHT) : "");
@@ -382,8 +370,9 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                 $pdf->MultiCell(16.6, 4.4, $totalPiece, 1, 'C', 0);
 
                 $puUrgent = ($pu_fpr40 > 0 ? $pu_fpr40 : "");
-                if ($puUrgent > 0)
-                    $puUrgent = price($puUrgent);
+                if ($puUrgent > 0
+
+                    )$puUrgent = price($puUrgent);
                 $pdf->SetXY($this->marge_gauche + 2 + 18.1, 115.4);
                 $pdf->MultiCell(16.6, 4.4, $puUrgent, 1, 'C', 0);
 
@@ -393,22 +382,12 @@ class pdf_pluton extends ModeleSynopsisficheinter {
 
 
                 if ($pu_fpr40 > 0 || $pu_fpr30 > 0 || $affZoneGauche) {
-                    //Deb mod tysauron
-//                    $pdf->MultiCell(16.9, 4.5, price($total_ht + $fichinter->extraArr[$this->totalPieceIdx]), 1, 'C', 0);
-//                    $pdf->SetXY($this->marge_gauche + 2 + 18, 139);
-//                    $pdf->MultiCell(16.9, 4.5, price($total_tva + ($fichinter->extraArr[$this->totalPieceIdx] * 0.196)), 1, 'C', 0);
-//                    $pdf->SetXY($this->marge_gauche + 2 + 18, 145);
-//                    $pdf->MultiCell(16.9, 4.5, price($total_ttc + ($fichinter->extraArr[$this->totalPieceIdx] * 1.196)), 1, 'C', 0);
-                    $totHt = $totalMO + $totDeplacementHT + $puUrgent + $totalPiece;
-                    $totTva = $totalMOTva + $totDeplacementTva + $totFPR40Tva + ($fichinter->extraArr[$this->totalPieceIdx] * 0.196);
-                    $totTtc = $totHt + $totTva;
                     $pdf->SetXY($this->marge_gauche + 2 + 18, 133);
-                    $pdf->MultiCell(16.9, 4.5, price($totHt), 1, 'C', 0);
+                    $pdf->MultiCell(16.9, 4.5, price($total_ht + $fichinter->extraArr[$this->totalPieceIdx]), 1, 'C', 0);
                     $pdf->SetXY($this->marge_gauche + 2 + 18, 139);
-                    $pdf->MultiCell(16.9, 4.5, price($totTva), 1, 'C', 0);
+                    $pdf->MultiCell(16.9, 4.5, price($total_tva + ($fichinter->extraArr[$this->totalPieceIdx] * 0.196)), 1, 'C', 0);
                     $pdf->SetXY($this->marge_gauche + 2 + 18, 145);
-                    $pdf->MultiCell(16.9, 4.5, price($totTtc), 1, 'C', 0);
-                    //f mod
+                    $pdf->MultiCell(16.9, 4.5, price($total_ttc + ($fichinter->extraArr[$this->totalPieceIdx] * 1.196)), 1, 'C', 0);
 
                     $pdf->SetXY($this->marge_gauche + 2 + 18, 153);
                     $pdf->MultiCell(16.9, 4.5, $fichinter->extraArr[$this->totalBonIdx], 1, 'C', 0);
@@ -518,40 +497,40 @@ class pdf_pluton extends ModeleSynopsisficheinter {
 
                 if ($fichinter->extraArr[$this->isIntervTermineIdx] == 1) {
                     //termine
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 35.8, 174.7, 6.2, 6.2);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 35.8, 174.7, 6.2, 6.2);
                 } else {
                     //en cours
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 35.8, 181.7, 6.2, 6.2);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 35.8, 181.7, 6.2, 6.2);
                 }
 
                 //Attente client
                 if ($fichinter->extraArr[$this->attenteClientIdx] . "x" != "x") {
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 36.2, 197.6, 6.1, 6);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 36.2, 197.6, 6.1, 6);
                 }
                 if ($fichinter->extraArr[$this->miseEnRelationIdx] == 'Direction Technique') {
                     //Dir Tech
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 37.5, 241.7, 4.8, 4.3);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 37.5, 241.7, 4.8, 4.3);
                 }
 
                 if ($fichinter->extraArr[$this->miseEnRelationIdx] == 'Service Commercial') {
                     //Service Commercial
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 37.5, 246.6, 4.8, 4.3);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 37.5, 246.6, 4.8, 4.3);
                 }
 
 
                 if ($fichinter->extraArr[$this->isInstallationIdx] == 1) {
                     //Installation
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 92, 20.7, 5, 5.1);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 92, 20.7, 5, 5.1);
                 }
 
                 if ($fichinter->extraArr[$this->isInterventionIdx] == 1) {
                     //Instervention
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 122.3, 20.7, 5, 5.1);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 122.3, 20.7, 5, 5.1);
                 }
 
                 //Temps passé
                 if ($isTempsPasse)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 50.2, 31.6, 4.9, 4.9);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 50.2, 31.6, 4.9, 4.9);
 
                 //Forfait
                 $isForfait = false;
@@ -560,50 +539,50 @@ class pdf_pluton extends ModeleSynopsisficheinter {
                 }
 
                 if ($isForfait)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 82.8, 31.6, 4.9, 4.9);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 82.8, 31.6, 4.9, 4.9);
 
                 //ss garantie
                 if ($isSousGarantie)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 105.8, 31.6, 4.9, 4.9);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 105.8, 31.6, 4.9, 4.9);
 
                 //Formation
                 if ($isFormation)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 139.5, 31.6, 4.9, 4.9);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 139.5, 31.6, 4.9, 4.9);
 
                 //Avant vente
                 if ($isAvantVente)
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 169.4, 31.6, 4.9, 4.9);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 169.4, 31.6, 4.9, 4.9);
 
 
                 if ($fichinter->extraArr[$this->recontactComIdx] == 1) {
                     //Contact client
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/caseCocher.png", 118, 254, 4.5, 4.5);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 118, 254, 4.5, 4.5);
                 }
 
                 //non oui moyen
                 //Non
                 if ($fichinter->extraArr[$this->techALheureIdx] == "Non")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 267.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 267.5, 4, 4);
                 if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Non")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 273.7, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 273.7, 4, 4);
                 if ($fichinter->extraArr[$this->satisfactionIdx] == "Non")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 135.25, 279.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 135.25, 279.5, 4, 4);
 
                 //Moyen
                 if ($fichinter->extraArr[$this->techALheureIdx] == "Moyen")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 267.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 267.5, 4, 4);
                 if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Moyen")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 273.7, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 273.7, 4, 4);
                 if ($fichinter->extraArr[$this->satisfactionIdx] == "Moyen")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 143.75, 279.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 143.75, 279.5, 4, 4);
 
                 //Oui
                 if ($fichinter->extraArr[$this->techALheureIdx] == "Oui")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 267.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 267.5, 4, 4);
                 if ($fichinter->extraArr[$this->infoTacheDurIdx] == "Oui")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 273.7, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 273.7, 4, 4);
                 if ($fichinter->extraArr[$this->satisfactionIdx] == "Oui")
-                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/cocherSansCase.png", 151.9, 279.5, 4, 4);
+                    $pdf->Image(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/cocherSansCase.png", 151.9, 279.5, 4, 4);
 
 
 
@@ -638,53 +617,33 @@ class pdf_pluton extends ModeleSynopsisficheinter {
 
                 $i = 0;
                 $newArr = array();
-                $diffTaillePage = 23;
-                $tailleMax = 52;
-                $pageVide = false;
+                $diffTaillePage = 27;
+                $tailleMax = 50;
                 foreach ($tmpArr as $cle => $ligneStr) {
                     $i++;
-                    if ($i > $tailleMax) {
+                    if ($i > $tailleMax || ($i > ($tailleMax - $diffTaillePage) && count($tmpArr) <= ($cle - $i + $diffTaillePage))) {
                         $tplidx = $pdf->importPage(3, "/MediaBox");
                         $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
                         $longText = join("\n", $newArr);
                         $pdf->SetXY(50, 76);
-                        $pdf->MultiCell(347, 4, $cle . "|" . $longText, 0, 'L', 0);
+                        $pdf->MultiCell(347, 4, $longText, 0, 'L', 0);
                         $pdf->AddPage();
                         $tplidx = $pdf->importPage(1, "/MediaBox");
                         $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
                         $newArr = array();
                         $i = 0;
-                    } elseif ($i > ($tailleMax - $diffTaillePage) && !isset($tmpArr[$cle - $i + $tailleMax+1])) {
-                        $pageVide = true;
                     }
                     $newArr[] = $tmpArr[$cle];
                 }
 
-                if ($pageVide) {
-                    $tplidx = $pdf->importPage(3, "/MediaBox");
-                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $longText = join("\n", $newArr);
-                    $pdf->SetXY(50, 76);
-                    $pdf->MultiCell(147, 4, $longText, 0, 'L', 0);
-                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-
-
-                    $pdf->AddPage();
-                    $tplidx = $pdf->importPage(1, "/MediaBox");
-                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $tplidx = $pdf->importPage(2, "/MediaBox");
-                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                } else {
-                    $tplidx = $pdf->importPage(2, "/MediaBox");
-                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $longText = join("\n", $newArr);
-                    $pdf->SetXY(50, 76);
-                    $pdf->MultiCell(147, 4, $longText, 0, 'L', 0);
-                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
-                }
-
 //                $tplidx = $pdf->importPage(1, "/MediaBox");
 //                $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
+                $tplidx = $pdf->importPage(2, "/MediaBox");
+                $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
+                $longText = join("\n", $newArr);
+                $pdf->SetXY(50, 76);
+                $pdf->MultiCell(147, 4, $longText, 0, 'L', 0);
+                $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 8);
 
 
 

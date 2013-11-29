@@ -168,7 +168,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_Cloture' && $_
 //        $fichinter->modelpdf=$conf->global->FICHEINTER_ADDON_PDF;
 //        $obj = $conf->global->FICHEINTER_ADDON;
 //        $obj = "mod_".$obj;
-//        require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/".$obj.".php");
+//        require_once(DOL_DOCUMENT_ROOT."/core/modules/fichinter/".$obj.".php");
 //        $modFicheinter = new $obj;
 //        $societe=new Societe($db);
 //        $societe->fetch($fichinter->socid);
@@ -182,7 +182,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_Cloture' && $_
 //                $synopsisdemandeinterv->fetch_lines();
 //                //all lines id if lignes[]
 //                $objLigneDemande = new SynopsisdemandeintervLigne($db);
-//                $objLigneFiche = new FichinterLigne($db);
+//                $objLigneFiche = new SynopsisfichinterLigne($db);
 //                foreach ($synopsisdemandeinterv->lignes as $ligne=>$idLigne)
 //                {
 //                    $objLigneDemande->fetch($idLigne->id);
@@ -234,7 +234,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $fichinter->fk_commande = $synopsisdemandeinterv->fk_commande;
     $obj = $conf->global->FICHEINTER_ADDON;
     $obj = "mod_" . $obj;
-    require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/" . $obj . ".php");
+    require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/" . $obj . ".php");
     $modFicheinter = new $obj;
     $societe = new Societe($db);
     $societe->fetch($fichinter->socid);
@@ -255,7 +255,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             }
             $synopsisdemandeinterv->fetch_lines();
             //all lines id if lignes[]
-            $objLigneFiche = new FichinterLigne($db);
+            $objLigneFiche = new SynopsisfichinterLigne($db);
 
             foreach ($synopsisdemandeinterv->lignes as $ligne) {
                 $objLigneFiche->fk_fichinter = $result;
@@ -1439,7 +1439,7 @@ EOF;
             require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
             $inter = new fichinter($db);
             $inter->fetch($idFI);
-            print "<tr><td class='ui-widget-content'>" . $inter->getNomUrl(true) . "</td></tr>";
+            print "<tr><td class='ui-widget-content'>" . $inter->getNomUrl(1) . "</td></tr>";
         }
         print "</table>";
         print '</td></tr>';

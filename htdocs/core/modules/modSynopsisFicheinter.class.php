@@ -63,6 +63,7 @@ class modSynopsisFicheinter extends DolibarrModules {
         $this->family = "Synopsis";
         $this->name = "Fiche inter +";
         $this->description = "Gestion des fiches d'intervention amélioré";
+        $this->dir_output = "fichinter";
 
 //        $this->revision = explode(" ", "$Revision: 1.33 $");
         $this->version = "1";
@@ -79,7 +80,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 
         // Dependances
         $this->depends = array("modSociete", "modCommercial");
-        $this->requiredby = array("modsynopsisdemandeinterv");
+        $this->requiredby = array("modSynopsisdemandeinterv");
 
         // Constantes
         $this->const = array();
@@ -87,17 +88,17 @@ class modSynopsisFicheinter extends DolibarrModules {
 
         $this->const[$r][0] = "FICHEINTER_ADDON_PDF";
         $this->const[$r][1] = "chaine";
-        $this->const[$r][2] = "soleil";
+        $this->const[$r][2] = "BIMP";
         $r++;
-
-        $this->const[$r][0] = "FICHEINTER_ADDON";
-        $this->const[$r][1] = "chaine";
-        $this->const[$r][2] = "48pacific";
-        $r++;
+//
+//        $this->const[$r][0] = "FICHEINTER_ADDON";
+//        $this->const[$r][1] = "chaine";
+//        $this->const[$r][2] = "48pacific";
+//        $r++;
 
         // Boites
         $this->boxes = array();
-        $this->boxes[0][1] = "box_ficheinter.php";
+//        $this->boxes[0][1] = "box_ficheinter.php";
 
         // Permissions
         $this->rights = array();
@@ -227,7 +228,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Interventions',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/liste.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/liste.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 1,
             'perms' => '$user->rights->synopsisficheinter->lire',
@@ -241,7 +242,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'ListOfInterventions',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/liste.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/liste.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 2,
             'perms' => '$user->rights->synopsisficheinter->lire',
@@ -255,7 +256,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'ListOfMyInterventions',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/liste.php?leftmenu=ficheinter&filtreUser=true',
+            'url' => '/synopsisfichinter/liste.php?leftmenu=ficheinter&filtreUser=true',
             'langs' => 'interventions',
             'position' => 1,
             'perms' => '$user->rights->synopsisficheinter->lire',
@@ -268,7 +269,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'NewIntervention',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/fiche.php?action=create&leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/fiche.php?action=create&leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 1,
             'perms' => '$user->rights->synopsisficheinter->creer',
@@ -283,7 +284,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Rapport FI',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/rapport.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/rapport.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 3,
             'perms' => '$user->rights->synopsisficheinter->lire',
@@ -349,7 +350,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Config prix',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/config/configPrix.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/config/configPrix.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 7,
             'perms' => '$user->rights->synopsisficheinter->config',
@@ -362,7 +363,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Config interv',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/config/configCategorie.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/config/configCategorie.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 8,
             'perms' => '$user->rights->synopsisficheinter->config',
@@ -375,7 +376,7 @@ class modSynopsisFicheinter extends DolibarrModules {
             'type' => 'left',
             'titre' => 'Config type interv',
             'mainmenu' => 'synopsisficheinter',
-            'url' => '/fichinter/config/configType.php?leftmenu=ficheinter',
+            'url' => '/synopsisfichinter/config/configType.php?leftmenu=ficheinter',
             'langs' => 'interventions',
             'position' => 9,
             'perms' => '$user->rights->synopsisficheinter->config',
@@ -404,56 +405,83 @@ class modSynopsisFicheinter extends DolibarrModules {
             "INSERT IGNORE INTO " . MAIN_DB_PREFIX . "document_model (nom, type) VALUES('" . $this->const[0][2] . "','ficheinter')",
         );
 
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter` (
-  `rowid` int(11) NOT NULL auto_increment,
-  `fk_soc` int(11) NOT NULL,
-  `fk_projet` int(11) default '0',
-  `fk_contrat` int(11) default '0',
-  `fk_commande` int(11) default NULL,
-  `ref` varchar(30) NOT NULL,
-  `tms` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
-  `datec` datetime default NULL,
-  `date_valid` datetime default NULL,
-  `datei` date default NULL,
-  `fk_user_author` int(11) default NULL,
-  `fk_user_valid` int(11) default NULL,
-  `fk_statut` smallint(6) default '0',
-  `duree` double default NULL,
-  `description` text,
-  `note_private` text,
-  `note_public` text,
-  `model_pdf` varchar(50) default NULL,
-  `total_ht` double default NULL,
-  `total_tva` double default NULL,
-  `total_ttc` double default NULL,
-  `entity` int(11) NOT NULL DEFAULT '1',
+//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinter` (
+//  `rowid` int(11) NOT NULL auto_increment,
+//  `fk_soc` int(11) NOT NULL,
+//  `fk_projet` int(11) default '0',
+//  `fk_contrat` int(11) default '0',
+//  `fk_commande` int(11) default NULL,
+//  `ref` varchar(30) NOT NULL,
+//  `tms` timestamp NOT NULL default CURRENT_TIMESTAMP on update CURRENT_TIMESTAMP,
+//  `datec` datetime default NULL,
+//  `date_valid` datetime default NULL,
+//  `datei` date default NULL,
+//  `fk_user_author` int(11) default NULL,
+//  `fk_user_valid` int(11) default NULL,
+//  `fk_statut` smallint(6) default '0',
+//  `duree` double default NULL,
+//  `description` text,
+//  `note_private` text,
+//  `note_public` text,
+//  `model_pdf` varchar(50) default NULL,
+//  `total_ht` double default NULL,
+//  `total_tva` double default NULL,
+//  `total_ttc` double default NULL,
+//  `entity` int(11) NOT NULL DEFAULT '1',
+//  `natureInter` int(11) NOT NULL,
+//  PRIMARY KEY  (`rowid`),
+//  UNIQUE KEY `ref` (`ref`),
+//  KEY `idx_fichinter_fk_soc` (`fk_soc`)
+//) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
+//
+//        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (
+//  `rowid` int(11) NOT NULL auto_increment,
+//  `fk_fichinter` int(11) default NULL,
+//  `date` date default NULL,
+//  `description` text,
+//  `duree` int(11) default NULL,
+//  `rang` int(11) default '0',
+//  `fk_typeinterv` int(11) default NULL,
+//  `fk_depProduct` int(11) default NULL,
+//  `tx_tva` double default '19.6',
+//  `pu_ht` double default NULL,
+//  `qte` double default NULL,
+//  `total_ht` double default NULL,
+//  `total_tva` double default NULL,
+//  `total_ttc` double default NULL,
+//  `fk_contratdet` int(11) default NULL,
+//  `fk_commandedet` int(11) default NULL,
+//  `isForfait` tinyint(1) default NULL,
+//  PRIMARY KEY  (`rowid`)
+//) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
+
+        
+        $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisfichinter` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_commande` int(11) DEFAULT NULL,
+  `total_ht` double DEFAULT NULL,
+  `total_tva` double DEFAULT NULL,
+  `total_ttc` double DEFAULT NULL,
   `natureInter` int(11) NOT NULL,
-  PRIMARY KEY  (`rowid`),
-  UNIQUE KEY `ref` (`ref`),
-  KEY `idx_fichinter_fk_soc` (`fk_soc`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
-        $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (
-  `rowid` int(11) NOT NULL auto_increment,
-  `fk_fichinter` int(11) default NULL,
-  `date` date default NULL,
-  `description` text,
-  `duree` int(11) default NULL,
-  `rang` int(11) default '0',
-  `fk_typeinterv` int(11) default NULL,
-  `fk_depProduct` int(11) default NULL,
-  `tx_tva` double default '19.6',
-  `pu_ht` double default NULL,
-  `qte` double default NULL,
-  `total_ht` double default NULL,
-  `total_tva` double default NULL,
-  `total_ttc` double default NULL,
-  `fk_contratdet` int(11) default NULL,
-  `fk_commandedet` int(11) default NULL,
-  `isForfait` tinyint(1) default NULL,
-  PRIMARY KEY  (`rowid`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
-
+  PRIMARY KEY (`rowid`)
+)";
+        $sql[] = "CREATE TABLE IF NOT EXISTS `llx_synopsisfichinterdet` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_typeinterv` int(11) DEFAULT NULL,
+  `fk_depProduct` int(11) DEFAULT NULL,
+  `tx_tva` double DEFAULT '19.6',
+  `pu_ht` double DEFAULT NULL,
+  `qte` double DEFAULT NULL,
+  `total_ht` double DEFAULT NULL,
+  `total_tva` double DEFAULT NULL,
+  `total_ttc` double DEFAULT NULL,
+  `fk_contratdet` int(11) DEFAULT NULL,
+  `fk_commandedet` int(11) DEFAULT NULL,
+  `isForfait` tinyint(1) DEFAULT NULL,
+  PRIMARY KEY (`rowid`)
+)";
+        
+        
         $sql[] = "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` (
   `id` int(11) NOT NULL auto_increment,
   `label` varchar(50) default NULL,
@@ -581,16 +609,23 @@ class modSynopsisFicheinter extends DolibarrModules {
   `prix_ht` double default NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ;";
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinterdet;";
+        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."Synopsis_fichinter;";
+        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
+". MAIN_DB_PREFIX ."Synopsis_fichinter as (SELECT f.`rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `fk_commande`, `ref`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, `total_ht`, `total_tva`, `total_ttc`, `natureInter`, `entity` 
+FROM llx_fichinter f left join llx_synopsisfichinter sf on f.rowid = sf.rowid);";
+        $sql[] = "CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW llx_Synopsis_fichinterdet as (SELECT f.`rowid`, `fk_fichinter`, `date`, `description`, `duree`, `rang`, `fk_typeinterv`, `fk_depProduct`, `tx_tva`, `pu_ht`, `qte`, `total_ht`, `total_tva`, `total_ttc`, `fk_contratdet`, `fk_commandedet`, `isForfait` 
+FROM ". MAIN_DB_PREFIX ."fichinterdet f  left join llx_synopsisfichinterdet sf on f.rowid = sf.rowid);";
         
-        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
-        
-        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
-        
-        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
-        
-        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
-        
-        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."Synopsis_fichinter` WHERE 1);";
+//        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
+//        
+//        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinterdet;";
+//        
+//        $sql[] = "DROP TABLE IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
+//        
+//        $sql[] = "DROP VIEW IF EXISTS ". MAIN_DB_PREFIX ."fichinter;";
+//        
+//        $sql[] = "CREATE VIEW ". MAIN_DB_PREFIX ."fichinter as (SELECT `rowid`, `fk_soc`, `fk_projet`, `fk_contrat`, `ref`, 1 as `entity`, `tms`, `datec`, `date_valid`, `datei`, `fk_user_author`, `fk_user_valid`, `fk_statut`, `duree`, `description`, `note_private`, `note_public`, `model_pdf`, '' as `extraparams` FROM `". MAIN_DB_PREFIX ."Synopsis_fichinter` WHERE 1);";
 
         return $this->_init($sql);
     }

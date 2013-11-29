@@ -32,7 +32,7 @@
  */
 
 /**
-        \file       htdocs/core/modules/synopsisficheinter/modules_synopsisficheinter.php
+        \file       htdocs/core/modules/fichinter/modules_fichinter.php
         \ingroup    ficheinter
         \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
                     et la classe mere de numerotation des fiches interventions
@@ -87,11 +87,11 @@ class ModeleSynopsisficheinter extends CommonDocGenerator
 
 
 /**
-        \class      ModeleNumRefFicheinter
+        \class      ModeleNumRefSynopsisficheinter
         \brief      Classe mere des modeles de numerotation des references de fiches d'intervention
 */
 
-class ModeleNumRefFicheinter
+class ModeleNumRefSynopsisficheinter
 {
     public $error='';
 
@@ -162,7 +162,7 @@ function fichinter_create($db, $object, $modele='', $outputlangs='')
     global $conf,$langs;
     $langs->load("ficheinter");
 
-    $dir = DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/";
+    $dir = DOL_DOCUMENT_ROOT."/core/modules/fichinter/";
 
     // Positionne modele sur le nom du modele de facture a utiliser
     if (! strlen($modele))
@@ -212,7 +212,7 @@ function fichinter_create($db, $object, $modele='', $outputlangs='')
    \param        propalid    id de la propal a effacer
    \param     propalref reference de la propal si besoin
 */
-function fichinter_delete_preview($db, $fichinterid, $fichinterref='')
+function synopsisfichinter_delete_preview($db, $fichinterid, $fichinterref='')
 {
     global $langs,$conf;
 

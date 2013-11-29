@@ -17,7 +17,7 @@ class Chrono extends CommonObject {
     public $ref;
     public $file_path;
     public $contactid;
-    public $user_author_id;
+    public $fk_user_author;
     public $date_modif;
     public $date;
     public $user_author = false;
@@ -52,10 +52,10 @@ class Chrono extends CommonObject {
                 $this->statut = $res->fk_statut;
                 $this->validation_number = $res->validation_number;
                 
-                $this->user_author_id = $res->fk_user_author;
-                if ($this->user_author_id > 0) {
+                $this->fk_user_author = $res->fk_user_author;
+                if ($this->fk_user_author > 0) {
                     $tmpUser = new User($this->db);
-                    $tmpUser->fetch($this->user_author_id);
+                    $tmpUser->fetch($this->fk_user_author);
                     $this->user_author = $tmpUser;
                 }
                 $this->user_modif_id = $res->fk_user_modif;

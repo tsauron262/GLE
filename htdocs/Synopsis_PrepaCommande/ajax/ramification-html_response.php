@@ -31,11 +31,11 @@
     {
         print "    <th class='ui-widget-header ui-state-default'>Action";
     }
-    require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/synopsisfichinter/class/synopsisfichinter.class.php");
     require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
     while ($res = $db->fetch_object($sql))
     {
-        $finter = new FichInter($db);
+        $finter = new Synopsisfichinter($db);
         $finter->fetch($res->rowid);
         print "<tr id='FI-".$res->rowid."'><td class='ui-widget-content'>".$finter->getNomUrl(1);
         if ($finter->fk_soc >0 )

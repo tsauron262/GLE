@@ -16,7 +16,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -27,24 +29,25 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  * or see http://www.gnu.org/
  */
 
 /**
-	\file       htdocs/core/modules/synopsisficheinter/mod_arctic.php
+	\file       htdocs/core/modules/fichinter/mod_arctic.php
 	\ingroup    fiche intervention
 	\brief      Fichier contenant la classe du modele de numerotation de reference de fiche intervention Arctic
 	\version    $Id: mod_arctic.php,v 1.10 2008/07/05 14:20:09 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/modules_fichinter.php");
 
 /**
 	\class      mod_arctic
 	\brief      Classe du modele de numerotation de reference de fiche intervention Arctic
 */
-class mod_arctic extends ModeleNumRefFicheinter
+class mod_arctic extends ModeleNumRefSynopsisficheinter
 {
 	var $version='dolibarr';		// 'development', 'experimental', 'dolibarr'
 	var $error = '';

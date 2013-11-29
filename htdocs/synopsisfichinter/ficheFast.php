@@ -50,23 +50,23 @@
  */
 
 /**
-  \file       htdocs/fichinter/fiche.php
+  \file       htdocs/synopsisfichinter/fiche.php
   \brief      Fichier fiche intervention
   \ingroup    ficheinter
   \version    $Id: fiche.php,v 1.100 2008/07/15 00:57:37 eldy Exp $
  */
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/modules_fichinter.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 if ($conf->projet->enabled) {
     require_once(DOL_DOCUMENT_ROOT . "/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 }
-if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php")) {
-    require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisficheinter/mod_" . FICHEINTER_ADDON . ".php");
+if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/mod_" . FICHEINTER_ADDON . ".php")) {
+    require_once(DOL_DOCUMENT_ROOT . "/core/modules/fichinter/mod_" . FICHEINTER_ADDON . ".php");
 }
 
 $langs->load("companies");
@@ -639,14 +639,14 @@ function cacherDecacherPRDV(){
 
 function affLienDoc($fichinter, $formfile, $conf) {
     $filename = sanitize_string($fichinter->ref);
-    $filedir = $conf->synopsisficheinter->dir_output . "/" . $fichinter->ref;
+    $filedir = $conf->ficheinter->dir_output . "/" . $fichinter->ref;
     $urlsource = $_SERVER["PHP_SELF"] . "?id=" . $fichinter->id;
     $somethingshown = $formfile->show_documents('synopsisficheinter', $filename, $filedir, $urlsource, 0, 0);
 }
 
 function genererDoc($db) {
     global $user, $langs, $conf;
-    $fichinter = new Fichinter($db);
+    $fichinter = new Synopsisfichinter($db);
     $fichinter->fetch($_REQUEST['id']);
     $fichinter->fetch_lines();
 
@@ -700,26 +700,32 @@ function saveForm() {
         $_POST['date' . $i] = str_replace(array("-", "h", "/", "\\", " "), ":", $_POST['date' . $i]);
         $tab = explode(":", $_POST['date' . $i]);
         $result = "";
+        
+        if ($tab[0] < 10)
+            $tab[0] = "0".intval($tab[0]);
+        if (isset($tab[1]) && $tab[1] < 10)
+            $tab[1] = "0".intval($tab[1]);
+        
         if (!isset($tab[1]))
-            $result .= "00:";
-        else {
-            if ($tab[0] < 10)
-                $result .= "0";
-            $result .= intval($tab[0]) . ":";
-        }
-        if (!isset($tab[1]))
-            $result .= "00";
-        else {
-            if ($tab[1] < 10)
-                $result .="0";
-            $result .= intval($tab[1]);
-        }
+            $result .= $tab[0].":00";
+        else
+            $result .= $tab[0].":".$tab[1];
+//        if (!isset($tab[1]))
+//            $result .= "00";
+//        else {
+//            if ($tab[1] < 10)
+//                $result .="0";
+//            $result .= intval($tab[1]);
+//        }
         $_POST['date' . $i] = $result;  
     }
 //    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);
 //    $oldData = mysql_fetch_object($req);
-    $req = "UPDATE `" . MAIN_DB_PREFIX . "Synopsis_fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "', natureInter = '" . $_POST['natureInter'] . "' WHERE  `" . MAIN_DB_PREFIX . "Synopsis_fichinter`.`rowid` =" . $fichinter->id;
+    $req = "UPDATE `" . MAIN_DB_PREFIX . "fichinter` SET  `datei` =  '" . convertirDate($_POST['date'], false) . "',`note_private` =  '" . $_POST['descP'] . "',`description` =  '" . $_POST['desc'] . "'
+         WHERE  `rowid` =" . $fichinter->id;
+    $sql = $db->query($req);
+    $req = "UPDATE `" . MAIN_DB_PREFIX . "synopsisfichinter` SET  natureInter = '" . $_POST['natureInter'] . "' WHERE  `rowid` =" . $fichinter->id;
     $sql = $db->query($req);
     extra(24, $_POST['date1']);
     extra(19, $_POST['attentes']);
@@ -761,12 +767,12 @@ function saveForm() {
 
         if (!isset($_POST['presta' . $i . "_rowid"]) || $_POST['presta' . $i . "_rowid"] == 0) {
             if (stripos($_POST['supprPresta'], 'presta' . $i . '_') === false)
-                $fichinter->addline(
+                $fichinter->addlineSyn(
                         $fichinter->id, $_POST['presta' . $i . "_descPrest"], date("Y-m-d"), $_POST['presta' . $i . "_duree"], $_POST['presta' . $i . "_fk_typeinterv"], 1, $pu_ht, ($_POST['presta' . $i . "_forfait"] == "on"), $_REQUEST['comLigneId'], (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0), $_POST['presta' . $i . "_fk_prod"]
                 );
         }
         else {
-            $fichinterline = new FichinterLigne($db);
+            $fichinterline = new SynopsisfichinterLigne($db);
             $fichinterline->fetch($_POST['presta' . $i . "_rowid"]);
             if (stripos($_POST['supprPresta'], 'presta' . $i . '_') === false) {
                 $fichinterline->desc = $_POST['presta' . $i . "_descPrest"];
@@ -795,7 +801,7 @@ function saveForm() {
 
 function initObj() {
     global $fichinter, $db;
-    $fichinter = new Fichinter($db);
+    $fichinter = new Synopsisfichinter($db);
     $result = $fichinter->fetch($_REQUEST["id"]);
     if (!$result > 0) {
         dol_print_error($db);
@@ -827,9 +833,9 @@ function prestations($rowid = null, $desc = null, $type = null, $duree = null) {
     global $db, $fichinter;
     if ($desc) {//Insert ou update
         if ($rowid && $rowid != 0)
-            $req = "UPDATE  `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
+            $req = "UPDATE  `" . MAIN_DB_PREFIX . "fichinterdet` SET  `description` =  '" . $desc . "', `fk_typeinterv` =  '" . $type . "', duree = '" . $duree . "' WHERE  `rowid` =" . $rowid;
         else
-            $req = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
+            $req = "INSERT INTO `" . MAIN_DB_PREFIX . "fichinterdet` (`description`, `fk_typeinterv`, fk_fichinter, date, duree) VALUES ('" . $desc . "', " . $type . ", " . $fichinter->id . ", now(), '" . $duree . "')";
         $sql = $db->query($req);
     } else {//Select
         if ($rowid)

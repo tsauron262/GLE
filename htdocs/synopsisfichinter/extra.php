@@ -13,14 +13,14 @@
   */
  /**
   *
-  * Name : quality.php
+  * Name : extra.php
   * GLE-1.2
   */
 
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/core/class/html.formfile.class.php");
-require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT."/synopsisfichinter/class/synopsisfichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/fichinter/modules_fichinter.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/fichinter.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/date.lib.php");
 if ($conf->projet->enabled)
@@ -28,9 +28,9 @@ if ($conf->projet->enabled)
     require_once(DOL_DOCUMENT_ROOT."/core/lib/project.lib.php");
     require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 }
-if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/mod_".FICHEINTER_ADDON.".php"))
+if (defined("FICHEINTER_ADDON") && is_readable(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/mod_".FICHEINTER_ADDON.".php"))
 {
-    require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/mod_".FICHEINTER_ADDON.".php");
+    require_once(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/mod_".FICHEINTER_ADDON.".php");
 }
 
 $langs->load("companies");
@@ -99,11 +99,12 @@ llxHeader($js);
         }
     }
 
-if ($_REQUEST["id"] > 0) {
+if ($_REQUEST["id"] > 0)
+{
     /*
     * Affichage en mode visu
     */
-    $fichinter = new Fichinter($db);
+    $fichinter = new Synopsisfichinter($db);
     $result=$fichinter->fetch($_REQUEST["id"]);
     if (! $result > 0)
     {
@@ -116,7 +117,7 @@ if ($_REQUEST["id"] > 0) {
 
     $head = synopsisfichinter_prepare_head($fichinter);
 
-    dol_fiche_head($head, 'quality', $langs->trans("InterventionCard"));
+    dol_fiche_head($head, 'extra', $langs->trans("InterventionCard"));
 
     /*
     * Confirmation de la suppression de la fiche d'intervention
@@ -175,12 +176,12 @@ if ($_REQUEST["id"] > 0) {
     }
     print '</td>';
     print '</tr></table><br><br/>';
-    print "<div class='titre'>Questionnaire</div>";
+    print "<div class='titre'>Extras</div>";
     if ($_REQUEST['action']=="validate")
     {
-        print "<div class='ui-state-highlight'>Le questionnaire a &eacute;t&eacute; valid&eacute;";
+        print "<div class='ui-state-highlight'>Le formulaire a &eacute;t&eacute; valid&eacute;";
     }
-    print "<form action='quality.php?id=".$_REQUEST['id']."' method='POST'>";
+    print "<form action='extra.php?id=".$_REQUEST['id']."' method='POST'>";
     print "<input type='hidden' name='action' value='validate'>";
     print '<table class="border" cellpadding=15 width="100%">';
 
@@ -190,11 +191,11 @@ if ($_REQUEST["id"] > 0) {
                        v.extra_value, description
                   FROM ".MAIN_DB_PREFIX."synopsisfichinter_extra_key as k
              LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = ".$fichinter->id." AND typeI = 'FI'
-                 WHERE k.active = 1 AND isQuality = 1";
+                 WHERE k.active = 1 AND (isQuality <> 1 OR isQuality IS NULL) AND (isInMainPanel <> 1 OR isInMainPanel IS NULL)";
     $sql = $db->query($requete);
     while ($res=$db->fetch_object($sql))
     {
-        print '<tr><th align=left colspan=2 class="ui-widget-header ui-state-default">'.$res->description;
+        print '<tr><th align=left colspan=2 class="ui-widget-header ui-state-default">'.$res->label;
 //        if ($_REQUEST['action']=='editExtra-'.$res->id)
 //        {
             switch ($res->type)
@@ -353,5 +354,6 @@ function sec2time($sec){
     return ($returnstring);
 }
 
-llxFooter();
+    
+    llxfooter();
 ?>

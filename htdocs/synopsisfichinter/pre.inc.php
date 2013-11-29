@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * $Id: pre.inc.php,v 1.6 2005/04/19 10:40:38 rodolphe Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/fichinter/pre.inc.php,v $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisfichinter/pre.inc.php,v $
  *
  */
 /*
@@ -43,53 +43,53 @@ function synopsisfichinter_prepare_head($fichinter)
   $h = 0;
   $head = array();
 
-  $head[$h][0] = DOL_URL_ROOT.'/fichinter/fiche.php?id='.$fichinter->id;
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/fiche.php?id='.$fichinter->id;
   $head[$h][1] = $langs->trans("Card");
   $head[$h][2] = 'card';
   $h++;
 
-  $head[$h][0] = DOL_URL_ROOT.'/fichinter/ficheFast.php?id='.$fichinter->id;
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/ficheFast.php?id='.$fichinter->id;
   $head[$h][1] = "Fiche rapide";
   $head[$h][2] = 'cardFast';
   $h++;
 
-  $head[$h][0] = DOL_URL_ROOT.'/fichinter/contact.php?id='.$fichinter->id;
+  $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/contact.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('InterventionContact');
     $head[$h][2] = 'contact';
     $h++;
 
     if (! empty($conf->global->MAIN_USE_PREVIEW_TABS))
     {
-        $head[$h][0] = DOL_URL_ROOT.'/fichinter/apercu.php?id='.$fichinter->id;
+        $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/apercu.php?id='.$fichinter->id;
         $head[$h][1] = $langs->trans('Preview');
         $head[$h][2] = 'preview';
         $h++;
     }
 
-    $head[$h][0] = DOL_URL_ROOT.'/fichinter/extra.php?id='.$fichinter->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/extra.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('Extra');
     $head[$h][2] = 'extra';
     $h++;
 
 
-    $head[$h][0] = DOL_URL_ROOT.'/fichinter/quality.php?id='.$fichinter->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/quality.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('Qualit&eacute;');
     $head[$h][2] = 'quality';
     $h++;
 
 
-    $head[$h][0] = DOL_URL_ROOT.'/fichinter/note.php?id='.$fichinter->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/note.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('Note');
     $head[$h][2] = 'note';
     $h++;
 
-    $head[$h][0] = DOL_URL_ROOT.'/fichinter/document.php?id='.$fichinter->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/document.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('Documents');
     $head[$h][2] = 'documents';
     $h++;
 
 
-    $head[$h][0] = DOL_URL_ROOT.'/fichinter/info.php?id='.$fichinter->id;
+    $head[$h][0] = DOL_URL_ROOT.'/synopsisfichinter/info.php?id='.$fichinter->id;
     $head[$h][1] = $langs->trans('Info');
     $head[$h][2] = 'info';
     $h++;

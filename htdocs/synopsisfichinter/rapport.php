@@ -18,7 +18,7 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *
  * $Id: rapport.php,v 1.12 2007/06/22 08:44:46 hregis Exp $
- * $Source: /cvsroot/dolibarr/dolibarr/htdocs/fichinter/rapport.php,v $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/synopsisfichinter/rapport.php,v $
  *
  */
 /*
@@ -36,7 +36,7 @@
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 
@@ -281,6 +281,7 @@ if ($resql) {
     print '<td align="center">Date</td>';
     print '<td align="center">' . $langs->trans("Duration") . '</td>';
     print '<td align="center">Prix HT</td>';
+    print '<td align="center">Statut</td>';
     print "</tr>\n";
     $var = true;
     $DureeTotal = 0;
@@ -288,7 +289,7 @@ if ($resql) {
     while ($objp = $db->fetch_object($resql)) {
         $var = !$var;
         print "<tr $bc[$var]>";
-        $di = new Fichinter($db);
+        $di = new Synopsisfichinter($db);
         $di->fetch($objp->fichid);
 
         $total_ht += $objp->total_ht;
@@ -311,6 +312,7 @@ if ($resql) {
         else
             print '<td align="center">' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm</td>';
         print '<td align="center">' . $objp->total_ht . ' &euro;</td>';
+        print '<td align="center">' . $di->getLibStatut(2) . ' </td>';
 
         $DureeTotal += $objp->duree;
         print "</tr>\n";

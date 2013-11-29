@@ -395,7 +395,7 @@ class gsm
                 if (is_array($genallowed)) $modellist=$genallowed;
                 else
                 {
-                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/synopsisficheinter/modules_fichinter.php');
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/fichinter/modules_fichinter.php');
                     $model=new ModelePDFFicheinter();
                     $modellist=$model->liste_modeles($db);
                 }

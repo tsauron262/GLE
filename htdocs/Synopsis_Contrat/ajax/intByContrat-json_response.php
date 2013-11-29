@@ -31,7 +31,7 @@ $typeObj = (isset($_REQUEST['type'])? $_REQUEST['type'] : "FI");
 if($typeObj == "FI"){
         require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
         $fi = new Fichinter($db);
-        $table = "fichinter";
+        $table = "Synopsis_fichinter";
 }
 else{
         require_once(DOL_DOCUMENT_ROOT."/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
@@ -44,7 +44,7 @@ else{
     default:
         $where = "fk_contrat=".$id;
        require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
-        $result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."Synopsis_".$table." WHERE ".$where);
+        $result = $db->query("SELECT COUNT(*) AS count FROM ".MAIN_DB_PREFIX."".$table." WHERE ".$where);
         $row = $db->fetch_object($result);
         $count = $row->count;
         if( $count >0 )
@@ -60,7 +60,7 @@ else{
         if ($start < 0) $start=0;
 
         $SQL = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_".$table." as c
+                  FROM ".MAIN_DB_PREFIX."".$table." as c
                  WHERE ".$where."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
@@ -75,7 +75,7 @@ else{
             $desc=$row->description;
             $fi->fetch($row->rowid);
             $userT = new User($db);
-            $userT->fetch($fi->user_author_id);
+            $userT->fetch($row->fk_user_author);
             
             $responce->rows[$i]['id']=$row->rowid;
             $responce->rows[$i]['cell']=array($row->rowid,
@@ -97,8 +97,8 @@ else{
        require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
        require_once(DOL_DOCUMENT_ROOT."/Babel_GMAO/SAV.class.php");
         $result = $db->query("SELECT count(*) as count
-                                FROM ".MAIN_DB_PREFIX."Synopsis_".$table."det
-                               WHERE fk_".$table." = ".$id);
+                                FROM ".MAIN_DB_PREFIX."".$table."det
+                               WHERE fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = ".$id);
         $row = $db->fetch_object($result);
         $count = $row->count;
         if( $count >0 )
@@ -113,10 +113,10 @@ else{
         // do not put $limit*($page - 1)
         if ($start < 0) $start=0;
 
-        $SQL = "SELECT t.label as type, t.isDeplacement, fd.date, fd.description, fd.total_ht, ".($typeObj=="FI" ?"fk_depProduct, " : "")."fd.fk_typeinterv, fd.duree
-                  FROM ".MAIN_DB_PREFIX."Synopsis_".$table."det as fd
+        $SQL = "SELECT t.label as type, fd.rowid as id, t.isDeplacement, fd.date, fd.description, fd.total_ht, ".($typeObj=="FI" ?"fk_depProduct, " : "")."fd.fk_typeinterv, fd.duree
+                  FROM ".MAIN_DB_PREFIX."".$table."det as fd
              LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv as t ON fd.fk_typeinterv = t.id AND active = 1
-                 WHERE fd.fk_".$table." = ".$id."
+                 WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = ".$id."
               ORDER BY $sidx $sord
                  LIMIT $start , $limit";
 //print $SQL;

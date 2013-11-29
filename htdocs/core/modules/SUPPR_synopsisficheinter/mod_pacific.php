@@ -33,20 +33,20 @@
  */
 
 /**
-    \file       htdocs/core/modules/synopsisficheinter/mod_pacific.php
+    \file       htdocs/core/modules/fichinter/mod_pacific.php
     \ingroup    fiche intervention
     \brief      Fichier contenant la classe du modele de numerotation de reference de fiche intervention Pacific
     \version    $Id: mod_pacific.php,v 1.5 2008/07/08 23:02:17 eldy Exp $
 */
 
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/modules_fichinter.php");
 
 /**
     \class      mod_pacific
         \brief      Classe du modele de numerotation de reference de fiche intervention Pacific
 */
 
-class mod_pacific extends ModeleNumRefFicheinter
+class mod_pacific extends ModeleNumRefSynopsisficheinter
 {
     public $prefix='FI';
     public $error='';

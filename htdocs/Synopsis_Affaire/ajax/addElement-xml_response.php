@@ -703,10 +703,10 @@
             case 'FI':
             {
                 //Commande
-                require_once(DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php');
+                require_once(DOL_DOCUMENT_ROOT.'/synopsisfichinter/class/synopsisfichinter.class.php');
                 if ($eid > 0)
                 {
-                    $prop = new Fichinter($db);
+                    $prop = new Synopsisfichinter($db);
                     $prop->fetch($eid);
                     //$xml .= "<group id='".$gid."'>";
                         $xmlArr[$gid] .= '<element>';

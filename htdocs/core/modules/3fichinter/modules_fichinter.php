@@ -20,7 +20,7 @@
  */
 
 /**
- *  \file       htdocs/core/modules/synopsisficheinter/modules_fichinter.php
+ *  \file       htdocs/core/modules/fichinter/modules_fichinter.php
  *  \ingroup    ficheinter
  *  \brief      Fichier contenant la classe mere de generation des fiches interventions en PDF
  *   			et la classe mere de numerotation des fiches interventions

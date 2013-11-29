@@ -19,11 +19,11 @@
  */
 
 /**
- *  \file       htdocs/core/modules/synopsisficheinter/mod_pacific.php
+ *  \file       htdocs/core/modules/fichinter/mod_pacific.php
  *  \ingroup    fiche intervention
  *  \brief      File with Pacific numbering module for interventions
  */
-require_once(DOL_DOCUMENT_ROOT ."/core/modules/synopsisficheinter/modules_fichinter.php");
+require_once(DOL_DOCUMENT_ROOT ."/core/modules/fichinter/modules_fichinter.php");
 
 /**
  *	Class to manage numbering of intervention cards with rule Pacific.

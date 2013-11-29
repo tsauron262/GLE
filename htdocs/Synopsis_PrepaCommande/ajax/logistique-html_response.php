@@ -80,15 +80,15 @@ if ($res > 0) {
                 } else {
                     print "" . ($val1['line']->logistique_ok > 0 ? "oui" : "non");
                 }
-                if ($val1['line']->logistique_ok == '1') {
-                    print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:none'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' class='datepicker'></div>";
-                } else {
+//                if ($val1['line']->logistique_ok == '1') {
+//                    print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:none'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' class='datepicker'></div>";
+//                } else {
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
                         print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:block'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' value='" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
                     } else {
                         print "<br/>Dispo&nbsp;le:&nbsp;" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "");
                     }
-                }
+//                }
             }
             print "</table></td></tr>";
         }
@@ -364,15 +364,15 @@ function displayLogistique($com) {
                 } else {
                     print "<tr><td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
                 }
-                if ($val->logistique_ok == '1') {
-                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
-                } else {
+//                if ($val->logistique_ok == '1') {
+//                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
+//                } else {
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
                         print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
                     } else {
                         print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                     }
-                }
+//                }
                 print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
                 print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);
                 print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($val->libelle);

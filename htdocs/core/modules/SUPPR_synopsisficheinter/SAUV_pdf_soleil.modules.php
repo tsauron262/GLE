@@ -31,13 +31,13 @@
  */
 
 /**
- \file       htdocs/core/modules/synopsisficheinter/pdf_soleil.modules.php
+ \file       htdocs/core/modules/fichinter/pdf_soleil.modules.php
  \ingroup    ficheinter
  \brief      Fichier de la classe permettant de generer les fiches d'intervention au modele Soleil
  \version    $Id: pdf_soleil.modules.php,v 1.46 2008/07/29 19:20:34 eldy Exp $
  */
 
-require_once(DOL_DOCUMENT_ROOT."/core/modules/synopsisficheinter/modules_synopsisficheinter.php");
+require_once(DOL_DOCUMENT_ROOT."/core/modules/fichinter/modules_fichinter.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/company.lib.php");
 
 

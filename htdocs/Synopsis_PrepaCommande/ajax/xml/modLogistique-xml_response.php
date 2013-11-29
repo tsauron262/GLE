@@ -33,11 +33,11 @@ foreach ($_REQUEST as $key => $val) {
 
         $set = 'logistique_ok='.$yesnoArr[$val];
 
-        if ($yesnoArr[$val] == 0 && preg_match('/([0-9]{2})[\W]{1}([0-9]{2})[\W]{1}([0-9]{4})/', $_REQUEST['logistiqueKODate-' . $arr[1]], $arr1)) {
+        if (/*$yesnoArr[$val] == 0 &&*/ preg_match('/([0-9]{2})[\W]{1}([0-9]{2})[\W]{1}([0-9]{4})/', $_REQUEST['logistiqueKODate-' . $arr[1]], $arr1)) {
             $epochDate = mktime(0, 0, 0, $arr1[2], $arr1[1], $arr1[3]);
             $dateDispo = date('Y-m-d', $epochDate);
             $set .= ", logistique_date_dispo='" . $dateDispo . "'";
-            $sql = $db->query($requete);
+//            $sql = $db->query($requete);
             if ($dateDispo > $nextDispo) {
                 $nextDispo = $dateDispo;
             }

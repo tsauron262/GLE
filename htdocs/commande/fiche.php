@@ -1508,6 +1508,7 @@ if ($action == 'create' && $user->rights->commande->creer)
 		$dateinvoice        = empty($conf->global->MAIN_AUTOFILL_DATE)?-1:0;
 		$projectid          = 0;
 	}
+        /*mod drsi */ if ($socid>0) /* Fmod drsi */
 	$absolute_discount=$soc->getAvailableDiscounts();
 
 

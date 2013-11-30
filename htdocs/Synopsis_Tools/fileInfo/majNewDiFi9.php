@@ -5,7 +5,7 @@ $tabTableSuppr = array("Synopsis_Dashboard", "Synopsis_Dashboard_module", "Synop
     "Synopsis_fichinter", "Synopsis_fichinterdet", "Synopsis_fichinter_c_typeInterv", "Synopsis_fichinter_extra_key", "Synopsis_fichinter_extra_value", "Synopsis_fichinter_extra_values_choice", "Synopsis_fichinter_User_PrixDepInterv", "Synopsis_fichinter_User_PrixTypeInterv");
 
 
-$modulesInit = array("SynopsisFicheinter", "Ficheinter", "Synopsisdemandeinterv", "SynopsisDashboard", "SynopsisProcess");
+$modulesInit = array("SynopsisFicheinter", "Ficheinter", "Synopsisdemandeinterv", "SynopsisDashboard", "SynopsisProcess", "SynopsisHotline");
 
 
 
@@ -57,7 +57,7 @@ $tabSql[] = "CREATE TABLE IF NOT EXISTS `llx_fichinterdet` (
 
 
 
-$text = "Maj des fi et di";
+$text = "Suivre lien ".DOL_URL_ROOT."/htdocs/admin/Synopsis_Chrono.php?action=modify&id=7 enregistrer pour actualiser les onglet chronolist ds objet.";
 $php = '';
 
 foreach ($modulesInit as $module)

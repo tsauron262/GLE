@@ -24,7 +24,7 @@ class fileInfo {
             $Directory = $this->pathFileInfo;
             $MyDirectory = opendir($Directory) or die('Erreur');
             while ($Entry = @readdir($MyDirectory)) {
-                if ($Entry != '.' && $Entry != '..') {
+                if ($Entry != '.' && $Entry != '..'  && stripos($Entry, "hide") === false) {
                     if (is_dir($Directory . '/' . $Entry)) {
                         //Dossier
                     } else { //if (!in_array($Entry, $this->fileVue)) {

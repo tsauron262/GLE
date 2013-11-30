@@ -1131,7 +1131,7 @@ if ($action == 'create') {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             echo "<span class='editDate editable'>".img_edit($langs->trans("setDate"))."</span>";
             echo "<div class='hide editDateDiv'>";
-            $form->form_date(DOL_URL_ROOT."/Synopsis_Contrat/ajax/modDateContrat.php?id=495", $object->date_contrat, "date_contrat");
+            $form->form_date(DOL_URL_ROOT."/Synopsis_Contrat/ajax/modDateContrat.php?id=".$_REQUEST['id'], $object->date_contrat, "date_contrat");
             echo "</div></td></tr>";
             echo "<tr><td>Total HT</td><td>" . $object->total_ht . " &euro;" . "</td>";
             echo "<td>Total TTC</td><td>" . $object->total_ttc . " &euro;" . "</td></tr>";

@@ -48,7 +48,7 @@ class box_synopsisNextsynopsisdemandeinterv extends ModeleBoxes {
     public $boxcode = "lastficheInterv";
     public $boximg = "object_fichinter";
     public $boxlabel;
-    public $depends = array("");
+    public $depends = array("synopsisdemandeinterv");
     public $db;
     public $param;
     public $info_box_head = array();

@@ -1,11 +1,11 @@
 <?php
 
-$tabTableSuppr = array("Synopsis_Dashboard", "Synopsis_Dashboard_module", "Synopsis_Dashboard_page", "Synopsis_Dashboard_settings", "Synopsis_Dashboard_widget",
+$tabTableSuppr = array("Synopsis_Chrono_key", "Synopsis_Chrono_conf", "Synopsis_Dashboard", "Synopsis_Dashboard_module", "Synopsis_Dashboard_page", "Synopsis_Dashboard_settings", "Synopsis_Dashboard_widget",
     "Synopsis_Process_type_element", "Synopsis_Process_type_element_trigger",
     "Synopsis_fichinter", "Synopsis_fichinterdet", "Synopsis_fichinter_c_typeInterv", "Synopsis_fichinter_extra_key", "Synopsis_fichinter_extra_value", "Synopsis_fichinter_extra_values_choice", "Synopsis_fichinter_User_PrixDepInterv", "Synopsis_fichinter_User_PrixTypeInterv");
 
 
-$modulesInit = array("SynopsisFicheinter", "Ficheinter", "Synopsisdemandeinterv", "SynopsisDashboard", "SynopsisProcess", "SynopsisHotline");
+$modulesInit = array("SynopsisFicheinter", "Ficheinter", "Synopsisdemandeinterv", "SynopsisDashboard", "SynopsisProcess", "SynopsisChrono", "SynopsisHotline");
 
 
 

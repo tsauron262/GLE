@@ -3,8 +3,14 @@ div.eventAbss{
     border: solid black 1px;
     background: #C8D8F6;
     background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3) 0%, rgba(40, 40, 40, 0.3) 100%);
-    background-image: -webkit-gradient( linear, left top, left bottom, color-stop(0, rgba(255,255,255,.3)), color-stop(1, rgba(40,40,40,.3)) );;
+    background-image: -webkit-gradient( linear, left top, left bottom, color-stop(0, rgba(255,255,255,.3)), color-stop(1, rgba(40,40,40,.3)) );
     border-radius: 6px;
+    overflow: hidden;
+}
+div.eventAbss.actif{
+    z-index: 100;
+    height: 130%!important;
+    width: 130%!important;
 }
 div.calendarSyn{
     position: relative;
@@ -30,6 +36,25 @@ img.bgAgenda{
     position: absolute;
     z-index: -1;
 }
+
+div.contentListUser{
+    display: inline;
+    padding: 15px;
+}
 div.listUser{
     display: none;
+}
+
+.datePlus{
+    float:right;
+}
+
+div.userOneDay{
+    z-index: 99;
+    position: relative;
+    background: whitesmoke;
+    margin: 10px 20px;
+    padding: 3px;
+border-radius: 10px;
+text-align: center;
 }

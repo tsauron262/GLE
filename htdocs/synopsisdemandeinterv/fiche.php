@@ -50,6 +50,7 @@ if (!isset($_REQUEST['action']))
 require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsisfichinter/class/synopsisfichinter.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsisdemandeinterv/modules_synopsisdemandeinterv.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsisdemandeinterv.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");

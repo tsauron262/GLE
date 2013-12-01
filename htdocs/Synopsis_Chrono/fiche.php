@@ -220,15 +220,7 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
           {
               if (socid > 0)
               {
-                    valueStr = jQuery('#socid').find('option[value='+socid+']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_");
-                    $("select.double").each(function(){
-                        select = $(this);
-                        $(this).find('option[value='+valueStr+']').each(function(){
-                            $(this).attr("selected", "selected");
-                            $(select).val(valueStr);
-                            $(select).change();
-                        });
-                    });
+                majDoubleSoc(socid,false);
                     jQuery.ajax({
                         url:"ajax/contactSoc-xml_response.php",
                       type:"POST",
@@ -255,7 +247,25 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
                 jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
               }
           }
-          jQuery(document).ready(function(){
+        function majDoubleSoc(socid, ifVide){
+             valueStr = jQuery('#socid').find('option[value='+socid+']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_");
+             $("select.double").each(function(){
+                 val = jQuery(this).find(':selected').val();
+                 if(!(ifVide && val > 1)){
+                 select = $(this);
+                 $(this).find('option[value='+valueStr+']').each(function(){
+                     $(this).attr("selected", "selected");
+                     $(select).val(valueStr);
+                     $(select).change();
+                 });
+                 }
+             });
+         }
+          jQuery(document).ready(function(){ 
+                setTimeout(function(){
+              socid = jQuery('#socid').find(':selected').val();
+                majDoubleSoc(socid,true);                
+                },200);
             jQuery('#socid').change(function(){
               socid = jQuery(this).find(':selected').val();
                 ajax_updater_postFct(socid);
@@ -775,6 +785,7 @@ EOF;
                            t.valueInValueField,
                            t.sourceIsOption,
                            k.type_subvaleur,
+                           k.extraCss,
                            t.phpClass
                       FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur AS t,
                            " . MAIN_DB_PREFIX . "Synopsis_Chrono_key AS k
@@ -791,7 +802,8 @@ EOF;
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
-                    $obj->fetch($res->type_subvaleur, $res->extraCss);
+                    $obj->cssClassM = $res->extraCss;
+                    $obj->fetch($res->type_subvaleur);
                     $obj->getValuePlus($res->value);
                     $html = "";
                     foreach ($obj->valuesArr as $key => $val) {

@@ -2,11 +2,11 @@ $(window).load(function() {
     $("div.eventAbss").hover(function(){
         elem = this;
         setTimeout(function(){
-            $(elem).css("z-index", "1000");
+            $(elem).addClass("actif");
         }, 500);
     },function(){
         setTimeout(function(){
-            $("div.eventAbss").css("z-index", "");
+            $("div.eventAbss").removeClass("actif");
         }, 500);
     });
     $("#group").change(function(){
@@ -21,7 +21,7 @@ $(window).load(function() {
         initNbUser();
     });
     initNbUser();
-    $('.listUser, .nbGroup').hover(function(){
+    $('.contentListUser').hover(function(){
         setTimeout(function(){
             $('.listUser').fadeIn();
         }, 500);

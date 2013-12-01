@@ -8,20 +8,29 @@ if (isset($_REQUEST['date'])) {
     $tabT = explode("/", $_REQUEST['date']);
     if (isset($tabT[2]))
     $date = new DateTime($tabT[2] . "/" . $tabT[1] . "/" . $tabT[0]);
+    $nbJours = $_REQUEST['nbJours'];
+    if(isset($_REQUEST['dateMoins']))
+    $date = date_add($date, date_interval_create_from_date_string("-".$nbJours." day"));
+    if(isset($_REQUEST['datePlus']))
+    $date = date_add($date, date_interval_create_from_date_string("+".$nbJours." day"));
 }
 if (!isset($date))
     $date = new DateTime();
 
+$vue = (isset($_REQUEST['vueSemaine'])? 7 : (isset($_REQUEST['vueJour']) ? 1 : (isset($_REQUEST['vueMois']) ? 30 : (isset($_REQUEST['oldVue']) ? $_REQUEST['oldVue'] : 30))));
+
+
+
 $tabUser = getTabUser();
 
-printMenu($tabUser, $date);
+printMenu($tabUser, $date->getTimestamp(), $vue);
 
 //Une semaine
-if (isset($_REQUEST['vueSemaine']))
+if ($vue == 7)
     printSemaine($date, $tabUser);
 
-elseif (isset($_REQUEST['vueJour']))
-    printPeriode($date, $tabUser, $nbJours = 1);
+elseif ($vue == 1)
+    printPeriode($date, $tabUser, 1);
 
 //Un mois
 else//if (isset($_REQUEST['vueMois']))
@@ -40,7 +49,14 @@ function getTabUser() {
     return $tabUser;
 }
 
-function printMenu($tabUser, $date) {
+function printMoinsPlus($date, $nbJours){
+    $dateM = date_sub($date, date_interval_create_from_date_string("-".$nbJours." day"));
+    $dateP = date_sub($date, date_interval_create_from_date_string("+".$nbJours." day"));
+    print "<button name='dateMois' value='<-'/>";
+    echo "</form>";
+}
+
+function printMenu($tabUser, $date, $vue) {
     global $db;
 
     $js = "var tabGroup = new Array();";
@@ -58,7 +74,7 @@ function printMenu($tabUser, $date) {
     }
     echo "<form action='' method='post'>";
     echo "<select id='group'>" . $select . "</select>";
-    echo "<span class='nbGroup'></span>";
+    echo "<div class='contentListUser'><span class='nbGroup'></span>";
 
 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
@@ -68,21 +84,28 @@ function printMenu($tabUser, $date) {
         $i++;
         echo "<td>";
         echo "<input " . (in_array($result->rowid, $tabUser) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
-        echo $result->firstname . " " . $result->lastname;
+        echo "<label for='user" . $result->rowid . "'>".$result->firstname . " " . $result->lastname."</label>";
         echo "</td>";
         if ($i > 5) {
             $i = 0;
             echo "</tr><tr>";
         }
     }
-    echo "</tr></table></div>";
+    echo "</tr></table></div></div>";
 
+    $form = new Form($db);
+    echo $form->select_date($date, 'date');
+//    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
 
-    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
-
+    echo "<input type='hidden' name='oldVue' value='".$vue."'/>";
+    echo "<input type='hidden' name='nbJours' value='".$vue."'/>";
     echo "<input type='submit' class='butAction' name='vueJour' value='Vue jour'/>";
     echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
     echo "<input type='submit' class='butAction' name='vueMois' value='Vue mois'/>";
+    echo "<br/>";
+    echo "<br/>";
+    echo "<input type='submit' class='butAction' name='dateMoins' value='<='/>";
+    echo "<input type='submit' class='butAction datePlus' name='datePlus' value='=>'/>";
     echo "</form>";
     echo "<br/><br/>";
 }
@@ -143,9 +166,11 @@ function printOneDayOneUser($userId, $date, $printUser = false, $printDate = fal
     print '<div class="calendarSyn">';
     print "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/agenda/img/".$bg.".jpg' class='bgAgenda'/>";
     if ($printUser) {
+        echo "<div class='userOneDay'>";
         $user = new User($db);
         $user->fetch($userId);
         echo $user->getNomUrl(1);
+        echo "</div>";
     }
     if ($printUser && $printDate)
         echo "<br/>";

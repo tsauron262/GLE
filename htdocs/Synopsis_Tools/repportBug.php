@@ -134,7 +134,7 @@ function bug($user, $text, $adresse) {
 
 print '<form method="post">
     <input type="hidden" name="action" value="send"/>
-    <input type="hidden" name="oldUrl" value="' . $_SERVER["HTTP_REFERER"] . '"/>
+    <input type="hidden" name="oldUrl" value="' . str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $_SERVER["HTTP_REFERER"]) . '"/>
      Décrivez brièvement les conditions du bogue svp <br/><br/>
     <textarea name="text" style="width:770px; height:300px"></textarea><br/><br/>
     <input type="submit" class="butAction" name="valider" value="Envoyer"/>

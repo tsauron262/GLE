@@ -803,6 +803,8 @@ function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {
         $text = "OrigineTo = " . $to . "\n\n" . $text;
+        $text = "OrigineCc = " . $ccAdmin . "\n\n" . $text;
+        $ccAdmin = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($cc != '')
         $ccAdmin .= ", " . $cc;

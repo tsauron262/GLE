@@ -223,7 +223,17 @@ class modSynopsisTools extends DolibarrModules
   `fk_comm` int(11) DEFAULT NULL,
   `note` varchar(500) NOT NULL,
   `date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`rowid`))");
+  PRIMARY KEY (`rowid`))",
+        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Tools_notificationUser` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_trigger` int(11) NOT NULL,
+  `fk_type_contact` int(11) NOT NULL,
+  `mailTo` varchar(200) NOT NULL,
+  `sujet` varchar(300) NOT NULL,
+  `message` text NOT NULL,
+  `active` tinyint(4) NOT NULL,
+  PRIMARY KEY (`rowid`)
+)");
     return $this->_init($sql);
   }
 

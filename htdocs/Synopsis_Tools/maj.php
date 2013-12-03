@@ -111,11 +111,11 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("INSERT INTO `llx_usergroup_user` (fk_usergroup, fk_user) VALUES(14,1)");
 
     $maj->ajoutDroitGr(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885,
-                                                                            342, 343, 230001, 161881, 161882,
+                                                                            342, 343, 230001, 161881, 161882,229201,
                                                                             2411,2412,2413,2414));
     $maj->ajoutDroitGr(array(14), array(358, 80881, 80882, 80883, 80884, 80886,106,
                             1001, 1002, 1003,1004,1005,
-                            229201,229202,229203,229204,229205,229206));//Admin
+                            229202,229203,229204,229205,229206));//Admin
     $maj->ajoutDroitGr(array(2, 7, 14), array(21,22,23,24,25,26,27,28,230002));//Propal
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);

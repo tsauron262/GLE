@@ -110,7 +110,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("update `llx_product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
     $maj->req("update `llx_product_extrafields` set `2hotline` = -1 where `2hotline` > 0");
 
-    $maj->ajoutDroitGr(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
+    $maj->ajoutDroitGr(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885));
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";

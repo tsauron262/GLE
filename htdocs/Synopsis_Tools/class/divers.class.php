@@ -87,6 +87,8 @@ class synopsisHook {
         $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
         $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
+        
+        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus;
     }
 
     public static function reloadPage() {

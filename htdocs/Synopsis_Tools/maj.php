@@ -260,7 +260,7 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     netoyeDet("propal");
     netoyeDet("usergroup", MAIN_DB_PREFIX . "usergroup_user");
     netoyeDet("user", MAIN_DB_PREFIX . "usergroup_user");
-//    netoyeDet("user", MAIN_DB_PREFIX . "user_rights");
+    netoyeDet("user", MAIN_DB_PREFIX . "user_rights");
 //        netoyeDet("product", "babel_categorie_product", "babel_");
     
     
@@ -344,10 +344,10 @@ function getTab() {
             array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass",*/ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
             array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civilite" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin",/* "webcal_login", "phenix_login", "phenix_pass",*/ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
         ),
-        array($oldPref . "user_rights", MAIN_DB_PREFIX . "user_rights",
-            array(),
-            array()
-        ),
+//        array($oldPref . "user_rights", MAIN_DB_PREFIX . "user_rights",
+//            array(),
+//            array()
+//        ),
         array($oldPref . "usergroup", MAIN_DB_PREFIX . "usergroup",
             array('rowid', 'datec', 'tms', 'nom', 'note'),
             array('rowid', 'datec', 'tms', 'nom', 'note')

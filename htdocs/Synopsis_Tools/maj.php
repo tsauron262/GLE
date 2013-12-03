@@ -108,7 +108,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("update `" . MAIN_DB_PREFIX . "societe` set status = 1");
     $maj->req("update `llx_product_extrafields` set `2hotline` = 0, `2teleMaintenance` = 0 where `2visiteSurSite` > 0;");
     $maj->req("update `llx_product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
-    $maj->req("INSERT INTO `llx_usergroup_rights` (fk_usergroup, _fk_id) VALUES(14,1)");
+    $maj->req("INSERT INTO `llx_usergroup_rights` (fk_usergroup, fk_id) VALUES(14,1)");
 
     $maj->ajoutDroitGr(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885,
                                                                             342, 343, 230001, 161881, 161882,

@@ -48,11 +48,11 @@ $socid = GETPOST('socid', 'int');
 $search_user=GETPOST('search_user','int');
 
 /* deb mod drsi */
-if (isset($user->rights->SynopsisTools) &&
-        !isset($user->rights->SynopsisTools->Commande->viewAll)
-        || (!$search_user && isset($user->rights->SynopsisTools->Commande->defaultViewMy) && $user->rights->SynopsisTools->Commande->defaultViewMy))
-    $search_sale = $user->id;
-else
+//if (isset($user->rights->SynopsisTools) &&
+//        !isset($user->rights->SynopsisTools->Commande->viewAll)
+//        || (!$search_user && isset($user->rights->SynopsisTools->Commande->defaultViewMy) && $user->rights->SynopsisTools->Commande->defaultViewMy))
+//    $search_sale = $user->id;
+//else
     $search_sale = GETPOST('search_sale', 'int');
 /* fmod */
 

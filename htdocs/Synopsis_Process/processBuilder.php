@@ -223,7 +223,20 @@ switch ($action) {
                                 jQuery('#modForm').submit(); 
                             }
                         });
-//                        jQuery('SELECT.double').each(function(){ jQuery(this).jDoubleSelect({text:'', finish: function(){ jQuery('SELECT.double').each(function(){ jQuery(this).selectmenu({style:'dropdown',maxHeight: 300});}); }, el1_change: function(){ jQuery('SELECT.double').each(function(){ jQuery(this).selectmenu({style:'dropdown',maxHeight: 300});}); }, destName:'trigger_refid', el2_dest:jQuery('#dest2el') });});
+                        jQuery('SELECT.double').each(function(){ 
+                            jQuery(this).jDoubleSelect({text:'', finish: function(){ 
+                                jQuery('SELECT.double').each(function(){ 
+//                                    jQuery(this).selectmenu({style:'dropdown',maxHeight: 300});
+                                }); 
+                            }, el1_change: function(){ 
+                                jQuery('SELECT.double').each(function(){ 
+//                                    jQuery(this).selectmenu({
+//                                        style:'dropdown',maxHeight: 300
+//                                    });
+                                }); 
+                            }, destName:'trigger_refid', el2_dest:jQuery('#dest2el') 
+                        });
+                    });
 
                     });
                         ;
@@ -316,7 +329,7 @@ function activatePdf(str){
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_type_element ORDER BY rang";
             $sql = $db->query($requete);
             while ($res = $db->fetch_object($sql)) {
-                print "<optgroup label='" . $res->label . "'>";
+                print "<optgroup label='" . str_replace(" ", "_", $res->label) . "'>";
                 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_trigger as t, " . MAIN_DB_PREFIX . "Synopsis_Process_type_element_trigger as te WHERE te.trigger_refid = t.id AND te.element_refid = " . $res->id . "  ORDER BY code";
                 $sql1 = $db->query($requete);
                 while ($res1 = $db->fetch_object($sql1)) {

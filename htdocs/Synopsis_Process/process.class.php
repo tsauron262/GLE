@@ -986,8 +986,14 @@ class processDet extends process {
             //  2b) Si non => continue
             //Valider
             $requete = false;
-            if ($statutAllOk)
+            if ($statutAllOk){
+                $this->fetch_process();
                 $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 3 WHERE id = " . $this->id;
+                $eval = $this->process->validAction;
+                $element_id = $this->element_refid;
+                if ($eval . "x" != "x")
+                    eval($eval);
+            }
             elseif ($statutRefuser) {
                 //TODO si Revision => nouvelle révision
                 //Sinon :> retour brouillon

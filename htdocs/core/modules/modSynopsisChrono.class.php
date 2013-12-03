@@ -227,6 +227,30 @@ class modSynopsisChrono extends DolibarrModules
                             'target'=>'',
                             'user'=>0);
         $r++;
+        
+        
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools',
+                            'type'=>'left',
+                            'titre'=>'Chrono',
+                            'mainmenu'=>'SynopsisTools',
+                            'leftmenu' => 'SynopsisChrono',
+                            'url'=>'/Synopsis_Chrono/liste.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'perms'=>'$user->rights->synopsischrono->read',
+                            'position'=>15,
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>'fk_mainmenu=SynopsisTools,fk_leftmenu=SynopsisChrono',
+                            'type'=>'left',
+                            'titre'=>'Config',
+                            'url'=>'/admin/Synopsis_Chrono.php',
+                            'langs' => 'synopsisGene@Synopsis_Tools',
+                            'perms'=>'$user->rights->synopsischrono->Generer',
+                            'position'=>151,
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.
@@ -235,7 +259,8 @@ class modSynopsisChrono extends DolibarrModules
   function init()
   {
         $this->remove();
-    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/liste.php' WHERE Titre = 'Process' AND type ='top'", "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
+    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/liste.php' WHERE Titre = 'Process' AND type ='top'", 
+        "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,
   `tms` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

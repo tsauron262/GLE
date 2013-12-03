@@ -214,7 +214,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'leftmenu' => 'SynPrepaImp',
             'url' => '/Synopsis_PrepaCommande/import/index.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 2,
+            'position' => 11,
             'perms' => '$user->rights->SynopsisPrepaCom->import->Admin',
             'target' => '',
             'user' => 0);
@@ -225,7 +225,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'titre' => 'Historique',
             'url' => '/Synopsis_PrepaCommande/import/history.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 2,
+            'position' => 111,
             'perms' => '$user->rights->SynopsisPrepaCom->import->Admin',
             'target' => '',
             'user' => 0);
@@ -235,7 +235,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'titre' => 'Config',
             'url' => '/Synopsis_PrepaCommande/import/config.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 3,
+            'position' => 112,
             'perms' => '$user->rights->SynopsisPrepaCom->import->Admin',
             'target' => '',
             'user' => 0);
@@ -245,7 +245,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'titre' => 'Import',
             'url' => '/Synopsis_PrepaCommande/import/testImport.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 3,
+            'position' => 113,
             'perms' => '$user->rights->SynopsisPrepaCom->import->Admin',
             'target' => '',
             'user' => 0);
@@ -257,7 +257,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'leftmenu' => 'SynopsisPrepa',
             'url' => '/Synopsis_PrepaCommande/index.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 1,
+            'position' => 12,
             'perms' => '$user->rights->SynopsisPrepaCom->all->Afficher',
             'target' => '',
             'user' => 0);
@@ -268,7 +268,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
             'titre' => 'Config.',
             'url' => '/Synopsis_PrepaCommande/config.php',
             'langs' => 'synopsisGene@Synopsis_Tools',
-            'position' => 1,
+            'position' => 121,
             'perms' => '$user->rights->SynopsisPrepaCom->config->Admin',
             'target' => '',
             'user' => 0);
@@ -282,7 +282,7 @@ class modSynopsisPrepaCommande extends DolibarrModules {
                 'titre' => $type,
                 'url' => '/product/liste.php?type='.$id,
                 'langs' => 'synopsisGene@Synopsis_Tools',
-                'position' => 1,
+                'position' => 122,
                 'perms' => '$user->rights->produit->lire',
                 'target' => '',
                 'user' => 0);

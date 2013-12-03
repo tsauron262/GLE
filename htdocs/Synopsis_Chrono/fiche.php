@@ -1002,7 +1002,7 @@ EOF;
                                 $tmpUser = new User($db);
                                 $tmpUser->fetch($res3->user_refid);
                                 if ($res3->validation == 1) {
-                                    print img_tick("Valider");
+                                    print img_picto("Valider","tick");
                                     print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
                                 } else {
                                     print img_error("Non valider");

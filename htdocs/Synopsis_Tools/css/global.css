@@ -5,7 +5,9 @@ div.hide{
     display: none;
 }
 
-
+div.divButAction, div.butActionDelete{
+    float: right;
+}
 .butAction{
     font-size: 12px;
 }

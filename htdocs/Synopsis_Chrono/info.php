@@ -94,7 +94,7 @@
               $tmpUser = new User($db);
               $tmpUser->id = $res->user_refid;
               $tmpUser->fetch($tmpUser->id);
-              if ($res->validation == 1){ print img_tick("Valider"); print " par ".$tmpUser->getNomUrl(1) . " le ".date('d/m/Y',strtotime($res->tms)); }
+              if ($res->validation == 1){ print img_picto("Valider", 'tick'); print " par ".$tmpUser->getNomUrl(1) . " le ".date('d/m/Y',strtotime($res->tms)); }
               else { print img_error("Non valider"); print " par ".$tmpUser->getNomUrl(1) . " le ".date('d/m/Y',strtotime($res->tms));}
               print "<td align=left class='ui-widget-content'>".nl2br($res->note);
           }

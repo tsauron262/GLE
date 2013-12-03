@@ -108,6 +108,14 @@ class modSynopsisTools extends DolibarrModules
         $this->rights[$r][4] = 'Global'; // Famille
         $this->rights[$r][5] = 'adminBug'; // Droit
         $r ++;
+
+        $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
+        $this->rights[$r][1] = 'Administrer les notifications mail';
+        $this->rights[$r][2] = 'r'; //useless
+        $this->rights[$r][3] = 0; // Default
+        $this->rights[$r][4] = 'Global'; // Famille
+        $this->rights[$r][5] = 'adminNotifMail'; // Droit
+        $r ++;
         
         
         $this->rights[$r][0] = $this->numero.$r;// this->numero ."". 1
@@ -141,39 +149,88 @@ class modSynopsisTools extends DolibarrModules
                             'user'=>0);
         $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=>"r=".$s,
+        $this->menu[$r]=array('fk_menu'=>"fk_mainmenu=SynopsisTools",
                             'type'=>'left',
                             'titre'=>'Php My Admin',
                             'mainmenu'=>'SynopsisTools',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
+                            'leftmenu'=>'myAdmin',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/myAdmin.php',
                             'langs'=>'',
-                            'position'=>1,
+                            'position'=>2,
                             'perms'=>'$user->rights->SynopsisTools->Global->phpMyAdmin',
                             'target'=>'',
                             'user'=>0);
+        $s = $r;
         $r++;
-        $this->menu[$r]=array('fk_menu'=>"r=".$s,
+        $this->menu[$r]=array('fk_menu'=>"fk_mainmenu=SynopsisTools,fk_leftmenu=myAdmin",
+                            'type'=>'left',
+                            'titre'=>'Php My Admin (new Onglet)',
+                            'mainmenu'=>'SynopsisTools',
+                            'url'=>'/Synopsis_Tools/Synopsis_myAdmin/index.php',
+                            'langs'=>'blank',
+                            'position'=>201,
+                            'perms'=>'$user->rights->SynopsisTools->Global->phpMyAdmin',
+                            'target'=>'',
+                            'user'=>0);
+        
+        
+        
+        
+        $r++;
+        $this->menu[$r]=array('fk_menu'=>"fk_mainmenu=SynopsisTools",
+                            'type'=>'left',
+                            'titre'=>'Tools',
+                            'mainmenu'=>'SynopsisTools',
+                            'leftmenu'=>'tools',        // To say if we can overwrite leftmenu
+                            'url'=>'/Synopsis_Tools/maj.php',
+                            'langs'=>'',
+                            'position'=>3,
+                            'perms'=>'$user->rights->SynopsisTools->Global->import',
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=tools',
                             'type'=>'left',
                             'titre'=>'Impor/Export/Verif',
                             'mainmenu'=>'SynopsisTools',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/maj.php',
                             'langs'=>'',
-                            'position'=>1,
+                            'position'=>301,
                             'perms'=>'$user->rights->SynopsisTools->Global->import',
+                            'target'=>'',
+                            'user'=>0);
+        $r++;
+        $this->menu[$r]=array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=tools',
+                            'type'=>'left',
+                            'titre'=>'Config mail',
+                            'mainmenu'=>'SynopsisTools',
+                            'url'=>'/Synopsis_Tools/notificationUser/list.php',
+                            'langs'=>'',
+                            'position'=>302,
+                            'perms'=>'$user->rights->SynopsisTools->Global->adminNotifMail',
                             'target'=>'',
                             'user'=>0);
         
         $r++;
-        $this->menu[$r]=array('fk_menu'=>"r=".$s,
+        $this->menu[$r]=array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=tools',
                             'type'=>'left',
                             'titre'=>'Fichier info maj',
                             'mainmenu'=>'SynopsisTools',
-                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
                             'url'=>'/Synopsis_Tools/listFileInfo.php',
                             'langs'=>'',
-                            'position'=>1,
+                            'position'=>303,
+                            'perms'=>'$user->rights->SynopsisTools->Global->fileInfo',
+                            'target'=>'',
+                            'user'=>0);
+        
+        $r++;
+        $this->menu[$r]=array('fk_menu' => 'fk_mainmenu=SynopsisTools,fk_leftmenu=tools',
+                            'type'=>'left',
+                            'titre'=>'Fichier log',
+                            'mainmenu'=>'SynopsisTools',
+                            'url'=>'/Synopsis_Tools/fichierLog.php',
+                            'langs'=>'',
+                            'position'=>304,
                             'perms'=>'$user->rights->SynopsisTools->Global->fileInfo',
                             'target'=>'',
                             'user'=>0);

@@ -75,9 +75,10 @@ if ($_REQUEST['action'] == 'validAction') {
     $res1 = $process->fetch($process_id);
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
-    $eval = $process->validAction;
-    if ($eval . "x" != "x")
-        eval($eval);
+//    if($process->fk_statut ); die;
+//    $eval = $process->validAction;
+//    if ($eval . "x" != "x")
+//        eval($eval);
 }
 
 if ($_REQUEST['action'] == 'validationForm') {
@@ -87,9 +88,9 @@ if ($_REQUEST['action'] == 'validationForm') {
     $process->validateDet($element_id, $type);
     $processDet = new processDet($db);
     $processDet->fetch($processDetId);
-    $eval = $process->validAction;
-    if ($eval . "x" != "x")
-        eval($eval);
+//    $eval = $process->validAction;
+//    if ($eval . "x" != "x")
+//        eval($eval);
 }
 if ($_REQUEST['action'] == 'reviser' && $processDetId > 0) {
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");

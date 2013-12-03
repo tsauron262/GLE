@@ -93,7 +93,7 @@ class InterfaceNotificationUser {
     }
 
     function replaceTextMail($str, $object) {
-        $str = str_replace("[ELEM]", $object->getNomUrl(), $str);
+        $str = str_replace("[ELEM]", $object->getNomUrl(1), $str);
         if (isset($object->name))
             $str = str_replace("[NAME]", $object->name, $str);
         if (isset($object->firstname) && isset($object->lastname))
@@ -130,19 +130,20 @@ class InterfaceNotificationUser {
                     $fk_soc = 0;
                     if(isset($object->fk_soc) && $object->fk_soc > 0)
                         $fk_soc = $object->fk_soc;
-                    elseif(type($object->fk_soc) == "societe")
+                    elseif(get_class($object) == "Societe")
                         $fk_soc = $object->id;
                     
                     if ($result->fk_type_contact == 1001 && $fk_soc)
-                        $sql2 = $this->db->query("SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "societe_commerciaux ec WHERE ec.fk_user = u.rowid AND fk_soc =" . $fk_soc);
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "societe_commerciaux ec WHERE ec.fk_user = u.rowid AND fk_soc =" . $fk_soc;
                     elseif ($result->fk_type_contact == 1002 && $fk_soc)
-                        $sql2 = $this->db->query("SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "element_element ec WHERE ec.fk_target = u.rowid AND source_type = 'soc' AND targettype = 'userTech' AND fk_source =" . $fk_soc);
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "element_element ec WHERE ec.fk_target = u.rowid AND sourcetype = 'soc' AND targettype = 'userTech' AND fk_source =" . $fk_soc;
                     elseif ($result->fk_type_contact == 1003 && isset($object->fk_user_prisencharge) && $object->fk_user_prisencharge > 0)
-                        $sql2 = $this->db->query("SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_prisencharge);
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_prisencharge;
                     elseif ($result->fk_type_contact == 1003 && isset($object->fk_user_author) && $object->fk_user_author > 0)
-                        $sql2 = $this->db->query("SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_author);
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_author;
                     else
-                        $sql2 = $this->db->query("SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "element_contact ec WHERE ec.fk_socpeople = u.rowid AND element_id =" . $object->id . " AND fk_c_type_contact =" . $result->fk_type_contact);
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "element_contact ec WHERE ec.fk_socpeople = u.rowid AND element_id =" . $object->id . " AND fk_c_type_contact =" . $result->fk_type_contact;
+                    $sql2 = $this->db->query($req);
                     while ($result2 = $this->db->fetch_object($sql2))
                         $tabMail[] = $result2->email;
                     $to .= implode(',', $tabMail);

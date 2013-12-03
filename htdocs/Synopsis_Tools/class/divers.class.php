@@ -8,7 +8,7 @@ class synopsisHook {
     private static $reload = false;
 
     function synopsisHook() {
-        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user;
+        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus;
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -71,6 +71,8 @@ class synopsisHook {
 
         $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
         $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
+
+        $tabContactPlus = array(1001 => array('id' => 1001, 'nom' => 'Commerciaux Société'), 1002 => array('id' => 1002, 'nom' => 'Techniciens Société'), 1003 => array('id' => 1003, 'nom' => 'Auteur'));
         if (is_object($langs)) {
             foreach ($tabProductType as $idT => $val)
                 $tabProductType[$idT] = $langs->trans($val);

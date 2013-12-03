@@ -39,7 +39,7 @@ if(isset($textSave))
 $text = file_get_contents($filename);
 echo "<form action='./fichierLog.php?action=save' method='post'>";
 echo "<textarea name='text' style='width:100%; height:400px;'>".$text."</textarea>";
-echo "<br/><input type='submit' value='Enregistrer'/></form>";
+echo "<br/><div class='divButAction'><input type='submit' class='butAction' value='Enregistrer'/></div></form>";
 
 //include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/fileInfo.class.php");
 //$fileInfo = new fileInfo($db);

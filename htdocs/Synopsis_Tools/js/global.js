@@ -130,10 +130,13 @@ function traiteScroll(heightDif) {
                 oldPadding = parseInt($(elem).attr("old-padding-right"));
             
             $(elem).addClass("reglabe2");
-            $(elem).height(newTaille);
             if($(elem).is(".fiche"))
                 $(elem).css("margin-right", "0");
-            $(elem).width($(elem).width()-17);
+//            margin = parseInt($(elem).css("margin-top").replace("px", ""))+parseInt($(elem).css("margin-bottom").replace("px", ""));
+            padding = parseInt($(elem).css("padding-top").replace("px", ""))+parseInt($(elem).css("padding-bottom").replace("px", ""));
+//            alert(margin+padding);
+            $(elem).height(newTaille-padding);
+            $(elem).width($(elem).width()-20);
             $(elem).css("padding-right", (oldPadding+15)+"px");
             
             //Test

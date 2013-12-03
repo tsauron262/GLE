@@ -1250,7 +1250,7 @@ if (is_dir($dir)) {
                                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
-                                $ref = $val['PcvFree8'];
+                                $ref = ($val['PcvFree8'] != "")? $val['PcvFree8'] : $val['PcvCode'];
                                 $oldRef = false;
 
                                 $tabRef = explode("-", $ref);
@@ -1266,7 +1266,7 @@ if (is_dir($dir)) {
                                 $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
                                 if ($result) {
                                     $oldRef = $ref;
-                                    $ref = "TEMP(" . $val['PcvFree8'] . ")";
+                                    $ref = "TEMP(" . (($val['PcvFree8'] != "")? $val['PcvFree8'] : $val['PcvCode']) . ")";
                                     $newRef = null;
                                     $oldId = $result[0];
                                 }

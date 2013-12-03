@@ -68,21 +68,21 @@ class modSynopsisHotline extends DolibarrModules
         $this->rights_class = 'SynopsisHotline'; //Max 12 lettres
 
 
-        $r = 0;
-        $this->rights[$r][0] = $this->numero."1";// this->numero ."". 1
-        $this->rights[$r][1] = 'Affichage des Revision';
-        $this->rights[$r][2] = 'r'; //useless
-        $this->rights[$r][3] = 1; // Default
-        $this->rights[$r][4] = 'SynopsisHotline'; // Famille
-        $this->rights[$r][5] = 'Affiche'; // Droit
-        $r ++;
-        $this->rights[$r][0] = $this->numero."2";// this->numero ."". 1
-        $this->rights[$r][1] = 'Reviser des proposition';
-        $this->rights[$r][2] = 'p'; //useless
-        $this->rights[$r][3] = 1; // Default
-        $this->rights[$r][4] = 'SynopsisHotline'; // Famille
-        $this->rights[$r][5] = 'Push'; // Droit
-        $r ++;
+//        $r = 0;
+//        $this->rights[$r][0] = $this->numero."1";// this->numero ."". 1
+//        $this->rights[$r][1] = 'Affichage des Revision';
+//        $this->rights[$r][2] = 'r'; //useless
+//        $this->rights[$r][3] = 1; // Default
+//        $this->rights[$r][4] = 'SynopsisHotline'; // Famille
+//        $this->rights[$r][5] = 'Affiche'; // Droit
+//        $r ++;
+//        $this->rights[$r][0] = $this->numero."2";// this->numero ."". 1
+//        $this->rights[$r][1] = 'Reviser des proposition';
+//        $this->rights[$r][2] = 'p'; //useless
+//        $this->rights[$r][3] = 1; // Default
+//        $this->rights[$r][4] = 'SynopsisHotline'; // Famille
+//        $this->rights[$r][5] = 'Push'; // Droit
+//        $r ++;
         
         // Menus
         //------

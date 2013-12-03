@@ -15,7 +15,7 @@ function widget_boxsynopsisdemandeinterv() {
     $langs->load("boxes");
     $tabValue = getValSetting();
     if (in_array(1, $tabValue))
-        $_REQUEST['filtreUser'] = $user - id;
+        $_REQUEST['filtreUser'] = $user->id;
     if (in_array(11, $tabValue))
         $_REQUEST['lien_commande'] = true;
     if (in_array(12, $tabValue))

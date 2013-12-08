@@ -169,13 +169,6 @@ else
      print $conf->global->FCKEDITOR_TEST;
      */
 }
-else
-{
-    print '<table class="noborder" width="100%">';
-    print '<tr class="liste_titre">';
-    print '<td colspan="2">'.$langs->trans("ActivateFCKeditor").'</td>';
-    print '<td align="center" width="100">'.$langs->trans("Action").'</td>';
-    print "</tr>\n";
 
 
 llxFooter();

@@ -56,7 +56,7 @@ class modSynopsisChrono extends DolibarrModules
         $this->config_page_url = "Synopsis_Chrono.php";
 
         // Dependences
-        $this->depends = array("modSynopsisProcess","modBanque");
+        $this->depends = array("modSynopsisProcess");
         $this->requiredby = array("modSynopsisHotline");
 
         // Constantes

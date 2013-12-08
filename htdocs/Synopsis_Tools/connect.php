@@ -1,0 +1,43 @@
+<?php
+
+/*
+ * * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.2
+ * Created on : 26 oct. 2010
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+/**
+ *
+ * Name : index.php
+ * GLE-1.2
+ */
+$_GET['optioncss'] = 'print';
+require_once('../main.inc.php');
+$url = DOL_URL_ROOT;
+if($_GET['url'] != '')
+    $url = $_GET['url'];
+
+if(isset($_REQUEST['off'])){
+$_SESSION['pagePrinc'] = "0";
+header("Location:".$url);
+die;
+}
+
+$_SESSION['pagePrinc'] = $user->id;
+llxHeader();
+    echo "<script>$(window).load(function() {"
+. "             initSynchServ(idActionMax);"
+            . "$(window).bind('beforeunload', function(){"
+            . " return 'Ceci va quiter le mode Connect';"
+            . "});"
+            . "});</script>";
+echo '<iframe class="fullScreen" src="'.$url.'" style="display: block;" name="iframePrinc"></iframe>';
+echo '<div class="deconnect"><a href="?off=true">Deconnect</a></div>';
+llxFooter();
+?>

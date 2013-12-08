@@ -115,7 +115,12 @@ foreach ($tabModel as $model => $nomModel) {
 
 
     $html .= '<div id="pan' . $nomDiv . '">';
-    $html .= "<input type='button'onclick='" . $champJs . " ajaxAddChrono(" . $model . ", " . $socid . ", tabChamp, function(id){popChrono(id, function(){ $(\".ui-icon-refresh\").trigger(\"click\");}); });' class='butAction' value = 'Créer " . $titre . "' /><br/><br/>";
+    $html .= "<input type='button'onclick='" . $champJs . " "
+            . "         ajaxAddChrono(" . $model . ", " . $socid . ", tabChamp, function(id){"
+            . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
+            . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
+            . "                                                                     }, \"New ".$titre."\"); "
+            . "                                                                  });' class='butAction' value = 'Créer " . $titre . "' /><br/><br/>";
 
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 

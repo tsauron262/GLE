@@ -4,24 +4,32 @@ $(window).load(function() {
         $(window).resize(function() {
             traiteScroll(heightDif);
         });
-        $("a").click(function(){
-            setTimeout(function(){
+        $("a").click(function() {
+            setTimeout(function() {
                 traiteScroll(heightDif);
-            }, 500);
+            }, 100);
         });
         traiteScroll(heightDif);
     }
-    
+
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
-    
-    
+
+
     ajNoteAjax();
-    
-    
+
+//    setTimeout(function() {
+////        initSynchServ(idActionMax);
+//    }, 5000);
+
+
+
+
+
+
     var datas = 'url=' + window.location;
     datas += '&type=consigne';
     editAjax(jQuery('.consigne.editable'), datas);
-    
+
     //    $(".ui-search-toolbar input").keypress(function(e) {
     //	//alert(e.keyCode);
     //	if(e.keyCode == 13) {
@@ -30,44 +38,139 @@ $(window).load(function() {
     //        else
     //		alert('Enter oser    was pressed.'+e.keyCode );
     //    });
-    
+
     $(".ui-search-toolbar input").focusout(function() {
         setTimeout(function() {
             var e = jQuery.Event("keypress", {
                 keyCode: 13
             });
             $(".ui-search-toolbar input").trigger(e);
-        }, 500);
+        }, 1000);
     });
-    
-    
+
+
     //    if ((navigator.appName).search(/Safari.+/) != -1){
-    $(".formdoc a").each(function(){
-        if($(this).attr('href').search(/.pdf/i) >= 0)
+    $(".formdoc a").each(function() {
+        if ($(this).attr('href').search(/.pdf/i) >= 0)
             $(this).attr("target", "");
     });
     //    }
     initFormChrono();
-    
-    
-    
+
+
+
     //    $(".nonactif").hide();
-    
-    $(".syntab li").click(function(){
+
+    $(".syntab li").click(function() {
         $(".syntab li").removeClass("actif");
         $(this).addClass("actif");
         $(".syntabelem").fadeOut();
-        $(".syntabelem."+$(this).find("a").attr("href").replace("#", "")).fadeIn();
+        $(".syntabelem." + $(this).find("a").attr("href").replace("#", "")).fadeIn();
     });
     $(".syntab .default").click();
-    
-    $(".editDate").click(function(){
+
+    $(".editDate").click(function() {
         $(".editDateDiv").fadeIn();
         $(this).fadeOut();
     });
-    
-    
+
+
 });
+
+function ajoutNotification(id, titre, msg) {
+    $("div.notificationText").append("<div class='oneNotification'><input type='hidden' class='idNotification' value='" + id + "'/><div class='titreNotification'><table style='width:100%'><tr><td>" + titre + "</td><td style='text-align:right;'><span class='marqueVueNotification editable'>X</span></td></tr></table></div>" + msg + "</div>");
+    $("span.marqueVueNotification").click(function() {
+        notifHtml = $(this).parent().parent();
+        datas = 'idVue=' + notifHtml.find(".idNotification").val();
+        jQuery.ajax({
+            url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/synch.php',
+            data: datas,
+            datatype: "xml",
+            type: "POST",
+            cache: false,
+            success: function(msg) {
+                notifHtml.fadeOut();
+            }
+        });
+    });
+}
+
+function CallBackPlusObj() {
+    this.tabCallBack = Array();
+    this.popOjectAffiche = popOjectAffiche;
+    this.popIFrame = popIFrame;
+}
+
+function initSynchServ(idAction) {
+    CallBackPlus = new CallBackPlusObj();
+    iframePrinc.CallBackPlus = CallBackPlus;
+    url = window.location.hash.replace("#", "");
+    if (url != '')
+        iframePrinc.location = window.location.hash.replace("#", "");
+    iframePrinc.initLienConnect();
+    initTransmission("iframePrinc");
+//    $(".fullScreen").load(function() {
+//        iframePrinc.CallBackPlus = CallBackPlus;
+//    });
+    timeTentative = 1;
+    boucleSynchServ(idAction);
+}
+function initSynchClient(){
+    $(document).bind("ajaxComplete", function() {
+        initLienConnect();
+    });
+    initLienConnect();
+}
+
+function boucleSynchServ(idAction) {
+    datas = 'idPagePrinc=' + idPagePrinc + '&idMax=' + idAction;
+    jQuery.ajax({
+        url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/synch.php',
+        data: datas,
+        datatype: "xml",
+        type: "POST",
+        cache: false,
+        success: function(msg) {
+            modif = false;
+            idActionT = $(msg).find("idAction").html();
+            if (idActionT > 0) {
+                idAction = idActionT;
+                ajoutNotification($(msg).find("idAction").html(), $(msg).find("titreAction").html(), $(msg).find("msgAction").html());
+                modif = true;
+            }
+
+
+//            idElemNotifT = $(msg).find("idElemNotif").html();
+//            if (idElemNotifT > 0) {
+//                idElemNotif = idElemNotifT;
+//                popOjectAffiche(idElemNotif, $(msg).find("typeElemNotif").html(), function() {
+//                    CallBackPlus.tabCallBack[idElemNotif]();
+//                }, $(msg).find("titreNotif").html());
+//                modif = true;
+//            }
+
+            echoT = $(msg).find("echo").html();
+            if (echoT != undefined) {
+                alert(echoT);
+                modif = true;
+            }
+
+            if (modif)
+                boucleSynchServ(idAction);
+            else {
+                setTimeout(function() {
+                    boucleSynchServ(idAction);
+                }, 50000);
+            }
+        },
+        error: function() {
+            setTimeout(function() {
+                boucleSynchServ(idAction);
+                timeTentative = timeTentative * 1.3;
+            }, timeTentative * 1000);
+        }
+    });
+}
 
 function dialogConfirm(url, titre, yes, no, id) {
     if (confirm(titre)) {
@@ -75,17 +178,17 @@ function dialogConfirm(url, titre, yes, no, id) {
     }
 }
 
-function initScroll(){
+function initScroll() {
     scrollY = $(window).scrollTop();
-    $(".reglabe, .reglabe2").each(function(){
+    $(".reglabe, .reglabe2").each(function() {
         scrollY += $(this).scrollTop();
         $(this).height('auto');
-        if($(this).attr("old-width"))
-            $(this).width($(this).attr("old-width"));            
+        if ($(this).attr("old-width"))
+            $(this).width($(this).attr("old-width"));
         else
             $(this).width('auto');
-        if($(this).attr("old-padding-right"))
-            $(this).css("padding-right", $(this).attr("old-padding-right")+"px");
+        if ($(this).attr("old-padding-right"))
+            $(this).css("padding-right", $(this).attr("old-padding-right") + "px");
         $(this).removeClass("reglabe");
         $(this).removeClass("reglabe2");
     });
@@ -104,43 +207,43 @@ function traiteScroll(heightDif) {
     appli = false;
     newTaille = 0;
     elem = null;
-    if(hauteurMenu < height && (0 || minimuAGagne > 0)){
-        $("#id-right div").each(function(){
-            if(!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")){
+    if (hauteurMenu < height && (0 || minimuAGagne > 0)) {
+        $("#id-right div").each(function() {
+            if (!$(this).is(".fichehalfright, .fichehalfleft") && !$(this).is(".fichehalfleft")) {
                 taille = $(this).innerHeight();
                 newTailleT = taille - minimuAGagne - 5;
-                reductionVisibilite = height/newTailleT;
+                reductionVisibilite = height / newTailleT;
                 nbPages = taille / newTailleT;
-                if($(this).is(":visible")
-                    && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30){
+                if ($(this).is(":visible")
+                        && newTailleT > 300 & (nbPages * reductionVisibilite * reductionVisibilite) < 30) {
                     newTaille = newTailleT;
                     elem = $(this);
                     appli = true;
                 }
             }
         });
-        
-        if(appli){
-            if(!$(elem).attr("old-width"))
+
+        if (appli) {
+            if (!$(elem).attr("old-width"))
                 $(elem).attr("old-width", $(elem).css("width"));
             oldPadding = parseInt($(elem).css("padding-right").replace("px", ""));
-            if(!$(elem).attr("old-padding-right"))
+            if (!$(elem).attr("old-padding-right"))
                 $(elem).attr("old-padding-right", oldPadding);
             else
                 oldPadding = parseInt($(elem).attr("old-padding-right"));
-            
+
             $(elem).addClass("reglabe2");
-            if($(elem).is(".fiche"))
+            if ($(elem).is(".fiche"))
                 $(elem).css("margin-right", "0");
 //            margin = parseInt($(elem).css("margin-top").replace("px", ""))+parseInt($(elem).css("margin-bottom").replace("px", ""));
-            padding = parseInt($(elem).css("padding-top").replace("px", ""))+parseInt($(elem).css("padding-bottom").replace("px", ""));
+            padding = parseInt($(elem).css("padding-top").replace("px", "")) + parseInt($(elem).css("padding-bottom").replace("px", ""));
 //            alert(margin+padding);
-            $(elem).height(newTaille-padding);
-            $(elem).width($(elem).width()-20);
-            $(elem).css("padding-right", (oldPadding+15)+"px");
-            
+            $(elem).height(newTaille - padding);
+            $(elem).width($(elem).width() - 20);
+            $(elem).css("padding-right", (oldPadding + 15) + "px");
+
             //Test
-            if(parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
+            if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
                 initScroll();
         }
     }
@@ -219,13 +322,13 @@ function findPos(el) {
     var _x = 0;
     var _y = 0;
     el = $(el);
-    while( el && typeof(el.offset()) == "object" && !isNaN( el.offset().left ) && !isNaN( el.offset().top ) ) {
+    while (el && typeof (el.offset()) == "object" && !isNaN(el.offset().left) && !isNaN(el.offset().top)) {
         _x += el.position().left + el.parent().scrollLeft();
         _y += el.position().top + el.parent().scrollTop();
         el = el.parent();
     }
     return {
-        y: _y, 
+        y: _y,
         x: _x
     };
 }
@@ -257,7 +360,7 @@ function ajNoteAjax() {
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
                 $('a#note, .noteAjax').hover(shownNote, hideNote);
                 $('a#note').addClass("lienNote");
-                
+
                 //                $(".controlBut").click(function(){
                 //                    if($(this).val() == "<"){
                 //                        $(this).val(">");
@@ -267,17 +370,17 @@ function ajNoteAjax() {
                 //                    }     
                 //                    shownHideNote();   
                 //                })
-                
+
                 editAjax(jQuery('#notePublicEdit'), datas, function() {
                     hideNote()
                 });
-            
+
             }
         }
     });
-    
-    
-    
+
+
+
     function shownHideNote() {
         $(".noteAjax .note").animate({
             width: 'toggle'
@@ -338,59 +441,185 @@ function editAjax(elem, datas, callOut) {
     });
 }
 
+//var tabCallBack = Array();
+//function appelPop(id, type, callBack) {
+//    CallBackPlus.tabCallBack[id] = callBack;
+//    datas = 'idPagePrinc=' + idPagePrinc + '&ouvreType=' + type + '&ouvreId=' + id;
+//    callBack2 = callBack;
+//    jQuery.ajax({
+//        url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/synch.php',
+//        data: datas,
+//        datatype: "xml",
+//        type: "POST",
+//        cache: false,
+//        success: function(msg) {
+////            callBack(msg);
+//        }
+//    });
+//}
 
-function popChrono(id, callBack) {
-    popIFrame(DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=" + id, callBack);
+
+function dispatchePopObject(id, type, callBack, titre) {//Affiche ici ou dans page princ si existe
+    if (typeof (CallBackPlus) != 'undefined')
+        CallBackPlus.popOjectAffiche(id, type, callBack, titre);
+//        appelPop(id, 'chrono', callBack);
+    else
+        popOjectAffiche(id, type, callBack, titre);
+
 }
-function popAddContact(id, callBack) {
-    popIFrame(DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=" + id, callBack);
+function popOjectAffiche(id, type, callBack, titreNotif) {//Affiche ici
+    if (type == 'chrono')
+        urlT = DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=";
+    else if (type == 'commande')
+        urlT = DOL_URL_ROOT + "/Synopsis_PrepaCommande/prepacommande.php?optioncss=print&id=";
+    else if (type == 'newContact')
+        urlT = DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=";
+    popIFrame(urlT + id, callBack, titreNotif);
+}
+function ajoutPictoConnect() {
+    $("a").each(function() {
+        if ($(this).attr('onclick') == undefined) {
+            $(this).attr("target", "iframePrinc");
+            if ($(this).find("img").size() > 0) {
+                parent = $(this).parent();
+                if (parent.find("a.popConnect").size() == 0) {
+                    if (parent.find("a").size() == 2) {
+                        ref = parent.find("a").last().html();
+                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="/gle_dev/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                    }
+
+
+                    if (parent.find("a").size() == 1) {
+                        tabT = $(this).html().split(">");
+                        if (tabT.length == 2 && tabT[1] != '') {
+                            ref = tabT[1];
+                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="/gle_dev/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+function initLienConnect() {
+    ajoutPictoConnect();
+    $(".pasTraiter.popConnect").each(function() {
+        $(this).click(function() {
+            tabT = $(this).attr("id").split("-");
+            nom = $(this).attr("id").replace(tabT[0] + "-" + tabT[1] + "-" + tabT[2] + "-", "");
+            if (tabT[0] == 'connect')
+                dispatchePopObject(tabT[2], tabT[1], function() {
+                }, nom);
+            else if (tabT[0] == 'connectUrl') {
+                if (tabT[1].indexOf("?") > 0)
+                    tabT[1] = tabT[1] + "&optioncss=print"
+                else
+                    tabT[1] = tabT[1] + "?optioncss=print"
+                dispatchePopIFrame(tabT[1], function() {
+                }, nom);
+            }
+
+            return false;
+        });
+        $(this).removeClass("pasTraiter");
+    });
 }
 
+function initTransmission(elem) {
+    if (typeof (CallBackPlus) != 'undefined') {
+        $("iframe[name='" + elem + "']").load(function() {
+            eval(elem + '.CallBackPlus = CallBackPlus;');
+//            eval(elem + '.initLienConnect();');
+            eval(elem + '.initSynchClient();');
+        });
+//            eval(elem + '.initLienConnect();');
 
-function popIFrame(urlIF, callBack) {
+
+        $("iframe.fullScreen").load(function() {
+            iFramePrinc(false);
+            eval('window.location.hash = ' + elem + '.location;');
+        });
+    }
+}
+
+function dispatchePopIFrame(urlIF, callBack, titreNotif) {
+    if (typeof (CallBackPlus) != 'undefined')
+        CallBackPlus.popIFrame(urlIF, callBack, titreNotif);
+    else
+        popIFrame(urlIF, callBack, titreNotif);
+}
+
+var nbIframe = 0;
+function popIFrame(urlIF, callBack, titreNotif) {
+    nbIframe++;
+    $("iframe.fullScreen").fadeOut();
     //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
-    $("body").append("<div class='fullScreen'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + urlIF + "'></iframe></div>");
-    
-    $("#id-container").hide();
-    
-    $(".fullScreen span.fermer").click(function() {
-        $("#id-container").show();
-        cacherSuppr($(this).parent());
-        callBack();
+    $("body").append("<div class='fullScreen' id='iFrame" + nbIframe + "'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + urlIF + "' name='iFrame" + nbIframe + "'></iframe></div>");
+//    $("#iFrame" + nbIframe+" iframe").load(function() {
+//        eval("iFrame" + nbIframe + ".CallBackPlus = CallBackPlus;");
+//    });
+    initTransmission("iFrame" + nbIframe);
+    $(".bottomObj").removeClass("actif");
+    $("div.notificationObj").append("<div class='bottomObj actif' id='lienIFrame" + nbIframe + "'><span>" + titreNotif + "</span></div>");
+//    $("#id-container").hide();
+
+    iFrame = $("#iFrame" + nbIframe + "");
+
+    iFrame.find("span.fermer").click(function() {
+        fermerIframe($(this).parent(), callBack);
     });
     var i = 0;
-    $(".fullScreen iframe").load(function(){
+    iFrame.find("iframe").load(function() {
         i++;
-        if(i > 1){
-            $("#id-container").show();
-            cacherSuppr($(this).parent());
-            callBack();
+        if (i > 1) {
+//        $("#id-container").show();
+            fermerIframe($(this).parent(), callBack);
         }
     });
-    $(".fullScreen span.petit").click(function() {
-        if($("iframe.fullScreen").size() == 0){
-            $("body").append("<iframe class='fullScreen'></iframe>");
-            if(document.location.href.indexOf("?") > 0)
-                src = document.location.href+"&inut";
-            else
-                src = document.location.href+"?inut";
-            $("iframe.fullScreen").attr("src", src);
-        }
-        else
-            $("iframe.fullScreen").fadeIn();
-        $("body").append("<div class='bottomObj'><span>Chrono</span></div>");
-        //        $(this).parent().fadeOut();
-        $(".bottomObj").click(function() {
-            //            $("div.fullScreen").fadeIn();
-            $("iframe.fullScreen").fadeOut();
-            cacherSuppr($(this));
-        });
+    iFrame.find("span.petit").click(function() {
+//        id = $(this).parent().attr("id").replace("iFrame", "");
+        iFramePrinc(true);
+    });
+    $(".bottomObj").click(function() {
+        return false;
+    });
+    $("#lienIFrame" + nbIframe).click(function() {
+        $(".bottomObj").removeClass("actif");
+        $(this).addClass("actif");
+        id = $(this).attr("id").replace("lienIFrame", "");
+        $("div.fullScreen").fadeOut();
+        $("div.fullScreen#iFrame" + id).fadeIn();
+        $("iframe.fullScreen").fadeOut();
+//            cacherSuppr($(this));
     });
 
 }
+function fermerIframe(elem, callBack) {
+    id = $(elem).attr("id").replace("iFrame", "");
+    cacherSuppr($("#lienIFrame" + id));
+    cacherSuppr($(elem));
+    callBack();
+    iFramePrinc(false);
+}
+function iFramePrinc(createIfNotExist) {
+    $(".bottomObj").removeClass("actif");
+    if ($("iframe.fullScreen").size() == 0 && createIfNotExist) {
+        $("body").append("<iframe class='fullScreen'  name='iframePrinc'></iframe>");
+        if (document.location.href.indexOf("?") > 0)
+            src = document.location.href + "&inut";
+        else
+            src = document.location.href + "?inut";
+        $("iframe.fullScreen").attr("src", src);
+        $("div.fullScreen").fadeOut();
+    }
+    else
+        $("iframe.fullScreen").fadeIn();
+}
+
+
 function addLienHtml(idIncr, id, nom, model, cible) {
-    if(id > 0)
-        $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom) + "</div>");
+    if (id > 0)
+        $(cible).prepend("<div class='elem'>" + model.replace("replaceId", idIncr).replace("replaceValue", id).replace("replaceValue", id).replace("replaceValue", id).replace("replaceValue", id).replace("replaceValue", id).replace("replaceNom", nom).replace("replaceNom", nom).replace("replaceNom", nom) + "</div>");
 }
 function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     champSup = '';
@@ -452,7 +681,7 @@ function cacherSuppr(element) {
     });
 }
 
-function addLienAj(firstParent){
+function addLienAj(firstParent) {
     parentDiv = $(firstParent).parent();
     model = $(parentDiv).find(".model").html();
     select = $(parentDiv).find("select");
@@ -462,44 +691,46 @@ function addLienAj(firstParent){
     ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), selectId, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
         if (ok == "ok")
             addLienHtml(idIncr, selectId, selectNom, model, parentDiv);
-    });    
+    });
 }
 
-function addChronoAj(firstParent){
+function addChronoAj(firstParent) {
     parentDiv = $(firstParent).parent();
     model = $(parentDiv).find(".model").html();
     addChrono(firstParent, $("#socid").val(), function(valReturn) {
-        ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), valReturn, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
+        sourceType = $(parentDiv).find(".sourcetype").val();
+        titre = 'Nouveau ' + sourceType;
+        ajaxManipElementElement("add", sourceType, $(parentDiv).find(".targettype").val(), valReturn, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
             if (ok == "ok") {
                 idIncr = idIncr + 1;
-                addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
-                popChrono(valReturn, function() {
-                    });
+                addLienHtml(idIncr, valReturn, titre, model, parentDiv);
+                dispatchePopObject(valReturn, 'chrono', function() {
+                }, titre);
             }
         });
     });
 }
 
-function initFormChrono(){
-    $(".showFormChrono").each(function(){
+function initFormChrono() {
+    $(".showFormChrono").each(function() {
         $(this).parent().find(".chronoForm").hide();
-        $(this).click(function(){
+        $(this).click(function() {
             $(this).parent().find(".chronoForm").show();
             $(this).remove();
         });
     });
-    
-    
-    
-    
+
+
+
+
     idIncr = 100;
     $(".formAjax .addLien").click(function() {
         addLienAj($(this));
         return false;
     });
     $(".formAjax .changeLien").click(function() {
-        $(this).parent().find("div.elem").each(function(){
-            if(!$(this).hasClass("model"))
+        $(this).parent().find("div.elem").each(function() {
+            if (!$(this).hasClass("model"))
                 $(this).remove();
         });
         addLienAj($(this));
@@ -510,8 +741,8 @@ function initFormChrono(){
         return false;
     });
     $(".formAjax .changeChrono").click(function() {
-        $(this).parent().find("div.elem").each(function(){
-            if(!$(this).hasClass("model"))
+        $(this).parent().find("div.elem").each(function() {
+            if (!$(this).hasClass("model"))
                 $(this).remove();
         });
         addChronoAj($(this));
@@ -521,30 +752,34 @@ function initFormChrono(){
         parentDiv = $(this).parent();
         model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
+        titre = "Nouveau " + $(this).parent().parent().find("th").html();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
-            popChrono(valReturn, function() {});
+            addLienHtml(idIncr, valReturn, titre, model, parentDiv);
+            dispatchePopObject(valReturn, 'chrono', function() {
+            }, titre);
         });
         return false;
     });
     $("#chronoTable .changeChrono").click(function() {
-        $(this).parent().find("div.elem").each(function(){
-            if(!$(this).hasClass("model"))
+        $(this).parent().find("div.elem").each(function() {
+            if (!$(this).hasClass("model"))
                 $(this).remove();
         });
         parentDiv = $(this).parent();
         model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
+        titre = "Nouveau " + $(this).parent().parent().find("th").html();
         addChrono(this, socid, function(valReturn) {
             idIncr = idIncr + 1;
-            addLienHtml(idIncr, valReturn, "Nouvellement crée", model, parentDiv);
-            popChrono(valReturn, function() {});
+            addLienHtml(idIncr, valReturn, titre, model, parentDiv);
+            dispatchePopObject(valReturn, 'chrono', function() {
+            }, titre);
         });
         return false;
     });
-    
-    $("#chronoTable .addLien").click(function(){
+
+    $("#chronoTable .addLien").click(function() {
         model = $(this).parent().find(".model").html();
         select = $(this).parent().find("select");
         selectId = $(select).val();
@@ -553,9 +788,9 @@ function initFormChrono(){
         addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
         return false;
     });
-    $("#chronoTable .changeLien").click(function(){
-        $(this).parent().find("div.elem").each(function(){
-            if(!$(this).hasClass("model"))
+    $("#chronoTable .changeLien").click(function() {
+        $(this).parent().find("div.elem").each(function() {
+            if (!$(this).hasClass("model"))
                 $(this).remove();
         });
         model = $(this).parent().find(".model").html();

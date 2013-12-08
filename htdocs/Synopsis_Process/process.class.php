@@ -2411,6 +2411,7 @@ class lien extends formulaireSource {
         $this->champVueSelect = $result->champVueSelect;
         $this->ordre = $result->ordre;
         $this->urlObj = $result->urlObj;
+        $this->picto = ($result->picto != '')? img_picto($result->label, $result->picto) : "";
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
         $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
@@ -2560,10 +2561,12 @@ print "".$js;
         $html = '<div class="' . $classDiv . ' elem">'
                 . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
+//        $html .= ;
         if ($this->urlObj != "") {
+            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\">" . $this->picto . "</a>";
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)
-                $html .= "onclick='popChrono(" . $idVal . ", function(){}); return false;'";
+                $html .= "onclick='dispatchePopObject(" . $idVal . ", \"chrono\", function(){}, \"" . $text . "\"); return false;'";
             else
                 $html .= "onclick='return confirm(\"Ceci va quiter la page sans enregistrer. Continuer ?\");'";
             $html .= ">" . $text . "</a>";
@@ -2582,9 +2585,10 @@ print "".$js;
                 while ($result = $this->db->fetch_object($sql)) {
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
-                        $this->valuesArr[$result->id] = lien($this->urlObj . $result->id) . finLien($result->nom);
+                        $html = lien($this->urlObj . $result->id) . finLien($this->picto.$result->nom);
                     else
-                        $this->valuesArr[$result->id] = $result->nom;
+                       $html = $this->picto.$result->nom;
+                    $this->valuesArr[$result->id] = $html;
                 }
         }
     }

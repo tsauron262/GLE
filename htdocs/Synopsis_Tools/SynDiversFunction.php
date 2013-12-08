@@ -8,6 +8,9 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
+function pictoConnect($type, $id, $ref){
+    return "<span class='popConnect pasTraiter' id='connect-".$type."-".$id."-".$ref."'>".img_picto("Ouvrir en mode connect", "connect@Synopsis_Tools")."</span>";
+}
 
 function show_actions_par_type($type, $idElement, $object, $done = false, $objcon = '', $noprint = 0) {
     global $conf, $langs, $db, $bc, $user;

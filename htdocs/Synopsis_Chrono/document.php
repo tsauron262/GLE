@@ -128,7 +128,7 @@ if ($_POST["sendit"]) {
     if (!is_dir($upload_dir))
         dol_mkdir($upload_dir);
 
-    if (is_dir($upload_dir)) {
+    if (is_dir($upload_dir) && $_FILES['userfile']['name'] != '') {
         $tmpName = $_FILES['userfile']['name'];
         //decode decimal HTML entities added by web browser
         $tmpName = dol_unescapefile($tmpName);

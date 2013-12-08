@@ -689,7 +689,8 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'setEffUser') {
 if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'setAttUser') {
     $tmpUser = new User($db);
     $tmpUser->id = $_REQUEST['AttUserid'];
-    if ($tmpUser->fetch($tmpUser->id) > 0) {
+//    die($_REQUEST['AttUserid']);
+    if ($tmpUser->fetch($_REQUEST['AttUserid']) > 0) {
         $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
         $synopsisdemandeinterv->fetch($_REQUEST['id']);
         $synopsisdemandeinterv->preparePrisencharge($tmpUser);
@@ -1446,7 +1447,8 @@ EOF;
         print '</td></tr>';
     }
     print '<tr><th class="ui-widget-header ui-state-default">Attribu&eacute; &agrave;';
-    if ($synopsisdemandeinterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
+//    if ($synopsisdemandeinterv->statuts == 0 || $user->rights->synopsisdemandeinterv->prisencharge)
+    if ($synopsisdemandeinterv->statut < 2)
         print '<a href="' . $_SERVER['PHP_SELF'] . '?action=editAttrib&id=' . $_REQUEST['id'] . '">' . img_edit($langs->trans('Changer Attribution'), 1) . '</a>';
 
     print '    <td class="ui-widget-content" colspan=1>';

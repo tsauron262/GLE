@@ -273,9 +273,9 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
         
             $(".addContact").click(function(){
                 socid = $("select#socid").val();
-                popAddContact(socid, function(){
+                 popOjectAffiche(socid, 'newContact', function(){
                     ajax_updater_postFct(socid, 'old');
-                });
+                }, 'Contact')
             });    
           
 

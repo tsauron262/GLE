@@ -12,6 +12,41 @@ div.divButAction, div.butActionDelete{
     font-size: 12px;
 }
 
+div.deconnect{
+    position: fixed;
+    top: 13px;
+    right: 132px;
+    z-index:1130;
+}
+
+.popConnect{
+    /*padding: 15px;*/
+    cursor: pointer; 
+}
+
+div.notificationText,div.notificationObj{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    z-index:1130;
+}
+div.notificationText{
+    bottom: 45px;
+}
+div.oneNotification{
+    border: solid black 1px;
+    background: #C8D8F6;
+    background-image: -moz-linear-gradient(center top , rgba(255, 255, 255, 0.3) 0%, rgba(40, 40, 40, 0.3) 100%);
+    background-image: -webkit-gradient( linear, left top, left bottom, color-stop(0, rgba(255,255,255,.3)), color-stop(1, rgba(40,40,40,.3)) );
+    border-radius: 6px;
+    overflow: hidden;
+    margin: 10px;
+    padding: 5px;
+}
+span.marqueVueNotification{
+    padding: 8px;
+}
+
 
 
 .fullScreen{
@@ -31,7 +66,7 @@ iframe.fullScreen{
     width: 100%;
     height: 100%;
     z-index: 1120;
-
+    padding-bottom:45px;
 }
 div.fullScreen iframe{
     width: 100%;
@@ -43,7 +78,7 @@ div.fullScreen  span{
     margin: 10px;
 
 }
-div.bottomObj{
+/*div.bottomObj{
     position: fixed;
     bottom: 0;
     right: 0;
@@ -52,7 +87,20 @@ div.bottomObj{
     border: solid black 2px;
     z-index:1130;
     background-image: url(../../Synopsis_Tools/img/bgGrisTrans.png);
+}*/
+div.bottomObj.actif{
+    background-color: green;
 }
+
+div.bottomObj{
+    float: right;
+
+    padding: 10px 25px;
+    cursor:  pointer;
+    border: solid black 2px;
+    background-image: url(../../Synopsis_Tools/img/bgGrisTrans.png);
+}
+
 
 /*div.tabBar{
     position: absolute;

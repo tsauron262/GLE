@@ -20,6 +20,9 @@
 require_once('../main.inc.php');
 llxHeader();
 
+//if (isset($_REQUEST['connect']))
+//    echo "<script>$(window).load(function() {initSynchServ(idActionMax);});</script>";
+
 print "<div class='titre'>Outil GLE</div>";
 print "<br/>";
 if (isset($user->rights->SynopsisTools->Global->phpMyAdmin)) {
@@ -35,7 +38,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
     print" <br/><br/><a href='../Synopsis_PrepaCommande/import/testImport.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Import 8sens -> GLE</span></a>";
 
 
-    print" <br/><br/><a href='../Synopsis_Tools/agenda/vue.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Agenda</span></a>";
+print" <br/><br/><a href='../Synopsis_Tools/agenda/vue.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Agenda</span></a>";
 
 
 llxFooter();

@@ -161,7 +161,7 @@ class synopsisHook {
     }
 
     static function getHeader() {
-
+        global $db;
         self::$timeDeb = microtime(true);
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
         $cssSoc = "/Synopsis_Tools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
@@ -173,6 +173,14 @@ class synopsisHook {
         $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
+        
+        
+        $sql = $db->query("SELECT MAX(id) as id FROM " . MAIN_DB_PREFIX . "actioncomm");
+            $result = $db->fetch_object($sql);
+            $return .= '<script type="text/javascript">'
+                    . '         var idActionMax = '. $result->id .';'
+                    . 'var idPagePrinc = "'.$_SESSION['pagePrinc'].'";'
+            . '</script>';
         $nameFile = DOL_DATA_ROOT . "/special.css";
         if (is_file($nameFile)) {
             $css = file_get_contents($nameFile);
@@ -189,10 +197,21 @@ class synopsisHook {
                 dashboard::getDashboard();
             }
         }
+        
+        echo "</div>";
+        
+        echo "<div class='notificationText'></div><div class='notificationObj'></div>";
+        
         $time = (microtime(true) - self::$timeDeb);
         if ($time > 4 && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4);
-        echo "</div><span class='timePage'>" . $time . " s</span>";
+        echo "<span class='timePage'>" . $time . " s</span>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
+        echo "<br/>";
     }
 
     public static function getObj($type) {
@@ -207,7 +226,7 @@ class synopsisHook {
             case 'chrono': {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
                     $obj = new Chrono($db);
-                    $tabMenu[0] = "Chrono";
+                    $tabMenu[0] = "Process";
                 }
                 break;
             case 'propal': {
@@ -242,11 +261,13 @@ class synopsisHook {
             case 'FI': {
                     require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
                     $obj = new Fichinter($db);
+                    $tabMenu[0] = "synopsisficheinter";
                 }
                 break;
             case 'DI': {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
                     $obj = new Synopsisdemandeinterv($db);
+                    $tabMenu[0] = "synopsisficheinter";
                 }
                 break;
             case 'contrat': {
@@ -558,7 +579,8 @@ class Synopsis_Commande extends Commande {
             $result.=($linkstart . img_object($label, $picto) . $linkend);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
-        $result.=$linkstart . $this->ref . $linkend;
+        $connect = pictoConnect("commande",$this->id,$this->ref);
+        $result.=$linkstart . $this->ref . $linkend . $connect;
         return $result;
     }
 

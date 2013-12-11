@@ -19,7 +19,7 @@
  */
 $_GET['optioncss'] = 'print';
 require_once('../main.inc.php');
-$url = DOL_URL_ROOT."index.php";
+$url = DOL_URL_ROOT."/index.php";
 if($_GET['url'] != '')
     $url = $_GET['url'];
 

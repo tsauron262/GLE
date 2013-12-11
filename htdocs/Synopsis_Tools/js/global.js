@@ -485,7 +485,7 @@ function ajoutPictoConnect() {
                 if (parent.find("a.popConnect").size() == 0) {
                     if (parent.find("a").size() == 2) {
                         ref = parent.find("a").last().html();
-                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="/gle_dev/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="'+DOL_URL_ROOT+'/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
                     }
 
 
@@ -493,7 +493,7 @@ function ajoutPictoConnect() {
                         tabT = $(this).html().split(">");
                         if (tabT.length == 2 && tabT[1] != '') {
                             ref = tabT[1];
-                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="/gle_dev/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="'+DOL_URL_ROOT+'/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
                         }
                     }
                 }

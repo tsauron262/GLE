@@ -115,11 +115,11 @@ function initSynchServ(idAction) {
     timeTentative = 1;
     boucleSynchServ(idAction);
 }
-function initSynchClient(){
+function initSynchClient(optioncss) {
     $(document).bind("ajaxComplete", function() {
-        initLienConnect();
+        initLienConnect(optioncss);
     });
-    initLienConnect();
+    initLienConnect(optioncss);
 }
 
 function boucleSynchServ(idAction) {
@@ -459,33 +459,33 @@ function editAjax(elem, datas, callOut) {
 //}
 
 
-function dispatchePopObject(id, type, callBack, titre) {//Affiche ici ou dans page princ si existe
+function dispatchePopObject(id, type, callBack, titre, nbLoad) {//Affiche ici ou dans page princ si existe
     if (typeof (CallBackPlus) != 'undefined')
-        CallBackPlus.popOjectAffiche(id, type, callBack, titre);
+        CallBackPlus.popOjectAffiche(id, type, callBack, titre, nbLoad);
 //        appelPop(id, 'chrono', callBack);
     else
-        popOjectAffiche(id, type, callBack, titre);
+        popOjectAffiche(id, type, callBack, titre, nbLoad);
 
 }
-function popOjectAffiche(id, type, callBack, titreNotif) {//Affiche ici
+function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
     if (type == 'chrono')
         urlT = DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=";
     else if (type == 'commande')
         urlT = DOL_URL_ROOT + "/Synopsis_PrepaCommande/prepacommande.php?optioncss=print&id=";
     else if (type == 'newContact')
         urlT = DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=";
-    popIFrame(urlT + id, callBack, titreNotif);
+    popIFrame(urlT + id, callBack, titreNotif, nbLoad);
 }
 function ajoutPictoConnect() {
     $("a").each(function() {
-        if ($(this).attr('onclick') == undefined) {
+        if ($(this).attr('onclick') == undefined && $(this).attr('href') != undefined) {
             $(this).attr("target", "iframePrinc");
             if ($(this).find("img").size() > 0) {
                 parent = $(this).parent();
                 if (parent.find("a.popConnect").size() == 0) {
-                    if (parent.find("a").size() == 2) {
+                    if (parent.find("a").size() == 2 && parent.find("a").last().find("img").size() == 0) {
                         ref = parent.find("a").last().html();
-                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="'+DOL_URL_ROOT+'/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
                     }
 
 
@@ -493,7 +493,7 @@ function ajoutPictoConnect() {
                         tabT = $(this).html().split(">");
                         if (tabT.length == 2 && tabT[1] != '') {
                             ref = tabT[1];
-                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="'+DOL_URL_ROOT+'/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
                         }
                     }
                 }
@@ -501,7 +501,17 @@ function ajoutPictoConnect() {
         }
     });
 }
-function initLienConnect() {
+function initLienConnect(optioncss) {
+    if(optioncss == "print"){
+    $("form").each(function() {
+        if ($(this).attr("action").indexOf("?") > 0)
+            $(this).attr("action", $(this).attr("action") + "&optioncss=print");
+        else
+            $(this).attr("action", $(this).attr("action") + "?optioncss=print");
+    });
+    }
+    
+    
     ajoutPictoConnect();
     $(".pasTraiter.popConnect").each(function() {
         $(this).click(function() {
@@ -509,14 +519,14 @@ function initLienConnect() {
             nom = $(this).attr("id").replace(tabT[0] + "-" + tabT[1] + "-" + tabT[2] + "-", "");
             if (tabT[0] == 'connect')
                 dispatchePopObject(tabT[2], tabT[1], function() {
-                }, nom);
+                }, nom, 100);
             else if (tabT[0] == 'connectUrl') {
                 if (tabT[1].indexOf("?") > 0)
                     tabT[1] = tabT[1] + "&optioncss=print"
                 else
                     tabT[1] = tabT[1] + "?optioncss=print"
                 dispatchePopIFrame(tabT[1], function() {
-                }, nom);
+                }, nom, 100);
             }
 
             return false;
@@ -530,7 +540,10 @@ function initTransmission(elem) {
         $("iframe[name='" + elem + "']").load(function() {
             eval(elem + '.CallBackPlus = CallBackPlus;');
 //            eval(elem + '.initLienConnect();');
-            eval(elem + '.initSynchClient();');
+            if (elem != "iframePrinc")
+                eval(elem + '.initSynchClient("print");');
+            else
+                eval(elem + '.initSynchClient("");');
         });
 //            eval(elem + '.initLienConnect();');
 
@@ -542,15 +555,15 @@ function initTransmission(elem) {
     }
 }
 
-function dispatchePopIFrame(urlIF, callBack, titreNotif) {
+function dispatchePopIFrame(urlIF, callBack, titreNotif, nbLoad) {
     if (typeof (CallBackPlus) != 'undefined')
-        CallBackPlus.popIFrame(urlIF, callBack, titreNotif);
+        CallBackPlus.popIFrame(urlIF, callBack, titreNotif, nbLoad);
     else
-        popIFrame(urlIF, callBack, titreNotif);
+        popIFrame(urlIF, callBack, titreNotif, nbLoad);
 }
 
 var nbIframe = 0;
-function popIFrame(urlIF, callBack, titreNotif) {
+function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     nbIframe++;
     $("iframe.fullScreen").fadeOut();
     //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
@@ -571,7 +584,7 @@ function popIFrame(urlIF, callBack, titreNotif) {
     var i = 0;
     iFrame.find("iframe").load(function() {
         i++;
-        if (i > 1) {
+        if (i > nbLoad) {
 //        $("#id-container").show();
             fermerIframe($(this).parent(), callBack);
         }
@@ -705,7 +718,7 @@ function addChronoAj(firstParent) {
                 idIncr = idIncr + 1;
                 addLienHtml(idIncr, valReturn, titre, model, parentDiv);
                 dispatchePopObject(valReturn, 'chrono', function() {
-                }, titre);
+                }, titre, 1);
             }
         });
     });
@@ -757,7 +770,7 @@ function initFormChrono() {
             idIncr = idIncr + 1;
             addLienHtml(idIncr, valReturn, titre, model, parentDiv);
             dispatchePopObject(valReturn, 'chrono', function() {
-            }, titre);
+            }, titre, 1);
         });
         return false;
     });
@@ -774,7 +787,7 @@ function initFormChrono() {
             idIncr = idIncr + 1;
             addLienHtml(idIncr, valReturn, titre, model, parentDiv);
             dispatchePopObject(valReturn, 'chrono', function() {
-            }, titre);
+            }, titre, 1);
         });
         return false;
     });

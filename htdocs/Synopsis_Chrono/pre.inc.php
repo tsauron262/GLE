@@ -41,22 +41,22 @@
 require ("../main.inc.php");
 require_once(DOL_DOCUMENT_ROOT."/projet/class/project.class.php");
 
-$langs->load("synopsisGene@Synopsis_Tools");
-$langs->load("companies");
-$langs->load("bills");
-$langs->load("orders");
-$langs->load("commercial");
-
-
-function llxHeader($head = "", $title="", $help_url='', $noscript = false)
-{
-  global $langs;
-
-  top_menu($head, $title,"",$noscript);
-
-  $menu = new Menu();
-
-
-  left_menu($menu->liste, $help_url);
-}
+//$langs->load("synopsisGene@Synopsis_Tools");
+//$langs->load("companies");
+//$langs->load("bills");
+//$langs->load("orders");
+//$langs->load("commercial");
+//
+//
+//function llxHeader($head = "", $title="", $help_url='', $noscript = false)
+//{
+//  global $langs;
+//
+//  top_menu($head, $title,"",$noscript);
+//
+//  $menu = new Menu();
+//
+//
+//  left_menu($menu->liste, $help_url);
+//}
 ?>

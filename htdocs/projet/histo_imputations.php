@@ -441,6 +441,8 @@ if ($formatView == "month") {
         else
             print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d/m', $tmpDate) . '</th>';
         $tmpDate += 3600 * 24;
+        if(date('d/m', $tmpDate) == "04/10")
+                $tmpDate += 3600;
         $totalDay[$tmpDate] = 0;
     }
 }

@@ -42,7 +42,7 @@ class modSynopsisHrm extends DolibarrModules {
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISHRM';
         $this->special = 0;
-        $this->picto = 'HRM';
+        $this->picto = 'user';
 
         // Dir
         $this->dirs = array();

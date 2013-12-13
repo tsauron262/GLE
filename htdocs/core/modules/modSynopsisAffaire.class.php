@@ -69,7 +69,7 @@ class modSynopsisAffaire extends DolibarrModules
         $this->version = '0.1';            // 'development' or 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISAFFAIRE';
         $this->special = 0;
-        $this->picto='affaire';
+        $this->picto='category-expanded';
 
         // Dir
         //----

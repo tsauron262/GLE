@@ -46,7 +46,7 @@ class modSynopsisRessources extends DolibarrModules
         $this->version = '2';
         $this->const_name = 'MAIN_MODULE_SYNOPSISRESSOURCES';
         $this->special = 0;
-        $this->picto='Synopsis_Ressources';
+        $this->picto='trip';
 
         // Dir
         $this->dirs = array();

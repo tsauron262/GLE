@@ -41,7 +41,7 @@ class modSynopsisContrat extends DolibarrModules {
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISCONTRAT';
         $this->special = 0;
-        $this->picto = 'contrat';
+        $this->picto = 'contract';
 
         // Dir
         $this->dirs = array();

@@ -46,7 +46,7 @@ class modSynopsisZimbra extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISZIMBRA';
         $this->special = 0;
-        $this->picto='ZIMBRABABEL';
+        $this->picto='email';
 
         // Dir
         $this->dirs = array();

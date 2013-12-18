@@ -177,10 +177,7 @@ class synopsisHook {
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
         
         
-        $sql = $db->query("SELECT MAX(id) as id FROM " . MAIN_DB_PREFIX . "actioncomm");
-            $result = $db->fetch_object($sql);
             $return .= '<script type="text/javascript">'
-                    . '         var idActionMax = '. $result->id .';'
                     . 'var idPagePrinc = "'.$_SESSION['pagePrinc'].'";'
             . '</script>';
         $nameFile = DOL_DATA_ROOT . "/special.css";

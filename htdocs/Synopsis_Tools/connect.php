@@ -19,25 +19,27 @@
  */
 $_GET['optioncss'] = 'print';
 require_once('../main.inc.php');
-$url = DOL_URL_ROOT."/index.php";
-if($_GET['url'] != '')
+$url = DOL_URL_ROOT . "/index.php";
+if ($_GET['url'] != '')
     $url = $_GET['url'];
 
-if(isset($_REQUEST['off'])){
-$_SESSION['pagePrinc'] = "0";
-header("Location:".$url);
-die;
+if (isset($_REQUEST['off'])) {
+    $_SESSION['pagePrinc'] = "0";
+    header("Location:" . $url);
+    die;
 }
 
 $_SESSION['pagePrinc'] = $user->id;
-llxHeader();
-    echo "<script>$(window).load(function() {"
-. "             initSynchServ(idActionMax);"
-            . "$(window).bind('beforeunload', function(){"
-            . " return 'Ceci va quiter le mode Connect';"
-            . "});"
-            . "});</script>";
-echo '<iframe class="fullScreen" src="'.$url.'" style="display: block;" name="iframePrinc"></iframe>';
+$sql = $db->query("SELECT MAX(id) as id FROM " . MAIN_DB_PREFIX . "actioncomm");
+$result = $db->fetch_object($sql);
+$js = "<script>$(window).load(function() {"
+ . "             initSynchServ('. $result->id .');"
+ . "$(window).bind('beforeunload', function(){"
+ . " return 'Ceci va quiter le mode Connect';"
+ . "});"
+ . "});</script>";
+llxHeader($js, "Mode Connect");
+echo '<iframe class="fullScreen" src="' . $url . '" style="display: block;" name="iframePrinc"></iframe>';
 echo '<div class="deconnect"><a href="?off=true">Deconnect</a></div>';
 llxFooter();
 ?>

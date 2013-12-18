@@ -85,6 +85,12 @@ class modSynopsisContrat extends DolibarrModules {
         $this->rights[2][3] = 1;
         $this->rights[2][4] = 'read';
 
+        $this->rights[2][0] = 161883;
+        $this->rights[2][1] = 'Renouveller les contrats';
+        $this->rights[2][2] = 'r';
+        $this->rights[2][3] = 1;
+        $this->rights[2][4] = 'renouveller';
+
 
         $r = 0;
         $this->tabs = array('contract:+annexe:Annexe PDF:@monmodule:/Synopsis_Contrat/annexes.php?id=__ID__',

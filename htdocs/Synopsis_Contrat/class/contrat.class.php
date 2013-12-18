@@ -34,15 +34,46 @@ class Synopsis_Contrat extends Contrat {
         return($res->extraparams);
     }
 
+    function addlineSyn($qty2, $reconductionAuto, $isSav, $sla, $durValid, $hotline, $telemaintenance, $maintenance, $type, $qteTempsPerDuree, $qteTktPerDuree, $nbVisite, $desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type = 'HT', $pu_ttc = 0, $info_bits = 0, $fk_fournprice = null, $pa_ht = 0) {
+        $id = parent::addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type = 'HT', $pu_ttc = 0, $info_bits = 0, $fk_fournprice = null, $pa_ht = 0);
+
+        $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
+                            (contratdet_refid,qte,tms,DateDeb,reconductionAuto,
+                            isSAV, SLA, durValid,
+                            hotline, telemaintenance, maintenance,
+                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
+                     VALUES (" . $id . "," . $qty2 . ",now(),now(),'" . $reconductionAuto . "',
+                            " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($sla) . "'," . $durValid . ",
+                            " . ($hotline <> 0 ? $hotline : 0) . "," . ($telemaintenance <> 0 ? $telemaintenance : 0) . "," . ($maintenance > 0 ? 1 : 0) . ",
+                            " . $type . ", '" . $qteTempsPerDuree . "','" . $qteTktPerDuree . "','" . $nbVisite . "')";
+        $sql1 = $this->db->query($requete2);
+    }
+
+    public function renouvellementSimple($user) {
+        $newContrat = new Synopsis_Contrat($this->db);
+        $newContrat->fetch($this->id);
+        $newContrat->renouvellementPart1($user, 0);
+//        die($newContrat->id);
+        $this->fetch_lines();
+        foreach ($this->lines as $lignes) {
+            $dateFin = $lignes->date_fin_validite - $lignes->date_ouverture_prevue + $newContrat->date_contrat;
+            $newContrat->addlineSyn($lignes->qty2, $lignes->GMAO_Mixte['reconductionAuto'], $lignes->GMAO_Mixte['isSAV'], $lignes->GMAO_Mixte['SLA'], $lignes->GMAO_Mixte['durVal'], $lignes->GMAO_Mixte['hotline'], $lignes->GMAO_Mixte['telemaintenance'], $lignes->GMAO_Mixte['maintenance'], $lignes->type, $lignes->GMAO_Mixte['qteTempsPerDuree'], $lignes->GMAO_Mixte['qteTktPerDuree'], $lignes->GMAO_Mixte['nbVisiteAn'], $lignes->desc, $lignes->price_ht, $lignes->qty, $lignes->tva_tx, $lignes->localtax1_tx, $lignes->localtax2_tx, $lignes->fk_product, $lignes->remise_percent, $newContrat->date_contrat, $dateFin);
+        }
+        $newContrat->renouvellementPart2();
+        return $newContrat->id;
+    }
+
     public function renouvellementPart1($user, $commId) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
 
-        $this->commId = $commId;
+        if ($commId > 0) {
+            $this->commId = $commId;
 
-        $commande = new Commande($this->db);
-        $commande->fetch($commId);
-        $this->date_contrat = $commande->date;
-
+            $commande = new Commande($this->db);
+            $commande->fetch($commId);
+            $this->date_contrat = $commande->date;
+        } else
+            $this->date_contrat = time();
         $this->cloture($user);
 
         $oldRef = $this->ref;
@@ -311,8 +342,7 @@ class Synopsis_Contrat extends Contrat {
             foreach ($tabLigne as $obj) {
                 $this->lines[] = $obj;
             }
-        }
-        else
+        } else
             die("Pas d'id");
     }
 
@@ -1132,8 +1162,7 @@ class Synopsis_Contrat extends Contrat {
                         if ($objp->statut == 0 && $db->jdate($objp->date_debut) < ($now - $conf->contrat->services->inactifs->warning_delay)) {
                             $return .= " " . img_warning($langs->trans("Late"));
                         }
-                    }
-                    else
+                    } else
                         $return .= $langs->trans("Unknown");
                     $return .= ' &nbsp;-&nbsp; ';
                     $return .= $langs->trans("DateEndPlanned") . ': ';
@@ -1142,8 +1171,7 @@ class Synopsis_Contrat extends Contrat {
                         if ($objp->statut == 4 && $db->jdate($objp->date_fin) < ($now - $conf->contrat->services->expires->warning_delay)) {
                             $return .= " " . img_warning($langs->trans("Late"));
                         }
-                    }
-                    else
+                    } else
                         $return .= $langs->trans("Unknown");
 
                     $return .= '</td>';
@@ -1832,7 +1860,7 @@ class Synopsis_Contrat extends Contrat {
 
     public function displayDialog($type = 'add', $mysoc = null, $objp = null) {
         global $conf, $form;
-        
+
         $form = new Form($this->db);
 
 
@@ -1883,14 +1911,14 @@ class Synopsis_Contrat extends Contrat {
         $html .= '</tr>' . "\n";
         $html .= '<tr>' . "\n";
         $html .= '<th class="ui-widget-header ui-state-default" width=150 colspan=1>Date de d&eacute;but' . "\n";
-        
+
         $html .= '<td class="ui-widget-content" colspan=2>';
-        
+
         ob_start();
         $html .= $form->select_date('', 'dateDeb' . $type);
         $html .= ob_get_clean();
 //        $html .= '<input type="text" class="datepicker" style="width: 100px" name="dateDeb' . $type . '" id="dateDeb' . $type . '">';
-        $html .= "\n" .'</td>' . "\n";
+        $html .= "\n" . '</td>' . "\n";
         $html .= '</tr>' . "\n";
         $html .= '<tr>' . "\n";
         $html .= '<th class="ui-widget-header ui-state-default" colspan=1>SLA' . "\n";

@@ -9,6 +9,7 @@ class autoDi {
 
     function autoDi($processDet = null, $idContrat = null) {
         global $db;
+        $db->commit();
         $this->db = $db;
         $this->processDet = $processDet;
 
@@ -116,12 +117,11 @@ class autoDi {
                 foreach ($this->tabType as $type) {
                     $this->sortie("<h2>SITE " . $nomSite . ": " . $type . "</h2><br/>");
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
-                        $delai = round(365 / count($site[$type]['tabVisite']) * ($type == "tele" ? (intval ($numVisiste) + 0.5) : $numVisiste));
+                        $delai = round(365 / count($site[$type]['tabVisite']) * ($type == "tele" ? (intval($numVisiste) + 0.5) : $numVisiste));
                         $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
                         $decale = 0;
                         for ($i = 0; $i < 100; $i++) {
-                            if (date_format($date, "w") != 0 && date_format($date, "w") != "6"
-                                    && !isset($tabDatePrise[date_format($date, "d-m-Y")])) {
+                            if (date_format($date, "w") != 0 && date_format($date, "w") != "6" && !isset($tabDatePrise[date_format($date, "d-m-Y")])) {
                                 $requete = "SELECT * FROM `" . MAIN_DB_PREFIX . "actioncomm` WHERE `datep` <= '" . date_format($date, "Y-m-d") . " 23:59:59' AND `datep2` >= '" . date_format($date, "Y-m-d") . "' AND fk_user_action =" . $this->idTech;
                                 $sql = $this->db->query($requete);
                                 if ($this->db->num_rows($sql) == 0) {
@@ -156,24 +156,22 @@ class autoDi {
         $this->getTabSecteur();
         $ligneFak = new Synopsis_ContratLigne($this->db);
         $tabSite = $this->tabSite;
-//        echo "<pre>";
-//        print_r($tabSite);
         global $user;
         foreach ($tabSite as $numSite => $site) {
             $nomSite = ($numSite + 1);
             $dureeDep = 0;
             $dureeInt = 2;
-            if ($numSite > 5){
+            if ($numSite > 5) {
                 $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $numSite);
-            if ($this->db->num_rows($sql) > 0) {
-                $result = $this->db->fetch_object($sql);
-                $nomSite = $result->description;
-                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $numSite . " AND key_id = " . CHRONO_KEY_SITE_DUREE_DEP);
                 if ($this->db->num_rows($sql) > 0) {
                     $result = $this->db->fetch_object($sql);
-                    $dureeDep = $result->value;
+                    $nomSite = $result->description;
+                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $numSite . " AND key_id = " . CHRONO_KEY_SITE_DUREE_DEP);
+                    if ($this->db->num_rows($sql) > 0) {
+                        $result = $this->db->fetch_object($sql);
+                        $dureeDep = $result->value;
+                    }
                 }
-            }
             }
             foreach ($this->tabType as $type) {
                 foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
@@ -182,9 +180,10 @@ class autoDi {
                     $di->socid = $this->contrat->socid;
                     $di->author = $user->id;
                     $di->fk_contrat = $this->idContrat;
-                    $textSite = (count($tabSite) > 1 ? " SITE : ".$nomSite : "");
-                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']). $textSite;
+                    $textSite = (count($tabSite) > 1 ? " SITE : " . $nomSite : "");
+                    $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . $textSite;
                     $newId = $di->create();
+//                    die($di->description . $newId);
                     $tech = new User($this->db);
                     $tech->fetch($this->idTech);
                     $di->fetch($newId);
@@ -196,8 +195,8 @@ class autoDi {
                         $idType = 20;
                         $di->addline($newId, "Déplacement ", $visite['date'], ("3600" * $dureeDep), 4, 1, 50, 1);
                     }
-                    else{
-                        $idType = 21;                        
+                    else {
+                        $idType = 21;
                     }
 
                     foreach ($visite['prod'] as $prod) {

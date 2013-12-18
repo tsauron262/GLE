@@ -1025,8 +1025,11 @@ class Contrat extends CommonObject
 				$result=$this->update_statut($user);
 				if ($result > 0)
 				{
-					$this->db->commit();
-					return 1;
+                                    /*Mod drsi retourne id */
+                                    $id = $this->db->last_insert_id(MAIN_DB_PREFIX . "contratdet");
+                                    $this->db->commit();
+                                    return $id;
+                                    /* fmod drsi */
 				}
 				else
 				{

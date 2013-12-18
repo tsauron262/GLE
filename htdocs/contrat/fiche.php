@@ -82,6 +82,11 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
         $object->fetch_lines();
         $contratSyn = new Synopsis_Contrat($db);
         $contratSyn->fetch($object->id);
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'renouvSimple') {
+            $id = $contratSyn->renouvellementSimple($user);
+            header('location: fiche.php?id=' . $id);
+        }
+        
         if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
 //    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($object->typeContrat == 6 || $object->typeContrat == 5)) {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
@@ -1738,15 +1743,25 @@ if ($action == 'create') {
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
     if (isset($_REQUEST["id"])) {
-// Send
+        // Renouve simple
         print "<br/>";
+        print '<div class="inline-block divButAction">';
         if ($object->statut == 1 || $object->statut == 2) {
-            print "<br/>";
-            if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
-                print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
-            } else
-                print '<div class="inline-block divButAction"><a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a></div>';
+//            print "<br/>";
+            if ($user->rights->synopsiscontrat->renouveller)
+                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
         }
+        
+        
+        // Send
+        if ($object->statut == 1 || $object->statut == 2) {
+//            print "<br/>";
+            if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
+                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a>';
+            } else
+                print '<a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a>';
+        }
+        print '</div><br/><br/><br/><br/>';
 
 
 

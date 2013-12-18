@@ -115,6 +115,7 @@ class Synopsis_Contrat extends Contrat {
             }
         }
 //        $this->activeAllLigne();
+         if ($this->commId > 0)
         addElementElement("commande", "contrat", $this->commId, $this->id);
     }
 

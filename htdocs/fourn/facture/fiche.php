@@ -1246,8 +1246,7 @@ if ($action == 'create')
                 print '<td><input size="50" name="label'.$i.'" value="'.$value_label.'" type="text"></td>';
                 print '<td align="right"><input type="text" size="8" name="amount'.$i.'" value="'.$value_pu.'"></td>';
                 print '<td align="right">';
-//                print $form->load_tva('tauxtva'.$i,$value_tauxtva,$societe,$mysoc);
-                print $form->load_tva("tva_tx",-1,$mysoc,'');
+                print $form->load_tva('tauxtva'.$i,$value_tauxtva,$societe,$mysoc);
                 print '</td>';
                 print '<td align="right"><input type="text" size="3" name="qty'.$i.'" value="'.$value_qty.'"></td>';
                 print '<td align="right"><input type="text" size="8" name="amountttc'.$i.'" value=""></td></tr>';

@@ -1107,7 +1107,8 @@ EOF;
         // VAT
         print '<tr><th class="ui-widget-header ui-state-default"  width="20%">' . $langs->trans("VATRate") . '</th>
                    <td class="ui-widget-content" >';
-        $html->select_tva("tva_tx", $conf->defaulttx, $mysoc, '');
+//        $html->select_tva("tva_tx", $conf->defaulttx, $mysoc, '');
+        print $form->load_tva("tva_tx",-1,$mysoc,'');
         print '</td></tr>';
 
         print '</table>';

@@ -28,8 +28,10 @@
  */
 
 require '../main.inc.php';
-require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/fiche.php';
-die;
+if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE)){
+    require DOL_DOCUMENT_ROOT.'/Synopsis_Tools/product/fiche.php';
+    die;
+}
 
 
 

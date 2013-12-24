@@ -115,8 +115,8 @@ class Synopsis_Contrat extends Contrat {
             }
         }
 //        $this->activeAllLigne();
-         if ($this->commId > 0)
-        addElementElement("commande", "contrat", $this->commId, $this->id);
+        if ($this->commId > 0)
+            addElementElement("commande", "contrat", $this->commId, $this->id);
     }
 
     public function setExtraParametersSimple($extra = "") {
@@ -1043,12 +1043,32 @@ class Synopsis_Contrat extends Contrat {
                 echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;
         }
         if ($ligne->GMAO_Mixte['SLA'] != "") {
-            echo "</td><td>";
-            echo "SLA : ";
-            echo $ligne->GMAO_Mixte['SLA'];
+            
+        echo "</td><td>";
+        echo "SLA : ";
+        echo $this->transSla($ligne->GMAO_Mixte['SLA']);
         }
         echo "</td></tr>";
         echo "</table>";
+    }
+
+    private function transSla($sla) {
+        $logoSla = "";
+        $intSla = 0;
+        if (stripos($sla, "4") !== false)
+            $intSla = 4;
+        elseif (stripos($sla, "2") !== false)
+            $intSla = 2;
+        elseif (stripos($sla, "6") !== false)
+            $intSla = 6;
+        elseif (stripos($sla, "8") !== false)
+            $intSla = 8;
+        if ($intSla > 0) {
+            $sla = $intSla . "h";
+            $logoSla = '<img title="' .$sla . '" alt="SLA" style="vertical-align: middle;" src="'. DOL_URL_ROOT.'/Synopsis_Contrat/img/logoSLA' . $intSla . '.jpg"/>';
+        } else
+            $logoSla = $sla;
+        return $logoSla;
     }
 
     function display1Line($object, $objL) {

@@ -40,6 +40,8 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 
 print" <br/><br/><a href='../Synopsis_Tools/agenda/vue.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Agenda</span></a>";
 
+print" <br/><br/><a href='../Synopsis_Tools/connect.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Connect</span></a>";
+
 
 llxFooter();
 ?>

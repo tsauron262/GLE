@@ -175,11 +175,11 @@ class synopsisHook {
         $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
-        
-        
-            $return .= '<script type="text/javascript">'
-                    . 'var idPagePrinc = "'.$_SESSION['pagePrinc'].'";'
-            . '</script>';
+
+
+        $return .= '<script type="text/javascript">'
+                . 'var idPagePrinc = "' . $_SESSION['pagePrinc'] . '";'
+                . '</script>';
         $nameFile = DOL_DATA_ROOT . "/special.css";
         if (is_file($nameFile)) {
             $css = file_get_contents($nameFile);
@@ -196,21 +196,23 @@ class synopsisHook {
                 dashboard::getDashboard();
             }
         }
-        
+
         echo "</div>";
-        
+
         echo "<div class='notificationText'></div><div class='notificationObj'></div>";
-        
+
         $time = (microtime(true) - self::$timeDeb);
         if ($time > 4 && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4);
         echo "<span class='timePage'>" . $time . " s</span>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
-        echo "<br/>";
+        if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
+            echo "<br/>";
+            echo "<br/>";
+            echo "<br/>";
+            echo "<br/>";
+            echo "<br/>";
+            echo "<br/>";
+        }
     }
 
     public static function getObj($type) {
@@ -548,8 +550,7 @@ class Synopsis_Commande extends Commande {
 //            $this->lines = array_merge($this->lines, $commande->lines);
             }
             $this->lines = $lines;
-        }
-        else
+        } else
             $this->fetch_lines($only_product);
         return true;
 //        return $this->fetch_lines($only_product);
@@ -578,7 +579,7 @@ class Synopsis_Commande extends Commande {
             $result.=($linkstart . img_object($label, $picto) . $linkend);
         if ($withpicto && $withpicto != 2)
             $result.=' ';
-        $connect = pictoConnect("commande",$this->id,$this->ref);
+//        $connect = pictoConnect("commande",$this->id,$this->ref);
         $result.=$linkstart . $this->ref . $linkend . $connect;
         return $result;
     }

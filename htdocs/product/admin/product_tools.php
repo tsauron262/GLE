@@ -107,7 +107,7 @@ if ($action == 'convert')
 						$newlevel=$level;
 
 						//print "$objectstatic->id $newprice, $price_base_type, $newvat, $newminprice, $newlevel, $newnpr<br>\n";
-						$retm=$objectstatic->updatePrice($newprice, $price_base_type, $user, $newvat, $newminprice, $newlevel, $newnpr);
+						$retm=$objectstatic->updatePrice(/*mod drsi */$obj->rowid, /*f mod drsi*/$newprice, $price_base_type, $user, $newvat, $newminprice, $newlevel, $newnpr);
 						if ($retm < 0)
 						{
 							$error++;

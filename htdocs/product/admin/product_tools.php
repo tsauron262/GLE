@@ -136,7 +136,7 @@ if ($action == 'convert')
 					if (! empty($price_base_type) && ! $updatelevel1)
 					{
 						//print "$objectstatic->id $newprice, $price_base_type, $newvat, $newminprice, $newlevel, $newnpr<br>\n";
-						$ret=$objectstatic->updatePrice($newprice, $price_base_type, $user, $newvat, $newminprice, $newlevel, $newnpr);
+						$ret=$objectstatic->updatePrice(/*mod drsi */$obj->rowid, /*f mod drsi*/$newprice, $price_base_type, $user, $newvat, $newminprice, $newlevel, $newnpr);
 					}
 
 					if ($ret < 0 || $retm < 0) $error++;

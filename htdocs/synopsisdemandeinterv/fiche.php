@@ -221,7 +221,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $synopsisdemandeinterv->id = $_REQUEST["id"];
     $synopsisdemandeinterv->fetch($_REQUEST["id"]);
     require_once(DOL_DOCUMENT_ROOT . "/fichinter/class/fichinter.class.php");
-    $fichinter = new Fichinter($db);
+    $fichinter = new Synopsisfichinter($db);
 
     $fichinter->date = $synopsisdemandeinterv->date;
     $fichinter->socid = $synopsisdemandeinterv->socid;
@@ -314,7 +314,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             }
             header('Location: ' . DOL_URL_ROOT . '/fichinter/fiche.php?id=' . $result);
         } else {
-            $mesg = '<div class="error ui-state-error">' . $fichinter->error . '</div>';
+            $mesg = '<div class="error ui-state-error">Impossible de créer la FI' . $fichinter->error . '</div>';
         }
     }
 }

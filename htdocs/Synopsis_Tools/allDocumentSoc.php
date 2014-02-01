@@ -198,11 +198,11 @@ if ($object->id) {
 
 
     /* Modif drsi */
-
+    
     $tabElement = array(
         'facture',
         'commande',
-        array('contract', 'contrat', 'contracts'),
+        array('contrat', 'contrat', 'synopsiscontrat', 'au contrat'),
         array('synopsisdemandeinterv', 'synopsisdemandeinterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
         array('synopsisficheinter', 'fichinter', 'synopsisficheinter', 'Fiche Inter'),
@@ -230,7 +230,7 @@ if ($object->id) {
             $sql2 = 'SELECT c.*';
             $sql2.= ' FROM ' . MAIN_DB_PREFIX . $nomTab . ' as c';
             $sql2.= ' WHERE c.fk_soc = ' . $object->id;
-
+            
             $resql2 = $db->query($sql2);
             if (!$resql2)
                 die($sql2);
@@ -238,7 +238,7 @@ if ($object->id) {
             while ($result = $db->fetch_object($resql2)) {
                 if ($typeElem == "facture")
                     $result->ref = $result->facnumber;
-
+                $result->ref = str_replace("/", "_", $result->ref);
                 $upload_dir2 = $dolibarr_main_data_root ."/". $nomDossier . "/" . $result->ref;
                 $filearray = dol_dir_list($upload_dir2, "all", 1, '', '', 'name', null, 1);
 

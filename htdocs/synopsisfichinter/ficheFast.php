@@ -395,8 +395,9 @@ if ($_REQUEST["id"] > 0) {
     }
 }
 
-print <<<EOF
+print "
 <script>
+    nbPresta = " . $nbPrest . ";
 jQuery(document).ready(function(){
     jQuery('.datePicker').datepicker({
         dateFormat: 'dd/mm/yy',
@@ -405,11 +406,10 @@ jQuery(document).ready(function(){
         changeYear: true,
         showButtonPanel: true,
         constrainInput: true,
-        gotoCurrent: true,showTime: false,        onSelect: function(dateText, inst) {            jQuery("#liv_day").val(inst.selectedDay);            jQuery("#liv_month").val(inst.selectedMonth + 1);            jQuery("#liv_year").val(inst.selectedYear);        }
+        gotoCurrent: true,showTime: false,        onSelect: function(dateText, inst) {            jQuery('#liv_day').val(inst.selectedDay);            jQuery('#liv_month').val(inst.selectedMonth + 1);            jQuery('#liv_year').val(inst.selectedYear);        }
     });
 });
-</script>
-EOF;
+</script>";
 
 
 

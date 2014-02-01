@@ -8,7 +8,6 @@ function initPresta() {
     });
 }
 jQuery(document).ready(function() {
-    nbPresta = ' . $nbPrest . ';
     initPresta();
     jQuery("#ajPresta").click(function() {
         nbPresta++;
@@ -34,9 +33,12 @@ function autoSave() {
     jQuery("*").keypress(function() {
         initTimeSave();
     });
+    enreg = false;
     function boucleSave() {
-        if (new Date().getTime() > timeMax)
+        if (new Date().getTime() > timeMax && enreg == false){
+            enreg = true;
             jQuery("form.formFast").submit();
+        }
         setTimeout(function() {
             boucleSave();
         }, 1000);

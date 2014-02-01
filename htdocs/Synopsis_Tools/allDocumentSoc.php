@@ -202,10 +202,10 @@ if ($object->id) {
     $tabElement = array(
         'facture',
         'commande',
-        array('contrat', 'contrat', 'synopsiscontrat', 'au contrat'),
+        array('synopsiscontrat', 'contrat', 'synopsiscontrat', 'au contrat'),
         array('synopsisdemandeinterv', 'synopsisdemandeinterv', 'synopsisdemandeinterv', 'Demande Inter'),
         'fichinter',
-        array('synopsisficheinter', 'fichinter', 'synopsisficheinter', 'Fiche Inter'),
+        array('ficheinter', 'fichinter', 'ficheinter', 'Fiche Inter'),
         array('synopsisprojet', 'Synopsis_projet', 'synopsisprojet', 'au Projet'),
         array('propal', 'propal', 'propale'),
         array('expedition', 'expedition', 'expedition/sending', 'à l\'expedition')

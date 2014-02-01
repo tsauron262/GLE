@@ -529,7 +529,7 @@ function genererDoc($db) {
         $outputlangs->setDefaultLang($_REQUEST['lang_id']);
     }
 
-    $result = fichinter_create($db, $fichinter, $_REQUEST['model'], $outputlangs);
+    $result = fichinter_create($db, $fichinter, "BIMP", $outputlangs);
     if ($result <= 0) {
         dol_print_error($db, $result);
         exit;

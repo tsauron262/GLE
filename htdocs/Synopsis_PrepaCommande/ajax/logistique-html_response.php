@@ -429,8 +429,8 @@ function displayLigneBouton($user, $com, $id = '') {
                         <td colspan=5 align=center>
                         <button id='logistique1" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; oui</button>
                         <button id='logistique2" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Tout &agrave; non</button>
-                        <button id='logistique3" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Valider</button>
                         <button id='logistique4" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Modifier</button>
+                        <br/><br/><button id='logistique3" . $id . "' class='butAction ui-corner-all ui-widget-header ui-state-default'>Validation</button>
                       </td></tr>";
         } else {
             print "<tr class='ui-widget-header'>

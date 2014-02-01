@@ -118,9 +118,8 @@ function cacherDecacherPRDV() {
 
 function cacherDecacherProd() {
     $(".fk_typeinterv").each(function() {
-        alert("select[name='" + $(this).attr("name").replace("fk_typeinterv", "fk_prod") + "']");
         select = $("select[name='" + $(this).attr("name").replace("fk_typeinterv", "fk_prod") + "']");
-        if ($(this).val() == 2)
+        if ($(this).val() == "2")
             select.hide();
         else
             select.show();

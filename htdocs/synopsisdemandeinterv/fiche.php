@@ -227,7 +227,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $fichinter->socid = $synopsisdemandeinterv->socid;
     $fichinter->duree = $synopsisdemandeinterv->duree;
     $fichinter->projet_id = $synopsisdemandeinterv->projetidp;
-    $fichinter->author = $user->id;
+    $fichinter->author = $synopsisdemandeinterv->fk_user_prisencharge;
     $fichinter->description = $synopsisdemandeinterv->description;
     $fichinter->modelpdf = $conf->global->FICHEINTER_ADDON_PDF;
     $fichinter->fk_di = $synopsisdemandeinterv->id;

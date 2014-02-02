@@ -694,7 +694,9 @@ if ($id > 0)
 
 				print "<tr ".$bc[$var].">";
 				print '<td class="nowrap"><a href="'.DOL_URL_ROOT.'/fichinter/fiche.php?id='.$objp->id.'">'.img_object($langs->trans("ShowPropal"),"propal").' '.$objp->ref.'</a></td>'."\n";
-                //print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->startdate)).'</td>'."\n";
+                                /* Mod drsi */
+                print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->startdate), 'day').'</td>'."\n";
+                                /*f Mod drsi */
 				print '<td align="right" width="120">'.convertSecondToTime($objp->duration).'</td>'."\n";
 				print '<td align="right" width="100">'.$fichinter_static->getLibStatut(5).'</td>'."\n";
 				print '</tr>';

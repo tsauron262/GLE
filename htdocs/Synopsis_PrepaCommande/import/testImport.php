@@ -441,7 +441,7 @@ if (is_dir($dir)) {
                         break;
                     }
 
-                    if (strpos($val["PcvCode"], "CL") !== false)//C'est une commande
+                    if (strpos($val["PcvCode"], "CL") !== false || strpos($val["PcvCode"], "CB") !== false)//C'est une commande
                         $typeLigne = "commande";
                     else
                         $typeLigne = "propal";

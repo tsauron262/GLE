@@ -248,9 +248,12 @@ function traiteScroll(heightDif) {
             
             //Test
             if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
-                initScroll();
+                scrollY = initScroll();
             
+//            if(!window.chrome)
             $(elem).scrollTop(scrollY);
+//        else
+//            alert("chrome");
         }
     }
 }

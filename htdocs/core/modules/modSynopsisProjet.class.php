@@ -147,11 +147,11 @@ class modSynopsisProjet extends DolibarrModules {
         $this->rights[7][3] = 1; // La permission est-elle une permission par defaut
         $this->rights[7][4] = 'caImput';
 
-        $this->rights[7][0] = 49; // id de la permission
-        $this->rights[7][1] = 'Modifier les projets/taches des autres'; // libelle de la permission
-        $this->rights[7][2] = 'c'; // type de la permission (deprecie a ce jour)
-        $this->rights[7][3] = 0; // La permission est-elle une permission par defaut
-        $this->rights[7][4] = 'modAll';
+        $this->rights[8][0] = 49; // id de la permission
+        $this->rights[8][1] = 'Modifier les projets/taches des autres'; // libelle de la permission
+        $this->rights[8][2] = 'c'; // type de la permission (deprecie a ce jour)
+        $this->rights[8][3] = 0; // La permission est-elle une permission par defaut
+        $this->rights[8][4] = 'modAll';
 
 
 

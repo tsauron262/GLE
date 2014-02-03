@@ -543,7 +543,7 @@ while ($res = $db->fetch_object($sql)) {
     $res1 = $db->fetch_object($sql1);
 
     $prevue = round(intval($res1->sumTps) / 36) / 100;
-
+    $realiser = getSumHeure($res->tid);
 
     if ($grandType == 1) {
 //        $requete2 = "SELECT sum(task_duration_effective) as sumTps
@@ -556,11 +556,12 @@ while ($res = $db->fetch_object($sql)) {
 //        $totalLigne = round(intval($res2->sumTps) / 36) / 100;
 
 
-        $totalLigne = getSumHeure($res->tid, null, $userId);
+        $totalLigne = getSumHeure($res->tid, $userId);
         $restant = $prevue - $totalLigne;
+        
     } elseif ($grandType == 3) {
         $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
-        $pourcAvenc = getSumHeure($res->tid, $prevue, $userId) / $prevue * 100;
+        $pourcAvenc = getSumHeure($res->tid, $userId) / $prevue * 100;
         $totalLigne = $pourcHeure - $pourcAvenc;
         $restant = "n/c";
     } else {
@@ -605,7 +606,7 @@ while ($res = $db->fetch_object($sql)) {
 //    die("lll".$proj->getStatsDuration() / 3600);
     $pourcTache = ($proj->getStatsDuration() > 0) ? $prevue / ($proj->getStatsDuration() / 3600) : 0;
     $prixTot = $prixTot * $pourcTache;
-    global $prevue, $prixTot;
+    global $prevue, $prixTot, $realiser;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
 //    $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 
@@ -630,10 +631,10 @@ while ($res = $db->fetch_object($sql)) {
         else
             $tmpDate2 = strtotime(date('Y-m-d', $tmpDate) . ' 23:59:59');
         if ($grandType == 1)
-            $nbHeure = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
+            $nbHeure = getSumHeure($res->tid, $userId, $tmpDate, $tmpDate2);
         elseif ($grandType == 3) {
             $pourcHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
-            $pourcAvenc = getSumHeure($res->tid, $prevue, $userId, $tmpDate, $tmpDate2) / $prevue * 100;
+            $pourcAvenc = getSumHeure($res->tid, $userId, $tmpDate, $tmpDate2) / $prevue * 100;
             if ($pourcAvenc > 0 || $pourcHeure > 0) {
                 if ($modVal != 3)
                     $tousVide = false;
@@ -819,15 +820,19 @@ print "</table>";
 llxFooter("<em>Derni&egrave;re modification </em>");
 
 function toAffiche($val, $unite = true) {
-    global $prevue, $prixTot, $modVal, $grandType;
+    global $prevue, $prixTot, $modVal, $grandType, $realiser;
 
     if ($val === "n/c")
         return '';
 
 
     if ($grandType == 1) {
-        if ($modVal == 3)
-            $val = $prixTot * $val / $prevue;
+        if($prevue <= 0)
+            $val = 0;
+        elseif ($modVal == 3){
+            $tot = ($realiser > $prevue)? $realiser : $prevue;
+            $val = $val / $tot * $prixTot;
+        }
         elseif ($modVal == 2)
             $val = $val / $prevue * 100;
     }
@@ -851,7 +856,7 @@ function getUnite($val) {
         return $val . " %";
 }
 
-function getSumHeure($fk_task, $prevue, $userId = -2, $tmpDate = null, $tmpDate2 = null) {
+function getSumHeure($fk_task, $userId = -2, $tmpDate = null, $tmpDate2 = null) {
     global $db;
     $requete = "SELECT sum(task_duration_effective / 3600) as task_duration_effective
                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective as e

@@ -1,16 +1,16 @@
 $(window).load(function() {
     heightDif = $(".fiche").innerHeight() - $(".tabBar").height(); //hauteur du rest (ne change pas
-    if ($("div.tmenudiv").is(':visible')) {
-        $(window).resize(function() {
-            traiteScroll(heightDif);
-        });
-        $("a").click(function() {
-            setTimeout(function() {
-                traiteScroll(heightDif);
-            }, 100);
-        });
-        traiteScroll(heightDif);
-    }
+//    if ($("div.tmenudiv").is(':visible')) {
+//        $(window).resize(function() {
+//            traiteScroll(heightDif);
+//        });
+//        $("a").click(function() {
+//            setTimeout(function() {
+//                traiteScroll(heightDif);
+//            }, 100);
+//        });
+//        traiteScroll(heightDif);
+//    }
 
     $("#mainmenua_SynopsisTools.tmenudisabled").parent().parent().hide();
 
@@ -198,7 +198,7 @@ function initScroll() {
 
 function traiteScroll(heightDif) {
     scrollY = initScroll();
-    //    alert("ee");
+        alert(scrollY);
     hauteurMenu = parseInt($("div.vmenu").innerHeight()) + parseInt($("#tmenu_tooltip").innerHeight()) + 30;
     height = parseInt(window.innerHeight);
     width = parseInt(window.innerWidth);
@@ -241,8 +241,12 @@ function traiteScroll(heightDif) {
             $(elem).height(newTaille - padding);
             $(elem).width($(elem).width() - 20);
             $(elem).css("padding-right", (oldPadding + 15) + "px");
-            $(elem).scrollTop(scrollY-hauteurMenu);
-
+            if(scrollY > 200)
+                scrollY = scrollY - 880;
+            $(elem).scrollTop(scrollY);
+//            
+//            alert(scrollY);
+            
             //Test
             if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
                 initScroll();
@@ -730,6 +734,7 @@ function initFormChrono() {
         $(this).parent().find(".chronoForm").hide();
         $(this).click(function() {
             $(this).parent().find(".chronoForm").show();
+            $(this).parent().find(".hide").removeClass("hide");
             $(this).remove();
         });
     });

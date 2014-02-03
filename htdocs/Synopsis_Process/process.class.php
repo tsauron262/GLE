@@ -2443,12 +2443,13 @@ class lien extends formulaireSource {
         print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElement . '"/>';
         print '<input type="hidden" name="targetid" class="targetid" value="' . $this->idChrono . '"/>';
         print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
+        print '<div class="hide">';
         $this->getValues();
         print '<select class ="chronoForm">';
         foreach ($this->valuesArr as $id => $val)
             print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
         print '</select>';
-        print '</div>';
+        print '</div></div>';
     }
 
     function displayValue() {

@@ -1210,8 +1210,9 @@ if ($action == 'create') {
         print '<table class="notopnoleft allwidth">'; // Array with (n*2)+1 lines
         $cursorline = 1;
         while ($cursorline <= $nbofservices) {
-            print '<tr height="16" ' . $bc[false] . /*deb mod drsi pour scroll en modif*/'id="' . $object->lines[$cursorline - 1]->id .'"'./*f mod drsi*/ '>';
+            print '<tr height="16" ' . $bc[false] .  '>';
             print '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
+            /*deb mod drsi pour scroll en modif*/ print '<div id="' . $object->lines[$cursorline - 1]->id .'"></div>';/*f mod drsi*/
             print $langs->trans("ServiceNb", $cursorline) . '</td>';
 
             print '<td class="tab" style="border-right: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';" rowspan="2">';

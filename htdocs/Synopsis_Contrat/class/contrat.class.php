@@ -1836,7 +1836,7 @@ class Synopsis_Contrat extends Contrat {
         $html = "";
         $js = "";
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
-            $html .= '<div id="addDialog" class="ui-state-default ui-corner-all" style="">';
+            $html .= '<div id="addDialog" class="hide ui-state-default ui-corner-all" style="">';
             $tab = $this->displayDialog('add', $mysoc, $objp);
             $html .= $tab[0];
             $js .= $tab[1];
@@ -1844,10 +1844,10 @@ class Synopsis_Contrat extends Contrat {
         }
 
         if ($user->rights->contrat->supprimer && ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED))) {
-            $html .= '<div id="delDialog"><span id="delDialog-content"></span></div>';
+            $html .= '<div id="delDialog" class="hide"><span id="delDialog-content"></span></div>';
         }
         if ($user->rights->contrat->creer || ($this->statut == 0 || ($this->statut == 1 && isset($conf->global->CONTRAT_EDITWHENVALIDATED) && $conf->global->CONTRAT_EDITWHENVALIDATED) )) {
-            $html .= '<div id="modDialog"><span id="modDialog-content">';
+            $html .= '<div id="modDialog" class="hide"><span id="modDialog-content">';
             $tab = $this->displayDialog('mod', $mysoc, $objp);
             $html .= $tab[0];
             $js .= $tab[1];

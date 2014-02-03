@@ -148,6 +148,7 @@ class InterfaceNotificationUser {
                         $tabMail[] = $result2->email;
                     $to .= implode(',', $tabMail);
                 }
+                die($to.$sujet.$message);
                 mailSyn($to, $sujet, $message);
             }
         }

@@ -308,7 +308,7 @@ EOF;
         print '<table class="liste" width="100%">';
         $arrGrpTmp = $commande->listGroupMember();
 
-        $sql = "SELECT cd.fk_product, cd.description, cd.price, sum(cd.qty) as qty, cd.rowid, cd.tva_tx, cd.subprice";
+        $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty as qty, cd.rowid, cd.tva_tx, cd.subprice";
         $sql.= " FROM " . MAIN_DB_PREFIX . "commandedet as cd ";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON cd.fk_product = p.rowid";
         if ($arrGrpTmp) {
@@ -320,7 +320,7 @@ EOF;
             $sql.= " WHERE cd.fk_commande = " . $commande->id;
         }
         $sql.= " AND p.fk_product_type = 0 ";
-        $sql.= " GROUP BY cd.fk_product";
+//        $sql.= " GROUP BY cd.fk_product";
         $sql.= " ORDER BY cd.rowid";
 
         $resql = $db->query($sql);

@@ -241,6 +241,7 @@ function traiteScroll(heightDif) {
             $(elem).height(newTaille - padding);
             $(elem).width($(elem).width() - 20);
             $(elem).css("padding-right", (oldPadding + 15) + "px");
+            $(elem).scrollTop(scrollY-hauteurMenu);
 
             //Test
             if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)

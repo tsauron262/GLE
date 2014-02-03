@@ -1210,7 +1210,7 @@ if ($action == 'create') {
         print '<table class="notopnoleft allwidth">'; // Array with (n*2)+1 lines
         $cursorline = 1;
         while ($cursorline <= $nbofservices) {
-            print '<tr height="16" ' . $bc[false] . '>';
+            print '<tr height="16" ' . $bc[false] . /*deb mod drsi pour scroll en modif*/'id="' . $object->lines[$cursorline - 1]->id .'"'./*f mod drsi*/ '>';
             print '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
             print $langs->trans("ServiceNb", $cursorline) . '</td>';
 
@@ -1293,7 +1293,7 @@ if ($action == 'create') {
                         print '&nbsp;';
                     }
                     if ($user->rights->contrat->creer && ($object->statut >= 0)) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . /*deb mod drsi pour scroll en modif*/'#' . $objp->rowid ./*f mod drsi*/ '">';
                         print img_edit();
                         print '</a>';
                     } else {

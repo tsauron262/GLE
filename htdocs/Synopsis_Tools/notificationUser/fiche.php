@@ -8,9 +8,9 @@ global $tabContactPlus;
 
 if (isset($_REQUEST['saveForm'])) {
     if (isset($_REQUEST['id']) && $_REQUEST['id'] > 0)
-        $req = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Tools_notificationUser SET fk_type_contact = " . $_REQUEST['typeContact'] . ", fk_trigger = " . $_REQUEST['fk_trigger'] . ", sujet = '" . $_REQUEST['sujet'] . "', message = '" . $_REQUEST['text'] . "', mailTo = '" . $_REQUEST['mailTo'] . "' WHERE rowid = " . $_REQUEST['id'];
+        $req = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Tools_notificationUser SET fk_type_contact = " . $_REQUEST['typeContact'] . ", fk_trigger = " . $_REQUEST['fk_trigger'] . ", sujet = '" . addslashes($_REQUEST['sujet']) . "', message = '" . addslashes($_REQUEST['text']) . "', mailTo = '" . addslashes($_REQUEST['mailTo']) . "' WHERE rowid = " . $_REQUEST['id'];
     else
-        $req = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Tools_notificationUser (fk_type_contact, fk_trigger, sujet, message, mailTo) VALUES (" . $_REQUEST['typeContact'] . "," . $_REQUEST['fk_trigger'] . ",'" . $_REQUEST['sujet'] . "','" . $_REQUEST['text'] . "','" . $_REQUEST['mailTo']."')";
+        $req = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Tools_notificationUser (fk_type_contact, fk_trigger, sujet, message, mailTo) VALUES (" . $_REQUEST['typeContact'] . "," . $_REQUEST['fk_trigger'] . ",'" . addslashes($_REQUEST['sujet']) . "','" . addslashes($_REQUEST['text']) . "','" . addslashes($_REQUEST['mailTo'])."')";
     if (!$db->query($req))
         die("Erreur : " . $req);
     header("Location: list.php");

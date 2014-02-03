@@ -1403,14 +1403,14 @@ if (is_dir($dir)) {
                          */
 
 
+                        $val['PlvQteUV'] = str_replace(",", ".", $val['PlvQteUV']);
                         if ($val['PlvQteUV'] < 0) {
                             $val['PlvQteUV'] = 0 - $val['PlvQteUV'];
                             $val['PlvPUNet'] = 0 - $val['PlvPUNet'];
                         }
-
                         $totalCom_ttc = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (1 + ( $val['TaxTaux'] / 100)));
                         $totalCom_tva = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (( $val['TaxTaux'] / 100)));
-
+//echo "lalalalalala".$totalCom_tva."|".$val['PlvQteUV'];
                         if ($comId) {
                             $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Ligne de commande</td>";
                             $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Ligne de commande</td>" . "\n";
@@ -1534,7 +1534,7 @@ if (is_dir($dir)) {
                                     if ($val['PlvCode'])
                                         $prodType = getProdType($val['PlvCode']);
                                     else
-                                        $prodType = 3;
+                                        $prodType = 5;
                                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
                                        (fk_commande,
                                         fk_product,

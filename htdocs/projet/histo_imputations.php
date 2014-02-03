@@ -95,7 +95,8 @@ $monthDur = 30;
 //Si format => monthly => debute le 1 du mois => doit determiner le nb de jour du mois
 if (($format == "weekly" || $format == "biweekly") && date('w', $date) != 1) {
     while (date('w', $date) != 1) {
-        $date -= 3600 * 24;
+//        $date -= 3600 * 24;
+        $date = strtotime("-1 day", $date);
     }
 } else if ($format == 'monthly' && date('j', $date) != 1) {
     $date = strtotime(date('Y', $date) . "-" . date('m', $date) . "-01");
@@ -440,9 +441,10 @@ if ($formatView == "month") {
             print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d', $tmpDate) . '</th>';
         else
             print '<th class="ui-state-hover ui-widget-header day_' . date('w', $tmpDate) . '">' . date('d/m', $tmpDate) . '</th>';
-        $tmpDate += 3600 * 24;
-        if(date('d/m', $tmpDate) == "04/10")
-                $tmpDate += 3600;
+//        $tmpDate += 3600 * 24;
+        $tmpDate = strtotime("+1 day", $tmpDate);
+//        if(date('d/m', $tmpDate) == "04/10")
+//                $tmpDate += 3600;
         $totalDay[$tmpDate] = 0;
     }
 }
@@ -465,7 +467,8 @@ if ($formatView == "month") {
     $arrJourFR = array(0 => "Dim", 1 => "Lun", 2 => "Mar", 3 => "Mer", 4 => "Jeu", 5 => "Ven", 6 => "Sam");
     for ($i = 0; $i < $arrNbJour[$format]; $i++) {
         print '<th class="ui-widget-header day_' . date('w', $tmpDate) . '">' . $arrJourFR[date('w', $tmpDate)] . '</th>';
-        $tmpDate += 3600 * 24;
+//        $tmpDate += 3600 * 24;
+        $tmpDate = strtotime("+1 day", $tmpDate);
     }
 }
 
@@ -663,7 +666,8 @@ while ($res = $db->fetch_object($sql)) {
         if ($formatView == "month")
             $tmpDate = $tmpDate2;
         else
-            $tmpDate += 3600 * 24;
+//            $tmpDate += 3600 * 24;
+        $tmpDate = strtotime("+1 day", $tmpDate);
         if ($nbHeure != 0 && toAffiche($nbHeure) != 0)
             $tousVide = false;
     }

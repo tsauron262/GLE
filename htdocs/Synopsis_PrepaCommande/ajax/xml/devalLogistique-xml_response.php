@@ -103,8 +103,8 @@ if ($sql) {
         $addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE . ", " . $conf->global->BIMP_MAIL_GESTPROD;
 
 
-        require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
-        sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
+//        require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
+        mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
     }
 } else {
     $xmlStr .= "<KO>KO</KO>";
@@ -119,18 +119,17 @@ print "<?xml version='1.0' encoding='utf-8'?$et\n";
 print $xmlStr;
 print "</ajax-response>";
 
-function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
-    global $mysoc;
-    global $langs;
-    $mail = new CMailFile($subject, $to, $from, $msg,
-                    $filename_list, $mimetype_list, $mimefilename_list,
-                    $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
-    $res = $mail->sendfile();
-    if ($res) {
-        return (1);
-    } else {
-        return -1;
-    }
-}
+//function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
+//    global $mysoc;
+//    global $langs;
+//    $mail = new CMailFile($subject, $to, $from, $msg,
+//                    $filename_list, $mimetype_list, $mimefilename_list,
+//                    $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
+//    if ($res) {
+//        return (1);
+//    } else {
+//        return -1;
+//    }
+//}
 
 ?>

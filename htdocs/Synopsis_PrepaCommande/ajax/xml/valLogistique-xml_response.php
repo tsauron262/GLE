@@ -104,8 +104,8 @@
       $addr_cc = $conf->global->BIMP_MAIL_GESTLOGISTIQUE.", ".$conf->global->BIMP_MAIL_GESTPROD;
 
 
-      require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
-      sendMail($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
+//      require_once(DOL_DOCUMENT_ROOT.'/core/class/CMailFile.class.php');
+      mailSyn2($subject,$to,$from,utf8_encodeRien($msg),array(),array(),array(),$addr_cc,'',0,1,$from);
     }
   } else {
       $xmlStr .= "<KO>KO</KO>";

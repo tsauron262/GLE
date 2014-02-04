@@ -797,38 +797,47 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
+function mailSyn2($subject,$to,$from,$msg,
+	$filename_list=array(),$mimetype_list=array(),$mimefilename_list=array(),
+	$addr_cc="",$addr_bcc="",$deliveryreceipt=0,$msgishtml=0,$errors_to='',$css=''){
     global $dolibarr_main_url_root;
-    $sujet = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $sujet);
-    $text = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $text);
+    $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+    $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
+    
+    if($from == '')
+        $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>';
     
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {
-        $text = "OrigineTo = " . $to . "\n\n" . $text;
-        $text = "OrigineCc = " . $ccAdmin . "\n\n" . $text;
-        $ccAdmin = '';
+        $msg = "OrigineTo = " . $to . "\n\n" . $msg;
+        $msg = "OrigineCc = " . $addr_cc . "\n\n" . $msg;
+        $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($cc != '')
-        $ccAdmin .= ", " . $cc;
+        $addr_cc = $ccAdmin.", " . $addr_cc;
     if (!isset($to) || $to == '') {
-        $text = "Pas de mail destinataire définit." . "\n\n" . $text;
+        $msg = "Pas de mail destinataire définit." . "\n\n" . $msg;
         $to = $toReplay;
     }
 //    if (!$headers) {
 //        $headers = 'MIME-Version: 1.0' . "\r\n";
 //        $headers .= 'Content-type: text/html; charset=iso-8859-1' . "\r\n";
 //        $headers .= 'From: Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>' . "\r\n";
-//        $headers .= 'Cc: ' . $ccAdmin . "\r\n";
+//        $headers .= 'Cc: ' . $addr_cc . "\r\n";
 //        $headers .= 'Reply-To: ' . $toReplay . "\r\n";
 //    }
-    $text = str_replace("\n", "<br/>", $text);
+    $msg = str_replace("\n", "<br/>", $msg);
     if (isset($to) && $to != '') {
-//        mail($to, $sujet, $text, $headers);
+//        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
-        $mailfile = new CMailFile($sujet, $to, 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>', $text, array(), array(), array(), $ccAdmin, "", 0, 1);
+        $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt);
         return $mailfile->sendfile();
     }
+}
+
+function mailSyn($to, $sujet, $text, $headers = null, $cc = '') {
+    mailSyn2($sujet, $to, '', $text, array(), array(), array(), $cc, "", 0, 1);
 }
 
 function utf8_encodeRien($str) {

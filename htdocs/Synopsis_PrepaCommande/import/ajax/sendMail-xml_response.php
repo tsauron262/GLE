@@ -28,7 +28,7 @@ if ($conf->global->BIMP_MAIL_TO ."x" == 'x' || $conf->global->BIMP_MAIL_FROM."x"
     $sql = $db->query($requete);
     $res = $db->fetch_object($sql);
 
-    $ret = sendMail('[Historique] Rapport d\'import',$conf->global->BIMP_MAIL_TO,$conf->global->BIMP_MAIL_FROM,$res->mailContent,
+    $ret = mailSyn2('[Historique] Rapport d\'import',$conf->global->BIMP_MAIL_TO,$conf->global->BIMP_MAIL_FROM,$res->mailContent,
              array(),array(),array(),
              ($conf->global->BIMP_MAIL_CC."x" == "x"?"":$conf->global->BIMP_MAIL_CC),
              ($conf->global->BIMP_MAIL_BCC."x" == "x"?"":$conf->global->BIMP_MAIL_BCC),

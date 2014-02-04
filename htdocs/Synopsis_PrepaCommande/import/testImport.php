@@ -1827,7 +1827,7 @@ if (!isset($conf->global->BIMP_MAIL_TO) || !isset($conf->global->BIMP_MAIL_FROM)
         $mailFileMimeNameArr[] = $val;
     }
 
-    sendMail('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "GLE <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
+    mailSyn2('Rapport d\'import', $conf->global->BIMP_MAIL_TO, "GLE <" . $conf->global->BIMP_MAIL_FROM . ">", $mailContent, $mailFileArr, $mailFileMimeArr, $mailFileMimeNameArr, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_CC), ($conf->global->BIMP_MAIL_BCC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_BCC), 0, 1, ($conf->global->BIMP_MAIL_CC . "x" == "x" ? "" : $conf->global->BIMP_MAIL_FROM));
 }
 
 

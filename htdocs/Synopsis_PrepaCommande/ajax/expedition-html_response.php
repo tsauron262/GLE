@@ -24,6 +24,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/order.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/sendings.lib.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/stock/class/entrepot.class.php");
 $msg = "";
+$GROUP_COMMANDE = true;
 
 if (isset($_REQUEST['nd']) && $_REQUEST['nd'] . "x" != "x" && isset($_REQUEST['action']) && $_REQUEST['action'] == "setDateLiv") {
     if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/', $_REQUEST['nd'], $arrRegEx)) {
@@ -86,10 +87,10 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
 
 //    require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
 //    $result = sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
-    
+
     $result = mailSyn($to, $subject, $msg);
-    if($result)
-        $msg = "Le mail a &eacute;t&eacute; envoy&eacute;".$to;
+    if ($result)
+        $msg = "Le mail a &eacute;t&eacute; envoy&eacute;" . $to;
     $tabExpe = getElementElement("commande", "shipping", $commande->id);
     $tabExp = array();
     foreach ($tabExpe as $elem)
@@ -306,19 +307,19 @@ EOF;
          * quantites livrees sont stockees dans $commande->expeditions[fk_product]
          */
         print '<table class="liste" width="100%">';
-        $arrGrpTmp = $commande->listGroupMember();
+        if ($GROUP_COMMANDE)
+            $arrGrpTmp = $commande->listGroupMember(false);
+        else
+            $arrGrpTmp = array($commande->id => $commande);
+
 
         $sql = "SELECT cd.fk_product, cd.description, cd.price, cd.qty as qty, cd.rowid, cd.tva_tx, cd.subprice";
         $sql.= " FROM " . MAIN_DB_PREFIX . "commandedet as cd ";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "product as p ON cd.fk_product = p.rowid";
-        if ($arrGrpTmp) {
-            $arrTmp = array();
-            foreach ($arrGrpTmp as $key => $val)
-                $arrTmp[] = $val->id;
-            $sql.= " WHERE cd.fk_commande IN (" . join(",", $arrTmp) . "," . $commande->id . ")";
-        } else {
-            $sql.= " WHERE cd.fk_commande = " . $commande->id;
-        }
+        $arrTmp = array();
+        foreach ($arrGrpTmp as $key => $val)
+            $arrTmp[] = $val->id;
+        $sql.= " WHERE cd.fk_commande IN (" . join(",", $arrTmp) . ")";
         $sql.= " AND p.fk_product_type = 0 ";
 //        $sql.= " GROUP BY cd.fk_product";
         $sql.= " ORDER BY cd.rowid";
@@ -367,7 +368,11 @@ EOF;
                 print '<td align="center">' . $objp->qty . '</td>';
 
                 print '<td align="center">';
-                $quantite_livree = $commande->expeditions[$objp->rowid];
+                $quantite_livree = 0;
+                foreach ($arrGrpTmp as $commT) {
+                    $commT->loadExpeditions(1);
+                    $quantite_livree += $commT->expeditions[$objp->rowid];
+                }
                 print $quantite_livree;
                 print '</td>';
 
@@ -405,69 +410,72 @@ EOF;
 //        print '</div>';
 
 
+        foreach ($arrGrpTmp as $key => $commande) {
 
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
+            if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
 
-            // Bouton expedier avec gestion des stocks
-            print "<br/>";
-            print '<table width="100%">';
+                // Bouton expedier avec gestion des stocks
+                print "<br/>";
+                print '<table width="100%">';
 
-            if ($conf->stock->enabled && isset($reste_a_livrer_total) && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer) {
-                print '<tr><td width="50%" colspan="2" valign="top">';
-                print_titre($langs->trans("NewSending"));
+                if ($conf->stock->enabled && isset($reste_a_livrer_total) && $reste_a_livrer_total > 0 && $commande->statut > 0 && $commande->statut < 3 && $user->rights->expedition->creer) {
+                    print '<tr><td width="50%" colspan="2" valign="top">';
+                    $langs->load("orders");
+                    print_titre($langs->trans("NewSending") . " " . $langs->trans("Order") . " " . $commande->getNomUrl(1));
 
-                print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/fiche.php">';
-                print '<input type="hidden" name="action" value="create">';
-                print '<input type="hidden" name="id" value="' . $commande->id . '">';
-                print '<input type="hidden" name="origin" value="commande">';
-                print '<input type="hidden" name="object_id" value="' . $commande->id . '">';
-                print '<table class="border" width="100%">';
+                    print '<form method="GET" action="' . DOL_URL_ROOT . '/expedition/fiche.php">';
+                    print '<input type="hidden" name="action" value="create">';
+                    print '<input type="hidden" name="id" value="' . $commande->id . '">';
+                    print '<input type="hidden" name="origin" value="commande">';
+                    print '<input type="hidden" name="object_id" value="' . $commande->id . '">';
+                    print '<table class="border" width="100%">';
 
-                $entrepot = new Entrepot($db);
-                $langs->load("stocks");
+                    $entrepot = new Entrepot($db);
+                    $langs->load("stocks");
 
-                print '<tr>';
-                print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Warehouse") . '</td>';
-                print '<td class="ui-widget-content">';
+                    print '<tr>';
+                    print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Warehouse") . '</td>';
+                    print '<td class="ui-widget-content">';
 
-                if (sizeof($entrepot->list_array()) === 1) {
-                    $uentrepot = array();
-                    $uentrepot[$user->entrepots[0]['id']] = $user->entrepots[0]['label'];
-                    print $html->selectarray("entrepot_id", $uentrepot);
-                } else {
-                    print $html->selectarray("entrepot_id", $entrepot->list_array());
+                    if (sizeof($entrepot->list_array()) === 1) {
+                        $uentrepot = array();
+                        $uentrepot[$user->entrepots[0]['id']] = $user->entrepots[0]['label'];
+                        print $html->selectarray("entrepot_id", $uentrepot);
+                    } else {
+                        print $html->selectarray("entrepot_id", $entrepot->list_array());
+                    }
+
+                    if (sizeof($entrepot->list_array()) <= 0) {
+                        print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="' . DOL_URL_ROOT . '/product/stock/fiche.php?action=create">definissez en un</a>';
+                    }
+                    print '</td></tr>';
+                    /*
+                      print '<tr><td width="20%">Mode d\'expedition</td>';
+                      print '<td>';
+                      print $html->selectarray("entrepot_id",$entrepot->list_array());
+                      print '</td></tr>';
+                     */
+
+                    print '<tr><td align="center" colspan="2"  class="ui-wiget-header ui-state-default">';
+                    print '<button style="padding: 5px 10px; width: 200px;"  class="butAction ui-corner-all ui-state-default ui-widget-header" named="save" value="' . $langs->trans("NewSending") . '">' . $langs->trans("NewSending") . '</button>';
+                    print '</td></tr>';
+
+                    print "</table>";
+                    print "</form>\n";
+
+                    $somethingshown = 1;
+                    print "</td></tr></table>";
                 }
-
-                if (sizeof($entrepot->list_array()) <= 0) {
-                    print ' &nbsp; Aucun entrep&ocirc;t d&eacute;finit, <a href="' . DOL_URL_ROOT . '/product/stock/fiche.php?action=create">definissez en un</a>';
-                }
-                print '</td></tr>';
-                /*
-                  print '<tr><td width="20%">Mode d\'expedition</td>';
-                  print '<td>';
-                  print $html->selectarray("entrepot_id",$entrepot->list_array());
-                  print '</td></tr>';
-                 */
-
-                print '<tr><td align="center" colspan="2"  class="ui-wiget-header ui-state-default">';
-                print '<button style="padding: 5px 10px; width: 200px;"  class="butAction ui-corner-all ui-state-default ui-widget-header" named="save" value="' . $langs->trans("NewSending") . '">' . $langs->trans("NewSending") . '</button>';
-                print '</td></tr>';
-
-                print "</table>";
-                print "</form>\n";
-
-                $somethingshown = 1;
-                print "</td></tr></table>";
             }
-        }
-        global $form;
-        $form = $html;
-        show_list_sending_receive('commande', $commande->id, '', false);
+            global $form;
+            $form = $html;
+            show_list_sending_receive('commande', $commande->id, '', false);
 //$origin='commande',$origin_id,$filter='',$display=true
-        if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-            print '<table cellpadding=10 class="border" width="100%">';
-            print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/fiche.php?action=create&origin=commande&object_id=' . $_REQUEST["id"] . '\'" class="butAction">Expedier</button><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/commande.php?id=' . $commande->id . '\'" class="butAction">Modifier</button>';
-            print '</table>';
+            if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
+                print '<table cellpadding=10 class="border" width="100%">';
+                print '<tr><td class="ui-widget-header" align="right"><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/fiche.php?action=create&origin=commande&object_id=' . $_REQUEST["id"] . '\'" class="butAction">Expedier</button><button onClick="location.href=\'' . DOL_URL_ROOT . '/expedition/commande.php?id=' . $commande->id . '\'" class="butAction">Modifier</button>';
+                print '</table>';
+            }
         }
     } else {
         /* Commande non trouvee */
@@ -478,9 +486,7 @@ EOF;
 function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
     global $mysoc;
     global $langs;
-    $mail = new CMailFile($subject, $to, $from, $msg,
-                    $filename_list, $mimetype_list, $mimefilename_list,
-                    $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
+    $mail = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
     $res = $mail->sendfile();
     if ($res) {
         return (1);

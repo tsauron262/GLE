@@ -811,6 +811,8 @@ $somethingshown = @$formfile->show_documents('imputations', $comref, $filedir . 
 
 
 print "</table>";
+global $logLongTime;
+$logLongTime = false;
 llxFooter("<em>Derni&egrave;re modification </em>");
 
 function toAffiche($val, $unite = true) {

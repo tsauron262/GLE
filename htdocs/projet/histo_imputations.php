@@ -520,6 +520,7 @@ $grandTotalRestant = 0;
 $grandTotalLigne = 0;
 $grandTotalLigne2 = 0;
 while ($res = $db->fetch_object($sql)) {
+    global $prevue, $prixTot, $realiser;
     $tousVide = true;
     $html = '';
     $bool = !$bool;
@@ -543,7 +544,7 @@ while ($res = $db->fetch_object($sql)) {
     $res1 = $db->fetch_object($sql1);
 
     $prevue = round(intval($res1->sumTps) / 36) / 100;
-    $realiser = getSumHeure($res->tid);
+    $realiser = getSumHeure($res->tid, $userId);
 
     if ($grandType == 1) {
 //        $requete2 = "SELECT sum(task_duration_effective) as sumTps
@@ -556,12 +557,12 @@ while ($res = $db->fetch_object($sql)) {
 //        $totalLigne = round(intval($res2->sumTps) / 36) / 100;
 
 
-        $totalLigne = getSumHeure($res->tid, $userId);
+        $totalLigne = $realiser;
         $restant = $prevue - $totalLigne;
         
     } elseif ($grandType == 3) {
         $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
-        $pourcAvenc = getSumHeure($res->tid, $userId) / $prevue * 100;
+        $pourcAvenc = $realiser / $prevue * 100;
         $totalLigne = $pourcHeure - $pourcAvenc;
         $restant = "n/c";
     } else {
@@ -606,7 +607,6 @@ while ($res = $db->fetch_object($sql)) {
 //    die("lll".$proj->getStatsDuration() / 3600);
     $pourcTache = ($proj->getStatsDuration() > 0) ? $prevue / ($proj->getStatsDuration() / 3600) : 0;
     $prixTot = $prixTot * $pourcTache;
-    global $prevue, $prixTot, $realiser;
     $hourPerDay = $conf->global->PROJECT_HOUR_PER_DAY;
 //    $totalLignePerDay = round(intval($res2->sumTps) / (36 * $hourPerDay)) / 100;
 

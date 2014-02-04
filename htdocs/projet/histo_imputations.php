@@ -14,7 +14,7 @@ $langs->load("project@projet");
 $userId = $user->id;
 
 
-if(!isset($_REQUEST['action']))
+if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
 
@@ -193,8 +193,7 @@ if ($_REQUEST['action'] == 'save') {
                                          VALUES (" . intval($newVal * 3600) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
                                 $sql1 = $db->query($requete);
                             }
-                        }
-                        else
+                        } else
                             $messErreur[] = "Plus de 9 h pour la journée " . date('Y-m-d H:i:s', $key1);
                     } elseif ($grandType == 2) {
 //                    echo "<pre>";print_r($_REQUEST);die;
@@ -223,8 +222,7 @@ if ($_REQUEST['action'] == 'save') {
                                          VALUES (" . intval($newVal) . ",'" . date('Y-m-d H:i:s', $key1) . "'," . $key . "," . $userId . ")";
                                 $sql1 = $db->query($requete);
                             }
-                        }
-                        else
+                        } else
                             $messErreur[] = "Plus de 100% pour la tache " . $res2->rowid;
                     }
                 }
@@ -237,7 +235,7 @@ if ($_REQUEST['action'] == 'save') {
             $sql = $db->query($requete);
             $res = $db->fetch_object($sql);
             $tot = $res->durEff;
-            if($tot <= 0)
+            if ($tot <= 0)
                 $tot = "0";
             $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET duration_effective = " . $tot . " WHERE rowid = " . $taskId;
             $sql = $db->query($requete);
@@ -539,7 +537,7 @@ while ($res = $db->fetch_object($sql)) {
                   FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
                  WHERE fk_task = " . $res->tid
             . (($userId != -2 && ($grandType == 1 || _IMPUT_POURC_MULTI_USER_)) ? " AND fk_user = $userId " : "");
-    
+
     $sql1 = $db->query($requete1);
     $res1 = $db->fetch_object($sql1);
 
@@ -559,7 +557,6 @@ while ($res = $db->fetch_object($sql)) {
 
         $totalLigne = $realiser;
         $restant = $prevue - $totalLigne;
-        
     } elseif ($grandType == 3) {
         $pourcHeure = getMoyPourc($res->tid, $prevue, $userId);
         $pourcAvenc = $realiser / $prevue * 100;
@@ -627,8 +624,7 @@ while ($res = $db->fetch_object($sql)) {
                 $tmpDate2 = strtotime(date('Y-', $tmpDate) . (date('m', $tmpDate) + 1) . date('-d', $tmpDate) . ' 00:00:00');
             else
                 $tmpDate2 = strtotime((date('Y', $tmpDate) + 1) . '-01' . date('-d', $tmpDate) . ' 00:00:00');
-        }
-        else
+        } else
             $tmpDate2 = strtotime(date('Y-m-d', $tmpDate) . ' 23:59:59');
         if ($grandType == 1)
             $nbHeure = getSumHeure($res->tid, $userId, $tmpDate, $tmpDate2);
@@ -639,11 +635,9 @@ while ($res = $db->fetch_object($sql)) {
                 if ($modVal != 3)
                     $tousVide = false;
                 $nbHeure = $pourcHeure - $pourcAvenc;
-            }
-            else
+            } else
                 $nbHeure = "n/c";
-        }
-        else
+        } else
             $nbHeure = getMoyPourc($res->tid, $prevue, $userId, $tmpDate, $tmpDate2);
 
 
@@ -668,7 +662,7 @@ while ($res = $db->fetch_object($sql)) {
             $tmpDate = $tmpDate2;
         else
 //            $tmpDate += 3600 * 24;
-        $tmpDate = strtotime("+1 day", $tmpDate);
+            $tmpDate = strtotime("+1 day", $tmpDate);
         if ($nbHeure != 0 && toAffiche($nbHeure) != 0)
             $tousVide = false;
     }
@@ -827,11 +821,15 @@ function toAffiche($val, $unite = true) {
 
 
     if ($grandType == 1) {
-        if($prevue <= 0)
+        if ($prevue <= 0)
             $val = 0;
-        elseif ($modVal == 3){
-            $tot = ($realiser > $prevue)? $realiser : $prevue;
-            $val = $val / $tot * $prixTot;
+        elseif ($modVal == 3) {
+            if ($val > 0) {
+                $tot = ($realiser > $prevue) ? $realiser : $prevue;
+                $val = $val / $tot * $prixTot;
+            }
+            else
+                $val = 0;
         }
         elseif ($modVal == 2)
             $val = $val / $prevue * 100;

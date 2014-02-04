@@ -75,7 +75,10 @@ else{
             $desc=$row->description;
             $fi->fetch($row->rowid);
             $userT = new User($db);
+            if($typeObj == "FI")
             $userT->fetch($row->fk_user_author);
+            else
+            $userT->fetch($row->fk_user_prisencharge);
             
             $responce->rows[$i]['id']=$row->rowid;
             $responce->rows[$i]['cell']=array($row->rowid,

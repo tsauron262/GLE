@@ -819,6 +819,7 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function delete($user) {
         global $conf, $user, $langs;
+        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
         $this->db->begin();
 

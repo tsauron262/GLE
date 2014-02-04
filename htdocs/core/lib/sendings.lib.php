@@ -196,6 +196,7 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
                         // Entrepot source
                         if (! empty($conf->stock->enabled))
                         {
+                            $langs->load('stocks');
                             print '<td align="center">'.$langs->trans("Warehouse").'</td>';
                         }
                         /*f mod drsi */

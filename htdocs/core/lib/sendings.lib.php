@@ -153,7 +153,7 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 	$product_static=new Product($db);
 	$expedition=new Expedition($db);
 
-	$sql = "SELECT obj.rowid, obj.fk_product, obj.label, obj.description, obj.product_type as fk_product_type, obj.qty as qty_asked, obj.date_start, obj.date_end";
+	$sql = "SELECT ed.fk_entrepot, obj.rowid, obj.fk_product, obj.label, obj.description, obj.product_type as fk_product_type, obj.qty as qty_asked, obj.date_start, obj.date_end";
 	$sql.= ", ed.qty as qty_shipped, ed.fk_expedition as expedition_id, ed.fk_origin_line";
 	$sql.= ", e.rowid as sendingid, e.ref as exp_ref, e.date_creation, e.date_delivery, e.date_expedition,";
 	//if ($conf->livraison_bon->enabled) $sql .= " l.rowid as livraison_id, l.ref as livraison_ref, l.date_delivery, ld.qty as qty_received,";
@@ -192,6 +192,13 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 			print '<td align="center">'.$langs->trans("DateCreation").'</td>';
 			print '<td align="center">'.$langs->trans("DateDeliveryPlanned").'</td>';
 			print '<td align="center">'.$langs->trans("QtyShipped").'</td>';
+                        /*Deb mod drsi entrepot dans liste*/
+                        // Entrepot source
+                        if (! empty($conf->stock->enabled))
+                        {
+                            print '<td align="center">'.$langs->trans("Warehouse").'</td>';
+                        }
+                        /*f mod drsi */
 			if ($conf->livraison_bon->enabled)
 			{
 				print '<td>'.$langs->trans("DeliveryOrder").'</td>';
@@ -327,7 +334,20 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 						print '<td>&nbsp;</td>';
 					}
 				}
-				print '</tr>';
+                                /*Deb mod drsi entrepot dans liste*/
+                                // Entrepot source
+                                if (! empty($conf->stock->enabled))
+                                {
+                                        print '<td align="left">';
+                                        if ($objp->fk_entrepot > 0)
+                                        {
+                                                $entrepot = new Entrepot($db);
+                                                $entrepot->fetch($objp->fk_entrepot);
+                                                print $entrepot->getNomUrl(1);
+                                        }
+                                        print '</td>';
+                                }
+                                /* f mod drsi */
 				$i++;
 			}
 

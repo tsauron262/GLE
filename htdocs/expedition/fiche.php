@@ -729,6 +729,9 @@ if ($action == 'create')
                 $product = new Product($db);
 
                 $line = $object->lines[$indiceAsked];
+                /* deb mod drsi */
+                $line->product_type = ($line->product_type == 0 && $line->fk_product_type == 0 ? 0 : 1);
+                /* f mod drsi */
                 $var=!$var;
 
                 // Show product and description

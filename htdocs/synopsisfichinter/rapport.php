@@ -77,15 +77,15 @@ $sortorder = "DESC";
 $sortfield = "f.datei";
 //}
 //if ($page == -1) { 
-$page = 0;
+$page = (isset($_REQUEST['page'])? $_REQUEST['page'] : 0);
 //}
-
+//die($conf->liste_limit);
 $limit = $conf->liste_limit;
-$offset = $limit * $page;
+$offset = $limit * ($page-0);
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-$sql = "SELECT s.nom,
+$sql1 = "SELECT s.nom,
             s.rowid as socid,
             f.description,
             f.ref,
@@ -94,7 +94,10 @@ $sql = "SELECT s.nom,
             f.fk_statut,
             f.duree,
 	    f.total_ht";
-$sql .= " FROM " . MAIN_DB_PREFIX . "societe as s,
+$sql2 = "SELECT SUM(f.duree) as duree,
+	    SUM(f.total_ht) as total,
+            COUNT(f.rowid) as nbLignes";
+$sql = " FROM " . MAIN_DB_PREFIX . "societe as s,
             " . MAIN_DB_PREFIX . "Synopsis_fichinter as f ";
 $sql .= " WHERE f.fk_soc = s.rowid";
 
@@ -159,8 +162,9 @@ if (isset($_GET['dateDeb']) && isset($_GET['dateFin']) && $_GET['dateDeb'] != ''
 if ($socid > 0) {
     $sql .= " AND fk_soc = " . $socid;
 }
-$sql .= " ORDER BY $sortfield $sortorder ";
 
+$sql2 = $sql2 . $sql;
+$sql1 = $sql1 . $sql . " ORDER BY $sortfield $sortorder  LIMIT $offset, $limit ";
 
 $requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
 $requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
@@ -202,12 +206,15 @@ while ($respre11 = $db->fetch_object($sqlpre11)) {
 $selectHtml2 .= "</select>";
 
 //TODO si selection société filtrer
-//print $sql;
-$resql = $db->query($sql);
+//print $sql1;
+$resql = $db->query($sql1);
+$resqlCount = $db->query($sql2);
 if ($resql) {
-    $num = $db->num_rows($resql);
-    $title = "Rapport d'activit&eacute; de " . utf8_decode(strftime("%B %Y", strtotime($start)));
-    print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $num);
+    $resultCount = $db->fetch_object($resqlCount);// / $limit;
+    $num = $resultCount->nbLignes;
+//    $num = 10;
+    $title = "Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start));
+    print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $offset+$limit+1, $num);
     print "<br/><br/>";
 
     echo "<div style='float: left;  margin-top:-18px; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
@@ -319,7 +326,9 @@ if ($resql) {
     }
     print "</table>";
 //    $db->free();
-    $durStr = convDur($DureeTotal);
+//    $durStr = convDur($DureeTotal);
+    $durStr = convDur($resultCount->duree);
+    $total_ht = $resultCount->total;
     if ($enJour)
         print "<br />" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm' . "  |  " . $total_ht . " &euro;";
     else

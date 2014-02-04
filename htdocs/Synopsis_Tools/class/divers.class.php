@@ -192,7 +192,7 @@ class synopsisHook {
         global $conf, $db, $logLongTime;
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISDASHBOARD)) {
-            if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php") !== false) {
+            if (stripos($_SERVER['REQUEST_URI'], DOL_URL_ROOT . "/index.php?mainmenu=home") !== false) {
                 dashboard::getDashboard();
             }
         }

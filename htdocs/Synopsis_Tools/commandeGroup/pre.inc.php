@@ -14,7 +14,9 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
   * GLE by Synopsis & DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -25,7 +27,8 @@
   *
   * Infos on http://www.synopsis-erp.com
   *
-  *//*
+  */
+/*
  *
  * $Id: pre.inc.php,v 1.18 2008/01/29 19:03:30 eldy Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/commande/pre.inc.php,v $
@@ -44,24 +47,24 @@ require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
 
 $langs->load("orders");
 
-
-function llxHeader($head = "", $title="", $help_url='')
-{
-    global $user, $conf, $langs;
-
-    top_menu($head, $title);
-
-    $menu = new Menu();
-
-    $menu->add(DOL_URL_ROOT."/commande/", $langs->trans("Orders"));
-    $menu->add_submenu(DOL_URL_ROOT."/commande/liste.php", $langs->trans("List"));
-    $menu->add_submenu(DOL_URL_ROOT."/commande/stats/", $langs->trans("Statistics"));
-
-    if ($conf->expedition->enabled && $user->rights->expedition->lire)
-    {
-        $menu->add(DOL_URL_ROOT."/expedition/", $langs->trans("Sendings"));
-    }
-
-    left_menu($menu->liste, $help_url);
-}
+//
+//function llxHeader($head = "", $title="", $help_url='')
+//{
+//    global $user, $conf, $langs;
+//
+//    top_menu($head, $title);
+//
+//    $menu = new Menu();
+//
+//    $menu->add(DOL_URL_ROOT."/commande/", $langs->trans("Orders"));
+//    $menu->add_submenu(DOL_URL_ROOT."/commande/liste.php", $langs->trans("List"));
+//    $menu->add_submenu(DOL_URL_ROOT."/commande/stats/", $langs->trans("Statistics"));
+//
+//    if ($conf->expedition->enabled && $user->rights->expedition->lire)
+//    {
+//        $menu->add(DOL_URL_ROOT."/expedition/", $langs->trans("Sendings"));
+//    }
+//
+//    left_menu($menu->liste, $help_url);
+//}
 ?>

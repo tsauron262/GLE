@@ -134,6 +134,11 @@ class pdf_bimp extends ModelePDFFicheinter {
 
             if (file_exists($dir)) {
                 $pdf = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
                 // Protection et encryption du pdf
 //                if ($conf->global->PDF_SECURITY_ENCRYPTION) {
 //                    $pdf = new FPDI_Protection('P', 'mm', $this->format);

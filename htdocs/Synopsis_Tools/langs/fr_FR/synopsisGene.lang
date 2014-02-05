@@ -293,12 +293,12 @@ ConfirmClotureDI=Confirmer la clôture de la demande d'intertvention?
 createFI=Créer une FI
 ConfirmClotureDIJS=Confirmer la clôture de la demande d\'intertvention?
 
-BoxLastsynopsisdemandeintervContrat = Mes dernières demande d'intervention Contrat
-BoxLastsynopsisdemandeintervCommande = Mes dernières demande d'intervention Commande
-BoxNextsynopsisdemandeinterv = Mes prochaines demande d'intervention
-BoxLastsynopsisdemandeinterv = Mes dernières demande d'intervention
-BoxLastFicheInterv = Mes dernières fiche d'intervention
-BoxTitlefichinter = Mes dernières fiche d'intervention
+BoxLastsynopsisdemandeintervContrat = Mes dernières demandes d'intervention Contrat
+BoxLastsynopsisdemandeintervCommande = Mes dernières demandes d'intervention Commande
+BoxNextsynopsisdemandeinterv = Mes prochaines demandes d'intervention
+BoxLastsynopsisdemandeinterv = Mes dernières demandes d'intervention
+BoxLastFicheInterv = Mes dernières fiches d'intervention
+BoxTitlefichinter = Mes dernières fiches d'intervention
 
 DeValid = Dévalider
 ConfirmDeValidateIntervention = Confirmer la dévalidation de la FI ?

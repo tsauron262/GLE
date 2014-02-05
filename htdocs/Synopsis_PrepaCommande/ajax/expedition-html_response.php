@@ -309,7 +309,7 @@ EOF;
         print '<table class="liste" width="100%">';
         if ($GROUP_COMMANDE)
             $arrGrpTmp = $commande->listGroupMember(false);
-        else
+        if(!$GROUP_COMMANDE || count($arrGrpTmp) == 0)
             $arrGrpTmp = array($commande->id => $commande);
 
 

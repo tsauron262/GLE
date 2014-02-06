@@ -589,7 +589,7 @@ class Synopsisfichinter extends Fichinter {
 
         $this->db->begin();
 
-        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisfichinterdet sf WHERE sf.rowid IN (SELECT f.rowid FROM " . MAIN_DB_PREFIX . "fichinterdet f WHERE fk_fichinter = " . $this->id . ")";
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "synopsisfichinterdet WHERE rowid IN (SELECT f.rowid FROM " . MAIN_DB_PREFIX . "fichinterdet f WHERE fk_fichinter = " . $this->id . ")";
         $sql2 = "DELETE FROM " . MAIN_DB_PREFIX . "fichinterdet WHERE fk_fichinter = " . $this->id;
         dol_syslog("Fichinter::delete sql=" . $sql);
         if ($this->db->query($sql) && $this->db->query($sql2)) {

@@ -223,7 +223,7 @@ EOF;
     <script>
 jQuery(document).ready(function(){
     jQuery('#list2').jqGrid({
-        url:'ajax/xml/commandeHisto-json_response.php?id='+socid,
+        url:'ajax/xml/commandeHisto-json_response.php?userId='+userId+'&id='+socid,
         datatype: 'json',
         colNames:['rowid','Ref','Date', 'Statut'],
         colModel:[ {name:'rowid',index:'rowid', width:55, hidden: true,hidedlg: true, search: false},
@@ -269,7 +269,7 @@ jQuery(document).ready(function(){
     jQuery('#list2').jqGrid('navGrid','#pager2',{edit:false,add:false,del:false,search:true});
 
     jQuery('#list1').jqGrid({
-        url:'ajax/xml/contratHisto-json_response.php?id='+socid,
+        url:'ajax/xml/contratHisto-json_response.php?userId='+userId+'&id='+socid,
         datatype: 'json',
         colNames:['rowid','Ref','Date', 'Statut'],
         colModel:[ {name:'rowid',index:'rowid', width:55, hidden: true,hidedlg: true, search: false},

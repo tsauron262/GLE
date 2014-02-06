@@ -83,11 +83,11 @@ if ($res > 0) {
 //                if ($val1['line']->logistique_ok == '1') {
 //                    print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:none'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' class='datepicker'></div>";
 //                } else {
-                    if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
-                        print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:block'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' value='" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
-                    } else {
-                        print "<br/>Dispo&nbsp;le:&nbsp;" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "");
-                    }
+                if ($user->rights->SynopsisPrepaCom->exped->Modifier) {
+                    print "   <div id='pasdispo-" . $val1['line']->id . "' style='display:block'>Dispo le :<input id='logistiqueKODate-" . $val1['line']->id . "' value='" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                } else {
+                    print "<br/>Dispo&nbsp;le:&nbsp;" . ($val1['line']->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val1['line']->logistique_date_dispo)) : "");
+                }
 //                }
             }
             print "</table></td></tr>";
@@ -309,8 +309,19 @@ print <<<EOF
         if($(elem).attr('value') != val || oblige){
             var tmp=jQuery(elem).attr('id').replace(/^logistiqueOK-/,'');
             jQuery(elem).attr('value', val);
-            if(val == 'yes')
+            if(val == 'yes'){
+                dateActu = new Date();
+                if(dateActu.getDate()<10)
+                    day = "0"+dateActu.getDate();
+                else
+                    day = dateActu.getDate();
+                if(dateActu.getMonth()<9)
+                    month = "0"+(dateActu.getMonth()+1);
+                else
+                    month = dateActu.getMonth()+1;
+                jQuery(suff+'#pasdispo-'+tmp).find("input").val(""+day+"/"+month+"/"+dateActu.getFullYear());
                 jQuery(suff+'#pasdispo-'+tmp).show();
+            }
             else
                 jQuery(suff+'#pasdispo-'+tmp).show();
 
@@ -367,11 +378,11 @@ function displayLogistique($com) {
 //                if ($val->logistique_ok == '1') {
 //                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
 //                } else {
-                    if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
-                    } else {
-                        print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
-                    }
+                if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
+                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                } else {
+                    print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
+                }
 //                }
                 print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
                 print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);

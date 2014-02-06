@@ -1250,8 +1250,8 @@ class synopsisdemandeintervLigne {
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
 //Compute total tva / total_TTC
-        $total_ttc = 1.196 * $this->total_ht;
-        $total_tva = 0.196 * $this->total_ht;
+        $total_ttc = 1.2 * $this->total_ht;
+        $total_tva = 0.2 * $this->total_ht;
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'synopsisdemandeintervdet';
@@ -1326,8 +1326,8 @@ class synopsisdemandeintervLigne {
         }
 
 //print "toto".$this->total_ht;
-        $total_ttc = 1.196 * $this->total_ht;
-        $total_tva = 0.196 * $this->total_ht;
+        $total_ttc = 1.2 * $this->total_ht;
+        $total_tva = 0.2 * $this->total_ht;
 
 
         // Mise a jour ligne en base

@@ -1062,8 +1062,8 @@ class SynopsisfichinterLigne extends FichinterLigne{
 //                $ligne->total_ht = floatval($ligne->duration) * floatval($pu_ht)/3600;
 //            }
 //Compute total tva / total_TTC
-        $total_ttc = 1.196 * $this->total_ht;
-        $total_tva = 0.196 * $this->total_ht;
+        $total_ttc = 1.2 * $this->total_ht;
+        $total_tva = 0.2 * $this->total_ht;
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO ' . MAIN_DB_PREFIX . 'fichinterdet';
@@ -1154,8 +1154,8 @@ class SynopsisfichinterLigne extends FichinterLigne{
         }
 
 //print "toto".$this->total_ht;
-        $total_ttc = 1.196 * $this->total_ht;
-        $total_tva = 0.196 * $this->total_ht;
+        $total_ttc = 1.2 * $this->total_ht;
+        $total_tva = 0.2 * $this->total_ht;
 
         $requete = "SELECT isDeplacement FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE id =" . $this->fk_typeinterv;
         $sql = $this->db->query($requete);

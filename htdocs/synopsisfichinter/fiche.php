@@ -271,7 +271,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_delete' && $_R
         $fichinter->fetch($_REQUEST['id']);
         $fichinter->delete($user);
     }
-    Header('Location: index.php?leftmenu=ficheinter');
+    Header('Location: '.DOL_URL_ROOT.'/synopsisfichinter/liste.php?leftmenu=ficheinter');
     exit;
 }
 

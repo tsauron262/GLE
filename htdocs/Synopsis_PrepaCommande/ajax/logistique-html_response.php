@@ -378,10 +378,16 @@ function displayLogistique($com) {
 //                if ($val->logistique_ok == '1') {
 //                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
 //                } else {
+                if($val->logistique_ok)
+                    $text = "Dispo depuis le :";
+                else
+                    $text = $imgWarning."Dispo le :";
+                
+                
                 if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text."<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
                 } else {
-                    print "<br/>" . $imgWarning . "&nbsp;Dispo&nbsp;le:&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
+                    print "<br/>" . $text."&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                 }
 //                }
                 print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));

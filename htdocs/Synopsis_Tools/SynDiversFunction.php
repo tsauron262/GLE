@@ -801,8 +801,8 @@ function mailSyn2($subject,$to,$from,$msg,
 	$filename_list=array(),$mimetype_list=array(),$mimefilename_list=array(),
 	$addr_cc="",$addr_bcc="",$deliveryreceipt=0,$msgishtml=0,$errors_to='',$css=''){
     global $dolibarr_main_url_root;
-    $subject = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $subject);
-    $msg = str_replace($dolibarr_main_url_root, DOL_URL_ROOT, $msg);
+    $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
+    $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
     
     if($from == '')
         $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>';

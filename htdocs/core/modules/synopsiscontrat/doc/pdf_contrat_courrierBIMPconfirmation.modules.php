@@ -204,35 +204,35 @@ class pdf_contrat_courrierBIMPconfirmation extends ModeleSynopsiscontrat
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Confirmation de contrat ".$contrat->ref),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Confirmation de contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
                 $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
                 $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 23,$remY);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_decode($contrat->societe->code_client),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_encodeRien($contrat->societe->code_client),0,'L');
 
 //Madame, Monsieur
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 90);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Madame, Monsieur,"),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous avez souscrit un contrat de services et nous vous en remercions").".",0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous avez souscrit un contrat de services et nous vous en remercions").".",0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 112);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Nous vous informons que nous avons procédé à son enregistrement. Ce contrat sera totalement validé lors du règlement de la facture. Vous trouverez ci-joint votre
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Nous vous informons que nous avons procédé à son enregistrement. Ce contrat sera totalement validé lors du règlement de la facture. Vous trouverez ci-joint votre
 exemplaire signé."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Votre numéro de contrat est ".$contrat->ref."."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
 Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+18);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_encodeRien("Mme OLAGNON
 Direction Technique
 "),0,'L');
 

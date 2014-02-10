@@ -239,7 +239,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $html = 'CONDITIONS GENERALES';
         $curY = $pdf->GetY();
         $pdf->SetX($this->marge_gauche );
-        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),'6',utf8_decode($html),0,'C',0);
+        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),'6',utf8_encodeRien($html),0,'C',0);
 
         $pdf->SetFont('Vera','',7);
 
@@ -322,13 +322,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($pdf->getY()  + 5);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"L",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"L",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block3),0,"R",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block3),0,"R",0);
 
         $pdf->SetAutoPageBreak(0,0);
 
@@ -370,11 +370,11 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $tmpWidth1 = $pdf->GetStringWidth($html);
         $curY = $pdf->GetY();
         $pdf->SetX($this->page_largeur / 2 - $tmpWidth / 2   );
-        $pdf->MultiCell($tmpWidth1,'6',utf8_decode($html),0,'R',0);
+        $pdf->MultiCell($tmpWidth1,'6',utf8_encodeRien($html),0,'R',0);
         $pdf->SetTextColor(38,0,255);
         $pdf->SetY($curY);
         $pdf->SetX($this->page_largeur / 2 + $tmpWidth / 2  - ($tmpWidth - $tmpWidth1) - 5);
-        $pdf->MultiCell($tmpWidth - $tmpWidth1 + 5,'6',utf8_decode($contratGA->ref),0,'R',0);
+        $pdf->MultiCell($tmpWidth - $tmpWidth1 + 5,'6',utf8_encodeRien($contratGA->ref),0,'R',0);
 
         $pdf->SetTextColor(0,0,0);
 
@@ -398,25 +398,25 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $col1d = 'Les loyers sont portables par tous les moyens du loueur et non quérables et sont dus pour la durée de la location irrévocable fixée dans les conditions particulières. La location est consentie sous réserve du paiement des loyers par le locataire. Leurs montants et leurs périodicités sont précisées dans les conditions particulières visées ci-dessus. Les loyers prévus au ';
 
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1head),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1head),0,'J',0);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1),0,'J',0);
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1ahead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1ahead),0,'J',0);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1a),0,'J',0);
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1bhead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1bhead),0,'J',0);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1b),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1b),0,'J',0);
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1chead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1chead),0,'J',0);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1c),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1c),0,'J',0);
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1dhead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1dhead),0,'J',0);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1d),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1d),0,'J',0);
         $pdf->SetY($curY);
 
         $col2 = 'contrat pourront être révisés par le loueur au moment de la prise d'.chr(146).'effet du contrat, en cas d'.chr(146).'évolution du taux de référence suivant : moyenne des derniers taux connus et publiés au jour du contrat de l'.chr(146).'Euribor 12 mois et du TEC 5. (Euribor 12 mois : Taux Interbancaire Offert en Euro publié quotidiennement par la Fédération Bancaire de l'.chr(146).'Union Européenne et TEC 5 : Taux des Echéances constantes à 5 ans, publiés quotidiennement par la Caisse des Dépôts et Consignations.)Entre le jour de l'.chr(146).'accord de financement et le jour de la livraison. Lors de la mise en loyer ils restent fixes pendant toute la période de location sous réserve d'.chr(146).'une modification de la fiscalité liée à ce type de contrat. Sauf dispositions contraires prévues aux conditions particulières, le paiement de toutes les sommes dues au titre du présent contrat, pour quelque raison que ce soit, s'.chr(146).'effectue par prélèvement automatique permanent sur le compte bancaire du locataire au jour d'.chr(146).'échéance ou en cas d'.chr(146).'impossibilité au jour ouvré précédent Le premier loyer est exigible à la date d'.chr(146).'effet de la location. Si la prise d'.chr(146).'effet intervient après le premier du mois, un  loyer  complémentaire, calculé prorata temporis, est payable par chèque ou prélèvement automatique bancaire. Au cas où le locataire ne serait pas assujetti à la taxe professionnelle, les loyers pourront être majorés de l'.chr(146).'incidence de cette taxe. En cas de livraison et/ou installation partielle, une redevance de mise à disposition de l'.chr(146).'équipement livré et/ou installé est facturée prorata temporis au fur et à mesure des livraisons, sur la base des loyers fixés aux conditions particulières.  Elle est payable par chèque ou prélèvement automatique bancaire. Le locataire autorise le loueur à recouvrer le montant des loyers directement ou par l'.chr(146).'intermédiaire de tout mandataire de son choix. Pour cela, le locataire remet une autorisation de prélèvement permanent au profit du loueur ou de tout organisme  qui se substitue éventuellement au loueur. Tout retard de paiement d'.chr(146).'une  somme due au loueur par le locataire entraînera, de plein droit et sans mise en demeure préalable l'.chr(146).'application d'.chr(146).'intérêts de retard à un taux fixé à trois fois le taux d'.chr(146).'intérêt légal en vigueur et ce à compter de l'.chr(146).'échéance impayée jusqu'.chr(146).'à complet paiement sans que cette stipulation puisse permettre au locataire de différer ou retarder le règlement sans préjudice du droit pour le loueur de prononcer la résiliation du présent contrat. Tous les frais afférents au recouvrement de ces sommes sont à l'.chr(146).'entière charge du locataire.';
@@ -425,13 +425,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2),0,'J',0);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2ahead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2ahead),0,'J',0);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2a),0,'J',0);
         $pdf->SetY($curY);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
 
@@ -443,19 +443,19 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
 
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3),0,'J',0);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3aheader),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3aheader),0,'J',0);
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3a),0,'J',0);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3bheader),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3bheader),0,'J',0);
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3b),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3b),0,'J',0);
 
 
         $pdf->SetFont('Vera','',7);
@@ -495,11 +495,11 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $tmpWidth1 = $pdf->GetStringWidth($html);
         $curY = $pdf->GetY();
         $pdf->SetX($this->page_largeur / 2 - $tmpWidth / 2   );
-        $pdf->MultiCell($tmpWidth1,'6',utf8_decode($html),0,'R',0);
+        $pdf->MultiCell($tmpWidth1,'6',utf8_encodeRien($html),0,'R',0);
         $pdf->SetTextColor(38,0,255);
         $pdf->SetY($curY);
         $pdf->SetX($this->page_largeur / 2 + $tmpWidth / 2  - ($tmpWidth - $tmpWidth1) - 5);
-        $pdf->MultiCell($tmpWidth - $tmpWidth1 + 5,'6',utf8_decode($contratGA->ref),0,'R',0);
+        $pdf->MultiCell($tmpWidth - $tmpWidth1 + 5,'6',utf8_encodeRien($contratGA->ref),0,'R',0);
 
         $pdf->SetTextColor(0,0,0);
 
@@ -516,13 +516,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $col1a = 'Les parties reconnaissent que l'.chr(146).'équipement loué à un rapport direct avec l'.chr(146).'activité du locataire.Par commodité de gestion le loueur peut facturer des prestations pour compte de tiers en même temps que ses loyers. Dans ce cas le locataire reconnaît que le contrat de location est totalement indépendant du contrat de prestation qu'.chr(146).'il aurait éventuellement signé et que de ce fait il s'.chr(146).'interdit de refuser le paiement des loyers relatifs au contrat de location, et ce quand bien même la prestation ne serait pas réalisé correctement. Par ailleurs en cas de défaillance du prestataire, il reconnaît qu'.chr(146).'il peut s'.chr(146).'adresser à tout autre prestataire de son choix, compte tenu de l'.chr(146).'absence de spécificité de l'.chr(146).'équipement loué. Les parties conviennent que, le locataire ayant choisi le fournisseur, l'.chr(146).'équipement, et ayant assuré la réception ';
 
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','B',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1ahead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1ahead),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col1a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col1a),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetY($curY);
 
@@ -532,15 +532,15 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2ahead),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2ahead),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetX($larg1 + $this->marge_gauche + $ptFond);
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col2a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col2a),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetY($curY);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
@@ -553,23 +553,23 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
 
         $pdf->SetFont('Vera','',5);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3aheader),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3aheader),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3a),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3a),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','B',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3bheader),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3bheader),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
         $pdf->SetFont('Vera','',5);
         $pdf->SetX($larg1 * 2 + $this->marge_gauche + $ptFond * 2);
-        $pdf->MultiCell($larg1,'3',utf8_decode($col3b),0,'J',0);
+        $pdf->MultiCell($larg1,'3',utf8_encodeRien($col3b),0,'J',0);
         $nexY=($pdf->GetY()>$nexY?$pdf->GetY():$nexY);
 
         $pdf->lasth=4;
@@ -581,13 +581,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($nexY + 5);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"L",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"L",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block3),0,"R",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block3),0,"R",0);
 
 
 
@@ -629,7 +629,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),10,'CONDITIONS PARTICULIERES',0,'C',0);
         $html = 'CONTRAT DE LOCATION N° '.$contratGA->ref;
         $pdf->SetFont('Vera','',10);
-        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),10,utf8_decode($html),0,'C',0);
+        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),10,utf8_encodeRien($html),0,'C',0);
         $pdf->SetFont('Vera','',8);
 
         $tmpFourn = new Societe($this->db);
@@ -637,7 +637,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $fournisseur_name = utf8_encode($tmpFourn->nom);
 
         $html = 'ENTRE : '.$mysoc->nom. '  ET ' . $fournisseur_name;
-        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),10,utf8_decode($html),0,'C',0);
+        $pdf->MultiCell($this->page_largeur - ($this->marge_gauche + $this->marge_droite),10,utf8_encodeRien($html),0,'C',0);
 
 
 
@@ -653,13 +653,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetY(50);
         $curY = 50;
         $pdf->SetFillColor(91,148,226);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Quantité'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Quantité'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1);
-        $pdf->MultiCell($larg1*2,'6', utf8_decode('Designation'),0,'C',1 );
+        $pdf->MultiCell($larg1*2,'6', utf8_encodeRien('Designation'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1*3);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Marque'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Marque'),0,'C',1 );
         $pdf->SetFont('Vera','',7);
 
         $contratGA->fetch_lignes();
@@ -668,13 +668,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             if ($val->fk_product > 0)
             {
                 $curY = $pdf->GetY();
-                $pdf->MultiCell($larg1,'4', utf8_decode($val->qty),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien($val->qty),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1);
-                $pdf->MultiCell($larg1*2,'4', utf8_decode($val->description),0,'C',0 );
+                $pdf->MultiCell($larg1*2,'4', utf8_encodeRien($val->description),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1*3);
-                $pdf->MultiCell($larg1,'4', utf8_decode('Marque'),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien('Marque'),0,'C',0 );
             }
         }
 
@@ -699,13 +699,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode("NOMBRE DE LOYER"),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien("NOMBRE DE LOYER"),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode("MONTANT"),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien("MONTANT"),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode("PERIODICITE"),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien("PERIODICITE"),0,"C",0);
         $curY += 5;
         $pdf->SetFont('Vera','B',8);
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
@@ -717,7 +717,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->MultiCell($larg1,'4',price(round($loyerGlobal*100)/100) . " ".chr(128),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($contratGA->periodicite),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($contratGA->periodicite),0,"C",0);
         if ($maintenance)
         {
             $pdf->SetTextColor(128,128,128);
@@ -756,13 +756,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"L",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"L",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block3),0,"R",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block3),0,"R",0);
 
         $pdf->SetFont('Vera','',7);
         // Pied de page
@@ -804,7 +804,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $html = $tmpSignature->fullname;
         $pdf->SetX($this->marge_gauche * 4);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'R',0 );
         $pdf->lasth=4;
         $pdf->SetFont('Vera','',10);
         $html='CONTRAT DE LOCATION N° ';
@@ -812,12 +812,12 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $tmpWidth1 = $pdf->GetStringWidth($html);
         $pdf->setX($this->page_largeur / 2  - ($tmpWidth/2));
 
-        $pdf->MultiCell(50,'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell(50,'6', utf8_encodeRien($html),0,'R',0 );
         $html = $contratGA->ref;
         $pdf->SetY($pdf->GetY()-12);
         $pdf->setX($this->page_largeur / 2 - ($tmpWidth/2) + $tmpWidth1 );
         $pdf->SetTextColor(38,0,255);
-        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_decode($html),0,'L',0 );
+        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_encodeRien($html),0,'L',0 );
         $pdf->SetTextColor(0,0,0);
 
         $pdf->SetFont('Vera','B',8);
@@ -848,13 +848,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetFillColor(255,255,255);
 
         $pdf->SetFillColor(91,148,226);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Quantité'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Quantité'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1);
-        $pdf->MultiCell($larg1*2,'6', utf8_decode('Designation'),0,'C',1 );
+        $pdf->MultiCell($larg1*2,'6', utf8_encodeRien('Designation'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1*3);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Marque'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Marque'),0,'C',1 );
         $pdf->SetFont('Vera','',7);
 
         $contratGA->fetch_lignes();
@@ -863,13 +863,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             if ($val->fk_product > 0)
             {
                 $curY = $pdf->GetY();
-                $pdf->MultiCell($larg1,'4', utf8_decode($val->qty),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien($val->qty),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1);
-                $pdf->MultiCell($larg1*2,'4', utf8_decode($val->description),0,'C',0 );
+                $pdf->MultiCell($larg1*2,'4', utf8_encodeRien($val->description),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1*3);
-                $pdf->MultiCell($larg1,'4', utf8_decode('Marque'),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien('Marque'),0,'C',0 );
             }
         }
 
@@ -895,32 +895,32 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - $this->marge_gauche - $this->marge_droite) / 4;
         $pdf->SetX($this->marge_gauche);
         $curY = $pdf->GetY();
-        $pdf->MultiCell($larg1,'6', utf8_decode('NOMBRE DE LOYERS'."\n".'12'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('NOMBRE DE LOYERS'."\n".'12'),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('MONTANT'."\n".'12 000'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('MONTANT'."\n".'12 000'),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*2+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('PERIODICITE'."\n".'trimestre'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('PERIODICITE'."\n".'trimestre'),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*3+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('DUREE'."\n".'36 mois'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('DUREE'."\n".'36 mois'),1,'C',0 );
 
         $pdf->SetX($this->marge_gauche);
         $curY = $pdf->GetY();
         $pdf->SetY($curY + 3);
         $pdf->SetFont('Vera','B',8);
-        $pdf->MultiCell($larg1-20,'6', utf8_decode('Suivi de'),0,'L',0 );
+        $pdf->MultiCell($larg1-20,'6', utf8_encodeRien('Suivi de'),0,'L',0 );
         $pdf->SetFont('Vera','',7);
         $pdf->SetY($curY);
         $pdf->SetX($larg1+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('NOMBRE DE LOYERS'."\n".'12'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('NOMBRE DE LOYERS'."\n".'12'),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*2+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('MONTANT'."\n".'12 000'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('MONTANT'."\n".'12 000'),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*3+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('PERIODICITE'."\n".'mensuelle'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('PERIODICITE'."\n".'mensuelle'),1,'C',0 );
 
         $datecontratGA = date('d/m/Y',($contratGA->mise_en_service > 0?$contratGA->mise_en_service:time()));
         $html = '<br><strong>Site d'.chr(146).'installation :</strong><br><strong>Date d'.chr(146).'installation :</strong> '.$datecontratGA.'<br><strong>Clause spécifique :</strong><br>Fait en autant d'.chr(146).'exemplaires que de parties, un pour chacune des parties<br>ANNEXE : Conditions Générales composées de deux pages recto : Feuillet A et Feuillet B';
@@ -938,13 +938,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"L",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"L",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block3),0,"R",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block3),0,"R",0);
 
         $pdf->SetFont('Vera','',7);
         // Pied de page
@@ -980,7 +980,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $html = $tmpSignature->fullname;
         $pdf->SetX($this->marge_gauche * 4);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'R',0 );
         $pdf->lasth=4;
         $pdf->SetFont('Vera','',10);
         $html='CONTRAT DE LOCATION N° ';
@@ -988,12 +988,12 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $tmpWidth1 = $pdf->GetStringWidth($html);
         $pdf->setX($this->page_largeur / 2  - ($tmpWidth/2));
 
-        $pdf->MultiCell(50,'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell(50,'6', utf8_encodeRien($html),0,'R',0 );
         $html = $contratGA->ref;
         $pdf->SetY($pdf->GetY()-12);
         $pdf->setX($this->page_largeur / 2 - ($tmpWidth/2) + $tmpWidth1 );
         $pdf->SetTextColor(38,0,255);
-        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_decode($html),0,'L',0 );
+        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_encodeRien($html),0,'L',0 );
         $pdf->SetTextColor(0,0,0);
 
         $pdf->SetFont('Vera','B',8);
@@ -1024,13 +1024,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetFillColor(255,255,255);
 
         $pdf->SetFillColor(91,148,226);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Quantité'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Quantité'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1);
-        $pdf->MultiCell($larg1*2,'6', utf8_decode('Designation'),0,'C',1 );
+        $pdf->MultiCell($larg1*2,'6', utf8_encodeRien('Designation'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1*3);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Marque'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Marque'),0,'C',1 );
         $pdf->SetFont('Vera','',7);
 
         $contratGA->fetch_lignes();
@@ -1040,7 +1040,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             if ($val->fk_product > 0)
             {
                 $curY = $pdf->GetY();
-                $pdf->MultiCell($larg1,'4', utf8_decode($val->qty),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien($val->qty),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1);
                 if (strlen($val->product->description) > 0)
@@ -1050,13 +1050,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
                     $tmpY = $pdf->writeHTMLCell($larg1*2, 4, $pdf->GetX(), $pdf->GetY(), $val->product->description, 0, 1, 0);
                     //$tmpY = $this->GetY();
                     $tmpY -= 12;
-                    //$pdf->MultiCell($larg1*2,'4', utf8_decode($tmpdesc),0,'C',0 );
+                    //$pdf->MultiCell($larg1*2,'4', utf8_encodeRien($tmpdesc),0,'C',0 );
                 } else {
-                    $pdf->MultiCell($larg1*2,'4', utf8_decode($val->description),0,'C',0 );
+                    $pdf->MultiCell($larg1*2,'4', utf8_encodeRien($val->description),0,'C',0 );
                 }
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1*3);
-                $pdf->MultiCell($larg1,'4', utf8_decode(' - '),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien(' - '),0,'C',0 );
             }
         }
 
@@ -1091,16 +1091,16 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - $this->marge_gauche - $this->marge_droite) / 4;
         $pdf->SetX($this->marge_gauche);
         $curY = $pdf->GetY();
-        $pdf->MultiCell($larg1,'6', utf8_decode('NOMBRE DE LOYERS'."\n".$nbIterTot),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('NOMBRE DE LOYERS'."\n".$nbIterTot),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('MONTANT'."\n".price(round($totLoyerHT * 100)/100))." ".chr(128),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('MONTANT'."\n".price(round($totLoyerHT * 100)/100))." ".chr(128),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*2+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('PERIODICITE'."\n".$periodicite),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('PERIODICITE'."\n".$periodicite),1,'C',0 );
         $pdf->SetY($curY);
         $pdf->SetX($larg1*3+$this->marge_gauche);
-        $pdf->MultiCell($larg1,'6', utf8_decode('DUREE'."\n".$durTot.' mois'),1,'C',0 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('DUREE'."\n".$durTot.' mois'),1,'C',0 );
 
         $datecontratGA = date('d/m/Y',($contratGA->mise_en_service > 0?$contratGA->mise_en_service:time()));
         $html = '<br><strong>Site d'.chr(146).'installation :</strong><br><strong>Date d'.chr(146).'installation :</strong> '.$datecontratGA.'<br><strong>Clause spécifique :</strong><br>Fait en autant d'.chr(146).'exemplaires que de parties, un pour chacune des parties<br>ANNEXE : Conditions Générales composées de deux pages recto : Feuillet A et Feuillet B';
@@ -1118,13 +1118,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 3;
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"L",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"L",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1 * 2);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block3),0,"R",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block3),0,"R",0);
 
         $pdf->SetFont('Vera','',7);
         // Pied de page
@@ -1175,7 +1175,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetY(50);
         $pdf->SetX($this->marge_gauche*3);
         $html = 'PROCES VERBAL DE RECEPTION ET MISE EN SERVICE DE MATERIEL';
-        $pdf->MultiCell(($this->page_largeur - ($this->marge_gauche+$this->marge_droite) * 3),10,utf8_decode($html),1,'C',0);
+        $pdf->MultiCell(($this->page_largeur - ($this->marge_gauche+$this->marge_droite) * 3),10,utf8_encodeRien($html),1,'C',0);
 
         $pdf->SetFont('Vera','',10);
         $head1 = 'ADRESSE DU LOCATAIRE : ';
@@ -1186,17 +1186,17 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $curY=$pdf->GetY();
         $pdf->SetX($this->marge_gauche*2);
         $pdf->SetFont('Vera','B',8);
-        $pdf->MultiCell(86,6,utf8_decode($head1),0,'C',0);
+        $pdf->MultiCell(86,6,utf8_encodeRien($head1),0,'C',0);
         $pdf->SetFont('Vera','',10);
         $pdf->SetX($this->marge_gauche*2);
-        $pdf->MultiCell(86,6,utf8_decode($addr1),0,'C',0);
+        $pdf->MultiCell(86,6,utf8_encodeRien($addr1),0,'C',0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche*2 + 86 +  ($this->page_largeur - 86 - $this->marge_gauche*2 - $this->marge_droite*2 - 86) );
         $pdf->SetFont('Vera','B',8);
-        $pdf->MultiCell(86,6,utf8_decode($head2),0,'C',0);
+        $pdf->MultiCell(86,6,utf8_encodeRien($head2),0,'C',0);
         $pdf->SetFont('Vera','',10);
         $pdf->SetX($this->marge_gauche*2 + 86 +  ($this->page_largeur - 86 - $this->marge_gauche*2 - $this->marge_droite*2 - 86) );
-        $pdf->MultiCell(86,6,utf8_decode($addr2),0,'C',0);
+        $pdf->MultiCell(86,6,utf8_encodeRien($addr2),0,'C',0);
 
 
         //intitulé
@@ -1208,12 +1208,12 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $tmpWidth1 = $pdf->GetStringWidth($html);
         $pdf->setX($this->page_largeur / 2  - ($tmpWidth/2));
 
-        $pdf->MultiCell(90,'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell(90,'6', utf8_encodeRien($html),0,'R',0 );
         $html = $contratGA->ref;
         $pdf->SetY($pdf->GetY()-12);
         $pdf->setX($this->page_largeur / 2 - ($tmpWidth/2) + $tmpWidth1 );
         $pdf->SetTextColor(38,0,255);
-        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_decode($html),0,'L',0 );
+        $pdf->MultiCell($this->page_largeur / 2 - ($this->marge_gauche / 2),'6', utf8_encodeRien($html),0,'L',0 );
         $pdf->SetTextColor(0,0,0);
 
 
@@ -1227,13 +1227,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $pdf->SetFillColor(255,255,255);
 
         $pdf->SetFillColor(91,148,226);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Quantité'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Quantité'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1);
-        $pdf->MultiCell($larg1*2,'6', utf8_decode('Designation'),0,'C',1 );
+        $pdf->MultiCell($larg1*2,'6', utf8_encodeRien('Designation'),0,'C',1 );
         $pdf->SetY($curY);
         $pdf->SetX($pdf->GetX()+$larg1*3);
-        $pdf->MultiCell($larg1,'6', utf8_decode('Marque'),0,'C',1 );
+        $pdf->MultiCell($larg1,'6', utf8_encodeRien('Marque'),0,'C',1 );
         $pdf->SetFont('Vera','',7);
 
         $contratGA->fetch_lignes();
@@ -1242,13 +1242,13 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
             if ($val->fk_product > 0)
             {
                 $curY = $pdf->GetY();
-                $pdf->MultiCell($larg1,'4', utf8_decode($val->qty),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien($val->qty),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1);
-                $pdf->MultiCell($larg1*2,'4', utf8_decode($val->description),0,'C',0 );
+                $pdf->MultiCell($larg1*2,'4', utf8_encodeRien($val->description),0,'C',0 );
                 $pdf->SetY($curY);
                 $pdf->SetX($pdf->GetX()+$larg1*3);
-                $pdf->MultiCell($larg1,'4', utf8_decode('Marque'),0,'C',0 );
+                $pdf->MultiCell($larg1,'4', utf8_encodeRien('Marque'),0,'C',0 );
             }
         }
 
@@ -1263,7 +1263,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $datecontratGA = date('d/m/Y',($contratGA->mise_en_service > 0?$contratGA->mise_en_service:time()));
 
-        $html = 'Fait à  '.utf8_decode($tmpFourn->ville). ' le '.$datecontratGA."<br>";
+        $html = 'Fait à  '.utf8_encodeRien($tmpFourn->ville). ' le '.$datecontratGA."<br>";
         $this->writeHTML($html, 4, 0,$pdf);
 
         $pdf->SetFont('Vera','B',7);
@@ -1273,10 +1273,10 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $larg1 = ($this->page_largeur - ($this->marge_gauche + $this->marge_droite)) / 2;
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block1),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block1),0,"C",0);
         $pdf->SetY($curY);
         $pdf->SetX($this->marge_gauche + $larg1);
-        $pdf->MultiCell($larg1,'4',utf8_decode($block2),0,"C",0);
+        $pdf->MultiCell($larg1,'4',utf8_encodeRien($block2),0,"C",0);
 
 
         // Pied de page
@@ -1349,7 +1349,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $html = $tmpSignature->fullname;
         $pdf->SetX($this->marge_gauche * 4);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'R',0 );
 
 
         // Pied de page
@@ -1396,7 +1396,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $html = $tmpSignature->fullname;
         $pdf->SetX($this->marge_gauche * 4);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'R',0 );
 
 
         // Pied de page
@@ -1440,7 +1440,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
         $html = $mysoc->nom . "\n". $mysoc->address . "\n". $mysoc->zip . " ".$mysoc->town;
 
         $pdf->SetFont('Vera','B',10);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'C',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'C',0 );
         $pdf->SetFont('Vera','',10);
 
         $html = "<br><br>Dans l".chr(146)."attente, nous vous souhaitons bonne réception de la présente et vous prions d".chr(146)."agréer, Madame, Monsieur, nos sincères salutations.<br><br><br>";
@@ -1449,7 +1449,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
         $html = $tmpSignature->fullname;
         $pdf->SetX($this->marge_gauche * 4);
-        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_decode($html),0,'R',0 );
+        $pdf->MultiCell($this->page_largeur- 3.5 * ($this->marge_gauche + $this->marge_droite),'6', utf8_encodeRien($html),0,'R',0 );
 
 
                     // Pied de page
@@ -1800,7 +1800,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
                 if($this->HREF) {
                     $pdf->addHtmlLink($this->HREF, $element, $fill);
                 } else {
-                    $pdf->Write($pdf->lasth , stripslashes(utf8_decode($pdf->unhtmlentities($element))), '', $fill);
+                    $pdf->Write($pdf->lasth , stripslashes(utf8_encodeRien($pdf->unhtmlentities($element))), '', $fill);
                 }
             } else {
                 $element = substr($element, 1, -1);

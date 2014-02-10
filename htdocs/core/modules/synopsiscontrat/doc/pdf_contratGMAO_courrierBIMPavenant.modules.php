@@ -204,29 +204,29 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
                 $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 14,$this->marge_haute + 60);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_decode("Avenant à votre contrat ".$contrat->ref),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Avenant à votre contrat ".$contrat->ref),0,'L');
                 $remY = $pdf->GetY();
                 $pdf->SetFont(''/*'Arial'*/, 'U', 10);
                 $pdf->SetXY($this->marge_gauche,$remY);
                 $pdf->MultiCell(23 ,4,"Code Client : ",0,'L');
                 $pdf->SetFont(''/*'Arial'*/, '', 10);
                 $pdf->SetXY($this->marge_gauche + 23,$remY);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_decode($contrat->societe->code_client),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 23) ,4,utf8_encodeRien($contrat->societe->code_client),0,'L');
 
 //Madame, Monsieur
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 90);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Madame, Monsieur,"),0,'L');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Madame, Monsieur,"),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 100);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Vous trouverez ci-joint l'avenant correspondant à votre contrat
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous trouverez ci-joint l'avenant correspondant à votre contrat
 N° ").$contrat->ref.".",0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 118);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_decode("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.
 Nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$this->marge_haute + 143);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_decode("Mme OLAGNON
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_encodeRien("Mme OLAGNON
 Direction Technique
 "),0,'L');
 

@@ -235,6 +235,7 @@ class Synopsis_Contrat extends Contrat {
 
     public function fetch($id, $ref = '') {
         $ret = parent::fetch($id, $ref);
+        $id = $this->id;
         $this->societe = new Societe($this->db);
         $this->societe->fetch($this->socid);
         $requete = "SELECT durValid,
@@ -1014,6 +1015,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     function lignePlus($object) {
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
         $ligne = new Synopsis_ContratLigne($this->db);
         $ligne->fetch($object->rowid);
         echo "<table width='100%'><tr class='impair'><td>";

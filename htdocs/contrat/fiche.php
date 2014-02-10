@@ -77,6 +77,10 @@ $object = new Synopsis_Contrat($db);
  * Deb mod drsi les action     generer pdf    -    suprimer fichier       - envoyer par mail
  */
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+    if(isset($_REQUEST['ref'])){
+        $object->fetch($_REQUEST["id"], $_REQUEST['ref']);
+        $_REQUEST["id"] = $object->id;
+    }
     if (isset($_REQUEST["id"])) {
         $object->fetch($_REQUEST["id"]);
         $object->fetch_lines();

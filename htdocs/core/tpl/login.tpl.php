@@ -80,7 +80,7 @@ $(document).ready(function () {
 <!-- Password -->
 <tr><td valign="middle" class="loginfield nowrap"><strong><label for="password"><?php echo $langs->trans('Password'); ?></label></strong></td>
 <td valign="middle" class="nowrap">
-<input id="password" name="password" class="flat" type="password" size="15" maxlength="30" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="off" />
+<input id="password" name="password" class="flat" type="password" size="15" maxlength="30" value="<?php echo dol_escape_htmltag($password); ?>" tabindex="2" autocomplete="on" />
 </td></tr>
 <?php
 if (! empty($hookmanager->resArray['options'])) {

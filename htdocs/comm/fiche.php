@@ -576,22 +576,17 @@ if ($id > 0)
 				$var=!$var;
                                 /* Mod drsi */
                                 $commande_static->id = $objp->cid;
-                                if(isset($memoireG) && count($memoireG) > 1 && !isset($memoireG[$commande_static->id])){
+                                if(isset($memoireG) && count($memoireG) > 0 && !isset($memoireG[$commande_static->id])){
                                         echo "</table></tr></td>";
-                                        $memoireMoin = true;
                                 }
-                               if(isset($memoireG) && count($memoireG) > 1 && isset($memoireG[$commande_static->id])){
+                               if(isset($memoireG) && count($memoireG) > 0 && isset($memoireG[$commande_static->id])){
                                     $MAXLIST++;
                                 }
                                 else{
                                     $memoireG = $commande_static->listGroupMember(false);
                                     if(count($memoireG) > 0){
-                                        $MAXLIST++;
+//                                        $MAXLIST++;
                                         echo "<tr class='impaire'><td>".$commande_static->OrderGroup->getNomUrl(1)."<br/><span align='right'>".$commande_static->OrderGroup->qteInGrp." commandes Total : ".price($commande_static->OrderGroup->total_ht)." €</span></td><td  colspan='3'><table class='noborder'>";
-                                    }
-                                    elseif($memoireMoin){
-                                        $MAXLIST--;
-                                        $memoireMoin = false;
                                     }
                                 }
                                      
@@ -605,6 +600,11 @@ if ($id > 0)
 				print '<td align="right" style="min-width: 60px">'.price($objp->total_ht).'</td>';
 				print '<td align="right" style="min-width: 60px" class="nowrap">'.$commande_static->LibStatut($objp->fk_statut,$objp->facture,5).'</td></tr>';
 				$i++;
+                                
+                                /*deb mod drsi */
+                                if(isset($memoireG) && count($memoireG) > 0 && $i==min($MAXLIST, $num))
+                                        echo "</table></tr></td>";
+                                /*f mod drsi*/
 			}
 			$db->free($resql);
 

@@ -331,12 +331,7 @@ if ($resql)
                 else{
                     $memoireG = $generic_commande->listGroupMember(false);
                     if(count($memoireG) > 0){
-                        $MAXLIST++;
                         echo "<tr class='impaire'><td>".$generic_commande->OrderGroup->getNomUrl(1)."<br/><span align='right'>".$generic_commande->OrderGroup->qteInGrp." commandes Total : ".price($generic_commande->OrderGroup->total_ht)." €</span></td><td  colspan='3'><table class='noborder'>";
-                    }
-                    elseif($memoireMoin){
-                        $MAXLIST--;
-                        $memoireMoin = false;
                     }
                 }
                 /*f mod drsi*/

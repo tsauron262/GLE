@@ -354,50 +354,57 @@ print <<<EOF
 EOF;
 
 function displayLogistique($com) {
+    $GROUP_COMMANDE = true;
     global $db, $user, $lang;
     $html = new Form($db);
-    $com->fetch_lines(1);
 
     $prod = new Product($db);
-    if (count($com->lines) > 0) {
-        foreach ($com->lines as $key => $val) {
-            $prod->fetch($val->fk_product);
-            if ($prod->type <> 0)
-                continue;
-            if ($val->ref . "x" != "x" && $val->qty <> 0) {
-                $imgWarning = "";
-                if (strtotime($val->logistique_date_dispo) < time()) {
-                    $imgWarning = img_warning("Date depass&eacute;");
-                }
-                if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                    $htmlSelect = str_replace('class="flat"', 'class="flat logistique"', $html->selectyesno('logistiqueOK-' . $val->rowid, $val->logistique_ok, 0));
-                    print "<tr><td width=155 class='ui-widget-content'>" . $htmlSelect;
-                } else {
-                    print "<tr><td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
-                }
+    if ($GROUP_COMMANDE)
+        $arrGrpTmp = $com->listGroupMember(false);
+    if (!$GROUP_COMMANDE || count($arrGrpTmp) == 0)
+        $arrGrpTmp = array($com->id => $com);
+    foreach ($arrGrpTmp as $com) {
+        $com->fetch_lines(1);
+        if (count($com->lines) > 0) {
+            foreach ($com->lines as $key => $val) {
+                $prod->fetch($val->fk_product);
+                if ($prod->type <> 0)
+                    continue;
+                if ($val->ref . "x" != "x" && $val->qty <> 0) {
+                    $imgWarning = "";
+                    if (strtotime($val->logistique_date_dispo) < time()) {
+                        $imgWarning = img_warning("Date depass&eacute;");
+                    }
+                    if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
+                        $htmlSelect = str_replace('class="flat"', 'class="flat logistique"', $html->selectyesno('logistiqueOK-' . $val->rowid, $val->logistique_ok, 0));
+                        print "<tr><td width=155 class='ui-widget-content'>" . $htmlSelect;
+                    } else {
+                        print "<tr><td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
+                    }
 //                if ($val->logistique_ok == '1') {
 //                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
 //                } else {
-                if($val->logistique_ok)
-                    $text = "Dispo depuis le :";
-                else
-                    $text = $imgWarning."Dispo le :";
-                
-                
-                if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text."<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
-                } else {
-                    print "<br/>" . $text."&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
-                }
+                    if ($val->logistique_ok)
+                        $text = "Dispo depuis le :";
+                    else
+                        $text = $imgWarning . "Dispo le :";
+
+
+                    if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
+                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text . "<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                    } else {
+                        print "<br/>" . $text . "&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
+                    }
 //                }
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
-                print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);
-                print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($val->libelle);
-                print "    <td class='ui-widget-content'>" . utf8_encodeRien($val->desc);
+                    print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
+                    print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);
+                    print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($val->libelle);
+                    print "    <td class='ui-widget-content'>" . utf8_encodeRien($val->desc);
+                }
             }
+        } else {
+            print " Pas de produits dans la commande";
         }
-    } else {
-        print " Pas de produits dans la commande";
     }
 }
 

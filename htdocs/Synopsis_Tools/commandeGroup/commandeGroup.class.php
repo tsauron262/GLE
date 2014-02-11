@@ -32,7 +32,7 @@ class CommandeGroup extends CommonObject{
                 $this->qteInGrp++;
                 if ($res->command_refid > 0)
                 {
-                    $comTmp = new Commande($this->db);
+                    $comTmp = new Synopsis_Commande($this->db);
                     $comTmp->fetch($res->command_refid);
                     $this->commandes[$res->command_refid] = $comTmp;
                 }

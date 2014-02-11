@@ -201,7 +201,14 @@ if ($resql)
 		print '<td>';
 		$contractstatic->id=$obj->cid;
 		$contractstatic->ref=$obj->ref?$obj->ref:$obj->cid;
-		print $contractstatic->getNomUrl(1,16);
+                /*dem mod drsi*/
+                if(isset($memoireIdC) && $memoireIdC == $contractstatic->id)
+                    print "--";
+                else{
+                    $memoireIdC = $contractstatic->id;
+                    print $contractstatic->getNomUrl(1,16);
+                }
+                /*f mod drsi*/
 		print '</td>';
 
 		// Service

@@ -260,7 +260,7 @@ $fileArray = array();
 $imported = "/imported/";
 
 $premiereDesc = true;
-die;
+
 global $langs, $conf;
 
 $webContent .= " <a href='index.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Retour</span></a>";

@@ -312,18 +312,46 @@ if ($resql)
     $total = 0;
     $subtotal = 0;
 
-	$generic_commande = new Commande($db);
+	$generic_commande = new /*deb mod drsi Commande*/Synopsis_Commande/*f mod drsi*/($db);
 	while ($i < min($num,$limit))
 	{
 		$objp = $db->fetch_object($resql);
 		$var=!$var;
+                
+                
+                /* Mod drsi */
+//                $generic_commande->fetch($objp->rowid);
+                $generic_commande->id = $objp->rowid;
+                if(isset($memoireG) && count($memoireG) > 0 && !isset($memoireG[$generic_commande->id])){
+                        echo "</table></tr></td>";
+                }
+               if(isset($memoireG) && count($memoireG) > 0 && isset($memoireG[$generic_commande->id])){
+                    $MAXLIST++;
+                }
+                else{
+                    $memoireG = $generic_commande->listGroupMember(false);
+                    if(count($memoireG) > 0){
+                        $MAXLIST++;
+                        echo "<tr class='impaire'><td>".$generic_commande->OrderGroup->getNomUrl(1)."<br/><span align='right'>".$generic_commande->OrderGroup->qteInGrp." commandes Total : ".price($generic_commande->OrderGroup->total_ht)." €</span></td><td  colspan='3'><table class='noborder'>";
+                    }
+                    elseif($memoireMoin){
+                        $MAXLIST--;
+                        $memoireMoin = false;
+                    }
+                }
+                /*f mod drsi*/
+                
+                
+                
+                
 		print '<tr '.$bc[$var].'>';
 		print '<td class="nowrap">';
 
         $generic_commande->id = $objp->rowid;
         $generic_commande->ref = $objp->ref;
 
-		print '<table class="nobordernopadding"><tr class="nocellnopadd">';
+		print '<table class="nobordernopadding">';
+                print '<tr class="nocellnopadd">';
 		print '<td class="nobordernopadding nowrap">';
 		print $generic_commande->getNomUrl(1,($viewstatut != 2?0:$objp->fk_statut));
 		print '</td>';

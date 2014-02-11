@@ -525,7 +525,7 @@ if ($id > 0)
 	 */
 	if (! empty($conf->commande->enabled) && $user->rights->commande->lire)
 	{
-		$commande_static=new Commande($db);
+		$commande_static=new /*deb mod drsi Commande*/Synopsis_Commande/*f mod drsi*/($db);
 
 		$sql = "SELECT s.nom, s.rowid,";
 		$sql.= " c.rowid as cid, c.total_ht, c.ref, c.fk_statut, c.facture,";
@@ -574,8 +574,28 @@ if ($id > 0)
 			{
 				$objp = $db->fetch_object($resql);
 				$var=!$var;
-				print "<tr $bc[$var]>";
                                 /* Mod drsi */
+                                $commande_static->id = $objp->cid;
+                                if(isset($memoireG) && count($memoireG) > 1 && !isset($memoireG[$commande_static->id])){
+                                        echo "</table></tr></td>";
+                                        $memoireMoin = true;
+                                }
+                               if(isset($memoireG) && count($memoireG) > 1 && isset($memoireG[$commande_static->id])){
+                                    $MAXLIST++;
+                                }
+                                else{
+                                    $memoireG = $commande_static->listGroupMember(false);
+                                    if(count($memoireG) > 0){
+                                        $MAXLIST++;
+                                        echo "<tr class='impaire'><td>".$commande_static->OrderGroup->getNomUrl(1)."<br/><span align='right'>".$commande_static->OrderGroup->qteInGrp." commandes Total : ".price($commande_static->OrderGroup->total_ht)." €</span></td><td  colspan='3'><table class='noborder'>";
+                                    }
+                                    elseif($memoireMoin){
+                                        $MAXLIST--;
+                                        $memoireMoin = false;
+                                    }
+                                }
+                                     
+				print "<tr $bc[$var]>";
                                 if(isset($conf->global->MAIN_MODULE_SYNOPSISPREPACOMMANDE))
                                     print '<td nowrap="nowrap"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$objp->cid.'">'.img_object($langs->trans("ShowOrder"),"order").' '.$objp->ref."</a>\n";
                                 else

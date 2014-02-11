@@ -9,6 +9,7 @@ class CommandeGroup extends CommonObject{
     public $commandes =array();
     public $nom;
     public $qteInGrp;
+    public $total_ht = 0;
 
     public function CommandeGroup($db) {
         $this->db = $db;
@@ -35,6 +36,7 @@ class CommandeGroup extends CommonObject{
                     $comTmp = new Synopsis_Commande($this->db);
                     $comTmp->fetch($res->command_refid);
                     $this->commandes[$res->command_refid] = $comTmp;
+                    $this->total_ht += $comTmp->total_ht;
                 }
             }
             return $this->id;

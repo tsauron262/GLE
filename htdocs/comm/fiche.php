@@ -602,8 +602,9 @@ if ($id > 0)
 	if (! empty($conf->contrat->enabled) && $user->rights->contrat->lire)
 	{
 		$contratstatic=new Contrat($db);
-
-		$sql = "SELECT s.nom, s.rowid, c.rowid as id, c.ref as ref, c.statut, c.datec as dc";
+/*mod drsi
+		$sql = "SELECT s.nom, s.rowid, c.rowid as id, c.ref as ref, c.statut, c.datec as dc";*/
+		$sql = "SELECT s.nom, s.rowid, c.rowid as id, c.ref as ref, c.statut, c.date_contrat as dc";/*f mod drsi*/
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contrat as c";
 		$sql.= " WHERE c.fk_soc = s.rowid ";
 		$sql.= " AND s.rowid = ".$object->id;
@@ -635,7 +636,7 @@ if ($id > 0)
 				print '<td class="nowrap">';
 				$contrat->id=$objp->id;
 				$contrat->ref=$objp->ref?$objp->ref:$objp->id;
-				print $contrat->getNomUrl(1,20);
+				print $contrat->getNomUrl(1,/*mod drsi 20*/25/*f mod drsi*/);
 				print "</td>\n";
 				print '<td align="right" width="80">'.dol_print_date($db->jdate($objp->dc),'day')."</td>\n";
 				print '<td width="20">&nbsp;</td>';

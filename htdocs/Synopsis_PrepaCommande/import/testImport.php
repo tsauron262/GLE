@@ -231,25 +231,38 @@ $remArrayComLigne = array(); // array contenant les commandes importer dans le f
 //Deplacement fichier OK et KO
 //Verif que le destinataire des mails de notification inclut bien l'auteur de la commande
 
-
-if (file_exists($dir . "temp/.importRunning")) {
-    print "Un import est d&eacute;j&agrave; en cours\n";
-    exit;
+$webContent = "";
+if ($displayHTML) {
+    llxHeader();
 }
-touch($dir . "temp/.importRunning");
+
+$filename = $dir . "temp/.importRunning";
+
+if (file_exists($filename)) {
+    if (isset($_REQUEST['deblocker']) && $_REQUEST['deblocker'])
+        unlink($filename);
+    else {
+        $dateI = date("d-m-Y H:i", file_get_contents($filename));
+        print "Un import est d&eacute;j&agrave; en cours depuis : " . $dateI . "<br/><br/>";
+        $dateDeblock = date("d-m-Y H:i", file_get_contents($filename) + 60 * 3);
+        if ($dateDeblock < date("d-m-Y H:i"))
+            echo "<a href='?deblocker=true'>Déblocker</a>";
+        else
+            echo "Deblockage possible aprés " . $dateDeblock;
+        exit;
+    }
+}
+touch($filename);
+file_put_contents($filename, time());
 $mailContent = "";
 $mailSumUpContent = array('nbFile' => 0, 'nbLine' => 0, 'nbLigneModif' => 0, 'commande' => array());
 $fileArray = array();
 $imported = "/imported/";
 
 $premiereDesc = true;
-
+die;
 global $langs, $conf;
 
-$webContent = "";
-if ($displayHTML) {
-    llxHeader();
-}
 $webContent .= " <a href='index.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Retour</span></a>";
 //$arrayImport = array();
 //1 ouvre le rep et trouve les fichiers
@@ -349,7 +362,7 @@ if (is_dir($dir)) {
                     $ligneNum = 0;
                     $arrDesc = array();
                     $arrConvNumcol2Nomcol = array();
-                    $mailSumUpContent['nbFile']++;
+                    $mailSumUpContent['nbFile'] ++;
                     foreach ($lines as $key => $val) {
                         if (!strlen($val) > 10)
                             continue;
@@ -448,7 +461,7 @@ if (is_dir($dir)) {
                     $paysGlobal = processPays($val['PysCode']);
                     $externalUserId = $val['PcvGPriID'];
                     $internalUserId = processUser($externalUserId);
-                    $mailSumUpContent['nbLine']++;
+                    $mailSumUpContent['nbLine'] ++;
                     $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
                     $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
 
@@ -1250,7 +1263,7 @@ if (is_dir($dir)) {
                                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
                                 $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
                                 $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
-                                $ref = ($val['PcvFree8'] != "")? $val['PcvFree8'] : $val['PcvCode'];
+                                $ref = ($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode'];
                                 $oldRef = false;
 
                                 $tabRef = explode("-", $ref);
@@ -1266,7 +1279,7 @@ if (is_dir($dir)) {
                                 $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
                                 if ($result) {
                                     $oldRef = $ref;
-                                    $ref = "TEMP(" . (($val['PcvFree8'] != "")? $val['PcvFree8'] : $val['PcvCode']) . ")";
+                                    $ref = "TEMP(" . (($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode']) . ")";
                                     $newRef = null;
                                     $oldId = $result[0];
                                 }
@@ -1423,8 +1436,7 @@ if (is_dir($dir)) {
                                 } elseif ($premiereDesc && $val['PlvLib'] != "") {
                                     $prodType = 100;
                                     $premiereDesc = false;
-                                }
-                                else
+                                } else
                                     $prodType = 106;
                                 $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
                                        (fk_propal,
@@ -1663,8 +1675,7 @@ if (is_dir($dir)) {
                             $webContent .= "<td class='KOtd error ui-widget-content'>Effacement de la liaison commande - groupe KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
                             $mailContent .= "<td style='background-color: #FFF;'>Effacement de la liaison commande - groupe KO</td>" . "\n";
                         }
-                    }
-                    else
+                    } else
                         $webContent .= ("pas de groupe commande");
                 } else {
                     //Recupere le groupeId
@@ -1870,7 +1881,7 @@ print "<br/><br/>Cache suppr : " . $tabStat['ef'];
   |                                                                                                              |
   +--------------------------------------------------------------------------------------------------------------+
  */
-unlink($dir . "temp/.importRunning");
+unlink($filename);
 
 global $logLongTime;
 $logLongTime = false;
@@ -2159,7 +2170,7 @@ function fetchWithCache($result) {
     $tabRequete = $tabRequeteP;
     $resultStr = get_resource_id($result);
     if (isset($tabRequete[$resultStr]['result'])) {
-        $tabStat['pc']++;
+        $tabStat['pc'] ++;
         $tabRequete[$resultStr]['index'] = $tabRequete[$resultStr]['index'] + 1;
         $index = $tabRequete[$resultStr]['index'];
         if (isset($tabRequete[$resultStr]['result'][$index]))
@@ -2168,7 +2179,7 @@ function fetchWithCache($result) {
             return false;
     }
     else {
-        $tabStat['pd']++;
+        $tabStat['pd'] ++;
         return $db->fetch_object($result);
     }
 }
@@ -2184,7 +2195,7 @@ function requeteWithCache($requete) {
     $noCache = true;
 
     if ($noCache) {
-        $tabStat['d']++;
+        $tabStat['d'] ++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL NO CACHE : " . $requete);
@@ -2221,19 +2232,19 @@ function requeteWithCache($requete) {
 
     if ($tabSuppr && isset($tabRequete[$tabSuppr])) {
         $tabRequete[$tabSuppr] = array();
-        $tabStat['ef']++;
+        $tabStat['ef'] ++;
     }
 
 
 
     if (isset($tabRequete[$tab][$requete])) {
-        $tabStat['c']++;
+        $tabStat['c'] ++;
         $result = $tabRequete[$tab][$requete];
         $strResult = get_resource_id($result);
         $tabRequete[$strResult]['index'] = -1;
         $result->data_seek(0);
     } else {
-        $tabStat['d']++;
+        $tabStat['d'] ++;
         $result = $db->query($requete);
         if (!$result)
             die("Erreur SQL : " . $requete);
@@ -2242,7 +2253,7 @@ function requeteWithCache($requete) {
             $tabRequete[$strResult]['result'] = array();
             $i = 0;
             while ($obj = $db->fetch_object($result)) {
-                $tabStat['pcd']++;
+                $tabStat['pcd'] ++;
 //            $tabRequete[$tab][$requete]['result'][$i] = $obj;
 //            $tabRequete[$tab][$requete]['count'] = $i;
 //            $tabRequete[$tab][$requete]['sql'] = $result;

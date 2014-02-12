@@ -41,6 +41,8 @@ print "<tr><th class='ui-widget-header ui-state-hover' colspan=4>Interventions";
 //    }
 //}
 $arrGrpCom = $com->listIdGroupMember();
+if(!$arrGrpCom)
+    $arrGrpCom = array($com->id);
 
 //Vendu en euro
 $requete = "SELECT SUM(total_ht) as tht

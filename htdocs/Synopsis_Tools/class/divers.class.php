@@ -486,7 +486,7 @@ class Synopsis_Commande extends Commande {
             }
             return $return;
         }
-        return false;
+        return array($this->id);
     }
     
     public function isGroupMember() {
@@ -563,8 +563,6 @@ class Synopsis_Commande extends Commande {
 
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
         $grp = $this->listIdGroupMember();
-        if(!$grp)
-            $grp = array($this->id);
         return $this->fetch_commande_lignes($grp, $only_product, $only_service, $only_contrat, $only_dep, $srv_dep);
 //        $lines = array();
 //        $comms = $this->listGroupMember(false);

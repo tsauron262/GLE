@@ -494,7 +494,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $msg .= "" . $this->user_prisencharge->fullname . " a bien pris en charge la DI " . $this->ref . " chez " . $this->societe->getNomUrl(1, 6) . ".";
                     $msg .= "<br/>";
                     $msg .= "<br/>";
-                    $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1, 6);
+                    $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);
 
                     $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
                     $from = $conf->global->BIMP_MAIL_FROM;

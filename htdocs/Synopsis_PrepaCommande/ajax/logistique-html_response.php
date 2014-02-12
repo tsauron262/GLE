@@ -367,6 +367,8 @@ function displayLogistique($com) {
         $com->fetch_lines(1);
         if (count($com->lines) > 0) {
             foreach ($com->lines as $key => $val) {
+                if ($val->fk_product <= 0)
+                    continue;
                 $prod->fetch($val->fk_product);
                 if ($prod->type <> 0)
                     continue;

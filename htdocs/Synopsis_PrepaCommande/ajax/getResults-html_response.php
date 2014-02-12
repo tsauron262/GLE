@@ -32,14 +32,15 @@ print "<table><tr><td valign=top colspan=2>";
 print "<table cellpadding=10 width=764>";
 print "<tr><th class='ui-widget-header ui-state-hover' colspan=4>Interventions";
 //Prevu dans la commande
-$arrGrp = array();
-$arrGrpCom = array($com->id => $com->id);
-$arrGrp = $com->listGroupMember(true);
-if (count($arrGrp) > 0 && $arrGrp) {
-    foreach ($arrGrp as $key => $commandeMember) {
-        $arrGrpCom[$commandeMember->id] = $commandeMember->id;
-    }
-}
+//$arrGrp = array();
+//$arrGrpCom = array($com->id => $com->id);
+//$arrGrp = $com->listGroupMember(true);
+//if (count($arrGrp) > 0 && $arrGrp) {
+//    foreach ($arrGrp as $key => $commandeMember) {
+//        $arrGrpCom[$commandeMember->id] = $commandeMember->id;
+//    }
+//}
+$arrGrpCom = $com->listIdGroupMember();
 
 //Vendu en euro
 $requete = "SELECT SUM(total_ht) as tht
@@ -167,6 +168,16 @@ while ($res = $db->fetch_object($sql)) {
 }
 print "</table>";
 
+//Lignes
+//$com->fetch_group_lines();
+//$lines = $com->lines;
+$sql = $db->query("SELECT `fk_product`, `total_ht` FROM `llx_commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
+$i = 0;
+while ($val = $db->fetch_object($sql)) {
+    $lines[$i] = $val;
+    $i++;
+}
+
 //Categorie
 $requete = "SELECT l.catId, c.label FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent as l, " . MAIN_DB_PREFIX . "categorie as c WHERE l.catId = c.rowid";
 $sqlContent = $db->query($requete);
@@ -190,21 +201,33 @@ while ($resContent = $db->fetch_object($sqlContent)) {
     $arrCat = array();
     $arrPos = array();
     $arrLabelSort = array();
-    $com->fetch_group_lines();
-    foreach ($com->lines as $key => $val) {
+    $ArrCat = array();
+
+    $sql = $db->query("SELECT `fk_product`, `total_ht` FROM `llx_commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
+    foreach ($lines as $key => $val) {
+//    while ($val = $db->fetch_object($sql)) {
         if ($val->fk_product > 0) {
             $replacePosition++;
-            $requete = "SELECT ct.fk_categorie, c.label, c.rowid, '" . $replacePosition . "' as position, fk_parent
+            if (!isset($ArrCat[$val->fk_product])) {
+                $ArrCat[$val->fk_product] = array();
+                $requete = "SELECT ct.fk_categorie, c.label, c.rowid, '" . $replacePosition . "' as position, fk_parent
                       FROM " . MAIN_DB_PREFIX . "categorie_product as ct
                         LEFT JOIN " . MAIN_DB_PREFIX . "categorie as c ON ct.fk_categorie = c.rowid
                      WHERE  ct.fk_product = " . $val->fk_product . "
                          AND c.rowid IN (SELECT catId FROM " . MAIN_DB_PREFIX . "Synopsis_PrepaCom_c_cat_listContent)";
-            $sql = $db->query($requete);
+                $sql = $db->query($requete);
+                if (!$sql)
+                    die("Erreur SQL " . $requete);
+                while ($res1 = $db->fetch_object($sql)) {
+                    $ArrCat[$val->fk_product][] = $res1;
+                }
+            }
 
 
 //            print $requete."<br/>";
             if ($sql) {
-                while ($res1 = $db->fetch_object($sql)) {
+//                while ($res1 = $db->fetch_object($sql)) {
+                foreach ($ArrCat[$val->fk_product] as $res1) {
                     $result = asPosition($res1->label);
                     if ($result) {
                         $res1->label = $result[1];

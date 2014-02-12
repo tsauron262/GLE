@@ -202,7 +202,7 @@ class synopsisHook {
         echo "<div class='notificationText'></div><div class='notificationObj'></div>";
 
         $time = (microtime(true) - self::$timeDeb);
-        if ($time > 4 && (!isset($logLongTime) || $logLongTime))
+        if ($time > 2 && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4);
         echo "<span class='timePage'>" . $time . " s</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
@@ -458,49 +458,37 @@ class Synopsis_Commande extends Commande {
     }
 
     function fetch_lines($only_product = 0) {
-        parent::fetch_lines($only_product);
-//        $this->lines=array();
-
-        foreach ($this->lines as $id => $line) {
-            $newLine = new Synopsis_OrderLine($this->db);
-            $newLine->fetch($this->lines[$id]->id);
-            $this->lines[$id] = $newLine;
-        }
-        return;
-        $sql = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
-        $sql.= ' WHERE l.fk_commande = ' . $this->id;
-        if ($only_product)
-            $sql .= ' AND p.fk_product_type = 0';
-        $sql .= ' ORDER BY l.rang';
-
-        dol_syslog("Commande::fetch_lines sql=" . $sql, LOG_DEBUG);
-        $result = $this->db->query($sql);
-        if ($result) {
-            $num = $this->db->num_rows($result);
-
-            $i = 0;
-            while ($i < $num) {
-                $objp = $this->db->fetch_object($result);
-
-                $line = new OrderLine($this->db);
-
-                $line->fetch($objp->rowid);
-
-                $this->lines[$i] = $line;
-
-                $i++;
-            }
-            $this->db->free($result);
-            parent::fetch_lines($only_product);
-            return 1;
-        } else {
-            $this->error = $this->db->error();
-            dol_syslog('Commande::fetch_lines: Error ' . $this->error, LOG_ERR);
-            return -3;
-        }
+//        parent::fetch_lines($only_product);
+////        $this->lines=array();
+//
+//        foreach ($this->lines as $id => $line) {
+//            $newLine = new Synopsis_OrderLine($this->db);
+//            $newLine->fetch($this->lines[$id]->id);
+//            $this->lines[$id] = $newLine;
+//        }
+//        return;
+        return $this->fetch_commande_lignes(array($this->id), $only_product);
     }
 
 //La commande est elle membre d'un groupe
+    public function listIdGroupMember(){
+//        return false;
+        $requete = "SELECT command_refid "
+                . "FROM `" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet` "
+                . "WHERE `commande_group_refid` = (SELECT `commande_group_refid` "
+                . "                                 FROM `" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet` "
+                . "                                 WHERE `command_refid` = ".$this->id.")";
+        $sql = $this->db->query($requete);
+        $return = array();
+        if ($this->db->num_rows($sql) > 0) {
+            while($result = $this->db->fetch_object($sql)){
+                $return[$result->command_refid] = $result->command_refid;
+            }
+            return $return;
+        }
+        return false;
+    }
+    
     public function isGroupMember() {
 //        return false;
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id as gid
@@ -535,25 +523,63 @@ class Synopsis_Commande extends Commande {
         }
         return array();
     }
+    
+    function fetch_commande_lignes($arrId, $only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0){
+        
+        $sql1 = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
+        $sql2 = ' WHERE l.fk_commande IN (' . implode(",", $arrId).")";
+        if ($only_product){
+            $sql1 .= ', ' . MAIN_DB_PREFIX . 'product as p';
+            $sql2 .= ' AND p.fk_product_type = 0 AND p.rowid = l.fk_product';
+        }
+        $sql2 .= ' ORDER BY l.rang';
+        
+        dol_syslog("Commande::fetch_lines sql=" . $sql1.$sql2, LOG_DEBUG);
+        $result = $this->db->query($sql1.$sql2);
+        if ($result) {
+            $num = $this->db->num_rows($result);
+
+            $i = 0;
+            while ($i < $num) {
+                $objp = $this->db->fetch_object($result);
+
+                $line = new Synopsis_OrderLine($this->db);
+
+                $line->fetch($objp->rowid);
+
+                $this->lines[$i] = $line;
+
+                $i++;
+            }
+            $this->db->free($result);
+//            parent::fetch_lines($only_product);
+            return $this->lines;
+        } else {
+            $this->error = $this->db->error();
+            dol_syslog('Commande::fetch_lines: Error ' . $this->error, LOG_ERR);
+            return -3;
+        }
+    }
 
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
-        $lines = array();
-        $comms = $this->listGroupMember(false);
-        $i = 0;
-        if (count($comms) > 0) {
-            foreach ($comms as $commande) {
-                $commande->fetch_lines();
-                foreach ($commande->lines as $ligne) {
-                    $lines[$i] = $ligne;
-                    $i++;
-                }
-//            $this->lines = array_merge($this->lines, $commande->lines);
-            }
-            $this->lines = $lines;
-        } else
-            $this->fetch_lines($only_product);
-        return true;
-//        return $this->fetch_lines($only_product);
+        return $this->fetch_commande_lignes($this->listIdGroupMember(), $only_product, $only_service, $only_contrat, $only_dep, $srv_dep);
+//        $lines = array();
+//        $comms = $this->listGroupMember(false);
+//        $i = 0;
+//        if (count($comms) > 0) {
+//            foreach ($comms as $commande) {
+//                $commande->fetch_lines();
+//                foreach ($commande->lines as $ligne) {
+//                    $lines[$i] = $ligne;
+//                    $i++;
+//                }
+////            $this->lines = array_merge($this->lines, $commande->lines);
+//            }
+//            $this->lines = $lines;
+//        } else
+//            $this->fetch_lines($only_product);
+//        return true;
+////        return $this->fetch_lines($only_product);
     }
 
     function getNomUrl($withpicto = 0, $option = 0, $max = 0, $short = 0) {

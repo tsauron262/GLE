@@ -39,8 +39,8 @@ $langs->load("synopsisGene@Synopsis_Tools");
 $langs->load('deliveries');
 $langs->load('products');
 
-if($user->societe_id)
-    header("Location: ".DOL_URL_ROOT."/commande/fiche.php?id=".$_REQUEST['id']);
+if ($user->societe_id)
+    header("Location: " . DOL_URL_ROOT . "/commande/fiche.php?id=" . $_REQUEST['id']);
 
 if (!$user->rights->commande->lire)
     accessforbidden();
@@ -52,9 +52,9 @@ $socid = 0;
 if ($user->societe_id > 0) {
     $socid = $user->societe_id;
 }
+$commande = new Synopsis_Commande($db);
+$commande->fetch((int) $_GET['id']);
 if ($user->societe_id > 0 && isset($_GET["id"]) && $_GET["id"] > 0) {
-    $commande = new Synopsis_Commande($db);
-    $commande->fetch((int) $_GET['id']);
     if ($user->societe_id != $commande->socid) {
         accessforbidden();
     }
@@ -78,15 +78,13 @@ if (!$id > 0) {
     print "<div class='error ui-error'>Pas de commande s&eacute;lectionn&eacute;e";
     exit;
 }
-$com = new Synopsis_Commande($db);
-$com->fetch($id);
 
-//saveHistoUser($com->id, "prepaCom",$com->ref);
+//saveHistoUser($commande->id, "prepaCom",$commande->ref);
 
 
 $js = '<script>';
 $js .= ' userId = ' . $user->id . ';';
-$js .= ' socId = ' . $com->socid . ';
+$js .= ' socId = ' . $commande->socid . ';
     comId = ' . $id . ';';
 $js .= ' DOL_URL_ROOT = "' . DOL_URL_ROOT . '";';
 $js.=<<<EOF
@@ -312,7 +310,7 @@ $js .= "<style>.submenu:hover { cursor: pointer; text-decoration: underline; fon
 </style>";
 llxHeader($js, "Préparation de commande");
 
-$head = commande_prepare_head($com);
+$head = commande_prepare_head($commande);
 dol_fiche_head($head, 'prepaCommande', $langs->trans("Preparation de commande"), 0, 'order');
 
 
@@ -321,7 +319,7 @@ print "<div class='titre'>Pr&eacute;paration</div>";
 //
 //
 //print "<table>";
-//foreach($com->lines as $key=>$val)
+//foreach($commande->lines as $key=>$val)
 //{
 //    print "<tr><td>".$val->desc;
 //    print "    <td>".$val->fk_prod;

@@ -347,7 +347,7 @@ EOF;
         if ($arrGrpTmp) {
             //ligne de la commande
             print '<tr><th style="padding: 5px;" colspan=' . $colspan . ' class="ui-state-default ui-widget-header">' . $commande->ref . '</th>';
-            foreach ($commande->liges as $key => $val) {
+            foreach ($commande->lines as $key => $val) {
                 $libelle = $val->libelle;
                 if ($val->fk_product > 0) {
                     $tmpProd = new Product($db);

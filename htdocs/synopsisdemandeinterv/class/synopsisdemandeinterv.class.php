@@ -500,7 +500,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $from = $conf->global->BIMP_MAIL_FROM;
                     $addr_cc = $this->user_prisencharge->email;
 
-                    $this->sendMail($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
+                    mailSyn2($subject, $to, $from, $msg, array(), array(), array(), $addr_cc, '', 0, 1, $from);
                 }
 
                 return 1;

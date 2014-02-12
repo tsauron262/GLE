@@ -562,7 +562,10 @@ class Synopsis_Commande extends Commande {
     }
 
     function fetch_group_lines($only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
-        return $this->fetch_commande_lignes($this->listIdGroupMember(), $only_product, $only_service, $only_contrat, $only_dep, $srv_dep);
+        $grp = $this->listIdGroupMember();
+        if(!$grp)
+            $grp = array($this->id);
+        return $this->fetch_commande_lignes($grp, $only_product, $only_service, $only_contrat, $only_dep, $srv_dep);
 //        $lines = array();
 //        $comms = $this->listGroupMember(false);
 //        $i = 0;

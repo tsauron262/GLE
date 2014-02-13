@@ -1035,7 +1035,7 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
         $clause = "Entre les soussignés";
         $clause1 = "BIMP INFORMATIQUE";
         $clause2 = "Société Anonyme OLYS au capital de 85 372 Euros, dont le siège social sis 4 rue du Cdt. Dubois
-69003 LYON, représentée par Monsieur Roland CHASSING, Président Directeur Général.
+69003 LYON, représentée par Monsieur Christian CONSTANTIN, Président Directeur Général.
 
 d'une part
 Et,";
@@ -1142,7 +1142,7 @@ Le ...................,
         $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'J');
         $remY = $pdf->GetY();
         $signature2 = "Pour BIMP Informatique :
-M. Roland CHASSING
+M. Christian CONSTANTIN
 Signature et cachet";
 
         $signature1 = "Pour  " . utf8_encode($this->contrat->societe->nom) . ":

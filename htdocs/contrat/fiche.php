@@ -90,6 +90,10 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $id = $contratSyn->renouvellementSimple($user);
             header('location: fiche.php?id=' . $id);
         }
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'reconduction') {
+            $contratSyn->reconduction($user);
+            header('location: fiche.php?id=' . $_REQUEST["id"]);
+        }
         
         if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
 //    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($object->typeContrat == 6 || $object->typeContrat == 5)) {
@@ -1753,8 +1757,10 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
         print '<div class="inline-block divButAction">';
         if ($object->statut == 1 || $object->statut == 2) {
 //            print "<br/>";
-            if ($user->rights->synopsiscontrat->renouveller)
+            if ($user->rights->synopsiscontrat->renouveller){
                 print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
+                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=reconduction">' . $langs->trans('Reconduction') . '</a>';
+            }
         }
         
         

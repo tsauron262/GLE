@@ -48,6 +48,16 @@ class Synopsis_Contrat extends Contrat {
                             " . $type . ", '" . $qteTempsPerDuree . "','" . $qteTktPerDuree . "','" . $nbVisite . "')";
         $sql1 = $this->db->query($requete2);
     }
+    
+    public function reconduction($user){
+        $this->fetch_lines();
+        $dateM = 0;
+        foreach($this->lines as $ligne)
+            if($ligne->date_fin_validite > $dateM)
+                $dateM = $ligne->date_fin_validite;
+            
+        $this->setDate(date("Y/m/d",$this->date_contrat), date("Y/m/d",$dateM));
+    }
 
     public function renouvellementSimple($user) {
         $newContrat = new Synopsis_Contrat($this->db);
@@ -1464,8 +1474,8 @@ class Synopsis_Contrat extends Contrat {
 //        $return .= '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;';
         return $return;
     }
-
-    public function setDateContrat($date) {
+    
+    public function setDate($dateDeb, $dateProlongation){
         $this->fetch_lines();
         $dureeMax = 0;
         $tmpProd = new Product($this->db);
@@ -1481,17 +1491,20 @@ class Synopsis_Contrat extends Contrat {
             }
             if ($duree > $dureeMax)
                 $dureeMax = $duree;
-            $query = "UPDATE " . MAIN_DB_PREFIX . "contratdet SET date_ouverture_prevue = '" . $date . "'";
+            $query = "UPDATE " . MAIN_DB_PREFIX . "contratdet SET date_ouverture_prevue = '" . $dateDeb . "'";
             if ($ligne->date_ouverture)
-                $query .= ", date_ouverture = '" . $date . "', date_fin_validite = date_add('" . $date . "',INTERVAL " . $duree . " MONTH)";
-
+                $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH)";
+//die($query . " WHERE rowid = " . $ligne->id);
             $sql = $this->db->query($query . " WHERE rowid = " . $ligne->id);
-        }
-        $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $date . "'";
+        $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $dateDeb . "'";
         if ($this->mise_en_service)
-            $query .= ", mise_en_service = '" . $date . "', fin_validite = date_add('" . $date . "',INTERVAL " . $dureeMax . " MONTH)";
+            $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH)";
         $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
-//        echo $query . " WHERE rowid = " . $this->id;
+        }
+    }
+
+    public function setDateContrat($date) {
+        $this->setDate($date, $date);
     }
 
     public function addLigneCommande($commId, $comLigneId) {

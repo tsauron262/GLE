@@ -2438,13 +2438,13 @@ class lien extends formulaireSource {
     function displayForm() {
         print '<div class="formAjax">';
         print '<span class="showFormChrono editable">'. img_edit().'</span>';
+        $this->getValues();
         print '<div class="hide">';
         print '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
         print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElem . '"/>';
         print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElement . '"/>';
         print '<input type="hidden" name="targetid" class="targetid" value="' . $this->idChrono . '"/>';
         print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
-        $this->getValues();
         print '<select class ="chronoForm">';
         foreach ($this->valuesArr as $id => $val)
             print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";

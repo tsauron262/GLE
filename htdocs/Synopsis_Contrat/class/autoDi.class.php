@@ -53,7 +53,7 @@ class autoDi {
             foreach ($this->tabType as $type) {
                 $nbVisite = 0;
                 if ($type == 'visite')
-                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn'];
+                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn']*$lignes->qty;
                 if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance'] && $lignes->qty > 1)
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {

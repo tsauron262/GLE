@@ -364,8 +364,10 @@ function displayLogistique($com) {
     if (!$GROUP_COMMANDE || count($arrGrpTmp) == 0)
         $arrGrpTmp = array($com->id => $com);
     foreach ($arrGrpTmp as $com) {
-        $com->fetch_lines(1);
+        if (count($com->lines) === 0)
+            $com->fetch_lines(1);
         if (count($com->lines) > 0) {
+//                echo "<pre>";print_r($com);
             foreach ($com->lines as $key => $val) {
                 if ($val->fk_product <= 0)
                     continue;

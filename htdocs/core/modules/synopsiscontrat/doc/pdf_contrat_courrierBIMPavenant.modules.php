@@ -146,8 +146,18 @@ class pdf_contrat_courrierBIMPavenant extends ModeleSynopsiscontrat
 //                }
 //                $pdf1=new FPDI('P','mm',$this->format);
                 $pdf = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
 
                 $pdf1 = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf1->setPrintHeader(false);
+                    $pdf1->setPrintFooter(false);
+                }
 
                 $pdf->Open();
                 $pdf1->Open();

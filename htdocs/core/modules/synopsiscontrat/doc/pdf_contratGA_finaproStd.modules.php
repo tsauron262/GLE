@@ -129,8 +129,18 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
                 // Protection et encryption du pdf
                 
                 $pdf = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
 
                 $pdf1 = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf1->setPrintHeader(false);
+                    $pdf1->setPrintFooter(false);
+                }
                 $pdf->Open();
 //                $pdf->AddPage();
 

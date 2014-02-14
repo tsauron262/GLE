@@ -151,8 +151,18 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 //                    $pdf = new FPDI('P', 'mm', $this->format);
 //                }
                 $pdf = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf->setPrintHeader(false);
+                    $pdf->setPrintFooter(false);
+                }
 
                 $pdf1 = pdf_getInstance($this->format);
+                if (class_exists('TCPDF'))
+                {
+                    $pdf1->setPrintHeader(false);
+                    $pdf1->setPrintFooter(false);
+                }
 //                $pdf1 = new FPDI('P', 'mm', $this->format);
 
                 $requete = "SELECT *

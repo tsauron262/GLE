@@ -43,6 +43,12 @@ $sall=GETPOST('sall');
 $statut=GETPOST('statut')?GETPOST('statut'):1;
 $socid=GETPOST('socid');
 
+/* deb mod drsi */
+if (! $sortfield && $expirer){ 
+    $sortfield="date_fin";
+    $sortorder="ASC";
+}
+/* f mod drsi*/
 if (! $sortfield) $sortfield="c.rowid";
 if (! $sortorder) $sortorder="DESC";
 
@@ -68,6 +74,7 @@ $sql.= ' SUM('.$db->ifsql("cd.statut=0",1,0).') as nb_initial,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NULL OR cd.date_fin_validite >= ".$db->idate($now).")",1,0).') as nb_running,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NOT NULL AND cd.date_fin_validite < ".$db->idate($now).")",1,0).') as nb_expired,';
 $sql.= ' SUM('.$db->ifsql("cd.statut=4 AND (cd.date_fin_validite IS NOT NULL AND cd.date_fin_validite < ".$db->idate($now - $conf->contrat->services->expires->warning_delay).")",1,0).') as nb_late,';
+/* mod drsi */ $sql.= ' MIN(cd.date_fin_validite) as date_fin,';/* f mod drsi */
 $sql.= ' SUM('.$db->ifsql("cd.statut=5",1,0).') as nb_closed,';
 $sql.= " c.rowid as cid, c.ref, c.datec, c.date_contrat, c.statut,";
 $sql.= " s.nom, s.rowid as socid";
@@ -84,6 +91,10 @@ if ($search_contract) $sql.= " AND (".(is_numeric($search_contract)?"c.rowid = "
 if ($sall)            $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR cd.label LIKE '%".$db->escape($sall)."%' OR cd.description LIKE '%".$db->escape($sall)."%')";
 $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut,";
 $sql.= " s.nom, s.rowid";
+/*mod drsi */
+if($expirer)
+$sql.= " HAVING nb_late > 0";
+/*f mod drsi */
 $sql.= " ORDER BY $sortfield $sortorder";
 $sql.= $db->plimit($conf->liste_limit + 1, $offset);
 
@@ -104,6 +115,7 @@ if ($resql)
     print_liste_field_titre($langs->trans("Company"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
     //print_liste_field_titre($langs->trans("DateCreation"), $_SERVER["PHP_SELF"], "c.datec","","$param",'align="center"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("DateContract"), $_SERVER["PHP_SELF"], "c.date_contrat","","$param",'align="center"',$sortfield,$sortorder);
+    /* deb mod drsi */ print_liste_field_titre($langs->trans("DateFin"), $_SERVER["PHP_SELF"], "date_fin","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
     //print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "c.statut","","$param",'align="center"',$sortfield,$sortorder);
     print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(0,3).'</td>';
     print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(4,3,0).'</td>';
@@ -133,13 +145,14 @@ if ($resql)
         $obj = $db->fetch_object($resql);
         $var=!$var;
         print '<tr '.$bc[$var].'>';
-        print '<td class="nowrap"><a href="fiche.php?id='.$obj->cid.'">';
+        /*mod drsi */print '<td class="nowrap"><a href="'.DOL_URL_ROOT.'/contrat/fiche.php?id='.$obj->cid.'">';/*f mod drsi */
         print img_object($langs->trans("ShowContract"),"contract").' '.(isset($obj->ref) ? $obj->ref : $obj->cid) .'</a>';
         if ($obj->nb_late) print img_warning($langs->trans("Late"));
         print '</td>';
         print '<td><a href="../comm/fiche.php?socid='.$obj->socid.'">'.img_object($langs->trans("ShowCompany"),"company").' '.$obj->nom.'</a></td>';
         //print '<td align="center">'.dol_print_date($obj->datec).'</td>';
         print '<td align="center">'.dol_print_date($db->jdate($obj->date_contrat)).'</td>';
+       /* mod drsi */ print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin)).'</td>';/*f mod drsi*/
         //print '<td align="center">'.$staticcontrat->LibStatut($obj->statut,3).'</td>';
         print '<td align="center">'.($obj->nb_initial>0?$obj->nb_initial:'').'</td>';
         print '<td align="center">'.($obj->nb_running>0?$obj->nb_running:'').'</td>';

@@ -128,11 +128,11 @@ class InterfaceNotificationUser {
                 if ($result->fk_type_contact > 0) {
                     $tabMail = array();
                     $fk_soc = 0;
-                    if(isset($object->fk_soc) && $object->fk_soc > 0)
+                    if (isset($object->fk_soc) && $object->fk_soc > 0)
                         $fk_soc = $object->fk_soc;
-                    elseif(get_class($object) == "Societe")
+                    elseif (get_class($object) == "Societe")
                         $fk_soc = $object->id;
-                    
+
                     if ($result->fk_type_contact == 1001 && $fk_soc)
                         $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "societe_commerciaux ec WHERE ec.fk_user = u.rowid AND fk_soc =" . $fk_soc;
                     elseif ($result->fk_type_contact == 1002 && $fk_soc)
@@ -148,7 +148,8 @@ class InterfaceNotificationUser {
                         $tabMail[] = $result2->email;
                     $to .= implode(',', $tabMail);
                 }
-                mailSyn($to, $sujet, $message);
+                $from = $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '.fr>';
+                mailSyn2($sujet, $to, $from, $message);
             }
         }
 //		if (empty($conf->notification->enabled)) return 0;     // Module not active, we do nothing

@@ -1523,7 +1523,9 @@ EOF;
                 //Accès à la hotline
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">';
-                if ($product->array_options['options_2hotline'] > 0) {
+                if ($product->array_options['options_2hotline'] == -1) {
+                    print 'OUI Illimité';
+                }elseif ($product->array_options['options_2hotline'] > 0) {
                     print 'OUI '.$product->array_options['options_2hotline'];
                 }else {
                     print 'NON';

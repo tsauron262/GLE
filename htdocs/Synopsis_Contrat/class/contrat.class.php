@@ -1049,7 +1049,7 @@ class Synopsis_Contrat extends Contrat {
         if ($ligne->GMAO_Mixte['hotline'] <> 0) {
             echo "</td><td>";
             echo "Nb Appels : ";
-            if ($ligne->GMAO_Mixte['hotline'] < 0)
+            if ($ligne->GMAO_Mixte['hotline'] == -1)
                 echo "illimité";
             else
                 echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;

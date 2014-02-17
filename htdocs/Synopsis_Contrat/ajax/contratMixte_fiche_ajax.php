@@ -456,7 +456,7 @@ switch ($action) {
                             //télémaintenance
                             $telemaintenance = ($_REQUEST['telemaintenancemod'] == "on" ? 1 : ($_REQUEST['telemaintenancemod'] > 0 ? $_REQUEST['telemaintenancemod'] : false));
                             //Hotline
-                            $hotline = ($_REQUEST['hotlinemod'] == "on" ? 1 : ($_REQUEST['hotlinemod'] > 0 ? $_REQUEST['hotlinemod'] : false));
+                            $hotline = ($_REQUEST['hotlinemod'] == "on" ? 1 : ($_REQUEST['hotlinemod'] == -1 ? -1 : ($_REQUEST['hotlinemod'] > 0 ? $_REQUEST['hotlinemod'] : false)));
 //                            $qte = 1;
                             //durValidite
                             $durSAV = ($_REQUEST['DurValMntmod'] > 0 ? $_REQUEST['DurValMntmod'] : 0);

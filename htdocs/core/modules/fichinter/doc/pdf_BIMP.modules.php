@@ -500,7 +500,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                     $pdf->SetXY(30, 3);
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), 'b', 12);
                     $pdf->SetTextColor(255, 0, 0);
-                    $pdf->MultiCell(187, 4, utf8_decode("Merci de saisir le champs descriptifs de l'intervention et durée de l'intervention"), 0, 'L', 0);
+                    $pdf->MultiCell(187, 4, "Merci de saisir les champs descriptifs de l'intervention et durée de l'intervention", 0, 'L', 0);
                 }
 
                 $pdf->SetTextColor(0, 0, 0);

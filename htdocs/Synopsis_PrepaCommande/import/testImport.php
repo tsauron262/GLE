@@ -1624,6 +1624,8 @@ if (is_dir($dir)) {
 //                $webContent = '';
                 $mailContent = '';
             }
+        }
+        closedir($dh);
 
             foreach ($tabImportOK['commande'] as $ref => $tabT) {
                 $id = $tabT['id'];
@@ -1730,8 +1732,6 @@ if (is_dir($dir)) {
                 $propal->setStatut(0);
                 $propal->valid($user);
             }
-        }
-        closedir($dh);
 
 
         /*

@@ -235,10 +235,10 @@ class pdf_contrat_courrierBIMPsignature extends ModeleSynopsiscontrat
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Merci de parapher chaque page et de nous retourner les différents exemplaires ci-joints
-dûment remplis et signés, afin de finaliser votre dossier."),0,'J');
+dûment remplis et signés, afin de finaliser votre dossier."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Si vous optez pour le prélèvement automatique, merci de compléter et de signer l'autorisation de prélèvement ci-jointe et de nous la retourner accompagnée de votre RIB."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Si vous optez pour le prélèvement automatique, merci de compléter et de signer l'autorisation de prélèvement ci-jointe et de nous la retourner accompagnée de votre RIB."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Bimp et CiCenter restent à votre disposition pour tout renseignement complémentaire.

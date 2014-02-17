@@ -235,14 +235,14 @@ class pdf_contrat_courrierBIMPrenouvellement extends ModeleSynopsiscontrat
 une durée d'un an."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous recevrez alors la facture correspondante. En cas de références particulières (bon de commande officiel, N° interne, adresse spécifique de facturation, etc.) à notifier sur celle-ci, merci de nous les transmettre avant l'échéance de votre contrat afin que celles-ci soient prises en compte."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Vous recevrez alors la facture correspondante. En cas de références particulières (bon de commande officiel, N° interne, adresse spécifique de facturation, etc.) à notifier sur celle-ci, merci de nous les transmettre avant l'échéance de votre contrat afin que celles-ci soient prises en compte."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Conformément à l'autorisation de prélèvement annexée à votre contrat, votre débit s'effectuera environ une semaine après la date de facture.
-Merci de vérifier si vos coordonnées bancaires n'ont pas changé."),0,'J');
+Merci de vérifier si vos coordonnées bancaires n'ont pas changé."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Ce contrat sera totalement validé lors du règlement de la facture."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Ce contrat sera totalement validé lors du règlement de la facture."),0,'L');
 
 
 

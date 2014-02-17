@@ -346,7 +346,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->SetFont('', '', 8);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
                     //Data Type de contrat
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($extraDataType), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($extraDataType), 0, 'L', 1);
                     $nextY = $pdf->getY();
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
@@ -355,7 +355,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
                     //Data Désignation
                     $pdf->SetFont('Helvetica', '', 7);
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encode($val->prodContrat->ref . " - ")) . utf8_encodeRien(utf8_encode($libelleContrat)), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encode($val->prodContrat->ref . " - ")) . utf8_encodeRien(utf8_encode($libelleContrat)), 0, 'L', 1);
                     $pdf->SetFont('', '', 8);
                     $nextY = $pdf->getY();
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
@@ -367,7 +367,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->SetFont('Helvetica', '', 7);
 
                     $pdf->MultiCell($col2, $hauteur_ligne / 2, "  " . utf8_encodeRien(utf8_encode($val->product->libelle . "
-  " . $val->description . ($val->serial_number . "x" == "x" ? "" : " (SN: " . $val->serial_number . ")"))), 0, 'J', 1);
+  " . $val->description . ($val->serial_number . "x" == "x" ? "" : " (SN: " . $val->serial_number . ")"))), 0, 'L', 1);
                     $nextY = $pdf->getY();
                     $pdf->SetFont('', '', 8);
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
@@ -377,7 +377,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Tarif"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
                     //Data Prix
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encode(price($val->total_ht) . EURO . "  pour " . $val->GMAO_Mixte['durVal'] . " mois")), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien(utf8_encode(price($val->total_ht) . EURO . "  pour " . $val->GMAO_Mixte['durVal'] . " mois")), 0, 'L', 1);
                     $nextY = $pdf->getY();
                     $pdf->SetXY($this->marge_gauche - 1, $nextY);
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
@@ -387,7 +387,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     $pdf->MultiCell($col1, $hauteur_ligne, utf8_encodeRien("Date"), 0, 'C', 1);
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
 //                    //Data Date
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien("Du " . $val->date_debut_reel . " au " . $val->date_fin_prevue . ($val->GMAO_Mixte['reconductionAuto'] > 0 ? " avec reconduction automatique" : "")), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien("Du " . $val->date_debut_reel . " au " . $val->date_fin_prevue . ($val->GMAO_Mixte['reconductionAuto'] > 0 ? " avec reconduction automatique" : "")), 0, 'L', 1);
                     $nextY = $pdf->getY();
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
@@ -418,7 +418,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
 
                     $pdf1->SetX(0);
                     $pdf1->SetY(0);
-                    $pdf1->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($condition), 0, 'J', 1);
+                    $pdf1->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($condition), 0, 'L', 1);
                     $sizeY = $pdf1->GetY();
                     $sizeX = $pdf1->GetX();
                     $hauteur_ligne2 = $hauteur_ligne;
@@ -429,7 +429,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $hauteur_ligne2 = $hauteur_ligne * 2;
                     }
                     //$condition .= "sizeY:".$sizeY." hauteur ligne:".$hauteur_ligne;
-                    $pdf->MultiCell($col2, $hauteur_ligne2, "  " . utf8_encodeRien($condition), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne2, "  " . utf8_encodeRien($condition), 0, 'L', 1);
                     $nextY = $remY;
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
 
@@ -452,7 +452,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                     }
                     //Data Info
                     $pdf->setXY($this->marge_gauche + $col1 - 1, $nextY);
-                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($info), 0, 'J', 1);
+                    $pdf->MultiCell($col2, $hauteur_ligne, "  " . utf8_encodeRien($info), 0, 'L', 1);
 //                    //Data Date
                     $nextY = $pdf->getY();
                     $pdf->Line($this->marge_gauche - 1, $nextY, $this->page_largeur - $this->marge_droite + 2, $nextY);
@@ -1117,39 +1117,39 @@ Le ...................,
 //Filtre => cloturer => ne s'affiche, tout ce qui est brouillon ne s'affiche pas
 
         $pdf->SetXY($this->marge_gauche + $decal_x, $this->marge_haute + $decal_y);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause1), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause1), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause2), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause2), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause3), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause3), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause4), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause4), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause5), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause5), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause6), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause6), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause7), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause7), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause8), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause8), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause9), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause9), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause10), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause10), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause11), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause11), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause12), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause12), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause13), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause13), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause14), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause14), 0, 'L');
         $pdf->SetFont('', 'B', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause15), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause15), 0, 'L');
         $pdf->SetFont('', '', 9);
-        $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'J');
+        $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'L');
         $remY = $pdf->GetY();
         $signature2 = "Pour BIMP Informatique :
 M. Christian CONSTANTIN-BERTIN

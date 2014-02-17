@@ -235,10 +235,10 @@ class pdf_contrat_courrierBIMPresiliation extends ModeleSynopsiscontrat
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Sachez que vous pouvez réactiver votre contrat à tout moment, ceci sur simple
-demande de devis."),0,'J');
+demande de devis."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+6);
-                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Restant à votre disposition, nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'J');
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,4,utf8_encodeRien("Restant à votre disposition, nous vous prions d'agréer, Madame, Monsieur, l'expression de nos sincères salutations."),0,'L');
 
                 $pdf->SetXY($this->marge_gauche,$pdf->GetY()+27);
                 $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 20) ,6,utf8_encodeRien("Mme OLAGNON

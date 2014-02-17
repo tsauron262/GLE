@@ -456,6 +456,7 @@ class Synopsisfichinter extends Fichinter {
     function setDI($idDI) {
         $requete = "DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target = " . $this->id;
         $res = $this->db->query($requete);
+        if($idDI > 0)
         $this->addDI($idDI);
     }
 

@@ -2495,9 +2495,9 @@ print "".$js;
                         $contratdet->fetch($result);
                         $html = "<br/>";
                         $color = "";
-                        $dtStr = date("c", $contratdet->date_fin_validite);
+                        $dtStr = ($contratdet->date_fin_validite > 0)? date("c", $contratdet->date_fin_validite) : null;
                         $dateF = new DateTime($dtStr);
-                        $dtStr = date("c", time());
+//                        $dtStr = date("c", time());
                         $dateActu = new DateTime();
                         $interval = date_diff($dateF, $dateActu);
                         if ($interval->format('%R%a') > 0)
@@ -2513,7 +2513,7 @@ print "".$js;
                             $html .= $product->getNomUrl(1) . " " . $product->description;
                             $html .= "<br/>";
                         }
-                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . date("d M Y", $contratdet->date_fin_validite);
+                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . (($contratdet->date_fin_validite > 0)? date("d M Y", $contratdet->date_fin_validite) : "n/c");
                         $html .= "<br/>";
                         $html .= "</div>";
                         $this->valuesArr[] = $html;
@@ -2567,7 +2567,7 @@ print "".$js;
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\">" . $this->picto . "</a>";
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)
-                $html .= "onclick='dispatchePopObject(" . $idVal . ", \"chrono\", function(){}, \"" . $text . "\"); return false;'";
+                $html .= "onclick='dispatchePopObject(" . $idVal . ", \"chrono\", function(){}, \"" . $text . "\",1); return false;'";
             else
                 $html .= "onclick='return confirm(\"Ceci va quiter la page sans enregistrer. Continuer ?\");'";
             $html .= ">" . $text . "</a>";

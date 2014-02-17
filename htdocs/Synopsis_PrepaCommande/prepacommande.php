@@ -374,6 +374,15 @@ print "<td valign=top width=900>Fiche";
 print "<div id='resDisp'>";
 print "</table>";
 
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'shipped' && $user->rights->commande->cloturer)
+{
+	$result = $commande->cloture($user);
+	if ($result < 0) $mesgs=$object->errors;
+}
+elseif (($commande->statut == 1 || $commande->statut == 2) && $user->rights->commande->cloturer) {
+    print '<br/><div class="inline-block"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $commande->id . '&amp;action=shipped">' . $langs->trans('ClassifyShipped') . '</a></div><br/><br/>';
+}
+
 
 print "<div id='replaceResult'>";
 

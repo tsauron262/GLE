@@ -1701,7 +1701,6 @@ $remCatGlob = false;
 
 foreach ($tabImportOK['commande'] as $ref => $tabT) {
     $id = $tabT['id'];
-    echo "mmmmmmmmmm" . $id;
     $codeAff = $tabT['codeAff'];
     $com = new Synopsis_Commande($db);
     $com->fetch($id);

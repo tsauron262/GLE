@@ -48,15 +48,15 @@ class Synopsis_Contrat extends Contrat {
                             " . $type . ", '" . $qteTempsPerDuree . "','" . $qteTktPerDuree . "','" . $nbVisite . "')";
         $sql1 = $this->db->query($requete2);
     }
-    
-    public function reconduction($user){
+
+    public function reconduction($user) {
         $this->fetch_lines();
         $dateM = 0;
-        foreach($this->lines as $ligne)
-            if($ligne->date_fin_validite > $dateM)
+        foreach ($this->lines as $ligne)
+            if ($ligne->date_fin_validite > $dateM)
                 $dateM = $ligne->date_fin_validite;
-            
-        $this->setDate(date("Y/m/d",$this->date_contrat), date("Y/m/d",$dateM));
+
+        $this->setDate(date("Y/m/d", $this->date_contrat), date("Y/m/d", $dateM));
     }
 
     public function renouvellementSimple($user) {
@@ -1025,7 +1025,7 @@ class Synopsis_Contrat extends Contrat {
     }
 
     function lignePlus($object) {
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
         $ligne = new Synopsis_ContratLigne($this->db);
         $ligne->fetch($object->rowid);
         echo "<table width='100%'><tr class='impair'><td>";
@@ -1055,10 +1055,10 @@ class Synopsis_Contrat extends Contrat {
                 echo $ligne->GMAO_Mixte['hotline'] * $ligne->qty;
         }
         if ($ligne->GMAO_Mixte['SLA'] != "") {
-            
-        echo "</td><td>";
-        echo "SLA : ";
-        echo $this->transSla($ligne->GMAO_Mixte['SLA']);
+
+            echo "</td><td>";
+            echo "SLA : ";
+            echo $this->transSla($ligne->GMAO_Mixte['SLA']);
         }
         echo "</td></tr>";
         echo "</table>";
@@ -1077,7 +1077,7 @@ class Synopsis_Contrat extends Contrat {
             $intSla = 8;
         if ($intSla > 0) {
             $sla = $intSla . "h";
-            $logoSla = '<img title="' .$sla . '" alt="SLA" style="vertical-align: middle;" src="'. DOL_URL_ROOT.'/Synopsis_Contrat/img/logoSLA' . $intSla . '.jpg"/>';
+            $logoSla = '<img title="' . $sla . '" alt="SLA" style="vertical-align: middle;" src="' . DOL_URL_ROOT . '/Synopsis_Contrat/img/logoSLA' . $intSla . '.jpg"/>';
         } else
             $logoSla = $sla;
         return $logoSla;
@@ -1474,8 +1474,8 @@ class Synopsis_Contrat extends Contrat {
 //        $return .= '<tr><td style="border-right: 1px solid #' . $colorb . '">&nbsp;';
         return $return;
     }
-    
-    public function setDate($dateDeb, $dateProlongation){
+
+    public function setDate($dateDeb, $dateProlongation) {
         $this->fetch_lines();
         $dureeMax = 0;
         $tmpProd = new Product($this->db);
@@ -1496,10 +1496,10 @@ class Synopsis_Contrat extends Contrat {
                 $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH)";
 //die($query . " WHERE rowid = " . $ligne->id);
             $sql = $this->db->query($query . " WHERE rowid = " . $ligne->id);
-        $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $dateDeb . "'";
-        if ($this->mise_en_service)
-            $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH)";
-        $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
+            $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $dateDeb . "'";
+            if ($this->mise_en_service)
+                $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH)";
+            $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
         }
     }
 
@@ -1644,19 +1644,31 @@ class Synopsis_Contrat extends Contrat {
 
     public function addAnnexe($annexeId) {
         $maxRang = 0;
-        $req1 = "SELECT max(`rang`) as max FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id;
+        $req1 = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id . " ORDER BY rang";
         $result = $this->db->query($req1);
-        while ($res = $this->db->fetch_object($result))
-            $maxRang = $res->max;
-        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (" . $annexeId . ", " . $this->id . ", " . ($maxRang + 1) . ", '')";
+        while ($res = $this->db->fetch_object($result)) {
+            $idAnn = $res->annexe_refid;
+            if ($idAnn != 36 && $idAnn != 25 && $idAnn != 2)
+                $tabEl[] = $idAnn;
+        }
+        $tabEl[] = 36;
+        $tabEl[] = 25;
+        $tabEl[] = 2;
+        if (!in_array($annexeId, $tabEl))
+                $tabEl[] = $annexeId;
+        $tabInsert = array();
+        foreach($tabEl as $id => $elem){
+            $tabInsert[] = "(" . $elem . ", " . $this->id . ", " . ($id+1) . ", '')";
+        }
+        $req2 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE contrat_refid = " . $this->id;
         if (!$this->db->query($req2))
             die($req2);
-        $req2 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE contrat_refid = " . $this->id . " AND annexe_refid IN (36,25,2)";
+        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES ".implode(",", $tabInsert);
         if (!$this->db->query($req2))
             die($req2);
-        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (36, " . $this->id . ", " . ($maxRang + 2) . ", ''), (25, " . $this->id . ", " . ($maxRang + 3) . ", ''), (2, " . $this->id . ", " . ($maxRang + 4) . ", '')";
-        if (!$this->db->query($req2))
-            die($req2);
+//        $req2 = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` (`annexe_refid`, `contrat_refid`, `rang`, `annexe`) VALUES (36, " . $this->id . ", " . ($maxRang + 2) . ", ''), (25, " . $this->id . ", " . ($maxRang + 3) . ", ''), (2, " . $this->id . ", " . ($maxRang + 4) . ", '')";
+//        if (!$this->db->query($req2))
+//            die($req2);
     }
 
 //    

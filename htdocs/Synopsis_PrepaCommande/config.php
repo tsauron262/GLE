@@ -209,8 +209,8 @@ if ($_REQUEST["action"] == 'totalCatList')
   //require_once('Var_Dump.php');
   //Var_Dump::Display($cat);
 
-  print "</form>";
   print "<button id='validateButton2' class='butAction'>Valider</button>";
+  print "</form>";
   print "</div>";
 
   $requete = "SELECT catId FROM ".MAIN_DB_PREFIX."Synopsis_PrepaCom_c_cat_listContent";

@@ -768,7 +768,7 @@ class Synopsis_Contrat extends Contrat {
 //        $html .= "<input id='" . $type . "Price' name='" . $type . "Price' style='width: 100px; text-align: center;'/>";
 //        $html .= '</td>';
 //        $html .= '<td align=right>TVA<td align=left width=180>';
-//        $html .= $form->load_tva($type . "Linetva_tx", "19.6", $mysoc, $this->societe, "", 0, false);
+//        $html .= $form->load_tva($type . "Linetva_tx", "20", $mysoc, $this->societe, "", 0, false);
 //
 //        $html .= '</td>';
 //        $html .= '<td align=right>Qt&eacute;</td><td align=left>';
@@ -1523,8 +1523,8 @@ class Synopsis_Contrat extends Contrat {
             die("Erreur SQL : " . $requete);
         $res = $db->fetch_object($sql);
         $total_ht = preg_replace('/,/', '.', $res->subprice * $res->qty);
-        $total_tva = preg_replace('/,/', '.', 0.196 * $total_ht);
-        $total_ttc = preg_replace('/,/', '.', 1.196 * $total_ht);
+        $total_tva = preg_replace('/,/', '.', 0.20 * $total_ht);
+        $total_ttc = preg_replace('/,/', '.', 1.20 * $total_ht);
         $sql = false;
 //for ($i = 0; $i < $qty; $i++) {
         /* $line0 = 0;
@@ -1595,7 +1595,7 @@ class Synopsis_Contrat extends Contrat {
                              total_ht, total_tva, total_ttc,fk_user_author,
                              "/* line_order,fk_commande_ligne,avenant, */ . "date_ouverture_prevue,date_ouverture, date_fin_validite)
                      VALUES (" . $contratId . ",'" . $res->fk_product . "',0,'" . addslashes($res->description) . "',
-                             19.6," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
+                             20," . $qte1 . "," . $res->subprice . "," . $res->subprice . ",
                              " . $total_ht . "," . $total_tva . "," . $total_ttc . "," . $user->id . "
                              " . /* $lineO.",".$comLigneId.",".$avenant. */",'" . $date . "','" . $date . "', date_add('" . $date . "',INTERVAL " . $duree . " MONTH))";
         $sql = $db->query($requete);
@@ -1780,7 +1780,7 @@ class Synopsis_Contrat extends Contrat {
 //        $html .=  "<input id='".$type."Price' name='".$type."Price' style='width: 100px; text-align: center;'/>";
 //        $html .=  '</td>';
 //        $html .=  '<td align=right>TVA<td align=left width=180>';
-//        $html .= $form->load_tva($type."Linetva_tx","19.6",$mysoc,$this->societe,"",0,false);
+//        $html .= $form->load_tva($type."Linetva_tx","20",$mysoc,$this->societe,"",0,false);
 //
 //        $html .=  '</td>';
 //        $html .=  '<td align=right>Qt&eacute;</td><td align=left>';
@@ -2366,7 +2366,7 @@ EOF;
         $html .= '<td class="ui-widget-content" colspan=3>' . "\n";
 
         $form = new Form($this->db);
-        $html .= $form->load_tva($type . 'tauxtva', '19.6', $mysoc, $this->societe->id, "", 0, false);
+        $html .= $form->load_tva($type . 'tauxtva', '20', $mysoc, $this->societe->id, "", 0, false);
 
         $html .= '<tr style="border: 1px Solid #0073EA;">' . "\n";
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Ajustement <em>Prorata temporis</em>' . "\n";

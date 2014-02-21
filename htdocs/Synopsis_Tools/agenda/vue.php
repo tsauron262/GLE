@@ -62,6 +62,19 @@ $js = <<<EOF
       border: 1px solid #aad;
       width: 270px;
     }
+        
+    .wc-header .wc-user-header a, .wc-header .wc-user-header{
+        overflow: visible;
+        height: 60px;
+        width: 60px;
+        -moz-transform:rotate(-45deg);
+        -webkit-transform:rotate(-45deg); 
+        -o-transform:rotate(-90deg);
+        -ms-transform : rotate(-90deg) 
+    }
+    .ui-widget-content td.ui-state-active{
+        background: none;
+    }
   </style>
 
 
@@ -132,7 +145,7 @@ $js .= <<<EOF
         
         data: 'events.json.php',
         users: [$userStr],
-        showAsSeparateUser: true,
+        showAsSeparateUser: false,
         displayOddEven: true,
         displayFreeBusys: true,
         daysToShow: 5,

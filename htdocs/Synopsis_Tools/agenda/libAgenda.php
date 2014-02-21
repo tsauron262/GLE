@@ -12,13 +12,13 @@ foreach($tabUser as $idUser => $nomUser){
 
 
 function getTabUser() {
-    global $user, $db;
+    global $user, $db, $langs;
     $tabUser = array();
     $tmpUser = new User($db);
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^user([0-9]*)$/', $key, $arrTmp)) {
             $tmpUser->fetch($val);
-            $tabUser[$val] = $tmpUser->getNomUrl();
+            $tabUser[$val] = '<span title="'.$tmpUser->getFullName($langs).'">'. $tmpUser->getNomUrl() ."</span>";
         }
     }
     if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']))

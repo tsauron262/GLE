@@ -17,10 +17,10 @@ $userStr = "'" . implode("','", $tabUser) . "'";
 $js = <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
     <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
- <link rel='stylesheet' type='text/css' href='../jquery/calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
-  <link rel="stylesheet" type="text/css" href="../jquery/calendar/jquery.weekcalendar.css" />
-  <link rel="stylesheet" type="text/css" href="../jquery/calendar/skins/default.css" />
-  <link rel="stylesheet" type="text/css" href="../jquery/calendar/skins/gcalendar.css" />
+ <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+  <link rel="stylesheet" type="text/css" href="./calendar/jquery.weekcalendar.css" />
+  <link rel="stylesheet" type="text/css" href="./calendar/skins/default.css" />
+  <link rel="stylesheet" type="text/css" href="./calendar/skins/gcalendar.css" />
   <style type="text/css">
     body {
       font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
@@ -64,12 +64,8 @@ $js = <<<EOF
     }
   </style>
 
-  <script type='text/javascript' src='../jquery/calendar/libs/jquery-1.4.4.min.js'></script>
-  <script type='text/javascript' src='../jquery/calendar/libs/jquery-ui-1.8.11.custom.min.js'></script>
-  <script type='text/javascript' src='../jquery/calendar/libs/jquery-ui-i18n.js'></script>
 
-  <script type="text/javascript" src="../jquery/calendar/libs/date.js"></script>
-  <script type="text/javascript" src="../jquery/calendar/jquery.weekcalendar.js"></script>
+  <script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>
   <script type="text/javascript">
 EOF;
 $js .= $tabJsIdUser;
@@ -131,7 +127,7 @@ $js .= <<<EOF
             back = escape(back);
             back = back.replace(/\//g, "%2F");
             newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&backtopage="+back;
-            window.location.replace(newUrl);
+            window.location.href = newUrl;
         },
         
         data: 'events.json.php',
@@ -144,11 +140,11 @@ $js .= <<<EOF
         headerSeparator: ' ',
         useShortDayNames: true,
         // I18N
-        firstDayOfWeek: $.datepicker.regional['fr'].firstDay,
-        shortDays: $.datepicker.regional['fr'].dayNamesShort,
-        longDays: $.datepicker.regional['fr'].dayNames,
-        shortMonths: $.datepicker.regional['fr'].monthNamesShort,
-        longMonths: $.datepicker.regional['fr'].monthNames,
+        firstDayOfWeek: $.datepicker.regional['fr_FR'].firstDay,
+        shortDays: $.datepicker.regional['fr_FR'].dayNamesShort,
+        longDays: $.datepicker.regional['fr_FR'].dayNames,
+        shortMonths: $.datepicker.regional['fr_FR'].monthNamesShort,
+        longMonths: $.datepicker.regional['fr_FR'].monthNames,
         dateFormat: 'd F y'
       });
     });
@@ -180,34 +176,12 @@ $js .= <<<EOF
         return result;
     }
   </script>
-        
 EOF;
 
 
 
 
 llxHeader($js);
-
-//if (isset($_REQUEST['date'])) {
-//    $tabT = explode("/", $_REQUEST['date']);
-//    if (isset($tabT[2]))
-//        $date = new DateTime($tabT[2] . "/" . $tabT[1] . "/" . $tabT[0]);
-//    $nbJours = $_REQUEST['nbJours'];
-//    if (isset($_REQUEST['dateMoins']))
-//        $date = date_add($date, date_interval_create_from_date_string("-" . $nbJours . " day"));
-//    if (isset($_REQUEST['datePlus']))
-//        $date = date_add($date, date_interval_create_from_date_string("+" . $nbJours . " day"));
-//}
-//if (!isset($date))
-//    $date = new DateTime();
-//
-//$vue = (isset($_REQUEST['vueSemaine']) ? 7 : (isset($_REQUEST['vueJour']) ? 1 : (isset($_REQUEST['vueMois']) ? 30 : (isset($_REQUEST['oldVue']) ? $_REQUEST['oldVue'] : 30))));
-
-
-
-
-
-
 
 
 
@@ -220,25 +194,6 @@ echo '
   <div id="calendar"></div>
 </body>
 </html>';
-
-////Une semaine
-//if ($vue == 7)
-//    printSemaine($date, $tabUser);
-//
-//elseif ($vue == 1)
-//    printPeriode($date, $tabUser, 1);
-//
-////Un mois
-//else//if (isset($_REQUEST['vueMois']))
-//    printMois($date, $tabUser);
-
-
-//function printMoinsPlus($date, $nbJours) {
-//    $dateM = date_sub($date, date_interval_create_from_date_string("-" . $nbJours . " day"));
-//    $dateP = date_sub($date, date_interval_create_from_date_string("+" . $nbJours . " day"));
-//    print "<button name='dateMois' value='<-'/>";
-//    echo "</form>";
-//}
 
 function printMenu($tabUser) {
     global $db;
@@ -276,19 +231,7 @@ function printMenu($tabUser) {
         }
     }
     echo "</tr></table></div></div>";
-
-//    $form = new Form($db);
-//    echo $form->select_date($date, 'date');
-////    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
-//
-//    echo "<input type='hidden' name='oldVue' value='" . $vue . "'/>";
-//    echo "<input type='hidden' name='nbJours' value='" . $vue . "'/>";
-//    echo "<input type='submit' class='butAction' name='vueJour' value='Vue jour'/>";
-//    echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
-//    echo "<input type='submit' class='butAction' name='vueMois' value='Vue mois'/>";
-//    echo "<br/>";
-//    echo "<br/>";
-//    echo "<input type='submit' class='butAction' name='dateMoins' value='<='/>";
+    
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<br/><br/>";

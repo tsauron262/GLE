@@ -331,13 +331,34 @@ $mailHeader .= "</table>" . "\n";
 $mailHeader .= "<table  border=0 width=700 cellpadding=10 style='border-collapse: collapse;'>" . "\n";
 $mailHeader .= "<tr><th style='background-color: #0073EA; color: #fff;' colspan=3>Les commandes ajout&eacute;es / modifi&eacute;es" . "</td>" . "\n";
 
+function fileToTab($file) {
+    $tabVal = array();
+    $tabEntete = array();
+    $content = file_get_contents($file);
+    $lines = explode("
+", $content);
+    $i = 0;
+    foreach ($lines as $key => $val) {
+        $i++;
+        $elems = explode("	", $val);
+        $j = 0;
+        foreach ($elems as $elem) {
+            $j++;
+            if ($i == 2)
+                $tabEntete[$j] = $elem;
+            elseif ($i != 1)
+                $tabVal[$i - 2][$tabEntete[$j]] = $elem;
+        }
+    }
+    return $tabVal;
+}
 
 $cntFile = -2;
 if (is_dir($dir)) {
     $tabImportOK = array('commande' => array(), 'propal' => array());
     if ($dh = opendir($dir)) {
         while (($file = readdir($dh)) !== false && $cntFile <= $maxFileImport) {
-
+            $OKFile = true;
             $remArrayComLigne = array(); // array contenant les commandes importer dans le fichier, pour supprimer les lignes en trops
             $File = array();
             $cntFile++;
@@ -356,64 +377,100 @@ if (is_dir($dir)) {
                 exec("/usr/bin/iconv -f MAC -t UTF8 " . $dir . "temp/" . $file . ".preparse > " . $dir . "temp/" . $file . ".iconv");
                 if (is_file($dir . "temp/" . $file . ".iconv")) {
                     $webContent .= "<td class='ui-widget-content'>OK</td>";
-                    $content = file_get_contents($dir . "temp/" . $file . ".iconv");
-                    $lines = preg_split("/\n/", $content);
-                    //3 analyse les colonnes
-                    $ligneNum = 0;
-                    $arrDesc = array();
-                    $arrConvNumcol2Nomcol = array();
-                    $mailSumUpContent['nbFile'] ++;
-                    foreach ($lines as $key => $val) {
-                        if (!strlen($val) > 10)
-                            continue;
-                        $cols = preg_split("/[\t]/", $val);
-                        if ($ligneNum == 0) {
-                            $arrDesc = $cols;
-                            $ligneNum++;
-                        } else if ($ligneNum == 1) {//Comprend pas
-                            foreach ($cols as $key1 => $val1) {
-                                $arrConvNumcol2Nomcol[$key1] = $val1;
-                                $arrayImport[0][$val1] = $arrDesc[$key1];
-                                $arrayImport[1][$val1] = $val1;
-                            }
-                            $ligneNum++;
-                        } else {
-                            foreach ($cols as $key2 => $val2) {
-                                switch ($arrConvNumcol2Nomcol[$key2]) {
-                                    case 'PcvDate': {
-                                            //convert to epoch
-                                            if (preg_match("/([0-9]{2})[\W]{1}([0-9]{2})[\W]{1}([0-9]{4})/", $val2, $arrTmp)) {
-                                                $val2 = strtotime($arrTmp[3] . "-" . $arrTmp[2] . "-" . $arrTmp[1]);
-                                            }
-                                        }
-                                        break;
-                                    case 'ArtPrixBase':
-                                    case 'PlvPUNet':
-                                    case 'PlvPA':
-                                    case 'PcvMtHT': {
-                                            $val2 = preg_replace('/,/', '.', $val2);
-                                        }
-                                        break;
-                                    case 'TaxTaux': {
-                                            $val2 = preg_replace('/,/', '.', $val2);
-                                            if ($val2 . "x" == "x")
-                                                $val2 = "19.6";
-                                        }
-                                        break;
-                                    default: {
-                                            $val2 = preg_replace('/\'/', '\\\'', $val2);
-                                        }
-                                        break;
+                    if ($file == "user.txt") {
+                        $tabVal = fileToTab($dir . "temp/" . $file . ".iconv");
+                        foreach ($tabVal as $val) {
+                            if ($val['PriGMocMail'] == '')
+                                echo "Pas d'email pour : " . $val['PriLib'] . "<br/>";
+                            else {
+                                $tabMail = array($val['PriGMocMail'],
+                                    str_replace("cicenter", "bimp", $val['PriGMocMail']),
+                                    str_replace("bimp", "cicenter", $val['PriGMocMail']),
+                                    str_replace("cicervice", "bimp", $val['PriGMocMail']),
+                                    str_replace("bimp", "cicervice", $val['PriGMocMail']));
+                                $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE email IN ('" . implode("','", $tabMail) . "')";
+                                $result = $db->query($sql);
+                                if ($db->num_rows($result) == 0) {
+                                    $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext IN ('" . $val['PRIID'] . "')";
+                                    $result = $db->query($sql);
+                                    if ($db->num_rows($result) == 1)
+                                        echo "Pas de correspondance mail correction par id dans llx_user " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
                                 }
-//                                $arrayImport[$cntFile][$key][$arrConvNumcol2Nomcol[$key2]] = utf8_decode($val2);
-                                $File[$key][$arrConvNumcol2Nomcol[$key2]] = utf8_decode($val2);
+
+                                if ($db->num_rows($result) > 0) {
+//                            if(isset($val['GleId'])){
+                                    $ligne = $db->fetch_object($result);
+//                                    echo $val['PRIID'] . " " . $ligne->rowid . "<br/>";
+                                    setElementElement("idUser8Sens", "idUserGle", $val['PRIID'], $ligne->rowid);
+//                            foreach($val as $nom => $value)
+//                                echo $nom." : ".$value."<br/>";
+                                }
+                                if ($db->num_rows($result) > 1)
+                                    echo "Plusieur résultat pour l'email : " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
+                                elseif ($db->num_rows($result) == 0)
+                                    echo "Pas de résultat pour l'email : " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
                             }
-                            $ligneNum++;
                         }
+                    } else {
+                        $content = file_get_contents($dir . "temp/" . $file . ".iconv");
+                        $lines = preg_split("/\n/", $content);
+                        //3 analyse les colonnes
+                        $ligneNum = 0;
+                        $arrDesc = array();
+                        $arrConvNumcol2Nomcol = array();
+                        $mailSumUpContent['nbFile'] ++;
+                        foreach ($lines as $key => $val) {
+                            if (!strlen($val) > 10)
+                                continue;
+                            $cols = preg_split("/[\t]/", $val);
+                            if ($ligneNum == 0) {
+                                $arrDesc = $cols;
+                                $ligneNum++;
+                            } else if ($ligneNum == 1) {//Comprend pas
+                                foreach ($cols as $key1 => $val1) {
+                                    $arrConvNumcol2Nomcol[$key1] = $val1;
+                                    $arrayImport[0][$val1] = $arrDesc[$key1];
+                                    $arrayImport[1][$val1] = $val1;
+                                }
+                                $ligneNum++;
+                            } else {
+                                foreach ($cols as $key2 => $val2) {
+                                    switch ($arrConvNumcol2Nomcol[$key2]) {
+                                        case 'PcvDate': {
+                                                //convert to epoch
+                                                if (preg_match("/([0-9]{2})[\W]{1}([0-9]{2})[\W]{1}([0-9]{4})/", $val2, $arrTmp)) {
+                                                    $val2 = strtotime($arrTmp[3] . "-" . $arrTmp[2] . "-" . $arrTmp[1]);
+                                                }
+                                            }
+                                            break;
+                                        case 'ArtPrixBase':
+                                        case 'PlvPUNet':
+                                        case 'PlvPA':
+                                        case 'PcvMtHT': {
+                                                $val2 = preg_replace('/,/', '.', $val2);
+                                            }
+                                            break;
+                                        case 'TaxTaux': {
+                                                $val2 = preg_replace('/,/', '.', $val2);
+                                                if ($val2 . "x" == "x")
+                                                    $val2 = "19.6";
+                                            }
+                                            break;
+                                        default: {
+                                                $val2 = preg_replace('/\'/', '\\\'', $val2);
+                                            }
+                                            break;
+                                    }
+//                                $arrayImport[$cntFile][$key][$arrConvNumcol2Nomcol[$key2]] = utf8_decode($val2);
+                                    $File[$key][$arrConvNumcol2Nomcol[$key2]] = utf8_decode($val2);
+                                }
+                                $ligneNum++;
+                            }
 //    var_dump::display($cols);
+                        }
+                        unlink($dir . "temp/" . $file . '.iconv');
+                        unlink($dir . "temp/" . $file . '.preparse');
                     }
-                    unlink($dir . "temp/" . $file . '.iconv');
-                    unlink($dir . "temp/" . $file . '.preparse');
                 } else {
                     $webContent .= "<tdclass='ui-widget-content'>Erreur de conversion</td>";
                 }
@@ -461,152 +518,155 @@ if (is_dir($dir)) {
                     $paysGlobal = processPays($val['PysCode']);
                     $externalUserId = $val['PcvGPriID'];
                     $internalUserId = processUser($externalUserId);
-                    $mailSumUpContent['nbLine'] ++;
-                    $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
-                    $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
+                    if (!$internalUserId)
+                        $OKFile = false;
+                    else {
+                        $mailSumUpContent['nbLine'] ++;
+                        $webContent .= "<tr><th class='ui-state-default ui-widget-hover' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>";
+                        $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;' colspan=2>Ligne: " . $key . "  " . ($typeLigne == "commande" ? "Commande" : "Propal") . ":" . $val["PcvCode"] . "</th>" . "\n";
 
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         Secteur societe                                                      |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
-                    $secteurActiv = false;
-                    if ($val['CliActivEnu'] . "x" != "x") {
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_secteur WHERE LOWER(libelle) = '" . strtolower($val['CliActivEnu']) . "' ";
-                        $sql = requeteWithCache($requete);
-                        if ($db->num_rows($sql) > 0) {
-                            $res = fetchWithCache($sql);
-                            $secteurActiv = $res->id;
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "c_secteur (code,libelle,active) VALUES ('" . SynSanitize($val['CliActivEnu']) . "','" . addslashes($val['CliActivEnu']) . "',1)";
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         Secteur societe                                                      |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
+                        $secteurActiv = false;
+                        if ($val['CliActivEnu'] . "x" != "x") {
+                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_secteur WHERE LOWER(libelle) = '" . strtolower($val['CliActivEnu']) . "' ";
                             $sql = requeteWithCache($requete);
-                            $secteurActiv = $db->last_insert_id('".MAIN_DB_PREFIX."c_secteur');
-                        }
-                    }
-
-
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         La societe                                                           |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
-
-                    if (isset($tabImportOK['soc'][$val["CliCode"]])) {
-                        $socid = $tabImportOK['soc'][$val['CliCode']]['socid'];
-                        $livAdd = $tabImportOK['soc'][$val['CliCode']]['livAdd'];
-                        $socContact = $tabImportOK['soc'][$val['CliCode']]['socContact'];
-                    } else {
-                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Soci&eacute;t&eacute;";
-                        $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;'>Soci&eacute;t&eacute;</th>" . "\n";
-                        $nomSoc = $val["CliLib"];
-                        $codSoc = $val["CliCode"];
-                        $socid = "";
-                        $assujTVA = 0;
-                        $typeEnt = 0;
-
-                        switch ($val['CliCategEnu']) {
-                            case "PME": {
-                                    $typeEnt = "8";
-                                }
-                                break;
-                            case "Educ": {
-                                    $typeEnt = "5";
-                                }
-                                break;
-                            case "PARTICULIER": {
-                                    $typeEnt = "8";
-                                }
-                                break;
-                            case "PARTICULIER": {
-                                    $typeEnt = "8";
-                                }
-                                break;
+                            if ($db->num_rows($sql) > 0) {
+                                $res = fetchWithCache($sql);
+                                $secteurActiv = $res->id;
+                            } else {
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "c_secteur (code,libelle,active) VALUES ('" . SynSanitize($val['CliActivEnu']) . "','" . addslashes($val['CliActivEnu']) . "',1)";
+                                $sql = requeteWithCache($requete);
+                                $secteurActiv = $db->last_insert_id('".MAIN_DB_PREFIX."c_secteur');
+                            }
                         }
 
-                        if ($val['TyvCode'] == "FR" || $val['TyvCode'] == "CP") {
-                            $assujTVA = 1;
-                        }
-                        $tmpSoc = "";
 
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
-                        $sql = requeteWithCache($requete);
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         La societe                                                           |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
 
-                        $socAdresse = $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'];
+                        if (isset($tabImportOK['soc'][$val["CliCode"]])) {
+                            $socid = $tabImportOK['soc'][$val['CliCode']]['socid'];
+                            $livAdd = $tabImportOK['soc'][$val['CliCode']]['livAdd'];
+                            $socContact = $tabImportOK['soc'][$val['CliCode']]['socContact'];
+                        } else {
+                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Soci&eacute;t&eacute;";
+                            $mailContent .= "<tr><th style='color: #fff; background-color: #0073EA;'>Soci&eacute;t&eacute;</th>" . "\n";
+                            $nomSoc = $val["CliLib"];
+                            $codSoc = $val["CliCode"];
+                            $socid = "";
+                            $assujTVA = 0;
+                            $typeEnt = 0;
 
-                        if ($db->num_rows($sql) > 0) {
-                            $res = fetchWithCache($sql);
-                            $socid = $res->rowid;
+                            switch ($val['CliCategEnu']) {
+                                case "PME": {
+                                        $typeEnt = "8";
+                                    }
+                                    break;
+                                case "Educ": {
+                                        $typeEnt = "5";
+                                    }
+                                    break;
+                                case "PARTICULIER": {
+                                        $typeEnt = "8";
+                                    }
+                                    break;
+                                case "PARTICULIER": {
+                                        $typeEnt = "8";
+                                    }
+                                    break;
+                            }
+
+                            if ($val['TyvCode'] == "FR" || $val['TyvCode'] == "CP") {
+                                $assujTVA = 1;
+                            }
+                            $tmpSoc = "";
+
+                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "societe WHERE code_client = '" . $codSoc . "'";
+                            $sql = requeteWithCache($requete);
+
+                            $socAdresse = $val['CliFAdrRue1'] . " " . $val['CliFAdrRue2'];
+
+                            if ($db->num_rows($sql) > 0) {
+                                $res = fetchWithCache($sql);
+                                $socid = $res->rowid;
 
 
 
-                            $sqlUpt = array();
-                            if ($res->nom != $nomSoc)
-                                $sqlUpt[] = " nom = '" . $nomSoc . "'";
-                            if ($res->siret == 'NULL')
-                                $res->siret = '';
-                            if ($res->siret . "x" != $val['CliSIRET'] . "x")
-                                $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
-                            if ($res->address != $socAdresse)
-                                $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
-                            if ($res->zip != $val['CliFAdrZip'])
-                                $sqlUpt[] = " zip = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
-                            if ($res->town != $val['CliFAdrCity'])
-                                $sqlUpt[] = " town = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
-                            if ($res->phone != $val['MocTel'])
-                                $sqlUpt[] = " phone = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
-                            if ($res->fk_pays != $paysGlobal)
-                                $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
-                            if ($res->tva_assuj != $assujTVA)
-                                $sqlUpt[] = " tva_assuj = " . $assujTVA;
-                            if ($secteurActiv && $secteurActiv != $res->ref_int)
-                                $sqlUpt[] = " ref_int = " . $secteurActiv;
-                            if ($typeEnt != $res->fk_typent)
-                                $sqlUpt[] = " fk_typent = " . $typeEnt;
+                                $sqlUpt = array();
+                                if ($res->nom != $nomSoc)
+                                    $sqlUpt[] = " nom = '" . $nomSoc . "'";
+                                if ($res->siret == 'NULL')
+                                    $res->siret = '';
+                                if ($res->siret . "x" != $val['CliSIRET'] . "x")
+                                    $sqlUpt[] = " siret = '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "'";
+                                if ($res->address != $socAdresse)
+                                    $sqlUpt[] = " address = '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "'";
+                                if ($res->zip != $val['CliFAdrZip'])
+                                    $sqlUpt[] = " zip = '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "'";
+                                if ($res->town != $val['CliFAdrCity'])
+                                    $sqlUpt[] = " town = '" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "'";
+                                if ($res->phone != $val['MocTel'])
+                                    $sqlUpt[] = " phone = '" . (strlen($val['MocTel']) > 0 ? $val['MocTel'] : "NULL") . "'";
+                                if ($res->fk_pays != $paysGlobal)
+                                    $sqlUpt[] = " fk_pays = " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL");
+                                if ($res->tva_assuj != $assujTVA)
+                                    $sqlUpt[] = " tva_assuj = " . $assujTVA;
+                                if ($secteurActiv && $secteurActiv != $res->ref_int)
+                                    $sqlUpt[] = " ref_int = " . $secteurActiv;
+                                if ($typeEnt != $res->fk_typent)
+                                    $sqlUpt[] = " fk_typent = " . $typeEnt;
 //            if ($res->titre != $val['CliTitleEnu'] )
 //                $sqlUpt[] = " titre = '".$val['CliTitleEnu'] ."'";
 
-                            if (count($sqlUpt) > 0) {
-                                //Creation de la societe ou mise à jour si code client exist
-                                $updtStr = join(',', $sqlUpt);
-                                $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = " . $codSoc;
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>" . "\n";
-                                    /*
-                                      +--------------------------------------------------------------------------------------------------------------+
-                                      |                                                                                                              |
-                                      |                                         Les commerciaux de la societe                                        |
-                                      |                                                                                                              |
-                                      +--------------------------------------------------------------------------------------------------------------+
-                                     */
-                                    $tmpSoc = new Societe($db);
-                                    $tmpSoc->fetch($socid);
-                                    if ($internalUserId > 0)
-                                        $tmpSoc->add_commercial($user, $internalUserId);
+                                if (count($sqlUpt) > 0) {
+                                    //Creation de la societe ou mise à jour si code client exist
+                                    $updtStr = join(',', $sqlUpt);
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = " . $codSoc;
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>" . "\n";
+                                        /*
+                                          +--------------------------------------------------------------------------------------------------------------+
+                                          |                                                                                                              |
+                                          |                                         Les commerciaux de la societe                                        |
+                                          |                                                                                                              |
+                                          +--------------------------------------------------------------------------------------------------------------+
+                                         */
+                                        $tmpSoc = new Societe($db);
+                                        $tmpSoc->fetch($socid);
+                                        if ($internalUserId > 0)
+                                            $tmpSoc->add_commercial($user, $internalUserId);
 
-                                    // Appel des triggers
-                                    $interface = new Interfaces($db);
-                                    $result = $interface->run_triggers('COMPANY_MODIFY', $tmpSoc, $user, $langs, $conf);
-                                    if ($result < 0) {
-                                        $error++;
-                                        $errors = $interface->errors;
+                                        // Appel des triggers
+                                        $interface = new Interfaces($db);
+                                        $result = $interface->run_triggers('COMPANY_MODIFY', $tmpSoc, $user, $langs, $conf);
+                                        if ($result < 0) {
+                                            $error++;
+                                            $errors = $interface->errors;
+                                        }
+                                    } else {
+                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; KO " . $requete . "</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; KO</td>" . "\n";
                                     }
                                 } else {
-                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; KO " . $requete . "</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour soci&eacute;t&eacute; KO</td>" . "\n";
+                                    $webContent .= "<td  class='ui-widget-content'>Pas de modification soci&eacute;t&eacute;</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de modification soci&eacute;t&eacute;</td>" . "\n";
                                 }
                             } else {
-                                $webContent .= "<td  class='ui-widget-content'>Pas de modification soci&eacute;t&eacute;</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Pas de modification soci&eacute;t&eacute;</td>" . "\n";
-                            }
-                        } else {
 
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "societe
                                     (nom,
                                      code_client,
                                      datec,
@@ -619,7 +679,7 @@ if (is_dir($dir)) {
                                      fk_pays,
                                      client,
 " . //                                     titre,
-                                    "                                    import_key,
+                                        "                                    import_key,
                                     tva_assuj,
                                     " . ($secteurActiv ? "ref_int," : "") . "
                                     fk_typent
@@ -635,49 +695,49 @@ if (is_dir($dir)) {
                                      " . (strlen($paysGlobal) > 0 ? "'" . $paysGlobal . "'" : "NULL") . ",
                                      1,
                                     "//'".$val['CliTitleEnu']."',
-                                    . $val['AdpGAdrID'] . ",
+                                        . $val['AdpGAdrID'] . ",
                                     " . $assujTVA . ",
                                     " . ($secteurActiv ? $secteurActiv . "," : "") . "
                                     " . $typeEnt
-                                    . ")";
-                            $sql = requeteWithCache($requete);
-                            $requete = "nnnnnnnnnnnnnimp";
+                                        . ")";
+                                $sql = requeteWithCache($requete);
+                                $requete = "nnnnnnnnnnnnnimp";
 //echo $requete;
-                            if ($sql) {
-                                /*
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                  |                                                                                                              |
-                                  |                                         Les commerciaux de la societe                                        |
-                                  |                                                                                                              |
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                 */
-                                /*
-                                  PcvFree5 => string(19) 5 Dossier suivi par
-                                  PcvGPriID => string(15) ID représentant
-                                  PriCode => string(18) Code collaborateur
-                                  PriLib => string(21) Libellé collaborateur
-                                 */
+                                if ($sql) {
+                                    /*
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                      |                                                                                                              |
+                                      |                                         Les commerciaux de la societe                                        |
+                                      |                                                                                                              |
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                     */
+                                    /*
+                                      PcvFree5 => string(19) 5 Dossier suivi par
+                                      PcvGPriID => string(15) ID représentant
+                                      PriCode => string(18) Code collaborateur
+                                      PriLib => string(21) Libellé collaborateur
+                                     */
 
-                                $socid = $db->last_insert_id("" . MAIN_DB_PREFIX . "societe");
-                                $tmpSoc = new Societe($db);
-                                $tmpSoc->fetch($socid);
-                                if ($internalUserId > 0)
-                                    $tmpSoc->add_commercial($user, $internalUserId);
-                                // Appel des triggers
-                                $interface = new Interfaces($db);
-                                $result = $interface->run_triggers('COMPANY_CREATE', $tmpSoc, $user, $langs, $conf);
-                                if ($result < 0) {
-                                    $error++;
-                                    $errors = $interface->errors;
+                                    $socid = $db->last_insert_id("" . MAIN_DB_PREFIX . "societe");
+                                    $tmpSoc = new Societe($db);
+                                    $tmpSoc->fetch($socid);
+                                    if ($internalUserId > 0)
+                                        $tmpSoc->add_commercial($user, $internalUserId);
+                                    // Appel des triggers
+                                    $interface = new Interfaces($db);
+                                    $result = $interface->run_triggers('COMPANY_CREATE', $tmpSoc, $user, $langs, $conf);
+                                    if ($result < 0) {
+                                        $error++;
+                                        $errors = $interface->errors;
+                                    }
+                                    // Fin appel triggers
+                                    $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; OK";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; KO " . $requete;
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; KO</td>" . "\n";
                                 }
-                                // Fin appel triggers
-                                $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; OK";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; OK</td>" . "\n";
-                            } else {
-                                $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation de la soci&eacute;t&eacute; KO " . $requete;
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation de la soci&eacute;t&eacute; KO</td>" . "\n";
                             }
-                        }
 
 
 //                    if ($internalUserId > 0)
@@ -686,105 +746,105 @@ if (is_dir($dir)) {
 //                        else
 //                            echo "Erreur pas de societe";
 
-                        /*
-                          +--------------------------------------------------------------------------------------------------------------+
-                          |                                                                                                              |
-                          |                                         Les contacts de la societe                                           |
-                          |                                                                                                              |
-                          +--------------------------------------------------------------------------------------------------------------+
-                         */
+                            /*
+                              +--------------------------------------------------------------------------------------------------------------+
+                              |                                                                                                              |
+                              |                                         Les contacts de la societe                                           |
+                              |                                                                                                              |
+                              +--------------------------------------------------------------------------------------------------------------+
+                             */
 
-                        $genre = $val["PrsTitleEnu"];
-                        $prenom = $val['PrsPrenom'];
-                        $nom = $val['PrsName'];
-                        $socpeopleExternalId = $val['PcvPCopID'];
+                            $genre = $val["PrsTitleEnu"];
+                            $prenom = $val['PrsPrenom'];
+                            $nom = $val['PrsName'];
+                            $socpeopleExternalId = $val['PcvPCopID'];
 
-                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Contact de la soci&eacute;t&eacute;</th>";
-                        $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Contact de la soci&eacute;t&eacute;</th>" . "\n";
+                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Contact de la soci&eacute;t&eacute;</th>";
+                            $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Contact de la soci&eacute;t&eacute;</th>" . "\n";
 
 
-                        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
-                        $sql = requeteWithCache($requete);
-                        $res = fetchWithCache($sql);
-                        $socContact = false;
-                        if ($db->num_rows($sql) > 0) {
-                            $sqlUpt = array();
-                            $socContact = $res->rowid;
-                            if ($socContact < 1) {
-                                print_r($res);
-                                die("Probléme societe" . $socContact . $requete);
-                            }
-                            if ($res->phone != $val['PcvMocTel'])
-                                $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
-                            if ($res->phone_mobile != $val['PcvMocPort'])
-                                $sqlUpt[] = " phone_mobile = '" . $val['PcvMocPort'] . "'";
-                            if ($res->civilite != $genre)
-                                $sqlUpt[] = " civilite = '" . $genre . "'";
-                            if (count($sqlUpt) > 0) {
-                                $updtStr = join(',', $sqlUpt);
-                                $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople SET " . $updtStr . " WHERE rowid =" . $socContact;
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour contact OK";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact OK</td>" . "\n";
+                            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "socpeople WHERE import_key = " . $socpeopleExternalId;
+                            $sql = requeteWithCache($requete);
+                            $res = fetchWithCache($sql);
+                            $socContact = false;
+                            if ($db->num_rows($sql) > 0) {
+                                $sqlUpt = array();
+                                $socContact = $res->rowid;
+                                if ($socContact < 1) {
+                                    print_r($res);
+                                    die("Probléme societe" . $socContact . $requete);
+                                }
+                                if ($res->phone != $val['PcvMocTel'])
+                                    $sqlUpt[] = " phone = '" . $val["PcvMocTel"] . "'";
+                                if ($res->phone_mobile != $val['PcvMocPort'])
+                                    $sqlUpt[] = " phone_mobile = '" . $val['PcvMocPort'] . "'";
+                                if ($res->civilite != $genre)
+                                    $sqlUpt[] = " civilite = '" . $genre . "'";
+                                if (count($sqlUpt) > 0) {
+                                    $updtStr = join(',', $sqlUpt);
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople SET " . $updtStr . " WHERE rowid =" . $socContact;
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour contact OK";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact KO</td>" . "\n";
+                                    }
                                 } else {
-                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour contact KO</td>" . "\n";
+                                    $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour contact n&eacute;cessaire";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour contact n&eacute;cessaire</td>" . "\n";
                                 }
                             } else {
-                                $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour contact n&eacute;cessaire";
-                                $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour contact n&eacute;cessaire</td>" . "\n";
-                            }
-                        } else {
-                            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
+                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople
                                     (datec,fk_soc,civilite,lastname,firstname,phone,phone_mobile,import_key, fk_user_creat)
                              VALUES (now()," . $socid . ",'" . $genre . "','" . $nom . "','" . $prenom . "','" . $val['PcvMocTel'] . "','" . $val['PcvMocPort'] . "'," . $socpeopleExternalId . ", NULL)";
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation contact OK";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact OK</td>" . "\n";
-                            } else {
-                                $webContent .= "<td class='KOtd error  ui-widget-content'>Cr&eacute;ation contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact KO</td>" . "\n";
+                                $sql = requeteWithCache($requete);
+                                if ($sql) {
+                                    $webContent .= "<td class='ui-widget-content'>Cr&eacute;ation contact OK";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact OK</td>" . "\n";
+                                } else {
+                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Cr&eacute;ation contact KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation contact KO</td>" . "\n";
+                                }
+                                $socContact = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
                             }
-                            $socContact = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
-                        }
 
-                        /*
-                          +--------------------------------------------------------------------------------------------------------------+
-                          |                                                                                                              |
-                          |                                         Adresse de livraison                                                 |
-                          |                                                                                                              |
-                          +--------------------------------------------------------------------------------------------------------------+
-                         */
+                            /*
+                              +--------------------------------------------------------------------------------------------------------------+
+                              |                                                                                                              |
+                              |                                         Adresse de livraison                                                 |
+                              |                                                                                                              |
+                              +--------------------------------------------------------------------------------------------------------------+
+                             */
 
-                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
-                        $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
-                        $livAdd = NULL;
-                        $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
-                        $soc = new Societe($db);
-                        $soc->fetch($socid);
-                        if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
+                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Adresse de livraison</th>";
+                            $mailContent .= "<tr><th style='color:#fff; background-color: #0073EA;'>Adresse de livraison</th>" . "\n";
+                            $livAdd = NULL;
+                            $livAdresse = $val['CliLAdrRue1'] . " " . $val['CliLAdrRue2'];
+                            $soc = new Societe($db);
+                            $soc->fetch($socid);
+                            if ($val['PcvLAdpID'] > 0 && !($socAdresse == $livAdresse && $val['CliFAdrZip'] == $val['CliLAdrZip'])) {
 
 
-                            $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                            $requete = "SELECT *
+                                $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                                $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "socpeople
                          WHERE (import_key = '" . $val['PcvLAdpID'] . "') || (fk_soc = " . $socid . " AND lastname = '" . $nomLivAdd . "') ||"
-                                    . "(fk_soc = " . $socid . "
+                                        . "(fk_soc = " . $socid . "
                                 AND zip = '" . $val['CliLAdrZip'] . "'
                                 AND town = '" . $val['CliLAdrCity'] . "'
                                 AND address = '" . $livAdresse . "')";
 //                        $requete = "SELECT *
 //                          FROM " . MAIN_DB_PREFIX . "societe_adresse_livraison
 //                         WHERE import_key = '" . $val['PcvLAdpID'] . "'";
-                            $sql = requeteWithCache($requete);
-                            $res = fetchWithCache($sql);
-                            if ($db->num_rows($sql) > 0) {
-                                $livAdd = $res->rowid;
-                                //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
-                                //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
-                                $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
+                                $sql = requeteWithCache($requete);
+                                $res = fetchWithCache($sql);
+                                if ($db->num_rows($sql) > 0) {
+                                    $livAdd = $res->rowid;
+                                    //            $webContent .=  "<td  class='ui-widget-content'> Pas de mise &agrave; jour de l'ad. de livraison</td>";
+                                    //            $mailContent .= "<td  style='background-color: #fff;'> Pas de mise &agrave; jour de l'ad. de livraison"."\n";
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "socpeople
                             SET fk_soc = " . $socid . "
                                 , zip = '" . $val['CliLAdrZip'] . "'
                                 , town = '" . $val['CliLAdrCity'] . "'
@@ -792,133 +852,133 @@ if (is_dir($dir)) {
                                 , fk_pays = " . ($paysGlobal . "x" != "x" ? $paysGlobal : NULL) . "
                                 , lastname = '" . $nomLivAdd . "'
                             WHERE import_key= " . $val['PcvLAdpID'];
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
-                                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK" . "\n";
-                                } else {
-                                    $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                    $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO" . "\n";
-                                }
-
-                                //Si modif
-                            } else {
-                                $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key, fk_user_creat)
-                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ", null)";
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
-                                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
-                                } else {
-                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
-                                    $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
-                                }
-                                $livAdd = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
-//die($livAdd);
-                            }
-                        } else {
-                            $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
-                            $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
-                        }
-
-                        $tabImportOK['soc'][$val["CliCode"]] = array('socid' => $socid, 'livAdd' => $livAdd, 'socContact' => $socContact);
-                    }
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         Les produits                                                         |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
-                    $prodId = false;
-//PlvNuf
-
-                    if ($val['ArtID'] > 0 && ($val['PlvNuf'] == 'Normal' || $val['PlvNuf'] == 'Port')) {
-
-                        /*
-
-                          ArtIsGaranti => string(7) Garanti            => ??
-                          ArtFree3 => string(17)  Désign2-2 Météor        => DurValidité contrat
-                          ArtDelai => string(20) Délai d'intervention     => SLA
-                          ArtDelai => string(20) Délai d'intervention     => SLA
-
-                         */
-
-                        $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Produits</th>";
-                        $mailContent .= "<tr><th  style='color:#fff; background-color: #0073EA;'>Produits</th>" . "\n";
-                        $requete = "SELECT p.*, 2dureeSav as durSav, 2prixAchatHt as prixAchat FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
-                        $sql = requeteWithCache($requete);
-                        $res = fetchWithCache($sql);
-                        $sqlUpt = array();
-                        $sqlUpt2 = array();
-                        if ($db->num_rows($sql) > 0) {
-                            $prodId = $res->rowid;
-                            if ($res->description != $val['PlvLib'])
-                                $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
-                            if ($res->label != $val['ArtLib'])
-                                $sqlUpt[] = " label = '" . $val['ArtLib'] . "'";
-                            if ($res->price != $val['ArtPrixBase'])
-                                $sqlUpt[] = " price = '" . $val['ArtPrixBase'] . "'";
-                            if ($res->prixAchat != $val['PlvPA'])
-                                $sqlUpt2[] = " 2prixAchatHt = '" . $val['PlvPA'] . "'";
-                            if ($res->durSav != $val['ArtDureeGar'])
-                                $sqlUpt2[] = " 2dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
-                            if ($res->tva_tx != $val['TaxTaux'])
-                                $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
-
-                            if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
-                                $ok = true;
-                                if (count($sqlUpt) > 0) {
-                                    $updtStr = join(',', $sqlUpt);
-                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET " . $updtStr . " WHERE import_key =" . $val['ArtID'];
                                     $sql = requeteWithCache($requete);
                                     if ($sql) {
-                                        $tmpProd = new Product($db);
-                                        $tmpProd->fetch($prodId);
-                                        $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                        $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison OK";
+                                        $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison OK" . "\n";
                                     } else {
-                                        $ok = false;
+                                        $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ad. livraison KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                        $mailContent .= "<td  style='background-color: #fff;'>Mise &agrave; jour ad. livraison KO" . "\n";
                                     }
-                                }
 
-                                if (count($sqlUpt2) > 0) {
-                                    $updtStr = join(',', $sqlUpt2);
-                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET " . $updtStr . " WHERE fk_object =" . $prodId;
-                                    $sql = requeteWithCache($requete);
-                                    if (!$sql)
-                                        $ok = false;
-                                }
-                                if ($ok) {
-                                    $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour produit OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit OK</td>" . "\n";
+                                    //Si modif
                                 } else {
-                                    $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit KO</td>" . "\n";
+                                    $nomLivAdd = $val['CliLAdrLib'] . " - " . $val['PcvLAdpID'];
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "socpeople (fk_soc, zip, town, address, fk_pays, lastname,import_key, fk_user_creat)
+                                 VALUES (" . $socid . ",'" . $val['CliLAdrZip'] . "','" . $val['CliLAdrCity'] . "','" . $livAdresse . "',1,'" . $nomLivAdd . "'," . $val['PcvLAdpID'] . ", null)";
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  OK";
+                                        $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  OK" . "\n";
+                                    } else {
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ad. livraison  KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span>";
+                                        $mailContent .= "<td  style='background-color: #fff;'>Cr&eacute;ation ad. livraison  KO" . "\n";
+                                    }
+                                    $livAdd = $db->last_insert_id(MAIN_DB_PREFIX . "socpeople");
+//die($livAdd);
                                 }
                             } else {
-                                $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour produit n&eacute;cessaire</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour produit n&eacute;cessaire</td>" . "\n";
+                                $webContent .= "<td  class='ui-widget-content'>Pas ad. livraison";
+                                $mailContent .= "<td  style='background-color: #fff;'>Pas ad. livraison" . "\n";
                             }
+
+                            $tabImportOK['soc'][$val["CliCode"]] = array('socid' => $socid, 'livAdd' => $livAdd, 'socContact' => $socContact);
+                        }
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         Les produits                                                         |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
+                        $prodId = false;
+//PlvNuf
+
+                        if ($val['ArtID'] > 0 && ($val['PlvNuf'] == 'Normal' || $val['PlvNuf'] == 'Port')) {
+
                             /*
-                              +--------------------------------------------------------------------------------------------------------------+
-                              |                                                                                                              |
-                              |                                         Catégorie et type                                                    |
-                              |                                                                                                              |
-                              +--------------------------------------------------------------------------------------------------------------+
+
+                              ArtIsGaranti => string(7) Garanti            => ??
+                              ArtFree3 => string(17)  Désign2-2 Météor        => DurValidité contrat
+                              ArtDelai => string(20) Délai d'intervention     => SLA
+                              ArtDelai => string(20) Délai d'intervention     => SLA
+
                              */
+
+                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Produits</th>";
+                            $mailContent .= "<tr><th  style='color:#fff; background-color: #0073EA;'>Produits</th>" . "\n";
+                            $requete = "SELECT p.*, 2dureeSav as durSav, 2prixAchatHt as prixAchat FROM " . MAIN_DB_PREFIX . "product p LEFT JOIN " . MAIN_DB_PREFIX . "product_extrafields ON fk_object = p.rowid WHERE p.import_key = '" . $val['ArtID'] . "' OR ref='" . $val['PlvCode'] . "'";
+                            $sql = requeteWithCache($requete);
+                            $res = fetchWithCache($sql);
+                            $sqlUpt = array();
+                            $sqlUpt2 = array();
+                            if ($db->num_rows($sql) > 0) {
+                                $prodId = $res->rowid;
+                                if ($res->description != $val['PlvLib'])
+                                    $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
+                                if ($res->label != $val['ArtLib'])
+                                    $sqlUpt[] = " label = '" . $val['ArtLib'] . "'";
+                                if ($res->price != $val['ArtPrixBase'])
+                                    $sqlUpt[] = " price = '" . $val['ArtPrixBase'] . "'";
+                                if ($res->prixAchat != $val['PlvPA'])
+                                    $sqlUpt2[] = " 2prixAchatHt = '" . $val['PlvPA'] . "'";
+                                if ($res->durSav != $val['ArtDureeGar'])
+                                    $sqlUpt2[] = " 2dureeSav = " . ($val['ArtDureeGar'] > 0 ? $val['ArtDureeGar'] : 0) . "";
+                                if ($res->tva_tx != $val['TaxTaux'])
+                                    $sqlUpt[] = " tva_tx = '" . $val['TaxTaux'] . "'";
+
+                                if (count($sqlUpt) > 0 || count($sqlUpt2) > 0) {
+                                    $ok = true;
+                                    if (count($sqlUpt) > 0) {
+                                        $updtStr = join(',', $sqlUpt);
+                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "product SET " . $updtStr . " WHERE import_key =" . $val['ArtID'];
+                                        $sql = requeteWithCache($requete);
+                                        if ($sql) {
+                                            $tmpProd = new Product($db);
+                                            $tmpProd->fetch($prodId);
+                                            $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                        } else {
+                                            $ok = false;
+                                        }
+                                    }
+
+                                    if (count($sqlUpt2) > 0) {
+                                        $updtStr = join(',', $sqlUpt2);
+                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "product_extrafields SET " . $updtStr . " WHERE fk_object =" . $prodId;
+                                        $sql = requeteWithCache($requete);
+                                        if (!$sql)
+                                            $ok = false;
+                                    }
+                                    if ($ok) {
+                                        $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour produit OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour produit KO</td>" . "\n";
+                                    }
+                                } else {
+                                    $webContent .= "<td class='ui-widget-content'>Pas de mise &agrave; jour produit n&eacute;cessaire</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour produit n&eacute;cessaire</td>" . "\n";
+                                }
+                                /*
+                                  +--------------------------------------------------------------------------------------------------------------+
+                                  |                                                                                                              |
+                                  |                                         Catégorie et type                                                    |
+                                  |                                                                                                              |
+                                  +--------------------------------------------------------------------------------------------------------------+
+                                 */
 //                            updateCategorie($val['PlvCode'], $prodId, $val);
 //                            updateType($val['PlvCode'], $prodId);
-                        } else {
-                            $requete = "INSERT " . MAIN_DB_PREFIX . "product
+                            } else {
+                                $requete = "INSERT " . MAIN_DB_PREFIX . "product
                                    (datec,
                                     ref,
                                     label,
                                     description,
                                     price,
                                     "/* tobuy,
-                                      durSav,
-                                     */ . "tva_tx,
+                                          durSav,
+                                         */ . "tva_tx,
                                     import_key)
                             VALUES (now(),
                                     '" . $val['PlvCode'] . "',
@@ -926,13 +986,13 @@ if (is_dir($dir)) {
                                     '" . $val['PlvLib'] . "',
                                     " . ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0) . ",
                                     "/* 1,
-                                      ".($val['ArtDureeGar']>0?$val['ArtDureeGar']:0).",
-                                      " */ . ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0) . ",
+                                          ".($val['ArtDureeGar']>0?$val['ArtDureeGar']:0).",
+                                          " */ . ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0) . ",
                                     " . ($val['ArtID'] > 0 ? $val['ArtID'] : 0) . ") ";
-                            $sql = requeteWithCache($requete);
-                            $prodId = $db->last_insert_id($sql);
+                                $sql = requeteWithCache($requete);
+                                $prodId = $db->last_insert_id($sql);
 
-                            $requete = "INSERT " . MAIN_DB_PREFIX . "product_extrafields
+                                $requete = "INSERT " . MAIN_DB_PREFIX . "product_extrafields
                                     (
                                     `tms` ,
                                     `fk_object`,
@@ -943,502 +1003,502 @@ if (is_dir($dir)) {
                                     '" . $prodId . "',
                                     '" . $val['ArtDureeGar'] . "',
                                     " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") ";
-                            $sql2 = requeteWithCache($requete);
+                                $sql2 = requeteWithCache($requete);
 
-                            if ($sql && $sql2) {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit OK</td>" . "\n";
+                                if ($sql && $sql2) {
+                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit OK</td>" . "\n";
 
-                                $tmpProd = new Product($db);
-                                $tmpProd->fetch($prodId);
-                                $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                    $tmpProd = new Product($db);
+                                    $tmpProd->fetch($prodId);
+                                    $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
 
-                                /*
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                  |                                                                                                              |
-                                  |                                         Catégorie et type                                                    |
-                                  |                                                                                                              |
-                                  +--------------------------------------------------------------------------------------------------------------+
-                                 */
-                                updateCategorie($val['PlvCode'], $prodId, $val);
-                                updateType($val['PlvCode'], $prodId);
-                            } else {
-                                $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit KO</td>" . "\n";
+                                    /*
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                      |                                                                                                              |
+                                      |                                         Catégorie et type                                                    |
+                                      |                                                                                                              |
+                                      +--------------------------------------------------------------------------------------------------------------+
+                                     */
+                                    updateCategorie($val['PlvCode'], $prodId, $val);
+                                    updateType($val['PlvCode'], $prodId);
+                                } else {
+                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit KO</td>" . "\n";
+                                }
+                                //$webContent .=  $requete . "<br/>";
                             }
-                            //$webContent .=  $requete . "<br/>";
-                        }
-                    }
-
-                    if ($socid > 0) {
-                        $condReg = false;
-                        $modReg = false;
-
-                        switch ($val['PcvGRgmID']) {
-                            default: {
-                                    $modReg = 0;
-                                    $condReg = 1;
-                                }
-                                break;
-                            case "6": {
-                                    $modReg = 0;
-                                    $condReg = 24;
-                                }
-                                break;
-                            case "16": {
-                                    $modReg = 11;
-                                    $condReg = 15;
-                                }
-                                break;
-                            case "42": {
-                                    $modReg = 11;
-                                    $condReg = 4;
-                                }
-                                break;
-                            case "77": {
-                                    $modReg = 11;
-                                    $condReg = 13;
-                                }
-                                break;
-                            case "79": {
-                                    $modReg = 11;
-                                    $condReg = 12;
-                                }
-                                break;
-                            case "126": {
-                                    $modReg = 12;
-                                    $condReg = 24;
-                                }
-                                break;
-                            case "291": {
-                                    $modReg = 11;
-                                    $condReg = 3;
-                                }
-                                break;
-                            case "337": {
-                                    $modReg = 7;
-                                    $condReg = 7;
-                                }
-                                break;
-                            case "341": {
-                                    $modReg = 7;
-                                    $condReg = 20;
-                                }
-                                break;
-                            case "353": {
-                                    $modReg = 8;
-                                    $condReg = 7;
-                                }
-                                break;
-                            case "357": {
-                                    $modReg = 11;
-                                    $condReg = 2;
-                                }
-                                break;
-                            case "382": {
-                                    $modReg = 0;
-                                    $condReg = 1;
-                                }
-                                break;
-                            case "383": {
-                                    $modReg = 0;
-                                    $condReg = 20;
-                                }
-                                break;
-                            case "384": {
-                                    $modReg = 6;
-                                    $condReg = 26;
-                                }
-                                break;
-                            case "385": {
-                                    $modReg = 7;
-                                    $condReg = 1;
-                                }
-                                break;
-                            case "386": {
-                                    $modReg = 7;
-                                    $condReg = 25;
-                                }
-                                break;
-                            case "387": {
-                                    $modReg = 7;
-                                    $condReg = 2;
-                                }
-                                break;
-                            case "388": {
-                                    $modReg = 7;
-                                    $condReg = 4;
-                                }
-                                break;
-                            case "389": {
-                                    $modReg = 7;
-                                    $condReg = 2;
-                                }
-                                break;
-                            case "390": {
-                                    $modReg = 7;
-                                    $condReg = 3;
-                                }
-                                break;
-                            case "391": {
-                                    $modReg = 0;
-                                    $condReg = 8;
-                                }
-                                break;
-                            case "392": {
-                                    $condReg = 4;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "393": {
-                                    $condReg = 5;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "394": {
-                                    $condReg = 12;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "395": {
-                                    $condReg = 19;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "396": {
-                                    $condReg = 18;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "397": {
-                                    $condReg = 15;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "398": {
-                                    $condReg = 2;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "399": {
-                                    $condReg = 3;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "400": {
-                                    $condReg = 10;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "401": {
-                                    $condReg = 4;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "402": {
-                                    $condReg = 5;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "403": {
-                                    $condReg = 12;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "404": {
-                                    $condReg = 19;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "405": {
-                                    $condReg = 18;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "406": {
-                                    $condReg = 15;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "407": {
-                                    $condReg = 1;
-                                    $modReg = 2;
-                                }
-                                break;
-                            case "408": {
-                                    $condReg = 21;
-                                    $modReg = 3;
-                                }
-                                break;
-                            case "409": {
-                                    $condReg = 1;
-                                    $modReg = 4;
-                                }
-                                break;
-                            case "411": {
-                                    $condReg = 14;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "412": {
-                                    $condReg = 4;
-                                    $modReg = 2;
-                                }
-                                break;
-                            case "413": {
-                                    $condReg = 5;
-                                    $modReg = 2;
-                                }
-                                break;
-                            case "414": {
-                                    $condReg = 9;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "415": {
-                                    $condReg = 26;
-                                    $modReg = 0;
-                                }
-                                break;
-                            case "416": {
-                                    $condReg = 3;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "417": {
-                                    $condReg = 1;
-                                    $modReg = 0;
-                                }
-                                break;
-                            case "418": {
-                                    $condReg = 27;
-                                    $modReg = 0;
-                                }
-                                break;
-                            case "420": {
-                                    $condReg = 13;
-                                    $modReg = 8;
-                                }
-                                break;
-                            case "421": {
-                                    $condReg = 25;
-                                    $modReg = 0;
-                                }
-                                break;
-                            case "422": {
-                                    $condReg = 12;
-                                    $modReg = 2;
-                                }
-                                break;
-                            case "423": {
-                                    $condReg = 22;
-                                    $modReg = 13;
-                                }
-                                break;
-                            case "426": {
-                                    $condReg = 10;
-                                    $modReg = 7;
-                                }
-                                break;
-                            case "427": {
-                                    $condReg = 9;
-                                    $modReg = 0;
-                                }
-                                break;
                         }
 
+                        if ($socid > 0) {
+                            $condReg = false;
+                            $modReg = false;
 
-                        /*
-                          +--------------------------------------------------------------------------------------------------------------+
-                          |                                                                                                              |
-                          |                                         La commande                                                          |
-                          |                                                                                                              |
-                          +--------------------------------------------------------------------------------------------------------------+
-                         */
+                            switch ($val['PcvGRgmID']) {
+                                default: {
+                                        $modReg = 0;
+                                        $condReg = 1;
+                                    }
+                                    break;
+                                case "6": {
+                                        $modReg = 0;
+                                        $condReg = 24;
+                                    }
+                                    break;
+                                case "16": {
+                                        $modReg = 11;
+                                        $condReg = 15;
+                                    }
+                                    break;
+                                case "42": {
+                                        $modReg = 11;
+                                        $condReg = 4;
+                                    }
+                                    break;
+                                case "77": {
+                                        $modReg = 11;
+                                        $condReg = 13;
+                                    }
+                                    break;
+                                case "79": {
+                                        $modReg = 11;
+                                        $condReg = 12;
+                                    }
+                                    break;
+                                case "126": {
+                                        $modReg = 12;
+                                        $condReg = 24;
+                                    }
+                                    break;
+                                case "291": {
+                                        $modReg = 11;
+                                        $condReg = 3;
+                                    }
+                                    break;
+                                case "337": {
+                                        $modReg = 7;
+                                        $condReg = 7;
+                                    }
+                                    break;
+                                case "341": {
+                                        $modReg = 7;
+                                        $condReg = 20;
+                                    }
+                                    break;
+                                case "353": {
+                                        $modReg = 8;
+                                        $condReg = 7;
+                                    }
+                                    break;
+                                case "357": {
+                                        $modReg = 11;
+                                        $condReg = 2;
+                                    }
+                                    break;
+                                case "382": {
+                                        $modReg = 0;
+                                        $condReg = 1;
+                                    }
+                                    break;
+                                case "383": {
+                                        $modReg = 0;
+                                        $condReg = 20;
+                                    }
+                                    break;
+                                case "384": {
+                                        $modReg = 6;
+                                        $condReg = 26;
+                                    }
+                                    break;
+                                case "385": {
+                                        $modReg = 7;
+                                        $condReg = 1;
+                                    }
+                                    break;
+                                case "386": {
+                                        $modReg = 7;
+                                        $condReg = 25;
+                                    }
+                                    break;
+                                case "387": {
+                                        $modReg = 7;
+                                        $condReg = 2;
+                                    }
+                                    break;
+                                case "388": {
+                                        $modReg = 7;
+                                        $condReg = 4;
+                                    }
+                                    break;
+                                case "389": {
+                                        $modReg = 7;
+                                        $condReg = 2;
+                                    }
+                                    break;
+                                case "390": {
+                                        $modReg = 7;
+                                        $condReg = 3;
+                                    }
+                                    break;
+                                case "391": {
+                                        $modReg = 0;
+                                        $condReg = 8;
+                                    }
+                                    break;
+                                case "392": {
+                                        $condReg = 4;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "393": {
+                                        $condReg = 5;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "394": {
+                                        $condReg = 12;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "395": {
+                                        $condReg = 19;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "396": {
+                                        $condReg = 18;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "397": {
+                                        $condReg = 15;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "398": {
+                                        $condReg = 2;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "399": {
+                                        $condReg = 3;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "400": {
+                                        $condReg = 10;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "401": {
+                                        $condReg = 4;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "402": {
+                                        $condReg = 5;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "403": {
+                                        $condReg = 12;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "404": {
+                                        $condReg = 19;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "405": {
+                                        $condReg = 18;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "406": {
+                                        $condReg = 15;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "407": {
+                                        $condReg = 1;
+                                        $modReg = 2;
+                                    }
+                                    break;
+                                case "408": {
+                                        $condReg = 21;
+                                        $modReg = 3;
+                                    }
+                                    break;
+                                case "409": {
+                                        $condReg = 1;
+                                        $modReg = 4;
+                                    }
+                                    break;
+                                case "411": {
+                                        $condReg = 14;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "412": {
+                                        $condReg = 4;
+                                        $modReg = 2;
+                                    }
+                                    break;
+                                case "413": {
+                                        $condReg = 5;
+                                        $modReg = 2;
+                                    }
+                                    break;
+                                case "414": {
+                                        $condReg = 9;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "415": {
+                                        $condReg = 26;
+                                        $modReg = 0;
+                                    }
+                                    break;
+                                case "416": {
+                                        $condReg = 3;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "417": {
+                                        $condReg = 1;
+                                        $modReg = 0;
+                                    }
+                                    break;
+                                case "418": {
+                                        $condReg = 27;
+                                        $modReg = 0;
+                                    }
+                                    break;
+                                case "420": {
+                                        $condReg = 13;
+                                        $modReg = 8;
+                                    }
+                                    break;
+                                case "421": {
+                                        $condReg = 25;
+                                        $modReg = 0;
+                                    }
+                                    break;
+                                case "422": {
+                                        $condReg = 12;
+                                        $modReg = 2;
+                                    }
+                                    break;
+                                case "423": {
+                                        $condReg = 22;
+                                        $modReg = 13;
+                                    }
+                                    break;
+                                case "426": {
+                                        $condReg = 10;
+                                        $modReg = 7;
+                                    }
+                                    break;
+                                case "427": {
+                                        $condReg = 9;
+                                        $modReg = 0;
+                                    }
+                                    break;
+                            }
 
-                        if ($typeLigne == "propal") {
-                            if (isset($tabImportOK['propal'][$val['PcvCode']]))
-                                $comId = $tabImportOK['propal'][$val['PcvCode']];
-                            else {
-                                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
-                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
-                                $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
-                                $ref = ($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode'];
-                                $oldRef = false;
 
-                                $tabRef = explode("-", $ref);
-                                if (isset($tabRef[1])) {
-                                    $newRef = $ref;
-                                    $oldRef = $tabRef[0];
-                                    $result = SynopsisRevisionPropal::getRefMax($oldRef, "propal");
+                            /*
+                              +--------------------------------------------------------------------------------------------------------------+
+                              |                                                                                                              |
+                              |                                         La commande                                                          |
+                              |                                                                                                              |
+                              +--------------------------------------------------------------------------------------------------------------+
+                             */
+
+                            if ($typeLigne == "propal") {
+                                if (isset($tabImportOK['propal'][$val['PcvCode']]))
+                                    $comId = $tabImportOK['propal'][$val['PcvCode']];
+                                else {
+                                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+                                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
+                                    $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
+                                    $ref = ($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode'];
+                                    $oldRef = false;
+
+                                    $tabRef = explode("-", $ref);
+                                    if (isset($tabRef[1])) {
+                                        $newRef = $ref;
+                                        $oldRef = $tabRef[0];
+                                        $result = SynopsisRevisionPropal::getRefMax($oldRef, "propal");
+                                        if ($result) {
+                                            $oldId = $result[0];
+                                        }
+                                    }
+
+                                    $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
                                     if ($result) {
+                                        $oldRef = $ref;
+                                        $ref = "TEMP(" . (($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode']) . ")";
+                                        $newRef = null;
                                         $oldId = $result[0];
                                     }
-                                }
 
-                                $result = SynopsisRevisionPropal::getRefMax($ref, "propal");
-                                if ($result) {
-                                    $oldRef = $ref;
-                                    $ref = "TEMP(" . (($val['PcvFree8'] != "") ? $val['PcvFree8'] : $val['PcvCode']) . ")";
-                                    $newRef = null;
-                                    $oldId = $result[0];
-                                }
-
-                                //Insert commande
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
+                                    //Insert commande
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propal
                                         (datec,ref, fk_user_author, fk_soc,fk_cond_reglement, datep, fk_mode_reglement,fk_delivery_address,import_key)
                                  VALUES (now(),'" . $ref . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
-                                $sql = requeteWithCache($requete);
-                                $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
-                                if (isset($oldRef) && $oldRef)
-                                    SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId, $newRef);
-                                if ($sql) {
-                                    $mode = "PROPAL_CREATE";
-                                    $tabImportOK['propal'][$val['PcvCode']] = $comId;
-                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
-                                } else {
-                                    $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
-                                }
-                            }
-                        } else {
-                            if (isset($tabImportOK['commande'][$val['PcvCode']]))
-                                $comId = $tabImportOK['commande'][$val['PcvCode']]['id'];
-                            else {
-                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
-                                $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
-                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE ref = '" . $val['PcvCode'] . "'";
-                                $sql = requeteWithCache($requete);
-                                $res = fetchWithCache($sql);
-                                //Creer la commande
-                                $comId = false;
-
-
-                                $mode = ""; //pour les trigger
-
-                                if (!$db->num_rows($sql) > 0) {
-                                    //Insert commande
-                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
-                                        (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
-                                 VALUES (now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                     $sql = requeteWithCache($requete);
-                                    $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
+                                    $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
+                                    if (isset($oldRef) && $oldRef)
+                                        SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId, $newRef);
                                     if ($sql) {
-                                        $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
-                                        $mode = "ORDER_CREATE";
+                                        $mode = "PROPAL_CREATE";
+                                        $tabImportOK['propal'][$val['PcvCode']] = $comId;
                                         $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
                                         $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
                                     } else {
                                         $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
                                         $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
                                     }
-                                } else {
-                                    //Updatecommande
-                                    $comId = $res->rowid;
-                                    $sqlUpt = array();
-                                    if ($res->fk_user_author != $internalUserId && $internalUserId > 0)
-                                        $sqlUpt[] = " fk_user_author = '" . $internalUserId . "'";
-                                    if ($res->fk_soc != $socid)
-                                        $sqlUpt[] = " fk_soc = '" . $socid . "'";
-                                    if ($res->fk_cond_reglement != $condReg)
-                                        $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
-                                    if ($res->fk_mode_reglement != $modReg)
-                                        $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
-                                    if ($res->fk_delivery_address != $livAdd)
-                                        $sqlUpt[] = " fk_delivery_address = '" . $livAdd . "'";
-                                    if (count($sqlUpt) > 0) {
-                                        $updtStr = join(',', $sqlUpt);
-                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
+                                }
+                            } else {
+                                if (isset($tabImportOK['commande'][$val['PcvCode']]))
+                                    $comId = $tabImportOK['commande'][$val['PcvCode']]['id'];
+                                else {
+                                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</td>";
+                                    $mailContent .= "<tr><th style='background-color: #0073EA; color: #FFF;'>" . ($typeLigne == "commande" ? "Commande" : "Propal") . "</th>" . "\n";
+                                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE ref = '" . $val['PcvCode'] . "'";
+                                    $sql = requeteWithCache($requete);
+                                    $res = fetchWithCache($sql);
+                                    //Creer la commande
+                                    $comId = false;
+
+
+                                    $mode = ""; //pour les trigger
+
+                                    if (!$db->num_rows($sql) > 0) {
+                                        //Insert commande
+                                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commande
+                                        (date_creation,ref, fk_user_author, fk_soc,fk_cond_reglement, date_commande, fk_mode_reglement,fk_delivery_address,import_key)
+                                 VALUES (now(),'" . $val['PcvCode'] . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                         $sql = requeteWithCache($requete);
+                                        $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "commande");
                                         if ($sql) {
                                             $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
-                                            $mode = "ORDER_MODIFY";
-                                            $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
-                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
+                                            $mode = "ORDER_CREATE";
+                                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation commande OK</td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande OK</td>" . "\n";
                                         } else {
-                                            $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
+                                            $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation commande KO</td>" . "\n";
                                         }
                                     } else {
-                                        $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
-                                        $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
+                                        //Updatecommande
+                                        $comId = $res->rowid;
+                                        $sqlUpt = array();
+                                        if ($res->fk_user_author != $internalUserId && $internalUserId > 0)
+                                            $sqlUpt[] = " fk_user_author = '" . $internalUserId . "'";
+                                        if ($res->fk_soc != $socid)
+                                            $sqlUpt[] = " fk_soc = '" . $socid . "'";
+                                        if ($res->fk_cond_reglement != $condReg)
+                                            $sqlUpt[] = " fk_cond_reglement = '" . $condReg . "'";
+                                        if ($res->fk_mode_reglement != $modReg)
+                                            $sqlUpt[] = " fk_mode_reglement = '" . $modReg . "'";
+                                        if ($res->fk_delivery_address != $livAdd)
+                                            $sqlUpt[] = " fk_delivery_address = '" . $livAdd . "'";
+                                        if (count($sqlUpt) > 0) {
+                                            $updtStr = join(',', $sqlUpt);
+                                            $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET " . $updtStr . " WHERE rowid =" . $comId;
+                                            $sql = requeteWithCache($requete);
+                                            if ($sql) {
+                                                $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
+                                                $mode = "ORDER_MODIFY";
+                                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour commande OK</td>";
+                                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande OK</td>" . "\n";
+                                            } else {
+                                                $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour commande KO</td>" . "\n";
+                                            }
+                                        } else {
+                                            $tabImportOK['commande'][$val['PcvCode']] = array('id' => $comId, 'codeAff' => $val['AffCode']);
+                                            $webContent .= "<td  class='ui-widget-content'>Pas de mise &agrave; jour commande n&eacute;c&eacute;ssaire";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Pas de mise &agrave; jour commande n&eacute;cessaire</td>" . "\n";
+                                        }
                                     }
                                 }
                             }
-                        }
 
-                        if ($comId > 0 && $livAdd > 0) {
-                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $livAdd . " AND fk_c_type_contact IN (102) AND element_id = " . $comId;
-                            $requete = "SELECT *" . $finReq;
-                            $sql = requeteWithCache($requete);
+                            if ($comId > 0 && $livAdd > 0) {
+                                $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $livAdd . " AND fk_c_type_contact IN (102) AND element_id = " . $comId;
+                                $requete = "SELECT *" . $finReq;
+                                $sql = requeteWithCache($requete);
 //                            die($requete);
-                            if ($db->num_rows($sql) < 1) {
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                if ($db->num_rows($sql) < 1) {
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
                                    VALUES (" . $livAdd . ",102," . $comId . ",4,now() )";
-                                $sql = requeteWithCache($requete);
-                            }
+                                    $sql = requeteWithCache($requete);
+                                }
 //print $requete;
-                        }
+                            }
 
 
-                        /*
-                         * A voir drsi drsi drsi
-                         */
-                        if ($comId > 0 && $socContact > 0) {
-                            $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
-                            $requete = "SELECT *" . $finReq;
-                            $sql = requeteWithCache($requete);
-                            if ($db->num_rows($sql) < 2) {
-                                $requete = "DELETE" . $finReq;
+                            /*
+                             * A voir drsi drsi drsi
+                             */
+                            if ($comId > 0 && $socContact > 0) {
+                                $finReq = " FROM " . MAIN_DB_PREFIX . "element_contact WHERE fk_socpeople =" . $socContact . " AND fk_c_type_contact IN (100,101) AND element_id = " . $comId;
+                                $requete = "SELECT *" . $finReq;
                                 $sql = requeteWithCache($requete);
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                if ($db->num_rows($sql) < 2) {
+                                    $requete = "DELETE" . $finReq;
+                                    $sql = requeteWithCache($requete);
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
                                    VALUES (" . $socContact . ",100," . $comId . ",4,now() )";
-                                $sql = requeteWithCache($requete);
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
+                                    $sql = requeteWithCache($requete);
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "element_contact(fk_socpeople, fk_c_type_contact, element_id,statut, datecreate)
                                    VALUES (" . $socContact . ",101," . $comId . ",4,now() )";
-                                $sql = requeteWithCache($requete);
-                            }
+                                    $sql = requeteWithCache($requete);
+                                }
 //print $requete;
-                        }
+                            }
 
-                        /*
-                          +--------------------------------------------------------------------------------------------------------------+
-                          |                                                                                                              |
-                          |                                         Les lignes de commandes                                              |
-                          |                                                                                                              |
-                          +--------------------------------------------------------------------------------------------------------------+
-                         */
+                            /*
+                              +--------------------------------------------------------------------------------------------------------------+
+                              |                                                                                                              |
+                              |                                         Les lignes de commandes                                              |
+                              |                                                                                                              |
+                              +--------------------------------------------------------------------------------------------------------------+
+                             */
 
-                        /*
-                          PlvFree0 => string(19)  Libre/Série Météor => coef ? sinon duree estimé (ajouter champs)
-                         */
+                            /*
+                              PlvFree0 => string(19)  Libre/Série Météor => coef ? sinon duree estimé (ajouter champs)
+                             */
 
 
-                        $val['PlvQteUV'] = str_replace(",", ".", $val['PlvQteUV']);
-                        if ($val['PlvQteUV'] < 0) {
-                            $val['PlvQteUV'] = 0 - $val['PlvQteUV'];
-                            $val['PlvPUNet'] = 0 - $val['PlvPUNet'];
-                        }
-                        $totalCom_ttc = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (1 + ( $val['TaxTaux'] / 100)));
-                        $totalCom_tva = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (( $val['TaxTaux'] / 100)));
+                            $val['PlvQteUV'] = str_replace(",", ".", $val['PlvQteUV']);
+                            if ($val['PlvQteUV'] < 0) {
+                                $val['PlvQteUV'] = 0 - $val['PlvQteUV'];
+                                $val['PlvPUNet'] = 0 - $val['PlvPUNet'];
+                            }
+                            $totalCom_ttc = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (1 + ( $val['TaxTaux'] / 100)));
+                            $totalCom_tva = preg_replace('/,/', '.', $val['PlvQteUV'] * $val['PlvPUNet'] * (( $val['TaxTaux'] / 100)));
 //echo "lalalalalala".$totalCom_tva."|".$val['PlvQteUV'];
-                        if ($comId) {
-                            $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Ligne de commande</td>";
-                            $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Ligne de commande</td>" . "\n";
-                            //Les lignes de commandes
+                            if ($comId) {
+                                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>Ligne de commande</td>";
+                                $mailContent .= "<tr><th style='background-color:#0073EA; color: #FFF;'>Ligne de commande</td>" . "\n";
+                                //Les lignes de commandes
 //Prix Achat
-                            if ($typeLigne == "propal") {
-                                if ($val['PlvCode']) {
-                                    $prodType = getProdType($val['PlvCode']);
-                                    $premiereDesc = true;
-                                } elseif ($premiereDesc && $val['PlvLib'] != "") {
-                                    $prodType = 100;
-                                    $premiereDesc = false;
-                                } else
-                                    $prodType = 106;
-                                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
+                                if ($typeLigne == "propal") {
+                                    if ($val['PlvCode']) {
+                                        $prodType = getProdType($val['PlvCode']);
+                                        $premiereDesc = true;
+                                    } elseif ($premiereDesc && $val['PlvLib'] != "") {
+                                        $prodType = 100;
+                                        $premiereDesc = false;
+                                    } else
+                                        $prodType = 106;
+                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "propaldet
                                        (fk_propal,
                                         fk_product,
                                         description,
@@ -1467,87 +1527,87 @@ if (is_dir($dir)) {
                                         " . $prodType . ")";
 
 
-                                $sql = requeteWithCache($requete);
-                                if ($sql) {
-                                    $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
-                                    if ($mode != 'ORDER_CREATE')
-                                        $mode = "ORDER_MODIFY";
-                                    $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ligne commande OK</td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande OK</td>" . "\n";
-                                } else {
-                                    $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                    $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
-                                }
-                            } else {
-                                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE import_key = " . $val['PlvID'];
-                                $sql1 = requeteWithCache($requete);
-                                $res1 = fetchWithCache($sql1);
-                                if ($db->num_rows($sql1) > 0) {
-                                    //Update
-                                    $sqlUpt = array();
-
-                                    if ($prodId && $res1->fk_product != $prodId)
-                                        $sqlUpt[] = " fk_product = '" . $prodId . "'";
-                                    if ($res1->buy_price_ht != $val['PlvPA'])
-                                        $sqlUpt[] = " buy_price_ht = '" . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . "'";
-                                    if ($res1->description != $val['PlvLib'])
-                                        $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
-                                    if ($val['PlvQteUV'] == '')
-                                        $val['PlvQteUV'] = 0;
-                                    if ($res1->qty != $val['PlvQteUV'])
-                                        $sqlUpt[] = " qty = '" . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvQteUV'] < 0 ? abs($val['PlvQteUV']) : 0))) . "'";
-                                    if ($val['PlvQteUV'] < 0) {
-                                        $val['PlvPUNet'] = - $val['PlvPUNet'];
-                                        $val['PlvQteUV'] = - $val['PlvQteUV'];
+                                    $sql = requeteWithCache($requete);
+                                    if ($sql) {
+                                        $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
+                                        if ($mode != 'ORDER_CREATE')
+                                            $mode = "ORDER_MODIFY";
+                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ligne commande OK</td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande OK</td>" . "\n";
+                                    } else {
+                                        $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
                                     }
-                                    if ($val['PlvPUNet'] == '')
-                                        $val['PlvPUNet'] = 0;
-                                    if ($res1->subprice != $val['PlvPUNet'])
-                                        $sqlUpt[] = " subprice = '" . preg_replace('/,/', '.', ($val['PlvPUNet']) > 0 ? $val['PlvPUNet'] : 0) . "'";
-                                    if ($res1->total_ht != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
-                                        $sqlUpt[] = " total_ht = qty * subprice ";
-                                    if ($res1->rang != $val['PlvNumLig'])
-                                        $sqlUpt[] = " rang = " . $val['PlvNumLig'];
-                                    if ($res1->tva_tx != $val['TaxTaux'])
-                                        $sqlUpt[] = " tva_tx = '" . preg_replace('/,/', '.', $val['TaxTaux']) . "'";
-                                    if ($res1->total_ttc != $totalCom_ttc)
-                                        $sqlUpt[] = " total_ttc = '" . $totalCom_ttc . "'";
-                                    if ($res1->total_tva != $totalCom_tva)
-                                        $sqlUpt[] = " total_tva = '" . $totalCom_tva . "'";
-                                    if ($val['PlvCode'])
-                                        $prodType = getProdType($val['PlvCode']);
-                                    else
-                                        $prodType = 5;
-                                    if ($res1->product_type != $prodType)
-                                        $sqlUpt[] = " product_type = '" . $prodType . "'";
+                                } else {
+                                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commandedet WHERE import_key = " . $val['PlvID'];
+                                    $sql1 = requeteWithCache($requete);
+                                    $res1 = fetchWithCache($sql1);
+                                    if ($db->num_rows($sql1) > 0) {
+                                        //Update
+                                        $sqlUpt = array();
+
+                                        if ($prodId && $res1->fk_product != $prodId)
+                                            $sqlUpt[] = " fk_product = '" . $prodId . "'";
+                                        if ($res1->buy_price_ht != $val['PlvPA'])
+                                            $sqlUpt[] = " buy_price_ht = '" . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . "'";
+                                        if ($res1->description != $val['PlvLib'])
+                                            $sqlUpt[] = " description = '" . $val['PlvLib'] . "'";
+                                        if ($val['PlvQteUV'] == '')
+                                            $val['PlvQteUV'] = 0;
+                                        if ($res1->qty != $val['PlvQteUV'])
+                                            $sqlUpt[] = " qty = '" . preg_replace('/,/', '.', ($val['PlvQteUV'] > 0 ? $val['PlvQteUV'] : ($val['PlvQteUV'] < 0 ? abs($val['PlvQteUV']) : 0))) . "'";
+                                        if ($val['PlvQteUV'] < 0) {
+                                            $val['PlvPUNet'] = - $val['PlvPUNet'];
+                                            $val['PlvQteUV'] = - $val['PlvQteUV'];
+                                        }
+                                        if ($val['PlvPUNet'] == '')
+                                            $val['PlvPUNet'] = 0;
+                                        if ($res1->subprice != $val['PlvPUNet'])
+                                            $sqlUpt[] = " subprice = '" . preg_replace('/,/', '.', ($val['PlvPUNet']) > 0 ? $val['PlvPUNet'] : 0) . "'";
+                                        if ($res1->total_ht != floatval($val['PlvQteUV']) * floatval($val['PlvPUNet']))
+                                            $sqlUpt[] = " total_ht = qty * subprice ";
+                                        if ($res1->rang != $val['PlvNumLig'])
+                                            $sqlUpt[] = " rang = " . $val['PlvNumLig'];
+                                        if ($res1->tva_tx != $val['TaxTaux'])
+                                            $sqlUpt[] = " tva_tx = '" . preg_replace('/,/', '.', $val['TaxTaux']) . "'";
+                                        if ($res1->total_ttc != $totalCom_ttc)
+                                            $sqlUpt[] = " total_ttc = '" . $totalCom_ttc . "'";
+                                        if ($res1->total_tva != $totalCom_tva)
+                                            $sqlUpt[] = " total_tva = '" . $totalCom_tva . "'";
+                                        if ($val['PlvCode'])
+                                            $prodType = getProdType($val['PlvCode']);
+                                        else
+                                            $prodType = 5;
+                                        if ($res1->product_type != $prodType)
+                                            $sqlUpt[] = " product_type = '" . $prodType . "'";
 
 
-                                    $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
-                                    if (count($sqlUpt) > 0) {
-                                        $updtStr = join(',', $sqlUpt);
-                                        $requete = "UPDATE " . MAIN_DB_PREFIX . "commandedet SET " . $updtStr . " WHERE rowid = " . $res1->rowid;
+                                        $remArrayComLigne[$comId][$res1->rowid] = $res1->rowid;
+                                        if (count($sqlUpt) > 0) {
+                                            $updtStr = join(',', $sqlUpt);
+                                            $requete = "UPDATE " . MAIN_DB_PREFIX . "commandedet SET " . $updtStr . " WHERE rowid = " . $res1->rowid;
 //                        print $requete;
-                                        $sql = requeteWithCache($requete);
-                                        if ($sql) {
-                                            $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ligne commande OK</td>";
-                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
-                                            if ($mode != 'ORDER_CREATE')
-                                                $mode = "ORDER_MODIFY";
+                                            $sql = requeteWithCache($requete);
+                                            if ($sql) {
+                                                $webContent .= "<td  class='ui-widget-content'>Mise &agrave; jour ligne commande OK</td>";
+                                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
+                                                if ($mode != 'ORDER_CREATE')
+                                                    $mode = "ORDER_MODIFY";
+                                            } else {
+                                                $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                                $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
+                                            }
                                         } else {
-                                            $webContent .= "<td class='KOtd error  ui-widget-content'>Mise &agrave; jour ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                            $mailContent .= "<td style='background-color: #FFF;'>Mise &agrave; jour ligne commande OK</td>" . "\n";
+                                            $webContent .= "<td  class='ui-widget-content'>Pas de modification ligne commande</td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Pas de modification ligne commande</td>" . "\n";
                                         }
                                     } else {
-                                        $webContent .= "<td  class='ui-widget-content'>Pas de modification ligne commande</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Pas de modification ligne commande</td>" . "\n";
-                                    }
-                                } else {
-                                    //Insert
-                                    if ($val['PlvCode'])
-                                        $prodType = getProdType($val['PlvCode']);
-                                    else
-                                        $prodType = 5;
-                                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
+                                        //Insert
+                                        if ($val['PlvCode'])
+                                            $prodType = getProdType($val['PlvCode']);
+                                        else
+                                            $prodType = 5;
+                                        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "commandedet
                                        (fk_commande,
                                         fk_product,
                                         description,
@@ -1576,50 +1636,50 @@ if (is_dir($dir)) {
                                         " . $prodType . ")";
 
 
-                                    $sql = requeteWithCache($requete);
-                                    if ($sql) {
-                                        $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
-                                        if ($mode != 'ORDER_CREATE')
-                                            $mode = "ORDER_MODIFY";
-                                        $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ligne commande OK</td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande OK</td>" . "\n";
-                                    } else {
-                                        $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                        $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
+                                        $sql = requeteWithCache($requete);
+                                        if ($sql) {
+                                            $remArrayComLigne[$comId][$db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'")] = $db->last_insert_id("'" . MAIN_DB_PREFIX . "commandedet'");
+                                            if ($mode != 'ORDER_CREATE')
+                                                $mode = "ORDER_MODIFY";
+                                            $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation ligne commande OK</td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande OK</td>" . "\n";
+                                        } else {
+                                            $webContent .= "<td  class='KOtd error  ui-widget-content'>Cr&eacute;ation ligne commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                            $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation ligne commande KO</td>" . "\n";
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
-                    /*
-                      +--------------------------------------------------------------------------------------------------------------+
-                      |                                                                                                              |
-                      |                                         Effacement Ligne de commande                                         |
-                      |                                                                                                              |
-                      +--------------------------------------------------------------------------------------------------------------+
-                     */
+                        /*
+                          +--------------------------------------------------------------------------------------------------------------+
+                          |                                                                                                              |
+                          |                                         Effacement Ligne de commande                                         |
+                          |                                                                                                              |
+                          +--------------------------------------------------------------------------------------------------------------+
+                         */
 
-                    $webContent .= "<table width=600 cellpadding=10>";
-                    $webContent .= "<tr><th colspan=2 class='ui-state-default ui-widget-header'>Syncho nombre de ligne de commande</td>";
-                    $mailContent .= "<tr><th colspan=2 style='background-color:#0073EA; color: #FFF;'>Syncho nombre de ligne de commande</td>" . "\n";
+                        $webContent .= "<table width=600 cellpadding=10>";
+                        $webContent .= "<tr><th colspan=2 class='ui-state-default ui-widget-header'>Syncho nombre de ligne de commande</td>";
+                        $mailContent .= "<tr><th colspan=2 style='background-color:#0073EA; color: #FFF;'>Syncho nombre de ligne de commande</td>" . "\n";
 
-                    foreach ($remArrayComLigne as $comId => $arrLigne) {
-                        $webContent .= "<tr><th colspan=1 class='ui-state-default ui-widget-header'>Commande #" . $comId . "</td>";
-                        $mailContent .= "<tr><th colspan=1 style='background-color:#0073EA; color: #FFF;'>Commande #" . $comId . "</td>" . "\n";
-                        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $comId . " AND rowid not in (" . join(",", $arrLigne) . ")";
-                        $sql = requeteWithCache($requete);
-                        if ($sql) {
-                            $webContent .= "<td  class='ui-widget-content'>Synchro des lignes de commande OK</td>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande OK</td>" . "\n";
-                        } else {
-                            $webContent .= "<td class='KOtd error ui-widget-content'>Synchro des lignes de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                            $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande KO</td>" . "\n";
+                        foreach ($remArrayComLigne as $comId => $arrLigne) {
+                            $webContent .= "<tr><th colspan=1 class='ui-state-default ui-widget-header'>Commande #" . $comId . "</td>";
+                            $mailContent .= "<tr><th colspan=1 style='background-color:#0073EA; color: #FFF;'>Commande #" . $comId . "</td>" . "\n";
+                            $requete = "DELETE FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $comId . " AND rowid not in (" . join(",", $arrLigne) . ")";
+                            $sql = requeteWithCache($requete);
+                            if ($sql) {
+                                $webContent .= "<td  class='ui-widget-content'>Synchro des lignes de commande OK</td>";
+                                $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande OK</td>" . "\n";
+                            } else {
+                                $webContent .= "<td class='KOtd error ui-widget-content'>Synchro des lignes de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                                $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande KO</td>" . "\n";
+                            }
                         }
+                        $webContent .= "</table>";
+                        $mailContent .= "</table>" . "\n";
                     }
-                    $webContent .= "</table>";
-                    $mailContent .= "</table>" . "\n";
                 }
-
 
 
 
@@ -1636,34 +1696,37 @@ if (is_dir($dir)) {
 
 
                 //Move file
-                if (!is_dir($dir . "/imported/"))
-                    if (!mkdir($dir . $imported))
-                        die("Impossible de créer le dossier.");
-                $webContent .= "<tr><th class='ui-state-default ui-widget-header'>deplacement fichier</th>";
-                $resultMv = rename($dir . "/" . $file, $dir . $imported . $file);
-                if ($resultMv)
-                    $webContent.= "<td class='ui-widget-content'>OK</td>";
-                else
-                    $webContent.= "<td class='ui-widget-content'>KO</td>";
+                if ($OKFile) {
+                    if (!is_dir($dir . "/imported/"))
+                        if (!mkdir($dir . $imported))
+                            die("Impossible de créer le dossier.");
+                    $webContent .= "<tr><th class='ui-state-default ui-widget-header'>deplacement fichier</th>";
+                    $resultMv = rename($dir . "/" . $file, $dir . $imported . $file);
+                    if ($resultMv)
+                        $webContent.= "<td class='ui-widget-content'>OK</td>";
+                    else
+                        $webContent.= "<td class='ui-widget-content'>KO</td>";
 
-                $webContent .= "</table>";
+                    $webContent .= "</table>";
 //                echo $webContent;
 //                $webContent = '';
-                $mailContent = '';
+                    $mailContent = '';
+                }
             }
         }
-        closedir($dh);
-
-
-
-        /*
-          +--------------------------------------------------------------------------------------------------------------+
-          |                                                                                                              |
-          |                                         Update total commande                                                |
-          |                                                                                                              |
-          +--------------------------------------------------------------------------------------------------------------+
-         */
     }
+    closedir($dh);
+
+
+
+    /*
+      +--------------------------------------------------------------------------------------------------------------+
+      |                                                                                                              |
+      |                                         Update total commande                                                |
+      |                                                                                                              |
+      +--------------------------------------------------------------------------------------------------------------+
+     */
+//    }
 } else {
     $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";
 }
@@ -2157,20 +2220,29 @@ function processUser($import_key) {
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
-        if (!isset($remUserArray[$import_key])) {
-            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
-            $sql = requeteWithCache($requete);
-            if ($db->num_rows($sql) > 0) {
-                $res = fetchWithCache($sql);
-                $remUserArray[$import_key] = $res->rowid;
-            } else
-                $remUserArray[$import_key] = false;
-            return $remUserArray[$import_key];
-        } else {
-            return $remUserArray[$import_key];
-        }
+        $result = getElementElement("idUser8Sens", "idUserGle", $import_key);
+        if (isset($result[0]['d']))
+            return $result[0]['d'];
+        else
+            affErreur("Pas de correspondance pour l'utilisateur dans GLE : id 8Sens " . $import_key);
+//        if (!isset($remUserArray[$import_key])) {
+//            $requete = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext = " . $import_key;
+//            $sql = requeteWithCache($requete);
+//            if ($db->num_rows($sql) > 0) {
+//                $res = fetchWithCache($sql);
+//                $remUserArray[$import_key] = $res->rowid;
+//            } else
+//                $remUserArray[$import_key] = false;
+//            return $remUserArray[$import_key];
+//        } else {
+//            return $remUserArray[$import_key];
+//        }
     } else
-        die("Pas d'id pour l'user");
+        affErreur("Pas d'id pour l'user");
+}
+
+function affErreur($text) {
+    echo "<br/><h3 style='color:red;'>" . $text . "</h3><br/>";
 }
 
 function fetchWithCache($result) {

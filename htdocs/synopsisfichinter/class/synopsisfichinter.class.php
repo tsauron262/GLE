@@ -1158,12 +1158,15 @@ class SynopsisfichinterLigne extends FichinterLigne{
         $total_ttc = 1.2 * $this->total_ht;
         $total_tva = 0.2 * $this->total_ht;
 
-        $requete = "SELECT isDeplacement FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE id =" . $this->fk_typeinterv;
-        $sql = $this->db->query($requete);
-        $res = $this->db->fetch_object($sql);
         $isDep = false;
-        if ($res->isDeplacement == 1 || 1)
-            $isDep = true;
+        
+        if($this->fk_typeinterv){
+            $requete = "SELECT isDeplacement FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv WHERE id =" . $this->fk_typeinterv;
+            $sql = $this->db->query($requete);
+            $res = $this->db->fetch_object($sql);
+                if ($res->isDeplacement == 1 || 1)
+                    $isDep = true;
+        }
 
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "fichinterdet SET";

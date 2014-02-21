@@ -154,6 +154,7 @@ Tél. : Soc-tel
             $dateFin = "";
             $qte = 0;
             $qte2 = 0;
+            $qteT = 0;
             $phraseDelai = "";
             while ($result = $this->db->fetch_object($res)) {
                 $ligneContrat = new Synopsis_ContratLigne($this->db);
@@ -165,19 +166,21 @@ Tél. : Soc-tel
 //                $serialNum = ($ligneContrat->serial_number != '') ? " \n SN : " . $ligneContrat->serial_number . "" : "";
                 $desc .= $ligneContrat->description . $sla . $serialNum . $ligneContrat->getInfoProductCli() . "\n\n";
                 $dateFin = date('d/m/Y', $ligneContrat->date_fin_validite);
-                $qte += $ligneContrat->qte;
+                $qte += $ligneContrat->qty;
                 $qte2 += $ligneContrat->qte2;
-                if ($result->qty2 == "8")
+                $qteTt = $ligneContrat->qty + $ligneContrat->qte2;
+                $qtT += $qteTt;
+                if ($qteTt == "8")
                     $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
-                elseif ($result->qty2 > 0)
-                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $result->qty) . " mois sur site (soit " . $result->qty . " visites par an).";
+                elseif ($qteTt > 0)
+                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $qteTt) . " mois sur site (soit " . $qteTt . " visites par an).";
             }
 
 
             $annexe = preg_replace('/Ligne-date_fin/', $dateFin, $annexe);
             $annexe = preg_replace('/Ligne-description/', html_entity_decode($desc), $annexe);
             $annexe = preg_replace('/Ligne-phrase_delai/', utf8_encodeRien($phraseDelai), $annexe);
-            $annexe = preg_replace('/Ligne-qte/', $qte, $annexe);
+            $annexe = preg_replace('/Ligne-qte/', $qteT, $annexe);
             $annexe = preg_replace('/Ligne-qte2/', $qte2, $annexe);
 
 

@@ -687,7 +687,7 @@ function print_left_eldy_menu($db,$menu_array_before,$menu_array_after,&$tabMenu
 				$newmenu->add("/contrat/fiche.php?&action=create&amp;leftmenu=contracts", $langs->trans("NewContract"), 1, $user->rights->contrat->creer);
 				$newmenu->add("/contrat/liste.php?leftmenu=contracts", $langs->trans("List"), 1, $user->rights->contrat->lire);
                                 /*mod drsi*/
-				$newmenu->add("/Synopsis_Contrat/listExpire.php?leftmenu=contracts", $langs->trans("Liste expirer"), 1, $user->rights->contrat->lire);
+				$newmenu->add("/Synopsis_Contrat/listExpire.php?leftmenu=contracts", $langs->trans("Liste expirés"), 1, $user->rights->contrat->lire);
                                 /* f mod drsi */
 				$newmenu->add("/contrat/services.php?leftmenu=contracts", $langs->trans("MenuServices"), 1, $user->rights->contrat->lire);
 				if (empty($leftmenu) || $leftmenu=="contracts") $newmenu->add("/contrat/services.php?leftmenu=contracts&amp;mode=0", $langs->trans("MenuInactiveServices"), 2, $user->rights->contrat->lire);

@@ -10,7 +10,7 @@ $result = $db->query($sql);
 //echo $sql;
 while($ligne = $db->fetch_object($result)){
     $userId = $newTabUser[$ligne->fk_user_action];
-    if(!$userId > 0)
+    if(!$userId > 0 || $userId === 0)
         die($sql.$userId."-".$ligne->fk_user_action);
         $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
         $eventsStr[] = '{"id":'.$ligne->id.', "start":"'.date('c', $db->jdate($ligne->datep)).'", "end":"'.date('c', $db->jdate($ligne->datep2)).'", "title":"'.$text.'", "userId": '.$userId.'}';

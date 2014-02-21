@@ -3,6 +3,7 @@ $tabUser = getTabUser();
 
 $i = 0;
 $newTabUser = array();
+$newTabUser2 = array();
 foreach($tabUser as $idUser => $nomUser){
     $newTabUser[$idUser] = $i;
     $newTabUser2[$i] = $idUser;

@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT .'/core/class/commonobject.class.php';
 
 
 /**
- *	Class to manage Dolibarr users
+ *	Class to manage GLE users
  */
 class User extends CommonObject
 {
@@ -1473,24 +1473,25 @@ class User extends CommonObject
 		// Define $urlwithroot
 		//$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
 		//$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-		$urlwithroot=DOL_MAIN_URL_ROOT;						// This is to use same domain name than current
+                global $dolibarr_main_url_root;
+		$urlwithroot=$dolibarr_main_url_root;						// This is to use same domain name than current
 
 		// TODO Use outputlangs to translate messages
 		if (! $changelater)
 		{
-			$mesg.= "A request to change your Dolibarr password has been received.\n";
+			$mesg.= "A request to change your GLE password has been received.\n";
 			$mesg.= "This is your new keys to login:\n\n";
 			$mesg.= $langs->trans("Login")." : $this->login\n";
 			$mesg.= $langs->trans("Password")." : $password\n\n";
 			$mesg.= "\n";
 			$url = $urlwithroot;
-			$mesg.= 'Click here to go to Dolibarr: '.$url."\n\n";
+			$mesg.= 'Click here to go to GLE: '.$url."\n\n";
 			$mesg.= "--\n";
 			$mesg.= $user->getFullName($langs);	// Username that make then sending
 		}
 		else
 		{
-			$mesg.= "A request to change your Dolibarr password has been received.\n";
+			$mesg.= "A request to change your GLE password has been received.\n";
 			$mesg.= "Your new key to login will be:\n\n";
 			$mesg.= $langs->trans("Login")." : $this->login\n";
 			$mesg.= $langs->trans("Password")." : $password\n\n";

@@ -21,7 +21,12 @@ $(window).load(function() {
         initNbUser();
     });
     initNbUser();
-    $('.contentListUser').hover(function(){
+    $('.contentListUser').click(function(){
+        setTimeout(function(){
+            $('.listUser').fadeIn();
+        }, 500);
+    });
+    $('.listUser').hover(function(){
         setTimeout(function(){
             $('.listUser').fadeIn();
         }, 500);

@@ -116,7 +116,7 @@ if ($result) {
     print "<tr class=\"liste_titre\">";
     print_liste_field_titre($langs->trans("Ref"), "liste.php", "f.ref", "", $urlparam, 'width="15%"', $sortfield, $sortorder);
     print_liste_field_titre($langs->trans("Company"), "liste.php", "s.nom", "", $urlparam, '', $sortfield, $sortorder);
-    print '<td>' . $langs->trans("Description") . '</td>';
+    print '<td>' . $langs->trans("Titre") . '</td>';
     print_liste_field_titre($langs->trans("Date"), "liste.php", "f.datei", "", $urlparam, 'align="center"', $sortfield);
     print '<td align="right">' . $langs->trans("Duration") . '</td>';
     print '<td align="right">' . $langs->trans("Order") . '</td>';

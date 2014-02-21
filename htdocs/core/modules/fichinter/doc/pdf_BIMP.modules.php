@@ -459,12 +459,14 @@ class pdf_bimp extends ModelePDFFicheinter {
 
 
                 $pdf->SetXY(19, 67);
+                if($heureAMarr != "00:00" || $heureAMdep != "00:00")
                 $pdf->MultiCell(20.5, 2.5, utf8_decode($heureAMarr . " à " . $heureAMdep), 0, 'C', 0);
 
 //                $pdf->SetXY(82.8, 54.57);
 //                $pdf->MultiCell(8.5, 2.5, $heureAMdep, 0, 'C', 0);
 
                 $pdf->SetXY(19, 72);
+                if($heurePMarr != "00:00" || $heurePMdep != "00:00")
                 $pdf->MultiCell(20.5, 2.5, utf8_decode($heurePMarr . " à " . $heurePMdep), 0, 'C', 0);
 
 //                $pdf->SetXY(82.8, 64.12);

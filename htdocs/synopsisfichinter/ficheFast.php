@@ -119,8 +119,19 @@ if ($_REQUEST["id"] > 0) {
 
     if (isset($_POST['update']))
         saveForm();
+    
+    
+    $prestations = prestations();
+    
+    
 
     $genererDoc = (extra(17) == 1 || extra(18) != null || extra(19) != '');
+    if($genererDoc)
+        foreach ($prestations as $prestation)
+            if($prestation->duree == 0){
+                $genererDoc = false;
+                echo "<h3 style='color:red;'>Pas de durée : Ligne ".$prestation->rowid."</h3>";
+            }
     if ($genererDoc) {
         genererDoc($db);
         affLienDoc($fichinter, $formfile, $conf);
@@ -226,7 +237,6 @@ if ($_REQUEST["id"] > 0) {
     print '</tr>';
 
 
-    $prestations = prestations();
 
 
 

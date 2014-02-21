@@ -169,7 +169,7 @@ Tél. : Soc-tel
                 $qte += $ligneContrat->qty;
                 $qte2 += $ligneContrat->qte2;
                 $qteTt = $ligneContrat->qty + $ligneContrat->qte2;
-                $qtT += $qteTt;
+                $qteT += $qteTt;
                 if ($qteTt == "8")
                     $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
                 elseif ($qteTt > 0)

@@ -192,7 +192,12 @@ Tél. : Soc-tel
         $socid = $contrat->socid;
 
 
-
+        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_contrat = ".$contrat->id. " ORDER BY datei ASC");
+        $strDi = "";
+        while($result = $this->db->fetch_object($sql)){
+            $strDi .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
+        }
+        $annexe = preg_replace('/Date-Di/', $strDi, $annexe);
 
 
 

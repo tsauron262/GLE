@@ -295,6 +295,7 @@ function getHelp($contrat, $user, $mysoc){
     print "<tr><td>Ligne-description<td>Description de la ligne<td>";
     print "<tr><td>Ligne-phrase_delai<td>Phrase stipulant le nombre de visite par an<td>";
     print "<tr><td>Ligne-qte<td>Quantité<td>";
+    print "<tr><td>Date-Di<td>Calendrier des DI<td>";
 
     print "<tr><th class='ui-widget-header ui-state-hover' colspan=3>Autre";
     print "<tr><td>DateDuJour<td>Date du jour<td>" . date('d/m/Y');

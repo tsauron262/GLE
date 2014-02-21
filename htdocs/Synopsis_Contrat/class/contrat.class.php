@@ -2616,6 +2616,15 @@ class Synopsis_ContratLigne extends ContratLigne {
 
     function getInfoOneProductCli($idProdCli, $opt = "", $size = 200) {
         $html = "\n";
+        $sql = $this->db->query("SELECT description FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id =" . $idProdCli);
+        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
+            $result = $this->db->fetch_object($sql);
+            if ($result->description != "") {
+                $html .= $prod->description . " ";
+            }
+        }
+        
+        
         $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1010");
         if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
             $result = $this->db->fetch_object($sql);

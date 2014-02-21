@@ -877,8 +877,8 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
             $civilite = $res->civilite;
             if ($langs->trans("CivilityShort" . $res->civilite) != "Short" . $civilite)
                 $civilite = $langs->trans("CivilityShort" . $res->civilite);
-            $to = $civilite . " " . $res->name . " " . $res->firstname;
-            $to_signature = $civilite . " " . $res->name . " " . $res->firstname;
+            $to = $civilite . " " . $res->lastname . " " . $res->firstname;
+            $to_signature = $civilite . " " . $res->lastname . " " . $res->firstname;
             if ($res->address . "x" != "x") {
                 $to .= "\n" . $res->address . " " . $res->cp . " " . $res->ville;
             }

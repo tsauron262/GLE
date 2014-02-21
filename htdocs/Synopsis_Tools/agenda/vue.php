@@ -124,8 +124,8 @@ $js .= <<<EOF
         save(calEvent);
       },
         eventNew : function(calEvent, Oevent, FreeBusyManager, calendar) {
-            start = calEvent.start;
-            end = calEvent.end;
+            start = calEvent.start.getTime();
+            end = calEvent.end.getTime();
             end -= 60*1000;
             back = document.location.href;
             back = escape(back);
@@ -162,21 +162,21 @@ $js .= <<<EOF
             result = result + "-";
         if (time.getMonth() < 9)
             result = result + "0";
-        result = result + (time.getMonth() + 1);
+        result = result +""+ (time.getMonth() + 1);
         if(option == 2)
             result = result + "-";
         if (time.getDate() < 10)
             result = result + "0";
-        result = result + time.getDate();
+        result = result +""+ time.getDate();
         if(option == 2){
             return result;
         }
         if (time.getHours() < 10)
             result = result + "0";
-        result = result + time.getHours();
+        result = result +""+ time.getHours();
         if (time.getMinutes() < 10)
             result = result + "0";
-        result = result + time.getMinutes();
+        result = result +""+ time.getMinutes();
         return result;
     }
   </script>

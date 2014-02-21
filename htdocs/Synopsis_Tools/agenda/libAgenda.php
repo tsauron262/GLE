@@ -23,7 +23,7 @@ function getTabUser() {
     if (count($tabUser) == 0 && isset($_SESSION['AGENDA']['tabUser']))
         $tabUser = $_SESSION['AGENDA']['tabUser'];
     elseif (count($tabUser) == 0)
-        $tabUser[$user->id] = "inc";
+        $tabUser[$user->id] = $user->getNomUrl();
     else
         $_SESSION['AGENDA']['tabUser'] = $tabUser;
         

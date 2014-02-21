@@ -1,62 +1,246 @@
 <?php
 
 require_once('../../main.inc.php');
-llxHeader('<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/agenda/agenda.js"></script>
-    <link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/agenda/agenda.css" />');
+require_once("libAgenda.php");
 
-if (isset($_REQUEST['date'])) {
-    $tabT = explode("/", $_REQUEST['date']);
-    if (isset($tabT[2]))
-    $date = new DateTime($tabT[2] . "/" . $tabT[1] . "/" . $tabT[0]);
-    $nbJours = $_REQUEST['nbJours'];
-    if(isset($_REQUEST['dateMoins']))
-    $date = date_add($date, date_interval_create_from_date_string("-".$nbJours." day"));
-    if(isset($_REQUEST['datePlus']))
-    $date = date_add($date, date_interval_create_from_date_string("+".$nbJours." day"));
-}
-if (!isset($date))
-    $date = new DateTime();
-
-$vue = (isset($_REQUEST['vueSemaine'])? 7 : (isset($_REQUEST['vueJour']) ? 1 : (isset($_REQUEST['vueMois']) ? 30 : (isset($_REQUEST['oldVue']) ? $_REQUEST['oldVue'] : 30))));
-
-
-
+$tabUserId = array();
 $tabUser = getTabUser();
+$i = 0;
+$tabJsIdUser = 'tabUserId = Array();';
+foreach ($tabUser as $userId => $nom) {
+    $i++;
+//    $tabUserId[] = "'".$userId.":".$nom."'";
+    $tabJsIdUser .= 'tabUserId.push(' . $userId . ');';
+}
+$userStr = "'" . implode("','", $tabUser) . "'";
 
-printMenu($tabUser, $date->getTimestamp(), $vue);
-
-//Une semaine
-if ($vue == 7)
-    printSemaine($date, $tabUser);
-
-elseif ($vue == 1)
-    printPeriode($date, $tabUser, 1);
-
-//Un mois
-else//if (isset($_REQUEST['vueMois']))
-    printMois($date, $tabUser);
-
-function getTabUser() {
-    global $user;
-    $tabUser = array();
-    foreach ($_REQUEST as $key => $val) {
-        if (preg_match('/^user([0-9]*)$/', $key, $arrTmp)) {
-            $tabUser[] = $val;
-        }
+$js = <<<EOF
+        <script type="text/javascript" src="../agenda/agenda.js"></script>
+    <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
+ <link rel='stylesheet' type='text/css' href='../jquery/calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+  <link rel="stylesheet" type="text/css" href="../jquery/calendar/jquery.weekcalendar.css" />
+  <link rel="stylesheet" type="text/css" href="../jquery/calendar/skins/default.css" />
+  <link rel="stylesheet" type="text/css" href="../jquery/calendar/skins/gcalendar.css" />
+  <style type="text/css">
+    body {
+      font-family: "Lucida Grande",Helvetica,Arial,Verdana,sans-serif;
+      margin: 0;
     }
-    if (count($tabUser) == 0)
-        $tabUser[] = $user->id;
-    return $tabUser;
-}
 
-function printMoinsPlus($date, $nbJours){
-    $dateM = date_sub($date, date_interval_create_from_date_string("-".$nbJours." day"));
-    $dateP = date_sub($date, date_interval_create_from_date_string("+".$nbJours." day"));
-    print "<button name='dateMois' value='<-'/>";
-    echo "</form>";
-}
+    h1 {
+      margin:0 0 2em;
+      padding: 0.5em;
+      font-size: 1.3em;
+    }
 
-function printMenu($tabUser, $date, $vue) {
+    p.description {
+      font-size: 0.8em;
+      padding: 1em;
+//      position: absolute;
+      top: 1.2em;
+      margin-right: 400px;
+    }
+
+    #calendar_selection {
+      font-size: 0.7em;
+//      position: absolute;
+      top: 1em;
+      right: 1em;
+      padding: 1em;
+      background: #ffc;
+      border: 1px solid #dda;
+      width: 270px;
+    }
+
+    #message {
+      font-size: 0.7em;
+//      position: absolute;
+      top: 1em;
+      right: 320px;
+      padding: 1em;
+      background: #ddf;
+      border: 1px solid #aad;
+      width: 270px;
+    }
+  </style>
+
+  <script type='text/javascript' src='../jquery/calendar/libs/jquery-1.4.4.min.js'></script>
+  <script type='text/javascript' src='../jquery/calendar/libs/jquery-ui-1.8.11.custom.min.js'></script>
+  <script type='text/javascript' src='../jquery/calendar/libs/jquery-ui-i18n.js'></script>
+
+  <script type="text/javascript" src="../jquery/calendar/libs/date.js"></script>
+  <script type="text/javascript" src="../jquery/calendar/jquery.weekcalendar.js"></script>
+  <script type="text/javascript">
+EOF;
+$js .= $tabJsIdUser;
+$js .= <<<EOF
+  (function($) {
+    var d = new Date();
+    d.setDate(d.getDate() - d.getDay());
+    var year = d.getFullYear();
+    var month = d.getMonth();
+    var day = d.getDate();
+
+
+    d = new Date();
+    d.setDate(d.getDate() -(d.getDay() - 3));
+    year = d.getFullYear();
+    month = d.getMonth();
+    day = d.getDate();
+
+        
+        function save(calEvent){
+            jQuery.ajax({
+                url: DOL_URL_ROOT + "/Synopsis_Tools/agenda/ajax.php",
+                type: "POST",
+                datatype: "xml",
+                data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime(),
+                error: function(msg) {
+                    alert("erreur");
+                }
+            });
+        }
+
+    $(document).ready(function() {
+      var Ocalendar = $('#calendar').weekCalendar({
+        timeslotsPerHour: 4,
+        date: new Date(toDateUrl(new Date(), 2)+'T08:00:00.000+00:00'),
+        height: function(Ocalendar){
+          return $(window).height() - $('h1').outerHeight(true);
+        },
+        eventRender : function(calEvent, Oevent) {
+          if (calEvent.end.getTime() < new Date().getTime()) {
+            Oevent.css('backgroundColor', '#aaa');
+            Oevent.find('.wc-time').css({
+              backgroundColor: '#999',
+              border:'1px solid #888'
+            });
+          }
+        },
+      eventResize: function(calEvent, Oevent) {
+        save(calEvent);
+      },
+      eventDrop: function(calEvent, Oevent) {
+        save(calEvent);
+      },
+        eventNew : function(calEvent, Oevent, FreeBusyManager, calendar) {
+            start = calEvent.start;
+            end = calEvent.end;
+            end -= 60*1000;
+            back = document.location.href;
+            back = escape(back);
+            back = back.replace(/\//g, "%2F");
+            newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&backtopage="+back;
+            window.location.replace(newUrl);
+        },
+        
+        data: 'events.json.php',
+        users: [$userStr],
+        showAsSeparateUser: true,
+        displayOddEven: true,
+        displayFreeBusys: true,
+        daysToShow: 5,
+        switchDisplay: {'1 journée': 1, '3 journées': 3, 'work week': 5, 'full week': 7},
+        headerSeparator: ' ',
+        useShortDayNames: true,
+        // I18N
+        firstDayOfWeek: $.datepicker.regional['fr'].firstDay,
+        shortDays: $.datepicker.regional['fr'].dayNamesShort,
+        longDays: $.datepicker.regional['fr'].dayNames,
+        shortMonths: $.datepicker.regional['fr'].monthNamesShort,
+        longMonths: $.datepicker.regional['fr'].monthNames,
+        dateFormat: 'd F y'
+      });
+    });
+  })(jQuery);
+        
+        
+    function toDateUrl(time, option) {
+        time = new Date(time);
+        result = time.getFullYear();
+        if(option == 2)
+            result = result + "-";
+        if (time.getMonth() < 9)
+            result = result + "0";
+        result = result + (time.getMonth() + 1);
+        if(option == 2)
+            result = result + "-";
+        if (time.getDate() < 10)
+            result = result + "0";
+        result = result + time.getDate();
+        if(option == 2){
+            return result;
+        }
+        if (time.getHours() < 10)
+            result = result + "0";
+        result = result + time.getHours();
+        if (time.getMinutes() < 10)
+            result = result + "0";
+        result = result + time.getMinutes();
+        return result;
+    }
+  </script>
+        
+EOF;
+
+
+
+
+llxHeader($js);
+
+//if (isset($_REQUEST['date'])) {
+//    $tabT = explode("/", $_REQUEST['date']);
+//    if (isset($tabT[2]))
+//        $date = new DateTime($tabT[2] . "/" . $tabT[1] . "/" . $tabT[0]);
+//    $nbJours = $_REQUEST['nbJours'];
+//    if (isset($_REQUEST['dateMoins']))
+//        $date = date_add($date, date_interval_create_from_date_string("-" . $nbJours . " day"));
+//    if (isset($_REQUEST['datePlus']))
+//        $date = date_add($date, date_interval_create_from_date_string("+" . $nbJours . " day"));
+//}
+//if (!isset($date))
+//    $date = new DateTime();
+//
+//$vue = (isset($_REQUEST['vueSemaine']) ? 7 : (isset($_REQUEST['vueJour']) ? 1 : (isset($_REQUEST['vueMois']) ? 30 : (isset($_REQUEST['oldVue']) ? $_REQUEST['oldVue'] : 30))));
+
+
+
+
+
+
+
+
+
+printMenu($tabUser);
+
+
+
+echo '
+
+  <div id="calendar"></div>
+</body>
+</html>';
+
+////Une semaine
+//if ($vue == 7)
+//    printSemaine($date, $tabUser);
+//
+//elseif ($vue == 1)
+//    printPeriode($date, $tabUser, 1);
+//
+////Un mois
+//else//if (isset($_REQUEST['vueMois']))
+//    printMois($date, $tabUser);
+
+
+//function printMoinsPlus($date, $nbJours) {
+//    $dateM = date_sub($date, date_interval_create_from_date_string("-" . $nbJours . " day"));
+//    $dateP = date_sub($date, date_interval_create_from_date_string("+" . $nbJours . " day"));
+//    print "<button name='dateMois' value='<-'/>";
+//    echo "</form>";
+//}
+
+function printMenu($tabUser) {
     global $db;
 
     $js = "var tabGroup = new Array();";
@@ -83,8 +267,8 @@ function printMenu($tabUser, $date, $vue) {
     while ($result = $db->fetch_object($sql)) {
         $i++;
         echo "<td>";
-        echo "<input " . (in_array($result->rowid, $tabUser) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
-        echo "<label for='user" . $result->rowid . "'>".$result->firstname . " " . $result->lastname."</label>";
+        echo "<input " . (isset($tabUser[$result->rowid]) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
+        echo "<label for='user" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</label>";
         echo "</td>";
         if ($i > 5) {
             $i = 0;
@@ -93,138 +277,20 @@ function printMenu($tabUser, $date, $vue) {
     }
     echo "</tr></table></div></div>";
 
-    $form = new Form($db);
-    echo $form->select_date($date, 'date');
-//    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
-
-    echo "<input type='hidden' name='oldVue' value='".$vue."'/>";
-    echo "<input type='hidden' name='nbJours' value='".$vue."'/>";
-    echo "<input type='submit' class='butAction' name='vueJour' value='Vue jour'/>";
-    echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
-    echo "<input type='submit' class='butAction' name='vueMois' value='Vue mois'/>";
-    echo "<br/>";
-    echo "<br/>";
-    echo "<input type='submit' class='butAction' name='dateMoins' value='<='/>";
-    echo "<input type='submit' class='butAction datePlus' name='datePlus' value='=>'/>";
+//    $form = new Form($db);
+//    echo $form->select_date($date, 'date');
+////    echo "<input name='date' type ='date' class='dateVue' value='" . date_format($date, "d/m/Y") . "'/>";
+//
+//    echo "<input type='hidden' name='oldVue' value='" . $vue . "'/>";
+//    echo "<input type='hidden' name='nbJours' value='" . $vue . "'/>";
+//    echo "<input type='submit' class='butAction' name='vueJour' value='Vue jour'/>";
+//    echo "<input type='submit' class='butAction' name='vueSemaine' value='Vue semaine'/>";
+//    echo "<input type='submit' class='butAction' name='vueMois' value='Vue mois'/>";
+//    echo "<br/>";
+//    echo "<br/>";
+//    echo "<input type='submit' class='butAction' name='dateMoins' value='<='/>";
+    echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<br/><br/>";
 }
-
-function printSemaine($date, $tabUser) {
-    $jSem = date_format($date, "w");
-    $date = date_sub($date, date_interval_create_from_date_string(($jSem > 0 ? ($jSem - 1) : 6) . " day"));
-    printPeriode($date, $tabUser, 7);
-}
-
-function printMois($date, $tabUser) {
-    global $db;
-    foreach ($tabUser as $user) {
-        $date = new DateTime(date_format($date, "Y-M-") . "01");
-        $jSem = date_format($date, "w");
-        $date = date_sub($date, date_interval_create_from_date_string(($jSem > 0 ? ($jSem - 1) : 6) . " day"));
-        $userO = new User($db);
-        $userO->fetch($user);
-        echo $userO->getNomUrl(1) . "<br/>";
-        printPeriode($date, $user, 35, "taille1");
-        echo "<br/>";
-    }
-}
-
-function printPeriode($date, $tabUser, $nbJours = 7, $cssPlus = "") {
-    $printUser = true;
-    if (!is_array($tabUser)) {
-        $tabUser = array($tabUser);
-        $printUser = false;
-    }
-    $tabJSem = array("Dimanche", "Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi");
-    for ($i = 0; $i < $nbJours; $i++) {
-        $date2 = strtotime(date_format($date, "Y-m-d"));
-        print "<div class='contentOneDay " . $cssPlus . "'>";
-        $jSem = date_format($date, "w");
-        echo $tabJSem[$jSem] . " " . dol_print_date($date2, "daytext");
-        print "<div class='oneDay'>";
-        foreach ($tabUser as $user) {
-            printOneDayOneUser($user, $date2, $printUser, false, ($jSem == 0 || $jSem == 6)? "bgAgendaFe" : "bgAgenda");
-        }
-        print "</div></div>";
-        if ($jSem == 0)
-            echo "<div class='clear'></div>";
-        $date = date_add($date, date_interval_create_from_date_string("1 day"));
-    }
-}
-
-function printOneDayOneUser($userId, $date, $printUser = false, $printDate = false, $bg = "bgAgenda") {
-    global $db;
-    $heureDebJ = "08";
-    $heureFinJ = "18";
-    $i = 0;
-    $coefx = 0.069444444 * 24 / ($heureFinJ - $heureDebJ);
-    $constx = -60 * $heureDebJ * $coefx;
-    $coefy = 0;
-    $minHeight = 60;
-    $sql = $db->query("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ((datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep > '" . date('Y-m-d 00:00:00', $date) . "') || (datep < '" . date('Y-m-d 23:59:00', $date) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $date) . "')) AND fk_user_action = " . $userId . " order by duree DESC ");
-    print '<div class="calendarSyn">';
-    print "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/agenda/img/".$bg.".jpg' class='bgAgenda'/>";
-    if ($printUser) {
-        echo "<div class='userOneDay'>";
-        $user = new User($db);
-        $user->fetch($userId);
-        echo $user->getNomUrl(1);
-        echo "</div>";
-    }
-    if ($printUser && $printDate)
-        echo "<br/>";
-    if ($printDate)
-        echo dol_print_date($date);
-    while ($result = $db->fetch_object($sql)) {
-        $i++;
-        $debuV = strtotime($result->datep);
-        $finV = strtotime($result->datep2);
-
-        $debuJ = strtotime(date('Y-M-d', $date) . " 00:00:00"); //Pour les elem sur plusieur jours
-        $finJ = strtotime(date('Y-M-d', $date) . " 23:59:59");
-        if ($debuJ > $debuV) {
-            $debuV = $debuJ;
-        }
-        if ($finJ < $finV) {
-            $finV = $finJ;
-        }
-
-        $debu = $debuV;
-        $fin = $finV;
-
-        $debuJ = strtotime(date('Y-M-d', $date) . " " . $heureDebJ . ":00:00"); //Pour les elem hors journéé de travail
-        $finJ = strtotime(date('Y-M-d', $date) . " " . $heureFinJ . ":00:00");
-        if ($debuJ > $debu) {
-            $debu = $debuJ;
-        }
-        if ($finJ < $fin) {
-            $fin = $finJ;
-        }
-
-
-
-        if (isset($result->datep2))
-            $duree = $fin - $debu;
-        else
-            $duree = 0;
-
-
-        if ($finJ <= $debu) {//Rdv aprés journé de travaile
-            $debu = $finJ - 7200;
-            $duree = $fin - $debu;
-        }
-
-        $minuteDeb = date('H', $debu) * 60 + date('i', $debu);
-        $minuteDur = $duree / 60;
-        print '<div id="event_' . $i . '" class="event eventAbss" style="top:' . (($minuteDeb * $coefx) + $constx) . '%; height:' . (($minuteDur > $minHeight ? $minuteDur : $minHeight) * $coefx) . '%; left:' . $coefy . '%;">';
-        print "<a href='".DOL_URL_ROOT."/comm/action/fiche.php?id=" . $result->id . "'>" . $result->label;
-        print "<br/>" . date("H:i", $debuV) . " - " . date("H:i", $finV) . "</a>";
-        print "<br/>" . $result->note;
-        print '</div>';
-        $coefy = $coefy + 2;
-    }
-    print "</div>";
-}
-
 ?>

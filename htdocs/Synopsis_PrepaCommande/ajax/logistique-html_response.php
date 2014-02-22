@@ -395,7 +395,7 @@ function displayLogistique($com) {
 
 
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text . "<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text . "<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo > 0 ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
                     } else {
                         print "<br/>" . $text . "&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                     }

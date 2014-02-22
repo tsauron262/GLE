@@ -132,7 +132,7 @@ class synopsisHook {
             histoNavigation::saveHisto($element_type, $element_id);
             $return .= histoNavigation::getBlocHisto();
         }
-        if ($element_id > 0 && ($element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
+        if ($element_id > 0 && ($element_type == "contrat" || $element_type == "commande" || $element_type == "DI" || $element_type == "FI" || $element_type == "expedition")) {
             $return .= '<div class="blockvmenupair rouge">';
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
@@ -386,6 +386,10 @@ class consigneCommande {
                 $id_comm = $obj->fk_commande;
             } elseif ($element_type == "expedition") {
                 $id_comm = $obj->origin_id;
+            } elseif ($element_type == "contrat") {
+                $tabT = getElementElement("commande", "contrat", null, $obj->id);
+                if (isset($tabT[0]['s']))
+                    $id_comm = $tabT[0]['s'];
             }
 
             if (isset($id_comm) && $id_comm > 0) {
@@ -471,24 +475,24 @@ class Synopsis_Commande extends Commande {
     }
 
 //La commande est elle membre d'un groupe
-    public function listIdGroupMember(){
+    public function listIdGroupMember() {
 //        return false;
         $requete = "SELECT command_refid "
                 . "FROM `" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet` "
                 . "WHERE `commande_group_refid` = (SELECT `commande_group_refid` "
                 . "                                 FROM `" . MAIN_DB_PREFIX . "Synopsis_commande_grpdet` "
-                . "                                 WHERE `command_refid` = ".$this->id.")";
+                . "                                 WHERE `command_refid` = " . $this->id . ")";
         $sql = $this->db->query($requete);
         $return = array();
         if ($this->db->num_rows($sql) > 0) {
-            while($result = $this->db->fetch_object($sql)){
+            while ($result = $this->db->fetch_object($sql)) {
                 $return[$result->command_refid] = $result->command_refid;
             }
             return $return;
         }
         return array($this->id);
     }
-    
+
     public function isGroupMember() {
 //        return false;
         $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_commande_grp.id as gid
@@ -523,19 +527,19 @@ class Synopsis_Commande extends Commande {
         }
         return array();
     }
-    
-    function fetch_commande_lignes($arrId, $only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0){
-        
+
+    function fetch_commande_lignes($arrId, $only_product = 0, $only_service = 0, $only_contrat = 0, $only_dep = 0, $srv_dep = 0) {
+
         $sql1 = 'SELECT l.rowid FROM ' . MAIN_DB_PREFIX . 'commandedet as l';
-        $sql2 = ' WHERE l.fk_commande IN (' . implode(",", $arrId).")";
-        if ($only_product){
+        $sql2 = ' WHERE l.fk_commande IN (' . implode(",", $arrId) . ")";
+        if ($only_product) {
             $sql1 .= ', ' . MAIN_DB_PREFIX . 'product as p';
             $sql2 .= ' AND p.fk_product_type = 0 AND p.rowid = l.fk_product';
         }
         $sql2 .= ' ORDER BY l.rang';
-        
-        dol_syslog("Commande::fetch_lines sql=" . $sql1.$sql2, LOG_DEBUG);
-        $result = $this->db->query($sql1.$sql2);
+
+        dol_syslog("Commande::fetch_lines sql=" . $sql1 . $sql2, LOG_DEBUG);
+        $result = $this->db->query($sql1 . $sql2);
         if ($result) {
             $num = $this->db->num_rows($result);
 

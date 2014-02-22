@@ -1832,7 +1832,7 @@ EOF;
         print "<td><SELECT id='addfk_typeinterv' name='fk_typeinterv'>";
         print "<OPTION value='-1'>Selectionner-></OPTION>";
         while ($res1 = $db->fetch_object($sql1)) {
-            if (!$fichinter->fk_contrat || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
+            if (!$fichinter->fk_contrat || $res1->isDeplacement || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
                 //Si déplacement OptGroup
                 if ($res1->isDeplacement == 1) {
                     $requete1 = "SELECT " . MAIN_DB_PREFIX . "product.label,

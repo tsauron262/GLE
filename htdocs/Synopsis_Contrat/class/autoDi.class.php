@@ -135,7 +135,7 @@ class autoDi {
                     foreach ($tabTech as $idTech) {
                         foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                             $delai = round(365 / count($site[$type]['tabVisite']) * ($type == "tele" ? (intval($numVisiste) + 0.5) : $numVisiste));
-                            $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
+                            $date = date_add(new DateTime($this->db->idate($this->contrat->date_contrat)), date_interval_create_from_date_string($delai . " day"));
                             $decale = 0;
                             for ($i = 0; $i < 100; $i++) {
                                 if (date_format($date, "w") != 0 && date_format($date, "w") != "6" && !isset($tabDatePrise[$idTech][date_format($date, "d-m-Y")])) {

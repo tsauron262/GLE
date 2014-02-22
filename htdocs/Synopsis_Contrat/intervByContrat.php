@@ -245,10 +245,11 @@ $contrat->fetch_lines();
 
 $nbDepDeb = date_diff(date_create($db->idate($contrat->date_contrat)), date_create())->days;
 $pourc = $result[0]['total_ht']/$contrat->total_ht*100;
+$pourcPro = $pourc*365/$nbDepDeb;
 print "<table class='border' width='100%'><tr><td> Date contrat <td>" . dol_print_date($contrat->date_contrat) . "
     <td>Vendue <td> " . $contrat->total_ht . " &euro;
     <tr><td>Prevue <td> " . $result[1]['total_ht'] . " &euro;";
-print "<td>Réaliser <td> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourc*365/$nbDepDeb)." %</tr></table><br/><br/>";
+print "<td>Réalisé <td ".($pourcPro > 100 ? "style='color:red'" : "")."> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourcPro)." %</tr></table><br/><br/>";
 
 
 

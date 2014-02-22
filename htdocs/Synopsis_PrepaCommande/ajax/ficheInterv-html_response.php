@@ -42,17 +42,25 @@
   {
     $com->fetch_group_lines(0,0);
 
-    $requete="SELECT fk_user_author, fk_user_valid , datei, duree, description, fk_statut, note_private, note_public, rowid
-                FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
+    $requete1="SELECT fk_user_author, fk_user_valid , datei, duree, description, fk_statut, note_private, note_public, rowid";
+    $requete2="SELECT count(rowid) as nb, fk_user_author as user";
+    $requete = " FROM ".MAIN_DB_PREFIX."Synopsis_fichinter
                WHERE fk_commande IN (".join(",",$arrGrpCom).")";
     if ($DiId>0)
     {
         $requete .= " AND ".MAIN_DB_PREFIX."Synopsis_fichinter.rowid = ".$DiId;
     }
-    $requete .= "
-            ORDER BY fk_user_author, datei DESC";
-//            print $requete;
-    $sql=$db->query($requete);
+    $requete2 .= $requete . " GROUP BY user";
+    $requete1 .= $requete . " ORDER BY fk_user_author, datei DESC";
+//            print $requete1;
+    $sql=$db->query($requete2);
+    while($res=$db->fetch_object($sql))
+    {
+        $tabTot[$res->user] = $res->nb;
+    }
+        
+        
+    $sql=$db->query($requete1);
     $rem = -10;
     while($res=$db->fetch_object($sql))
     {
@@ -67,7 +75,7 @@
             if ($rem!=$res->fk_user_author)
             {
                 print "<tr><td colspan=8>&nbsp;";
-                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Effectu&eacute; par ". utf8_encodeRien($tmpUser->getNomUrl(1));
+                print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>".$tabTot[$tmpUser->id]." Effectu&eacute; par ". utf8_encodeRien($tmpUser->getNomUrl(1));
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
                            <th class='ui-widget-header ui-state-default'>Date

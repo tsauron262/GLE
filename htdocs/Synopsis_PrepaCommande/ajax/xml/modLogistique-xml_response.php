@@ -42,6 +42,9 @@ foreach ($_REQUEST as $key => $val) {
                 $nextDispo = $dateDispo;
             }
         }
+        elseif(isset($_REQUEST['logistiqueKODate-' . $arr[1]]))
+            $set .= ", logistique_date_dispo='null'";
+            
         $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commandedet SET " . $set . " WHERE rowid = " . $arr[1];
         $sql = $db->query($requete);
         if ($yesnoArr[$val] == 0 && $totalOK) {

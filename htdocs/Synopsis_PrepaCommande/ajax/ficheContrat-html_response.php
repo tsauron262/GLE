@@ -158,8 +158,8 @@ if ($id > 0) {
     }
     print '<tr><td colspan="3"><img class="imgLoad" style="display:none;" src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/working.gif">';
     print "<button onClick='createContrat(" . 0 . ")' class='butAction'>Cr&eacute;er nouveau contrat manuellement</button>";
+    print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tout ajouter a un nouveau contrat</button>";
     if ($touCreer) {
-        print "<button class='butAjoutContratAll butAction' onClick='ajoutContratAll(tabLigneIdS, 0, 0)'>Tout ajouter a un nouveau contrat</button>";
         print '<tr><td colspan="3">';
         $requete = "SELECT *
                                   FROM " . MAIN_DB_PREFIX . "contrat

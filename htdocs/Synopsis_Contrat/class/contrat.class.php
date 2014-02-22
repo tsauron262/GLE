@@ -1493,12 +1493,12 @@ class Synopsis_Contrat extends Contrat {
                 $dureeMax = $duree;
             $query = "UPDATE " . MAIN_DB_PREFIX . "contratdet SET date_ouverture_prevue = '" . $dateDeb . "'";
             if ($ligne->date_ouverture)
-                $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH)";
+                $query .= ", date_ouverture = '" . $dateDeb . "', date_fin_validite = date_add(date_add('" . $dateProlongation . "',INTERVAL " . $duree . " MONTH),INTERVAL -1 DAY)";
 //die($query . " WHERE rowid = " . $ligne->id);
             $sql = $this->db->query($query . " WHERE rowid = " . $ligne->id);
             $query = "UPDATE " . MAIN_DB_PREFIX . "contrat SET date_contrat = '" . $dateDeb . "'";
             if ($this->mise_en_service)
-                $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH)";
+                $query .= ", mise_en_service = '" . $dateDeb . "', fin_validite = date_add(date_add('" . $dateProlongation . "',INTERVAL " . $dureeMax . " MONTH),INTERVAL -1 DAY)";
             $sql = $this->db->query($query . " WHERE rowid = " . $this->id);
         }
     }

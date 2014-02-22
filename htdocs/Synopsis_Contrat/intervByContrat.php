@@ -242,10 +242,13 @@ $requete = "SELECT *
              WHERE fk_contrat = " . $contratid;
 
 $contrat->fetch_lines();
+
+$nbDepDeb = date_diff(date_create($db->idate($contrat->date_contrat)), date_create())->days;
+$pourc = $result[0]['total_ht']/$contrat->total_ht*100;
 print "<table class='border' width='100%'><tr><td> Date contrat <td>" . dol_print_date($contrat->date_contrat) . "
-    <td>Prevue <td> " . $result[1]['total_ht'] . " &euro;
-    <tr><td>Vendue <td> " . $contrat->total_ht . " &euro;";
-print "<td>Réaliser <td> " . $result[0]['total_ht'] . " &euro;</tr></table><br/><br/>";
+    <td>Vendue <td> " . $contrat->total_ht . " &euro;
+    <tr><td>Prevue <td> " . $result[1]['total_ht'] . " &euro;";
+print "<td>Réaliser <td> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourc*$nbDepDeb/365)." %</tr></table><br/><br/>";
 
 
 

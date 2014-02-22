@@ -2620,7 +2620,7 @@ class Synopsis_ContratLigne extends ContratLigne {
         if ($this->db->num_rows($sql) > 0) {
             $result = $this->db->fetch_object($sql);
             if ($result->description != "") {
-                $html .= $result->description . " ";
+                $html .= $result->description . " : ";
             }
         }
         
@@ -2644,8 +2644,9 @@ class Synopsis_ContratLigne extends ContratLigne {
         $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $idProdCli . " AND key_id = 1011");
         if ($this->db->num_rows($sql) > 0) {
             $result = $this->db->fetch_object($sql);
-            $html .= ($result->value != "" && $opt != "SN") ? " SN : " : "";
+            $html .= ($result->value != "" && $opt != "SN") ? " [SN : " : "";
             $html .= ($result->value != "") ? $result->value : "";
+            $html .= ($result->value != "" && $opt != "SN") ? "]" : "";
         }
         return dol_trunc($html, $size);
     }

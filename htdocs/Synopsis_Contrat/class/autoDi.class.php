@@ -53,7 +53,7 @@ class autoDi {
             foreach ($this->tabType as $type) {
                 $nbVisite = 0;
                 if ($type == 'visite')
-                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn']*$lignes->qty;
+                    $nbVisite = $lignes->GMAO_Mixte['nbVisiteAn'] * $lignes->qty;
                 if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance'] && $lignes->qty > 1)
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
@@ -119,7 +119,20 @@ class autoDi {
                 }
                 foreach ($this->tabType as $type) {
                     $this->sortie("<h2>SITE " . $nomSite . ": " . $type . "</h2><br/>");
-                    foreach ($this->idTech as $idTech) {
+
+                    $tabTech = $this->idTech;
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
+                    if ($this->db->num_rows($sql) > 0) {
+                        $tabTech = array();
+                        $result = $this->db->fetch_object($sql);
+                        if ($result->value > 0) {
+                            $tabTech[] = $result->value;
+                        }
+                    }
+
+
+
+                    foreach ($tabTech as $idTech) {
                         foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                             $delai = round(365 / count($site[$type]['tabVisite']) * ($type == "tele" ? (intval($numVisiste) + 0.5) : $numVisiste));
                             $date = date_add(new DateTime(), date_interval_create_from_date_string($delai . " day"));
@@ -181,7 +194,16 @@ class autoDi {
                 }
             }
             foreach ($this->tabType as $type) {
-                foreach ($this->idTech as $idTech) {
+                    $tabTech = $this->idTech;
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
+                    if ($this->db->num_rows($sql) > 0) {
+                        $tabTech = array();
+                        $result = $this->db->fetch_object($sql);
+                        if ($result->value > 0) {
+                            $tabTech[] = $result->value;
+                        }
+                    }
+                foreach ($tabTech as $idTech) {
                     foreach ($site[$type]['tabVisite'] as $numVisiste => $visite) {
                         $di = new Synopsisdemandeinterv($this->db);
                         $di->date = $visite['date'];
@@ -198,19 +220,24 @@ class autoDi {
                         $di->preparePrisencharge($tech);
                         if ($type == "visite") {
                             if ($dureeDep == 0)
-                                $dureeDep = 1;
+                                $dureeDep = 60;
                             $dureeInt = 4;
                             $idType = 20;
-                            $di->addline($newId, "Déplacement ", $visite['date'], ("3600" * $dureeDep), 4, 1, 50, 1);
+                            $di->addline($newId, "Déplacement ", $visite['date'], ("60" * $dureeDep), 4, 1, 50, 1);
                         }
                         else {
                             $idType = 21;
                         }
-
+                        
+                        $nbProd = count($visite['prod']);
+                        if($nbProd < 3)
+                            $dureeInt = 4 / $nbProd;
+                        else
+                            $dureeInt = 8 / $nbProd;
                         foreach ($visite['prod'] as $prod) {
                             $product = new Product($this->db);
                             $product->fetch($prod['fkProdContrat']);
-                            $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], (3600 * $dureeInt), $idType, 1, 95);
+                            $di->addline($newId, $product->libelle . " \n Matériel a suivre " . $ligneFak->getInfoOneProductCli($prod['idProd']), $visite['date'], (3600 * $dureeInt), $idType, 1, 100);
                         }
                         $di->valid($user);
                     }

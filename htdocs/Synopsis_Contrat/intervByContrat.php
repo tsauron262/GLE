@@ -248,7 +248,7 @@ $pourc = $result[0]['total_ht']/$contrat->total_ht*100;
 print "<table class='border' width='100%'><tr><td> Date contrat <td>" . dol_print_date($contrat->date_contrat) . "
     <td>Vendue <td> " . $contrat->total_ht . " &euro;
     <tr><td>Prevue <td> " . $result[1]['total_ht'] . " &euro;";
-print "<td>Réaliser <td> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourc*$nbDepDeb/365)." %</tr></table><br/><br/>";
+print "<td>Réaliser <td> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourc*365/$nbDepDeb)." %</tr></table><br/><br/>";
 
 
 

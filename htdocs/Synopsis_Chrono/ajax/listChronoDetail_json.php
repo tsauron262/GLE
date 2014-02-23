@@ -342,7 +342,7 @@ switch ($action) {
                 if ($val == 'datetime')
                     $requeteArr[] .= "`" . $key . "` datetime DEFAULT NULL";
                 else
-                    $requeteArr[] .= "`" . $key . "` VARCHAR(100) DEFAULT NULL";
+                    $requeteArr[] .= "`" . $key . "` VARCHAR(150) DEFAULT NULL";
             }
             if (count($requeteArr) > 0)
                 $requete .= "," . join(',', $requeteArr);

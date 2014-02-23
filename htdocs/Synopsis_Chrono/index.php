@@ -17,7 +17,7 @@
   * GLE-1.2
   */
 
-header("Location: ".str_replace("index", "liste", $_SERVER['REQUEST_URI']));
+header("Location: listDetail.php");
 exit;
 require_once("pre.inc.php");
 

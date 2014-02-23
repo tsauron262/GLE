@@ -29,7 +29,7 @@ $js = $html = $html2 = "";
 //$tabModel = array(100, 101);
 
 $tabModel = array();
-    $champ = array();
+$champ = array();
 if (isset($_REQUEST['obj'])) {
     if ($_REQUEST['obj'] == "soc") {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
@@ -78,6 +78,19 @@ if (isset($_REQUEST['obj'])) {
         while ($result = $db->fetch_object($sql))
             $tabModel[$result->id] = $result->titre;
     }
+} else {
+//        $langs->load("contracts");
+//        require_once DOL_DOCUMENT_ROOT . '/core/lib/propal.lib.php';
+//        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
+//        $projet = new Propal($db);
+//        $projet->fetch($_REQUEST['id']);
+//        $filtre = "fk_propal=" . $projet->id;
+//        $champ['fk_propal'] = $projet->id;
+//        $head = propal_prepare_head($projet);
+//        $socid = $projet->socid;
+    $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1");
+    while ($result = $db->fetch_object($sql))
+        $tabModel[$result->id] = $result->titre;
 }
 
 
@@ -116,10 +129,10 @@ foreach ($tabModel as $model => $nomModel) {
 
     $html .= '<div id="pan' . $nomDiv . '">';
     $html .= "<input type='button'onclick='" . $champJs . " "
-            . "         ajaxAddChrono(" . $model . ", " . $socid . ", tabChamp, function(id){"
+            . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"
             . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
             . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
-            . "                                                                     }, \"New ".$titre."\", 1); "
+            . "                                                                     }, \"New " . $titre . "\", 1); "
             . "                                                                  });' class='butAction' value = 'Créer " . $titre . "' /><br/><br/>";
 
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
@@ -128,7 +141,7 @@ foreach ($tabModel as $model => $nomModel) {
 
         $html .= '<table id="' . $nomDiv . '" class="scroll ui-widget " cellpadding="0" cellspacing="0"></table>';
         $html .= '<div id="' . $nomDiv . 'Pager" class="scroll" style="text-align:center;"></div>';
-    } else{
+    } else {
         $html .= "<br/>";
         $html .= "Vous ne disposez pas des droits pour voir ce chrono";
         $html .= "<br/>";
@@ -157,7 +170,7 @@ EOF;
 
 
 llxHeader($js, $titre);
-dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
+//dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
 
 
 print "<div id='tabs'>";

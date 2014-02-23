@@ -46,6 +46,8 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 
 $langs->load("companies");
 $langs->load("interventions");
+$langs->load("orders");
+$langs->load("contracts");
 
 
 $filtreUser = (isset($_REQUEST['filtreUser']));
@@ -114,13 +116,13 @@ if ($result) {
     $i = 0;
     print '<table class="noborder" width="100%">';
     print "<tr class=\"liste_titre\">";
-    print_liste_field_titre($langs->trans("Ref"), "liste.php", "f.ref", "", $urlparam, 'width="15%"', $sortfield, $sortorder);
+    print_liste_field_titre($langs->trans("Ref"), "liste.php", "f.ref", "", $urlparam, 'width="10%"', $sortfield, $sortorder);
     print_liste_field_titre($langs->trans("Company"), "liste.php", "s.nom", "", $urlparam, '', $sortfield, $sortorder);
     print '<td>' . $langs->trans("Titre") . '</td>';
     print_liste_field_titre($langs->trans("Date"), "liste.php", "f.datei", "", $urlparam, 'align="center"', $sortfield);
-    print '<td align="right">' . $langs->trans("Duration") . '</td>';
-    print '<td align="right">' . $langs->trans("Order") . '</td>';
-    print '<td align="right">' . $langs->trans("Contract") . '</td>';
+    print '<td align="center">' . $langs->trans("Duration") . '</td>';
+    print '<td align="center">' . $langs->trans("Order") . '</td>';
+    print '<td align="center">' . $langs->trans("Contract") . '</td>';
     print '<td align="right">' . $langs->trans("Status") . '</td>';
     print "</tr>\n";
     $var = True;

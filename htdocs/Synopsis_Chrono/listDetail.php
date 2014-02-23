@@ -1,4 +1,5 @@
 <?php
+include("./listByObjet.php");die;
 
 /*
  */

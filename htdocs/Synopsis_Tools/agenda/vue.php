@@ -115,7 +115,7 @@ $js .= <<<EOF
         timeslotsPerHour: 4,
         date: new Date(toDateUrl(new Date(), 2)+'T08:00:00.000+00:00'),
         height: function(Ocalendar){
-          return $(window).height() - $('h1').outerHeight(true);
+          return $(window).height() - $('h1').outerHeight(true) - 110;
         },
         eventRender : function(calEvent, Oevent) {
           if (calEvent.end.getTime() < new Date().getTime()) {
@@ -225,7 +225,7 @@ function printMenu($tabUser) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom . "</option>";
     }
     echo "<form action='' method='post'>";
-    echo "<select id='group'>" . $select . "</select>";
+    echo "<select id='group'><option value='0'>Groupes</option>" . $select . "</select>";
     echo "<div class='contentListUser'><span class='nbGroup'></span>";
 
 

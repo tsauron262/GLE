@@ -1651,11 +1651,11 @@ class Synopsis_Contrat extends Contrat {
             if ($idAnn != 36 && $idAnn != 25 && $idAnn != 2)
                 $tabEl[] = $idAnn;
         }
+        if (!in_array($annexeId, $tabEl))
+                $tabEl[] = $annexeId;
         $tabEl[] = 36;
         $tabEl[] = 25;
         $tabEl[] = 2;
-        if (!in_array($annexeId, $tabEl))
-                $tabEl[] = $annexeId;
         $tabInsert = array();
         foreach($tabEl as $id => $elem){
             $tabInsert[] = "(" . $elem . ", " . $this->id . ", " . ($id+1) . ", '')";

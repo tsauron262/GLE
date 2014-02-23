@@ -174,7 +174,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                               FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p,
                                    " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a
                              WHERE p.id = a.annexe_refid
-                               AND a.contrat_refid = " . $contrat->id . "
+                               AND a.contrat_refid = " . $contrat->id . " AND type = 1
                           ORDER BY a.rang";
                 $sql = $this->db->query($requete);
                 $rang = 1;
@@ -430,7 +430,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                         $pdf->Link($this->marge_gauche + $col1, $nextY, $this->page_largeur - ($this->marge_droite + $this->marge_gauche), 2 * $hauteur_ligne, $arrAnnexe[$arr[1]]['lnk']);
                     } else {
                         $sql = "SELECT annexe.rang FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` annexe, " . MAIN_DB_PREFIX . "product_extrafields prod WHERE `annexe_refid` = prod.`2annexe`
-                                    AND prod.`fk_object` = '" . $val->fk_product . "' 
+                                    AND prod.`fk_object` = '" . $val->fk_product . "' AND type = 1  
                                     AND `contrat_refid` = '" . $contrat->id . "'";
                         $res = $this->db->query($sql);
                         $result = $this->db->fetch_object($res);

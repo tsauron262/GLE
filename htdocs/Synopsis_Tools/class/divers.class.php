@@ -163,28 +163,33 @@ class synopsisHook {
     static function getHeader() {
         global $db;
         self::$timeDeb = microtime(true);
+        
+        //css
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
         $cssSoc = "/Synopsis_Tools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
         if (is_file(DOL_DOCUMENT_ROOT . $cssSoc))
             $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc . '" />' . "\n";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print")
             $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/print.css" />' . "\n";
-        $return .= "<script type=\"text/javascript\">var DOL_URL_ROOT = '" . DOL_URL_ROOT . "';</script>\n";
+        
+        $nameFile = DOL_DATA_ROOT . "/special.css";
+        if (is_file($nameFile)) {
+            $css = file_get_contents($nameFile);
+            $return .= "<style>" . $css . "</style>";
+        }
+        
+        
+        ///js
+        $return .= "<script type=\"text/javascript\">"
+                . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
+                . 'var idPagePrinc = "' . $_SESSION['pagePrinc'] . '";'
+                . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 
         $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
 
-
-        $return .= '<script type="text/javascript">'
-                . 'var idPagePrinc = "' . $_SESSION['pagePrinc'] . '";'
-                . '</script>';
-        $nameFile = DOL_DATA_ROOT . "/special.css";
-        if (is_file($nameFile)) {
-            $css = file_get_contents($nameFile);
-            $return .= "<style>" . $css . "</style>";
-        }
         return $return;
     }
 

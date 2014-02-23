@@ -39,7 +39,7 @@ class annexe {
         $requete = "SELECT *, IF(a.annexe != '', a.annexe, p.annexe) as annexeP
                               FROM " . MAIN_DB_PREFIX . "Synopsis_contrat_annexePdf as p,
                                    " . MAIN_DB_PREFIX . "Synopsis_contrat_annexe as a
-                             WHERE p.id = a.annexe_refid
+                             WHERE p.id = a.annexe_refid AND type = 1
                                AND a.contrat_refid = " . $contrat->id . "
                           ORDER BY a.rang";
 //                die($requete);
@@ -261,6 +261,10 @@ Tél. : Soc-tel
         $arr['prenom'] = 'Pr&eacute;om';
 
         return $annexe;
+    }
+    
+    public static function getListAnnexe($type){
+        
     }
 }
 

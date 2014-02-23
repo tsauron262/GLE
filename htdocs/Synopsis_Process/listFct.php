@@ -134,7 +134,7 @@ EOF;
 $jqgridJs.= '   });'."\n";
 $js .= $jqgridJs."</script>";
 
-llxHeader($js,utf8_decode('Liste des fonctions'),'',1);
+llxHeader($js,utf8_decode('Liste des fonctions'));
 
 
   print '<table id="gridlistFct" class="scroll ui-widget " cellpadding="0" cellspacing="0"></table>';

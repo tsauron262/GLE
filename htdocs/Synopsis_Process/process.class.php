@@ -986,7 +986,7 @@ class processDet extends process {
             //  2b) Si non => continue
             //Valider
             $requete = false;
-            if ($statutAllOk){
+            if ($statutAllOk) {
                 $this->fetch_process();
                 $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Processdet SET fk_statut = 3 WHERE id = " . $this->id;
                 $eval = $this->process->validAction;
@@ -2411,16 +2411,16 @@ class lien extends formulaireSource {
         $this->champVueSelect = $result->champVueSelect;
         $this->ordre = $result->ordre;
         $this->urlObj = $result->urlObj;
-        $this->picto = ($result->picto != '')? img_picto($result->label, $result->picto) : "";
+        $this->picto = ($result->picto != '') ? img_picto($result->label, $result->picto) : "";
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
         $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : $_REQUEST['id']);
 
         $this->nomElement = getParaChaine($this->cssClassM, "type:");
         $this->tabVal = array();
-        $tabResult = getElementElement($this->nomElem, $this->nomElement, null, $this->idChrono, $this->ordre);
+        $tabResult = getElementElement($this->nomElement, $this->nomElem, $this->idChrono, null, $this->ordre);
         foreach ($tabResult as $val)
-            $this->tabVal[] = $val['s'];
+            $this->tabVal[] = $val['d'];
         $debReq = "SELECT " . $this->champId . " as id, " .
                 $this->champVueSelect . " as nom "
                 . "FROM " . $this->table . " "
@@ -2435,21 +2435,23 @@ class lien extends formulaireSource {
         $this->typeChrono = getParaChaine($this->where, "model_refid = ", "AND");
     }
 
-    function displayForm() {
+    function displayForm($inValuesArray = true) {
         print '<div class="formAjax">';
-        print '<span class="showFormChrono editable">'. img_edit().'</span>';
+        print '<span class="showFormChrono editable">' . img_edit() . '</span>';
         $this->getValues();
         print '<div class="hide">';
         print '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
-        print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElem . '"/>';
-        print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElement . '"/>';
-        print '<input type="hidden" name="targetid" class="targetid" value="' . $this->idChrono . '"/>';
+        print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElem . '"/>';
+        print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElement . '"/>';
+        print '<input type="hidden" name="sourceid" class="sourceid" value="' . $this->idChrono . '"/>';
         print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
         print '<select class ="chronoForm">';
         foreach ($this->valuesArr as $id => $val)
             print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
         print '</select>';
         print '</div></div>';
+        if(!$inValuesArray)
+            $this->valuesArr = array();
     }
 
     function displayValue() {
@@ -2461,28 +2463,28 @@ class lien extends formulaireSource {
     function getValuePlus($id) {
         if ($this->id == 1) {
             if (count($this->tabVal) > 0) {
-$js =<<<EOF
-<script>
-jQuery(document).ready(function(){
-    jQuery('#tabsA').tabs({
-        cache: true,
-        spinner: 'Chargement ...',
-        fx: {opacity: 'toggle' }
-    })
-});
-</script>
+                $js = <<<EOF
+                    <script>
+                    jQuery(document).ready(function(){
+                        jQuery('#tabsA').tabs({
+                            cache: true,
+                            spinner: 'Chargement ...',
+                            fx: {opacity: 'toggle' }
+                        })
+                    });
+                    </script>
 EOF;
-print "<div id='tabsA'>";
-print "<ul class='syntab'>";
-print "<li><a href='#actif' class='default'>Service Actif</a></li>";
-print "<li><a href='#nonactif'>Service non actif</a></li>";
-print "</ul>";
-print "<div id='nonactif'>";
-print "</div>";
-print "<div id='actif'>";
+                print "<div id='tabsA'>";
+                print "<ul class='syntab'>";
+                print "<li><a href='#actif' class='default'>Service Actif</a></li>";
+                print "<li><a href='#nonactif'>Service non actif</a></li>";
+                print "</ul>";
+                print "<div id='nonactif'>";
+                print "</div>";
+                print "<div id='actif'>";
 //Drag Drop
-print "</div>";
-print "".$js;
+                print "</div>";
+                print "" . $js;
 //                print "<ul class='syntab'>";
 //                print "<li id='#actif' class='default'>Service Actif</li>";
 //                print "<li id='#nonactif'>Service non actif</li>";
@@ -2495,7 +2497,7 @@ print "".$js;
                         $contratdet->fetch($result);
                         $html = "<br/>";
                         $color = "";
-                        $dtStr = ($contratdet->date_fin_validite > 0)? date("c", $contratdet->date_fin_validite) : null;
+                        $dtStr = ($contratdet->date_fin_validite > 0) ? date("c", $contratdet->date_fin_validite) : null;
                         $dateF = new DateTime($dtStr);
 //                        $dtStr = date("c", time());
                         $dateActu = new DateTime();
@@ -2513,7 +2515,7 @@ print "".$js;
                             $html .= $product->getNomUrl(1) . " " . $product->description;
                             $html .= "<br/>";
                         }
-                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . (($contratdet->date_fin_validite > 0)? date("d M Y", $contratdet->date_fin_validite) : "n/c");
+                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . (($contratdet->date_fin_validite > 0) ? date("d M Y", $contratdet->date_fin_validite) : "n/c");
                         $html .= "<br/>";
                         $html .= "</div>";
                         $this->valuesArr[] = $html;
@@ -2521,16 +2523,16 @@ print "".$js;
                 }
             }
         } else
-            $this->getValue($id);
+            $this->displayForm(false);
         return $this->valuesArr;
     }
 
     function setValue($idChrono, $tabVal) {
         print_r($tabVal);
-        delElementElement($this->nomElem, $this->nomElement, null, $idChrono, $this->ordre);
+        delElementElement($this->nomElement, $this->nomElem, $idChrono, null, $this->ordre);
         foreach ($tabVal as $val) {
             if ($val != 0)
-                addElementElement($this->nomElem, $this->nomElement, $val, $idChrono, $this->ordre);
+                addElementElement($this->nomElement, $this->nomElem, $idChrono, $val, $this->ordre);
         }
     }
 
@@ -2543,20 +2545,21 @@ print "".$js;
             $this->valuesArr[$result->id] = $result->nom;
             if (in_array($result->id, $this->tabVal)) {
                 $i++;
-                if($this->hasMultiValue || $i == 1)
+                if ($this->hasMultiValue || $i == 1)
                     echo $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
             }
         }
         echo $this->getOneLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
 //                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
-        if($this->hasMultiValue)
+        if ($this->hasMultiValue)
             $actionChrono = "add";
         else
             $actionChrono = "change";
         if ($this->typeChrono > 0)
-            echo "<button class='".$actionChrono."Chrono chronoForm' id='addChrono" . $this->typeChrono . "'>Créer</button>";
-        echo "<button class='".$actionChrono."Lien chronoForm'>Ajouter</button>";
+            echo "<button class='" . $actionChrono . "Chrono chronoForm' id='addChrono" . $this->typeChrono . "'>Créer</button>";
+        echo "<button class='" . $actionChrono . "Lien chronoForm'>Ajouter</button>";
     }
+    
 
     function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
         $html = '<div class="' . $classDiv . ' elem">'
@@ -2571,8 +2574,7 @@ print "".$js;
             else
                 $html .= "onclick='return confirm(\"Ceci va quiter la page sans enregistrer. Continuer ?\");'";
             $html .= ">" . $text . "</a>";
-        }
-        else
+        } else
             $html .= $text;
         $html .= "</div>";
         return $html;
@@ -2586,9 +2588,9 @@ print "".$js;
                 while ($result = $this->db->fetch_object($sql)) {
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
-                        $html = lien($this->urlObj . $result->id) . finLien($this->picto.$result->nom);
+                        $html = lien($this->urlObj . $result->id) . finLien($this->picto . $result->nom);
                     else
-                       $html = $this->picto.$result->nom;
+                        $html = $this->picto . $result->nom;
                     $this->valuesArr[$result->id] = $html;
                 }
         }

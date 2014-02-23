@@ -803,6 +803,7 @@ EOF;
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->cssClassM = $res->extraCss;
+                    $obj->socid = $chr->socid;
                     $obj->fetch($res->type_subvaleur);
                     $obj->getValuePlus($res->value);
                     $html = "";

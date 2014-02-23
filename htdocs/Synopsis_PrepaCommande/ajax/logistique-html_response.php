@@ -285,6 +285,26 @@ print <<<EOF
                         success:function(msg){
                             var res = jQuery(msg).find('result').text();
                             jQuery('#modDialog').dialog("close");
+                            if(jQuery(msg).find('result').length > 0)
+                            {
+                                jQuery('#valDialog').dialog("close");
+                                //reload
+                                jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
+                                jQuery('#valDialog').dialog( "destroy" );
+                                jQuery('#valDialog').remove();
+                                jQuery.ajax({
+                                    url: "ajax/logistique-html_response.php",
+                                    data: "id="+comId,
+                                    cache: false,
+                                    datatype: "html",
+                                    type: "POST",
+                                    success: function(msg){
+                                        jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
+                                    },
+                                });
+                            } else {
+                                alert ('Il y a eu une erreur');
+                            }
                         }
                     });
                 },
@@ -322,8 +342,10 @@ print <<<EOF
                 jQuery(suff+'#pasdispo-'+tmp).find("input").val(""+day+"/"+month+"/"+dateActu.getFullYear());
                 jQuery(suff+'#pasdispo-'+tmp).show();
             }
-            else
+            else{
+                jQuery(suff+'#pasdispo-'+tmp).find("input").val("");
                 jQuery(suff+'#pasdispo-'+tmp).show();
+            }
 
         }
     }
@@ -379,26 +401,35 @@ function displayLogistique($com) {
                     if (strtotime($val->logistique_date_dispo) < time()) {
                         $imgWarning = img_warning("Date depass&eacute;");
                     }
+                    
+                    
+                    $class = '';
+                    if ($val->logistique_ok)
+                        $text = "Dispo depuis le :";
+                    else{
+                        $text = $imgWarning . "Dispo le :";
+                        $class = 'red';
+                    }
+                    
+                     print '<tr class="'.$class.'">';
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
                         $htmlSelect = str_replace('class="flat"', 'class="flat logistique"', $html->selectyesno('logistiqueOK-' . $val->rowid, $val->logistique_ok, 0));
-                        print "<tr><td width=155 class='ui-widget-content'>" . $htmlSelect;
+                        print "<td width=155 class='ui-widget-content'>" . $htmlSelect;
                     } else {
-                        print "<tr><td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
+                        print "<td width=155 class='ui-widget-content' align=center>" . ($val->logistique_ok > 0 ? "oui" : "non");
                     }
 //                if ($val->logistique_ok == '1') {
 //                    print "   <div id='pasdispo-" . $val->rowid . "' style='display:none'>" . $imgWarning . " Dispo le :<input id='logistiqueKODate-" . $val->rowid . "' class='datepicker'></div>";
 //                } else {
-                    if ($val->logistique_ok)
-                        $text = "Dispo depuis le :";
-                    else
-                        $text = $imgWarning . "Dispo le :";
 
-
+                    print '<div>';
+                    $date = ($val->logistique_date_dispo > 0 ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
                     if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1) {
-                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text . "<input id='logistiqueKODate-" . $val->rowid . "' value='" . ($val->logistique_date_dispo > 0 ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "") . "' class='datepicker'></div>";
+                        print "   <div id='pasdispo-" . $val->rowid . "' style='display:block'>" . $text . "<input id='logistiqueKODate-" . $val->rowid . "' value='" . $date . "' class='datepicker'></div>";
                     } else {
-                        print "<br/>" . $text . "&nbsp;" . ($val->logistique_date_dispo . "x" != "x" ? date('d/m/Y', strtotime($val->logistique_date_dispo)) : "");
+                        print "<br/>" . $text . "&nbsp;" . $date;
                     }
+                    print '</div>';
 //                }
                     print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));
                     print "    <td width=20 class='ui-widget-content'>" . utf8_encodeRien($val->qty);

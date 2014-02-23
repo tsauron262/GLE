@@ -8,8 +8,8 @@ function sanitize_string($str, $newstr = '_') {
     return str_replace($forbidden_chars_to_underscore, $newstr, str_replace($forbidden_chars_to_remove, "", $str));
 }
 
-function pictoConnect($type, $id, $ref){
-    return "<span class='popConnect pasTraiter' id='connect-".$type."-".$id."-".$ref."'>".img_picto("Ouvrir en mode connect", "connect@Synopsis_Tools")."</span>";
+function pictoConnect($type, $id, $ref) {
+    return "<span class='popConnect pasTraiter' id='connect-" . $type . "-" . $id . "-" . $ref . "'>" . img_picto("Ouvrir en mode connect", "connect@Synopsis_Tools") . "</span>";
 }
 
 function show_actions_par_type($type, $idElement, $object, $done = false, $objcon = '', $noprint = 0) {
@@ -34,12 +34,12 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
         $out.='<tr class="liste_titre">';
         $out.='<td colspan="2">';
         if (get_class($object) == 'Societe')
-            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/listactions.php?socid=' . $object->id . '&amp;status='. ($done ? 'done' : 'todo'). '">';
-        
+            $out.='<a href="' . DOL_URL_ROOT . '/comm/action/listactions.php?socid=' . $object->id . '&amp;status=' . ($done ? 'done' : 'todo') . '">';
+
         if ($done)
-        $out.=$langs->trans("ActionsDoneShort");
+            $out.=$langs->trans("ActionsDoneShort");
         else
-        $out.=$langs->trans("ActionsToDoShort");
+            $out.=$langs->trans("ActionsToDoShort");
         if (get_class($object) == 'Societe')
             $out.='</a>';
         $out.='</td>';
@@ -91,12 +91,11 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
         else
             $sql.= " AND ((a.percent >= 0 AND a.percent < 100) OR (a.percent = -1 AND a.datep > '" . $db->idate($now) . "'))";
         $sql.= " AND elementtype = '" . $type . "' AND fk_element ";
-        if(is_array($idElement)){
+        if (is_array($idElement)) {
             $idElement = implode(",", $idElement);
-            $sql .= "IN (".$idElement.")";
-        }            
-        else 
-            $sql .= "=".$idElement;
+            $sql .= "IN (" . $idElement . ")";
+        } else
+            $sql .= "=" . $idElement;
         $sql.= " ORDER BY a.datep DESC, a.id DESC";
 
         dol_syslog("company.lib::show_actions_todo sql=" . $sql);
@@ -176,7 +175,6 @@ function show_actions_par_type($type, $idElement, $object, $done = false, $objco
     else
         print $out;
 }
-
 
 function htmlToAgenda($str) {
     $tag = "a";
@@ -357,10 +355,7 @@ function launchRunningProcess($db, $type_str, $element_id) {
                                 $process->fetch($tmp->process_refid);
                                 $process->getGlobalRights($user);
                                 $tmpNomProcc = 'process' . $tmp->process_refid;
-                                if ($user->rights->process_user->$tmpNomProcc->valider
-                                        || $user->rights->process_user->$tmpNomProcc->validerTech
-                                        || $user->rights->process_user->$tmpNomProcc->validerDir
-                                        || $user->rights->process_user->$tmpNomProcc->validerCom)
+                                if ($user->rights->process_user->$tmpNomProcc->valider || $user->rights->process_user->$tmpNomProcc->validerTech || $user->rights->process_user->$tmpNomProcc->validerDir || $user->rights->process_user->$tmpNomProcc->validerCom)
                                     continue;
                             }
 
@@ -454,7 +449,7 @@ function seems_utf8($str) {
         else
             return false;# Does not match any model
         for ($j = 0; $j < $n; $j++) { # n bytes matching 10bbbbbb follow ?
-            if ((++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
+            if (( ++$i == $length) || ((ord($str[$i]) & 0xC0) != 0x80))
                 return false;
         }
     }
@@ -785,7 +780,10 @@ function setElementElement($typeS, $typeD, $idS, $idD, $ordre = true) {
         $typeS = $typeST;
         $idS = $idST;
     }
-    delElementElement($typeS, $typeD, $idS);
+    if ($ordre)
+        delElementElement($typeS, $typeD, $idS);
+    else
+        delElementElement($typeS, $typeD, null, $idD);
     return addElementElement($typeS, $typeD, $idS, $idD);
 }
 
@@ -797,16 +795,14 @@ function asPosition($str) {
     return false;
 }
 
-function mailSyn2($subject,$to,$from,$msg,
-	$filename_list=array(),$mimetype_list=array(),$mimefilename_list=array(),
-	$addr_cc="",$addr_bcc="",$deliveryreceipt=0,$msgishtml=0,$errors_to='',$css=''){
+function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = "", $addr_bcc = "", $deliveryreceipt = 0, $msgishtml = 0, $errors_to = '', $css = '') {
     global $dolibarr_main_url_root;
     $subject = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $subject);
     $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
-    
-    if($from == '')
+
+    if ($from == '')
         $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <no-replay-' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '@synopsis-erp.com>';
-    
+
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";
     if (defined('MOD_DEV_SYN_MAIL')) {
@@ -815,7 +811,7 @@ function mailSyn2($subject,$to,$from,$msg,
         $addr_cc = '';
         $to = MOD_DEV_SYN_MAIL;
     } elseif ($cc != '')
-        $addr_cc = $ccAdmin.", " . $addr_cc;
+        $addr_cc = $ccAdmin . ", " . $addr_cc;
     if (!isset($to) || $to == '') {
         $msg = "Pas de mail destinataire définit." . "\n\n" . $msg;
         $to = $toReplay;

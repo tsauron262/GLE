@@ -191,7 +191,7 @@ EOF;
 
 EOF;
     
-$js .= ' <script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.min.js" type="text/javascript"/>';
+    $js .= ' <script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.min.js" type="text/javascript"></script>';
   llxHeader($js,'Constructeur de fonction');
 
     switch ($action){

@@ -690,7 +690,7 @@ function supprLigne(element) {
             $(firstParent).fadeOut();
     };
     if ($(parentDiv).hasClass("formAjax"))
-        ajaxManipElementElement("rm", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(firstParent).find("input").val(), $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), callBack);
+        ajaxManipElementElement("rm", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(parentDiv).find(".sourceid").val(), $(firstParent).find("input").val(), $(parentDiv).find(".ordre").val(), callBack);
     else
         cacherSuppr(firstParent);
     return false;
@@ -703,14 +703,16 @@ function cacherSuppr(element) {
     });
 }
 
-function addLienAj(firstParent) {
+function addLienAj(firstParent, mode) {
+    if(!mode)
+        mode = "add";
     parentDiv = $(firstParent).parent();
     model = $(parentDiv).find(".model").html();
     select = $(parentDiv).find("select");
     selectId = $(select).val();
     idIncr++;
     selectNom = $(select).find("option:selected").text();
-    ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), selectId, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
+    ajaxManipElementElement(mode, $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(parentDiv).find(".sourceid").val(), selectId, $(parentDiv).find(".ordre").val(), function(ok) {
         if (ok == "ok")
             addLienHtml(idIncr, selectId, selectNom, model, parentDiv);
     });
@@ -720,9 +722,9 @@ function addChronoAj(firstParent) {
     parentDiv = $(firstParent).parent();
     model = $(parentDiv).find(".model").html();
     addChrono(firstParent, $("#socid").val(), function(valReturn) {
-        sourceType = $(parentDiv).find(".sourcetype").val();
-        titre = 'Nouveau ' + sourceType;
-        ajaxManipElementElement("add", sourceType, $(parentDiv).find(".targettype").val(), valReturn, $(parentDiv).find(".targetid").val(), $(parentDiv).find(".ordre").val(), function(ok) {
+        targetType = $(parentDiv).find(".targettype").val();
+        titre = 'Nouveau ' + targetType;
+        ajaxManipElementElement("add", $(parentDiv).find(".sourcetype").val(), targetType, $(parentDiv).find(".sourceid").val(), valReturn, $(parentDiv).find(".ordre").val(), function(ok) {
             if (ok == "ok") {
                 idIncr = idIncr + 1;
                 addLienHtml(idIncr, valReturn, titre, model, parentDiv);
@@ -756,7 +758,7 @@ function initFormChrono() {
             if (!$(this).hasClass("model"))
                 $(this).remove();
         });
-        addLienAj($(this));
+        addLienAj($(this), 'set');
         return false;
     });
     $(".formAjax .addChrono").click(function() {
@@ -771,7 +773,7 @@ function initFormChrono() {
         addChronoAj($(this));
         return false;
     });
-    $("#chronoTable .addChrono").click(function() {
+    $("form #chronoTable .addChrono").click(function() {
         parentDiv = $(this).parent();
         model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
@@ -784,7 +786,7 @@ function initFormChrono() {
         });
         return false;
     });
-    $("#chronoTable .changeChrono").click(function() {
+    $("form #chronoTable .changeChrono").click(function() {
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();
@@ -802,7 +804,7 @@ function initFormChrono() {
         return false;
     });
 
-    $("#chronoTable .addLien").click(function() {
+    $("form #chronoTable .addLien").click(function() {
         model = $(this).parent().find(".model").html();
         select = $(this).parent().find("select");
         selectId = $(select).val();
@@ -811,7 +813,7 @@ function initFormChrono() {
         addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
         return false;
     });
-    $("#chronoTable .changeLien").click(function() {
+    $("form #chronoTable .changeLien").click(function() {
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();

@@ -108,7 +108,7 @@ function widget_listContratMixte() {
         $table .="</p>";
         $table2 .="</p>";
         return array(
-            'title' => 'Contrat - 10 prochains contrats mixtes',
+            'title' => 'Contrat - 10 prochains contrats à échéance',
             'content' => $table,
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',
@@ -119,7 +119,7 @@ function widget_listContratMixte() {
         );
     } else {
         return array(
-            'title' => 'Contrat - 10 prochains contrats mixtes',
+            'title' => 'Contrat - 10 prochains contrats à échéance',
             'content' => 'Vous ne possedez pas les droits requis pour ce module',
             'initScript' => "",
             'classes' => 'ui-state-default ui-widget-header',

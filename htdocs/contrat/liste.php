@@ -89,12 +89,20 @@ if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.
 if ($search_nom)      $sql.= " AND s.nom LIKE '%".$db->escape($search_nom)."%'";
 if ($search_contract) $sql.= " AND (".(is_numeric($search_contract)?"c.rowid = ".$db->escape($search_contract)." OR ":'')." c.ref LIKE '%".$db->escape($search_contract)."%')";
 if ($sall)            $sql.= " AND (s.nom LIKE '%".$db->escape($sall)."%' OR cd.label LIKE '%".$db->escape($sall)."%' OR cd.description LIKE '%".$db->escape($sall)."%')";
+
+/*mod drsi */
+if($expirer)
+$sql.= " AND cd.statut < 5";
+/*f mod drsi */
+
 $sql.= " GROUP BY c.rowid, c.ref, c.datec, c.date_contrat, c.statut,";
 $sql.= " s.nom, s.rowid";
+
 /*mod drsi */
 if($expirer)
 $sql.= " HAVING nb_late > 0";
 /*f mod drsi */
+
 $sql.= " ORDER BY $sortfield $sortorder";
 $sql.= $db->plimit($conf->liste_limit + 1, $offset);
 
@@ -115,7 +123,7 @@ if ($resql)
     print_liste_field_titre($langs->trans("Company"), $_SERVER["PHP_SELF"], "s.nom","","$param",'',$sortfield,$sortorder);
     //print_liste_field_titre($langs->trans("DateCreation"), $_SERVER["PHP_SELF"], "c.datec","","$param",'align="center"',$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("DateContract"), $_SERVER["PHP_SELF"], "c.date_contrat","","$param",'align="center"',$sortfield,$sortorder);
-    /* deb mod drsi */ print_liste_field_titre($langs->trans("DateFin"), $_SERVER["PHP_SELF"], "date_fin","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
+    /* deb mod drsi */ print_liste_field_titre($langs->trans("Date Fin"), $_SERVER["PHP_SELF"], "date_fin","","$param",'align="center"',$sortfield,$sortorder); /*f mod drsi*/
     //print_liste_field_titre($langs->trans("Status"), $_SERVER["PHP_SELF"], "c.statut","","$param",'align="center"',$sortfield,$sortorder);
     print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(0,3).'</td>';
     print '<td class="liste_titre" width="16">'.$staticcontratligne->LibStatut(4,3,0).'</td>';

@@ -434,7 +434,7 @@ class modSynopsisDashboard extends DolibarrModules {
 (169, 'Pr&eacute;paration commande - 10 derniers com. en attente', 'listPrepaCommandeProb', 1),
 (170, 'Pr&eacute;paration commande - 10 derniers groupes modifi&eacute;s', 'listPrepaGroupCommande', 1),
 (171, 'Navigation - Derniers &eacute;l&eacute;ments visit&eacute;s', 'NavigationUser', 1),
-(172, 'Contrat - 10 prochains contrats mixtes', 'listContratMixte', 1),
+(172, 'Contrat - 10 prochains contrats à échéance', 'listContratMixte', 1),
 (173, 'Pr&eacute;paration commande - Exp&eacute;dition - Derni&egrave;res exp&eacute;ditions', 'listExpeditionPrepaCommande', 1),
 (174, 'Pr&eacute;paration commande - Derniers contrats &agrave; saisir', 'listPrepaCommandeContratAFaire', 1),
 (175, 'Propositions commerciales - 10 derni&egrave;res prop. de financement', 'listPropaleFinancement', 0),

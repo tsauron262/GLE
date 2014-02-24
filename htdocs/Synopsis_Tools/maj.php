@@ -245,7 +245,7 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
                 }
                 foreach ($tabLien as $lien) {
                     if ($idSoc > 0 && !in_array($lien['s'], $tabSoc[$idSoc]) && !isset($tabSuppr['elementElement'][$result2->nomElem][$lien['s']]))
-                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc " . $idSoc . ")</br>" . print_r($tabSoc[$idSoc]));
+                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc " . $idSoc . ")</br>");
                 }
             }
         }

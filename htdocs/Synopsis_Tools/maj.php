@@ -206,6 +206,8 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     }
 }
 else if (isset($_GET['action']) && $_GET['action'] == "verif") {
+    $tabSuppr = $tabSuppri = array();
+    //Test des chrono
     $sql = $db->query("SELECT * FROM llx_Synopsis_Chrono_key WHERE type_valeur = 10");
     while ($result = $db->fetch_object($sql)) {
         $tabValOk = array();
@@ -239,20 +241,57 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
                 foreach ($tabLien as $lien) {
                     if (!in_array($lien['s'], $tabValOK)) {
                         $tabSuppr['elementElement'][$result2->nomElem][$lien['s']] = $lien['s'];
-                        erreur("Lien vers element existant plus." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . "</br>");
+                        erreur("[AUTOCORRECT] Lien vers element existant plus." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . "</br>");
                     }
                 }
                 foreach ($tabLien as $lien) {
-                    if (!in_array($lien['s'], $tabSoc[$idSoc]) && !isset($tabSuppr['elementElement'][$result2->nomElem][$lien['s']]))
-                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc ".$idSoc.")</br>");
+                    if ($idSoc > 0 && !in_array($lien['s'], $tabSoc[$idSoc]) && !isset($tabSuppr['elementElement'][$result2->nomElem][$lien['s']]))
+                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc ".$idSoc.")</br>".print_r($tabSoc[$idSoc]));
                 }
             }
         }
     }
+    
+    foreach(array("FI" => array("table" => "fichinter"), 
+        "DI" => array("table" => "synopsisdemandeinterv"), 
+        "comm" => array("table" => "commande"), 
+        "commande" => array("table" => "commande"), 
+        "contrat" => array("table" => "contrat"), 
+        "contratdet" => array("table" => "contratdet"), 
+        "idUserGle" => array("table" => "user"), 
+        "userTech" => array("table" => "user")) as $elem => $para){
+        $result = getElementElement($elem);
+        foreach($result as $ligne){
+            $idT = $ligne['s'];
+            $nomId = (isset($para['nomId'])? $para['nomId'] : "rowid");
+            $sql = $db->query("SELECT ".$nomId." FROM ".MAIN_DB_PREFIX.$para['table']. " WHERE ".$nomId." = ".$idT);
+            if ($db->num_rows($sql) < 1){
+                $tabSuppr['elementElement'][$elem][] = $idT;
+                erreur("[AUTOCORRECT] Lien vers element inexistant. ".$elem." | ".$idT);
+            }
+        }
+        
+        $result = getElementElement(null, $elem);
+        foreach($result as $ligne){
+            $idT = $ligne['d'];
+            $nomId = (isset($para['nomId'])? $para['nomId'] : "rowid");
+            $sql = $db->query("SELECT ".$nomId." FROM ".MAIN_DB_PREFIX.$para['table']. " WHERE ".$nomId." = ".$idT);
+            if ($db->num_rows($sql) < 1){
+                $tabSupprI['elementElement'][$elem][] = $idT;
+                erreur("[AUTOCORRECT] Lien vers element inexistant. ".$elem." | ".$idT);
+            }
+        }
+    }
+    
+    
     if (isset($tabSuppr['elementElement']))
         foreach ($tabSuppr['elementElement'] as $element => $tabValSuppr)
             foreach ($tabValSuppr as $idSuppr)
-                delElementElement($element, null, $idSuppr);
+               delElementElement($element, null, $idSuppr);
+    if (isset($tabSupprI['elementElement']))
+        foreach ($tabSupprI['elementElement'] as $element => $tabValSuppr)
+            foreach ($tabValSuppr as $idSuppr)
+                delElementElement(null, $element, null, $idSuppr);
 
     netoyeDet("propal");
     netoyeDet("commande");

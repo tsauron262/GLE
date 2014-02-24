@@ -109,7 +109,7 @@ if ($res > 0) {
         print "    <td style='padding:15px 10px 10px 10px;' valign=top width=70 class='ui-widget-content'>" . ($res->datei > 0 ? date('d/m/Y', strtotime($res->datei)) : "");
         $tmpDur = convDur($res->duree);
         print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'>" . $tmpDur['hours']['abs'] . "h" . $tmpDur['minutes']['rel'];
-        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'> " . utf8_decode($di->getLibStatut(4));
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=80 class='ui-widget-content'> " . utf8_encodeRien($di->getLibStatut(4));
         $fiStr = "";
         $tabFI = $di->getFI();
         foreach ($tabFI as $idFI) {

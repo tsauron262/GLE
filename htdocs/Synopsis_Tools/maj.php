@@ -253,8 +253,7 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     }
     
     foreach(array("FI" => array("table" => "fichinter"), 
-        "DI" => array("table" => "synopsisdemandeinterv"), 
-        "comm" => array("table" => "commande"), 
+        "DI" => array("table" => "synopsisdemandeinterv"),
         "commande" => array("table" => "commande"), 
         "contrat" => array("table" => "contrat"), 
         "contratdet" => array("table" => "contratdet"), 

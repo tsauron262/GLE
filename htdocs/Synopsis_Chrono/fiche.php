@@ -218,6 +218,13 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
         $js .= <<< EOF
           function ajax_updater_postFct(socid, valueSelected)
           {
+              if(valueSelected == "socid")
+                majDoubleSoc(socid,false);
+                $("#"+valueSelected).trigger("change");
+          }
+                  
+          function ajax_updater_postFct2(socid, valueSelected)
+          {
               if (socid > 0)
               {
                 majDoubleSoc(socid,false);
@@ -268,14 +275,14 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
                 },200);
             jQuery('#socid').change(function(){
               socid = jQuery(this).find(':selected').val();
-                ajax_updater_postFct(socid);
+                ajax_updater_postFct2(socid);
             });
         
             $(".addContact").click(function(){
                 socid = $("select#socid").val();
                  popOjectAffiche(socid, 'newContact', function(){
-                    ajax_updater_postFct(socid, 'old');
-                }, 'Contact')
+                    ajax_updater_postFct2(socid, 'old');
+                }, 'Contact', 1)
             });    
           
 
@@ -297,10 +304,10 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
 EOF;
     $js .= "</script>";
 }
-//$js .=  ajax_combobox("contactid");
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
-$js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js"></script>' . "\n";
+//$js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js"></script>' . "\n";
+
 
 //$js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 //launchRunningProcess($db,'Chrono',$_GET['id']);
@@ -359,9 +366,9 @@ if ($id > 0) {
         if ($chr->model->hasSociete == 1) {
             print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
             if ($chr->model->hasContact == 1)
-                print '    <td  class="ui-widget-content" colspan="1">' . $html->select_company($chr->socid, 'socid', 1, false, "") . '</td>';
+                print '    <td  class="ui-widget-content" colspan="1">' . $html->select_company($chr->socid, 'socid', 1, 0, 0,0,array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))) . '</td>';
             else
-                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, false, "") . '</td>';
+                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 0, 0,0,array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))) . '</td>';
         }
         if ($chr->model->hasContact == 1) {
             if (!$chr->model->hasSociete == 1)
@@ -459,12 +466,12 @@ EOF;
 EOF;
                         print " jQuery('#Chrono-" . $res->id . "_jDS').each(function(){
                             var select = $(this);
-                            $(select).combobox({
-                                selected: function(event, ui) {
-                                    select.find('option[value=\"'+$(this).val()+'\"]').attr('selected', 'selected');
-                                    select.change();
-                                }
-                            });
+//                            $(select).combobox({
+//                                selected: function(event, ui) {
+//                                    select.find('option[value=\"'+$(this).val()+'\"]').attr('selected', 'selected');
+//                                    select.change();
+//                                }
+//                            });
       });
         },
         el1_change: function(){";
@@ -517,10 +524,12 @@ EOF;
                         }
                         $html .= "<td><div id='destChrono-" . $res->id . "'></div>";
                         $html .= "</table>";
+                    echo ajax_combobox("Chrono-".$res->id."_jDS", "", 3);
                     } else {
                         foreach ($obj->valuesArr as $key => $val) {
                             $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key ? "SELECTED" : "") . " value='" . $key . "'>" . $val . "</OPTION>";
                         }
+                    echo ajax_combobox("Chrono-".$res->id."", "", 3);
                     }
                     if ($res->endNeeded == 1)
                         $html .= $res->htmlEndTag;

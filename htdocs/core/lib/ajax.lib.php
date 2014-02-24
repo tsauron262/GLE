@@ -316,7 +316,7 @@ function ajax_combobox($htmlname, $event=array(), $minLengthToAutocomplete=0)
     		minLengthToAutocomplete : '.$minLengthToAutocomplete.',
     		selected : function(event,ui) {
                     if(window.ajax_updater_postFct)
-                        ajax_updater_postFct($(this).val());
+                        ajax_updater_postFct($(this).val(), $(this).attr("id"));
                     var obj = '.json_encode($event).';
                     $.each(obj, function(key,values) {
                             if (values.method.length) {

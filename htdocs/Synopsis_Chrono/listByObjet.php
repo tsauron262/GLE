@@ -89,15 +89,22 @@ if (isset($_REQUEST['obj'])) {
 //        $head = propal_prepare_head($projet);
 //        $socid = $projet->socid;
     $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1");
-    while ($result = $db->fetch_object($sql))
-        $tabModel[$result->id] = $result->titre;
+    while ($result = $db->fetch_object($sql)){
+        $nomI = $result->titre;
+        $titre = $nomI;
+        if(isset($result->picto) && $result->picto != '')
+            $titre = img_picto($nomI, "object_".$result->picto)."  ". $nomI;
+        $tabModel[$result->id] =  array('nomModel' => $nomI, 'titre' => $titre);
+    }
 }
 
 
 if ($filtre != "")
     $filtre = "&_search2=true&" . $filtre;
 
-foreach ($tabModel as $model => $nomModel) {
+foreach ($tabModel as $model => $data) {
+    $nomModel = $data['nomModel'];
+    $titre = $data['titre'];
     $nomDiv = "gridChronoDet" . $model;
     if ($model == 100) {
         if (isset($ctrId))
@@ -111,7 +118,6 @@ foreach ($tabModel as $model => $nomModel) {
         $nomOnglet = "productCli";
     }
 
-    $titre = $nomModel;
 
 
     $champJs = "tabChamp = new Array();";
@@ -128,12 +134,12 @@ foreach ($tabModel as $model => $nomModel) {
 
 
     $html .= '<div id="pan' . $nomDiv . '">';
-    $html .= "<input type='button'onclick='" . $champJs . " "
+    $html .= "<a class='butAction' onclick='" . $champJs . " "
             . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"
             . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
             . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
-            . "                                                                     }, \"New " . $titre . "\", 1); "
-            . "                                                                  });' class='butAction' value = 'Créer " . $titre . "' /><br/><br/>";
+            . "                                                                     }, \"New " . $nomModel . "\", 1); "
+            . "                                                                  });'>Créer " . $titre . "</a><br/><br/>";
 
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 

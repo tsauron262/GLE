@@ -51,7 +51,7 @@ class Chrono extends CommonObject {
                 $this->socid = $res->fk_societe;
                 $this->statut = $res->fk_statut;
                 $this->validation_number = $res->validation_number;
-                
+
                 $this->fk_user_author = $res->fk_user_author;
                 if ($this->fk_user_author > 0) {
                     $tmpUser = new User($this->db);
@@ -85,13 +85,13 @@ class Chrono extends CommonObject {
                     $this->model->fetch($res->model_refid);
                     $this->mask = $this->model->modele;
                 }
-                
-                if ($this->socid > 0 && $this->mode->hasSociete) {
+
+                if ($this->socid > 0 && $this->model->hasSociete) {
                     $soc = new Societe($this->db);
                     $soc->fetch($this->socid);
                     $this->societe = $soc;
                 }
-                
+
                 global $user;
                 $this->getRights($user);
                 return($id);
@@ -543,9 +543,9 @@ class Chrono extends CommonObject {
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $this->ref, 'chrono@Synopsis_Chrono', false, false, false, true) . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $this->ref, $this->model->picto, false, false, false, true) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $this->ref, 'chrono@Synopsis_Chrono') . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $this->ref, $this->model->picto) . $lienfin . ' ');
 
         $result.=$lien . ($maxlen ? dol_trunc($this->ref, $maxlen) : $this->ref) . $lienfin;
         return $result;
@@ -745,6 +745,7 @@ class ChronoRef {
             $this->tms = $res->tms;
             $this->revision_model_refid = $res->revision_model_refid;
             $this->active = $res->active;
+            $this->picto = (isset($res->picto) && $res->picto != "")? $res->picto : 'chrono@Synopsis_Chrono';
         }
     }
 

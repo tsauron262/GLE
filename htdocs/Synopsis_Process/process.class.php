@@ -2495,7 +2495,7 @@ EOF;
                     if ($result > 0) {
                         $contratdet = new Synopsis_ContratLigne($this->db);
                         $contratdet->fetch($result);
-                        $html = "<br/>";
+                        $html = "";
                         $color = "";
                         $dtStr = ($contratdet->date_fin_validite > 0) ? date("c", $contratdet->date_fin_validite) : null;
                         $dateF = new DateTime($dtStr);
@@ -2567,7 +2567,7 @@ EOF;
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
         if ($this->urlObj != "") {
-            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\">" . $this->picto . "</a>";
+            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\"> " . $this->picto . "</a> ";
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)
                 $html .= "onclick='dispatchePopObject(" . $idVal . ", \"chrono\", function(){}, \"" . $text . "\",1); return false;'";
@@ -2588,7 +2588,7 @@ EOF;
                 while ($result = $this->db->fetch_object($sql)) {
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
-                        $html = lien($this->urlObj . $result->id) . finLien($this->picto . $result->nom);
+                        $html = lien($this->urlObj . $result->id) . finLien($this->picto ." ". $result->nom);
                     else
                         $html = $this->picto . $result->nom;
                     $this->valuesArr[$result->id] = $html;

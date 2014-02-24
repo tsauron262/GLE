@@ -283,6 +283,7 @@ div.champGr{
 
 .showFormChrono{
     float: left;
+    margin-right: 15px;
 }
 
 th.ui-state-default{

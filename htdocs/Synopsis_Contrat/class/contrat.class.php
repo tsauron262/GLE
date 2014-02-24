@@ -246,6 +246,8 @@ class Synopsis_Contrat extends Contrat {
     public function fetch($id, $ref = '') {
         $ret = parent::fetch($id, $ref);
         $id = $this->id;
+        if(!$id > 0)
+            return 0;
         $this->societe = new Societe($this->db);
         $this->societe->fetch($this->socid);
         $requete = "SELECT durValid,

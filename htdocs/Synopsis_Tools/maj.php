@@ -216,8 +216,8 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
             $sqlChrono = $db->query("SELECT * FROM llx_Synopsis_Chrono WHERE model_refid = " . $result->model_refid);
             while ($resultChrono = $db->fetch_object($sqlChrono)) {
                 $idSoc = $resultChrono->fk_societe;
-                if (!$idSoc > 0)
-                    die("kkkk");
+//                if (!$idSoc > 0)
+//                    die("kkkk");
                 if (!isset($tabSoc[$idSoc]) && $idSoc > 0) {
                     if ($idSoc > 0) {
                         $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));

@@ -357,7 +357,7 @@ class Synopsis_Contrat extends Contrat {
                 $this->lines[] = $obj;
             }
         } else
-            die("Pas d'id");
+            echo("Pas d'id");
     }
 
 //    

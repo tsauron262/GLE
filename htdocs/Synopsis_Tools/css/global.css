@@ -311,3 +311,7 @@ span.timePage {
     background-image: none;
 }
 
+
+.datetimepicker{
+    min-width: 120px;
+}

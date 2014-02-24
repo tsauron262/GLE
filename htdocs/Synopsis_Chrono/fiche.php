@@ -296,6 +296,8 @@ if ($action == "Modify" || $action == "ModifyAfterValid") {
         jQuery('.datepicker').datepicker({ showTime : false});
         jQuery('.datetimepicker').each(function(){
         date = $(this).attr("value");
+                if(date == "" && $(this).hasClass("now"))
+                    date = new Date();
             $(this).datetimepicker({ showTime : true}).datepicker( "setDate" , date);
         });
 

@@ -77,10 +77,9 @@ $object = new Synopsis_Contrat($db);
  * Deb mod drsi les action     generer pdf    -    suprimer fichier       - envoyer par mail
  */
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
-    if(isset($_REQUEST['ref'])){
-        $object->fetch($_REQUEST["id"], $_REQUEST['ref']);
-        $_REQUEST["id"] = $object->id;
-    }
+    $object->fetch($_REQUEST["id"], (isset($_REQUEST['ref'])) ? $_REQUEST['ref'] : '');
+    $_REQUEST["id"] = $object->id;
+    $id = $object->id;
     if (isset($_REQUEST["id"])) {
         $object->fetch($_REQUEST["id"]);
         $object->fetch_lines();
@@ -94,7 +93,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $contratSyn->reconduction($user);
             header('location: fiche.php?id=' . $_REQUEST["id"]);
         }
-        
+
         if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
 //    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($object->typeContrat == 6 || $object->typeContrat == 5)) {
 //        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsiscontrat/modules_contratGA.php");
@@ -1142,9 +1141,9 @@ if ($action == 'create') {
         print '<td colspan="3">' . dol_print_date($object->date_contrat, "dayhour") . "\n";
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
-            echo "<span class='editDate editable'>".img_edit($langs->trans("setDate"))."</span>";
+            echo "<span class='editDate editable'>" . img_edit($langs->trans("setDate")) . "</span>";
             echo "<div class='hide editDateDiv'>";
-            $form->form_date(DOL_URL_ROOT."/Synopsis_Contrat/ajax/modDateContrat.php?id=".$_REQUEST['id'], $object->date_contrat, "date_contrat");
+            $form->form_date(DOL_URL_ROOT . "/Synopsis_Contrat/ajax/modDateContrat.php?id=" . $_REQUEST['id'], $object->date_contrat, "date_contrat");
             echo "</div></td></tr>";
             echo "<tr><td>Total HT</td><td>" . $object->total_ht . " &euro;" . "</td>";
             echo "<td>Total TTC</td><td>" . $object->total_ttc . " &euro;" . "</td></tr>";
@@ -1218,9 +1217,9 @@ if ($action == 'create') {
         print '<table class="notopnoleft allwidth">'; // Array with (n*2)+1 lines
         $cursorline = 1;
         while ($cursorline <= $nbofservices) {
-            print '<tr height="16" ' . $bc[false] .  '>';
+            print '<tr height="16" ' . $bc[false] . '>';
             print '<td class="liste_titre" width="90" style="border-left: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';">';
-            /*deb mod drsi pour scroll en modif*/ print '<div id="' . $object->lines[$cursorline - 1]->id .'"></div>';/*f mod drsi*/
+            /* deb mod drsi pour scroll en modif */ print '<div id="' . $object->lines[$cursorline - 1]->id . '"></div>'; /* f mod drsi */
             print $langs->trans("ServiceNb", $cursorline) . '</td>';
 
             print '<td class="tab" style="border-right: 1px solid #' . $colorb . '; border-top: 1px solid #' . $colorb . '; border-bottom: 1px solid #' . $colorb . ';" rowspan="2">';
@@ -1302,7 +1301,7 @@ if ($action == 'create') {
                         print '&nbsp;';
                     }
                     if ($user->rights->contrat->creer && ($object->statut >= 0)) {
-                        print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . /*deb mod drsi pour scroll en modif*/'#' . $objp->rowid ./*f mod drsi*/ '">';
+                        print '<a href="' . $_SERVER['PHP_SELF'] . '?id=' . $object->id . '&amp;action=editline&amp;rowid=' . $objp->rowid . /* deb mod drsi pour scroll en modif */'#' . $objp->rowid . /* f mod drsi */ '">';
                         print img_edit();
                         print '</a>';
                     } else {
@@ -1751,19 +1750,19 @@ if ($action == 'create') {
 
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
-    if (isset($_REQUEST["id"])) {
+    if (isset($_REQUEST["id"]) && isset($object->id) && $object->id > 0) {
         // Renouve simple
         print "<br/>";
         print '<div class="inline-block divButAction">';
         if ($object->statut == 1 || $object->statut == 2) {
 //            print "<br/>";
-            if ($user->rights->synopsiscontrat->renouveller){
+            if ($user->rights->synopsiscontrat->renouveller) {
                 print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
                 print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=reconduction">' . $langs->trans('Reconduction') . '</a>';
             }
         }
-        
-        
+
+
         // Send
         if ($object->statut == 1 || $object->statut == 2) {
 //            print "<br/>";
@@ -1969,7 +1968,7 @@ if ($conf->margin->enabled) {
                             $('#buying_price').show();
                         }
                     },
-                    'json');
+                            'json');
                 }
                 else {
                     $("#fournprice").hide();

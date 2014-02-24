@@ -89,7 +89,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         array($oldPref . "contrat", MAIN_DB_PREFIX . "Synopsis_contrat_GMAO",
             array('rowid', 'condReg_refid', 'modeReg_refid'),
             array('id', 'condReg_refid', 'modeReg_refid')
-            )), true);
+        )), true);
 //    $maj->rectifId(array(629,395,630,395,631,396,632,396,633,397,634,397,635,398,636,398,637,399,638,399,639,400,640,400,641,401,642,401,643,402,644,402,645,403,646,403,647,404,648,404,649,405,650,405,651,406,652,406,653,407,654,407,655,408,656,408,657,409,658,409,659,410,660,410,661,411,662,411,663,412,664,412,665,413,666,413,699,341,700,341,701,342,702,342,703,343,704,343,705,335,706,335,707,336,708,336,709,420,710,420,711,421,712,421,713,422,714,422,715,423,716,423,717,424,718,424,719,425,720,425,721,426,722,426,723,427,724,427,725,428,726,428,727,429,728,429,729,430,730,430,731,431,732,431,733,432,734,432,735,433,736,433,737,434,738,434,739,435,740,435,741,436,742,436,743,437,744,437,745,438,746,438,747,439,748,439,749,440,750,440,751,441,752,441,753,442,754,442,755,443,756,443,757,444,758,444,775,1579,776,1579));
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "commandedet` SET `product_type`= 106 WHERE `fk_product` is null AND `total_ttc` = 0");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "contratdet` SET `fk_product` = (SELECT `fk_contrat_prod` FROM `" . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO` WHERE `contratdet_refid` = `rowid`)");
@@ -111,12 +111,12 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("INSERT INTO `llx_usergroup_user` (fk_usergroup, fk_user) VALUES(14,1)");
 
     $maj->ajoutDroitGr(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885,
-                                                                            342, 343, 230001, 161881, 161882,229201,
-                                                                            2411,2412,2413,2414));
-    $maj->ajoutDroitGr(array(14), array(358, 80881, 80882, 80883, 80884, 80886,106,
-                            1001, 1002, 1003,1004,1005,
-                            229202,229203,229204,229205,229206));//Admin
-    $maj->ajoutDroitGr(array(2, 7, 14), array(21,22,23,24,25,26,27,28,230002));//Propal
+        342, 343, 230001, 161881, 161882, 229201,
+        2411, 2412, 2413, 2414));
+    $maj->ajoutDroitGr(array(14), array(358, 80881, 80882, 80883, 80884, 80886, 106,
+        1001, 1002, 1003, 1004, 1005,
+        229202, 229203, 229204, 229205, 229206)); //Admin
+    $maj->ajoutDroitGr(array(2, 7, 14), array(21, 22, 23, 24, 25, 26, 27, 28, 230002)); //Propal
 }elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
@@ -220,14 +220,13 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
                 $idSoc = $resultChrono->fk_societe;
 //                if (!$idSoc > 0)
 //                    die("kkkk");
-                if (!isset($tabSoc[$idSoc]) && $idSoc > 0) {
-                    if ($idSoc > 0) {
-                        $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));
-                        while ($result4 = $db->fetch_object($sql4)) {
-                            $tabSoc[$idSoc][] = $result4->$champId;
-                        }
-                    } else
-                        $tabSoc[$idSoc] = array();
+                if (!isset($tabSoc[$idSoc]) && $idSoc > 0)
+                    $tabSoc[$idSoc] = array();
+                if ($idSoc > 0) {
+                    $sql4 = $db->query("SELECT " . $champId . " FROM " . $result2->table . " WHERE " . str_replace("[id]", $idSoc, $result2->sqlFiltreSoc));
+                    while ($result4 = $db->fetch_object($sql4)) {
+                        $tabSoc[$idSoc][] = $result4->$champId;
+                    }
                 }
                 if (!isset($tabValOK)) {
                     $tabValOK = array();
@@ -246,47 +245,47 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
                 }
                 foreach ($tabLien as $lien) {
                     if ($idSoc > 0 && !in_array($lien['s'], $tabSoc[$idSoc]) && !isset($tabSuppr['elementElement'][$result2->nomElem][$lien['s']]))
-                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc ".$idSoc.")</br>".print_r($tabSoc[$idSoc]));
+                        erreur("Contrainte non respecté." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . " (Soc " . $idSoc . ")</br>" . print_r($tabSoc[$idSoc]));
                 }
             }
         }
     }
-    
-    foreach(array("FI" => array("table" => "fichinter"), 
-        "DI" => array("table" => "synopsisdemandeinterv"),
-        "commande" => array("table" => "commande"), 
-        "contrat" => array("table" => "contrat"), 
-        "contratdet" => array("table" => "contratdet"), 
-        "idUserGle" => array("table" => "user"), 
-        "userTech" => array("table" => "user")) as $elem => $para){
+
+    foreach (array("FI" => array("table" => "fichinter"),
+ "DI" => array("table" => "synopsisdemandeinterv"),
+ "commande" => array("table" => "commande"),
+ "contrat" => array("table" => "contrat"),
+ "contratdet" => array("table" => "contratdet"),
+ "idUserGle" => array("table" => "user"),
+ "userTech" => array("table" => "user")) as $elem => $para) {
         $result = getElementElement($elem);
-        foreach($result as $ligne){
+        foreach ($result as $ligne) {
             $idT = $ligne['s'];
-            $nomId = (isset($para['nomId'])? $para['nomId'] : "rowid");
-            $sql = $db->query("SELECT ".$nomId." FROM ".MAIN_DB_PREFIX.$para['table']. " WHERE ".$nomId." = ".$idT);
-            if ($db->num_rows($sql) < 1){
+            $nomId = (isset($para['nomId']) ? $para['nomId'] : "rowid");
+            $sql = $db->query("SELECT " . $nomId . " FROM " . MAIN_DB_PREFIX . $para['table'] . " WHERE " . $nomId . " = " . $idT);
+            if ($db->num_rows($sql) < 1) {
                 $tabSuppr['elementElement'][$elem][] = $idT;
-                erreur("[AUTOCORRECT] Lien vers element inexistant. ".$elem." | ".$idT);
+                erreur("[AUTOCORRECT] Lien vers element inexistant. " . $elem . " | " . $idT);
             }
         }
-        
+
         $result = getElementElement(null, $elem);
-        foreach($result as $ligne){
+        foreach ($result as $ligne) {
             $idT = $ligne['d'];
-            $nomId = (isset($para['nomId'])? $para['nomId'] : "rowid");
-            $sql = $db->query("SELECT ".$nomId." FROM ".MAIN_DB_PREFIX.$para['table']. " WHERE ".$nomId." = ".$idT);
-            if ($db->num_rows($sql) < 1){
+            $nomId = (isset($para['nomId']) ? $para['nomId'] : "rowid");
+            $sql = $db->query("SELECT " . $nomId . " FROM " . MAIN_DB_PREFIX . $para['table'] . " WHERE " . $nomId . " = " . $idT);
+            if ($db->num_rows($sql) < 1) {
                 $tabSupprI['elementElement'][$elem][] = $idT;
-                erreur("[AUTOCORRECT] Lien vers element inexistant. ".$elem." | ".$idT);
+                erreur("[AUTOCORRECT] Lien vers element inexistant. " . $elem . " | " . $idT);
             }
         }
     }
-    
-    
+
+
     if (isset($tabSuppr['elementElement']))
         foreach ($tabSuppr['elementElement'] as $element => $tabValSuppr)
             foreach ($tabValSuppr as $idSuppr)
-               delElementElement($element, null, $idSuppr);
+                delElementElement($element, null, $idSuppr);
     if (isset($tabSupprI['elementElement']))
         foreach ($tabSupprI['elementElement'] as $element => $tabValSuppr)
             foreach ($tabValSuppr as $idSuppr)
@@ -300,8 +299,8 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     netoyeDet("user", MAIN_DB_PREFIX . "usergroup_user");
     netoyeDet("user", MAIN_DB_PREFIX . "user_rights");
 //        netoyeDet("product", "babel_categorie_product", "babel_");
-    
-    
+
+
     $sql = $db->query("SELECT * FROM llx_socpeople");
     $tabFusion = array();
     while ($result = $db->fetch_object($sql)) {
@@ -379,8 +378,8 @@ function getTab() {
     global $oldPref;
     return array(
         array($oldPref . "user", MAIN_DB_PREFIX . "user",
-            array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass",*/ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
-            array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civilite" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin",/* "webcal_login", "phenix_login", "phenix_pass",*/ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
+            array("rowid", "external_id", "datec", "tms", "login", "pass", "pass_crypted", "pass_temp", "name", "firstname", "office_phone", "office_fax", "user_mobile", "email", "admin", /* "local_admin",  "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", "statut", "lang", /* "CV_ndf", "Propal_seuilWarn", "PropalWarnValidator", "Propal_seuilValidResp", "Propal_validatorResp", "empnumber", "IM_user_name" */),
+            array("rowid", /* "entity", */ "ref_ext"/* , "ref_int" */, "datec", "tms", "login", "pass", "pass_crypted", "pass_temp"/* , "civilite" */, "lastname", "firstname", "office_phone", "office_fax", "user_mobile", "email"/* , "signature" */, "admin", /* "webcal_login", "phenix_login", "phenix_pass", */ "module_comm", "module_compta", "fk_societe", "fk_socpeople", "fk_member", "note", "datelastlogin", "datepreviouslogin", "egroupware_id", "ldap_sid", /* "openid", */ "statut", /* "photo", */ "lang")
         ),
 //        array($oldPref . "user_rights", MAIN_DB_PREFIX . "user_rights",
 //            array(),

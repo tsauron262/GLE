@@ -35,7 +35,7 @@ function widget_listExpeditionAValider() {
         $sql.= " LEFT JOIN llx_societe as s ON s.rowid = e.fk_soc";*/
         $sql = "SELECT *, comm.rowid as rowid";
         $sql.= " FROM llx_commande comm, llx_element_element el, llx_Synopsis_commande comm2 ";
-        $sql.= $clause." el.fk_target > 0 AND el.fk_target != 17 AND comm.rowid = el.fk_source AND comm.rowid = comm2.rowid AND el.sourcetype = 'comm' AND el.targettype LIKE 'entrepot%'";
+        $sql.= $clause." el.fk_target > 0 AND el.fk_target != 17 AND comm.rowid = el.fk_source AND comm.rowid = comm2.rowid AND el.sourcetype = 'commande' AND el.targettype LIKE 'entrepot%'";
         $sql.= " AND fk_statut IN (1)";
          //$sql .= " AND fk_soc = ".$socid;
         $sql.= " ORDER BY date_valid desc";

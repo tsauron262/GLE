@@ -38,7 +38,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "setDepot" && isset($_R
     if ($_REQUEST["id"] > 0) {
         $commande = new Synopsis_Commande($db);
         if ($commande->fetch($_REQUEST["id"]) > 0) {
-            setElementElement('comm', 'entrepot' . $_REQUEST["numDep"], $_REQUEST["id"], $_REQUEST["nd"]);
+            setElementElement('commande', 'entrepot' . $_REQUEST["numDep"], $_REQUEST["id"], $_REQUEST["nd"]);
         }
     }
 }
@@ -50,8 +50,12 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'notifyExped' && $_REQU
 
     $to = '';
 //    $requete = "SELECT email FROM BIMP_site as s , BIMP_site_commande as sc WHERE sc.site_id = s.id AND  fk_commande = " . $_REQUEST['id'];
-    $tabEntrep = getElementElement('comm', 'entrepot', $commande->id);
-    $tabEntrep = array_merge($tabEntrep, getElementElement('comm', 'entrepot2', $commande->id));
+    $tabEntrep = getElementElement('commande', 'entrepot', $commande->id);
+    $tabEntrep = array_merge($tabEntrep, getElementElement('commande', 'entrepot0', $commande->id));
+    $tabEntrep = array_merge($tabEntrep, getElementElement('commande', 'entrepot1', $commande->id));
+    $tabEntrep = array_merge($tabEntrep, getElementElement('commande', 'entrepot2', $commande->id));
+    $tabEntrep = array_merge($tabEntrep, getElementElement('commande', 'entrepot3', $commande->id));
+    $tabEntrep = array_merge($tabEntrep, getElementElement('commande', 'entrepot4', $commande->id));
     if (isset($tabEntrep[0])) {
         $idEntr = $tabEntrep[0]['d'];
         $requete = "SELECT description as email FROM " . MAIN_DB_PREFIX . "entrepot WHERE rowid = " . $idEntr;
@@ -168,7 +172,7 @@ if ($_REQUEST["id"] > 0) {
             print $langs->trans('D&eacute;poser &agrave;');
             print '<a href="#pppart7a" onClick="changeSiteDepot(' . $i . ');">' . img_edit($langs->trans('Site BIMP'), 1) . "</a>";
             print '</th><td align=center colspan="1" width=40% class="ui-widget-content">';
-            $tabEntrep = getElementElement('comm', 'entrepot' . $i, $commande->id);
+            $tabEntrep = getElementElement('commande', 'entrepot' . $i, $commande->id);
             $idEntr = 0;
             if (isset($tabEntrep[0]))
                 $idEntr = $tabEntrep[0]['d'];

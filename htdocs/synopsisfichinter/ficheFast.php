@@ -677,7 +677,8 @@ function saveForm() {
     $res = $db->fetch_object($sql);
     if (isset($res->rowid))
         $fichinter->delete_contact($res->rowid);
-    $result = $fichinter->add_contact($_POST["contactid"], 131, 'external');
+    if(isset($_POST["contactid"]) && $_POST["contactid"] > 0)
+        $result = $fichinter->add_contact($_POST["contactid"], 131, 'external');
     //prestations($_POST['presta' . $i . "_rowid"], $_POST['presta' . $i . "_descPrest"], $_POST['presta' . $i . "_fk_typeinterv"], $_POST['presta' . $i . "_duree"]);
 
     initObj();

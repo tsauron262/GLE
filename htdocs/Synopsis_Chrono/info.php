@@ -22,7 +22,7 @@
   $js = "";
    $id = $_REQUEST['id'];
   llxHeader($js,'Info chrono');
-  print "<div class='titre'>Info chrono</div><br/>";
+//  print "<div class='titre'>Info chrono</div><br/>";
 
   if ($msg ."x" != 'x')
   {

@@ -1592,7 +1592,7 @@ EOF;
         return ($html);
     }
 
-    public function validate($user) {
+    public function validate($user, $force_number = '') {
         global $langs, $conf;
         $sql = "UPDATE " . MAIN_DB_PREFIX . "contrat SET statut = 1 ,date_valid=now()";
         $sql .= " WHERE rowid = " . $this->id . " AND statut = 0";

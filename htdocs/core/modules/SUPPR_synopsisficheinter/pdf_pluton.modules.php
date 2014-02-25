@@ -704,7 +704,7 @@ class pdf_pluton extends ModeleSynopsisficheinter {
 
 
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

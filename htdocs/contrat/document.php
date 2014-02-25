@@ -69,10 +69,16 @@ if ($object->id > 0)
 {
 	$object->fetch_thirdparty();
 }
-
-$upload_dir = $conf->contrat->dir_output.'/'.dol_sanitizeFileName($object->ref);
-$modulepart='contract';
-
+/*mod drsi*/
+if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+    $upload_dir = $conf->synopsiscontrat->dir_output.'/'.dol_sanitizeFileName($object->ref);
+    $modulepart='synopsiscontract';
+}
+else{
+    $upload_dir = $conf->contrat->dir_output.'/'.dol_sanitizeFileName($object->ref);
+    $modulepart='contract';
+}
+/*fmod drsi*/
 
 /*
  * Actions

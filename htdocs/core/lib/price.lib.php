@@ -74,7 +74,7 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 	if (empty($txtva)) $txtva=0;
 	if (empty($seller) || ! is_object($seller))
 	{
-		dol_syslog("calcul_price_total Warning: function is called with parameter seller that is missing", LOG_WARNING);
+		dol_syslog("calcul_price_total Warning: function is called with parameter seller that is missing", LOG_INFO);
 		if (! is_object($mysoc))	// mysoc may be not defined (during migration process)
 		{
 			$mysoc=new Societe($db);
@@ -85,7 +85,7 @@ function calcul_price_total($qty, $pu, $remise_percent_ligne, $txtva, $uselocalt
 	}
 	if (empty($localtaxes_array) || ! is_array($localtaxes_array))
 	{
-		dol_syslog("calcul_price_total Warning: function is called with parameter localtaxes_array that is missing", LOG_WARNING);
+		dol_syslog("calcul_price_total Warning: function is called with parameter localtaxes_array that is missing", LOG_INFO);
 	}
 	// Too verbose. Enable for debug only
 	//dol_syslog("calcul_price_total qty=".$qty." pu=".$pu." remiserpercent_ligne=".$remise_percent_ligne." txtva=".$txtva." uselocaltax1_rate=".$uselocaltax1_rate." uselocaltax2_rate=".$uselocaltax2_rate);

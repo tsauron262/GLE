@@ -663,7 +663,7 @@ class pdf_pluton extends ModelePDFFicheinter {
 
 
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

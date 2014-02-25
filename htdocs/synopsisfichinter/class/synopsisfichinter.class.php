@@ -97,7 +97,7 @@ class Synopsisfichinter extends Fichinter {
      *        \return        int        <0 if KO, >0 if OK
      */
 
-    function create() {
+    function create($user, $notrigger = 0) {
         global $user, $langs, $conf;
         dol_syslog("Fichinter.class::create ref=" . $this->ref);
 
@@ -187,7 +187,7 @@ class Synopsisfichinter extends Fichinter {
      *    \return        int        <0 si ko, >0 si ok
      */
 
-    function update() {
+    function update($user, $noTrigger = 0) {
         global $user, $langs, $conf;
         if (!is_numeric($this->duree)) {
             $this->duree = 0;
@@ -585,7 +585,7 @@ class Synopsisfichinter extends Fichinter {
      *    \brief      Efface fiche intervention
      *    \param      user        Objet du user qui efface
      */
-    function delete($user) {
+    function delete($user, $noTrigger = 0) {
         global $conf, $user, $langs;
 
         $this->db->begin();
@@ -1032,7 +1032,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
      *      \brief         Insere l'objet ligne d'intervention en base
      *        \return        int        <0 si ko, >0 si ok
      */
-    function insert() {
+    function insert($user, $noTrigger = 0) {
         global $user, $langs, $conf;
         dol_syslog("FichinterLigne::insert rang=" . $this->rang);
         $this->db->begin();
@@ -1144,7 +1144,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
      *      \brief         Mise a jour de l'objet ligne d'intervention en base
      *        \return        int        <0 si ko, >0 si ok
      */
-    function update() {
+    function update($user, $noTrigger = 0) {
         $this->db->begin();
         global $user, $langs, $conf;
 

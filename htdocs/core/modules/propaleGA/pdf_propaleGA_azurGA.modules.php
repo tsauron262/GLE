@@ -382,7 +382,7 @@ class pdf_propaleGA_azurGA extends ModelePDFPropalesGA
 
                 // Pied de page
                 $this->_pagefoot($pdf,$outputlangs);
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

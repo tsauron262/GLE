@@ -333,7 +333,7 @@ class pdf_soleil extends Modelesynopsisdemandeinterv
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'', 9);   // On repositionne la police par defaut
 
                 $this->_pagefoot($pdf,$synopsisdemandeinterv,$outputlangs);
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

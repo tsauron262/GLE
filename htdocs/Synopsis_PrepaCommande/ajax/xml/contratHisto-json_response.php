@@ -50,6 +50,7 @@
 
     $SQL = "SELECT * FROM ".MAIN_DB_PREFIX."contrat WHERE fk_soc=".$id."  ORDER BY $sidx $sord LIMIT $start , $limit";
     $result = $db->query( $SQL ) or die("Couldn t execute query.".mysql_error() . $SQL);
+    $responce = new object();
     $responce->page = $page;
     $responce->total = $total_pages;
     $responce->records = $count;

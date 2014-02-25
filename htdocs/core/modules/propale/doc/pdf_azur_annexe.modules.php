@@ -447,7 +447,7 @@ class pdf_azur_annexe extends ModelePDFPropales {
                 // Pied de page
                 $this->_pagefoot($pdf, $object, $outputlangs);
                 if (method_exists($pdf, 'AliasNbPages'))
-                    $pdf->AliasNbPages();
+                    if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

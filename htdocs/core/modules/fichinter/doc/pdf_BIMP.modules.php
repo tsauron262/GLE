@@ -758,7 +758,7 @@ class pdf_bimp extends ModelePDFFicheinter {
 
 
                 $this->footer($pdf);
-//                $pdf->AliasNbPages();
+//                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 //                die($pdf->getAliasNbPages());
 
                 $pdf->Close();

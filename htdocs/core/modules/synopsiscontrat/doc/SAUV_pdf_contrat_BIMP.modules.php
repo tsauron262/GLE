@@ -964,7 +964,7 @@ au " . $val->date_fin_prevue), 0, 'C', 1);
 
 
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;

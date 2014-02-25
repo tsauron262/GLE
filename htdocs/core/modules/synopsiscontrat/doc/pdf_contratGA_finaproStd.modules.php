@@ -191,7 +191,7 @@ class pdf_contratGA_finaproStd extends ModeleSynopsiscontratGA
 
                 $this->page_conditionParticuliereBNP36_12($pdf,$contratGA,$tmpSignature);
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
                 $this->file = $file;$pdf->Output($file, 'f');
 

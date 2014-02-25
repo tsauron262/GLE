@@ -751,7 +751,7 @@ class pdf_soleil extends ModelePDFFicheinter {
 
 
                 $this->footer($pdf);
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

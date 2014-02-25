@@ -194,7 +194,7 @@ ini_set('display_errors', 1);
 $classAnnexe = new annexe();
 $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;

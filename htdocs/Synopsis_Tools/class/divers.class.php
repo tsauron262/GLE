@@ -2,6 +2,10 @@
 
 include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
 
+class object {
+    
+}
+
 class synopsisHook {
 
     static $timeDeb = 0;
@@ -21,8 +25,6 @@ class synopsisHook {
 
         date_default_timezone_set('Europe/Paris');
 
-        ini_set('display_errors', 1);
-
         $builddoc = (isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
         $viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
         $modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
@@ -34,6 +36,10 @@ class synopsisHook {
 
         ini_set('upload_max_filesize', 10000);
         ini_set('post_max_size', 10000);
+
+        ini_set('display_errors', ($modDev > 0));
+        ini_set('log_errors', '1');
+        ini_set('error_log', DOL_DATA_ROOT.'/gle.log');
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
@@ -163,7 +169,7 @@ class synopsisHook {
     static function getHeader() {
         global $db;
         self::$timeDeb = microtime(true);
-        
+
         //css
         $return = '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/global.css" />' . "\n";
         $cssSoc = "/Synopsis_Tools/css/" . MAIN_INFO_SOCIETE_NOM . ".css";
@@ -171,14 +177,14 @@ class synopsisHook {
             $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . $cssSoc . '" />' . "\n";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print")
             $return .= '<link rel="stylesheet" type="text/css" href="' . DOL_URL_ROOT . '/Synopsis_Tools/css/print.css" />' . "\n";
-        
+
         $nameFile = DOL_DATA_ROOT . "/special.css";
         if (is_file($nameFile)) {
             $css = file_get_contents($nameFile);
             $return .= "<style>" . $css . "</style>";
         }
-        
-        
+
+
         ///js
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'

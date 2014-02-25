@@ -325,7 +325,7 @@ class pdf_soleil extends ModelePDFFicheinter
                 $pdf->SetFont(pdf_getPDFFont($outputlangs),'', 9);   // On repositionne la police par defaut
 
                 $this->_pagefoot($pdf,$outputlangs);
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

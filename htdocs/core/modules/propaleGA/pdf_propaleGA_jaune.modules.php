@@ -273,7 +273,7 @@ class pdf_propaleGA_jaune extends ModelePDFPropalesGA
 
                 // Pied de page
                 $this->_pagefoot($pdf,$propale,$outputlangs);
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
                 $pdf->Close();
 

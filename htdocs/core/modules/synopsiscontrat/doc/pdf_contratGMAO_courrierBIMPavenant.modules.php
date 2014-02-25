@@ -243,7 +243,7 @@ Direction Technique
 
                 $this->_pagefoot($pdf,$outputlangs);
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;$pdf->Output($file, 'f');

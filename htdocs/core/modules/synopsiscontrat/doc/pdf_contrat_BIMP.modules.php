@@ -824,7 +824,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
 
 
 
-                $pdf->AliasNbPages();
+                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;

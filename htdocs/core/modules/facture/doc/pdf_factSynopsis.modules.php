@@ -403,7 +403,7 @@ class pdf_factSynopsis extends ModelePDFFactures
 
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
-				$pdf->AliasNbPages();
+				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->Close();
 

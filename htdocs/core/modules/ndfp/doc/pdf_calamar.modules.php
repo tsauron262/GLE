@@ -294,7 +294,7 @@ class pdf_calamar extends ModeleNdfp
                                                                                
 				// Footpage
 				$this->_pagefoot($pdf, $object, $outputlangs);
-				$pdf->AliasNbPages();
+				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				$pdf->Close();
 

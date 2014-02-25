@@ -1646,6 +1646,7 @@ class Synopsis_Contrat extends Contrat {
 
     public function addAnnexe($annexeId) {
         $maxRang = 0;
+        $tabEl = array();
         $req1 = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id . " ORDER BY rang";
         $result = $this->db->query($req1);
         while ($res = $this->db->fetch_object($result)) {

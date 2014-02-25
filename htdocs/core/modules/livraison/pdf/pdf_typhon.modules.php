@@ -97,8 +97,8 @@ class pdf_typhon extends ModelePDFDeliveryOrder
 
 		// Define position of columns
 		$this->posxdesc=$this->marge_gauche+1;
-		$this->posxcomm=111;
-		//$this->posxtva=111;
+		$this->posxcomm=112;
+		//$this->posxtva=112;
 		//$this->posxup=126;
 		$this->posxqty=174;
 		//$this->posxdiscount=162;
@@ -432,6 +432,7 @@ class pdf_typhon extends ModelePDFDeliveryOrder
 
 				// Pied de page
 				$this->_pagefoot($pdf,$object,$outputlangs);
+
 				if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
 
 				// Check product remaining to be delivered
@@ -696,6 +697,7 @@ class pdf_typhon extends ModelePDFDeliveryOrder
 		$posy+=2;
 
 		// Add list of linked orders on shipment
+		// Currently not supported by pdf_writeLinkedObjects, link for delivery to order is done through shipment)
 		if ($object->origin == 'expedition' || $object->origin == 'shipping')
 		{
 			$Yoff=$posy-5;
@@ -707,7 +709,6 @@ class pdf_typhon extends ModelePDFDeliveryOrder
 		    $origin 	= $shipment->origin;
 			$origin_id 	= $shipment->origin_id;
 
-		    // TODO move to external function
 			if ($conf->$origin->enabled)
 			{
 				$outputlangs->load('orders');

@@ -2,6 +2,8 @@
 /* Copyright (C) 2001-2006 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
+ * Copyright (C) 2013      Florian Henry       <florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,11 +53,15 @@ $search_zipcode=GETPOST("search_zipcode");
 $search_town=GETPOST("search_town");
 $search_code=GETPOST("search_code");
 $search_compta=GETPOST("search_compta");
+$search_status		= GETPOST("search_status",'int');
+if ($search_status=='') $search_status=1; // always display activ customer first
 
 // Load sale and categ filters
 $search_sale  = GETPOST("search_sale");
 $search_categ = GETPOST("search_categ",'int');
 $catid        = GETPOST("catid",'int');
+// If the internal user must only see his customers, force searching by him
+if (!$user->rights->societe->client->voir && !$socid) $search_sale = $user->id;
 
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('customerlist'));
@@ -82,6 +88,7 @@ if (GETPOST("button_removefilter_x"))
     $search_idprof2='';
     $search_idprof3='';
     $search_idprof4='';
+    $seach_status=1;
 }
 
 
@@ -91,6 +98,7 @@ if (GETPOST("button_removefilter_x"))
  */
 
 $formother=new FormOther($db);
+$form = new Form($db);
 $thirdpartystatic=new Societe($db);
 
 $help_url='EN:Module_Third_Parties|FR:Module_Tiers|ES:Empresas';
@@ -98,28 +106,32 @@ llxHeader('',$langs->trans("ThirdParty"),$help_url);
 
 $sql = "SELECT s.rowid, s.nom as name, s.client, s.zip, s.town, st.libelle as stcomm, s.prefix_comm, s.code_client, s.code_compta, s.status as status,";
 $sql.= " s.datec, s.datea, s.canvas";
-// We'll need these fields in order to filter by sale (including the case where the user can only see his prospects)
-if ($search_sale) $sql .= ", sc.fk_soc, sc.fk_user";
+if ((!$user->rights->societe->client->voir && !$socid) || $search_sale) $sql .= ", sc.fk_soc, sc.fk_user"; // We need these fields in order to filter by sale (including the case where the user can only see his prospects)
 $sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 if (! empty($search_categ) || ! empty($catid)) $sql.= ' LEFT JOIN '.MAIN_DB_PREFIX."categorie_societe as cs ON s.rowid = cs.fk_societe"; // We need this table joined to the select in order to filter by categ
+if ((!$user->rights->societe->client->voir && !$socid) || $search_sale) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc"; // We need this table joined to the select in order to filter by sale
 $sql.= ", ".MAIN_DB_PREFIX."c_stcomm as st";
-// We'll need this table joined to the select in order to filter by sale
-if ($search_sale || !$user->rights->societe->client->voir) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE s.fk_stcomm = st.id";
 $sql.= " AND s.client IN (1, 3)";
 $sql.= ' AND s.entity IN ('.getEntity('societe', 1).')';
-if (!$user->rights->societe->client->voir && ! $socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+if ((!$user->rights->societe->client->voir && !$socid) || $search_sale) $sql.= " AND s.rowid = sc.fk_soc";
 if ($socid) $sql.= " AND s.rowid = ".$socid;
 if ($search_sale) $sql.= " AND s.rowid = sc.fk_soc";		// Join for the needed table to filter by sale
 if ($catid > 0)          $sql.= " AND cs.fk_categorie = ".$catid;
 if ($catid == -2)        $sql.= " AND cs.fk_categorie IS NULL";
 if ($search_categ > 0)   $sql.= " AND cs.fk_categorie = ".$search_categ;
 if ($search_categ == -2) $sql.= " AND cs.fk_categorie IS NULL";
-if ($search_nom)   $sql.= " AND s.nom LIKE '%".$db->escape($search_nom)."%'";
+if ($search_nom) {
+	$sql .= natural_search('s.nom', $search_nom);
+}
 if ($search_zipcode) $sql.= " AND s.zip LIKE '".$db->escape($search_zipcode)."%'";
-if ($search_town) $sql.= " AND s.town LIKE '%".$db->escape($search_town)."%'";
+if ($search_town) {
+	$sql .= natural_search('s.town', $search_town);
+}
 if ($search_code)  $sql.= " AND s.code_client LIKE '%".$db->escape($search_code)."%'";
 if ($search_compta) $sql.= " AND s.code_compta LIKE '%".$db->escape($search_compta)."%'";
+
+if ($search_status!='') $sql .= " AND s.status = ".$db->escape($search_status);
 // Insert sale filter
 if ($search_sale)
 {
@@ -137,8 +149,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 $sql.= $db->order($sortfield,$sortorder);
 $sql.= $db->plimit($conf->liste_limit +1, $offset);
 
-dol_syslog('comm:list.php: sql='.$sql,LOG_DEBUG);
-
+dol_syslog('comm/list.php: sql='.$sql,LOG_DEBUG);
 $result = $db->query($sql);
 if ($result)
 {
@@ -147,6 +158,7 @@ if ($result)
 	$param = "&amp;search_nom=".$search_nom."&amp;search_code=".$search_code."&amp;search_zipcode=".$search_zipcode."&amp;search_town=".$search_town;
  	if ($search_categ != '') $param.='&amp;search_categ='.$search_categ;
  	if ($search_sale != '')	$param.='&amp;search_sale='.$search_sale;
+ 	if ($search_status != '') $param.='&amp;search_status='.$search_status;
 
 	print_barre_liste($langs->trans("ListOfCustomers"), $page, $_SERVER["PHP_SELF"],$param,$sortfield,$sortorder,'',$num,$nbtotalofrecords);
 
@@ -184,8 +196,8 @@ if ($result)
 	print_liste_field_titre($langs->trans("CustomerCode"),$_SERVER["PHP_SELF"],"s.code_client","",$param,"",$sortfield,$sortorder);
     print_liste_field_titre($langs->trans("AccountancyCode"),$_SERVER["PHP_SELF"],"s.code_compta","",$param,'align="left"',$sortfield,$sortorder);
 	print_liste_field_titre($langs->trans("DateCreation"),$_SERVER["PHP_SELF"],"datec","",$param,'align="right"',$sortfield,$sortorder);
-    print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],"s.status","",$param,'align="right"',$sortfield,$sortorder);
-
+    print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],"s.status","",$param,'align="center"',$sortfield,$sortorder);
+    print '<td class="liste_titre">&nbsp;</td>';
     $parameters=array();
     $formconfirm=$hookmanager->executeHooks('printFieldListTitle',$parameters);    // Note that $action and $object may have been modified by hook
 
@@ -213,11 +225,17 @@ if ($result)
     print '<input type="text" class="flat" name="search_compta" value="'.$search_compta.'" size="10">';
     print '</td>';
 
-    print '</td><td>&nbsp;</td>';
+    print '<td class="liste_titre" align="center">';
+    print '&nbsp;';
+    print '</td>';
 
-    print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/search.png" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+    print '<td class="liste_titre" align="center">';
+    print $form->selectarray('search_status', array('0'=>$langs->trans('ActivityCeased'),'1'=>$langs->trans('InActivity')),$search_status);
+    print '</td>';
+
+    print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
     print '&nbsp; ';
-    print '<input type="image" class="liste_titre" name="button_removefilter" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/searchclear.png" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
+    print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'" title="'.dol_escape_htmltag($langs->trans("RemoveFilter")).'">';
     print '</td>';
 
     $parameters=array();
@@ -233,11 +251,12 @@ if ($result)
 
 		$var=!$var;
 
-		print "<tr $bc[$var]>";
+		print "<tr ".$bc[$var].">";
 		print '<td>';
 		$thirdpartystatic->id=$obj->rowid;
         $thirdpartystatic->name=$obj->name;
         $thirdpartystatic->client=$obj->client;
+        $thirdpartystatic->code_client=$obj->code_client;
         $thirdpartystatic->canvas=$obj->canvas;
         $thirdpartystatic->status=$obj->status;
         print $thirdpartystatic->getNomUrl(1);
@@ -247,9 +266,10 @@ if ($result)
         print '<td>'.$obj->code_client.'</td>';
         print '<td>'.$obj->code_compta.'</td>';
         print '<td align="right">'.dol_print_date($db->jdate($obj->datec),'day').'</td>';
-        print '<td align="right">'.$thirdpartystatic->getLibStatut(3);
+        print '<td align="center">'.$thirdpartystatic->getLibStatut(3);
         print '</td>';
-
+        print '<td></td>';
+        
         $parameters=array('obj' => $obj);
         $formconfirm=$hookmanager->executeHooks('printFieldListValue',$parameters);    // Note that $action and $object may have been modified by hook
 

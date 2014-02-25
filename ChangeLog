@@ -1,43 +1,237 @@
 --------------------------------------------------------------
 English Dolibarr ChangeLog
 --------------------------------------------------------------
+
+
+***** ChangeLog for 3.5.1 compared to 3.5.0 *****
+Fix: Do not report trigger errors twice.
+Fix: Error when creating event was not reported.
+Fix: Bug of import of agenda when using https link
+Fix: Field nature not saved correctly
+Fix: Substituion of extra field was ko for order
+Fix: Bad translation of date format for pt_BR.
+Fix: priority field of agenda record is smallint.
+Fix: Missing loading of lang in some pages.
+Fix: Write note in invoice when using pos module.
+Fix: Link to paypal was invalid into email text.
+Fix: ref and date of supplier invoice.
+Fix: Check on bank account.
+Fix: Problem with file upload and download.
+Fix: Page load not ending when large number of thirdparies. We 
+     added option MAIN_DISABLE_AJAX_COMBOX to disable javascript
+     combo feature that is root cause of problem.
+Fix: [ bug #1231 ] PDF always generated in interventions
+Fix: Be sure there is no duplicate default rib.
+Fix: Enable extrafields for customer order, proposal and invoice lines. This feature
+     was developed for 3.5 but was disabled (hidden) because of a bug not possible to
+     fix enough quickly for 3.5.0 release. 
+Fix: user right on Holiday for month report nor working.
+Fix: [ bug #1250 ] "Supplier Ref. product" sidebar search box does not work
+Fix: Bad space in predefined messages. 
+Fix: Signature was not added for email sent from thirdparty page.
+Fix: Action event SHIPPING_VALIDATE is not implemented
+Fix: The customer code was set to uppercase when using numbering module leopard. We
+     must keep data safe of any change.
+
+***** ChangeLog for 3.5 compared to 3.4.* *****
+For users:
+- New: Add hidden option BANK_DISABLE_DIRECT_INPUT.
+- New: More options to select status of users into select user list.
+- New: [ task #862 ] Add ODT on shipments.
+- New: [ task #149 ] Add # of notes and attachments in tabs.
+- New: Can edit customer ref at any time.
+- New: [ task #877 ] Reorganize menus.
+- New: [ task #858 ] Holiday module: note on manual holiday assignation.
+- New: [ task #892 ] Add hidden option in thirdparty customer/supplier module to hide non active
+  companies in select_company method.
+- New: [ task #531 ] Add a workload field on tasks.
+- New: Add graph of bank account input/output into input-output report page.
+- New: Add script export-bank-receipts.php
+- New: Add option "filter=bank" onto script rebuild_merge_pdf.php to merge PDF that
+  has one payment on a specific bank account.*
+- New: [ task #901 ] Add Extrafield on Fiche Inter.
+- New: Show process id in all command line scripts.
+- New: Module mailman can subscribe/unsubscribe to ML according to categories or type of member.
+- New: Add object_hour and object_date_rfc as substitution tag for open document generation.
+- New: Add options to send an email when paypal or paybox payment is done.
+- New: Clone product/service composition.
+- New: Add option ADHERENT_LOGIN_NOT_REQUIRED.
+- New: Add a cron module to define scheduled jobs.
+- New: Add new graphical boxes (customer and supplier invoices and orders per month).
+- New: [ task #286 ] Enhance rounding function of prices to allow round of sum instead of sum of rounding.
+- New: Can add an event automatically when a project is create. 
+- New: Add option MAIN_GENERATE_DOCUMENT_WITH_PICTURE.
+- New: Add option excludethirdparties and onlythirdparties into merge pdf scripts.
+- New: [ task #925 ] Add ODT document generation for Tasks in project module.
+- New: [ task #924 ] Add numbering rule on task.
+- New: [ task #165 ] Add import/export of multiprices.
+- New: Add Maghreb regions and departments.
+- New: A more responsive design for statistic box of home page.
+- New: [ task #1005 ] Adapting to Spanish legislation bill numbering
+- New: [ task #1011 ] Now supplier order and invoice deal with payment terms and mode.
+- New: [ task #1014 ] Add option to recursively add parent category.
+- New: [ task #1016 ] Can define a specific numbering for deposits.
+- New: [ task #918 ] Stock replenishment.
+- New : Add pdf link into supplier invoice list and supplier order list.
+- New : Genrate auto the PDF for supplier invoice.
+- New : Add category into filter webservice thirdparty method getListOfThirdParties.
+- New : Allow to define margin or mark rate during quoting, ordering, invoicing.
+- New : User permissions on margin module.
+- New : Add ref supplier into muscadet model/
+- New : Add ability to copy contact address to clipboard.
+- New: Can use tag {mm} before {yy} even when there is a reset into numbering masks.
+- New: [ task #1060 ] Register fields localtax(1|2)_type into details tables.
+- New: [ task #923 ] Localtax support for ODT templates. 
+- New: [ task #90 ] Barcode search.
+- New: Add hidden option MAIN_VAT_DEFAULT_IF_AUTODETECT_FAILS.
+- New: Can send an email from thirdparty card.
+- New: Can cancel holidays that were previously validated.
+- New: Can choose contact on event (action com) creation, and filtered by thirdparty.
+- New: Add hidden option MAIN_FORCE_DEFAULT_STATE_ID.
+- New: Add page to make mass stock movement.
+- New: Add field oustanding limit into thirdparty properties.
+- New: Can enter a vat payment of zero.
+- New: Add path to installed dir of external modules + Name and web of module provider.
+- New: Add option to use a specific mask for uploaded filename.
+- New: Can attach external links to objects as we can attach files.
+- Qual: Implement same rule for return value of all command line scripts (0 when success, <>0 if error).
+- Fix: [ bug #992 ] Proforma invoices don't have a separated numeric count.
+- Fix: [ bug #1022 ] correct margin calculation for credit notes.
+- Fix: Better management of using ajax for upload form (to solve problem when enabling ajax jquery multifile upload in some cases).
+- Fix: Lost stats filters into year selection.
+- Fix: Some config data are shared between suppliers orders and suppliers invoices
+
+New experimental module:
+- New: [ task #157 ] Add a Skype button (adherents / third parties / contacts)
+
+For translators:
+- Qual: Normalized sort order of all languages files with English reference files.
+- New: Add language code files for South Africa, France new Caledonia, Vietnam.
+- New: Translate string for email to change password.
+
+For developers:
+- New: DolGraph can build graph with three lines.
+- New: DolGraph accept a parameter to cache data of graph getNbByMonthWithPrevYear.
+- New: Can enable tuning info with option MAIN_SHOW_TUNING_INFO.
+- New: Show version of client lib used by mysql drivers.
+- New: Add function to get content of an url (using all dolibarr setup like timeout, proxies...)
+- New: Upgrade lib of TCPDF to 6.0
+- New: Upgrade jquery flot library to 0.8.1
+- New: Add property "hidden" into module descriptors to allow to hide a module according to
+  some dynamic conditions.
+- New: Add option MAIN_MOTD_SETUPPAGE to add a content onto setup page. Also content for
+  MAIN_MOTD_SETUPPAGE, MAIN_MOTD_SETUPPAGE, MAIN_HOME now accept "|langfile" into translation
+  key to use a specific language file.
+- New: Make some changes to allow usage of several alternative $dolibarr_main_url_root variables.
+- Qual: All nowrap properties are now using CSS class nowrap.
+- Qual: Move hard coded code of module mailmanspip into trigger.
+- New: Into POST forms, if you can add a parameter DOL_AUTOSET_COOKIE with a value that is list name,
+  separated by a coma, of other POST parameters, Dolibarr will automatically save this parameters
+  into user cookies.
+- New: Add hook addHomeSetup.
+- New: Add trigger CATEGORY_LINK and CATEGORY_UNLINK.
+- New: A trigger can return an array of error strings instead of one error string.
+- New: Add method to use a dictionary as a combo box.
+- New: Add update method for web service product.
+- Fix also several bugs with old code. 
+
+WARNING: Following change may create regression for some external modules, but was necessary to make
+Dolibarr better:
+
+1) We started to clean hooks code. 
+If your hook want to modify value of $actions, it's role of your hook to modify it. Dolibarr 
+hook code will no more decide this for your module. If your action class for hook was returning
+a string or an array, instead your module must set $actionclassinstance->results (to return array) 
+or $actionclassinstance->resprints (to return string) to return same thing. The return value must 
+be replaced by a "return 0";
+Goal is to fix old compatibility code that does not match hook specifications: 
+ http://wiki.dolibarr.org/index.php/Hooks_system   
+
+2) If you implemented hook printTopRightMenu, check that output does not include '<td>' tags any more.
+All content added must be tagged by a '<div>' with css class="login_block_elem"
+
+3) Some methods object->addline used a first parameter that was object->id, some not. Of course
+this was not a good practice, since object->id is already known, there is no need to provide id as 
+parameter. All methods addline in this case were modified to remove this parameter. 
+
+4) Method ->classer_facturee() is deprecated. It must be replace with ->classifyBilled().
+
+5) Property ->tel on objects is now ->phone
+
+6) Trigger LINEPROPAL_MODIFY is renamed into LINEPROPAL_UPDATE and
+   Trigger CONTRACT_LINE_DELETE rnamed into LINECONTRACT_DELETE to match naming rules.
+
+
+
+***** ChangeLog for 3.4.3 compared to 3.4.2 *****
+Fix: Bad get of localtaxes into contracts add lines
+
+***** ChangeLog for 3.4.3 compared to 3.4.2 *****
+Fix: Warning into bank conciliation feature.
+Fix: Bad get of localtaxes into contracts add lines.
+Fix: Add a limit into list to avoid browser to hang when database is too large.
+Fix: [ bug #1212 ] 'jqueryFileTree.php' directory traversal vulnerability
+
+***** ChangeLog for 3.4.3 compared to 3.4.2 *****
+Fix: Warning into bank conciliation feature.
+Fix: Bad get of localtaxes into contracts add lines.
+Fix: Add a limit into list to avoid browser to hang when database is too large.
+Fix: [ bug #1212 ] 'jqueryFileTree.php' directory traversal vulnerability
+
 ***** ChangeLog for 3.4.2 compared to 3.4.1 *****
-Fix: field's problem into company's page (RIB)
-Fix: Document cerfa doesn't contained firstname & lastname from donator
+Fix: field's problem into company's page (RIB).
+Fix: Document cerfa doesn't contained firstname & lastname from donator.
 Fix: Bad rounding on margin calculations and display.
 Fix: Option drop table into backup was broken.
-Fix: [ bug #1105 ] Searching Boxes other search option
-Fix: wrong buy price update
+Fix: [ bug #1105 ] Searching Boxes other search option.
+Fix: wrong buy price update.
+Fix: [ bug #1142 ] Set paiement on invoice (PGSql).
+Fix: [ bug #1145 ] Agenda button list type do not display.
+Fix: [ bug #1148 ] Product consomation : supplier order bad status.
+Fix: [ bug #1159 ] Commercial search "other" give p.note do not exists.
+Fix: [ bug #1174 ] Product translated description not good into PDF.
+Fix: [ bug #1163 ] SQL Error when searching for supplier orders.
+Fix: [ bug #1162 ] Translaction for morning and afternoon.
+Fix: [ bug #1161 ] Search on product label.
+Fix: [ bug #1075 ] POS module doesn't decrement stock of products in delayed payment mode.
+Fix: [ bug #1171 ] Documents lost in interventions after validating.
+Fix: fix unsubscribe URL into mailing when sending manually (not by script).
+Fix: [ bug #1182 ] ODT company_country tag is htmlencoded.
+Fix: [ bug #1196 ] Product barcode search does not expect 13th digit on EAN13 type.
+Fix: [ bug #1202 ] Wrong amount in deposit % invoice from proposal.
+Fix: Removed analytics tags into doc page.
+Fix: Call Image on this instead of pdf.
+Fix: Missing parameter for photo.
+Fix: Bad SQL request for turnover report.
 
 ***** ChangeLog for 3.4.1 compared to 3.4.0 *****
-Fix: Display buying price on line edit when no supplier price is defined
-Fix: Retrieving of margin info when invoice created automatically from order
-Fix: Reordering supplier products in list by supplier or supplier ref was crashing
-Fix: [ bug #1029 ] Tulip numbering mask
-Fix: Supplier invoice and supplier order are not displayed into object link into agenda event card
-Fix: [ bug #1033 ] SUPPLIER REF disappeared
-Fix: update extrafield do not display immediatly after update
-Fix: Fix bug with canvas thirdparty
-Fix: [ bug #1037 ] Consumption> Supplier invoices related
-Fix: User group name do not display in card (view or edit mode)
-Fix: Link "Show all supplier invoice" on suplier card not working 
-Fix: [ bug #1039 ] Pre-defined invoices conversion
-Fix: If only service module is activated, it's impossible to delete service
-Fix: [ bug #1043 ] Bad interventions ref numbering
-Fix: Mailing module : if an email is already in destinaires list all other email from selector was not inserted
-Fix: Localtaxes balance not showing
-Fix: Intervention box links to contracts id
-Fix: Compatiblity with multicompany module
-Fix: Edit propal line was losing product supplier price id
-Fix: Delete linked element to supplier invoice when deleted 
-Fix: [ bug #1061 ] Bad info shipped products
-Fix: [ bug #1062 ] Documents lost in propals and contracts validating
-Fix: Supplier price displayed on document lines and margin infos didnt take discount
-Fix: sorting on qty did not work in supplier product list
-Fix: there was no escaping on filter fields in supplier product list
-Fix: bugs on margin reports and better margin calculation on credit notes
-Qual: Add travis-ci integration
-
+Fix: Display buying price on line edit when no supplier price is defined.
+Fix: Retrieving of margin info when invoice created automatically from order.
+Fix: Reordering supplier products in list by supplier or supplier ref was crashing.
+Fix: [ bug #1029 ] Tulip numbering mask.
+Fix: Supplier invoice and supplier order are not displayed into object link into agenda event card.
+Fix: [ bug #1033 ] SUPPLIER REF disappeared.
+Fix: update extrafield do not display immediatly after update.
+Fix: Fix bug with canvas thirdparty.
+Fix: [ bug #1037 ] Consumption> Supplier invoices related.
+Fix: User group name do not display in card (view or edit mode).
+Fix: Link "Show all supplier invoice" on suplier card not working. 
+Fix: [ bug #1039 ] Pre-defined invoices conversion.
+Fix: If only service module is activated, it's impossible to delete service.
+Fix: [ bug #1043 ] Bad interventions ref numbering.
+Fix: Mailing module : if an email is already in destinaires list all other email from selector was not inserted.
+Fix: Localtaxes balance not showing.
+Fix: Intervention box links to contracts id.
+Fix: Compatiblity with multicompany module.
+Fix: Edit propal line was losing product supplier price id.
+Fix: Delete linked element to supplier invoice when deleted.
+Fix: [ bug #1061 ] Bad info shipped products.
+Fix: [ bug #1062 ] Documents lost in propals and contracts validating.
+Fix: Supplier price displayed on document lines and margin infos didnt take discount.
+Fix: sorting on qty did not work in supplier product list.
+Fix: there was no escaping on filter fields in supplier product list.
+Fix: bugs on margin reports and better margin calculation on credit notes.
+Qual: Add travis-ci integration.
 
 ***** ChangeLog for 3.4 compared to 3.3.* *****
 For users:
@@ -135,6 +329,13 @@ backport commit 384e3812eb73a15adafb472cacfb93397a54459b to fix W3C/edit contrac
  
 
 
+***** ChangeLog for 3.3.5 compared to 3.3.4 *****
+- Fix: Change to make debian package ok despite removal of ckeditor.
+- Fix: jcrop file to match debian rules
+- Fix: Add missing country UK.
+- Fix: Minor fix into package.
+- Fix: Add missing label on project field.
+
 ***** ChangeLog for 3.3.4 compared to 3.3.3 *****
 - Fix: [ bug #1001 ] Social Contribution : State not correct
 - Fix: Better management of pdf generation when tcpdf is not available.
@@ -204,7 +405,7 @@ For users:
 - New: Can list elements (invoices, orders or proposals) on a particular
   user contact). This allow to view a "basket" of its elements.
 - New: Show bank account on payment list of invoice card.
-- New: Cloning project allow to clones task, notes, files, contacts. 
+- New: Cloning project allow to clones task, notes, projects files, tasks files, contacts. 
 - New: Enhance default style.
 - New: Can edit and resiliate member status from list.
 - New: Can insert URL links into elements lines. Also reported into PDF.
@@ -305,7 +506,6 @@ Dolibarr license has also been updated from GPLv2+ to GPLv3+.
 
 
 ***** ChangeLog for 3.2.3 compared to 3.2.2 *****
-
 - Fix: Some permission into agenda module.
 - Fix: Generation of PDF was not using correct font for some languages.
 - Fix some translations.
@@ -459,7 +659,6 @@ WARNING: To reduce technic debt, all functions dolibarr_xxx were renamed int dol
 
 
 ***** ChangeLog for 3.1.3 compared to 3.1.2 *****
-
 Fix: PgSQL - property must be set if success
 Fix: Provide a solution for backup when mysqldump is not available
 Fix: Bug #460 - Wrong entity assignment when creating a warehouse
@@ -468,7 +667,6 @@ Fix: bug #405 - Late icon always displayed on comm/propal.php
 
 
 ***** ChangeLog for 3.1.2 compared to 3.1.1 *****
-
 - Fix: Can clone a proposal
 - Fix: Add member ID in substitution method
 - Fix: Duplicate end tag and missing form parts
@@ -481,7 +679,6 @@ Fix: bug #405 - Late icon always displayed on comm/propal.php
 
 
 ***** ChangeLog for 3.1.1 compared to 3.1.0 *****
-
 - New: Add option FACTURE_DEPOSITS_ARE_JUST_PAYMENTS. With this option added, 
        credit notes are not removed from total amount of invoice but are just 
        payments used to reducs remain to pay.
@@ -603,7 +800,6 @@ For translators:
 
 
 ***** ChangeLog for 3.0 compared to 2.9.* *****
-
 For users:
 - New: Can edit date of cheque receipts.
 - New: Add Sales journal and Purchase journal report.
@@ -699,7 +895,6 @@ For developers:
 
 
 ***** ChangeLog for 2.9 compared to 2.8.* *****
-
 For users:
 - New: POS module allow to choose which warehouse to use.
 - New: Support "Department/State" field on company setup, contact, 
@@ -817,7 +1012,6 @@ For users:
 
 
 ***** ChangeLog for 2.8 compared to 2.7.* *****
-
 For users:
 - New: Support note on trips module
 - New: Can link contacts to projects
@@ -868,7 +1062,6 @@ For developers:
 
 
 ***** ChangeLog for 2.7.1 compared to 2.7 *****
-
 For users:
 - Fix: Bad decimal management for it_IT and fr_BE languages.
 - Fix: A third party created from a member is created as a 
@@ -881,7 +1074,6 @@ For users:
 
 
 ***** ChangeLog for 2.7 compared to 2.6.* *****
-
 For users:
 - New: Add a print icon to show a page to print without menus.
 - New: Can add a free text on bank cheque receipts.
@@ -980,7 +1172,6 @@ For developers:
 
 
 ***** ChangeLog for 2.6 compared to 2.5.* *****
-
 For users:
 - New: Add filter on status in emailing selector for Dolibarr users.
 - New: Can add bookmarks on all pages.
@@ -1063,7 +1254,6 @@ For developers:
 
 
 ***** ChangeLog for 2.5 compared to 2.4.* *****
-
 For users:
 - Sessions timeout can be configured to overwrite PHP setup.
 - Can filter on date in services list.
@@ -1127,7 +1317,6 @@ For developers:
    
 
 ***** ChangeLog for 2.4 compared to 2.2.* *****
-
 For users:
 - Add a calendar module (module agenda) with ical/vcal/rss export.
 - Look enhancement in graphics (thanks artichow).
@@ -1182,7 +1371,6 @@ For developers:
 
 
 ***** ChangeLog for 2.2 compared to 2.1.* *****
-
 - Add more statistics on main page.
 - Add option to add message on login page.
 - Management of categories for third parties.
@@ -1216,7 +1404,6 @@ For developers:
 
 
 ***** ChangeLog for 2.1 compared to 2.0.* *****
-
 - Added a better installer.
 - Support user and groups permissions.
 - Translation in english and support for several languages.
@@ -1281,12 +1468,10 @@ For developers:
 
 
 ***** ChangeLog for 2.0.1 compared to 2.0 *****
-
 Minor bug fixes
 
 
 
 ***** ChangeLog for 2.0 compared to 1.0.* *****
-
 ChangeLog file size is so important, that it is not included inside Dolibarr
 package. You can find it at www.dolibarr.org

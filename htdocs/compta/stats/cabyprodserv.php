@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2013      Antoine Iauch        <aiauch@gpcsolutions.fr>
+/* Copyright (C) 2013 Antoine Iauch        <aiauch@gpcsolutions.fr>
+ * Copyright (C) 2013 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -142,7 +143,8 @@ $formother = new FormOther($db);
 $nom=$langs->trans("SalesTurnover").', '.$langs->trans("ByProductsAndServices");
 
 if ($modecompta=="CREANCES-DETTES") {
-    $nom.='<br>('.$langs->trans("SeeReportInInputOutputMode",'<a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&modecompta=RECETTES-DEPENSES">','</a>').')';
+	$calcmode=$langs->trans("CalcModeDebt");
+    $calcmode.='<br>('.$langs->trans("SeeReportInInputOutputMode",'<a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&modecompta=RECETTES-DEPENSES">','</a>').')';
 
     $period=$form->select_date($date_start,'date_start',0,0,0,'',1,0,1).' - '.$form->select_date($date_end,'date_end',0,0,0,'',1,0,1);
 
@@ -155,7 +157,8 @@ if ($modecompta=="CREANCES-DETTES") {
 
     $builddate=time();
 } else {
-    $nom.='<br>('.$langs->trans("SeeReportInDueDebtMode",'<a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&modecompta=CREANCES-DETTES">','</a>').')';
+	$calcmode=$langs->trans("CalcModeEngagement");
+	$calcmode.='<br>('.$langs->trans("SeeReportInDueDebtMode",'<a href="'.$_SERVER["PHP_SELF"].'?year='.$year.'&modecompta=CREANCES-DETTES">','</a>').')';
 
     $period=$form->select_date($date_start,'date_start',0,0,0,'',1,0,1).' - '.$form->select_date($date_end,'date_end',0,0,0,'',1,0,1);
 
@@ -165,29 +168,27 @@ if ($modecompta=="CREANCES-DETTES") {
     $builddate=time();
 }
 
-report_header($nom,$nomlink,$period,$periodlink,$description,$builddate,$exportlink,$tableparams);
+report_header($nom,$nomlink,$period,$periodlink,$description,$builddate,$exportlink,$tableparams,$calcmode);
 
 
 // SQL request
 $catotal=0;
 
-if ($modecompta == 'CREANCES-DETTES') {
+if ($modecompta == 'CREANCES-DETTES') 
+{
     $sql = "SELECT DISTINCT p.rowid as rowid, p.ref as ref, p.label as label,";
-    $sql.= " sum(DISTINCT l.total_ht) as amount, sum(DISTINCT l.total_ttc) as amount_ttc";
-    $sql.= " FROM ".MAIN_DB_PREFIX."product as p";
-    $sql.= " JOIN ".MAIN_DB_PREFIX."facturedet as l";
-    $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."facture as f ON l.fk_facture = f.rowid";
-    if ($selected_cat === -2) {
-	$sql.=" LEFT OUTER JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON p.rowid = cp.fk_product";
-    }
-    if ($selected_cat && $selected_cat !== -2) {
-	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON c.rowid = " . $selected_cat;
-	if ($subcat) {
-	    $sql.=" OR c.fk_parent = " . $selected_cat;
+    $sql.= " sum(l.total_ht) as amount, sum(l.total_ttc) as amount_ttc";
+    $sql.= " FROM ".MAIN_DB_PREFIX."facture as f, ".MAIN_DB_PREFIX."facturedet as l, ".MAIN_DB_PREFIX."product as p";
+	if ($selected_cat === -2)	// Without any category 
+	{
+	    $sql.= " LEFT OUTER JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON p.rowid = cp.fk_product";
 	}
-	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie_product as cp ON cp.fk_categorie = c.rowid";
-    }
+	else if ($selected_cat) 	// Into a specific category
+	{
+	    $sql.= ", ".MAIN_DB_PREFIX."categorie as c, ".MAIN_DB_PREFIX."categorie_product as cp";
+	}
     $sql.= " WHERE l.fk_product = p.rowid";
+	$sql.= " AND l.fk_facture = f.rowid";
     $sql.= " AND f.fk_statut in (1,2)";
     if (! empty($conf->global->FACTURE_DEPOSITS_ARE_JUST_PAYMENTS)) {
 	$sql.= " AND f.type IN (0,1,2)";
@@ -197,16 +198,21 @@ if ($modecompta == 'CREANCES-DETTES') {
     if ($date_start && $date_end) {
 	$sql.= " AND f.datef >= '".$db->idate($date_start)."' AND f.datef <= '".$db->idate($date_end)."'";
     }
-    if ($selected_cat === -2) {
-	$sql.=" AND cp.fk_product is null";
-    }
-    if ($selected_cat && $selected_cat !== -2) {
-	$sql.= " AND cp.fk_product = p.rowid";
-    }
+	if ($selected_cat === -2)	// Without any category  
+	{
+	    $sql.=" AND cp.fk_product is null";
+	}
+	else if ($selected_cat) {	// Into a specific category
+	    $sql.= " AND (c.rowid = ".$selected_cat;
+	    if ($subcat) $sql.=" OR c.fk_parent = " . $selected_cat;
+	    $sql.= ")";
+		$sql.= " AND cp.fk_categorie = c.rowid AND cp.fk_product = p.rowid";
+	}
     $sql.= " AND f.entity = ".$conf->entity;
-    $sql.= " GROUP BY p.rowid ";
-    $sql.= "ORDER BY p.ref ";
+    $sql.= " GROUP BY p.rowid";
+    $sql.= " ORDER BY p.ref";
 
+    dol_syslog("cabyprodserv sql=".$sql);
     $result = $db->query($sql);
     if ($result) {
 	$num = $db->num_rows($result);
@@ -246,7 +252,7 @@ if ($modecompta == 'CREANCES-DETTES') {
     }
     print '></td>';
     print '<td colspan="3" align="right">';
-    print '<input type="image" class="liste_titre" name="button_search" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/search.png"  value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+    print '<input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'"  value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
     print '</td></tr>';
 	    // Array header
     print "<tr class=\"liste_titre\">";
@@ -327,7 +333,7 @@ if ($modecompta == 'CREANCES-DETTES') {
 		    $var=!$var;
 		    print "<tr ".$bc[$var].">";
 
-		    // Third party
+		    // Product
 		     $fullname=$name[$key];
 		    if ($key >= 0) {
 			$linkname='<a href="'.DOL_URL_ROOT.'/product/fiche.php?id='.$key.'">'.img_object($langs->trans("ShowProduct"),'product').' '.$fullname.'</a>';
@@ -339,23 +345,24 @@ if ($modecompta == 'CREANCES-DETTES') {
 
 		// Amount w/o VAT
 		print '<td align="right">';
-		if ($key > 0) {
+		/*if ($key > 0) {
 		    print '<a href="'.DOL_URL_ROOT.'/compta/facture/list.php?productid='.$key.'">';
 		} else {
 		    print '<a href="#">';
-		}
+		}*/
 		print price($amount_ht[$key]);
+		//print '</a>';
 		print '</td>';
 
 		// Amount with VAT
 		print '<td align="right">';
-		if ($key > 0) {
+		/*if ($key > 0) {
 		    print '<a href="'.DOL_URL_ROOT.'/compta/facture/list.php?productid='.$key.'">';
 		} else {
 		    print '<a href="#">';
-		}
+		}*/
 		print price($amount[$key]);
-		print '</a>';
+		//print '</a>';
 		print '</td>';
 
 		// Percent;
@@ -381,8 +388,10 @@ if ($modecompta == 'CREANCES-DETTES') {
     print '</form>';
 } else {
     // $modecompta != 'CREANCES-DETTES'
-    // TODO: better message
-    print '<div class="warning">' . $langs->trans("WarningNotRelevant") . '</div>';
+    // "Calculation of part of each product for accountancy in this mode is not possible. When a partial payment (for example 5 euros) is done on an
+    // invoice with 2 product (product A for 10 euros and product B for 20 euros), what is part of paiment for product A and part of paiment for product B ?
+    // Because there is no way to know this, this report is not relevant.  
+	print '<br>'.$langs->trans("TurnoverPerProductInCommitmentAccountingNotRelevant") . '<br>';
 }
 
 llxFooter();

@@ -2,15 +2,23 @@
 #----------------------------------------------------------------------------
 # \file         build/makepack-dolibarr.pl
 # \brief        Dolibarr package builder (tgz, zip, rpm, deb, exe, aps)
-# \author       (c)2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+# \author       (c)2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
+#
+# This is list of constant you can set to have generated packages moved into a specific dir: 
+#DESTIBETARC='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/lastbuild'
+#DESTISTABLE='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/stable'
+#DESTIMODULES='/media/HDDATA1_LD/Mes Sites/Web/Admin1/wwwroot/files/modules'
+#DESTIDOLIMEDBETARC='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/lastbuild'
+#DESTIDOLIMEDMODULES='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/modules'
+#DESTIDOLIMEDSTABLE='/media/HDDATA1_LD/Mes Sites/Web/DoliCloud/dolimed.com/htdocs/files/stable'
 #----------------------------------------------------------------------------
 
 use Cwd;
 
 $PROJECT="dolibarr";
 $MAJOR="3";
-$MINOR="4";
-$BUILD="2";		# Mettre x pour release, x-dev pour dev, x-beta pour beta, x-rc pour release candidate
+$MINOR="5";
+$BUILD="1";		# Mettre x pour release, x-dev pour dev, x-beta pour beta, x-rc pour release candidate
 $RPMSUBVERSION="auto";	# auto use value found into BUILD
 
 @LISTETARGET=("TGZ","ZIP","RPM_GENERIC","RPM_FEDORA","RPM_MANDRIVA","RPM_OPENSUSE","DEB","APS","EXEDOLIWAMP","SNAPSHOT");   # Possible packages
@@ -23,7 +31,7 @@ $RPMSUBVERSION="auto";	# auto use value found into BUILD
 "RPM_FEDORA"=>"rpmbuild",
 "RPM_MANDRIVA"=>"rpmbuild",
 "RPM_OPENSUSE"=>"rpmbuild",
-"DEB"=>"dpkg",
+"DEB"=>"dpkg dpatch",
 "APS"=>"zip",
 "EXEDOLIWAMP"=>"ISCC.exe"
 );
@@ -38,7 +46,7 @@ $FILENAMETGZ="$PROJECT-$MAJOR.$MINOR.$BUILD";
 $FILENAMEZIP="$PROJECT-$MAJOR.$MINOR.$BUILD";
 $FILENAMEXZ="$PROJECT-$MAJOR.$MINOR.$BUILD";
 $FILENAMERPM="$PROJECT-$MAJOR.$MINOR.$BUILD-$RPMSUBVERSION";
-$FILENAMEDEB="${PROJECT}_${MAJOR}.${MINOR}.${BUILD}";
+$FILENAMEDEB="see later";
 $FILENAMEAPS="$PROJECT-$MAJOR.$MINOR.$BUILD.app";
 $FILENAMEEXEDOLIWAMP="DoliWamp-$MAJOR.$MINOR.$BUILD";
 if (-d "/usr/src/redhat")   { $RPMDIR="/usr/src/redhat"; } # redhat
@@ -59,6 +67,23 @@ $DIR||='.'; $DIR =~ s/([^\/\\])[\\\/]+$/$1/;
 
 $SOURCE="$DIR/..";
 $DESTI="$SOURCE/build";
+if (! $ENV{"DESTIBETARC"} || ! $ENV{"DESTISTABLE"})
+{
+    print "Error: Missing environment variables.\n";
+	print "You must define the environment variable DESTIBETARC and DESTISTABLE to point to the\ndirectories where you want to save the generated packages.\n";
+	print "Example: DESTIBETARC='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/lastbuild'\n";
+	print "Example: DESTISTABLE='/media/HDDATA1_LD/Mes Sites/Web/Dolibarr/dolibarr.org/files/stable'\n";
+	print "$PROG.$Extension aborted.\n";
+    sleep 2;
+	exit 1;
+}
+if (! -d $ENV{"DESTIBETARC"} || ! -d $ENV{"DESTISTABLE"})
+{
+    print "Error: Directory of environment variable DESTIBETARC or DESTISTABLE does not exist.\n";
+	print "$PROG.$Extension aborted.\n";
+    sleep 2;
+	exit 1;
+}
 
 # Detect OS type
 # --------------
@@ -66,7 +91,7 @@ if ("$^O" =~ /linux/i || (-d "/etc" && -d "/var" && "$^O" !~ /cygwin/i)) { $OS='
 elsif (-d "/etc" && -d "/Users") { $OS='macosx'; $CR=''; }
 elsif ("$^O" =~ /cygwin/i || "$^O" =~ /win32/i) { $OS='windows'; $CR="\r"; }
 if (! $OS) {
-    print "$PROG.$Extension was not able to detect your OS.\n";
+    print "Error: Can't detect your OS.\n";
 	print "Can't continue.\n";
 	print "$PROG.$Extension aborted.\n";
     sleep 2;
@@ -105,8 +130,8 @@ for (0..@ARGV-1) {
     	$FILENAMESNAPSHOT.="-".$PREFIX; 
     }
 }
-if ($ENV{"DESTIBETARC"} && $BUILD =~ /[a-z]/i)    { $DESTI = $ENV{"DESTIBETARC"}; }		# Force output dir if env DESTI is defined
-if ($ENV{"DESTISTABLE"}  && $BUILD =~ /^[0-9]+$/) { $DESTI = $ENV{"DESTISTABLE"}; }	# Force output dir if env DESTI is defined
+if ($ENV{"DESTIBETARC"} && $BUILD =~ /[a-z]/i)   { $DESTI = $ENV{"DESTIBETARC"}; }	# Force output dir if env DESTI is defined
+if ($ENV{"DESTISTABLE"} && $BUILD =~ /^[0-9]+$/) { $DESTI = $ENV{"DESTISTABLE"}; }	# Force output dir if env DESTI is defined
 
 
 print "Makepack version $VERSION\n";
@@ -200,7 +225,7 @@ foreach my $target (keys %CHOOSEDTARGET) {
             last;
         } else {
             # Pas erreur ou erreur autre que programme absent
-            print " Found ".$REQUIREMENTTARGET{$target}."\n";
+            print " Found ".$req."\n";
         }
     }
 }
@@ -253,6 +278,8 @@ if ($nboftargetok) {
 	    	mkdir "$BUILDROOT/$PROJECT";
 	    	print "Copy $SOURCE into $BUILDROOT/$PROJECT\n";
 	    	$ret=`cp -pr "$SOURCE" "$BUILDROOT/$PROJECT"`;
+	    	print "Copy $SOURCE/build/debian/apache/.htaccess into $BUILDROOT/$PROJECT/build/debian/apache/.htaccess\n";
+	    	$ret=`cp -pr "$SOURCE/build/debian/apache/.htaccess" "$BUILDROOT/$PROJECT/build/debian/apache/.htaccess"`;
 	    }
 	    print "Clean $BUILDROOT\n";
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/.buildpath`;
@@ -262,6 +289,7 @@ if ($nboftargetok) {
         $ret=`rm -f  $BUILDROOT/$PROJECT/.gitignore`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/.project`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/.settings`;
+	    $ret=`rm -fr $BUILDROOT/$PROJECT/.tx`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/build.xml`;
 	    $ret=`rm -f  $BUILDROOT/$PROJECT/quickbuild.xml`;
         $ret=`rm -f  $BUILDROOT/$PROJECT/pom.xml`;
@@ -327,6 +355,7 @@ if ($nboftargetok) {
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/bootstrap*`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/custom*`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/multicompany*`;
+	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/nltechno*`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/pos*`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/test`;
 	    $ret=`rm -fr $BUILDROOT/$PROJECT/Thumbs.db $BUILDROOT/$PROJECT/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/*/Thumbs.db $BUILDROOT/$PROJECT/*/*/*/*/Thumbs.db`;
@@ -336,7 +365,10 @@ if ($nboftargetok) {
         $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/jqueryFileTree/connectors/jqueryFileTree.pl`;    # Avoid errors into rpmlint
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/template`;  # Package not valid for most linux distributions (errors reported into compile.js). Package should be embed by modules to avoid problems.
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpmailer`;                # Package not valid for most linux distributions (errors reported into file LICENSE). Package should be embed by modules to avoid problems.
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/ckeditor/_source`;		# Keep this removal in case we embed libraries
+        $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/ckeditor/adapters`;	# Keep this removal in case we embed libraries
    	    
+	    $ret=`rm -f  $BUILDROOT/$PROJECT/htdocs/includes/jquery/plugins/multiselect/MIT-LICENSE.txt`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/nusoap/lib/Mail`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpexcel/license.txt`;
         $ret=`rm -fr $BUILDROOT/$PROJECT/htdocs/includes/phpexcel/PHPExcel/Shared/PDF`;
@@ -384,6 +416,7 @@ if ($nboftargetok) {
     	if ($target eq 'TGZ') 
     	{
     		$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/standard');
 			if (-d $DESTI.'/standard') { $NEWDESTI=$DESTI.'/standard'; } 
 
     		print "Remove target $FILENAMETGZ.tgz...\n";
@@ -410,6 +443,7 @@ if ($nboftargetok) {
     	if ($target eq 'XZ') 
     	{
     		$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/standard');
 			if (-d $DESTI.'/standard') { $NEWDESTI=$DESTI.'/standard'; } 
 
     		print "Remove target $FILENAMEXZ.xz...\n";
@@ -440,6 +474,7 @@ if ($nboftargetok) {
     	if ($target eq 'ZIP') 
     	{
     		$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/standard');
 			if (-d $DESTI.'/standard') { $NEWDESTI=$DESTI.'/standard'; } 
 
     		print "Remove target $FILENAMEZIP.zip...\n";
@@ -474,6 +509,7 @@ if ($nboftargetok) {
     		if ($target =~ /FEDO/i) { $subdir="package_rpm_redhat-fedora"; }
     		if ($target =~ /MAND/i) { $subdir="package_rpm_mandriva"; }
     		if ($target =~ /OPEN/i) { $subdir="package_rpm_opensuse"; }
+    		mkdir($DESTI.'/'.$subdir);
 			if (-d $DESTI.'/'.$subdir) { $NEWDESTI=$DESTI.'/'.$subdir; } 
 
     		$ARCH='noarch';
@@ -483,11 +519,12 @@ if ($nboftargetok) {
             $newbuild =~ s/(dev|alpha)/0.1.a/gi;			# dev
             $newbuild =~ s/beta/0.2.beta1/gi;				# beta
             $newbuild =~ s/rc./0.3.rc1/gi;					# rc
-            if ($newbuild !~ /-/) { $newbuild.='-3'; }		# finale
+            if ($newbuild !~ /-/) { $newbuild.='-0.3'; }	# finale
             #$newbuild =~ s/(dev|alpha)/0/gi;				# dev
             #$newbuild =~ s/beta/1/gi;						# beta
             #$newbuild =~ s/rc./2/gi;						# rc
             #if ($newbuild !~ /-/) { $newbuild.='-3'; }		# finale
+            #print "newbuild=".$newbuild."\n";exit;
             $REL1 = $newbuild; $REL1 =~ s/-.*$//gi;
             if ($RPMSUBVERSION eq 'auto') { $RPMSUBVERSION = $newbuild; $RPMSUBVERSION =~ s/^.*-//gi; }
             print "Version is $MAJOR.$MINOR.$REL1-$RPMSUBVERSION\n";
@@ -569,6 +606,7 @@ if ($nboftargetok) {
     	if ($target eq 'DEB') 
     	{
     		$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/package_debian-ubuntu');
 			if (-d $DESTI.'/package_debian-ubuntu') { $NEWDESTI=$DESTI.'/package_debian-ubuntu'; } 
 
             $olddir=getcwd();
@@ -577,15 +615,17 @@ if ($nboftargetok) {
             $newbuild =~ s/(dev|alpha)/1/gi;                # dev
             $newbuild =~ s/beta/2/gi;                       # beta
             $newbuild =~ s/rc./3/gi;                        # rc
-            if ($newbuild !~ /-/) { $newbuild.='-4'; }      # finale
-            # now newbuild is 0-1 or 0-4 for example
+            if ($newbuild !~ /-/) { $newbuild.='-3'; }      # finale is same than rc
+            # now newbuild is 0-1 or 0-3 for example
             print "Version is $MAJOR.$MINOR.$newbuild\n";
             $build = $newbuild;
             $build =~ s/-.*$//g;
 			# now build is 0 for example
 			# $build .= '+nmu1';
 			# now build is 0+nmu1 for example
-			
+
+			$FILENAMEDEB="${PROJECT}_${MAJOR}.${MINOR}.${newbuild}";
+
     		print "Remove target ${FILENAMEDEB}_all.deb...\n";
     		unlink("$NEWDESTI/${FILENAMEDEB}_all.deb");
     		print "Remove target ${FILENAMEDEB}.dsc...\n";
@@ -600,6 +640,8 @@ if ($nboftargetok) {
     		
 			print "Copy $BUILDROOT/$PROJECT to $BUILDROOT/$PROJECT.tmp\n";
 			$cmd="cp -pr \"$BUILDROOT/$PROJECT\" \"$BUILDROOT/$PROJECT.tmp\"";
+			$ret=`$cmd`;
+			$cmd="cp -pr \"$BUILDROOT/$PROJECT/build/debian/apache/.htaccess\" \"$BUILDROOT/$PROJECT.tmp/build/debian/apache/.htaccess\"";
 			$ret=`$cmd`;
 
  			print "Remove other files\n";
@@ -638,12 +680,14 @@ if ($nboftargetok) {
             $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/build/rpm`;
             $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/build/zip`;
             # We remove embedded libraries or fonts (this is also inside rules file, target clean)
-	   	    $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/ckeditor`;
-			$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/fonts`,
-	   	    $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/geoip`;
-	   	    $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/nusoap`;
-            $ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/odtphp/zip/pclzip`;
-
+	   	    #$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/ckeditor`;
+			#$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/fonts`,
+	   	    #$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/geoip`;
+	   	    #$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/nusoap`;
+            #$ret=`rm -fr $BUILDROOT/$PROJECT.tmp/htdocs/includes/odtphp/zip/pclzip`;
+            # Rename upstream changelog to match debian rules
+			$ret=`mv $BUILDROOT/$PROJECT.tmp/ChangeLog $BUILDROOT/$PROJECT.tmp/changelog`;
+			
             # Prepare source package (init debian dir)
             print "Create directory $BUILDROOT/$PROJECT.tmp/debian\n";
             $ret=`mkdir "$BUILDROOT/$PROJECT.tmp/debian"`;
@@ -663,11 +707,15 @@ if ($nboftargetok) {
             $ret=`cp -fr "$SOURCE/build/debian/patches"        "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -fr "$SOURCE/build/debian/po"             "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -fr "$SOURCE/build/debian/source"         "$BUILDROOT/$PROJECT.tmp/debian"`;
+            $ret=`cp -fr "$SOURCE/build/debian/apache"         "$BUILDROOT/$PROJECT.tmp/debian/apache"`;
+            $ret=`cp -f  "$SOURCE/build/debian/apache/.htaccess" "$BUILDROOT/$PROJECT.tmp/debian/apache"`;
+            $ret=`cp -fr "$SOURCE/build/debian/lighttpd"       "$BUILDROOT/$PROJECT.tmp/debian/lighttpd"`;
             # Add files also required to build binary package
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.config"         "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.postinst"       "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.postrm"         "$BUILDROOT/$PROJECT.tmp/debian"`;
             $ret=`cp -f  "$SOURCE/build/debian/dolibarr.templates"      "$BUILDROOT/$PROJECT.tmp/debian"`;
+            $ret=`cp -f  "$SOURCE/build/debian/install.forced.php.install"      "$BUILDROOT/$PROJECT.tmp/debian"`;
             
 			# Set owners and permissions
             print "Set owners on files/dir\n";
@@ -711,6 +759,8 @@ if ($nboftargetok) {
 
             chdir("$olddir");
     		
+    		print "You can check package with lintian --pedantic -E -I \"$NEWDESTI/${FILENAMEDEB}_all.deb\"\n";
+    		
     		# Move to final dir
             print "Move *_all.deb to $NEWDESTI\n";
             $ret=`mv $BUILDROOT/*_all.deb "$NEWDESTI/"`;
@@ -723,6 +773,7 @@ if ($nboftargetok) {
     	if ($target eq 'APS') 
     	{
 			$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/package_aps');
 			if (-d $DESTI.'/package_aps') { $NEWDESTI=$DESTI.'/package_aps'; } 
 			
             $newbuild = $BUILD;
@@ -807,6 +858,7 @@ if ($nboftargetok) {
     	if ($target eq 'EXEDOLIWAMP')
     	{
     		$NEWDESTI=$DESTI;
+    		mkdir($DESTI.'/package_windows');
 			if (-d $DESTI.'/package_windows') { $NEWDESTI=$DESTI.'/package_windows'; } 
     		
      		print "Remove target $FILENAMEEXEDOLIWAMP.exe...\n";

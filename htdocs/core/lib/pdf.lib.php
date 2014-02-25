@@ -1,31 +1,31 @@
 <?php
 /* Copyright (C) 2006-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2006      Rodolphe Quiedeville <rodolphe@quiedeville.org>
-* Copyright (C) 2007      Patrick Raguin       <patrick.raguin@gmail.com>
-* Copyright (C) 2010-2012 Regis Houssin        <regis.houssin@capnetworks.com>
-* Copyright (C) 2010      Juanjo Menent        <jmenent@2byte.es>
-* Copyright (C) 2012      Christophe Battarel  <christophe.battarel@altairis.fr>
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 3 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program. If not, see <http://www.gnu.org/licenses/>.
-* or see http://www.gnu.org/
-*/
+ * Copyright (C) 2007      Patrick Raguin       <patrick.raguin@gmail.com>
+ * Copyright (C) 2010-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2010      Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2012      Christophe Battarel  <christophe.battarel@altairis.fr>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * or see http://www.gnu.org/
+ */
 
 /**
  *	\file       htdocs/core/lib/pdf.lib.php
-*	\brief      Set of functions used for PDF generation
-*	\ingroup    core
-*/
+ *	\brief      Set of functions used for PDF generation
+ *	\ingroup    core
+ */
 
 
 /**
@@ -72,11 +72,45 @@ function pdf_getFormat($outputlangs='')
  *      @param	string		$format         Array(width,height). Keep empty to use default setup.
  *      @param	string		$metric         Unit of format ('mm')
  *      @param  string		$pagetype       'P' or 'l'
- *      @return TPDF							PDF object
+ *      @return TPDF						PDF object
  */
 function pdf_getInstance($format='',$metric='mm',$pagetype='P')
 {
 	global $conf;
+
+	// Define constant for TCPDF
+	define('K_TCPDF_EXTERNAL_CONFIG',1);	// this avoid using tcpdf_config file
+	define('K_PATH_CACHE', DOL_DATA_ROOT.'/admin/temp/');
+	define('K_PATH_URL_CACHE', DOL_DATA_ROOT.'/admin/temp/');
+	dol_mkdir(K_PATH_CACHE);
+	define('K_BLANK_IMAGE', '_blank.png');
+	define('PDF_PAGE_FORMAT', 'A4');
+	define('PDF_PAGE_ORIENTATION', 'P');
+	define('PDF_CREATOR', 'TCPDF');
+	define('PDF_AUTHOR', 'TCPDF');
+	define('PDF_HEADER_TITLE', 'TCPDF Example');
+	define('PDF_HEADER_STRING', "by Dolibarr ERP CRM");
+	define('PDF_UNIT', 'mm');
+	define('PDF_MARGIN_HEADER', 5);
+	define('PDF_MARGIN_FOOTER', 10);
+	define('PDF_MARGIN_TOP', 27);
+	define('PDF_MARGIN_BOTTOM', 25);
+	define('PDF_MARGIN_LEFT', 15);
+	define('PDF_MARGIN_RIGHT', 15);
+	define('PDF_FONT_NAME_MAIN', 'helvetica');
+	define('PDF_FONT_SIZE_MAIN', 10);
+	define('PDF_FONT_NAME_DATA', 'helvetica');
+	define('PDF_FONT_SIZE_DATA', 8);
+	define('PDF_FONT_MONOSPACED', 'courier');
+	define('PDF_IMAGE_SCALE_RATIO', 1.25);
+	define('HEAD_MAGNIFICATION', 1.1);
+	define('K_CELL_HEIGHT_RATIO', 1.25);
+	define('K_TITLE_MAGNIFICATION', 1.3);
+	define('K_SMALL_RATIO', 2/3);
+	define('K_THAI_TOPCHARS', true);
+	define('K_TCPDF_CALLS_IN_HTML', true);
+	define('K_TCPDF_THROW_EXCEPTION_ERROR', false);
+
 
 	if (! empty($conf->global->MAIN_USE_FPDF) && ! empty($conf->global->MAIN_DISABLE_FPDI))
 		return "Error MAIN_USE_FPDF and MAIN_DISABLE_FPDI can't be set together";
@@ -148,25 +182,25 @@ function pdf_getInstance($format='',$metric='mm',$pagetype='P')
 			/**
 			 * writeHTMLCell
 			 *
-			 * @param unknown_type $w			Width
-			 * @param unknown_type $h			Height
-			 * @param unknown_type $x			X
-			 * @param unknown_type $y			Y
-			 * @param unknown_type $html		Html
-			 * @param unknown_type $border		Border
-			 * @param unknown_type $ln			Ln
-			 * @param unknown_type $fill		Fill
-			 * @param unknown_type $reseth		Reseth
-			 * @param unknown_type $align		Align
-			 * @param unknown_type $autopadding	Autopadding
-			 * @return void
+			 * @param	int		$w				Width
+			 * @param 	int		$h				Height
+			 * @param 	int		$x				X
+			 * @param 	int		$y				Y
+			 * @param 	string	$html			Html
+			 * @param 	int		$border			Border
+			 * @param 	int		$ln				Ln
+			 * @param 	boolean	$fill			Fill
+			 * @param 	boolean	$reseth			Reseth
+			 * @param 	string	$align			Align
+			 * @param 	boolean	$autopadding	Autopadding
+			 * @return 	void
 			 */
 			public function writeHTMLCell($w, $h, $x, $y, $html = '', $border = 0, $ln = 0, $fill = false, $reseth = true, $align = '', $autopadding = true)
 			{
 				$this->SetXY($x,$y);
 				$val=str_replace('<br>',"\n",$html);
-				$val=dol_string_nohtmltag($val,false,'ISO-8859-1');
-				//print 'eee'.$val;exit;
+				//$val=dol_string_nohtmltag($val,false,'ISO-8859-1');
+				$val=dol_string_nohtmltag($val,false,'UTF-8');
 				$this->MultiCell($w,$h,$val,$border,$align,$fill);
 			}
 		}
@@ -425,7 +459,7 @@ function pdf_watermark(&$pdf, $outputlangs, $h, $w, $unit, $text)
 	elseif ($unit=='in') $k=72;
 
 	$savx=$pdf->getX(); $savy=$pdf->getY();
-	
+
 	$watermark_angle=atan($h/$w)/2;
 	$watermark_x_pos=0;
 	$watermark_y_pos=$h/3;
@@ -923,7 +957,17 @@ function pdf_getlinedesc($object,$i,$outputlangs,$hideref=0,$hidedesc=0,$issuppl
 		if (! empty($conf->global->MAIN_MULTILANGS) && ($outputlangs->defaultlang != $langs->defaultlang))
 		{
 			if (! empty($prodser->multilangs[$outputlangs->defaultlang]["label"]) && $label == $prodser->label)     $label=$prodser->multilangs[$outputlangs->defaultlang]["label"];
-			if (! empty($prodser->multilangs[$outputlangs->defaultlang]["description"]) && $desc == $prodser->description) $desc=$prodser->multilangs[$outputlangs->defaultlang]["description"];
+			
+			//Manage HTML entities description test
+			//Cause $prodser->description is store with htmlentities but $desc no
+			$needdesctranslation=false;
+			if (!empty($desc) && dol_textishtml($desc) && !empty($prodser->description) && dol_textishtml($prodser->description)) {
+				$needdesctranslation=(strpos(dol_html_entity_decode($desc,ENT_QUOTES | ENT_HTML401),dol_html_entity_decode($prodser->description,ENT_QUOTES | ENT_HTML401))!==false);
+			} else {
+				$needdesctranslation=($desc == $prodser->description);
+			}
+
+			if (! empty($prodser->multilangs[$outputlangs->defaultlang]["description"]) && ($needdesctranslation))  $desc=$prodser->multilangs[$outputlangs->defaultlang]["description"];
 			if (! empty($prodser->multilangs[$outputlangs->defaultlang]["note"]) && $note == $prodser->note)        $note=$prodser->multilangs[$outputlangs->defaultlang]["note"];
 		}
 	}
@@ -995,6 +1039,22 @@ function pdf_getlinedesc($object,$i,$outputlangs,$hideref=0,$hidedesc=0,$issuppl
 			}
 
 			$libelleproduitservice=$prefix_prodserv.$ref_prodserv.$libelleproduitservice;
+		}
+	}
+
+	// Add an additional description for the category products
+	if (! empty($conf->global->CATEGORY_ADD_DESC_INTO_DOC) && $idprod && ! empty($conf->categorie->enabled))
+	{
+		include_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+		$categstatic=new Categorie($db);
+		// recovering the list of all the categories linked to product
+		$tblcateg=$categstatic->containing($idprod,0);
+		foreach ($tblcateg as $cate)
+		{
+			// Adding the descriptions if they are filled
+			$desccateg=$cate->add_description;
+			if ($desccateg)
+				$libelleproduitservice.='__N__'.$desccateg;
 		}
 	}
 
@@ -1181,11 +1241,11 @@ function pdf_getlineupwithtax($object,$i,$outputlangs,$hidedetails=0)
 		{
 			if (method_exists($modules[$special_code],'pdf_getlineupwithtax')) return $modules[$special_code]->pdf_getlineupwithtax($object,$i,$outputlangs,$hidedetails);
 		}
-    }
-    else
-    {
-        if (empty($hidedetails) || $hidedetails > 1) return price(($object->lines[$i]->subprice) + ($object->lines[$i]->subprice)*($object->lines[$i]->tva_tx)/100, 0, $outputlangs);
-    }
+	}
+	else
+	{
+		if (empty($hidedetails) || $hidedetails > 1) return price(($object->lines[$i]->subprice) + ($object->lines[$i]->subprice)*($object->lines[$i]->tva_tx)/100, 0, $outputlangs);
+	}
 }
 
 /**
@@ -1347,7 +1407,7 @@ function pdf_getlineremisepercent($object,$i,$outputlangs,$hidedetails=0)
  *	@param	int			$i					Current line number
  *  @param  Translate	$outputlangs		Object langs for output
  *  @param	int			$hidedetails		Hide details (0=no, 1=yes, 2=just special lines)
- * 	@return	void
+ * 	@return	string							Return total of line excl tax
  */
 function pdf_getlinetotalexcltax($object,$i,$outputlangs,$hidedetails=0)
 {
@@ -1375,6 +1435,7 @@ function pdf_getlinetotalexcltax($object,$i,$outputlangs,$hidedetails=0)
 			if (empty($hidedetails) || $hidedetails > 1) return price($sign * $object->lines[$i]->total_ht, 0, $outputlangs);
 		}
 	}
+	return '';
 }
 
 /**
@@ -1384,7 +1445,7 @@ function pdf_getlinetotalexcltax($object,$i,$outputlangs,$hidedetails=0)
  *	@param	int			$i					Current line number
  *  @param 	Translate	$outputlangs		Object langs for output
  *  @param	int			$hidedetails		Hide value (0 = no, 1 = yes, 2 = just special lines)
- *  @return	void
+ *  @return	string							Return total of line incl tax
  */
 function pdf_getlinetotalwithtax($object,$i,$outputlangs,$hidedetails=0)
 {
@@ -1400,17 +1461,16 @@ function pdf_getlinetotalwithtax($object,$i,$outputlangs,$hidedetails=0)
 		{
 			$special_code = $object->lines[$i]->special_code;
 			if (! empty($object->lines[$i]->fk_parent_line)) $special_code = $object->getSpecialCode($object->lines[$i]->fk_parent_line);
-			foreach($object->hooks as $modules)
-			{
-				if (method_exists($modules[$special_code],'pdf_getlinetotalwithtax')) return $modules[$special_code]->pdf_getlinetotalwithtax($object,$i,$outputlangs,$hidedetails);
-			}
-        }
-        else
-        {
-            if (empty($hidedetails) || $hidedetails > 1) return
-				price(($object->lines[$i]->total_ht) + ($object->lines[$i]->total_ht)*($object->lines[$i]->tva_tx)/100, 0, $outputlangs);
-        }
-    }
+			$parameters = array('i'=>$i,'outputlangs'=>$outputlangs,'hidedetails'=>$hidedetails,'special_code'=>$special_code);
+			$action='';
+			return $hookmanager->executeHooks('pdf_getlinetotalwithtax',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+		}
+		else
+		{
+			if (empty($hidedetails) || $hidedetails > 1) return price(($object->lines[$i]->total_ht) + ($object->lines[$i]->total_ht)*($object->lines[$i]->tva_tx)/100, 0, $outputlangs);
+		}
+	}
+	return '';
 }
 
 /**
@@ -1462,7 +1522,7 @@ function pdf_getTotalQty($object,$type,$outputlangs)
  *
  * 	@param	object		$object			Object
  * 	@param	Translate	$outputlangs	Object lang for output
- * 	@return	void
+ * 	@return	array   Linked objects
  */
 function pdf_getLinkedObjects($object,$outputlangs)
 {
@@ -1522,6 +1582,37 @@ function pdf_getLinkedObjects($object,$outputlangs)
 	}
 
 	return $linkedobjects;
+}
+
+/**
+ * Return dimensions to use for images onto PDF checking that width and height are not higher than
+ * maximum (16x32 by default).
+ *
+ * @param	string		$realpath		Full path to photo file to use
+ * @return	array						Height and width to use to output image (in pdf user unit, so mm)
+ */
+function pdf_getSizeForImage($realpath)
+{
+	global $conf;
+
+	$maxwidth=(empty($conf->global->MAIN_DOCUMENTS_WITH_PICTURE_WIDTH)?16:$conf->global->MAIN_DOCUMENTS_WITH_PICTURE_WIDTH);
+	$maxheight=(empty($conf->global->MAIN_DOCUMENTS_WITH_PICTURE_HEIGHT)?32:$conf->global->MAIN_DOCUMENTS_WITH_PICTURE_HEIGHT);
+	include_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
+	$tmp=dol_getImageSize($realpath);
+	if ($tmp['height'])
+	{
+		$width=(int) round($maxheight*$tmp['width']/$tmp['height']);	// I try to use maxheight
+		if ($width > $maxwidth)	// Pb with maxheight, so i use maxwidth
+		{
+			$width=$maxwidth;
+			$height=(int) round($maxwidth*$tmp['height']/$tmp['width']);
+		}
+		else	// No pb with maxheight
+		{
+			$height=$maxheight;
+		}
+	}
+	return array('width'=>$width,'height'=>$height);
 }
 
 ?>

@@ -347,18 +347,20 @@ class FormOther
      *  @param	string	$selected     	Preselected value
      *  @param  string	$htmlname      	Name of combo list (example: 'search_sale')
      *  @param  User	$user           Object user
+     *  @param	int		$showstatus		0=show user status only if status is disabled, 1=always show user status into label, -1=never show user status
      *  @return string					Html combo list code
      */
-    function select_salesrepresentatives($selected,$htmlname,$user)
+    function select_salesrepresentatives($selected,$htmlname,$user,$showstatus=0)
     {
-        global $conf;
+        global $conf,$langs;
+        $langs->load('users');
 
         // Select each sales and print them in a select input
         $moreforfilter ='<select class="flat" name="'.$htmlname.'">';
         $moreforfilter.='<option value="">&nbsp;</option>';
 
         // Get list of users allowed to be viewed
-        $sql_usr = "SELECT u.rowid, u.lastname as name, u.firstname, u.login";
+        $sql_usr = "SELECT u.rowid, u.lastname, u.firstname, u.statut, u.login";
         $sql_usr.= " FROM ".MAIN_DB_PREFIX."user as u";
         $sql_usr.= " WHERE u.entity IN (0,".$conf->entity.")";
         if (empty($user->rights->user->user->lire)) $sql_usr.=" AND u.fk_societe = ".($user->societe_id?$user->societe_id:0);
@@ -366,12 +368,12 @@ class FormOther
         if (empty($user->rights->user->user->lire) && $user->societe_id)
         {
             $sql_usr.=" UNION ";
-            $sql_usr.= "SELECT u2.rowid, u2.lastname as name, u2.firstname, u2.login";
+            $sql_usr.= "SELECT u2.rowid, u2.lastname, u2.firstname, u2.statut, u2.login";
             $sql_usr.= " FROM ".MAIN_DB_PREFIX."user as u2, ".MAIN_DB_PREFIX."societe_commerciaux as sc";
             $sql_usr.= " WHERE u2.entity IN (0,".$conf->entity.")";
             $sql_usr.= " AND u2.rowid = sc.fk_user AND sc.fk_soc=".$user->societe_id;
         }
-        $sql_usr.= " ORDER BY name ASC";
+        $sql_usr.= " ORDER BY lastname ASC";
         //print $sql_usr;exit;
 
         $resql_usr = $this->db->query($sql_usr);
@@ -384,7 +386,28 @@ class FormOther
                 if ($obj_usr->rowid == $selected) $moreforfilter.=' selected="selected"';
 
                 $moreforfilter.='>';
-                $moreforfilter.=$obj_usr->firstname." ".$obj_usr->name." (".$obj_usr->login.')';
+                $moreforfilter.=dolGetFirstLastname($obj_usr->firstname,$obj_usr->lastname);
+                // Complete name with more info
+                $moreinfo=0;
+                if (! empty($conf->global->MAIN_SHOW_LOGIN))
+                {
+                	$out.=($moreinfo?' - ':' (').$obj->login;
+                	$moreinfo++;
+                }
+                if ($showstatus >= 0)
+                {
+					if ($obj_usr->statut == 1 && $showstatus == 1)
+					{
+						$moreforfilter.=($moreinfo?' - ':' (').$langs->trans('Enabled');
+	                	$moreinfo++;
+					}
+					if ($obj_usr->statut == 0)
+					{
+						$moreforfilter.=($moreinfo?' - ':' (').$langs->trans('Disabled');
+                		$moreinfo++;
+					}
+				}
+				$moreforfilter.=($moreinfo?')':'');
                 $moreforfilter.='</option>';
             }
             $this->db->free($resql_usr);
@@ -1060,6 +1083,68 @@ class FormOther
         return count($boxactivated);
     }
 
+
+    /**
+     *  Return a HTML select list of bank accounts
+     *
+     *  @param  string	$htmlname          	Name of select zone
+     *  @param	string	$dictionnarytable	Dictionnary table
+     *  @param	string	$keyfield			Field for key
+     *  @param	string	$labelfield			Label field
+     *  @param	string	$selected			Selected value
+     *  @param  int		$useempty          	1=Add an empty value in list, 2=Add an empty value in list only if there is more than 2 entries.
+     * 	@return	void
+     */
+    function select_dictionnary($htmlname,$dictionnarytable,$keyfield='code',$labelfield='label',$selected='',$useempty=0)
+    {
+        global $langs, $conf;
+
+        $langs->load("admin");
+
+        $sql = "SELECT rowid, ".$keyfield.", ".$labelfield;
+        $sql.= " FROM ".MAIN_DB_PREFIX.$dictionnarytable;
+        $sql.= " ORDER BY ".$labelfield;
+
+        dol_syslog(get_class($this)."::select_dictionnary sql=".$sql);
+        $result = $this->db->query($sql);
+        if ($result)
+        {
+            $num = $this->db->num_rows($result);
+            $i = 0;
+            if ($num)
+            {
+                print '<select id="select'.$htmlname.'" class="flat selectdictionnary" name="'.$htmlname.'"'.($moreattrib?' '.$moreattrib:'').'>';
+                if ($useempty == 1 || ($useempty == 2 && $num > 1))
+                {
+                    print '<option value="-1">&nbsp;</option>';
+                }
+
+                while ($i < $num)
+                {
+                    $obj = $this->db->fetch_object($result);
+                    if ($selected == $obj->rowid || $selected == $obj->$keyfield)
+                    {
+                        print '<option value="'.$obj->$keyfield.'" selected="selected">';
+                    }
+                    else
+                    {
+                        print '<option value="'.$obj->$keyfield.'">';
+                    }
+                    print $obj->$labelfield;
+                    print '</option>';
+                    $i++;
+                }
+                print "</select>";
+            }
+            else
+			{
+                print $langs->trans("DictionnaryEmpty");
+            }
+        }
+        else {
+            dol_print_error($this->db);
+        }
+    }
 
 }
 

@@ -74,7 +74,7 @@ class doc_generic_order_odt extends ModelePDFCommandes
 		$this->option_modereg = 0;                 // Affiche mode reglement
 		$this->option_condreg = 0;                 // Affiche conditions reglement
 		$this->option_codeproduitservice = 0;      // Affiche code produit-service
-		$this->option_multilang = 0;               // Dispo en plusieurs langues
+		$this->option_multilang = 1;               // Dispo en plusieurs langues
 		$this->option_escompte = 0;                // Affiche si il y a eu escompte
 		$this->option_credit_note = 0;             // Support credit notes
 		$this->option_freetext = 1;				   // Support add of a personalised text
@@ -102,6 +102,7 @@ class doc_generic_order_odt extends ModelePDFCommandes
 		'object_ref'=>$object->ref,
 		'object_ref_ext'=>$object->ref_ext,
 		'object_ref_customer'=>$object->ref_client,
+        'object_hour'=>dol_print_date($object->date,'hour'),
 		'object_date'=>dol_print_date($object->date,'day'),
 		'object_date_delivery'=>dol_print_date($object->date_livraison,'dayhour'),
 		'object_date_creation'=>dol_print_date($object->date_creation,'day'),
@@ -113,10 +114,20 @@ class doc_generic_order_odt extends ModelePDFCommandes
 		'object_payment_mode'=>($outputlangs->transnoentitiesnoconv('PaymentType'.$object->mode_reglement_code)!='PaymentType'.$object->mode_reglement_code?$outputlangs->transnoentitiesnoconv('PaymentType'.$object->mode_reglement_code):$object->mode_reglement),
 		'object_payment_term_code'=>$object->cond_reglement_code,
 		'object_payment_term'=>($outputlangs->transnoentitiesnoconv('PaymentCondition'.$object->cond_reglement_code)!='PaymentCondition'.$object->cond_reglement_code?$outputlangs->transnoentitiesnoconv('PaymentCondition'.$object->cond_reglement_code):$object->cond_reglement),
-		'object_total_ht'=>price($object->total_ht,0,$outputlangs),
-		'object_total_vat'=>price($object->total_tva,0,$outputlangs),
-		'object_total_ttc'=>price($object->total_ttc,0,$outputlangs),
-		'object_total_discount_ht' => price($object->getTotalDiscount(), 0, $outputlangs),
+
+		'object_total_ht_locale'=>price($object->total_ht, 0, $outputlangs),
+		'object_total_vat_locale'=>price($object->total_tva, 0, $outputlangs),
+		'object_total_localtax1_locale'=>price($object->total_localtax1, 0, $outputlangs),
+		'object_total_localtax2_locale'=>price($object->total_localtax2, 0, $outputlangs),
+		'object_total_ttc_locale'=>price($object->total_ttc, 0, $outputlangs),
+		'object_total_discount_ht_locale' => price($object->getTotalDiscount(), 0, $outputlangs),
+		'object_total_ht'=>price2num($object->total_ht),
+		'object_total_vat'=>price2num($object->total_tva),
+		'object_total_localtax1'=>price2num($object->total_localtax1),
+		'object_total_localtax2'=>price2num($object->total_localtax2),
+		'object_total_ttc'=>price2num($object->total_ttc),
+		'object_total_discount_ht' => price2num($object->getTotalDiscount()),
+
 		'object_vatrate'=>vatrate($object->tva),
 		'object_note_private'=>$object->note,
 		'object_note'=>$object->note_public,
@@ -129,6 +140,16 @@ class doc_generic_order_odt extends ModelePDFCommandes
 			$resarray['object_total_vat_'.$line->tva_tx]+=$line->total_tva;
 		}
 
+		// Retrieve extrafields
+		if(is_array($object->array_options) && count($object->array_options))
+		{
+			require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+			$extrafields = new ExtraFields($this->db);
+			$extralabels = $extrafields->fetch_name_optionals_label('commande',true);
+			$object->fetch_optionals($object->id,$extralabels);
+
+			$resarray = $this->fill_substitutionarray_with_extrafields($object,$resarray,$extrafields,$array_key='object',$outputlangs);
+		}
 		return $resarray;
 	}
 
@@ -381,15 +402,22 @@ class doc_generic_order_odt extends ModelePDFCommandes
 
 				// Open and load template
 				require_once ODTPHP_PATH.'odf.php';
-				$odfHandler = new odf(
-					$srctemplatepath,
-					array(
-					'PATH_TO_TMP'	  => $conf->commande->dir_temp,
-					'ZIP_PROXY'		  => 'PclZipProxy',	// PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
-					'DELIMITER_LEFT'  => '{',
-					'DELIMITER_RIGHT' => '}'
-					)
-				);
+				try {
+					$odfHandler = new odf(
+						$srctemplatepath,
+						array(
+						'PATH_TO_TMP'	  => $conf->commande->dir_temp,
+						'ZIP_PROXY'		  => 'PclZipProxy',	// PhpZipProxy or PclZipProxy. Got "bad compression method" error when using PhpZipProxy.
+						'DELIMITER_LEFT'  => '{',
+						'DELIMITER_RIGHT' => '}'
+						)
+					);
+				}
+				catch(Exception $e)
+				{
+					$this->error=$e->getMessage();
+					return -1;
+				}
 				// After construction $odfHandler->contentXml contains content and
 				// [!-- BEGIN row.lines --]*[!-- END row.lines --] has been replaced by
 				// [!-- BEGIN lines --]*[!-- END lines --]
@@ -524,6 +552,18 @@ class doc_generic_order_odt extends ModelePDFCommandes
 					return -1;
 				}
 
+				// Replace labels translated
+				$tmparray=$outputlangs->get_translations_for_substitutions();
+				foreach($tmparray as $key=>$value)
+				{
+					try {
+						$odfHandler->setVars($key, $value, true, 'UTF-8');
+					}
+					catch(OdfException $e)
+					{
+					}
+				}
+
 				// Call the beforeODTSave hook
 				$parameters=array('odfHandler'=>&$odfHandler,'file'=>$file,'object'=>$object,'outputlangs'=>$outputlangs);
 				$reshook=$hookmanager->executeHooks('beforeODTSave',$parameters,$this,$action);    // Note that $action and $object may have been modified by some hooks
@@ -544,7 +584,7 @@ class doc_generic_order_odt extends ModelePDFCommandes
 						$this->error=$e->getMessage();
 						return -1;
 					}
-				}	
+				}
 
 				if (! empty($conf->global->MAIN_UMASK))
 					@chmod($file, octdec($conf->global->MAIN_UMASK));

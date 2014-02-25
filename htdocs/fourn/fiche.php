@@ -63,7 +63,20 @@ if ($action == 'setsupplieraccountancycode')
     }
     $action="";
 }
-
+// conditions de reglement
+if ($action == 'setconditions' && $user->rights->societe->creer)
+{
+	$object->fetch($id);
+	$result=$object->setPaymentTerms(GETPOST('cond_reglement_supplier_id','int'));
+	if ($result < 0) dol_print_error($db,$object->error);
+}
+// mode de reglement
+if ($action == 'setmode' && $user->rights->societe->creer)
+{
+	$object->fetch($id);
+	$result=$object->setPaymentMethods(GETPOST('mode_reglement_supplier_id','int'));
+	if ($result < 0) dol_print_error($db,$object->error);
+}
 
 
 /*
@@ -86,11 +99,9 @@ if ($object->fetch($id))
 
 
 	print '<div class="fichecenter"><div class="fichehalfleft">';
-	//print '<table width="100%" class="notopnoleftnoright">';
-	//print '<tr><td valign="top" width="50%" class="notopnoleft">';
 
 	print '<table width="100%" class="border">';
-	print '<tr><td width="20%">'.$langs->trans("ThirdPartyName").'</td><td width="80%" colspan="3">';
+	print '<tr><td width="30%">'.$langs->trans("ThirdPartyName").'</td><td width="70%" colspan="3">';
 	$object->next_prev_filter="te.fournisseur = 1";
 	print $form->showrefnav($object,'socid','',($user->societe_id?0:1),'rowid','nom','','');
 	print '</td></tr>';
@@ -142,7 +153,7 @@ if ($object->fetch($id))
 	print '<tr><td>'.$langs->trans("Web").'</td><td colspan="3">'.dol_print_url($object->url).'</td></tr>';
 
 	// Phone
-	print '<tr><td>'.$langs->trans("Phone").'</td><td style="min-width: 25%;">'.dol_print_phone($object->tel,$object->country_code,0,$object->id,'AC_TEL').'</td>';
+	print '<tr><td>'.$langs->trans("Phone").'</td><td style="min-width: 25%;">'.dol_print_phone($object->phone,$object->country_code,0,$object->id,'AC_TEL').'</td>';
 
 	// Fax
 	print '<td>'.$langs->trans("Fax").'</td><td style="min-width: 25%;">'.dol_print_phone($object->fax,$object->country_code,0,$object->id,'AC_FAX').'</td></tr>';
@@ -190,9 +201,49 @@ if ($object->fetch($id))
 	}
 
     // TVA Intra
-    print '<tr><td nowrap>'.$langs->trans('VATIntra').'</td><td colspan="3">';
+    print '<tr><td class="nowrap">'.$langs->trans('VATIntra').'</td><td colspan="3">';
     print $object->tva_intra;
     print '</td></tr>';
+
+	// Conditions de reglement par defaut
+	$langs->load('bills');
+	$form = new Form($db);
+	print '<tr><td>';
+	print '<table width="100%" class="nobordernopadding"><tr><td>';
+	print $langs->trans('PaymentConditions');
+	print '<td>';
+	if (($action != 'editconditions') && $user->rights->societe->creer) print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editconditions&amp;socid='.$object->id.'">'.img_edit($langs->trans('SetConditions'),1).'</a></td>';
+	print '</tr></table>';
+	print '</td><td colspan="3">';
+	if ($action == 'editconditions')
+	{
+		$form->form_conditions_reglement($_SERVER['PHP_SELF'].'?socid='.$object->id,$object->cond_reglement_supplier_id,'cond_reglement_supplier_id',-1,1);
+	}
+	else
+	{
+		$form->form_conditions_reglement($_SERVER['PHP_SELF'].'?socid='.$object->id,$object->cond_reglement_supplier_id,'none');
+	}
+	print "</td>";
+	print '</tr>';
+
+	// Mode de reglement par defaut
+	print '<tr><td class="nowrap">';
+	print '<table width="100%" class="nobordernopadding"><tr><td class="nowrap">';
+	print $langs->trans('PaymentMode');
+	print '<td>';
+	if (($action != 'editmode') && $user->rights->societe->creer) print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?action=editmode&amp;socid='.$object->id.'">'.img_edit($langs->trans('SetMode'),1).'</a></td>';
+	print '</tr></table>';
+	print '</td><td colspan="3">';
+	if ($action == 'editmode')
+	{
+		$form->form_modes_reglement($_SERVER['PHP_SELF'].'?socid='.$object->id,$object->mode_reglement_supplier_id,'mode_reglement_supplier_id');
+	}
+	else
+	{
+		$form->form_modes_reglement($_SERVER['PHP_SELF'].'?socid='.$object->id,$object->mode_reglement_supplier_id,'none');
+	}
+	print "</td>";
+	print '</tr>';
 
     // Module Adherent
     if (! empty($conf->adherent->enabled))
@@ -210,7 +261,7 @@ if ($object->fetch($id))
         }
         else
         {
-            print $langs->trans("UserNotLinkedToMember");
+            print $langs->trans("ThirdpartyNotLinkedToMember");
         }
         print '</td>';
         print "</tr>\n";
@@ -220,7 +271,6 @@ if ($object->fetch($id))
 
 
 	print '</div><div class="fichehalfright"><div class="ficheaddleft">';
-	//print '</td><td valign="top" width="50%" class="notopnoleftnoright">';
 
 
 	$var=true;
@@ -288,7 +338,7 @@ if ($object->fetch($id))
 				$obj = $db->fetch_object($resql);
 				$var=!$var;
 
-				print "<tr $bc[$var]>";
+				print "<tr ".$bc[$var].">";
 				print '<td><a href="commande/fiche.php?id='.$obj->rowid.'">'.img_object($langs->trans("ShowOrder"),"order")." ".$obj->ref.'</a></td>';
 				print '<td align="center" width="80">';
 				if ($obj->dc)
@@ -343,7 +393,7 @@ if ($object->fetch($id))
 
 			    print '<tr class="liste_titre">';
     			print '<td colspan="4">';
-    			print '<table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans('LastSuppliersBills',($num<=$MAXLIST?"":$MAXLIST)).'</td><td align="right"><a href="'.DOL_URL_ROOT.'/fourn/facture/index.php?socid='.$object->id.'">'.$langs->trans('AllBills').' ('.$num.')</td>';
+    			print '<table class="nobordernopadding" width="100%"><tr><td>'.$langs->trans('LastSuppliersBills',($num<=$MAXLIST?"":$MAXLIST)).'</td><td align="right"><a href="'.DOL_URL_ROOT.'/fourn/facture/list.php?socid='.$object->id.'">'.$langs->trans('AllBills').' ('.$num.')</td>';
                 print '<td width="20px" align="right"><a href="'.DOL_URL_ROOT.'/compta/facture/stats/index.php?mode=supplier&socid='.$object->id.'">'.img_picto($langs->trans("Statistics"),'stats').'</a></td>';
     			print '</tr></table>';
     			print '</td></tr>';
@@ -375,8 +425,6 @@ if ($object->fetch($id))
 
 	print '</div></div></div>';
 	print '<div style="clear:both"></div>';
-	//print '</td></tr>';
-	//print '</table>' . "\n";
 
 	dol_fiche_end();
 
@@ -419,7 +467,7 @@ if ($object->fetch($id))
     {
         print '<br>';
         // List of contacts
-        show_contacts($conf,$langs,$db,$object,$_SERVER["PHP_SELF"].'?id='.$object->id);
+        show_contacts($conf,$langs,$db,$object,$_SERVER["PHP_SELF"].'?socid='.$object->id);
     }
 
     // Addresses list

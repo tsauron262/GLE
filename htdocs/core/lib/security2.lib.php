@@ -153,7 +153,8 @@ function dol_loginfunction($langs,$conf,$mysoc)
 
 	// Note: $conf->css looks like '/theme/eldy/style.css.php'
 	$conf->css = "/theme/".(GETPOST('theme')?GETPOST('theme','alpha'):$conf->theme)."/style.css.php";
-	$themepath=dol_buildpath((empty($conf->global->MAIN_FORCETHEMEDIR)?'':$conf->global->MAIN_FORCETHEMEDIR).$conf->css,1);
+	//$themepath=dol_buildpath((empty($conf->global->MAIN_FORCETHEMEDIR)?'':$conf->global->MAIN_FORCETHEMEDIR).$conf->css,1);
+	$themepath=dol_buildpath($conf->css,1);
 	if (! empty($conf->modules_parts['theme']))		// Using this feature slow down application
 	{
 		foreach($conf->modules_parts['theme'] as $reldir)
@@ -270,12 +271,13 @@ function dol_loginfunction($langs,$conf,$mysoc)
 	if (! empty($conf->global->MAIN_HOME))
 	{
 		$i=0;
-		while (preg_match('/__\(([a-zA-Z]+)\)__/i',$conf->global->MAIN_HOME,$reg) && $i < 100)
+		while (preg_match('/__\(([a-zA-Z|@]+)\)__/i',$conf->global->MAIN_HOME,$reg) && $i < 100)
 		{
-			$conf->global->MAIN_HOME=preg_replace('/__\('.$reg[1].'\)__/i',$langs->trans($reg[1]),$conf->global->MAIN_HOME);
+			$tmp=explode('|',$reg[1]);
+			if (! empty($tmp[1])) $langs->load($tmp[1]);
+			$conf->global->MAIN_HOME=preg_replace('/__\('.preg_quote($reg[1]).'\)__/i',$langs->trans($tmp[0]),$conf->global->MAIN_HOME);
 			$i++;
 		}
-
 		$main_home=dol_htmlcleanlastbr($conf->global->MAIN_HOME);
 	}
 

@@ -4,7 +4,7 @@
  * Copyright (C) 2004		Christophe Combelles	<ccomb@free.fr>
  * Copyright (C) 2005		Marc Barilley			<marc@ocebo.com>
  * Copyright (C) 2005-2012	Regis Houssin			<regis.houssin@capnetworks.com>
- * Copyright (C) 2010-2011	Juanjo Menent			<jmenent@2byte.es>
+ * Copyright (C) 2010-2013	Juanjo Menent			<jmenent@2byte.es>
  * Copyright (C) 2013		Philippe Grand			<philippe.grand@atoo-net.com>
  * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
  *
@@ -76,6 +76,10 @@ class FactureFournisseur extends CommonInvoice
     var $note_private;
     var $note_public;
     var $propalid;
+    var $cond_reglement_id;
+    var $cond_reglement_code;
+    var $mode_reglement_id;
+    var $mode_reglement_code;
 
     var $lines;
     var $fournisseur;	// deprecated
@@ -120,7 +124,8 @@ class FactureFournisseur extends CommonInvoice
 		$error=0;
         $now=dol_now();
 
-        // Clear parameters
+        // Clean parameters
+        if (isset($this->ref_supplier)) $this->ref_supplier=trim($this->ref_supplier);
         if (empty($this->date)) $this->date=$now;
 
         $socid = $this->socid;
@@ -142,6 +147,8 @@ class FactureFournisseur extends CommonInvoice
         $sql.= ", datec";
         $sql.= ", datef";
 		$sql.= ", fk_projet";
+		$sql.= ", fk_cond_reglement";
+		$sql.= ", fk_mode_reglement";
         $sql.= ", note_private";
         $sql.= ", note_public";
         $sql.= ", fk_user_author";
@@ -156,6 +163,8 @@ class FactureFournisseur extends CommonInvoice
         $sql.= ", '".$this->db->idate($now)."'";
         $sql.= ", '".$this->db->idate($this->date)."'";
 		$sql.= ", ".(isset($this->fk_project)?$this->fk_project:"null");
+		$sql.= ", ".(isset($this->cond_reglement_id)?$this->cond_reglement_id:"null");
+		$sql.= ", ".(isset($this->mode_reglement_id)?$this->mode_reglement_id:"null");
         $sql.= ", '".$this->db->escape($this->note_private)."'";
         $sql.= ", '".$this->db->escape($this->note_public)."'";
         $sql.= ", ".$user->id.",";
@@ -299,17 +308,22 @@ class FactureFournisseur extends CommonInvoice
         $sql.= " t.fk_facture_source,";
         $sql.= " t.fk_projet,";
         $sql.= " t.fk_cond_reglement,";
+		$sql.= " t.fk_mode_reglement,";
         $sql.= " t.date_lim_reglement,";
         $sql.= " t.note_private,";
         $sql.= " t.note_public,";
         $sql.= " t.model_pdf,";
         $sql.= " t.import_key,";
         $sql.= " t.extraparams,";
+        $sql.= " cr.code as cond_reglement_code, cr.libelle as cond_reglement_libelle,";
+        $sql.= " p.code as mode_reglement_code, p.libelle as mode_reglement_libelle,";
         $sql.= ' s.nom as socnom, s.rowid as socid';
-        $sql.= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as t,'.MAIN_DB_PREFIX.'societe as s';
+        $sql.= ' FROM '.MAIN_DB_PREFIX.'facture_fourn as t';
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON (t.fk_soc = s.rowid)";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_payment_term as cr ON (t.fk_cond_reglement = cr.rowid)";
+        $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_paiement as p ON (t.fk_mode_reglement = p.id)";
         if ($id)  $sql.= " WHERE t.rowid=".$id;
         if ($ref) $sql.= " WHERE t.ref='".$this->db->escape($ref)."'";
-        $sql.= ' AND t.fk_soc = s.rowid';
 
         dol_syslog(get_class($this)."::fetch sql=".$sql, LOG_DEBUG);
         $resql=$this->db->query($sql);
@@ -351,7 +365,13 @@ class FactureFournisseur extends CommonInvoice
                 $this->fk_user_valid		= $obj->fk_user_valid;
                 $this->fk_facture_source	= $obj->fk_facture_source;
                 $this->fk_project			= $obj->fk_projet;
-                $this->fk_cond_reglement	= $obj->fk_cond_reglement;
+	            $this->cond_reglement_id	= $obj->fk_cond_reglement;
+	            $this->cond_reglement_code	= $obj->cond_reglement_code;
+	            $this->cond_reglement		= $obj->cond_reglement_libelle;
+	            $this->cond_reglement_doc	= $obj->cond_reglement_libelle;
+	            $this->mode_reglement_id	= $obj->fk_mode_reglement;
+	            $this->mode_reglement_code	= $obj->mode_reglement_code;
+	            $this->mode_reglement		= $obj->mode_reglement_libelle;
                 $this->date_echeance		= $this->db->jdate($obj->date_lim_reglement);
                 $this->note					= $obj->note_private;	// deprecated
                 $this->note_private			= $obj->note_private;
@@ -617,6 +637,13 @@ class FactureFournisseur extends CommonInvoice
         	$error++;
         }
 
+		if (! $error)
+		{
+			// Delete linked object
+			$res = $this->deleteObjectLinked();
+			if ($res < 0) $error++;
+		}
+
         if (! $error)
         {
         	// Appel des triggers
@@ -870,7 +897,7 @@ class FactureFournisseur extends CommonInvoice
             	if (preg_match('/^[\(]?PROV/i', $this->ref))
             	{
             		// On renomme repertoire facture ($this->ref = ancienne ref, $num = nouvelle ref)
-            		// In order not to loose attached files
+            		// in order not to lose the attached files
             		$facref = dol_sanitizeFileName($this->ref);
             		$snumfa = dol_sanitizeFileName($num);
 
@@ -1137,7 +1164,10 @@ class FactureFournisseur extends CommonInvoice
         // qty, pu, remise_percent et txtva
         // TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
         // la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-        $tabprice = calcul_price_total($qty, $pu, $remise_percent, $vatrate, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type, $this->thirdparty);
+
+        $localtaxes_type=getLocalTaxesFromRate($vatrate,0,$this->thirdparty);
+
+        $tabprice = calcul_price_total($qty, $pu, $remise_percent, $vatrate, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type, $this->thirdparty,$localtaxes_type);
         $total_ht  = $tabprice[0];
         $total_tva = $tabprice[1];
         $total_ttc = $tabprice[2];
@@ -1168,6 +1198,8 @@ class FactureFournisseur extends CommonInvoice
         $sql.= ", tva_tx = ".price2num($vatrate);
         $sql.= ", localtax1_tx = ".price2num($txlocaltax1);
         $sql.= ", localtax2_tx = ".price2num($txlocaltax2);
+		$sql.= ", localtax1_type = '".$localtaxes_type[0]."'";
+		$sql.= ", localtax2_type = '".$localtaxes_type[2]."'";
         $sql.= ", total_ht = ".price2num($total_ht);
         $sql.= ", tva= ".price2num($total_tva);
         $sql.= ", total_localtax1= ".price2num($total_localtax1);
@@ -1346,7 +1378,7 @@ class FactureFournisseur extends CommonInvoice
             while ($obj=$this->db->fetch_object($resql))
             {
                 $this->nbtodo++;
-                if ($this->db->jdate($obj->datefin) < ($now - $conf->facture->fournisseur->warning_delay)) $this->nbtodolate++;
+                if (! empty($obj->datefin) && $this->db->jdate($obj->datefin) < ($now - $conf->facture->fournisseur->warning_delay)) $this->nbtodolate++;
             }
             $this->db->free($resql);
             return 1;
@@ -1430,11 +1462,10 @@ class FactureFournisseur extends CommonInvoice
         }
 
         $obj = new $classname();
-
         $numref = "";
         $numref = $obj->getNumRef($soc,$this,$mode);
 
-        if ( $numref != "")
+        if ($numref != "")
         {
         	return $numref;
         }

@@ -129,36 +129,39 @@ class Commande extends CommonOrder
         global $db, $langs, $conf;
         $langs->load("order");
 
-        $dir = DOL_DOCUMENT_ROOT . "/core/modules/commande";
-
         if (! empty($conf->global->COMMANDE_ADDON))
         {
-            $file = $conf->global->COMMANDE_ADDON.".php";
+        	$mybool=false;
 
-            // Chargement de la classe de numerotation
+            $file = $conf->global->COMMANDE_ADDON.".php";
             $classname = $conf->global->COMMANDE_ADDON;
 
-            $result=include_once $dir.'/'.$file;
-            if ($result)
+            // Include file with class
+            foreach ($conf->file->dol_document_root as $dirroot)
             {
-                $obj = new $classname();
-                $numref = "";
-                $numref = $obj->getNextValue($soc,$this);
+            	$dir = $dirroot."/core/modules/commande/";
+            	// Load file with numbering class (if found)
+            	$mybool|=@include_once $dir.$file;
+            }
 
-                if ( $numref != "")
-                {
-                    return $numref;
-                }
-                else
-                {
-                    dol_print_error($db,get_class($this)."::getNextNumRef ".$obj->error);
-                    return "";
-                }
+            if (! $mybool)
+            {
+            	dol_print_error('',"Failed to include file ".$file);
+            	return '';
+            }
+
+            $obj = new $classname();
+            $numref = "";
+            $numref = $obj->getNextValue($soc,$this);
+
+            if ($numref != "")
+            {
+            	return $numref;
             }
             else
-            {
-                print $langs->trans("Error")." ".$langs->trans("Error_COMMANDE_ADDON_NotDefined");
-                return "";
+			{
+            	dol_print_error($db,get_class($this)."::getNextNumRef ".$obj->error);
+            	return "";
             }
         }
         else
@@ -678,7 +681,6 @@ class Commande extends CommonOrder
                     }
 
                     $result = $this->addline(
-                        $this->id,
                         $this->lines[$i]->desc,
                         $this->lines[$i]->subprice,
                         $this->lines[$i]->qty,
@@ -1002,7 +1004,6 @@ class Commande extends CommonOrder
     /**
      *	Add an order line into database (linked to product/service or not)
      *
-     *	@param      int				$commandeid      	Id of line
      *	@param      string			$desc            	Description of line
      *	@param      double			$pu_ht    	        Unit price (without tax)
      *	@param      double			$qty             	Quantite
@@ -1024,6 +1025,7 @@ class Commande extends CommonOrder
      *  @param		int				$fk_fournprice		Id supplier price
      *  @param		int				$pa_ht				Buying price (without tax)
      *  @param		string			$label				Label
+	 *  @param		array			$array_option		extrafields array
      *	@return     int             					>0 if OK, <0 if KO
      *
      *	@see        add_product
@@ -1033,8 +1035,12 @@ class Commande extends CommonOrder
      *	par l'appelant par la methode get_default_tva(societe_vendeuse,societe_acheteuse,produit)
      *	et le desc doit deja avoir la bonne valeur (a l'appelant de gerer le multilangue)
      */
-	function addline($commandeid, $desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='')
+	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $info_bits=0, $fk_remise_except=0, $price_base_type='HT', $pu_ttc=0, $date_start='', $date_end='', $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=null, $pa_ht=0, $label='',$array_option=0)
     {
+    	global $mysoc;
+    	
+    	$commandeid=$this->id;
+
         dol_syslog(get_class($this)."::addline commandeid=$commandeid, desc=$desc, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, fk_product=$fk_product, remise_percent=$remise_percent, info_bits=$info_bits, fk_remise_except=$fk_remise_except, price_base_type=$price_base_type, pu_ttc=$pu_ttc, date_start=$date_start, date_end=$date_end, type=$type", LOG_DEBUG);
 
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
@@ -1079,7 +1085,10 @@ class Commande extends CommonOrder
             // qty, pu, remise_percent et txtva
             // TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
             // la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-            $tabprice = calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type);
+            
+            $localtaxes_type=getLocalTaxesFromRate($txtva,0,$mysoc);
+            
+            $tabprice = calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type,'', $localtaxes_type);
             $total_ht  = $tabprice[0];
             $total_tva = $tabprice[1];
             $total_ttc = $tabprice[2];
@@ -1114,6 +1123,8 @@ class Commande extends CommonOrder
             $this->line->tva_tx=$txtva;
             $this->line->localtax1_tx=$txlocaltax1;
             $this->line->localtax2_tx=$txlocaltax2;
+			$this->line->localtax1_type = $localtaxes_type[0];
+			$this->line->localtax2_type = $localtaxes_type[2];
             $this->line->fk_product=$fk_product;
             $this->line->fk_remise_except=$fk_remise_except;
             $this->line->remise_percent=$remise_percent;
@@ -1139,6 +1150,10 @@ class Commande extends CommonOrder
             // TODO Ne plus utiliser
             $this->line->price=$price;
             $this->line->remise=$remise;
+
+			if (is_array($array_option) && count($array_option)>0) {
+				$this->line->array_options=$array_option;
+			}
 
             $result=$this->line->insert();
             if ($result > 0)
@@ -1339,16 +1354,13 @@ class Commande extends CommonOrder
                 $this->lines				= array();
 
                 if ($this->statut == 0) $this->brouillon = 1;
-                
+
                 // Retreive all extrafield for invoice
                 // fetch optionals attributes and labels
-                if(!class_exists('Extrafields'))
-                	require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
+                require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
                 $extrafields=new ExtraFields($this->db);
                 $extralabels=$extrafields->fetch_name_optionals_label($this->table_element,true);
-                if (count($extralabels)>0) {
-                	$this->fetch_optionals($this->id,$extralabels);
-                }
+               	$this->fetch_optionals($this->id,$extralabels);
 
                 $this->db->free();
 
@@ -2210,6 +2222,7 @@ class Commande extends CommonOrder
 	 * Classify the order as invoiced
 	 *
 	 * @return     int     <0 if ko, >0 if ok
+	 * @deprecated
 	 */
 	function classer_facturee()
 	{
@@ -2239,11 +2252,12 @@ class Commande extends CommonOrder
      *  @param		int				$pa_ht				Price (without tax) of product when it was bought
      *  @param		string			$label				Label
      *  @param		int				$special_code		Special code (also used by externals modules!)
+	 *  @param		array			$array_option		extrafields array
      *  @return   	int              					< 0 if KO, > 0 if OK
      */
-	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1=0,$txlocaltax2=0, $price_base_type='HT', $info_bits=0, $date_start='', $date_end='', $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0)
+	function updateline($rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1=0,$txlocaltax2=0, $price_base_type='HT', $info_bits=0, $date_start='', $date_end='', $type=0, $fk_parent_line=0, $skip_update_total=0, $fk_fournprice=null, $pa_ht=0, $label='', $special_code=0, $array_option=0)
     {
-        global $conf;
+        global $conf, $mysoc;
 
         dol_syslog(get_class($this)."::updateline $rowid, $desc, $pu, $qty, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, $price_base_type, $info_bits, $date_start, $date_end, $type");
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
@@ -2273,7 +2287,10 @@ class Commande extends CommonOrder
             // qty, pu, remise_percent et txtva
             // TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
             // la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
-            $tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type);
+            
+            $localtaxes_type=getLocalTaxesFromRate($txtva,0,$mysoc);
+            
+            $tabprice=calcul_price_total($qty, $pu, $remise_percent, $txtva, $txlocaltax1, $txlocaltax2, 0, $price_base_type, $info_bits, $type, '', $localtaxes_type);
             $total_ht  = $tabprice[0];
             $total_tva = $tabprice[1];
             $total_ttc = $tabprice[2];
@@ -2312,6 +2329,8 @@ class Commande extends CommonOrder
             $this->line->tva_tx=$txtva;
             $this->line->localtax1_tx=$txlocaltax1;
             $this->line->localtax2_tx=$txlocaltax2;
+			$this->line->localtax1_type = $localtaxes_type[0];
+			$this->line->localtax2_type = $localtaxes_type[2];
             $this->line->remise_percent=$remise_percent;
             $this->line->subprice=$subprice;
             $this->line->info_bits=$info_bits;
@@ -2334,6 +2353,10 @@ class Commande extends CommonOrder
             // TODO deprecated
             $this->line->price=$price;
             $this->line->remise=$remise;
+
+			if (is_array($array_option) && count($array_option)>0) {
+				$this->line->array_options=$array_option;
+			}
 
             $result=$this->line->update();
             if ($result > 0)
@@ -2420,7 +2443,7 @@ class Commande extends CommonOrder
         	// Delete linked contacts
         	$res = $this->delete_linked_contact();
         	if ($res < 0) $error++;
-        	
+
         	// Remove extrafields
         	if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
         	{
@@ -2434,7 +2457,7 @@ class Commande extends CommonOrder
 
         	// On efface le repertoire de pdf provisoire
         	$comref = dol_sanitizeFileName($this->ref);
-        	if ($conf->commande->dir_output)
+        	if ($conf->commande->dir_output && !empty($this->ref))
         	{
         		$dir = $conf->commande->dir_output . "/" . $comref ;
         		$file = $conf->commande->dir_output . "/" . $comref . "/" . $comref . ".pdf";
@@ -2458,8 +2481,8 @@ class Commande extends CommonOrder
         			}
         		}
         	}
-        	
-        	
+
+
         }
 
         if (! $error)
@@ -2823,6 +2846,7 @@ class Commande extends CommonOrder
             {
                 $this->nb["orders"]=$obj->nb;
             }
+            $this->db->free($resql);
             return 1;
         }
         else
@@ -2900,6 +2924,7 @@ class Commande extends CommonOrder
             {
                 $obj = $this->db->fetch_object($resql);
 
+				$this->lines[$i]					= new OrderLine($this->db);
                 $this->lines[$i]->id				= $obj->rowid;
                 $this->lines[$i]->label 			= $obj->custom_label;
                 $this->lines[$i]->description 		= $obj->description;
@@ -2952,10 +2977,13 @@ class Commande extends CommonOrder
  *  \class      OrderLine
  *  \brief      Classe de gestion des lignes de commande
  */
-class OrderLine
+class OrderLine extends CommonOrderLine
 {
     var $db;
     var $error;
+
+	public $element='commandedet';
+	public $table_element='commandedet';
 
     var $oldline;
 
@@ -2972,6 +3000,8 @@ class OrderLine
     var $tva_tx;			// VAT Rate for product/service (example 19.6)
     var $localtax1_tx; 		// Local tax 1
     var $localtax2_tx; 		// Local tax 2
+    var $localtax1_type;	// Local tax 1 type
+	var $localtax2_type;	// Local tax 2 type
     var $subprice;      	// U.P. HT (example 100)
     var $remise_percent;	// % for line discount (example 20%)
     var $fk_remise_except;
@@ -3055,6 +3085,7 @@ class OrderLine
             $this->fk_product       = $objp->fk_product;
             $this->product_type     = $objp->product_type;
             $this->info_bits        = $objp->info_bits;
+			$this->special_code		= $objp->special_code;
             $this->total_ht         = $objp->total_ht;
             $this->total_tva        = $objp->total_tva;
             $this->total_localtax1  = $objp->total_localtax1;
@@ -3102,6 +3133,18 @@ class OrderLine
         $resql=$this->db->query($sql);
         if ($resql)
         {
+			// Remove extrafields
+			if ((! $error) && (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED))) // For avoid conflicts if trigger used
+			{
+				$this->id=$this->rowid;
+				$result=$this->deleteExtraFields();
+				if ($result < 0)
+				{
+					$error++;
+					dol_syslog(get_class($this)."::delete error -4 ".$this->error, LOG_ERR);
+				}
+			}
+
             // Appel des triggers
             include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
             $interface=new Interfaces($this->db);
@@ -3137,6 +3180,8 @@ class OrderLine
         if (empty($this->tva_tx)) $this->tva_tx=0;
         if (empty($this->localtax1_tx)) $this->localtax1_tx=0;
         if (empty($this->localtax2_tx)) $this->localtax2_tx=0;
+		if (empty($this->localtax1_type)) $this->localtax1_type=0;
+		if (empty($this->localtax2_type)) $this->localtax2_type=0;
         if (empty($this->total_localtax1)) $this->total_localtax1=0;
         if (empty($this->total_localtax2)) $this->total_localtax2=0;
         if (empty($this->rang)) $this->rang=0;
@@ -3161,7 +3206,8 @@ class OrderLine
 
         // Insertion dans base de la ligne
         $sql = 'INSERT INTO '.MAIN_DB_PREFIX.'commandedet';
-        $sql.= ' (fk_commande, fk_parent_line, label, description, qty, tva_tx, localtax1_tx, localtax2_tx,';
+        $sql.= ' (fk_commande, fk_parent_line, label, description, qty, ';
+        $sql.= ' tva_tx, localtax1_tx, localtax2_tx, localtax1_type, localtax2_type,';
         $sql.= ' fk_product, product_type, remise_percent, subprice, price, remise, fk_remise_except,';
         $sql.= ' special_code, rang, fk_product_fournisseur_price, buy_price_ht,';
         $sql.= ' info_bits, total_ht, total_tva, total_localtax1, total_localtax2, total_ttc, date_start, date_end)';
@@ -3173,6 +3219,8 @@ class OrderLine
         $sql.= " '".price2num($this->tva_tx)."',";
         $sql.= " '".price2num($this->localtax1_tx)."',";
         $sql.= " '".price2num($this->localtax2_tx)."',";
+		$sql.= " '".$this->localtax1_type."',";
+		$sql.= " '".$this->localtax2_type."',";
         $sql.= ' '.(! empty($this->fk_product)?$this->fk_product:"null").',';
         $sql.= " '".$this->product_type."',";
         $sql.= " '".price2num($this->remise_percent)."',";
@@ -3199,6 +3247,16 @@ class OrderLine
         if ($resql)
         {
             $this->rowid=$this->db->last_insert_id(MAIN_DB_PREFIX.'commandedet');
+
+			if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+			{
+				$this->id=$this->rowid;
+				$result=$this->insertExtraFields();
+				if ($result < 0)
+				{
+					$error++;
+				}
+			}
 
             if (! $notrigger)
             {
@@ -3238,6 +3296,8 @@ class OrderLine
 		if (empty($this->tva_tx)) $this->tva_tx=0;
 		if (empty($this->localtax1_tx)) $this->localtax1_tx=0;
 		if (empty($this->localtax2_tx)) $this->localtax2_tx=0;
+		if (empty($this->localtax1_type)) $this->localtax1_type=0;
+		if (empty($this->localtax2_type)) $this->localtax2_type=0;
 		if (empty($this->qty)) $this->qty=0;
 		if (empty($this->total_localtax1)) $this->total_localtax1=0;
 		if (empty($this->total_localtax2)) $this->total_localtax2=0;
@@ -3266,6 +3326,8 @@ class OrderLine
 		$sql.= " , tva_tx=".price2num($this->tva_tx);
 		$sql.= " , localtax1_tx=".price2num($this->localtax1_tx);
 		$sql.= " , localtax2_tx=".price2num($this->localtax2_tx);
+		$sql.= " , localtax1_type='".$this->localtax1_type."'";
+		$sql.= " , localtax2_type='".$this->localtax2_type."'";
 		$sql.= " , qty=".price2num($this->qty);
 		$sql.= " , subprice=".price2num($this->subprice)."";
 		$sql.= " , remise_percent=".price2num($this->remise_percent)."";
@@ -3294,6 +3356,16 @@ class OrderLine
 		$resql=$this->db->query($sql);
 		if ($resql)
 		{
+			if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+			{
+				$this->id=$this->rowid;
+				$result=$this->insertExtraFields();
+				if ($result < 0)
+				{
+					$error++;
+				}
+			}
+
 			if (! $notrigger)
 			{
 				// Appel des triggers

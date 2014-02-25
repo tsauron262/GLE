@@ -305,8 +305,11 @@ class PaiementFourn extends Paiement
 			if ($bank_line_id)
 			{
     			$accline = new AccountLine($this->db);
-    			$accline->fetch($bank_line_id);
-				$result=$accline->delete();
+    			$result=$accline->fetch($bank_line_id);
+    			if ($result > 0) // If result = 0, record not found, we don't try to delete
+    			{
+    				$result=$accline->delete();
+    			}
     			if ($result < 0)
     			{
                     $this->error=$accline->error;
@@ -380,6 +383,8 @@ class PaiementFourn extends Paiement
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'paiementfourn_facturefourn as pf, '.MAIN_DB_PREFIX.'facture_fourn as f';
 		$sql.= ' WHERE pf.fk_facturefourn = f.rowid AND fk_paiementfourn = '.$this->id;
 		if ($filter) $sql.= ' AND '.$filter;
+
+		dol_syslog(get_class($this).'::getBillsArray sql='.$sql,LOG_DEBUG);
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
@@ -399,7 +404,7 @@ class PaiementFourn extends Paiement
 		else
 		{
 			$this->error=$this->db->error();
-			dol_syslog('PaiementFourn::getBillsArray Error '.$this->error.' - sql='.$sql);
+			dol_syslog(get_class($this).'::getBillsArray Error '.$this->error);
 			return -1;
 		}
 	}

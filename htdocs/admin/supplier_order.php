@@ -4,7 +4,7 @@
  * Copyright (C) 2005-2011 Regis Houssin           <regis.houssin@capnetworks.com>
  * Copyright (C) 2004      Sebastien Di Cintio     <sdicintio@ressource-toi.org>
  * Copyright (C) 2004      Benoit Mortier          <benoit.mortier@opensides.be>
- * Copyright (C) 2010-2012 Juanjo Menent           <jmenent@2byte.es>
+ * Copyright (C) 2010-2013 Juanjo Menent           <jmenent@2byte.es>
  * Copyright (C) 2011-2013 Philippe Grand          <philippe.grand@atoo-net.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,14 +61,14 @@ if ($action == 'updateMask')
 
     if (! $res > 0) $error++;
 
-    if (! $error)
-    {
-        $mesg = "<font class=\"ok\">".$langs->trans("SetupSaved")."</font>";
-    }
-    else
-    {
-        $mesg = "<font class=\"error\">".$langs->trans("Error")."</font>";
-    }
+	if (! $error)
+	{
+		setEventMessage($langs->trans("SetupSaved"));
+	}
+	else
+	{
+		setEventMessage($langs->trans("Error"),'errors');
+	}
 }
 
 else if ($action == 'specimen')  // For orders
@@ -106,13 +106,13 @@ else if ($action == 'specimen')  // For orders
     	}
     	else
     	{
-    		$mesg='<font class="error">'.$module->error.'</font>';
+    		setEventMessage($module->error,'errors');
     		dol_syslog($module->error, LOG_ERR);
     	}
     }
     else
     {
-    	$mesg='<font class="error">'.$langs->trans("ErrorModuleNotFound").'</font>';
+    	setEventMessage($langs->trans("ErrorModuleNotFound"),'errors');
     	dol_syslog($langs->trans("ErrorModuleNotFound"), LOG_ERR);
     }
 }
@@ -172,14 +172,14 @@ else if ($action == 'set_SUPPLIER_ORDER_FREE_TEXT')
 
     if (! $res > 0) $error++;
 
-    if (! $error)
-    {
-        $mesg = "<font class=\"ok\">".$langs->trans("SetupSaved")."</font>";
-    }
-    else
-    {
-        $mesg = "<font class=\"error\">".$langs->trans("Error")."</font>";
-    }
+	if (! $error)
+	{
+		setEventMessage($langs->trans("SetupSaved"));
+	}
+	else
+	{
+		setEventMessage($langs->trans("Error"),'errors');
+	}
 }
 
 
@@ -213,7 +213,7 @@ print '<td width="100">'.$langs->trans("Name").'</td>';
 print '<td>'.$langs->trans("Description").'</td>';
 print '<td>'.$langs->trans("Example").'</td>';
 print '<td align="center" width="60">'.$langs->trans("Status").'</td>';
-print '<td align="center" width="16">'.$langs->trans("Info").'</td>';
+print '<td align="center" width="16">'.$langs->trans("ShortInfo").'</td>';
 print "</tr>\n";
 
 clearstatcache();
@@ -344,7 +344,8 @@ print '<td width="100">'.$langs->trans("Name").'</td>'."\n";
 print '<td>'.$langs->trans("Description").'</td>'."\n";
 print '<td align="center" width="60">'.$langs->trans("Status").'</td>'."\n";
 print '<td align="center" width="60">'.$langs->trans("Default").'</td>'."\n";
-print '<td align="center" width="40" colspan="2">'.$langs->trans("Info").'</td>';
+print '<td align="center" width="40">'.$langs->trans("ShortInfo").'</td>';
+print '<td align="center" width="40">'.$langs->trans("Preview").'</td>';
 print '</tr>'."\n";
 
 clearstatcache();
@@ -460,8 +461,6 @@ print '</td><td align="right">';
 print '<input type="submit" class="button" value="'.$langs->trans("Modify").'">';
 print "</td></tr>\n";
 print '</form>';
-
-dol_htmloutput_mesg($mesg);
 
 $db->close();
 llxFooter();

@@ -19,8 +19,8 @@
  */
 
 /**
- *      \file       htdocs/societe/admin/societe_extrafields.php
- *		\ingroup    societe
+ *      \file       htdocs/comm/admin/propal_extrafields.php
+ *		\ingroup    propal
  *		\brief      Page to setup extra fields of third party
  */
 
@@ -51,7 +51,7 @@ if (!$user->admin) accessforbidden();
  * Actions
  */
 
-require DOL_DOCUMENT_ROOT.'/core/admin_extrafields.inc.php';
+require DOL_DOCUMENT_ROOT.'/core/actions_extrafields.inc.php';
 
 
 

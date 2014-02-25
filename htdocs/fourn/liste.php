@@ -3,6 +3,7 @@
  * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2011      Philippe Grand       <philippe.grand@atoo-net.com>
+ * Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,17 +87,20 @@ $sql.= ", ".MAIN_DB_PREFIX."c_stcomm as st";
 if (!$user->rights->societe->client->voir && !$socid) $sql .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 $sql.= " WHERE s.fk_stcomm = st.id AND s.fournisseur = 1";
 $sql.= " AND s.entity IN (".getEntity('societe', 1).")";
-if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
+if (!$user->rights->societe->client->voir && !$socid) $sql .= " AND s.rowid = sc.fk_soc";
 if ($socid) $sql .= " AND s.rowid = ".$socid;
-if ($socname)
-{
-	$sql .= " AND s.nom LIKE '%".$db->escape($socname)."%'";
+if ($socname) {
+	$sql .= natural_search('s.nom', $socname);
 	$sortfield = "s.nom";
 	$sortorder = "ASC";
 }
-if ($search_nom)   $sql .= " AND s.nom LIKE '%".$db->escape($search_nom)."%'";
+if ($search_nom) {
+	$sql .= natural_search('s.nom', $search_nom);
+}
 if ($search_zipcode) $sql .= " AND s.zip LIKE '".$db->escape($search_zipcode)."%'";
-if ($search_town) $sql .= " AND s.town LIKE '%".$db->escape($search_town)."%'";
+if ($search_town) {
+	$sql .= natural_search('s.town', $search_town);
+}
 if ($search_code_fournisseur)   $sql .= " AND s.code_fournisseur LIKE '%".$db->escape($search_code_fournisseur)."%'";
 if ($search_compta_fournisseur) $sql .= " AND s.code_compta_fournisseur LIKE '%".$db->escape($search_compta_fournisseur)."%'";
 if ($search_datec)   $sql .= " AND s.datec LIKE '%".$db->escape($search_datec)."%'";
@@ -114,6 +118,7 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 $sql.= $db->order($sortfield,$sortorder);
 $sql.= $db->plimit($conf->liste_limit+1, $offset);
 
+dol_syslog('fourn/liste.php: sql='.$sql,LOG_DEBUG);
 $resql = $db->query($sql);
 if ($resql)
 {
@@ -178,7 +183,7 @@ if ($resql)
 	print '<input class="flat" type="text" size="10" name="search_datec" value="'.$search_datec.'">';
 	print '</td>';
 
-	print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" src="'.DOL_URL_ROOT.'/theme/'.$conf->theme.'/img/search.png" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
+	print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
 
 	$parameters=array();
 	$formconfirm=$hookmanager->executeHooks('printFieldListOption',$parameters);    // Note that $action and $object may have been modified by hook

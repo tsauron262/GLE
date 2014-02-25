@@ -255,8 +255,8 @@ if ($_REQUEST["id"] > 0) {
             <td class="ui-widget-content" colspan="3"><input type="text" name="desc" style="width:320px;" value="' . $resultG->description . '"/></td>
         </tr>';
     echo '<tr>
-            <th>Intervention</th>
-        </tr>
+            <th height="30px">Intervention</th>
+        <td class="ui-widget-content" colspan="3" rowspan="2"><table width="100%">
 ';
     $nbPrest = 0;
     foreach ($prestations as $prestation) {
@@ -304,10 +304,10 @@ if ($_REQUEST["id"] > 0) {
 
 
 
-        $htmlStr = '<input type="hidden" name="' . $prefId . 'rowid" value="' . $prestation->rowid . '"/>';
+        $htmlStr = '';
 
         $htmlStr .= '<tr>
-            <th width="25%">Type</th>
+            <th width="25%" class="ui-widget-header ui-state-default" style="color:black;">Type <input type="hidden" name="' . $prefId . 'rowid" value="' . $prestation->rowid . '"/></th>
             <td class="ui-widget-content" colspan="1">' . $selectHtml . '</td>
             <td class="ui-widget-content" colspan="1">' . $htmlSelect2 . '</td>
             <td class="ui-widget-content" colspan="1"><input type="button" class="supprPrestaButton butAction" id="suppr_' . $prefId . '" value="Supprimer"/></td>';
@@ -320,6 +320,9 @@ if ($_REQUEST["id"] > 0) {
         $htmlStr .= '<tr>
             <th width="25%" class="ui-widget-header ui-state-default">Rapport</th>
             <td class="ui-widget-content" colspan="3"><textarea name="' . $prefId . 'descPrest">' . stripslashes($prestation->description) . '</textarea></td>
+        </tr>';
+        $htmlStr .= '<tr>
+            <td class="ui-widget-content" colspan="4">&nbsp;</td>
         </tr>';
         echo $htmlStr;
 
@@ -366,7 +369,9 @@ if ($_REQUEST["id"] > 0) {
 //        }
         echo $htmlStr;
     }
-    echo '<tr id="ajPrestaZone"><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
+    echo '<tr id="ajPrestaZone">';
+    echo '</table><tr><th><td>';
+    echo '<tr><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
     $checked = (extra(17) == 1) ? ' checked="checked"' : '';
 
     echo '<tr>

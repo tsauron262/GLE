@@ -160,7 +160,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
 
 
 if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'remove_file') {
-	require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
+    require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
     $filedir = $conf->ficheinter->dir_output . "/" . $fichinter->ref;
     $file = $filedir . '/' . GETPOST('file', 'alpha'); // Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
     $result = dol_delete_file($file);
@@ -271,7 +271,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_delete' && $_R
         $fichinter->fetch($_REQUEST['id']);
         $fichinter->delete($user);
     }
-    Header('Location: '.DOL_URL_ROOT.'/synopsisfichinter/liste.php?leftmenu=ficheinter');
+    Header('Location: ' . DOL_URL_ROOT . '/synopsisfichinter/liste.php?leftmenu=ficheinter');
     exit;
 }
 

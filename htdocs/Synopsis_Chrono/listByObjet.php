@@ -39,8 +39,14 @@ if (isset($_REQUEST['obj'])) {
         $head = societe_prepare_head($soc);
         $socid = $_REQUEST['id'];
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasSociete` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql))
-            $tabModel[$result->id] = $result->titre;
+        while ($result = $db->fetch_object($sql)){
+            $nomI = $result->titre;
+            $titre = $nomI;
+            if (isset($result->picto) && $result->picto != '')
+                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
+            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
+        }
+//            $tabModel[$result->id] = $result->titre;
     } else if ($_REQUEST['obj'] == "ctr") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/contract.lib.php';
@@ -62,8 +68,14 @@ if (isset($_REQUEST['obj'])) {
         $head = synopsis_project_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasProjet` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql))
-            $tabModel[$result->id] = $result->titre;
+        while ($result = $db->fetch_object($sql)){
+            $nomI = $result->titre;
+            $titre = $nomI;
+            if (isset($result->picto) && $result->picto != '')
+                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
+            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
+        }
+//            $tabModel[$result->id] = $result->titre;
     } else if ($_REQUEST['obj'] == "propal") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/propal.lib.php';
@@ -75,8 +87,14 @@ if (isset($_REQUEST['obj'])) {
         $head = propal_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasPropal` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql))
-            $tabModel[$result->id] = $result->titre;
+        while ($result = $db->fetch_object($sql)) {
+            $nomI = $result->titre;
+            $titre = $nomI;
+            if (isset($result->picto) && $result->picto != '')
+                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
+            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
+        }
+//        $tabModel[$result->id] = $result->titre;
     }
 } else {
 //        $langs->load("contracts");
@@ -89,12 +107,12 @@ if (isset($_REQUEST['obj'])) {
 //        $head = propal_prepare_head($projet);
 //        $socid = $projet->socid;
     $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1");
-    while ($result = $db->fetch_object($sql)){
+    while ($result = $db->fetch_object($sql)) {
         $nomI = $result->titre;
         $titre = $nomI;
-        if(isset($result->picto) && $result->picto != '')
-            $titre = img_picto($nomI, "object_".$result->picto)."  ". $nomI;
-        $tabModel[$result->id] =  array('nomModel' => $nomI, 'titre' => $titre);
+        if (isset($result->picto) && $result->picto != '')
+            $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
+        $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
     }
 }
 

@@ -599,7 +599,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
     $modFicheinter = new $obj;
     $numpr = $modFicheinter->getNextValue($societe, $fichinter);
 
-    if ($_REQUEST["socid"]) {
+    if ($_REQUEST["socid"] > 0) {
         print "<form name='fichinter' action=\"fiche.php\" method=\"post\">";
 
         print '<table class="border" cellpadding=15 width="100%">';

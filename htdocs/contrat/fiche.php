@@ -1026,12 +1026,12 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                             for ( var i=0;i<id.length;i++) 
                                 if(id[i].indexOf("ligne") > -1 || id[i].indexOf("rowid") > -1)
                                     nId = id[i].split("=")[1];
-                            elem = $(this).parent().parent().parent().parent().parent().parent().parent().children("td.liste_titre");
-                            elem.css(\'cursor\',\'pointer\');
-                            elem.html(elem.html()+"<p class=\'mod\'>Modifier</p>");
-                            elem.html(elem.html()+"<p class=\'detail\'>Detail</p>");
-                            elem.html(elem.html()+"<p class=\'haut\'>/\\\</p>");
-                            elem.html(elem.html()+"<p class=\'bas\'>\\\/</p>");
+                            elem = $(this).parent().parent().parent().parent().children("tr.liste_titre").children("td").first();
+                            elem.html(elem.html()+"<p class=\'fl\'>&nbsp;</p><p class=\'fl\'>&nbsp;</p>");
+                            elem.html(elem.html()+"<p class=\'mod fl cp\'>Modifier</p>");
+                            elem.html(elem.html()+"<p class=\'detail fl cp\'>Detail</p>");
+                            elem.html(elem.html()+"<p class=\'haut fl cp\'>/\\\</p>");
+                            elem.html(elem.html()+"<p class=\'bas fl cp\'>\\\/</p>");
 //                            elem.click(function(){
 //                                location.href = DOL_URL_ROOT+"/Synopsis_Contrat/contratDetail.php?id="+nId;
 //                            });
@@ -1453,7 +1453,8 @@ if ($action == 'create') {
                 $total = 0;
 
                 print '<tr class="liste_titre">';
-                print '<td>'.$langs->trans("ServiceNb",$cursorline).'</td>';
+                print '<td><p class="fl">'.$langs->trans("ServiceNb",$cursorline)."</p>";
+            /* deb mod drsi pour scroll en modif */ print '<div id="' . $object->lines[$cursorline - 1]->id . '"></div>' /* f mod drsi */.'</td>';
                 print '<td width="50" align="center">'.$langs->trans("VAT").'</td>';
                 print '<td width="50" align="right">'.$langs->trans("PriceUHT").'</td>';
                 print '<td width="30" align="center">'.$langs->trans("Qty").'</td>';
@@ -1830,6 +1831,10 @@ if ($action == 'create') {
 
                 print '</form>';
             }
+            /* deb mod drsi */
+            if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT))
+                print $contratSyn->lignePlus($objp);
+            /* fin mod drsi */
 
            /* print '</td>';	// End td if line is 1
 

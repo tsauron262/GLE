@@ -112,6 +112,10 @@ function initSynchServ(idAction) {
 //    $(".fullScreen").load(function() {
 //        iframePrinc.CallBackPlus = CallBackPlus;
 //    });
+//    $(window).on('hashchange', function() {
+////        iframePrinc.location.replace(window.location.hash.replace("#", ""));
+//    });
+
     timeTentative = 1;
     boucleSynchServ(idAction);
 }
@@ -559,7 +563,9 @@ function initTransmission(elem) {
 
         $("iframe.fullScreen").load(function() {
             iFramePrinc(false);
-            eval('window.location.hash = ' + elem + '.location;');
+            eval('url = document.location.href;'+
+                  'newUrl = url.replace(window.location.hash, "") + "#" +' + elem + '.location;'+
+                    'history.replaceState("{}", "",newUrl);');
         });
     }
 }

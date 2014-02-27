@@ -230,7 +230,7 @@ div.mainmenu.synopsisficheinter {
     height: 350px;
     width: 250px;
 }
-.editable{
+.editable, .cp{
     cursor: pointer;    
 }
 a#note.lienNote{
@@ -315,4 +315,10 @@ span.timePage {
 
 .datetimepicker{
     min-width: 120px;
+}
+
+
+.fl{
+    float: left;
+    margin-left: 10px;
 }

@@ -37,7 +37,7 @@ function widget_listExpeditionPrepaCommande() {
         $sql.= $clause." sc.fk_user = " .$user->id;
         $clause = " AND ";
     }
-         $sql .= " WHERE c.date_livraison IS NOT NULL";
+         $sql .= $clause." c.date_livraison IS NOT NULL";
         $sql .= " AND ce.sourcetype = 'commande' AND ce.targettype = 'shipping'";
         $sql .= " AND b.fk_entrepot IS NOT NULL
                    LIMIT 50";

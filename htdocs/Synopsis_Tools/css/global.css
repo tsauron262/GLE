@@ -322,3 +322,7 @@ span.timePage {
     float: left;
     margin-left: 10px;
 }
+
+li.tmenusel a.tmenusel{
+    color: black;
+}

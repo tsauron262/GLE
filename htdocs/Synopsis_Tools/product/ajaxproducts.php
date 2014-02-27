@@ -60,7 +60,7 @@ if($_REQUEST['type'] == "2")
 
 
 $form = new Form($db);
-$form->select_produits_do(isset($_REQUEST['prodId'])?$_REQUEST['prodId']:'', $_REQUEST["htmlname"], $_REQUEST["type"], 50, $_REQUEST["price_level"], utf8_decode($_REQUEST["keysearch"]), $_REQUEST['status']);
+$form->select_produits(isset($_REQUEST['prodId'])?$_REQUEST['prodId']:'', $_REQUEST["htmlname"], $_REQUEST["type"], 50, $_REQUEST["price_level"], utf8_decode($_REQUEST["keysearch"]), $_REQUEST['status']);
 
 
 //

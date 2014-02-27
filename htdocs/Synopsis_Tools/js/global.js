@@ -331,20 +331,20 @@ function traiteScroll(heightDif) {
 ////    document.body.scrollTop = scrollY;
 //}
 
-function findPos(el) {
-    var _x = 0;
-    var _y = 0;
-    el = $(el);
-    while (el && typeof (el.offset()) == "object" && !isNaN(el.offset().left) && !isNaN(el.offset().top)) {
-        _x += el.position().left + el.parent().scrollLeft();
-        _y += el.position().top + el.parent().scrollTop();
-        el = el.parent();
-    }
-    return {
-        y: _y,
-        x: _x
-    };
-}
+//function findPos(el) {
+//    var _x = 0;
+//    var _y = 0;
+//    el = $(el);
+//    while (el && typeof (el.offset()) == "object" && !isNaN(el.offset().left) && !isNaN(el.offset().top)) {
+//        _x += el.position().left + el.parent().scrollLeft();
+//        _y += el.position().top + el.parent().scrollTop();
+//        el = el.parent();
+//    }
+//    return {
+//        y: _y,
+//        x: _x
+//    };
+//}
 
 
 function ajNoteAjax() {

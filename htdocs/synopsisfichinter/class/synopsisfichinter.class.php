@@ -292,20 +292,20 @@ class Synopsisfichinter extends Fichinter {
         }
     }
 
-    private function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
-        global $mysoc;
-        global $langs;
-        require_once(DOL_DOCUMENT_ROOT . '/lib/CMailFile.class.php');
-        $mail = new CMailFile($subject, $to, $from, $msg,
-                        $filename_list, $mimetype_list, $mimefilename_list,
-                        $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
-        $res = $mail->sendfile();
-        if ($res) {
-            return (1);
-        } else {
-            return -1;
-        }
-    }
+//    private function sendMail($subject, $to, $from, $msg, $filename_list = array(), $mimetype_list = array(), $mimefilename_list = array(), $addr_cc = '', $addr_bcc = '', $deliveryreceipt = 0, $msgishtml = 1, $errors_to = '') {
+//        global $mysoc;
+//        global $langs;
+//        require_once(DOL_DOCUMENT_ROOT . '/lib/CMailFile.class.php');
+//        $mail = new CMailFile($subject, $to, $from, $msg,
+//                        $filename_list, $mimetype_list, $mimefilename_list,
+//                        $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
+//        $res = $mail->sendfile();
+//        if ($res) {
+//            return (1);
+//        } else {
+//            return -1;
+//        }
+//    }
 
     function devalid($user, $outputdir) {
         $this->setDraft($user);

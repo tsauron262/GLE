@@ -5,7 +5,7 @@
  * Copyright (C) 2005-2009 Regis Houssin         <regis.houssin@capnetworks.com>
  * Copyright (C) 2005      Simon TOSSER          <simon@kornog-computing.com>
  * Copyright (C) 2011-2012 Juanjo Menent         <jmenent@2byte.es>
- * Copyright (C) 2013      Cédric Salvador       <csalvador@gpcsolutions.fr>
+ * Copyright (C) 2013      CĂŠdric Salvador       <csalvador@gpcsolutions.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,22 +73,6 @@ $modulepart='fichinter';
  */
 
 include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
-
-// Delete
-else if ($action == 'confirm_deletefile' && $confirm == 'yes')
-{
-	if ($object->id > 0)
-	{
-		$langs->load("other");
-		$object->fetch_thirdparty();
-
-		$file = $upload_dir . '/' . GETPOST('urlfile');	// Do not use urldecode here ($_GET and $_REQUEST are already decoded by PHP).
-		dol_delete_file($file,0,0,0,$object);
-		$_SESSION['DolMessage'] = '<div class="ok">'.$langs->trans("FileWasRemoved",GETPOST('urlfile')).'</div>';
-		Header('Location: '.$_SERVER["PHP_SELF"].'?id='.$id);
-		exit;
-	}
-}
 
 
 /*

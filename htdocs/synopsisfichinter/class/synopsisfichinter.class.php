@@ -565,6 +565,7 @@ class Synopsisfichinter extends Fichinter {
     }
 
     function majPrixDi() {
+        global $user;
         $this->fetch_lines();
         foreach ($this->lignes as $lignes) {
             if ($lignes->fk_commandedet) {
@@ -574,7 +575,7 @@ class Synopsisfichinter extends Fichinter {
                     if ($lignes->pu_ht != $res->pu_ht || $lignes->isForfait != $res->isForfait) {
                         $lignes->pu_ht = $res->pu_ht;
                         $lignes->isForfait = $res->isForfait;
-                        $lignes->update();
+                        $lignes->update($user);
                     }
                 }
             }
@@ -798,7 +799,7 @@ class Synopsisfichinter extends Fichinter {
             }
 
 
-            $result = $ligne->insert();
+            $result = $ligne->insert($user);
             if ($result > 0) {
                 $this->db->commit();
                 return 1;

@@ -72,7 +72,7 @@ if ($object->id > 0)
 /*mod drsi*/
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
     $upload_dir = $conf->synopsiscontrat->dir_output.'/'.dol_sanitizeFileName($object->ref);
-    $modulepart='synopsiscontract';
+    $modulepart='synopsiscontrat';
 }
 else{
     $upload_dir = $conf->contrat->dir_output.'/'.dol_sanitizeFileName($object->ref);
@@ -148,7 +148,7 @@ if ($object->id)
     	if ($ret == 'html') print '<br>';
     }
 
-    $modulepart = 'contract';
+//    $modulepart = 'contract';
     $permission = $user->rights->contrat->creer;
     $param = '&id=' . $object->id;
     include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';

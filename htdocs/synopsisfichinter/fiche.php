@@ -183,7 +183,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add') {
     $fichinter->fk_commande = $_POST["fk_commande"];
 
     if ($fichinter->socid > 0) {
-        $result = $fichinter->create();
+        $result = $fichinter->create($user);
         if ($result > 0) {
             if (isset($_REQUEST['fk_contratdet']))
                 addElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet'], $result);
@@ -462,7 +462,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == 'updateligne' && $user->ri
     }
 
 
-    $result = $fichinterline->update();
+    $result = $fichinterline->update($user);
     $fichinter->majPrixDi();
 
 

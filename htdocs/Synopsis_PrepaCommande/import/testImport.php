@@ -936,7 +936,7 @@ if (is_dir($dir)) {
                                         if ($sql) {
                                             $tmpProd = new Product($db);
                                             $tmpProd->fetch($prodId);
-                                            $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                            $tmpProd->updatePrice(($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
                                         } else {
                                             $ok = false;
                                         }
@@ -1011,7 +1011,7 @@ if (is_dir($dir)) {
 
                                     $tmpProd = new Product($db);
                                     $tmpProd->fetch($prodId);
-                                    $tmpProd->updatePrice($prodId, ($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
+                                    $tmpProd->updatePrice(($val['ArtPrixBase'] > 0 ? $val['ArtPrixBase'] : 0), "HT", $user, ($val['TaxTaux'] > 0 ? $val['TaxTaux'] : 0));
 
                                     /*
                                       +--------------------------------------------------------------------------------------------------------------+

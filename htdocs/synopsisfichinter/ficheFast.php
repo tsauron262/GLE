@@ -582,7 +582,7 @@ if (get_magic_quotes_gpc()) { // Si les magic quotes sont activés, on les désa
 }
 
 function saveForm() {
-    global $db, $fichinter;
+    global $db, $fichinter, $user;
     $_POST = addslashes_r($_POST);
 
     for ($i = 1; $i < 5; $i++) {
@@ -671,7 +671,7 @@ function saveForm() {
                 $fichinterline->typeIntervProd = $_POST['presta' . $i . "_fk_prod"];
                 $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
                 $fichinterline->pu_ht = $pu_ht;
-                $result = $fichinterline->update();
+                $result = $fichinterline->update($user);
             } else
                 $fichinterline->delete_line();
         }

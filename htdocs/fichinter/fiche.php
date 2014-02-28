@@ -3,8 +3,10 @@ require '../main.inc.php';
 
 
 /* mod drsi  */
-if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER))
+if (isset($conf->global->MAIN_MODULE_SYNOPSISFICHEINTER)){
     header("Location: ".str_replace("fichinter/fiche", "synopsisfichinter/fiche", $_SERVER['REQUEST_URI']));
+    die;
+}
 /* fmod drsi */ 
 
 

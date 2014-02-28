@@ -173,6 +173,7 @@ print "</table>";
 //Lignes
 //$com->fetch_group_lines();
 //$lines = $com->lines;
+$lines = array();
 $sql = $db->query("SELECT `fk_product`, `total_ht` FROM `llx_commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
 $i = 0;
 while ($val = $db->fetch_object($sql)) {

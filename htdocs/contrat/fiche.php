@@ -1984,7 +1984,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
         if ($object->statut == 1 || $object->statut == 2) {
 //            print "<br/>";
             if ($user->rights->synopsiscontrat->renouveller) {
-                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
+//                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
                 print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=reconduction">' . $langs->trans('Reconduction') . '</a>';
             }
         }

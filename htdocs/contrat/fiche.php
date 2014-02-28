@@ -121,6 +121,11 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                 $action = '';
             }
         }
+        else if ($action == 'setModP') {
+            if ($object->id > 0) {
+                $db->query("UPDATE ".MAIN_DB_PREFIX."Synopsis_contrat_GMAO SET condReg_refid = ".$_REQUEST['condid'].", modeReg_refid = ".$_REQUEST['paiementtype']." WHERE contrat_refid = ".$object->id);
+            }
+        }
         else if ($action == 'send' && !GETPOST('addfile') && !GETPOST('removedfile') && !GETPOST('cancel')) {
             $langs->load('mails');
 
@@ -1352,14 +1357,19 @@ if ($action == 'create') {
             echo "<tr><td>Total HT</td><td>" . $object->total_ht . " &euro;" . "</td>";
             echo "<td>Total TTC</td><td>" . $object->total_ttc . " &euro;" . "</td></tr>";
             //condition de reglement
-            if (isset($_REQUEST['modPaiement'])) {
+//            if (isset($_REQUEST['modPaiement'])) {
+                print '<form>';
                 print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Conditions de paiement") . '</th>';
                 print '    <td class="ui-widget-content">';
-                $form->select_conditions_paiements($com->cond_reglement_id, 'condid', -1, 0, $display = true);
+                $form->select_conditions_paiements($object->condReg_refid, 'condid', -1, 0, $display = true);
                 print '<tr><th width="20%"  class="ui-widget-header ui-state-default" nowrap>' . $langs->trans("Mode de paiement") . '</th>';
                 print '    <td class="ui-widget-content">';
-                $form->select_types_paiements($com->mode_reglement_id, 'paiementtype', "", 0, 0, 0, $display = true);
-            }
+                $form->select_types_paiements($object->modeReg_refid, 'paiementtype', "");
+                print '<input type="hidden" name="id" value="'.$id.'"/>';
+                print '<input type="hidden" name="action" value="setModP"/>';
+                print '<input type="submit" value="Valider"/>';
+                print '</form>';
+//            }
         }
         /* fin mod drsi */
 

@@ -17,7 +17,7 @@
   * GLE-1.2
   */
 
-header("Location: listDetail.php");
+header("Location: listDetail.php?mainmenu=Process");
 exit;
 require_once("pre.inc.php");
 

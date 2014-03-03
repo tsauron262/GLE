@@ -242,7 +242,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
     $fichinter->ref = $modFicheinter->getNextValue($societe, $ficheinter);
 
     if ($fichinter->socid > 0) {
-        $result = $fichinter->create();
+        $result = $fichinter->create($user);
         if ($result > 0) {
 
             //transfert toutes les lignes
@@ -310,7 +310,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
 //                    print '<br/>';
 //                    var_dump($objLigneFiche);
 //                    print '<br/>';
-                $objLigneFiche->insert();
+                $objLigneFiche->insert($user);
             }
             header('Location: ' . DOL_URL_ROOT . '/fichinter/fiche.php?id=' . $result);
         } else {

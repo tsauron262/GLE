@@ -244,8 +244,14 @@ $requete = "SELECT *
 $contrat->fetch_lines();
 
 $nbDepDeb = date_diff(date_create($db->idate($contrat->date_contrat)), date_create())->days;
-$pourc = $result[0]['total_ht']/$contrat->total_ht*100;
-$pourcPro = $pourc*365/$nbDepDeb;
+if($contrat->total_ht > 0){
+    $pourc = $result[0]['total_ht'] / $contrat->total_ht * 100;
+    $pourcPro = $pourc * 365 / $nbDepDeb;
+}
+else{
+    $pourc = "N/C";
+    $pourcPro = "N/C";
+}
 print "<table class='border' width='100%'><tr><td> Date contrat <td>" . dol_print_date($contrat->date_contrat) . "
     <td>Vendue <td> " . $contrat->total_ht . " &euro;
     <tr><td>Prevue <td> " . $result[1]['total_ht'] . " &euro;";

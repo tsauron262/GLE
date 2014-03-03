@@ -1,6 +1,6 @@
 <?php
 
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == "save" && $_REQUEST['text'] != "") {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == "save" && isset($_REQUEST['text'])) {
     $textSave = $_REQUEST['text'];
     $textT = explode("\n", $textSave);
     $textT = array_reverse($textT);

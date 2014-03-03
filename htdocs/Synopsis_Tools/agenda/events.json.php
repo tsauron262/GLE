@@ -10,9 +10,9 @@ $result = $db->query($sql);
 //echo $sql;
 while($ligne = $db->fetch_object($result)){
     $userId = $newTabUser[$ligne->fk_user_action];
-        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label . "\n nnn";
-        $text = str_replace('"', '\"', nl2br($text));
-        $text = str_replace("\n", ' ', $text);
+        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
+        $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text); 
+        $text = str_replace('"', '\"', $text);
         $eventsStr[] = '{"id":'.$ligne->id.', "start":"'.date('c', $db->jdate($ligne->datep)).'", "end":"'.date('c', $db->jdate($ligne->datep2)).'", "title":"'.$text.'", "userId": '.$userId.'}';
 }
 echo "[";

@@ -83,7 +83,7 @@ $pagenext = $page + 1;
 llxHeader("", "Liste des FI");
 
 
-$sql = "SELECT s.nom,s.rowid as socid, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
+$sql = "SELECT s.nom,s.rowid as socid, f.fk_user_author, f.ref,f.datei as dp, f.rowid as fichid, f.fk_statut, f.description, f.duree";
 if (!$user->rights->societe->client->voir && !$socid)
     $sql .= ", sc.fk_soc, sc.fk_user";
 $sql.= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
@@ -118,7 +118,8 @@ if ($result) {
     print "<tr class=\"liste_titre\">";
     print_liste_field_titre($langs->trans("Ref"), "liste.php", "f.ref", "", $urlparam, 'width="10%"', $sortfield, $sortorder);
     print_liste_field_titre($langs->trans("Company"), "liste.php", "s.nom", "", $urlparam, '', $sortfield, $sortorder);
-    print '<td>' . $langs->trans("Titre") . '</td>';
+    print_liste_field_titre($langs->trans("Titre"), $_SERVER["PHP_SELF"], "f.description", "", $urlparam, '', $sortfield, $sortorder);
+    print_liste_field_titre($langs->trans("Technicien"), $_SERVER["PHP_SELF"], "f.fk_user_author", "", $urlparam, '', $sortfield, $sortorder);
     print_liste_field_titre($langs->trans("Date"), "liste.php", "f.datei", "", $urlparam, 'align="center"', $sortfield);
     print '<td align="center">' . $langs->trans("Duration") . '</td>';
     print '<td align="center">' . $langs->trans("Order") . '</td>';
@@ -136,6 +137,9 @@ if ($result) {
         print "<td><a href=\"fiche.php?id=" . $objp->fichid . "\">" . img_object($langs->trans("Show"), "intervention") . ' ' . $objp->ref . "</a></td>\n";
         print '<td><a href="' . DOL_URL_ROOT . '/comm/fiche.php?socid=' . $objp->socid . '">' . img_object($langs->trans("ShowCompany"), "company") . ' ' . dol_trunc($objp->nom, 44) . "</a></td>\n";
         print '<td>' . nl2br($objp->description) . '</td>';
+        $tmpUser = new User($db);
+        $tmpUser->fetch($objp->fk_user_author);
+        print '<td>' . $tmpUser->getNomUrl(1) . '</td>';
         print '<td align="center">' . dol_print_date($db->jdate($objp->dp), 'day') . "</td>\n";
         print '<td align="right">' . ConvertSecondToTime($objp->duree) . '</td>';
         $requete = "SELECT fk_contrat, fk_commande

@@ -225,14 +225,14 @@ $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
         $langs->load('dict');
         $requete = "
         SELECT *
-          FROM llx_c_type_contact,
-               llx_element_contact,
-               llx_socpeople
+          FROM ".MAIN_DB_PREFIX."c_type_contact,
+               ".MAIN_DB_PREFIX."element_contact,
+               ".MAIN_DB_PREFIX."socpeople
          WHERE `code` = 'SALESREPSIGN'
            AND source = 'external'
            AND element = 'contrat'
-           AND llx_element_contact.fk_c_type_contact = llx_c_type_contact.rowid
-           AND llx_socpeople.rowid = llx_element_contact.fk_socpeople
+           AND ".MAIN_DB_PREFIX."element_contact.fk_c_type_contact = ".MAIN_DB_PREFIX."c_type_contact.rowid
+           AND ".MAIN_DB_PREFIX."socpeople.rowid = ".MAIN_DB_PREFIX."element_contact.fk_socpeople
            AND element_id = " . $this->contrat->id;
         $sql = $this->db->query($requete);
         $to = "";

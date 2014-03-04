@@ -170,8 +170,8 @@ class pdf_contrat_courrierBIMPrenHLaugmentation extends ModeleSynopsiscontrat
 
 //representant légal : signataire contrat
                 $requete = "SELECT fk_socpeople
-                              FROM llx_c_type_contact as c,
-                                   llx_element_contact as e
+                              FROM ".MAIN_DB_PREFIX."c_type_contact as c,
+                                   ".MAIN_DB_PREFIX."element_contact as e
                              WHERE c.element = 'contrat'
                                AND c.source = 'external'
                                AND c.code = 'SALESREPSIGN'

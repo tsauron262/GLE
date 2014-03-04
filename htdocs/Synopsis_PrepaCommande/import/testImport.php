@@ -394,7 +394,7 @@ if (is_dir($dir)) {
                                     $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext IN ('" . $val['PRIID'] . "')";
                                     $result = $db->query($sql);
                                     if ($db->num_rows($result) == 1)
-                                        echo "Pas de correspondance mail correction par id dans llx_user " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
+                                        echo "Pas de correspondance mail correction par id dans ".MAIN_DB_PREFIX."user " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
                                 }
 
                                 if ($db->num_rows($result) > 0) {

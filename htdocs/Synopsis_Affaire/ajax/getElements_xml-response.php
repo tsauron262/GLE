@@ -24,7 +24,7 @@
     $xml = "<ajax-response>";
 
     $arrExclude=array();
-    $requete = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid = ". $affaireId ." ORDER BY type";
+    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element WHERE affaire_refid = ". $affaireId ." ORDER BY type";
     $sql = $db->query($requete);
     while ($res=$db->fetch_object($sql))
     {

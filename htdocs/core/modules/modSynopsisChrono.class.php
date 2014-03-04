@@ -259,7 +259,7 @@ class modSynopsisChrono extends DolibarrModules
   function init()
   {
         $this->remove();
-    $sql = array("UPDATE llx_menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/index.php' WHERE Titre = 'Process' AND type ='top'", 
+    $sql = array("UPDATE ".MAIN_DB_PREFIX."menu set Titre = 'Chrono/Process', url = '/Synopsis_Chrono/index.php' WHERE Titre = 'Process' AND type ='top'", 
         "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Chrono` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `date_create` datetime DEFAULT NULL,

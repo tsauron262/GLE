@@ -255,7 +255,7 @@ if ($affaireid > 0)
         print '</form>';
 
         //List de tous les documents
-        $requete = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
         //    print $requete;
         $sql=$db->query($requete);
         $filearray1=array();

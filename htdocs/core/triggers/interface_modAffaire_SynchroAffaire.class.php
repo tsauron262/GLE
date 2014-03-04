@@ -337,7 +337,7 @@ global $langs;
 function delAffaireElement($type,$id)
 {
     global $db;
-    $requete = "DELETE FROM llx_Synopsis_Affaire_Element WHERE type='".$type."' AND element_id = ".$id;
+    $requete = "DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Affaire_Element WHERE type='".$type."' AND element_id = ".$id;
     $db->query($requete);
 }
 
@@ -345,7 +345,7 @@ function addSqlAffaireElement($type,$eid,$affaireId)
 {
     global $user;
     global $db;
-    $requete ="INSERT INTO `llx_Synopsis_Affaire_Element`
+    $requete ="INSERT INTO `".MAIN_DB_PREFIX."Synopsis_Affaire_Element`
                            (`type`,`element_id`,`datea`,`fk_author`,`affaire_refid`)
                     VALUES
                            ('".$type."', ".$eid.", 'now();' , ".$user->id.", ".$affaireId.")";
@@ -363,7 +363,7 @@ function addAffaireElement($type,$obj)
         {
             //Si une propal liee a une commande est dans une affaire, on insert dans la meme affaire
             $requete ="SELECT affaire_refid
-                         FROM ".MAIN_DB_PREFIX."co_pr, llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_pr, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_commande = ".$obj->id ."
                           AND fk_propale = element_id
                           AND type='propale'";
@@ -377,7 +377,7 @@ function addAffaireElement($type,$obj)
         case "facture":
         {
             $requete ="SELECT affaire_refid
-                         FROM ".MAIN_DB_PREFIX."co_fa, llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_fa, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_facture = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -391,7 +391,7 @@ function addAffaireElement($type,$obj)
         case "livraison":
         {
             $requete ="SELECT affaire_refid
-                         FROM ".MAIN_DB_PREFIX."co_liv, llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_liv, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_livraison = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -401,7 +401,7 @@ function addAffaireElement($type,$obj)
                 addSqlAffaireElement($type,$obj->id,$res->affaire_refid);
             }
             $requete ="SELECT affaire_refid
-                         FROM ".MAIN_DB_PREFIX."co_exp, llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_exp, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_livraison = ".$obj->id ."
                           AND fk_expedition = element_id
                           AND type='expedition'";
@@ -415,7 +415,7 @@ function addAffaireElement($type,$obj)
         case "expedition":
         {
             $requete ="SELECT affaire_refid
-                         FROM ".MAIN_DB_PREFIX."co_exp, llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."co_exp, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_expedition = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -429,7 +429,7 @@ function addAffaireElement($type,$obj)
         case "facture fournisseur":
         {
             $requete ="SELECT affaire_refid
-                         FROM Babel_li_fourn_co_fa, llx_Synopsis_Affaire_Element
+                         FROM Babel_li_fourn_co_fa, ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE fk_facture = ".$obj->id ."
                           AND fk_commande = element_id
                           AND type='commande'";
@@ -445,7 +445,7 @@ function addAffaireElement($type,$obj)
             
                     $tabDI = $obj->getDI();
             $requete ="SELECT affaire_refid
-                         FROM llx_Synopsis_Affaire_Element
+                         FROM ".MAIN_DB_PREFIX."Synopsis_Affaire_Element
                         WHERE element_id IN (".  implode(",",$tabDI).")
                           AND type='DI'";
             $sql = $obj->db->query($requete);

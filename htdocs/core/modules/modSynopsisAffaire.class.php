@@ -211,7 +211,7 @@ class modSynopsisAffaire extends DolibarrModules
         // Permissions
         $this->remove();
         $this->dirs[0]=$conf->synopsisaffaire->dir_output;
-        $sql = array("CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire` (
+        $sql = array("CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Affaire` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `nom` varchar(255) DEFAULT NULL,
   `description` longtext,
@@ -223,7 +223,7 @@ class modSynopsisAffaire extends DolibarrModules
   `entity` INT NOT NULL DEFAULT  '1',
   PRIMARY KEY (`id`),
   KEY `fk_user_create` (`fk_user_create`))",
-                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_Element` (
+                "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Affaire_Element` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(255) DEFAULT NULL,
   `element_id` int(11) DEFAULT NULL,
@@ -235,14 +235,14 @@ class modSynopsisAffaire extends DolibarrModules
   UNIQUE KEY `uniqIdx_Affaire_Element` (`type`,`element_id`,`affaire_refid`),
   KEY `fk_author` (`fk_author`),
   KEY `affaire_refid` (`affaire_refid`))",
-                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_key` (
+                "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Affaire_key` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `affaire_refid` int(11) DEFAULT NULL,
   `nom` varchar(50) DEFAULT NULL,
   `description` longtext,
   PRIMARY KEY (`id`),
   KEY `affaire_refid` (`affaire_refid`))",
-                "CREATE TABLE IF NOT EXISTS `llx_Synopsis_Affaire_value` (
+                "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."Synopsis_Affaire_value` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `affaire_refid` int(11) DEFAULT NULL,
   `value` longtext,

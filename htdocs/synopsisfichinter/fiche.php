@@ -323,7 +323,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
           if(isset($resultT[0]['s'])){
           $contradet = $resultT[0]['s'];
           //            die("ok".$contradet);
-          $requete = "SELECT `price_ht` as prix_ht FROM `llx_contratdet` WHERE `rowid` = ".$contradet;
+          $requete = "SELECT `price_ht` as prix_ht FROM `" . MAIN_DB_PREFIX . "contratdet` WHERE `rowid` = ".$contradet;
           $sql = $db->query($requete);
           $res = $db->fetch_object($sql);
           if ($res->prix_ht > 0) {

@@ -1785,13 +1785,13 @@ class modSynopsisProcess extends DolibarrModules {
   `urlObj` varchar(150) NOT NULL,
   `hasMultiValue` tinyint(4) NOT NULL,
   PRIMARY KEY (`rowid`));",
-            "INSERT IGNORE INTO `llx_Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`, `hasMultiValue`) VALUES
-(1, 'ContratLigne (N)', '', 'llx_contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `llx_contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id=', 1),
-(2, 'Appel', '', 'llx_Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(3, 'ProduitCli', '', 'llx_Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(4, 'Licence', '', 'llx_Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'Synopsis_Chrono/fiche.php?id=', 1),
-(5, 'Compte Utilisateur', '', 'llx_Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(6, 'Site', '', 'llx_Synopsis_Chrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 0);");
+            "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`, `hasMultiValue`) VALUES
+(1, 'ContratLigne (N)', '', '".MAIN_DB_PREFIX."contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `".MAIN_DB_PREFIX."contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id=', 1),
+(2, 'Appel', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(3, 'ProduitCli', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(4, 'Licence', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'Synopsis_Chrono/fiche.php?id=', 1),
+(5, 'Compte Utilisateur', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
+(6, 'Site', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 0);");
         $retour = $this->_init($sql);
 
         include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");

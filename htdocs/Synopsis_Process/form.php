@@ -189,7 +189,7 @@ function saveDatas($db, $req, $process_id, $element_id, $processDetId, $go = tru
     
     //Valeur avec le label
     $requete = "SELECT m.label as valeur, m.id 
-        FROM `llx_Synopsis_Process_form_model` m, `llx_Synopsis_Process` p 
+        FROM `".MAIN_DB_PREFIX."Synopsis_Process_form_model` m, `".MAIN_DB_PREFIX."Synopsis_Process` p 
         WHERE m.form_refid = p.`formulaire_refid` AND p.`id` = ".$process_id;
         
     if (count($arrSkip) > 0)

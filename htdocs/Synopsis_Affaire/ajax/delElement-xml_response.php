@@ -23,7 +23,7 @@
   {
     //On recuepre le type et le eid
     $requete = "SELECT *
-                  FROM llx_Synopsis_Affaire_Element
+                  FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element
                  WHERE id = ".$id;
     $sql = $db->query($requete);
     $return = "";
@@ -65,7 +65,7 @@
 
     }
 
-     $requete = "DELETE FROM llx_Synopsis_Affaire_Element
+     $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element
                        WHERE id = ".$id;
      $sql = $db->query($requete);
      if ($sql){

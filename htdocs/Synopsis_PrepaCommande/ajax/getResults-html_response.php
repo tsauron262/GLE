@@ -174,7 +174,7 @@ print "</table>";
 //$com->fetch_group_lines();
 //$lines = $com->lines;
 $lines = array();
-$sql = $db->query("SELECT `fk_product`, `total_ht` FROM `llx_commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
+$sql = $db->query("SELECT `fk_product`, `total_ht` FROM `".MAIN_DB_PREFIX."commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
 $i = 0;
 while ($val = $db->fetch_object($sql)) {
     $lines[$i] = $val;
@@ -206,7 +206,7 @@ while ($resContent = $db->fetch_object($sqlContent)) {
     $arrLabelSort = array();
     $ArrCat = array();
 
-    $sql = $db->query("SELECT `fk_product`, `total_ht` FROM `llx_commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
+    $sql = $db->query("SELECT `fk_product`, `total_ht` FROM `".MAIN_DB_PREFIX."commandedet` WHERE fk_product > 0 AND `fk_commande` IN (" . implode(",", $com->listIdGroupMember()) . ")");
     foreach ($lines as $key => $val) {
 //    while ($val = $db->fetch_object($sql)) {
         if ($val->fk_product > 0) {

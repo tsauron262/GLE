@@ -37,14 +37,14 @@ class Affaire extends CommonObject {
     }
     public function create(){
         global $user;
-        $requete = "INSERT INTO `llx_Synopsis_Affaire`
+        $requete = "INSERT INTO `" . MAIN_DB_PREFIX . "Synopsis_Affaire`
                                 (`nom`,`description`,`date_creation`,`fk_user_create`,`statut`,`ref`)
                          VALUES
                                 ('".$this->nom."', '".$this->description."', now(),  ".$user->id.", 0, '".$this->ref."') ";
         $sql = $this->db->query($requete);
         if ($sql)
         {
-            $lastId = $this->db->last_insert_id('llx_Synopsis_Affaire');
+            $lastId = $this->db->last_insert_id(MAIN_DB_PREFIX . 'Synopsis_Affaire');
             return($lastId);
         } else {
             return -1;
@@ -93,7 +93,7 @@ class Affaire extends CommonObject {
                           "/* modelContactPDF_refid, 
                            modelPNPDF_refid,*/. "
                            statut
-                      FROM llx_Synopsis_Affaire
+                      FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire
                      WHERE id = ".$this->id;
         $sql = $this->db->query($requete);
         if ($sql)
@@ -196,7 +196,7 @@ class Affaire extends CommonObject {
 
     public function get_element_list($type){
         $array=array();
-        $requete = "SELECT element_id FROM llx_Synopsis_Affaire_Element WHERE type='".$type."' AND affaire_refid = ".$this->id;
+        $requete = "SELECT element_id FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element WHERE type='".$type."' AND affaire_refid = ".$this->id;
         $sql = $this->db->query($requete);
         if ($sql){
             while($res=$this->db->fetch_object($sql))
@@ -226,7 +226,7 @@ class Affaire extends CommonObject {
 
     public function verifyNumRef()
     {
-        $sql = "SELECT rowid FROM llx_Synopsis_Affaire";
+        $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire";
         $sql.= " WHERE ref = '".$this->ref."'";
 
         $result = $this->db->query($sql);
@@ -282,7 +282,7 @@ class Affaire extends CommonObject {
     public function isMemberOfGroup($id,$type)
     {
         $arr=array();
-        $requete = "SELECT * FROM llx_Synopsis_Affaire_Element WHERE element_id=".$id." AND type LIKE '".$type."'";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element WHERE element_id=".$id." AND type LIKE '".$type."'";
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)){
             $arr[]=$res->affaire_refid;

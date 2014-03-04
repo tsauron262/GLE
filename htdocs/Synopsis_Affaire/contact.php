@@ -301,50 +301,50 @@ if ($_REQUEST["action"] == 'deleteline' && $user->rights->affaire->creer)
 
     $contactstatic=new Contact($db);
 
-    $requete =" SELECT * FROM llx_Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
+    $requete =" SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Affaire_Element WHERE affaire_refid =".$affaireid;
     $sql=$db->query($requete);
-    $arr['affaire']['SQL']='llx_Synopsis_Affaire';
+    $arr['affaire']['SQL']= MAIN_DB_PREFIX . 'Synopsis_Affaire';
     $arr['affaire']['OBJ']='Affaire';
     $arr['affaire']['RIGHT']='affaire';
 
 
-    $arr['propale']['SQL']='".MAIN_DB_PREFIX."propal';
+    $arr['propale']['SQL']=MAIN_DB_PREFIX.'propal';
     $arr['propale']['OBJ']='Propal';
     $arr['propale']['RIGHT']='propale';
 
-    $arr['commande']['SQL']='".MAIN_DB_PREFIX."commande';
+    $arr['commande']['SQL']=MAIN_DB_PREFIX.'commande';
     $arr['commande']['OBJ']='Commande';
     $arr['commande']['RIGHT']='commande';
 
-    $arr['facture']['SQL']='".MAIN_DB_PREFIX."facture';
+    $arr['facture']['SQL']=MAIN_DB_PREFIX.'facture';
     $arr['facture']['OBJ']='Facture';
     $arr['facture']['RIGHT']='facture';
 
-    $arr['expedition']['SQL']='".MAIN_DB_PREFIX."expedition';
+    $arr['expedition']['SQL']=MAIN_DB_PREFIX.'expedition';
     $arr['expedition']['OBJ']='Expedition';
     $arr['expedition']['RIGHT']='expedition';
 
-    $arr['livraison']['SQL']='".MAIN_DB_PREFIX."livraison';
+    $arr['livraison']['SQL']=MAIN_DB_PREFIX.'livraison';
     $arr['livraison']['OBJ']='Livraison';
     $arr['livraison']['RIGHT']='livraison';
 
-    $arr['projet']['SQL']='".MAIN_DB_PREFIX."Synopsis_projet';
+    $arr['projet']['SQL']=MAIN_DB_PREFIX.'Synopsis_projet';
     $arr['projet']['OBJ']='Project';
     $arr['projet']['RIGHT']='projet';
 
-    $arr['contrat']['SQL']='".MAIN_DB_PREFIX."contrat';
+    $arr['contrat']['SQL']=MAIN_DB_PREFIX.'contrat';
     $arr['contrat']['OBJ']='Contrat';
     $arr['contrat']['RIGHT']='contrat';
 
-    $arr['contratGA']['SQL']='".MAIN_DB_PREFIX."contrat';
+    $arr['contratGA']['SQL']=MAIN_DB_PREFIX.'contrat';
     $arr['contratGA']['OBJ']='ContratGA';
     $arr['contratGA']['RIGHT']='GA->contrat';
 
-    $arr['commande fournisseur']['SQL']='".MAIN_DB_PREFIX."commande_fournisseur';
+    $arr['commande fournisseur']['SQL']=MAIN_DB_PREFIX.'commande_fournisseur';
     $arr['commande fournisseur']['OBJ']='CommandeFournisseur';
     $arr['commande fournisseur']['RIGHT']='fournisseur->commande';
 
-    $arr['facture fournisseur']['SQL']='".MAIN_DB_PREFIX."facture_fourn';
+    $arr['facture fournisseur']['SQL']=MAIN_DB_PREFIX.'facture_fourn';
     $arr['facture fournisseur']['OBJ']='FactureFournisseur';
     $arr['facture fournisseur']['RIGHT']='fournisseur->facture';
     $bc[false]=$bc[true]='class="ui-widget-content"';

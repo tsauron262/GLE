@@ -109,8 +109,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 if ($result < 0) {
                     dol_print_error($this->db, $fichinter->error);
                 }
-            }
-            else{
+            } else {
                 $Nfichinter = new Synopsisfichinter($this->db);
                 $result = $Nfichinter->fetch($fichinter->id);
                 $fichinter = $Nfichinter;
@@ -134,8 +133,7 @@ class pdf_bimp extends ModelePDFFicheinter {
 
             if (file_exists($dir)) {
                 $pdf = pdf_getInstance($this->format);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
@@ -178,7 +176,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 $total_ht = 0;
                 $total_tva = 0;
                 $total_ttc = 0;
-                $total_duree = 0;
+                $total_duree = $totDeplacementTime = 0;
 
 
                 if ($fichinter->fk_contrat) {
@@ -190,11 +188,11 @@ class pdf_bimp extends ModelePDFFicheinter {
                     $total_ttc += $val->total_ttc;
                     $total_duree += $val->duration;
                     if ($val->fk_commandedet > 0) {
-                        $requete = "SELECT ".MAIN_DB_PREFIX."product.ref
-                                      FROM ".MAIN_DB_PREFIX."commandedet,
-                                           ".MAIN_DB_PREFIX."product
-                                     WHERE ".MAIN_DB_PREFIX."product.rowid = ".MAIN_DB_PREFIX."commandedet.fk_product
-                                       AND ".MAIN_DB_PREFIX."commandedet.rowid =" . $val->fk_commandedet;
+                        $requete = "SELECT " . MAIN_DB_PREFIX . "product.ref
+                                      FROM " . MAIN_DB_PREFIX . "commandedet,
+                                           " . MAIN_DB_PREFIX . "product
+                                     WHERE " . MAIN_DB_PREFIX . "product.rowid = " . MAIN_DB_PREFIX . "commandedet.fk_product
+                                       AND " . MAIN_DB_PREFIX . "commandedet.rowid =" . $val->fk_commandedet;
                         $sql1 = $this->db->query($requete);
                         $res1 = $this->db->fetch_object($sql1);
                         if ($res1->ref == 'FPR40') {
@@ -229,7 +227,9 @@ class pdf_bimp extends ModelePDFFicheinter {
                     if ($val->fk_typeinterv == 4) {
                         $totDeplacementHT+= $val->total_ht;
                         $totDeplacementTva+= $val->total_tva;
-                    }
+                        $totDeplacementTime+= $val->duration;
+                    } else
+                        $pu_ht = $val->pu_ht;
                 }
 
 
@@ -289,7 +289,7 @@ class pdf_bimp extends ModelePDFFicheinter {
 //CUSTOMER / BILLING sinon
 //Contact de la commande
                 $requete = "SELECT *
-                              FROM ".MAIN_DB_PREFIX."element_contact
+                              FROM " . MAIN_DB_PREFIX . "element_contact
                              WHERE fk_c_type_contact IN (130,131) AND element_id =  " . $fichinter->id;
                 $sql1 = $this->db->query($requete);
                 $arrContact = array();
@@ -298,7 +298,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 }
                 if (isset($fichinter->fk_commande) && $fichinter->fk_commande > 0) {
                     $requete = "SELECT *
-                              FROM ".MAIN_DB_PREFIX."element_contact
+                              FROM " . MAIN_DB_PREFIX . "element_contact
                              WHERE fk_c_type_contact IN (101) AND element_id =  " . $fichinter->fk_commande;
                     $sql1 = $this->db->query($requete);
                     while ($res1 = $this->db->fetch_object($sql1)) {
@@ -328,54 +328,54 @@ class pdf_bimp extends ModelePDFFicheinter {
                 $pdf->SetXY($this->marge_gauche + 1 + 17, 53.5);
                 $pdf->MultiCell(17.5, 4.4, $fichinter->societe->code_client, 0, 'C', 0);
 
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 83);
-                $pu_ht = ($pu_fpr30 > 0 ? $pu_fpr30 : "");
-                if ($pu_ht > 0)
-                    $pu_ht = price($pu_ht);
-                $pdf->MultiCell(16.6, 4.4, $pu_ht, 0, 'C', 0);
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 89);
-                $totTpsPasse = ($totTempsFPR30 > 0 ? $totTempsFPR30 : "");
-                if ($totTpsPasse > 0)
-                    $totTpsPasse = $this->sec2time($totTpsPasse);
-                elseif ($affZoneGauche)
-                    $totTpsPasse = $this->sec2time($total_duree);
-                $totTpsPasse = str_replace("min", "m", $totTpsPasse);
-                $pdf->MultiCell(16.6, 4.4, $totTpsPasse, 0, 'C', 0);
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 94);
-                $totalMO = $total_ht - $totDeplacementHT;
-                $totalMO = ($pu_fpr30 > 0 ? price($totalMO) : "");
-                //Mod tysauron
-                $totalMO = $totFPR30;
-                if ($totalMO == "0")
-                    $totalMO = '';
-                $totalMOTva = $totFPR30Tva;
-                //F mod
-                if ($totalMO > 0)
-                    $pdf->MultiCell(16.6, 4.4, price($totalMO), 0, 'C', 0);
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 99);
-                $totDeplacementHT = ($pu_fpr30 > 0 ? price($totDeplacementHT) : "");
+                $type = $fichinter->extraArr[35];
+                if ($type == 4 || $pu_fpr40 > 0 || $pu_fpr30 > 0 || $affZoneGauche) {
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 83);
+//                $pu_ht = ($pu_fpr30 > 0 ? $pu_fpr30 : "");
+                    if ($pu_ht > 0)
+                        $pu_ht = price($pu_ht);
+                    $pdf->MultiCell(16.6, 4.4, $pu_ht, 0, 'C', 0);
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 89);
+                    $totTpsPasse = $total_duree - $totDeplacementTime;
+                    if ($totTpsPasse > 0)
+                        $totTpsPasse = $this->sec2time($totTpsPasse);
+                    elseif ($affZoneGauche)
+                        $totTpsPasse = $this->sec2time($total_duree);
+                    $totTpsPasse = str_replace("min", "m", $totTpsPasse);
+                    $pdf->MultiCell(16.6, 4.4, $totTpsPasse, 0, 'C', 0);
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 94);
+                    $totalMO = $total_ht - $totDeplacementHT;
+                    //Mod tysauron
+//                $totalMO = $totFPR30;
+//                if ($totalMO == "0")
+//                    $totalMO = '';
+//                $totalMOTva = $totFPR30Tva;
+                    //F mod
+                    if ($totalMO > 0)
+                        $pdf->MultiCell(16.6, 4.4, price($totalMO), 0, 'C', 0);
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 99);
+//                $totDeplacementHT = ($pu_fpr30 > 0 ? price($totDeplacementHT) : "");
 
-                $pdf->MultiCell(16.6, 4.4, $totDeplacementHT, 0, 'C', 0);
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 104);
-                $totalPiece = "";
-                if ($fichinter->extraArr[$this->totalPieceIdx] > 0 && $pu_fpr30 > 0) {
-                    $totalPiece = price($fichinter->extraArr[$this->totalPieceIdx]);
-                }
+                    $pdf->MultiCell(16.6, 4.4, $totDeplacementHT, 0, 'C', 0);
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 104);
+                    $totalPiece = "";
+                    if ($fichinter->extraArr[$this->totalPieceIdx] > 0 && $pu_fpr30 > 0) {
+                        $totalPiece = price($fichinter->extraArr[$this->totalPieceIdx]);
+                    }
 
-                $pdf->MultiCell(16.6, 4.4, $totalPiece, 0, 'C', 0);
+                    $pdf->MultiCell(16.6, 4.4, $totalPiece, 0, 'C', 0);
 
-                $puUrgent = ($pu_fpr40 > 0 ? $pu_fpr40 : "");
-                if ($puUrgent > 0)
-                    $puUrgent = price($puUrgent);
-                $pdf->SetXY($this->marge_gauche + 2 + 17.2, 109);
-                $pdf->MultiCell(16.6, 4.4, $puUrgent, 0, 'C', 0);
-
-
-                $pdf->SetXY($this->marge_gauche + 3.2, 117.5);
-                $pdf->MultiCell(33.6, 4.7, $fichinter->extraArr[$this->recupDataIdx], 0, 'C', 0);
+                    $puUrgent = ($pu_fpr40 > 0 ? $pu_fpr40 : "");
+                    if ($puUrgent > 0)
+                        $puUrgent = price($puUrgent);
+                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 109);
+                    $pdf->MultiCell(16.6, 4.4, $puUrgent, 0, 'C', 0);
 
 
-                if ($pu_fpr40 > 0 || $pu_fpr30 > 0 || $affZoneGauche) {
+                    $pdf->SetXY($this->marge_gauche + 3.2, 117.5);
+                    $pdf->MultiCell(33.6, 4.7, $fichinter->extraArr[$this->recupDataIdx], 0, 'C', 0);
+
+
                     //Deb mod tysauron
 //                    $pdf->MultiCell(16.9, 4.5, price($total_ht + $fichinter->extraArr[$this->totalPieceIdx]), 1, 'C', 0);
 //                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 139);
@@ -419,7 +419,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 10);
 
                 if (isset($fichinter->fk_commande) && $fichinter->fk_commande > 0) {
-                    $req = "SELECT * FROM ".MAIN_DB_PREFIX."commande where rowid = " . $fichinter->fk_commande;
+                    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "commande where rowid = " . $fichinter->fk_commande;
                     $sql = $this->db->query($req);
                     $res99 = $this->db->fetch_object($sql);
 
@@ -429,7 +429,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 }
 
                 if (isset($fichinter->fk_contrat) && $fichinter->fk_contrat > 0) {
-                    $req = "SELECT * FROM ".MAIN_DB_PREFIX."contrat where rowid = " . $fichinter->fk_contrat;
+                    $req = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat where rowid = " . $fichinter->fk_contrat;
                     $sql = $this->db->query($req);
                     $res99 = $this->db->fetch_object($sql);
                     $pdf->SetXY(174.3, 14.1);
@@ -459,15 +459,15 @@ class pdf_bimp extends ModelePDFFicheinter {
 
 
                 $pdf->SetXY(19, 67);
-                if($heureAMarr != "00:00" || $heureAMdep != "00:00")
-                $pdf->MultiCell(20.5, 2.5, utf8_encodeRien($heureAMarr . " à " . $heureAMdep), 0, 'C', 0);
+                if ($heureAMarr != "00:00" || $heureAMdep != "00:00")
+                    $pdf->MultiCell(20.5, 2.5, utf8_encodeRien($heureAMarr . " à " . $heureAMdep), 0, 'C', 0);
 
 //                $pdf->SetXY(82.8, 54.57);
 //                $pdf->MultiCell(8.5, 2.5, $heureAMdep, 0, 'C', 0);
 
                 $pdf->SetXY(19, 72);
-                if($heurePMarr != "00:00" || $heurePMdep != "00:00")
-                $pdf->MultiCell(20.5, 2.5, utf8_encodeRien($heurePMarr . " à " . $heurePMdep), 0, 'C', 0);
+                if ($heurePMarr != "00:00" || $heurePMdep != "00:00")
+                    $pdf->MultiCell(20.5, 2.5, utf8_encodeRien($heurePMarr . " à " . $heurePMdep), 0, 'C', 0);
 
 //                $pdf->SetXY(82.8, 64.12);
 //                $pdf->MultiCell(8.5, 2.5, , 0, 'C', 0);
@@ -480,7 +480,7 @@ class pdf_bimp extends ModelePDFFicheinter {
 //                     $tmpArr[]=$this->sec2time($val->duration)." - ".$val->desc;
 
                     if ($val->fk_contratdet > 0) {
-                        $requete = "SELECT description FROM ".MAIN_DB_PREFIX."contratdet WHERE rowid = " . $val->fk_contratdet;
+                        $requete = "SELECT description FROM " . MAIN_DB_PREFIX . "contratdet WHERE rowid = " . $val->fk_contratdet;
                         $sql = $this->db->query($requete);
                         $res = $this->db->fetch_object($sql);
                         $tmpdesc = ($res->description . "x" != "x" ? $res->description . " :\n" . $val->desc : $val->desc);
@@ -579,7 +579,6 @@ class pdf_bimp extends ModelePDFFicheinter {
                   $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 133.1, 35.5, 3.6, 3.6);
                  */
 
-                $type = $fichinter->extraArr[35];
                 if ($type == 3)
                     $pdf->Image(DOL_DOCUMENT_ROOT . "/synopsisfichinter/pdf/caseCocher.png", 92, 20.6, 4, 4);
                 if ($type == 1)
@@ -699,7 +698,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                         $tplidx = $pdf->importPage(1, "/MediaBox");
                         $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
 
-                        $this->affDesc($pdf, $newArr,$outputlangs);
+                        $this->affDesc($pdf, $newArr, $outputlangs);
                         $this->AddPage($pdf);
 //                        $tplidx = $pdf->importPage(1, "/MediaBox");
 //                        $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
@@ -719,10 +718,10 @@ class pdf_bimp extends ModelePDFFicheinter {
 //                    $tplidx = $pdf->importPage(3, "/MediaBox");
 //                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
                     $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsisfichinter/pdf/RapportIntervBIMP12.pdf');
-                    
+
                     $tplidx = $pdf->importPage(1, "/MediaBox");
                     $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                    $this->affDesc($pdf, $newArr,$outputlangs);
+                    $this->affDesc($pdf, $newArr, $outputlangs);
                     $this->AddPage($pdf);
 //                    $tplidx = $pdf->importPage(1, "/MediaBox");
 //                    $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);

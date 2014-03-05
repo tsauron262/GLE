@@ -10,10 +10,17 @@ $result = $db->query($sql);
 //echo $sql;
 while($ligne = $db->fetch_object($result)){
     $userId = $newTabUser[$ligne->fk_user_action];
-        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
+//        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
+        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label."', 1); return false;\">" . $ligne->label;
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text); 
         $text = str_replace('"', '\"', $text);
-        $eventsStr[] = '{"id":'.$ligne->id.', "start":"'.date('c', $db->jdate($ligne->datep)).'", "end":"'.date('c', $db->jdate($ligne->datep2)).'", "title":"'.$text.'", "userId": '.$userId.'}';
+        if(!isset($ligne->datep2))
+            $ligne->datep2 = $ligne->datep;
+        $tabColor = array(50=> "#BBCCFF", 5=>"purple", 2=>"red");
+        $colorStr = '';
+        if(isset($tabColor[$ligne->fk_action]))
+            $colorStr = ', "color":"'.$tabColor[$ligne->fk_action].'"';
+        $eventsStr[] = '{"id":'.$ligne->id.', "start":"'.date('c', $db->jdate($ligne->datep)).'", "end":"'.date('c', $db->jdate($ligne->datep2)).'", "title":"'.$text.'", "userId": '.$userId.$colorStr.'}';
 }
 echo "[";
     

@@ -118,12 +118,20 @@ $js .= <<<EOF
           return $(window).height() - $('h1').outerHeight(true) - 110;
         },
         eventRender : function(calEvent, Oevent) {
-          if (calEvent.end.getTime() < new Date().getTime()) {
-            Oevent.css('backgroundColor', '#aaa');
-            Oevent.find('.wc-time').css({
-              backgroundColor: '#999',
-              border:'1px solid #888'
-            });
+          if (calEvent.color != ''){
+              Oevent.css('backgroundColor', calEvent.color);
+              Oevent.find('.wc-time').css({
+                backgroundColor: calEvent.color,
+              });
+          }
+          else{
+            if (calEvent.end.getTime() < new Date().getTime()) {
+              Oevent.css('backgroundColor', '#aaa');
+              Oevent.find('.wc-time').css({
+                backgroundColor: '#999',
+                border:'1px solid #888'
+              });
+            }
           }
         },
       eventResize: function(calEvent, Oevent) {
@@ -139,8 +147,9 @@ $js .= <<<EOF
             back = document.location.href;
             back = escape(back);
             back = back.replace(/\//g, "%2F");
-            newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&backtopage="+back;
-            window.location.href = newUrl;
+            newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
+            dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 1);
+//            window.location.href = newUrl;
         },
         
         data: 'events.json.php',

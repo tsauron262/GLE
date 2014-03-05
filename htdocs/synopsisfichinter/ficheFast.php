@@ -672,11 +672,11 @@ function saveForm() {
                 $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
                 $fichinterline->pu_ht = $pu_ht;
                 $result = $fichinterline->update($user);
-                $fichinter->majPrixDi();
             } else
                 $fichinterline->delete_line();
         }
     }
+    $fichinter->majPrixDi();
 
 
     $req = "SELECT *  FROM `" . MAIN_DB_PREFIX . "element_contact` WHERE `statut` = 4 AND `element_id` = " . $fichinter->id . " AND `fk_c_type_contact` = 131";

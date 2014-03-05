@@ -384,6 +384,7 @@ if (isset($_REQUEST["action"]) && $_POST['action'] == "addligne" && $user->right
             $outputlangs->setDefaultLang($_REQUEST['lang_id']);
         }
         fichinter_create($db, $fichinter, $fichinter->modelpdf, $outputlangs);
+        $fichinter->majPrixDi();
     }
 }
 

@@ -384,6 +384,7 @@ class pdf_bimp extends ModelePDFFicheinter {
 //                    $pdf->MultiCell(16.9, 4.5, price($total_ttc + ($fichinter->extraArr[$this->totalPieceIdx] * 1.196)), 1, 'C', 0);
                     $totHt = $totalMO + $totDeplacementHT + $puUrgent + $totalPiece;
                     $totTva = $totalMOTva + $totDeplacementTva + $totFPR40Tva + ($fichinter->extraArr[$this->totalPieceIdx] * 0.196);
+                    $totTva = $total_tva;
                     $totTtc = $totHt + $totTva;
                     $pdf->SetXY($this->marge_gauche + 2 + 17.2, 121.5);
                     $pdf->MultiCell(16.9, 4.5, price($totHt), 0, 'C', 0);
@@ -393,11 +394,13 @@ class pdf_bimp extends ModelePDFFicheinter {
                     $pdf->MultiCell(16.9, 4.5, price($totTtc), 0, 'C', 0);
                     //f mod
 
-                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 136.8);
-                    $pdf->MultiCell(16.9, 4.5, price($fichinter->extraArr[$this->totalBonIdx]), 0, 'C', 0);
+                    if ($fichinter->extraArr[$this->totalBonIdx] > 0 || $fichinter->extraArr[$this->bonRemisIdx] > 0) {
+                        $pdf->SetXY($this->marge_gauche + 2 + 17.2, 136.8);
+                        $pdf->MultiCell(16.9, 4.5, price($fichinter->extraArr[$this->totalBonIdx]), 0, 'C', 0);
 
-                    $pdf->SetXY($this->marge_gauche + 2 + 17.2, 140.7);
-                    $pdf->MultiCell(16.9, 6.1, price($fichinter->extraArr[$this->bonRemisIdx]), 0, 'C', 0);
+                        $pdf->SetXY($this->marge_gauche + 2 + 17.2, 140.7);
+                        $pdf->MultiCell(16.9, 6.1, price($fichinter->extraArr[$this->bonRemisIdx]), 0, 'C', 0);
+                    }
                 }
 
                 if ($fichinter->extraArr[$this->isIntervTermineIdx] != 1) {

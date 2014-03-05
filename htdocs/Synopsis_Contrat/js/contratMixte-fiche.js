@@ -523,18 +523,19 @@ jQuery(function() {
                 var url = DOL_URL_ROOT + '/Synopsis_Tools/product/ajaxproducts.php';
                 //                if (fkProd > 0) {
                 jQuery('#modClauseProd').replaceWith('<div id="modClauseProd" class="ui-widget-content" style="padding: 5px;">'+jQuery(msg).find('productClause').text()+'</div>');
-                var retId = 'ajdynfieldp_idprod_mod';
-                var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1';
-                if (fkProd + "x" != "x")
-                    param = param + '&prodId=' + fkProd;
-                $('#search_p_idprod_mod').bind('keyup',function(){
-                    param12 = param+"&keysearch="+jQuery(this).val();
-                    getResult1(url, param12, retId);
-                });
-                desc = jQuery(msg).find('product2').text();
-                jQuery('#search_p_idprod_mod').val(desc)
                 
-                getResult1(url, param+"&keysearch="+desc, retId);
+//                var retId = 'ajdynfieldp_idprod_mod';
+//                var param = 'htmlname=p_idprod_mod&price_level=&type=0&mode=1&status=1';
+//                if (fkProd + "x" != "x")
+//                    param = param + '&prodId=' + fkProd;
+//                $('#search_p_idprod_mod').bind('keyup',function(){
+//                    param12 = param+"&keysearch="+jQuery(this).val();
+//                    getResult1(url, param12, retId);
+//                });
+//                desc = jQuery(msg).find('product2').text();
+//                jQuery('#search_p_idprod_mod').val(desc)
+//                
+//                getResult1(url, param+"&keysearch="+desc, retId);
                                  
                 //                }
                 
@@ -549,13 +550,16 @@ jQuery(function() {
                 if (fkProd2 + "x" != "x")
                     param2 = param2 + '&prodId=' + fkProd2;
                 $('#search_p_idContratprod_mod').bind('keyup',function(){
-                    param22 = param2+"&keysearch="+jQuery(this).val();
-                    getResult1(url, param22, retId2);
+                    desc = jQuery('#search_p_idContratprod_mod').val();
+                    getResult1(url, param2+"&keysearch="+desc, retId2);
                 });
                 desc = jQuery(msg).find('product').text();
-                jQuery('#search_p_idContratprod_mod').val(desc)
-                
+                jQuery('#search_p_idContratprod_mod').val(desc);
                 getResult1(url, param2+"&keysearch="+desc, retId2);
+                
+                
+                
+                
             //                }
                     
                     

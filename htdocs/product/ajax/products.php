@@ -36,7 +36,7 @@ $htmlname=GETPOST('htmlname','alpha');
 $socid=GETPOST('socid','int');
 $type=GETPOST('type','int');
 $mode=GETPOST('mode','int');
-$status=((GETPOST('status','int') >= 0) ? GETPOST('status','int') : -1);
+$status=((GETPOST('status','int') > 0 || GETPOST('status','int') === 0) ? GETPOST('status','int') : -1);
 $outjson=(GETPOST('outjson','int') ? GETPOST('outjson','int') : 0);
 $price_level=GETPOST('price_level','int');
 $action=GETPOST('action', 'alpha');

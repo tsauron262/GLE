@@ -672,6 +672,7 @@ function saveForm() {
                 $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
                 $fichinterline->pu_ht = $pu_ht;
                 $result = $fichinterline->update($user);
+                $fichinter->majPrixDi();
             } else
                 $fichinterline->delete_line();
         }

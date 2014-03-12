@@ -35,7 +35,8 @@
     foreach($di->lignes as $key=>$val)
     {
         $val->fk_synopsisdemandeinterv = $res;
-        $val->datei = $di->date;
+        if($db->jdate($val->datei) < date(time()))
+            $val->datei = $di->date;
         $val->insert();
     }
 

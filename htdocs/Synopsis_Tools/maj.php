@@ -40,6 +40,33 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 
 
+if (isset($_GET['action']) && $_GET['action'] == "majExpedition") {
+    $sql = $db->query("SELECT * FROM `llx_expeditiondet` WHERE `fk_origin_line` NOT IN (SELECT `rowid` FROM `llx_commandedet` WHERE 1)");
+    while($result = $db->fetch_object($sql)){
+//        echo($result->fk_expedition."  ".$result->fk_origin_line."  <br/>");
+//        $sql2 = $db->query("SELECT * FROM llx_expedition WHERE rowid = ".$result->fk_expedition ."");
+//        $result2 = $db->fetch_object($sql2);
+        $sql3 = $db->query("SELECT * FROM llx_commandedet WHERE fk_commande = (SELECT fk_source 
+FROM  `llx_element_element` 
+WHERE  `sourcetype` LIKE  'commande'
+AND  `targettype` LIKE  'shipping' AND fk_target = ".$result->fk_expedition.")");
+        while($result3 = $db->fetch_object($sql3)){
+            if($result3->qty == $result->qty){
+                if(!isset($tabUtiliser[$result->rowid])){
+                if(!isset($tabUtiliser2[$result3->rowid])){
+                    $tabUtiliser[$result->rowid] = true;
+                    $tabUtiliser2[$result3->rowid] = true;
+                    echo $result->rowid."|".$result->fk_origin_line."|".$result3->rowid."expe ".$result->fk_expedition."<br/>";
+                    $db->query("UPDATE  `llx_expeditiondet` SET  `fk_origin_line` =  ".$result3->rowid." WHERE  `rowid` = ".$result->rowid." AND fk_origin_line = ".$result->fk_origin_line);
+//                    break;
+                }
+                }
+            }
+        }
+    }
+    echo "Fin maj";
+}
+
 if (isset($_GET['action']) && $_GET['action'] == "majFile") {
     $repl1 = "-";
     $repl2 = "–";

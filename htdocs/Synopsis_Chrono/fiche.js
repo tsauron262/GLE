@@ -51,7 +51,6 @@ function majDoubleSoc(socid, ifVide) {
         }
     });
     $(".chrid-keyid").each(function() {
-        if (socid != "-1") {
             div = $(this).parent();
             jQuery.ajax({
                 url: "ajax/getList.php",
@@ -60,11 +59,12 @@ function majDoubleSoc(socid, ifVide) {
                 data: "socid=" + socid + "&chrid-keyid=" + div.children(".chrid-keyid").val(),
                 success: function(msg) {
 //                eval(msg.find("script"));
-                    div.html(msg);
-                    initFormChrono();
+                    if (msg != "") {
+                        div.html(msg);
+                        initFormChrono();
+                    }
                 }
             });
-        }
     });
 }
 jQuery(document).ready(function() {

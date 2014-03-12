@@ -394,7 +394,7 @@ if (is_dir($dir)) {
                                     $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "user WHERE ref_ext IN ('" . $val['PRIID'] . "')";
                                     $result = $db->query($sql);
                                     if ($db->num_rows($result) == 1)
-                                        echo "Pas de correspondance mail correction par id dans ".MAIN_DB_PREFIX."user " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
+                                        echo "Pas de correspondance mail correction par id dans " . MAIN_DB_PREFIX . "user " . $val['PriGMocMail'] . " - ID - " . $val['PRIID'] . "<br/>";
                                 }
 
                                 if ($db->num_rows($result) > 0) {
@@ -1663,19 +1663,6 @@ if (is_dir($dir)) {
                         $webContent .= "<tr><th colspan=2 class='ui-state-default ui-widget-header'>Syncho nombre de ligne de commande</td>";
                         $mailContent .= "<tr><th colspan=2 style='background-color:#0073EA; color: #FFF;'>Syncho nombre de ligne de commande</td>" . "\n";
 
-                        foreach ($remArrayComLigne as $comId => $arrLigne) {
-                            $webContent .= "<tr><th colspan=1 class='ui-state-default ui-widget-header'>Commande #" . $comId . "</td>";
-                            $mailContent .= "<tr><th colspan=1 style='background-color:#0073EA; color: #FFF;'>Commande #" . $comId . "</td>" . "\n";
-                            $requete = "DELETE FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $comId . " AND rowid not in (" . join(",", $arrLigne) . ")";
-                            $sql = requeteWithCache($requete);
-                            if ($sql) {
-                                $webContent .= "<td  class='ui-widget-content'>Synchro des lignes de commande OK</td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande OK</td>" . "\n";
-                            } else {
-                                $webContent .= "<td class='KOtd error ui-widget-content'>Synchro des lignes de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
-                                $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande KO</td>" . "\n";
-                            }
-                        }
                         $webContent .= "</table>";
                         $mailContent .= "</table>" . "\n";
                     }
@@ -1711,6 +1698,19 @@ if (is_dir($dir)) {
 //                echo $webContent;
 //                $webContent = '';
                     $mailContent = '';
+                }
+                foreach ($remArrayComLigne as $comId => $arrLigne) {
+                    $webContent .= "<tr><th colspan=1 class='ui-state-default ui-widget-header'>Commande #" . $comId . "</td>";
+                    $mailContent .= "<tr><th colspan=1 style='background-color:#0073EA; color: #FFF;'>Commande #" . $comId . "</td>" . "\n";
+                    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "commandedet WHERE fk_commande = " . $comId . " AND rowid not in (" . join(",", $arrLigne) . ")";
+                    $sql = requeteWithCache($requete);
+                    if ($sql) {
+                        $webContent .= "<td  class='ui-widget-content'>Synchro des lignes de commande OK</td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande OK</td>" . "\n";
+                    } else {
+                        $webContent .= "<td class='KOtd error ui-widget-content'>Synchro des lignes de commande KO<span id='debugS'>Err: " . $db->lasterrno . "<br/>" . $db->lastqueryerror . "<br/>" . $db->lasterror . "</span></td>";
+                        $mailContent .= "<td style='background-color: #FFF;'>Synchro des lignes de commande KO</td>" . "\n";
+                    }
                 }
             }
         }

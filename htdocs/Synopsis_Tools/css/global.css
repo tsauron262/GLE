@@ -326,3 +326,8 @@ span.timePage {
 li.tmenusel a.tmenusel{
     color: black;
 }
+
+textarea.grand{
+    width: 600px;
+    height: 200px;
+}

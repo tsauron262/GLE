@@ -505,6 +505,7 @@ if ($id > 0) {
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produits concerné</th>';
     print '<td colspan="3" class="ui-widget-content">';
     $lien->displayForm();
+    print "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
 
 
 

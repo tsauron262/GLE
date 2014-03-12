@@ -1038,6 +1038,7 @@ class Synopsis_Contrat extends Contrat {
         $lien->cssClassM = "type:contratdet";
         $lien->fetch(3);
         $lien->displayForm();
+        echo "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
         if ($ligne->GMAO_Mixte['nbVisiteAn'] > 0) {
             echo "</td><td>";
             echo "Nb Visite sur site : ";

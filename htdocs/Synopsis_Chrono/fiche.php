@@ -39,14 +39,14 @@ if ($action == 'supprimer') {
     if ($user->rights->synopsischrono->Supprimer || $rightChrono->supprimer) {
         $res = $chr->supprimer($id);
         if ($res > 0) {
-            if($chr->propalid)
-                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=propal&id=".$chr->propalid);
-            elseif($chr->projetid)
-                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=project&id=".$chr->projetid);
-            elseif($chr->socid)
-                header('Location: '.DOL_URL_ROOT."/Synopsis_Chrono/listByObjet.php?obj=soc&id=".$chr->socid);
+            if ($chr->propalid)
+                header('Location: ' . DOL_URL_ROOT . "/Synopsis_Chrono/listByObjet.php?obj=propal&id=" . $chr->propalid);
+            elseif ($chr->projetid)
+                header('Location: ' . DOL_URL_ROOT . "/Synopsis_Chrono/listByObjet.php?obj=project&id=" . $chr->projetid);
+            elseif ($chr->socid)
+                header('Location: ' . DOL_URL_ROOT . "/Synopsis_Chrono/listByObjet.php?obj=soc&id=" . $chr->socid);
             else
-            header('Location: liste.php');
+                header('Location: liste.php');
         } else {
             header('Location: ?id=' . $id);
         }
@@ -213,104 +213,12 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
 
     $mesg = '<div class="ok">' . $langs->trans("FileWasRemoved") . '</div>';
 }
-if ($action == "Modify" || $action == "ModifyAfterValid") {
-    $js = "<script>";
-        $js .= <<< EOF
-          function ajax_updater_postFct(socid, valueSelected)
-          {
-              if(valueSelected == "socid")
-                majDoubleSoc(socid,false);
-                $("#"+valueSelected).trigger("change");
-          }
-                  
-          function ajax_updater_postFct2(socid, valueSelected)
-          {
-              if (socid > 0)
-              {
-                majDoubleSoc(socid,false);
-                    jQuery.ajax({
-                        url:"ajax/contactSoc-xml_response.php",
-                      type:"POST",
-                      datatype:"xml",
-                      data:"socid="+socid,
-                      success: function(msg){
-                            jQuery('#contactSociete').replaceWith("<div id='contactSociete'>"+jQuery(msg).find('contactsList').text()+"</div>");
-//                          jQuery('#contactSociete').find('select').selectmenu({style: 'dropdown', maxHeight: 300 });
-                            if(valueSelected == 'old'){
-                                idMax = 0;
-                                jQuery('#contactSociete').find('option').each(function(){
-                                    id = parseInt($(this).attr("value"));
-                                    if(id > idMax)
-                                    idMax = id;
-                                });
-                                jQuery('#contactSociete').find('option[value="'+idMax+'"]').attr("selected", "selected");
-                            }
-                            else if(valueSelected != null){
-                                jQuery('#contactSociete').find('option[value="'+valueSelected+'"]').attr("selected", "selected");
-                            }
-                      }
-                    });
-              } else {
-                jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
-              }
-          }
-        function majDoubleSoc(socid, ifVide){
-             valueStr = jQuery('#socid').find('option[value='+socid+']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_");
-             $("select.double").each(function(){
-                 val = jQuery(this).find(':selected').val();
-                 if(!(ifVide && val > 1)){
-                 select = $(this);
-                 $(this).find('option[value='+valueStr+']').each(function(){
-                     $(this).attr("selected", "selected");
-                     $(select).val(valueStr);
-                     $(select).change();
-                 });
-                 }
-             });
-         }
-          jQuery(document).ready(function(){ 
-                setTimeout(function(){
-              socid = jQuery('#socid').find(':selected').val();
-                majDoubleSoc(socid,true);                
-                },200);
-            jQuery('#socid').change(function(){
-              socid = jQuery(this).find(':selected').val();
-                ajax_updater_postFct2(socid);
-            });
-        
-            $(".addContact").click(function(){
-                socid = $("select#socid").val();
-                 popOjectAffiche(socid, 'newContact', function(){
-                    ajax_updater_postFct2(socid, 'old');
-                }, 'Contact', 1)
-            });    
-          
-
-        jQuery.validator.addMethod(
-            'required',
-            function(value, element) {
-                return (value+"x"!="x");
-            },
-            '<br/>Ce champs est requis'
-        );
-        jQuery('.datepicker').datepicker({ showTime : false});
-        jQuery('.datetimepicker').each(function(){
-        date = $(this).attr("value");
-                if(date == "" && $(this).hasClass("now"))
-                    date = new Date();
-            $(this).datetimepicker({ showTime : true}).datepicker( "setDate" , date);
-        });
-
-        jQuery('#form').validate();
-      });
-EOF;
-    $js .= "</script>";
-}
+//if ($action == "Modify" || $action == "ModifyAfterValid") {
+    $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
+//}
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 //$js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.selectmenu.js"></script>' . "\n";
-
-
 //$js .= '<script src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/ui/ui.datetimepicker.js" type="text/javascript"></script>';
 //launchRunningProcess($db,'Chrono',$_GET['id']);
 define('REQUIRE_JQUERY_TIMEPICKER', true);
@@ -368,9 +276,9 @@ if ($id > 0) {
         if ($chr->model->hasSociete == 1) {
             print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
             if ($chr->model->hasContact == 1)
-                print '    <td  class="ui-widget-content" colspan="1">' . $html->select_company($chr->socid, 'socid', 1, 0, 0,0,array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))) . '</td>';
+                print '    <td  class="ui-widget-content" colspan="1">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
             else
-                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 0, 0,0,array(array('method'=>'getContacts', 'url'=>dol_buildpath('/core/ajax/contacts.php',1), 'htmlname'=>'contactid', 'params'=>array('add-customer-contact'=>'disabled')))) . '</td>';
+                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
         }
         if ($chr->model->hasContact == 1) {
             if (!$chr->model->hasSociete == 1)
@@ -392,7 +300,7 @@ if ($id > 0) {
                 $tmpContact = $html->tmpReturn;
             }
             $tmpContact = ob_get_clean();
-                print '    <td  class="ui-widget-content" colspan="'.(($chr->model->hasSociete == 1)? 1 : 3) .'"><span class="addContact editable" style="float: left; padding : 3px 15px 0 0;">'.img_picto($langs->trans("Create"),'filenew').'</span><div id="contactSociete">' . $tmpContact . '</div></td>';
+            print '    <td  class="ui-widget-content" colspan="' . (($chr->model->hasSociete == 1) ? 1 : 3) . '"><span class="addContact editable" style="float: left; padding : 3px 15px 0 0;">' . img_picto($langs->trans("Create"), 'filenew') . '</span><div id="contactSociete">' . $tmpContact . '</div></td>';
         }
 
         if ($chr->model->hasDescription) {
@@ -405,178 +313,14 @@ if ($id > 0) {
             print '</td>';
         }
 
-//Ajoute les extra key/Values
-        $requete = "SELECT k.nom,
-                           k.id,
-                           v.`value`,
-                           t.nom as typeNom,
-                           t.hasSubValeur,
-                           t.subValeur_table,
-                           t.subValeur_idx,
-                           t.subValeur_text,
-                           t.htmlTag,
-                           t.htmlEndTag,
-                           t.endNeeded,
-                           t.cssClass,
-                           t.cssScript,
-                           t.jsCode,
-                           t.valueIsChecked,
-                           t.valueIsSelected,
-                           t.valueInTag,
-                           t.valueInValueField,
-                           t.sourceIsOption,
-                           k.type_subvaleur,
-                           k.extraCss,
-                           t.phpClass
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur AS t,
+
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/chronoFiche.lib.php");
+        $requete = "SELECT k.id FROM
                            " . MAIN_DB_PREFIX . "Synopsis_Chrono_key AS k
-                      LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Chrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chr->id . "
-                     WHERE t.id = k.type_valeur
-                       AND k.model_refid = " . $chr->model_refid;
-        //print $requete;
+                      WHERE k.model_refid = " . $chr->model_refid;
         $sql = $db->query($requete);
-        while ($res = $db->fetch_object($sql)) {
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap class="ui-state-default">' . $res->nom;
-            print '    <td  class="ui-widget-content" colspan="3">';
-            if ($res->hasSubValeur == 1) {
-                if ($res->sourceIsOption) {
-                    $tag = preg_replace('/>$/', "", $res->htmlTag);
-                    $html = "";
-                    $html .= $tag;
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
-                    $tmp = $res->phpClass;
-                    $obj = new $tmp($db);
-                    $obj->socid = $chr->socid;
-                    $obj->cssClassM = $res->extraCss;
-                    $obj->fetch($res->type_subvaleur);
-                    $obj->getValues();
-                    if (isset($obj->tabVal[0])) {
-                        $res->value = $obj->tabVal[0];
-                        $res->valueIsSelected = true;
-                    }
-                    $extra_extraClass = "";
-                    if ($obj->OptGroup . "x" != "x") {
-                        $extra_extraClass = " double noSelDeco ";
-                        print <<<EOF
-                      <script>
-jQuery(document).ready(function(){
-EOF;
-                        print "jQuery('#Chrono-" . $res->id . "').jDoubleSelect({\n";
-                        print <<<EOF
-        text:'',
-        finish: function(){
-EOF;
-                        print " jQuery('#Chrono-" . $res->id . "_jDS').each(function(){
-                            var select = $(this);
-//                            $(select).combobox({
-//                                selected: function(event, ui) {
-//                                    select.find('option[value=\"'+$(this).val()+'\"]').attr('selected', 'selected');
-//                                    select.change();
-//                                }
-//                            });
-      });
-        },
-        el1_change: function(){";
-                        print " /*jQuery('#Chrono-" . $res->id . "_jDS_2').selectmenu({\n";
-                        print <<<EOF
-                style:'dropdown',
-                maxHeight: 300
-            });*/
-        },
-EOF;
-                        print "el2_dest: jQuery('#destChrono-" . $res->id . "'),\n";
-                        print <<<EOF
-    });
-});
-
-                      </script>
-EOF;
-                    }
-                    if ($res->extraCss . $res->cssClass . $extra_extraClass . "x" != "x") {
-                        $html .= " class='" . $res->cssClass . " " . $res->extraCss . " " . $extra_extraClass . "' ";
-                    }
-                    if ($res->valueInValueField) {
-                        $html .= " value='" . $res->value . "' ";
-                    }
-                    if ($res->valueIsChecked) {
-                        $html .= ($res->value == 1 ? " CHECKED " : "");
-                    }
-                    $html .= " name='Chrono-" . $res->id . "' ";
-                    $html .= " id='Chrono-" . $res->id . "' ";
-                    $html.=">";
-                    if ($res->valueInTag) {
-                        $html .= $res->value;
-                    }
-                    $remOpt = false;
-
-                    $html .= "<option value=''>S&eacute;lectionner</option>";
-                    if ($obj->OptGroup . "x" != "x") {
-                        $html = "<table><tr><td width=50%>" . $html;
-                            $html .= "<OPTGROUP label=' '>";
-                            $html .= "<OPTION value='0'></OPTION>";
-                        foreach ($obj->valuesGroupArr as $key => $val) {
-                            $val['label'] = str_replace(" ", "_", $val['label']);
-                            $val['label'] = str_replace("'", "_", $val['label']);
-                            $html .= "<OPTGROUP label='" . $val['label'] . "'>";
-                            $html .= "<OPTION value='0'></OPTION>";
-                            foreach ($val['data'] as $key1 => $val1) {
-                                $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key1 ? "SELECTED" : "") . " value='" . $key1 . "'>" . $val1 . "</OPTION>";
-                            }
-                            $html .= "</OPTGROUP>";
-                        }
-                        $html .= "<td><div id='destChrono-" . $res->id . "'></div>";
-                        $html .= "</table>";
-                    echo ajax_combobox("Chrono-".$res->id."_jDS", "", 3);
-                    } else {
-                        foreach ($obj->valuesArr as $key => $val) {
-                            $html .= "<OPTION " . ($res->valueIsSelected && $res->value == $key ? "SELECTED" : "") . " value='" . $key . "'>" . $val . "</OPTION>";
-                        }
-                    echo ajax_combobox("Chrono-".$res->id."", "", 3);
-                    }
-                    if ($res->endNeeded == 1)
-                        $html .= $res->htmlEndTag;
-                    print $html;
-                } else {
-                    //Beta
-                    if ($res->phpClass == 'fct')
-                        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
-                    $tmp = $res->phpClass;
-                    $obj = new $tmp($db);
-                    $obj->fetch($res->type_subvaleur);
-                    $obj->call_function_chronoModule($chr->model_refid, $chr->id);
-                }
-            } else {
-                //Construct Form
-                $tag = preg_replace('/>$/', "", $res->htmlTag);
-                $html = "";
-                $html .= $tag;
-
-                if ($res->cssClass == 'datetimepicker') {
-                    if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $res->value, $arr)) {
-//                        $res->value = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
-                    }
-                }
-
-                if ($res->extraCss . $res->cssClass . "x" != "x") {
-                    $html .= " class='" . $res->cssClass . " " . $res->extraCss . "' ";
-                }
-                if ($res->valueInValueField) {
-                    $html .= " value='" . $res->value . "' ";
-                }
-                if ($res->valueIsChecked) {
-                    $html .= ($res->value == 1 ? " CHECKED " : "");
-                }
-                $html .= " name='Chrono-" . $res->id . "' ";
-                $html .= " id='Chrono-" . $res->id . "' ";
-                $html.=">";
-                if ($res->valueInTag) {
-                    $html .= $res->value;
-                }
-                if ($res->endNeeded == 1)
-                    $html .= $res->htmlEndTag;
-                print $html;
-            }
-            print '</td>';
+        while ($result = $db->fetch_object($sql)) {
+            getValueForm($chr->id, $result->id, $chr->socid);
         }
 
 //
@@ -598,23 +342,23 @@ EOF;
                      <td colspan=1 class=" ui-widget-content" >' . $chr->model->titre . '</td>';
         $hasSoc = $chr->socid && $chr->model->hasSociete == 1;
         $hasCont = $chr->contact && $chr->model->hasContact == 1;
-        
-        if($hasSoc || $hasCont)
+
+        if ($hasSoc || $hasCont)
             echo "<tr/>";
-        
+
         if ($hasSoc) {
             $societe = new Societe($db);
             $societe->fetch($chr->socid);
-                // Societe
-                print '<th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="'.($hasCont? 1 : 3).'">' . $societe->getNomUrl(1) . '</td>';
+            // Societe
+            print '<th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
+            print '    <td  class="ui-widget-content" colspan="' . ($hasCont ? 1 : 3) . '">' . $societe->getNomUrl(1) . '</td>';
         }
 
         if ($hasCont) {
-                // Contact
-                print '<th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">';
-                print $langs->trans('Contact') . '</th>';
-                print '    <td  class="ui-widget-content" colspan="' .($hasSoc? 1 : 3). '">' . $chr->contact->getNomUrl(1) . '</td>';
+            // Contact
+            print '<th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">';
+            print $langs->trans('Contact') . '</th>';
+            print '    <td  class="ui-widget-content" colspan="' . ($hasSoc ? 1 : 3) . '">' . $chr->contact->getNomUrl(1) . '</td>';
         }
         $chr->user_author->fetch($chr->user_author->id);
 
@@ -1014,7 +758,7 @@ EOF;
                                 $tmpUser = new User($db);
                                 $tmpUser->fetch($res3->user_refid);
                                 if ($res3->validation == 1) {
-                                    print img_picto("Valider","tick");
+                                    print img_picto("Valider", "tick");
                                     print " par " . $tmpUser->getNomUrl(1) . " le " . date('d/m/Y', strtotime($res3->tms));
                                 } else {
                                     print img_error("Non valider");

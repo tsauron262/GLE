@@ -93,7 +93,9 @@
 
     if (isset($conf->global->BIMP_MAIL_FROM) && isset($conf->global->BIMP_MAIL_GESTLOGISTIQUE)) {
       $msg = "Bonjour,<br/><br/>";
-      $msg .= "La commande ".$commande->getNomUrl(1,6)." a &eacute;t&eacute; modifié après la valididation logistique.";
+        $soc = new Societe($db);
+        $soc->fetch($commande->socid);
+        $msg .= "La commande " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") a &eacute;t&eacute; modifié après la valididation logistique.";
       if ($commande->logistique_ok != 1)
           $msg .= "<br/><b><em><font style='color: red'> Attention, certains produits ne sont pas disponibles !!!</font></em></b>";
       else

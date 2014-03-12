@@ -60,7 +60,9 @@
         $to = $tmpUser->email;
 
         $msg = "Bonjour ".$tmpUser->getFullName($langs).",<br/><br/>";
-        $msg .= "La commande ".$commande->getNomUrl(1,6)." a &eacute;t&eacute; invalid&eacute;e financi&egrave;rement.";
+        $soc = new Societe($db);
+        $soc->fetch($commande->socid);
+        $msg .= "La commande " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") a &eacute;t&eacute; invalid&eacute;e financi&egrave;rement.";
 
         $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";
         $from = $conf->global->BIMP_MAIL_FROM;

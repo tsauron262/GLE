@@ -97,10 +97,12 @@ if ($sql) {
         $to = $tmpUser->email;
 
         $msg = "Bonjour " . $tmpUser->getFullName($langs) . ",<br/><br/>";
+        $soc = new Societe($db);
+        $soc->fetch($commande->socid);
         if ($commande->finance_ok = 1)
-            $msg .= "La commande de " . $societe->nom . " ref: " . $commande->getNomUrl(1, 6) . " du " . date('d/m/Y', $commande->date) . " a &eacute;t&eacute; valid&eacute;e financi&egrave;rement.";
+            $msg .= "La commande de " . $societe->nom . " ref: " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") du " . date('d/m/Y', $commande->date) . " a &eacute;t&eacute; valid&eacute;e financi&egrave;rement.";
         else
-            $msg .= "La commande de " . $societe->nom . " ref: " . $commande->getNomUrl(1, 6) . " du " . date('d/m/Y', $commande->date) . " a &eacute;t&eacute; valid&eacute;e financi&egrave;rement.";
+            $msg .= "La commande de " . $societe->nom . " ref: " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") du " . date('d/m/Y', $commande->date) . " a &eacute;t&eacute; valid&eacute;e financi&egrave;rement.";
         $msg .= " Ce statut est " . $statusFin;
 
         $msg .= "<br/><br/>Cordialement,<br/>\nGLE\n";

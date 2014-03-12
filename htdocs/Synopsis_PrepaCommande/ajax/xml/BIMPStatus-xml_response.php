@@ -52,7 +52,9 @@ if ($sql) {
     $to = $tmpUser->email;
 
     $msg = "Bonjour " . $tmpUser->firstname. " ".$tmpUser->lastname . ",<br/><br/>";
-    $msg .= "La commande " . $commande->getNomUrl(1, 6) . " a &eacute;t&eacute; modifi&eacute;e. Elle est maintenant au statut : " . $res->label;
+        $soc = new Societe($db);
+        $soc->fetch($commande->socid);
+        $msg .= "La commande " . $commande->getNomUrl(1, 6) . "(".$soc->getNomUrl(1).") a &eacute;t&eacute; modifi&eacute;e. Elle est maintenant au statut : " . $res->label;
     $msg .= "<br/><br/>Cordialement,<br/>GLE";
     $addr_cc = (isset($conf->global->BIMP_MAIL_GESTPROD)? $conf->global->BIMP_MAIL_GESTPROD : '');
     

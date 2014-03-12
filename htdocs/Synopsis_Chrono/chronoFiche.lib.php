@@ -1,7 +1,7 @@
 <?php
 
 function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
-    global $db;
+    global $db, $user;
     $requete = "SELECT k.nom,
                            k.id,
                            v.`value`,
@@ -54,8 +54,8 @@ function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
                     $res->value = $obj->tabVal[0];
                     $res->valueIsSelected = true;
                 }
-                if ($res->value == 0 && stripos($obj->cssClassM, "my") !== false)
-                    $res->value = $user->rowid;
+                if ($res->value == 0 && stripos($obj->cssClassM, "myUser") !== false)
+                    $res->value = $user->id;
                 $extra_extraClass = "";
                 if ($obj->OptGroup . "x" != "x") {
                     $extra_extraClass = " double noSelDeco ";

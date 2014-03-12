@@ -51,18 +51,20 @@ function majDoubleSoc(socid, ifVide) {
         }
     });
     $(".chrid-keyid").each(function() {
-        div = $(this).parent();
-        jQuery.ajax({
-            url: "ajax/getList.php",
-            type: "POST",
-            datatype: "html",
-            data: "socid=" + socid+"&chrid-keyid=" + div.children(".chrid-keyid").val(),
-            success: function(msg) {
+        if (socid != "-1") {
+            div = $(this).parent();
+            jQuery.ajax({
+                url: "ajax/getList.php",
+                type: "POST",
+                datatype: "html",
+                data: "socid=" + socid + "&chrid-keyid=" + div.children(".chrid-keyid").val(),
+                success: function(msg) {
 //                eval(msg.find("script"));
-                div.html(msg);
-                initFormChrono();
-            }
-        });
+                    div.html(msg);
+                    initFormChrono();
+                }
+            });
+        }
     });
 }
 jQuery(document).ready(function() {
@@ -105,7 +107,7 @@ jQuery(document).ready(function() {
 
 
 function addLienAj(firstParent, mode) {
-    if(!mode)
+    if (!mode)
         mode = "add";
     parentDiv = $(firstParent).parent();
     model = $(parentDiv).find(".model").html();

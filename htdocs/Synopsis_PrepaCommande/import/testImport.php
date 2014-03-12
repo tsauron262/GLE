@@ -894,7 +894,7 @@ if (is_dir($dir)) {
                         $prodId = false;
 //PlvNuf
 
-                        if ($val['ArtID'] > 0 && ($val['PlvNuf'] == 'Normal' || $val['PlvNuf'] == 'Port')) {
+                        if ($val['ArtID'] > 0 && $val['ArtID'] != 41490 && ($val['PlvNuf'] == 'Normal' || $val['PlvNuf'] == 'Port')) {
 
                             /*
 
@@ -2365,7 +2365,7 @@ function updateType($ref, $prodId) {
 }
 
 function getProdType($ref) {
-    if ($ref . 'x' != "x") {
+    if ($ref . 'x' != "x" && $ref != "0") {
         global $remTypeGlob, $db;
         if (!is_array($remTypeGlob)) {
             $remTypeGlob = array();

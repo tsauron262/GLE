@@ -39,7 +39,10 @@ $cfg['Servers'][$i]['AllowNoPassword'] = false;
  */
 
 /* User used to manipulate with storage */
-include("../../conf/conf.php");
+
+$conffile = "../../conf/conf.php";
+/*mod drsi*/ include("../../Synopsis_Tools/includeConf.inc.php"); /*f mod drsi */
+include($conffile);
 $cfg['Servers'][$i]['auth_type'] = 'config';
 $cfg['Servers'][$i]['host'] = $dolibarr_main_db_host;
  $cfg['Servers'][$i]['user'] = $dolibarr_main_db_user;

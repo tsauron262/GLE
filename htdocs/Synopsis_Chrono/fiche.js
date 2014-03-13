@@ -38,19 +38,20 @@ function ajax_updater_postFct2(socid, valueSelected)
     }
 }
 function majDoubleSoc(socid, ifVide) {
-    valueStr = jQuery('#socid').find('option[value=' + socid + ']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
-    $("select.double").each(function() {
-        val = jQuery(this).find(':selected').val();
-        if (!(ifVide && val > 1)) {
-            select = $(this);
-            $(this).find('option[value=' + valueStr + ']').each(function() {
-                $(this).attr("selected", "selected");
-                $(select).val(valueStr);
-                $(select).change();
-            });
-        }
-    });
-    $(".chrid-keyid").each(function() {
+    if (socid > 0) {
+        valueStr = jQuery('#socid').find('option[value=' + socid + ']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
+        $("select.double").each(function() {
+            val = jQuery(this).find(':selected').val();
+            if (!(ifVide && val > 1)) {
+                select = $(this);
+                $(this).find('option[value=' + valueStr + ']').each(function() {
+                    $(this).attr("selected", "selected");
+                    $(select).val(valueStr);
+                    $(select).change();
+                });
+            }
+        });
+        $(".chrid-keyid").each(function() {
             div = $(this).parent();
             jQuery.ajax({
                 url: "ajax/getList.php",
@@ -65,7 +66,8 @@ function majDoubleSoc(socid, ifVide) {
                     }
                 }
             });
-    });
+        });
+    }
 }
 jQuery(document).ready(function() {
     setTimeout(function() {
@@ -101,6 +103,8 @@ jQuery(document).ready(function() {
     });
 
     jQuery('#form').validate();
+    
+    initFormChrono();
 });
 
 

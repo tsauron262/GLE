@@ -9,7 +9,7 @@ class htmlOld {
         return $js;
     }
 
-    public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => false, position => "left")) {
+    public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left")) {
         $this->arrLigne = array();
         $js = 'jQuery(document).ready(function(){';
         $js .= 'var grid = jQuery("#' . $id . '").jqGrid({';
@@ -31,7 +31,23 @@ class htmlOld {
             $js .= '         edit:' . ($pagerArr['edit'] ? 'true' : 'false') . ',';
             $js .= '         search:' . ($pagerArr['search'] ? 'true' : 'false') . ',';
             $js .= '         position:"' . ($pagerArr['position'] . "x" != "x" ? $pagerArr['position'] : 'left') . '"';
-            $js .= '       });';
+            $js .= '       });'
+                    . ''
+          . "jQuery('#" . $id . "').jqGrid('navButtonAdd', '#" . $id . "Pager', {
+                caption: '',
+                buttonicon: \"ui-icon-calculator\",
+                title: \"Choose columns\",
+                onClickButton: function () {
+                    $(this).jqGrid('columnChooser', {
+                        done: function (perm) {
+                            if (perm) {
+                                this.jqGrid(\"remapColumns\", perm, true);
+//                                saveColumnState.call(this, perm);
+                            }
+                        }
+                    });
+                }
+            });";
         } else {
             $js .= ';';
         }

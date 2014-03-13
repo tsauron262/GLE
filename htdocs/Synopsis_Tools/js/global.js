@@ -55,7 +55,7 @@ $(window).load(function() {
             $(this).attr("target", "");
     });
     //    }
-    initFormChrono();
+//    initFormChrono();
 
 
 

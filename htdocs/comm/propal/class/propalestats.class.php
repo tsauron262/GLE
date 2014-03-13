@@ -65,6 +65,7 @@ class PropaleStats extends Stats
 		$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
 
 		$this->field='total_ht';
+		/*mod drsi*/$this->field_line='total_ht';/*f mod drsi*/
 
                 //Mod drsi
 //		$this->where.= " fk_statut > 0";

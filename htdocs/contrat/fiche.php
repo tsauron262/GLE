@@ -985,6 +985,7 @@ if (!empty($conf->global->MAIN_DISABLE_CONTACTS_TAB) && $user->rights->contrat->
 $header = '';
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
     if (isset($_REQUEST["id"])) {
+        $header .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
 
         $type = 7;
         $header .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";

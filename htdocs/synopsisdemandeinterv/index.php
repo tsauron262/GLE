@@ -71,7 +71,7 @@ $offset = $limit * $page;
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
-$filtreUser = (isset($_REQUEST['filtreUser']));
+$filtreUser = (isset($_REQUEST['filtreUser']) && $_REQUEST['filtreUser']);
 
 /*
  *    View
@@ -103,7 +103,7 @@ if ($result) {
 
     $synopsisdemandeinterv_static = new Synopsisdemandeinterv($db);
 
-    $urlparam = "&amp;socid=$socid";
+    $urlparam = "&amp;socid=$socid&filtreUser=$filtreUser";
     if ($filtreUser)
         print_barre_liste($langs->trans("ListOfMyDIs"), $page, "index.php", $urlparam, $sortfield, $sortorder, '', $num);
     else

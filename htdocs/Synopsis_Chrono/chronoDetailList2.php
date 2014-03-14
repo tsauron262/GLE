@@ -12,7 +12,10 @@ class htmlOld {
     public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left")) {
         $this->arrLigne = array();
         $js = 'jQuery(document).ready(function(){';
-        $js .= 'var grid = jQuery("#' . $id . '").jqGrid({';
+        $js .= 'firstLoad = true;
+
+            isColState = typeof (myColumnsState) !== \'undefined\' && myColumnsState !== null;
+            var grid = jQuery("#' . $id . '").jqGrid({';
 
         $this->listjqGrid_base($arr);
         if ($pager) {
@@ -21,7 +24,31 @@ class htmlOld {
 
         $js .= join(',' . "\n\t", $this->arrLigne);
 
-        $js .= '})';
+        $js .= ',
+                loadComplete: function () {
+                    var $this = $(this), i, count;
+
+                    if (firstLoad) {
+                        firstLoad = false;
+                        if (isColState) {
+                            $this.jqGrid("remapColumns", myColumnsState.permutation, true);
+                        }
+                        if (typeof (this.ftoolbar) !== "boolean" || !this.ftoolbar) {
+                            // create toolbar if needed
+                            $this.jqGrid(\'filterToolbar\',
+                                {stringResult: true, searchOnEnter: true, defaultSearch: myDefaultSearch});
+                        }
+                    }
+                    refreshSerchingToolbar($this, myDefaultSearch);
+                    for (i = 0, count = idsOfSelectedRows.length; i < count; i++) {
+                        $this.jqGrid(\'setSelection\', idsOfSelectedRows[i], false);
+                    }
+                    saveColumnState.call($this, this.p.remapColumns);
+                },
+                resizeStop: function () {
+                    saveColumnState.call($grid, $grid[0].p.remapColumns);
+                }
+})';
         if ($pager) {
             $js .= '.navGrid("#' . $id . 'Pager",';
             $js .= '       { ';

@@ -36,7 +36,7 @@
     $et = ">";
     print "<?xml version='1.0' encoding='utf-8'?$et\n";
     print "<ajax-response>";
-    print utf8_encode($xml);
+    print utf8_encodeRien($xml);
     print "</ajax-response>";
 
 ?>

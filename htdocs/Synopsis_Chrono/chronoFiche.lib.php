@@ -32,6 +32,7 @@ function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
 //    print $requete;
     $sql = $db->query($requete);
     while ($res = $db->fetch_object($sql)) {
+            $res->value = stripslashes($res->value);
         if ($withEntete) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap class="ui-state-default">' . $res->nom;
             print '    <td  class="ui-widget-content" colspan="3">';

@@ -550,6 +550,7 @@ if ($id > 0) {
         //print $requete;
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {
+            $res->value = stripslashes($res->value);
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
             print '    <td  class="ui-widget-content" colspan="3">';
             if ($res->hasSubValeur == 1) {

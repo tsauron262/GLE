@@ -516,6 +516,7 @@ switch ($action) {
 
 function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = false, $phpClass = '', $valueIsSelected = false, $valueIsChecked = false) {
     global $db;
+    $val = stripslashes($val);
     //Synopsis_Chrono_key_type_valeur
     if ($hasSubValeur) {
 //var_dump($phpClass);

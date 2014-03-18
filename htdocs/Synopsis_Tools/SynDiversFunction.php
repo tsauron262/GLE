@@ -895,7 +895,7 @@ function convDur($duration) {
     return( $converted_duration);
 }
 
-function select_dolusersInGroup($form, $group, $selected = '', $htmlname = 'userid', $show_empty = 0, $exclude = '', $disabled = 0, $include = '', $enableonly = '', $force_entity = false) {
+function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 'userid', $show_empty = 0, $exclude = '', $disabled = 0, $include = '', $enableonly = '', $force_entity = false) {
     global $conf, $user, $langs;
 
     // If no preselected user defined, we take current user
@@ -935,7 +935,8 @@ function select_dolusersInGroup($form, $group, $selected = '', $htmlname = 'user
         }
     }
     $sql.= " AND ug2.fk_user = u.rowid";
-    $sql.= " AND ug2.fk_usergroup =" . $group;
+    if ($group != '')
+        $sql.= " AND ug2.fk_usergroup =" . $group;
     if (!empty($user->societe_id))
         $sql.= " AND u.fk_societe = " . $user->societe_id;
     if (is_array($exclude) && $excludeUsers)

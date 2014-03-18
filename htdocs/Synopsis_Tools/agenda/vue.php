@@ -106,6 +106,9 @@ $js .= <<<EOF
                 data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime(),
                 error: function(msg) {
                     alert("erreur");
+                },
+                success: function(msg) {
+                    $('#calendar').weekCalendar('refresh');
                 }
             });
         }
@@ -253,9 +256,10 @@ function printMenu($tabUser) {
         }
     }
     echo "</tr></table></div></div>";
-    
+
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
     echo "<br/><br/>";
 }
+
 ?>

@@ -180,7 +180,8 @@ class ActionComm extends CommonObject
         $sql.= "transparency,";
         $sql.= "fk_element,";
         $sql.= "elementtype,";
-        $sql.= "entity";
+        $sql.= "entity,";
+        /*mod drsi */$sql.= "ref_ext";
         $sql.= ") VALUES (";
         $sql.= "'".$this->db->idate($now)."',";
         $sql.= (strval($this->datep)!=''?"'".$this->db->idate($this->datep)."'":"null").",";
@@ -199,7 +200,8 @@ class ActionComm extends CommonObject
         $sql.= "'".$this->transparency."',";
         $sql.= (! empty($this->fk_element)?$this->fk_element:"null").",";
         $sql.= (! empty($this->elementtype)?"'".$this->elementtype."'":"null").",";
-        $sql.= $conf->entity;
+        $sql.= $conf->entity.",";
+        /*mod drsi */$sql.= $this->ref_ext;
         $sql.= ")";
         
 

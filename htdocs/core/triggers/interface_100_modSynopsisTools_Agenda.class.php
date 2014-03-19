@@ -100,6 +100,7 @@ class InterfaceAgenda {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
+require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
         $idActionLier = array();
         $idRef = $object->id;
         if (isset($object->ref_ext)) {

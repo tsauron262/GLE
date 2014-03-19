@@ -201,7 +201,7 @@ class ActionComm extends CommonObject
         $sql.= (! empty($this->fk_element)?$this->fk_element:"null").",";
         $sql.= (! empty($this->elementtype)?"'".$this->elementtype."'":"null").",";
         $sql.= $conf->entity.",";
-        /*mod drsi */$sql.= $this->ref_ext;
+        /*mod drsi */$sql.= "'".$this->ref_ext."'";
         $sql.= ")";
         
 

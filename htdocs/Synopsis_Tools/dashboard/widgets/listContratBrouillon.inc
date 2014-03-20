@@ -92,10 +92,10 @@ function widget_listContratBrouillon() {
                     $table .=  '</tr>';
                     }
                     $table2 .=  '<tr '.$bc[$var].'><td nowrap>';
-//                    $table2 .=  $staticcontrat->getNomUrl(1,'');
+                    $table2 .=  $staticcontrat->getNomUrl(1,'');
                     $table2 .=  '</td>';
                     $table2 .=  '<td>';
-//                    $table2 .=  $companystatic->getNomUrl(1,'',16);
+                    $table2 .=  $companystatic->getNomUrl(1,'',16);
                     $table2 .=  '</td>';
                     $table2 .= "<td>";
                     $table2 .= $typeC['Nom'];

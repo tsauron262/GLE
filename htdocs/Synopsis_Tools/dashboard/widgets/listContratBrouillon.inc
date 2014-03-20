@@ -111,7 +111,7 @@ function widget_listContratBrouillon() {
             $table .=  "</table><br>";
             $db->free($resql);
         }
-        die($table);
+
 
         $table .="</p>";
         $table2 .="</p>";

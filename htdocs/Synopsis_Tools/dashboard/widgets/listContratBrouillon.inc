@@ -111,7 +111,7 @@ function widget_listContratBrouillon() {
             $table .=  "</table><br>";
             $db->free($resql);
         }
-        syslog(LOG_WARNING, $table);
+        die(syslog(LOG_ERR, $table."dddd")."ee".$table);
 
         $table .="</p>";
         $table2 .="</p>";

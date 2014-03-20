@@ -53,13 +53,13 @@ function widget_listContratBrouillon() {
             $table .=  '<br>';
             $table .=  '<table class="noborder" width="100%">';
             $table .=  '<tr class="liste_titre">';
-            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num<10?' ('.$num.')':'10').'</td>';
+            $table .=  '<td colspan="3">'.$langs->trans("DraftContracts")." ".($num<10?' ('.$num.')':'10').'</td>';
     //        $table .=  "<td>Type</td>";
             $table .=  '</tr>';
             $table2 .=  '<br>';
             $table2 .=  '<table class="noborder" width="100%">';
             $table2 .=  '<tr class="liste_titre">';
-            $table2 .=  '<td colspan="3">'.$langs->trans("DraftContracts").($num?' ('.$num.')':'').'</td>';
+            $table2 .=  '<td colspan="3">'.$langs->trans("DraftContracts")." ".($num?' ('.$num.')':'').'</td>';
     //        $table .=  "<td>Type</td>";
             $table2 .=  '</tr>';
             if ($num)
@@ -75,7 +75,7 @@ function widget_listContratBrouillon() {
                     $staticcontrat->id=$obj->rowid;
                     $companystatic->id=$obj->socid;
                     $companystatic->fetch($obj->socid);
-                    $companystatic->name="klmklmkm'klmklmkml";
+                    $companystatic->name=$obj->name;
                     $companystatic->client=1;
                     $staticcontrat->typeContrat = $obj->type;
                     $typeC = $staticcontrat->getTypeContrat();
@@ -84,7 +84,7 @@ function widget_listContratBrouillon() {
                     $table .=  $staticcontrat->getNomUrl(1,'');
                     $table .=  '</td>';
                     $table .=  '<td>';
-                    $table .=  $companystatic->getNomUrl(1,'',16);
+                    $table .=  $companystatic->getNomUrl(1,'',10);
                     $table .=  '</td>';
                     $table .= "<td>";
                     $table .= $typeC['Nom'];

@@ -94,9 +94,9 @@ function widget_statOfcOrderStatusAll() {
         }
     }
     $table2 .= "</table>";
-//    $table2 .= "</table>";
+    $table2 .= "</table>";
 
-//    $table .="</p>";
+    $table .="</p>";
     $table2 .="</p>";
     return array(
         'title' => 'Stats - Toutes les commandes par status',

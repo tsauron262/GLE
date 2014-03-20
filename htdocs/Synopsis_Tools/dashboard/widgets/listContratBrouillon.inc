@@ -75,7 +75,7 @@ function widget_listContratBrouillon() {
                     $staticcontrat->id=$obj->rowid;
                     $companystatic->id=$obj->socid;
                     $companystatic->fetch($obj->socid);
-                    $companystatic->name=$obj->name;
+                    $companystatic->name="klmklmkm'klmklmkml";
                     $companystatic->client=1;
                     $staticcontrat->typeContrat = $obj->type;
                     $typeC = $staticcontrat->getTypeContrat();

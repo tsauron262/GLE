@@ -19,7 +19,7 @@ function widget_statAVentiler() {
 
 
     $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."facturedet";
-    $sql .= " WHERE fk_export_compta = 0";
+    $sql .= " WHERE fk_code_ventilation = 0";
     $result = $db->query($sql);
     if ($result)
     {
@@ -30,7 +30,7 @@ function widget_statAVentiler() {
     }
 
     $sql = "SELECT count(*) FROM ".MAIN_DB_PREFIX."paiement";
-    $sql .= " WHERE fk_export_compta = 0";
+    $sql .= " WHERE fk_code_ventilation = 0";
 
     $result = $db->query($sql);
     if ($result)

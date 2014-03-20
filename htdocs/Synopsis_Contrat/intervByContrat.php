@@ -77,8 +77,8 @@ for ($i = 0; $i < 2; $i++) {
         $table = "Synopsis_fichinter";
     else
         $table = "synopsisdemandeinterv";
-        $requete = "SELECT *
-              FROM " . MAIN_DB_PREFIX . "".$table . "
+    $requete = "SELECT *
+              FROM " . MAIN_DB_PREFIX . "" . $table . "
              WHERE fk_contrat = " . $contratid;
     $sql = $db->query($requete);
 
@@ -98,12 +98,12 @@ for ($i = 0; $i < 2; $i++) {
             $arrResByDateDur[$anneeMoi] = 0;
             $arrResByDateTotHT[$anneeMoi] = 0;
         }
-        $arrResByStatut[$res->fk_statut]++;
+        $arrResByStatut[$res->fk_statut] ++;
         $arrResByStatutDur[$res->fk_statut] += $res->duree;
         $arrResByStatutTotHT[$res->fk_statut] += $res->total_ht;
 
         if (date('U', strtotime($res->datei)) > 0) {
-            $arrResByDate[$anneeMoi]++;
+            $arrResByDate[$anneeMoi] ++;
             $arrRemDate[$anneeMoi] = date('m/Y', strtotime($res->datei));
             $arrResByDateDur[$anneeMoi] += $res->duree;
             $arrResByDateTotHT[$anneeMoi] += $res->total_ht;
@@ -114,7 +114,7 @@ for ($i = 0; $i < 2; $i++) {
 
 
 
-    $html .= "<h2>".($i==0 ?"Intervention" : "Demande") ." : " . $totalSAV . "</h2>";
+    $html .= "<h2>" . ($i == 0 ? "Intervention" : "Demande") . " : " . $totalSAV . "</h2>";
     $html .= "<div id='tab" . $i . "'>";
     $html .= "<ul>";
     $html .= " <li><a href='#Statut" . $i . "'><span>Par statut</span></a></li>";
@@ -156,10 +156,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.label, fd.duree, fd.total_ht, fd.fk_typeinterv
-              FROM " . MAIN_DB_PREFIX ."".$table.  "det as fd,
-                   " . MAIN_DB_PREFIX ."".$table. " as f,
+              FROM " . MAIN_DB_PREFIX . "" . $table . "det as fd,
+                   " . MAIN_DB_PREFIX . "" . $table . " as f,
                    " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as b
-             WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = f.rowid
+             WHERE fd.fk_" . ($table == "Synopsis_fichinter" ? "fichinter" : $table) . " = f.rowid
                AND b.id = fd.fk_typeinterv
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.rang";
@@ -194,10 +194,10 @@ for ($i = 0; $i < 2; $i++) {
 
 
     $requete = "SELECT b.lastname, b.firstname, fd.duree, fd.total_ht, f.fk_user_author
-              FROM " . MAIN_DB_PREFIX ."".$table. "det as fd,
-                   " . MAIN_DB_PREFIX ."".$table. " as f,
+              FROM " . MAIN_DB_PREFIX . "" . $table . "det as fd,
+                   " . MAIN_DB_PREFIX . "" . $table . " as f,
                    " . MAIN_DB_PREFIX . "user as b
-             WHERE fd.fk_".($table == "Synopsis_fichinter" ? "fichinter" : $table)." = f.rowid
+             WHERE fd.fk_" . ($table == "Synopsis_fichinter" ? "fichinter" : $table) . " = f.rowid
                AND b.rowid = f.fk_user_author
                AND f.fk_contrat = " . $contratid . "
           ORDER BY b.firstname";
@@ -244,18 +244,21 @@ $requete = "SELECT *
 $contrat->fetch_lines();
 
 $nbDepDeb = date_diff(date_create($db->idate($contrat->date_contrat)), date_create())->days;
-if($contrat->total_ht > 0){
+if ($contrat->total_ht > 0) {
     $pourc = $result[0]['total_ht'] / $contrat->total_ht * 100;
-    $pourcPro = $pourc * 365 / $nbDepDeb;
-}
-else{
+    if ($nbDepDeb > 0) {
+        $pourcPro = $pourc * 365 / $nbDepDeb;
+    } else {
+        $pourcPro = "N/C";
+    }
+} else {
     $pourc = "N/C";
     $pourcPro = "N/C";
 }
 print "<table class='border' width='100%'><tr><td> Date contrat <td>" . dol_print_date($contrat->date_contrat) . "
     <td>Vendue <td> " . $contrat->total_ht . " &euro;
     <tr><td>Prevue <td> " . $result[1]['total_ht'] . " &euro;";
-print "<td>Réalisé <td ".($pourcPro > 100 ? "style='color:red'" : "")."> " . price($result[0]['total_ht']) . " &euro; (".price($pourc)." %) Prorata : ".  price($pourcPro)." %</tr></table><br/><br/>";
+print "<td>Réalisé <td " . ($pourcPro > 100 ? "style='color:red'" : "") . "> " . price($result[0]['total_ht']) . " &euro; (" . price($pourc) . " %) Prorata : " . price($pourcPro) . " %</tr></table><br/><br/>";
 
 
 

@@ -81,7 +81,7 @@ function widget_listContratBrouillon() {
                     $typeC = $staticcontrat->getTypeContrat();
                     if($i < 10){
                     $table .=  '<tr '.$bc[$var].'><td nowrap>';
-//                    $table .=  $staticcontrat->getNomUrl(1,'');
+                    $table .=  $staticcontrat->getNomUrl(1,'');
                     $table .=  '</td>';
                     $table .=  '<td>';
 //                    $table .=  $companystatic->getNomUrl(1,'',16);

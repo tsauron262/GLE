@@ -265,13 +265,16 @@ echo "11h";
 
 				// New page
 				$pdf->AddPage();
+echo "11i";
 				if (! empty($tplidx)) $pdf->useTemplate($tplidx);
 				$pagenb++;
+echo "11j";
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 				$pdf->SetTextColor(0,0,0);
 
+echo "11k";
 				$tab_top = 90;
 				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
 				$tab_height = 130;

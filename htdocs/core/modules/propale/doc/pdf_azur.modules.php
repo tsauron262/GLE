@@ -1201,11 +1201,14 @@ echo "8";
 echo "4";
 		$pdf->SetFont('','B',$default_font_size);
 
+echo "5";
 		$posy+=5;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
+echo "6";
 		$pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref")." : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
+echo "7";
 		$posy+=1;
 		$pdf->SetFont('','', $default_font_size - 1);
 

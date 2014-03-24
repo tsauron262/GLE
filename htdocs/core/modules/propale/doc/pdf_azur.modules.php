@@ -270,8 +270,11 @@ echo "11i";
 				$pagenb++;
 echo "11j";
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
+echo "11l";
 				$pdf->SetFont('','', $default_font_size - 1);
+echo "11m";
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
+echo "11n";
 				$pdf->SetTextColor(0,0,0);
 
 echo "11k";

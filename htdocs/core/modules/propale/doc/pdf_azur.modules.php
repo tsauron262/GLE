@@ -239,6 +239,7 @@ echo "11h";
                 }
 
 				$pdf->Open();
+echo "11g";
 				$pagenb=0;
 				$pdf->SetDrawColor(128,128,128);
 
@@ -249,6 +250,7 @@ echo "11h";
 				$pdf->SetKeyWords($outputlangs->convToOutputCharset($object->ref)." ".$outputlangs->transnoentities("CommercialProposal"));
 				if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
+echo "11gg";
 				$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 
 				// Positionne $this->atleastonediscount si on a au moins une remise
@@ -259,6 +261,7 @@ echo "11h";
 						$this->atleastonediscount++;
 					}
 				}
+echo "11h";
 
 				// New page
 				$pdf->AddPage();

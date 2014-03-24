@@ -86,9 +86,15 @@ $viewstatut = GETPOST('viewstatut');
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('orderlist'));
 
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('orderlist'));
+
 /*
  * Actions
  */
+
+$parameters=array('socid'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hook
 
 $parameters = array('socid' => $socid);
 $reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action);    // Note that $action and $object may have been modified by some hook
@@ -125,8 +131,8 @@ llxHeader('', $langs->trans("Orders"), $help_url);
 
 $sql = 'SELECT s.nom, s.rowid as socid, s.client, c.rowid, c.ref, c.total_ht, c.ref_client,';
 $sql.= ' c.date_valid, c.date_commande, c.note_private, c.date_livraison, c.fk_statut, c.facture as facturee';
-$sql.= ' FROM ' . MAIN_DB_PREFIX . 'societe as s';
-$sql.= ', ' . MAIN_DB_PREFIX . 'commande as c';
+$sql.= ' FROM '.MAIN_DB_PREFIX.'societe as s';
+$sql.= ', '.MAIN_DB_PREFIX.'commande as c';
 // We'll need this table joined to the select in order to filter by sale
 if ($search_sale > 0 || (!$user->rights->societe->client->voir && !$socid))
     $sql .= ", " . MAIN_DB_PREFIX . "societe_commerciaux as sc";
@@ -135,16 +141,15 @@ if ($search_user > 0) {
     $sql.=", " . MAIN_DB_PREFIX . "c_type_contact as tc";
 }
 $sql.= ' WHERE c.fk_soc = s.rowid';
-$sql.= ' AND c.entity = ' . $conf->entity;
-if ($socid)
-    $sql.= ' AND s.rowid = ' . $socid;
-if (!$user->rights->societe->client->voir && !$socid)
-    $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " . $user->id;
+$sql.= ' AND c.entity = '.$conf->entity;
+if ($socid)	$sql.= ' AND s.rowid = '.$socid;
+if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 if ($sref) {
-    $sql .= natural_search('c.ref', $sref);
+	$sql .= natural_search('c.ref', $sref);
 }
-if ($sall) {
-    $sql .= natural_search(array('c.ref', 'c.note_private'), $sall);
+if ($sall)
+{
+	$sql .= natural_search(array('c.ref', 'c.note_private'), $sall);
 }
 if ($viewstatut <> '') {
     if ($viewstatut < 4 && $viewstatut > -3) {
@@ -190,8 +195,9 @@ if ($deliverymonth > 0) {
 else if ($deliveryyear > 0) {
     $sql.= " AND c.date_livraison BETWEEN '" . $db->idate(dol_get_first_day($deliveryyear, 1, false)) . "' AND '" . $db->idate(dol_get_last_day($deliveryyear, 12, false)) . "'";
 }
-if (!empty($snom)) {
-    $sql .= natural_search('s.nom', $snom);
+if (!empty($snom))
+{
+	$sql .= natural_search('s.nom', $snom);
 }
 if (!empty($sref_client)) {
     $sql.= ' AND c.ref_client LIKE \'%' . $db->escape($sref_client) . '%\'';
@@ -283,31 +289,31 @@ if ($resql) {
         print '</td></tr>';
     }
 
-    print '<tr class="liste_titre">';
-    print_liste_field_titre($langs->trans('Ref'), $_SERVER["PHP_SELF"], 'c.ref', '', $param, 'width="25%"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('RefCustomerOrder'), $_SERVER["PHP_SELF"], 'c.ref_client', '', $param, '', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('Company'), $_SERVER["PHP_SELF"], 's.nom', '', $param, '', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('OrderDate'), $_SERVER["PHP_SELF"], 'c.date_commande', '', $param, 'align="right"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('DeliveryDate'), $_SERVER["PHP_SELF"], 'c.date_livraison', '', $param, 'align="right"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('AmountHT'), $_SERVER["PHP_SELF"], 'c.total_ht', '', $param, 'align="right"', $sortfield, $sortorder);
-    print_liste_field_titre($langs->trans('Status'), $_SERVER["PHP_SELF"], 'c.fk_statut', '', $param, 'align="right"', $sortfield, $sortorder);
-    print '</tr>';
-    print '<tr class="liste_titre">';
-    print '<td class="liste_titre">';
-    print '<input class="flat" size="6" type="text" name="sref" value="' . $sref . '">';
-    print '</td>';
-    print '<td class="liste_titre" align="left">';
-    print '<input class="flat" type="text" size="6" name="sref_client" value="' . $sref_client . '">';
-    print '</td>';
-    print '<td class="liste_titre" align="left">';
-    print '<input class="flat" type="text" name="snom" value="' . $snom . '">';
-    print '</td>';
-    print '<td class="liste_titre">&nbsp;';
-    print '</td><td class="liste_titre">&nbsp;';
-    print '</td><td class="liste_titre">&nbsp;';
-    print '</td><td align="right" class="liste_titre">';
-    print '<input type="image" class="liste_titre" name="button_search" src="' . img_picto($langs->trans("Search"), 'search.png', '', '', 1) . '"  value="' . dol_escape_htmltag($langs->trans("Search")) . '" title="' . dol_escape_htmltag($langs->trans("Search")) . '">';
-    print '</td></tr>';
+	print '<tr class="liste_titre">';
+	print_liste_field_titre($langs->trans('Ref'),$_SERVER["PHP_SELF"],'c.ref','',$param,'width="25%"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('RefCustomerOrder'),$_SERVER["PHP_SELF"],'c.ref_client','',$param,'',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('Company'),$_SERVER["PHP_SELF"],'s.nom','',$param,'',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('OrderDate'),$_SERVER["PHP_SELF"],'c.date_commande','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('DeliveryDate'),$_SERVER["PHP_SELF"],'c.date_livraison','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('AmountHT'),$_SERVER["PHP_SELF"],'c.total_ht','',$param, 'align="right"',$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans('Status'),$_SERVER["PHP_SELF"],'c.fk_statut','',$param,'align="right"',$sortfield,$sortorder);
+	print '</tr>';
+	print '<tr class="liste_titre">';
+	print '<td class="liste_titre">';
+	print '<input class="flat" size="6" type="text" name="sref" value="'.$sref.'">';
+	print '</td>';
+	print '<td class="liste_titre" align="left">';
+	print '<input class="flat" type="text" size="6" name="sref_client" value="'.$sref_client.'">';
+	print '</td>';
+	print '<td class="liste_titre" align="left">';
+	print '<input class="flat" type="text" name="snom" value="'.$snom.'">';
+	print '</td>';
+	print '<td class="liste_titre">&nbsp;';
+	print '</td><td class="liste_titre">&nbsp;';
+	print '</td><td class="liste_titre">&nbsp;';
+	print '</td><td align="right" class="liste_titre">';
+	print '<input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'"  value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+	print '</td></tr>';
 
     $var = true;
     $total = 0;
@@ -342,29 +348,39 @@ if ($resql) {
         /* f mod drsi */
 
 
+		print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
+		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_valid),$db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
+			print img_picto($langs->trans("Late"),"warning");
+		if(!empty($objp->note_private))
+		{
+			print ' <span class="note">';
+			print '<a href="'.DOL_URL_ROOT.'/commande/note.php?id='.$objp->rowid.'">'.img_picto($langs->trans("ViewPrivateNote"),'object_generic').'</a>';
+			print '</span>';
+		}
+		print '</td>';
 
 
-        print '<tr ' . $bc[$var] . '>';
-        print '<td class="nowrap">';
+		print '</td>';
+
+		// Ref customer
+		print '<td>'.$objp->ref_client.'</td>';
 
         $generic_commande->id = $objp->rowid;
         $generic_commande->ref = $objp->ref;
 
-        print '<table class="nobordernopadding">';
-        print '<tr class="nocellnopadd">';
-        print '<td class="nobordernopadding nowrap">';
-        print $generic_commande->getNomUrl(1, ($viewstatut != 2 ? 0 : $objp->fk_statut));
-        print '</td>';
-
-        print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
-        if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_valid), $db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
-            print img_picto($langs->trans("Late"), "warning");
-        if (!empty($objp->note_private)) {
-            print ' <span class="note">';
-            print '<a href="' . DOL_URL_ROOT . '/commande/note.php?id=' . $objp->rowid . '">' . img_picto($langs->trans("ViewPrivateNote"), 'object_generic') . '</a>';
-            print '</span>';
-        }
-        print '</td>';
+		// If module invoices enabled and user with invoice creation permissions
+		if (! empty($conf->facture->enabled) && ! empty($conf->global->ORDER_BILLING_ALL_CUSTOMER))
+		{
+			if ($user->rights->facture->creer)
+			{
+				if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0))
+				{
+					print '&nbsp;<a href="'.DOL_URL_ROOT.'/commande/orderstoinvoice.php?socid='.$companystatic->id.'">';
+					print img_picto($langs->trans("CreateInvoiceForThisCustomer").' : '.$companystatic->nom, 'object_bill', 'hideonsmartphone').'</a>';
+				}
+			}
+		}
+		print '</td>';
 
         print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
         $filename = dol_sanitizeFileName($objp->ref);

@@ -1360,7 +1360,7 @@ EOF;
             print '<td class="ui-widget-content" colspan=3>';
             print $langs->trans("NoProject") . '&nbsp;&nbsp;';
             if ($synopsisdemandeinterv->brouillon)
-                print '<a class="butAction" href=../projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
+                print '<a class="butAction" href=../DOL3.5.2projet/fiche.php?socid=' . $societe->id . '&action=create>' . $langs->trans('AddProject') . '</a>';
             print '</td>';
         } else {
             if ($synopsisdemandeinterv->statut == 0 && $user->rights->synopsisdemandeinterv->creer) {
@@ -1380,7 +1380,7 @@ EOF;
                     print '<td colspan="3" class="ui-widget-content">';
                     $proj = new Project($db);
                     $proj->fetch($synopsisdemandeinterv->projetidp);
-                    print '<a href="../projet/fiche.php?id=' . $synopsisdemandeinterv->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
+                    print '<../DOL3.5.2projet/fiche.phpiche.php?id=' . $synopsisdemandeinterv->projetidp . '" title="' . $langs->trans('ShowProject') . '">';
                     print $proj->title;
                     print '</a>';
                     print '</td>';

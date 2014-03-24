@@ -124,10 +124,11 @@ See ChangeLog file found into package.
    Compatible with European directives (2006/112/CE ... 2010/45/UE) (http://europa.eu/legislation_summaries/taxation/l31057_en.htm)
    ...
 
-
 ## WHAT GLE CAN'T DO YET (TODO LIST)
 
 This is features that GLE does not support completely yet:
+
+This is features that Dolibarr does not support completely yet:
 
 - No double party accountancy (only bank and treasury management).
 - Dolibarr manage one currency at once (mono-currency).

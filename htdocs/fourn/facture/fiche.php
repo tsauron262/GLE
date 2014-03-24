@@ -532,7 +532,9 @@ elseif ($action == 'addline' && $user->rights->fournisseur->facture->creer)
 	$error=0;
 
 	// Set if we used free entry or predefined product
-	if (GETPOST('addline_libre'))
+	if (GETPOST('addline_libre')
+			|| (GETPOST('dp_desc') && ! GETPOST('addline_libre') && ! GETPOST('idprod', 'int')>0)	// we push enter onto qty field
+			)
 	{
 		$predef='';
 		$idprod=0;
@@ -540,7 +542,9 @@ elseif ($action == 'addline' && $user->rights->fournisseur->facture->creer)
 		$price_ht = GETPOST('price_ht');
 		$tva_tx=(GETPOST('tva_tx')?GETPOST('tva_tx'):0);
 	}
-	if (GETPOST('addline_predefined'))
+	if (GETPOST('addline_predefined')
+			|| (! GETPOST('dp_desc') && ! GETPOST('addline_predefined') && GETPOST('idprod', 'int')>0)	// we push enter onto qty field
+			)			
 	{
 		$predef=(($conf->global->MAIN_FEATURES_LEVEL < 2) ? '_predef' : '');
 		$idprod=GETPOST('idprod', 'int');
@@ -2127,11 +2131,11 @@ else
                 if (empty($conf->global->PRODUIT_USE_SEARCH_TO_SELECT)) print '<br>';
 
                 $ajaxoptions=array(
-                		'update' => array('pqty' => 'qty', 'p_remise_percent' => 'discount'),
-                		'disabled' => 'addPredefinedProductButton',
-                		'error' => $langs->trans("NoPriceDefinedForThisSupplier")
+						'update' => array('qty_predef'=>'qty','remise_percent_predef' => 'discount'),	// html id tag will be edited with which ajax json response key
+                		'disabled' => 'addPredefinedProductButton',	// html id to disable once select is done
+                		'error' => $langs->trans("NoPriceDefinedForThisSupplier") // translation of an error saved into var 'error'
                 );
-                $form->select_produits_fournisseurs($object->socid, '', 'idprodfournprice', '', '', $ajaxoptions);
+                $form->select_produits_fournisseurs($object->socid, GETPOST('idprodfournprice'), 'idprodfournprice', '', '', $ajaxoptions);
 
                 if (empty($conf->global->PRODUIT_USE_SEARCH_TO_SELECT)) print '<br>';
 

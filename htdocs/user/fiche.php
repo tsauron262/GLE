@@ -1888,6 +1888,21 @@ else
             }
             print '</td>';
 
+			// Accountancy code
+            print "<tr>";
+            print '<td valign="top">'.$langs->trans("AccountancyCode").'</td>';
+            print '<td>';
+            if ($caneditfield)
+            {
+                print '<input size="30" type="text" class="flat" name="accountancy_code" value="'.$object->accountancy_code.'">';
+            }
+            else
+            {
+                print '<input type="hidden" name="accountancy_code" value="'.$object->accountancy_code.'">';
+                print $object->accountancy_code;
+            }
+            print '</td>';
+
             // Status
             print '<tr><td valign="top">'.$langs->trans("Status").'</td>';
             print '<td>';

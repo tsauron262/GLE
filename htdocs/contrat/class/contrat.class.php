@@ -570,7 +570,7 @@ class Contrat extends CommonObject
 
 				if ($line->statut == 0) $this->nbofserviceswait++;
 				if ($line->statut == 4 && (empty($line->date_fin_prevue) || $line->date_fin_prevue >= $now)) $this->nbofservicesopened++;
-				if ($line->statut == 4 && $line->date_fin_prevue < $now) $this->nbofservicesexpired++;
+				if ($line->statut == 4 && (! empty($line->date_fin_prevue) && $line->date_fin_prevue < $now)) $this->nbofservicesexpired++;
 				if ($line->statut == 5) $this->nbofservicesclosed++;
 
 				$total_ttc+=$objp->total_ttc;   // TODO Not saved into database
@@ -655,7 +655,7 @@ class Contrat extends CommonObject
 
 				if ($line->statut == 0) $this->nbofserviceswait++;
 				if ($line->statut == 4 && (empty($line->date_fin_prevue) || $line->date_fin_prevue >= $now)) $this->nbofservicesopened++;
-				if ($line->statut == 4 && $line->date_fin_prevue < $now) $this->nbofservicesexpired++;
+				if ($line->statut == 4 && (! empty($line->date_fin_prevue) && $line->date_fin_prevue < $now)) $this->nbofservicesexpired++;
 				if ($line->statut == 5) $this->nbofservicesclosed++;
 
 				$this->lines[]        = $line;
@@ -1159,7 +1159,7 @@ class Contrat extends CommonObject
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
 
-		$localtaxes_type=getLocalTaxesFromRate($tvatx,0,$mysoc);
+		$localtaxes_type=getLocalTaxesFromRate($txtva,0,$mysoc);
 
 		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $tvatx, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1, '', $localtaxes_type);
 		$total_ht  = $tabprice[0];
@@ -1803,7 +1803,7 @@ class ContratLigne
 	 */
 	function getLibStatut($mode)
 	{
-		return $this->LibStatut($this->statut,$mode,(isset($this->date_fin_validite)?($this->date_fin_validite < dol_now()?1:0):-1));
+		return $this->LibStatut($this->statut,$mode,((! empty($this->date_fin_validite))?($this->date_fin_validite < dol_now()?1:0):-1));
 	}
 
 	/**

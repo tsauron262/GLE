@@ -139,16 +139,7 @@ if ($object->id)
     	if ($ret == 'html') print '<br>';
     }
 
-    /*
-     * Confirmation suppression fichier
-     */
-    if ($action == 'delete')
-    {
-    	$ret=$form->form_confirm($_SERVER["PHP_SELF"].'?id='.$id.'&urlfile='.urlencode(GETPOST("urlfile")), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile', '', 0, 1);
-    	if ($ret == 'html') print '<br>';
-    }
-
-//    $modulepart = 'contract';
+    $modulepart = 'contract';
     $permission = $user->rights->contrat->creer;
     $param = '&id=' . $object->id;
     include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
@@ -156,7 +147,7 @@ if ($object->id)
 }
 else
 {
-	print $langs->trans("UnkownError");
+	print $langs->trans("ErrorUnknown");
 }
 
 

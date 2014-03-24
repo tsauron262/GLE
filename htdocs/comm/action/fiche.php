@@ -4,7 +4,7 @@
  * Copyright (C) 2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005      Simon TOSSER         <simon@kornog-computing.com>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2010      Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2010-2013 Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2013      Florian Henry        <florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,18 +27,18 @@
  *       \brief      Page for event card
  */
 require '../../main.inc.php';
-require_once DOL_DOCUMENT_ROOT . '/core/lib/agenda.lib.php';
-require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
-require_once DOL_DOCUMENT_ROOT . '/contact/class/contact.class.php';
-require_once DOL_DOCUMENT_ROOT . '/user/class/user.class.php';
-require_once DOL_DOCUMENT_ROOT . '/comm/action/class/cactioncomm.class.php';
-require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
-require_once DOL_DOCUMENT_ROOT . '/core/class/html.formactions.class.php';
-if (!empty($conf->projet->enabled)) {
-    require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
-    require_once DOL_DOCUMENT_ROOT . '/core/class/html.formprojet.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/agenda.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
+require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
+require_once DOL_DOCUMENT_ROOT.'/comm/action/class/cactioncomm.class.php';
+require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
+if (! empty($conf->projet->enabled)) {
+	require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
+	require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
 }
-require_once DOL_DOCUMENT_ROOT . '/core/class/extrafields.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
 
 $langs->load("companies");
 $langs->load("commercial");
@@ -47,12 +47,12 @@ $langs->load("bills");
 $langs->load("orders");
 $langs->load("agenda");
 
-$action = GETPOST('action', 'alpha');
-$cancel = GETPOST('cancel', 'alpha');
-$backtopage = GETPOST('backtopage', 'alpha');
-$contactid = GETPOST('contactid', 'int');
-$origin = GETPOST('origin', 'alpha');
-$originid = GETPOST('originid', 'int');
+$action=GETPOST('action','alpha');
+$cancel=GETPOST('cancel','alpha');
+$backtopage=GETPOST('backtopage','alpha');
+$contactid=GETPOST('contactid','int');
+$origin=GETPOST('origin','alpha');
+$originid=GETPOST('originid','int');
 
 // Security check
 $socid = GETPOST('socid', 'int');
@@ -60,8 +60,7 @@ $id = GETPOST('id', 'int');
 if ($user->societe_id)
     $socid = $user->societe_id;
 $result = restrictedArea($user, 'agenda', $id, 'actioncomm&societe', 'myactions&allactions', 'fk_soc', 'id');
-if ($user->societe_id && $socid)
-    $result = restrictedArea($user, 'societe', $socid);
+if ($user->societe_id && $socid) $result = restrictedArea($user,'societe',$socid);
 
 $error = GETPOST("error");
 $mesg = '';
@@ -82,6 +81,11 @@ $hookmanager->initHooks(array('actioncard'));
 /*
  * Actions
  */
+
+// Add action
+if ($action == 'add_action')
+{
+	$error=0;
 
 // Add action
 if ($action == 'add_action') {
@@ -109,53 +113,63 @@ if ($action == 'add_action') {
     $datep = dol_mktime($fulldayevent ? '00' : $_POST["aphour"], $fulldayevent ? '00' : $_POST["apmin"], 0, $_POST["apmonth"], $_POST["apday"], $_POST["apyear"]);
     $datef = dol_mktime($fulldayevent ? '23' : $_POST["p2hour"], $fulldayevent ? '59' : $_POST["p2min"], $fulldayevent ? '59' : '0', $_POST["p2month"], $_POST["p2day"], $_POST["p2year"]);
 
-    // Check parameters
-    if (!$datef && $percentage == 100) {
-        $error++;
-        $action = 'create';
-        $mesg = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->trans("DateEnd")) . '</div>';
-    }
+	// Check parameters
+	if (! $datef && $percentage == 100)
+	{
+		$error++;
+		$action = 'create';
+		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")).'</div>';
+	}
 
-    if (empty($conf->global->AGENDA_USE_EVENT_TYPE) && !GETPOST('label')) {
-        $error++;
-        $action = 'create';
-        $mesg = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->trans("Title")) . '</div>';
-    }
+	if (empty($conf->global->AGENDA_USE_EVENT_TYPE) && ! GETPOST('label'))
+	{
+		$error++;
+		$action = 'create';
+		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Title")).'</div>';
+	}
 
-    // Initialisation objet cactioncomm
-    if (!GETPOST('actioncode')) {
-        $error++;
-        $action = 'create';
-        $mesg = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->trans("Type")) . '</div>';
-    } else {
-        $result = $cactioncomm->fetch(GETPOST('actioncode'));
-    }
+	// Initialisation objet cactioncomm
+	if (! GETPOST('actioncode'))
+	{
+		$error++;
+		$action = 'create';
+		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Type")).'</div>';
+	}
+	else
+	{
+		$result=$cactioncomm->fetch(GETPOST('actioncode'));
+	}
 
-    // Initialisation objet actioncomm
-    $actioncomm->type_id = $cactioncomm->id;
-    $actioncomm->type_code = $cactioncomm->code;
-    $actioncomm->priority = GETPOST("priority") ? GETPOST("priority") : 0;
-    $actioncomm->fulldayevent = (!empty($fulldayevent) ? 1 : 0);
-    $actioncomm->location = GETPOST("location");
-    $actioncomm->transparency = (GETPOST("transparency") == 'on' ? 1 : 0);
-    $actioncomm->label = trim(GETPOST('label'));
-    $actioncomm->fk_element = GETPOST("fk_element");
-    $actioncomm->elementtype = GETPOST("elementtype");
-    if (!GETPOST('label')) {
-        if (GETPOST('actioncode') == 'AC_RDV' && $contact->getFullName($langs)) {
-            $actioncomm->label = $langs->transnoentitiesnoconv("TaskRDVWith", $contact->getFullName($langs));
-        } else {
-            if ($langs->trans("Action" . $actioncomm->type_code) != "Action" . $actioncomm->type_code) {
-                $actioncomm->label = $langs->transnoentitiesnoconv("Action" . $actioncomm->type_code) . "\n";
-            } else
-                $actioncomm->label = $cactioncomm->libelle;
-        }
-    }
-    $actioncomm->fk_project = isset($_POST["projectid"]) ? $_POST["projectid"] : 0;
-    $actioncomm->datep = $datep;
-    $actioncomm->datef = $datef;
-    $actioncomm->percentage = $percentage;
-    $actioncomm->duree = ((float) (GETPOST('dureehour') * 60) + (float) GETPOST('dureemin')) * 60;
+	// Initialisation objet actioncomm
+	$actioncomm->type_id = $cactioncomm->id;
+	$actioncomm->type_code = $cactioncomm->code;
+	$actioncomm->priority = GETPOST("priority")?GETPOST("priority"):0;
+	$actioncomm->fulldayevent = (! empty($fulldayevent)?1:0);
+	$actioncomm->location = GETPOST("location");
+	$actioncomm->transparency = (GETPOST("transparency")=='on'?1:0);
+	$actioncomm->label = trim(GETPOST('label'));
+	$actioncomm->fk_element = GETPOST("fk_element");
+	$actioncomm->elementtype = GETPOST("elementtype");
+	if (! GETPOST('label'))
+	{
+		if (GETPOST('actioncode') == 'AC_RDV' && $contact->getFullName($langs))
+		{
+			$actioncomm->label = $langs->transnoentitiesnoconv("TaskRDVWith",$contact->getFullName($langs));
+		}
+		else
+		{
+			if ($langs->trans("Action".$actioncomm->type_code) != "Action".$actioncomm->type_code)
+			{
+				$actioncomm->label = $langs->transnoentitiesnoconv("Action".$actioncomm->type_code)."\n";
+			}
+			else $actioncomm->label = $cactioncomm->libelle;
+		}
+	}
+	$actioncomm->fk_project = isset($_POST["projectid"])?$_POST["projectid"]:0;
+	$actioncomm->datep = $datep;
+	$actioncomm->datef = $datef;
+	$actioncomm->percentage = $percentage;
+	$actioncomm->duree=((float) (GETPOST('dureehour') * 60) + (float) GETPOST('dureemin')) * 60;
 
     $usertodo = new User($db);
     if ($_POST["affectedto"] > 0) {
@@ -177,12 +191,10 @@ if ($action == 'add_action') {
         $actioncomm->societe = $societe;
     }
 
-    // Special for module webcal and phenix
-    // TODO external modules
-    if (!empty($conf->webcalendar->enabled) && GETPOST('add_webcal') == 'on')
-        $actioncomm->use_webcal = 1;
-    if (!empty($conf->phenix->enabled) && GETPOST('add_phenix') == 'on')
-        $actioncomm->use_phenix = 1;
+	// Special for module webcal and phenix
+	// TODO external modules
+	if (! empty($conf->webcalendar->enabled) && GETPOST('add_webcal') == 'on') $actioncomm->use_webcal=1;
+	if (! empty($conf->phenix->enabled) && GETPOST('add_phenix') == 'on') $actioncomm->use_phenix=1;
 
     // Check parameters
     if ($actioncomm->type_code == 'AC_RDV' && ($datep == '' || ($datef == '' && empty($fulldayevent)))) {
@@ -211,36 +223,45 @@ if ($action == 'add_action') {
         // On cree l'action
         $idaction = $actioncomm->add($user);
 
-        if ($idaction > 0) {
-            if (!$actioncomm->error) {
-                $db->commit();
-                if (!empty($backtopage)) {
-                    dol_syslog("Back to " . $backtopage);
-                    header("Location: " . $backtopage);
-                } elseif ($idaction) {
-                    header("Location: " . DOL_URL_ROOT . '/comm/action/fiche.php?id=' . $idaction);
-                } else {
-                    header("Location: " . DOL_URL_ROOT . '/comm/action/index.php');
-                }
-                exit;
-            } else {
-                // If error
-                $db->rollback();
-                $langs->load("errors");
-                $error = $langs->trans($actioncomm->error);
-                setEventMessage($error, 'errors');
-                $action = 'create';
-            }
-        } else {
-            $db->rollback();
-            $langs->load("errors");
-            if (!empty($actioncomm->error))
-                setEventMessage($langs->trans($actioncomm->error), 'errors');
-            if (count($actioncomm->errors))
-                setEventMessage($actioncomm->errors, 'errors');
-            $action = 'create';
-        }
-    }
+		if ($idaction > 0)
+		{
+			if (! $actioncomm->error)
+			{
+				$db->commit();
+				if (! empty($backtopage))
+				{
+					dol_syslog("Back to ".$backtopage);
+					header("Location: ".$backtopage);
+				}
+				elseif($idaction)
+				{
+					header("Location: ".DOL_URL_ROOT.'/comm/action/fiche.php?id='.$idaction);
+				}
+				else
+				{
+					header("Location: ".DOL_URL_ROOT.'/comm/action/index.php');
+				}
+				exit;
+			}
+			else
+			{
+				// If error
+				$db->rollback();
+				$langs->load("errors");
+				$error=$langs->trans($actioncomm->error);
+				setEventMessage($error,'errors');
+				$action = 'create';
+			}
+		}
+		else
+		{
+			$db->rollback();
+			$langs->load("errors");
+			if (! empty($actioncomm->error)) setEventMessage($langs->trans($actioncomm->error), 'errors');
+			if (count($actioncomm->errors)) setEventMessage($actioncomm->errors, 'errors');
+			$action = 'create';
+		}
+	}
 }
 
 /*
@@ -310,19 +331,26 @@ if ($action == 'update') {
             $action = 'edit';
         }
 
-        // Users
-        $usertodo = new User($db);
-        if ($_POST["affectedto"]) {
-            $usertodo->fetch($_POST["affectedto"]);
-        }
-        $actioncomm->usertodo = $usertodo;
-        $actioncomm->transparency = (GETPOST("transparency") == 'on' ? 1 : 0);
-
-        $userdone = new User($db);
-        if ($_POST["doneby"]) {
-            $userdone->fetch($_POST["doneby"]);
-        }
-        $actioncomm->userdone = $userdone;
+		$actioncomm->fk_action   = dol_getIdFromCode($db, $_POST["actioncode"], 'c_actioncomm');
+		$actioncomm->label       = $_POST["label"];
+		$actioncomm->datep       = $datep;
+		$actioncomm->datef       = $datef;
+		$actioncomm->percentage  = $percentage;
+		$actioncomm->priority    = $_POST["priority"];
+        $actioncomm->fulldayevent= $_POST["fullday"]?1:0;
+		$actioncomm->location    = GETPOST('location');
+		$actioncomm->societe->id = $_POST["socid"];
+		$actioncomm->contact->id = $_POST["contactid"];
+		$actioncomm->fk_project  = $_POST["projectid"];
+		$actioncomm->note        = $_POST["note"];
+		$actioncomm->pnote       = $_POST["note"];
+		$actioncomm->fk_element	 = $_POST["fk_element"];
+		$actioncomm->elementtype = $_POST["elementtype"];
+		if (! $datef && $percentage == 100)
+		{
+			$error=$langs->trans("ErrorFieldRequired",$langs->trans("DateEnd"));
+			$action = 'edit';
+		}
 
         // Fill array 'array_options' with data from add form
         $ret = $extrafields->setOptionalsFromPost($extralabels, $actioncomm);
@@ -468,22 +496,25 @@ if ($action == 'create') {
         $form->select_date($datef, 'p2', 1, 1, 1, "action", 1, 1, 0, 0, 'fulldayend');
     print '</td></tr>';
 
-    // Status
-    print '<tr><td width="10%">' . $langs->trans("Status") . ' / ' . $langs->trans("Percentage") . '</td>';
-    print '<td>';
-    $percent = -1;
-    if (isset($_GET['status']) || isset($_POST['status'])) {
-        $percent = GETPOST('status');
-    } else if (isset($_GET['percentage']) || isset($_POST['percentage'])) {
-        $percent = GETPOST('percentage');
-    } else {
-        if (GETPOST("afaire") == 1)
-            $percent = 0;
-        else if (GETPOST("afaire") == 2)
-            $percent = 100;
-    }
-    $htmlactions->form_select_status_action('formaction', $percent, 1, 'complete');
-    print '</td></tr>';
+	// Status
+	print '<tr><td width="10%">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td>';
+	print '<td>';
+	$percent=-1;
+	if (isset($_GET['status']) || isset($_POST['status']))
+	{
+		$percent=GETPOST('status');
+	}
+	else if (isset($_GET['percentage']) || isset($_POST['percentage']))
+	{
+		$percent=GETPOST('percentage');
+	}
+	else
+	{
+		if (GETPOST("afaire") == 1) $percent=0;
+		else if (GETPOST("afaire") == 2) $percent=100;
+	}
+	$htmlactions->form_select_status_action('formaction',$percent,1,'complete');
+	print '</td></tr>';
 
     // Location
     print '<tr><td>' . $langs->trans("Location") . '</td><td colspan="3"><input type="text" name="location" size="50" value="' . $actioncomm->location . '"></td></tr>';
@@ -505,25 +536,38 @@ if ($action == 'create') {
     print '<input id="transparency" type="checkbox" name="transparency" value="' . $actioncomm->transparency . '">';
     print '</td></tr>';
 
-    // Realised by
-    if ($conf->global->AGENDA_ENABLE_DONEBY) {
-        print '<tr><td class="nowrap">' . $langs->trans("ActionDoneBy") . '</td><td>';
-        $form->select_users(GETPOST("doneby") ? GETPOST("doneby") : (!empty($actioncomm->userdone->id) && $percent == 100 ? $actioncomm->userdone->id : 0), 'doneby', 1);
-        print '</td></tr>';
-    }
+	// Realised by
+	if ($conf->global->AGENDA_ENABLE_DONEBY)
+	{
+		print '<tr><td class="nowrap">'.$langs->trans("ActionDoneBy").'</td><td>';
+		$form->select_users(GETPOST("doneby")?GETPOST("doneby"):(! empty($actioncomm->userdone->id) && $percent==100?$actioncomm->userdone->id:0),'doneby',1);
+		print '</td></tr>';
+	}
 
     print '</table>';
     print '<br><br>';
     print '<table class="border" width="100%">';
 
-    // Societe, contact
-    print '<tr><td width="30%" class="nowrap">' . $langs->trans("ActionOnCompany") . '</td><td>';
-    if (GETPOST('socid', 'int') > 0) {
-        $societe = new Societe($db);
-        $societe->fetch(GETPOST('socid', 'int'));
-        print $societe->getNomUrl(1);
-        print '<input type="hidden" name="socid" value="' . GETPOST('socid', 'int') . '">';
-    } else {
+	// Societe, contact
+	print '<tr><td width="30%" class="nowrap">'.$langs->trans("ActionOnCompany").'</td><td>';
+	if (GETPOST('socid','int') > 0)
+	{
+		$societe = new Societe($db);
+		$societe->fetch(GETPOST('socid','int'));
+		print $societe->getNomUrl(1);
+		print '<input type="hidden" name="socid" value="'.GETPOST('socid','int').'">';
+	}
+	else
+	{
+
+		$events=array();
+		$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
+		//For external user force the company to user company
+		if (!empty($user->societe_id)) {
+			print $form->select_company($user->societe_id,'socid','',1,1,0,$events);
+		} else {
+			print $form->select_company('','socid','',1,1,0,$events);
+		}
 
         $events = array();
         $events[] = array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
@@ -536,39 +580,41 @@ if ($action == 'create') {
     }
     print '</td></tr>';
 
-    print '<tr><td class="nowrap">' . $langs->trans("ActionOnContact") . '</td><td>';
-    $form->select_contacts(GETPOST('socid', 'int'), GETPOST('contactid'), 'contactid', 1);
-    print '</td></tr>';
+	print '<tr><td class="nowrap">'.$langs->trans("ActionOnContact").'</td><td>';
+	$form->select_contacts(GETPOST('socid','int'),GETPOST('contactid'),'contactid',1);
+	print '</td></tr>';
 
 
-    // Project
-    if (!empty($conf->projet->enabled)) {
-        $formproject = new FormProjets($db);
+	// Project
+	if (! empty($conf->projet->enabled))
+	{
+		$formproject=new FormProjets($db);
+
+		// Projet associe
+		$langs->load("projects");
+
+		print '<tr><td valign="top">'.$langs->trans("Project").'</td><td>';
+
+		$numproject=$formproject->select_projects((! empty($societe->id)?$societe->id:0),GETPOST("projectid")?GETPOST("projectid"):'','projectid');
+		if ($numproject==0)
+		{
+			print ' &nbsp; <a href="'.DOL_URL_ROOT.'/projet/fiche.php?socid='.$societe->id.'&action=create">'.$langs->trans("AddProject").'</a>';
+		}
+		print '</td></tr>';
+	}
+	if(!empty($origin) && !empty($originid))
+	{
+		print '<input type="hidden" name="fk_element" size="10" value="'.GETPOST('originid').'">';
+		print '<input type="hidden" name="elementtype" size="10" value="'.GETPOST('origin').'">';
+	}
 
         // Projet associe
         $langs->load("projects");
 
-        print '<tr><td valign="top">' . $langs->trans("Project") . '</td><td>';
-
-        $numproject = $formproject->select_projects((!empty($societe->id) ? $societe->id : 0), GETPOST("projectid") ? GETPOST("projectid") : '', 'projectid');
-        if ($numproject == 0) {
-            print ' &nbsp; <a href="' . DOL_URL_ROOT . '/projet/fiche.php?socid=' . $societe->id . '&action=create">' . $langs->trans("AddProject") . '</a>';
-        }
-        print '</td></tr>';
-    }
-    if (!empty($origin) && !empty($originid)) {
-        print '<input type="hidden" name="fk_element" size="10" value="' . GETPOST('originid') . '">';
-        print '<input type="hidden" name="elementtype" size="10" value="' . GETPOST('origin') . '">';
-    }
-
-    if (GETPOST("datep") && preg_match('/^([0-9][0-9][0-9][0-9])([0-9][0-9])([0-9][0-9])$/', GETPOST("datep"), $reg)) {
-        $actioncomm->datep = dol_mktime(0, 0, 0, $reg[2], $reg[3], $reg[1]);
-    }
-
-    // Priority
-    print '<tr><td class="nowrap">' . $langs->trans("Priority") . '</td><td colspan="3">';
-    print '<input type="text" name="priority" value="' . (GETPOST('priority') ? GETPOST('priority') : ($actioncomm->priority ? $actioncomm->priority : '')) . '" size="5">';
-    print '</td></tr>';
+	// Priority
+	print '<tr><td class="nowrap">'.$langs->trans("Priority").'</td><td colspan="3">';
+	print '<input type="text" name="priority" value="'.(GETPOST('priority')?GETPOST('priority'):($actioncomm->priority?$actioncomm->priority:'')).'" size="5">';
+	print '</td></tr>';
 
     // Description
     print '<tr><td valign="top">' . $langs->trans("Description") . '</td><td>';
@@ -579,8 +625,8 @@ if ($action == 'create') {
 
 
     // Other attributes
-    $parameters = array('id' => $actioncomm->id);
-    $reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $actioncomm, $action);    // Note that $action and $object may have been modified by hook
+    $parameters=array('id'=>$actioncomm->id);
+    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$actioncomm,$action);    // Note that $action and $object may have been modified by hook
 
 
     if (empty($reshook) && !empty($extrafields->attribute_label)) {
@@ -658,10 +704,11 @@ if ($id > 0) {
     $now = dol_now();
     $delay_warning = $conf->global->MAIN_DELAY_ACTIONS_TODO * 24 * 60 * 60;
 
-    // Confirmation suppression action
-    if ($action == 'delete') {
-        print $form->formconfirm("fiche.php?id=" . $id, $langs->trans("DeleteAction"), $langs->trans("ConfirmDeleteAction"), "confirm_delete", '', '', 1);
-    }
+	// Confirmation suppression action
+	if ($action == 'delete')
+	{
+		print $form->formconfirm("fiche.php?id=".$id,$langs->trans("DeleteAction"),$langs->trans("ConfirmDeleteAction"),"confirm_delete",'','',1);
+	}
 
     if ($action == 'edit') {
         if (!empty($conf->use_javascript_ajax)) {
@@ -737,11 +784,11 @@ if ($id > 0) {
             $form->select_date($act->datef, 'p2', 1, 1, 1, "action", 1, 1, 0, 0, 'fulldayend');
         print '</td></tr>';
 
-        // Status
-        print '<tr><td class="nowrap">' . $langs->trans("Status") . ' / ' . $langs->trans("Percentage") . '</td><td colspan="3">';
-        $percent = GETPOST("percentage") ? GETPOST("percentage") : $act->percentage;
-        $htmlactions->form_select_status_action('formaction', $percent, 1);
-        print '</td></tr>';
+		// Status
+		print '<tr><td class="nowrap">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td><td colspan="3">';
+		$percent=GETPOST("percentage")?GETPOST("percentage"):$act->percentage;
+		$htmlactions->form_select_status_action('formaction',$percent,1);
+		print '</td></tr>';
 
         // Location
         print '<tr><td>' . $langs->trans("Location") . '</td><td colspan="3"><input type="text" name="location" size="50" value="' . $act->location . '"></td></tr>';
@@ -769,48 +816,50 @@ if ($id > 0) {
 
         print '<table class="border" width="100%">';
 
-        // Thirdparty - Contact
-        if ($conf->societe->enabled) {
-            print '<tr><td width="30%">' . $langs->trans("ActionOnCompany") . '</td>';
-            print '<td>';
-            $events = array();
-            $events[] = array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
-            print $form->select_company($act->societe->id, 'socid', '', 1, 1, 0, $events);
-            print '</td>';
+		// Thirdparty - Contact
+		if ($conf->societe->enabled)
+		{
+			print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td>';
+			print '<td>';
+			$events=array();
+			$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
+			print $form->select_company($act->societe->id,'socid','',1,1,0,$events);
+			print '</td>';
 
-            // Contact
-            print '<td>' . $langs->trans("Contact") . '</td><td width="30%">';
-            $form->select_contacts($act->societe->id, $act->contact->id, 'contactid', 1);
-            print '</td></tr>';
-        }
+			// Contact
+			print '<td>'.$langs->trans("Contact").'</td><td width="30%">';
+			$form->select_contacts($act->societe->id, $act->contact->id,'contactid',1);
+			print '</td></tr>';
+		}
 
-        // Project
-        if (!empty($conf->projet->enabled)) {
+		// Project
+		if (! empty($conf->projet->enabled))
+		{
 
-            $formproject = new FormProjets($db);
+			$formproject=new FormProjets($db);
+
+			// Projet associe
+			$langs->load("project");
+
+			print '<tr><td width="30%" valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
+			$numprojet=$formproject->select_projects($act->societe->id,$act->fk_project,'projectid');
+			if ($numprojet==0)
+			{
+				print ' &nbsp; <a href="../../projet/fiche.php?socid='.$societe->id.'&action=create">'.$langs->trans("AddProject").'</a>';
+			}
+			print '</td></tr>';
+		}
 
             // Projet associe
             $langs->load("project");
 
-            print '<tr><td width="30%" valign="top">' . $langs->trans("Project") . '</td><td colspan="3">';
-            $numprojet = $formproject->select_projects($act->societe->id, $act->fk_project, 'projectid');
-            if ($numprojet == 0) {
-                print ' &nbsp; <a href="../../projet/fiche.php?socid=' . $societe->id . '&action=create">' . $langs->trans("AddProject") . '</a>';
-            }
-            print '</td></tr>';
-        }
-
-        // Priority
-        print '<tr><td nowrap width="30%">' . $langs->trans("Priority") . '</td><td colspan="3">';
-        print '<input type="text" name="priority" value="' . ($act->priority ? $act->priority : '') . '" size="5">';
-        print '</td></tr>';
-
-        // Object linked
-        if (!empty($act->fk_element) && !empty($act->elementtype)) {
-            include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-            print '<tr><td>' . $langs->trans("LinkedObject") . '</td>';
-            print '<td colspan="3">' . dolGetElementUrl($act->fk_element, $act->elementtype, 1) . '</td></tr>';
-        }
+		// Object linked
+		if (! empty($act->fk_element) && ! empty($act->elementtype))
+		{
+			include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+			print '<tr><td>'.$langs->trans("LinkedObject").'</td>';
+			print '<td colspan="3">'.dolGetElementUrl($act->fk_element,$act->elementtype,1).'</td></tr>';
+		}
 
         // Description
         print '<tr><td valign="top">' . $langs->trans("Description") . '</td><td colspan="3">';
@@ -821,11 +870,11 @@ if ($id > 0) {
         print '</td></tr>';
 
         // Other attributes
-        $parameters = array('colspan' => ' colspan="3"', 'colspanvalue' => '3', 'id' => $act->id);
-        $reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $act, $action);    // Note that $action and $object may have been modified by hook
-        if (empty($reshook) && !empty($extrafields->attribute_label)) {
-            print $actioncomm->showOptionals($extrafields, 'edit');
-        }
+        $parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$act->id);
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
+		if (empty($reshook) && ! empty($extrafields->attribute_label))
+		{
+			print $act->showOptionals($extrafields,'edit');
 
         print '</table>';
 
@@ -942,29 +991,37 @@ if ($id > 0) {
 
         print '</table><br><br><table class="border" width="100%">';
 
-        // Third party - Contact
-        if ($conf->societe->enabled) {
-            print '<tr><td width="30%">' . $langs->trans("ActionOnCompany") . '</td><td>' . ($act->societe->id ? $act->societe->getNomUrl(1) : $langs->trans("None"));
-            if ($act->societe->id && $act->type_code == 'AC_TEL') {
-                if ($act->societe->fetch($act->societe->id)) {
-                    print "<br>" . dol_print_phone($act->societe->phone);
-                }
-            }
-            print '</td>';
-            print '<td>' . $langs->trans("Contact") . '</td>';
-            print '<td>';
-            if ($act->contact->id > 0) {
-                print $act->contact->getNomUrl(1);
-                if ($act->contact->id && $act->type_code == 'AC_TEL') {
-                    if ($act->contact->fetch($act->contact->id)) {
-                        print "<br>" . dol_print_phone($act->contact->phone_pro);
-                    }
-                }
-            } else {
-                print $langs->trans("None");
-            }
-            print '</td></tr>';
-        }
+		// Third party - Contact
+		if ($conf->societe->enabled)
+		{
+			print '<tr><td width="30%">'.$langs->trans("ActionOnCompany").'</td><td>'.($act->societe->id?$act->societe->getNomUrl(1):$langs->trans("None"));
+			if ($act->societe->id && $act->type_code == 'AC_TEL')
+			{
+				if ($act->societe->fetch($act->societe->id))
+				{
+					print "<br>".dol_print_phone($act->societe->phone);
+				}
+			}
+			print '</td>';
+			print '<td>'.$langs->trans("Contact").'</td>';
+			print '<td>';
+			if ($act->contact->id > 0)
+			{
+				print $act->contact->getNomUrl(1);
+				if ($act->contact->id && $act->type_code == 'AC_TEL')
+				{
+					if ($act->contact->fetch($act->contact->id))
+					{
+						print "<br>".dol_print_phone($act->contact->phone_pro);
+					}
+				}
+			}
+			else
+			{
+				print $langs->trans("None");
+			}
+			print '</td></tr>';
+		}
 
         // Project
         if (!empty($conf->projet->enabled)) {
@@ -982,12 +1039,13 @@ if ($id > 0) {
         print ($act->priority ? $act->priority : '');
         print '</td></tr>';
 
-        // Object linked
-        if (!empty($act->fk_element) && !empty($act->elementtype)) {
-            include_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
-            print '<tr><td>' . $langs->trans("LinkedObject") . '</td>';
-            print '<td colspan="3">' . dolGetElementUrl($act->fk_element, $act->elementtype, 1) . '</td></tr>';
-        }
+		// Object linked
+		if (! empty($act->fk_element) && ! empty($act->elementtype))
+		{
+			include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
+			print '<tr><td>'.$langs->trans("LinkedObject").'</td>';
+			print '<td colspan="3">'.dolGetElementUrl($act->fk_element,$act->elementtype,1).'</td></tr>';
+		}
 
         // Description
         print '<tr><td valign="top">' . $langs->trans("Description") . '</td><td colspan="3">';
@@ -995,11 +1053,8 @@ if ($id > 0) {
         print '</td></tr>';
 
         // Other attributes
-        $parameters = array();
-        $reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $act, $action);    // Note that $action and $object may have been modified by hook
-        // Other attributes
-        $parameters = array('colspan' => ' colspan="3"', 'colspanvalue' => '3', 'id' => $act->id);
-        $reshook = $hookmanager->executeHooks('formObjectOptions', $parameters, $act, $action);    // Note that $action and $object may have been modified by hook
+		$parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$act->id);
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
 
         print '</table>';
 

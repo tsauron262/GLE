@@ -262,16 +262,31 @@ if ($action == 'confirm_active' && $confirm == 'yes' && $user->rights->contrat->
     } else {
         $mesg = $object->error;
     }
-} else if ($action == 'confirm_closeline' && $confirm == 'yes' && $user->rights->contrat->activer) {
-    $object->fetch($id);
-    $result = $object->close_line($user, GETPOST('ligne'), GETPOST('dateend'), urldecode(GETPOST('comment')));
-
-    if ($result > 0) {
-        header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $object->id);
-        exit;
-    } else {
-        $mesg = $object->error;
+    else {
+        $mesg=$object->error;
     }
+}
+
+else if ($action == 'confirm_closeline' && $confirm == 'yes' && $user->rights->contrat->activer)
+{
+	if (! GETPOST('dateend'))
+	{
+		$error++;
+		setEventMessage($langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")),'errors');
+	}
+	if (! $error)
+	{
+	    $object->fetch($id);
+	    $result = $object->close_line($user, GETPOST('ligne'), GETPOST('dateend'), urldecode(GETPOST('comment')));
+	    if ($result > 0)
+	    {
+	        header("Location: ".$_SERVER['PHP_SELF']."?id=".$object->id);
+	        exit;
+	    }
+	    else {
+	        $mesg=$object->error;
+	    }
+	}
 }
 
 // Si ajout champ produit predefini
@@ -403,7 +418,7 @@ if ($action == 'add' && $user->rights->contrat->creer)
 	                for ($i=0;$i<$num;$i++)
 	                {
 	                    $product_type=($lines[$i]->product_type?$lines[$i]->product_type:0);
-	                    
+
 						if ($product_type == 1) { //only services	// TODO Exclude also deee
 							// service prédéfini
 							if ($lines[$i]->fk_product > 0)
@@ -1242,14 +1257,14 @@ if ($action == 'create') {
     {
         $result=$object->fetch($id,$ref);
         if ($result < 0) dol_print_error($db,$object->error);
-        $result=$object->fetch_lines();
+        $result=$object->fetch_lines();	// This also init $this->nbofserviceswait, $this->nbofservicesopened, $this->nbofservicesexpired=, $this->nbofservicesclosed
         if ($result < 0) dol_print_error($db,$object->error);
         $result=$object->fetch_thirdparty();
         if ($result < 0) dol_print_error($db,$object->error);
 
         dol_htmloutput_errors($mesg,'');
 
-        $nbofservices = count($object->lines);
+        $nbofservices=count($object->lines);
 
         $author = new User($db);
         $author->fetch($object->user_author_id);
@@ -1639,6 +1654,8 @@ if ($action == 'create') {
 
             print "</form>\n";
 
+            print "</form>\n";
+
 
             /*
              * Confirmation to delete service line of contract
@@ -1824,11 +1841,13 @@ if ($action == 'create') {
                 if ($dateactend > $now)
                     $dateactend = $now;
 
-                print '<tr ' . $bc[$var] . '><td colspan="2">';
-                if ($objp->statut >= 4) {
-                    if ($objp->statut == 4) {
-                        print $langs->trans("DateEndReal") . ' ';
-                        $form->select_date($dateactend, "end", $usehm, $usehm, ($objp->date_fin_reelle > 0 ? 0 : 1), "closeline");
+                print '<tr '.$bc[$var].'><td colspan="2">';
+                if ($objp->statut >= 4)
+                {
+                    if ($objp->statut == 4)
+                    {
+                        print $langs->trans("DateEndReal").' ';
+                        $form->select_date($dateactend,"end",$usehm,$usehm,($objp->date_fin_reelle>0?0:1),"closeline",1,1);
                     }
                 }
                 print '</td>';
@@ -1857,6 +1876,7 @@ if ($action == 'create') {
         //print '</table>';
 
 
+
         // Form to add new line
         if ($user->rights->contrat->creer && ($object->statut >= 0)) {
             $dateSelector = 1;
@@ -1872,8 +1892,17 @@ if ($action == 'create') {
 			print '<br>';
             print '<table id="tablelines" class="noborder noshadow" width="100%">';	// Array with (n*2)+1 lines
 
-            print '<br>';
-            print '<table id="tablelines" class="noborder" width="100%">'; // Array with (n*2)+1 lines
+			print "\n";
+			print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline')?'#add':'#line_'.GETPOST('lineid')).'" method="POST">
+			<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
+			<input type="hidden" name="action" value="'.(($action != 'editline')?'addline':'updateligne').'">
+			<input type="hidden" name="mode" value="">
+			<input type="hidden" name="id" value="'.$object->id.'">
+			';
+
+			print '<br>';
+            print '<table id="tablelines" class="noborder noshadow" width="100%">';	// Array with (n*2)+1 lines
+
             // Trick to not show product entries
             $savproductenabled = $conf->product->enabled;
             $conf->product->enabled = 0;
@@ -1900,8 +1929,8 @@ if ($action == 'create') {
                 $reshook = $hookmanager->executeHooks('formAddObjectLine', $parameters, $object, $action);    // Note that $action and $object may have been modified by hook
             }
 
-            // Restore correct setup
-            $conf->product->enabled = $savproductenabled;
+        	// Restore correct setup
+        	$conf->product->enabled = $savproductenabled;
 
             print '</table>';
 

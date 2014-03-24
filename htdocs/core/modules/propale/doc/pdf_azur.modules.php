@@ -1161,11 +1161,12 @@ class pdf_azur extends ModelePDFPropales
 		$posx=$this->page_largeur-$this->marge_droite-100;
 
 		$pdf->SetXY($this->marge_gauche,$posy);
-$this->emetteur->logo = 0;
+echo "1";
 		// Logo
 		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)
 		{
+echo "2a";
 			if (is_readable($logo))
 			{
 			    $height=pdf_getHeightForLogo($logo);
@@ -1181,16 +1182,19 @@ $this->emetteur->logo = 0;
 		}
 		else
 		{
+echo "2b";
 			$text=$this->emetteur->name;
 			$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, 'L');
 		}
 
+echo "3";
 		$pdf->SetFont('','B',$default_font_size + 3);
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
 		$title=$outputlangs->transnoentities("CommercialProposal");
 		$pdf->MultiCell(100, 4, $title, '', 'R');
 
+echo "4";
 		$pdf->SetFont('','B',$default_font_size);
 
 		$posy+=5;

@@ -143,7 +143,7 @@ class pdf_azur extends ModelePDFPropales
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
 		if (! empty($conf->global->MAIN_USE_FPDF)) $outputlangs->charset_output='ISO-8859-1';
-
+echo "11";
 		$outputlangs->load("main");
 		$outputlangs->load("dict");
 		$outputlangs->load("companies");
@@ -153,6 +153,7 @@ class pdf_azur extends ModelePDFPropales
 
 		$nblignes = count($object->lines);
 		
+echo "12";
 		// Loop on each lines to detect if there is at least one image to show
 		$realpatharray=array();
 		if (! empty($conf->global->MAIN_GENERATE_PROPOSALS_WITH_PICTURE))
@@ -179,6 +180,7 @@ class pdf_azur extends ModelePDFPropales
 				if ($realpath) $realpatharray[$i]=$realpath;
 			}
 		}
+echo "13";
 		if (count($realpatharray) == 0) $this->posxpicture=$this->posxtva;
 
 		if ($conf->propal->dir_output)
@@ -268,6 +270,7 @@ class pdf_azur extends ModelePDFPropales
 				$tab_height = 130;
 				$tab_height_newpage = 150;
 
+echo "14";
 				// Affiche notes
 				if (! empty($object->note_public))
 				{
@@ -289,6 +292,7 @@ class pdf_azur extends ModelePDFPropales
 				{
 					$height_note=0;
 				}
+echo "15";
 
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
@@ -500,6 +504,7 @@ class pdf_azur extends ModelePDFPropales
 					}
 				}
 
+echo "16";
 				// Show square
 				if ($pagenb == 1)
 				{
@@ -557,6 +562,7 @@ class pdf_azur extends ModelePDFPropales
 			$this->error=$langs->trans("ErrorConstantNotDefined","PROP_OUTPUTDIR");
 			return 0;
 		}
+echo "19";
 
 		$this->error=$langs->trans("ErrorUnknown");
 		return 0;   // Erreur par defaut

@@ -1161,54 +1161,43 @@ class pdf_azur extends ModelePDFPropales
 		$posx=$this->page_largeur-$this->marge_droite-100;
 
 		$pdf->SetXY($this->marge_gauche,$posy);
-echo "1";
+
 		// Logo
-		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
-		if ($this->emetteur->logo)
-		{
-echo "2a";
-			if (is_readable($logo))
-			{
-			    $height=pdf_getHeightForLogo($logo);
-			    $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
-			}
-			else
-			{
-				$pdf->SetTextColor(200,0,0);
-				$pdf->SetFont('','B',$default_font_size - 2);
-				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound",$logo), 0, 'L');
-				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
-			}
-		}
-		else
-		{
-echo "2b";
+//		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
+//		if ($this->emetteur->logo)
+//		{
+//			if (is_readable($logo))
+//			{
+//			    $height=pdf_getHeightForLogo($logo);
+//			    $pdf->Image($logo, $this->marge_gauche, $posy, 0, $height);	// width=0 (auto)
+//			}
+//			else
+//			{
+//				$pdf->SetTextColor(200,0,0);
+//				$pdf->SetFont('','B',$default_font_size - 2);
+//				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorLogoFileNotFound",$logo), 0, 'L');
+//				$pdf->MultiCell(100, 3, $outputlangs->transnoentities("ErrorGoToGlobalSetup"), 0, 'L');
+//			}
+//		}
+//		else
+//		{
 			$text=$this->emetteur->name;
 			$pdf->MultiCell(100, 4, $outputlangs->convToOutputCharset($text), 0, 'L');
-		}
+//		}
 
-echo "3";
 		$pdf->SetFont('','B',$default_font_size + 3);
-echo "5";
 		$pdf->SetXY($posx,$posy);
-echo "6";
 		$pdf->SetTextColor(0,0,60);
-echo "7";
 		$title=$outputlangs->transnoentities("CommercialProposal");
-echo "8";
-//		$pdf->MultiCell(100, 4, $title, '', 'R');
+		$pdf->MultiCell(100, 4, $title, '', 'R');
 
-echo "4";
 		$pdf->SetFont('','B',$default_font_size);
 
-echo "5";
 		$posy+=5;
 		$pdf->SetXY($posx,$posy);
 		$pdf->SetTextColor(0,0,60);
-echo "6";
 		$pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref")." : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
 
-echo "7";
 		$posy+=1;
 		$pdf->SetFont('','', $default_font_size - 1);
 

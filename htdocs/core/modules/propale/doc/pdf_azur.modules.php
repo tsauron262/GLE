@@ -1190,7 +1190,7 @@ class pdf_azur extends ModelePDFPropales
 		$pdf->SetTextColor(0,0,60);
 		$title=$outputlangs->transnoentities("CommercialProposal");
                 echo "deb";
-		$pdf->MultiCell(100, 4, "ll", '', 'R');
+		$pdf->MultiCell(10, 4, "ll", '', 'R');
                 echo "fin";
 
 		$pdf->SetFont('','B',$default_font_size);

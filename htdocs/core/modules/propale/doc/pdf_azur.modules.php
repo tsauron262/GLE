@@ -185,6 +185,7 @@ echo "13";
 
 		if ($conf->propal->dir_output)
 		{
+echo "13Bis";
 			$object->fetch_thirdparty();
 			
 			// $deja_regle = 0;
@@ -206,6 +207,7 @@ echo "13";
 			{
 				if (dol_mkdir($dir) < 0)
 				{
+echo "1nnnn";
 					$this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
 					return 0;
 				}
@@ -213,6 +215,7 @@ echo "13";
 
 			if (file_exists($dir))
 			{
+echo "11b";
 				// Create pdf instance
                 $pdf=pdf_getInstance($this->format);
                 $default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
@@ -226,6 +229,7 @@ echo "13";
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
+echo "11h";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs));
                 // Set path to the background PDF File
                 if (empty($conf->global->MAIN_DISABLE_FPDI) && ! empty($conf->global->MAIN_ADD_PDF_BACKGROUND))

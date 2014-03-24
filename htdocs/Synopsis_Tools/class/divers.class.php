@@ -188,7 +188,7 @@ class synopsisHook {
         ///js
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
-                . 'var idPagePrinc = "' . $_SESSION['pagePrinc'] . '";'
+                . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc'])? $_SESSION['pagePrinc'] : "") . '";'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 

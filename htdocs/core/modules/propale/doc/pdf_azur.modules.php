@@ -1161,7 +1161,7 @@ class pdf_azur extends ModelePDFPropales
 		$posx=$this->page_largeur-$this->marge_droite-100;
 
 		$pdf->SetXY($this->marge_gauche,$posy);
-
+$this->emetteur->logo = 0;
 		// Logo
 		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)

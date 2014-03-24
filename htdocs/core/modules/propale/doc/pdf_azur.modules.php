@@ -1189,9 +1189,13 @@ echo "2b";
 
 echo "3";
 		$pdf->SetFont('','B',$default_font_size + 3);
+echo "5";
 		$pdf->SetXY($posx,$posy);
+echo "6";
 		$pdf->SetTextColor(0,0,60);
+echo "7";
 		$title=$outputlangs->transnoentities("CommercialProposal");
+echo "8";
 		$pdf->MultiCell(100, 4, $title, '', 'R');
 
 echo "4";

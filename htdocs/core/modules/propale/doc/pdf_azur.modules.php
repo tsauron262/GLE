@@ -136,14 +136,13 @@ class pdf_azur extends ModelePDFPropales
      *  @return     int             				1=OK, 0=KO
 	 */
 	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
-	{error_reporting(E_ALL);
-        ini_set('display_errors', 1);echo "ggggggggggggggggggggg";
+	{
 		global $user,$langs,$conf,$mysoc,$db,$hookmanager;
 
 		if (! is_object($outputlangs)) $outputlangs=$langs;
 		// For backward compatibility with FPDF, force output charset to ISO, because FPDF expect text to be encoded in ISO
 		if (! empty($conf->global->MAIN_USE_FPDF)) $outputlangs->charset_output='ISO-8859-1';
-echo "11";
+
 		$outputlangs->load("main");
 		$outputlangs->load("dict");
 		$outputlangs->load("companies");
@@ -153,7 +152,6 @@ echo "11";
 
 		$nblignes = count($object->lines);
 		
-echo "12";
 		// Loop on each lines to detect if there is at least one image to show
 		$realpatharray=array();
 		if (! empty($conf->global->MAIN_GENERATE_PROPOSALS_WITH_PICTURE))
@@ -180,12 +178,10 @@ echo "12";
 				if ($realpath) $realpatharray[$i]=$realpath;
 			}
 		}
-echo "13";
 		if (count($realpatharray) == 0) $this->posxpicture=$this->posxtva;
 
 		if ($conf->propal->dir_output)
 		{
-echo "13Bis";
 			$object->fetch_thirdparty();
 			
 			// $deja_regle = 0;
@@ -207,7 +203,6 @@ echo "13Bis";
 			{
 				if (dol_mkdir($dir) < 0)
 				{
-echo "1nnnn";
 					$this->error=$langs->trans("ErrorCanNotCreateDir",$dir);
 					return 0;
 				}
@@ -215,7 +210,6 @@ echo "1nnnn";
 
 			if (file_exists($dir))
 			{
-echo "11b";
 				// Create pdf instance
                 $pdf=pdf_getInstance($this->format);
                 $default_font_size = pdf_getPDFFontSize($outputlangs);	// Must be after pdf_getInstance
@@ -229,7 +223,6 @@ echo "11b";
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
-echo "11h";
                 $pdf->SetFont(pdf_getPDFFont($outputlangs));
                 // Set path to the background PDF File
                 if (empty($conf->global->MAIN_DISABLE_FPDI) && ! empty($conf->global->MAIN_ADD_PDF_BACKGROUND))
@@ -239,7 +232,6 @@ echo "11h";
                 }
 
 				$pdf->Open();
-echo "11g";
 				$pagenb=0;
 				$pdf->SetDrawColor(128,128,128);
 
@@ -250,7 +242,6 @@ echo "11g";
 				$pdf->SetKeyWords($outputlangs->convToOutputCharset($object->ref)." ".$outputlangs->transnoentities("CommercialProposal"));
 				if (! empty($conf->global->MAIN_DISABLE_PDF_COMPRESSION)) $pdf->SetCompression(false);
 
-echo "11gg";
 				$pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 
 				// Positionne $this->atleastonediscount si on a au moins une remise
@@ -261,29 +252,21 @@ echo "11gg";
 						$this->atleastonediscount++;
 					}
 				}
-echo "11h";
 
 				// New page
 				$pdf->AddPage();
-echo "11i";
 				if (! empty($tplidx)) $pdf->useTemplate($tplidx);
 				$pagenb++;
-echo "11j";
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
-echo "11l";
 				$pdf->SetFont('','', $default_font_size - 1);
-echo "11m";
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
-echo "11n";
 				$pdf->SetTextColor(0,0,0);
 
-echo "11k";
 				$tab_top = 90;
 				$tab_top_newpage = (empty($conf->global->MAIN_PDF_DONOTREPEAT_HEAD)?42:10);
 				$tab_height = 130;
 				$tab_height_newpage = 150;
 
-echo "14";
 				// Affiche notes
 				if (! empty($object->note_public))
 				{
@@ -305,7 +288,6 @@ echo "14";
 				{
 					$height_note=0;
 				}
-echo "15";
 
 				$iniY = $tab_top + 7;
 				$curY = $tab_top + 7;
@@ -517,7 +499,6 @@ echo "15";
 					}
 				}
 
-echo "16";
 				// Show square
 				if ($pagenb == 1)
 				{
@@ -575,7 +556,6 @@ echo "16";
 			$this->error=$langs->trans("ErrorConstantNotDefined","PROP_OUTPUTDIR");
 			return 0;
 		}
-echo "19";
 
 		$this->error=$langs->trans("ErrorUnknown");
 		return 0;   // Erreur par defaut
@@ -1181,7 +1161,7 @@ echo "19";
 		$posx=$this->page_largeur-$this->marge_droite-100;
 
 		$pdf->SetXY($this->marge_gauche,$posy);
-
+die($conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo);
 		// Logo
 		$logo=$conf->mycompany->dir_output.'/logos/'.$this->emetteur->logo;
 		if ($this->emetteur->logo)

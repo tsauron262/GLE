@@ -136,7 +136,7 @@ class pdf_azur extends ModelePDFPropales
      *  @return     int             				1=OK, 0=KO
 	 */
 	function write_file($object,$outputlangs,$srctemplatepath='',$hidedetails=0,$hidedesc=0,$hideref=0)
-	{
+	{error_reporting(E_ALL);
         ini_set('display_errors', 1);
 		global $user,$langs,$conf,$mysoc,$db,$hookmanager;
 

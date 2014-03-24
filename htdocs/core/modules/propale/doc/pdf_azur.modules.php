@@ -1196,7 +1196,7 @@ echo "6";
 echo "7";
 		$title=$outputlangs->transnoentities("CommercialProposal");
 echo "8";
-		$pdf->MultiCell(100, 4, $title, '', 'R');
+//		$pdf->MultiCell(100, 4, $title, '', 'R');
 
 echo "4";
 		$pdf->SetFont('','B',$default_font_size);

@@ -262,9 +262,6 @@ if ($action == 'confirm_active' && $confirm == 'yes' && $user->rights->contrat->
     } else {
         $mesg = $object->error;
     }
-    else {
-        $mesg=$object->error;
-    }
 }
 
 else if ($action == 'confirm_closeline' && $confirm == 'yes' && $user->rights->contrat->activer)

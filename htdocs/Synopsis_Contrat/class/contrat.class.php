@@ -2620,7 +2620,7 @@ class Synopsis_ContratLigne extends ContratLigne {
     function getInfoOneProductCli($idProdCli, $opt = "", $size = 200) {
         $html = "\n";
         $sql = $this->db->query("SELECT description FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id =" . $idProdCli);
-        if ($this->db->num_rows($sql) > 0) {
+        if ($this->db->num_rows($sql) > 0 && $opt != "SN") {
             $result = $this->db->fetch_object($sql);
             if ($result->description != "") {
                 $html .= $result->description . " : ";
@@ -2660,7 +2660,7 @@ class Synopsis_ContratLigne extends ContratLigne {
         foreach ($elems as $elem) {
             $htmlT .= $this->getInfoOneProductCli($elem['d'], $opt, $size);
         }
-        return $htmlT;
+        return dol_trunc($htmlT, $size);
     }
 
 }

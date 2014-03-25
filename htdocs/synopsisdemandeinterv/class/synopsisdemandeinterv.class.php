@@ -884,7 +884,7 @@ class Synopsisdemandeinterv extends CommonObject {
         global $langs, $conf;
         if ($user->rights->synopsisdemandeinterv->creer) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
-            $sql.= " SET datei = " . $this->db->idate($date_delivery);
+            $sql.= " SET datei = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
             if ($this->db->query($sql)) {

@@ -26,7 +26,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit1 = $user->rights->commande->lire;
         $droit2 = $user->rights->commande->creer;
     }
-    if (stripos($url, '/fichinter/') !== false) {
+    if (stripos($url, '/fichinter/') !== false || stripos($url, '/synopsisfichinter/') !== false) {
         $table = MAIN_DB_PREFIX . "fichinter";
         $droit1 = $user->rights->synopsisficheinter->lire;
         $droit2 = $user->rights->synopsisficheinter->creer;

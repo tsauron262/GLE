@@ -39,7 +39,7 @@ function showDP(base,dateFieldID,format,codelang)
 	showDP.datefieldID=dateFieldID;	// Must be after the close
 
 	var dateField=getObjectFromID(dateFieldID);
-	
+
 	// get positioning
 	var thetop=getTop(dateField)+dateField.offsetHeight;
 
@@ -61,7 +61,7 @@ function showDP(base,dateFieldID,format,codelang)
 	showDP.box.style.position="absolute";
 	showDP.box.style.top=thetop + "px";
 	showDP.box.style.left=theleft + "px";
-	
+
 	if (dateField.value)	// Si il y avait valeur initiale dans champ
 	{
 		selDate=getDateFromFormat(dateField.value,format);
@@ -104,7 +104,7 @@ function resetDP(base,dateFieldID,format,codelang)
 	var dateField=getObjectFromID(dateFieldID);
 	dateField.value = formatDate(new Date(), format);
 	dpChangeDay(dateFieldID,format);
-	
+
 	var alreadybox=getObjectFromID("DPCancel");
 	if (alreadybox) showDP(base,dateFieldID,format,codelang);
 }
@@ -122,7 +122,7 @@ function loadMonth(base,month,year,ymd,codelang)
 	}
 
 	var req=null;
-	
+
 	req=loadXMLDoc(theURL,null,false);
 	if (req.responseText == '') alert('Failed to get URL '.theURL);
  	// alert(theURL+' - '+req.responseText); // L'url doit avoir la meme racine
@@ -244,7 +244,7 @@ function loadXMLDoc(url,readyStateFunction,async)
 	if (window.XMLHttpRequest)
 	{
 		req = new XMLHttpRequest();
-		
+
 // if (req.overrideMimeType) {
 // req.overrideMimeType('text/xml');
 // }
@@ -341,10 +341,10 @@ function displaySelectBoxes() {
 function formatDate(date,format)
 {
 	// alert('formatDate date='+date+' format='+format);
-	
+
 	// Force parametres en chaine
 	format=format+"";
-	
+
 	var result="";
 
 	var year=date.getYear()+""; if (year.length < 4) { year=""+(year-0+1900); }
@@ -377,7 +377,7 @@ function formatDate(date,format)
 		else if (substr == 'mm')   { result=result+(minute<0||minute>9?"":"0")+minute; }
 		else if (substr == 'ss')   { result=result+(seconde<0||seconde>9?"":"0")+seconde; }
 		else { result=result+substr; }
-		
+
 		i+=substr.length;
 	}
 
@@ -415,7 +415,7 @@ function getDateFromFormat(val,format)
 	format=format+"";
 
 	if (val == '') return 0;
-	
+
 	var now=new Date();
 	var year=now.getYear(); if (year.length < 4) { year=""+(year-0+1900); }
 	var month=now.getMonth()+1;
@@ -467,11 +467,11 @@ function getDateFromFormat(val,format)
             seconde=getIntegerInString(val,d,1,2); 
             d -= 2- seconde.length; 
         } 
-	
+
 		i+=substr.length;
 		d+=substr.length;
 	}
-	
+
 	// Check if format param are ok
 	if (year==null||year<1) { return 0; }
 	if (month==null||(month<1)||(month>12)) { return 0; }
@@ -479,7 +479,7 @@ function getDateFromFormat(val,format)
 	if (hour==null||(hour<0)||(hour>24)) { return 0; }
 	if (minute==null||(minute<0)||(minute>60)) { return 0; }
 	if (seconde==null||(seconde<0)||(seconde>60)) { return 0; }
-		
+
 	// alert(year+' '+month+' '+day+' '+hour+' '+minute+' '+seconde);
 	return new Date(year,month-1,day,hour,minute,seconde);
 }
@@ -899,6 +899,24 @@ function confirmConstantAction(action, url, code, input, box, entity, yesButton,
     });
 })( jQuery );
 
+
+/*
+ * Function to output a dialog bog for copy/paste
+ * 
+ * @param	string	text	Text to put into copy/paste area
+ * @param	string	text2	Text to put under the copy/paste area
+ */
+function copyToClipboard(text,text2) 
+{
+	text = text.replace(/<br>/g,"\n");
+	var newElem = "<textarea id=\"coords\" style=\"border: none; width: 90%; height: 120px;\">"+text+"</textarea><br><br>"+text2;
+	$("#dialog").html(newElem);
+	$("#dialog").dialog();
+	$("#coords").select();
+	return false;
+}
+
+
 /* 
  * Timer for delayed keyup function
  * 
@@ -922,4 +940,3 @@ function confirmConstantAction(action, url, code, input, box, entity, yesButton,
 	    }
 	});
 })(jQuery);
-

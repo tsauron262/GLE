@@ -899,8 +899,8 @@ if ($id > 0)
 	}
         /*Fin modif drsi*/
 
-	print "</td></tr>";
-	print "</table>";
+	print '</div></div></div>';
+	print '<div style="clear:both"></div>';
 
 	dol_fiche_end();
 

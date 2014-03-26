@@ -813,7 +813,7 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
                     $pdf1->SetFont('Helvetica', '', 6.5);
 
 
-                    $nextY = $pdf->getY()+1;
+                    $nextY = $pdf->getY();
                 }
                 $this->_pagefoot($pdf, $contrat, $outputlangs);
 

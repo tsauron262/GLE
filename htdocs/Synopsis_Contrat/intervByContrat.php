@@ -417,7 +417,7 @@ jQuery(document).ready(function(){
 jQuery('#list2').jqGrid({
         url:'ajax/intByContrat-json_response.php?type=DI&id='+contratId,
         datatype: 'json',
-        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Demande intervention', 'Tech',"statut"],
+        colNames:['rowid','Description','Date intervention', 'total_ht','Dur&eacute;e totale', 'Demande intervention', 'Fiche intervention', 'Tech',"Statut"],
         colModel:[ {name:'rowid',index:'rowid', width:55, hidden: true,hidedlg: true, search: false},
                    {name:'description',index:'description', align: 'left'},
                    {name:'datei',index:'datei', width:40,
@@ -447,6 +447,7 @@ jQuery('#list2').jqGrid({
                    {name:'duree',index:'duree', width:80, align: 'center'},
                    {name:'rowid',index:'rowid', width:80, align: 'center'},
                    {name:'rowid',index:'rowid', width:80, align: 'center'},
+                   {name:'fk_user_prisencharge',index:'fk_user_prisencharge', width:80, align: 'center'},
                    {name:'fk_statut',index:'fk_statut', width:80, align: 'center'},
                  ],
         rowNum:10,

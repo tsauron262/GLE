@@ -69,6 +69,7 @@ if ($res > 0) {
                 print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%;line-height: 2em'>Attribu&eacute; &agrave; " . utf8_encodeRien($tmpUser->getNomUrl(1));
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
+                           <th class='ui-widget-header ui-state-default'>Titre
                            <th class='ui-widget-header ui-state-default'>Effectu&eacute; par
                            <th class='ui-widget-header ui-state-default'>Date
                            <th class='ui-widget-header ui-state-default'>Dur&eacute;e totale
@@ -84,6 +85,7 @@ if ($res > 0) {
                 print "<tr><th class='ui-widget-header ui-state-default' colspan=8 valign=center style='font-size:125%; line-height: 2em'>Non Attribu&eacute;";
                 print "<tr><th class='ui-widget-header ui-state-default'>&nbsp;
                            <th class='ui-widget-header ui-state-default'>Ref.
+                           <th class='ui-widget-header ui-state-default'>Titre
                            <th class='ui-widget-header ui-state-default'>Effectu&eacute; par
                            <th class='ui-widget-header ui-state-default'>Date
                            <th class='ui-widget-header ui-state-default'>Dur&eacute;e totale
@@ -97,6 +99,7 @@ if ($res > 0) {
         }
         print "<tr><td valign=top width=30 class='ui-widget-content'><span class='ui-widget-header'><span id='displayDIDet-" . $res->rowid . "' class='displayDIDet ui-icon ui-icon-circle-triangle-e'></span></span>";
         print "    <td style='padding:15px 10px 10px 10px;' valign=top width=130 class='ui-widget-content' >" . $di->getNomUrl(1);
+        print "    <td style='padding:15px 10px 10px 10px;' valign=top width=130 class='ui-widget-content' >" . $di->description;
         if ($res->fk_user_target > 0) {
             $tmpUser->fetch($res->fk_user_target);
             print "<td style='padding:15px 10px 10px 10px;' valign=top width=100 class='ui-widget-content'>" . utf8_encodeRien($tmpUser->getNomUrl(1));
@@ -135,8 +138,14 @@ if ($res > 0) {
             } else {
                 print "<button id='attribDI-" . $res->rowid . "' class='attribDI butAction ui-widget-header ui-state-default'>Attr &agrave;</button>";
             }
-            print "<button id='modDI-" . $res->rowid . "' class='modDI butAction ui-widget-header ui-state-default'>Modifier</button>";
+//            print "<button id='modDI-" . $res->rowid . "' class='modDI butAction ui-widget-header ui-state-default'>Modifier</button>";
             print "<button id='cloneDI-" . $res->rowid . "' class='cloneDI butAction ui-widget-header ui-state-default'>Cloner</button>";
+            if($res->fk_statut == 0)
+                print "<button id='validDI-" . $res->rowid . "' class='validDI butAction ui-widget-header ui-state-default'>Valider</button>";
+            elseif($res->fk_statut == 1)
+                print "<button id='pecDI-" . $res->rowid . "' class='pecDI butAction ui-widget-header ui-state-default'>Prise en charge</button>";
+            elseif($res->fk_statut == 2)
+            print "<button id='clotureDI-" . $res->rowid . "' class='clotureDI butAction ui-widget-header ui-state-default'>Cloturer</button>";
         }
         print "</table>";
         print "<table width=900>";
@@ -212,6 +221,36 @@ function cloneDi(id){
                     jQuery('#rempDIDial').remove();
                 }
 
+                jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
+                jQuery.ajax({
+                    url: "ajax/synopsisdemandeinterv-html_response.php",
+                    data: "id="+comId,
+                    cache: false,
+                    datatype: "html",
+                    type: "POST",
+                    success: function(msg){
+                        jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
+                    },
+                });
+            } else {
+                alert('Il y a eu une erreur');
+            }
+        }
+    });
+}
+
+
+
+function setStatutDi(id, statut){
+    jQuery.ajax({
+        url:'ajax/xml/setStatutDi-xml_response.php',
+        data:"id="+id+"&statut="+statut,
+        datatype:"xml",
+        type:"POST",
+        cache:false,
+        success:function(msg){
+            if(jQuery(msg).find('OK').length>0)
+            {
                 jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
                 jQuery.ajax({
                     url: "ajax/synopsisdemandeinterv-html_response.php",
@@ -453,6 +492,18 @@ function cloneDi(id){
         jQuery('.cloneDI').click(function(){
             var id = jQuery(this).attr('id').replace(/^cloneDI-/,"");
             cloneDi(id);
+        });
+        jQuery('.validDI').click(function(){
+            var id = jQuery(this).attr('id').replace(/^validDI-/,"");
+            setStatutDi(id, 1);
+        });
+        jQuery('.clotureDI').click(function(){
+            var id = jQuery(this).attr('id').replace(/^clotureDI-/,"");
+            setStatutDi(id, 3);
+        });
+        jQuery('.pecDI').click(function(){
+            var id = jQuery(this).attr('id').replace(/^pecDI-/,"");
+            setStatutDi(id, 2);
         });
 
 

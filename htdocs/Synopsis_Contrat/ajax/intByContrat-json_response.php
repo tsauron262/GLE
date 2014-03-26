@@ -18,6 +18,7 @@
   require_once('../../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT.'/core/lib/contract.lib.php');
+        require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
 
 $id= isset($_REQUEST["id"])? $_REQUEST["id"] : '';
 $action = isset($_REQUEST["action"])? $_REQUEST["action"] : '';
@@ -29,7 +30,6 @@ if(!$sidx) $sidx =1;
 
 $typeObj = (isset($_REQUEST['type'])? $_REQUEST['type'] : "FI");
 if($typeObj == "FI"){
-        require_once(DOL_DOCUMENT_ROOT."/fichinter/class/fichinter.class.php");
         $fi = new Fichinter($db);
         $table = "Synopsis_fichinter";
 }
@@ -85,11 +85,21 @@ else{
                                                traite_str("&nbsp;&nbsp;".$desc),
                                                $row->datei,
                                                price($row->total_ht)."&nbsp;&nbsp;",
-                                               $arr['hours']["abs"].":".$arr['minutes']['rel'],
-                                               $fi->getNomUrl(1),
-                                               $userT->getNomUrl(1),
-                                               $fi->getLibStatut(4)
-                                               );
+                                               $arr['hours']["abs"].":".$arr['minutes']['rel']);
+            $responce->rows[$i]['cell'][] = $fi->getNomUrl(1);
+            if($typeObj != "FI"){
+                $fi2 = new Fichinter($db);
+                $resultT = '';
+                $tabT = getElementElement("DI", "FI", $fi->id);
+                foreach($tabT as $val){
+                    $fi2->fetch($val["d"]);
+                    $resultT .= $fi2->getNomUrl(1);
+                }
+                $responce->rows[$i]['cell'][] = $resultT;
+            }
+            $responce->rows[$i]['cell'][] = $userT->getNomUrl(1);
+            $responce->rows[$i]['cell'][] = $fi->getLibStatut(4);
+            
             $i++;
         }
         echo json_encode($responce);

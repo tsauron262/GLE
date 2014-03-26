@@ -809,11 +809,11 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
 //                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);                    $pdf->MultiCell($col, $hauteur_ligne, utf8_encodeRien(price($val->total_ht) . EURO . " pour " . $val->GMAO_Mixte['durVal'] . " mois"), 0, 'C', 1);
                     $slaT = utf8_encodeRien(utf8_encodeRien($val->SLA));
                     $hauteurSla = (strlen($slaT) < 25) ? $hauteur_ligne : $hauteur_ligne / 2;
-                    $pdf->MultiCell($col, $hauteurSla, $slaT, 0, 'C', 1);
+                    $pdf->MultiCell($col, $hauteur_ligne, $slaT, 0, 'C', 1);
                     $pdf1->SetFont('Helvetica', '', 6.5);
 
 
-                    $nextY = $pdf->getY();
+                    $nextY = $pdf->getY()+1;
                 }
                 $this->_pagefoot($pdf, $contrat, $outputlangs);
 

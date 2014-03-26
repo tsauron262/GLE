@@ -2658,11 +2658,11 @@ class Synopsis_ContratLigne extends ContratLigne {
 
     function getInfoProductCli($opt = "", $size = 200) {
         $elems = getElementElement("contratdet", "productCli", $this->id);
-        $htmlT = "";
+        $htmlT = array();
         foreach ($elems as $elem) {
-            $htmlT .= $this->getInfoOneProductCli($elem['d'], $opt, $size);
+            $htmlT[] = $this->getInfoOneProductCli($elem['d'], $opt, $size);
         }
-        return dol_trunc($htmlT, $size);
+        return dol_trunc(implode("\n", $htmlT), $size);
     }
 
 }

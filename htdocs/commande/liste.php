@@ -347,6 +347,16 @@ if ($resql) {
         }
         /* f mod drsi */
 
+print '<tr '.$bc[$var].'>';
+		print '<td class="nowrap">';
+
+		$generic_commande->id=$objp->rowid;
+		$generic_commande->ref=$objp->ref;
+
+		print '<table class="nobordernopadding"><tr class="nocellnopadd">';
+		print '<td class="nobordernopadding nowrap">';
+		print $generic_commande->getNomUrl(1,($viewstatut != 2?0:$objp->fk_statut));
+		print '</td>';
 
 		print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
 		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_valid),$db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
@@ -359,48 +369,25 @@ if ($resql) {
 		}
 		print '</td>';
 
+		print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
+		$filename=dol_sanitizeFileName($objp->ref);
+		$filedir=$conf->commande->dir_output . '/' . dol_sanitizeFileName($objp->ref);
+		$urlsource=$_SERVER['PHP_SELF'].'?id='.$objp->rowid;
+		print $formfile->getDocumentsLink($generic_commande->element, $filename, $filedir);
+		print '</td>';
+		print '</tr></table>';
 
 		print '</td>';
 
 		// Ref customer
 		print '<td>'.$objp->ref_client.'</td>';
 
-        $generic_commande->id = $objp->rowid;
-        $generic_commande->ref = $objp->ref;
-
-		// If module invoices enabled and user with invoice creation permissions
-		if (! empty($conf->facture->enabled) && ! empty($conf->global->ORDER_BILLING_ALL_CUSTOMER))
-		{
-			if ($user->rights->facture->creer)
-			{
-				if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0))
-				{
-					print '&nbsp;<a href="'.DOL_URL_ROOT.'/commande/orderstoinvoice.php?socid='.$companystatic->id.'">';
-					print img_picto($langs->trans("CreateInvoiceForThisCustomer").' : '.$companystatic->nom, 'object_bill', 'hideonsmartphone').'</a>';
-				}
-			}
-		}
-		print '</td>';
-
-        print '<td width="16" align="right" class="nobordernopadding hideonsmartphone">';
-        $filename = dol_sanitizeFileName($objp->ref);
-        $filedir = $conf->commande->dir_output . '/' . dol_sanitizeFileName($objp->ref);
-        $urlsource = $_SERVER['PHP_SELF'] . '?id=' . $objp->rowid;
-        print $formfile->getDocumentsLink($generic_commande->element, $filename, $filedir);
-        print '</td>';
-        print '</tr></table>';
-
-        print '</td>';
-
-        // Ref customer
-        print '<td>' . $objp->ref_client . '</td>';
-
-        // Company
-        $companystatic->id = $objp->socid;
-        $companystatic->nom = $objp->nom;
-        $companystatic->client = $objp->client;
-        print '<td>';
-        print $companystatic->getNomUrl(1, 'customer');
+		// Company
+		$companystatic->id=$objp->socid;
+		$companystatic->nom=$objp->nom;
+		$companystatic->client=$objp->client;
+		print '<td>';
+		print $companystatic->getNomUrl(1,'customer');
 
         // If module invoices enabled and user with invoice creation permissions
         if (!empty($conf->facture->enabled) && !empty($conf->global->ORDER_BILLING_ALL_CUSTOMER)) {

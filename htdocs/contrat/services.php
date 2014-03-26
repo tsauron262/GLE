@@ -124,7 +124,7 @@ if ($resql)
 	if ($search_contract) $param.='&amp;search_contract='.urlencode($search_contract);
 	if ($search_nom)      $param.='&amp;search_nom='.urlencode($search_nom);
 	if ($search_service)  $param.='&amp;search_service='.urlencode($search_service);
-	if ($mode)            $param.='&amp;mode='.$mode;
+	if ($mode || $mode == "0")            $param.='&amp;mode='.$mode;
 	if ($filter)          $param.='&amp;filter='.$filter;
 	if (! empty($filter_op1) && $filter_op1 != -1) $param.='&amp;filter_op1='.urlencode($filter_op1);
 	if (! empty($filter_op2) && $filter_op2 != -1) $param.='&amp;filter_op2='.urlencode($filter_op2);

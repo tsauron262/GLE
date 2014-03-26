@@ -234,6 +234,9 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
                 dol_syslog($langs->trans('ErrorFailedToReadEntity', $langs->trans("Proposal")));
             }
         }
+        else if ($action == "activerAll"){
+            $object->activeAllLigne();
+        }
     }
 }
 /*
@@ -1359,7 +1362,7 @@ if ($action == 'create') {
 
         // Date
         print '<tr><td>' . $langs->trans("Date") . '</td>';
-        /* deb mod drsi */
+        /* deb mod drsi pour modif date + condition reglement + type paimenet*/
         print '<td colspan="3">' . dol_print_date($object->date_contrat, "dayhour") . "\n";
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
@@ -1969,6 +1972,38 @@ if ($action == 'create') {
                 //	print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.$langs->trans("CloseRefusedBecauseOneServiceActive").'">'.$langs->trans("Close").'</a></div>';
                 //}
             }
+            
+            
+            /* mod drsi bouton */
+            
+            // Renouve simple
+            if ($object->statut == 1 || $object->statut == 2) {
+    //            print "<br/>";
+                if ($user->rights->synopsiscontrat->renouveller) {
+    //                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
+                    print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=reconduction">' . $langs->trans('Reconduction') . '</a></div>';
+                }
+            }
+            
+            //Tout activer
+            if ($object->nbofservicesopened+$object->nbofservicesclosed+$object->nbofservicesexpired < $nbofservices  && ($object->statut == 1 || $object->statut == 2)) {
+    //            print "<br/>";
+                if ($user->rights->synopsiscontrat->renouveller) {
+    //                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
+                    print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=activerAll">' . $langs->trans('Activer tous les services') . '</a></div>';
+                }
+            }
+
+
+            // Send
+            if ($object->statut == 1 || $object->statut == 2) {
+    //            print "<br/>";
+                if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
+                    print '<div class="inline-block divButAction"><a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a></div>';
+                } else
+                    print '<div class="inline-block divButAction"><a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a></div>';
+            }
+            /*fmod drsi */
 
             // On peut supprimer entite si
             // - Droit de creer + mode brouillon (erreur creation)
@@ -1999,32 +2034,12 @@ if ($action == 'create') {
 
 
 /*
- * deb mod drsi    Bouton envoyer par mail        form envoy mail         for genere doc
+ * deb mod drsi  form envoy mail         for genere doc
  */
 
 
 if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
     if (isset($_REQUEST["id"]) && isset($object->id) && $object->id > 0) {
-        // Renouve simple
-        print "<br/>";
-        print '<div class="inline-block divButAction">';
-        if ($object->statut == 1 || $object->statut == 2) {
-//            print "<br/>";
-            if ($user->rights->synopsiscontrat->renouveller) {
-//                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=renouvSimple">' . $langs->trans('Renouvellement simple') . '</a>';
-                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=reconduction">' . $langs->trans('Reconduction') . '</a>';
-            }
-        }
-
-
-        // Send
-        if ($object->statut == 1 || $object->statut == 2) {
-//            print "<br/>";
-            if (empty($conf->global->MAIN_USE_ADVANCED_PERMS) || $user->rights->propal->propal_advance->send) {
-                print '<a class="butAction" href="' . $_SERVER["PHP_SELF"] . '?id=' . $object->id . '&amp;action=presend&amp;mode=init">' . $langs->trans('SendByMail') . '</a>';
-            } else
-                print '<a class="butActionRefused" href="#">' . $langs->trans('SendByMail') . '</a>';
-        }
         print '</div><br/><br/><br/><br/>';
 
 

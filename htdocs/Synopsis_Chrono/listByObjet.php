@@ -194,7 +194,7 @@ EOF;
 
 
 llxHeader($js, $titre);
-//dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
+dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
 
 
 print "<div id='tabs'>";

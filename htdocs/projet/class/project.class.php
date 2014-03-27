@@ -701,6 +701,64 @@ class Project extends CommonObject {
 
         return $result;
     }
+    
+    
+    /**
+     * 	Check if user has permission on current project
+     *
+     * 	@param	User	$user		Object user to evaluate
+     * 	@param  string	$mode		Type of permission we want to know: 'read', 'write'
+     * 	@return	int					>0 if user has permission, <0 if user has no permission
+     */
+    function restrictedProjectArea($user, $mode='read')
+    {
+        // To verify role of users
+        $userAccess = 0;
+        if (($mode == 'read' && ! empty($user->rights->projet->all->lire)) || ($mode == 'write' && ! empty($user->rights->projet->all->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->all->supprimer)))
+        {
+            $userAccess = 1;
+        }
+        else if ($this->public && (($mode == 'read' && ! empty($user->rights->projet->lire)) || ($mode == 'write' && ! empty($user->rights->projet->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->supprimer))))
+        {
+            $userAccess = 1;
+        }
+        else
+		{
+            foreach (array('internal', 'external') as $source)
+            {
+                $userRole = $this->liste_contact(4, $source);
+                $num = count($userRole);
+
+                $nblinks = 0;
+                while ($nblinks < $num)
+                {
+                    if ($source == 'internal' && preg_match('/^PROJECT/', $userRole[$nblinks]['code']) && $user->id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }
+                    // Permission are supported on users only. To have an external thirdparty contact to see a project, its user must allowed to contacts of projects.
+                    /*if ($source == 'external' && preg_match('/PROJECT/', $userRole[$nblinks]['code']) && $user->contact_id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }*/
+                    $nblinks++;
+                }
+            }
+            //if (empty($nblinks))	// If nobody has permission, we grant creator
+            //{
+            //	if ((!empty($this->user_author_id) && $this->user_author_id == $user->id))
+            //	{
+            //		$userAccess = 1;
+            //	}
+            //}
+        }
+
+        return ($userAccess?$userAccess:-1);
+    }
 
     public function getTasksRoleForUser($user) {
         $tasksrole = array();

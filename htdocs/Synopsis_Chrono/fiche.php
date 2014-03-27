@@ -149,7 +149,7 @@ if ($action == 'modifier') {
 //Extra Value
 
     $res = $chr->update($chr->id);
-    $dataArr = array();
+    $dataArr = $tabChronoValue = array();
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^Chrono-([0-9]*)$/', $key, $arrTmp)) {
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key, " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur WHERE " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur.id = " . MAIN_DB_PREFIX . "Synopsis_Chrono_key.type_valeur AND " . MAIN_DB_PREFIX . "Synopsis_Chrono_key.id = " . $arrTmp[1];

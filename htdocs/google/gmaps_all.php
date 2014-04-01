@@ -266,6 +266,8 @@ if ($resql)
                 
                 if($mode=='thirdparty')
                     $object->name=$object->getNomUrl(1);
+                
+                $addresstosearch = virerCedex($addresstosearch);
 /*fmod drsi */
 		$object->latitude = $obj->latitude;
 		$object->longitude = $obj->longitude;
@@ -597,4 +599,14 @@ function googlegetURLContent($url,$postorget='GET',$param='')
 
 	return $rep;
 }
+
+/*drsi*/
+    function virerCedex($str){
+        $str = preg_replace("/BP( )*[0-9]*/", " ", $str);
+
+        $str = preg_replace("/cedex/", " ", $str);
+        $str = preg_replace("/cédex/", " ", $str);
+
+        return $str;
+    }
 ?>

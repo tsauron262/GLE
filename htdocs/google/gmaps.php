@@ -146,6 +146,19 @@ if (empty($conf->global->SOCIETE_DISABLE_STATE)) print '<tr><td>'.$langs->trans(
 print '</table>';
 
 
+/* mod drsi*/
+$address = virerCedex($address);
+function virerCedex($str){
+    $str = preg_replace("/BP( )*[0-9]*/", " ", $str);
+    
+    $str = preg_replace("/cedex/", " ", $str);
+    $str = preg_replace("/cédex/", " ", $str);
+    
+    return $str;
+}
+/*fmod drsi*/
+
+
 // Show maps
 
 if ($address && $address != $object->country)

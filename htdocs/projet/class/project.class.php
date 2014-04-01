@@ -61,6 +61,11 @@ class Project extends CommonObject {
     public $CostRHByTaskByUser = array();
     public $CostRHByUserByTask = array();
     public $element = 'synopsisprojet';
+    public $table_element = 'Synopsis_projet';  //!< Name of table without prefix where object is stored
+    public $table_element_line = 'Synopsis_projet_task';
+    public $fk_element = 'fk_projet';
+    protected $ismultientitymanaged = 1;  // 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
+
 
     /**
      *    \brief  Constructeur de la classe

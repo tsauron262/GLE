@@ -108,13 +108,18 @@ $head=array();
 $title='';
 $picto='';
 $type='';
-if (empty($mode) || $mode=='thirdparty')
+
+if (empty($mode))
+    $mode='thirdparty';
+
+
+if ($mode=='thirdparty')
 {
     
     
     
     
-    
+    /* mod drsi*/
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 $htmlother=new FormOther($db);
 	// Filter on categories
@@ -135,7 +140,7 @@ $htmlother=new FormOther($db);
 		print '</div>';
 	}
         $search_categ = ($search_categ > 0)? $search_categ : 0;
-    
+    /*f mod drsi*/
     
     
     
@@ -250,10 +255,18 @@ if ($resql)
 
 		$addresstosearch=dol_format_address($obj,1," ");
 		$address=dol_format_address($obj,1,", ");	// address to show
-
-		$object=new stdClass();
+/*mod drsi */
+                if($mode=='thirdparty')
+                    $object=new Societe();
+                else
+                    $object=new stdClass();
+                
 		$object->id=$obj->id;
-		$object->name=$obj->name?$obj->name:($obj->lastname.' '.$obj->firstname);
+                $object->name=$obj->name?$obj->name:($obj->lastname.' '.$obj->firstname);
+                
+                if($mode=='thirdparty')
+                    $object->name=$object->getNomUrl(1);
+/*fmod drsi */
 		$object->latitude = $obj->latitude;
 		$object->longitude = $obj->longitude;
 		$object->address = $address;

@@ -110,6 +110,45 @@ $picto='';
 $type='';
 if (empty($mode) || $mode=='thirdparty')
 {
+    
+    
+    
+    
+    
+require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
+$htmlother=new FormOther($db);
+	// Filter on categories
+	$moreforfilter='';
+        $search_categ = $_REQUEST['search_categ'];
+	if (! empty($conf->categorie->enabled))
+	{
+		$moreforfilter.='<form>';
+		$moreforfilter.=$langs->trans('Categories'). ': ';
+		$moreforfilter.=$htmlother->select_categories(1,$search_categ,'search_categ',1);
+		$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
+		$moreforfilter.='<input type="submit" value="Valider"/></form>';
+	}
+	if ($moreforfilter)
+	{
+		print '<div class="liste_titre">';
+		print $moreforfilter;
+		print '</div>';
+	}
+        $search_categ = ($search_categ > 0)? $search_categ : 0;
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 	$socid = GETPOST('socid','int');
 	if ($user->societe_id) $socid=$user->societe_id;
 
@@ -125,11 +164,11 @@ if (empty($mode) || $mode=='thirdparty')
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_pays as c ON s.fk_pays = c.rowid";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."google_maps as g ON s.rowid = g.fk_object and g.type_object='".$type."'";
 	if ($search_sale || (!$user->rights->societe->client->voir && !$socid)) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
-        /*mod drsi*/ if($filtreCatFourn)
+        /*mod drsi*/ if($search_categ)
             $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat";
 	$sql.= " WHERE s.status = 1";
-        /*mod drsi*/ if($filtreCatFourn)
-            $sql .= " AND cat.fk_societe = s.rowid AND cat.fk_categorie = '".$filtreCatFourn."'";
+        /*mod drsi*/ if($search_categ)
+            $sql .= " AND cat.fk_societe = s.rowid AND cat.fk_categorie = '".$search_categ."'";
 	$sql.= " AND s.entity IN (".getEntity('societe', 1).")";
 	if ($search_sale || (! $user->rights->societe->client->voir && ! $socid))	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;	// protect for external user

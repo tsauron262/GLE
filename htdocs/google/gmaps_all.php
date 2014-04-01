@@ -102,7 +102,7 @@ $form=new Form($db);
 
 $content = "Default content";
 $act = "";
-
+$filtreCatFourn = 4;
 //On fabrique les onglets
 $head=array();
 $title='';
@@ -122,10 +122,14 @@ if (empty($mode) || $mode=='thirdparty')
 	$sql.= " c.rowid as country_id, c.code as country_code, c.libelle as country,";
 	$sql.= " g.rowid as gid, g.fk_object, g.latitude, g.longitude, g.address as gaddress, g.result_code, g.result_label";
 	$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
+        /*mod drsi*/ if($filtreCatFourn)
+            $sql .= ", ".MAIN_DB_PREFIX."categorie_fournisseur as cat";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."c_pays as c ON s.fk_pays = c.rowid";
 	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."google_maps as g ON s.rowid = g.fk_object and g.type_object='".$type."'";
 	if ($search_sale || (!$user->rights->societe->client->voir && !$socid)) $sql.= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 	$sql.= " WHERE s.status = 1";
+        /*mod drsi*/ if($filtreCatFourn)
+            $sql .= " AND fk_societe = s.rowid AND fk_categorie = '".$filtreCatFourn."'";
 	$sql.= " AND s.entity IN (".getEntity('societe', 1).")";
 	if ($search_sale || (! $user->rights->societe->client->voir && ! $socid))	$sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	if ($socid) $sql.= " AND s.rowid = ".$socid;	// protect for external user

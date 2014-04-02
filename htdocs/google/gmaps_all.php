@@ -257,7 +257,7 @@ if ($resql)
 		$address=dol_format_address($obj,1,", ");	// address to show
 /*mod drsi */
                 if($mode=='thirdparty')
-                    $object=new Societe();
+                    $object=new Societe($db);
                 else
                     $object=new stdClass();
                 

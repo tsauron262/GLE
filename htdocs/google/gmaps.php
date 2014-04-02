@@ -158,8 +158,6 @@ function virerCedex($str){
     
     return $str;
 }
-die($address);
-$address = "Service Comptable 10 rue Général Plessier 69219 / LYON  CÉDEX 02";
 /*fmod drsi*/
 
 

@@ -149,10 +149,11 @@ print '</table>';
 /* mod drsi*/
 $address = virerCedex($address);
 function virerCedex($str){
-    $str = preg_replace("/BP( )*[0-9]*/", " ", $str);
+    $str = preg_replace("/BP( )*[0-9]*/i", " ", $str);
     
-    $str = preg_replace("/cedex/", " ", $str);
-    $str = preg_replace("/cédex/", " ", $str);
+    $str = preg_replace("/cedex( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/cédex( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/ - ,/i", " ", $str);
     
     return $str;
 }

@@ -601,12 +601,13 @@ function googlegetURLContent($url,$postorget='GET',$param='')
 }
 
 /*drsi*/
-    function virerCedex($str){
-        $str = preg_replace("/BP( )*[0-9]*/", " ", $str);
-
-        $str = preg_replace("/cedex/", " ", $str);
-        $str = preg_replace("/cédex/", " ", $str);
-
-        return $str;
-    }
+function virerCedex($str){
+    $str = preg_replace("/BP( )*[0-9]*/i", " ", $str);
+    
+    $str = preg_replace("/cedex( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/cédex( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/ - ,/i", " ", $str);
+    
+    return $str;
+}
 ?>

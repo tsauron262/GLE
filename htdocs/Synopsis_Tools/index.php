@@ -42,6 +42,9 @@ print" <br/><br/><a href='../Synopsis_Tools/agenda/vue.php'><span style='float: 
 
 print" <br/><br/><a href='../Synopsis_Tools/connect.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Connect</span></a>";
 
+if (isset($conf->global->GOOGLE_ENABLE_GMAPS))
+    print" <br/><br/><a href='../google/gmaps_all.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Carte des tiers</span></a>";
+
 
 llxFooter();
 ?>

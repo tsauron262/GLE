@@ -139,7 +139,7 @@ foreach ($tabModel as $model => $data) {
     $nomDiv = "gridChronoDet" . $model;
     if ($model == 100) {
         if (isset($ctrId))
-            $champ[1038] = $ctrId;
+            $champ[1037] = $ctrId;
 //        $champ[1001] = date("d/m/Y H:i");
 //        $titre = "Appel Hotline";
         $nomOnglet = "hotline";

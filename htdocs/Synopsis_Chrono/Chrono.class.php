@@ -53,11 +53,11 @@ class Chrono extends CommonObject {
                 $this->validation_number = $res->validation_number;
 
                 $this->fk_user_author = $res->fk_user_author;
+                $tmpUser = new User($this->db);
                 if ($this->fk_user_author > 0) {
-                    $tmpUser = new User($this->db);
                     $tmpUser->fetch($this->fk_user_author);
-                    $this->user_author = $tmpUser;
                 }
+                $this->user_author = $tmpUser;
                 $this->user_modif_id = $res->fk_user_modif;
                 if ($this->user_modif_id > 0) {
                     $tmpUser = new User($this->db);

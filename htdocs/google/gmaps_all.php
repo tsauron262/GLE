@@ -602,10 +602,11 @@ function googlegetURLContent($url,$postorget='GET',$param='')
 
 /*drsi*/
 function virerCedex($str){
-    $str = preg_replace("/BP( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/BP( )*[0-9]{1,10}/i", " ", $str);
     
     $str = preg_replace("/cedex( )*[0-9]*/i", " ", $str);
     $str = preg_replace("/cédex( )*[0-9]*/i", " ", $str);
+    $str = preg_replace("/cÉdex( )*[0-9]*/i", " ", $str);
     $str = preg_replace("/ - ,/i", " ", $str);
     
     return $str;

@@ -306,6 +306,11 @@ function iniTabChronoList() {
         if ($res->hasSociete == "1")
             $hasSoc = 1;
     }
+
+    $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_key`, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id");
+    while ($result = $db->fetch_object($sql))
+        $hasContrat = true;
+
     $i = 0;
     if ($hasPropal) {
         $i++;
@@ -324,6 +329,14 @@ function iniTabChronoList() {
     if ($hasSoc) {
         $type = "thirdparty";
         $type2 = "soc";
+        $i++;
+        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+//            die($requete3);
+        $sql2 = $db->query($requete3);
+    }
+    if ($hasContrat) {
+        $type = "contract";
+        $type2 = "ctr";
         $i++;
         $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);

@@ -23,7 +23,7 @@ $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
 $id = $_REQUEST['id'];
 $modelT = $_REQUEST['model'];
 
-$js = $html = $html2 = "";
+$js = $html = $html2 = $titreGege= "";
 
 
 //$tabModel = array(100, 101);
@@ -35,6 +35,7 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
         $soc = new Societe($db);
         $soc->fetch($_REQUEST['id']);
+        $obj = $soc;
         $filtre = "fk_societe=" . urlencode($_REQUEST['id']);
         $head = societe_prepare_head($soc);
         $socid = $_REQUEST['id'];
@@ -46,6 +47,7 @@ if (isset($_REQUEST['obj'])) {
                 $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
             $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
         }
+        $titreGege = $soc->getNomUrl();
 //            $tabModel[$result->id] = $result->titre;
     } else if ($_REQUEST['obj'] == "ctr") {
         $langs->load("contracts");
@@ -53,16 +55,26 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/contrat/class/contrat.class.php';
         $ctr = new Contrat($db);
         $ctr->fetch($_REQUEST['id']);
+        $obj = $ctr;
         $filtre = "Contrat=" . urlencode($ctr->ref);
         $head = contract_prepare_head($ctr);
         $socid = $ctr->socid;
         $ctrId = $_REQUEST['id'];
+        $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_key`, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id ". (isset($modelT) ? " AND c.id=" . $modelT : ""));
+        while ($result = $db->fetch_object($sql)){
+            $nomI = $result->titre;
+            $titre = $nomI;
+            if (isset($result->picto) && $result->picto != '')
+                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
+            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
+        }
     } else if ($_REQUEST['obj'] == "project") {
         $langs->load("project@projet");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/synopsis_project.lib.php';
         require_once DOL_DOCUMENT_ROOT . '/projet/class/project.class.php';
         $projet = new Project($db);
         $projet->fetch($_REQUEST['id']);
+        $obj = $projet;
         $filtre = "fk_projet=" . $projet->id;
         $champ['fk_projet'] = $projet->id;
         $head = synopsis_project_prepare_head($projet);
@@ -82,6 +94,7 @@ if (isset($_REQUEST['obj'])) {
         require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
         $projet = new Propal($db);
         $projet->fetch($_REQUEST['id']);
+        $obj = $projet;
         $filtre = "fk_propal=" . $projet->id;
         $champ['fk_propal'] = $projet->id;
         $head = propal_prepare_head($projet);
@@ -126,8 +139,8 @@ foreach ($tabModel as $model => $data) {
     $nomDiv = "gridChronoDet" . $model;
     if ($model == 100) {
         if (isset($ctrId))
-            $champ[1004] = $ctrId;
-        $champ[1001] = date("d/m/Y H:i");
+            $champ[1038] = $ctrId;
+//        $champ[1001] = date("d/m/Y H:i");
 //        $titre = "Appel Hotline";
         $nomOnglet = "hotline";
     }
@@ -194,8 +207,29 @@ EOF;
 
 
 llxHeader($js, $titre);
-dol_fiche_head($head, $nomOnglet, $langs->trans($titre));
+dol_fiche_head($head, 'chrono', $langs->trans($titre));
 
+$form = new Form($db);
+if($obj){
+    print '<table class="border" width="100%">';
+    print '<tr><td width="25%">'.$langs->trans('Nom élément').'</td>';
+    print '<td colspan="3">';
+    $champ = 'ref';
+    if(isset($obj->nom))
+        $champ = 'nom';
+    print $form->showrefnav($obj,'obj='.$_REQUEST['obj'].'&id','',($user->societe_id?0:1),'rowid',$champ);
+    print '</td></tr>';
+    if($obj != $soc && $socid > 0){
+        $soc = new Societe($db);
+        $soc->fetch($socid);
+        print '<tr><td width="25%">'.$langs->trans('ThirdPartyName').'</td>';
+        print '<td colspan="3">';
+        print $soc->getNomUrl(1);
+        print '</td></tr>';
+    }
+
+    print '</table></br>';
+}
 
 print "<div id='tabs'>";
 print "<ul>";

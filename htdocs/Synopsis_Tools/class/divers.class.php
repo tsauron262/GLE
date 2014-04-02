@@ -655,6 +655,7 @@ class histoNavigation {
 
     static function getBlocHisto() {
         global $db, $user, $conf, $langs;
+        $langs->load("synopsisGene");
 //        if ($conf->global->MAIN_MODULE_SYNOPSISHISTO && $user->rights->MiniHisto->all->Afficher) {
         $return = '<div class="blockvmenupair">';
         $return .= '<div class="menu_titre">';

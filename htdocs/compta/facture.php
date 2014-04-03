@@ -1140,7 +1140,7 @@ else if (($action == 'addline' || $action == 'addline_predef') && $user->rights-
 	$error = 0;
 
 	// Set if we used free entry or predefined product
-	if (GETPOST('addline_libre'))
+	if (GETPOST(/*mod drsi*/'addline'/*mod drsi*/))
 	{
 		$predef='';
 		$idprod=0;

@@ -770,7 +770,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print '</td></tr>';
         }
 //lié a un contrat de maintenance ou mixte
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE extraparams in (3,7) AND fk_soc =" . $societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE "./*extraparams in (3,7) AND*/" fk_soc =" . $societe->id;
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';

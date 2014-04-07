@@ -315,14 +315,14 @@ function iniTabChronoList() {
     if ($hasPropal) {
         $i++;
         $type = "propal";
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@Synopsis_Chrono:/Synopsis_Chrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
         $sql2 = $db->query($requete3);
     }
     if ($hasProjet) {
         $i++;
         $type = "project";
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@Synopsis_Chrono:/Synopsis_Chrono/listByObjet.php?obj=" . $type . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
         $sql2 = $db->query($requete3);
     }
@@ -330,7 +330,7 @@ function iniTabChronoList() {
         $type = "thirdparty";
         $type2 = "soc";
         $i++;
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@Synopsis_Chrono:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
         $sql2 = $db->query($requete3);
     }
@@ -338,7 +338,7 @@ function iniTabChronoList() {
         $type = "contract";
         $type2 = "ctr";
         $i++;
-        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:@monmodule:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
+        $requete3 = "INSERT INTO `" . MAIN_DB_PREFIX . "const`(`name`, `entity`, `value`, `type`, `visible`) VALUES ('MAIN_MODULE_SYNOPSISCHRONO_TABS_" . $i . "',1,'" . $type . ":+chrono:Chrono:chrono@Synopsis_Chrono:/Synopsis_Chrono/listByObjet.php?obj=" . $type2 . "&"/* . $res->idT . */ . "id=__ID__','chaine',0)";
 //            die($requete3);
         $sql2 = $db->query($requete3);
     }

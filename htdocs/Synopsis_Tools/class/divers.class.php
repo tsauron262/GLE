@@ -167,7 +167,7 @@ class synopsisHook {
     }
 
     static function getHeader() {
-        global $db;
+        global $db, $langs;
         self::$timeDeb = microtime(true);
 
         //css
@@ -195,6 +195,13 @@ class synopsisHook {
         $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
+        
+        
+        
+        $langs->load("synopsisGene@Synopsis_Tools");
+        $langsSoc = "/Synopsis_Tools/langs/fr_FR/" . MAIN_INFO_SOCIETE_NOM . ".lang";
+        if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
+            $langs->load(MAIN_INFO_SOCIETE_NOM."@Synopsis_Tools");
 
         return $return;
     }

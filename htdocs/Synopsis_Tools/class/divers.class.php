@@ -198,10 +198,10 @@ class synopsisHook {
         
         
         
-        $langs->load("synopsisGene@Synopsis_Tools");
         $langsSoc = "/Synopsis_Tools/langs/fr_FR/" . MAIN_INFO_SOCIETE_NOM . ".lang";
         if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
             $langs->load(MAIN_INFO_SOCIETE_NOM."@Synopsis_Tools");
+        $langs->load("synopsisGene@Synopsis_Tools");
 
         return $return;
     }

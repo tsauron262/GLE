@@ -255,7 +255,7 @@ class modSynopsisTools extends DolibarrModules
         
         
         $this->tabs = array('thirdparty:-document',
-            'thirdparty:+allDoc:Tous les fichier joint:@Synopsis_Tools:/Synopsis_Tools/allDocumentSoc.php?id=__ID__',
+            'thirdparty:+allDoc:allDoc:synopsisGene@Synopsis_Tools:/Synopsis_Tools/allDocumentSoc.php?id=__ID__',
             'agenda:+agenda:Test New Agenda:@Synopsis_Tools:/Synopsis_Tools/agenda/vue.php');
     }
    /**

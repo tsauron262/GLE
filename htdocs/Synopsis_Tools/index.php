@@ -46,5 +46,8 @@ if (isset($conf->global->GOOGLE_ENABLE_GMAPS))
     print" <br/><br/><a href='../google/gmaps_all.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Carte des tiers</span></a>";
 
 
+    print" <br/><br/><a href='../apple/test.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Apple</span></a>";
+
+
 llxFooter();
 ?>

@@ -23,7 +23,6 @@ $details = array (
 $gsx = new GSX ( $details );
 
 echo "mi";
-
 echo "<pre>"; print_r($gsx->lookup ( 'C02H21L8DHJQ' ));
 echo "<pre>"; print_r($gsx->part ( array ( 'serialNumber' =>'C02H21L8DHJQ' , 'partDescription' => 'op' )));
 //echo "<pre>"; print_r($gsx->part ( array ( 'partNumber' =>'Z661-6061')));

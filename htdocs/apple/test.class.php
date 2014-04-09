@@ -904,6 +904,7 @@ class GSX {
 	protected function soap_error ( $code , $string ) {
 		// The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
 		$additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
+                echo 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
                 dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR);
 		return $this->outputFormat ( 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo );
 	}

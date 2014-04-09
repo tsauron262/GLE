@@ -23,8 +23,9 @@ $details = array (
 $gsx = new GSX ( $details );
 
 echo "mi";
-echo "<pre>"; print_r($gsx->lookup ( 'C02H21L8DHJQ' ));
-echo "<pre>"; print_r($gsx->part ( array ( 'serialNumber' =>'C02H21L8DHJQ' , 'partDescription' => 'op' )));
+
+echo "<pre>"; print_r($gsx->lookup ( 'CK0070H7E1D' , 'warranty' ));
+echo "<pre>"; print_r($gsx->part ( array ( 'serialNumber' =>'CK0070H7E1D')));
 //echo "<pre>"; print_r($gsx->part ( array ( 'partNumber' =>'Z661-6061')));
 
 echo "fin";

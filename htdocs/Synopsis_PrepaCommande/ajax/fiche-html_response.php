@@ -259,8 +259,12 @@ EOF;
                 // Total HT
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
                 print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td>';
 
+            print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
+                           <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
+            print traiteStr(nl2br($commande->note_public));
+            print '</div></td>';
                 // Total TVA
                 print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_tva) . '</td>';
                 print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
@@ -415,10 +419,6 @@ EOF;
                 }
             }
 
-            print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
-                           <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
-            print traiteStr(nl2br($commande->note_public));
-            print '</div></td>';
             print '</tr>';
             print <<<EOF
 <style>

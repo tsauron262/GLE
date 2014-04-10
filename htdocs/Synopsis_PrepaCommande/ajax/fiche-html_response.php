@@ -67,6 +67,14 @@ if ($id > 0) {
     print ' <script src="' . $jspath . '/jquery.jeditable.js" type="text/javascript"></script>';
     print <<<EOF
         <style>
+        .zoneGrp{
+            display: none;
+        }
+    
+    .zoneGrpTitre{
+        cursor:pointer;
+    }
+    
         #notePublicEdit button{
             -moz-border-radius: 8px 8px 8px 8px;
             background-color: #0073EA;
@@ -112,6 +120,10 @@ EOF;
         }
         </style>
             <script>
+                $(".zoneGrpTitre").click(function(){
+                    $(".zoneGrp").show();
+                });
+    
                  jQuery('#notePublicEdit').editable('ajax/xml/notePublic-xmlresponse.php', {
                      type      : 'textarea',
                      cancel    : 'Annuler',
@@ -216,68 +228,18 @@ EOF;
         print '</tr>';
         // Lignes de 3 colonnes
 
-        if ($user->rights->SynopsisPrepaCom->all->AfficherPrix) {
-
-            //SI groupe de commande
-            if ($arrGrpTmp) {
-                print '<tr><th colspan=4 class="ui-state-hover ui-widget-header">Groupe de commande</th>';
-                $total_ht = 0;
-                $total_tva = 0;
-                $total_ttc = 0;
-                // Total HT
-                print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $commande->ref . '</th>';
-//                print ' | ' . $langs->trans('AmountHT') . '</th>';
-                $total_ht += $commande->total_ht;
-                print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
-
-
-                foreach ($arrGrpTmp as $key => $val) {
-                    // Total HT
-                    $total_ht += $val->total_ht;
-                    print '<tr><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $val->ref . '</th>';
-//                    print ' | ' . $langs->trans('AmountHT') . '</th>';
-                    print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($val->total_ht) . '</b></td>';
-                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
-                }
-                //Total groupe
-                print '<tr><th colspan=4 class="ui-state-default ui-widget-header">Total groupe</th>';
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
-                print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($total_ht) . '</b></td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
-
-                // Total TVA
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th>
-                               <td class="ui-widget-content" align="right">' . price($total_tva) . '</td>';
-                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
-
-                // Total TTC
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th>
-                               <td class="ui-widget-content" align="right">' . price($total_ttc) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
-            } else {
-                // Total HT
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
-                print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
-                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td>';
-
-            print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
-                           <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
-            print traiteStr(nl2br($commande->note_public));
-            print '</div></td>';
-                // Total TVA
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_tva) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
-
-                // Total TTC
-                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_ttc) . '</td>';
-                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
-            }
-        }
+        
 
         // Statut
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Status') . '</th>';
         print '<td class="ui-widget-content" colspan="3">' . $commande->getLibStatut(4) . '</td>';
+        
+        
+        print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
+                       <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
+        print traiteStr(nl2br($commande->note_public));
+        print '</div></td>';
+        
         print '</tr>';
 
         // Statut logistique
@@ -337,7 +299,7 @@ EOF;
 //                $res = $db->fetch_object($sql);
             $exp = new expedition($db);
             $exp->fetch($tabExpe[0]['d']);
-            print '<td class="ui-widget-content" colspan="2">';
+            print '<td class="ui-widget-content" colspan="1">';
             print $exp->getNomUrl(1);
             print '<td class="ui-widget-content" colspan="2">';
             print $exp->getLibStatut(4);
@@ -440,7 +402,63 @@ EOF;
             }
             print '</td></tr>';
         }
+        
+        
+        if ($user->rights->SynopsisPrepaCom->all->AfficherPrix) {
 
+            //SI groupe de commande
+            if ($arrGrpTmp) {
+                print '<tr class="zoneGrpTitre"><th colspan=4 class="ui-state-hover ui-widget-header">Groupe de commande</th>';
+                $total_ht = $commande->total_ht;
+                $total_tva = $commande->total_tva;
+                $total_ttc = $commande->total_ttc;
+                // Total HT
+                print '<tr class="zoneGrp"><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $commande->getNomUrl(1) . '</th>';
+//                print ' | ' . $langs->trans('AmountHT') . '</th>';
+                print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
+                print '<td colspan=2 style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
+
+
+                foreach ($arrGrpTmp as $key => $val) {
+                    // Total HT
+                    $total_ht += $val->total_ht;
+                    $total_tva += $val->total_tva;
+                    $total_ttc += $val->total_ttc;
+                    print '<tr class="zoneGrp"><th style="padding: 5px;" class="ui-state-default ui-widget-header">' . $val->getNomUrl(1) . '</th>';
+//                    print ' | ' . $langs->trans('AmountHT') . '</th>';
+                    print '<td style="padding: 5px;" colspan=1 class="ui-widget-content" align="right"><b>' . price($val->total_ht) . '</b></td>';
+                    print '<td colspan=2  style="padding: 5px;" class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . ' HT</td></tr>';
+                }
+                //Total groupe
+                print '<tr><th colspan=4 class="ui-state-default ui-widget-header">Total groupe</th>';
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
+                print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($total_ht) . '</b></td>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+
+                // Total TVA
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th>
+                               <td class="ui-widget-content" align="right">' . price($total_tva) . '</td>';
+                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+
+                // Total TTC
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th>
+                               <td class="ui-widget-content" align="right">' . price($total_ttc) . '</td>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+            } else {
+                // Total HT
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountHT') . '</th>';
+                print '<td colspan=1 class="ui-widget-content" align="right"><b>' . price($commande->total_ht) . '</b></td>';
+                print '<td colspan=2 class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td>';
+
+                // Total TVA
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountVAT') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_tva) . '</td>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+
+                // Total TTC
+                print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('AmountTTC') . '</th><td class="ui-widget-content" align="right">' . price($commande->total_ttc) . '</td>';
+                print '<td colspan=2  class="ui-widget-content">' . $langs->trans('Currency' . $conf->global->MAIN_MONNAIE) . '</td></tr>';
+            }
+        }
 
         print '</table><br>';
         print "\n";

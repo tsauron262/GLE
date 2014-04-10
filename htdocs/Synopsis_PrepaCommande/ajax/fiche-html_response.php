@@ -246,20 +246,6 @@ EOF;
 #notePublicEdit { cursor: pointer; }
 </style>
 EOF;
-            // Adresse de livraison
-            print '<tr><th height="10" class="ui-state-default ui-widget-header">';
-            print $langs->trans('DeliveryAddress');
-            print '</td>';
-
-            print '</th><td colspan="3" class="ui-widget-content">';
-            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdelivery_adress') {
-//                    print traiteStr($html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'adresse_livraison_id','commande',$commande->id,false));
-                print getAdresseLivraisonComm($commande->id);
-            } else {
-//                    print traiteStr($html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'none','commande',$commande->id,false));
-                print getAdresseLivraisonComm($commande->id);
-            }
-            print '</td></tr>';
         }
 
         print "<tr>";
@@ -437,6 +423,24 @@ EOF;
             print '  <span onClick="openBIMPStatusDial();">' . img_edit() . '</span>';
         print '</td>';
         print '</tr>';
+        
+        
+        
+        
+            // Adresse de livraison
+            print '<tr><th height="10" class="ui-state-default ui-widget-header">';
+            print $langs->trans('DeliveryAddress');
+            print '</td>';
+
+            print '</th><td colspan="3" class="ui-widget-content">';
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdelivery_adress') {
+//                    print traiteStr($html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'adresse_livraison_id','commande',$commande->id,false));
+                print getAdresseLivraisonComm($commande->id);
+            } else {
+//                    print traiteStr($html->form_adresse_livraison($_SERVER['PHP_SELF'].'?id='.$commande->id,$commande->adresse_livraison_id,$_REQUEST['socid'],'none','commande',$commande->id,false));
+                print getAdresseLivraisonComm($commande->id);
+            }
+            print '</td></tr>';
 
 
         print '</table><br>';

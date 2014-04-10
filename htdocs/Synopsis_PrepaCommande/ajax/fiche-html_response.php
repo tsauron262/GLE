@@ -211,43 +211,6 @@ EOF;
         print '</td>';
         print '</tr>';
 
-        // Date de livraison
-        if ($conf->expedition->enabled) {
-            print '<tr><th height="10" class="ui-state-default ui-widget-header">';
-            print $langs->trans('DeliveryDate');
-            print '</th><td colspan="3" class="ui-widget-content">';
-            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_livraison') {
-                print '<form name="setdate_livraison" action="' . $_SERVER["PHP_SELF"] . '?id=' . $commande->id . '" method="post">';
-                print '<input type="hidden" name="action" value="setdate_livraison">';
-                $html->select_date($commande->date_livraison, 'liv_', '', '', '', "setdate_livraison");
-                print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
-                print '</form>';
-            } else {
-                print $commande->date_livraison ? htmlentities(utf8_decode(dol_print_date($commande->date_livraison, 'day'))) : '&nbsp;';
-            }
-            print '</td>';
-
-            $arrGrpTmp = $commande->listGroupMember();
-            if (!$user->rights->SynopsisPrepaCom->all->AfficherPrix) {
-                $nbrow-=3;
-            } else {
-                if ($arrGrpTmp) {
-                    $nbrow += (count($arrGrpTmp) + 4);
-                }
-            }
-
-            print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
-                           <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
-            print traiteStr(nl2br($commande->note_public));
-            print '</div></td>';
-            print '</tr>';
-            print <<<EOF
-<style>
-#notePublicEdit { cursor: pointer; }
-</style>
-EOF;
-        }
-
         print "<tr>";
 
         print '</tr>';
@@ -426,7 +389,42 @@ EOF;
         
         
         
-        
+
+        // Date de livraison
+        if ($conf->expedition->enabled) {
+            print '<tr><th height="10" class="ui-state-default ui-widget-header">';
+            print $langs->trans('DeliveryDate');
+            print '</th><td colspan="3" class="ui-widget-content">';
+            if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'editdate_livraison') {
+                print '<form name="setdate_livraison" action="' . $_SERVER["PHP_SELF"] . '?id=' . $commande->id . '" method="post">';
+                print '<input type="hidden" name="action" value="setdate_livraison">';
+                $html->select_date($commande->date_livraison, 'liv_', '', '', '', "setdate_livraison");
+                print '<input type="submit" class="button" value="' . $langs->trans('Modify') . '">';
+                print '</form>';
+            } else {
+                print $commande->date_livraison ? htmlentities(utf8_decode(dol_print_date($commande->date_livraison, 'day'))) : '&nbsp;';
+            }
+            print '</td>';
+
+            $arrGrpTmp = $commande->listGroupMember();
+            if (!$user->rights->SynopsisPrepaCom->all->AfficherPrix) {
+                $nbrow-=3;
+            } else {
+                if ($arrGrpTmp) {
+                    $nbrow += (count($arrGrpTmp) + 4);
+                }
+            }
+
+            print '<td class="ui-widget-content" rowspan="' . $nbrow . '" valign="top">' . $langs->trans('NotePublic') . ' :<br/>
+                           <div style="width: 95%; min-height: 11em; height: 28em; padding: 5px; overflow-y: hidden; color: rgb(0, 0, 0); background: none repeat scroll 0% 0% rgb(250, 229, 128); margin: 0px 3% 0px 1%;" id="notePublicEdit">';
+            print traiteStr(nl2br($commande->note_public));
+            print '</div></td>';
+            print '</tr>';
+            print <<<EOF
+<style>
+#notePublicEdit { cursor: pointer; }
+</style>
+EOF;
             // Adresse de livraison
             print '<tr><th height="10" class="ui-state-default ui-widget-header">';
             print $langs->trans('DeliveryAddress');
@@ -441,6 +439,7 @@ EOF;
                 print getAdresseLivraisonComm($commande->id);
             }
             print '</td></tr>';
+        }
 
 
         print '</table><br>';

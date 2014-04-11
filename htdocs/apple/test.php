@@ -3,28 +3,19 @@
 require_once('../main.inc.php');
 llxHeader();
 
+echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
+echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
 
-require_once NUSOAP_PATH.'/nusoap.php';
+echo '<div style="background-color: #E6E6E6; width: 100%; padding: 10px; margin-bottom: 30px;">' . "\n";
+echo '<label for="serialInput">Entrez un numéro de série: </label>' . "\n";
+echo '<input type="text" name="serialInput" id="serialInput" value="C02H21L8DHJQ"';
+echo 'onfocus="this.value = \'\';"';
+echo '/>' . "\n";
+echo '<button id="serialSubmit">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>' . "\n";
+echo '</div>';
+echo '<div id="serialResult"></div>' . "\n";
+echo '<div id="productInfos"></div>' . "\n";
 
-
-require_once ( 'test.class.php' );
-
-$details = array (
-    'apiMode'           => 'production',
-    'regionCode'        => 'apac',
-    'userId'            => 'Corinne@actitec.fr',
-    'password'          => 'cocomart01',
-    'serviceAccountNo'  => '0000100635',
-    'languageCode'      => 'en',
-    'userTimeZone'      => 'AEST' ,
-    'returnFormat'      => 'php' ,
-);
-
-$gsx = new GSX ( $details );
-
-echo "mi";
-echo "<pre>"; print_r($gsx->lookup ( 'C02H21L8DHJQ' ));
-echo "<pre>"; print_r($gsx->part ( array ( 'serialNumber' =>'C02H21L8DHJQ' , 'partDescription' => 'op' )));
 //echo "<pre>"; print_r($gsx->part ( array ( 'partNumber' =>'Z661-6061')));
 
-echo "fin";
+//echo "fin";

@@ -33,7 +33,7 @@ class gsxDatas {
         }
         $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
-        $html = '';
+        $html = '<input type="hidden" id="curSerial" value="'.$this->serial.'"/>';
         if (isset($response) && count($response)) {
             if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
@@ -110,6 +110,10 @@ class gsxDatas {
 
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
+
+//                    $html .= '<div id="componentsListContainer">'."\n";
+//                    $html .= '<div class="blocTitle">Rechercher un composant compatible</div>';
+//                    $html .= '</div>'."\n";
                 }
             }
         }

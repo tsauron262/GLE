@@ -17,5 +17,4 @@ echo '<div id="serialResult"></div>' . "\n";
 echo '<div id="productInfos"></div>' . "\n";
 
 //echo "<pre>"; print_r($gsx->part ( array ( 'partNumber' =>'Z661-6061')));
-
 //echo "fin";

@@ -401,7 +401,7 @@ class GSX {
         } elseif ($api_mode == 'it') {
             return $this->wsdlUrl = 'https://gsxwsit.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
-            $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+            $this->wsdlUrl = 'http://gle.bimp.fr/GLE/apple/test.wsdl';
 
             return $this->wsdlUrl;
         }

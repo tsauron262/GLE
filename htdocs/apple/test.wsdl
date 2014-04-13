@@ -1,0 +1,2610 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="GsxWSEmeaAspService"
+    targetNamespace="http://gsxws.apple.com/services/core/asp/emea"
+    xmlns:tns="http://gsxws.apple.com/services/core/asp/emea"
+    xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+    xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/"
+    xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy"
+    xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"
+    xmlns:global-rr="http://gsxws.apple.com/elements/global"
+    xmlns:core-rr="http://gsxws.apple.com/elements/core"
+    xmlns:asp-rr="http://gsxws.apple.com/elements/core/asp"
+    xmlns:emeaAsp-rr="http://gsxws.apple.com/elements/core/asp/emea">
+    
+    <wsdl:documentation>
+        Release Date: 08-September-2013 06:00 PM Pacific
+    </wsdl:documentation>
+    
+    <!-- ///////// MTOM Policy Declaration: START --> 
+    <wsp:Policy wsu:Id="GlobalMTOMPolicy">
+        <wsp:ExactlyOne>
+            <wsp:All>
+                <wsoma:OptimizedMimeSerialization /> 
+            </wsp:All>
+        </wsp:ExactlyOne>
+    </wsp:Policy>
+    <!-- ///////// MTOM Policy Declaration: END -->
+    
+    <!-- ///////// XSD Types Declaration: START -->
+    <wsdl:types>
+        <xs:schema>
+            <xs:import namespace="http://gsxws.apple.com/elements/global" schemaLocation="gsx-global-requestResponse-elements.xsd" />
+            <xs:import namespace="http://gsxws.apple.com/elements/core" schemaLocation="gsx-core-requestResponse-elements.xsd" />
+            <xs:import namespace="http://gsxws.apple.com/elements/core/asp" schemaLocation="gsx-coreAsp-requestResponse-elements.xsd" />
+            <xs:import namespace="http://gsxws.apple.com/elements/core/asp/emea" schemaLocation="gsx-emeaAsp-requestResponse.xsd" />
+        </xs:schema>
+    </wsdl:types>
+    <!-- ///////// XSD Types Declaration: END -->
+    
+    <!-- ///////// Message Declarations: START -->
+    <!-- Message 1: authenticate -->
+    <wsdl:message name="authenticateRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Authenticate" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:Authenticate" />
+    </wsdl:message>
+    <wsdl:message name="authenticateResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Authenticate" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:AuthenticateResponse" />
+    </wsdl:message>
+    
+    <!-- Message 2: Logout -->
+    <wsdl:message name="logoutRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Logout" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:Logout" />
+    </wsdl:message>
+    <wsdl:message name="logoutResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for Logout API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:LogoutResponse" />
+    </wsdl:message>
+    
+    <!-- Message 3: Warranty Status -->
+    <wsdl:message name="warrantyDetailRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Warranty Status" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:WarrantyStatus" />
+    </wsdl:message>
+    <wsdl:message name="warrantyDetailResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Warranty Status" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:WarrantyStatusResponse" />
+    </wsdl:message>
+
+    <!-- Message 4: Create Carry In -->
+    <wsdl:message name="createCarryInRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Carry-In Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="emeaAsp-rr:CreateCarryIn" />
+    </wsdl:message>
+    <wsdl:message name="createCarryInResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Carry-In Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="emeaAsp-rr:CreateCarryInResponse" /> 
+    </wsdl:message>
+
+    <!-- Message 5: CompTIA Code Lookup -->
+    <wsdl:message name="comptiaCodeLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "CompTIA Code Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:ComptiaCodeLookup" />
+    </wsdl:message>
+    <wsdl:message name="comptiaCodeLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "CompTIA Code Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:ComptiaCodeLookupResponse" />
+    </wsdl:message>
+
+    <!-- Message 6: Parts Lookup -->
+    <wsdl:message name="partsLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Parts Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="core-rr:PartsLookup" />
+    </wsdl:message>
+    <wsdl:message name="partsLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Parts Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="core-rr:PartsLookupResponse" />
+    </wsdl:message>
+
+    <!-- Message 7: Mark Repair Complete -->
+    <wsdl:message name="markRepairCompleteRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Mark Repair Complete" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:MarkRepairComplete" />
+    </wsdl:message>
+    <wsdl:message name="markRepairCompleteResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Mark Repair Complete" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:MarkRepairCompleteResponse" />
+    </wsdl:message>
+
+    <!-- Message 8: Update KGB Serial Number -->
+    <wsdl:message name="updateKGBSerialNumberRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update KGb Serial Number" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateKGBSerialNumber" />
+    </wsdl:message>
+    <wsdl:message name="updateKGBSerialNumberResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update KGb Serial Number" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateKGBSerialNumberResponse" />
+    </wsdl:message>
+    
+    <!-- Message 10: Repair Details -->
+    <wsdl:message name="repairDetailsRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Repair Details" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="core-rr:RepairDetails" />
+    </wsdl:message>
+    <wsdl:message name="repairDetailsResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Repair Details" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="core-rr:RepairDetailsResponse" />
+    </wsdl:message>
+    
+    <!-- Message 11: Repair Lookup -->
+    <wsdl:message name="repairLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Repair Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairLookup" />
+    </wsdl:message>
+    <wsdl:message name="repairLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Repair Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairLookupResponse" />
+    </wsdl:message>
+    
+    <!-- Message 12: Repair Status -->
+    <wsdl:message name="repairStatusRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Repair Status" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairStatus" />
+    </wsdl:message>
+    <wsdl:message name="repairStatusResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Repair Status" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairStatusResponse" />
+    </wsdl:message>
+    
+    <!-- Message 13: Repair Details Lookup -->
+    <wsdl:message name="repairDetailsLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Repair Details Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairDetailsLookup" />
+    </wsdl:message>
+    <wsdl:message name="repairDetailsLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Repair Details Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RepairDetailsLookupResponse" />
+    </wsdl:message>
+    
+    <!-- Message 14: Update Carry In -->
+    <wsdl:message name="updateCarryInRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update Carry In" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateCarryIn" />
+    </wsdl:message>
+    <wsdl:message name="updateCarryInResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update Carry In" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateCarryInResponse" />
+    </wsdl:message>
+    
+    <!-- Message 15: Create Mail In -->
+    <wsdl:message name="createMailInRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Mail In" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateMailInRepair" />
+    </wsdl:message>
+    <wsdl:message name="createMailInResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Mail In" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateMailInRepairResponse" />
+    </wsdl:message>
+    
+    <!-- Message 16: New Onsite Dispatches -->
+    <wsdl:message name="newOnsiteDispatchesRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "New Onsite dispatches" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:NewOnsiteDispatches" />
+    </wsdl:message>
+    <wsdl:message name="newOnsiteDispatchesResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "New Onsite dispatches" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:NewOnsiteDispatchesResponse" />
+    </wsdl:message>
+    
+    <!-- Message 17: Onsite Dispatch Detail -->
+    <wsdl:message name="onsiteDispatchDetailRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Onsite Dispatch Detail" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:OnsiteDispatchDetail" />
+    </wsdl:message>
+    <wsdl:message name="onsiteDispatchDetailResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Onsite Dispatch Detail" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:OnsiteDispatchDetailResponse" />
+    </wsdl:message>
+    
+    <!-- Message 18: Parts Return Update -->
+    <wsdl:message name="partsReturnUpdateRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Parts Return Update" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:PartsReturnUpdate" />
+    </wsdl:message>
+    <wsdl:message name="partsReturnUpdateResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Parts Return Update" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:PartsReturnUpdateResponse" />
+    </wsdl:message>
+    
+    <!-- Message 19: Create APP Order -->
+    <wsdl:message name="createAPPOrderRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create APP Order" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateAPPOrder" />
+    </wsdl:message>
+    <wsdl:message name="createAPPOrderResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create APP Order" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateAPPOrderResponse" />
+    </wsdl:message>
+    
+    <!-- Message 20: Create Stocking Order -->
+    <wsdl:message name="createStockingOrderRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Stocking Order" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateStockingOrder" />
+    </wsdl:message>
+    <wsdl:message name="createStockingOrderResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Stocking Order" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateStockingOrderResponse" />
+    </wsdl:message>
+    
+    <!-- Message 21: Create SRF Order -->
+    <wsdl:message name="createSRFOrderRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create SRF Order" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateSRFOrder" />
+    </wsdl:message>
+    <wsdl:message name="createSRFOrderResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create SRF Order" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateSRFOrderResponse" />
+    </wsdl:message>
+    
+    <!-- Message 22: View Pending APP Orders -->
+    <wsdl:message name="viewPendingAPPOrdersRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "View Pending APP Orders" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewPendingAPPOrders" />
+    </wsdl:message>
+    <wsdl:message name="viewPendingAPPOrdersResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "View Pending APP Orders" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewPendingAPPOrdersResponse" />
+    </wsdl:message>
+    
+    <!-- Message 23: Parts Pending Return -->
+    <wsdl:message name="partsPendingReturnRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Parts Pending Return" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:PartsPendingReturn" />
+    </wsdl:message>
+    <wsdl:message name="partsPendingReturnResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Parts Pending Return" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:PartsPendingReturnResponse" />
+    </wsdl:message>
+    
+    <!-- Message 24: Update Serial Number -->
+    <wsdl:message name="updateSerialNumberRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update Serial Number" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateSerialNumber" />
+    </wsdl:message>
+    <wsdl:message name="updateSerialNumberResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update Serial Number" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateSerialNumberResponse" />
+    </wsdl:message>
+    
+    <!-- Message 25: Submit Warranty Claims Exception (Submit Affidavit) -->
+    <wsdl:message name="submitWarrantyClaimsExceptionRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Submit Warranty Claims Exception" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:SubmitWarrantyClaimsException" />
+    </wsdl:message>
+    <wsdl:message name="submitWarrantyClaimsExceptionResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Submit Warranty Claims Exception" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:SubmitWarrantyClaimsExceptionResponse" />
+    </wsdl:message>
+    
+    <!-- Message 26: View Bulk Return Proforma -->
+    <wsdl:message name="viewBulkReturnProformaRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "View Bulk Return Proforma" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewBulkReturnProforma" /> 
+    </wsdl:message>
+    <wsdl:message name="viewBulkReturnProformaResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "View Bulk Return Proforma" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewBulkReturnProformaResponse" />
+    </wsdl:message>
+    
+    <!-- Message 27: Download Return Label -->
+    <wsdl:message name="downloadReturnLabelRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Download Return Label" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ReturnLabel" />
+    </wsdl:message>
+    <wsdl:message name="downloadReturnLabelResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Download Return Label" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ReturnLabelResponse" />
+    </wsdl:message>
+    
+    <!-- Message 28: Register Parts for Bulk Return -->
+    <wsdl:message name="registerPartsForBulkReturnRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Register Parts For Bulk Return" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RegisterPartsForBulkReturn" /> 
+    </wsdl:message>
+    <wsdl:message name="registerPartsForBulkReturnResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Register Parts For Bulk Return" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RegisterPartsForBulkReturnResponse" />
+    </wsdl:message>
+    
+    <!-- Message 29: Create DSD Onsite Repair -->
+    <wsdl:message name="createDSDOnsiteRepairRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create DSD Onsite Repair" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateDSDOnsiteRepair" />
+    </wsdl:message>
+    <wsdl:message name="createDSDOnsiteRepairResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create DSD Onsite Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateDSDOnsiteRepairResponse" />
+    </wsdl:message>
+    
+    <!-- Message 30: Update DSD Onsite Repair -->
+    <wsdl:message name="updateDSDOnsiteRepairRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update DSD Onsite Repair" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateDSDOnsiteRepair" /> 
+    </wsdl:message>
+    <wsdl:message name="updateDSDOnsiteRepairResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update DSD Onsite Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateDSDOnsiteRepairResponse" />
+    </wsdl:message>
+    
+    <!-- Message 31: Create Indirect Onsite Repair -->
+    <wsdl:message name="createIndirectOnsiteRepairRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Indirect Onsite Repair" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateIndirectOnsiteRepair" />
+    </wsdl:message>
+    <wsdl:message name="createIndirectOnsiteRepairResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Indirect Onsite Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateIndirectOnsiteRepairResponse" />
+    </wsdl:message>
+    
+    <!-- Message 32: Create Whole Unit Exchange -->
+    <wsdl:message name="createWholeUnitExchangeRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Whole Unit Exchange" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateWholeUnitExchange" />
+    </wsdl:message>
+    <wsdl:message name="createWholeUnitExchangeResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Whole Unit Exchange" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateWholeUnitExchangeResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 33: Repair Fetch Diagnostic -->
+    <wsdl:message name="fetchRepairDiagnosticRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Repair Diagnostic" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairDiagnostic" />
+    </wsdl:message>
+    <wsdl:message name="fetchRepairDiagnosticResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Repair Diagnostic" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairDiagnosticResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 34: Create CND Repair -->
+    <wsdl:message name="createCNDRepairRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create CND Repair" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateCNDRepair" />
+    </wsdl:message>
+    <wsdl:message name="createCNDRepairResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create CND Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateCNDRepairResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 35: Invoice ID Lookup -->
+    <wsdl:message name="invoiceIDLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Invoice ID Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:InvoiceIDLookup" />
+    </wsdl:message>
+    <wsdl:message name="invoiceIDLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Invoice ID Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:InvoiceIDLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 36: Invoice Details Lookup -->
+    <wsdl:message name="invoiceDetailsLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Invoice Details Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:InvoiceDetailsLookup" />
+    </wsdl:message>
+    <wsdl:message name="invoiceDetailsLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Invoice Details Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:InvoiceDetailsLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 37: Create General Escalation -->
+    <wsdl:message name="createGenEscRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create General Escalation" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateGeneralEscalation" />
+    </wsdl:message>
+    <wsdl:message name="createGenEscResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create General Escalation" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateGeneralEscalationResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 38: Update General Escalation -->
+    <wsdl:message name="updateGeneralEscRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update General Escalation" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateGeneralEscalation" />
+    </wsdl:message>
+    <wsdl:message name="updateGeneralEscResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update General Escalation" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateGeneralEscalationResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 39: Update Mail-in Requote Escalation -->
+    <wsdl:message name="updateMailInRequoteEscRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update Mail-in Requote Escalation" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateMailInRequoteEscalation" />
+    </wsdl:message>
+    <wsdl:message name="updateMailInRequoteEscResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update Mail-in Requote Escalation" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateMailInRequoteEscalationResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 40: Update Whole Unit Requote Escalation -->
+    <wsdl:message name="updateWholeUnitRequoteEscRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Update Whole Unit Requote Escalation" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateWholeUnitRequoteEscalation" />
+    </wsdl:message>
+    <wsdl:message name="updateWholeUnitRequoteEscResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update Whole Unit Requote Escalation" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateWholeUnitRequoteEscalationResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 41: Requote Escalation Summary Lookup -->
+    <wsdl:message name="requoteEscSummaryLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Requote Escalation Summary Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RequoteEscalationSummaryLookup" />
+    </wsdl:message>
+    <wsdl:message name="requoteEscSummaryLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Requote Escalation Summary Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RequoteEscalationSummaryLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 42: Requote Escalation Details Lookup -->
+    <wsdl:message name="requoteEscDetailsLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Requote Escalation Details Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RequoteEscalationDetailsLookup" />
+    </wsdl:message>
+    <wsdl:message name="requoteEscDetailsLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Requote Escalation Details Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:RequoteEscalationDetailsLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 43: General Escalation Summary Lookup -->
+    <wsdl:message name="generalEscSummaryLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "General Escalation Summary Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:GeneralEscalationSummaryLookup" />
+    </wsdl:message>
+    <wsdl:message name="generalEscSummaryLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "General Escalation Summary Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:GeneralEscalationSummaryLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 44: General Escalation Details Lookup -->
+    <wsdl:message name="generalEscDetailsLookupRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "General Escalation Details Lookup" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:GeneralEscalationDetailsLookup" />
+    </wsdl:message>
+    <wsdl:message name="generalEscDetailsLookupResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "General Escalation Details Lookup" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:GeneralEscalationDetailsLookupResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 45: Fetch Communication Articles -->
+    <wsdl:message name="fetchCommunicationArticlesRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Communication Articles" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchCommunicationArticles" />
+    </wsdl:message>
+    <wsdl:message name="fetchCommunicationArticlesResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Communication Articles" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchCommunicationArticlesResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 46: Fetch Communication Content -->
+    <wsdl:message name="fetchCommunicationContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Communication Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchCommunicationContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchCommunicationContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Communication Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchCommunicationContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 47: Acknowledge Communication -->
+    <wsdl:message name="ackCommunicationRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Acknowledge Communication" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:AcknowledgeCommunication" />
+    </wsdl:message>
+    <wsdl:message name="ackCommunicationResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Acknowledge Communication" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:AcknowledgeCommunicationResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 48: Fetch Functional Areas -->
+    <wsdl:message name="fetchFunctionalAreasRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Functional Areas" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchFunctionalAreas" />
+    </wsdl:message>
+    <wsdl:message name="fetchFunctionalAreasResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Functional Areas" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchFunctionalAreasResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 49: Fetch Issue List -->
+    <wsdl:message name="fetchIssueListRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Issue List" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchIssueList" />
+    </wsdl:message>
+    <wsdl:message name="fetchIssueListResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Issue List" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchIssueListResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 50: Fetch Quick Check -->
+    <wsdl:message name="fetchQuickCheckRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Quick Check" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchQuickCheck" />
+    </wsdl:message>
+    <wsdl:message name="fetchQuickCheckResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Quick Check" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchQuickCheckResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 51: Fetch TS Node -->
+    <wsdl:message name="fetchTSNodeRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch TS Node" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchTSNode" />
+    </wsdl:message>
+    <wsdl:message name="fetchTSNodeResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch TS Node" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:FetchTSNodeResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 52: Fetch Disk Image Article ID -->
+    <wsdl:message name="fetchDiskImageArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Disk Image Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiskImageArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchDiskImageArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Disk Image Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiskImageArticleIDResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 53: Fetch Disk Image Article Content -->
+    <wsdl:message name="fetchDiskImageArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Disk Image Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiskImageArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchDiskImageArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Disk Image Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiskImageArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 54: Fetch Repair Process Article ID -->
+    <wsdl:message name="fetchRepairProcessArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Repair Process Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairProcessArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchRepairProcessArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Repair Process Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairProcessArticleIDResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 55: Fetch Repair Process Article Content -->
+    <wsdl:message name="fetchRepairProcessArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Repair Process Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairProcessArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchRepairProcessArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Repair Process Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchRepairProcessArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 56: Fetch Operational Procedure Article ID -->
+    <wsdl:message name="fetchOperationalProcedureArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Operational Procedure Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchOperationalProcedureArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchOperationalProcedureArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Operational Procedure Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchOperationalProcedureArticleIDResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 57: Fetch Operational Procedure Article Content -->
+    <wsdl:message name="fetchOperationalProcedureArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Operational Procedure Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchOperationalProcedureArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchOperationalProcedureArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Operational Procedure Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchOperationalProcedureArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 58: Fetch Technical Procedure Article ID -->
+    <wsdl:message name="fetchTechnicalProcedureArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Technical Procedure Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchTechnicalProcedureArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchTechnicalProcedureArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Technical Procedure Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchTechnicalProcedureArticleIDResponse"  />
+    </wsdl:message>
+        
+    <!-- Message 59: Fetch Technical Procedure Article Content -->
+    <wsdl:message name="fetchTechnicalProcedureArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Technical Procedure Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchTechnicalProcedureArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchTechnicalProcedureArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Technical Procedure Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchTechnicalProcedureArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 60: Fetch Self Help Article ID -->
+    <wsdl:message name="fetchSelfHelpArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Self Help Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchSelfHelpArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchSelfHelpArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Self Help Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchSelfHelpArticleIDResponse"  />
+    </wsdl:message>
+        
+    <!-- Message 61: Fetch Self Help Article Content -->
+    <wsdl:message name="fetchSelfHelpArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Self Help Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchSelfHelpArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchSelfHelpArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Self Help Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchSelfHelpArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 62: Fetch Service Video Article ID -->
+    <wsdl:message name="fetchServiceVideoArticleIDRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Service Video Article ID" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchServiceVideoArticleID" />
+    </wsdl:message>
+    <wsdl:message name="fetchServiceVideoArticleIDResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Service Video Article ID" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchServiceVideoArticleIDResponse"  />
+    </wsdl:message>
+        
+    <!-- Message 63: Fetch Service Video Article Content -->
+    <wsdl:message name="fetchServiceVideoArticleContentRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Service Video Article Content" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchServiceVideoArticleContent" />
+    </wsdl:message>
+    <wsdl:message name="fetchServiceVideoArticleContentResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Service Video Article Content" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchServiceVideoArticleContentResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 64: Fetch Product Model -->
+    <wsdl:message name="fetchProductModelRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Product Model Request" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchProductModel" />
+    </wsdl:message>
+    <wsdl:message name="fetchProductModelResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Product Model" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchProductModelResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 65: Fetch Image -->
+    <wsdl:message name="fetchImageRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Image" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchImage" />
+    </wsdl:message>
+    <wsdl:message name="fetchImageResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Image" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchImageResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 66: Create Repair Or Replace -->
+    <wsdl:message name="createRORRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Create Repair Or Replace" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateRepairOrReplace" />
+    </wsdl:message>
+    <wsdl:message name="createRORResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Create Repair Or Replace" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateRepairOrReplaceResponse"  />
+    </wsdl:message>
+    
+         <!-- Message 67 : Update CarryIn Return Before Replace Repair -->
+    <wsdl:message name="updateCarryInReturnReplaceRequestMessage">
+        <wsdl:documentation>
+           Incoming message for "Update CaaryIn Return Before Replace" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateCarryInReturnBeforeReplace" />
+    </wsdl:message>
+    <wsdl:message name="updateCarryInReturnReplaceResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Update CaaryIn Return Before Replace" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:UpdateCarryInReturnBeforeReplaceResponse" />
+    </wsdl:message> 
+    
+    
+    <!-- Message 68: Create CarryIn Return Before Replace Repair -->
+    <wsdl:message name="createCarryInReturnBeforeReplace">
+        <wsdl:documentation>
+            Incoming message for "Create CarryIn Return Before Replace" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateCarryInReturnBeforeReplace" />
+    </wsdl:message>
+    <wsdl:message name="createCarryInReturnBeforeReplaceResponse">
+        <wsdl:documentation>
+            Outgoing message for "Create CarryIn Return Before Replace" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:CreateCarryInReturnBeforeReplaceResponse"  />
+    </wsdl:message>
+    
+    <!-- Message 69: Return Report for Bulk Return -->
+    <wsdl:message name="returnReportRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Return Report" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ReturnReport" /> 
+    </wsdl:message>
+    <wsdl:message name="returnReportResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Return Report" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ReturnReportResponse" />
+    </wsdl:message>
+    
+    <!-- Message 70: Initiate iOSD Diagnostic -->
+    <wsdl:message name="initiateIOSDiagnosticRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Initiate iOSD Diagnostic" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:InitiateIOSDiagnostic" /> 
+    </wsdl:message>
+    <wsdl:message name="initiateIOSDiagnosticResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Initiate iOSD Diagnostic" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:InitiateIOSDiagnosticResponse" />
+    </wsdl:message>
+    
+    <!-- Message 71: Fetch Diagnostic Event Numbers -->
+    <wsdl:message name="fetchDiagnosticEventNumbersRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch Diagnostic Event Numbers" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiagnosticEventNumbers" /> 
+    </wsdl:message>
+    <wsdl:message name="fetchDiagnosticEventNumbersResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch Diagnostic Event Numbers" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchDiagnosticEventNumbersResponse" />
+    </wsdl:message>
+    
+    <!-- Message 72: Fetch iOSD Diagnostic -->
+    <wsdl:message name="fetchIOSDiagnosticRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Fetch iOSD Diagnostic" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchIOSDiagnostic" /> 
+    </wsdl:message>
+    <wsdl:message name="fetchIOSDiagnosticResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Fetch iOSD Diagnostic" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchIOSDiagnosticResponse" />
+    </wsdl:message>
+    
+    <!-- Message 73: TSPS Review PreCheck -->
+    <wsdl:message name="tspsReviewPreCheckRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "TSPS Review PreCheck" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:TSPSReviewPreCheck" /> 
+    </wsdl:message>
+    <wsdl:message name="tspsReviewPreCheckResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "TSPS Review PreCheck" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:TSPSReviewPreCheckResponse" />
+    </wsdl:message>
+    
+    <!-- Message 74: iOS Activation Details -->
+    <wsdl:message name="iosActivationDetailsRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "iOS Activation Details" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchIOSActivationDetails" /> 
+    </wsdl:message>
+    <wsdl:message name="iosActivationDetailsResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "iOS Activation Details" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="global-rr:FetchIOSActivationDetailsResponse" />
+    </wsdl:message>
+    
+    <!-- Message 75: Delete Repair API -->
+    <wsdl:message name="deleteRepairRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Delete Repair" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:DeleteRepair" /> 
+    </wsdl:message>
+    <wsdl:message name="deleteRepairResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Delete Repair" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:DeleteRepairResponse" />
+    </wsdl:message>
+    
+    <!-- Message 76:  consignmentIncreaseOrderLookUp API-->   
+    <wsdl:message name="consignmentIncreaseOrderLookUpRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "consignmentIncreaseOrderLookUp" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ConsignmentIncreaseOrderLookUp" /> 
+    </wsdl:message>
+    <wsdl:message name="consignmentIncreaseOrderLookUpResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "consignmentIncreaseOrderLookUp" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ConsignmentIncreaseOrderLookUpResponse" />
+    </wsdl:message>
+    <!-- Message 76: END consignmentIncreaseOrderLookUp API -->  
+    
+     <!-- Message 77: Component Check API -->
+     <wsdl:message name="componentCheckRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "Component Check" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ComponentCheck" /> 
+     </wsdl:message>
+     <wsdl:message name="componentCheckResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "Component Check" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ComponentCheckResponse" />
+     </wsdl:message> 
+     <!-- Message 77 : END Component Check API -->
+    
+     <!-- Message 78:  consignmentDecreaseOrderLookUp API-->   
+    <wsdl:message name="consignmentDecreaseOrderLookUpRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "consignmentDecreaseOrderLookUp" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ConsignmentDecreaseOrderLookUp" /> 
+    </wsdl:message>
+    <wsdl:message name="consignmentDecreaseOrderLookUpResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "consignmentDecreaseOrderLookUp" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ConsignmentDecreaseOrderLookUpResponse" />
+    </wsdl:message>
+    <!-- Message 78: END consignmentDecreaseOrderLookUp API --> 
+    
+    <!-- Message 79:  SubmitConsignmentDecreaseOrder API-->   
+    <wsdl:message name="submitConsignmentDecreaseOrderRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "submitConsignmentDecreaseOrder" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:SubmitConsignmentDecreaseOrder" /> 
+    </wsdl:message>
+    <wsdl:message name="submitConsignmentDecreaseOrderResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "submitConsignmentDecreaseOrder" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:SubmitConsignmentDecreaseOrderResponse" />
+    </wsdl:message>
+    <!-- Message 79: END SubmitConsignmentDecreaseOrder API--> 
+    
+     <!-- Message 80:  AcknowledgeConsignmentIncreaseOrder API-->   
+    <wsdl:message name="acknowledgeConsignmentIncreaseOrderRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "AcknowledgeConsignmentIncreaseOrder" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:AcknowledgeConsignmentIncreaseOrder" /> 
+    </wsdl:message>
+    <wsdl:message name="acknowledgeConsignmentIncreaseOrderResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "AcknowledgeConsignmentIncreaseOrder" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:AcknowledgeConsignmentIncreaseOrderResponse" />
+    </wsdl:message>
+    <!-- Message 80: END ConsignmentIncreaseOrder API--> 
+   
+     <!-- Message 81:  ValidateFromConsignedStock API-->   
+    <wsdl:message name="validateFromConsignedStockRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "ValidateFromConsignedStock" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ValidateFromConsignedStock" /> 
+    </wsdl:message>
+    <wsdl:message name="validateFromConsignedStockResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "ValidateFromConsignedStock" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ValidateFromConsignedStockResponse" />
+    </wsdl:message>
+    <!-- Message 81: END ValidateFromConsignedStock API-->
+    
+    <!-- Message 82:  ViewConsignmentProforma API-->   
+    <wsdl:message name="viewConsignmentProformaRequestMessage">
+        <wsdl:documentation>
+            Incoming message for "ViewConsignmentProforma" API 
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewConsignmentProforma" /> 
+    </wsdl:message>
+    <wsdl:message name="viewConsignmentProformaResponseMessage">
+        <wsdl:documentation>
+            Outgoing message for "ViewConsignmentProforma" API
+        </wsdl:documentation>
+        <wsdl:part name="parameters" element="asp-rr:ViewConsignmentProformaResponse" />
+    </wsdl:message>
+    <!-- Message 82: END ViewConsignmentProforma API-->   
+    
+   <!-- ///////// Message Declarations: END -->
+    
+    <!-- ///////// PortType Declarations: START -->
+    <wsdl:portType name="GsxWSEmeaAspPort">
+        <wsdl:documentation>
+            The service Port for AASP EMEA specific web service operations.
+        </wsdl:documentation>
+        
+        <!-- Operation 1: Authenticate -->
+        <wsdl:operation name="Authenticate">
+            <wsdl:documentation>
+                The Authenticate operation.
+            </wsdl:documentation>
+            <wsdl:input message="tns:authenticateRequestMessage" />
+            <wsdl:output message="tns:authenticateResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 2: Logout -->
+        <wsdl:operation name="Logout">
+            <wsdl:documentation>
+                The Logout operation
+            </wsdl:documentation>
+            <wsdl:input message="tns:logoutRequestMessage" />
+            <wsdl:output message="tns:logoutResponseMessage" />
+            </wsdl:operation>
+        
+        <!-- Operation 3: Warranty Status -->
+        <wsdl:operation name="WarrantyStatus">
+            <wsdl:documentation>
+                The Get Warranty Status operation.
+            </wsdl:documentation>
+            <wsdl:input message="tns:warrantyDetailRequestMessage" />
+            <wsdl:output message="tns:warrantyDetailResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 4: Create Carry In -->
+        <wsdl:operation name="CreateCarryInRepair">
+            <wsdl:documentation>The Create Carry-In operation.</wsdl:documentation>
+            <wsdl:input message="tns:createCarryInRequestMessage" />
+            <wsdl:output message="tns:createCarryInResponseMessage" />
+            </wsdl:operation>
+        
+        <!-- Operation 5: CompTIA Code Lookup -->
+        <wsdl:operation name="CompTIACodes">
+            <wsdl:documentation>The CompTIA code lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:comptiaCodeLookupRequestMessage"  />
+            <wsdl:output message="tns:comptiaCodeLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 6: Parts Lookup -->
+        <wsdl:operation name="PartsLookup">
+            <wsdl:documentation>The Parts lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:partsLookupRequestMessage" />
+            <wsdl:output message="tns:partsLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 7: Mark Repair Complete -->
+        <wsdl:operation name="MarkRepairComplete">
+            <wsdl:documentation>The Mark Repair Complete operation.</wsdl:documentation>
+            <wsdl:input message="tns:markRepairCompleteRequestMessage" />
+            <wsdl:output message="tns:markRepairCompleteResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 8: Update KGB Serial Number Update -->
+        <wsdl:operation name="KGBSerialNumberUpdate">
+            <wsdl:documentation>The Update KGB Serial Number operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateKGBSerialNumberRequestMessage" />
+            <wsdl:output message="tns:updateKGBSerialNumberResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 10: Repair Details -->
+        <wsdl:operation name="RepairDetails">
+            <wsdl:documentation>The Repair Details operation.</wsdl:documentation>
+            <wsdl:input message="tns:repairDetailsRequestMessage" />
+            <wsdl:output message="tns:repairDetailsResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 11: Repair Lookup -->
+        <wsdl:operation name="RepairLookup">
+            <wsdl:documentation>The Repair Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:repairLookupRequestMessage" />
+            <wsdl:output message="tns:repairLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 12: Repair Status -->
+        <wsdl:operation name="RepairStatus">
+            <wsdl:documentation>The Repair Status operation.</wsdl:documentation>
+            <wsdl:input message="tns:repairStatusRequestMessage" />
+            <wsdl:output message="tns:repairStatusResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 13: Repair Details Lookup -->
+        <wsdl:operation name="RepairDetailsLookup">
+            <wsdl:documentation>The Repair Details Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:repairDetailsLookupRequestMessage" />
+            <wsdl:output message="tns:repairDetailsLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 14: Update Carry In -->
+        <wsdl:operation name="CarryInRepairUpdate">
+            <wsdl:documentation>The Update Carry In operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateCarryInRequestMessage" />
+            <wsdl:output message="tns:updateCarryInResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 15: Create Mail In -->
+        <wsdl:operation name="CreateMailInRepair">
+            <wsdl:documentation>The Create Mail In operation.</wsdl:documentation>
+            <wsdl:input message="tns:createMailInRequestMessage" />
+            <wsdl:output message="tns:createMailInResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 16: New DSD Onsite Dispatches -->
+        <wsdl:operation name="NewOnsiteDispatches">
+            <wsdl:documentation>The New Onsite Dispatches operation.</wsdl:documentation>
+            <wsdl:input message="tns:newOnsiteDispatchesRequestMessage" />
+            <wsdl:output message="tns:newOnsiteDispatchesResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 17: Onsite Dispatch Detail -->
+        <wsdl:operation name="OnsiteDispatchDetail">
+            <wsdl:documentation>The Onsite Dispatch Detail operation.</wsdl:documentation>
+            <wsdl:input message="tns:onsiteDispatchDetailRequestMessage" />
+            <wsdl:output message="tns:onsiteDispatchDetailResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 18: Parts Return Update -->
+        <wsdl:operation name="PartsReturnUpdate">
+            <wsdl:documentation>The Parts Return Update operation.</wsdl:documentation>
+            <wsdl:input message="tns:partsReturnUpdateRequestMessage" />
+            <wsdl:output message="tns:partsReturnUpdateResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 19: Create APP Order -->
+        <wsdl:operation name="CreateAPPOrder">
+            <wsdl:documentation>The Create APP Order operation.</wsdl:documentation>
+            <wsdl:input message="tns:createAPPOrderRequestMessage" />
+            <wsdl:output message="tns:createAPPOrderResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 20: Create Stocking Order -->
+        <wsdl:operation name="CreateStockingOrder">
+            <wsdl:documentation>The Create Stocking Order operation.</wsdl:documentation>
+            <wsdl:input message="tns:createStockingOrderRequestMessage" />
+            <wsdl:output message="tns:createStockingOrderResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 21: Create SRF Order -->
+        <wsdl:operation name="CreateSRFOrder">
+            <wsdl:documentation>The Create SRF Order operation.</wsdl:documentation>
+            <wsdl:input message="tns:createSRFOrderRequestMessage" />
+            <wsdl:output message="tns:createSRFOrderResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 22: View Pending APP Orders -->
+        <wsdl:operation name="ViewPendingAPPOrders">
+            <wsdl:documentation>The View Pending APP Orders operation.</wsdl:documentation>
+            <wsdl:input message="tns:viewPendingAPPOrdersRequestMessage" />
+            <wsdl:output message="tns:viewPendingAPPOrdersResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 23: Parts Pending Return -->
+        <wsdl:operation name="PartsPendingReturn">
+            <wsdl:documentation>The Parts Pending Return operation.</wsdl:documentation>
+            <wsdl:input message="tns:partsPendingReturnRequestMessage" />
+            <wsdl:output message="tns:partsPendingReturnResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 24: Update Serial Number -->
+        <wsdl:operation name="UpdateSerialNumber">
+            <wsdl:documentation>The Update Serial Number operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateSerialNumberRequestMessage" />
+            <wsdl:output message="tns:updateSerialNumberResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 25: Submit Warranty Claims Exception (Submit Affidavit) -->
+        <wsdl:operation name="SubmitWarrantyClaimsExceptionForm">
+            <wsdl:documentation>The Submit Warranty Claims Exception (Submit Affidavit) operation.</wsdl:documentation>
+            <wsdl:input message="tns:submitWarrantyClaimsExceptionRequestMessage" />
+            <wsdl:output message="tns:submitWarrantyClaimsExceptionResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 26: View Bulk Return Proforma -->
+        <wsdl:operation name="ViewBulkReturnProforma">
+            <wsdl:documentation>The View Bulk Return Proforma operation.</wsdl:documentation>
+            <wsdl:input message="tns:viewBulkReturnProformaRequestMessage" />
+            <wsdl:output message="tns:viewBulkReturnProformaResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 27: Download Return Label -->
+        <wsdl:operation name="ReturnLabel">
+            <wsdl:documentation>The Download Return Label operation.</wsdl:documentation>
+            <wsdl:input message="tns:downloadReturnLabelRequestMessage" />
+            <wsdl:output message="tns:downloadReturnLabelResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 28: Register Parts For Bulk Return -->
+        <wsdl:operation name="RegisterPartsForBulkReturn">
+            <wsdl:documentation>The Register Parts For Bulk Return operation.</wsdl:documentation>
+            <wsdl:input message="tns:registerPartsForBulkReturnRequestMessage" />
+            <wsdl:output message="tns:registerPartsForBulkReturnResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 29: Create DSD Onsite Repair -->
+        <wsdl:operation name="CreateDSDOnsiteRepair">
+            <wsdl:documentation>The Create DSD Onsite Repair operation.</wsdl:documentation>
+            <wsdl:input message="tns:createDSDOnsiteRepairRequestMessage" />
+            <wsdl:output message="tns:createDSDOnsiteRepairResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 30: Update DSD Onsite Repair -->
+        <wsdl:operation name="DSDOnsiteUpdate">
+            <wsdl:documentation>The Update DSD Onsite Repair operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateDSDOnsiteRepairRequestMessage" />
+            <wsdl:output message="tns:updateDSDOnsiteRepairResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 31: Create Indirect Onsite Repair -->
+        <wsdl:operation name="CreateIndirectOnsiteRepair">
+            <wsdl:documentation>The Create Indirect Onsite Repair operation.</wsdl:documentation>
+            <wsdl:input message="tns:createIndirectOnsiteRepairRequestMessage" />
+            <wsdl:output message="tns:createIndirectOnsiteRepairResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 32: Create Whole Unit Exchange -->
+        <wsdl:operation name="CreateWholeUnitExchange">
+            <wsdl:documentation>The Create Whole Unit Exchange operation.</wsdl:documentation>
+            <wsdl:input message="tns:createWholeUnitExchangeRequestMessage" />
+            <wsdl:output message="tns:createWholeUnitExchangeResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 33: Fetch Repair Diagnostic -->
+        <wsdl:operation name="FetchRepairDiagnostic">
+            <wsdl:documentation>The Fetch Repair Diagnostic operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchRepairDiagnosticRequestMessage" />
+            <wsdl:output message="tns:fetchRepairDiagnosticResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 34: Create CND Repair -->
+        <wsdl:operation name="CreateCNDRepair">
+            <wsdl:documentation>The Create CND Repair operation.</wsdl:documentation>
+            <wsdl:input message="tns:createCNDRepairRequestMessage" />
+            <wsdl:output message="tns:createCNDRepairResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 35: Invoice ID Lookup -->
+        <wsdl:operation name="InvoiceIDLookup">
+            <wsdl:documentation>The Invoice ID Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:invoiceIDLookupRequestMessage" />
+            <wsdl:output message="tns:invoiceIDLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 36: Invoice Details Lookup -->
+        <wsdl:operation name="InvoiceDetailsLookup">
+            <wsdl:documentation>The Invoice Details Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:invoiceDetailsLookupRequestMessage" />
+            <wsdl:output message="tns:invoiceDetailsLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 37: Create General Escalation -->
+        <wsdl:operation name="CreateGeneralEscalation">
+            <wsdl:documentation>The Create General Escalation operation.</wsdl:documentation>
+            <wsdl:input message="tns:createGenEscRequestMessage" />
+            <wsdl:output message="tns:createGenEscResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 38: Update General Escalation -->
+        <wsdl:operation name="UpdateGeneralEscalation">
+            <wsdl:documentation>The Update General Escalation operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateGeneralEscRequestMessage" />
+            <wsdl:output message="tns:updateGeneralEscResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 39: Update Mail-in Requote Escalation -->
+        <wsdl:operation name="UpdateMailInRequoteEscalation">
+            <wsdl:documentation>The Update Mail-in Requote Escalation operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateMailInRequoteEscRequestMessage" />
+            <wsdl:output message="tns:updateMailInRequoteEscResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 40: Update Whole Unit Requote Escalation -->
+        <wsdl:operation name="UpdateWholeUnitRequoteEscalation">
+            <wsdl:documentation>The Update Whole Unit Requote Escalation operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateWholeUnitRequoteEscRequestMessage" />
+            <wsdl:output message="tns:updateWholeUnitRequoteEscResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 41: Requote Escalation Summary Lookup -->
+        <wsdl:operation name="RequoteEscalationSummaryLookup">
+            <wsdl:documentation>The Requote Escalation Summary Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:requoteEscSummaryLookupRequestMessage" />
+            <wsdl:output message="tns:requoteEscSummaryLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 42: Requote Escalation Details Lookup -->
+        <wsdl:operation name="RequoteEscalationDetailsLookup">
+            <wsdl:documentation>The Requote Escalation Details Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:requoteEscDetailsLookupRequestMessage" />
+            <wsdl:output message="tns:requoteEscDetailsLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 43: General Escalation Summary Lookup -->
+        <wsdl:operation name="GeneralEscalationSummaryLookup">
+            <wsdl:documentation>The General Escalation Summary Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:generalEscSummaryLookupRequestMessage" />
+            <wsdl:output message="tns:generalEscSummaryLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 44: General Escalation Details Lookup -->
+        <wsdl:operation name="GeneralEscalationDetailsLookup">
+            <wsdl:documentation>The General Escalation Details Lookup operation.</wsdl:documentation>
+            <wsdl:input message="tns:generalEscDetailsLookupRequestMessage" />
+            <wsdl:output message="tns:generalEscDetailsLookupResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 45: Fetch Communication Articles -->
+        <wsdl:operation name="FetchCommunicationArticles">
+            <wsdl:documentation>The Fetch Communication Articles operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchCommunicationArticlesRequestMessage" />
+            <wsdl:output message="tns:fetchCommunicationArticlesResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 46: Fetch Communication Content -->
+        <wsdl:operation name="FetchCommunicationContent">
+            <wsdl:documentation>The Fetch Communication Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchCommunicationContentRequestMessage" />
+            <wsdl:output message="tns:fetchCommunicationContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 47: Acknowledge Communication -->
+        <wsdl:operation name="AcknowledgeCommunication">
+            <wsdl:documentation>The Acknowledge Communication operation.</wsdl:documentation>
+            <wsdl:input message="tns:ackCommunicationRequestMessage" />
+            <wsdl:output message="tns:ackCommunicationResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 48: Fetch Functional Areas -->
+        <wsdl:operation name="FetchFunctionalAreas">
+            <wsdl:documentation>The Fetch Functional Areas operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchFunctionalAreasRequestMessage" />
+            <wsdl:output message="tns:fetchFunctionalAreasResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 49: Fetch Issue List -->
+        <wsdl:operation name="FetchIssueList">
+            <wsdl:documentation>The Fetch Issue List operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchIssueListRequestMessage" />
+            <wsdl:output message="tns:fetchIssueListResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 50: Fetch Quick Check -->
+        <wsdl:operation name="FetchQuickCheck">
+            <wsdl:documentation>The Fetch Quick Check operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchQuickCheckRequestMessage" />
+            <wsdl:output message="tns:fetchQuickCheckResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 51: Fetch TS Node -->
+        <wsdl:operation name="FetchTSNode">
+            <wsdl:documentation>The Fetch TS Node operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchTSNodeRequestMessage" />
+            <wsdl:output message="tns:fetchTSNodeResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 52: Fetch Disk Image Article ID -->
+        <wsdl:operation name="FetchDiskImageArticleID">
+            <wsdl:documentation>The Fetch Disk Image Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchDiskImageArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchDiskImageArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 53: Fetch Disk Image Article Content -->
+        <wsdl:operation name="FetchDiskImageArticleContent">
+            <wsdl:documentation>The Fetch Disk Image Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchDiskImageArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchDiskImageArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 54: Fetch Repair Process Article ID -->
+        <wsdl:operation name="FetchRepairProcessArticleID">
+            <wsdl:documentation>The Fetch Repair Process Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchRepairProcessArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchRepairProcessArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 55: Fetch Repair Process Article Content -->
+        <wsdl:operation name="FetchRepairProcessArticleContent">
+            <wsdl:documentation>The Fetch Repair Process Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchRepairProcessArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchRepairProcessArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 56: Fetch Operational Procedure Article ID -->
+        <wsdl:operation name="FetchOperationalProcedureArticleID">
+            <wsdl:documentation>The Fetch Operational Procedure Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchOperationalProcedureArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchOperationalProcedureArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 57: Fetch Operational Procedure Article Content -->
+        <wsdl:operation name="FetchOperationalProcedureArticleContent">
+            <wsdl:documentation>The Fetch Operational Procedure Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchOperationalProcedureArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchOperationalProcedureArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 58: Fetch Technical Procedure Article ID -->
+        <wsdl:operation name="FetchTechnicalProcedureArticleID">
+            <wsdl:documentation>The Fetch Technical Procedure Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchTechnicalProcedureArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchTechnicalProcedureArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 59: Fetch Technical Procedure Article Content -->
+        <wsdl:operation name="FetchTechnicalProcedureArticleContent">
+            <wsdl:documentation>The Fetch Technical Procedure Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchTechnicalProcedureArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchTechnicalProcedureArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 60: Fetch Self Help Article ID -->
+        <wsdl:operation name="FetchSelfHelpArticleID">
+            <wsdl:documentation>The Fetch Self Help Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchSelfHelpArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchSelfHelpArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 61: Fetch Self Help Article Content -->
+        <wsdl:operation name="FetchSelfHelpArticleContent">
+            <wsdl:documentation>The Fetch Self Help Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchSelfHelpArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchSelfHelpArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 62: Fetch Service Video Article ID -->
+        <wsdl:operation name="FetchServiceVideoArticleID">
+            <wsdl:documentation>The Fetch Service Video Article ID operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchServiceVideoArticleIDRequestMessage" />
+            <wsdl:output message="tns:fetchServiceVideoArticleIDResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 63: Fetch Service Video Article Content -->
+        <wsdl:operation name="FetchServiceVideoArticleContent">
+            <wsdl:documentation>The Fetch Service Video Article Content operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchServiceVideoArticleContentRequestMessage" />
+            <wsdl:output message="tns:fetchServiceVideoArticleContentResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 64: Fetch Product Model -->
+        <wsdl:operation name="FetchProductModel">
+            <wsdl:documentation>The Fetch Product Model operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchProductModelRequestMessage" />
+            <wsdl:output message="tns:fetchProductModelResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 65: Fetch Image -->
+        <wsdl:operation name="FetchImage">
+            <wsdl:documentation>The Fetch Image operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchImageRequestMessage" />
+            <wsdl:output message="tns:fetchImageResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 66: Create Repair Or Replace -->
+        <wsdl:operation name="CreateRepairOrReplace">
+            <wsdl:documentation>The Create Repair Or Replace operation.</wsdl:documentation>
+            <wsdl:input message="tns:createRORRequestMessage" />
+            <wsdl:output message="tns:createRORResponseMessage" />
+        </wsdl:operation>
+        
+        <!--  Operation 67: Update CaaryIn Return Before Replace -->
+        <wsdl:operation name="CarryInReturnBeforeReplaceRepairUpdate">
+            <wsdl:documentation>The Update CaaryIn Return Before Replace operation.</wsdl:documentation>
+            <wsdl:input message="tns:updateCarryInReturnReplaceRequestMessage" />
+            <wsdl:output message="tns:updateCarryInReturnReplaceResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 68: Create CarryIn Return Before Replace Repair -->
+        <wsdl:operation name="CreateCarryInReturnBeforeReplace">
+            <wsdl:documentation>The Create CarryIn Return Before Replace operation.</wsdl:documentation>
+            <wsdl:input message="tns:createCarryInReturnBeforeReplace" />
+            <wsdl:output message="tns:createCarryInReturnBeforeReplaceResponse" />
+        </wsdl:operation>
+        
+        <!-- Operation 69: Return Report -->
+        <wsdl:operation name="ReturnReport">
+            <wsdl:documentation>The Return Report operation.</wsdl:documentation>
+            <wsdl:input message="tns:returnReportRequestMessage" />
+            <wsdl:output message="tns:returnReportResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 70: Initiate iOSD Diagnostic -->
+        <wsdl:operation name="InitiateIOSDiagnostic">
+            <wsdl:documentation>The Initiate iOSD Diagnostic operation.</wsdl:documentation>
+            <wsdl:input message="tns:initiateIOSDiagnosticRequestMessage" />
+            <wsdl:output message="tns:initiateIOSDiagnosticResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 71: Fetch Diagnostic Event Numbers -->
+        <wsdl:operation name="FetchDiagnosticEventNumbers">
+            <wsdl:documentation>The Fetch Diagnostic Event Numbers operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchDiagnosticEventNumbersRequestMessage" />
+            <wsdl:output message="tns:fetchDiagnosticEventNumbersResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 72: Fetch iOSD Diagnostic -->
+        <wsdl:operation name="FetchIOSDiagnostic">
+            <wsdl:documentation>The Fetch iOSD Diagnostic operation.</wsdl:documentation>
+            <wsdl:input message="tns:fetchIOSDiagnosticRequestMessage" />
+            <wsdl:output message="tns:fetchIOSDiagnosticResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 73: TSPS Review PreCheck -->
+        <wsdl:operation name="TSPSReviewPreCheck">
+            <wsdl:documentation>The TSPS Review PreCheck operation.</wsdl:documentation>
+            <wsdl:input message="tns:tspsReviewPreCheckRequestMessage" />
+            <wsdl:output message="tns:tspsReviewPreCheckResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 74: iOS Activation Details  -->
+        <wsdl:operation name="FetchIOSActivationDetails">
+            <wsdl:documentation>The iOS Activation Details  Operation.</wsdl:documentation>
+            <wsdl:input message="tns:iosActivationDetailsRequestMessage" />
+            <wsdl:output message="tns:iosActivationDetailsResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 75: Delete Repair -->
+        <wsdl:operation name="DeleteRepair">
+            <wsdl:documentation>The Delete Repair operation.</wsdl:documentation>
+            <wsdl:input message="tns:deleteRepairRequestMessage" />
+            <wsdl:output message="tns:deleteRepairResponseMessage" />
+        </wsdl:operation>
+        
+         <!-- Operation 76 : Consignment Increase Orders LookUp -->
+        <wsdl:operation name="ConsignmentIncreaseOrdersLookUp">
+            <wsdl:documentation>Consignment Increase Order LookUp</wsdl:documentation>
+            <wsdl:input message="tns:consignmentIncreaseOrderLookUpRequestMessage" />
+            <wsdl:output message="tns:consignmentIncreaseOrderLookUpResponseMessage" />
+        </wsdl:operation>
+              
+        <!-- Operation 77 : Component Check -->
+        <wsdl:operation name="ComponentCheck">
+            <wsdl:documentation>This Component Check operation.</wsdl:documentation>
+            <wsdl:input message="tns:componentCheckRequestMessage" />
+            <wsdl:output message="tns:componentCheckResponseMessage" />
+        </wsdl:operation>
+        
+         <!-- Operation 78 : Consignment Decrease Orders LookUp -->
+        <wsdl:operation name="ConsignmentDecreaseOrdersLookUp">
+            <wsdl:documentation>Consignment Decrease Order LookUp</wsdl:documentation>
+            <wsdl:input message="tns:consignmentDecreaseOrderLookUpRequestMessage" />
+            <wsdl:output message="tns:consignmentDecreaseOrderLookUpResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 79 : Submit Consignment Decrease Order -->
+        <wsdl:operation name="SubmitConsignmentDecreaseOrder">
+            <wsdl:documentation>Submit Consignment Decrease Order</wsdl:documentation>
+            <wsdl:input message="tns:submitConsignmentDecreaseOrderRequestMessage" />
+            <wsdl:output message="tns:submitConsignmentDecreaseOrderResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 80 : Acknowledge Consignment Increase Order -->
+        <wsdl:operation name="AcknowledgeConsignmentIncreaseOrder">
+            <wsdl:documentation>Acknowledge Consignment Increase Order</wsdl:documentation>
+            <wsdl:input message="tns:acknowledgeConsignmentIncreaseOrderRequestMessage" />
+            <wsdl:output message="tns:acknowledgeConsignmentIncreaseOrderResponseMessage" />
+        </wsdl:operation>
+        
+        
+       <!-- Operation 81: ValidateFromConsignedStock -->
+                
+        <wsdl:operation name="ValidateFromConsignedStock">
+            <wsdl:documentation>Validate From Consigned Stock</wsdl:documentation>
+            <wsdl:input message="tns:validateFromConsignedStockRequestMessage" />
+            <wsdl:output message="tns:validateFromConsignedStockResponseMessage" />
+        </wsdl:operation>
+        
+        <!-- Operation 82 : View Consignment Proforma -->
+        <wsdl:operation name="ViewConsignmentProforma">
+            <wsdl:documentation>View Consignment Proforma</wsdl:documentation>
+            <wsdl:input message="tns:viewConsignmentProformaRequestMessage" />
+            <wsdl:output message="tns:viewConsignmentProformaResponseMessage" />
+		</wsdl:operation>
+     
+    </wsdl:portType>
+    <!-- ///////// PortType Declarations: END -->
+    
+    <!-- ///////// Binding Declarations: START -->
+    <wsdl:binding name="GsxWSEmeaAspBinding" type="tns:GsxWSEmeaAspPort">
+        <wsdl:documentation>
+            This defines the binding between SOAP actions to the corresponding PORT type declarations. The binding
+            style is "Document-Wrapped".
+        </wsdl:documentation>
+        
+        <!-- MTOM Policy Reference -->
+        <wsp:PolicyReference URI="#GlobalMTOMPolicy" />
+        
+        <soap:binding transport="http://schemas.xmlsoap.org/soap/http" style="document" />
+        
+        <!-- Binding 1: For Authenticate -->
+        <wsdl:operation name="Authenticate">
+            <wsdl:documentation>
+                This binds the soap action "urn:authenticate" to port type "Authenticate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:authenticate" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 2: For Logout -->
+        <wsdl:operation name="Logout">
+            <wsdl:documentation>
+                This binds the soap action "urn:logout" to the port type "Logout"
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:logout"/>
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 3: For Warranty Status -->
+        <wsdl:operation name="WarrantyStatus">
+            <wsdl:documentation>
+                This binds the soap action "urn:warrantyStatus" to port type "WarrantyStatus".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:warrantyStatus" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 4: For Create Carry-In -->
+        <wsdl:operation name="CreateCarryInRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:createCarryIn" to port type "createCarryIn".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createCarryIn" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 5: For CompTIA Code Lookup -->
+        <wsdl:operation name="CompTIACodes">
+            <wsdl:documentation>
+                This binds the soap action "urn:lookupCompTIACodes" to port type "lookupCompTIACodes".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:lookupCompTIACodes" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 6: For Parts Lookup -->
+        <wsdl:operation name="PartsLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:partsLookup" to port type "PartsLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:partsLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 7: For Mark Repair Complete -->
+        <wsdl:operation name="MarkRepairComplete">
+            <wsdl:documentation>
+                This binds the soap action "urn:markRepairComplete" to port type "MarkRepairComplete".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:markRepairComplete" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 8: For Update KGB Serial Number -->
+        <wsdl:operation name="KGBSerialNumberUpdate">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateKGBSerialNumber" to port type "KGBSerialNumberUpdate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateKGBSerialNumber" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 10: For Repair Details -->
+        <wsdl:operation name="RepairDetails">
+            <wsdl:documentation>
+                This binds the soap action "urn:repairDetails" to port type "RepairDetails".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:repairDetails" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 11: For Repair Lookup -->
+        <wsdl:operation name="RepairLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:repairLookup" to port type "RepairLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:repairLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 12: For Repair Status -->
+        <wsdl:operation name="RepairStatus">
+            <wsdl:documentation>
+                This binds the soap action "urn:repairStatus" to port type "RepairStatus".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:repairStatus" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 13: For Repair Details Lookup -->
+        <wsdl:operation name="RepairDetailsLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:repairDetailsLookup" to port type "RepairDetailsLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:repairDetailsLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 14: For Update Carry In -->
+        <wsdl:operation name="CarryInRepairUpdate">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateCarryIn" to port type "CarryInRepairUpdate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateCarryIn" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 15: For Create Mail In -->
+        <wsdl:operation name="CreateMailInRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:createMailIn" to port type "CreateMailInRepair".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createMailIn" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 16: For New Onsite Dispatches -->
+        <wsdl:operation name="NewOnsiteDispatches">
+            <wsdl:documentation>
+                This binds the soap action "urn:newOnsiteDispatches" to port type "NewOnsiteDispatches".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:newOnsiteDispatches" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 17: For Onsite Dispatch Detail -->
+        <wsdl:operation name="OnsiteDispatchDetail">
+            <wsdl:documentation>
+                This binds the soap action "urn:onsiteDispatchDetail" to port type "OnsiteDispatchDetail".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:onsiteDispatchDetail" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 18: For Parts Return Update -->
+        <wsdl:operation name="PartsReturnUpdate">
+            <wsdl:documentation>
+                This binds the soap action "urn:partsReturnUpdate" to port type "PartsReturnUpdate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:partsReturnUpdate" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 19: For Create APP Order -->
+        <wsdl:operation name="CreateAPPOrder">
+            <wsdl:documentation>
+                This binds the soap action "urn:createAPPOrder" to port type "CreateAPPOrder".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createAPPOrder" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 20: For Create Stocking Order -->
+        <wsdl:operation name="CreateStockingOrder">
+            <wsdl:documentation>
+                This binds the soap action "urn:createStockingOrder" to port type "CreateStockingOrder".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createStockingOrder" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 21: For Create SRF Order -->
+        <wsdl:operation name="CreateSRFOrder">
+            <wsdl:documentation>
+                This binds the soap action "urn:createSRFOrder" to port type "CreateSRFOrder".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createSRFOrder" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 22: For View Pending APP Orders API -->
+        <wsdl:operation name="ViewPendingAPPOrders">
+            <wsdl:documentation>
+                This binds the soap action "urn:viewPendingAPPOrders" to port type "ViewPendingAPPOrders".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:viewPendingAPPOrders" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 23: For Parts Pending Return API -->
+        <wsdl:operation name="PartsPendingReturn">
+            <wsdl:documentation>
+                This binds the soap action "urn:partsPendingReturn" to port type "PartsPendingReturn".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:partsPendingReturn" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 24: For Update Serial Number API -->
+        <wsdl:operation name="UpdateSerialNumber">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateSerialNumber" to port type "UpdateSerialNumber".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateSerialNumber" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 25: For Submit Warranty Claims Exception (Submit Affidavit) API -->
+        <wsdl:operation name="SubmitWarrantyClaimsExceptionForm">
+            <wsdl:documentation>
+                This binds the soap action "urn:submitWarrantyClaimsException" to port type "SubmitWarrantyClaimsExceptionForm".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:submitWarrantyClaimsException" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 26: View Bulk Return Proforma API -->
+        <wsdl:operation name="ViewBulkReturnProforma">
+            <wsdl:documentation>
+                This binds the soap action "urn:viewBulkReturnProforma" to port type "ViewBulkReturnProforma".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:viewBulkReturnProforma" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 27: Download Return Label API -->
+        <wsdl:operation name="ReturnLabel">
+            <wsdl:documentation>
+                This binds the soap action "urn:downloadReturnLabel" to port type "ReturnLabel".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:downloadReturnLabel" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 28: Register Parts For Bulk Return -->
+        <wsdl:operation name="RegisterPartsForBulkReturn">
+            <wsdl:documentation>
+                This binds the soap action "urn:registerPartsForBulkReturn" to port type "RegisterPartsForBulkReturn".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:registerPartsForBulkReturn" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 29: Create DSD Onsite Repair -->
+        <wsdl:operation name="CreateDSDOnsiteRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:createDSDOnsiteRepair" to port type "CreateDSDOnsiteRepair".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createDSDOnsiteRepair" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 30: Update DSD Onsite Repair -->
+        <wsdl:operation name="DSDOnsiteUpdate">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateDSDOnsiteRepair" to port type "DSDOnsiteUpdate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateDSDOnsiteRepair" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 31: Create Indirect Onsite Repair -->
+        <wsdl:operation name="CreateIndirectOnsiteRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:createIndirectOnsiteRepair" to port type "CreateIndirectOnsiteRepair".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createIndirectOnsiteRepair" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 32: Create Whole Unit Exchange -->
+        <wsdl:operation name="CreateWholeUnitExchange">
+            <wsdl:documentation>
+                This binds the soap action "urn:createWholeUnitExchange" to port type "CreateWholeUnitExchange".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createWholeUnitExchange" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 33: Fetch Diagnostic Repair -->
+        <wsdl:operation name="FetchRepairDiagnostic">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchRepairDiagnostic" to port type "FetchRepairDiagnostic".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchRepairDiagnostic" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 34: For Create CND Repair -->
+        <wsdl:operation name="CreateCNDRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:createCNDRepair" to port type "createCNDRepair".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createCNDRepair" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 35: For Invoice ID Lookup -->
+        <wsdl:operation name="InvoiceIDLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:invoiceIDLookup" to port type "invoiceIDLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:invoiceIDLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 36: For Invoice Details Lookup -->
+        <wsdl:operation name="InvoiceDetailsLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:invoiceDetailsLookup" to port type "invoiceDetailsLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:invoiceDetailsLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 37: For Create General Escalation -->
+        <wsdl:operation name="CreateGeneralEscalation">
+            <wsdl:documentation>
+                This binds the soap action "urn:createGeneralEscalation" to port type "createGeneralEscalation".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createGeneralEscalation" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 38: For Update General Escalation -->
+        <wsdl:operation name="UpdateGeneralEscalation">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateGeneralEscalation" to port type "updateGeneralEscalation".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateGeneralEscalation" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 39: For Update Mail-in Requote Escalation -->
+        <wsdl:operation name="UpdateMailInRequoteEscalation">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateMailInRequoteEscalation" to port type "updateMailInRequoteEscalation".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateMailInRequoteEscalation" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 40: For Update Whole Unit Requote Escalation -->
+        <wsdl:operation name="UpdateWholeUnitRequoteEscalation">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateWholeUnitRequoteEscalation" to port type "updateWholeUnitRequoteEscalation".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateWholeUnitRequoteEscalation" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 41: For Requote Escalation Summary Lookup -->
+        <wsdl:operation name="RequoteEscalationSummaryLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:requoteEscalationSummaryLookup" to port type "requoteEscalationSummaryLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:requoteEscalationSummaryLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 42: For Requote Escalation Details Lookup -->
+        <wsdl:operation name="RequoteEscalationDetailsLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:requoteEscalationDetailsLookup" to port type "requoteEscalationDetailsLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:requoteEscalationDetailsLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 43: For General Escalation Summary Lookup -->
+        <wsdl:operation name="GeneralEscalationSummaryLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:generalEscalationSummaryLookup" to port type "generalEscalationSummaryLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:generalEscalationSummaryLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 44: For General Escalation Details Lookup -->
+        <wsdl:operation name="GeneralEscalationDetailsLookup">
+            <wsdl:documentation>
+                This binds the soap action "urn:generalEscalationDetailsLookup" to port type "generalEscalationDetailsLookup".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:generalEscalationDetailsLookup" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 45: For Fetch Communication Articles -->
+        <wsdl:operation name="FetchCommunicationArticles">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchCommunicationArticles" to port type "fetchCommunicationArticles".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchCommunicationArticles" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 46: For Fetch Communication Content -->
+        <wsdl:operation name="FetchCommunicationContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchCommunicationContent" to port type "fetchCommunicationContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchCommunicationContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 47: For Acknowledge Communication -->
+        <wsdl:operation name="AcknowledgeCommunication">
+            <wsdl:documentation>
+                This binds the soap action "urn:acknowledgeCommunication" to port type "acknowledgeCommunication".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:acknowledgeCommunication" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 48: For Fetch Functional Areas -->
+        <wsdl:operation name="FetchFunctionalAreas">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchFunctionalAreas" to port type "fetchFunctionalAreas".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchFunctionalAreas" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 49: For Fetch Issue List -->
+        <wsdl:operation name="FetchIssueList">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchIssueList" to port type "fetchIssueList".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchIssueList" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 50: For Fetch Quick Check -->
+        <wsdl:operation name="FetchQuickCheck">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchQuickCheck" to port type "fetchQuickCheck".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchQuickCheck" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 51: For Fetch TS Node -->
+        <wsdl:operation name="FetchTSNode">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchTSNode" to port type "fetchTSNode".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchTSNode" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 52: For Fetch Disk Image Article ID -->
+        <wsdl:operation name="FetchDiskImageArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchDiskImageArticleID" to port type "fetchDiskImageArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchDiskImageArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 53: For Fetch Disk Image Article Content -->
+        <wsdl:operation name="FetchDiskImageArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchDiskImageArticleContent" to port type "fetchDiskImageArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchDiskImageArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 54: For Repair Process Article ID -->
+        <wsdl:operation name="FetchRepairProcessArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchRepairProcessArticleID" to port type "fetchRepairProcessArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchRepairProcessArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 55: For Repair Process Article Content -->
+        <wsdl:operation name="FetchRepairProcessArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchRepairProcessArticleContent" to port type "fetchRepairProcessArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchRepairProcessArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 56: For Fetch Operational Procedure Article ID -->
+        <wsdl:operation name="FetchOperationalProcedureArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchOperationalProcedureArticleID" to port type "fetchOperationalProcedureArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchOperationalProcedureArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 57: For Fetch Operational Procedure Article Content -->
+        <wsdl:operation name="FetchOperationalProcedureArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchOperationalProcedureArticleContent" to port type "fetchOperationalProcedureArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchOperationalProcedureArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 58: For Fetch Technical Procedure Article ID -->
+        <wsdl:operation name="FetchTechnicalProcedureArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchTechnicalProcedureArticleID" to port type "fetchTechnicalProcedureArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchTechnicalProcedureArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 59: For Fetch Technical Procedure Article Content -->
+        <wsdl:operation name="FetchTechnicalProcedureArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchTechnicalProcedureArticleContent" to port type "fetchTechnicalProcedureArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchTechnicalProcedureArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 60: For Fetch Self Help Article ID -->
+        <wsdl:operation name="FetchSelfHelpArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchSelfHelpArticleID" to port type "fetchSelfHelpArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchSelfHelpArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 61: For Fetch Self Help Article Content -->
+        <wsdl:operation name="FetchSelfHelpArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchSelfHelpArticleContent" to port type "fetchSelfHelpArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchSelfHelpArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 62: For Fetch Service Video Article ID -->
+        <wsdl:operation name="FetchServiceVideoArticleID">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchServiceVideoArticleID" to port type "fetchServiceVideoArticleID".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchServiceVideoArticleID" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 63: For Fetch Service Video Article Content -->
+        <wsdl:operation name="FetchServiceVideoArticleContent">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchServiceVideoArticleContent" to port type "fetchServiceVideoArticleContent".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchServiceVideoArticleContent" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 64: For Fetch Product Model -->
+        <wsdl:operation name="FetchProductModel">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchProductModel" to port type "fetchProductModel".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchProductModel" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 65: For Fetch Image -->
+        <wsdl:operation name="FetchImage">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchImage" to port type "fetchImage".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchImage" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 66: Create Repair Or Replace -->
+        <wsdl:operation name="CreateRepairOrReplace">
+            <wsdl:documentation>
+                This binds the soap action "urn:createRepairOrReplace" to port type "CreateRepairOrReplace".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createRepairOrReplace" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 67: For Update CarryIn Return Before Replace -->
+        <wsdl:operation name="CarryInReturnBeforeReplaceRepairUpdate">
+            <wsdl:documentation>
+                This binds the soap action "urn:updateCarryInReturnBeforeReplace" to port type  "CarryInReturnBeforeReplaceRepairUpdate".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:updateCarryInReturnBeforeReplace" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation> 
+        
+        <!-- Binding 68: Create CarryIn Return Before Replace Repair -->
+        <wsdl:operation name="CreateCarryInReturnBeforeReplace">
+            <wsdl:documentation>
+                This binds the soap action "urn:createCarryInReturnBeforeReplace" to port type "createCarryInReturnBeforeReplace".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:createCarryInReturnBeforeReplace" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 69: Return Report -->
+        <wsdl:operation name="ReturnReport">
+            <wsdl:documentation>
+                This binds the soap action "urn:returnReport" to port type "ReturnReport".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:returnReport" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 70: Initiate iOSD Diagnostic -->
+        <wsdl:operation name="InitiateIOSDiagnostic">
+            <wsdl:documentation>
+                This binds the soap action "urn:initiateIOSDiagnostic" to port type "InitiateIOSDiagnostic".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:initiateIOSDiagnostic" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 71: Fetch Diagnostic Event Numbers -->
+        <wsdl:operation name="FetchDiagnosticEventNumbers">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchDiagnosticEventNumbers" to port type "FetchDiagnosticEventNumbers".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchDiagnosticEventNumbers" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 72: Fetch iOSD Diagnostic -->
+        <wsdl:operation name="FetchIOSDiagnostic">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchIOSDiagnostic" to port type "FetchIOSDiagnostic".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchIOSDiagnostic" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 73: TSPS Review PreCheck -->
+        <wsdl:operation name="TSPSReviewPreCheck">
+            <wsdl:documentation>
+                This binds the soap action "urn:tspsReviewPreCheck" to port type "TSPSReviewPreCheck".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:tspsReviewPreCheck" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+       <!-- Binding 74: iOS Activation Details -->
+        <wsdl:operation name="FetchIOSActivationDetails">
+            <wsdl:documentation>
+                This binds the soap action "urn:fetchIOSActivationDetails" to port type "FetchIOSActivationDetails".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:fetchIOSActivationDetails" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 75: Delete Repair -->
+        <wsdl:operation name="DeleteRepair">
+            <wsdl:documentation>
+                This binds the soap action "urn:deleteRepair" to port type "DeleteRepair".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:deleteRepair" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+      <!-- Binding 76: Consignment Increase Orders LookUp API --> 
+         <wsdl:operation name="ConsignmentIncreaseOrdersLookUp">
+            <wsdl:documentation>
+                This binds the soap action "urn:consignmentIncreaseOrdersLookUp" to port type "consignmentIncreaseOrdersLookUp".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:consignmentIncreaseOrdersLookUp" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation> 
+         
+        <!-- Binding 77 : Component Check -->
+        <wsdl:operation name="ComponentCheck">
+            <wsdl:documentation>
+                 This binds the soap action "urn: componentCheck" to port type "componentCheck".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:componentCheck" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+        </wsdl:operation>
+        
+        <!-- Binding 78: Consignment Decrease Order LookUp API --> 
+         <wsdl:operation name="ConsignmentDecreaseOrdersLookUp">
+            <wsdl:documentation>
+                This binds the soap action "urn:consignmentDecreaseOrderLookUp" to port type "consignmentDecreaseOrdersLookUp".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:consignmentDecreaseOrdersLookUp" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation> 
+         
+          <!-- Binding 79: SubmitConsignmentDecreaseOrder API --> 
+          <wsdl:operation name="SubmitConsignmentDecreaseOrder">
+            <wsdl:documentation>
+                This binds the soap action "urn:submitConsignmentDecreaseOrder" to port type "submitConsignmentDecreaseOrder".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:submitConsignmentDecreaseOrder" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation> 
+         
+          <!-- Binding 80: AcknowledgeConsignmentIncreaseOrder API --> 
+          <wsdl:operation name="AcknowledgeConsignmentIncreaseOrder">
+            <wsdl:documentation>
+                This binds the soap action "urn:acknowledgeConsignmentIncreaseOrder" to port type "acknowledgeConsignmentIncreaseOrder".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:acknowledgeConsignmentIncreaseOrder" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation>
+         
+        <!-- Binding 81: ValidateFromConsignedStock --> 
+         <wsdl:operation name="ValidateFromConsignedStock">
+            <wsdl:documentation>
+                This binds the soap action "urn:validateFromConsignedStock" to port type "validateFromConsignedStock".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:validateFromConsignedStock" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation>
+         
+         <!-- Binding 82: ViewConsignmentProforma API --> 
+          <wsdl:operation name="ViewConsignmentProforma">
+            <wsdl:documentation>
+                This binds the soap action "urn:viewConsignmentProforma" to port type "viewConsignmentProforma".
+            </wsdl:documentation>
+            <soap:operation soapAction="urn:viewConsignmentProforma" />
+            <wsdl:input><soap:body use="literal" /></wsdl:input>
+            <wsdl:output><soap:body use="literal" /></wsdl:output>
+         </wsdl:operation>   
+         
+     </wsdl:binding>
+    
+    <!-- ///////// Binding Declarations: END -->
+    
+    <!-- ///////// Service Declaration: START -->
+    <wsdl:service name="GsxWSEmeaAspService">
+        <wsdl:documentation>
+            This WSDL defines the GSX API operations that Apple Authorized Service Partners from EMEA region could leverage.
+        </wsdl:documentation>
+        <wsdl:port name="GsxWSEmeaAspPort" binding="tns:GsxWSEmeaAspBinding">
+            <soap:address location="https://gsxws2.apple.com/gsx-ws/services/emea/asp"/>
+        </wsdl:port>
+    </wsdl:service>
+    <!-- ///////// Service Declaration: END -->
+    
+</wsdl:definitions>

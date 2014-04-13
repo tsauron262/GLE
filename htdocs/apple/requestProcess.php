@@ -3,7 +3,8 @@
 //error_reporting(E_ERROR);
 //ini_set('display_errors', 1);
 
-require_once dirname(__FILE__) . '/../includes/nusoap/lib/nusoap.php';
+require_once '../main.inc.php';
+require_once DOL_DOCUMENT_ROOT .'/includes/nusoap/lib/nusoap.php';
 
 require_once ( 'gsxDatas.class.php' );
 

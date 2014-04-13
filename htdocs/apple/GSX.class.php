@@ -458,6 +458,9 @@ class GSX {
         if (!is_object($this->soapClient)) {
             $this->initiate_soap_client();
         }
+        if (!is_object($this->soapClient)) {
+            return 0;
+        }
         $authentication_array = array(
             'AuthenticateRequest' => array(
                 'userId' => $this->gsxDetails['userId'],
@@ -893,6 +896,7 @@ class GSX {
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
         dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR);
+        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo."</p>");
         $this->errors['soap'][] = $this->outputFormat('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo);
     }
 

@@ -21,7 +21,7 @@ class gsxDatas {
         );
         $this->gsx = new GSX($details);
         $this->serial = $serial;
-        if (count($this->gsx->errors['init'])) {
+        if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {
             $this->errors[] = 'GSX_init_error';
             echo 'error';
         }

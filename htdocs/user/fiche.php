@@ -1076,7 +1076,6 @@ else
             if (! empty($conf->societe->enabled)) $rowspan++;
             if (! empty($conf->adherent->enabled)) $rowspan++;
 
-            
             // Lastname
             print '<tr><td valign="top">'.$langs->trans("Lastname").'</td>';
             print '<td>'.$object->lastname.'</td>';
@@ -1888,21 +1887,6 @@ else
             }
             print '</td>';
 
-			// Accountancy code
-            print "<tr>";
-            print '<td valign="top">'.$langs->trans("AccountancyCode").'</td>';
-            print '<td>';
-            if ($caneditfield)
-            {
-                print '<input size="30" type="text" class="flat" name="accountancy_code" value="'.$object->accountancy_code.'">';
-            }
-            else
-            {
-                print '<input type="hidden" name="accountancy_code" value="'.$object->accountancy_code.'">';
-                print $object->accountancy_code;
-            }
-            print '</td>';
-
             // Status
             print '<tr><td valign="top">'.$langs->trans("Status").'</td>';
             print '<td>';
@@ -1979,22 +1963,6 @@ else
             	print $object->showOptionals($extrafields,'edit');
             }
 
-            // Other attributes
-            $parameters=array('colspan' => ' colspan="2"');
-            $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
-            if (empty($reshook) && ! empty($extrafields->attribute_label))
-            {
-            	foreach($extrafields->attribute_label as $key=>$label)
-            	{
-            		$value=(isset($_POST["options_".$key])?$_POST["options_".$key]:$object->array_options["options_".$key]);
-            		print '<tr><td';
-            		if (! empty($extrafields->attribute_required[$key])) print ' class="fieldrequired"';
-            		print '>'.$label.'</td><td colspan="3">';
-            		print $extrafields->showInputField($key,$value);
-            		print '</td></tr>'."\n";
-            	}
-            }
-                        
             print '</table>';
 
             print '<br><center>';

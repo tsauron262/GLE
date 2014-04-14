@@ -25,6 +25,7 @@ td.rowTitle {
 }
 #productDatas {
     border: 1px solid #DCDCDC;
+    background: white;
 }
 #productDatas caption {
     background-color: #DCDCDC;

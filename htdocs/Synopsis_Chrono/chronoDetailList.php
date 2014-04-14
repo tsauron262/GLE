@@ -11,7 +11,7 @@ class htmlOld {
 
     public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left")) {
         $this->arrLigne = array();
-        $js = 'jQuery(document).ready(function(){';
+        $js = 'jQuery(document).ready(function(){eventList_init'.$id.' = false;';
         $js .= 'var grid = jQuery("#' . $id . '").jqGrid({';
 
         $this->listjqGrid_base($arr);
@@ -20,6 +20,18 @@ class htmlOld {
         }
 
         $js .= join(',' . "\n\t", $this->arrLigne);
+        
+        $js .= ', loadComplete : function() { 
+            
+            if (eventList_init'.$id.' > 0)
+                saveGridToCookie("'.$id.'", jQuery("#' . $id . '"));
+            if (eventList_init'.$id.' == 1)
+                eventList_init'.$id.' =2;
+            if (eventList_init'.$id.' == false){
+                loadGridFromCookie("'.$id.'");
+                eventList_init'.$id.' =1;
+            }
+            }';
 
         $js .= '})';
         if ($pager) {
@@ -51,8 +63,38 @@ class htmlOld {
         } else {
             $js .= ';';
         }
-
+$js .='function saveGridToCookie(name, grid) {
+var gridInfo = new Object();
+name = name + window.location.pathname;
+gridInfo.url = grid.jqGrid(\'getGridParam\', \'url\');
+gridInfo.sortname = grid.jqGrid(\'getGridParam\', \'sortname\');
+gridInfo.sortorder = grid.jqGrid(\'getGridParam\', \'sortorder\');
+gridInfo.selrow = grid.jqGrid(\'getGridParam\', \'selrow\');
+gridInfo.page = grid.jqGrid(\'getGridParam\', \'page\');
+gridInfo.rowNum = grid.jqGrid(\'getGridParam\', \'rowNum\');
+$.cookie(name, JSON.stringify(gridInfo));
+}
+function loadGridFromCookie(name) { 
+var c = $.cookie(name + window.location.pathname);
+if (c == null)
+return;
+var gridInfo = JSON.parse(c);
+var grid = jQuery("#" + name);
+grid.jqGrid(\'setGridParam\', { url: gridInfo.url });
+grid.jqGrid(\'setGridParam\', { sortname: gridInfo.sortname });
+grid.jqGrid(\'setGridParam\', { sortorder: gridInfo.sortorder });
+grid.jqGrid(\'setGridParam\', { selrow: gridInfo.selrow });
+grid.jqGrid(\'setGridParam\', { page: gridInfo.page });
+grid.jqGrid(\'setGridParam\', { rowNum: gridInfo.rowNum });
+setTimeout(function(){
+//$("#"+name+"Pager_center .ui-pg-input").val(gridInfo.page);
+//$("#"+name+"Pager_left .ui-icon-refresh").trigger("click");
+grid.trigger("reloadGrid");
+}, 200);
+}';
         $js .= '});';
+        
+        
         if ($display) {
             print $js;
         }
@@ -321,9 +363,10 @@ EOF;
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
         $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/css/ui.multiselect.css" />';
+        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
         $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
         $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
-        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
          $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
     }
 

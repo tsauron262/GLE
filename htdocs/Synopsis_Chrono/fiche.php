@@ -378,7 +378,7 @@ if ($id > 0) {
 
         if ($chr->validation_number > 0 && $chr->statut != 2 && $chr->statut != 3) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Derni&egrave;re demande de validation :';
-            print '    <td  class="ui-widget-content" colspan="3">';
+            print '    <td  class="ui-widget-content" colspan="1">';
             $requete = "SELECT d.label, m.user_refid, m.validation,m.tms,m.note
                             FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_Multivalidation as m,
                                  " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def as d
@@ -516,8 +516,13 @@ if ($id > 0) {
         if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
-            print '    <td  class="ui-widget-content" colspan="3">' . $chr->description . '</td>';
+            print '    <td  class="ui-widget-content" colspan="1">' . $chr->description . '</td>';
         }
+        
+        
+        
+        print '<td colspan="2" rowspan="100" class="zonePlus">';
+        
 //Ajoute les extra key/Values
         $requete = "SELECT k.nom,
                            k.id,
@@ -552,7 +557,7 @@ if ($id > 0) {
         while ($res = $db->fetch_object($sql)) {
             $res->value = stripslashes($res->value);
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
-            print '    <td  class="ui-widget-content" colspan="3">';
+            print '    <td  class="ui-widget-content '.$res->extraCss.'" colspan="1">';
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");

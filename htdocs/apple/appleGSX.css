@@ -39,3 +39,25 @@ td.rowTitle {
 }
 
 /*Filtres composants*/
+#componentsListContainer {
+    padding: 10px 20px;
+    background-color: #E6E6E6;
+    margin: 30px 0;
+}
+
+#componentsListContainer div.titre {
+    font-size: 15px;
+    margin-bottom: 15px;
+}
+
+#componentsListContainer div.searchBloc {
+    display: inline-block;
+    margin: 0 20px;
+}
+
+#componentSearch {
+    width: 200px;
+}
+#componentsList {
+    border: 1px solid #F0F0F0;
+}

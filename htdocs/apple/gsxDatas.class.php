@@ -3,10 +3,25 @@
 require_once ( 'GSX.class.php' );
 
 class gsxDatas {
-
     public $gsx = null;
     protected $serial = null;
     protected $errors = array();
+    public static $componentsTypes = array(
+        0 => 'Général',
+        1 => 'Visuel',
+        2 => 'Affichage',
+        3 => 'Stockage',
+        4 => 'Périphériques d\'entrées',
+        5 => 'Cartes',
+        6 => 'Alimentation',
+        7 => 'Impression',
+        8 => 'Périphériques multi-fonctions',
+        9 => 'Périphériques de communication',
+        'A' => 'Partage',
+        'B' => 'iPhone',
+        'C' => 'iPod',
+        'D' => 'iPad'
+    );
 
     public function __construct($serial) {
         global $user;
@@ -124,9 +139,23 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
 
-//                    $html .= '<div id="componentsListContainer">'."\n";
-//                    $html .= '<div class="blocTitle">Rechercher un composant compatible</div>';
-//                    $html .= '</div>'."\n";
+                    $html .= '<div id="componentsListContainer">' . "\n";
+                    $html .= '<div class="titre">Rechercher un composant compatible</div>' . "\n";
+                    $html .= '<div class="searchBloc">' . "\n";
+                    $html .= '<label for="componentType">Type de composant: </label>' . "\n";
+                    $html .= '<select name="componentType" id="componentType">' . "\n";
+                    foreach (self::$componentsTypes as $code => $name) {
+                        $html .= '<option value="' . $code . '" ' . ((!$code) ? 'selected' : '') . '>' . $name . '</option>' . "\n";
+                    }
+                    $html .= '</select>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="searchBloc"' . "\n";
+                    $html .= '<label for="componentSearch">Mots-clés: </label>' . "\n";
+                    $html .= '<input type="text max="80" name="componentSearch" id="componentSearch"/>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<button id="componentSearchSubmit" onclick="onComponentSearchSubmit()">Rechercher</button>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<div id="partsResult"></div>' . "\n";
                 }
             }
         }
@@ -134,6 +163,83 @@ class gsxDatas {
             $this->errors[] = 'GSX_lookup_fail';
             $html .= '<p class="error">Echec de la récupération des données depuis la plateforme Apple GSX</p>' . "\n";
         }
+
+//        $response = $this->gsx->lookup($this->serial, 'model');
+//        echo '<pre>';
+//        echo print_r($response);
+//        echo '</pre>';
+
+        return $html;
+    }
+
+    public function getPartsHtml($filter = null, $search = null) {
+        $params = array(
+            'serialNumber' => $this->serial
+        );
+        if (isset($search)) {
+            $params['partDescription'] = $search;
+        }
+
+        $parts = $this->gsx->part($params);
+//        echo 'Filtre: ' . $filter . '<br/>';
+//        echo '<pre>';
+//        print_r($parts);
+//        echo '</pre>';
+
+        $html = '';
+        $check = false;
+        if (isset($parts) && count($parts)) {
+            if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
+                if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
+                    $check = true;
+                    if (isset($filter) && ($filter != 0)) {
+                        $filtered = array();
+                        foreach ($parts['ResponseArray']['responseData'] as $part) {
+                            if (isset($part['componentCode']) && $part['componentCode']) {
+                                if ($part['componentCode'] == $filter) {
+                                    $filtered[] = $part;
+                                }
+                            }
+                        }
+                        $parts = $filtered;
+                    } else {
+                        $parts = $parts['ResponseArray']['responseData'];
+                    }
+                }
+            }
+        }
+        if (!$check) {
+            $this->errors[] = 'GSX_parts_fail';
+            $html .= '<p class="error">Echec de la récupération des données depuis la plateforme Apple GSX</p>' . "\n";
+        } else if (count($parts)) {
+//            echo '<pre>';
+//            print_r($parts);
+//            echo '</pre>';
+            $html .= '<p>' . count($parts) . ' composants trouvés</p>';
+            $odd = true;
+            $html .= '<table id="componentsList">' . "\n";
+            $html .= '<th style="min-width: 350px">Nom</th>' . "\n";
+            $html .= '<th style="min-width: 100px">N°</th>' . "\n";
+            $html .= '<th style="min-width: 100px">Type</th>' . "\n";
+//            $html .= '<th style="min-width: 120px">Prix</th>' . "\n";
+            $html .= '<th></th>' . "\n";
+            $html .= '<thead>' . "\n";
+            $html .= '</head><tbody>' . "\n";
+            foreach ($parts as $part) {
+                $html .= '<tr' . ($odd ? ' class="oddRow"' : '') . '>' . "\n";
+                $html .= '<td>' . $part['partDescription'] . '</td>' . "\n";
+                $html .= '<td>' . $part['partNumber'] . '</td>' . "\n";
+                $html .= '<td>' . $part['partType'] . '</td>' . "\n";
+//                $html .= '<td>' . $part['exchangePrice'] . '</td>' . "\n";
+                $html .= '<td><button>Commander</button></td>' . "\n";
+                $html .= '</tr>';
+                $odd = !$odd;
+            }
+            $html .= '</tbody></table>' . "\n";
+        } else {
+            $html .= '<p>Aucun composant ne correspond à vos critères de recherche</p>';
+        }
+
         return $html;
     }
 

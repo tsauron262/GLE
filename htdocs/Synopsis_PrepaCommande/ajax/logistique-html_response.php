@@ -218,36 +218,56 @@ print <<<EOF
             title: "Validation de la logistique",
             buttons: {
                 Ok: function(){
-                    //num Commande
-                    //Statut Valid aka logistique_statut
+                    var findJquery = caseLogistique;
+                    if (!findJquery) findJquery = "";
+                    else findJquery= " "+findJquery;
+                    var data=jQuery('#resDisp'+findJquery).find('select').serialize();
+                    var data1="";
+                    jQuery('#resDisp'+findJquery).find('.datepicker').each(function(){
+                        var id = jQuery(this).attr('id');
+                        var val = jQuery(this).val();
+                        data1+='&'+id+'='+val;
+                    });
+
                     jQuery.ajax({
-                        url: 'ajax/xml/valLogistique-xml_response.php',
+                        url: 'ajax/xml/modLogistique-xml_response.php',
                         datatype: "xml",
                         type: "POST",
-                        data: "comId="+comId,
+                        data: data+data1+"&comId="+comId,
                         cache: false,
                         success:function(msg){
-                            if(jQuery(msg).find('OK').length > 0)
-                            {
-                                jQuery('#valDialog').dialog("close");
-                                //reload
-                                jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
-                                jQuery('#valDialog').dialog( "destroy" );
-                                jQuery('#valDialog').remove();
-                                jQuery.ajax({
-                                    url: "ajax/logistique-html_response.php",
-                                    data: "id="+comId,
-                                    cache: false,
-                                    datatype: "html",
-                                    type: "POST",
-                                    success: function(msg){
-                                        jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
-                                    },
-                                });
-                            } else {
-                                alert ('Il y a eu une erreur');
-                            }
-                        }
+                            //num Commande
+                            //Statut Valid aka logistique_statut
+                            jQuery.ajax({
+                                url: 'ajax/xml/valLogistique-xml_response.php',
+                                datatype: "xml",
+                                type: "POST",
+                                data: "comId="+comId,
+                                cache: false,
+                                success:function(msg){
+                                    if(jQuery(msg).find('OK').length > 0)
+                                    {
+                                        jQuery('#valDialog').dialog("close");
+                                        //reload
+                                        jQuery('#resDisp').replaceWith('<div id="resDisp"><img src="'+DOL_URL_ROOT+'/Synopsis_Common/images/ajax-loader.gif"/></div>');
+                                        jQuery('#valDialog').dialog( "destroy" );
+                                        jQuery('#valDialog').remove();
+                                        jQuery.ajax({
+                                            url: "ajax/logistique-html_response.php",
+                                            data: "id="+comId,
+                                            cache: false,
+                                            datatype: "html",
+                                            type: "POST",
+                                            success: function(msg){
+                                                jQuery('#resDisp').replaceWith('<div id="resDisp">'+msg+' </div>');
+                                            },
+                                        });
+                                    } else {
+                                        alert ('Il y a eu une erreur');
+                                    }
+                                }
+                            });
+                         }
                     });
 
                     jQuery(this).dialog("close");

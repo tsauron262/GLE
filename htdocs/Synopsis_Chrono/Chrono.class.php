@@ -254,6 +254,15 @@ class Chrono extends CommonObject {
             $sql1 = $this->db->query($requete);
         }
         if ($sqlA && $newId > 0) {
+            global $user, $langs, $conf;
+            // Appel des triggers
+            include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+            $interface = new Interfaces($this->db);
+            $result = $interface->run_triggers('CHRONO_REVISED', $this, $user, $langs, $conf);
+            if ($result < 0) {
+                $this->error = $interface->errors;
+            }
+            // Fin appel triggers
             $this->db->commit();
             return $newId;
         } else {

@@ -632,7 +632,7 @@ if (is_dir($dir)) {
                                 if (count($sqlUpt) > 0) {
                                     //Creation de la societe ou mise à jour si code client exist
                                     $updtStr = join(',', $sqlUpt);
-                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = " . $codSoc;
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = '" . $codSoc."'";
                                     $sql = requeteWithCache($requete);
                                     if ($sql) {
                                         $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";

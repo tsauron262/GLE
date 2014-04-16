@@ -31,13 +31,7 @@ class InterfaceNotificationUser {
 
     var $db;
     var $listofmanagedevents = array(
-        'BILL_VALIDATE',
-        'ORDER_VALIDATE',
-        'PROPAL_VALIDATE',
-        'FICHINTER_VALIDATE',
-        'ORDER_SUPPLIER_APPROVE',
-        'ORDER_SUPPLIER_REFUSE',
-        'SHIPPING_VALIDATE'
+        ''
     );
 
     /**
@@ -141,6 +135,8 @@ class InterfaceNotificationUser {
                         $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_prisencharge;
                     elseif ($result->fk_type_contact == 1003 && isset($object->fk_user_author) && $object->fk_user_author > 0)
                         $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid =" . $object->fk_user_author;
+                    elseif ($result->fk_type_contact == 1004 && isset($object->id) && isset($object->model_refid))
+                        $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u WHERE u.rowid IN (SELECT `value` FROM `llx_Synopsis_Chrono_value` WHERE `key_id` IN (SELECT `id` FROM `llx_Synopsis_Chrono_key` WHERE `nom` LIKE 'tech' AND `model_refid` = ".$object->model_refid.") AND `chrono_refid` = ".$object->id.")";
                     else
                         $req = "SELECT u.email FROM " . MAIN_DB_PREFIX . "user u, " . MAIN_DB_PREFIX . "element_contact ec WHERE ec.fk_socpeople = u.rowid AND element_id =" . $object->id . " AND fk_c_type_contact =" . $result->fk_type_contact;
                     $sql2 = $this->db->query($req);

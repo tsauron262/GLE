@@ -1710,6 +1710,7 @@ class modSynopsisProcess extends DolibarrModules {
 (11, 107),
 (11, 108),
 (11, 109),
+(11, 209),
 (12, 11),
 (12, 12),
 (12, 13),

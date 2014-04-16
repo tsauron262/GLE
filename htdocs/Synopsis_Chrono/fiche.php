@@ -605,11 +605,11 @@ if ($id > 0) {
             print '</td>';
         }
         print '</table></div><div class="divButAction">';
+            print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
-            print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
             print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
-        } else if (($user->rights->synopsischrono->ModifierApresValide ) && $chr->statut > 0 && $chr->statut != 999) {
-            print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
+        } 
+        if (($user->rights->synopsischrono->ModifierApresValide )  && $chr->statut != 999) {
 
             $requete = "SELECT *
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
@@ -628,12 +628,11 @@ if ($id > 0) {
                 }
             }
 
-
-            if ($chr->model->hasRevision == 1 && $chr->model->revision_model_refid > 0 && $chr->statut != 3)
-                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
-            else if ($chr->model->hasRevision == 1 && $chr->statut != 3)
+            if ($chr->model->hasRevision == 1 && !$chr->model->revision_model_refid > 0)
                 print "<div class='ui-error error'>Pas de mod&egrave;le de r&eacute;visions !</div>";
-            else if ($chr->model->hasRevision == 1 && $chr->statut == 3) {
+            else if ($chr->model->hasRevision == 1 && $chr->model->revision_model_refid > 0 && $chr->statut != 3 && ($chr->statut > 0 || !$chr->model->hasStatut))
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
+            else if ($chr->model->hasRevision == 1 && $chr->statut == 3) {//deja Réviser afficher suivante derniere
 //Affiche le dernier et le suivant
 
 
@@ -658,8 +657,9 @@ if ($id > 0) {
                 if ($res->id > 0) {
                     print "<button class='butAction' onClick='location.href=\"?id=" . $res->id . "\"'>Derni&egrave;re r&eacute;vision: " . $res->ref . "</button>";
                 }
-            } else if ($chr->statut != 3)
-                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>Modifier</button>";
+            }
+            if ($chr->statut != 3 && $chr->statut > 0)//Dévalider
+                print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>Dévalider</button>";
         }
         $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_rights_def WHERE active=1 AND isValidationForAll = 1";
         $sql2 = $db->query($requete2);

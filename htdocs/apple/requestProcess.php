@@ -18,6 +18,15 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Aucun numéro de série fournit</p>' . "\n";
             }
             break;
+
+            case 'searchParts':
+                if (isset($_GET['serial'])) {
+                $datas = new gsxDatas($_GET['serial']);
+                echo $datas->getPartsHtml(isset($_GET['filter'])?$_GET['filter']:null, isset($_GET['search'])?$_GET['search']:null);
+            } else {
+                echo '<p class="error">Aucun numéro de série fournit</p>' . "\n";
+            }
+                break;
     }
     die('');
 }

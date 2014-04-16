@@ -23,6 +23,12 @@ function onRequestResponse(xhr, requestType) {
             $('#productInfos').html(xhr.responseText);
             $('#productInfos').slideDown(250);
             break;
+
+        case 'searchParts':
+            $('#partsResult').slideUp(250);
+            $('#partsResult').html(xhr.responseText);
+            $('#partsResult').slideDown(250);
+            break;
     }
 }
 
@@ -32,13 +38,29 @@ function setGetRequest(requestType, requestParams) {
         //alert('state: ' + xhr.readyState + ', status: ' +xhr.status);
         var RT = requestType;
         if((xhr.readyState == 4) && ((xhr.status == 200) || (xhr.status == 0))) {
-           onRequestResponse(xhr, RT);
+            onRequestResponse(xhr, RT);
         }
     }
     xhr.open("GET", './requestProcess.php?action='+requestType+requestParams);
     xhr.send();
 }
 
+function onComponentSearchSubmit() {
+    var params = '&serial='+$('#curSerial').val()+'&filter='+$('#componentType').val();
+    var search = $('#componentSearch').val()
+    if (search) {
+        if (!/^[a-zA-Z0-9 \-]+$/.test(search)) {
+            alert('Votre recherche par mots-clés ne doit contenir que des caractères alphanumériques');
+            return;
+        }
+        params += '&search='+search;
+    }
+    $('#partsResult').slideUp(250);
+    $('#partsResult').html('Requête en cours de traitement...');
+    $('#partsResult').slideDown(250);
+
+    setGetRequest('searchParts', params);
+}
 $(document).ready(function() {
     $('#serialSubmit').click(function() {
         $('#serialResult').slideUp(250);

@@ -81,9 +81,19 @@ jQuery(document).ready(function() {
 
     $(".addContact").click(function() {
         socid = $("select#socid").val();
-        popOjectAffiche(socid, 'newContact', function() {
+        dispatchePopObject(socid, 'newContact', function() {
             ajax_updater_postFct2(socid, 'old');
         }, 'Contact', 1)
+    });
+
+    $(".addSoc").click(function() {
+        socid = $("select#socid").val();
+        dispatchePopObject(socid, 'newSoc', function() {
+//            $("#form").attr('action', $("#form").attr('action')+"&action=modify&socid=max");
+            $("#form").append('<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="socid" value="max"/>');
+            $(".required").removeClass("required");
+            $("#form").submit();
+        }, 'Société', 1)
     });
 
 

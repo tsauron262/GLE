@@ -49,6 +49,7 @@ function getValueForm($chrid, $keyid, $socid, $withEntete = true) {
                 $obj = new $tmp($db);
                 $obj->socid = $socid;
                 $obj->cssClassM = $res->extraCss;
+                $obj->idChrono = $chrid;
                 $obj->fetch($res->type_subvaleur);
                 $obj->getValues();
                 if (isset($obj->tabVal[0])) {

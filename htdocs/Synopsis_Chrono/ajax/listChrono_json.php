@@ -168,6 +168,13 @@ if ($_REQUEST['type'] > 0)
 
 $wh .= " AND revision is NULL ";
 
+
+//$_REQUEST['filtre'] = "C02H21L8DHJQ";
+if(isset($_REQUEST['filtre']))
+    $wh .= "AND (id IN (SELECT chrono_refid 
+FROM  `llx_Synopsis_Chrono_value` 
+WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%') ";
+
 switch ($action)
 {
     default :

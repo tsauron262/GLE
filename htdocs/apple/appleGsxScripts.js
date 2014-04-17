@@ -243,7 +243,7 @@ function setGetRequest(requestType, requestParams) {
             onRequestResponse(xhr, RT);
         }
     }
-    xhr.open("GET", './requestProcess.php?action='+requestType+requestParams);
+    xhr.open("GET", DOL_URL_ROOT+'/apple/requestProcess.php?action='+requestType+requestParams);
     xhr.send();
 }
 

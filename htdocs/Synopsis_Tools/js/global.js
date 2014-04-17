@@ -245,15 +245,15 @@ function traiteScroll(heightDif) {
             $(elem).height(newTaille - padding);
             $(elem).width($(elem).width() - 20);
             $(elem).css("padding-right", (oldPadding + 15) + "px");
-            if(scrollY > 250)
+            if (scrollY > 250)
                 scrollY = scrollY - 250;
 //            
 //            alert(scrollY);
-            
+
             //Test
             if (parseInt($("body").innerHeight()) > height || parseInt($("body").innerWidth()) > width)
                 scrollY = initScroll();
-            
+
 //            if(!window.chrome)
             $(elem).scrollTop(scrollY);
 //        else
@@ -487,10 +487,13 @@ function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
         urlT = DOL_URL_ROOT + "/Synopsis_PrepaCommande/prepacommande.php?optioncss=print&id=";
     else if (type == 'newContact')
         urlT = DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=";
+    else if (type == 'newSoc')
+        urlT = DOL_URL_ROOT + "/societe/soc.php?leftmenu=customers&action=create&type=c&optioncss=print&cc=";
     popIFrame(urlT + id, callBack, titreNotif, nbLoad);
 }
 function ajoutPictoConnect() {
     $("a").each(function() {
+        ok = false;
         if ($(this).attr('onclick') == undefined && $(this).attr('href') != undefined) {
             $(this).attr("target", "iframePrinc");
             if ($(this).find("img").size() > 0) {
@@ -498,7 +501,7 @@ function ajoutPictoConnect() {
                 if (parent.find("a.popConnect").size() == 0) {
                     if (parent.find("a").size() == 2 && parent.find("a").last().find("img").size() == 0) {
                         ref = parent.find("a").last().html();
-                        parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                        ok = true;
                     }
 
 
@@ -506,25 +509,32 @@ function ajoutPictoConnect() {
                         tabT = $(this).html().split(">");
                         if (tabT.length == 2 && tabT[1] != '') {
                             ref = tabT[1];
-                            parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
+                            ok = true;
                         }
                     }
                 }
+            }
+            if (ok == true) {
+                lien = parent.find("a").last().attr("href");
+                if (lien.indexOf("fiche.php") > 0 ||
+                        lien.indexOf("listDetail.php") > 0 ||
+                        lien.indexOf("prepacommande.php") > 0)
+                    parent.prepend('<a class="popConnect pasTraiter" id="connectUrl-' + $(this).attr("href") + '--' + ref + '"><img src="' + DOL_URL_ROOT + '/Synopsis_Tools/img/connect.png" border="0" alt="Ouvrir en mode connect" title="Ouvrir en mode connect&amp;mainmenu=commercial&amp;leftmenu=orders"></a>');
             }
         }
     });
 }
 function initLienConnect(optioncss) {
-    if(optioncss == "print"){
-    $("form").each(function() {
-        if ($(this).attr("action").indexOf("?") > 0)
-            $(this).attr("action", $(this).attr("action") + "&optioncss=print");
-        else
-            $(this).attr("action", $(this).attr("action") + "?optioncss=print");
-    });
+    if (optioncss == "print") {
+        $("form").each(function() {
+            if ($(this).attr("action").indexOf("?") > 0)
+                $(this).attr("action", $(this).attr("action") + "&optioncss=print");
+            else
+                $(this).attr("action", $(this).attr("action") + "?optioncss=print");
+        });
     }
-    
-    
+
+
     ajoutPictoConnect();
     $(".pasTraiter.popConnect").each(function() {
         $(this).click(function() {
@@ -563,8 +573,8 @@ function initTransmission(elem) {
 
         $("iframe.fullScreen").load(function() {
             iFramePrinc(false);
-            eval('url = document.location.href;'+
-                  'newUrl = url.replace(window.location.hash, "") + "#" +' + elem + '.location;'+
+            eval('url = document.location.href;' +
+                    'newUrl = url.replace(window.location.hash, "") + "#" +' + elem + '.location;' +
                     'history.replaceState("{}", "",newUrl);');
         });
     }

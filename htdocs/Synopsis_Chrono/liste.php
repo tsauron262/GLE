@@ -143,8 +143,8 @@ jQuery(document).ready(function() {
     }
 var grid = jQuery("#gridListProspect").jqGrid({
             datatype: "json",
-            url: "ajax/listChrono_json.php?userId="+userId+extra,
 EOF;
+        $jqgridJs .=    'url: "ajax/listChrono_json.php?userId="+userId+extra'.($_REQUEST['filtre']? "+'&filtre=".$_REQUEST['filtre']."'" : "").',';
 if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
     $jqgridJs .= "colNames:['id' ,'hasRev','Ref', 'Type','Tiers','Contact','Date cr&eacute;ation','Dern. modif.','Statut', 'Nb Doc'],";
 else
@@ -462,6 +462,8 @@ llxHeader($js, 'Liste chrono', '');
 dol_fiche_head('', 'Chrono', $langs->trans("Liste des Chrono"));
 
 print '<div id="mysearch"></div>';
+print '<br/><div><form action="?"><input type="text" name="filtre" value="'.$_REQUEST['filtre'].'"/>'
+. '<input type="submit" class="butAction" name="valider" value="Filtrer"/></form></div>';
 
 print "<br/>";
 

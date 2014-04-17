@@ -15,6 +15,7 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
 //Var_Dump::Display($_REQUEST);
 $id = $_REQUEST['id'];
 $action = $_REQUEST['action'];
+$action2 = (isset($_REQUEST['action2']) ? $_REQUEST['action2'] : "");
 $upload_dir = $conf->synopsischrono->dir_output . "/" . $id;
 
 $js = "";
@@ -146,6 +147,14 @@ if ($action == 'modifier') {
     $chr->propalid = addslashes($_REQUEST['Proposition comm.']);
     $chr->projetid = addslashes($_REQUEST['Projet']);
 
+    if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
+        $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe");
+        if ($db->num_rows($sql) > 0) {
+            $result = $db->fetch_object($sql);
+            $chr->socid = $result->max;
+        }
+    }
+
 //Extra Value
 
     $res = $chr->update($chr->id);
@@ -184,7 +193,7 @@ if ($action == 'modifier') {
         }
     }
     if ($res > 0) {
-        header('location:?id=' . $id);
+        header('location:?id=' . $id . ($action2 != "" ? "&action=$action2" : ""));
     } else {
         $msg = "Erreur dans la mise &agrave; jour";
     }
@@ -214,7 +223,7 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
     $mesg = '<div class="ok">' . $langs->trans("FileWasRemoved") . '</div>';
 }
 //if ($action == "Modify" || $action == "ModifyAfterValid") {
-    $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
+$js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.js'></script>";
 //}
 $js .= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/Synopsis_Common/jquery/jquery.jDoubleSelect.js'></script>";
 $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
@@ -264,7 +273,7 @@ if ($id > 0) {
         print '<br>';
     }
 
-    if ($action == "Modify" && $user->rights->synopsischrono->Modifier) {
+    if (($action == "Modify") && $user->rights->synopsischrono->Modifier) {
         print "<form id='form' action='?id=" . $chr->id . "' method=post>";
         print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<input type='hidden' name='action' value='modifier'>";
@@ -275,10 +284,10 @@ if ($id > 0) {
                      <td colspan=1 class=" ui-widget-content" >' . $chr->model->titre . '</td>';
         if ($chr->model->hasSociete == 1) {
             print '<tr><th colspan=1 class="ui-state-default ui-widget-header" >' . $langs->trans('Company') . '</th>';
-            if ($chr->model->hasContact == 1)
-                print '    <td  class="ui-widget-content" colspan="1">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
-            else
-                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
+
+            print '    <td  class="ui-widget-content" colspan="' . (($chr->model->hasContact == 1) ? '1' : '3') . '"><span class="addSoc editable" style="float: left; padding : 3px 15px 0 0;">' . img_picto($langs->trans("Create"), 'filenew') . '</span>' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
+//            else
+//                print '    <td  class="ui-widget-content" colspan="3">' . $html->select_company($chr->socid, 'socid', 1, 1, 0, 0, array(array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php', 1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled')))) . '</td>';
         }
         if ($chr->model->hasContact == 1) {
             if (!$chr->model->hasSociete == 1)
@@ -416,8 +425,7 @@ if ($id > 0) {
         }
 
         if ($chr->model->hasPropal) {
-            print '<tr><th class="ui-widget-header ui-state-default">Proposition comm.
-		<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&action=editprop">' . img_edit("Editer proposition comm.", 1) . '</a>';
+            print '<tr><th class="ui-widget-header ui-state-default">Proposition comm.';
             // print '<td colspan=1 class="ui-widget-content">';
             $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono,
@@ -436,7 +444,10 @@ if ($id > 0) {
                         $idT = $res->rowid;
                     }
                 }
-                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ORDER BY `rowid` DESC";
+                $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ";
+                if($hasSoc)
+                    $requete2 .= " WHERE fk_soc = ".$chr->socid;
+                $requete2 .= " ORDER BY `rowid` DESC";
                 $sql2 = $db->query($requete2);
                 while ($res = $db->fetch_object($sql2)) {
                     print "<option value='" . $res->rowid . "'" . (($res->rowid == $idT) ? " selected=\"selected\"" : "") . ">" . $res->ref . "</option>";
@@ -444,11 +455,16 @@ if ($id > 0) {
                 print '<input type="submit" value="Modifier"/>';
                 print "</form>";
             } else {
-                if ($resql = $db->query($requete)) {
+                echo '<a href="' . $_SERVER["PHP_SELF"] . '?id=' . $id . '&action=editprop">' . img_edit("Editer proposition comm.", 1) . '</a>';
+                $resql = $db->query($requete);
+                if ($db->num_rows($resql) > 0) {
                     while ($res = $db->fetch_object($resql)) {
-                        print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a></td>";
+                        print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a><br/>Total : ".price($res->total_ht,1,'',1,-1,-1,$conf->currency)." HT</td>";
                     }
                 }
+                else
+                    echo "<td class='ui-widget-content'>".
+                        '<a href="' . DOL_URL_ROOT . '/comm/propal.php?action=create' . ($hasSoc?"&socid=".$chr->socid:"") . '">Créer</a>';
             }
         }
         /* 	print '<tr><th class="ui-widget-header ui-state-default">Projet';
@@ -518,11 +534,11 @@ if ($id > 0) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '    <td  class="ui-widget-content" colspan="1">' . $chr->description . '</td>';
         }
-        
-        
-        
+
+
+
         print '<td colspan="2" rowspan="100" class="zonePlus">';
-        
+
 //Ajoute les extra key/Values
         $requete = "SELECT k.nom,
                            k.id,
@@ -557,7 +573,7 @@ if ($id > 0) {
         while ($res = $db->fetch_object($sql)) {
             $res->value = stripslashes($res->value);
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
-            print '    <td  class="ui-widget-content '.$res->extraCss.'" colspan="1">';
+            print '    <td  class="ui-widget-content ' . $res->extraCss . '" colspan="1">';
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
@@ -605,11 +621,11 @@ if ($id > 0) {
             print '</td>';
         }
         print '</table></div><div class="divButAction">';
-            print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
+        print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
             print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=Modify\"'>Modifier</button>";
-        } 
-        if (($user->rights->synopsischrono->ModifierApresValide )  && $chr->statut != 999) {
+        }
+        if (($user->rights->synopsischrono->ModifierApresValide ) && $chr->statut != 999) {
 
             $requete = "SELECT *
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
@@ -634,9 +650,6 @@ if ($id > 0) {
                 print "<button class='butAction' onClick='location.href=\"?id=" . $chr->id . "&action=ModifyAfterValid\"'>R&eacute;viser</button>";
             else if ($chr->model->hasRevision == 1 && $chr->statut == 3) {//deja Réviser afficher suivante derniere
 //Affiche le dernier et le suivant
-
-
-
                 $requete = "SELECT *
                                 FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono
                                WHERE orig_ref = '" . $chr->orig_ref . "'

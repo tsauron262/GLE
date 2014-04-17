@@ -3,6 +3,7 @@
 require_once ( 'GSX.class.php' );
 
 class gsxDatas {
+
     public $gsx = null;
     protected $serial = null;
     protected $errors = array();
@@ -19,8 +20,8 @@ class gsxDatas {
         9 => 'Périphériques de communication',
         'A' => 'Partage',
         'B' => 'iPhone',
-        'C' => 'iPod',
-        'D' => 'iPad'
+        'E' => 'iPod',
+        'F' => 'iPad'
     );
 
     public function __construct($serial) {
@@ -140,22 +141,41 @@ class gsxDatas {
                     $html .= '</tbody></table>' . "\n";
 
                     $html .= '<div id="componentsListContainer">' . "\n";
-                    $html .= '<div class="titre">Rechercher un composant compatible</div>' . "\n";
-                    $html .= '<div class="searchBloc">' . "\n";
-                    $html .= '<label for="componentType">Type de composant: </label>' . "\n";
-                    $html .= '<select name="componentType" id="componentType">' . "\n";
-                    foreach (self::$componentsTypes as $code => $name) {
-                        $html .= '<option value="' . $code . '" ' . ((!$code) ? 'selected' : '') . '>' . $name . '</option>' . "\n";
-                    }
-                    $html .= '</select>' . "\n";
+                    $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
+                    $html .= '<div id="typeFilters" class="searchBloc">' . "\n";
+                    $html .= '<div id="filterTitle">Filtrer par catégorie de composant</div>';
+                    $html .= '<div id="typeFiltersContent"><div style="margin-bottom: 20px;"><span id="filterCheckAll">Tout cocher</span>';
+                    $html .= '<span id="filterHideAll">Tout décocher</span></div></div>';
                     $html .= '</div>' . "\n";
                     $html .= '<div class="searchBloc"' . "\n";
-                    $html .= '<label for="componentSearch">Mots-clés: </label>' . "\n";
-                    $html .= '<input type="text max="80" name="componentSearch" id="componentSearch"/>' . "\n";
+                    $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
+                    $html .= '<input type="text max="80" name="keywordFilter" id="keywordFilter"/>' . "\n";
+                    $html .= '<button id="addKeywordFilter" onclick="addKeywordFilter()">Ajouter</button>' . "\n";
                     $html .= '</div>' . "\n";
-                    $html .= '<button id="componentSearchSubmit" onclick="onComponentSearchSubmit()">Rechercher</button>' . "\n";
                     $html .= '</div>' . "\n";
-                    $html .= '<div id="partsResult"></div>' . "\n";
+                    $html .= '<div id="curKeywords"></div>'."\n";
+                    $html .= '<div id="partsListContainer"></div>' . "\n";
+
+                    $parts = $this->gsx->part(array('serialNumber' => $this->serial));
+
+                    $checkParts = false;
+                    if (isset($parts) && count($parts)) {
+                        if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
+                            if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
+                                $checkParts = true;
+                                $parts = $parts['ResponseArray']['responseData'];
+                                $html .= '<script type="text/javascript">'."\n";
+                                foreach ($parts as $part) {
+                                    $html .= 'PM.addPart(\''.  addslashes($part['componentCode']).'\', \''.addslashes($part['partDescription']).'\', ';
+                                    $html .= '\''.addslashes($part['partNumber']).'\', \''.addslashes($part['partType']).'\');'."\n";
+                                }
+                                $html .= '</script>'."\n";
+                            }
+                        }
+                    }
+                    if (!$checkParts) {
+                        $html .= '<p class="error">Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX</p>';
+                    }
                 }
             }
         }
@@ -171,78 +191,6 @@ class gsxDatas {
 
         return $html;
     }
-
-    public function getPartsHtml($filter = null, $search = null) {
-        $params = array(
-            'serialNumber' => $this->serial
-        );
-        if (isset($search)) {
-            $params['partDescription'] = $search;
-        }
-
-        $parts = $this->gsx->part($params);
-//        echo 'Filtre: ' . $filter . '<br/>';
-//        echo '<pre>';
-//        print_r($parts);
-//        echo '</pre>';
-
-        $html = '';
-        $check = false;
-        if (isset($parts) && count($parts)) {
-            if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
-                if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
-                    $check = true;
-                    if (isset($filter) && ($filter != 0)) {
-                        $filtered = array();
-                        foreach ($parts['ResponseArray']['responseData'] as $part) {
-                            if (isset($part['componentCode']) && $part['componentCode']) {
-                                if ($part['componentCode'] == $filter) {
-                                    $filtered[] = $part;
-                                }
-                            }
-                        }
-                        $parts = $filtered;
-                    } else {
-                        $parts = $parts['ResponseArray']['responseData'];
-                    }
-                }
-            }
-        }
-        if (!$check) {
-            $this->errors[] = 'GSX_parts_fail';
-            $html .= '<p class="error">Echec de la récupération des données depuis la plateforme Apple GSX</p>' . "\n";
-        } else if (count($parts)) {
-//            echo '<pre>';
-//            print_r($parts);
-//            echo '</pre>';
-            $html .= '<p>' . count($parts) . ' composants trouvés</p>';
-            $odd = true;
-            $html .= '<table id="componentsList">' . "\n";
-            $html .= '<th style="min-width: 350px">Nom</th>' . "\n";
-            $html .= '<th style="min-width: 100px">N°</th>' . "\n";
-            $html .= '<th style="min-width: 100px">Type</th>' . "\n";
-//            $html .= '<th style="min-width: 120px">Prix</th>' . "\n";
-            $html .= '<th></th>' . "\n";
-            $html .= '<thead>' . "\n";
-            $html .= '</head><tbody>' . "\n";
-            foreach ($parts as $part) {
-                $html .= '<tr' . ($odd ? ' class="oddRow"' : '') . '>' . "\n";
-                $html .= '<td>' . $part['partDescription'] . '</td>' . "\n";
-                $html .= '<td>' . $part['partNumber'] . '</td>' . "\n";
-                $html .= '<td>' . $part['partType'] . '</td>' . "\n";
-//                $html .= '<td>' . $part['exchangePrice'] . '</td>' . "\n";
-                $html .= '<td><button>Commander</button></td>' . "\n";
-                $html .= '</tr>';
-                $odd = !$odd;
-            }
-            $html .= '</tbody></table>' . "\n";
-        } else {
-            $html .= '<p>Aucun composant ne correspond à vos critères de recherche</p>';
-        }
-
-        return $html;
-    }
-
 }
 
 ?>

@@ -7,6 +7,22 @@ class gsxDatas {
     public $gsx = null;
     protected $serial = null;
     protected $errors = array();
+    public static $componentsTypes = array(
+        0 => 'Général',
+        1 => 'Visuel',
+        2 => 'Affichage',
+        3 => 'Stockage',
+        4 => 'Périphériques d\'entrées',
+        5 => 'Cartes',
+        6 => 'Alimentation',
+        7 => 'Impression',
+        8 => 'Périphériques multi-fonctions',
+        9 => 'Périphériques de communication',
+        'A' => 'Partage',
+        'B' => 'iPhone',
+        'E' => 'iPod',
+        'F' => 'iPad'
+    );
 
     public function __construct($serial) {
         global $user;
@@ -124,9 +140,42 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
 
-//                    $html .= '<div id="componentsListContainer">'."\n";
-//                    $html .= '<div class="blocTitle">Rechercher un composant compatible</div>';
-//                    $html .= '</div>'."\n";
+                    $html .= '<div id="componentsListContainer">' . "\n";
+                    $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
+                    $html .= '<div id="typeFilters" class="searchBloc">' . "\n";
+                    $html .= '<div id="filterTitle">Filtrer par catégorie de composant</div>';
+                    $html .= '<div id="typeFiltersContent"><div style="margin-bottom: 20px;"><span id="filterCheckAll">Tout cocher</span>';
+                    $html .= '<span id="filterHideAll">Tout décocher</span></div></div>';
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="searchBloc"' . "\n";
+                    $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
+                    $html .= '<input type="text max="80" name="keywordFilter" id="keywordFilter"/>' . "\n";
+                    $html .= '<button id="addKeywordFilter" onclick="addKeywordFilter()">Ajouter</button>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<div id="curKeywords"></div>'."\n";
+                    $html .= '<div id="partsListContainer"></div>' . "\n";
+
+                    $parts = $this->gsx->part(array('serialNumber' => $this->serial));
+
+                    $checkParts = false;
+                    if (isset($parts) && count($parts)) {
+                        if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
+                            if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
+                                $checkParts = true;
+                                $parts = $parts['ResponseArray']['responseData'];
+                                $html .= '<script type="text/javascript">'."\n";
+                                foreach ($parts as $part) {
+                                    $html .= 'PM.addPart(\''.  addslashes($part['componentCode']).'\', \''.addslashes($part['partDescription']).'\', ';
+                                    $html .= '\''.addslashes($part['partNumber']).'\', \''.addslashes($part['partType']).'\');'."\n";
+                                }
+                                $html .= '</script>'."\n";
+                            }
+                        }
+                    }
+                    if (!$checkParts) {
+                        $html .= '<p class="error">Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX</p>';
+                    }
                 }
             }
         }
@@ -134,9 +183,14 @@ class gsxDatas {
             $this->errors[] = 'GSX_lookup_fail';
             $html .= '<p class="error">Echec de la récupération des données depuis la plateforme Apple GSX</p>' . "\n";
         }
+
+//        $response = $this->gsx->lookup($this->serial, 'model');
+//        echo '<pre>';
+//        echo print_r($response);
+//        echo '</pre>';
+
         return $html;
     }
-
 }
 
 ?>

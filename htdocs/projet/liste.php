@@ -107,12 +107,12 @@ jQuery(document).ready(function(){
             colModel:[  {name:'id',index:'id', width:5, hidden:true,key:true,hidedlg:true,search:false},
                         {name:'title',index:'title', width:300},
                         {name:'ref',index:'ref', width:30},
-                        {name:'dateo',index:'dateo', width:60, align:"center"},
-                        {name:'statut',index:'statut', width:60, align:"right"},
-                        {name:'avanc',index:'avanc', width:60, align:"center"},
+                        {name:'dateo',index:'dateo', width:60, align:"center",search:false},
+                        {name:'statut',index:'statut', width:60, align:"right",stype:'select', searchoptions:"{value: statutRess}"},
+                        {name:'avanc',index:'avanc', width:60, align:"center",search:false},
                         {name:'socname',index:'socname', width:150, align:"center"},
-                        {name:'cntMyTask',index:'cntMyTask', width:50, align:"center"},
-                        {name:'fk_user_resp',index:'fk_user_resp', width:90, align:"center"},
+                        {name:'cntMyTask',index:'cntMyTask', width:50, align:"center",search:false},
+                        {name:'fk_user_resp',index:'fk_user_resp', width:90, align:"center",search:false},
                       ],
             rowNum:30,
             rowList:[30,50,100],
@@ -196,7 +196,7 @@ jQuery(document).ready(function(){
 
         }
         jQuery("#ui-datepicker-div").addClass("promoteZ");
-        jQuery("#ui-timepicker-div").addClass("promoteZ");
+        jQuery("#ui-timepicker-div").addClass("promoteZ"); setTimeout(function(){   jQuery("#gridListProj").filterToolbar('');},500);
 
 });
 

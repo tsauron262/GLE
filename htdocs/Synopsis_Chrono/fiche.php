@@ -369,7 +369,7 @@ if ($id > 0) {
             print $langs->trans('Contact') . '</th>';
             print '    <td  class="ui-widget-content" colspan="' . ($hasSoc ? 1 : 3) . '">' . $chr->contact->getNomUrl(1) . '</td>';
         }
-        $chr->user_author->fetch($chr->user_author->id);
+//        $chr->user_author->fetch($chr->user_author->id);
 
         if ($chr->model->hasSuivie) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Cr&eacute;er le';

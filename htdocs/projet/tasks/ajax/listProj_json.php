@@ -37,7 +37,7 @@ if(!$sidx) $sidx =1; // connect to the database
 
 $wh = "";
 $searchOn = $_REQUEST['_search'];
-if($searchOn=='true')
+if($searchOn='true')
 {
     $oper="";
 
@@ -59,14 +59,17 @@ if($searchOn=='true')
                               AND ".MAIN_DB_PREFIX."Synopsis_projet_task.fk_task_type <> 3
                               AND fk_projet = p.rowid ) ';
     }
-    if ($searchField == "nom"){
+    if ($searchField == "nom" || $_REQUEST['title']){
         $searchField = "p.title";
+        $searchString = $_REQUEST['title'];
     }
-    if ($searchField == "socname"){
+    if ($searchField == "socname" || $_REQUEST['socname']){
         $searchField = "s.nom";
+        $searchString = $_REQUEST['socname'];
     }
-    if ($searchField == "ref"){
+    if ($searchField == "ref" || $_REQUEST['ref']){
         $searchField = "p.ref";
+        $searchString = $_REQUEST['ref'];
     }    
 //    if ($searchField == "fk_user_resp"){
 //        $userseek = $_REQUEST['searchString'];
@@ -75,6 +78,11 @@ if($searchOn=='true')
 //
 //        $searchField = "".MAIN_DB_PREFIX."societe.nom";
 //    }
+    
+    if(isset($searchField) && $searchField != '' && !isset($_REQUEST['searchOper']))
+        $_REQUEST['searchOper'] = 'cn';
+    
+    
     if ($_REQUEST['searchOper'] == 'eq')
     {
         $oper = '=';
@@ -144,7 +152,7 @@ if ($extra == "viewmine")
 }
 //$SQL .= "   AND ".MAIN_DB_PREFIX."societe.rowid = p.fk_soc ".$wh;
 $SQL .= $wh;
-
+//die($SQL);
 $result = $db->query($SQL);
 $row = $db->fetch_array($result,MYSQL_ASSOC);
  $count = $row['cnt'];

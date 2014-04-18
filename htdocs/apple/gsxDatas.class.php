@@ -140,10 +140,25 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
 
+                    $html .= '<div id="cartContainer"><div id="cartTitle">Commande de composants   ';
+                    $html .= '<span><span id="nbrCartProducts">0</span> produit(s)</span></div></div>'."\n";
+                    $html .= '<div id="cartContent">'."\n";
+                    $html .= '<p id="noProducts">Aucun produit dans votre panier de commande</p>'."\n";
+                    $html .= '<table id="cartProducts">'."\n";
+                    $html .= '<thead>'."\n";
+                    $html .= '<th style="min-width: 250px">Nom</th>'."\n";
+                    $html .= '<th style="min-width: 80px">Réf</th>'."\n";
+                    $html .= '<th>Qté</th>'."\n";
+                    $html .= '</thead>'."\n";
+                    $html .= '<tbody></tbody>'."\n";
+                    $html .= '</table>'."\n";
+                    $html .= '<div id="orderSubmitContainer"><button id="orderSubmit">Valider la commande</button></div>'."\n";
+                    $html .= '</div>'."\n";
+
                     $html .= '<div id="componentsListContainer">' . "\n";
                     $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
                     $html .= '<div id="typeFilters" class="searchBloc">' . "\n";
-                    $html .= '<div id="filterTitle">Filtrer par catégorie de composant</div>';
+                    $html .= '<button id="filterTitle">Filtrer par catégorie de composant</button>';
                     $html .= '<div id="typeFiltersContent"><div style="margin-bottom: 20px;"><span id="filterCheckAll">Tout cocher</span>';
                     $html .= '<span id="filterHideAll">Tout décocher</span></div></div>';
                     $html .= '</div>' . "\n";
@@ -152,9 +167,15 @@ class gsxDatas {
                     $html .= '<input type="text max="80" name="keywordFilter" id="keywordFilter"/>' . "\n";
                     $html .= '<button id="addKeywordFilter" onclick="addKeywordFilter()">Ajouter</button>' . "\n";
                     $html .= '</div>' . "\n";
-                    $html .= '</div>' . "\n";
+                    $html .= '<div class="searchBloc">'."\n";
+                    $html .= '<label for="searchPartInput">Recherche par référence: </label>'."\n";
+                    $html .= '<input type="text" name="searchPartInput" id="searchPartInput" size="12" maxlength="24"/>';
+                    $html .= '<button id="searchPartSubmit" onclick="searchPartByNum()">Rechercher</button>'."\n";
+                    $html .= '</div>'."\n";
                     $html .= '<div id="curKeywords"></div>'."\n";
+                    $html .= '<div id="searchResult"></div>';
                     $html .= '<div id="partsListContainer"></div>' . "\n";
+                    $html .= '</div>' . "\n";
 
                     $parts = $this->gsx->part(array('serialNumber' => $this->serial));
 

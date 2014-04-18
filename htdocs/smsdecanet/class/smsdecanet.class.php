@@ -44,7 +44,7 @@
 				$this->error = $result->error;
 				return 0;
 			} else {
-				return $result->message_id;
+				return 1;//$result->message_id;
 			}
 		}
 		

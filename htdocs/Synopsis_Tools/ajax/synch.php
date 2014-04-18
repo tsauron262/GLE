@@ -26,7 +26,7 @@ class Boucle /* extends Thread */ {
             $return .= "<idAction>" . $result->id . "</idAction>";
             $return .= "<titreAction>" . $object->getNomUrl(1) . "</titreAction>";
             $note1 = str_replace("\n", "<br/>", $object->note);
-            $note2 = $object->getElementUrl($object->fk_element, $object->elementtype, 1);
+            $note2 = $object->getNomUrl($object->fk_element, $object->elementtype, 1);
             if($note != '' && $note2 != '')
                 $note1 .= "<br/>";
             $return .= "<msgAction>" .$note1.$note2. "</msgAction>";

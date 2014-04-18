@@ -155,9 +155,19 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $return .= '<div class="blockvmenupair">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts">
-                    <img src="' . DOL_URL_ROOT . '/theme/eldy/img/object_contract.png" border="0" alt="" title=""> Contrats</a><br></div>';
+                    '.img_object("Contrat", "contract").' Contrats</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
             $return .= '<input type="text" class="flat" name="sall" size="10">';
+            $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
+            $return .= '</div></form>';
+        }
+
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
+            $return .= '<div class="blockvmenupair">';
+            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/listDetail.php?mainmenu=Process">
+                     '.img_object("Chrono", "chrono@Synopsis_Chrono").$langs->trans("Chrono").'</a><br></div>';
+            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/Synopsis_Chrono/liste.php?mainmenu=Process">';
+            $return .= '<input type="text" class="flat" name="filtre" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
             $return .= '</div></form>';
         }

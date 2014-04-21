@@ -489,6 +489,8 @@ function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
         urlT = DOL_URL_ROOT + "/contact/fiche.php?action=create&optioncss=print&socid=";
     else if (type == 'newSoc')
         urlT = DOL_URL_ROOT + "/societe/soc.php?leftmenu=customers&action=create&type=c&optioncss=print&cc=";
+    else if (type == 'sms')
+        urlT = DOL_URL_ROOT + "/smsdecanet/send.php?optioncss=print&id=";
     popIFrame(urlT + id, callBack, titreNotif, nbLoad);
 }
 function ajoutPictoConnect() {

@@ -1009,4 +1009,5 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
     return $out;
 }
 
+
 ?>

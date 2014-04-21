@@ -1,4 +1,5 @@
 <?php
+
 /* Copyright (C) 2012 Maxime MANGIN <maxime@tuxserv.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,10 +22,9 @@
  *  \ingroup    produit
  *  \brief      Page d'administration/configuration du module contrat d'abonnement
  */
-
 require("../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
-require_once(DOL_DOCUMENT_ROOT ."/smsdecanet/core/modules/modSmsDecanet.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/admin.lib.php");
+require_once(DOL_DOCUMENT_ROOT . "/smsdecanet/core/modules/modSmsDecanet.class.php");
 
 $langs->load("admin");
 $langs->load("sms");
@@ -32,110 +32,124 @@ $langs->load("smsdecanet@smsdecanet");
 
 // Security check
 if (!$user->admin)
-accessforbidden();
+    accessforbidden();
 
-$action=GETPOST('action');
+$action = GETPOST('action');
 
 
-if ($action == 'send' && ! $_POST['cancel'])
-{
-	$error=0;
+if ($action == 'send' && !$_POST['cancel']) {
+    $error = 0;
 
-	$smsfrom='';
-	if (! empty($_POST["fromsms"])) $smsfrom=GETPOST("fromsms");
-	if (empty($smsfrom)) $smsfrom=GETPOST("fromname");
-	$sendto     = GETPOST("sendto");
-	$body       = GETPOST('message');
-	$deliveryreceipt= GETPOST("deliveryreceipt");
-    $deferred   = GETPOST('deferred');
-    $priority   = GETPOST('priority');
-    $class      = GETPOST('class');
-    $errors_to  = GETPOST("errorstosms");
+    $smsfrom = '';
+    if (!empty($_POST["fromsms"]))
+        $smsfrom = GETPOST("fromsms");
+    if (empty($smsfrom))
+        $smsfrom = GETPOST("fromname");
+    $sendto = GETPOST("sendto");
+    $body = GETPOST('message');
+    $deliveryreceipt = GETPOST("deliveryreceipt");
+    $deferred = GETPOST('deferred');
+    $priority = GETPOST('priority');
+    $class = GETPOST('class');
+    $errors_to = GETPOST("errorstosms");
 
-	// Create form object
-	include_once(DOL_DOCUMENT_ROOT.'/core/class/html.formsms.class.php');
-	$formsms = new FormSms($db);
+    // Create form object
+    include_once(DOL_DOCUMENT_ROOT . '/core/class/html.formsms.class.php');
+    $formsms = new FormSms($db);
 
-	if (! empty($formsms->error))
-	{
-	    $message='<div class="error">'.$formsms->error.'</div>';
-	    $action='test';
-	    $error++;
-	}
-    if (empty($body))
-    {
-        $message='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Message")).'</div>';
-        $action='test';
+    if (!empty($formsms->error)) {
+        $message = '<div class="error">' . $formsms->error . '</div>';
+        $action = 'test';
         $error++;
     }
-	if (empty($smsfrom) || ! str_replace('+','',$smsfrom))
-	{
-		$message='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("SmsFrom")).'</div>';
-        $action='test';
-		$error++;
-	}
-	if (empty($sendto) || ! str_replace('+','',$sendto))
-	{
-		$message='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("SmsTo")).'</div>';
-        $action='test';
-		$error++;
-	}
-	if (! $error)
-	{
-		require_once(DOL_DOCUMENT_ROOT."/core/class/CSMSFile.class.php");
+    if (empty($body)) {
+        $message = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Message")) . '</div>';
+        $action = 'test';
+        $error++;
+    }
+    if (empty($smsfrom) || !str_replace('+', '', $smsfrom)) {
+        $message = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("SmsFrom")) . '</div>';
+        $action = 'test';
+        $error++;
+    }
+    if (empty($sendto) || !str_replace('+', '', $sendto)) {
+        $message = '<div class="error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("SmsTo")) . '</div>';
+        $action = 'test';
+        $error++;
+    }
+    if (!$error) {
+        require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
 
-		$smsfile = new CSMSFile($sendto, $smsfrom, $body, $deliveryreceipt, $deferred, $priority, $class);
-		$result=$smsfile->sendfile();
-		if ($result>0)
-		{
-			$message='<div class="ok">'.$langs->trans("SmsSuccessfulySent",$smsfrom,$sendto).'</div>';
-		}
-		else
-		{
-			$message='<div class="error">'.$langs->trans("ResultKo").'<br>'.$smsfile->error.' '.$result.'</div>';
-		}
+        $smsfile = new CSMSFile($sendto, $smsfrom, $body, $deliveryreceipt, $deferred, $priority, $class);
+        $result = $smsfile->sendfile();
+        if ($result > 0) {
+            $message = '<div class="ok">' . $langs->trans("SmsSuccessfulySent", $smsfrom, $sendto) . '</div>';
+        } else {
+            $message = '<div class="error">' . $langs->trans("ResultKo") . '<br>' . $smsfile->error . ' ' . $result . '</div>';
+        }
 
-		$action='';
-	}
+        $action = '';
+    }
 }
 
-llxHeader('',$langs->trans("SendSMS"));
+llxHeader('', $langs->trans("SendSMS"));
 dol_htmloutput_mesg($message);
-$to = '+33';
-$socid=intval($_GET['id']);
-if($socid>0) {
-	$soc = new Societe($db);
-	$soc->fetch($socid);
-	$soc->info($socid);
-	if(substr($soc->tel,0,1)!='+')
-		$to = '+'.$soc->state_id.''.substr($soc->tel,1);
+$tabPrefPays[0] = "33";
+$to = '+'.$tabPrefPays[0];
+$socid = intval($_GET['id']);
+if(isset($_REQUEST['to'])){
+    $phone = $_REQUEST['to'];
+    $idPays = 0;
+}
+else if ($socid > 0) {
+    $soc = new Societe($db);
+    $soc->fetch($socid);
+    $soc->info($socid);
+    $phone = $soc->phone;
+    $idPays = $soc->state_id;
+}
+if (isset($phone) && $phone != "") {
+    if (substr($phone, 0, 1) != '+')
+        $toT = '+' . $tabPrefPays[$idPays] . '' . substr($phone, 1);
+    else
+        $toT = $phone;
+    
+    if(strlen($toT) == 12 && (stripos($toT, "+".$tabPrefPays[$idPays]."6") === 0 || stripos($toT, "+".$tabPrefPays[$idPays]."7") === 0))
+            $to = $toT;
 }
 
+$fromPerso = (isset($_REQUEST['fromsms']) && $_REQUEST['fromsms'] != "");
 
-$linkback='<a href="'.DOL_URL_ROOT.'/admin/modules.php">'.$langs->trans("BackToModuleList").'</a>';
-print_fiche_titre($langs->trans("SendSMS"),false,'setup');
-include_once(DOL_DOCUMENT_ROOT."/core/class/html.formsms.class.php");
+
+$linkback = '<a href="' . DOL_URL_ROOT . '/admin/modules.php">' . $langs->trans("BackToModuleList") . '</a>';
+print_fiche_titre($langs->trans("SendSMS"), false, 'setup');
+include_once(DOL_DOCUMENT_ROOT . "/core/class/html.formsms.class.php");
 $formsms = new FormSms($db);
-$formsms->fromtype='user';
-$formsms->fromid=$user->id;
-$formsms->fromsms = (isset($_POST['fromsms'])?$_POST['fromsms']:($conf->global->MAIN_MAIL_SMS_FROM?$conf->global->MAIN_MAIL_SMS_FROM:$user->user_mobile));
-$formsms->withfromreadonly=0;
-$formsms->withsubstit=0;
-$formsms->withfrom=1;
-$formsms->witherrorsto=1;
-$formsms->withto=$to;
-$formsms->withfile=2;
-$formsms->withbody=$langs->trans("yourMessage");
-$formsms->withbodyreadonly=0;
-$formsms->withcancel=0;
-$formsms->withfckeditor=0;
+$formsms->fromtype = ($fromPerso ? 'perso' : 'user');
+$formsms->fromid = $user->id;
+$formsms->fromsms = ($fromPerso ? $_REQUEST['fromsms'] : ($conf->global->MAIN_MAIL_SMS_FROM ? $conf->global->MAIN_MAIL_SMS_FROM : $user->user_mobile));
+$formsms->withfromreadonly = $fromPerso;
+$formsms->withto = $to;
+$formsms->withsubstit = 0;
+$formsms->withfrom = 1;
+$formsms->witherrorsto = 1;
+$formsms->withfile = 2;
+$formsms->withbody = (isset($_REQUEST['msg']) && $_REQUEST['msg'] != "" ? $_REQUEST['msg'] : $langs->trans("yourMessage"));
+$formsms->withbodyreadonly = 0;
+$formsms->withcancel = 0;
+$formsms->withfckeditor = 0;
 // Tableau des parametres complementaires du post
-$formsms->param["action"]="send";
-$formsms->param["models"]="body";
-$formsms->param["smsid"]=0;
-$formsms->param["returnurl"]=$_SERVER['REQUEST_URI'];
+$formsms->param["action"] = "send";
+$formsms->param["models"] = "body";
+$formsms->param["smsid"] = 0;
+$formsms->param["returnurl"] = $_SERVER['REQUEST_URI'];
 
 $formsms->show_form();
 $db->close();
+
+$fromsms = urlencode('SAV BIMP');
+$msg = urlencode("Message avec espace é à l'oin");
+$to = urlencode("+33628335081");
+print '<a href="#" onclick="dispatchePopObject(\'&msg='.$msg.'&fromsms='.$fromsms.'&to='.$to.'\', \'sms\',function(){}, \'SMS\', 100);">pop</a>';
 
 llxFooter('$Date: 2010/03/10 15:00:00');

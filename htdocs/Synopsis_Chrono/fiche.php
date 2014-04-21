@@ -580,6 +580,7 @@ if ($id > 0) {
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
                     $obj->cssClassM = $res->extraCss;
+                    $obj->idChrono = $id;
                     $obj->socid = $chr->socid;
                     $obj->fetch($res->type_subvaleur);
                     $obj->getValuePlus($res->value);
@@ -603,6 +604,8 @@ if ($id > 0) {
                         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                     $tmp = $res->phpClass;
                     $obj = new $tmp($db);
+                    $obj->cssClassM = $res->extraCss;
+                    $obj->idChrono = $id;
                     $obj->fetch($res->type_subvaleur);
                     $obj->call_function_chronoModule($chr->model_refid, $chr->id);
                 }

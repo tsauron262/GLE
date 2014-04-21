@@ -2332,6 +2332,7 @@ class globalvar extends formulaireSource {
     public $glabalVarEval;
     public $valueArr;
     public $valuesArr;
+    public $idChrono = 0;
 
     public function globalvar($DB) {
         $this->db = $DB;
@@ -2356,7 +2357,11 @@ class globalvar extends formulaireSource {
                 $this->globalvar = $res->globalVar;
                 $this->label = $res->label;
                 $this->description = $res->description;
+                $this->nomElement = getParaChaine($this->cssClassM, "type:");
                 $eval = $this->globalvar;
+                $eval = str_replace("_CHRONOID_", $this->idChrono, $eval);
+                $eval = str_replace("_NOMELEM_", $this->nomElement, $eval);
+                require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/functionPlusProcess.php");
                 eval('$eval = ' . $eval . ";");
                 $this->glabalVarEval = $eval;
             }

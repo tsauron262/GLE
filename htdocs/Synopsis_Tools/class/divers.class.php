@@ -9,6 +9,7 @@ class object {
 class synopsisHook {
 
     static $timeDeb = 0;
+    private static $MAX_TIME_LOG = 4;
     private static $reload = false;
 
     function synopsisHook() {
@@ -231,7 +232,7 @@ class synopsisHook {
         echo "<div class='notificationText'></div><div class='notificationObj'></div>";
 
         $time = (microtime(true) - self::$timeDeb);
-        if ($time > 2 && (!isset($logLongTime) || $logLongTime))
+        if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
             dol_syslog("Pages lente " . $time . " s", 4);
         echo "<span class='timePage'>" . $time . " s</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {

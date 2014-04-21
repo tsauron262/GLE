@@ -551,7 +551,8 @@ switch ($action) {
                   ($prodid>0?$prodid:0),
                   $commandeDetId
                   ); */
-                delElementElement("commandedet", "contratdet", NULL, $_REQUEST['lineid']);
+                delElementElement("commandedet", "contratdet", null, $_REQUEST['lineid']);
+                if($commandeDetId > 0)
                 setElementElement("commandedet", "contratdet", $commandeDetId, $_REQUEST['lineid']);
 
                 if ($result > 0) {

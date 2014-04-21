@@ -11,17 +11,29 @@ $(window).load(function() {
     if ($(".apple_sn").size() && $(".zonePlus").size()) {
         var serial = $(".apple_sn").html();
         var resultZone = $(".zonePlus");
-        if (!serial || !resultZone.size()) {
-            resultZone.html('<p class="error">Veuillez entrer un numéro de série</p>');
-//        } else if (!/^[0-9a-zA-Z]+$/.test(serial)) {
-//            resultZone.html('<p class="error">Le format du numéro de série est incorrect</p>');
-        } else {
-            resultZone.html('<div id="serialResult"></div><div id="productInfos"></div>');
+                ok = false;
+        if (serial != "") {
+//            resultZone.html('<p class="error">Veuillez entrer un numéro de série</p>');
+////        } else if (!/^[0-9a-zA-Z]+$/.test(serial)) {
+////            resultZone.html('<p class="error">Le format du numéro de série est incorrect</p>');
+//        } else {
+            tabT = serial.split(" | ");
             $.getScript(DOL_URL_ROOT + "/apple/appleGsxScripts.js", function() {
                 $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/apple/appleGSX.css"}));
-                setGetRequest('newSerial', '&serial=' + serial);
+                for (i = 0; i < tabT.length && !ok; i++) {
+                    serial = tabT[i];
+                    if(serial.length > 10 && serial.length < 13){
+                        resultZone.append('<div id="serialResult"></div><div id="productInfos"></div>');
+                        setGetRequest('newSerial', '&serial=' + serial);
+                        ok = true;
+                    }
+                }
+                if(!ok)
+                    resultZone.html('<p class="error">Pas de numéro de série correct</p>');
             });
         }
+        else
+                    resultZone.html('<p class="error">Pas de numéro de série</p>');
     }
 });
 

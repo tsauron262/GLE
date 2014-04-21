@@ -1,7 +1,8 @@
-function Part(name, num, type) {
+function Part(name, num, type, price) {
     this.name = name;
     this.num = num;
     this.type = type;
+    this.price = price;
 }
 
 function CartProduct(gpe, id) {
@@ -28,11 +29,12 @@ function PartsManager() {
         'E' :'iPod',
         'F' :'iPad'
     }
-    this.parts = [];
-    this.cartProds = [];
+    this.parts = []; // Liste des parts (Objets Part) dans un sous-tableau pour chaque catégorie.
+    this.cartProds = []; // Liste des produits dans le panier de commande (objets CartProduct).
     this.nextCartProdId = 0;
     this.nbrProds = 0;
 
+    //Gestion de la liste des Parts:
     this.removeParts = function() {
         for (gpe in this.parts) {
             for (id in this.parts[gpe]) {
@@ -43,18 +45,35 @@ function PartsManager() {
         delete this.parts;
         this.parts = [];
     };
-    this.addPart = function(group, name, num, type) {
+    this.addPart = function(group, name, num, type, price) {
         if (group === ' ')
             group = 0;
         if (!this.parts[group])
             this.parts[group] = [];
-        this.parts[group].push(new Part(name, num, type));
+        this.parts[group].push(new Part(name, num, type, price));
+    };
+    this.loadParts = function () {
+        this.deleteCart();
+        this.removeParts();
+        $('#loadParts').slideUp(250);
+        if ($('#partsRequestResult').css('display') != 'none')
+            $('#partsRequestResult').slideUp(250, function() {
+                $(this).html('<p>Requête en cours de traitement</p>').slideDown(250);
+            });
+        else {
+            $('#partsRequestResult').html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        }
+        var serial = $('#curSerial').val();
+        if (!serial)
+            serial = '0';
+        setGetRequest('loadParts', '&serial='+serial);
     };
     this.displayParts = function() {
         var $container = $('#partsListContainer');
         var ths = '<th style="min-width: 350px">Nom</th>';
         ths += '<th style="min-width: 100px">Ref.</th>';
         ths += '<th style="min-width: 100px">Type</th>';
+        ths += '<th style="min-width: 100px">Prix</th>';
         ths += '<th></th>';
 
         for (gpe in this.parts) {
@@ -74,6 +93,7 @@ function PartsManager() {
                 html += '<td class="partName">'+this.parts[gpe][id].name+'</td>';
                 html += '<td>'+this.parts[gpe][id].num+'</td>';
                 html += '<td>'+this.parts[gpe][id].type+'</td>';
+                html += '<td>'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
                 html += '<td><span id="add_'+gpe+'_'+id+'" class="addToOrder activated" onclick="PM.addToCart($(this))">Commander</span></td>';
                 html += '</tr>';
                 odd = !odd;
@@ -144,6 +164,8 @@ function PartsManager() {
             }
         });
     };
+
+    // Gestion de l'affichage:
     this.openPartsGroup = function($gpe) {
         $gpe.parent().children('div.partsList').slideDown(250);
         $gpe.attr('class', 'partGroupName opened').off('click').click(function() {
@@ -190,6 +212,7 @@ function PartsManager() {
         }
     };
 
+    // Gestion des filtres et des recherches:
     this.filterByKeywords = function(dataToCheck) {
         this.unsetSearch();
         var kw = [];
@@ -205,6 +228,7 @@ function PartsManager() {
                 var display = true;
                 for (i in kw) {
                     var str = null;
+                    var regex = new RegExp('^(.*)'+kw[i]+'(.*)$', 'i');
                     switch (dataToCheck) {
                         case 'name':
                             str = ptr.parts[gpe][id].name;
@@ -215,12 +239,8 @@ function PartsManager() {
                             break;
                     }
                     if (str) {
-                        if (str.search(kw[i]) < 0) {
-                            if (str.search(kw[i].toLowerCase()) < 0) {
-                                if (str.search(kw[i].toUpperCase()) < 0) {
-                                    display = false;
-                                }
-                            }
+                        if (!regex.test(str)) {
+                            display = false;
                         }
                     }
                 }
@@ -288,6 +308,7 @@ function PartsManager() {
         }
     };
 
+    // Gestion du panier de commande:
     this.addToCart = function($span) {
         if (($span).hasClass('deactivated'))
             return;
@@ -302,15 +323,22 @@ function PartsManager() {
         var html = '<tr id="cartProd_'+this.nextCartProdId+'">';
         html += '<td>'+this.parts[gpe][id].name+'</td>';
         html += '<td class="ref">'+this.parts[gpe][id].num+'</td>';
-        html += '<td><input type="number" value="1" class="prodQty" size="8"/></td>';
+        html += '<td class="price">'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
+        html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
+        html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
+        html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
         html += '<td><span class="removeCartProduct" onclick="PM.removeFromCart($(this))"></span></td>';
         html += '</tr>';
         $('#cartProducts').show().find('tbody').append(html);
         $('#nbrCartProducts').html(ptr.nbrProds);
         this.nextCartProdId++;
+        this.activateCartSave();
     };
     this.removeFromCart = function($span) {
-        $span.off('click');
+        if ($span.hasClass('deactivated'))
+            return;
+
+        $span.attr('class', 'removeCartProduct deactivated');
         var $tr = $span.parent('td').parent('tr');
         var id = $tr.attr('id').replace(/^cartProd_(\d+)$/, '$1');
         $tr.fadeOut(250, function(){
@@ -329,10 +357,85 @@ function PartsManager() {
         });
         delete this.cartProds[id];
         this.cartProds[id] = null;
+        this.activateCartSave();
+    };
+    this.deleteCart = function() {
+        this.nextCartProdId = 0;
+        this.nbrProds = 0;
+        for (id in this.cartProds) {
+            delete this.cartProds[id];
+        }
+        delete this.cartProds;
+        this.cartProds = [];
+    };
+    this.activateCartSave = function() {
+        $('#cartSave').attr('class', 'blueHover');
+    };
+    this.deactivateCartSave = function() {
+        $('#cartSave').attr('class', 'deactivated');
+    };
+    this.savePartsCart = function() {
+        if (!this.cartProds.length)
+            return;
+
+        if ($('#cartSave').hasClass('deactivated'))
+            return;
+        this.deactivateCartSave();
+
+        var params = '&serial='+$('#curSerial').val();
+        var i = 1;
+        for (id in this.cartProds) {
+            params += '&part_'+i+'_ref='+this.parts[this.cartProds[id].gpe][this.cartProds[id].id].num;
+            params += '&part_'+i+'_qty='+this.cartProds[id].qty;
+        }
+        $('#cartSaveResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        setGetRequest('savePartsCart', params);
+    };
+    this.sendPartsOrder = function() {
+        if (!this.cartProds.length)
+            return;
     };
 }
 
+var nextXhrsId = 1;
+var xhrs = {
+    'newSerial' : 0,
+    'loadParts' : 0
+}
+var maxProdQty = 99;
+
 var PM = new PartsManager();
+
+function checkProdQty($input) {
+    var val = $input.val();
+    if (!val)
+        $input.val(1);
+    else if (!/^[0-9]+$/.test(val)) {
+        $input.val(1);
+    } else {
+        val = parseInt(val);
+        if (val < 1)
+            $input.val(1);
+        if (val > maxProdQty)
+            $input.val(maxProdQty);
+    }
+}
+function prodQtyDown($button) {
+    var $input = $button.parent().find('input.prodQty');
+    var val = parseInt($input.val());
+    val--;
+    if (val < 1)
+        val = 1;
+    $input.val(val);
+}
+function prodQtyUp($button) {
+    var $input = $button.parent().find('input.prodQty');
+    var val = parseInt($input.val());
+    val++;
+    if (val > maxProdQty)
+        val = maxProdQty;
+    $input.val(val);
+}
 
 function showTypeFilters() {
     $('#typeFiltersContent').stop().css('display', 'none').slideDown(250);
@@ -350,8 +453,15 @@ function addKeywordFilter() {
         });
         return;
     }
-    if (!/^[a-zA-Z0-9\-\_ ]+$/.test(kw)) {
-        $('#curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"</p>');
+    if (/ +/.test(kw)) {
+        $('#curKeywords').append('<p class="error">Veuillez n\'entrer qu\'un seul mot à la fois</p>');
+        $('#curKeywords').find('p.error').fadeOut(5000, function(){
+            $(this).remove();
+        });
+        return;
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(kw)) {
+        $('#curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques</p>');
         $('#curKeywords').find('p.error').fadeOut(5000, function(){
             $(this).remove();
         });
@@ -410,18 +520,62 @@ function onRequestResponse(xhr, requestType) {
     switch (requestType) {
         case 'newSerial':
             $('#serialResult').slideUp(250);
-            $('#productInfos').html(xhr.responseText);
-            PM.displayParts();
-            $('#productInfos').slideDown(250);
+            $('#productInfos').html(xhr.responseText).slideDown(250);
+            break;
+
+        case 'loadParts':
+            $('#partsRequestResult').slideUp(250, function() {
+                $(this).html(xhr.responseText);
+                PM.displayParts();
+                $(this).slideDown(250);
+            });
+            break;
+
+        case 'savePartsCart':
+            $('#cartSaveResults').animate({
+                'opacity': 0.1
+            }, {
+                'duration' : 250,
+                'complete' : function() {
+                    PM.activateCartSave();
+                    $(this).html(xhr.responseText).animate({
+                        'opacity': 1
+                    }, {
+                        'duration': 250,
+                        'complete' : function() {
+                            $(this).fadeOut(5000, function() {
+                                $(this).slideUp(250, function() {
+                                    $(this).html('');
+                                });
+                            })
+                        }
+                    });
+                }
+            });
             break;
     }
 }
 function setGetRequest(requestType, requestParams) {
     var xhr = getXMLHttpRequest();
+
+    if (xhrs[requestType]) {
+        var ID = nextXhrsId;
+        nextXhrsId++;
+        xhrs[requestType] = ID;
+        if (requestType == 'newSerial')
+            xhrs['loadParts'] = 0;
+    }
+
     xhr.onreadystatechange = function(){
         //alert('state: ' + xhr.readyState + ', status: ' +xhr.status);
         var RT = requestType;
         if((xhr.readyState == 4) && ((xhr.status == 200) || (xhr.status == 0))) {
+            if (xhrs[RT]) {
+                if (xhrs[RT] != ID) {
+                    alert('Requête zappée');
+                    return;
+                }
+            }
             onRequestResponse(xhr, RT);
         }
     }
@@ -443,7 +597,7 @@ $(document).ready(function() {
             $('#serialResult').html('<p class="error">Le format du numéro de série est incorrect</p>');
         } else {
             setGetRequest('newSerial', '&serial='+serial);
-            $('#serialResult').html('<p>Requête en cours de traitement...</p>');
+            $('#serialResult').html('<p class="requestProcess">Requête en cours de traitement</p>');
         }
         $('#serialResult').slideDown(250);
     });

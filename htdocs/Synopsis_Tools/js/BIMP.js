@@ -17,7 +17,7 @@ $(window).load(function() {
 ////        } else if (!/^[0-9a-zA-Z]+$/.test(serial)) {
 ////            resultZone.html('<p class="error">Le format du numéro de série est incorrect</p>');
 //        } else {
-            tabT = serial.split(" | ");
+            tabT = serial.split(" ");
             $.getScript(DOL_URL_ROOT + "/apple/appleGsxScripts.js", function() {
                 $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/apple/appleGSX.css"}));
                 for (i = 0; i < tabT.length && !ok; i++) {

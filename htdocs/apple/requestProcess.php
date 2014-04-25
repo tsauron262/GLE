@@ -12,31 +12,63 @@ $userId = 'Corinne@actitec.fr';
 $password = 'cocomart01';
 $serviceAccountNo = '0000100635';
 
+function fetchPartsList() {
+    $parts = array();
+    $i = 1;
+    while (true) {
+        if (isset($_POST['part_' . $i . '_ref'])) {
+            $parts[] = array(
+                'partNumber' => $_POST['part_' . $i . '_ref'],
+                'quantity' => isset($_POST['part_' . i . '_qty']) ? $_POST['part_' . i . '_qty'] : 1
+            );
+        } else
+            break;
+        $i++;
+    }
+    return $parts;
+}
+
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'newSerial':
+        case 'loadProduct':
             if (isset($_GET['serial'])) {
                 $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                 echo $datas->getLookupHtml();
             } else {
-                echo '<p class="error">Aucun numéro de série fournit</p>' . "\n";
+                echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
 
         case 'loadParts':
             if (isset($_GET['serial']) && $_GET['serial']) {
-                $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                echo $datas->getPartsListHtml();
+                if (isset($_GET['prodId'])) {
+                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                    echo $datas->getPartsListHtml($_GET['prodId']);
+                } else {
+                    echo '<p class="error">Impossible d\'obtenir la liste des composants : ID produit absent</p>' . "\n";
+                }
             } else {
                 echo '<p class="error">Impossible d\'obtenir la liste des composants : numéro de série invalide</p>' . "\n";
             }
             break;
 
         case 'savePartsCart':
-            echo '<p class="confirmation">Le panier a été correctement enregistré</p>';
+            if (isset($_POST['serial'])) {
+                $parts = fetchPartsList();
+                if (count($parts))
+                    echo '<p class="confirmation">Le panier a été correctement enregistré (' . count($parts) . ' produit(s))</p>';
+                else {
+                    echo '<p class="error">Une erreur est survenue: aucun produit dans le panier</p>';
+                }
+            } else {
+                echo '<p class="error">Une erreur est survenue: numéro de série absent</p>';
+            }
             break;
 
         case 'sendPartsOrder':
+            if (isset($_POST['serial'])) {
+                $parts = fetchPartsList();
+            }
             break;
     }
     die('');

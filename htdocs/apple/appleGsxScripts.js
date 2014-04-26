@@ -23,6 +23,80 @@ var partDataType = {
     'price': 'Prix'
 }
 
+function CompTIACodes() {
+    this.loadStatus = 'unloaded';
+    this.codes = [];
+    this.modifiers = [];
+
+    this.addCode = function(grp, code, desc) {
+        if (!this.codes[grp]) {
+            this.codes[grp] = [];
+        }
+        this.codes[grp][code] = desc;
+    };
+    this.addModifier = function(modifier, desc) {
+        this.modifiers[modifier] = desc;
+    }
+    this.endInit = function() {
+        if ((this.loadStatus == 'loading') || (this.loadStatus == 'newLoadingTry')) {
+            for (id in GSX.products) {
+                if (GSX.products[id].cart) {
+                    GSX.products[id].cart.onComptiaLoadingEnd();
+                }
+            }
+            this.loadStatus = 'loaded';
+        }
+    }
+    this.load = function() {
+        if (this.loadStatus != 'unloaded')
+            return;
+        this.loadStatus = 'loading';
+        for (id in GSX.products) {
+            if (GSX.products[id].cart) {
+                GSX.products[id].cart.onComptiaLoadingStart();
+            }
+        }
+        setRequest('GET', 'loadCompTIACodes', 0, '');
+    }
+    this.appendCompTIACodesSelect = function($div, group) {
+        if (!$div.length)
+            return;
+
+        if (!this.codes[group])
+            return;
+
+
+        var html = '<select class="compTIACodeSelect">';
+        html += '<option value="0">Code symptôme</option>';
+        for (code in this.codes[group]) {
+            html += '<option value="'+code+'">'+code+' - '+this.codes[group][code]+'</option>';
+        }
+        html += '</select>';
+        html += '<select class="compTIAModifierSelect">';
+        html += '<option value="0">Modificateur</option>';
+        for (mod in this.modifiers) {
+            html += '<option value="'+mod+'">'+mod+' - '+this.modifiers[mod]+'</option>';
+        }
+        html += '</select>';
+        $div.html(html);
+    };
+    this.onLoadFail = function() {
+        if (this.loadStatus == 'loading') {
+            this.loadStatus = 'newLoadingTry';
+            setRequest('GET', 'loadCompTIACodes', 0, '');
+        } else if (this.loadStatus == 'newLoadingTry') {
+            this.loadStatus = 'fail';
+            for (id in GSX.products) {
+                if (GSX.products[id].cart) {
+                    GSX.products[id].cart.onComptiaLoadingFail();
+                }
+            }
+        }
+    }
+}
+
+var CTIA = new CompTIACodes();
+
 function Part(name, num, type, price) {
     this.name = name;
     this.num = num;
@@ -46,30 +120,98 @@ function Cart(prodId, serial, PM) {
     this.nbrProds = 0;
     this.$prod = $('#prod_'+prodId);
 
+    this.onComptiaLoadingStart = function() {
+        var $cart = this.$prod.find('.cartContent');
+        if ($cart.length) {
+            displayRequestMsg('requestProcess', 'Liste des codes compTIA en cours de chargement', $cart.find('.cartRequestResults'));
+            $cart.find('.cartRequestResults').show();
+            $cart.find('.noProducts').hide();
+            $cart.find('.cartProducts').hide();
+            $cart.find('.cartSubmitContainer').hide();
+        }
+    };
+    this.onComptiaLoadingEnd = function() {
+        var $cart = this.$prod.find('.cartContent');
+        if ($cart.length) {
+            $cart.find('th.comptiaCodeTitle').show();
+            $cart.find('.cartRequestResults').html('').hide();
+            if (this.nbrProds) {
+                for (id in this.cartProds) {
+                    if (this.cartProds[id]) {
+                        var $td = $cart.find('tr.cartProd_'+id).find('td.compTIACodes');
+                        if ($td.length)
+                            CTIA.appendCompTIACodesSelect($td, this.cartProds[id].gpe);
+                    }
+                }
+                $cart.find('.noProducts').hide();
+                $cart.find('.cartProducts').show();
+                $cart.find('.cartSubmitContainer').show();
+            } else {
+                $cart.find('.noProducts').show();
+                $cart.find('.cartProducts').hide();
+                $cart.find('.cartSubmitContainer').hide();
+            }
+        }
+    };
+    this.onComptiaLoadingFail = function() {
+        var $cart = this.$prod.find('.cartContent');
+        $cart.find('.cartRequestResults').html('').hide();
+        $cart.find('.cartSubmit').attr('class', 'cartSubmit deactivated');
+        var html = '<div style="margin: 20px">';
+        html += '<p class="error" style="font-size: 11px">';
+        html += 'Le chargement des codes compTIA a échoué. <br/>';
+        html += 'Le service Apple GSX est probablement temporairement indisponible.<br />';
+        html += 'Veuillez réessayer de recharger la page ultérieurement<br />';
+        html += 'L\'envoi des commandes de composants est désactivée pour le moment</p>';
+        html += '</div>';
+        $cart.append(html);
+        if (this.nbrProds) {
+            $cart.find('.noProducts').hide();
+            $cart.find('.cartProducts').show();
+            $cart.find('.cartSubmitContainer').show();
+        } else {
+            $cart.find('.noProducts').show();
+            $cart.find('.cartProducts').hide();
+            $cart.find('.cartSubmitContainer').hide();
+        }
+    };
+
     this.add = function($span) {
         if (($span).hasClass('deactivated'))
             return;
 
+        var curId = this.nextCartProdId;
+        this.nextCartProdId++;
         var gpe = $span.attr('id').replace(/^add_(\d+)_(.*)_(.*)$/, '$2');
         var id = $span.attr('id').replace(/^add_(\d+)_(.*)_(.*)$/, '$3');
         $span.attr('class', 'addToCart deactivated');
-        this.cartProds[this.nextCartProdId] = new CartProduct(gpe, id);
+        this.cartProds[curId] = new CartProduct(gpe, id);
         this.nbrProds++;
-        this.$prod.find('.noProducts').hide();
-        this.$prod.find('.cartSubmitContainer').show();
-        var html = '<tr class="cartProd_'+this.nextCartProdId+'">';
+
+        var html = '<tr class="cartProd_'+curId+'">';
         html += '<td>'+this.PM.parts[gpe][id].name+'</td>';
         html += '<td class="ref">'+this.PM.parts[gpe][id].num+'</td>';
         html += '<td class="price">'+this.PM.parts[gpe][id].price+'&nbsp;&euro;</td>';
         html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
         html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
         html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
+        html += '<td class="compTIACodes"></td>';
         html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
         html += '</tr>';
-        this.$prod.find('.cartProducts').show().find('tbody').append(html);
+        this.$prod.find('.cartProducts').find('tbody').append(html);
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
-        this.nextCartProdId++;
         this.activateSave();
+        if (CTIA.loadStatus == 'loaded') {
+            CTIA.appendCompTIACodesSelect(this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
+            this.$prod.find('.noProducts').hide();
+            this.$prod.find('.cartProducts').show();
+            this.$prod.find('.cartSubmitContainer').show();
+        } else if (CTIA.loadStatus == 'fail') {
+            this.$prod.find('.noProducts').hide();
+            this.$prod.find('.cartProducts').show();
+            this.$prod.find('.cartSubmitContainer').show();
+        } else
+            CTIA.load();
     };
     this.remove = function($span) {
         if ($span.hasClass('deactivated'))
@@ -128,11 +270,13 @@ function Cart(prodId, serial, PM) {
                 i++;
             }
         }
-        this.$prod.find('.cartSaveResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
     };
     this.submit = function() {
         if (!this.cartProds.length)
+            return;
+        if (this.$prod.find('.cartSubmit').hasClass('deactivated'))
             return;
     };
 }
@@ -557,7 +701,7 @@ function GSX() {
 var GSX = new GSX();
 
 function displayRequestMsg(type, msg, $div) {
-    if (type == 'requestProcess')
+    if ((type == 'requestProcess') && (msg === ''))
         msg = 'Requête en cours de traitement';
 
     if (!$div)
@@ -633,6 +777,15 @@ function getXMLHttpRequest() {
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
     switch (requestType) {
+        case 'loadCompTIACodes':
+            if (xhr.responseText == 'fail') {
+                CTIA.onLoadFail();
+            } else {
+                eval(xhr.responseText);
+                CTIA.endInit();
+            }
+            break;
+
         case 'loadProduct':
             $('#requestResult').slideUp(250);
             $div = $('#prod_'+prodId);
@@ -657,7 +810,7 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'savePartsCart':
-            $('#prod_'+prodId).find('.cartSaveResults').animate({
+            $('#prod_'+prodId).find('.cartRequestResults').animate({
                 'opacity': 0.1
             }, {
                 'duration' : 250,

@@ -52,6 +52,24 @@ if (isset($_GET['action'])) {
             }
             break;
 
+        case 'loadCompTIACodes':
+            $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+            $results = $datas->getCompTIACodesArray();
+            if ($results === 'fail')
+                die('fail');
+
+            $eval = '';
+            foreach ($results['grps'] as $gpe => $codes) {
+                foreach ($codes as $code => $desc) {
+                    $eval .= 'CTIA.addCode(\'' . $gpe . '\', \'' . $code . '\', \'' . addslashes($desc) . '\')' . "\n";
+                }
+            }
+            foreach ($results['mods'] as $mod => $desc) {
+                $eval .= 'CTIA.addModifier(\'' . $mod . '\', \'' . addslashes($desc) . '\')' . "\n";
+            }
+            echo $eval;
+            break;
+
         case 'savePartsCart':
             if (isset($_POST['serial'])) {
                 $parts = fetchPartsList();

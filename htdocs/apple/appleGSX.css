@@ -201,6 +201,9 @@ td.rowTitle {
     padding: 20px;
     min-width: 361px;
 }
+th.comptiaCodeTitle {
+    display: none;
+}
 .noProducts:before {
     font-family: 'FA';
     font-size: 18px;
@@ -278,12 +281,17 @@ span.removeCartProduct {
     margin-left: 10px;
     font-size: 20px;
 }
-.cartSaveResults {
+.cartRequestResults {
     display: none;
     text-align: center;
     margin-top: 30px;
 }
-
+select.compTIACodeSelect,
+select.compTIAModifierSelect {
+    font-size: 11px;
+    width: 120px;
+    height: 20px;
+}
 /*Liste des composants*/
 .partsRequestResult {
     display: none;

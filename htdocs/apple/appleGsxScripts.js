@@ -36,7 +36,7 @@ function CompTIACodes() {
     };
     this.addModifier = function(modifier, desc) {
         this.modifiers[modifier] = desc;
-    }
+    };
     this.endInit = function() {
         if ((this.loadStatus == 'loading') || (this.loadStatus == 'newLoadingTry')) {
             for (id in GSX.products) {
@@ -46,7 +46,7 @@ function CompTIACodes() {
             }
             this.loadStatus = 'loaded';
         }
-    }
+    };
     this.load = function() {
         if (this.loadStatus != 'unloaded')
             return;
@@ -57,14 +57,13 @@ function CompTIACodes() {
             }
         }
         setRequest('GET', 'loadCompTIACodes', 0, '');
-    }
+    };
     this.appendCompTIACodesSelect = function($div, group) {
         if (!$div.length)
             return;
 
         if (!this.codes[group])
             return;
-
 
         var html = '<select class="compTIACodeSelect">';
         html += '<option value="0">Code symptôme</option>';
@@ -92,7 +91,7 @@ function CompTIACodes() {
                 }
             }
         }
-    }
+    };
 }
 
 var CTIA = new CompTIACodes();
@@ -161,7 +160,7 @@ function Cart(prodId, serial, PM) {
         html += '<p class="error" style="font-size: 11px">';
         html += 'Le chargement des codes compTIA a échoué. <br/>';
         html += 'Le service Apple GSX est probablement temporairement indisponible.<br />';
-        html += 'Veuillez réessayer de recharger la page ultérieurement<br />';
+        html += 'Veuillez essayer de recharger la page ultérieurement<br />';
         html += 'L\'envoi des commandes de composants est désactivée pour le moment</p>';
         html += '</div>';
         $cart.append(html);

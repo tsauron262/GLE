@@ -61,7 +61,8 @@ class gsxDatas {
         if (count($this->errors)) {
             return '<p class="error">Impossible d\'afficher les informations demandées</p>' . "\n";
         }
-        echo "<pre>";print_r($this->gsx->obtainCompTIA());die;
+//        echo "<pre>";print_r($this->gsx->obtainCompTIA());die;
+        $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
         $html = '<input type="hidden" id="curSerial" value="' . $this->serial . '"/>';
         if (isset($response) && count($response)) {

@@ -147,6 +147,8 @@ EOF;
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                 $tmp = $res->phpClass;
                 $obj = new $tmp($db);
+                $obj->socid = $socid;
+                $obj->cssClassM = $res->extraCss;
                 $obj->idChrono = $chrid;
                 $obj->fetch($res->type_subvaleur);
                 $obj->call_function_chronoModule($keyid, $chrid);

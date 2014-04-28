@@ -1,3 +1,102 @@
+var maxProdQty = 99;
+
+var partsGroup = {
+    0 : 'Général',
+    1 :'Visuel',
+    2 :'Affichage',
+    3 :'Stockage',
+    4 :'Périphériques d\'entrées',
+    5 :'Cartes',
+    6 :'Alimentation',
+    7 :'Impression',
+    8 :'Périphériques multi-fonctions',
+    9 :'Périphériques de communication',
+    'A' :'Partage',
+    'B' :'iPhone',
+    'E' :'iPod',
+    'F' :'iPad'
+};
+var partDataType = {
+    'name': 'Nom',
+    'num': 'Ref.',
+    'type': 'Type',
+    'price': 'Prix'
+}
+
+function CompTIACodes() {
+    this.loadStatus = 'unloaded';
+    this.codes = [];
+    this.modifiers = [];
+
+    this.addCode = function(grp, code, desc) {
+        if (!this.codes[grp]) {
+            this.codes[grp] = [];
+        }
+        this.codes[grp][code] = desc;
+    };
+    this.addModifier = function(modifier, desc) {
+        this.modifiers[modifier] = desc;
+    }
+    this.endInit = function() {
+        if ((this.loadStatus == 'loading') || (this.loadStatus == 'newLoadingTry')) {
+            for (id in GSX.products) {
+                if (GSX.products[id].cart) {
+                    GSX.products[id].cart.onComptiaLoadingEnd();
+                }
+            }
+            this.loadStatus = 'loaded';
+        }
+    }
+    this.load = function() {
+        if (this.loadStatus != 'unloaded')
+            return;
+        this.loadStatus = 'loading';
+        for (id in GSX.products) {
+            if (GSX.products[id].cart) {
+                GSX.products[id].cart.onComptiaLoadingStart();
+            }
+        }
+        setRequest('GET', 'loadCompTIACodes', 0, '');
+    }
+    this.appendCompTIACodesSelect = function($div, group) {
+        if (!$div.length)
+            return;
+
+        if (!this.codes[group])
+            return;
+
+
+        var html = '<select class="compTIACodeSelect">';
+        html += '<option value="0">Code symptôme</option>';
+        for (code in this.codes[group]) {
+            html += '<option value="'+code+'">'+code+' - '+this.codes[group][code]+'</option>';
+        }
+        html += '</select>';
+        html += '<select class="compTIAModifierSelect">';
+        html += '<option value="0">Modificateur</option>';
+        for (mod in this.modifiers) {
+            html += '<option value="'+mod+'">'+mod+' - '+this.modifiers[mod]+'</option>';
+        }
+        html += '</select>';
+        $div.html(html);
+    };
+    this.onLoadFail = function() {
+        if (this.loadStatus == 'loading') {
+            this.loadStatus = 'newLoadingTry';
+            setRequest('GET', 'loadCompTIACodes', 0, '');
+        } else if (this.loadStatus == 'newLoadingTry') {
+            this.loadStatus = 'fail';
+            for (id in GSX.products) {
+                if (GSX.products[id].cart) {
+                    GSX.products[id].cart.onComptiaLoadingFail();
+                }
+            }
+        }
+    }
+}
+
+var CTIA = new CompTIACodes();
+
 function Part(name, num, type, price) {
     this.name = name;
     this.num = num;
@@ -11,28 +110,184 @@ function CartProduct(gpe, id) {
     this.qty = 1;
 }
 
-function PartsManager() {
+function Cart(prodId, serial, PM) {
     var ptr = this;
-    this.groups = {
-        0 : 'Général',
-        1 :'Visuel',
-        2 :'Affichage',
-        3 :'Stockage',
-        4 :'Périphériques d\'entrées',
-        5 :'Cartes',
-        6 :'Alimentation',
-        7 :'Impression',
-        8 :'Périphériques multi-fonctions',
-        9 :'Périphériques de communication',
-        'A' :'Partage',
-        'B' :'iPhone',
-        'E' :'iPod',
-        'F' :'iPad'
-    }
-    this.parts = []; // Liste des parts (Objets Part) dans un sous-tableau pour chaque catégorie.
-    this.cartProds = []; // Liste des produits dans le panier de commande (objets CartProduct).
+    this.prodId = prodId;
+    this.serial = serial;
+    this.PM = PM;
+    this.cartProds = [];
     this.nextCartProdId = 0;
     this.nbrProds = 0;
+    this.$prod = $('#prod_'+prodId);
+
+    this.onComptiaLoadingStart = function() {
+        var $cart = this.$prod.find('.cartContent');
+        if ($cart.length) {
+            displayRequestMsg('requestProcess', 'Liste des codes compTIA en cours de chargement', $cart.find('.cartRequestResults'));
+            $cart.find('.cartRequestResults').show();
+            $cart.find('.noProducts').hide();
+            $cart.find('.cartProducts').hide();
+            $cart.find('.cartSubmitContainer').hide();
+        }
+    };
+    this.onComptiaLoadingEnd = function() {
+        var $cart = this.$prod.find('.cartContent');
+        if ($cart.length) {
+            $cart.find('th.comptiaCodeTitle').show();
+            $cart.find('.cartRequestResults').html('').hide();
+            if (this.nbrProds) {
+                for (id in this.cartProds) {
+                    if (this.cartProds[id]) {
+                        var $td = $cart.find('tr.cartProd_'+id).find('td.compTIACodes');
+                        if ($td.length)
+                            CTIA.appendCompTIACodesSelect($td, this.cartProds[id].gpe);
+                    }
+                }
+                $cart.find('.noProducts').hide();
+                $cart.find('.cartProducts').show();
+                $cart.find('.cartSubmitContainer').show();
+            } else {
+                $cart.find('.noProducts').show();
+                $cart.find('.cartProducts').hide();
+                $cart.find('.cartSubmitContainer').hide();
+            }
+        }
+    };
+    this.onComptiaLoadingFail = function() {
+        var $cart = this.$prod.find('.cartContent');
+        $cart.find('.cartRequestResults').html('').hide();
+        $cart.find('.cartSubmit').attr('class', 'cartSubmit deactivated');
+        var html = '<div style="margin: 20px">';
+        html += '<p class="error" style="font-size: 11px">';
+        html += 'Le chargement des codes compTIA a échoué. <br/>';
+        html += 'Le service Apple GSX est probablement temporairement indisponible.<br />';
+        html += 'Veuillez réessayer de recharger la page ultérieurement<br />';
+        html += 'L\'envoi des commandes de composants est désactivée pour le moment</p>';
+        html += '</div>';
+        $cart.append(html);
+        if (this.nbrProds) {
+            $cart.find('.noProducts').hide();
+            $cart.find('.cartProducts').show();
+            $cart.find('.cartSubmitContainer').show();
+        } else {
+            $cart.find('.noProducts').show();
+            $cart.find('.cartProducts').hide();
+            $cart.find('.cartSubmitContainer').hide();
+        }
+    };
+
+    this.add = function($span) {
+        if (($span).hasClass('deactivated'))
+            return;
+
+        var curId = this.nextCartProdId;
+        this.nextCartProdId++;
+        var gpe = $span.attr('id').replace(/^add_(\d+)_(.*)_(.*)$/, '$2');
+        var id = $span.attr('id').replace(/^add_(\d+)_(.*)_(.*)$/, '$3');
+        $span.attr('class', 'addToCart deactivated');
+        this.cartProds[curId] = new CartProduct(gpe, id);
+        this.nbrProds++;
+
+        var html = '<tr class="cartProd_'+curId+'">';
+        html += '<td>'+this.PM.parts[gpe][id].name+'</td>';
+        html += '<td class="ref">'+this.PM.parts[gpe][id].num+'</td>';
+        html += '<td class="price">'+this.PM.parts[gpe][id].price+'&nbsp;&euro;</td>';
+        html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
+        html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
+        html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
+        html += '<td class="compTIACodes"></td>';
+        html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
+        html += '</tr>';
+        this.$prod.find('.cartProducts').find('tbody').append(html);
+        this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
+        this.activateSave();
+        if (CTIA.loadStatus == 'loaded') {
+            CTIA.appendCompTIACodesSelect(this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
+            this.$prod.find('.noProducts').hide();
+            this.$prod.find('.cartProducts').show();
+            this.$prod.find('.cartSubmitContainer').show();
+        } else if (CTIA.loadStatus == 'fail') {
+            this.$prod.find('.noProducts').hide();
+            this.$prod.find('.cartProducts').show();
+            this.$prod.find('.cartSubmitContainer').show();
+        } else
+            CTIA.load();
+    };
+    this.remove = function($span) {
+        if ($span.hasClass('deactivated'))
+            return;
+
+        $span.attr('class', 'removeCartProduct deactivated');
+        var $tr = $span.parent('td').parent('tr');
+        var id = $tr.attr('class').replace(/^cartProd_(\d+)$/, '$1');
+        $tr.fadeOut(250, function(){
+            $(this).remove();
+            if (!ptr.$prod.find('.cartProducts').find('tbody').find('tr').length) {
+                ptr.$prod.find('.cartProducts').hide();
+                ptr.$prod.find('.cartSubmitContainer').slideUp(250);
+                ptr.$prod.find('.noProducts').slideDown(250);
+            }
+        });
+        this.nbrProds--;
+        this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
+        var $addSpan = this.$prod.find('.partGroup_'+this.cartProds[id].gpe).find('tr.partRow_'+this.cartProds[id].id).find('span.addToCart');
+        $addSpan.attr('class', 'addToCart activated').click(function() {
+            ptr.add($(this));
+        });
+        delete this.cartProds[id];
+        this.cartProds[id] = null;
+        this.activateSave();
+    };
+    this.deleteCart = function() {
+        this.nextCartProdId = 0;
+        this.nbrProds = 0;
+        for (id in this.cartProds) {
+            delete this.cartProds[id];
+        }
+        delete this.cartProds;
+        this.cartProds = [];
+    };
+    this.activateSave = function() {
+        this.$prod.find('.cartSave').attr('class', 'cartSave blueHover');
+    };
+    this.deactivateSave = function() {
+        this.$prod.find('.cartSave').attr('class', 'cartSave blueHover deactivated');
+    };
+    this.save = function() {
+        if (!this.cartProds.length)
+            return;
+
+        if (this.$prod.find('.cartSave').hasClass('deactivated'))
+            return;
+        this.deactivateSave();
+
+        var params = 'serial='+this.serial;
+        var i = 1;
+        for (id in this.cartProds) {
+            if (this.cartProds[id]) {
+                params += '&part_'+i+'_ref='+this.PM.parts[this.cartProds[id].gpe][this.cartProds[id].id].num;
+                params += '&part_'+i+'_qty='+this.cartProds[id].qty;
+                i++;
+            }
+        }
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        setRequest('POST', 'savePartsCart', this.prodId, params);
+    };
+    this.submit = function() {
+        if (!this.cartProds.length)
+            return;
+        if (this.$prod.find('.cartSubmit').hasClass('deactivated'))
+            return;
+    };
+}
+
+function PartsManager(prodId, serial) {
+    this.prodId = prodId;
+    this.serial = serial;
+    var ptr = this;
+    this.parts = [];
+    this.$prod = $('#prod_'+prodId);
+    this.$parts = null;
 
     //Gestion de la liste des Parts:
     this.removeParts = function() {
@@ -53,23 +308,12 @@ function PartsManager() {
         this.parts[group].push(new Part(name, num, type, price));
     };
     this.loadParts = function () {
-        this.deleteCart();
         this.removeParts();
-        $('#loadParts').slideUp(250);
-        if ($('#partsRequestResult').css('display') != 'none')
-            $('#partsRequestResult').slideUp(250, function() {
-                $(this).html('<p>Requête en cours de traitement</p>').slideDown(250);
-            });
-        else {
-            $('#partsRequestResult').html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
-        }
-        var serial = $('#curSerial').val();
-        if (!serial)
-            serial = '0';
-        setGetRequest('loadParts', '&serial='+serial);
+        setRequest('GET', 'loadParts', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
+        displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
     };
     this.displayParts = function() {
-        var $container = $('#partsListContainer');
+        this.$parts = this.$prod.find('.partsListContainer');
         var ths = '<th style="min-width: 350px">Nom</th>';
         ths += '<th style="min-width: 100px">Ref.</th>';
         ths += '<th style="min-width: 100px">Type</th>';
@@ -77,9 +321,9 @@ function PartsManager() {
         ths += '<th></th>';
 
         for (gpe in this.parts) {
-            $('#typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_'+gpe+'"/><label for="typeFilter_'+gpe+'">'+this.groups[gpe]+'</label><br/>');
-            var html = '<div id="partGroup_'+gpe+'" class="partGroup">';
-            html += '<div class="partGroupName closed">'+this.groups[gpe]+'<span class="partsNbr">('+this.parts[gpe].length+' produits)</span></div>';
+            this.$prod.find('.typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_'+ptr.prodId+'_'+gpe+'"/><label for="typeFilter_'+ptr.prodId+'_'+gpe+'">'+partsGroup[gpe]+'</label><br/>');
+            var html = '<div class="partGroup_'+gpe+' partGroup">';
+            html += '<div class="partGroupName closed">'+partsGroup[gpe]+'<span class="partsNbr">('+this.parts[gpe].length+' produits)</span></div>';
             html += '<div class="partsList">';
             html += '<table><thead>'+ths+'</thead><tbody>';
             var odd = true;
@@ -94,39 +338,39 @@ function PartsManager() {
                 html += '<td>'+this.parts[gpe][id].num+'</td>';
                 html += '<td>'+this.parts[gpe][id].type+'</td>';
                 html += '<td>'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
-                html += '<td><span id="add_'+gpe+'_'+id+'" class="addToOrder activated" onclick="PM.addToCart($(this))">Commander</span></td>';
+                html += '<td><span id="add_'+this.prodId+'_'+gpe+'_'+id+'" class="addToCart activated" onclick="GSX.products['+this.prodId+'].cart.add($(this))">Commander</span></td>';
                 html += '</tr>';
                 odd = !odd;
             }
             html += '</tbody></table>';
             html += '</div>';
             html += '</div>';
-            $container.append(html);
+            this.$parts.append(html);
         }
         this.setEvents();
     };
     this.setEvents = function() {
-        $('#cartTitle').mouseover(function() {
-            if ($('#cartContent').css('display') == 'none')
-                $('#cartContent').fadeIn(250);
+        ptr.$prod.find('.cartTitle').mouseover(function() {
+            if (ptr.$prod.find('.cartContent').css('display') == 'none')
+                ptr.$prod.find('.cartContent').fadeIn(250);
             else {
-                $('#cartContent').stop().css('opacity', 1);
+                ptr.$prod.find('.cartContent').stop().css('opacity', 1);
             }
         }).mouseleave(function() {
-            $('#cartContent').fadeOut(250);
+            ptr.$prod.find('.cartContent').fadeOut(250);
         });
-        $('#cartContent').mouseover(function() {
-            $('#cartContent').stop().css('opacity', 1);
+        ptr.$prod.find('.cartContent').mouseover(function() {
+            ptr.$prod.find('.cartContent').stop().css('opacity', 1);
         }).mouseout(function() {
-            $('#cartContent').fadeOut(250);
+            ptr.$prod.find('.cartContent').fadeOut(250);
         });
-        $('div.partGroupName.closed').click(function() {
+        ptr.$prod.find('div.partGroupName.closed').click(function() {
             ptr.openPartsGroup($(this));
         });
-        $('div.partGroupName.opened').click(function() {
+        ptr.$prod.find('div.partGroupName.opened').click(function() {
             ptr.closePartsGroup($(this));
         });
-        $('tr.partRow').mouseover(function() {
+        ptr.$prod.find('tr.partRow').mouseover(function() {
             $(this).find('td').css({
                 'border-top': '1px solid #22A022',
                 'border-bottom': '1px solid #22A022',
@@ -139,33 +383,39 @@ function PartsManager() {
                 'color': '#464646'
             });
         });
-        $('#filterTitle').mouseover(function(){
-            showTypeFilters();
+        ptr.$prod.find('.filterTitle').mouseover(function(){
+            ptr.showTypeFilters();
         }).mouseout(function() {
-            hideTypeFilters();
+            ptr.hideTypeFilters();
         });
-        $('#typeFiltersContent').mouseover(function(){
-            showTypeFilters();
+        ptr.$prod.find('.typeFiltersContent').mouseover(function(){
+            ptr.showTypeFilters();
         }).mouseout(function() {
-            hideTypeFilters();
+            ptr.hideTypeFilters();
         });
-        $('#filterCheckAll').click(function() {
+        ptr.$prod.find('.filterCheckAll').click(function() {
             ptr.showAllPartsGroup();
         });
-        $('#filterHideAll').click(function() {
+        ptr.$prod.find('.filterHideAll').click(function() {
             ptr.hideAllPartsGroup();
         });
-        $('#typeFiltersContent input').change(function() {
-            var gpe = $(this).attr('id').replace(/^typeFilter_(.+)$/, '$1');
+        ptr.$prod.find('.typeFiltersContent input').change(function() {
+            var gpe = $(this).attr('id').replace(/^typeFilter_(\d+)_(.+)$/, '$2');
             if ($(this).prop('checked')) {
-                $('#partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
+                ptr.$prod.find('.partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
             } else {
-                $('#partGroup_'+gpe).slideUp(250);
+                ptr.$prod.find('.partGroup_'+gpe).slideUp(250);
             }
         });
     };
 
     // Gestion de l'affichage:
+    this.showTypeFilters = function() {
+        this.$prod.find('.typeFiltersContent').stop().css('display', 'none').slideDown(250);
+    }
+    this.hideTypeFilters = function() {
+        this.$prod.find('.typeFiltersContent').stop().slideUp(250);
+    }
     this.openPartsGroup = function($gpe) {
         $gpe.parent().children('div.partsList').slideDown(250);
         $gpe.attr('class', 'partGroupName opened').off('click').click(function() {
@@ -179,45 +429,138 @@ function PartsManager() {
         });
     };
     this.showPartsGroup = function(gpe) {
-        $('#typeFilter_'+gpe).attr('checked', '');
-        $('#partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
+        $('#typeFilter_'+ptr.prodId+'_'+gpe).attr('checked', '');
+        this.$prod.find('.partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
     };
     this.hidePartsGroup = function(gpe) {
-        $('#typeFilter_'+gpe).removeAttr('checked');
-        $('#partGroup_'+gpe).stop().hide();
+        $('#typeFilter_'+ptr.prodId+'_'+gpe).removeAttr('checked');
+        this.$prod.find('.partGroup_'+gpe).stop().hide();
     };
     this.showAllPartsGroup = function() {
-        $('#typeFiltersContent').find('input').each(function() {
+        this.$prod.find('.typeFiltersContent').find('input').each(function() {
             $(this).attr('checked', '');
         });
-        $('.partGroup').each(function() {
+        this.$prod.find('.partGroup').each(function() {
             $(this).stop().show();
         });
     };
     this.hideAllPartsGroup = function() {
-        $('#typeFiltersContent').find('input').each(function() {
+        this.$prod.find('.typeFiltersContent').find('input').each(function() {
             $(this).removeAttr('checked');
         });
-        $('.partGroup').each(function() {
+        this.$prod.find('.partGroup').each(function() {
             $(this).slideUp(250);
         });
     };
     this.resetPartsDisplay = function() {
         this.showAllPartsGroup();
-        $('tr.partRow').each(function() {
+        this.$prod.find('tr.partRow').each(function() {
             $(this).show();
         });
         for (gpe in this.parts) {
-            $('#partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
+            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
         }
     };
 
     // Gestion des filtres et des recherches:
-    this.filterByKeywords = function(dataToCheck) {
+    this.addKeywordFilter = function() {
+        var kw = this.$prod.find('.keywordFilter').val();
+        if (!kw) {
+            this.$prod.find('.curKeywords').append('<p class="error">Veuillez entrer un mot-clé</p>');
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(2000, function(){
+                $(this).remove();
+            });
+            return;
+        }
+        if (/ +/.test(kw)) {
+            this.$prod.find('.curKeywords').append('<p class="error">Veuillez n\'entrer qu\'un seul mot à la fois</p>');
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function(){
+                $(this).remove();
+            });
+            return;
+        }
+        if (!/^[a-zA-Z0-9\.,\-]+$/.test(kw)) {
+            this.$prod.find('.curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques</p>');
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function(){
+                $(this).remove();
+            });
+            return;
+        }
+        var kwType = this.$prod.find('select.keywordFilterType').val();
+        this.$prod.find('.curKeywords').find('p.error').stop().remove();
+        var html = '<div><span class="keyword">'+kw+'</span>';
+        html += '<span class="kwType kwt_'+kwType+'">&nbsp;&nbsp;('+partDataType[kwType]+')</span>';
+        html += '<span class="removeKeyWord" onclick="GSX.products['+this.prodId+'].PM.removeKeywordFilter($(this))"></span></div>';
+        this.$prod.find('.curKeywords').append(html);
+        this.$prod.find('.keywordFilter').val('');
+        this.filterByKeywords();
+    };
+    this.removeKeywordFilter = function($span) {
+        $span.parent('div').remove();
+        if (this.$prod.find('.curKeywords').find('div').length)
+            this.filterByKeywords('name');
+        else
+            this.unsetKeywordsFilter();
+    };
+    this.searchPartByNum = function() {
+        var $result = this.$prod.find('.searchResult');
+        var search = this.$prod.find('.searchPartInput').val();
+        if (!search) {
+            $result.append('<p class="error">Veuillez entrer un code produit</p>');
+            $result.find('p.error').fadeOut(2000, function(){
+                $(this).remove();
+            });
+            return;
+        }
+        if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
+            $result.append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"</p>');
+            $result.find('p.error').fadeOut(5000, function(){
+                $(this).remove();
+            });
+            return;
+        }
+        this.unsetSearch();
+        this.$prod.find('.searchResult').html('<div class="partSearchNum"><span class="searchNum">'+search+'</span><span class="removeSearch" onclick="GSX.products['+this.prodId+'].PM.unsetSearch()"></span></div>');
+        this.$prod.find('.curKeywords').find('div').each(function() {
+            $(this).remove();
+        });
+        $('tr.partRow').each(function() {
+            $(this).hide();
+        });
+        var n = 0;
+        for (gpe in this.parts) {
+            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('');
+            var check = false;
+            for (id in this.parts[gpe]) {
+                if (this.parts[gpe][id].num == search) {
+                    check = true;
+                    n++;
+                    this.$prod.find('.partGroup_'+gpe).find('tr.partRow_'+id).show();
+                }
+            }
+            if (check) {
+                this.showPartsGroup(gpe);
+                this.openPartsGroup(this.$prod.find('.partGroup_'+gpe).find('div.partGroupName'));
+            } else {
+                this.hidePartsGroup(gpe);
+                this.closePartsGroup(this.$prod.find('.partGroup_'+gpe).find('div.partGroupName'));
+                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('');
+            }
+        }
+        if (!n) {
+            this.$prod.find('.searchResult').append('<p class="error">Aucun composant compatible ne correspond à ce numéro</p>');
+        }
+    };
+    this.filterByKeywords = function() {
         this.unsetSearch();
         var kw = [];
-        $('#curKeywords').children('div').each(function(){
-            kw.push($(this).find('span.keyword').text());
+        this.$prod.find('.curKeywords').children('div').each(function(){
+            var txt = $(this).find('span.keyword').text();
+            var type = $(this).find('.kwType').attr('class').replace(/^kwType kwt_(.*)$/, '$1');
+            kw.push({
+                'txt' : txt,
+                'type' : type
+            });
         });
         $('tr.partRow').each(function() {
             $(this).hide();
@@ -228,14 +571,27 @@ function PartsManager() {
                 var display = true;
                 for (i in kw) {
                     var str = null;
-                    var regex = new RegExp('^(.*)'+kw[i]+'(.*)$', 'i');
-                    switch (dataToCheck) {
+                    var regex = null;
+                    switch (kw[i].type) {
                         case 'name':
+                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
                             str = ptr.parts[gpe][id].name;
                             break;
 
                         case 'num':
+                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
                             str = ptr.parts[gpe][id].num;
+                            break;
+
+                        case 'price':
+                            kw[i].txt = kw[i].txt.replace(/,/g, '.');
+                            regex = new RegExp('^'+kw[i].txt+'\.*\d*$', 'i');
+                            str = ptr.parts[gpe][id].price;
+                            break;
+
+                        case 'type':
+                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
+                            str = ptr.parts[gpe][id].type;
                             break;
                     }
                     if (str) {
@@ -245,167 +601,131 @@ function PartsManager() {
                     }
                 }
                 if (display) {
-                    $('#partGroup_'+gpe).find('tr.partRow_'+id).show();
+                    this.$prod.find('.partGroup_'+gpe).find('tr.partRow_'+id).show();
                     n++;
                 }
             }
-            $('#partGroup_'+gpe).find('span.partsNbr').html('('+n+' produits)');
+            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+n+' produits)');
             if (n > 0)
-                $('#partGroup_'+gpe).find('span.partsNbr').css('color', '#00780A');
+                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').css('color', '#00780A');
             else
-                $('#partGroup_'+gpe).find('span.partsNbr').css('color', '#960000');
+                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').css('color', '#960000');
         }
     };
     this.unsetKeywordsFilter = function() {
-        $('#curKeywords').find('div').each(function() {
+        this.$prod.find('.curKeywords').find('div').each(function() {
             $(this).remove();
         });
-        $('#searchResult').html('');
+        this.$prod.find('.searchResult').html('');
         $('tr.partRow').each(function(){
             $(this).show();
         });
         for (gpe in this.parts) {
-            $('#partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
-        }
-    };
-    this.searchPartByNum = function(num) {
-        this.unsetSearch();
-        $('#searchResult').html('<div id="partSearchNum"><span class="searchNum">'+num+'</span><span class="removeSearch" onclick="PM.unsetSearch()"></span></div>');
-        $('#curKeywords').find('div').each(function() {
-            $(this).remove();
-        });
-        $('tr.partRow').each(function() {
-            $(this).hide();
-        });
-        var n = 0;
-        for (gpe in this.parts) {
-            $('#partGroup_'+gpe).find('span.partsNbr').html('');
-            var check = false;
-            for (id in this.parts[gpe]) {
-                if (this.parts[gpe][id].num == num) {
-                    check = true;
-                    n++;
-                    $('#partGroup_'+gpe).find('tr.partRow_'+id).show();
-                }
-            }
-            if (check) {
-                this.showPartsGroup(gpe);
-                this.openPartsGroup($('#partGroup_'+gpe).find('div.partGroupName'));
-            } else {
-                this.hidePartsGroup(gpe);
-                this.closePartsGroup($('#partGroup_'+gpe).find('div.partGroupName'));
-                $('#partGroup_'+gpe).find('span.partsNbr').html('');
-            }
-        }
-        if (!n) {
-            $('#searchResult').append('<p class="error">Aucun composant compatible ne correspond à ce numéro</p>');
+            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
         }
     };
     this.unsetSearch = function() {
-        if ($('#partSearchNum').length) {
-            $('#searchResult').html('');
+        if (this.$prod.find('.partSearchNum').length) {
+            this.$prod.find('.searchResult').html('');
             this.resetPartsDisplay();
         }
     };
+}
 
-    // Gestion du panier de commande:
-    this.addToCart = function($span) {
-        if (($span).hasClass('deactivated'))
+function GSX_Product(id, serial) {
+    this.id = id;
+    this.serial = serial;
+    this.PM = null;
+    this.cart = null;
+
+    this.loadDatas = function() {
+        $('#requestsResponsesContainer').append('<div id="prod_'+id+'" class="productDatasContainer"></div>');
+        setRequest('GET', 'loadProduct', id, '&serial='+serial);
+        displayRequestMsg('requestProcess', '');
+    }
+
+    this.loadParts = function() {
+        this.PM = new PartsManager(this.id, this.serial);
+        this.cart = new Cart(id, serial, this.PM);
+        this.PM.loadParts();
+    }
+}
+
+function GSX() {
+    this.products = [];
+    this.nextProdId = 1;
+
+    this.loadProduct = function (serial) {
+        if (!serial) {
+            displayRequestMsg('error', 'Veuillez entrer un numéro de série');
             return;
+        }
 
-        var gpe = $span.attr('id').replace(/^add_(.*)_(.*)$/, '$1');
-        var id = $span.attr('id').replace(/^add_(.*)_(.*)$/, '$2');
-        $span.attr('class', 'addToOrder deactivated');
-        this.cartProds[this.nextCartProdId] = new CartProduct(gpe, id);
-        this.nbrProds++;
-        $('#noProducts').hide();
-        $('#orderSubmitContainer').show();
-        var html = '<tr id="cartProd_'+this.nextCartProdId+'">';
-        html += '<td>'+this.parts[gpe][id].name+'</td>';
-        html += '<td class="ref">'+this.parts[gpe][id].num+'</td>';
-        html += '<td class="price">'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
-        html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
-        html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
-        html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
-        html += '<td><span class="removeCartProduct" onclick="PM.removeFromCart($(this))"></span></td>';
-        html += '</tr>';
-        $('#cartProducts').show().find('tbody').append(html);
-        $('#nbrCartProducts').html(ptr.nbrProds);
-        this.nextCartProdId++;
-        this.activateCartSave();
-    };
-    this.removeFromCart = function($span) {
-        if ($span.hasClass('deactivated'))
+        if (!/^[0-9A-Z]{11,12}$/.test(serial)) {
+            displayRequestMsg('error', 'Le format du numéro de série est incorrect');
             return;
+        }
 
-        $span.attr('class', 'removeCartProduct deactivated');
-        var $tr = $span.parent('td').parent('tr');
-        var id = $tr.attr('id').replace(/^cartProd_(\d+)$/, '$1');
-        $tr.fadeOut(250, function(){
-            $(this).remove();
-            if (!$('#cartProducts').find('tbody').find('tr').length) {
-                $('#cartProducts').hide();
-                $('#orderSubmitContainer').slideUp(250);
-                $('#noProducts').slideDown(250);
+        for (id in this.products) {
+            if (this.products[id].serial == serial) {
+                displayRequestMsg('error', 'Un produit possédant ce numéro de série a déjà été chargé');
+                return;
             }
-        });
-        this.nbrProds--;
-        $('#nbrCartProducts').html(ptr.nbrProds);
-        var $addSpan = $('#partGroup_'+this.cartProds[id].gpe).find('tr.partRow_'+this.cartProds[id].id).find('span.addToOrder');
-        $addSpan.attr('class', 'addToOrder activated').click(function() {
-            ptr.addToCart($(this));
-        });
-        delete this.cartProds[id];
-        this.cartProds[id] = null;
-        this.activateCartSave();
-    };
-    this.deleteCart = function() {
-        this.nextCartProdId = 0;
-        this.nbrProds = 0;
-        for (id in this.cartProds) {
-            delete this.cartProds[id];
         }
-        delete this.cartProds;
-        this.cartProds = [];
+        this.products[this.nextProdId] = new GSX_Product(this.nextProdId, serial);
+        this.products[this.nextProdId].loadDatas();
+        this.nextProdId++;
     };
-    this.activateCartSave = function() {
-        $('#cartSave').attr('class', 'blueHover');
-    };
-    this.deactivateCartSave = function() {
-        $('#cartSave').attr('class', 'deactivated');
-    };
-    this.savePartsCart = function() {
-        if (!this.cartProds.length)
+    this.loadProductParts = function($button) {
+        var prodId = getProdId($button);
+        if (!prodId) {
+            displayRequestMsg('error', 'Erreur : ID produit absent', $('#prod'+prodId).find('.partsRequestResult'));
             return;
-
-        if ($('#cartSave').hasClass('deactivated'))
-            return;
-        this.deactivateCartSave();
-
-        var params = '&serial='+$('#curSerial').val();
-        var i = 1;
-        for (id in this.cartProds) {
-            params += '&part_'+i+'_ref='+this.parts[this.cartProds[id].gpe][this.cartProds[id].id].num;
-            params += '&part_'+i+'_qty='+this.cartProds[id].qty;
         }
-        $('#cartSaveResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
-        setGetRequest('savePartsCart', params);
+        if (this.products[prodId]) {
+            $button.slideUp(250);
+            this.products[prodId].loadParts();
+        }
+        else {
+            displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod'+prodId).find('.partsRequestResult'));
+        }
     };
-    this.sendPartsOrder = function() {
-        if (!this.cartProds.length)
-            return;
+    this.addPart = function(prodId, group, name, num, type, price) {
+        this.products[prodId].PM.addPart(group, name, num, type, price);
+    }
+    this.displayParts = function(prodId) {
+        this.products[prodId].PM.displayParts();
     };
 }
 
-var nextXhrsId = 1;
-var xhrs = {
-    'newSerial' : 0,
-    'loadParts' : 0
+var GSX = new GSX();
+
+function displayRequestMsg(type, msg, $div) {
+    if ((type == 'requestProcess') && (msg === ''))
+        msg = 'Requête en cours de traitement';
+
+    if (!$div)
+        $div = $('#requestResult');
+
+    var html = '<p class="'+type+'">'+msg+'</p>';
+
+    if ($div.css('display') != 'none') {
+        $div.slideUp(250, function() {
+            $(this).html(html).slideDown(250);
+        });
+    } else {
+        $div.html(html);
+        $div.slideDown(250);
+    }
 }
-var maxProdQty = 99;
 
-var PM = new PartsManager();
-
+function getProdId($obj) {
+    if (!$obj.length)
+        return 0;
+    var id = $obj.parent('.productDatasContainer').attr('id').replace(/^prod_(\d+)$/, '$1');
+    if (!id) return 0;
+    return id;
+}
 function checkProdQty($input) {
     var val = $input.val();
     if (!val)
@@ -437,68 +757,6 @@ function prodQtyUp($button) {
     $input.val(val);
 }
 
-function showTypeFilters() {
-    $('#typeFiltersContent').stop().css('display', 'none').slideDown(250);
-}
-function hideTypeFilters() {
-    $('#typeFiltersContent').stop().slideUp(250);
-}
-
-function addKeywordFilter() {
-    var kw = $('#keywordFilter').val();
-    if (!kw) {
-        $('#curKeywords').append('<p class="error">Veuillez entrer un mot-clé</p>');
-        $('#curKeywords').find('p.error').fadeOut(2000, function(){
-            $(this).remove();
-        });
-        return;
-    }
-    if (/ +/.test(kw)) {
-        $('#curKeywords').append('<p class="error">Veuillez n\'entrer qu\'un seul mot à la fois</p>');
-        $('#curKeywords').find('p.error').fadeOut(5000, function(){
-            $(this).remove();
-        });
-        return;
-    }
-    if (!/^[a-zA-Z0-9]+$/.test(kw)) {
-        $('#curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques</p>');
-        $('#curKeywords').find('p.error').fadeOut(5000, function(){
-            $(this).remove();
-        });
-        return;
-    }
-    $('#curKeywords').find('p.error').stop().remove();
-    $('#curKeywords').append('<div><span class="keyword">'+kw+'</span><span class="removeKeyWord" onclick="removeKeywordFilter($(this))"></span></div>');
-    $('#keywordFilter').val('');
-    PM.filterByKeywords('name');
-}
-function removeKeywordFilter($span) {
-    $span.parent('div').remove();
-    if ($('#curKeywords').find('div').length)
-        PM.filterByKeywords('name');
-    else
-        PM.unsetKeywordsFilter();
-}
-function searchPartByNum() {
-    var search = $('#searchPartInput').val();
-    if (!search) {
-        $('#searchResult').append('<p class="error">Veuillez entrer un code produit</p>');
-        $('#searchResult').find('p.error').fadeOut(2000, function(){
-            $(this).remove();
-        });
-        return;
-    }
-    if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
-        $('#searchResult').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"</p>');
-        $('#searchResult').find('p.error').fadeOut(5000, function(){
-            $(this).remove();
-        });
-        return;
-    }
-    $('#searchPartInput').val('');
-    PM.searchPartByNum(search);
-}
-
 function getXMLHttpRequest() {
     var xhr = null;
     if (window.XMLHttpRequest || window.ActiveXObject) {
@@ -516,28 +774,48 @@ function getXMLHttpRequest() {
     }
     return xhr;
 }
-function onRequestResponse(xhr, requestType) {
+function onRequestResponse(xhr, requestType, prodId) {
+    var $div = null;
     switch (requestType) {
-        case 'newSerial':
-            $('#serialResult').slideUp(250);
-            $('#productInfos').html(xhr.responseText).slideDown(250);
+        case 'loadCompTIACodes':
+            if (xhr.responseText == 'fail') {
+                CTIA.onLoadFail();
+            } else {
+                eval(xhr.responseText);
+                CTIA.endInit();
+            }
+            break;
+
+        case 'loadProduct':
+            $('#requestResult').slideUp(250);
+            $div = $('#prod_'+prodId);
+            if ($div.length)
+                $div.html(xhr.responseText).slideDown(250).show();
+            else {
+                displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
+            }
             break;
 
         case 'loadParts':
-            $('#partsRequestResult').slideUp(250, function() {
-                $(this).html(xhr.responseText);
-                PM.displayParts();
-                $(this).slideDown(250);
-            });
+            $div = $('#prod_'+prodId).find('.partsRequestResult');
+            if ($div.length) {
+                $div.slideUp(250, function() {
+                    $(this).html(xhr.responseText);
+                    GSX.displayParts(prodId);
+                    $(this).slideDown(250);
+                });
+            } else {
+                displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
+            }
             break;
 
         case 'savePartsCart':
-            $('#cartSaveResults').animate({
+            $('#prod_'+prodId).find('.cartRequestResults').animate({
                 'opacity': 0.1
             }, {
                 'duration' : 250,
                 'complete' : function() {
-                    PM.activateCartSave();
+                    GSX.products[prodId].cart.activateSave();
                     $(this).html(xhr.responseText).animate({
                         'opacity': 1
                     }, {
@@ -555,50 +833,27 @@ function onRequestResponse(xhr, requestType) {
             break;
     }
 }
-function setGetRequest(requestType, requestParams) {
+function setRequest(method, requestType, prodId, requestParams) {
     var xhr = getXMLHttpRequest();
-
-    if (xhrs[requestType]) {
-        var ID = nextXhrsId;
-        nextXhrsId++;
-        xhrs[requestType] = ID;
-        if (requestType == 'newSerial')
-            xhrs['loadParts'] = 0;
-    }
 
     xhr.onreadystatechange = function(){
         //alert('state: ' + xhr.readyState + ', status: ' +xhr.status);
         var RT = requestType;
+        var ID = prodId;
         if((xhr.readyState == 4) && ((xhr.status == 200) || (xhr.status == 0))) {
-            if (xhrs[RT]) {
-                if (xhrs[RT] != ID) {
-                    alert('Requête zappée');
-                    return;
-                }
-            }
-            onRequestResponse(xhr, RT);
+            onRequestResponse(xhr, RT, ID);
         }
     }
-    xhr.open("GET", './requestProcess.php?action='+requestType+requestParams);
-    xhr.send();
-}
+    switch (method) {
+        case 'GET':
+            xhr.open(method, './requestProcess.php?action='+requestType+requestParams);
+            xhr.send();
+            break;
 
-$(document).ready(function() {
-    $('#serialSubmit').click(function() {
-        $('#serialResult').slideUp(250);
-        $('#productInfos').slideUp(250);
-        PM.removeParts();
-        if ($('#partsListContainer').length)
-            $('#partsListContainer').html('');
-        var serial = $('#serialInput').val();
-        if (!serial) {
-            $('#serialResult').html('<p class="error">Veuillez entrer un numéro de série</p>');
-        } else if (!/^[0-9a-zA-Z]+$/.test(serial)) {
-            $('#serialResult').html('<p class="error">Le format du numéro de série est incorrect</p>');
-        } else {
-            setGetRequest('newSerial', '&serial='+serial);
-            $('#serialResult').html('<p class="requestProcess">Requête en cours de traitement</p>');
-        }
-        $('#serialResult').slideDown(250);
-    });
-});
+        case 'POST':
+            xhr.open(method, './requestProcess.php?action='+requestType);
+            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            xhr.send(requestParams);
+            break;
+    }
+}

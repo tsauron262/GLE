@@ -3,6 +3,7 @@
 require_once ( 'GSX.class.php' );
 
 class gsxDatas {
+
     public $gsx = null;
     protected $serial = null;
     protected $partsCart = array();
@@ -11,12 +12,12 @@ class gsxDatas {
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
-        2 => 'Affichage',
-        3 => 'Stockage',
+        2 => 'Moniteurs',
+        3 => 'Mémoire auxiliaire',
         4 => 'Périphériques d\'entrées',
         5 => 'Cartes',
         6 => 'Alimentation',
-        7 => 'Impression',
+        7 => 'Imprimantes',
         8 => 'Périphériques multi-fonctions',
         9 => 'Périphériques de communication',
         'A' => 'Partage',
@@ -63,7 +64,6 @@ class gsxDatas {
         }
         $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
-        $html = '<input type="hidden" id="curSerial" value="' . $this->serial . '"/>';
         if (isset($response) && count($response)) {
             if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
@@ -73,7 +73,7 @@ class gsxDatas {
 //                    echo '</pre>';
                     $check = true;
 
-                    $html .= '<table id="productDatas">' . "\n";
+                    $html .= '<table class="productDatas">' . "\n";
                     $html .= '<thead><caption>' . $datas['productDescription'] . '</caption></thead>' . "\n";
                     $html .= '<tbody>' . "\n";
                     $html .= '' . "\n";
@@ -81,11 +81,11 @@ class gsxDatas {
                     $html .= '<tr>' . "\n";
 
                     $src = $datas['imageURL'];
-                    if (isset($src) && $src) {
-                        $html .= '<td class="productImgContainer">' . "\n";
-                        $html .= '<img class="productImg" src="' . $src . '"/>' . "\n";
-                        $html .= '</td>' . "\n";
-                    }
+//                    if (isset($src) && $src) {
+                    $html .= '<td class="productImgContainer">' . "\n";
+                    $html .= '<img class="productImg" src="' . $src . '"/>' . "\n";
+                    $html .= '</td>' . "\n";
+//                    }
 
                     $html .= '<td>' . "\n";
                     $html .= '<table><thead></thead><tbody>' . "\n";
@@ -140,8 +140,8 @@ class gsxDatas {
 
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
-                    $html .= '<button id="loadParts" onclick="PM.loadParts()">Charger la liste des composants compatibles</button>' . "\n";
-                    $html .= '<div id="partsRequestResult"></div>' . "\n";
+                    $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
+                    $html .= '<div class="partsRequestResult"></div>' . "\n";
                 }
             }
         }
@@ -158,30 +158,32 @@ class gsxDatas {
         return $html;
     }
 
-    public function getCartHtml() {
-        $html = '<div id="cartContainer"><div id="cartTitle">Commande de composants   ';
-        $html .= '<span><span id="nbrCartProducts">0</span> produit(s)</span></div></div>' . "\n";
-        $html .= '<div id="cartContent">' . "\n";
-        $html .= '<p id="noProducts">Aucun produit dans votre panier de commande</p>' . "\n";
-        $html .= '<table id="cartProducts">' . "\n";
+    public function getCartHtml($prodId) {
+        $html = '<div class="cartContainer"><div class="cartTitle">Commande de composants   ';
+        $html .= '<span><span class="nbrCartProducts">0</span> produit(s)</span></div></div>' . "\n";
+
+        $html .= '<div class="cartContent">' . "\n";
+        $html .= '<p class="noProducts">Aucun produit dans votre panier de commande</p>' . "\n";
+        $html .= '<table class="cartProducts">' . "\n";
         $html .= '<thead>' . "\n";
         $html .= '<th style="min-width: 250px">Nom</th>' . "\n";
         $html .= '<th style="min-width: 80px">Réf</th>' . "\n";
         $html .= '<th style="min-width: 80px">Prix</th>' . "\n";
         $html .= '<th>Qté</th>' . "\n";
+        $html .= '<th class="comptiaCodeTitle">CompTIA Code</th>'."\n";
         $html .= '</thead>' . "\n";
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
-        $html .= '<div id="orderSubmitContainer">'."\n";
-        $html .= '<button id="cartSave" class="blueHover" onclick="PM.savePartsCart()">Sauvegarder le panier</button>'."\n";
-        $html .= '<button id="orderSubmit" class="greenHover" onclick="PM.sendPartsOrder()">Valider la commande</button>'."\n";
-        $html .= '<div id="cartSaveResults"></div>'."\n";
+        $html .= '<div class="cartSubmitContainer">' . "\n";
+        $html .= '<button class="cartSave blueHover" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
+        $html .= '<button class="cartSubmit greenHover" onclick="GSX.products[' . $prodId . '].cart.submit()">Valider la commande</button>' . "\n";
         $html .= '</div>' . "\n";
+        $html .= '<div class="cartRequestResults"></div>' . "\n";
         $html .= '</div>' . "\n";
         return $html;
     }
 
-    public function getPartsListHtml($displayCart = true) {
+    public function getPartsListHtml($prodId, $displayCart = true) {
         $parts = $this->gsx->part(array('serialNumber' => $this->serial));
         $check = false;
         if (isset($parts) && count($parts)) {
@@ -191,32 +193,40 @@ class gsxDatas {
                     $parts = $parts['ResponseArray']['responseData'];
                     $html = '';
                     if ($displayCart)
-                        $html .= $this->getCartHtml();
-                    $html .= '<div id="componentsListContainer">' . "\n";
+                        $html .= $this->getCartHtml($prodId);
+                    $html .= '<div class="componentsListContainer">' . "\n";
                     $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
-                    $html .= '<div id="typeFilters" class="searchBloc">' . "\n";
-                    $html .= '<button id="filterTitle">Filtrer par catégorie de composant</button>';
-                    $html .= '<div id="typeFiltersContent"><div style="margin-bottom: 20px;"><span id="filterCheckAll">Tout cocher</span>';
-                    $html .= '<span id="filterHideAll">Tout décocher</span></div></div>';
+                    $html .= '<div class="typeFilters searchBloc">' . "\n";
+                    $html .= '<button class="filterTitle">Filtrer par catégorie de composant</button>';
+                    $html .= '<div class="typeFiltersContent">'."\n";
+                    $html .= '<div style="margin-bottom: 20px;">'."\n";
+                    $html .= '<span class="filterCheckAll">Tout cocher</span>';
+                    $html .= '<span class="filterHideAll">Tout décocher</span></div></div>';
                     $html .= '</div>' . "\n";
                     $html .= '<div class="searchBloc"' . "\n";
                     $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
-                    $html .= '<input type="text max="80" name="keywordFilter" id="keywordFilter"/>' . "\n";
-                    $html .= '<button id="addKeywordFilter" onclick="addKeywordFilter()">Ajouter</button>' . "\n";
+                    $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
+                    $html .= '<select class="keywordFilterType">'."\n";
+                    $types = array('name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
+                    foreach ($types as $key => $type) {
+                        $html .= '<option value="'.$key.'">'.$type.'</option>'."\n";
+                    }
+                    $html .= '</select>'."\n";
+                    $html .= '<button class="addKeywordFilter" onclick="GSX.products['.$prodId.'].PM.addKeywordFilter()">Ajouter</button>' . "\n";
                     $html .= '</div>' . "\n";
                     $html .= '<div class="searchBloc">' . "\n";
                     $html .= '<label for="searchPartInput">Recherche par référence: </label>' . "\n";
-                    $html .= '<input type="text" name="searchPartInput" id="searchPartInput" size="12" maxlength="24"/>';
-                    $html .= '<button id="searchPartSubmit" onclick="searchPartByNum()">Rechercher</button>' . "\n";
+                    $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
+                    $html .= '<button class="searchPartSubmit" onclick="GSX.products['.$prodId.'].PM.searchPartByNum()">Rechercher</button>' . "\n";
                     $html .= '</div>' . "\n";
-                    $html .= '<div id="curKeywords"></div>' . "\n";
-                    $html .= '<div id="searchResult"></div>';
-                    $html .= '<div id="partsListContainer"></div>' . "\n";
+                    $html .= '<div class="curKeywords"></div>' . "\n";
+                    $html .= '<div class="searchResult"></div>';
+                    $html .= '<div class="partsListContainer"></div>' . "\n";
                     $html .= '</div>' . "\n";
 
                     $html .= '<script type="text/javascript">' . "\n";
                     foreach ($parts as $part) {
-                        $html .= 'PM.addPart(';
+                        $html .= 'GSX.addPart('.$prodId.', ';
                         $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
                         $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
                         $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
@@ -232,6 +242,49 @@ class gsxDatas {
             $html .= '<p class="error">Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX</p>';
         }
         return $html;
+//        echo '<pre>';
+//        print_r($this->gsx->obtainCompTIA());
+//        echo '</pre>';
+//        return '';
+    }
+
+    public function getCompTIACodesArray() {
+        $datas = $this->gsx->obtainCompTIA();
+        $codes = array(
+            'grps' => array(),
+            'mods' => array()
+        );
+        $check = false;
+        if (isset($datas) && count($datas)) {
+            if (isset($datas['ComptiaCodeLookupResponse']) && count($datas['ComptiaCodeLookupResponse'])) {
+                if (isset($datas['ComptiaCodeLookupResponse']['comptiaInfo']) && count($datas['ComptiaCodeLookupResponse']['comptiaInfo'])) {
+                    $datas = $datas['ComptiaCodeLookupResponse']['comptiaInfo'];
+                    $check = true;
+                    if (isset($datas['comptiaGroup']) && count($datas['comptiaGroup'])) {
+                        foreach ($datas['comptiaGroup'] as $i => $group) {
+                            $codes['grps'][$group['componentId']] = array();
+                            if ($i == 0) {
+                                $codes['grps'][$group['componentId']]['000'] = 'Non-applicable';
+                            } else {
+                                foreach ($group['comptiaCodeInfo'] as $codeInfo) {
+                                    $codes['grps'][$group['componentId']][$codeInfo['comptiaCode']] = $codeInfo['comptiaDescription'];
+                                }
+                            }
+                        }
+                    } else
+                        $check = false;
+                    if (isset($datas['comptiaModifier']) && count($datas['comptiaModifier'])) {
+                        foreach ($datas['comptiaModifier'] as $mod) {
+                            $codes['mods'][$mod['modifierCode']] = $mod['comptiaDescription'];
+                        }
+                    } else
+                        $check = false;
+                }
+            }
+        }
+        if (!$check)
+            return 'fail';
+        return $codes;
     }
 
     public function addToCart($partRef, $qty) {
@@ -247,6 +300,7 @@ class gsxDatas {
         if (!count($this->partsCart))
             return false;
     }
+
 }
 
 ?>

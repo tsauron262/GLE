@@ -1,20 +1,29 @@
 <?php
-
 require_once('../main.inc.php');
 llxHeader();
+?>
 
-echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
-echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
+<link type="text/css" rel="stylesheet" href="appleGSX.css"/>
+<script type="text/javascript" src="./appleGsxScripts.js"></script>
 
-echo '<div style="background-color: #E6E6E6; width: 100%; padding: 10px; margin-bottom: 30px;">' . "\n";
-echo '<label for="serialInput">Entrez un numéro de série: </label>' . "\n";
-echo '<input type="text" name="serialInput" id="serialInput" value="C02H21L8DHJQ"';
-echo 'onfocus="this.value = \'\';"';
-echo '/>' . "\n";
-echo '<button id="serialSubmit">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>' . "\n";
-echo '</div>';
-echo '<div id="serialResult"></div>' . "\n";
-echo '<div id="productInfos"></div>' . "\n";
+<div style="background-color: #E6E6E6; width: 100%; padding: 10px; margin-bottom: 30px;">
+    <label for="serialInput">Entrez un numéro de série: </label>
+    <input type="text" name="serialInput" id="serialInput" value="C02H21L8DHJQ" onfocus="this.value = ''"/>
+    <button id="serialSubmit">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
+</div>
 
-//echo "<pre>"; print_r($gsx->part ( array ( 'partNumber' =>'Z661-6061')));
-//echo "fin";
+<div id="requestsResponsesContainer"></div>
+<div id="requestResult"></div>
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('#serialSubmit').click(function() {
+            if (GSX) {
+                GSX.loadProduct($('#serialInput').val());
+            }
+            else
+                alert('Objet GSX non initialisé');
+        });
+    });
+</script>
+

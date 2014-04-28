@@ -50,7 +50,9 @@ button.deactivated:hover {
     color: #B4B4B4;
     border-color: #B4B4B4;
 }
-
+label {
+    color: #505050;
+}
 p.error:before {
     content: '\f06a';
     font-family: 'FA';
@@ -79,10 +81,13 @@ p.confirmation:before {
 }
 
 /*Infos produit*/
-#serialResult,
-#productInfos {
+#requestResult,
+#requestsResponsesContainer {
+    margin: 20px;
+}
+div.productDatasContainer {
     display: none;
-    margin: 30px;
+    margin-top: 30px;
 }
 img.productImg {
     max-height: 200px;
@@ -105,12 +110,12 @@ tr.evenRow {
 td.rowTitle {
     font-weight: bold;
 }
-#productDatas {
+.productDatas {
     border: 1px solid #DCDCDC;
     background: white;
     float left;
 }
-#productDatas caption {
+.productDatas caption {
     font-size: 18px;
     font-weight: bold;
     text-align: left;
@@ -126,22 +131,22 @@ td.rowTitle {
     background: linear-gradient(to bottom,  rgba(242,242,242,1) 0%,rgba(219,219,219,1) 50%,rgba(232,232,232,1) 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f2f2f2', endColorstr='#e8e8e8',GradientType=0 ); /* IE6-9 */
 }
-#productDatas td {
+.productDatas td {
     padding: 3px 8px;
 }
-#loadParts {
+.loadParts {
     padding: 8px 10px;
     margin-top: 20px;
     font-size: 14px;
 }
-#loadParts:before {
+.loadParts:before {
     font-weight: normal;
     font-size: 18px;
     font-family: 'FA';
     margin-right: 10px;
     content: '\f03a';
 }
-#loadParts:after {
+.loadParts:after {
     font-family: 'FA';
     font-size: 18px;
     margin-left: 10px;
@@ -149,20 +154,20 @@ td.rowTitle {
 }
 
 /*Panier de commande*/
-#cartContainer {
+.cartContainer {
 
 }
-#cartTitle:before {
+.cartTitle:before {
     font-family: 'FA';
     content: '\f07a';
     margin-right: 15px;
 }
-#cartTitle:after {
+.cartTitle:after {
     font-family: 'FA';
     content: '\f0d7';
     margin-left: 10px;
 }
-#cartTitle {
+.cartTitle {
     font-size: 18px;
     font-weight: bold;
     text-align: left;
@@ -184,11 +189,11 @@ td.rowTitle {
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#ededed',GradientType=0 ); /* IE6-9 */
 
 }
-#cartTitle span {
+.cartTitle span {
     font-size: 12px;
     color: #787878;
 }
-#cartContent {
+.cartContent {
     position: absolute;
     display: none;
     background-color: #fff;
@@ -196,40 +201,43 @@ td.rowTitle {
     padding: 20px;
     min-width: 361px;
 }
-#noProducts:before {
+th.comptiaCodeTitle {
+    display: none;
+}
+.noProducts:before {
     font-family: 'FA';
     font-size: 18px;
     margin-right: 10px;
     content: '\f057';
 }
-#noProducts {
+.noProducts {
     color: #8C1E1E;
     font-weight: bold;
     font-size: 14px;
     text-align: center;
 }
-#cartProducts {
+.cartProducts {
     display: none;
     border-collapse: collapse;
 }
-#cartProducts th {
+.cartProducts th {
     font-weight: normal;
     color: #292964;
     margin-bottom: 5px;
     border-bottom: 1px solid #9999C8;
 }
-#cartProducts td {
+.cartProducts td {
     vertical-align: middle;
     padding: 2px 4px;
     border-bottom: 1px dotted #B4B4B4;
     font-weight: bold;
     color: #323232;
 }
-#cartProducts td.ref {
+.cartProducts td.ref {
     font-weight: normal;
     text-align: center;
 }
-#cartProducts td.price {
+.cartProducts td.price {
     font-weight: normal;
     color: #2F2FA0;
     text-align: center;
@@ -251,71 +259,76 @@ span.removeCartProduct {
     margin-left: 10px;
     font-size: 14px;
 }
-#orderSubmitContainer {
+.cartSubmitContainer {
     display: none;
     text-align: right;
     padding: 30px 20px 0 20px;
 }
-#cartSave,
-#orderSubmit {
+.cartSave,
+.cartSubmit {
     font-size: 14px;
     margin: 0 5px;
 }
-#cartSave:before {
+.cartSave:before {
     font-family: 'FA';
     content: '\f0c7';
     font-size: 20px;
     margin-right: 10px;
 }
-#orderSubmit:after {
+.cartSubmit:after {
     content: '\f0a9';
     font-family: 'FA';
     margin-left: 10px;
     font-size: 20px;
 }
-#cartSaveResults {
+.cartRequestResults {
     display: none;
     text-align: center;
     margin-top: 30px;
 }
-
+select.compTIACodeSelect,
+select.compTIAModifierSelect {
+    font-size: 11px;
+    width: 120px;
+    height: 20px;
+}
 /*Liste des composants*/
-#partsRequestResult {
+.partsRequestResult {
     display: none;
 }
-#componentsListContainer {
+.componentsListContainer {
     padding: 20px;
     background-color: #F0F0F0;
     border: 1px solid #C8C8C8;
     margin-top: 15px;
 }
-#componentsListContainer div.titre {
+.componentsListContainer div.titre {
     font-size: 15px;
     margin-bottom: 15px;
 }
-#componentsListContainer div.searchBloc {
+.componentsListContainer div.searchBloc {
     display: inline-block;
     margin: 10px 20px;
 }
 
 /*Type filter*/
-#filterTitle:before {
+.filterTitle:before {
     font-family: 'FA';
     font-size: 16px;
     content: '\f0b0';
     margin-right: 10px;
 }
-#filterTitle:after {
+.filterTitle:after {
     font-family: 'FA';
     font-size: 16px;
     content: '\f0d7';
     margin-left: 10px;
 }
-#filterTitle:hover {
+.filterTitle:hover {
     color: #282828;
     cursor: pointer;
 }
-#typeFiltersContent {
+.typeFiltersContent {
     position: absolute;
     display: none;
     z-index: 99;
@@ -325,47 +338,47 @@ span.removeCartProduct {
     box-shadow: 0 0 4px #787878;
     max-width: 480px;
 }
-#typeFiltersContent span {
+.typeFiltersContent span {
     color: #787878;
     font-size: 11px;
     padding: 0 10px;
 }
-#typeFiltersContent span:hover {
+.typeFiltersContent span:hover {
     color: #282828;
     cursor: pointer;
 }
-#filterCheckAll:before {
+.filterCheckAll:before {
     font-family: 'FA';
     content: '\f046';
     margin-right: 8px;
 }
-#filterHideAll:before {
+.filterHideAll:before {
     font-family: 'FA';
     content: '\f096';
     margin-right: 5px;
 }
-#typeFiltersContent label {
+.typeFiltersContent label {
     margin-top: 10px;
     display: inline-block;
 }
 
 /*Keywords Filter & Part search*/
-#keywordFilter {
+.keywordFilter {
     width: 150px;
 }
-#addKeywordFilter:after {
+.addKeywordFilter:after {
     font-family: 'FA';
     margin-left: 8px;
     content: '\f055';
 }
-#curKeywords,
-#searchResult {
+.curKeywords,
+.searchResult {
     margin: 0 20px;
     font-size: 15px;
     color: #282828;
 }
-#curKeywords div,
-#partSearchNum {
+.curKeywords div,
+.partSearchNum {
     margin: 10px;
     padding: 5px;
     border-radius: 8px;
@@ -373,11 +386,18 @@ span.removeCartProduct {
     display: inline-block;
     background-color: #fff;
 }
+span.keyword {
+    font-weight: bold;
+}
 span.keyword:before {
     content: '\f0b0';
     font-family: 'FA';
     margin-right: 10px;
     color: #505050;
+}
+span.kwType {
+    color: #646464;
+    font-size: 11px;
 }
 span.removeKeyWord,
 span.removeSearch {
@@ -396,10 +416,10 @@ span.removeSearch:hover {
     color: #960000;
     cursor: pointer;
 }
-#searchPartSubmit {
+.searchPartSubmit {
     margin-left: 5px;
 }
-#searchPartSubmit:after {
+.searchPartSubmit:after {
     font-family: 'FA';
     margin-left: 8px;
     content: '\f002';
@@ -411,7 +431,7 @@ span.searchNum:before {
 }
 
 /*parts*/
-#partsListContainer {
+.partsListContainer {
     margin-top: 10px;
 }
 div.partGroup {
@@ -505,25 +525,25 @@ span.partsNbr {
     font-weight: bold;
     text-align: left;
 }
-span.addToOrder {
+span.addToCart {
     font-weight: bold;
     margin: 0px 10px;
     padding: 3px 5px;
     margin: 0;
     border-radius: 4px;
 }
-span.addToOrder.activated {
+span.addToCart.activated {
     color: #505050;
 }
-span.addToOrder.deactivated {
+span.addToCart.deactivated {
     color: #B4B4B4;
 }
-span.addToOrder.activated:hover {
+span.addToCart.activated:hover {
     background-color: #00A000;
     color: #fff;
     cursor: pointer;
 }
-span.addToOrder:before {
+span.addToCart:before {
     font-family: 'FA';
     content: '\f064';
     margin-right: 10px;

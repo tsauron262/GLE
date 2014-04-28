@@ -23,7 +23,7 @@ $(window).load(function() {
                 for (i = 0; i < tabT.length; i++) {
                     serial = tabT[i];
                     if(/^[A-Z0-9]{11,12}$/.test(serial)){
-                        resultZone.append('<div id="serialResult"></div><div id="productInfos"></div>');
+                        resultZone.append('<div id="requestsResponsesContainer"></div><div id="requestResult"></div>');
                         GSX.loadProduct(serial);
 //                        setRequest('newSerial', '&serial=' + serial);
                         ok = true;

@@ -846,12 +846,12 @@ function setRequest(method, requestType, prodId, requestParams) {
     }
     switch (method) {
         case 'GET':
-            xhr.open(method, './requestProcess.php?action='+requestType+requestParams);
+            xhr.open(method, DOL_URL_ROOT+'/apple/requestProcess.php?action='+requestType+requestParams);
             xhr.send();
             break;
 
         case 'POST':
-            xhr.open(method, './requestProcess.php?action='+requestType);
+            xhr.open(method, DOL_URL_ROOT+'/apple/requestProcess.php?action='+requestType);
             xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
             xhr.send(requestParams);
             break;

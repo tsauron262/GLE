@@ -430,7 +430,9 @@ print '<br>';
     print "</div>";
     print "<div id='clef'>";
     print "<table width=100% cellpadding=10>";
-    print "<tr><th width=20% class='ui-widget-header ui-state-default'>Nom";
+    print "<tr>";
+    print " <th width=20 class='ui-widget-header ui-state-default'>";
+    print " <th width=20% class='ui-widget-header ui-state-default'>Nom";
     print "    <th width=40% class='ui-widget-header ui-state-default'>Description";
     print "    <th width=10% class='ui-widget-header ui-state-default'>Css";
     print "    <th width=10% class='ui-widget-header ui-state-default'>List d&eacute;tails";
@@ -446,16 +448,22 @@ print '<br>';
                        k.type_subvaleur,
                        k.extraCss,
                        k.inDetList,
-                       k.id
+                       k.id,
+                       k.rang
                   FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_key as k ,
                        ".MAIN_DB_PREFIX."Synopsis_Chrono_key_type_valeur  as v
                  WHERE v.id=k.type_valeur
-                   AND model_refid = ".$_REQUEST['id'];
+                   AND model_refid = ".$_REQUEST['id']
+            ." ORDER BY k.rang";
     $sql = $db->query($requete);
     //TODO reorder
     //TODO duplicate name
     while ($res = $db->fetch_object($sql)){
-        print "<tr><td width=20% class='ui-widget-content'>".$res->nom;
+        print "<tr>";
+        
+        print "    <td width=30 align=center class='ui-widget-content'><a href='".DOL_URL_ROOT."/Synopsis_Tools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang + 1)."&oldRang=".$res->rang."'>\/</a>";
+        print "   <a href='".DOL_URL_ROOT."/Synopsis_Tools/ajax/order.php?type=chrono_key&idElem=".$res->id."&idFk=".$_REQUEST['id']."&newRang=".($res->rang - 1)."&oldRang=".$res->rang."'>/\</a>";
+        print "<td width=20% class='ui-widget-content'>".$res->nom;
         print "    <td width=40% class='ui-widget-content'>".$res->description;
         print "    <td width=10% class='ui-widget-content'>".$res->extraCss;
         print "    <td width=10% class='ui-widget-content'>".($res->inDetList==1?"Oui":"Non");

@@ -161,7 +161,12 @@ if ($action == 'modifier') {
     $dataArr = $tabChronoValue = array();
     foreach ($_REQUEST as $key => $val) {
         if (preg_match('/^Chrono-([0-9]*)$/', $key, $arrTmp)) {
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key, " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur WHERE " . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur.id = " . MAIN_DB_PREFIX . "Synopsis_Chrono_key.type_valeur AND " . MAIN_DB_PREFIX . "Synopsis_Chrono_key.id = " . $arrTmp[1];
+            $requete = "SELECT * FROM "
+                    . "" . MAIN_DB_PREFIX . "Synopsis_Chrono_key k, "
+                    . "" . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur tk "
+                    . "WHERE tk.id = k.type_valeur AND k.id = " . $arrTmp[1]
+                    . " ORDER BY k.rang";
+            
             $sql = $db->query($requete);
             if ($sql)
                 $res = $db->fetch_object($sql);
@@ -236,6 +241,8 @@ define('REQUIRE_JQUERY_MULTISELECT', true);
 $chr = new Chrono($db);
 if ($id > 0) {
     $chr->fetch($id);
+}
+if($chr->id > 0) {
     if (isset($_REQUEST['nomenu'])) {
         top_htmlhead($js, 'Fiche ' . $chr->model->titre);
     } else
@@ -326,7 +333,8 @@ if ($id > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/chronoFiche.lib.php");
         $requete = "SELECT k.id FROM
                            " . MAIN_DB_PREFIX . "Synopsis_Chrono_key AS k
-                      WHERE k.model_refid = " . $chr->model_refid;
+                      WHERE k.model_refid = " . $chr->model_refid
+                ." ORDER BY k.rang";
         $sql = $db->query($requete);
         while ($result = $db->fetch_object($sql)) {
             getValueForm($chr->id, $result->id, $chr->socid);
@@ -372,7 +380,7 @@ if ($id > 0) {
 //        $chr->user_author->fetch($chr->user_author->id);
 
         if ($chr->model->hasSuivie) {
-            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Cr&eacute;er le';
+            print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Crée le';
             print '    <td  class="ui-widget-content" colspan="1">' . date('d/m/Y \&\a\g\r\a\v\e\; H:i', $chr->date) . '</td>';
             print '    <th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">Par';
             print '    <td  class="ui-widget-content" colspan="1">' . $chr->user_author->getNomUrl(1) . '</td>';
@@ -567,7 +575,8 @@ if ($id > 0) {
                            " . MAIN_DB_PREFIX . "Synopsis_Chrono_key AS k
                       LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Chrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chr->id . "
                      WHERE t.id = k.type_valeur
-                       AND k.model_refid = " . $chr->model_refid;
+                       AND k.model_refid = " . $chr->model_refid
+                ." ORDER BY k.rang";
         //print $requete;
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {

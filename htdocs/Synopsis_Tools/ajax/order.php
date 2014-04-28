@@ -8,6 +8,11 @@ $idFk = $_REQUEST['idFk'];
 $newRang = $_REQUEST['newRang'];
 $oldRang = $_REQUEST['oldRang'];
 
+if($newRang == -1 && $oldRang == 0){
+    $newRang = 0;
+    $oldRang = 1;
+}
+
 if ($newRang > $oldRang) {
     $ptiRang = $oldRang;
     $grRang = $newRang;
@@ -18,22 +23,28 @@ if ($newRang > $oldRang) {
     $changePlus = false;
 }
 
-if ($type == "contratdet" && $newRang > 0) {
+if ($type == "contratdet" && $newRang >= 0) {
     $champFk = "contratdet_refid IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "contratdet WHERE fk_contrat = " . $idFk . ")";
     $nomTab = MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO";
     $champId = "contratdet_refid";
     $header = "Location: ../../contrat/fiche.php?id=" . $idFk;
+}
+if ($type == "chrono_key" && $newRang >= 0) {
+    $champFk = "model_refid = " . $idFk . "";
+    $nomTab = MAIN_DB_PREFIX . "Synopsis_Chrono_key";
+    $champId = "id";
+    $header = "Location: ../../admin/Synopsis_Chrono_advMode.php?id=" . $idFk;
 }
 
 
 if (isset($champFk)) {
     $sql = $db->query("SELECT * FROM  " . $nomTab . " WHERE  " . $champFk . " AND rang = 0");
     if ($db->num_rows($sql) > 0) {
-        $sql = $db->query("SELECT * FROM  " . $nomTab . " WHERE  " . $champFk);
+        $sql = $db->query("SELECT * FROM  " . $nomTab . " WHERE  " . $champFk." order by rang");
         $i = 0;
         while ($result = $db->fetch_object($sql)) {
             $i++;
-            $request = "UPDATE " . $nomTab . " SET rang = " . $i . " WHERE " . $champFk . " AND " . $champId . " = " . $result->contratdet_refid;
+            $request = "UPDATE " . $nomTab . " SET rang = " . $i . " WHERE " . $champFk . " AND " . $champId . " = " . $result->$champId;
             $db->query($request);
             echo $request;
         }

@@ -209,6 +209,7 @@ switch ($action) {
             $arrvalueIsChecked = array();
             $arrvalueIsSelected = array();
             $tabLien = array();
+            $tabGlobalVar = array();
             while ($resPre = $db->fetch_object($sqlPre)) {
                 $nom = sanitize_string($resPre->nom);
                 $arrPre[$resPre->id] = $resPre->id;
@@ -231,8 +232,11 @@ switch ($action) {
                     $arrvalueIsSelected[$nom] = true;
                 if ($res1->valueIsChecked == 1)
                     $arrvalueIsChecked[$nom] = true;
+                if ($resPre->type_valeur == 7) {
+                    $tabGlobalVar[] = array("nom" => $resPre->nom, "sub_valeur" => $resPre->type_subvaleur, "extraCss" => $resPre->extraCss);
+                }
                 if ($resPre->type_valeur == 10) {
-                    $tabLien[] = array("nom" => $resPre->nom, "sub_valeur" => $resPre->type_subvaleur);
+                    $tabLien[] = array("nom" => $resPre->nom, "sub_valeur" => $resPre->type_subvaleur, "extraCss" => $resPre->extraCss);
                 }
             }
             $requete = "SELECT *
@@ -308,10 +312,20 @@ switch ($action) {
                     $val = parseValue($res->chrono_value, $res->extraCss, $arrHasSubVal[$nom], $arrSourceIsOption[$nom], $arrphpClass[$nom], $arrvalueIsSelected[$nom], $arrvalueIsChecked[$nom]);
                     $arrValue[$res->chrono_id][$nom] = array('value' => $val, "id" => $res->id);
                     $iter++;
+                    if (!isset($tabGlobalVarTraiter[$res->chrono_id])) {
+                        foreach ($tabGlobalVar as $lien) {
+                            $lien['nom'] = str_replace(" ", "_", $lien['nom']);
+                            $val = parseValue($res->chrono_id, $lien['extraCss'], $lien['sub_valeur'], 0, "globalvar");
+
+                            $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
+                            $iter++;
+                            $tabGlobalVarTraiter[$res->chrono_id] = true;
+                        }
+                    }
                     if (!isset($tabLienTraiter[$res->chrono_id])) {
                         foreach ($tabLien as $lien) {
                             $lien['nom'] = str_replace(" ", "_", $lien['nom']);
-                            $val = parseValue("", $res->extraCss, $lien['sub_valeur'], 1, "Lien", 1, 0);
+                            $val = parseValue("", $lien['extraCss'], $lien['sub_valeur'], 1, "Lien", 1, 0);
 
                             $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);
                             $iter++;
@@ -425,8 +439,7 @@ switch ($action) {
             if ($sidx != "chrono_id" || $searchField) {
                 $responce->records = $i;
                 $requete .= "         LIMIT $start , $limit";
-            }
-            else
+            } else
                 $responce->records = $count;
 
             $sql = $db->query($requete);
@@ -524,6 +537,8 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
             require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
             $tmp = $phpClass;
             $obj = new $tmp($db);
+            $obj->cssClassM = $extraCss;
+            $obj->idChrono = $val;
             $obj->fetch($hasSubValeur, $extraCss);
             $obj->getValue($val);
             if (isset($obj->tabVal[0])) {
@@ -545,10 +560,20 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
             return $html;
         } else {
             //Beta
-            if ($phpClass == 'fct') {
+            if ($phpClass == 'globalvar') {
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                 $tmp = $phpClass;
                 $obj = new $tmp($db);
+            $obj->cssClassM = $extraCss;
+            $obj->idChrono = $val;
+                $obj->fetch($hasSubValeur);
+                return $obj->getValue($val);
+            } elseif ($phpClass == 'fct') {
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                $tmp = $phpClass;
+                $obj = new $tmp($db);
+            $obj->cssClassM = $extraCss;
+            $obj->idChrono = $val;
                 $obj->fetch($hasSubValeur);
                 $obj->call_function_chronoModule($chr->model_refid, $chr->id);
             } else {

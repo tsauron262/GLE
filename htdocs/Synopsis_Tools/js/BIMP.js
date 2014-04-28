@@ -20,11 +20,12 @@ $(window).load(function() {
             tabT = serial.split(" ");
             $.getScript(DOL_URL_ROOT + "/apple/appleGsxScripts.js", function() {
                 $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/apple/appleGSX.css"}));
-                for (i = 0; i < tabT.length && !ok; i++) {
+                for (i = 0; i < tabT.length; i++) {
                     serial = tabT[i];
-                    if(serial.length > 10 && serial.length < 13){
-                        resultZone.append('<div id="serialResult"></div><div id="productInfos"></div>');
+                    if(/^[A-Z0-9]{11,12}$/.test(serial)){
+                        resultZone.append('<div id="serialResult_' + serial+'"></div><div id="productInfos' + serial+'"></div>');
                         setGetRequest('newSerial', '&serial=' + serial);
+//                        setRequest('newSerial', '&serial=' + serial);
                         ok = true;
                     }
                 }

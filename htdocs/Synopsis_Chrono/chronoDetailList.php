@@ -191,7 +191,7 @@ EOF;
 
         $colModel = array();
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key WHERE inDetList = 1 AND model_refid = " . $id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key WHERE inDetList = 1 AND model_refid = " . $id. " ORDER BY rang";
         $sql = $db->query($requete);
         $colModelArr = array();
         $colModelArr[0] = array('name' => "id", "index" => "id", "width" => 0, 'hidden' => true, "search" => false, "align" => "left", "key" => true, "hidedlg" => true);

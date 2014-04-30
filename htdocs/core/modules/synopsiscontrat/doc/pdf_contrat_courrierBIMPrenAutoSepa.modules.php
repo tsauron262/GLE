@@ -13,7 +13,7 @@
   */
  /**
   *
-  * Name : pdf_contrat_courrierBIMPAutoPrelevement.modules.php
+  * Name : pdf_contrat_courrierBIMPavenant.modules.php
   * GLE-1.2
   */
 
@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/pdf.lib.php';
 if(!defined('EURO'))
     define ('EURO', chr(128) );
 
-class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
+class pdf_contrat_courrierBIMPrenAutoSepa extends ModeleSynopsiscontrat
 {
     public $emetteur;    // Objet societe qui emet
 
@@ -42,7 +42,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
     \brief      Constructeur
     \param        db        Handler acces base de donnee
     */
-    function pdf_contrat_courrierBIMPAutoPrelevement($db)
+    function pdf_contrat_courrierBIMPrenAutoSepa($db)
     {
 
         global $conf,$langs,$mysoc;
@@ -90,7 +90,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
         $outputlangs->load("bills");
         $outputlangs->load("contrat");
         $outputlangs->load("products");
-//        //$outputlangs->setPhpLang();
+        //$outputlangs->setPhpLang();
         if ($conf->synopsiscontrat->dir_output)
         {
             // Definition de l'objet $contrat (pour compatibilite ascendante)
@@ -115,7 +115,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
             } else {
                 $propref = sanitize_string($contrat->ref);
                 $dir = $conf->synopsiscontrat->dir_output . "/" . $propref;
-                $file = $dir ."/Courrier_AutoPrelev.pdf";
+                $file = $dir ."/Courrier_renouv_SEPA".date("d_m_Y")."_" . $propref . ".pdf";
             }
             $this->contrat = $contrat;
 
@@ -133,7 +133,18 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $pdf="";
                 $nblignes = sizeof($contrat->lignes);
                 // Protection et encryption du pdf
-                
+//                if ($conf->global->PDF_SECURITY_ENCRYPTION)
+//                {
+//                    $pdf=new FPDI_Protection('P','mm',$this->format);
+//                    $pdfrights = array('print'); // Ne permet que l'impression du document
+//                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
+//                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
+//                    $pdf->SetProtection($pdfrights,$pdfuserpass,$pdfownerpass);
+//                } else  {
+//
+//                    $pdf=new FPDI('P','mm',$this->format);
+//                }
+//                $pdf1=new FPDI('P','mm',$this->format);
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF'))
                 {
@@ -152,7 +163,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $pdf1->Open();
                 $pdf->AddPage();
                 $pdf1->AddPage();
-                $pdf1->SetFont(''/*'Arial'*/, '', 8);
+                $pdf1->SetFont('', '', 8);
 
                 $pdf->SetDrawColor(128,128,128);
 
@@ -166,26 +177,82 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf->SetAutoPageBreak(0,0);
 
-                //$pdf->AddFont('VeraMoBI', 'BI', 'VeraMoBI.php');
-                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
+//                $pdf->AddFont('BI', 'BI', 'BI.php');
+//                //$pdf->AddFont('fq-logo', 'Roman', 'fq-logo.php');
 
                 // Tete de page
                 $this->_pagehead($pdf, $contrat, 1, $outputlangs);
-                $pdf->SetFont(''/*'Arial'*/, 'B', 12);
+                $pdf->SetFont('', 'B', 12);
 
-                $pagecountTpl=$pdf->setSourceFile(DOL_DOCUMENT_ROOT.'/core/modules/synopsiscontrat/SEPA_BP.pdf');
+//Encart societe
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100) ,6,($contrat->societe->titre."x" != "x"?$contrat->societe->titre." ":"").$contrat->societe->nom,0,'L');
+                $pdf->SetFont('', '', 11);
+                $pdf->SetX($this->marge_gauche + 100);
 
-                $tplidx=$pdf->importPage(1,"/MediaBox");
-                $pdf->useTemplate($tplidx, 0, 0,0,0,true);
-                
-                
-                
-                $pdf->SetFont(/*'Arial'*/'', 'B', 10);
-//                for($x=240;$x<300;$x=$x+1){
-                    
-                $pdf->SetXY(137.5,242);
-                $pdf->MultiCell(140 ,200,$contrat->ref,0,'L');
-//                }
+//representant légal : signataire contrat
+                $requete = "SELECT fk_socpeople
+                              FROM ".MAIN_DB_PREFIX."c_type_contact as c,
+                                   ".MAIN_DB_PREFIX."element_contact as e
+                             WHERE c.element = 'contrat'
+                               AND c.source = 'external'
+                               AND c.code = 'SALESREPSIGN'
+                               AND e.statut = 4
+                               AND e.fk_c_type_contact = c.rowid
+                               AND e.element_id = ".$contrat->id;
+                $sql = $this->db->query($requete);
+                $contact = "";
+                if ($sql && $this->db->num_rows($sql) > 0)
+                {
+                    $res = $this->db->fetch_object($sql);
+                    require_once(DOL_DOCUMENT_ROOT."/contact/class/contact.class.php");
+                    $tmpcontact = new Contact($this->db);
+                    $tmpcontact->fetch($res->fk_socpeople);
+                    $contact = $tmpcontact->lastname." ".$tmpcontact->firstname;
+                }
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contact,0,'L');
+                $pdf->SetX($this->marge_gauche + 100);
+//addresse :> add de la société
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 100),6,$contrat->societe->address."\n".$contrat->societe->zip." ".$contrat->societe->town,0,'L');
+
+//Date
+                $pdf->SetFont('', '', 10);
+                $pdf->SetXY($this->marge_gauche + 100,$this->marge_haute + 44);
+                $pdf->MultiCell($this->page_largeur - $this->marge_droite - ($this->marge_gauche + 50) ,6,"Lyon, le ".date("d/m/Y"),0,'L');
+
+//Objet
+//                $pdf->SetFont('', 'U', 10);
+//                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
+//                $pdf->MultiCell(14 ,4,"Objet : ",0,'L');
+                $pdf->SetFont('', '', 10);
+                $pdf->SetXY($this->marge_gauche,$this->marge_haute + 60);
+                $pdf->MultiCell($this->page_largeur-($this->marge_droite + $this->marge_gauche + 14) ,4,utf8_encodeRien("Objet : Modification réglementaire de vos prélèvements
+
+
+Cher client, cliente, 
+
+Nous allons remplacer prochainement le service de prélèvement national que vous utilisez jusqu'à présent par le nouveau service de prélèvement européen, le prélèvement SEPA. 
+Conformément à l'article 19 de l'ordonnance 2009-866, relatif à la continuité des mandats de prélèvement, le consentement donné au titre du prélèvement national que vous avez signé demeure valable pour le prélèvement SEPA; nous continuerons à envoyer des instructions à votre banque pour débiter votre compte et votre banque continuera à débiter votre compte conformément à nos instructions; vous n'aurez donc aucune démarche à accomplir auprès de votre banque. 
+
+
+Vous trouverez ci-après les informations caractérisant votre prélèvement SEPA : 
+Nom du créancier : 		SA OLYS
+Identifiant Créancier SEPA : FR02ZZZ008801
+
+
+en cas de réclamation, révocation ou modification relative à vos prélèvements SEPA, vous pourrez adresser vos demandes à : 
+
+BIMP 
+Service mandats SEPA
+4 rue du commandant Dubois
+69003 LYON
+
+
+Veuillez agréer, Madame, Monsieur, l'expression de nos salutations distinguées. 
+
+
+Le service facturation"),0,'L');
+
 
                 $this->_pagefoot($pdf,$outputlangs);
 
@@ -194,7 +261,7 @@ class pdf_contrat_courrierBIMPAutoPrelevement extends ModeleSynopsiscontrat
 
                 $this->file = $file;$pdf->Output($file, 'f');
 
-                //$langs->setPhpLang();    // On restaure langue session
+//                //$langs->setPhpLang();    // On restaure langue session
 
 
                 return 1;   // Pas d'erreur

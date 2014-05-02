@@ -337,7 +337,7 @@ function PartsManager(prodId, serial) {
                 html += '<td>'+this.parts[gpe][id].num+'</td>';
                 html += '<td>'+this.parts[gpe][id].type+'</td>';
                 html += '<td>'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
-                html += '<td><span id="add_'+this.prodId+'_'+gpe+'_'+id+'" class="addToCart activated" onclick="GSX.products['+this.prodId+'].cart.add($(this))">Commander</span></td>';
+                html += '<td><span id="add_'+this.prodId+'_'+gpe+'_'+id+'" class="addToCart activated" onclick="GSX.products['+this.prodId+'].cart.add($(this))">Ajouter au panier</span></td>';
                 html += '</tr>';
                 odd = !odd;
             }
@@ -678,14 +678,13 @@ function GSX() {
     this.loadProductParts = function($button) {
         var prodId = getProdId($button);
         if (!prodId) {
-            displayRequestMsg('error', 'Erreur : ID produit absent', $('#prod'+prodId).find('.partsRequestResult'));
+            alert('Erreur : ID produit absent');
             return;
         }
         if (this.products[prodId]) {
             $button.slideUp(250);
             this.products[prodId].loadParts();
-        }
-        else {
+        } else {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod'+prodId).find('.partsRequestResult'));
         }
     };
@@ -694,6 +693,25 @@ function GSX() {
     }
     this.displayParts = function(prodId) {
         this.products[prodId].PM.displayParts();
+    };
+    this.loadRepairForm = function($button) {
+        var prodId = getProdId($button.parent('p').parent('div.repairPopUp'));
+        if (!prodId) {
+            alert('Erreur : ID produit absent');
+            return;
+        }
+        var $prod = $('#prod_'+prodId);
+        if (!$prod.length) {
+            alert('Une erreur est survenue, opération impossible');
+            return;
+        }
+        if (this.products[prodId]) {
+            var requestType = $prod.find('.repairTypeSelect').val();
+            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial);
+            displayRequestMsg('requestProcess', '', $prod.find('div.repairFormContainer'));
+        } else {
+            displayRequestMsg('error', 'Erreur : produit non initialisé', $prod.find('.partsRequestResult'));
+        }
     };
 }
 
@@ -721,7 +739,9 @@ function displayRequestMsg(type, msg, $div) {
 function getProdId($obj) {
     if (!$obj.length)
         return 0;
-    var id = $obj.parent('.productDatasContainer').attr('id').replace(/^prod_(\d+)$/, '$1');
+    var $prod = $obj.parent('.productDatasContainer');
+    if (!$prod.length) return 0;
+    var id = $prod.attr('id').replace(/^prod_(\d+)$/, '$1');
     if (!id) return 0;
     return id;
 }
@@ -754,6 +774,20 @@ function prodQtyUp($button) {
     if (val > maxProdQty)
         val = maxProdQty;
     $input.val(val);
+}
+
+function displayCreateRepairPopUp($button) {
+    var prodId = getProdId($button);
+    $('#prod_'+prodId).find('div.repairPopUp').show();
+}
+function hideCreateRepairPopUp($button) {
+    $button.parent('.repairPopUp').hide();
+}
+function displayLabelInfos($span) {
+    $span.find('div.labelInfos').stop().css('opacity', 1).show();
+}
+function hideLabelInfos($span) {
+    $span.find('div.labelInfos').fadeOut(250);
 }
 
 function getXMLHttpRequest() {
@@ -794,6 +828,16 @@ function onRequestResponse(xhr, requestType, prodId) {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
             }
             break;
+        case 'loadRepairForm':
+            $div = $('#prod_'+prodId).find('.repairFormContainer');
+            if ($div.length) {
+                $div.slideUp(250, function(){
+                    $(this).html(xhr.responseText).show();
+                });
+            } else {
+                displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
+            }
+        break;
 
         case 'loadParts':
             $div = $('#prod_'+prodId).find('.partsRequestResult');

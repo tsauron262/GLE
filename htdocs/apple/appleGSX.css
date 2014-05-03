@@ -79,6 +79,16 @@ p.confirmation:before {
     content: '\f00c';
     margin-right: 10px;
 }
+p.alert {
+    font-weight: bold;
+    font-size: 14px;
+    color: #FF870F;
+}
+p.alert:before {
+    font-family: 'FA';
+    content: '\f071';
+    margin-right: 10px;
+}
 
 /*Infos produit*/
 #requestResult,
@@ -134,6 +144,7 @@ td.rowTitle {
 .productDatas td {
     padding: 3px 8px;
 }
+.createRepair,
 .loadParts {
     padding: 8px 10px;
     margin-top: 20px;
@@ -146,11 +157,18 @@ td.rowTitle {
     margin-right: 10px;
     content: '\f03a';
 }
+.createRepair:after,
 .loadParts:after {
     font-family: 'FA';
     font-size: 18px;
     margin-left: 10px;
     content: '\f138';
+}
+.createRepair:before {
+    font-family: 'FA';
+    content: '\f0ad';
+    margin-right: 10px;
+    font-size: 16px;
 }
 
 /*Panier de commande*/
@@ -547,4 +565,117 @@ span.addToCart:before {
     font-family: 'FA';
     content: '\f064';
     margin-right: 10px;
+}
+
+/*Repairs*/
+div.repairPopUp {
+    display: none;
+    position: absolute;
+    margin: auto;
+    max-width: 80%;
+    top: 150px;
+    box-shadow: 0 0 12px #505050;
+    border-radius: 12px;
+    z-index: 9999;
+    padding: 30px;
+    background: #FFFBF2;
+}
+.loadFormResults,
+.repairFormContainer {
+    display: none;
+}
+span.hidePopUp:before {
+    font-family: 'FA';
+    content: '\f057';
+    margin-right: 10px;
+    font-size: 18px;
+}
+span.hidePopUp {
+    position: absolute;
+    right: 0;
+    top: 0;
+    margin: 20px;
+    color: #787878;
+    font-weight: bold;
+}
+span.hidePopUp:hover {
+    cursor: pointer;
+    color: #B40000;
+}
+.loadRepairForm:after {
+    font-family: 'FA';
+    content: '\f0a9';
+    margin-left: 10px;
+}
+
+/*formulaires*/
+div.requestTitle {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003C78;
+    text-align: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #CDCDCD;
+}
+p.requiredInfos {
+    text-align: right;
+    font-style: italic;
+    font-size: 11px;
+    color: #B40000;
+}
+p.requiredInfos span.required:before,
+div.requestFormInputs span.required:before {
+    font-family: 'FA';
+    color: #B40000;
+    content: '\f069';
+    font-size: 6px;
+    margin-left: 5px;
+}
+
+span.displayInfos:before {
+    color: #3574B4;
+    font-family: 'FA';
+    content: '\f059';
+    font-size: 16px;
+    margin: 0 10px;
+    cursor: pointer;
+}
+div.labelInfos {
+    position: absolute;
+    display: none;
+    background-color: #fff;
+    padding: 5px;
+    border-radius: 6px;
+    box-shadow: 0 0 8px #808080;
+    color: #1D4064;
+    font-weight: bold;
+}
+
+div.requestFormInputs label {
+    color: #505050;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    margin-right: 20px;
+    display: inline-block;
+}
+
+div.requestFormInputs label.dataTitle:before {
+    content: '\f054';
+    font-family: 'FA';
+    margin-right: 5px;
+    font-size: 12px;
+}
+div.requestFormInputs input {
+    width: 250px;
+}
+
+div.requestFormInputs fieldset {
+    border: 1px solid #CDCDCD;
+    border-radius: 12px;
+    margin: 20px 10px;
+}
+
+table.requestParts{
+    display: none;
 }

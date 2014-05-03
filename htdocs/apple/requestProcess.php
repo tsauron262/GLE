@@ -1,8 +1,8 @@
 <?php
 
-//error_reporting(E_ALL);
-//error_reporting(E_ERROR);
-//ini_set('display_errors', 1);
+error_reporting(E_ALL);
+error_reporting(E_ERROR);
+ini_set('display_errors', 1);
 
 require_once '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
@@ -34,6 +34,19 @@ if (isset($_GET['action'])) {
             if (isset($_GET['serial'])) {
                 $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                 echo $datas->getLookupHtml();
+            } else {
+                echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
+            }
+            break;
+
+        case 'loadRepairForm':
+            if (isset($_GET['serial'])) {
+                if (isset($_GET['requestType'])) {
+                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                    echo $datas->getRequestFormHtml($_GET['requestType']);
+                } else {
+                    echo '<p class="error">Une erreur est survenue (Type de requête absent)</p>';
+                }
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }

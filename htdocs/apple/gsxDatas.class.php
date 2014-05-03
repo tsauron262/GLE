@@ -1,9 +1,7 @@
 <?php
-
-require_once ( 'GSX.class.php' );
+require_once ('GSX_Request.class.php');
 
 class gsxDatas {
-
     public $gsx = null;
     protected $serial = null;
     protected $partsCart = array();
@@ -142,7 +140,22 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
                     $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
+                    $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Créer une réparation</button>'."\n";
                     $html .= '<div class="partsRequestResult"></div>' . "\n";
+
+                    $html .= '<div class="repairPopUp">'."\n";
+                    $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>'."\n";
+                    $html .= '<p>Sélectionnez le type de réparation que vous souhaitez créer: <br/></p>';
+                    $html .= '<select class="repairTypeSelect">'."\n";
+                    foreach (GSX_Request::$requests_definitions as $name => $requestDatas) {
+                        $html .= '<option value="'.$name.'">'.$requestDatas['name'].'</option>';
+                    }
+                    $html .= '</select>';
+                    $html .= '<p style="text-align: right">'."\n";
+                    $html .= '<button class="loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</button>'."\n";
+                    $html .= '</p>'."\n";
+                    $html .= '<div class="repairFormContainer"/></div>';
+                    $html .= '</div>'."\n";
                 }
             }
         }
@@ -160,7 +173,7 @@ class gsxDatas {
     }
 
     public function getCartHtml($prodId) {
-        $html = '<div class="cartContainer"><div class="cartTitle">Commande de composants   ';
+        $html = '<div class="cartContainer"><div class="cartTitle">Panier de composants   ';
         $html .= '<span><span class="nbrCartProducts">0</span> produit(s)</span></div></div>' . "\n";
 
         $html .= '<div class="cartContent">' . "\n";
@@ -288,6 +301,10 @@ class gsxDatas {
         return $codes;
     }
 
+    public function getRequestFormHtml($requestType) {
+        return GSX_Request::generateRequestFormHtml($requestType, array('serialNumber' => $this->serial));
+    }
+
     public function addToCart($partRef, $qty) {
         $this->partsCart[$partRef] = $qty;
     }
@@ -301,7 +318,6 @@ class gsxDatas {
         if (!count($this->partsCart))
             return false;
     }
-
 }
 
 ?>

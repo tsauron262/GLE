@@ -52,7 +52,7 @@ function majDoubleSoc(socid, ifVide) {
             }
         });
         $(".chrid-keyid").each(function() {
-            div = $(this).parent();
+            var div = $(this).parent();
             jQuery.ajax({
                 url: "ajax/getList.php",
                 type: "POST",
@@ -113,7 +113,7 @@ jQuery(document).ready(function() {
     });
 
     jQuery('#form').validate();
-    
+
     initFormChrono();
 });
 
@@ -127,12 +127,14 @@ function addLienAj(firstParent, mode) {
     model = $(parentDiv).find(".model").html();
     select = $(parentDiv).find("select");
     selectId = $(select).val();
-    idIncr++;
-    selectNom = $(select).find("option:selected").text();
-    ajaxManipElementElement(mode, $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(parentDiv).find(".sourceid").val(), selectId, $(parentDiv).find(".ordre").val(), function(ok) {
-        if (ok == "ok")
-            addLienHtml(idIncr, selectId, selectNom, model, parentDiv);
-    });
+    if (selectId > 0) {
+        idIncr++;
+        selectNom = $(select).find("option:selected").text();
+        ajaxManipElementElement(mode, $(parentDiv).find(".sourcetype").val(), $(parentDiv).find(".targettype").val(), $(parentDiv).find(".sourceid").val(), selectId, $(parentDiv).find(".ordre").val(), function(ok) {
+            if (ok == "ok")
+                addLienHtml(idIncr, selectId, selectNom, model, parentDiv);
+        });
+    }
 }
 
 function addChronoAj(firstParent) {
@@ -153,6 +155,7 @@ function addChronoAj(firstParent) {
 }
 
 function initFormChrono() {
+    $(".addLien, .changeLien").unbind('click');
     $(".showFormChrono").each(function() {
         $(this).parent().find(".chronoForm").hide();
         $(this).click(function() {
@@ -225,9 +228,11 @@ function initFormChrono() {
         model = $(this).parent().find(".model").html();
         select = $(this).parent().find("select");
         selectId = $(select).val();
-        idIncr++;
-        selectNom = $(select).find("option:selected").text();
-        addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
+        if (selectId > 0) {
+            idIncr++;
+            selectNom = $(select).find("option:selected").text();
+            addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
+        }
         return false;
     });
     $("form #chronoTable .changeLien").click(function() {
@@ -238,9 +243,11 @@ function initFormChrono() {
         model = $(this).parent().find(".model").html();
         select = $(this).parent().find("select");
         selectId = $(select).val();
-        idIncr++;
-        selectNom = $(select).find("option:selected").text();
-        addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
+        if (selectId > 0) {
+            idIncr++;
+            selectNom = $(select).find("option:selected").text();
+            addLienHtml(idIncr, selectId, selectNom, model, $(this).parent());
+        }
         return false;
     });
 }

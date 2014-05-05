@@ -1333,7 +1333,7 @@ class synopsisdemandeintervLigne {
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
-        $sql.= ",date=" . $this->db->idate($this->datei);
+        $sql.= ",date='" . $this->db->idate($this->datei)."'";
         $sql.= ",duree=" . $this->duration;
         $sql.= ",fk_typeinterv=" . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL');
         if ($this->qte . "x" != "x")

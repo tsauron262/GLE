@@ -356,7 +356,7 @@ class GSX_Request {
         )
     );
 
-    protected function getDataInput($name, $defs, $options, $value = null) {
+    protected static function getDataInput($name, $defs, $options, $value = null) {
         if ($defs['type'] == 'file')
             return '';
 

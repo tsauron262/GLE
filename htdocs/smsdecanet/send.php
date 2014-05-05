@@ -147,9 +147,5 @@ $formsms->param["returnurl"] = $_SERVER['REQUEST_URI'];
 $formsms->show_form();
 $db->close();
 
-$fromsms = urlencode('SAV BIMP');
-$msg = urlencode("Message avec espace é à l'oin");
-$to = urlencode("+33628335081");
-print '<a href="#" onclick="dispatchePopObject(\'&msg='.$msg.'&fromsms='.$fromsms.'&to='.$to.'\', \'sms\',function(){}, \'SMS\', 100);">pop</a>';
 
 llxFooter('$Date: 2010/03/10 15:00:00');

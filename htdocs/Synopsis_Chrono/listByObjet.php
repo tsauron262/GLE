@@ -199,8 +199,15 @@ jQuery(document).ready(function(){
     jQuery('#tabs').tabs({
         cache: true,
         spinner: 'Chargement ...',
-        fx: {opacity: 'toggle' }
-    })
+        fx: {opacity: 'toggle' },
+        select: function(event, ui) {                   
+            window.location.hash = ui.tab.hash;
+            $.cookie("currentTab", ui.tab.hash, { expires: 7 });
+        }
+    });
+        
+    $("li[aria-controls='" + ($.cookie("currentTab").replace("#", "")) + "'] a").click();
+        
 });
 </script>
 EOF;

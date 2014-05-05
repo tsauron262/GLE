@@ -318,8 +318,8 @@ function limitChars(textarea, limit, infodiv)
 
         print "</table>\n";
 
-        print '<center>';
-        print "<input class=\"button\" type=\"submit\" name=\"sendmail\" value=\"".$langs->trans("SendSms")."\"";
+        print '<br/><center>';
+        print "<input class=\"button butAction\" type=\"submit\" name=\"sendmail\" value=\"".$langs->trans("SendSms")."\"";
         print ">";
         if ($this->withcancel)
         {

@@ -264,8 +264,8 @@ print "<td>Réalisé <td " . ($pourcPro > 100 ? "style='color:red'" : "") . "> "
 
 print "<div id='tabs'>";
 print "<ul>";
-print "<li><a href='#FI'>Fiche Intervention</a></li>";
 print "<li><a href='#DI'>Demande Intervention</a></li>";
+print "<li><a href='#FI'>Fiche Intervention</a></li>";
 print "</ul>";
 print "<div id='FI'>";
 print '<table id="list1"></table> <div id="pager1"></div>';

@@ -15,9 +15,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program; if not, write to the Free Software
- * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
-*/
-/*
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.*//*
   ** GLE by Synopsis et DRSI
   *
   * Author: Tommy SAURON <tommy@drsi.fr>
@@ -28,8 +26,7 @@
   *
   * Infos on http://www.finapro.fr
   *
-  */
-/*
+  *//*
  *
  * $Id: index.php,v 1.9 2008/03/01 01:26:51 eldy Exp $
  * $Source: /cvsroot/dolibarr/dolibarr/htdocs/projet/tasks/index.php,v $
@@ -53,84 +50,7 @@ if ($user->societe_id > 0)
   $socid = $user->societe_id;
 }
 
-print_barre_liste($title, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num);
-
-// Show description of content
-if ($mine) print $langs->trans("MyProjectsDesc").'<br><br>';
-else
-{
-	if ($user->rights->projet->all->lire && ! $socid) print $langs->trans("ProjectsDesc").'<br><br>';
-	else print $langs->trans("ProjectsPublicDesc").'<br><br>';
-}
-
-// Get list of project id allowed to user (in a string list separated by coma)
-$projectsListId = $projectstatic->getProjectsAuthorizedForUser($user,$mine,1,$socid);
-
-// Get list of tasks in tasksarray and taskarrayfiltered
-// We need all tasks (even not limited to a user because a task to user can have a parent that is not affected to him).
-$tasksarray=$taskstatic->getTasksArray(0, 0, $projectstatic->id, $socid, 0, $search_project);
-// We load also tasks limited to a particular user
-$tasksrole=($mine ? $taskstatic->getUserRolesForProjectsOrTasks(0,$user,$projectstatic->id,0) : '');
-
-print '<form method="POST" action="'.$_SERVER["PHP_SELF"].'">';
-print '<input type="hidden" name="mode" value="'.GETPOST('mode').'">';
-
-print '<table class="noborder" width="100%">';
-
-print '<tr class="liste_titre">';
-print '<td>'.$langs->trans("Project").'</td>';
-print '<td width="80">'.$langs->trans("RefTask").'</td>';
-print '<td>'.$langs->trans("LabelTask").'</td>';
-print '<td align="center">'.$langs->trans("DateStart").'</td>';
-print '<td align="center">'.$langs->trans("DateEnd").'</td>';
-print '<td align="center">'.$langs->trans("PlannedWorkload");
-// TODO Replace 86400 and 7 to take account working hours per day and working day per weeks
-//print '<br>('.$langs->trans("DelayWorkHour").')';
-print '</td>';
-print '<td align="right">'.$langs->trans("ProgressDeclared").'</td>';
-print '<td align="right">'.$langs->trans("TimeSpent").'</td>';
-print '<td align="right">'.$langs->trans("ProgressCalculated").'</td>';
-print "</tr>\n";
-
-print '<tr class="liste_titre">';
-print '<td class="liste_titre">';
-print '<input type="text" class="flat" name="search_project" value="'.$search_project.'" size="8">';
-print '</td>';
-print '<td class="liste_titre" colspan="7">';
-print '&nbsp;';
-print '</td>';
-print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
-print "</tr>\n";
-
-if (count($tasksarray) > 1000)
-{
-	print '<tr '.$bc[0].'>';
-	print '<td colspan="9">';
-	print $langs->trans("TooManyDataPleaseUseMoreFilters");
-	print '</td></tr>';
-}
-else
-{
-	// Show all lines in taskarray (recursive function to go down on tree)
-	$j=0; $level=0;
-	$nboftaskshown=projectLinesa($j, 0, $tasksarray, $level, true, 1, $tasksrole, $projectsListId, 0);
-}
-
-print "</table>";
-
-print '</form>';
-
-print '</div>';
-
-/*
- * Actions
- */
-if ($user->rights->projet->creer)
-{
-	print '<div class="tabsAction">';
-	print '<a class="butAction" href="'.DOL_URL_ROOT.'/projet/tasks.php?action=create">'.$langs->trans('AddTask').'</a>';
-	print '</div>';
-}
+$transAreaType = $langs->trans("Tiers");
 
 
 $jQueryDashBoardPath = DOL_URL_ROOT.'/Synopsis_Common/jquery/dashboard/';

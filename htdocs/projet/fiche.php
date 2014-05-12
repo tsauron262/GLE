@@ -1,8 +1,8 @@
 <?php
 
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2013 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2005-2007 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
 
@@ -140,40 +140,8 @@ if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
         $res = $db->fetch_object($sql);
         $_POST["ref"] = $res->ref;
 
-    if (! $error)
-    {
-        $error=0;
-
-        $db->begin();
-
-        $object->ref             = GETPOST('ref','alpha');
-        $object->title           = GETPOST('title'); // Do not use 'alpha' here, we want field as it is
-        $object->socid           = GETPOST('socid','int');
-        $object->description     = GETPOST('description'); // Do not use 'alpha' here, we want field as it is
-        $object->public          = GETPOST('public','alpha');
-        $object->datec=dol_now();
-        $object->date_start=$date_start;
-        $object->date_end=$date_end;
-
-        // Fill array 'array_options' with data from add form
-        $ret = $extrafields->setOptionalsFromPost($extralabels,$object);
-
-        $result = $object->create($user);
-        if ($result > 0)
-        {
-            // Add myself as project leader
-            $result = $object->add_contact($user->id, 'PROJECTLEADER', 'internal');
-            if ($result < 0)
-            {
-                $langs->load("errors");
-                $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
-                $error++;
-            }
-        }
-        else
-        {
-            $langs->load("errors");
-            $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
+        $error = 0;
+        if (empty($_POST["ref"])) {
             $error++;
             $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
             $mesg = '<div class="error ui-state-error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")) . '</div>';
@@ -199,181 +167,15 @@ if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
     }
 }
 
-if ($action == 'update' && ! $_POST["cancel"] && $user->rights->projet->creer)
-{
-    $error=0;
-
-    if (empty($ref))
-    {
-        $error++;
-        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
-        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")).'</div>';
-    }
-    if (empty($_POST["title"]))
-    {
-        $error++;
-        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
-        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
-    }
-
-    $db->begin();
-
-    if (! $error)
-    {
-        $object->oldcopy = dol_clone($object);
-
-		$old_start_date = $object->date_start;
-
-        $object->ref          = GETPOST('ref','alpha');
-        $object->title        = GETPOST('title'); // Do not use 'alpha' here, we want field as it is
-        $object->socid        = GETPOST('socid','int');
-        $object->description  = GETPOST('description');	// Do not use 'alpha' here, we want field as it is
-        $object->public       = GETPOST('public','alpha');
-        $object->date_start   = empty($_POST["project"])?'':$date_start;
-        $object->date_end     = empty($_POST["projectend"])?'':$date_end;
-
-        // Fill array 'array_options' with data from add form
-        $ret = $extrafields->setOptionalsFromPost($extralabels,$object);
-		if ($ret < 0)
-		{
-			$error++;
-		}
-    }
-
-    if (! $error)
-    {
-    	$result=$object->update($user);
-    	if ($result < 0)
-    	{
-    		$error++;
-    		setEventMessage($object->errors,'errors');
-    	}
-    }
-
-    if (! $error)
-    {
-    	if (GETPOST("reportdate") && ($object->date_start!=$old_start_date))
-    	{
-    		$result=$object->shiftTaskDate($old_start_date);
-    		if ($result < 0)
-    		{
-    			$error++;
-    			$mesg='<div class="error">'.$langs->trans("ErrorShiftTaskDate").':'.$object->error.'</div>';
-    		}
-    	}
-    }
-
-    if ($error)
-    {
-		$db->rollback();
-    	$action='edit';
-    }
-    else
-	{
-    	$db->commit();
-
-		if (GETPOST('socid','int') > 0) $object->societe->fetch(GETPOST('socid','int'));
-		else unset($object->societe);
-    }
-}
-
-// Build doc
-if ($action == 'builddoc' && $user->rights->projet->creer)
-{
-	// Save last template used to generate document
-	if (GETPOST('model')) $object->setDocModel($user, GETPOST('model','alpha'));
-
-    $outputlangs = $langs;
-    if (GETPOST('lang_id'))
-    {
-        $outputlangs = new Translate("",$conf);
-        $outputlangs->setDefaultLang(GETPOST('lang_id'));
-    }
-    $result=project_pdf_create($db, $object, $object->modelpdf, $outputlangs);
-    if ($result <= 0)
-    {
-        dol_print_error($db,$result);
+if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
+    $projet = new Project($db);
+    $projet->id = $_GET["id"];
+    if ($projet->delete($user) == 0) {
+        Header("Location: index.php");
         exit;
-    }
-}
-
-// Delete file in doc form
-if ($action == 'remove_file' && $user->rights->projet->creer)
-{
-    require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
-
-    if ($object->id > 0)
-    {
-        $langs->load("other");
-        $upload_dir =	$conf->projet->dir_output . "/";
-        $file =	$upload_dir	. '/' .	GETPOST('file');
-        $ret=dol_delete_file($file);
-        if ($ret) setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
-        else setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
-    }
-}
-
-
-if ($action == 'confirm_validate' && GETPOST('confirm') == 'yes')
-{
-    $result = $object->setValid($user);
-    if ($result <= 0)
-    {
-        $mesg='<div class="error">'.$object->error.'</div>';
-    }
-}
-
-if ($action == 'confirm_close' && GETPOST('confirm') == 'yes')
-{
-    $result = $object->setClose($user);
-    if ($result <= 0)
-    {
-        $mesg='<div class="error">'.$object->error.'</div>';
-    }
-}
-
-if ($action == 'confirm_reopen' && GETPOST('confirm') == 'yes')
-{
-    $result = $object->setValid($user);
-    if ($result <= 0)
-    {
-        $mesg='<div class="error">'.$object->error.'</div>';
-    }
-}
-
-if ($action == 'confirm_delete' && GETPOST("confirm") == "yes" && $user->rights->projet->supprimer)
-{
-    $object->fetch($id);
-    $result=$object->delete($user);
-    if ($result > 0)
-    {
-        header("Location: index.php");
+    } else {
+        Header("Location: fiche.php?id=" . $projet->id);
         exit;
-    }
-    else
-    {
-        dol_syslog($object->error,LOG_DEBUG);
-        $mesg='<div class="error">'.$langs->trans("CantRemoveProject").'</div>';
-    }
-}
-
-if ($action == 'confirm_clone' && $user->rights->projet->creer && GETPOST('confirm') == 'yes')
-{
-    $clone_contacts=GETPOST('clone_contacts')?1:0;
-    $clone_tasks=GETPOST('clone_tasks')?1:0;
-	$clone_project_files = GETPOST('clone_project_files') ? 1 : 0;
-	$clone_task_files = GETPOST('clone_task_files') ? 1 : 0;
-    $clone_notes=GETPOST('clone_notes')?1:0;
-    $result=$object->createFromClone($object->id,$clone_contacts,$clone_tasks,$clone_project_files,$clone_task_files,$clone_notes);
-    if ($result <= 0)
-    {
-        $mesg='<div class="error">'.$object->error.'</div>';
-    }
-    else
-    {
-    	$object->fetch($result);	// Load new object
-    	$action='edit';
-    	$comefromclone=true;
     }
 }
 
@@ -515,51 +317,13 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     $head = synopsis_project_prepare_head($projet);
     dol_fiche_head($head, 'project', $langs->trans("Project"));
 
-    // Confirmation validation
-    if ($action == 'validate')
-    {
-        print $form->formconfirm($_SERVER["PHP_SELF"].'?id='.$object->id, $langs->trans('ValidateProject'), $langs->trans('ConfirmValidateProject'), 'confirm_validate','',0,1);
-    }
-    // Confirmation close
-    if ($action == 'close')
-    {
-        print $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("CloseAProject"),$langs->trans("ConfirmCloseAProject"),"confirm_close",'','',1);
-    }
-    // Confirmation reopen
-    if ($action == 'reopen')
-    {
-        print $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("ReOpenAProject"),$langs->trans("ConfirmReOpenAProject"),"confirm_reopen",'','',1);
-    }
-    // Confirmation delete
-    if ($action == 'delete')
-    {
-        $text=$langs->trans("ConfirmDeleteAProject");
-        $task=new Task($db);
-        $taskarray=$task->getTasksArray(0,0,$object->id,0,0);
-        $nboftask=count($taskarray);
-        if ($nboftask) $text.='<br>'.img_warning().' '.$langs->trans("ThisWillAlsoRemoveTasks",$nboftask);
-        print $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id,$langs->trans("DeleteAProject"),$text,"confirm_delete",'','',1);
+    if ($_REQUEST['action'] == 'delete') {
+        $html->form_confirm("fiche.php?id=" . $_GET["id"], $langs->trans("DeleteAProject"), $langs->trans("ConfirmDeleteAProject"), "confirm_delete");
+        print "<br>";
     }
 
-    // Clone confirmation
-    if ($action == 'clone')
-    {
-        $formquestion=array(
-    		'text' => $langs->trans("ConfirmClone"),
-            array('type' => 'checkbox', 'name' => 'clone_contacts',		'label' => $langs->trans("CloneContacts"), 			'value' => true),
-            array('type' => 'checkbox', 'name' => 'clone_tasks',   		'label' => $langs->trans("CloneTasks"), 			'value' => true),
-            array('type' => 'checkbox', 'name' => 'clone_notes',   		'label' => $langs->trans("CloneNotes"), 			'value' => true),
-        	array('type' => 'checkbox', 'name' => 'clone_project_files','label' => $langs->trans("CloneProjectFiles"),	    'value' => false),
-        	array('type' => 'checkbox', 'name' => 'clone_task_files',	'label' => $langs->trans("CloneTaskFiles"),         'value' => false)
-        );
-
-        print $form->formconfirm($_SERVER["PHP_SELF"]."?id=".$object->id, $langs->trans("CloneProject"), $langs->trans("ConfirmCloneProject"), "confirm_clone", $formquestion, '', 1, 240);
-    }
-
-    if ($action == 'edit' && $userWrite > 0)
-    {
-        print '<form action="'.$_SERVER["PHP_SELF"].'" method="POST">';
-        print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+    if ($_REQUEST['action'] == 'edit') {
+        print '<form method="post" action="fiche.php">';
         print '<input type="hidden" name="action" value="update">';
         print '<input type="hidden" name="id" value="' . $_GET["id"] . '">';
 
@@ -573,11 +337,10 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
                    <td class="ui-widget-content"><input size="30" name="title" value="' . $projet->title . '"></td></tr>';
 
-        // Customer
-        print '<tr><td>'.$langs->trans("Thirdparty").'</td><td>';
-        $text=$form->select_company($object->societe->id,'socid','',1,1);
-        $texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
-        print $form->textwithtooltip($text.' '.img_help(),$texthelp,1);
+        // Client
+        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Company") . '</th>
+                   <td class="ui-widget-content">';
+        print   $html->select_company($projet->societe->id, 'socid', '', 1);
         print '</td></tr>';
 
         // Responsable du projet
@@ -617,11 +380,9 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
                    <td class="ui-widget-content" colspan=3>' . $projet->title . '</td></tr>';
 
-        // Third party
-        print '<tr><td>'.$langs->trans("Thirdparty").'</td><td>';
-        if ($object->societe->id > 0) print $object->societe->getNomUrl(1);
-        else print'&nbsp;';
-        print '</td></tr>';
+        // Project leader
+        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("OfficerProject") . '</th>
+                   <td class="ui-widget-content" colspan=3>' . $projet->user->getNomUrl(1) . '</td></tr>';
 
         //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectBegin").'</th>
         //         <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_valid)).'</td>';

@@ -1,7 +1,23 @@
 <?php
-/* Copyright (C) 2010 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2012 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2013 Cédric Salvador      <csalvador@gpcsolutions.fr>
+
+/*
+  ** GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Create on : 4-1-2009
+  * Version 1.1
+  *
+  * Infos on http://www.finapro.fr
+  *
+  */
+/*
+ */
+/* Copyright (C) 2003-2004 Rodolphe Quiedeville  <rodolphe@quiedeville.org>
+ * Copyright (C) 2004-2008 Laurent Destailleur   <eldy@users.sourceforge.net>
+ * Copyright (C) 2005      Marc Barilley / Ocebo <marc@ocebo.com>
+ * Copyright (C) 2005      Regis Houssin         <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,17 +63,8 @@ if ($_GET["id"]) { $projetid=$_GET["id"]; }
 if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add" && $_POST["action"] != "update" && !$_POST["cancel"])) accessforbidden();
 
 // Security check
-$socid=0;
-if ($user->societe_id > 0) $socid=$user->societe_id;
-$result=restrictedArea($user,'projet',$id,'');
-
-$object = new Project($db);
-$object->fetch($id,$ref);
-if ($object->id > 0)
-{
-	$object->fetch_thirdparty();
-	$upload_dir = $conf->projet->dir_output . "/" . dol_sanitizeFileName($object->ref);
-}
+if ($user->societe_id) $socid=$user->societe_id;
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
 
 // Get parameters
 $page=$_GET["page"];
@@ -172,8 +179,97 @@ if ($_REQUEST['SynAction'] == 'dlZipByGrp')
 /*
  * Actions
  */
+// Envoi fichier
+if ($_POST["sendit"] && isset($projetConf->dir_output))
+{
+    $projet = new Project($db);
+    $projet->fetch($projetid);
+    $upload_dir = $projetConf->dir_output . "/" . sanitize_string($projet->ref);
 
-include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_pre_headers.tpl.php';
+    
+    
+    if (dol_mkdir($upload_dir) >= 0) {
+        $resupload = dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . dol_unescapefile($_FILES['userfile']['name']), 0, 0, $_FILES['userfile']['error']);
+        if (is_numeric($resupload) && $resupload > 0) {
+            if (image_format_supported($upload_dir . "/" . $_FILES['userfile']['name']) == 1) {
+                // Create small thumbs for image (Ratio is near 16/9)
+                // Used on logon for example
+                $imgThumbSmall = vignette($upload_dir . "/" . $_FILES['userfile']['name'], $maxwidthsmall, $maxheightsmall, '_small', $quality, "thumbs");
+                // Create mini thumbs for image (Ratio is near 16/9)
+                // Used on menu or for setup page for example
+                $imgThumbMini = vignette($upload_dir . "/" . $_FILES['userfile']['name'], $maxwidthmini, $maxheightmini, '_mini', $quality, "thumbs");
+            }
+            $mesg = '<div class="ok">' . $langs->trans("FileTransferComplete") . '</div>';
+        } else {
+            $langs->load("errors");
+            if ($resupload < 0) { // Unknown error
+                $mesg = '<div class="error">' . $langs->trans("ErrorFileNotUploaded") . '</div>';
+            } else if (preg_match('/ErrorFileIsInfectedWithAVirus/', $resupload)) { // Files infected by a virus
+                $mesg = '<div class="error">' . $langs->trans("ErrorFileIsInfectedWithAVirus") . '</div>';
+            } else { // Known error
+                $mesg = '<div class="error">' . $langs->trans($resupload) . '</div>';
+            }
+        }
+    }
+    /*if ($projet->fetch($projetid))
+    {
+        $upload_dir = $projetConf->dir_output . "/" . sanitize_string($projet->ref);
+        if (! is_dir($upload_dir)) 
+            dol_mkdir($upload_dir);
+        if (is_dir($upload_dir))
+        {
+            $tmpName = $_FILES['userfile']['name'];
+            //decode decimal HTML entities added by web browser
+            $tmpName = dol_unescapefile($tmpName );
+
+            if (dol_move_uploaded_file($_FILES['userfile']['tmp_name'], $upload_dir . "/" . $tmpName,0) > 0)
+            {
+                $mesg = '<div class="ok">'.$langs->trans("FileTransferComplete").'</div>';
+
+                //ajoute dans ".MAIN_DB_PREFIX."Synopsis_projet_document
+
+
+                //add file to ecm
+                // Appel des triggers
+                include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+                $interface=new Interfaces($db);
+                $interface->texte=$tmpName;
+                $result=$interface->run_triggers('ECM_UL_PROJET',$projet,$user,$langs,$conf);
+                if ($result < 0) { $error++; $this->errors=$interface->errors; }
+                // Fin appel triggers
+//                require_once(DOL_DOCUMENT_ROOT . "/ecm/ecmdirectory.class.php" );
+//                $ecm = new EcmDirectory($db);
+//                $ecm->create_assoc("projet",$projet, $_FILES['userfile']['name'],$user,$conf);
+                //print_r($_FILES);
+            }
+            else
+            {
+                // Echec transfert (fichier d�passant la limite ?)
+                $mesg = '<div class="error ui-state-error">'.$langs->trans("ErrorFileNotUploaded").'</div>';
+                // print_r($_FILES);
+            }
+        }
+    }*/
+}
+
+// Delete
+if ($_REQUEST['action'] =='delete')
+{
+    $projet = new Project($db);
+
+    $projetid=$_GET["id"];
+    if ($projet->fetch($projetid))
+    {
+        $upload_dir = $projetConf->dir_output . "/" . sanitize_string($projet->ref);
+        $file = $upload_dir . '/' . urldecode($_GET['urlfile']);
+        dol_delete_file($file);
+        $mesg = '<div class="ok">'.$langs->trans("FileWasRemoved").'</div>';
+        include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
+        $interface=new Interfaces($db);
+        $result=$interface->run_triggers('ECM_UL_DEL_PROJET',$projet,$user,$langs,$conf);
+        if ($result < 0) { $error++; $this->errors=$interface->errors; }
+    }
+}
 
 
 /*
@@ -441,13 +537,8 @@ $header .= <<< EOF
 
 EOF;
 
-	// Files list constructor
-	$filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
-	$totalsize=0;
-	foreach($filearray as $key => $file)
-	{
-		$totalsize+=$file['size'];
-	}
+//Affiche un form :> choix user par autocomplete dans zimbra
+
 
 $header .= <<< EOF
                     tmp += "</div>";
@@ -662,9 +753,92 @@ function remFromDocGroup(draggable,helper,ui)
                 initDnD();
             } else {
 
-	$modulepart = 'project';
-	$permission = ($userWrite > 0);
-	include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';
+            }
+        }
+    });
+
+}
+    // let the gallery items be draggable
+    function initDnD()
+    {
+       jQuery('.ui-icon-trash').click(function(){
+            remFromDocGroup(jQuery(this).parent().parent());
+       });
+       jQuery(".notdraggable").draggable( 'disable' );
+EOF;
+
+//TODO
+//fichier a virer  dans detail :> nbr de fichier
+//Pour les droits , si droit de modifier les groupes de document => cacher Doc du projet
+// deco filetree + vert +fiedset
+
+        $requete = "SELECT *
+                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_document_group
+                     WHERE fk_projet = ".$projetid;
+        $sql1 = $db->query($requete);
+        if ($db->num_rows($sql1)> 0)
+        {
+            while ($res=$db->fetch_object($sql1))
+            {
+                // let the trash be droppable, accepting the gallery items
+                $header .= 'jQuery("#droppable'.$res->id.'").droppable({';
+                    $header .= "accept: '.draggable',";
+                    $header .= "activeClass: 'ui-state-highlight',";
+                    $header .= "drop: function(ev, ui) {";
+                    $header .= '             addToDocGroup(ui.draggable,this,ev,ui); ';
+               $header .= " }";
+               $header .= "});";
+            }
+        }
+
+$header .= <<<EOF
+
+       jQuery('.draggable').draggable({
+                    cancel: 'a.ui-icon',// clicking an icon won't initiate dragging
+                    revert: 'invalid', // when not dropped, the item will revert back to its initial position
+                    containment: 'document', // stick to demo-frame if present
+                    helper: 'clone',
+                    cursor: 'move',
+                    iframefix: true,
+                    zIndex: 100000,
+                    refreshPositions: true,
+                    distance: 10,
+                });
+       jQuery(".draggable").draggable( 'enable' );
+
+        // let the trash items be draggable
+//       jQuery(".droppabledraggable").draggable({
+//                    cancel: 'a.ui-icon',// clicking an icon won't initiate dragging
+//                    revert: 'invalid', // when not dropped, the item will revert back to its initial position
+//                    containment: 'document',
+//                    helper: 'clone',
+//                    cursor: 'move',
+//                    iframefix: true,
+//                    zIndex: 100010,
+//                    refreshPositions: true,
+//                    distance: 10,
+//                });
+
+        // let the gallery be droppable as well, accepting items from the trash
+        jQuery('#treeDocs').droppable({
+            accept: '.droppable div',
+            activeClass: 'custom-state-active',
+            drop: function(ev, ui) {
+                remFromDocGroup(ui.draggable,ui.helper,ui);
+            }
+        });
+    }
+
+
+//Refaireenutilisant l'espace à droite comme dans doc Group
+function displayCondAction(obj)
+{
+    //console.log(jQuery(obj).parent().parent().find('.condDisplay'));
+    if (obj.checked)
+    {
+        jQuery(obj).parent().parent().parent().find('.condDisplay').slideDown("slow");
+         jQuery(obj).parent().parent().parent().parent().parent().parent().find('.condDisplayVert').find('#projetTreeDiv').animate({ width: "226px", opacity: 1,display: "block"});
+        //console.log(jQuery(obj).parent().parent().parent().parent().parent().parent().find('.condDisplayVert').find('#projetTreeDiv').text());
 
     } else {
         jQuery(obj).parent().parent().parent().find('.condDisplay').slideUp("slow");

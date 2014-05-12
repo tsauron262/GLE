@@ -2,8 +2,7 @@
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005      Marc Bariley / Ocebo <marc@ocebo.com>
- * Copyright (C) 2005-2010 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2013      Cédric Salvador      <csalvador@gpcsolutions.fr>
+ * Copyright (C) 2005-2006 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
 
@@ -94,38 +93,106 @@ $jqgridJs .= 'var gridimgpath="'.$imgPath.'/images/";';
 $jqgridJs .= 'var userId="'.$user->id.'";';
 $jqgridJs .= 'var socId="'.$socid.'";';
 
-$sql = "SELECT p.rowid as projectid, p.ref, p.title, p.fk_statut, p.public, p.fk_user_creat";
-$sql.= ", p.datec as date_create, p.dateo as date_start, p.datee as date_end";
-$sql.= ", s.nom, s.rowid as socid";
-$sql.= " FROM ".MAIN_DB_PREFIX."projet as p";
-$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on p.fk_soc = s.rowid";
-$sql.= " WHERE p.entity = ".$conf->entity;
-if ($mine || ! $user->rights->projet->all->lire) $sql.= " AND p.rowid IN (".$projectsListId.")";
-// No need to check company, as filtering of projects must be done by getProjectsAuthorizedForUser
-//if ($socid || ! $user->rights->societe->client->voir)	$sql.= "  AND (p.fk_soc IS NULL OR p.fk_soc = 0 OR p.fk_soc = ".$socid.")";
-if ($socid) $sql.= "  AND (p.fk_soc IS NULL OR p.fk_soc = 0 OR p.fk_soc = ".$socid.")";
-if ($search_ref)
-{
-	$sql .= natural_search('p.ref', $search_ref);
-}
-if ($search_label)
-{
-	$sql .= natural_search('p.title', $search_label);
-}
-if ($search_societe)
-{
-	$sql .= natural_search('s.nom', $search_societe);
-}
-$sql.= $db->order($sortfield,$sortorder);
-$sql.= $db->plimit($conf->liste_limit+1, $offset);
+$jqgridJs .= <<<EOF
+jQuery(document).ready(function(){
+    var get = "";
+    if (socId > 0)
+    {
+        get = "&socid="+socId;
+    }
+    jQuery("#gridListProj").jqGrid({
+            datatype: "json",
+            url: "tasks/ajax/listProj_json.php?userId="+userId+get,
+            colNames:['id', 'D&eacute;signation','Ref','Date de d&eacute;but', 'Statut', 'Avancement','Client','Taille &eacute;quipe',"Responsable"],
+            colModel:[  {name:'id',index:'id', width:5, hidden:true,key:true,hidedlg:true,search:false},
+                        {name:'title',index:'title', width:300},
+                        {name:'ref',index:'ref', width:30},
+                        {name:'dateo',index:'dateo', width:60, align:"center",search:false},
+                        {name:'statut',index:'statut', width:60, align:"right",stype:'select', searchoptions:"{value: statutRess}"},
+                        {name:'avanc',index:'avanc', width:60, align:"center",search:false},
+                        {name:'socname',index:'socname', width:150, align:"center"},
+                        {name:'cntMyTask',index:'cntMyTask', width:50, align:"center",search:false},
+                        {name:'fk_user_resp',index:'fk_user_resp', width:90, align:"center",search:false},
+                      ],
+            rowNum:30,
+            rowList:[30,50,100],
+            imgpath: gridimgpath,
+            pager: jQuery('#gridListProjPager'),
+            sortname: 'id',
+            mtype: "POST",
+            viewrecords: true,
+            autowidth: true,
+            height: 500,
+            sortorder: "desc",
+            //multiselect: true,
+            caption: "Projets",
+            
+            loadComplete: function(){
+                    jQuery(".progressbar").each(function(){
+                       var val = $(this).text();
+                        jQuery(this).text('');
+                        jQuery(this).progressbar( {
+                           value: parseInt(val),
+                           orientation: "horizontal",
+                       });
+                });
+            },
+            subGrid : true,
+            subGridRowExpanded: function(subgrid_id, row_id) {
+                 // we pass two parameters
+                 // subgrid_id is a id of the div tag created whitin a table data
+                 // the id of this elemenet is a combination of the "sg_" + id of the row
+                 // the row_id is the id of the row
+                 // If we wan to pass additinal parameters to the url we can use
+                 // a method getRowData(row_id) - which returns associative array in type name-value
+                 // here we can easy construct the flowing
+                 var subgrid_table_id, pager_id;
+                 subgrid_table_id = subgrid_id+"_t";
+                 mtype: "POST",
+                 pager_id = "p_"+subgrid_table_id;
+                 jQuery("#"+subgrid_id).html("<table id='"+subgrid_table_id+"' class='scroll'></table><div id='"+pager_id+"' class='scroll'></div>");
+                 jQuery("#"+subgrid_table_id).jqGrid({
+                        url:"tasks/ajax/listAllTask_json.php?userId="+userId+"&projId="+row_id,
+                        datatype: "json",
+                        colNames: ['id','Acteur','R&ocirc;le', 'D&eacute;signation','Statut','Avancement','Date de d&eacute;but', 'Dur&eacute;e'],
+                        colModel: [ {name:'id',index:'id', width:55, hidden:true,key:true,hidedlg:true,search:false},
+                                    {name:'acto',index:'acto', width:80, align:"center"},
+                                    {name:'role',index:'role', width:80, align:"center"},
+                                    {name:'title',index:'title', width:90},
+                                    {name:'statut',index:'statut', width:80, align:"center",editoptions:{value:"0:Selection;1:Brouillon;2:Valider;3:Cloturer"}},
+                                    {name:'progress',index:'progress', width:80, align:"center"},
+                                    {name:'task_date',index:'task_date', width:90, datefmt: "dd/mm/yyyy",sorttype: "date", align:"center"},
+                                    {name:'task_duration',index:'task_duration', width:80, align:"center"},
+                                  ],
+                        rowNum:20,
+                        width: "850",
+                        pager: pager_id,
+                        imgpath: gridimgpath,
+                        sortname: 'id',
+                        sortorder: "asc",
+                        height: '100%',
+                    }).navGrid("#"+pager_id,{edit:false,add:false,del:false}) },
+        }).navGrid('#gridListProjPager',
+                   { add:false,
+                     del:false,
+                     edit:false,
+                     position:"left"
+        });
 
-dol_syslog("list allowed project sql=".$sql);
-$resql = $db->query($sql);
-if ($resql)
-{
-	$var=true;
-	$num = $db->num_rows($resql);
-	$i = 0;
+        jQuery.datepicker.setDefaults(jQuery.extend({showMonthAfterYear: false}, jQuery.datepicker.regional['fr']));
+        var arr = new Array("adddatedeb", "adddatefin", "Moddatedeb", "Moddatefin");
+        for (i in arr)
+        {
+            jQuery("#"+arr[i]).datepicker({dateFormat: 'dd/mm/yy',
+                    changeMonth: true,
+                    changeYear: true,
+                    showButtonPanel: true,
+                    buttonImage: 'cal.png',
+                    buttonImageOnly: true,
+                    showTime: true,
+                    duration: '',
+                    constrainInput: false,
+            });
 
         }
         jQuery("#ui-datepicker-div").addClass("promoteZ");
@@ -136,94 +203,8 @@ if ($resql)
 </script>
 EOF;
 
-	print '<table class="noborder" width="100%">';
-	print '<tr class="liste_titre">';
-	print_liste_field_titre($langs->trans("Ref"),$_SERVER["PHP_SELF"],"p.ref","","","",$sortfield,$sortorder);
-	print_liste_field_titre($langs->trans("Label"),$_SERVER["PHP_SELF"],"p.title","","","",$sortfield,$sortorder);
-	print_liste_field_titre($langs->trans("Company"),$_SERVER["PHP_SELF"],"s.nom","","","",$sortfield,$sortorder);
-	print_liste_field_titre($langs->trans("Visibility"),$_SERVER["PHP_SELF"],"p.public","","","",$sortfield,$sortorder);
-	print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],'p.fk_statut',"","",'align="right"',$sortfield,$sortorder);
-	print "</tr>\n";
-
-	print '<tr class="liste_titre">';
-	print '<td class="liste_titre">';
-	print '<input type="text" class="flat" name="search_ref" value="'.$search_ref.'" size="6">';
-	print '</td>';
-	print '<td class="liste_titre">';
-	print '<input type="text" class="flat" name="search_label" value="'.$search_label.'">';
-	print '</td>';
-	print '<td class="liste_titre">';
-	print '<input type="text" class="flat" name="search_societe" value="'.$search_societe.'">';
-	print '</td>';
-	print '<td class="liste_titre">&nbsp;</td>';
-	print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
-	print "</tr>\n";
-
-	while ($i < $num)
-	{
-		$objp = $db->fetch_object($resql);
-
-		$projectstatic->id = $objp->projectid;
-		$projectstatic->user_author_id = $objp->fk_user_creat;
-		$projectstatic->public = $objp->public;
-
-		$userAccess = $projectstatic->restrictedProjectArea($user);
-
-		if ($userAccess >= 0)
-		{
-			$var=!$var;
-			print "<tr ".$bc[$var].">";
-
-			// Project url
-			print "<td>";
-			$projectstatic->ref = $objp->ref;
-			print $projectstatic->getNomUrl(1);
-			print "</td>";
-
-			// Title
-			print '<td>';
-			print dol_trunc($objp->title,24);
-			print '</td>';
-
-			// Company
-			print '<td>';
-			if ($objp->socid)
-			{
-				$socstatic->id=$objp->socid;
-				$socstatic->nom=$objp->nom;
-				print $socstatic->getNomUrl(1);
-			}
-			else
-			{
-				print '&nbsp;';
-			}
-			print '</td>';
-
-			// Visibility
-			print '<td align="left">';
-			if ($objp->public) print $langs->trans('SharedProject');
-			else print $langs->trans('PrivateProject');
-			print '</td>';
-
-			// Status
-			$projectstatic->statut = $objp->fk_statut;
-			print '<td align="right">'.$projectstatic->getLibStatut(3).'</td>';
-
-			print "</tr>\n";
-
-		}
-
-		$i++;
-	}
-
-	$db->free($resql);
-}
-else
-{
-	dol_print_error($db);
-}
-
-print "</table>";
+$js .= $jqgridJs;
+llxHeader($js,$langs->trans("Projects"));
 
 
 

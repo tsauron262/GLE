@@ -1,6 +1,5 @@
 <?php
-require_once ('GSX_Request.class.php');
-
+require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 class gsxDatas {
     public $gsx = null;
     protected $serial = null;
@@ -56,7 +55,7 @@ class gsxDatas {
         }
     }
 
-    public function getLookupHtml() {
+    public function getLookupHtml($prodId) {
         if (count($this->errors)) {
             return '<p class="error">Impossible d\'afficher les informations demandées</p>' . "\n";
         }
@@ -143,17 +142,20 @@ class gsxDatas {
                     $html .= '<div class="partsRequestResult"></div>' . "\n";
 
                     $html .= '<div class="repairPopUp">'."\n";
+                    $html .= '<input type="hidden" class="prodId" value="'.$prodId.'"/>'."\n";
                     $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>'."\n";
                     $html .= '<p>Sélectionnez le type de réparation que vous souhaitez créer: <br/></p>';
                     $html .= '<select class="repairTypeSelect">'."\n";
-                    foreach (GSX_Request::$requests_definitions as $name => $requestDatas) {
-                        $html .= '<option value="'.$name.'">'.$requestDatas['name'].'</option>';
+
+                    $requests = GSX_Request::getRequestsByType('repair');
+                    foreach ($requests as $name => $label) {
+                        $html .= '<option value="'.$name.'">'.$label.'</option>';
                     }
                     $html .= '</select>';
                     $html .= '<p style="text-align: right">'."\n";
                     $html .= '<button class="loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</button>'."\n";
                     $html .= '</p>'."\n";
-                    $html .= '<div class="repairFormContainer"/></div>';
+                    $html .= '<div class="repairFormContainer"></div>';
                     $html .= '</div>'."\n";
                 }
             }
@@ -301,7 +303,8 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType) {
-        return GSX_Request::generateRequestFormHtml($requestType, array('serialNumber' => $this->serial));
+        $gsxRequest = new GSX_Request($requestType);
+        return $gsxRequest->generateRequestFormHtml(array('serialNumber' => $this->serial));
     }
 
     public function addToCart($partRef, $qty) {

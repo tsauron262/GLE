@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+    <!--Parts-->
+    <def name="partNumber" type="text" max="18" jsCheck="alphaNum">
+        <label>Référence</label>
+    </def>
+    <def name="comptiaCode" type="comptiaCode">
+        <label>Code CompTIA</label>
+    </def>
+    <def name="comptiaModifier" type="comptiaModifier">
+        <label>Modificateur</label>
+    </def>
+
+    <!--Adresses-->
+    <def name="addressLine1" type="text" max="60" jsCheck="text">
+        <label>Adresse ligne 1</label>
+    </def>
+    <def name="addressLine2" type="text" max="40" jsCheck="text">
+        <label>Adresse ligne 2</label>
+    </def>
+    <def name="addressLine3" type="text" max="40" jsCheck="text">
+        <label>Adresse ligne 3</label>
+    </def>
+    <def name="addressLine4" type="text" max="40" jsCheck="text">
+        <label>Adresse ligne 4</label>
+    </def>
+    <def name="city" type="text" max="40" jsCheck="text">
+        <label>Ville</label>
+    </def>
+    <def name="companyName" type="text" max="100" jsCheck="text">
+        <label>Société</label>
+    </def>
+    <def name="country" type="text" max="3" jsCheck="text">
+        <label>Pays</label>
+    </def>
+    <def name="firstName" type="text" max="96" jsCheck="text">
+        <label>Prénom</label>
+    </def>
+    <def name="lastName" type="text" max="96" jsCheck="text">
+        <label>Nom</label>
+    </def>
+    <def name="primaryPhone" type="tel" max="30" jsCheck="phone">
+        <label>Numéro de téléphone principal</label>
+    </def>
+    <def name="secondaryPhone" type="tel" max="30" jsCheck="phone">
+        <label>Numéro de téléphone secondaire</label>
+    </def>
+    <def name="region" type="select">
+        <label>Région</label>
+        <values>
+            <val val="002">Asie / Pacifique</val>
+            <val val="003">Japon</val>
+            <val val="004">Europe</val>
+            <val val="005">Etats-Unis</val>
+            <val val="006">Canada</val>
+            <val val="007">Amérique du sud</val>
+        </values>
+    </def>
+    <def name="state" type="text" max="3" jsCheck="text">
+        <label>Etat</label>
+    </def>
+    <def name="zipCode" type="text" max="10" jsCheck="zipCode">
+        <label>Code postal</label>
+    </def>
+    <def name="emailAdresse" type="email" max="241" jsCheck="email">
+        <label>Adresse e-mail</label>
+    </def>
+
+    <!--Repairs-->
+    <def name="billTo" type="text" max="10" jsCheck="text">
+        <label>Numéro "Bill To"</label>
+    </def>
+    <def name="checkIfOutOfWarrantyCoverage" type="YesNo">
+        <label>Vérifier la couverture hors garantie</label>
+    </def>
+    <def name="customerAddress" type="datasGroup">
+        <label>Adresse du client</label>
+    </def>
+    <def name="diagnosedByTechId" type="text" max="15" jsCheck="text">
+        <label>ID du technicien à l'origine du diagnostique</label>
+    </def>
+    <def name="diagnosis" type="textarea" max="1500" jsCheck="text">
+        <label>Diagnostique du technicien</label>
+    </def>
+    <def name="fileName" type="fileSelect" max="30">
+        <label>Fichier à envoyer</label>
+    </def>
+    <def name="fileData" type="file" hidden="1"></def>
+    <def name="notes" type="textarea" max="800" jsCheck="text">
+        <label>Notes du technicien</label>
+    </def>
+    <def name="orderLines" type="partsList">
+        <label>Composants</label>
+    </def>
+    <def name="overrideDiagnosticCodeCheck" type="YesNo">
+        <label>Ne pas effectuer la vérification du code du diagnostique</label>
+        <infos>Si Oui, le code de diagnostique n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>
+    </def>
+    <def name="poNumber" type="text" max="35" jsCheck="text">
+        <label>Purchase order number</label>
+    </def>
+    <def name="popFaxed" type="YesNo">
+        <label>Preuve d'achat faxé</label>
+    </def>
+    <def name="referenceNumber" type="text" max="15" jsCheck="text">
+        <label>Référence</label>
+    </def>
+    <def name="requestReviewByApple" type="YesNo">
+        <label>Vérification de la requête par Apple</label>
+    </def>
+    <def name="serialNumber" type="text" max="18" jsCheck="text">
+        <label>Numéro de série</label>
+    </def>
+    <def name="shipTo" type="text" max="10" jsCheck="text">
+        <label>Numéro "Ship to"</label>
+    </def>
+    <def name="symptom" type="textarea" max="1500" jsCheck="text">
+        <label>Symptômes de l'unité</label>
+    </def>
+    <def name="unitReceivedDate" type="text" jsCheck="date">
+        <label>Date de réception de l'unité</label>
+        <infos>Format: "JJ/MM/AA"</infos>
+    </def>
+    <def name="unitReceivedTime" type="text" jsCheck="time">
+        <label>Heure de réception de l'unité</label>
+        <infos>Format: HH:MM AM (matin) / PM (après-midi). Ex: "04:15 PM" pour "16 h 15"</infos>
+    </def>
+    <def name="componentCheckReview" type="YesNo">
+        <label>Vérification des composants</label>
+    </def>
+</root>

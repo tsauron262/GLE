@@ -636,16 +636,16 @@ function GSX_Product(id, serial) {
     this.serial = serial;
     this.PM = null;
     this.cart = null;
+    this.repairPartsDatasDefs = [];
 
     this.loadDatas = function() {
-        $('#requestsResponsesContainer').append('<div id="prod_'+id+'" class="productDatasContainer"></div>');
-        setRequest('GET', 'loadProduct', id, '&serial='+serial);
+        $('#requestsResponsesContainer').append('<div id="prod_'+this.id+'" class="productDatasContainer"></div>');
+        setRequest('GET', 'loadProduct', this.id, '&prodId='+this.id+'&serial='+serial);
         displayRequestMsg('requestProcess', '');
-    }
-
+    };
     this.loadParts = function() {
         this.PM = new PartsManager(this.id, this.serial);
-        this.cart = new Cart(id, serial, this.PM);
+        this.cart = new Cart(this.id, this.serial, this.PM);
         this.PM.loadParts();
     }
 }
@@ -654,6 +654,77 @@ function GSX() {
     this.products = [];
     this.nextProdId = 1;
 
+    this.importPartsFromCartToRepair = function(repair) {
+        var $form = $('#repairForm_'+repair);
+        if ($form.length) {
+            var $container = $form.find('div.repairPartsContainer');
+            var $template = $form.find('div.repairsPartsInputsTemplate');
+            var prodId = $form.parent('div.repairFormContainer').parent('div.repairPopUp').find('input.prodId').val();
+            if (prodId && $container.length && $template.length) {
+                var $prod = $('#prod_'+prodId);
+                if ($prod.length) {
+                    var $cart = $prod.find('div.cartContent');
+                    if (!$cart.length) {
+                        $container.html('<p class="alert">Veuillez charger la liste des composants pour afficher le panier</p>').slideDown(250);
+                        return;
+                    }
+                    var $partsRows = $cart.find('table.cartProducts').find('tbody').find('tr');
+                    if (!$partsRows.length) {
+                        $container.html('<p class="alert">Veuillez ajouter des éléments au panier depuis la liste des composants compatibles</p>').slideDown(250);
+                        return;
+                    }
+                    $container.html('');
+                    var i = 1;
+                    $partsRows.each(function() {
+                        var partName = $(this).find('td:first').text();
+                        var html = '<div class="partDatasBlock">';
+                        html += '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
+                        html += '<div class="partDatasContent">';
+                        html += $template.html();
+                        html += '</div>';
+                        $container.append(html);
+                        var $div = $container.find('div.partDatasContent');
+                        var $partRow = $(this);
+                        if ($div.length) {
+                            $div.find('div.dataBlock').each(function() {
+                                var dataName = $(this).find('label').attr('for');
+                                var select = null;
+                                switch (dataName) {
+                                    case 'partNumber':
+                                        $(this).find('input').val($partRow.find('td.ref').text()).attr('id', 'partNumber_'+i).attr('name', 'partNumber_'+i);
+                                        break;
+
+                                    case 'comptiaCode':
+                                        select = '<select id="comptiaCode_'+i+'" name="comptiaCode_'+i+'">';
+                                        select += $partRow.find('select.compTIACodeSelect').html();
+                                        select += '</select>';
+                                        $(this).find('div.comptiaCodeContainer').html(select);
+                                        $(this).find('div.comptiaCodeContainer').find('select').val($partRow.find('select.compTIACodeSelect').val());
+                                        break;
+
+                                    case 'comptiaModifier':
+                                        select = '<select id="comptiaModifier_'+i+'" name="comptiaModifier_'+i+'">';
+                                        select += $partRow.find('select.compTIAModifierSelect').html();
+                                        select += '</select>';
+                                        $(this).find('div.comptiaModifierContainer').html(select);
+                                        $(this).find('div.comptiaModifierContainer').find('select').val($partRow.find('select.compTIAModifierSelect').val());
+                                        break;
+
+                                    default:
+                                        $(this).find('#'+dataName).attr('id', dataName+'_'+i).attr('name', dataName+'_'+i);
+                                        break;
+                                }
+                            });
+                        }
+                        i++;
+                    });
+                    $container.slideDown(250);
+                    return;
+                }
+            }
+        }
+        alert('Une erreur est survenue');
+    };
     this.loadProduct = function (serial) {
         if (!serial) {
             displayRequestMsg('error', 'Veuillez entrer un numéro de série');
@@ -789,7 +860,121 @@ function displayLabelInfos($span) {
 function hideLabelInfos($span) {
     $span.find('div.labelInfos').fadeOut(250);
 }
+function togglePartDatasBlockDisplay($div) {
+    if ($div.hasClass('closed')) {
+        $div.parent('div.partDatasBlock').find('div.partDatasContent').slideDown(250);
+        $div.attr('class', 'partDatasBlockTitle open');
+    } else {
+        $div.parent('div.partDatasBlock').find('div.partDatasContent').slideUp(250);
+        $div.attr('class', 'partDatasBlockTitle closed');
+    }
+}
+function assignInputCheckMsg($input, type, msg) {
+    var html = '<span class="'+type+'">'+msg+'</span>';
+    var $checkSpan = $input.parent('div.dataBlock').find('span.dataCheck');
+    if ($checkSpan.length) {
+        $checkSpan.slideUp(250);
+        $checkSpan.html(html).slideDown(250);
+    } else {
+        alert('Erreur, pas de span!!');
+    }
+}
+function checkInput($input, type) {
+    var val = $input.val();
+    if (!val.length) {
+        if ($input.attr('required') !== undefined){
+            assignInputCheckMsg($input, 'notOk', 'Information obligatoire');
+            return;
+        }
+        assignInputCheckMsg($input, '', '');
+        return;
+    }
+    switch (type) {
+        case 'text':
+            if (!/^.+$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', '');
+                return;
+            }
+            break;
 
+        case 'alphanum':
+            if (!/^[a-zA-Z0-9\-\._ ]+$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
+                return;
+            }
+            break;
+
+        case 'phone':
+            val = val.replace(/\./g, '');
+            val = val.replace(/\-/g, '');
+            val = val.repalce(/\//g, '');
+            val = val.replace(/ /g, '');
+            $input.val(val);
+            if (!/^[0-9]{10}$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format invalide');
+                return;
+            }
+            break;
+
+        case 'email':
+            if (!/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+[._a-z\p{L}0-9-]*\.[a-z\p{L}0-9]+$/i.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format de l\'adresse e-mail invalide');
+                return;
+            }
+            break;
+
+        case 'zipCode':
+            if (!/^[0-9]{5}$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format du code postal invalide');
+                return;
+            }
+            break;
+
+        case 'date':
+            if (!/^[0-9]{2}\/[0-9]{2}\/[0-9]{2}$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format de la date invalide. (Attendu: JJ/MM/AA)');
+                return;
+            }
+            break;
+
+        case 'time':
+            if (!/^[0-9]{2}:[0-9]{2}( [AP]M)?$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format de l\'heure invalide. (Attendu: HH:MM AM/PM)');
+                return;
+            }
+            var hours = parseInt(val.replace(/^([0-9]{2}):[0-9]{2}.*$/, '$1'));
+            var mins = parseInt(val.replace(/^[0-9]{2}:([0-9]{2}).*$/, '$1'));
+            if (mins > 59) {
+                assignInputCheckMsg($input, 'notOk', 'Heure incorrecte');
+                return;
+            }
+            if (hours > 12) {
+                if (hours < 24) {
+                    hours -= 12;
+                    $input.val(hours+':'+mins+' PM');
+                } else {
+                    assignInputCheckMsg($input, 'notOk', 'Heure incorrecte');
+                    return;
+                }
+            } else {
+                if (!/^[0-9]{2}:[0-9]{2} [AP]M$/.test(val)) {
+                    $input.val(hours+':'+mins+' AM');
+                }
+            }
+            break;
+
+        case 'num':
+            if (!/^[0-9]*$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format invalide (Chiffres uniquement).');
+                return;
+            }
+            break;
+    }
+    assignInputCheckMsg($input, 'ok', '');
+}
+function submitGsxRequestForm($span, request) {
+    $('#repairForm_'+request).submit();
+}
 function getXMLHttpRequest() {
     var xhr = null;
     if (window.XMLHttpRequest || window.ActiveXObject) {
@@ -837,7 +1022,7 @@ function onRequestResponse(xhr, requestType, prodId) {
             } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
             }
-        break;
+            break;
 
         case 'loadParts':
             $div = $('#prod_'+prodId).find('.partsRequestResult');

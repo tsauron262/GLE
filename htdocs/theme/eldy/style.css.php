@@ -484,10 +484,6 @@ div.ficheaddleft {
 display : table;
 margin : 0px auto;
 }
-.containercenter {
-display : table;
-margin : 0px auto;
-}
 
 
 /* ============================================================================== */

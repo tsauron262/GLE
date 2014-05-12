@@ -92,6 +92,12 @@ class box_graph_invoices_permonth extends ModeleBoxes
 		$socid=0;
 		if ($user->societe_id) $socid=$user->societe_id;
 		if (! $user->rights->societe->client->voir || $socid) $prefix.='private-'.$user->id.'-';	// If user has no permission to see all, output dir is specific to user
+
+		$dir=''; 	// We don't need a path because image file will not be saved into disk
+		$prefix='';
+		$socid=0;
+		if ($user->societe_id) $socid=$user->societe_id;
+		if (! $user->rights->societe->client->voir || $socid) $prefix.='private-'.$user->id.'-';	// If user has no permission to see all, output dir is specific to user
 		
 		if ($user->rights->facture->lire)
 		{

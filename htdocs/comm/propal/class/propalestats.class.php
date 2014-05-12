@@ -65,15 +65,12 @@ class PropaleStats extends Stats
 		$this->from_line = MAIN_DB_PREFIX.$object->table_element_line." as tl";
 
 		$this->field='total_ht';
-		/*mod drsi*/$this->field_line='total_ht';/*f mod drsi*/
-
-                //Mod drsi
-//		$this->where.= " fk_statut > 0";
-		$this->where.= " fk_statut > 0 AND fk_statut != 3";
-                
-		$this->where.= /*" AND p.fk_soc = s.rowid*/" AND p.entity = ".$conf->entity;
-                //f mod drsi
-		if (!$user->rights->societe->client->voir && !$user->societe_id) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
+		$this->field_line='total_ht';
+		
+		$this->where.= " p.fk_statut > 0";
+		//$this->where.= " AND p.fk_soc = s.rowid AND p.entity = ".$conf->entity;
+		$this->where.= " AND p.entity = ".$conf->entity;
+		if (!$user->rights->societe->client->voir && !$this->socid) $this->where .= " AND p.fk_soc = sc.fk_soc AND sc.fk_user = " .$user->id;
 		if($this->socid)
 		{
 			$this->where.=" AND p.fk_soc = ".$this->socid;

@@ -103,6 +103,7 @@ cui hai bisogno ed essere facile da usare.
 %{__cp} -pr build/tgz/*     $RPM_BUILD_ROOT%{_datadir}/%{name}/build/tgz
 %{__cp} -pr htdocs  $RPM_BUILD_ROOT%{_datadir}/%{name}
 %{__cp} -pr scripts $RPM_BUILD_ROOT%{_datadir}/%{name}
+%{__rm} -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs/includes/ckeditor/_source  
 %{__rm} -rf $RPM_BUILD_ROOT%{_datadir}/%{name}/htdocs/includes/fonts
 
 # Lang
@@ -289,8 +290,9 @@ fi
 # Restart mysql
 echo Restart mysql
 if [ -f /etc/init.d/mysqld ]; then
-  /etc/init.d/mysqld restart
-else
+  /sbin/service mysqld restart
+fi
+if [ -f /etc/init.d/mysql ]; then
   /sbin/service mysql restart
 fi
 

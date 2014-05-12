@@ -292,6 +292,20 @@ class Categorie
 
 		$this->db->begin();
 
+		/* FIX #1317 : Check for child cat and move up 1 level*/
+		if (! $error)
+		{
+			$sql = "UPDATE ".MAIN_DB_PREFIX."categorie";
+			$sql.= " SET fk_parent = ".$this->fk_parent; 
+			$sql.= " WHERE fk_parent = ".$this->id;
+
+			if (!$this->db->query($sql))
+			{
+				$this->error=$this->db->lasterror();
+				dol_syslog("Error sql=".$sql." ".$this->error, LOG_ERR);
+				$error++;
+			}
+		}
 		if (! $error)
 		{
 			$sql  = "DELETE FROM ".MAIN_DB_PREFIX."categorie_societe";
@@ -328,6 +342,17 @@ class Categorie
 		if (! $error)
 		{
 			$sql  = "DELETE FROM ".MAIN_DB_PREFIX."categorie_member";
+			$sql .= " WHERE fk_categorie = ".$this->id;
+			if (!$this->db->query($sql))
+			{
+				$this->error=$this->db->lasterror();
+				dol_syslog("Error sql=".$sql." ".$this->error, LOG_ERR);
+				$error++;
+			}
+		}
+		if (! $error)
+		{
+			$sql  = "DELETE FROM ".MAIN_DB_PREFIX."categorie_contact";
 			$sql .= " WHERE fk_categorie = ".$this->id;
 			if (!$this->db->query($sql))
 			{

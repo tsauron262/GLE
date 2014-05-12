@@ -89,9 +89,15 @@ $hookmanager->initHooks(array('orderlist'));
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('orderlist'));
 
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('orderlist'));
+
 /*
  * Actions
  */
+
+$parameters=array('socid'=>$socid);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hook
 
 $parameters=array('socid'=>$socid);
 $reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hook
@@ -382,6 +388,9 @@ print '<tr '.$bc[$var].'>';
 		// Ref customer
 		print '<td>'.$objp->ref_client.'</td>';
 
+		// Ref customer
+		print '<td>'.$objp->ref_client.'</td>';
+
 		// Company
 		$companystatic->id=$objp->socid;
 		$companystatic->nom=$objp->nom;
@@ -389,27 +398,19 @@ print '<tr '.$bc[$var].'>';
 		print '<td>';
 		print $companystatic->getNomUrl(1,'customer');
 
-        // If module invoices enabled and user with invoice creation permissions
-        if (!empty($conf->facture->enabled) && !empty($conf->global->ORDER_BILLING_ALL_CUSTOMER)) {
-            if ($user->rights->facture->creer) {
-                if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0)) {
-                    print '&nbsp;<a href="' . DOL_URL_ROOT . '/commande/orderstoinvoice.php?socid=' . $companystatic->id . '">';
-                    print img_picto($langs->trans("CreateInvoiceForThisCustomer") . ' : ' . $companystatic->nom, 'object_bill', 'hideonsmartphone') . '</a>';
-                }
-            }
-        }
-        print '</td>';
-
-        // Order date
-        $y = dol_print_date($db->jdate($objp->date_commande), '%Y');
-        $m = dol_print_date($db->jdate($objp->date_commande), '%m');
-        $ml = dol_print_date($db->jdate($objp->date_commande), '%B');
-        $d = dol_print_date($db->jdate($objp->date_commande), '%d');
-        print '<td align="right">';
-        print $d;
-        print ' <a href="' . $_SERVER['PHP_SELF'] . '?orderyear=' . $y . '&amp;ordermonth=' . $m . '">' . $ml . '</a>';
-        print ' <a href="' . $_SERVER['PHP_SELF'] . '?orderyear=' . $y . '">' . $y . '</a>';
-        print '</td>';
+		// If module invoices enabled and user with invoice creation permissions
+		if (! empty($conf->facture->enabled) && ! empty($conf->global->ORDER_BILLING_ALL_CUSTOMER))
+		{
+			if ($user->rights->facture->creer)
+			{
+				if (($objp->fk_statut > 0 && $objp->fk_statut < 3) || ($objp->fk_statut == 3 && $objp->facturee == 0))
+				{
+					print '&nbsp;<a href="'.DOL_URL_ROOT.'/commande/orderstoinvoice.php?socid='.$companystatic->id.'">';
+					print img_picto($langs->trans("CreateInvoiceForThisCustomer").' : '.$companystatic->nom, 'object_bill', 'hideonsmartphone').'</a>';
+				}
+			}
+		}
+		print '</td>';
 
         // Delivery date
         $y = dol_print_date($db->jdate($objp->date_livraison), '%Y');

@@ -1656,6 +1656,8 @@ if ($action == 'create') {
 
             print "</form>\n";
 
+            print "</form>\n";
+
 
             /*
              * Confirmation to delete service line of contract
@@ -1875,22 +1877,6 @@ if ($action == 'create') {
         }
         //print '</table>';
 
-
-
-        // Form to add new line
-        if ($user->rights->contrat->creer && ($object->statut >= 0)) {
-            $dateSelector = 1;
-
-			print "\n";
-			print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline')?'#add':'#line_'.GETPOST('lineid')).'" method="POST">
-			<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">
-			<input type="hidden" name="action" value="'.(($action != 'editline')?'addline':'updateligne').'">
-			<input type="hidden" name="mode" value="">
-			<input type="hidden" name="id" value="'.$object->id.'">
-			';
-
-			print '<br>';
-            print '<table id="tablelines" class="noborder noshadow" width="100%">';	// Array with (n*2)+1 lines
 
 			print "\n";
 			print '	<form name="addproduct" id="addproduct" action="'.$_SERVER["PHP_SELF"].'?id='.$object->id.(($action != 'editline')?'#add':'#line_'.GETPOST('lineid')).'" method="POST">

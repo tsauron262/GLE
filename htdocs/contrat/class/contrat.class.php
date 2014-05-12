@@ -1159,7 +1159,7 @@ class Contrat extends CommonObject
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
 
-		$localtaxes_type=getLocalTaxesFromRate(/*mod drsi*/$tvatx/*fmod drsi*/,0,$mysoc);
+		$localtaxes_type=getLocalTaxesFromRate($txtva,0,$mysoc);
 
 		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $tvatx, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1, '', $localtaxes_type);
 		$total_ht  = $tabprice[0];

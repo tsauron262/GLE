@@ -359,6 +359,8 @@ if ($id > 0 || ! empty($ref))
 
 		dol_fiche_end();
 
+		dol_fiche_end();
+
 		// List of already dispatching
 		$sql = "SELECT p.ref, p.label,";
 		$sql.= " e.rowid as warehouse_id, e.label as entrepot,";

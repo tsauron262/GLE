@@ -479,7 +479,7 @@ function getDateFromFormat(val,format)
 	if (hour==null||(hour<0)||(hour>24)) { return 0; }
 	if (minute==null||(minute<0)||(minute>60)) { return 0; }
 	if (seconde==null||(seconde<0)||(seconde>60)) { return 0; }
-
+		
 	// alert(year+' '+month+' '+day+' '+hour+' '+minute+' '+seconde);
 	return new Date(year,month-1,day,hour,minute,seconde);
 }

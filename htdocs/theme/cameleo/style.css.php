@@ -1822,6 +1822,8 @@ border-radius:6px;
 /* Calendar                                                                       */
 /* ============================================================================== */
 
+img.datecallink { padding-left: 2px !important; padding-right: 2px !important; }
+
 .ui-datepicker-trigger {
 	vertical-align: middle;
 	cursor: pointer;

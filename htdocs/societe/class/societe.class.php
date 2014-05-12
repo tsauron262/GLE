@@ -1022,7 +1022,7 @@ class Societe extends CommonObject
         require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
         $entity=isset($this->entity)?$this->entity:$conf->entity;
-        
+
         dol_syslog(get_class($this)."::delete", LOG_DEBUG);
         $error = 0;
 
@@ -1168,7 +1168,8 @@ class Societe extends CommonObject
                 return -1;
             }
         }
-
+		else dol_syslog("Can't remove thirdparty with id ".$id.". There is ".$objectisused." childs", LOG_WARNING);
+        return 0;
     }
 
     /**
@@ -1472,6 +1473,16 @@ class Societe extends CommonObject
         global $conf,$langs;
 
         $name=$this->name?$this->name:$this->nom;
+
+		if ($conf->global->SOCIETE_ADD_REF_IN_LIST && (!empty($withpicto))) {
+			if (($this->client) && (! empty ( $this->code_client ))) {
+				$code = $this->code_client . ' - ';
+			}
+			if (($this->fournisseur) && (! empty ( $this->code_fournisseur ))) {
+				$code .= $this->code_fournisseur . ' - ';
+			}
+			$name =$code.' '.$name;
+		}
 
 		if ($conf->global->SOCIETE_ADD_REF_IN_LIST && (!empty($withpicto))) {
 			if (($this->client) && (! empty ( $this->code_client ))) {

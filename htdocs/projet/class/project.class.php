@@ -66,10 +66,857 @@ class Project extends CommonObject {
     public $fk_element = 'fk_projet';
     protected $ismultientitymanaged = 1;  // 0=No test on entity, 1=Test with field entity, 2=Test with link by societe
 
+    var $id;
+    var $ref;
+    var $description;
+    var $statut;
+    var $title;
+    var $date_start;
+    var $date_end;
+    var $socid;
+    var $user_author_id;    //!< Id of project creator. Not defined if shared project.
+    var $public;      //!< Tell if this is a public or private project
+    var $note_private;
+    var $note_public;
+    var $statuts_short;
+    var $statuts;
+    var $oldcopy;
+
 
     /**
-     *    \brief  Constructeur de la classe
-     *    \param  DB          handler acces base de donnees
+     *  Constructor
+     *
+     *  @param      DoliDB		$db      Database handler
+     */
+    function __construct($db)
+    {
+        $this->db = $db;
+        $this->societe = new Societe($db);
+
+        $this->statuts_short = array(0 => 'Draft', 1 => 'Validated', 2 => 'Closed');
+        $this->statuts = array(0 => 'Draft', 1 => 'Validated', 2 => 'Closed');
+    }
+
+    /**
+     *    Create a project into database
+     *
+     *    @param    User	$user       	User making creation
+     *    @param	int		$notrigger		Disable triggers
+     *    @return   int         			<0 if KO, id of created project if OK
+     */
+    function create($user, $notrigger=0)
+    {
+        global $conf, $langs;
+
+        $error = 0;
+        $ret = 0;
+
+        // Check parameters
+        if (!trim($this->ref))
+        {
+            $this->error = 'ErrorFieldsRequired';
+            dol_syslog(get_class($this)."::create error -1 ref null", LOG_ERR);
+            return -1;
+        }
+
+        $this->db->begin();
+
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "projet (";
+        $sql.= "ref";
+        $sql.= ", title";
+        $sql.= ", description";
+        $sql.= ", fk_soc";
+        $sql.= ", fk_user_creat";
+        $sql.= ", fk_statut";
+        $sql.= ", public";
+        $sql.= ", datec";
+        $sql.= ", dateo";
+        $sql.= ", datee";
+        $sql.= ", entity";
+        $sql.= ") VALUES (";
+        $sql.= "'" . $this->db->escape($this->ref) . "'";
+        $sql.= ", '" . $this->db->escape($this->title) . "'";
+        $sql.= ", '" . $this->db->escape($this->description) . "'";
+        $sql.= ", " . ($this->socid > 0 ? $this->socid : "null");
+        $sql.= ", " . $user->id;
+        $sql.= ", 0";
+        $sql.= ", " . ($this->public ? 1 : 0);
+        $sql.= ", " . $this->db->idate(dol_now());
+        $sql.= ", " . ($this->date_start != '' ? $this->db->idate($this->date_start) : 'null');
+        $sql.= ", " . ($this->date_end != '' ? $this->db->idate($this->date_end) : 'null');
+        $sql.= ", ".$conf->entity;
+        $sql.= ")";
+
+        dol_syslog(get_class($this)."::create sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . "projet");
+            $ret = $this->id;
+
+            if (!$notrigger)
+            {
+                // Call triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_CREATE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // End call triggers
+            }
+        }
+        else
+        {
+            $this->error = $this->db->lasterror();
+            $this->errno = $this->db->lasterrno();
+            dol_syslog(get_class($this)."::create error -2 " . $this->error, LOG_ERR);
+            $error++;
+        }
+
+        //Update extrafield
+        if (!$error) {
+        	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+        	{
+        		$result=$this->insertExtraFields();
+        		if ($result < 0)
+        		{
+        			$error++;
+        		}
+        	}
+        }
+
+        if (!$error && !empty($conf->global->MAIN_DISABLEDRAFTSTATUS))
+        {
+            $res = $this->setValid($user);
+            if ($res < 0) $error++;
+        }
+
+        if (!$error)
+        {
+            $this->db->commit();
+            return $ret;
+        }
+        else
+        {
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    /**
+     * Update a project
+     *
+     * @param  User		$user       User object of making update
+     * @param  int		$notrigger  1=Disable all triggers
+     * @return int
+     */
+    function update($user, $notrigger=0)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        // Clean parameters
+        $this->title = trim($this->title);
+        $this->description = trim($this->description);
+
+        if (dol_strlen(trim($this->ref)) > 0)
+        {
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet SET";
+            $sql.= " ref='" . $this->ref . "'";
+            $sql.= ", title = '" . $this->db->escape($this->title) . "'";
+            $sql.= ", description = '" . $this->db->escape($this->description) . "'";
+            $sql.= ", fk_soc = " . ($this->socid > 0 ? $this->socid : "null");
+            $sql.= ", fk_statut = " . $this->statut;
+            $sql.= ", public = " . ($this->public ? 1 : 0);
+            $sql.= ", datec=" . ($this->date_c != '' ? $this->db->idate($this->date_c) : 'null');
+            $sql.= ", dateo=" . ($this->date_start != '' ? $this->db->idate($this->date_start) : 'null');
+            $sql.= ", datee=" . ($this->date_end != '' ? $this->db->idate($this->date_end) : 'null');
+            $sql.= " WHERE rowid = " . $this->id;
+
+            dol_syslog(get_class($this)."::Update sql=" . $sql, LOG_DEBUG);
+            if ($this->db->query($sql))
+            {
+                if (!$notrigger)
+                {
+                    // Call triggers
+                    include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                    $interface = new Interfaces($this->db);
+                    $result = $interface->run_triggers('PROJECT_MODIFY', $this, $user, $langs, $conf);
+                    if ($result < 0)
+                    {
+                        $error++;
+                        $this->errors = $interface->errors;
+                    }
+                    // End call triggers
+                }
+
+                //Update extrafield
+                if (!$error) {
+                	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+                	{
+                		$result=$this->insertExtraFields();
+                		if ($result < 0)
+                		{
+                			$error++;
+                		}
+                	}
+                }
+
+                if (! $error && (is_object($this->oldcopy) && $this->oldcopy->ref != $this->ref))
+                {
+                	// We remove directory
+                	if ($conf->projet->dir_output)
+                	{
+                		$olddir = $conf->projet->dir_output . "/" . dol_sanitizeFileName($this->oldcopy->ref);
+                		$newdir = $conf->projet->dir_output . "/" . dol_sanitizeFileName($this->ref);
+                		if (file_exists($olddir))
+                		{
+                			$res=@dol_move($olddir, $newdir);
+                			if (! $res)
+                			{
+                				$this->error='ErrorFailToMoveDir';
+                				$error++;
+                			}
+                		}
+                	}
+                }
+
+                $result = 1;
+            }
+            else
+            {
+                $this->error = $this->db->lasterror();
+                dol_syslog(get_class($this)."::Update error -2 " . $this->error, LOG_ERR);
+                $result = -2;
+            }
+        }
+        else
+        {
+            dol_syslog(get_class($this)."::Update ref null");
+            $result = -1;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 	Get object and lines from database
+     *
+     * 	@param      int		$id       	Id of object to load
+     * 	@param		string	$ref		Ref of project
+     * 	@return     int      		   	>0 if OK, 0 if not found, <0 if KO
+     */
+    function fetch($id, $ref='')
+    {
+        if (empty($id) && empty($ref)) return -1;
+
+        $sql = "SELECT rowid, ref, title, description, public, datec";
+        $sql.= ", tms, dateo, datee, fk_soc, fk_user_creat, fk_statut, note_private, note_public,model_pdf";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "projet";
+        if (! empty($id))
+        {
+        	$sql.= " WHERE rowid=".$id;
+        }
+        else if (! empty($ref))
+        {
+        	$sql.= " WHERE ref='".$ref."'";
+        	$sql.= " AND entity IN (".getEntity('project').")";
+        }
+
+        dol_syslog(get_class($this)."::fetch sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            if ($this->db->num_rows($resql))
+            {
+                $obj = $this->db->fetch_object($resql);
+
+                $this->id = $obj->rowid;
+                $this->ref = $obj->ref;
+                $this->title = $obj->title;
+                $this->titre = $obj->title; // TODO deprecated
+                $this->description = $obj->description;
+                $this->date_c = $this->db->jdate($obj->datec);
+                $this->datec = $this->db->jdate($obj->datec); // TODO deprecated
+                $this->date_m = $this->db->jdate($obj->tms);
+                $this->datem = $this->db->jdate($obj->tms);  // TODO deprecated
+                $this->date_start = $this->db->jdate($obj->dateo);
+                $this->date_end = $this->db->jdate($obj->datee);
+                $this->note_private = $obj->note_private;
+                $this->note_public = $obj->note_public;
+                $this->socid = $obj->fk_soc;
+                $this->societe->id = $obj->fk_soc; // TODO For backward compatibility
+                $this->user_author_id = $obj->fk_user_creat;
+                $this->public = $obj->public;
+                $this->statut = $obj->fk_statut;
+                $this->modelpdf	= $obj->model_pdf;
+
+                $this->db->free($resql);
+
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            $this->error = $this->db->lasterror();
+            dol_syslog(get_class($this)."::fetch " . $this->error, LOG_ERR);
+            return -1;
+        }
+    }
+
+    /**
+     * 	Return list of projects
+     *
+     * 	@param		int		$socid		To filter on a particular third party
+     * 	@return		array				List of projects
+     */
+    function liste_array($socid='')
+    {
+        global $conf;
+
+        $projects = array();
+
+        $sql = "SELECT rowid, title";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "projet";
+        $sql.= " WHERE entity = " . $conf->entity;
+        if (! empty($socid)) $sql.= " AND fk_soc = " . $socid;
+
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            $nump = $this->db->num_rows($resql);
+
+            if ($nump)
+            {
+                $i = 0;
+                while ($i < $nump)
+                {
+                    $obj = $this->db->fetch_object($resql);
+
+                    $projects[$obj->rowid] = $obj->title;
+                    $i++;
+                }
+            }
+            return $projects;
+        }
+        else
+        {
+            print $this->db->lasterror();
+        }
+    }
+
+    /**
+     * 	Return list of elements for type linked to project
+     *
+     * 	@param		string		$type		'propal','order','invoice','order_supplier','invoice_supplier'
+     * 	@return		array					List of orders linked to project, <0 if error
+     */
+    function get_element_list($type)
+    {
+        $elements = array();
+
+        $sql = '';
+        if ($type == 'propal')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "propal WHERE fk_projet=" . $this->id;
+        if ($type == 'order')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "commande WHERE fk_projet=" . $this->id;
+        if ($type == 'invoice')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "facture WHERE fk_projet=" . $this->id;
+        if ($type == 'invoice_predefined')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "facture_rec WHERE fk_projet=" . $this->id;
+        if ($type == 'order_supplier')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "commande_fournisseur WHERE fk_projet=" . $this->id;
+        if ($type == 'invoice_supplier')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "facture_fourn WHERE fk_projet=" . $this->id;
+        if ($type == 'contract')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "contrat WHERE fk_projet=" . $this->id;
+        if ($type == 'intervention')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "fichinter WHERE fk_projet=" . $this->id;
+        if ($type == 'trip')
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "deplacement WHERE fk_projet=" . $this->id;
+        if ($type == 'agenda')
+            $sql = "SELECT id as rowid FROM " . MAIN_DB_PREFIX . "actioncomm WHERE fk_project=" . $this->id;
+        if (! $sql) return -1;
+
+        //print $sql;
+        dol_syslog(get_class($this)."::get_element_list sql=" . $sql);
+        $result = $this->db->query($sql);
+        if ($result)
+        {
+            $nump = $this->db->num_rows($result);
+            if ($nump)
+            {
+                $i = 0;
+                while ($i < $nump)
+                {
+                    $obj = $this->db->fetch_object($result);
+
+                    $elements[$i] = $obj->rowid;
+
+                    $i++;
+                }
+                $this->db->free($result);
+
+                /* Return array */
+                return $elements;
+            }
+        }
+        else
+        {
+            dol_print_error($this->db);
+        }
+    }
+
+    /**
+     *    Delete a project from database
+     *
+     *    @param       User		$user            User
+     *    @param       int		$notrigger       Disable triggers
+     *    @return      int       			      <0 if KO, 0 if not possible, >0 if OK
+     */
+    function delete($user, $notrigger=0)
+    {
+        global $langs, $conf;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $error = 0;
+
+        $this->db->begin();
+
+        if (!$error)
+        {
+            // Delete linked contacts
+            $res = $this->delete_linked_contact();
+            if ($res < 0)
+            {
+                $this->error = 'ErrorFailToDeleteLinkedContact';
+                //$error++;
+                $this->db->rollback();
+                return 0;
+            }
+        }
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task_extrafields";
+        $sql.= " WHERE fk_object IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "projet_task WHERE fk_projet=" . $this->id . ")";
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task";
+        $sql.= " WHERE fk_projet=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet";
+        $sql.= " WHERE rowid=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_extrafields";
+        $sql.= " WHERE fk_object=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+
+        if ($resql)
+        {
+            // We remove directory
+            $projectref = dol_sanitizeFileName($this->ref);
+            if ($conf->projet->dir_output)
+            {
+                $dir = $conf->projet->dir_output . "/" . $projectref;
+                if (file_exists($dir))
+                {
+                    $res = @dol_delete_dir_recursive($dir);
+                    if (!$res)
+                    {
+                        $this->error = 'ErrorFailToDeleteDir';
+                        $this->db->rollback();
+                        return 0;
+                    }
+                }
+            }
+
+            if (!$notrigger)
+            {
+                // Call triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_DELETE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // End call triggers
+            }
+
+            dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+            $this->db->commit();
+            return 1;
+        }
+        else
+        {
+            $this->error = $this->db->lasterror();
+            dol_syslog(get_class($this) . "::delete " . $this->error, LOG_ERR);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    /**
+     * 		Validate a project
+     *
+     * 		@param		User	$user		User that validate
+     * 		@return		int					<0 if KO, >0 if OK
+     */
+    function setValid($user)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        if ($this->statut != 1)
+        {
+            $this->db->begin();
+
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet";
+            $sql.= " SET fk_statut = 1";
+            $sql.= " WHERE rowid = " . $this->id;
+            $sql.= " AND entity = " . $conf->entity;
+
+            dol_syslog(get_class($this)."::setValid sql=" . $sql);
+            $resql = $this->db->query($sql);
+            if ($resql)
+            {
+                // Appel des triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_VALIDATE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // Fin appel triggers
+
+                if (!$error)
+                {
+                	$this->statut=1;
+                	$this->db->commit();
+                    return 1;
+                }
+                else
+                {
+                    $this->db->rollback();
+                    $this->error = join(',', $this->errors);
+                    dol_syslog(get_class($this)."::setValid " . $this->error, LOG_ERR);
+                    return -1;
+                }
+            }
+            else
+            {
+                $this->db->rollback();
+                $this->error = $this->db->lasterror();
+                dol_syslog(get_class($this)."::setValid " . $this->error, LOG_ERR);
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * 		Close a project
+     *
+     * 		@param		User	$user		User that validate
+     * 		@return		int					<0 if KO, >0 if OK
+     */
+    function setClose($user)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        if ($this->statut != 2)
+        {
+            $this->db->begin();
+
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet";
+            $sql.= " SET fk_statut = 2";
+            $sql.= " WHERE rowid = " . $this->id;
+            $sql.= " AND entity = " . $conf->entity;
+            $sql.= " AND fk_statut = 1";
+
+            dol_syslog(get_class($this)."::setClose sql=" . $sql);
+            $resql = $this->db->query($sql);
+            if ($resql)
+            {
+                // Appel des triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_CLOSE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // Fin appel triggers
+
+                if (!$error)
+                {
+                    $this->statut = 2;
+                    $this->db->commit();
+                    return 1;
+                }
+                else
+                {
+                    $this->db->rollback();
+                    $this->error = join(',', $this->errors);
+                    dol_syslog(get_class($this)."::setClose " . $this->error, LOG_ERR);
+                    return -1;
+                }
+            }
+            else
+            {
+                $this->db->rollback();
+                $this->error = $this->db->lasterror();
+                dol_syslog(get_class($this)."::setClose " . $this->error, LOG_ERR);
+                return -1;
+            }
+        }
+    }
+
+    /**
+     *  Return status label of object
+     *
+     *  @param  int			$mode       0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto
+     * 	@return string      			Label
+     */
+    function getLibStatut($mode=0)
+    {
+        return $this->LibStatut($this->statut, $mode);
+    }
+
+    /**
+     *  Renvoi status label for a status
+     *
+     *  @param	int		$statut     id statut
+     *  @param  int		$mode       0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto
+     * 	@return string				Label
+     */
+    function LibStatut($statut, $mode=0)
+    {
+        global $langs;
+
+        if ($mode == 0)
+        {
+            return $langs->trans($this->statuts[$statut]);
+        }
+        if ($mode == 1)
+        {
+            return $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 2)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 3)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0');
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4');
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6');
+        }
+        if ($mode == 4)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 5)
+        {
+            if ($statut == 0)
+                return $langs->trans($this->statuts_short[$statut]) . ' ' . img_picto($langs->trans($this->statuts_short[$statut]), 'statut0');
+            if ($statut == 1)
+                return $langs->trans($this->statuts_short[$statut]) . ' ' . img_picto($langs->trans($this->statuts_short[$statut]), 'statut1');
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+    }
+
+    /**
+     * 	Renvoie nom clicable (avec eventuellement le picto)
+     *
+     * 	@param	int		$withpicto		0=Pas de picto, 1=Inclut le picto dans le lien, 2=Picto seul
+     * 	@param	string	$option			Variant ('', 'nolink')
+     * 	@param	int		$addlabel		0=Default, 1=Add label into string
+     * 	@return	string					Chaine avec URL
+     */
+    function getNomUrl($withpicto=0, $option='', $addlabel=0)
+    {
+        global $langs;
+
+        $result = '';
+        $lien = '';
+        $lienfin = '';
+
+        if ($option != 'nolink')
+        {
+            $lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
+            $lienfin = '</a>';
+        }
+
+        $picto = 'projectpub';
+        if (!$this->public) $picto = 'project';
+
+        $label = $langs->trans("ShowProject") . ': ' . $this->ref . ($this->title ? ' - ' . $this->title : '');
+
+        if ($withpicto) $result.=($lien . img_object($label, $picto) . $lienfin);
+        if ($withpicto && $withpicto != 2) $result.=' ';
+        if ($withpicto != 2) $result.=$lien . $this->ref . $lienfin . (($addlabel && $this->title) ? ' - ' . $this->title : '');
+        return $result;
+    }
+
+    /**
+     *  Initialise an instance with random values.
+     *  Used to build previews or test instances.
+     * 	id must be 0 if object instance is a specimen.
+     *
+     *  @return	void
+     */
+    function initAsSpecimen()
+    {
+        global $user, $langs, $conf;
+
+        $now=dol_now();
+
+        // Charge tableau des produits prodids
+        $prodids = array();
+
+        $sql = "SELECT rowid";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "product";
+        $sql.= " WHERE tosell = 1";
+        $sql.= " AND entity = " . $conf->entity;
+
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            $num_prods = $this->db->num_rows($resql);
+            $i = 0;
+            while ($i < $num_prods)
+            {
+                $i++;
+                $row = $this->db->fetch_row($resql);
+                $prodids[$i] = $row[0];
+            }
+        }
+
+        // Initialise parametres
+        $this->id = 0;
+        $this->ref = 'SPECIMEN';
+        $this->specimen = 1;
+        $this->socid = 1;
+        $this->date_c = $now;
+        $this->date_m = $now;
+        $this->date_start = $now;
+        $this->note_public = 'SPECIMEN';
+        $nbp = rand(1, 9);
+        $xnbp = 0;
+        while ($xnbp < $nbp)
+        {
+            $line = new Task($this->db);
+            $line->desc = $langs->trans("Description") . " " . $xnbp;
+            $line->qty = 1;
+            $prodid = rand(1, $num_prods);
+            $line->fk_product = $prodids[$prodid];
+            $xnbp++;
+        }
+    }
+
+    /**
+     * 	Check if user has permission on current project
+     *
+     * 	@param	User	$user		Object user to evaluate
+     * 	@param  string	$mode		Type of permission we want to know: 'read', 'write'
+     * 	@return	int					>0 if user has permission, <0 if user has no permission
+     */
+    function restrictedProjectArea($user, $mode='read')
+    {
+        // To verify role of users
+        $userAccess = 0;
+        if (($mode == 'read' && ! empty($user->rights->projet->all->lire)) || ($mode == 'write' && ! empty($user->rights->projet->all->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->all->supprimer)))
+        {
+            $userAccess = 1;
+        }
+        else if ($this->public && (($mode == 'read' && ! empty($user->rights->projet->lire)) || ($mode == 'write' && ! empty($user->rights->projet->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->supprimer))))
+        {
+            $userAccess = 1;
+        }
+        else
+		{
+            foreach (array('internal', 'external') as $source)
+            {
+                $userRole = $this->liste_contact(4, $source);
+                $num = count($userRole);
+
+                $nblinks = 0;
+                while ($nblinks < $num)
+                {
+                    if ($source == 'internal' && preg_match('/^PROJECT/', $userRole[$nblinks]['code']) && $user->id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }
+                    // Permission are supported on users only. To have an external thirdparty contact to see a project, its user must allowed to contacts of projects.
+                    /*if ($source == 'external' && preg_match('/PROJECT/', $userRole[$nblinks]['code']) && $user->contact_id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }*/
+                    $nblinks++;
+                }
+            }
+            //if (empty($nblinks))	// If nobody has permission, we grant creator
+            //{
+            //	if ((!empty($this->user_author_id) && $this->user_author_id == $user->id))
+            //	{
+            //		$userAccess = 1;
+            //	}
+            //}
+        }
+
+        return ($userAccess?$userAccess:-1);
+    }
+
+    /**
+     * Return array of projects a user has permission on, is affected to, or all projects
+     *
+     * @param 	User	$user			User object
+     * @param 	int		$mode			0=All project I have permission on, 1=Projects affected to me only, 2=Will return list of all projects with no test on contacts
+     * @param 	int		$list			0=Return array,1=Return string list
+     * @param	int		$socid			0=No filter on third party, id of third party
+     * @return 	array or string			Array of projects id, or string with projects id separated with ","
      */
     function getProjectsAuthorizedForUser($user, $mode=0, $list=0, $socid=0)
     {
@@ -162,11 +1009,21 @@ class Project extends CommonObject {
         $this->labelstatut_short[999] = $langs->trans("ProjectStatusWaitingValidationShort");
     }
 
-    /*
-     *    \brief      Cree un projet en base
-     *    \param      user        Id utilisateur qui cree
-     *    \return     int         <0 si ko, id du projet cree si ok
-     */
+     /**
+      * Load an object from its id and create a new one in database
+	  *
+	  *	@param	int		$fromid     	Id of object to clone
+	  *	@param	bool	$clone_contact	clone contact of project
+	  *	@param	bool	$clone_task		clone task of project
+	  *	@param	bool	$clone_project_file		clone file of project
+	  *	@param	bool	$clone_task_file		clone file of task (if task are copied)
+      *	@param	bool	$clone_note		clone note of project
+      *	@param	bool	$notrigger		no trigger flag
+	  * @return	int						New id of clone
+	  */
+	function createFromClone($fromid,$clone_contact=false,$clone_task=true,$clone_project_file=false,$clone_task_file=false,$clone_note=true,$notrigger=0)
+	{
+		global $user,$langs,$conf;
 
     public function create($user) {
         $error = 0;
@@ -287,16 +1144,8 @@ class Project extends CommonObject {
         }
     }
 
-    public function launch() {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet SET date_launch=now(), fk_statut = 10 WHERE rowid = " . $this->id;
-        $sql = $this->db->query($requete);
-        if ($sql)
-            return(1);
-        else {
-            $this->error = $db->lastqueryerror . '<br/>' . $this->db->lasterror;
-            return(-1);
-        }
-    }
+		// Create clone
+		$result=$clone_project->create($user,$notrigger);
 
     public function info() {
         $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "Synopsis_projet WHERE rowid = " . $this->id;
@@ -790,10 +1639,31 @@ class Project extends CommonObject {
         return $tasksrole;
     }
 
-    public function getTasksArray() {
-        $tasks = array();
+					foreach ($tab as $contacttoadd)
+					{
+						$clone_project->add_contact($contacttoadd['id'], $contacttoadd['code'], $contacttoadd['source'],$notrigger);
+						if ($clone_project->error == 'DB_ERROR_RECORD_ALREADY_EXISTS')
+						{
+							$langs->load("errors");
+							$this->error.=$langs->trans("ErrorThisContactIsAlreadyDefinedAsThisType");
+							$error++;
+						}
+						else
+						{
+							if ($clone_project->error!='')
+							{
+								$this->error.=$clone_project->error;
+								$error++;
+							}
+						}
+					}
+				}
+			}
 
-        /* Liste des taches dans $tasks */
+			//Duplicate file
+			if ($clone_project_file)
+			{
+				require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
 
         $sql = "SELECT t.rowid, t.title, t.fk_task_parent, t.duration_effective";
         $sql .= " FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task as t";
@@ -839,1191 +1709,39 @@ class Project extends CommonObject {
     public $workedPercentQual = 0;
     public $statAvgProgByGroup = array();
 
-    public function aggregateProgressProject() {
-        //chope tous les groupes
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_task_type=3 AND fk_projet = " . $this->id . " ORDER BY level DESC";
-        $sql = $this->db->query($requete);
-        $arr = array();
-        $arrParent = array();
-        while ($res = $this->db->fetch_object($sql)) {
-            $requete1 = "SELECT avg(progress) as prog FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_projet =" . $this->id . "  AND fk_task_parent = " . $res->rowid;
-            $sql1 = $this->db->query($requete1);
-            $res1 = $this->db->fetch_object($sql1);
-            $avg = $res1->prog;
-            $this->statAvgProgByGroup[$res->rowid] = $avg;
-            $requete2 = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_projet_task SET progress = $avg WHERE rowid = " . $res->rowid;
-            $this->db->query($requete2);
-        }
-        $requeteAvg = "SELECT avg(progress) as AVGGlobal FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task WHERE fk_projet = " . $this->id . " AND (fk_task_parent = 0 OR fk_task_parent IS NULL)";
-        $sqlAvg = $this->db->query($requeteAvg);
-        $resAvg = $this->db->fetch_object($sqlAvg);
-        if ($resAvg->AVGGlobal < 5) {
-            $this->statAvgProgByGroup[0] = preg_replace('/,/', '.', round($resAvg->AVGGlobal, 2));
-        } else {
-            $this->statAvgProgByGroup[0] = preg_replace('/,/', '.', round($resAvg->AVGGlobal, 0));
-        }
+			    foreach ($tasksarray as $tasktoclone)
+			    {
+					$result_clone = $taskstatic->createFromClone($tasktoclone->id,$clone_project_id,$tasktoclone->fk_parent,true,true,false,$clone_task_file,true,false);
+					if ($result_clone <= 0)
+				    {
+				    	$this->error.=$result_clone->error;
+						$error++;
+				    }
+				    else
+				    {
+				    	$new_task_id=$result_clone;
+				    	$taskstatic->fetch($tasktoclone->id);
 
         return ($this->statAvgProgByGroup[0]);
 
 
-        //faire le calculs de progression du group et stocker dans la db
-        //au niveau 0, calcul global, retour de la valeur
-    }
-
-    public $totDuration = 0;
-
-    public function getStatsDuration() {
-        //chope tous les temps pour toutes les taches par type (milestone / tache) en secondes
-        $requete = "SELECT SUM(task_duration) as duree_prevue
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . $this->id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time.fk_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type <> 3";
-        $sql = $this->db->query($requete);
-        $res = $this->db->fetch_object($sql);
-        $this->totDuration = $res->duree_prevue;
-        return ( $this->totDuration);
-    }
-
-    public $workedDuration = 0;
-
-    public function getStatsDurationEffective() {
-        //chope tous les temps pour toutes les taches par type (milestone / tache) en secondes
-        $requete = "SELECT SUM(task_duration_effective) as duree_conso
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . $this->id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective.fk_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type <> 3";
-        $sql = $this->db->query($requete);
-        $res = $this->db->fetch_object($sql);
-        $this->workedDuration = $res->duree_conso;
-        return ( $this->workedDuration);
-    }
-
-    /**
-     *        \brief      Renvoie nom clicable (avec eventuellement le picto)
-     *        \param        withpicto        Inclut le picto dans le lien
-     *        \param        option            Sur quoi pointe le lien
-     *        \param        maxlen            Longueur max libelle
-     *        \return        string            Chaine avec URL
-     */
-    function getNomUrl($withpicto = 0, $option = '', $maxlen = 0) {
-        global $langs;
-        if($maxlen == 1)//Incoherent
-            $maxlen = 0;
-
-        $result = '';
-        $lien = "";
-        if ($this->hasGantt == 1)
-            $lien = '<a href="' . DOL_URL_ROOT . '/projet/gantt/gantt.php?id=' . $this->id . '">';
-        else if ($this->hasTacheLight == 1)
-            $lien = '<a href="' . DOL_URL_ROOT . '/projet/tasks/fiche.php?mode=Light&id=' . $this->id . '">';
-        else
-            $lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
-        $lienfin = '</a>';
-
-        $label = $this->ref ."-".$this->title;
-        if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' . $label, 'project') . $lienfin . ' ');
-        $result.=$lien . ($maxlen ? dol_trunc($label, $maxlen) : $label) . $lienfin;
-        return $result;
-    }
-
-    function getTaskNomUrl($id, $withpicto = 0, $option = '', $maxlen = 0, $titreT = '') {
-        global $langs;
-
-        $result = '';
-
-        $lien = '<a href="' . DOL_URL_ROOT . '/projet/tasks/task.php?id=' . $id . '">';
-        $lienfin = '</a>';
-
-        $titre = $this->title . ($titreT != '' ? ' - ' . $titreT : '');
-        if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowTask") . ': ' . $titre, 'task') . $lienfin . ' ');
-        $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
-        return $result;
-    }
-
-    public function showTreeTask($js, $width = 150, $height = 300, $opacity = '1', $display = 'block') {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title, " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
-                       AND fk_task_parent is null
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet.rowid = " . $this->id;
-        $sql = $this->db->query($requete);
-
-        print '<div id="projetTreeDiv" style="width: ' . $width . 'px;  z-index: 2; float: left; opacity:' . $opacity . ';display:' . $display . '; overflow: auto; max-height: ' . $height . 'px; height: ' . $height . 'px;">';
-        print '<ul id="projetTree" class="projecttree treeview">';
-        print '  <li  class="lastCollapsable"><div class="hitarea lastCollapsable-hitarea"></div><span class="project">' . $this->title . '</span>';
-        $i = 0;
-        $count2 = $this->db->num_rows($sql);
-        while ($res = $this->db->fetch_object($sql)) {
-            $i++;
-            print '      <ul>';
-            $requete1 = "SELECT count(*) as cnt
-                             FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                                  " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                            WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
-                              AND fk_task_parent = $res->rowid";
-            $sql1 = $this->db->query($requete1);
-            $res1 = $this->db->fetch_object($sql1);
-            if ($res1->cnt > 0) {
-                if ($i == $res1->cnt) {
-                    print '          <li class="lastCollapsable"><div class="hitarea lastCollapsable-hitarea"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    $this->recursTask($res->rowid, $js);
-                    print '  </li>';
-                } else {
-                    print '          <li class="collapsable"><div class="hitarea collapsable-hitarea"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    $this->recursTask($res->rowid, $js);
-                    print '  </li>';
-                }
-            } else {
-                if ($count2 == $i) {
-                    print '          <li class="last"><div class="last"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    print '  </li>';
-                } else {
-                    print '          <li class=""><div class=""></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    print '  </li>';
-                }
-            }
-
-            print '</ul>';
-        }
-
-        print '  </li>';
-        print '</ul>';
-
-
-        print '</div>';
-    }
-
-    private function recursTask($parentId, $js) {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.title, " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
-                       AND fk_task_parent = " . $parentId;
-        $sql = $this->db->query($requete);
-        $i = 0;
-        $count2 = $this->db->num_rows($sql);
-        while ($res = $this->db->fetch_object($sql)) {
-            $i++;
-            print '      <ul>';
-            $requete1 = "SELECT count(*) as cnt FROM " . MAIN_DB_PREFIX . "Synopsis_projet,
-                              " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                        WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet = " . MAIN_DB_PREFIX . "Synopsis_projet.rowid
-                          AND fk_task_parent = $res->rowid";
-            $sql1 = $this->db->query($requete1);
-            $res1 = $this->db->fetch_object($sql1);
-            if ($res1->cnt > 0) {
-                if ($i == $res1->cnt) {
-                    print '          <li class="lastCollapsable"><div class="hitarea lastCollapsable-hitarea"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    $this->recursTask($res->rowid, $js);
-                    print '  </li>';
-                } else {
-                    print '          <li class="collapsable"><div class="hitarea collapsable-hitarea"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    $this->recursTask($res->rowid, $js);
-                    print '  </li>';
-                }
-            } else {
-                if ($count2 == $i) {
-                    print '          <li class="last"><div class="last"></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    print '  </li>';
-                } else {
-                    print '          <li class=""><div class=""></div><span class="task"><a href="#" onClick="' . $js . '(' . $res->rowid . ',this);">' . $res->title . '</a></span>';
-                    print '  </li>';
-                }
-            }
-            print '      </ul>';
-        }
-    }
-
-    public function getEndDateProject() {
-        // Effectif C'est la date de fin de la derniere tache
-        // Prevu C'est la date de fin du projet Prévu lors de la config
-    }
-
-    private $arrCoutHoraire = array();
-
-    public function getCoutHoraireRH($type = 'user', $userId) {
-
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISHRM)) {
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-            $hrm = new Hrm($this->db);
-        }
-        if ($type == "user") {
-            $coutHoraire = "0";
-            if ($this->arrCoutHoraire[$type][$userId] != 0) {
-                $coutHoraire = $this->arrCoutHoraire[$type][$userId];
-            } else {
-                $requete = "SELECT couthoraire
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_hrm_user
-                             WHERE user_id = " . $userId . "
-                          ORDER BY startDate DESC
-                             LIMIT 1";
-                $sql2 = $this->db->query($requete);
-                if ($sql2) {
-                    $res2 = $this->db->fetch_object($sql2);
-                    $coutHoraire = $res2->couthoraire;
-                }
-                if ($coutHoraire == "0" && isset($conf->global->MAIN_MODULE_SYNOPSISHRM)) {
-                    //on prend le cout de l'equipe
-                    //get Team Id
-                    $teamId = $hrm->getTeam($res->fk_user);
-                    $requete = "SELECT couthoraire FROM Babel_hrm_team WHERE teamId = " . $teamId;
-                    $sql_team = $this->db->query($requete);
-                    if ($sql_team) {
-                        $res3 = $this->db->fetch_object($sql_team);
-                        $coutHoraire = $res3->couthoraire;
-                    }
-                }
-                $this->arrCoutHoraire[$type][$userId] = $coutHoraire;
-            }
-            return($coutHoraire);
-        } else if ($type == 'group') {
-            $coutHoraire = 0;
-            if ($this->arrCoutHoraire[$type][$userId] != 0) {
-                $coutHoraire = $this->arrCoutHoraire[$type][$userId];
-            } else if (isset($conf->global->MAIN_MODULE_SYNOPSISHRM)) {
-
-                $teamId = $hrm->getTeam($res->fk_user);
-                $requete = "SELECT couthoraire FROM Babel_hrm_team WHERE teamId = " . $userId;
-                $sql_team = $this->db->query($requete);
-                if ($sql_team) {
-                    $res3 = $this->db->fetch_object($sql_team);
-                    $coutHoraire = $res3->couthoraire;
-                }
-                $this->arrCoutHoraire[$type][$userId] = $coutHoraire;
-            }
-            return($coutHoraire);
-        }
-    }
-
-    public function costTaskRH($taskId) {
-        global $conf;
-//TODO 2 cases : effectif / prévu
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-//        $hrm = new hrm($this->db);
-//        $arrFerie = $hrm->jourFerie();
-
-        $db = $this->db;
-
-        $arr = array();
-        $arr['taskCostForUser'] = 0;
-        $arr['totalDur'] = 0;
-        $arrayByDay = array();
-        //$hrm->listRessources();
-//TODO optimizer
-//require_once('Var_Dump.php');
-//Var_Dump::Display($hrm->allRessource);
-//        foreach($hrm->allRessource as $key=>$val) //Humm
-//        {
-//            if ("x".$val['GLEId'] != "x")
-//            {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.percent as occupation,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type as userType,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as title
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors,
-                                   " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
-                               AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
-        $sql = $db->query($requete);
-        $iter = 0;
-        while ($res = $db->fetch_object($sql)) {
-            if ($res->fk_user . "x" != "x") {
-                //coutHoraire
-                $coutHoraire = $this->getCoutHoraireRH($res->userType, $res->fk_user);
-//TODO ajouter user/group
-                $requete = "SELECT task_duration as Dur,
-                                           unix_timestamp(task_date) as task_dateF,
-                                           fk_user
-                                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time
-                                     WHERE fk_task = " . $res->tid . "
-                                       AND fk_user=" . $res->fk_user;
-                $sql1 = $db->query($requete);
-                //par tache , paruser, par jour
-                while ($res1 = $db->fetch_object($sql1)) {
-                    //minuit le premier et le dernier jour
-                    $beginTask = mktime(0, 0, 0, date("m", $res1->task_dateF), date("d", $res1->task_dateF), date("Y", $res1->task_dateF));
-                    $endTask = mktime(23, 59, 59, date("m", $res1->task_dateF + $res1->Dur), date("d", $res1->task_dateF + $res1->Dur), date("Y", $res1->task_dateF + $res1->Dur));
-
-                    if ($res1->Dur < 86400) {
-                        $costMajore = 0;
-                        $costMajore1 = 0;
-                        $costMajore2 = 0;
-                        if (date("N", $res1->task_dateF) != date('N', $res1->task_dateF + $res1->Dur)) {
-                            //temp => minuit
-                            $day1Dur = mktime(23, 59, 59, date('m', $res1->task_dateF), date('d', $res1->task_dateF), date('Y', $res1->task_dateF)) - $res1->task_dateF;
-                            $date2 = $res1->task_dateF + $res1->Dur;
-                            $day2Debut = mktime(0, 0, 0, date('m', $date2), date('d', $date2), date('Y', $date2));
-
-
-                            $costMajore1 = $this->getCostRHForAday($res1->task_dateF, $day1Dur, $res->occupation, $coutHoraire);
-                            $costMajore2 = $this->getCostRHForAday($day2Debut, $res1->Dur - $day1Dur, $res->occupation, $coutHoraire);
-
-                            $this->CostRHByDay[$beginTask]['duree'] += $day1Dur * ($res->occupation / 100);
-                            $this->CostRHByDay[$day2Debut]['duree'] += ($res1->Dur - $day1Dur) * ($res->occupation / 100);
-
-                            $this->CostRHByDay[$beginTask]['cost'] += $costMajore1;
-                            $this->CostRHByDay[$day2Debut]['cost'] += $costMajore2;
-                            $this->costByDay['task'][$taskId]['HRessource']['duree'][$beginTask] += $day1Dur * ($res->occupation / 100);
-                            $this->costByDay['task'][$taskId]['HRessource']['cost'][$beginTask] += $costMajore1;
-                            $this->costByDay['task'][$taskId]['HRessource']['duree'][$day2Debut] += ($res1->Dur - $day1Dur) * ($res->occupation / 100);
-                            $this->costByDay['task'][$taskId]['HRessource']['cost'][$day2Debut] += $costMajore2;
-                            $costMajore = $costMajore1 + $costMajore2;
-                        } else {
-                            $costMajore = $this->getCostRHForAday($res1->task_dateF, $res1->Dur, $res->occupation, $coutHoraire);
-                            $this->costByDay['task'][$taskId]['HRessource']['duree'][$beginTask] += $res1->Dur * ($res->occupation / 100);
-                            $this->costByDay['task'][$taskId]['HRessource']['cost'][$beginTask] += $costMajore;
-                            $this->CostRHByDay[$beginTask]['duree'] += $res1->Dur * ($res->occupation / 100);
-                            $this->CostRHByDay[$beginTask]['cost'] += $costMajore;
-                        }
-                        $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['id'] = $taskId;
-                        $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['title'] = $res->title;
-                        $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['duration']+=$res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $costMajore;
-
-                        $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['id'] = $taskId;
-                        $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['title'] = $res->title;
-                        $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['duration']+=$res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $costMajore;
-
-                        $this->CostRHByUser[$res->fk_user]['totalDur'] += $res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByUser[$res->fk_user]['totalCostForUser'] += $costMajore;
-
-                        $this->cost["task"][$taskId]['coutRH'] += $costMajore;
-                        $this->cost["task"][$taskId]['durRH'] += $res1->Dur * ($res->occupation / 100);
-                    } else {
-                        //Cas du premier et du dernier jour => jour entier
-                        for ($i = $beginTask; $i < $endTask; $i+= 86400) {
-                            if (date('N', $i) == 6 || date('N', $i) == 7) {
-                                continue;
-                            }
-                            //Jour ferié
-                            $pasFerie = $this->isFerie($i);
-
-                            if ($pasFerie) {
-
-                                //Calcul du nombre d'heure dans la journee % config
-                                $dur = $conf->global->PROJECT_HOUR_PER_DAY * 3600 * ($res->occupation / 100);
-                                $cout = ($dur / 3600 * $coutHoraire);
-
-                                $this->costByDay['task'][$taskId]['HRessource']['duree'][$i] += $dur;
-                                $this->costByDay['task'][$taskId]['HRessource']['cost'][$i] += $cout;
-                                $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['id'] = $taskId;
-                                $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['title'] = $res->title;
-                                $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['duration']+=$dur;
-                                $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $cout;
-
-                                $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['id'] = $taskId;
-                                $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['title'] = $res->title;
-                                $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['duration']+=$dur;
-                                $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $cout;
-
-                                $this->CostRHByUser[$res->fk_user]['totalDur'] += $dur;
-                                $this->CostRHByUser[$res->fk_user]['totalCostForUser'] += $cout;
-
-                                $this->cost["task"][$taskId]['coutRH'] += $cout;
-                                $this->cost["task"][$taskId]['durRH'] += $dur;
-                            }
-                        }
-                        //Horaire speciaux
-                        $requete = "SELECT *
-                                              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_special,
-                                                   " . MAIN_DB_PREFIX . "Synopsis_projet_trancheHoraire
-                                             WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_trancheHoraire.id = " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_special.fk_tranche
-                                               AND fk_task = " . $taskId . "
-                                               AND fk_user=" . $res->fk_user . '
-                                               AND type="' . $res->userType . '"';
-                        $sql2 = $this->db->query($requete);
-                        while ($res2 = $this->db->fetch_object($sql2)) {
-                            $factor = $res2->facteur;
-                            $dur = $res2->qte * 3600 * ($res->occupation / 100);
-                            $cout = ($dur / 3600) * $coutHoraire * ($factor / 100);
-
-                            $this->costByDay['task'][$taskId]['HRessource']['duree'][-1] += $dur;
-                            $this->costByDay['task'][$taskId]['HRessource']['cost'][-1] += $cout;
-//                                    $this->CostRHByDay[-1]['duree'] += $dur;
-//                                    $this->CostRHByDay[-1]['cost'] += $cout;
-                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['id'] = $taskId;
-                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['title'] = $res->title;
-                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['duration']+=$dur;
-                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $cout;
-
-                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['id'] = $taskId;
-                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['title'] = $res->title;
-                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['duration']+=$dur;
-                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $cout;
-
-                            $this->CostRHByUser[$res->fk_user]['totalDur'] += $dur;
-                            $this->CostRHByUser[$res->fk_user]['totalCostForUser'] += $cout;
-
-                            $this->cost["task"][$taskId]['coutRH'] += $cout;
-                            $this->cost["task"][$taskId]['durRH'] += $dur;
-                        }
-                    }
-                }
-            }
-            $iter++;
-//                }
-//            }
-        }
-        return ($this->cost["task"][$taskId]['coutRH']);
-    }
-
-    public function costTaskRHEffective($taskId) {
-        global $conf;
-//TODO 2 cases : effectif / prévu
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-//        $hrm = new hrm($this->db);
-//        $arrFerie = $hrm->jourFerie();
-
-        $db = $this->db;
-
-        $arr = array();
-        $arr['taskCostForUser'] = 0;
-        $arr['totalDur'] = 0;
-        $arrayByDay = array();
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_user,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid as tid,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.percent as occupation,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.type as userType,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as title
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . MAIN_DB_PREFIX . "Synopsis_projet_task_actors.fk_projet_task
-                       AND " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid = " . $taskId;
-        $sql = $db->query($requete);
-        $iter = 0;
-        while ($res = $db->fetch_object($sql)) {
-            if ($res->fk_user . "x" != "x") {
-                //coutHoraire
-                $coutHoraire = $this->getCoutHoraireRH($res->userType, $res->fk_user);
-//TODO ajouter user/group
-                $requete = "SELECT task_duration_effective as Dur,
-                                   unix_timestamp(task_date_effective) as task_dateF,
-                                   fk_user
-                              FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task_time_effective
-                             WHERE fk_task = " . $res->tid . "
-                               AND fk_user=" . $res->fk_user;
-                $sql1 = $db->query($requete);
-                //par tache , paruser, par jour
-                while ($res1 = $db->fetch_object($sql1)) {
-                    //minuit le premier et le dernier jour
-                    $beginTask = mktime(0, 0, 0, date("m", $res1->task_dateF), date("d", $res1->task_dateF), date("Y", $res1->task_dateF));
-                    $endTask = mktime(23, 59, 59, date("m", $res1->task_dateF + $res1->Dur), date("d", $res1->task_dateF + $res1->Dur), date("Y", $res1->task_dateF + $res1->Dur));
-
-                    if ($res1->Dur < 86400) {
-                        $costMajore = 0;
-                        $costMajore1 = 0;
-                        $costMajore2 = 0;
-                        if (date("N", $res1->task_dateF) != date('N', $res1->task_dateF + $res1->Dur)) {
-                            //temp => minuit
-                            $day1Dur = mktime(23, 59, 59, date('m', $res1->task_dateF), date('d', $res1->task_dateF), date('Y', $res1->task_dateF)) - $res1->task_dateF;
-                            $date2 = $res1->task_dateF + $res1->Dur;
-                            $day2Debut = mktime(0, 0, 0, date('m', $date2), date('d', $date2), date('Y', $date2));
-
-
-                            $costMajore1 = $this->getCostRHForAdayEffective($res1->task_dateF, $day1Dur, $res->occupation, $coutHoraire);
-                            $costMajore2 = $this->getCostRHForAdayEffective($day2Debut, $res1->Dur - $day1Dur, $res->occupation, $coutHoraire);
-
-                            $this->CostRHByDayEffective[$beginTask]['duree'] += $day1Dur * ($res->occupation / 100);
-                            $this->CostRHByDayEffective[$day2Debut]['duree'] += ($res1->Dur - $day1Dur) * ($res->occupation / 100);
-
-                            $this->CostRHByDayEffective[$beginTask]['cost'] += $costMajore1;
-                            $this->CostRHByDayEffective[$day2Debut]['cost'] += $costMajore2;
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['duree'][$beginTask] += $day1Dur * ($res->occupation / 100);
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['cost'][$beginTask] += $costMajore1;
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['duree'][$day2Debut] += ($res1->Dur - $day1Dur) * ($res->occupation / 100);
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['cost'][$day2Debut] += $costMajore2;
-                            $costMajore = $costMajore1 + $costMajore2;
-                        } else {
-                            $costMajore = $this->getCostRHForAday($res1->task_dateF, $res1->Dur, $res->occupation, $coutHoraire);
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['duree'][$beginTask] += $res1->Dur * ($res->occupation / 100);
-                            $this->costByDayEffective['task'][$taskId]['HRessource']['cost'][$beginTask] += $costMajore;
-                            $this->CostRHByDayEffective[$beginTask]['duree'] += $res1->Dur * ($res->occupation / 100);
-                            $this->CostRHByDayEffective[$beginTask]['cost'] += $costMajore;
-                        }
-                        $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['id'] = $taskId;
-                        $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['title'] = $res->title;
-                        $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['duration']+=$res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $costMajore;
-
-                        $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['id'] = $taskId;
-                        $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['title'] = $res->title;
-                        $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['duration']+=$res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $costMajore;
-
-                        $this->CostRHByUserEffective[$res->fk_user]['totalDur'] += $res1->Dur * ($res->occupation / 100);
-                        $this->CostRHByUserEffective[$res->fk_user]['totalCostForUser'] += $costMajore;
-
-                        $this->costEffective["task"][$taskId]['coutRH'] += $costMajore;
-                        $this->costEffective["task"][$taskId]['durRH'] += $res1->Dur * ($res->occupation / 100);
-                    } else {
-                        //Cas du premier et du dernier jour => jour entier
-                        for ($i = $beginTask; $i < $endTask; $i+= 86400) {
-                            if (date('N', $i) == 6 || date('N', $i) == 7) {
-                                continue;
-                            }
-                            //Jour ferié
-                            $pasFerie = $this->isFerie($i);
-
-                            if ($pasFerie) {
-
-                                //Calcul du nombre d'heure dans la journee % config
-                                $dur = $conf->global->PROJECT_HOUR_PER_DAY * 3600 * ($res->occupation / 100);
-                                $cout = ($dur / 3600 * $coutHoraire);
-
-                                $this->costByDayEffective['task'][$taskId]['HRessource']['duree'][$i] += $dur;
-                                $this->costByDayEffective['task'][$taskId]['HRessource']['cost'][$i] += $cout;
-                                $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['id'] = $taskId;
-                                $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['title'] = $res->title;
-                                $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['duration']+=$dur;
-                                $this->CostRHByTaskByUserEffective[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $cout;
-
-                                $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['id'] = $taskId;
-                                $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['title'] = $res->title;
-                                $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['duration']+=$dur;
-                                $this->CostRHByUserByTaskEffective[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $cout;
-
-                                $this->CostRHByUserEffective[$res->fk_user]['totalDur'] += $dur;
-                                $this->CostRHByUserEffective[$res->fk_user]['totalCostForUser'] += $cout;
-
-                                $this->costEffective["task"][$taskId]['coutRH'] += $cout;
-                                $this->costEffective["task"][$taskId]['durRH'] += $dur;
-                            }
-                        }
-//Prob recupere la quantite d'horaire special Effective
-//                        //Horaire speciaux
-//                        $requete = "SELECT *
-//                                      FROM ".MAIN_DB_PREFIX."Synopsis_projet_task_time_special,
-//                                           ".MAIN_DB_PREFIX."Synopsis_projet_trancheHoraire
-//                                     WHERE ".MAIN_DB_PREFIX."Synopsis_projet_trancheHoraire.id = ".MAIN_DB_PREFIX."Synopsis_projet_task_time_special.fk_tranche
-//                                       AND fk_task = ".$taskId."
-//                                       AND fk_user=".$res->fk_user . '
-//                                       AND type="'.$res->userType.'"';
-//                        $sql2 = $this->db->query($requete);
-//                        while ($res2 = $this->db->fetch_object($sql2))
-//                        {
-//                            $factor = $res2->facteur;
-//                            $dur = $res2->qte * 3600 * ($res->occupation / 100);
-//                            $cout = ($dur / 3600) * $coutHoraire  * ($factor /100);
-//
-//                            $this->costByDay['task'][$taskId]['HRessource']['duree'][-1] += $dur;
-//                            $this->costByDay['task'][$taskId]['HRessource']['cost'][-1] += $cout;
-//                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['id']=$taskId;
-//                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['title']=$res->title;
-//                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['duration']+=$dur;
-//                            $this->CostRHByTaskByUser[$taskId]['task'][$res->fk_user]['taskCostForUser']+= $cout;
-//
-//                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['id']=$taskId;
-//                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['title']=$res->title;
-//                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['duration']+=$dur;
-//                            $this->CostRHByUserByTask[$res->fk_user]['task'][$taskId]['taskCostForUser']+= $cout;
-//
-//                            $this->CostRHByUser[$res->fk_user]['totalDur'] += $dur;
-//                            $this->CostRHByUser[$res->fk_user]['totalCostForUser'] += $cout;
-//
-//                            $this->cost["task"][$taskId]['coutRH'] += $cout;
-//                            $this->cost["task"][$taskId]['durRH'] += $dur;
-//
-//                        }
-                    }
-                }
-            }
-            $iter++;
-        }
-        return ($this->costEffective["task"][$taskId]['coutRH']);
-    }
-
-    public function getCostRHForAday($debut, $Dur, $occupation, $coutHoraire) {
-        $pasFerie = $this->isFerie($debut);
-        $cout = 0;
-        switch (true) {
-            case (!$pasFerie): {
-                    $arrRes = $this->getHourPerTranche(8, $debut, $Dur);
-                    foreach ($arrRes as $factor => $qte) {
-                        $cout += ($occupation / 100 ) * ($factor / 100) * ($qte / 3600) * $coutHoraire;
-                    }
-                }
-                break;
-            case (date('N', $debut) == 6): {
-                    $arrRes = $this->getHourPerTranche(6, $debut, $Dur);
-                    foreach ($arrRes as $factor => $qte) {
-                        $cout += ($occupation / 100 ) * ($factor / 100) * ($qte / 3600) * $coutHoraire;
-                    }
-                }
-                break;
-            case (date('N', $debut) == 7): {
-                    $arrRes = $this->getHourPerTranche(7, $debut, $Dur);
-                    foreach ($arrRes as $factor => $qte) {
-                        $cout += ($occupation / 100 ) * ($factor / 100) * ($qte / 3600) * $coutHoraire;
-                    }
-                }
-                break;
-            default: {
-                    $arrRes = $this->getHourPerTranche(1, $debut, $Dur);
-                    foreach ($arrRes as $factor => $qte) {
-                        $cout += ($occupation / 100 ) * ($factor / 100) * ($qte / 3600) * $coutHoraire;
-                    }
-                }
-                break;
-        }
-        return($cout);
-    }
-
-    private $ArrFerie = false;
-
-    public function isFerie($day, $forceRefresh = false) {
-        $this->ArrFerie = array();
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISHRM)) {
-            require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-            $hrm = new hrm($this->db);
-            if ($forceRefresh || !$this->ArrFerie) {
-                $this->ArrFerie = $hrm->jourFerie();
-            }
-        }
-
-        $pasFerie = true;
-        foreach ($this->ArrFerie as $key) {
-            //print $key . " " . $j ."\n";
-            if ($key >= $day && $key <= $day + 24 * 3600) {
-                $pasFerie = false;
-                break;
-            }
-        }
-        return($pasFerie);
-    }
-
-    public function getHourPerTranche($trancheId, $debut, $dur) {
-        $ret = array();
-
-        $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_trancheHoraire
-                     WHERE day " . ($trancheId == 1 ? 'is null ' : ' = ' . $trancheId . " ");
-        $sql = $this->db->query($requete);
-        $arrTranche = array();
-        while ($res = $this->db->fetch_object($sql)) {
-            $debutTranche = $this->hourToSec($res->debut);
-            $finTranche = $this->hourToSec($res->fin);
-            $facteurTranche = $res->facteur;
-            $arrTranche[$res->id]['debut'] = $debutTranche;
-            $arrTranche[$res->id]['fin'] = $finTranche;
-            $arrTranche[$res->id]['facteur'] = $facteurTranche;
-        }
-        $hourByFactor = array();
-        $hourByFactor[100] = 0;
-        $tmpDebut = $debut - mktime(0, 0, 0, date('m', $debut), date('d', $debut), date('Y', $debut));
-        for ($i = $tmpDebut; $i < $tmpDebut + $dur; $i+=60) { // par minute
-            $found = false;
-            foreach ($arrTranche as $key => $val) {
-                if ($i >= $val['debut'] && $i <= $val['fin']) {
-                    $found = $val['facteur'];
-                    break;
-                }
-            }
-            if ($found) {
-                $hourByFactor[$found]+=60;
-            } else {
-                $hourByFactor[100]+=60;
-            }
-        }
-        return($hourByFactor);
-    }
-
-    public function hourToSec($hour) {
-        if (preg_match("/([0-9]{2}):([0-9]{2})/", $hour, $arr)) {
-            $return = (intval($arr[1]) * 3600) + (intval($arr[2]) * 60);
-            return($return);
-        } else if (preg_match("/([0-9]{2}):([0-9]{2}):([0-9]{2})/", $hour, $arr)) {
-            $return = (intval($arr[1]) * 3600) + (intval($arr[2]) * 60) + (intval($arr[3]));
-            return($return);
-        } else {
-            return(false);
-        }
-    }
-
-    public function SecToHour($hour) {
-        return(date('H:i', $hour));
-    }
-
-    public $arrCostRessourcePerDayPerTask = array();
-    public $CostRessourceByUser = array();
-    public $CostRessourceByTask = array();
-    public $CostByRessource = array();
-
-    public function costTaskRessource($taskId) {
-        global $conf;
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-//        $hrm = new hrm($this->db);
-//        $arrFerie = $hrm->jourFerie();
-        $db = $this->db;
-        $requete = "SELECT unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datedeb) as datedebF,
-                           unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datefin) as datefinF,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.cout,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_user_imputation,
-                           ifnull(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_projet_task,-1) as taskId,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.nom,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.fk_resa_type,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as ttitle
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_ressource = " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
-                       AND fk_projet_task = " . $taskId . "
-                       AND fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid";
-        $sql = $db->query($requete);
-        $arrayByDay = array();
-        $totalDur = 0;
-        $totalCnt = 0;
-
-        if ($conf->global->ALLDAY == 0)
-            die("Horraire de travaille non configurée <a href='config.php'>Config</a>");
-
-        while ($res = $db->fetch_object($sql)) {
-            $array = array();
-            $array['totalCostForRessources'] = 0;
-            $array['totalDur'] = 0;
-            for ($j = $res->datedebF; $j <= $res->datefinF; $j += 3600 * 24) {
-                $currentDay = mktime(0, 0, 0, date('m', $j), date('d', $j), date('Y', $j));
-                if (date('N', $j) < 6) { //pas un week end
-                    //ajouter si pas un jour ferie
-                    $pasFerie = $this->isFerie($j);
-                    if ($pasFerie) {
-                        $nextDate = 0;
-                        if (preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", date("d/m/Y", $j), $arr)) {
-                            $nextDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]) + 24 * 3600;
-                        }
-                        if ($nextDate > $res->datefinF)
-                            $nextDate = $res->datefinF;
-                        $durationPerDay = $nextDate - $j;
-                        //                            print $nextDate."\n".$res1->datefinF."\n".$durationPerDay / 3600 ."\n";
-                        //Prob timezone
-                        if ($durationPerDay > $conf->global->ALLDAY * 3600)//On fait la journée compléte
-                            $dureeEnHeure = $conf->global->ALLDAY * 3600;
-                        else
-                            $dureeEnHeure = $durationPerDay;
-                        switch ($res->fk_resa_type) {
-                            case 1://Prix par heure
-                                $tmpCout = $res->cout * $dureeEnHeure / 3600; // le cout est un cout horaire
-                                break;
-                            case 2://Prix par demi journée
-                                if ($dureeEnHeure > $conf->global->HALFDAY * 3600) {//2 demi journée
-                                    $tmpCout = $res->cout * 2;
-                                } else {//1Demi j
-                                    $tmpCout = $res->cout;
-                                }
-                                break;
-                            case 3:
-                            default://Prix par jour
-                                $tmpCout = $res->cout;
-                                break;
-                        }
-                        $tmpCount = $dureeEnHeure;
-                        $array['totalDur'] +=$tmpCount;
-                        $array['totalCostForRessources'] += $tmpCout; // le cout est un cout horaire
-                        $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $tmpCount;
-                        $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $tmpCout;
-                        $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $tmpCount;
-                        $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $tmpCout;
-                        $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $tmpCount;
-                        $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $tmpCout;
-                        /* if ($durationPerDay > $conf->global->ALLDAY * 3600) {
-                          switch ($res->fk_resa_type) {
-                          case 1:
-                          $array['totalDur'] +=$conf->global->ALLDAY * 3600;
-                          $array['totalCostForRessources'] += $res->cout * $conf->global->ALLDAY; // le cout est un cout horaire
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * $conf->global->ALLDAY; // le cout est un cout horaire
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout * $conf->global->ALLDAY;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout * $conf->global->ALLDAY;
-                          break;
-                          case 2:
-                          $array['totalDur'] += $conf->global->HALFDAY * 2 * 3600; // le cout est un cout par 1/2j
-                          $array['totalCostForRessources'] += $res->cout * 2;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * 2; // le cout est un cout horaire
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout * 2;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout * 2;
-
-                          break;
-                          case 3:
-                          default:
-                          $array['totalDur'] += $conf->global->ALLDAY * 3600; // le cout est un cout parj
-                          $array['totalCostForRessources'] += $res->cout;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout; // le cout est un cout horaire
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $conf->global->ALLDAY;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $conf->global->ALLDAY;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout;
-                          break;
-                          }
-                          } else {
-                          switch ($res->fk_resa_type) {
-                          case 1:
-                          $array['totalDur'] += $durationPerDay;
-                          $array['totalCostForRessources'] += $res->cout * $durationPerDay / 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $durationPerDay;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * $durationPerDay / 3600; // le cout est un cout horaire
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $durationPerDay;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout * $durationPerDay / 3600;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $durationPerDay;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout * $durationPerDay / 3600;
-
-                          break;
-                          case 2:
-                          $array['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                          $array['totalCostForRessources'] += $res->cout * 2;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * 2;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout * 2;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout * 2;
-                          break;
-                          case 3:
-                          default:
-                          $array['totalDur'] += $conf->global->ALLDAY * 3600;
-                          $array['totalCostForRessources'] += $res->cout;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                          $this->costByDay["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                          $this->arrCostRessourcePerDayPerTask[$currentDay]['cout'] += $res->cout;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                          $this->arrCostAllRessourcePerDay[$currentDay]['cout'] += $res->cout;
-                          break;
-                          }
-                          } */
-                    }
-                }
-            }//fin de pour chaque jour // TODO mettre dans la requete
-            $title = $res->ttitle;
-
-            $this->CostRessourceByTask[$res->taskId][$res->fk_user_imputation]['title'] = $title;
-            $this->CostRessourceByTask[$res->taskId][$res->fk_user_imputation]['duration'] += $array['totalDur'];
-            $this->CostRessourceByTask[$res->taskId][$res->fk_user_imputation]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostRessourceByUser[$res->fk_user_imputation][$res->taskId]['title'] = $title;
-            $this->CostRessourceByUser[$res->fk_user_imputation][$res->taskId]['duration'] += $array['totalDur'];
-            $this->CostRessourceByUser[$res->fk_user_imputation][$res->taskId]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostByRessource[$res->id]['duration'] += $array['totalDur'];
-            $this->CostByRessource[$res->id]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostByRessource[$res->id]['nom'] = $res->nom;
-            $totalCnt += $array['totalCostForRessources'];
-            $totalDur += $array['totalDur'];
-        }//fin de pour chaque ressource
-        $this->cost["task"][$taskId]['coutRessource'] = $totalCnt;
-        $this->cost["task"][$taskId]['durRessource'] = $totalDur;
-        return ($totalCnt);
-    }
-
-    public $arrCostRessourcePerDayPerTaskEffective = array();
-    public $CostRessourceByUserEffective = array();
-    public $CostRessourceByTaskEffective = array();
-    public $CostByRessourceEffectiv = array();
-
-    public function costTaskRessourceEffective($taskId) {
-        global $conf;
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-//        $hrm = new hrm($this->db);
-//        $arrFerie = $hrm->jourFerie();
-        $db = $this->db;
-        $requete = "SELECT unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datedeb) as datedebF,
-                           unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datefin) as datefinF,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.cout,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_user_imputation,
-                           ifnull(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_projet_task,-1) as taskId,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.nom,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.fk_resa_type,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title as ttitle
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_ressource = " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
-                       AND fk_projet_task = " . $taskId . "
-                       AND fk_projet_task = " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                       AND " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datefin< now()";
-        $sql = $db->query($requete);
-        $array = array();
-        $array['totalCostForRessources'] = 0;
-        $array['totalDur'] = 0;
-        $arrayByDay = array();
-        $totalDur = 0;
-        $totalCnt = 0;
-
-        //print $requete;
-        $iter = 0;
-        $count = 0;
-        $cout = 0;
-        while ($res = $db->fetch_object($sql)) {
-            for ($j = $res->datedebF; $j <= $res->datefinF; $j += 3600 * 24) {
-                $currentDay = mktime(0, 0, 0, date('m', $j), date('d', $j), date('Y', $j));
-                if (date('N', $j) < 6) { //pas un week end
-                    //ajouter si pas un jour ferie
-                    $pasFerie = $this->isFerie($j);
-                    if ($pasFerie) {
-                        $nextDate = 0;
-                        if (preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", date("d/m/Y", $j), $arr)) {
-                            $nextDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]) + 24 * 3600;
-                        }
-                        if ($nextDate > $res->datefinF)
-                            $nextDate = $res->datefinF;
-                        $durationPerDay = $nextDate - $j;
-                        //                            print $nextDate."\n".$res1->datefinF."\n".$durationPerDay / 3600 ."\n";
-                        //Prob timezone
-                        if ($durationPerDay > $conf->global->ALLDAY * 3600) {
-                            switch ($res->fk_resa_type) {
-                                case 1:
-                                    $array['totalDur'] +=$conf->global->ALLDAY * 3600;
-                                    $array['totalCostForRessources'] += $res->cout * $conf->global->ALLDAY; // le cout est un cout horaire
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * $conf->global->ALLDAY; // le cout est un cout horaire
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout * $conf->global->ALLDAY;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout * $conf->global->ALLDAY;
-                                    break;
-                                case 2:
-                                    $array['totalDur'] += $conf->global->HALFDAY * 2 * 3600; // le cout est un cout par 1/2j
-                                    $array['totalCostForRessources'] += $res->cout * 2;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * 2; // le cout est un cout horaire
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout * 2;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout * 2;
-
-                                    break;
-                                case 3:
-                                default:
-                                    $array['totalDur'] += $conf->global->ALLDAY * 3600; // le cout est un cout parj
-                                    $array['totalCostForRessources'] += $res->cout;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout; // le cout est un cout horaire
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $conf->global->ALLDAY;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $conf->global->ALLDAY;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout;
-                                    break;
-                            }
-                        } else {
-                            switch ($res->fk_resa_type) {
-                                case 1:
-                                    $array['totalDur'] += $durationPerDay;
-                                    $array['totalCostForRessources'] += $res->cout * $durationPerDay / 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $durationPerDay;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * $durationPerDay / 3600; // le cout est un cout horaire
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $durationPerDay;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout * $durationPerDay / 3600;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $durationPerDay;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout * $durationPerDay / 3600;
-
-                                    break;
-                                case 2:
-                                    $array['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $array['totalCostForRessources'] += $res->cout * 2;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout * 2;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout * 2;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $conf->global->HALFDAY * 2 * 3600;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout * 2;
-                                    break;
-                                case 3:
-                                default:
-                                    $array['totalDur'] += $conf->global->ALLDAY * 3600;
-                                    $array['totalCostForRessources'] += $res->cout;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalDur'] += $conf->global->ALLDAY * 3600;
-                                    $this->costByDayEffective["task"][$taskId]['Ressource'][$currentDay]['totalCostForRessources'] += $res->cout;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                                    $this->arrCostRessourcePerDayPerTaskEffective[$currentDay]['cout'] += $res->cout;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['count'] += $conf->global->ALLDAY * 3600;
-                                    $this->arrCostAllRessourcePerDayEffective[$currentDay]['cout'] += $res->cout;
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }//fin de pour chaque jour // TODO mettre dans la requete
-            $title = $res->ttitle;
-
-            $this->CostRessourceByTaskEffective[$res->taskId][$res->fk_user_imputation]['title'] = $title;
-            $this->CostRessourceByTaskEffective[$res->taskId][$res->fk_user_imputation]['duration'] += $array['totalDur'];
-            $this->CostRessourceByTaskEffective[$res->taskId][$res->fk_user_imputation]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostRessourceByUserEffective[$res->fk_user_imputation][$res->taskId]['title'] = $title;
-            $this->CostRessourceByUserEffective[$res->fk_user_imputation][$res->taskId]['duration'] += $array['totalDur'];
-            $this->CostRessourceByUserEffective[$res->fk_user_imputation][$res->taskId]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostByRessourceEffective[$res->id]['duration'] += $array['totalDur'];
-            $this->CostByRessourceEffective[$res->id]['totalCostForRessources'] += $array['totalCostForRessources'];
-            $this->CostByRessourceEffective[$res->id]['nom'] = $res->nom;
-            $totalCnt += $array['totalCostForRessources'];
-            $totalDur += $array['totalDur'];
-        }//fin de pour chaque ressource
-        $this->costEffective["task"][$taskId]['coutRessource'] = $totalCnt;
-        $this->costEffective["task"][$taskId]['durRessource'] = $totalDur;
-        return ($totalCnt);
-    }
-
-    public function costTaskFraisProjet($taskId) {
-        $somme = 0;
-        $requete = "SELECT SUM(montantHT) as somme
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_frais
-                     WHERE fk_task =" . $taskId;
-        $sql = $this->db->query($requete);
-        if ($sql) {
-            while ($res = $this->db->fetch_object($sql)) {
-                $somme = $res->somme;
-            }
-        }
-        $this->cost["task"][$taskId]['FraisProjet'] = $somme;
-
-        $requete = "SELECT SUM(montantHT) as somme, unix_timestamp(dateAchat) as FdateAchat
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_frais
-                     WHERE fk_task =" . $taskId . "
-                  GROUP BY day(dateAchat), week(dateAchat), year(dateAchat)";
-        $sql = $this->db->query($requete);
-        //print $requete ;
-        $arrayByDay = array();
-        if ($sql) {
-            while ($res = $this->db->fetch_object($sql)) {
-                $arrayByDay[$res->FdateAchat] = $res->somme;
-            }
-        }
-        $this->costByDay["task"][$taskId]['FraisProjet'] = $arrayByDay;
-
-        return ($somme);
-    }
-
-    public function costTaskFraisProjetEffective($taskId) {
-        $somme = 0;
-        $requete = "SELECT SUM(montantHT) as somme
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_frais
-                     WHERE fk_task =" . $taskId . " AND dateAchat < now()";
-        $sql = $this->db->query($requete);
-        if ($sql) {
-            while ($res = $this->db->fetch_object($sql)) {
-                $somme = $res->somme;
-            }
-        }
-        $this->costEffective["task"][$taskId]['FraisProjet'] = $somme;
-
-        $requete = "SELECT SUM(montantHT) as somme, unix_timestamp(dateAchat) as FdateAchat
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_frais
-                     WHERE fk_task =" . $taskId . " and dateAchat < now()
-                  GROUP BY day(dateAchat), week(dateAchat), year(dateAchat)";
-        $sql = $this->db->query($requete);
-        //print $requete ;
-        $arrayByDay = array();
-        if ($sql) {
-            while ($res = $this->db->fetch_object($sql)) {
-                $arrayByDay[$res->FdateAchat] = $res->somme;
-            }
-        }
-        $this->costByDayEffective["task"][$taskId]['FraisProjet'] = $arrayByDay;
-
-        return ($somme);
-    }
-
-    public function costTask($taskId) {
-        $somme = 0;
-        $somme1 = 0;
-        $somme += $this->costTaskRessource($taskId);
-        $somme += $this->costTaskFraisProjet($taskId);
-        $somme += $this->costTaskRH($taskId);
-        $somme1 += $this->costTaskRessourceEffective($taskId);
-        $somme1 += $this->costTaskFraisProjetEffective($taskId);
-        $somme1 += $this->costTaskRHEffective($taskId);
-        $this->cost["task"][$taskId]['total'] = $somme;
-        $this->costEffective["task"][$taskId]['total'] = $somme1;
-        return ($somme);
-    }
-
-    public $arrCostRessourcePerDay = array();
-    public $arrCostAllRessourcePerDay = array();
-
-    public function costProjetRessource($conf) {
-//        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Hrm/hrm.class.php");
-//        $hrm = new hrm($this->db);
-//        $arrFerie = $hrm->jourFerie();
-        $db = $this->db;
-        $requete = "SELECT unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datedeb) as datedebF,
-                           unix_timestamp(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.datefin) as datefinF,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.cout,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_user_imputation,
-                           ifnull(" . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_projet_task,-1) as taskId,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.nom,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.fk_resa_type,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa,
-                           " . MAIN_DB_PREFIX . "Synopsis_global_ressources
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_global_ressources_resa.fk_ressource = " . MAIN_DB_PREFIX . "Synopsis_global_ressources.id
-                       AND fk_projet = " . $this->id . " AND fk_projet_task is null";
-        $sql = $db->query($requete);
-        $totalDur = 0;
-        $totalCnt = 0;
-        $title = "Global";
-        while ($res = $db->fetch_object($sql)) {
-            for ($j = $res->datedebF; $j <= $res->datefinF; $j += 3600 * 24) {
-                if (date('N', $j) < 6) { //pas un week end
-                    //ajouter si pas un jour ferie
-                    $pasFerie = $this->isFerie($j);
-                    if ($pasFerie) {
-                        $nextDate = 0;
-                        $curdate = mktime(0, 0, 0, date('m', $j), date('d', $j), date('Y', $j));
-                        if (preg_match("/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})/", date("d/m/Y", $j), $arr)) {
-                            $nextDate = mktime(0, 0, 0, $arr[2], $arr[1], $arr[3]) + 24 * 3600;
-                        }
-                        if ($nextDate > $res->datefinF)//Il reste - de 24 heures
-                            $nextDate = $res->datefinF;
-                        $durationPerDay = $nextDate - $j;
-                        //                            print $nextDate."\n".$res1->datefinF."\n".$durationPerDay / 3600 ."\n";
-                        //Prob timezone
-                        if ($durationPerDay > $conf->global->ALLDAY * 3600)//On fait la journée compléte
-                            $dureeEnHeure = $conf->global->ALLDAY * 3600;
-                        else
-                            $dureeEnHeure = $durationPerDay;
-                        switch ($res->fk_resa_type) {
-                            case 1://Prix par heure
-                                $tmpCout = $res->cout * $dureeEnHeure / 3600; // le cout est un cout horaire
-                                break;
-                            case 2://Prix par demi journée
-                                if ($dureeEnHeure > $conf->global->HALFDAY * 3600) {//2 demi journée
-                                    $tmpCout = $res->cout * 2;
-                                } else {//1Demi j
-                                    $tmpCout = $res->cout;
-                                }
-                                break;
-                            case 3:
-                            default://Prix par jour
-                                $tmpCout = $res->cout;
-                                break;
-                        }
-                        $tmpCount = $dureeEnHeure;
-
-                        $this->updateArrCoutRessource($curdate, $tmpCout, $tmpCount, $title, $res);
-                        $totalCnt += $tmpCount;
-                        $totalDur += $tmpCout;
-                    }
-                }
-            }//fin de pour chaque jour
-            //calcul la duree
-            //$array['totalDur'] += $count;
-            //calcul du cout de la ressource
-            //$array['totalCostForRessources'] += $cout;
-        }//fin de pour chaque ressource
-        $this->cost["projet"]['coutRessource'] = $totalDur;
-        $this->cost["projet"]['durRessource'] = $totalCnt;
+			    //Parse all clone node to be sure to update new parent
+			    $tasksarray=$taskstatic->getTasksArray(0, 0, $clone_project_id, $socid, 0);
+			    foreach ($tasksarray as $task_cloned)
+			    {
+			    	$taskstatic->fetch($task_cloned->id);
+			    	if ($taskstatic->fk_task_parent!=0)
+			    	{
+			    		$taskstatic->fk_task_parent=$tab_conv_child_parent[$taskstatic->fk_task_parent];
+			    	}
+			    	$res=$taskstatic->update($user,$notrigger);
+			    	if ($result_clone <= 0)
+				    {
+				    	$this->error.=$taskstatic->error;
+						$error++;
+				    }
+			    }
+			}
 
 
 
@@ -2196,46 +1914,117 @@ class Project extends CommonObject {
         }
     }
 
-    public function sec2time($sec) {
-        if (!is_numeric($sec)) {
-            $sec = 0;
-        }
-        $returnstring = " ";
-        $days = intval($sec / 86400);
-        $hours = intval(($sec / 3600) - ($days * 24));
-        $minutes = intval(($sec - (($days * 86400) + ($hours * 3600))) / 60);
-        $seconds = $sec - ( ($days * 86400) + ($hours * 3600) + ($minutes * 60));
+			if ($to_update)
+			{
+		    	$result = $task->update($user);
+		    	if (!$result)
+		    	{
+		    		$error++;
+		    		$this->error.=$task->error;
+		    	}
+			}
+	    }
+	    if ($error!=0)
+	    {
+	    	return -1;
+	    }
+	    return $result;
+	}
 
-        $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-        $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-        $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-        $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-        $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-        //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-        //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-        return ($returnstring);
-    }
+	/**
+	 * Clean tasks not linked to an existing parent
+	 *
+	 * @return	int				Nb of records deleted
+	 */
+	function clean_orphelins()
+	{
+		$nb=0;
 
-    public function sec2hour($sec) {
-        if (!is_numeric($sec)) {
-            $sec = 0;
-        }
-        $days = false;
-        $returnstring = " ";
-        $hours = intval(($sec / 3600));
-        $minutes = intval(($sec - ( ($hours * 3600))) / 60);
-        $seconds = $sec - ( ($hours * 3600) + ($minutes * 60));
+		// There is orphelins. We clean that
+		$listofid=array();
 
-        $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-        $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-        $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-        $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-        $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-        //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-        //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-        return ($returnstring);
-    }
+		// Get list of all id in array listofid
+		$sql='SELECT rowid FROM '.MAIN_DB_PREFIX.'projet_task';
+		$resql = $this->db->query($sql);
+		if ($resql)
+		{
+			$num = $this->db->num_rows($resql);
+			$i = 0;
+			while ($i < $num && $i < 100)
+			{
+				$obj = $this->db->fetch_object($resql);
+				$listofid[]=$obj->rowid;
+				$i++;
+			}
+		}
+		else
+		{
+			dol_print_error($this->db);
+		}
 
+		if (count($listofid))
+		{
+			print 'Code asked to check and clean orphelins.';
+
+			$sql = "UPDATE ".MAIN_DB_PREFIX."projet_task";
+			$sql.= " SET fk_task_parent = 0";
+			$sql.= " WHERE fk_task_parent NOT IN (".join(',',$listofid).")";	// So we update only records linked to a non existing parent
+
+			$resql = $this->db->query($sql);
+			if ($resql)
+			{
+				$nb=$this->db->affected_rows($sql);
+
+				if ($nb > 0)
+				{
+					// Removed orphelins records
+					print 'Some orphelins were found and modified to be parent so records are visible again: ';
+					print join(',',$listofid);
+				}
+				
+				return $nb;
+			}
+			else
+			{
+				return -1;
+			}
+		}
+	}
+
+
+	 /**
+	  *    Associate element to a project
+	  *
+	  *    @param	string	$TableName			Table of the element to update
+	  *    @param	int		$ElementSelectId	Key-rowid of the line of the element to update
+	  *    @return	int							1 if OK or < 0 if KO
+	  */
+	function update_element($TableName, $ElementSelectId)
+	{
+		$sql="UPDATE ".MAIN_DB_PREFIX.$TableName;
+
+		if ($TableName=="actioncomm")
+		{
+			$sql.= " SET fk_project=".$this->id;
+			$sql.= " WHERE id=".$ElementSelectId;
+		}
+		else
+		{
+			$sql.= " SET fk_projet=".$this->id;
+			$sql.= " WHERE rowid=".$ElementSelectId;
+		}
+
+		dol_syslog(get_class($this)."::update_element sql=" . $sql, LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if (!$resql) {
+			$this->error=$this->db->lasterror();
+			dol_syslog(get_class($this)."::update_element error : " . $this->error, LOG_ERR);
+			return -1;
+		}else {
+			return 1;
+		}
+
+	}
 }
 
 class ProjectTask extends commonObject {

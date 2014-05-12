@@ -1,12 +1,12 @@
 <?php
 
 error_reporting(E_ALL);
-error_reporting(E_ERROR);
+//error_reporting(E_ERROR);
 ini_set('display_errors', 1);
 
 require_once '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-require_once ( 'gsxDatas.class.php' );
+require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
 
 $userId = 'Corinne@actitec.fr';
 $password = 'cocomart01';
@@ -32,8 +32,12 @@ if (isset($_GET['action'])) {
     switch ($_GET['action']) {
         case 'loadProduct':
             if (isset($_GET['serial'])) {
-                $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                echo $datas->getLookupHtml();
+                if (isset($_GET['prodId'])) {
+                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                    echo $datas->getLookupHtml($_GET['prodId']);
+                } else {
+                    echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
+                }
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
@@ -92,13 +96,25 @@ if (isset($_GET['action'])) {
                     echo '<p class="error">Une erreur est survenue: aucun produit dans le panier</p>';
                 }
             } else {
-                echo '<p class="error">Une erreur est survenue: numéro de série absent</p>';
+                echo '<p class="error">Une erreur est survenue: numéro de série absent.</p>';
             }
             break;
 
         case 'sendPartsOrder':
             if (isset($_POST['serial'])) {
                 $parts = fetchPartsList();
+            }
+            break;
+
+        case 'sendGSXRequest':
+            llxHeader();
+            echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>'."\n";
+            echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>'."\n";
+            if (isset($_GET['request'])) {
+                $GSXRequest = new GSX_Request($_GET['request']);
+                echo $GSXRequest->processRequestForm();
+            } else {
+                echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
             }
             break;
     }

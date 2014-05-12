@@ -3,6 +3,7 @@
     src: url(./fonts/fontawesome.eot),
         url(./fonts/fontawesome.ttf);
 }
+span.button,
 button {
     border-radius: 6px;
     border: 1px solid #828282;
@@ -18,6 +19,7 @@ button {
     background: linear-gradient(to bottom,  rgba(252,252,252,1) 0%,rgba(226,226,226,1) 100%); /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#fcfcfc', endColorstr='#e2e2e2',GradientType=0 ); /* IE6-9 */
 }
+span.button:hover,
 button:hover {
     cursor: pointer;
     color: #282828;
@@ -33,14 +35,17 @@ button:hover {
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ffffff', endColorstr='#e0e0e0',GradientType=0 ); /* IE6-9 */
 
 }
+span.button.redHover:hover,
 button.redHover:hover {
     color: #960000;
     border-color: #960000;
 }
+span.button.greenHover:hover,
 button.greenHover:hover {
     color: #199600;
     border-color: #199600;
 }
+span.button.blueHover:hover,
 button.blueHover:hover {
     color: #0050A0;
     border-color: #0050A0;
@@ -123,7 +128,6 @@ td.rowTitle {
 .productDatas {
     border: 1px solid #DCDCDC;
     background: white;
-    float left;
 }
 .productDatas caption {
     font-size: 18px;
@@ -632,7 +636,9 @@ div.requestFormInputs span.required:before {
     font-size: 6px;
     margin-left: 5px;
 }
-
+div.requestFormInputs div.dataBlock {
+    margin-bottom: 15px;
+}
 span.displayInfos:before {
     color: #3574B4;
     font-family: 'FA';
@@ -651,31 +657,89 @@ div.labelInfos {
     color: #1D4064;
     font-weight: bold;
 }
-
 div.requestFormInputs label {
     color: #505050;
-    margin-top: 20px;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
     margin-right: 20px;
     display: inline-block;
 }
-
 div.requestFormInputs label.dataTitle:before {
     content: '\f054';
     font-family: 'FA';
     margin-right: 5px;
     font-size: 12px;
 }
+div.requestFormInputs span.dataCheck {
+    margin-left: 10px;
+    font-weight: bold;
+    font-size: 12px;
+}
+div.requestFormInputs span.dataCheck span.ok {
+    color: #00A000;
+}
+div.requestFormInputs span.dataCheck span.notOk {
+    color: #B40000;
+}
+div.requestFormInputs span.dataCheck span.notOk:before {
+    font-family: 'FA';
+    content: '\f00d';
+    margin-right: 8px;
+    font-size: 16px;
+}
+div.requestFormInputs span.dataCheck span.ok:before {
+    font-family: 'FA';
+    content: '\f00c';
+    margin-right: 8px;
+    font-size: 16px;
+}
 div.requestFormInputs input {
     width: 250px;
 }
-
+div.requestFormInputs input[type="radio"] {
+    width: 80px;
+}
 div.requestFormInputs fieldset {
     border: 1px solid #CDCDCD;
     border-radius: 12px;
     margin: 20px 10px;
 }
-
-table.requestParts{
+div.repairsPartsInputsTemplate,
+div.repairPartsContainer{
     display: none;
+}
+div.partDatasBlock {
+    margin: 10px 0;
+    border-top: 1px solid #969696;
+}
+div.partDatasBlockTitle {
+    padding: 5px 0;
+    font-size: 14px;
+    color: #646464;
+    font-weight: bold;
+}
+div.partDatasBlockTitle:hover {
+    cursor: pointer;
+    color: #505050;
+}
+div.partDatasBlockTitle.closed:before {
+    font-family: 'FA';
+    margin-right: 15px;
+    content: '\f0fe';
+}
+div.partDatasBlockTitle.open:before {
+    font-family: 'FA';
+    margin-right: 15px;
+    content: '\f146';
+}
+div.partDatasContent {
+    display: none;
+    padding: 10px 20px;
+    border-left: 1px dotted #B4B4B4;
+}
+div.singleRequestFormContainer {
+    padding: 30px;
+    box-shadow: 0 0 12px #505050;
+    border-radius: 12px;
+    background: #FFFBF2;
+    width: 700px;
 }

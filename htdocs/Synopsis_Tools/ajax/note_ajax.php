@@ -68,7 +68,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 
     if (isset($table) && isset($id) && $id > 0 && $droit1) {
         if (isset($_POST['note']) && $droit2) {//Onupload
-            $requete = "UPDATE " . $table . " SET " . $nomChampNote . " = '" . trim($_POST['note']) . "' WHERE rowid = " . $id;
+            $requete = "UPDATE " . $table . " SET " . $nomChampNote . " = '" . addslashes(trim($_POST['note'])) . "' WHERE rowid = " . $id;
             $db->query($requete);
         }
 

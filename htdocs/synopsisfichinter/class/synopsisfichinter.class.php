@@ -676,7 +676,7 @@ class Synopsisfichinter extends Fichinter {
         global $langs, $conf;
         if ($user->rights->synopsisficheinter->creer) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "fichinter ";
-            $sql.= " SET datei = " . $this->db->idate($date_delivery);
+            $sql.= " SET datei = '" . $this->db->idate($date_delivery)."'";
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
             if ($this->db->query($sql)) {

@@ -49,4 +49,20 @@
             <data name="fileData" required="0"></data>
         </datas>
     </request>
+    
+    <request name="UpdateSerialNumber" type="repair">
+        <label>Màj serial</label>
+        <datas>
+            <data name="repairConfirmationNumber" required="1"></data>
+            <data name="partInfo" required="1">
+                <datas>
+                    <data name="partNumber"></data>
+                    <data name="oldSerialNumber"></data>
+                    <data name="serialNumber"></data>
+                    <data name="reasonCode"></data>
+                    <data name="isPartDOA"></data>
+                </datas>
+            </data>
+        </datas>
+    </request>
 </root>

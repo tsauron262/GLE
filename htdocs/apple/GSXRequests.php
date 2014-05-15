@@ -319,6 +319,8 @@ class GSX_Request {
         $html .= '<p class="requiredInfos"><sup><span class="required"></span></sup>Champs requis</p>';
         $html .= '<div class="requestFormInputs">' . "\n";
         $html .= '<input type="hidden" id="requestName" name="requestName" value="' . $this->requestName . '"/>';
+        if(isset($_REQUEST['chronoId']))
+        $html .= '<input type="hidden" id="chronoId" name="chronoId" value="' . $_REQUEST['chronoId']. '"/>';
         foreach ($this->datas['request'] as $dataNode) {
             $html .= $this->getDataInput($dataNode, $values);
         }
@@ -370,7 +372,6 @@ class GSX_Request {
                                 while (1) {
                                     $results = $this->processRequestDatas($subDatasNodes, $index);
                                     if (count($results)) {
-                                        echo 'la';
                                         $datas[$dataName][] = $results;
                                     } else
                                         break;
@@ -390,10 +391,9 @@ class GSX_Request {
                             }
                         } else {
                             $inputName = $dataName;
-                            if (isset($dataIndex)) {
+                            if (isset($dataIndex))
                                 $inputName .= '_' . $dataIndex;
-                                echo $inputName;
-                            }
+
                             if (isset($_POST[$inputName]) && $_POST[$inputName]) {
                                 $value = $this->checkInputData($defs, $_POST[$inputName]);
                                 $datas[$dataName] = $value;
@@ -461,8 +461,9 @@ class GSX_Request {
             $wrapper = 'repairData';
 
             $requestData = $this->_requestBuilder($request, $wrapper, $requestDatas);
-            $response = $this->request($requestData, $client);
-            return $this->outputFormat($response);
+//            $response = $this->request($requestData, $client);
+//            return $this->outputFormat($response);
+            return true;
         }
     }
 

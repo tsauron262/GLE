@@ -128,4 +128,29 @@
     <def name="componentCheckReview" type="YesNo">
         <label>Vérification des composants</label>
     </def>
+    
+    <!--Maj serial-->
+    <def name="repairConfirmationNumber" type="text" max="15" jsCheck="text">
+        <label>Numéro de confirmation de la réparation</label>
+    </def>
+    
+    <def name="partInfo" type="partsList">
+        <label>Informations composants</label>
+    </def>
+    
+    <def name="oldSerialNumber" type="text" max="18" jsCheck="">
+        <label>Ancien numéro de série</label>
+    </def>
+    
+    <def name="reasonCode" type="select">
+        <label>Raison</label>
+        <values>
+            <val val="RS">Retour du stock</val>
+            <val val="OT">Autre</val>
+        </values>
+    </def>
+    
+    <def name="isPartDOA" type="YesNo">
+        <label>DOA?</label>
+    </def>
 </root>

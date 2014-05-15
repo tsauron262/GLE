@@ -8,9 +8,9 @@ require_once '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
 
-$userId = 'Corinne@actitec.fr';
-$password = 'cocomart01';
-$serviceAccountNo = '0000100635';
+//$userId = 'Corinne@actitec.fr';
+//$password = 'cocomart01';
+//$serviceAccountNo = '0000100635';
 
 function fetchPartsList() {
     $parts = array();
@@ -34,7 +34,8 @@ if (isset($_GET['action'])) {
             if (isset($_GET['serial'])) {
                 if (isset($_GET['prodId'])) {
                     $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                    echo $datas->getLookupHtml($_GET['prodId']);
+                    if ($datas->connect)
+                        echo $datas->getLookupHtml($_GET['prodId']);
                 } else {
                     echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
                 }
@@ -107,12 +108,16 @@ if (isset($_GET['action'])) {
             break;
 
         case 'sendGSXRequest':
-            llxHeader();
-            echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>'."\n";
-            echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>'."\n";
             if (isset($_GET['request'])) {
                 $GSXRequest = new GSX_Request($_GET['request']);
-                echo $GSXRequest->processRequestForm();
+                $result = $GSXRequest->processRequestForm();
+                if ($result !== true) {
+                    llxHeader();
+                    echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
+                    echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
+                    echo $result;
+                } else
+                    header ("Location:".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$_REQUEST['chronoId']);
             } else {
                 echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
             }

@@ -307,9 +307,9 @@ function PartsManager(prodId, serial) {
         this.parts[group].push(new Part(name, num, type, price));
     };
     this.loadParts = function () {
+        displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
         this.removeParts();
         setRequest('GET', 'loadParts', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
-        displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
     };
     this.displayParts = function() {
         this.$parts = this.$prod.find('.partsListContainer');
@@ -797,14 +797,7 @@ function displayRequestMsg(type, msg, $div) {
 
     var html = '<p class="'+type+'">'+msg+'</p>';
 
-    if ($div.css('display') != 'none') {
-        $div.slideUp(250, function() {
-            $(this).html(html).slideDown(250);
-        });
-    } else {
-        $div.html(html);
-        $div.slideDown(250);
-    }
+    $div.html(html).hide().slideDown(250);
 }
 
 function getProdId($obj) {

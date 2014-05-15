@@ -1,7 +1,11 @@
 <?php
+
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
+
 class gsxDatas {
+
     public $gsx = null;
+    public $connect = false;
     protected $serial = null;
     protected $partsCart = array();
     protected $errors = array();
@@ -36,7 +40,7 @@ class gsxDatas {
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        else
+        elseif ($userId && $password && $serviceAccountNo)
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
@@ -47,11 +51,17 @@ class gsxDatas {
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
+        else {
+            echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/fiche.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
+            return 0;
+        }
         $this->gsx = new GSX($details);
         $this->serial = $serial;
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {
             $this->errors[] = 'GSX_init_error';
-            echo 'error';
+//            echo 'error';
+        } else {
+            $this->connect = true;
         }
     }
 
@@ -139,25 +149,25 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
                     $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
-                    $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Créer une réparation</button>'."\n";
+                    $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Créer une réparation</button>' . "\n";
                     $html .= '<div class="partsRequestResult"></div>' . "\n";
 
-                    $html .= '<div class="repairPopUp">'."\n";
-                    $html .= '<input type="hidden" class="prodId" value="'.$prodId.'"/>'."\n";
-                    $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>'."\n";
+                    $html .= '<div class="repairPopUp">' . "\n";
+                    $html .= '<input type="hidden" class="prodId" value="' . $prodId . '"/>' . "\n";
+                    $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>' . "\n";
                     $html .= '<p>Sélectionnez le type de réparation que vous souhaitez créer: <br/></p>';
-                    $html .= '<select class="repairTypeSelect">'."\n";
+                    $html .= '<select class="repairTypeSelect">' . "\n";
 
                     $requests = GSX_Request::getRequestsByType('repair');
                     foreach ($requests as $name => $label) {
-                        $html .= '<option value="'.$name.'">'.$label.'</option>';
+                        $html .= '<option value="' . $name . '">' . $label . '</option>';
                     }
                     $html .= '</select>';
-                    $html .= '<p style="text-align: right">'."\n";
-                    $html .= '<button class="loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</button>'."\n";
-                    $html .= '</p>'."\n";
+                    $html .= '<p style="text-align: right">' . "\n";
+                    $html .= '<button class="loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</button>' . "\n";
+                    $html .= '</p>' . "\n";
                     $html .= '<div class="repairFormContainer"></div>';
-                    $html .= '</div>'."\n";
+                    $html .= '</div>' . "\n";
                 }
             }
         }
@@ -186,7 +196,7 @@ class gsxDatas {
         $html .= '<th style="min-width: 80px">Réf</th>' . "\n";
         $html .= '<th style="min-width: 80px">Prix</th>' . "\n";
         $html .= '<th>Qté</th>' . "\n";
-        $html .= '<th class="comptiaCodeTitle">CompTIA Code</th>'."\n";
+        $html .= '<th class="comptiaCodeTitle">CompTIA Code</th>' . "\n";
         $html .= '</thead>' . "\n";
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
@@ -214,26 +224,26 @@ class gsxDatas {
                     $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
                     $html .= '<div class="typeFilters searchBloc">' . "\n";
                     $html .= '<button class="filterTitle">Filtrer par catégorie de composant</button>';
-                    $html .= '<div class="typeFiltersContent">'."\n";
-                    $html .= '<div style="margin-bottom: 20px;">'."\n";
+                    $html .= '<div class="typeFiltersContent">' . "\n";
+                    $html .= '<div style="margin-bottom: 20px;">' . "\n";
                     $html .= '<span class="filterCheckAll">Tout cocher</span>';
                     $html .= '<span class="filterHideAll">Tout décocher</span></div></div>';
                     $html .= '</div>' . "\n";
                     $html .= '<div class="searchBloc"' . "\n";
                     $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
                     $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
-                    $html .= '<select class="keywordFilterType">'."\n";
+                    $html .= '<select class="keywordFilterType">' . "\n";
                     $types = array('name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
                     foreach ($types as $key => $type) {
-                        $html .= '<option value="'.$key.'">'.$type.'</option>'."\n";
+                        $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
                     }
-                    $html .= '</select>'."\n";
-                    $html .= '<button class="addKeywordFilter" onclick="GSX.products['.$prodId.'].PM.addKeywordFilter()">Ajouter</button>' . "\n";
+                    $html .= '</select>' . "\n";
+                    $html .= '<button class="addKeywordFilter" onclick="GSX.products[' . $prodId . '].PM.addKeywordFilter()">Ajouter</button>' . "\n";
                     $html .= '</div>' . "\n";
                     $html .= '<div class="searchBloc">' . "\n";
                     $html .= '<label for="searchPartInput">Recherche par référence: </label>' . "\n";
                     $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
-                    $html .= '<button class="searchPartSubmit" onclick="GSX.products['.$prodId.'].PM.searchPartByNum()">Rechercher</button>' . "\n";
+                    $html .= '<button class="searchPartSubmit" onclick="GSX.products[' . $prodId . '].PM.searchPartByNum()">Rechercher</button>' . "\n";
                     $html .= '</div>' . "\n";
                     $html .= '<div class="curKeywords"></div>' . "\n";
                     $html .= '<div class="searchResult"></div>';
@@ -242,7 +252,7 @@ class gsxDatas {
 
                     $html .= '<script type="text/javascript">' . "\n";
                     foreach ($parts as $part) {
-                        $html .= 'GSX.addPart('.$prodId.', ';
+                        $html .= 'GSX.addPart(' . $prodId . ', ';
                         $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
                         $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
                         $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
@@ -307,15 +317,15 @@ class gsxDatas {
         global $db;
         $gsxRequest = new GSX_Request($requestType);
         $chronoId = $_REQUEST['chronoId'];
-        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Chrono/Chrono.class.php");
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
         $chrono = new Chrono($db);
         $chrono->fetch($chronoId);
         $chrono->getValues($chronoId);
-        
+
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
         $valDef['diagnosis'] = $chrono->description;
-//        $valDef['serialNumber'] = $this->serial;
+        $valDef['unitReceivedTime'] = "14:30";
 //        print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef);
     }
@@ -333,6 +343,7 @@ class gsxDatas {
         if (!count($this->partsCart))
             return false;
     }
+
 }
 
 ?>

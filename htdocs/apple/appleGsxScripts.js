@@ -679,11 +679,11 @@ function GSX() {
                         var partName = $(this).find('td:first').text();
                         var html = '<div class="partDatasBlock">';
                         html += '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
-                        html += '<div class="partDatasContent">';
+                        html += '<div class="partDatasContent partDatasContent_'+i+'">';
                         html += $template.html();
                         html += '</div>';
                         $container.append(html);
-                        var $div = $container.find('div.partDatasContent');
+                        var $div = $container.find('div.partDatasContent_'+i+'');
                         var $partRow = $(this);
                         if ($div.length) {
                             $div.find('div.dataBlock').each(function() {
@@ -875,8 +875,6 @@ function assignInputCheckMsg($input, type, msg) {
     if ($checkSpan.length) {
         $checkSpan.slideUp(250);
         $checkSpan.html(html).slideDown(250);
-    } else {
-        alert('Erreur, pas de span!!');
     }
 }
 function checkInput($input, type) {

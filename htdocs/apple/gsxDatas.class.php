@@ -280,7 +280,7 @@ class gsxDatas {
                             $codes['grps'][$group['componentId']] = array();
                             if ($i == 0) {
                                 $codes['grps'][$group['componentId']]['000'] = 'Non-applicable';
-                            } else {
+                            } else if (isset($group['comptiaCodeInfo']) && count($group['comptiaCodeInfo'])) {
                                 foreach ($group['comptiaCodeInfo'] as $codeInfo) {
                                     $codes['grps'][$group['componentId']][$codeInfo['comptiaCode']] = $codeInfo['comptiaDescription'];
                                 }

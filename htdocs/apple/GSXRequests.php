@@ -323,7 +323,7 @@ class GSX_Request {
             $html .= $this->getDataInput($dataNode, $values);
         }
         $html .= '</div>' . "\n";
-        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover" onclick="submitGsxRequestForm($(this), \''.$this->requestName.'\')">Envoyer</span></div>';
+        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover" onclick="submitGsxRequestForm($(this), \'' . $this->requestName . '\')">Envoyer</span></div>';
         $html .= '</form>' . "\n";
         return $html;
     }
@@ -344,13 +344,71 @@ class GSX_Request {
         return $results;
     }
 
-    public function processRequestDatas(array $datasNodes) {
+    public function checkInputData($defs, $value) {
+        return $value;
+    }
+
+    public function processRequestDatas(array $datasNodes, $dataIndex = null) {
         $datas = array();
-        foreach ($this->datas['request'] as $dataNode) {
+        foreach ($datasNodes as $dataNode) {
             if ($dataNode->hasAttribute('name')) {
                 $dataName = $dataNode->getAttribute('name');
                 if ($dataName !== '') {
-
+                    $required = $dataNode->getAttribute('required');
+                    if ($required == '1')
+                        $required = true;
+                    else
+                        $required = false;
+                    $defs = $this->getDataDefinitionsArray($dataName);
+                    if (isset($defs)) {
+                        if ($defs['type'] == 'partsList') {
+                            $datas[$dataName] = array();
+                            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                            if (count($subDatasNode) == 1) {
+                                $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                                $index = 1;
+                                while (1) {
+                                    $results = $this->processRequestDatas($subDatasNodes, $index);
+                                    if (count($results)) {
+                                        echo 'la';
+                                        $datas[$dataName][] = $results;
+                                    } else
+                                        break;
+                                    $index++;
+                                }
+                            } else {
+                                $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml":
+                                    liste des données absentes pour le groupe "' . $dataName . '"');
+                            }
+                        } else if ($defs['type'] == 'datasGroup') {
+                            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                            if (count($subDatasNode) == 1) {
+                                $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                                $datas[$dataName] = $this->processRequestDatas($subDatasNodes);
+                            } else {
+                                $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml": liste des données absentes pour le groupe "' . $dataName . '"');
+                            }
+                        } else {
+                            $inputName = $dataName;
+                            if (isset($dataIndex)) {
+                                $inputName .= '_' . $dataIndex;
+                                echo $inputName;
+                            }
+                            if (isset($_POST[$inputName]) && $_POST[$inputName]) {
+                                $value = $this->checkInputData($defs, $_POST[$inputName]);
+                                $datas[$dataName] = $value;
+                            } else {
+                                $default = $dataNode->getAttribute('default');
+                                if (isset($default) && ($default !== '')) {
+                                    $datas[$dataName] = $default;
+                                } else if ($required) {
+                                    $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
+                                }
+                            }
+                        }
+                    } else {
+                        $this->addError('Definitions absentes pour la donnée "' . $dataName . '"');
+                    }
                 } else {
                     $this->addError('Erreur de syntaxe XML: 1 attribut "nom" non-spécifié');
                 }
@@ -377,22 +435,37 @@ class GSX_Request {
         }
 
         $requestDatas = $this->processRequestDatas($this->datas['request']);
-        $this->addError('Test');
+
         if (count($this->errors)) {
-            $html = '<p class="errors">Erreurs:<br/><br/></p>';
+            $html = '<p class="error">Des erreurs ont été détecter:<br/><br/>';
             $i = 1;
             foreach ($this->errors as $error) {
-                $html .= $i.'. '.$error.'<br/>';
+                $html .= $i . '. ' . $error . '<br/>';
+                $i++;
             }
-            $html .= '<br/><br/>';
+            $html .= '</p><br/><br/>';
             unset($this->errors);
             $this->errors = array();
-            $html .= '<div class="singleRequestFormContainer">'."\n";
+
+            echo '<pre>';
+            print_r($requestDatas);
+            echo '</pre>';
+
+            $html .= '<div class="singleRequestFormContainer">' . "\n";
             $html .= $this->generateRequestFormHtml($requestDatas);
             $html .= '</div>';
             return $html;
+        } else {
+            $client = $this->requestName;
+            $request = $this->requestName . 'Request';
+            $wrapper = 'repairData';
+
+            $requestData = $this->_requestBuilder($request, $wrapper, $requestDatas);
+            $response = $this->request($requestData, $client);
+            return $this->outputFormat($response);
         }
     }
+
 }
 
 ?>

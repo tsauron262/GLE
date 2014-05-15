@@ -304,8 +304,20 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType) {
+        global $db;
         $gsxRequest = new GSX_Request($requestType);
-        return $gsxRequest->generateRequestFormHtml(array('serialNumber' => $this->serial));
+        $chronoId = $_REQUEST['chronoId'];
+        require_once(DOL_DOCUMENT_ROOT."/Synopsis_Chrono/Chrono.class.php");
+        $chrono = new Chrono($db);
+        $chrono->fetch($chronoId);
+        $chrono->getValues($chronoId);
+        
+        $valDef = array();
+        $valDef['serialNumber'] = $this->serial;
+        $valDef['diagnosis'] = $chrono->description;
+//        $valDef['serialNumber'] = $this->serial;
+//        print_r($chrono->extraValue);
+        return $gsxRequest->generateRequestFormHtml($valDef);
     }
 
     public function addToCart($partRef, $qty) {

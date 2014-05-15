@@ -778,7 +778,7 @@ function GSX() {
         }
         if (this.products[prodId]) {
             var requestType = $prod.find('.repairTypeSelect').val();
-            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial);
+            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial+"&chronoId="+chronoId);
             displayRequestMsg('requestProcess', '', $prod.find('div.repairFormContainer'));
         } else {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $prod.find('.partsRequestResult'));

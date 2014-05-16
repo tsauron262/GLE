@@ -312,7 +312,7 @@ class GSX_Request {
         }
 
         $html .= '<form class="gsxRepairForm" id="repairForm_' . $this->requestName . '" method="POST"';
-        $html .= ' action="'.DOL_URL_ROOT.'/apple/requestProcess.php?&action=sendGSXRequest&request=' . $this->requestName . '"';
+        $html .= ' action="'.DOL_URL_ROOT.'/apple/ajax/requestProcess.php?&action=sendGSXRequest&request=' . $this->requestName . '"';
         $html .= ' enctype="multipart/form-data">' . "\n";
 
         $html .= '<div class="requestTitle">' . $this->requestLabel . '</div>' . "\n";

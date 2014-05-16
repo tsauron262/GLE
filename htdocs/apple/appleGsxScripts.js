@@ -23,6 +23,9 @@ var partDataType = {
     'price': 'Prix'
 }
 
+var extra = "";
+if (typeof(chronoId) != 'undefined') 
+    extra = extra+ "&chronoId="+chronoId;
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
     this.codes = [];
@@ -778,7 +781,7 @@ function GSX() {
         }
         if (this.products[prodId]) {
             var requestType = $prod.find('.repairTypeSelect').val();
-            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial+"&chronoId="+chronoId);
+            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial);
             displayRequestMsg('requestProcess', '', $prod.find('div.repairFormContainer'));
         } else {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $prod.find('.partsRequestResult'));
@@ -1065,12 +1068,12 @@ function setRequest(method, requestType, prodId, requestParams) {
     }
     switch (method) {
         case 'GET':
-            xhr.open(method, DOL_URL_ROOT+'/apple/requestProcess.php?action='+requestType+requestParams);
+            xhr.open(method, DOL_URL_ROOT+'/apple/ajax/requestProcess.php?action='+requestType+requestParams+extra);
             xhr.send();
             break;
 
         case 'POST':
-            xhr.open(method, DOL_URL_ROOT+'/apple/requestProcess.php?action='+requestType);
+            xhr.open(method, DOL_URL_ROOT+'/apple/ajax/requestProcess.php?action='+requestType+extra);
             xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
             xhr.send(requestParams);
             break;

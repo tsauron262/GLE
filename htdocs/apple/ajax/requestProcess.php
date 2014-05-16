@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 //error_reporting(E_ERROR);
 ini_set('display_errors', 1);
 
-require_once '../main.inc.php';
+require_once '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
 
@@ -116,7 +116,7 @@ if (isset($_GET['action'])) {
                     echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
                     echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
                     echo $result;
-                } else
+                } else if (isset($_REQUEST['chronoId']))
                     header ("Location:".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$_REQUEST['chronoId']);
             } else {
                 echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';

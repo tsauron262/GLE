@@ -23,7 +23,7 @@ $result = restrictedArea($user, 'synopsischrono', $socid, '', '', 'Afficher');
 $id = $_REQUEST['id'];
 $modelT = $_REQUEST['model'];
 
-$js = $html = $html2 = $titreGege= "";
+$js = $html = $html2 = $titreGege = "";
 
 
 //$tabModel = array(100, 101);
@@ -40,13 +40,7 @@ if (isset($_REQUEST['obj'])) {
         $head = societe_prepare_head($soc);
         $socid = $_REQUEST['id'];
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasSociete` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql)){
-            $nomI = $result->titre;
-            $titre = $nomI;
-            if (isset($result->picto) && $result->picto != '')
-                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
-            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
-        }
+
         $titreGege = $soc->getNomUrl();
 //            $tabModel[$result->id] = $result->titre;
     } else if ($_REQUEST['obj'] == "ctr") {
@@ -60,14 +54,7 @@ if (isset($_REQUEST['obj'])) {
         $head = contract_prepare_head($ctr);
         $socid = $ctr->socid;
         $ctrId = $_REQUEST['id'];
-        $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_key`, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id ". (isset($modelT) ? " AND c.id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql)){
-            $nomI = $result->titre;
-            $titre = $nomI;
-            if (isset($result->picto) && $result->picto != '')
-                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
-            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
-        }
+        $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_key`, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id " . (isset($modelT) ? " AND c.id=" . $modelT : ""));
     } else if ($_REQUEST['obj'] == "project") {
         $langs->load("project@projet");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/synopsis_project.lib.php';
@@ -80,14 +67,6 @@ if (isset($_REQUEST['obj'])) {
         $head = synopsis_project_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasProjet` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql)){
-            $nomI = $result->titre;
-            $titre = $nomI;
-            if (isset($result->picto) && $result->picto != '')
-                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
-            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
-        }
-//            $tabModel[$result->id] = $result->titre;
     } else if ($_REQUEST['obj'] == "propal") {
         $langs->load("contracts");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/propal.lib.php';
@@ -100,33 +79,19 @@ if (isset($_REQUEST['obj'])) {
         $head = propal_prepare_head($projet);
         $socid = $projet->socid;
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1 AND `hasPropal` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
-        while ($result = $db->fetch_object($sql)) {
-            $nomI = $result->titre;
-            $titre = $nomI;
-            if (isset($result->picto) && $result->picto != '')
-                $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
-            $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
-        }
-//        $tabModel[$result->id] = $result->titre;
     }
 } else {
-//        $langs->load("contracts");
-//        require_once DOL_DOCUMENT_ROOT . '/core/lib/propal.lib.php';
-//        require_once DOL_DOCUMENT_ROOT . '/comm/propal/class/propal.class.php';
-//        $projet = new Propal($db);
-//        $projet->fetch($_REQUEST['id']);
-//        $filtre = "fk_propal=" . $projet->id;
-//        $champ['fk_propal'] = $projet->id;
-//        $head = propal_prepare_head($projet);
-//        $socid = $projet->socid;
     $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_conf` WHERE active= 1");
-    while ($result = $db->fetch_object($sql)) {
-        $nomI = $result->titre;
-        $titre = $nomI;
-        if (isset($result->picto) && $result->picto != '')
-            $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
-        $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
+
+}
+while ($result = $db->fetch_object($sql)) {
+    $nomI = $result->titre;
+    $titre = $nomI;
+    if (isset($result->picto) && $result->picto != ''){
+        $result->picto = preg_replace('/\[KEY\|[0-9]*\]/', "$1", $result->picto);
+        $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
     }
+    $tabModel[$result->id] = array('nomModel' => $nomI, 'titre' => $titre);
 }
 
 
@@ -217,19 +182,19 @@ llxHeader($js, $titre);
 dol_fiche_head($head, 'chrono', $langs->trans($titre));
 
 $form = new Form($db);
-if($obj){
+if ($obj) {
     print '<table class="border" width="100%">';
-    print '<tr><td width="25%">'.$langs->trans('Nom élément').'</td>';
+    print '<tr><td width="25%">' . $langs->trans('Nom élément') . '</td>';
     print '<td colspan="3">';
     $champ = 'ref';
-    if(isset($obj->nom))
+    if (isset($obj->nom))
         $champ = 'nom';
-    print $form->showrefnav($obj,'obj='.$_REQUEST['obj'].'&id','',($user->societe_id?0:1),'rowid',$champ);
+    print $form->showrefnav($obj, 'obj=' . $_REQUEST['obj'] . '&id', '', ($user->societe_id ? 0 : 1), 'rowid', $champ);
     print '</td></tr>';
-    if($obj != $soc && $socid > 0){
+    if ($obj != $soc && $socid > 0) {
         $soc = new Societe($db);
         $soc->fetch($socid);
-        print '<tr><td width="25%">'.$langs->trans('ThirdPartyName').'</td>';
+        print '<tr><td width="25%">' . $langs->trans('ThirdPartyName') . '</td>';
         print '<td colspan="3">';
         print $soc->getNomUrl(1);
         print '</td></tr>';

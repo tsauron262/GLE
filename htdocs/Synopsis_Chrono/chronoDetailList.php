@@ -248,6 +248,7 @@ EOF;
             }
             if($res1->nom == "Liste"){
 //                print_r($res1);
+                $tabVal= array();
                 $sql2 = $db->query("SELECT label as val, valeur as id FROM ".MAIN_DB_PREFIX."Synopsis_Process_form_list_members WHERE list_refid = ".$res->type_subvaleur);
                 while($result= $db->fetch_object($sql2))
                         $tabVal[] = "".$result->val . ":".$result->val."";

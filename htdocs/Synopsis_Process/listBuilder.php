@@ -195,7 +195,7 @@ EOF;
        print "<form id='modForm' onSubmit='return(false);' action='listBuilder.php?action=update&id=".$listeObj->id."' method='POST'><table cellpadding=15 width=100%>";
        print '  <tr>';
        print "      <th class='ui-widget-header ui-state-default' width=150>Label";
-       print "      <td align=center class='ui-widget-content' width=600><input type='text' class='required' name='label' value=".$listeObj->label."'>";
+       print "      <td align=center class='ui-widget-content' width=600><input type='text' class='required' name='label' value=".$listeObj->label.">";
 
        print '  <tr>';
        print "      <th class='ui-widget-header ui-state-default'>Description";

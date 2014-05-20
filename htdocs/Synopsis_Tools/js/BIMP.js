@@ -37,7 +37,7 @@ $(window).load(function() {
                     resultZone.html('<p class="error">Pas de numéro de série</p>');
     }
     
-    if($(".choixAccess").size()){
+    if($("textarea.choixAccess").size()){
         textarea = $(".choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Baterie", "Boite complet");
        textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" onclick="textarea.append($(this).val()+\', \');">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 

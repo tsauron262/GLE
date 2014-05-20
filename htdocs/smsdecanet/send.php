@@ -31,8 +31,8 @@ $langs->load("sms");
 $langs->load("smsdecanet@smsdecanet");
 
 // Security check
-if (!$user->admin)
-    accessforbidden();
+//if (!$user->admin)
+//    accessforbidden();
 
 $action = GETPOST('action');
 

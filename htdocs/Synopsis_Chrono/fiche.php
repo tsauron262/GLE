@@ -31,6 +31,19 @@ if ($action == 'setprop') {
     $db->query("UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono SET propalid = '" . $_REQUEST['prop'] . "' WHERE id = " . $id);
 }
 
+if ($action == 'createPC') {
+    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+    $chr = new Chrono($db);
+    $chr->fetch($_REQUEST['id']);
+    $prop = new Propal($db);
+    $prop->socid = $chr->socid;
+    $prop->date = "now()";
+    $prop->cond_reglement_id = 0;
+    $prop->mode_reglement_id = 0;
+    $prop->create($user);
+    $db->query("UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono SET propalid = '" . $prop->id . "' WHERE id = " . $id);
+}
+
 if ($action == 'supprimer') {
     $chr = new Chrono($db);
     $chr->fetch($id);
@@ -166,7 +179,7 @@ if ($action == 'modifier') {
                     . "" . MAIN_DB_PREFIX . "Synopsis_Chrono_key_type_valeur tk "
                     . "WHERE tk.id = k.type_valeur AND k.id = " . $arrTmp[1]
                     . " ORDER BY k.rang";
-            
+
             $sql = $db->query($requete);
             if ($sql)
                 $res = $db->fetch_object($sql);
@@ -242,7 +255,7 @@ $chr = new Chrono($db);
 if ($id > 0) {
     $chr->fetch($id);
 }
-if($chr->id > 0) {
+if ($chr->id > 0) {
     if (isset($_REQUEST['nomenu'])) {
         top_htmlhead($js, 'Fiche ' . $chr->model->titre);
     } else
@@ -334,7 +347,7 @@ if($chr->id > 0) {
         $requete = "SELECT k.id FROM
                            " . MAIN_DB_PREFIX . "Synopsis_Chrono_key AS k
                       WHERE k.model_refid = " . $chr->model_refid
-                ." ORDER BY k.rang";
+                . " ORDER BY k.rang";
         $sql = $db->query($requete);
         while ($result = $db->fetch_object($sql)) {
             getValueForm($chr->id, $result->id, $chr->socid);
@@ -453,8 +466,8 @@ if($chr->id > 0) {
                     }
                 }
                 $requete2 = "SELECT * FROM " . MAIN_DB_PREFIX . "propal ";
-                if($hasSoc)
-                    $requete2 .= " WHERE fk_soc = ".$chr->socid;
+                if ($hasSoc)
+                    $requete2 .= " WHERE fk_soc = " . $chr->socid;
                 $requete2 .= " ORDER BY `rowid` DESC";
                 $sql2 = $db->query($requete2);
                 while ($res = $db->fetch_object($sql2)) {
@@ -467,12 +480,19 @@ if($chr->id > 0) {
                 $resql = $db->query($requete);
                 if ($db->num_rows($resql) > 0) {
                     while ($res = $db->fetch_object($resql)) {
-                        print "<td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/comm/propal.php?id=" . $res->rowid . "'>" . $res->ref . "</a><br/>Total : ".price($res->total_ht,1,'',1,-1,-1,$conf->currency)." HT</td>";
+                        require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                        $propal = new Propal($db);
+                        $propal->fetch($res->rowid);
+                        print "<td class='ui-widget-content'>" .$propal->getNomUrl(1) ." ". $propal->getLibStatut() . "<br/>Total : " . price($res->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT</td>";
                     }
+                } else {
+                    echo "<td class='ui-widget-content'>";
+                    if ($hasSoc)
+//                        echo '<a href="' . DOL_URL_ROOT . '/comm/propal.php?action=create' . ($hasSoc?"&socid=".$chr->socid:"") . '">Créer</a>';
+                        echo '<a href="?id=' . $id . '&action=createPC">Créer</a>';
+                    else
+                        echo 'Pas de client définit';
                 }
-                else
-                    echo "<td class='ui-widget-content'>".
-                        '<a href="' . DOL_URL_ROOT . '/comm/propal.php?action=create' . ($hasSoc?"&socid=".$chr->socid:"") . '">Créer</a>';
             }
         }
         /* 	print '<tr><th class="ui-widget-header ui-state-default">Projet';
@@ -576,7 +596,7 @@ if($chr->id > 0) {
                       LEFT JOIN " . MAIN_DB_PREFIX . "Synopsis_Chrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chr->id . "
                      WHERE t.id = k.type_valeur
                        AND k.model_refid = " . $chr->model_refid
-                ." ORDER BY k.rang";
+                . " ORDER BY k.rang";
         //print $requete;
         $sql = $db->query($requete);
         while ($res = $db->fetch_object($sql)) {

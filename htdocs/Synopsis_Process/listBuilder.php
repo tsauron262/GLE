@@ -139,8 +139,8 @@ EOF;
                 var valeur = jQuery('#modFormAddElement').find('#valeur').val();
                 var dateNow = new Date();
                 var curDate = dateNow.getTime();
-                inputHiddenText = "<input type='hidden' name='label-d"+curDate+"' value='"+label+"'>";
-                inputHiddenText += "<input type='hidden' name='valeur-d"+curDate+"' value='"+valeur+"'>";
+                inputHiddenText = "<input type='hidden' name='label-d"+curDate+"' value=\""+label+"\">";
+                inputHiddenText += "<input type='hidden' name='valeur-d"+curDate+"' value=\""+valeur+"\">";
 
                 var longHtml = '<table width=100% style="clear:both;"><tr><td width=250>'+inputHiddenText+label+'<td width=250>'+valeur+'<td><button class="butActionDelete" onClick="delListElement(this);">Supprimer</button></tr></table>';
                 jQuery('#sortable').append('<li id="sortable_d'+curDate+'" class="ui-state-highlight">'+longHtml+'</li>')
@@ -195,7 +195,7 @@ EOF;
        print "<form id='modForm' onSubmit='return(false);' action='listBuilder.php?action=update&id=".$listeObj->id."' method='POST'><table cellpadding=15 width=100%>";
        print '  <tr>';
        print "      <th class='ui-widget-header ui-state-default' width=150>Label";
-       print "      <td align=center class='ui-widget-content' width=600><input type='text' class='required' name='label' value='".$listeObj->label."'>";
+       print "      <td align=center class='ui-widget-content' width=600><input type='text' class='required' name='label' value=".$listeObj->label."'>";
 
        print '  <tr>';
        print "      <th class='ui-widget-header ui-state-default'>Description";
@@ -212,8 +212,8 @@ EOF;
        foreach($listeObj->lignes as $key=>$val)
        {
            print "          <li id='sortable_".$val->id."' class='ui-state-highlight'>";
-           $inputHiddenText = "<input type='hidden' name='label-".$val->id."' value='".$val->label."'>";
-           $inputHiddenText .= "<input type='hidden' name='valeur-".$val->id."' value='".$val->valeur."'>";
+           $inputHiddenText = "<input type='hidden' name='label-".$val->id."' value=\"".$val->label."\">";
+           $inputHiddenText .= "<input type='hidden' name='valeur-".$val->id."' value=\"".$val->valeur."\">";
 
            print "              <table width=100%><tr><td width=250>".$inputHiddenText.$val->label."<td width=250>".$val->valeur."<td><button class='butActionDelete' onClick='delListElement(this);'>Supprimer</button></table>";
            print "          </li>";

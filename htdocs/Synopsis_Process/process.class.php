@@ -2416,7 +2416,7 @@ class lien extends formulaireSource {
         $this->champVueSelect = $result->champVueSelect;
         $this->ordre = $result->ordre;
         $this->urlObj = $result->urlObj;
-        $this->picto = ($result->picto != '') ? img_picto($result->label, $result->picto) : "";
+        $this->picto = $result->picto;
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
         $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : (isset($_REQUEST['id'])? $_REQUEST['id'] :  $this->idChrono));
@@ -2572,8 +2572,24 @@ EOF;
                 . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
+        
+        if(stripos($this->picto, '[KEY|')){
+            $tabT = explode('[KEY|', $this->picto);
+            $tabT = explode(']', $tabT[1]);
+            $keyId = $tabT[0];
+            $val = "";
+            $result = $this->db->query("SELECT value FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid = ".$idVal." AND key_id = ".$keyId);
+            if($this->db->num_rows($result > 0)){
+                $ligne = $this->db->fetch_object($result);
+                $val = $ligne->value;
+            }
+            $this->picto = str_replace('[KEY|'.$keyId.']', $val, $this->picto);
+        }
+        $picto = ($this->picto != '') ? img_picto($text, $this->picto) : "";
+        
+        
         if ($this->urlObj != "") {
-            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\"> " . $this->picto . "</a> ";
+            $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\"> " . $picto . "</a> ";
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
             if ($this->typeChrono > 0)
                 $html .= "onclick='dispatchePopObject(" . $idVal . ", \"chrono\", function(){}, \"" . $text . "\",1); return false;'";

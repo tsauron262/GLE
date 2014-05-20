@@ -546,6 +546,18 @@ class Chrono extends CommonObject {
 
         $lien = '<a title="' . $this->ref . " : " . $this->description . '" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
+        
+        if(stripos($this->model->picto, '[KEY|')){
+            $tabT = explode('[KEY|', $this->model->picto);
+            $tabT = explode(']', $tabT[1]);
+            $keyId = $tabT[0];
+            $this->getValues();
+//            echo "<pre>";
+//            print_r($this);
+//            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
+            $val = $this->extraValueById[$this->id][$keyId]['value'];
+            $this->model->picto = str_replace('[KEY|'.$keyId.']', $val, $this->model->picto);
+        }
 
         if ($option == 6) {
             $lien = '<a title="' . $this->nom . '" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $this->id . '">';
@@ -644,7 +656,9 @@ class Chrono extends CommonObject {
         }
     }
 
-    public function getValues($chrono_id) {
+    public function getValues($chrono_id = null) {
+        if($chrono_id == null)
+            $chrono_id = $this->id;
         if (count($this->keysListId) < 1) {
             $this->getKeys();
         }
@@ -659,6 +673,7 @@ class Chrono extends CommonObject {
             $key = $this->keysList[$res->key_id]['nom'];
             $desc = $this->keysList[$res->key_id]['description'];
             $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
+            $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
         }
     }
 

@@ -321,12 +321,42 @@ class gsxDatas {
         $chrono = new Chrono($db);
         $chrono->fetch($chronoId);
         $chrono->getValues($chronoId);
+        
+        $tech = new User($db);
+        $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
 
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
-        $valDef['diagnosis'] = $chrono->description;
-        $valDef['unitReceivedTime'] = "14:30";
-//        print_r($chrono->extraValue);
+        $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
+        $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
+        $valDef['unitReceivedDate'] = $dateH[0];
+        $valDef['unitReceivedTime'] = $dateH[1];
+        
+        $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
+        $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+        $valDef['billTo'] = $tech->array_options['options_apple_service'];
+        $valDef['poNumber'] = $chrono->ref;
+        
+//        echo "<pre>"; print_r($chrono->contact);
+        
+        if(isset($chrono->contact->id)){
+            $valDef['addressLine1'] = $chrono->contact->address;
+//            $valDef['addressLine2'] = $chrono->contact->;
+//            $valDef['addressLine3'] = $chrono->contact->;
+//            $valDef['addressLine4'] = $chrono->contact->;
+            $valDef['city'] = $chrono->contact->town;
+            $valDef['companyName'] = $chrono->societe->name;
+            $valDef['country'] = "FRANCE";
+            $valDef['firstName'] = $chrono->contact->firstname;
+            $valDef['lastName'] = $chrono->contact->lastname;
+            $valDef['primaryPhone'] = $chrono->contact->phone_pro;
+            $valDef['secondaryPhone'] = $chrono->contact->phone_mobile;
+            $valDef['zipCode'] = $chrono->contact->zip;
+            $valDef['emailAdresse'] = $chrono->contact->email;
+        }
+        
+        
+//        echo "<pre>";print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef);
     }
 

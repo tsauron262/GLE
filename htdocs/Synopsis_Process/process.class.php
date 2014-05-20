@@ -2573,7 +2573,7 @@ EOF;
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
         
-        $picto = self::traitePicto($this->picto, $id);
+        $picto = self::traitePicto($this->picto, $idVal);
         
         
         if ($this->urlObj != "") {
@@ -2599,7 +2599,7 @@ EOF;
             $val = "";
             $result = $db->query("SELECT value FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid = ".$id." AND key_id = ".$keyId);
             if($db->num_rows($result > 0)){
-                $ligne = $this->db->fetch_object($result);
+                $ligne = $db->fetch_object($result);
                 $val = $ligne->value;
             }
             $picto = str_replace('[KEY|'.$keyId.']', $val, $picto);
@@ -2608,12 +2608,12 @@ EOF;
     }
 
     function getValue($id) {
-        $picto = self::traitePicto($this->picto, $id);
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
 //        die("jjjj");
             if ($sql)
                 while ($result = $this->db->fetch_object($sql)) {
+                    $picto = self::traitePicto($this->picto, $result->id);
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
                         $html = lien($this->urlObj . $result->id) . finLien($picto ." ". $result->nom);

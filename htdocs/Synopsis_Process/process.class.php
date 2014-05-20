@@ -2573,19 +2573,7 @@ EOF;
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
         
-        if(stripos($this->picto, '[KEY|')){
-            $tabT = explode('[KEY|', $this->picto);
-            $tabT = explode(']', $tabT[1]);
-            $keyId = $tabT[0];
-            $val = "";
-            $result = $this->db->query("SELECT value FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid = ".$idVal." AND key_id = ".$keyId);
-            if($this->db->num_rows($result > 0)){
-                $ligne = $this->db->fetch_object($result);
-                $val = $ligne->value;
-            }
-            $this->picto = str_replace('[KEY|'.$keyId.']', $val, $this->picto);
-        }
-        $picto = ($this->picto != '') ? img_picto($text, $this->picto) : "";
+        $picto = self::traitePicto($this->picto);
         
         
         if ($this->urlObj != "") {
@@ -2601,8 +2589,26 @@ EOF;
         $html .= "</div>";
         return $html;
     }
+    
+    private static function traitePicto($picto, $id){
+        global $db;
+        if(stripos($picto, '[KEY|')){
+            $tabT = explode('[KEY|', $picto);
+            $tabT = explode(']', $tabT[1]);
+            $keyId = $tabT[0];
+            $val = "";
+            $result = $db->query("SELECT value FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid = ".$id." AND key_id = ".$keyId);
+            if($db->num_rows($result > 0)){
+                $ligne = $this->db->fetch_object($result);
+                $val = $ligne->value;
+            }
+            $picto = str_replace('[KEY|'.$keyId.']', $val, $picto);
+        }
+        return ($picto != '') ? img_picto($text, $picto) : "";
+    }
 
     function getValue($id) {
+        $picto = self::traitePicto($this->picto);
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
 //        die("jjjj");
@@ -2610,9 +2616,9 @@ EOF;
                 while ($result = $this->db->fetch_object($sql)) {
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
-                        $html = lien($this->urlObj . $result->id) . finLien($this->picto ." ". $result->nom);
+                        $html = lien($this->urlObj . $result->id) . finLien($picto ." ". $result->nom);
                     else
-                        $html = $this->picto . $result->nom;
+                        $html = $picto . $result->nom;
                     $this->valuesArr[$result->id] = $html;
                 }
         }

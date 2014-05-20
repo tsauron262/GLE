@@ -2573,7 +2573,7 @@ EOF;
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
         
-        $picto = self::traitePicto($this->picto);
+        $picto = self::traitePicto($this->picto, $id);
         
         
         if ($this->urlObj != "") {
@@ -2608,7 +2608,7 @@ EOF;
     }
 
     function getValue($id) {
-        $picto = self::traitePicto($this->picto);
+        $picto = self::traitePicto($this->picto, $id);
         if ($this->reqValue != "") {
             $sql = $this->db->query($this->reqValue);
 //        die("jjjj");

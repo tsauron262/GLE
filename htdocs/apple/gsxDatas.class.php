@@ -3,11 +3,9 @@
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 
 class gsxDatas {
-
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
-    protected $partsCart = array();
     protected $errors = array();
     public static $apiMode = 'production';
     public static $componentsTypes = array(
@@ -40,18 +38,18 @@ class gsxDatas {
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        elseif ($userId && $password && $serviceAccountNo)
+        else if (isset($userId) && isset($password) && isset($serviceAccountNo)) {
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
-                'userId' => isset($userId) ? $userId : '',
-                'password' => isset($password) ? $password : '',
-                'serviceAccountNo' => isset($serviceAccountNo) ? $serviceAccountNo : '',
+                'userId' => $userId,
+                'password' => $password,
+                'serviceAccountNo' => $serviceAccountNo,
                 'languageCode' => 'fr',
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        else {
+        } else {
             echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/fiche.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;
         }
@@ -201,8 +199,8 @@ class gsxDatas {
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
         $html .= '<div class="cartSubmitContainer">' . "\n";
-        $html .= '<button class="cartSave blueHover" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
-        $html .= '<button class="cartSubmit greenHover" onclick="GSX.products[' . $prodId . '].cart.submit()">Valider la commande</button>' . "\n";
+        $html .= '<button class="cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
+        $html .= '<button class="cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</button>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
         $html .= '</div>' . "\n";
@@ -329,21 +327,6 @@ class gsxDatas {
 //        print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef);
     }
-
-    public function addToCart($partRef, $qty) {
-        $this->partsCart[$partRef] = $qty;
-    }
-
-    public function saveCart() {
-        if (!count($this->partsCart))
-            return false;
-    }
-
-    public function sendOrderFromCart() {
-        if (!count($this->partsCart))
-            return false;
-    }
-
 }
 
 ?>

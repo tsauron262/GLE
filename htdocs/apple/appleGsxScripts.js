@@ -24,8 +24,9 @@ var partDataType = {
 }
 
 var extra = "";
-if (typeof(chronoId) != 'undefined') 
+if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
+
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
     this.codes = [];
@@ -109,7 +110,22 @@ function Part(name, num, type, price) {
 function CartProduct(gpe, id) {
     this.gpe = gpe;
     this.id = id;
-    this.qty = 1;
+    this.qty = null;
+    this.comptiaCode = null;
+    this.comptiaModifier = null;
+    this.setValues = function($tr) {
+        if (!$tr.length)
+            return;
+        if (this.qty) {
+            $tr.find('input.prodQty').val(this.qty);
+        }
+        if (this.comptiaCode) {
+            $tr.find('select.compTIACodeSelect').val(this.comptiaCode);
+        }
+        if (this.comptiaModifier) {
+            $tr.find('select.compTIAModifierSelect').val(this.comptiaModifier);
+        }
+    };
 }
 
 function Cart(prodId, serial, PM) {
@@ -129,7 +145,6 @@ function Cart(prodId, serial, PM) {
             $cart.find('.cartRequestResults').show();
             $cart.find('.noProducts').hide();
             $cart.find('.cartProducts').hide();
-            $cart.find('.cartSubmitContainer').hide();
         }
     };
     this.onComptiaLoadingEnd = function() {
@@ -143,15 +158,14 @@ function Cart(prodId, serial, PM) {
                         var $td = $cart.find('tr.cartProd_'+id).find('td.compTIACodes');
                         if ($td.length)
                             CTIA.appendCompTIACodesSelect($td, this.cartProds[id].gpe);
+                        this.cartProds[id].setValues($cart.find('tr.cartProd_'+id));
                     }
                 }
                 $cart.find('.noProducts').hide();
                 $cart.find('.cartProducts').show();
-                $cart.find('.cartSubmitContainer').show();
             } else {
                 $cart.find('.noProducts').show();
                 $cart.find('.cartProducts').hide();
-                $cart.find('.cartSubmitContainer').hide();
             }
         }
     };
@@ -170,15 +184,13 @@ function Cart(prodId, serial, PM) {
         if (this.nbrProds) {
             $cart.find('.noProducts').hide();
             $cart.find('.cartProducts').show();
-            $cart.find('.cartSubmitContainer').show();
         } else {
             $cart.find('.noProducts').show();
             $cart.find('.cartProducts').hide();
-            $cart.find('.cartSubmitContainer').hide();
         }
     };
 
-    this.add = function($span) {
+    this.add = function($span, qty, comptiaCode, comptiaModifier) {
         if (($span).hasClass('deactivated'))
             return;
 
@@ -188,6 +200,14 @@ function Cart(prodId, serial, PM) {
         var id = $span.attr('id').replace(/^add_(\d+)_(.*)_(.*)$/, '$3');
         $span.attr('class', 'addToCart deactivated');
         this.cartProds[curId] = new CartProduct(gpe, id);
+
+        if (qty)
+            this.cartProds[curId].qty = qty;
+        if (comptiaCode)
+            this.cartProds[curId].comptiaCode = comptiaCode;
+        if (comptiaModifier)
+            this.cartProds[curId].comptiaModifier = comptiaModifier;
+
         this.nbrProds++;
 
         var html = '<tr class="cartProd_'+curId+'">';
@@ -205,6 +225,7 @@ function Cart(prodId, serial, PM) {
         this.activateSave();
         if (CTIA.loadStatus == 'loaded') {
             CTIA.appendCompTIACodesSelect(this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
+            this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_'+curId));
             this.$prod.find('.noProducts').hide();
             this.$prod.find('.cartProducts').show();
             this.$prod.find('.cartSubmitContainer').show();
@@ -226,7 +247,6 @@ function Cart(prodId, serial, PM) {
             $(this).remove();
             if (!ptr.$prod.find('.cartProducts').find('tbody').find('tr').length) {
                 ptr.$prod.find('.cartProducts').hide();
-                ptr.$prod.find('.cartSubmitContainer').slideUp(250);
                 ptr.$prod.find('.noProducts').slideDown(250);
             }
         });
@@ -248,12 +268,16 @@ function Cart(prodId, serial, PM) {
         }
         delete this.cartProds;
         this.cartProds = [];
+        this.$prod.find('.cartProducts').find('tbody').html('');
+        this.$prod.find('span.addToCart.deactivated').each(function(){
+            $(this).attr('class', 'addToCart activated');
+        });
     };
     this.activateSave = function() {
-        this.$prod.find('.cartSave').attr('class', 'cartSave blueHover');
+        this.$prod.find('.cartSave').attr('class', 'cartSave greenHover');
     };
     this.deactivateSave = function() {
-        this.$prod.find('.cartSave').attr('class', 'cartSave blueHover deactivated');
+        this.$prod.find('.cartSave').attr('class', 'cartSave greenHover deactivated');
     };
     this.save = function() {
         if (!this.cartProds.length)
@@ -266,20 +290,46 @@ function Cart(prodId, serial, PM) {
         var params = 'serial='+this.serial;
         var i = 1;
         for (id in this.cartProds) {
+            var $tr = this.$prod.find('tr.cartProd_'+id);
             if (this.cartProds[id]) {
                 params += '&part_'+i+'_ref='+this.PM.parts[this.cartProds[id].gpe][this.cartProds[id].id].num;
-                params += '&part_'+i+'_qty='+this.cartProds[id].qty;
+                if ($tr.find('select.compTIACodeSelect'))
+                    params += '&part_'+i+'_comptiaCode='+$tr.find('select.compTIACodeSelect').val();
+                if ($tr.find('select.compTIAModifierSelect'))
+                    params += '&part_'+i+'_comptiaModifier='+$tr.find('select.compTIAModifierSelect').val();
+                if ($tr.find('input.prodQty'))
+                    params += '&part_'+i+'_qty='+$tr.find('input.prodQty').val();
                 i++;
             }
         }
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
     };
-    this.submit = function() {
-        if (!this.cartProds.length)
+    this.load = function() {
+        if (this.$prod.find('.cartLoad').hasClass('deactivated'))
             return;
-        if (this.$prod.find('.cartSubmit').hasClass('deactivated'))
-            return;
+
+        if (this.cartProds.length) {
+            if (!confirm("Toutes les éventuelles modifications du panier faites depuis votre dernier enregistrement seront perdues.\n\nContiner?"))
+                return;
+            this.deleteCart();
+        }
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        setRequest('GET', 'loadPartsCart', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
+    };
+    this.onPartLoad = function(partNumber, comptiaCode, comptiaModifier, qty) {
+        for (gpe in this.PM.parts) {
+            for (id in this.PM.parts[gpe]) {
+                if (this.PM.parts[gpe][id].num == partNumber) {
+                    var $span = this.$prod.find('#add_'+ptr.prodId+'_'+gpe+'_'+id);
+                    if ($span.length) {
+                        this.add($span, qty, comptiaCode, comptiaModifier);
+                        return;
+                    }
+                }
+            }
+        }
+        alert('Le composant (ref. '+partNumber+') semble ne plus figurer dans la liste des composants disponibles');
     };
 }
 
@@ -802,7 +852,27 @@ function displayRequestMsg(type, msg, $div) {
 
     $div.html(html).hide().slideDown(250);
 }
-
+function displayCartRequestResult(prodId, html) {
+    $('#prod_'+prodId).find('.cartRequestResults').show().animate({
+        'opacity': 0.1
+    }, {
+        'duration' : 250,
+        'complete' : function() {
+            $(this).html(html).animate({
+                'opacity': 1
+            }, {
+                'duration': 250,
+                'complete' : function() {
+                    $(this).fadeOut(5000, function() {
+                        $(this).slideUp(250, function() {
+                            $(this).html('');
+                        });
+                    })
+                }
+            });
+        }
+    });
+}
 function getProdId($obj) {
     if (!$obj.length)
         return 0;
@@ -1032,26 +1102,21 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'savePartsCart':
-            $('#prod_'+prodId).find('.cartRequestResults').animate({
-                'opacity': 0.1
-            }, {
-                'duration' : 250,
-                'complete' : function() {
-                    GSX.products[prodId].cart.activateSave();
-                    $(this).html(xhr.responseText).animate({
-                        'opacity': 1
-                    }, {
-                        'duration': 250,
-                        'complete' : function() {
-                            $(this).fadeOut(5000, function() {
-                                $(this).slideUp(250, function() {
-                                    $(this).html('');
-                                });
-                            })
-                        }
-                    });
-                }
-            });
+            displayCartRequestResult(prodId, xhr.responseText);
+            GSX.products[prodId].cart.activateSave();
+            break;
+
+        case 'loadPartsCart':
+            if (xhr.responseText == 'noSerial') {
+                displayCartRequestResult(prodId, '<p class="error">Erreur: numéro de série absent</p>');
+            } else if (xhr.responseText == 'noPart') {
+                displayCartRequestResult(prodId, '<p class="alert">Aucun composant enregistré pour ce numéro de série</p>');
+            } else if (xhr.responseText == 'noDb'){
+                displayCartRequestResult(prodId, '<p class="error">Impossible d\'accéder à la base de données.</p>');
+            } else {
+                $('#prod_'+prodId).find('.cartRequestResults').html('').hide();
+                eval(xhr.responseText);
+            }
             break;
     }
 }

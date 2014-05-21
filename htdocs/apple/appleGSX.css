@@ -282,12 +282,11 @@ span.removeCartProduct {
     font-size: 14px;
 }
 .cartSubmitContainer {
-    display: none;
     text-align: right;
     padding: 30px 20px 0 20px;
 }
 .cartSave,
-.cartSubmit {
+.cartLoad {
     font-size: 14px;
     margin: 0 5px;
 }
@@ -297,10 +296,10 @@ span.removeCartProduct {
     font-size: 20px;
     margin-right: 10px;
 }
-.cartSubmit:after {
-    content: '\f0a9';
+.cartLoad:before {
+    content: '\f090';
     font-family: 'FA';
-    margin-left: 10px;
+    margin-right: 10px;
     font-size: 20px;
 }
 .cartRequestResults {

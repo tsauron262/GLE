@@ -681,7 +681,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                 $i = $j = 0;
                 $newArr = array();
                 $diffTaillePage = 26; //23
-                $tailleMax = 58;
+                $tailleMax = 68;
                 $pageVide = false;
                 foreach ($tmpArr as $cle => $ligneStr) {
                     $i++;

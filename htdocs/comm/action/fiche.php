@@ -47,7 +47,7 @@ $langs->load("bills");
 $langs->load("orders");
 $langs->load("agenda");
 
-$action=GETPOST('action','alpha');
+$objection=GETPOST('action','alpha');
 $cancel=GETPOST('cancel','alpha');
 $backtopage=GETPOST('backtopage','alpha');
 $contactid=GETPOST('contactid','int');
@@ -83,7 +83,7 @@ $hookmanager->initHooks(array('actioncard'));
  */
 
 // Add action
-if ($action == 'add_action')
+if ($objection == 'add_action')
 {
 	$error=0;
 
@@ -115,14 +115,14 @@ if ($action == 'add_action')
 	if (! $datef && $percentage == 100)
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")).'</div>';
 	}
 
 	if (empty($conf->global->AGENDA_USE_EVENT_TYPE) && ! GETPOST('label'))
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Title")).'</div>';
 	}
 
@@ -130,7 +130,7 @@ if ($action == 'add_action')
 	if (! GETPOST('actioncode'))
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Type")).'</div>';
 	}
 	else
@@ -200,20 +200,20 @@ if ($action == 'add_action')
 	if ($object->type_code == 'AC_RDV' && ($datep == '' || ($datef == '' && empty($fulldayevent))))
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")).'</div>';
 	}
 	if (! empty($datea) && GETPOST('percentage') == 0)
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorStatusCantBeZeroIfStarted").'</div>';
 	}
 
 	if (! GETPOST('apyear') && ! GETPOST('adyear'))
 	{
 		$error++;
-		$action = 'create';
+		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("Date")).'</div>';
 	}
 
@@ -254,7 +254,7 @@ if ($action == 'add_action')
 				$langs->load("errors");
 				$error=$langs->trans($object->error);
 				setEventMessage($error,'errors');
-				$action = 'create';
+				$objection = 'create';
 			}
 		}
 		else
@@ -263,7 +263,7 @@ if ($action == 'add_action')
 			$langs->load("errors");
 			if (! empty($object->error)) setEventMessage($langs->trans($object->error), 'errors');
 			if (count($object->errors)) setEventMessage($object->errors, 'errors');
-			$action = 'create';
+			$objection = 'create';
 		}
 	}
 }
@@ -271,7 +271,7 @@ if ($action == 'add_action')
 /*
  * Action suppression de l'action
  */
-if ($action == 'confirm_delete' && GETPOST("confirm") == 'yes')
+if ($objection == 'confirm_delete' && GETPOST("confirm") == 'yes')
 {
 	$object->fetch($id);
 
@@ -296,7 +296,7 @@ if ($action == 'confirm_delete' && GETPOST("confirm") == 'yes')
 /*
  * Action update event
  */
-if ($action == 'update')
+if ($objection == 'update')
 {
 	if (empty($cancel))
 	{
@@ -336,7 +336,7 @@ if ($action == 'update')
 		if (! $datef && $percentage == 100)
 		{
 			$error=$langs->trans("ErrorFieldRequired",$langs->trans("DateEnd"));
-			$action = 'edit';
+			$objection = 'edit';
 		}
 
 		// Users
@@ -401,7 +401,7 @@ llxHeader('',$langs->trans("Agenda"),$help_url);
 $form = new Form($db);
 $htmlactions = new FormActions($db);
 
-if ($action == 'create')
+if ($objection == 'create')
 {
 	$contact = new Contact($db);
 
@@ -628,7 +628,7 @@ if ($action == 'create')
 
     // Other attributes
     $parameters=array('id'=>$object->id);
-    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
+    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
 
 
 	if (empty($reshook) && ! empty($extrafields->attribute_label))
@@ -697,12 +697,12 @@ if ($id > 0)
 	$delay_warning=$conf->global->MAIN_DELAY_ACTIONS_TODO*24*60*60;
 
 	// Confirmation suppression action
-	if ($action == 'delete')
+	if ($objection == 'delete')
 	{
 		print $form->formconfirm("fiche.php?id=".$id,$langs->trans("DeleteAction"),$langs->trans("ConfirmDeleteAction"),"confirm_delete",'','',1);
 	}
 
-	if ($action == 'edit')
+	if ($objection == 'edit')
 	{
 	    if (! empty($conf->use_javascript_ajax))
         {
@@ -774,7 +774,7 @@ if ($id > 0)
 
 		// Status
 		print '<tr><td class="nowrap">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td><td colspan="3">';
-		$percent=GETPOST("percentage")?GETPOST("percentage"):$act->percentage;
+		$percent=GETPOST("percentage")?GETPOST("percentage"):$object->percentage;
 		$htmlactions->form_select_status_action('formaction',$percent,1);
 		print '</td></tr>';
 
@@ -812,12 +812,12 @@ if ($id > 0)
 			print '<td>';
 			$events=array();
 			$events[]=array('method' => 'getContacts', 'url' => dol_buildpath('/core/ajax/contacts.php',1), 'htmlname' => 'contactid', 'params' => array('add-customer-contact' => 'disabled'));
-			print $form->select_company($act->societe->id,'socid','',1,1,0,$events);
+			print $form->select_company($object->societe->id,'socid','',1,1,0,$events);
 			print '</td>';
 
 			// Contact
 			print '<td>'.$langs->trans("Contact").'</td><td width="30%">';
-			$form->select_contacts($act->societe->id, $act->contact->id,'contactid',1);
+			$form->select_contacts($object->societe->id, $object->contact->id,'contactid',1);
 			print '</td></tr>';
 		}
 
@@ -831,7 +831,7 @@ if ($id > 0)
 			$langs->load("project");
 
 			print '<tr><td width="30%" valign="top">'.$langs->trans("Project").'</td><td colspan="3">';
-			$numprojet=$formproject->select_projects($act->societe->id,$act->fk_project,'projectid');
+			$numprojet=$formproject->select_projects($object->societe->id,$object->fk_project,'projectid');
 			if ($numprojet==0)
 			{
 				print ' &nbsp; <a href="../../projet/fiche.php?socid='.$societe->id.'&action=create">'.$langs->trans("AddProject").'</a>';
@@ -861,11 +861,11 @@ if ($id > 0)
         print '</td></tr>';
 
         // Other attributes
-        $parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$act->id);
-        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
+        $parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$object->id);
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
-			print $act->showOptionals($extrafields,'edit');
+			print $object->showOptionals($extrafields,'edit');
 
 		}
 
@@ -987,7 +987,7 @@ if ($id > 0)
 			{
 				if ($object->societe->fetch($object->societe->id))
 				{
-					print "<br>".dol_print_phone($act->societe->phone);
+					print "<br>".dol_print_phone($object->societe->phone);
 				}
 			}
 			print '</td>';
@@ -1043,8 +1043,8 @@ if ($id > 0)
 		print '</td></tr>';
 
         // Other attributes
-		$parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$act->id);
-        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$act,$action);    // Note that $action and $object may have been modified by hook
+		$parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$object->id);
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
 
 		print '</table>';
 
@@ -1069,7 +1069,7 @@ if ($id > 0)
 
         /* deb mod drsi */
         echo "<h3>Actions liées</h3>";
-//        $object = $act;
+//        $object = $object;
         $idObj = $object->id;
         $object->fetch($idObj);
         $idActionLier = array();
@@ -1109,11 +1109,11 @@ if ($id > 0)
         }
 
         foreach ($idActionLier as $id) {
-            $actionTmp = new ActionComm($db);
-            $actionTmp->fetch($id);
+            $objectionTmp = new ActionComm($db);
+            $objectionTmp->fetch($id);
             $userTmp = new User($db);
-            $userTmp->fetch($actionTmp->usertodo->id);
-            echo $actionTmp->getNomUrl(1) . " " . $userTmp->getNomUrl(1) . " <a href='?id=" . $idObj . "&removeUser=" . $id . "'>" . img_delete() . "</a><br/>";
+            $userTmp->fetch($objectionTmp->usertodo->id);
+            echo $objectionTmp->getNomUrl(1) . " " . $userTmp->getNomUrl(1) . " <a href='?id=" . $idObj . "&removeUser=" . $id . "'>" . img_delete() . "</a><br/>";
         }
 
         echo "<form>";
@@ -1134,10 +1134,10 @@ if ($id > 0)
 	print '<div class="tabsAction">';
 
 	$parameters=array();
-	$reshook=$hookmanager->executeHooks('addMoreActionsButtons',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
+	$reshook=$hookmanager->executeHooks('addMoreActionsButtons',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
 	if (empty($reshook))
 	{
-		if ($action != 'edit')
+		if ($objection != 'edit')
 		{
 			if ($user->rights->agenda->allactions->create ||
 			   (($object->author->id == $user->id || $object->usertodo->id == $user->id) && $user->rights->agenda->myactions->create))

@@ -36,6 +36,19 @@ $(window).load(function() {
         }, 500);
     });
     
+    
+    
+    
+    $("body").keyup(function(e) {
+	//alert(e.keyCode);
+	if(e.keyCode == 37) {
+            $(".ui-button-icon-primary.ui-icon.ui-icon-seek-prev").click();
+	}
+	if(e.keyCode == 39) {
+            $(".ui-button-icon-primary.ui-icon.ui-icon-seek-next").click();
+	}
+});
+    
 //    $(".dateVue").val("2010/01/01");
 });
 

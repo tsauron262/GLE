@@ -160,8 +160,15 @@ $js .= <<<EOF
         showAsSeparateUser: false,
         displayOddEven: true,
         displayFreeBusys: true,
-        daysToShow: 5,
-        switchDisplay: {'1 journée': 1, '3 journées': 3, 'work week': 5, 'full week': 7},
+EOF;
+$js .= 'daysToShow: '.((count($tabUser) < 6)? '5' : '3').',';
+
+$js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
+if(count($tabUser) < 6)
+$js .= ", 'work week': 5, 'full week': 7";
+$js .= "},";
+        
+$js .= <<<EOF
         headerSeparator: ' ',
         useShortDayNames: true,
         // I18N
@@ -238,7 +245,7 @@ function printMenu($tabUser) {
     }
     echo "<form action='' method='post'>";
     echo "<select id='group'><option value='0'>Groupes</option>" . $select . "</select>";
-    echo "<div class='contentListUser'><span class='nbGroup'></span>";
+    echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
 
 
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");

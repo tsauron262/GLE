@@ -139,15 +139,15 @@ if ($action == 'add_action')
 	}
 
 	// Initialisation objet actioncomm
-	$actioncomm->type_id = $cactioncomm->id;
-	$actioncomm->type_code = $cactioncomm->code;
-	$actioncomm->priority = GETPOST("priority")?GETPOST("priority"):0;
-	$actioncomm->fulldayevent = (! empty($fulldayevent)?1:0);
-	$actioncomm->location = GETPOST("location");
-	$actioncomm->transparency = (GETPOST("transparency")=='on'?1:0);
-	$actioncomm->label = trim(GETPOST('label'));
-	$actioncomm->fk_element = GETPOST("fk_element");
-	$actioncomm->elementtype = GETPOST("elementtype");
+	$object->type_id = $cactioncomm->id;
+	$object->type_code = $cactioncomm->code;
+	$object->priority = GETPOST("priority")?GETPOST("priority"):0;
+	$object->fulldayevent = (! empty($fulldayevent)?1:0);
+	$object->location = GETPOST("location");
+	$object->transparency = (GETPOST("transparency")=='on'?1:0);
+	$object->label = trim(GETPOST('label'));
+	$object->fk_element = GETPOST("fk_element");
+	$object->elementtype = GETPOST("elementtype");
 	if (! GETPOST('label'))
 	{
 		if (GETPOST('actioncode') == 'AC_RDV' && $contact->getFullName($langs))
@@ -163,11 +163,11 @@ if ($action == 'add_action')
 			else $object->label = $cactioncomm->libelle;
 		}
 	}
-	$actioncomm->fk_project = isset($_POST["projectid"])?$_POST["projectid"]:0;
-	$actioncomm->datep = $datep;
-	$actioncomm->datef = $datef;
-	$actioncomm->percentage = $percentage;
-	$actioncomm->duree=((float) (GETPOST('dureehour') * 60) + (float) GETPOST('dureemin')) * 60;
+	$object->fk_project = isset($_POST["projectid"])?$_POST["projectid"]:0;
+	$object->datep = $datep;
+	$object->datef = $datef;
+	$object->percentage = $percentage;
+	$object->duree=((float) (GETPOST('dureehour') * 60) + (float) GETPOST('dureemin')) * 60;
 
 	$usertodo=new User($db);
 	if ($_POST["affectedto"] > 0)
@@ -193,8 +193,8 @@ if ($action == 'add_action')
 
 	// Special for module webcal and phenix
 	// TODO external modules
-	if (! empty($conf->webcalendar->enabled) && GETPOST('add_webcal') == 'on') $actioncomm->use_webcal=1;
-	if (! empty($conf->phenix->enabled) && GETPOST('add_phenix') == 'on') $actioncomm->use_phenix=1;
+	if (! empty($conf->webcalendar->enabled) && GETPOST('add_webcal') == 'on') $object->use_webcal=1;
+	if (! empty($conf->phenix->enabled) && GETPOST('add_phenix') == 'on') $object->use_phenix=1;
 
 	// Check parameters
 	if ($object->type_code == 'AC_RDV' && ($datep == '' || ($datef == '' && empty($fulldayevent))))
@@ -261,8 +261,8 @@ if ($action == 'add_action')
 		{
 			$db->rollback();
 			$langs->load("errors");
-			if (! empty($actioncomm->error)) setEventMessage($langs->trans($actioncomm->error), 'errors');
-			if (count($actioncomm->errors)) setEventMessage($actioncomm->errors, 'errors');
+			if (! empty($object->error)) setEventMessage($langs->trans($object->error), 'errors');
+			if (count($object->errors)) setEventMessage($object->errors, 'errors');
 			$action = 'create';
 		}
 	}
@@ -318,21 +318,21 @@ if ($action == 'update')
 		$datep=dol_mktime($fulldayevent?'00':$aphour, $fulldayevent?'00':$apmin, 0, $_POST["apmonth"], $_POST["apday"], $_POST["apyear"]);
 		$datef=dol_mktime($fulldayevent?'23':$p2hour, $fulldayevent?'59':$p2min, $fulldayevent?'59':'0', $_POST["p2month"], $_POST["p2day"], $_POST["p2year"]);
 
-		$actioncomm->fk_action   = dol_getIdFromCode($db, $_POST["actioncode"], 'c_actioncomm');
-		$actioncomm->label       = $_POST["label"];
-		$actioncomm->datep       = $datep;
-		$actioncomm->datef       = $datef;
-		$actioncomm->percentage  = $percentage;
-		$actioncomm->priority    = $_POST["priority"];
-        $actioncomm->fulldayevent= $_POST["fullday"]?1:0;
-		$actioncomm->location    = GETPOST('location');
-		$actioncomm->societe->id = $_POST["socid"];
-		$actioncomm->contact->id = $_POST["contactid"];
-		$actioncomm->fk_project  = $_POST["projectid"];
-		$actioncomm->note        = $_POST["note"];
-		$actioncomm->pnote       = $_POST["note"];
-		$actioncomm->fk_element	 = $_POST["fk_element"];
-		$actioncomm->elementtype = $_POST["elementtype"];
+		$object->fk_action   = dol_getIdFromCode($db, $_POST["actioncode"], 'c_actioncomm');
+		$object->label       = $_POST["label"];
+		$object->datep       = $datep;
+		$object->datef       = $datef;
+		$object->percentage  = $percentage;
+		$object->priority    = $_POST["priority"];
+        $object->fulldayevent= $_POST["fullday"]?1:0;
+		$object->location    = GETPOST('location');
+		$object->societe->id = $_POST["socid"];
+		$object->contact->id = $_POST["contactid"];
+		$object->fk_project  = $_POST["projectid"];
+		$object->note        = $_POST["note"];
+		$object->pnote       = $_POST["note"];
+		$object->fk_element	 = $_POST["fk_element"];
+		$object->elementtype = $_POST["elementtype"];
 		if (! $datef && $percentage == 100)
 		{
 			$error=$langs->trans("ErrorFieldRequired",$langs->trans("DateEnd"));
@@ -536,14 +536,14 @@ if ($action == 'create')
 
 	// Busy
 	print '<tr><td width="30%" class="nowrap">'.$langs->trans("Busy").'</td><td>';
-	print '<input id="transparency" type="checkbox" name="transparency"'.($actioncomm->transparency?' checked="checked"':'').'>';
+	print '<input id="transparency" type="checkbox" name="transparency"'.($object->transparency?' checked="checked"':'').'>';
 	print '</td></tr>';
 
 	// Realised by
 	if ($conf->global->AGENDA_ENABLE_DONEBY)
 	{
 		print '<tr><td class="nowrap">'.$langs->trans("ActionDoneBy").'</td><td>';
-		$form->select_users(GETPOST("doneby")?GETPOST("doneby"):(! empty($actioncomm->userdone->id) && $percent==100?$actioncomm->userdone->id:0),'doneby',1);
+		$form->select_users(GETPOST("doneby")?GETPOST("doneby"):(! empty($object->userdone->id) && $percent==100?$object->userdone->id:0),'doneby',1);
 		print '</td></tr>';
 	}
 
@@ -615,7 +615,7 @@ if ($action == 'create')
 
 	// Priority
 	print '<tr><td class="nowrap">'.$langs->trans("Priority").'</td><td colspan="3">';
-	print '<input type="text" name="priority" value="'.(GETPOST('priority')?GETPOST('priority'):($actioncomm->priority?$actioncomm->priority:'')).'" size="5">';
+	print '<input type="text" name="priority" value="'.(GETPOST('priority')?GETPOST('priority'):($object->priority?$object->priority:'')).'" size="5">';
 	print '</td></tr>';
 
     // Description
@@ -627,8 +627,8 @@ if ($action == 'create')
 
 
     // Other attributes
-    $parameters=array('id'=>$actioncomm->id);
-    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$actioncomm,$action);    // Note that $action and $object may have been modified by hook
+    $parameters=array('id'=>$object->id);
+    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 
 
 	if (empty($reshook) && ! empty($extrafields->attribute_label))
@@ -849,7 +849,7 @@ if ($id > 0)
 		{
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 			print '<tr><td>'.$langs->trans("LinkedObject").'</td>';
-			print '<td colspan="3">'.dolGetElementUrl($act->fk_element,$act->elementtype,1).'</td></tr>';
+			print '<td colspan="3">'.dolGetElementUrl($object->fk_element,$object->elementtype,1).'</td></tr>';
 		}
 
         // Description
@@ -1034,7 +1034,7 @@ if ($id > 0)
 		{
 			include_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 			print '<tr><td>'.$langs->trans("LinkedObject").'</td>';
-			print '<td colspan="3">'.dolGetElementUrl($act->fk_element,$act->elementtype,1).'</td></tr>';
+			print '<td colspan="3">'.dolGetElementUrl($object->fk_element,$object->elementtype,1).'</td></tr>';
 		}
 
 		// Description

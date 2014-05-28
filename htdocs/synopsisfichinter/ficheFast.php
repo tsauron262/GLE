@@ -371,6 +371,7 @@ if ($_REQUEST["id"] > 0) {
     }
     echo '<tr id="ajPrestaZone">';
     echo '</table><tr><th><td>';
+    if($fichinter->statut == 0)
     echo '<tr><td colspan="4"><input type="button" class="butAction" id="ajPresta" value="Ajouter ligne"/><input type="hidden" id="supprPresta" name="supprPresta" value=""/></td></tr>';
     $checked = (extra(17) == 1) ? ' checked="checked"' : '';
 
@@ -434,7 +435,7 @@ $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv W
 $sql3 = $db->query($requete);
 $selectHtml .= '<OPTION value="-1">Selectionner-></OPTION>';
 while ($res3 = $db->fetch_object($sql3)) {
-    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21)
+    if (!$fichinter->fk_contrat || $res3->id == 14 || $res3->id == 20 || $res3->id == 21 || $res3->id == 4)
         $selectHtml .= '<OPTION value="' . $res3->id . '">' . $res3->label . '</OPTION>';
 }
 $selectHtml .= "</SELECT>";

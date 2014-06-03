@@ -1647,7 +1647,7 @@ class Synopsis_Contrat extends Contrat {
     public function addAnnexe($annexeId) {
         $maxRang = 0;
         $tabEl = array();
-        $req1 = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id . " ORDER BY rang";
+        $req1 = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id . " GROUP BY annexe_refid ORDER BY rang";
         $result = $this->db->query($req1);
         while ($res = $this->db->fetch_object($result)) {
             $idAnn = $res->annexe_refid;
@@ -1656,7 +1656,8 @@ class Synopsis_Contrat extends Contrat {
         }
         if (!in_array($annexeId, $tabEl))
                 $tabEl[] = $annexeId;
-        $tabEl[] = 36;
+        if(stripos($this->ref, "CMED") === false)
+                $tabEl[] = 36;
         $tabEl[] = 25;
         $tabEl[] = 2;
         $tabInsert = array();

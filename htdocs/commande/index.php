@@ -178,7 +178,7 @@ if (! empty($conf->commande->enabled))
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 
-	$resql=$db->query($sql);
+	$resql=$db->query($sql/*mod drsi*/." LIMIT 0,100"/*f md drsi*/);
 	if ($resql)
 	{
 		print '<table class="noborder" width="100%">';
@@ -296,9 +296,9 @@ if (! empty($conf->commande->enabled))
 	$sql.= " AND c.fk_statut = 1";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-	$sql.= " ORDER BY c.rowid "/*mod drsi*/."DESC LIMIT 0,100"/*f md drsi*/;
+	$sql.= " ORDER BY c.rowid DESC";
 
-	$resql=$db->query($sql);
+	$resql=$db->query($sql/*mod drsi*/." LIMIT 0,100"/*f md drsi*/);
 	if ($resql)
 	{
 		$num = $db->num_rows($resql);
@@ -369,7 +369,7 @@ if (! empty($conf->commande->enabled))
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
 	$sql.= " ORDER BY c.rowid DESC";
 
-	$resql=$db->query($sql);
+	$resql=$db->query($sql/*mod drsi*/." LIMIT 0,100"/*f md drsi*/);
 	if ($resql)
 	{
 		$num = $db->num_rows($resql);

@@ -36,7 +36,29 @@ function ajax_updater_postFct2(socid, valueSelected)
     } else {
         jQuery('#contactSociete').replaceWith("<div id='contactSociete'></div>")
     }
+    majOldSelect();
 }
+function majOldSelect() {
+    $("select.old").each(function() {
+        if ($(this).val() == "0") {
+            maxValue = 0;
+            $(this).children().each(function() {
+                var val = $(this).attr('value');
+                val = parseInt(val, 10);
+                if (maxValue === undefined || maxValue < val) {
+                    maxValue = val;
+                }
+            });
+            if (maxValue > 0) {
+                $(this).val(maxValue);
+                id = $(this).attr("id");
+                id = id.replace("_jDS_2", "");
+                $("#" + id).val(maxValue);
+            }
+        }
+    });
+}
+
 function majDoubleSoc(socid, ifVide) {
     if (socid > 0) {
         valueStr = jQuery('#socid').find('option[value=' + socid + ']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
@@ -115,6 +137,10 @@ jQuery(document).ready(function() {
     jQuery('#form').validate();
 
     initFormChrono();
+
+    setTimeout(function() {
+        majOldSelect();
+    }, 500);
 });
 
 

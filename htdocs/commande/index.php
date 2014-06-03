@@ -296,7 +296,7 @@ if (! empty($conf->commande->enabled))
 	$sql.= " AND c.fk_statut = 1";
 	if ($socid) $sql.= " AND c.fk_soc = ".$socid;
 	if (!$user->rights->societe->client->voir && !$socid) $sql.= " AND s.rowid = sc.fk_soc AND sc.fk_user = " .$user->id;
-	$sql.= " ORDER BY c.rowid DESC";
+	$sql.= " ORDER BY c.rowid "/*mod drsi*/."DESC LIMIT 0,100"/*f md drsi*/;
 
 	$resql=$db->query($sql);
 	if ($resql)

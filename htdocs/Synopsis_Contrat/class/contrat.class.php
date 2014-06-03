@@ -241,6 +241,12 @@ class Synopsis_Contrat extends Contrat {
         $this->ref = $this->getNextNumRef($soc);
 //        $this->ref = str_replace($oldPref, $pref ."-". $oldPref, $this->ref);
         $this->majRef();
+        
+        
+        //Add contact
+        $this->delete_linked_contact();
+        $this->add_contact(2, 10, "internal");
+        $this->add_contact(5, 11, "internal");
     }
 
     public function fetch($id, $ref = '') {

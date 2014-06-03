@@ -87,6 +87,13 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $id = $contratSyn->renouvellementSimple($user);
             header('location: fiche.php?id=' . $id);
         }
+        if(isset($_REQUEST['action']) && $_REQUEST['action'] == "setContact"){
+            foreach($object->liste_contact(-1,'external') as $contact)
+                $object->delete_contact($contact['rowid']);
+            $object->add_contact($_REQUEST['contactid'], 20, "external");
+            $object->add_contact($_REQUEST['contactid'], 21, "external");
+            $object->add_contact($_REQUEST['contactid'], 22, "external");            
+        }
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'reconduction') {
             $contratSyn->reconduction($user);
             header('location: fiche.php?id=' . $_REQUEST["id"]);
@@ -1386,6 +1393,13 @@ if ($action == 'create') {
                 print '<input type="submit" value="Valider"/>';
                 print '</form>';
 //            }
+                $tabT = $object->liste_contact(-1,'external');
+                $idContact = (isset($tabT[0]) ? $tabT[0]['id'] : '');
+            echo "<tr><td>Contact</td><td><form action=''><input type='hidden' name='action' value='setContact'>";
+                print '<input type="hidden" name="id" value="'.$id.'"/>';
+                $nbofcontacts=$form->select_contacts($object->socid, $idContact, 'contactid');
+                print '<input type="submit" value="Valider"/></form>';
+                echo "</td>";
         }
         /* fin mod drsi */
 

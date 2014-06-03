@@ -9,7 +9,7 @@ class htmlOld {
         return $js;
     }
 
-    public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left")) {
+    public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left"), $optionSearch) {
         $this->arrLigne = array();
         $js = 'jQuery(document).ready(function(){eventList_init'.$id.' = false;';
         $js .= 'var grid = jQuery("#' . $id . '").jqGrid({';
@@ -24,11 +24,11 @@ class htmlOld {
         $js .= ', loadComplete : function() { 
             
             if (eventList_init'.$id.' > 0)
-                saveGridToCookie("'.$id.'", jQuery("#' . $id . '"));
+                saveGridToCookie("'.$id.$optionSearch.'", jQuery("#' . $id . '"));
             if (eventList_init'.$id.' == 1)
                 eventList_init'.$id.' =2;
             if (eventList_init'.$id.' == false){
-                loadGridFromCookie("'.$id.'");
+                loadGridFromCookie("'.$id.$optionSearch.'");
                 eventList_init'.$id.' =1;
             }
             }';
@@ -191,7 +191,7 @@ EOF;
 
         $colModel = array();
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key WHERE inDetList = 1 AND model_refid = " . $id. " ORDER BY rang";
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_key WHERE inDetList = 1 AND model_refid = " . $id/*. " ORDER BY rang"*/;
         $sql = $db->query($requete);
         $colModelArr = array();
         $colModelArr[0] = array('name' => "id", "index" => "id", "width" => 0, 'hidden' => true, "search" => false, "align" => "left", "key" => true, "hidedlg" => true);
@@ -335,7 +335,7 @@ EOF;
         );
 
 
-        $js .= $htmlOld->listjqGrid($arr, $nomDiv, true, false, array(view => false, add => false, edit => false, search => false, position => "left"));
+        $js .= $htmlOld->listjqGrid($arr, $nomDiv, true, false, array(view => false, add => false, edit => false, search => false, position => "left"), $optionSearch);
 
         $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
     }

@@ -218,7 +218,7 @@ if ($action == 'modifier') {
 }
 // Suppression fichier
 if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
-    $file = $upload_dir . "/" . urldecode($_GET["urlfile"]);
+    $file = $conf->synopsischrono->dir_output . "/" . urldecode($_GET["urlfile"]);
     dol_delete_file($file);
     //TODO
     $tmpName = $_FILES['userfile']['name'];
@@ -364,7 +364,7 @@ if ($chr->id > 0) {
         . '$( document ).ready(function() {'
         . '});'
         . '</script>';
-    } else {
+    } else if($chr->id > 0){
         print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
                      <td colspan=1 class=" ui-widget-content" >' . $chr->getNomUrl(1) . '</td>

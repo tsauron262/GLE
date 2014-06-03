@@ -698,11 +698,15 @@ class histoNavigation {
     }
 
     public static function histoUser($res) {
+        global $conf;
         $tabResult = synopsisHook::getObjAndMenu($res->element_type);
         $obj = $tabResult[0];
         $tabMenu = $tabResult[1];
         if ($obj) {
+            $sysLogActive = $conf->syslog->enabled;
+            $conf->syslog->enabled = 0;
             $result = $obj->fetch($res->element_id);
+            $conf->syslog->enabled = $sysLogActive;
             if ($result > 0 && $obj->ref . "x" != "x") {
                 $replace = ($tabMenu[0] ? '&mainmenu=' . $tabMenu[0] : '') . ($tabMenu[1] ? '&leftmenu=' . $tabMenu[1] : '') . '">';
                 if ($res->element_type == "propal")

@@ -167,7 +167,7 @@ if ($_POST["sendit"]) {
 
 // Suppression fichier
 if ($_POST['action'] == 'confirm_deletefile' && $_POST['confirm'] == 'yes') {
-    $file = $upload_dir . "/" . ($_GET["urlfile"]);
+    $file = $conf->synopsischrono->dir_output . "/" . ($_GET["urlfile"]);
     dol_delete_file($file);
     $tmpName = $_FILES['userfile']['name'];
     //decode decimal HTML entities added by web browser

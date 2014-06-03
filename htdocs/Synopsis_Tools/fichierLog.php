@@ -1,10 +1,13 @@
 <?php
 
+$inverser = false;
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "save" && isset($_REQUEST['text'])) {
     $textSave = $_REQUEST['text'];
-    $textT = explode("\n", $textSave);
-    $textT = array_reverse($textT);
-    $textSave = implode("\n", $textT);
+    if ($inverser) {
+        $textT = explode("\n", $textSave);
+        $textT = array_reverse($textT);
+        $textSave = implode("\n", $textT);
+    }
 }
 $_REQUEST['text'] = "";
 $_POST['text'] = "";
@@ -41,9 +44,11 @@ if (isset($textSave))
     file_put_contents($filename, $textSave);
 
 $text = file_get_contents($filename);
-$textT = explode("\n", $text);
-$textT = array_reverse($textT);
-$text = implode("\n", $textT);
+if ($inverser) {
+    $textT = explode("\n", $text);
+    $textT = array_reverse($textT);
+    $text = implode("\n", $textT);
+}
 echo "<form action='./fichierLog.php?action=save' method='post'>";
 echo "<textarea name='text' style='width:100%; height:400px;'>" . $text . "</textarea>";
 echo "<br/><div class='divButAction'><input type='submit' class='butAction' value='Enregistrer'/></div></form>";

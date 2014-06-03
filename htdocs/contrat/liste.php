@@ -94,7 +94,7 @@ if ($search_contract) {
     $sql .= natural_search(array('c.rowid', 'c.ref'), $search_contract);
 }
 if ($sall) {
-    $sql .= natural_search(array('s.nom', 'cd.label', 'cd.description'), $sall);
+    $sql .= natural_search(array('s.nom', 'cd.label'/*mod drsi*/, 'c.rowid', 'c.ref'/*fmodDrsi*/, 'cd.description'), $sall);
 }
 
 /*mod drsi */

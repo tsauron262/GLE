@@ -173,7 +173,7 @@ Tél. : Soc-tel
                 if ($qteTt == "8")
                     $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
                 elseif ($qteTt > 0)
-                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $qteTt) . " mois sur site (soit " . $qteTt . " visites par an).";
+                    $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $qteTt) . " mois sur site (soit " . $qteTt . " visite(s) par an).";
             }
 
 

@@ -2361,7 +2361,7 @@ class globalvar extends formulaireSource {
                 $eval = $this->globalvar;
                 $eval = str_replace("_CHRONOID_", $this->idChrono, $eval);
                 $eval = str_replace("_NOMELEM_", $this->nomElement, $eval);
-                require_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/functionPlusProcess.php");
+                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/functionPlusProcess.php");
                 eval('$eval = ' . $eval . ";");
                 $this->glabalVarEval = $eval;
             }
@@ -2419,7 +2419,7 @@ class lien extends formulaireSource {
         $this->picto = $result->picto;
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
-        $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : (isset($_REQUEST['id'])? $_REQUEST['id'] :  $this->idChrono));
+        $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : (isset($_REQUEST['id']) ? $_REQUEST['id'] : $this->idChrono));
 
         $this->nomElement = getParaChaine($this->cssClassM, "type:");
         $this->tabVal = array();
@@ -2455,7 +2455,7 @@ class lien extends formulaireSource {
             print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
         print '</select>';
         print '</div></div>';
-        if(!$inValuesArray)
+        if (!$inValuesArray)
             $this->valuesArr = array();
     }
 
@@ -2562,20 +2562,19 @@ EOF;
         else
             $actionChrono = "change";
         if ($this->typeChrono > 0)
-            echo "<span class='" . $actionChrono . "Chrono chronoForm cp picto' id='addChrono" . $this->typeChrono . "'>".img_picto($langs->trans("Create"), 'filenew')."</span>";
+            echo "<span class='" . $actionChrono . "Chrono chronoForm cp picto' id='addChrono" . $this->typeChrono . "'>" . img_picto($langs->trans("Create"), 'filenew') . "</span>";
         echo "<button class='" . $actionChrono . "Lien chronoForm'>Ajouter</button>";
     }
-    
 
     function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
         $html = '<div class="' . $classDiv . ' elem">'
                 . '<input type="hidden" name="ChronoLien-' . $id . '-' . $nomElement . '-' . $i . '" value="' . $idVal . "\"/>"
                 . "<button onclick='" . $supprAction . "return false;' class='supprLien chronoForm'>X</button>";
 //        $html .= ;
-        
+
         $picto = self::traitePicto($this->picto, $idVal);
-        
-        
+
+
         if ($this->urlObj != "") {
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\"> " . $picto . "</a> ";
             $html .= "<a href=\"" . DOL_URL_ROOT . "/" . $this->urlObj . $idVal . "\" ";
@@ -2589,20 +2588,23 @@ EOF;
         $html .= "</div>";
         return $html;
     }
-    
-    private static function traitePicto($picto, $id){
+
+    private static function traitePicto($picto, $id) {
         global $db;
-        if(stripos($picto, '[KEY|')){
+        if (stripos($picto, '[KEY|')) {
             $tabT = explode('[KEY|', $picto);
             $tabT = explode(']', $tabT[1]);
             $keyId = $tabT[0];
             $val = "";
-            $result = $db->query("SELECT value FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid = ".$id." AND key_id = ".$keyId);
-            if($db->num_rows($result > 0)){
-                $ligne = $db->fetch_object($result);
-                $val = $ligne->value;
-            }
-            $picto = str_replace('[KEY|'.$keyId.']', $val, $picto);
+            if (is_numeric($id)) {
+                $result = $db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $id . " AND key_id = " . $keyId);
+                if ($db->num_rows($result > 0)) {
+                    $ligne = $db->fetch_object($result);
+                    $val = $ligne->value;
+                }
+            } else
+                $val = 0;
+            $picto = str_replace('[KEY|' . $keyId . ']', $val, $picto);
         }
         return ($picto != '') ? img_picto($text, $picto) : "";
     }
@@ -2616,7 +2618,7 @@ EOF;
                     $picto = self::traitePicto($this->picto, $result->id);
                     $result->nom = dol_trunc($result->nom, 100);
                     if ($this->urlObj != "")
-                        $html = lien($this->urlObj . $result->id) . finLien($picto ." ". $result->nom);
+                        $html = lien($this->urlObj . $result->id) . finLien($picto . " " . $result->nom);
                     else
                         $html = $picto . $result->nom;
                     $this->valuesArr[$result->id] = $html;

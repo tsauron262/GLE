@@ -513,6 +513,7 @@ jQuery(document).ready(function(){
                             }
                         }
                     }).form()){
+                        $('.ui-dialog-buttonset button').attr('disabled','disabled');
                         var data = jQuery('#createDIDialog').find('form').serialize();
                         jQuery.ajax({
                             url:"ajax/xml/createDI-xml_response.php",

@@ -195,11 +195,13 @@ function initFormChrono() {
 
 
     idIncr = 100;
-    $(".formAjax .addLien").click(function() {
+    $(".formAjax .addLien").click(function(event) {
+        event.stopPropagation();
         addLienAj($(this));
         return false;
     });
-    $(".formAjax .changeLien").click(function() {
+    $(".formAjax .changeLien").click(function(event) {
+        event.stopPropagation();
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();
@@ -207,11 +209,13 @@ function initFormChrono() {
         addLienAj($(this), 'set');
         return false;
     });
-    $(".formAjax .addChrono").click(function() {
+    $(".formAjax .addChrono").click(function(event) {
+        event.stopPropagation();
         addChronoAj($(this));
         return false;
     });
-    $(".formAjax .changeChrono").click(function() {
+    $(".formAjax .changeChrono").click(function(event) {
+        event.stopPropagation();
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();
@@ -219,7 +223,10 @@ function initFormChrono() {
         addChronoAj($(this));
         return false;
     });
-    $("form #chronoTable .addChrono").click(function() {
+    $("form #chronoTable .addChrono").click(function(event) {alert("ee");
+		event.cancelBubble = true;
+		event.returnValue = false;
+        event.stopPropagation();
         parentDiv = $(this).parent();
         model = $(parentDiv).find(".model").html();
         socid = $("#socid").parent().find("select").val();
@@ -230,9 +237,10 @@ function initFormChrono() {
             dispatchePopObject(valReturn, 'chrono', function() {
             }, titre, 1);
         });
-        return false;
+        return true;
     });
-    $("form #chronoTable .changeChrono").click(function() {
+    $("form #chronoTable .changeChrono").click(function(event) {
+        event.stopPropagation();
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();
@@ -250,7 +258,8 @@ function initFormChrono() {
         return false;
     });
 
-    $("form #chronoTable .addLien").click(function() {
+    $("form #chronoTable .addLien").click(function(event) {
+        event.stopPropagation();
         model = $(this).parent().find(".model").html();
         select = $(this).parent().find("select");
         selectId = $(select).val();
@@ -261,7 +270,8 @@ function initFormChrono() {
         }
         return false;
     });
-    $("form #chronoTable .changeLien").click(function() {
+    $("form #chronoTable .changeLien").click(function(event) {
+        event.stopPropagation();
         $(this).parent().find("div.elem").each(function() {
             if (!$(this).hasClass("model"))
                 $(this).remove();

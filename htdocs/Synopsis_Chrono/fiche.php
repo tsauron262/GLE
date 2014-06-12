@@ -295,7 +295,7 @@ if ($chr->id > 0) {
 
     if (($action == "Modify") && $user->rights->synopsischrono->Modifier) {
         print "<form id='form' action='?id=" . $chr->id . "' method=post>";
-        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
+        print "<table id='chronoTable' class='border' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<input type='hidden' name='action' value='modifier'>";
         print "<input type='hidden' name='id' value='" . $chr->id . "'>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
@@ -365,7 +365,7 @@ if ($chr->id > 0) {
         . '});'
         . '</script>';
     } else if($chr->id > 0){
-        print "<table id='chronoTable' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
+        print "<table id='chronoTable' class='border' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
                      <td colspan=1 class=" ui-widget-content" >' . $chr->getNomUrl(1) . '</td>
                      <th colspan=1 class=" ui-widget-header ui-state-default" >Type</th>

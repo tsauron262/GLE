@@ -315,6 +315,7 @@ switch ($action) {
                     if (!isset($tabGlobalVarTraiter[$res->chrono_id])) {
                         foreach ($tabGlobalVar as $lien) {
                             $lien['nom'] = str_replace(" ", "_", $lien['nom']);
+                            $lien['nom'] = str_replace("/", "_", $lien['nom']);
                             $val = parseValue($res->chrono_id, $lien['extraCss'], $lien['sub_valeur'], 0, "globalvar");
 
                             $arrValue[$res->chrono_id][$lien['nom']] = array('value' => $val, "id" => $res->id);

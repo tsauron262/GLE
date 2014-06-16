@@ -1148,7 +1148,7 @@ if ($id > 0)
 			{
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("Modify").'</a></div>';
 			}
-
+                /*mod drsi*/}/*f mod drsi*/
 			if ($user->rights->agenda->allactions->delete ||
 			   (($object->author->id == $user->id || $object->usertodo->id == $user->id) && $user->rights->agenda->myactions->delete))
 			{
@@ -1158,7 +1158,7 @@ if ($id > 0)
 			{
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="'.$langs->trans("NotAllowed").'">'.$langs->trans("Delete").'</a></div>';
 			}
-		}
+		/*mod drsi } fmod drsi*/
 	}
 
 	print '</div>';

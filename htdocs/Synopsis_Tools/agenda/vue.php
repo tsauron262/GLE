@@ -173,7 +173,7 @@ $js .= <<<EOF
         useShortDayNames: true,
         // I18N
         firstDayOfWeek: $.datepicker.regional['fr_FR'].firstDay,
-        shortDays: $.datepicker.regional['fr_FR'].dayNamesShort,
+        shortDays: $.datepicker.regional['fr_FR'].dayNames,
         longDays: $.datepicker.regional['fr_FR'].dayNames,
         shortMonths: $.datepicker.regional['fr_FR'].monthNamesShort,
         longMonths: $.datepicker.regional['fr_FR'].monthNames,

@@ -13,6 +13,11 @@ while ($ligne = $db->fetch_object($result)) {
     $userId = $newTabUser[$ligne->fk_user_action];
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
     $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 100); return false;\">" . $ligne->label;
+    if($ligne->fk_soc > 0){
+        $soc = new Societe($db);
+        $soc->fetch($ligne->fk_soc);
+        $text .= "<br/><br/>".$soc->getNomUrl(1);
+    }
     $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
     $text = str_replace('"', '\"', $text);
     if (!isset($ligne->datep2))

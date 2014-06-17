@@ -59,6 +59,7 @@ class FormActions
         global $langs,$conf;
 
         $listofstatus = array(
+            '-2' => $langs->trans("Canceled"),
             '-1' => $langs->trans("ActionNotApplicable"),
             '0' => $langs->trans("ActionRunningNotStarted"),
             '50' => $langs->trans("ActionRunningShort"),

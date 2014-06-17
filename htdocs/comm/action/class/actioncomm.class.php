@@ -703,7 +703,7 @@ class ActionComm extends CommonObject
     function LibStatut($percent,$mode,$hidenastatus=0)
     {
         global $langs;
-
+/*mod drsi*/if ($percent==-2 ) return $langs->trans('Canceled');/*fmod drsi*/
         if ($mode == 0)
         {
         	if ($percent==-1 && ! $hidenastatus) return $langs->trans('StatusNotApplicable');

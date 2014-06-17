@@ -12,11 +12,13 @@ $result = $db->query($sql);
 while ($ligne = $db->fetch_object($result)) {
     $userId = $newTabUser[$ligne->fk_user_action];
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
-    $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 100); return false;\">" . $ligne->label;
-    if($ligne->fk_soc > 0){
+    $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
+    $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
+    $text .= "<a title='".$ligne->label."' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 100); return false;\">" . $ligne->label;
+    if ($ligne->fk_soc > 0) {
         $soc = new Societe($db);
         $soc->fetch($ligne->fk_soc);
-        $text .= "<br/><br/>".$soc->getNomUrl(1);
+        $text .= "<br/><br/>" . $soc->getNomUrl(1);
     }
     $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
     $text = str_replace('"', '\"', $text);
@@ -25,11 +27,11 @@ while ($ligne = $db->fetch_object($result)) {
     if (!isset($ligne->datep))
         $ligne->datep = $ligne->datep2;
     $tabColor = array(50 => "#BBCCFF", 5 => "purple", 2 => "red",
-        51 => "red",54 => "red",55 => "red",58 => "red",66 => "red",
-        52 => "blue",53 => "blue",56 => "blue",57 => "blue",63 => "blue",
-        60 => "green",63 => "green",
+        51 => "red", 54 => "red", 55 => "red", 58 => "red", 66 => "red",
+        52 => "blue", 53 => "blue", 56 => "blue", 57 => "blue", 63 => "blue",
+        60 => "green", 63 => "green",
         61 => 'purple',
-        64 => "gray",65 => "gray");
+        64 => "gray", 65 => "gray");
     $colorStr = '';
     if (isset($tabColor[$ligne->fk_action]))
         $colorStr = ', "color":"' . $tabColor[$ligne->fk_action] . '"';

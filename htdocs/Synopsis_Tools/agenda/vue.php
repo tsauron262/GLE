@@ -14,7 +14,8 @@ foreach ($tabUser as $userId => $nom) {
 }
 $userStr = "'" . implode("','", $tabUser) . "'";
 
-$js = <<<EOF
+$js = ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
+$js .= <<<EOF
         <script type="text/javascript" src="../agenda/agenda.js"></script>
     <link rel="stylesheet" type="text/css" href="../agenda/agenda.css" />
  <link rel='stylesheet' type='text/css' href='./calendar/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
@@ -103,7 +104,7 @@ $js .= <<<EOF
                 url: DOL_URL_ROOT + "/Synopsis_Tools/agenda/ajax.php",
                 type: "POST",
                 datatype: "xml",
-                data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime(),
+                data: "setUser=" + calEvent.userId + "&id=" + calEvent.id + "&start=" + calEvent.start.getTime() + "&end=" + calEvent.end.getTime() + "&clone="+calEvent.clone,
                 error: function(msg) {
                     alert("erreur");
                 },
@@ -119,6 +120,9 @@ $js .= <<<EOF
         date: new Date(toDateUrl(new Date(), 2)+'T08:00:00.000+00:00'),
         height: function(Ocalendar){
           return $(window).height() - $('h1').outerHeight(true) - 110;
+        },
+        calendarAfterLoad: function(element) {
+            initCopyColler();
         },
         eventRender : function(calEvent, Oevent) {
           if (calEvent.color != ''){
@@ -144,15 +148,28 @@ $js .= <<<EOF
         save(calEvent);
       },
         eventNew : function(calEvent, Oevent, FreeBusyManager, calendar) {
-            start = calEvent.start.getTime();
-            end = calEvent.end.getTime();
-            end -= 60*1000;
-            back = document.location.href;
-            back = escape(back);
-            back = back.replace(/\//g, "%2F");
-            newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
-            dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 1);
-//            window.location.href = newUrl;
+        idActionCopy = $.cookie("copyAction");
+        idActionCut = $.cookie("cutAction");
+        if(idActionCut > 0){
+            $.cookie("cutAction", 0);
+            calEvent.id = idActionCut;
+            save(calEvent);
+        } else if(idActionCopy > 0){
+            $.cookie("copyAction", 0);
+            calEvent.id = idActionCopy;
+            calEvent.clone = true;
+            save(calEvent);
+        } else{
+                start = calEvent.start.getTime();
+                end = calEvent.end.getTime();
+                end -= 60*1000;
+                back = document.location.href;
+                back = escape(back);
+                back = back.replace(/\//g, "%2F");
+                newUrl = "../../comm/action/fiche.php?action=create&datep="+toDateUrl(start)+"&datef="+toDateUrl(end)+"&affectedto="+tabUserId[parseInt(calEvent.userId)]+"&optioncss=print&backtopage="+back;
+                dispatchePopIFrame(newUrl, function(){ $('#calendar').weekCalendar('refresh'); }, 'New Action', 1);
+    //            window.location.href = newUrl;
+            }
         },
         
         data: 'events.json.php',
@@ -161,13 +178,13 @@ $js .= <<<EOF
         displayOddEven: true,
         displayFreeBusys: true,
 EOF;
-$js .= 'daysToShow: '.((count($tabUser) < 6)? '5' : '3').',';
+$js .= 'daysToShow: ' . ((count($tabUser) < 6) ? '5' : '3') . ',';
 
 $js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
-if(count($tabUser) < 6)
-$js .= ", 'work week': 5, 'full week': 7";
+if (count($tabUser) < 6)
+    $js .= ", 'work week': 5, 'full week': 7";
 $js .= "},";
-        
+
 $js .= <<<EOF
         headerSeparator: ' ',
         useShortDayNames: true,
@@ -207,6 +224,67 @@ $js .= <<<EOF
         result = result +""+ time.getMinutes();
         return result;
     }
+        
+        
+divActCli = initCtrlV = null;
+setInterval("blink(divActCli)",500);
+function initCopyColler(){
+    $(elem).addClass("actif");
+        var ctrlDown = false;
+        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88;
+        var survol = false;
+        $(document).keydown(function(e)
+        {
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+                ctrlDown = true;
+        }).keyup(function(e)
+        {
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+                ctrlDown = false;
+        });
+        $(".wc-cal-event").mouseover(function()
+        {
+            survol = $(this).find(".idAction").attr("value");
+        }).mouseout(function() {
+            survol = null;
+        });
+
+        $(document).keydown(function(e)
+        {
+            if(survol > 0){
+                if (ctrlDown && (e.keyCode == cKey)){
+                    $(".idAction").parent().parent().show();
+                    divAct = divActCli =  $(".idAction[value='"+survol+"']").parent().parent();
+                    $.cookie("copyAction", survol);
+                }
+                else if (ctrlDown && (e.keyCode == xKey)){
+                    $(".idAction").parent().parent().css({ 'opacity' : 0.8 });
+                    divAct =  $(".idAction[value='"+survol+"']").parent().parent();
+                    $.cookie("cutAction", survol);
+                    divAct.css({ 'opacity' : 0.4 });
+                }
+            }
+            if (ctrlDown && (e.keyCode == vKey) && initCtrlV == null){
+                alert("Dessiner à l'endroit souhaité");
+                initCtrlV = true;
+            }
+        });
+        
+        
+        
+        $(".percent[value='-2']").each(function(){
+            $(this).parent().parent().css("background-image", "url("+DOL_URL_ROOT+"/Synopsis_Tools/agenda/barrer.png)");  
+        });
+}
+        
+function blink(ob) { 
+        if(ob !== null){
+    if (ob.is(':visible')) 
+        ob.hide(); 
+    else
+        ob.show();  
+        }
+}  
   </script>
 EOF;
 

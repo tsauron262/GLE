@@ -231,7 +231,7 @@ setInterval("blink(divActCli)",500);
 function initCopyColler(){
     $(elem).addClass("actif");
         var ctrlDown = false;
-        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88;
+        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
         var survol = false;
         $(document).keydown(function(e)
         {
@@ -251,17 +251,22 @@ function initCopyColler(){
 
         $(document).keydown(function(e)
         {
-            if(survol > 0){
-                if (ctrlDown && (e.keyCode == cKey)){
-                    $(".idAction").parent().parent().show();
-                    divAct = divActCli =  $(".idAction[value='"+survol+"']").parent().parent();
+//        alert(e.keyCode);
+            if (ctrlDown && (((e.keyCode == cKey || e.keyCode == xKey) && survol) || e.keyCode == zKey)){
+                divAct =  $(".idAction[value='"+survol+"']").parent().parent();
+                divActs =  $(".idAction").parent().parent();
+                divActs.css({ 'opacity' : 0.8 });
+                divActCli = null;
+                divActs.show();
+                $.cookie("cutAction", "");
+                $.cookie("copyAction", "");
+                if (e.keyCode == cKey){
                     $.cookie("copyAction", survol);
+                    divActCli =  divAct;
                 }
-                else if (ctrlDown && (e.keyCode == xKey)){
-                    $(".idAction").parent().parent().css({ 'opacity' : 0.8 });
-                    divAct =  $(".idAction[value='"+survol+"']").parent().parent();
-                    $.cookie("cutAction", survol);
+                if (e.keyCode == xKey){
                     divAct.css({ 'opacity' : 0.4 });
+                    $.cookie("cutAction", survol);
                 }
             }
             if (ctrlDown && (e.keyCode == vKey) && initCtrlV == null){

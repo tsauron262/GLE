@@ -611,7 +611,8 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     var i = 0;
     iFrame.find("iframe").load(function() {
         i++;
-        if (i > nbLoad) {
+        urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
+        if (i > nbLoad && urlStr.indexOf("delete",0) === -1) {
 //        $("#id-container").show();
             fermerIframe($(this).parent(), callBack);
         }

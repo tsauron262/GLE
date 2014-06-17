@@ -14,7 +14,7 @@ while ($ligne = $db->fetch_object($result)) {
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
     $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
     $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
-    $text .= "<a title='".$ligne->label."' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 100); return false;\">" . $ligne->label;
+    $text .= "<a title='".$ligne->label."' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 1); return false;\">" . $ligne->label;
     if ($ligne->fk_soc > 0) {
         $soc = new Societe($db);
         $soc->fetch($ligne->fk_soc);

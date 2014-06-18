@@ -36,7 +36,7 @@ class partsCart {
         if (count($this->partsCart)) {
             $result = $this->db->query('SELECT `rowid` FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart WHERE `serial_number` = \'' . $this->serial . '\'');
             $cartRowId = null;
-            if ($db->num_rows($result) > 0) {
+            if ($this->db->num_rows($result) > 0) {
                 $result = $this->db->fetch_object($result);
                 $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $result->rowid;
                 if (!$this->db->query($sql))

@@ -311,9 +311,11 @@ echo '
 </html>';
 
 function printMenu($tabUser) {
-    global $db;
+    global $db,$user;
 
     $js = "var tabGroup = new Array();";
+    $js .= "tabGroup[-1] = new Array();";
+    $js .= "tabGroup[-1].push(".$user->id.");";
     $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup_user");
     while ($result = $db->fetch_object($sql)) {
         $js .= "if(!tabGroup[" . $result->fk_usergroup . "]) tabGroup[" . $result->fk_usergroup . "] = new Array();";
@@ -327,7 +329,7 @@ function printMenu($tabUser) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom . "</option>";
     }
     echo "<form action='' method='post'>";
-    echo "<select id='group'><option value='0'>Groupes</option>" . $select . "</select>";
+    echo "<select id='group'><option value='0'>Groupes</option><option value='-1'>Moi</option>" . $select . "</select>";
     echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
 
 

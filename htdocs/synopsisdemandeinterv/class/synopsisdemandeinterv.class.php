@@ -269,6 +269,7 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->author = $obj->fk_user_author;
                 $this->fk_user_prisencharge = $obj->fk_user_prisencharge;
                 $this->user_prisencharge = new User($this->db);
+                $this->user_prisencharge->fetch($this->fk_user_prisencharge);
                 $this->user_author_id = $obj->fk_user_author;
 
                 if ($this->statut == 0)
@@ -517,21 +518,20 @@ class Synopsisdemandeinterv extends CommonObject {
             return -1;
         }
     }
-
-    function preparePrisencharge($userT, $outputdir = "") {
-        global $langs, $conf, $user;
-
-        $this->db->begin();
-
-        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
-        $sql.= " SET fk_user_prisencharge=" . $userT->id;
-        $sql.= " WHERE rowid = " . $this->id . " AND fk_statut < 2";
-
-        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
-        $resql = $this->db->query($sql);
-        if ($resql) {
+    
+    function synchroAction(){
+            global $user;
+            $this->fetch($this->id);
             require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
-            $action = new ActionComm($this->db);
+            
+            $tabAct = ActionComm::getActions($this->db, 0, $this->id, 'synopsisdemandeinterv');
+            $update = (count($tabAct) > 0);
+            
+            if($update)
+                $action = $tabAct[0];
+            else
+                $action = new ActionComm($this->db);
+            
             $action->datep = $this->db->jdate(date("Y-m-d", $this->date)." 08:00:00");
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date)." 18:00:00");
             $action->type_id = 50;
@@ -543,8 +543,29 @@ class Synopsisdemandeinterv extends CommonObject {
             $action->societe = $soc;
             $action->label = $this->description." DI : ".$this->ref;
             $action->note = $this->description;
-            $action->usertodo = $userT;
-            $action->add($user);
+            $action->usertodo = $this->user_prisencharge;
+            
+            
+            if($update)
+                $action->update($user);
+            else
+                $action->add($user);
+    }
+
+    function preparePrisencharge($userT, $outputdir = "") {
+        global $langs, $conf, $user;
+
+        $this->db->begin();
+
+        $this->user_prisencharge = $userT;
+        $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
+        $sql.= " SET fk_user_prisencharge=" . $userT->id;
+        $sql.= " WHERE rowid = " . $this->id . " AND fk_statut < 2";
+
+        dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
+        $resql = $this->db->query($sql);
+        if ($resql) {
+            $this->synchroAction();
             
 //            die("ok");
             
@@ -882,6 +903,7 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function set_date_delivery($user, $date_delivery) {
         global $langs, $conf;
+        
         if ($user->rights->synopsisdemandeinterv->creer) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
@@ -897,6 +919,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $error++;
                     $this->errors = $interface->errors;
                 }
+                $this->synchroAction();
                 // Fin appel triggers
                 return 1;
             } else {

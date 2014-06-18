@@ -111,6 +111,9 @@ class ActionComm extends CommonObject
         $error=0;
         $now=dol_now();
 
+        
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
+        
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);
         $this->location=dol_trunc(trim($this->location),128);
@@ -436,6 +439,9 @@ class ActionComm extends CommonObject
         global $langs,$conf,$hookmanager;
 
         $error=0;
+        
+        
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
         // Clean parameters
         $this->label=trim($this->label);

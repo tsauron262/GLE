@@ -19,6 +19,9 @@
                     <data name="partNumber" required="1"></data>
                     <data name="comptiaCode" required="1"></data>
                     <data name="comptiaModifier" required="1"></data>
+                    <data name="abused" required="0" default="N"></data>
+                    <data name="returnableDamage" required="0" default="N"></data>
+                    <data name="coveredByACPlus" required="0" default="N"></data>
                 </datas>
             </data>
             <data name="customerAddress" required="1">
@@ -34,7 +37,7 @@
                     <data name="lastName" required="1"></data>
                     <data name="primaryPhone" required="1"></data>
                     <data name="secondaryPhone" required="0"></data>
-                    <data name="region" required="1" default="004"></data>
+                    <data name="regionCode" required="1" default="004"></data>
                     <data name="state" required="1" default="FRA"></data>
                     <data name="zipCode" required="1"></data>
                     <data name="emailAdresse" required="1"></data>
@@ -49,7 +52,7 @@
             <data name="fileData" required="0"></data>
         </datas>
     </request>
-    
+
     <request name="UpdateSerialNumber" type="repair">
         <label>Màj serial</label>
         <datas>
@@ -66,7 +69,7 @@
         </datas>
         <response>
             <data>
-                
+
             </data>
         </response>
     </request>

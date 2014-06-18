@@ -7,10 +7,14 @@ ini_set('display_errors', 1);
 require_once '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
+require_once DOL_DOCUMENT_ROOT . '/apple/partsCart.class.php';
 
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
+$userId = 'tysauron@gmail.com';
+$password = 'freeparty';
+$serviceAccountNo = '0000100520';
 
 function fetchPartsList() {
     $parts = array();
@@ -19,7 +23,9 @@ function fetchPartsList() {
         if (isset($_POST['part_' . $i . '_ref'])) {
             $parts[] = array(
                 'partNumber' => $_POST['part_' . $i . '_ref'],
-                'quantity' => isset($_POST['part_' . i . '_qty']) ? $_POST['part_' . i . '_qty'] : 1
+                'comptiaCode' => (isset($_POST['part_' . $i . '_comptiaCode']) ? $_POST['part_' . $i . '_comptiaCode'] : 0),
+                'comptiaModifier' => (isset($_POST['part_' . $i . '_comptiaModifier']) ? $_POST['part_' . $i . '_comptiaModifier'] : 0),
+                'qty' => (isset($_POST['part_' . $i . '_qty']) ? $_POST['part_' . $i . '_qty'] : 1)
             );
         } else
             break;
@@ -46,11 +52,15 @@ if (isset($_GET['action'])) {
 
         case 'loadRepairForm':
             if (isset($_GET['serial'])) {
-                if (isset($_GET['requestType'])) {
-                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                    echo $datas->getRequestFormHtml($_GET['requestType']);
+                if (isset($_GET['prodId'])) {
+                    if (isset($_GET['requestType'])) {
+                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                        echo $datas->getRequestFormHtml($_GET['requestType'], $_GET['prodId']);
+                    } else {
+                        echo '<p class="error">Une erreur est survenue (Type de requête absent)</p>';
+                    }
                 } else {
-                    echo '<p class="error">Une erreur est survenue (Type de requête absent)</p>';
+                    echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
                 }
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
@@ -91,9 +101,14 @@ if (isset($_GET['action'])) {
         case 'savePartsCart':
             if (isset($_POST['serial'])) {
                 $parts = fetchPartsList();
-                if (count($parts))
-                    echo '<p class="confirmation">Le panier a été correctement enregistré (' . count($parts) . ' produit(s))</p>';
-                else {
+                if (count($parts)) {
+                    global $db;
+                    if (!isset($db))
+                        die('<p class="error">Impossible d\'accéder à la base de données.</p>');
+                    $cart = new partsCart($db, $_POST['serial'], isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
+                    $cart->setPartsCart(fetchPartsList());
+                    echo $cart->saveCart();
+                } else {
                     echo '<p class="error">Une erreur est survenue: aucun produit dans le panier</p>';
                 }
             } else {
@@ -101,25 +116,50 @@ if (isset($_GET['action'])) {
             }
             break;
 
-        case 'sendPartsOrder':
-            if (isset($_POST['serial'])) {
-                $parts = fetchPartsList();
+        case 'loadPartsCart':
+            if (isset($_GET['serial']) && isset($_GET['prodId'])) {
+                global $db;
+                if (!isset($db))
+                    die('noDb');
+                $cart = new partsCart($db, $_GET['serial'], isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
+                $cart->loadCart();
+                if (count($cart->partsCart)) {
+                    $script = 'if (GSX.products[' . $_GET['prodId'] . ']) {' . "\n";
+                    $jsCart = 'GSX.products[' . $_GET['prodId'] . '].cart';
+                    foreach ($cart->partsCart as $part) {
+                        $script .= $jsCart . '.onPartLoad(\'' . $part['partNumber'] . '\', ';
+                        $script .= '\'' . $part['comptiaCode'] . '\', ';
+                        $script .= '\'' . $part['comptiaModifier'] . '\', ';
+                        $script .= '\'' . $part['qty'] . '\');' . "\n";
+                    }
+                    $script .= '}' . "\n";
+                    echo $script;
+                } else {
+                    die('noPart');
+                }
+            } else {
+                die('noSerial');
             }
             break;
 
         case 'sendGSXRequest':
-            if (isset($_GET['request'])) {
-                $GSXRequest = new GSX_Request($_GET['request']);
-                $result = $GSXRequest->processRequestForm();
-                if ($result !== true) {
-                    llxHeader();
-                    echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
-                    echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
-                    echo $result;
-                } else if (isset($_REQUEST['chronoId']))
-                    header ("Location:".DOL_URL_ROOT."/Synopsis_Chrono/fiche.php?id=".$_REQUEST['chronoId']);
+            if (isset($_GET['serial'])) {
+                if (isset($_GET['request'])) {
+                    if (isset($_GET['prodId'])) {
+                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                        $result = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
+                        llxHeader();
+                        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/apple/appleGSX.css"/>' . "\n";
+                        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/apple/appleGsxScripts.js"></script>' . "\n";
+                        echo $result;
+                    } else {
+                        echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
+                    }
+                } else {
+                    echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
+                }
             } else {
-                echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
+                echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
     }

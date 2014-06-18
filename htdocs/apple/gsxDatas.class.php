@@ -7,9 +7,8 @@ class gsxDatas {
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
-    protected $partsCart = array();
     protected $errors = array();
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -40,18 +39,18 @@ class gsxDatas {
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        elseif ($userId && $password && $serviceAccountNo)
+        else if (isset($userId) && isset($password) && isset($serviceAccountNo)) {
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
-                'userId' => isset($userId) ? $userId : '',
-                'password' => isset($password) ? $password : '',
-                'serviceAccountNo' => isset($serviceAccountNo) ? $serviceAccountNo : '',
+                'userId' => $userId,
+                'password' => $password,
+                'serviceAccountNo' => $serviceAccountNo,
                 'languageCode' => 'fr',
                 'userTimeZone' => 'CEST',
                 'returnFormat' => 'php',
             );
-        else {
+        } else {
             echo '<p class="error">Pas d\'identifiant apple.<a href="' . DOL_URL_ROOT . '/user/fiche.php?id=' . $user->id . '"> Corriger</a></p>' . "\n";
             return 0;
         }
@@ -201,8 +200,8 @@ class gsxDatas {
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
         $html .= '<div class="cartSubmitContainer">' . "\n";
-        $html .= '<button class="cartSave blueHover" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
-        $html .= '<button class="cartSubmit greenHover" onclick="GSX.products[' . $prodId . '].cart.submit()">Valider la commande</button>' . "\n";
+        $html .= '<button class="cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
+        $html .= '<button class="cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</button>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
         $html .= '</div>' . "\n";
@@ -313,7 +312,7 @@ class gsxDatas {
         return $codes;
     }
 
-    public function getRequestFormHtml($requestType) {
+    public function getRequestFormHtml($requestType, $prodId) {
         global $db;
         $gsxRequest = new GSX_Request($requestType);
         $chronoId = $_REQUEST['chronoId'];
@@ -360,18 +359,45 @@ class gsxDatas {
         return $gsxRequest->generateRequestFormHtml($valDef);
     }
 
-    public function addToCart($partRef, $qty) {
-        $this->partsCart[$partRef] = $qty;
-    }
+    public function processRequestForm($prodId, $requestType) {
+        $GSXRequest = new GSX_Request($requestType);
+        $result = $GSXRequest->processRequestForm($prodId);
+        $html = '';
+        if ($GSXRequest->isLastRequestOk()) {
 
-    public function saveCart() {
-        if (!count($this->partsCart))
-            return false;
-    }
+            $html .= '<div class="requestResponseContainer">';
 
-    public function sendOrderFromCart() {
-        if (!count($this->partsCart))
-            return false;
+            $client = $GSXRequest->requestName;
+            $request = $GSXRequest->requestName . 'Request';
+            $wrapper = 'repairData';
+
+            $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
+            $response = $this->gsx->request($requestData, $client);
+            if (count($this->gsx->errors['soap'])) {
+                $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";
+                $i = 1;
+                foreach ($this->gsx->errors['soap'] as $soapError) {
+                    $html .= $i . '. ' . $soapError . '.<br/>' . "\n";
+                    $i++;
+                }
+                $html .= '</p>' . "\n";
+            } else {
+                $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
+//            $html .= '<pre>';
+//            $html .= print_r($this->gsx->outputFormat($response));
+//            $html .= '</pre>';
+            }
+
+            $html .= '</div>';
+            if (isset($_REQUEST['chronoId'])) {
+                $html .= '<div style="margin: 30px; text-align: right;">';
+                $html .= '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $_REQUEST['chronoId'] . '">Retour</a>';
+                $html .= '</div>';
+            }
+        } else {
+            $html = $result;
+        }
+        return $html;
     }
 
 }

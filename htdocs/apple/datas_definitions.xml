@@ -10,7 +10,15 @@
     <def name="comptiaModifier" type="comptiaModifier">
         <label>Modificateur</label>
     </def>
-
+    <def name="abused" type="YesNo">
+        <label>Pièce endommagée non-retournable (abus)</label>
+    </def>
+    <def name="returnableDamage" type="YesNo">
+        <label>Pièce endommagée (retournable)</label>
+    </def>
+    <def name="coveredByACPlus" type="YesNo">
+        <label>Dommages couverts par AppleCare+</label>
+    </def>
     <!--Adresses-->
     <def name="addressLine1" type="text" max="60" jsCheck="text">
         <label>Adresse ligne 1</label>
@@ -45,7 +53,7 @@
     <def name="secondaryPhone" type="tel" max="30" jsCheck="phone">
         <label>Numéro de téléphone secondaire</label>
     </def>
-    <def name="region" type="select">
+    <def name="regionCode" type="select">
         <label>Région</label>
         <values>
             <val val="002">Asie / Pacifique</val>
@@ -128,20 +136,20 @@
     <def name="componentCheckReview" type="YesNo">
         <label>Vérification des composants</label>
     </def>
-    
+
     <!--Maj serial-->
     <def name="repairConfirmationNumber" type="text" max="15" jsCheck="text">
         <label>Numéro de confirmation de la réparation</label>
     </def>
-    
+
     <def name="partInfo" type="partsList">
         <label>Informations composants</label>
     </def>
-    
+
     <def name="oldSerialNumber" type="text" max="18" jsCheck="">
         <label>Ancien numéro de série</label>
     </def>
-    
+
     <def name="reasonCode" type="select">
         <label>Raison</label>
         <values>
@@ -149,7 +157,7 @@
             <val val="OT">Autre</val>
         </values>
     </def>
-    
+
     <def name="isPartDOA" type="YesNo">
         <label>DOA?</label>
     </def>

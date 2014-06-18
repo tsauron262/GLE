@@ -12,8 +12,9 @@ class GSX_Request {
         'request' => null,
         'response' => null
     );
-    protected $requestName = '';
-    protected $requestLabel = '';
+    public $requestName = '';
+    public $requestLabel = '';
+    protected $requestOk = false;
 
     public function __construct($requestName) {
         $this->requestName = $requestName;
@@ -123,8 +124,9 @@ class GSX_Request {
         return null;
     }
 
-    protected function getDataInput($dataNode, $values = null) {
+    protected function getDataInput($dataNode, $values = null, $index = null) {
         $name = $dataNode->getAttribute('name');
+        $inputName = $name . (isset($index) ? '_' . $index : '');
         if (!$name) {
             return '<p class="error">Erreur de syntaxe dans le fichier xml : 1 attribut "name" non-défini.</p>';
         }
@@ -148,7 +150,7 @@ class GSX_Request {
             $default = $dataNode->getAttribute('default');
 
         if ($defs['type'] == 'datasGroup') {
-            $html .= '<fieldset id="' . $name . '">';
+            $html .= '<fieldset id="' . $inputName . '">';
             if (isset($defs['label'])) {
                 $html .= '<legend>' . $defs['label'];
                 if (isset($defs['infos'])) {
@@ -161,7 +163,7 @@ class GSX_Request {
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                 foreach ($dataNodes as $node) {
-                    $html .= $this->getDataInput($node, $values);
+                    $html .= $this->getDataInput($node, isset($values[$name])?$values[$name]:null, $index);
                 }
             } else {
                 $html .= '<p class="alert">Aucunes définitions pour ces données</p>' . "\n";
@@ -170,7 +172,7 @@ class GSX_Request {
         } else {
             $html .= '<div class="dataBlock">' . "\n";
             if (isset($defs['label'])) {
-                $html .= '<label class="dataTitle" for="' . $name . '">' . $defs['label'];
+                $html .= '<label class="dataTitle" for="' . $inputName . '">' . $defs['label'];
                 $html .= ($required ? '<sup><span class="required"></span></sup>' : '');
                 if (isset($defs['infos'])) {
                     $html .= '<span class="displayInfos" onmouseover="displayLabelInfos($(this))" onmouseout="hideLabelInfos($(this))">';
@@ -194,7 +196,7 @@ class GSX_Request {
                         $html .= '<br/>' . "\n";
                         $html .= '<textarea cols="80" rows="10" ';
                     }
-                    $html .= 'id="' . $name . '" name="' . $name . '"' . ($required ? ' required' : '');
+                    $html .= 'id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
 
                     if ($defs['type'] != 'textarea') {
                         if (isset($values[$name]))
@@ -220,7 +222,7 @@ class GSX_Request {
 
                 case 'select':
                     if (isset($defs['values'])) {
-                        $html .= '<select name="' . $name . '" id="' . $name . '"' . ($required ? ' required' : '' ) . '>';
+                        $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' ) . '>';
                         $html .= '<option value="0">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
                         foreach ($defs['values'] as $v => $txt) {
                             $html .= '<option value="' . $v . '"';
@@ -246,14 +248,14 @@ class GSX_Request {
                     else if (isset($default))
                         $defVal = $default;
 
-                    $html .= '<input type="radio" id="' . $name . '_yes" name="' . $name . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
-                    $html .= '<label for="' . $name . '_yes">Oui</label>' . "\n";
-                    $html .= '<input type="radio" id="' . $name . '_no" name="' . $name . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
-                    $html .= '<label for="' . $name . '_no">Non</label>' . "\n";
+                    $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
+                    $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
+                    $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
+                    $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
                     break;
 
                 case 'fileSelect':
-                    $html .= '<input type="file" id="' . $name . '" name="' . $name . '"/>';
+                    $html .= '<input type="file" id="' . $inputName . '" name="' . $inputName . '"/>';
                     break;
 
                 case 'partsList':
@@ -261,15 +263,46 @@ class GSX_Request {
                     if (count($subDatasNode) == 1) {
                         $partsDataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                         if (count($partsDataNodes)) {
-                            $html .= '<span class="button importParts blueHover"';
-                            $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
-                            $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
-                            $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
-                            foreach ($partsDataNodes as $partDataNode) {
-                                $html .= $this->getDataInput($partDataNode);
+                            $orderLines = null;
+                            if (isset($values)) {
+                                if (isset($values[$name])) {
+                                    if (is_array($values[$name])) {
+                                        $orderLines = $values[$name];
+                                    }
+                                }
                             }
-                            $html .= '</div>';
-                            $html .= '<div class="repairPartsContainer"></div>';
+
+                            if (isset($orderLines) && is_array($orderLines)) {
+//                                $html .= '<div class="repairPartsContainer">' . "\n";
+                                $partCount = 0;
+                                $i = 1;
+                                foreach ($orderLines as $orderLine) {
+                                    $partCount++;
+                                    $html .= '<div class="partDatasBlock">';
+                                    $html .= '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">Composant ' . $i . '</div>';
+                                    $html .= '<div class="partDatasContent partDatasContent_' . $i . '">';
+                                    foreach ($partsDataNodes as $partDataNode) {
+                                        $html .= $this->getDataInput($partDataNode, $orderLine, $i);
+                                    }
+                                    $html .= '</div>';
+                                    $i++;
+                                }
+                                $html .= '</div>' . "\n";
+                                $html .= '<input type="hidden" id="partsCount" name="partsCount" value="' . $partCount . '"/>' . "\n";
+                            } else {
+                                $html .= '<span class="button importParts blueHover"';
+                                $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
+                                $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
+
+                                $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
+                                foreach ($partsDataNodes as $partDataNode) {
+                                    $html .= $this->getDataInput($partDataNode);
+                                }
+                                $html .= '</div>';
+                                $html .= '<div class="repairPartsContainer"></div>' . "\n";
+                                $html .= '<input type="hidden" id="partsCount" name="partsCount" value="0"/>' . "\n";
+                            }
+
                             break;
                         }
                     }
@@ -277,11 +310,21 @@ class GSX_Request {
                     break;
 
                 case 'comptiaCode':
-                    $html .= '<div class="comptiaCodeContainer"></div>';
+                    $html .= '<div class="comptiaCodeContainer">' . "\n";
+                    if (isset($values[$name])) {
+                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                    }
+                    $html .= '</div>';
                     break;
 
                 case 'comptiaModifier':
-                    $html .= '<div class="comptiaModifierContainer"></div>';
+                    $html .= '<div class="comptiaModifierContainer">' . "\n";
+                    if (isset($values[$name])) {
+                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                    }
+                    $html .= '</div>';
                     break;
 
                 default:
@@ -295,7 +338,7 @@ class GSX_Request {
         return $html;
     }
 
-    public function generateRequestFormHtml($values) {
+    public function generateRequestFormHtml($values, $prodId, $serial) {
         if (count($this->errors)) {
             $html = '<p class="error">Impossible d\'afficher le formulaire pour cette requête.<br/><br/>';
             $html .= 'Erreurs:<br/><br/>';
@@ -312,20 +355,20 @@ class GSX_Request {
         }
 
         $html .= '<form class="gsxRepairForm" id="repairForm_' . $this->requestName . '" method="POST"';
-        $html .= ' action="'.DOL_URL_ROOT.'/apple/ajax/requestProcess.php?&action=sendGSXRequest&request=' . $this->requestName . '"';
+        $html .= ' action="' . DOL_URL_ROOT . '/apple/ajax/requestProcess.php?serial=' . $serial . '&action=sendGSXRequest&prodId=' . $prodId . '&request=' . $this->requestName . '"';
         $html .= ' enctype="multipart/form-data">' . "\n";
 
         $html .= '<div class="requestTitle">' . $this->requestLabel . '</div>' . "\n";
         $html .= '<p class="requiredInfos"><sup><span class="required"></span></sup>Champs requis</p>';
         $html .= '<div class="requestFormInputs">' . "\n";
         $html .= '<input type="hidden" id="requestName" name="requestName" value="' . $this->requestName . '"/>';
-        if(isset($_REQUEST['chronoId']))
-        $html .= '<input type="hidden" id="chronoId" name="chronoId" value="' . $_REQUEST['chronoId']. '"/>';
+        if (isset($_REQUEST['chronoId']))
+            $html .= '<input type="hidden" id="chronoId" name="chronoId" value="' . $_REQUEST['chronoId'] . '"/>';
         foreach ($this->datas['request'] as $dataNode) {
             $html .= $this->getDataInput($dataNode, $values);
         }
         $html .= '</div>' . "\n";
-        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover" onclick="submitGsxRequestForm($(this), \'' . $this->requestName . '\')">Envoyer</span></div>';
+        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover" onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\')">Envoyer</span></div>';
         $html .= '</form>' . "\n";
         return $html;
     }
@@ -364,22 +407,24 @@ class GSX_Request {
                     $defs = $this->getDataDefinitionsArray($dataName);
                     if (isset($defs)) {
                         if ($defs['type'] == 'partsList') {
-                            $datas[$dataName] = array();
-                            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
-                            if (count($subDatasNode) == 1) {
-                                $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                                $index = 1;
-                                while (1) {
-                                    $results = $this->processRequestDatas($subDatasNodes, $index);
-                                    if (count($results)) {
-                                        $datas[$dataName][] = $results;
-                                    } else
-                                        break;
-                                    $index++;
+                            if (isset($_POST['partsCount'])) {
+                                $partCount = (int) $_POST['partsCount'];
+                                $datas[$dataName] = array();
+                                $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                                if (count($subDatasNode) == 1) {
+                                    $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                                    for ($index = 1; $index <= $partCount; $index++) {
+                                        $results = $this->processRequestDatas($subDatasNodes, $index);
+                                        if (count($results)) {
+                                            $datas[$dataName][] = $results;
+                                        }
+                                    }
+                                } else {
+                                    $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml":
+                                    liste des données absentes pour le groupe "' . $dataName . '"');
                                 }
                             } else {
-                                $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml":
-                                    liste des données absentes pour le groupe "' . $dataName . '"');
+                                $this->addError('Erreur technique: nombre de composants absent.');
                             }
                         } else if ($defs['type'] == 'datasGroup') {
                             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
@@ -419,7 +464,14 @@ class GSX_Request {
         return $datas;
     }
 
-    public function processRequestForm() {
+    public function processRequestForm($prodId) {
+//        echo '<div>';
+//        echo '<p>POST:</p>';
+//        echo '<pre>';
+//        print_r($_POST);
+//        echo '</pre>';
+//        echo '</div>';
+        $this->requestOk = false;
         if (count($this->errors)) {
             $html = '<p class="error">Impossible d\'éxécuter la  requête.<br/><br/>';
             $html .= 'Erreurs:<br/><br/>';
@@ -437,7 +489,7 @@ class GSX_Request {
         $requestDatas = $this->processRequestDatas($this->datas['request']);
 
         if (count($this->errors)) {
-            $html = '<p class="error">Des erreurs ont été détecter:<br/><br/>';
+            $html = '<p class="error">Des erreurs ont été détectées:<br/><br/>';
             $i = 1;
             foreach ($this->errors as $error) {
                 $html .= $i . '. ' . $error . '<br/>';
@@ -446,25 +498,25 @@ class GSX_Request {
             $html .= '</p><br/><br/>';
             unset($this->errors);
             $this->errors = array();
-
-            echo '<pre>';
-            print_r($requestDatas);
-            echo '</pre>';
-
+//            echo '<pre>';
+//            print_r($requestDatas);
+//            echo '</pre>';
             $html .= '<div class="singleRequestFormContainer">' . "\n";
-            $html .= $this->generateRequestFormHtml($requestDatas);
+            $html .= $this->generateRequestFormHtml($requestDatas, $prodId);
             $html .= '</div>';
             return $html;
-        } else {
-            $client = $this->requestName;
-            $request = $this->requestName . 'Request';
-            $wrapper = 'repairData';
-
-            $requestData = $this->_requestBuilder($request, $wrapper, $requestDatas);
-//            $response = $this->request($requestData, $client);
-//            return $this->outputFormat($response);
-            return true;
         }
+
+        echo '<p>Données traitées: </p>' . "\n";
+//        echo '<pre>';
+//        print_r($requestDatas);
+//        echo '</pre>';
+        $this->requestOk = true;
+        return $requestDatas;
+    }
+
+    public function isLastRequestOk() {
+        return $this->requestOk;
     }
 
 }

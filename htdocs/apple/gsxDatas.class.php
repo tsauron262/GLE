@@ -8,7 +8,7 @@ class gsxDatas {
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    public static $apiMode = 'ut';
+    public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',

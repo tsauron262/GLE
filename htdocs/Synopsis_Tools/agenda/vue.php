@@ -231,7 +231,7 @@ setInterval("blink(divActCli)",500);
 function initCopyColler(){
 //    $(elem).addClass("actif");
         var ctrlDown = false;
-        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
+        var ctrlKey = 17, pommeKey = 91, pommeKey2 = 222, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
         var survol = false;
         
         $(".wc-cal-event").mouseover(function()
@@ -243,7 +243,7 @@ function initCopyColler(){
         
         $(document).keydown(function(e)
         {
-            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey || e.keyCode == pommeKey2)
                 ctrlDown = true;
         
 //        alert(e.keyCode+" | "+ctrlDown);
@@ -271,7 +271,7 @@ function initCopyColler(){
             }
         }).keyup(function(e)
         {
-            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey || e.keyCode == pommeKey2)
                 ctrlDown = false;
         });
         

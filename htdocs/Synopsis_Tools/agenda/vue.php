@@ -231,7 +231,7 @@ setInterval("blink(divActCli)",500);
 function initCopyColler(){
     $(elem).addClass("actif");
         var ctrlDown = false;
-        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
+        var ctrlKey = 17, pommeKey = 9, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
         var survol = false;
         $(document).keydown(function(e)
         {

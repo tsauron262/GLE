@@ -338,25 +338,25 @@ class gsxDatas {
         
 //        echo "<pre>"; print_r($chrono->contact);
         
+        $valDef['customerAddress']['companyName'] = $chrono->societe->name;
         if(isset($chrono->contact->id)){
-            $valDef['addressLine1'] = $chrono->contact->address;
+            $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
-            $valDef['city'] = $chrono->contact->town;
-            $valDef['companyName'] = $chrono->societe->name;
-            $valDef['country'] = "FRANCE";
-            $valDef['firstName'] = $chrono->contact->firstname;
-            $valDef['lastName'] = $chrono->contact->lastname;
-            $valDef['primaryPhone'] = $chrono->contact->phone_pro;
-            $valDef['secondaryPhone'] = $chrono->contact->phone_mobile;
-            $valDef['zipCode'] = $chrono->contact->zip;
-            $valDef['emailAdresse'] = $chrono->contact->email;
+            $valDef['customerAddress']['city'] = $chrono->contact->town;
+            $valDef['customerAddress']['country'] = "FRANCE";
+            $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
+            $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+            $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+            $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+            $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+            $valDef['customerAddress']['emailAdresse'] = $chrono->contact->email;
         }
         
         
-//        echo "<pre>";print_r($chrono->extraValue);
-        return $gsxRequest->generateRequestFormHtml($valDef);
+//        print_r($chrono->extraValue);
+        return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
     public function processRequestForm($prodId, $requestType) {

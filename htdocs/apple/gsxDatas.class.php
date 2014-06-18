@@ -8,7 +8,7 @@ class gsxDatas {
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    public static $apiMode = 'it';
+    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -340,6 +340,7 @@ class gsxDatas {
         
         $valDef['customerAddress']['companyName'] = $chrono->societe->name;
         if(isset($chrono->contact->id)){
+            $valDef['customerAddress']['street'] = $chrono->contact->address;
             $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
@@ -351,7 +352,7 @@ class gsxDatas {
             $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
             $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
             $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-            $valDef['customerAddress']['emailAdresse'] = $chrono->contact->email;
+            $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
         }
         
         

@@ -3,11 +3,12 @@
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 
 class gsxDatas {
+
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    public static $apiMode = 'production';
+    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -311,7 +312,7 @@ class gsxDatas {
         return $codes;
     }
 
-    public function getRequestFormHtml($requestType) {
+    public function getRequestFormHtml($requestType, $prodId) {
         global $db;
         $gsxRequest = new GSX_Request($requestType);
         $chronoId = $_REQUEST['chronoId'];
@@ -325,8 +326,50 @@ class gsxDatas {
         $valDef['diagnosis'] = $chrono->description;
         $valDef['unitReceivedTime'] = "14:30";
 //        print_r($chrono->extraValue);
-        return $gsxRequest->generateRequestFormHtml($valDef);
+        return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
+
+    public function processRequestForm($prodId, $requestType) {
+        $GSXRequest = new GSX_Request($requestType);
+        $result = $GSXRequest->processRequestForm($prodId);
+        $html = '';
+        if ($GSXRequest->isLastRequestOk()) {
+
+            $html .= '<div class="requestResponseContainer">';
+
+            $client = $GSXRequest->requestName;
+            $request = $GSXRequest->requestName . 'Request';
+            $wrapper = 'repairData';
+
+            $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
+            $response = $this->gsx->request($requestData, $client);
+            if (count($this->gsx->errors['soap'])) {
+                $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";
+                $i = 1;
+                foreach ($this->gsx->errors['soap'] as $soapError) {
+                    $html .= $i . '. ' . $soapError . '.<br/>' . "\n";
+                    $i++;
+                }
+                $html .= '</p>' . "\n";
+            } else {
+                $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
+//            $html .= '<pre>';
+//            $html .= print_r($this->gsx->outputFormat($response));
+//            $html .= '</pre>';
+            }
+
+            $html .= '</div>';
+            if (isset($_REQUEST['chronoId'])) {
+                $html .= '<div style="margin: 30px; text-align: right;">';
+                $html .= '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $_REQUEST['chronoId'] . '">Retour</a>';
+                $html .= '</div>';
+            }
+        } else {
+            $html = $result;
+        }
+        return $html;
+    }
+
 }
 
 ?>

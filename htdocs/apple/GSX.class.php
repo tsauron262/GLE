@@ -310,7 +310,7 @@ class GSX {
      *
      */
     public function __construct($_gsxDetailsArray = array()) {
-        // We default to using production mode for GSX
+// We default to using production mode for GSX
         if (!isset($_gsxDetailsArray['apiMode'])) {
             $_gsxDetailsArray['apiMode'] = 'production';
         }
@@ -347,10 +347,10 @@ class GSX {
             $this->gsxDetails['serviceAccountNo'] = $_gsxDetailsArray['serviceAccountNo'];
         }
 
-        // If user has left languageCode empty, we assign the GSX default.
+// If user has left languageCode empty, we assign the GSX default.
         $this->gsxDetails['languageCode'] = ( empty($_gsxDetailsArray['languageCode']) ) ? 'en' : $_gsxDetailsArray['languageCode'];
 
-        // If user has left userTimeZone empty, we assign the GSX default.
+// If user has left userTimeZone empty, we assign the GSX default.
         $this->gsxDetails['userTimeZone'] = ( empty($_gsxDetailsArray['userTimeZone']) ) ? 'PST' : $_gsxDetailsArray['userTimeZone'];
 
         $this->gsxDetails['returnFormat'] = $_gsxDetailsArray['returnFormat'];
@@ -375,8 +375,8 @@ class GSX {
      *
      */
     public function __destruct() {
-        // We can destruct class settings, but I don't want to log out, purely for the reason if someone
-        // uses this class with a custom AJAX environment.
+// We can destruct class settings, but I don't want to log out, purely for the reason if someone
+// uses this class with a custom AJAX environment.
         unset($this->userSessionId);
     }
 
@@ -400,6 +400,8 @@ class GSX {
             return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
         } elseif ($api_mode == 'it') {
             return $this->wsdlUrl = 'https://gsxwsit.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+        } elseif ($api_mode == 'ut') {
+            return $this->wsdlUrl = 'https://gsxwsut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
             $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
 
@@ -425,7 +427,7 @@ class GSX {
             $this->assign_wsdl();
         }
 
-        // Set the timeout to 10 seconds.
+// Set the timeout to 10 seconds.
         $connectionOptions = array(
             'connection_timeout' => '5',
         );
@@ -520,7 +522,7 @@ class GSX {
 
                 $modelData = $this->request($requestData, $clientLookup);
 
-                //$errorMessage = $this->_obtainErrorMessage ( $modelData );
+//$errorMessage = $this->_obtainErrorMessage ( $modelData );
 
                 return $this->outputFormat($modelData['FetchProductModelResponse']['productModelResponse'], $errorMessage, $returnFormat);
 
@@ -539,7 +541,7 @@ class GSX {
 
                 $warrantyDetails = $this->request($requestData, $clientLookup);
 
-                //$errorMessage = $this->_obtainErrorMessage ( $warrantyDetails );
+//$errorMessage = $this->_obtainErrorMessage ( $warrantyDetails );
 
                 return $this->outputFormat($warrantyDetails['WarrantyStatusResponse']['warrantyDetailInfo'], $errorMessage, $returnFormat);
 
@@ -597,8 +599,8 @@ class GSX {
 
         $partsLookup = $this->request($requestData, $clientLookup);
 
-        //var_dump($partsLookup);
-        //$errorMessage = $this->_obtainErrorMessage ( $partsLookup );
+//var_dump($partsLookup);
+//$errorMessage = $this->_obtainErrorMessage ( $partsLookup );
 
         return $this->outputFormat($partsLookup['PartsLookupResponse']['parts'], $errorMessage, $returnFormat);
     }
@@ -617,7 +619,7 @@ class GSX {
 
                 $repairLookup = $this->request($requestData, $clientLookup);
 
-                //$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
+//$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
 
                 return $this->outputFormat($repairLookup, $errorMessage, $returnFormat);
 
@@ -635,7 +637,7 @@ class GSX {
 
                 $repairLookup = $this->request($requestData, $clientLookup);
 
-                //$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
+//$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
 
                 return $this->outputFormat($repairLookup['RepairDetailsResponse']['lookupResponseData'], $errorMessage, $returnFormat);
 
@@ -705,7 +707,7 @@ class GSX {
             $this->authenticate();
         }
 
-        // Manually build the request...
+// Manually build the request...
         $compTIARequest = array(
             'ComptiaCodeLookupRequest' => array(
                 'userSession' => array(
@@ -725,7 +727,7 @@ class GSX {
         return $compTIAAnswer;
     }
 
-    // HELPER FUNCTIONS
+// HELPER FUNCTIONS
 
     /**
      *
@@ -744,7 +746,7 @@ class GSX {
      * @access private
      *
      */
-    private function request($requestData, $clientLookup) {
+    public function request($requestData, $clientLookup) {
         if (!$this->userSessionId) {
             $this->authenticate();
         }
@@ -784,7 +786,7 @@ class GSX {
      * @access private
      *
      */
-    private function _requestBuilder($requestName, $wrapperName, $details) {
+    public function _requestBuilder($requestName, $wrapperName, $details) {
         $requestArray = array(
             "$requestName" => array(
                 'userSession' => array(
@@ -797,7 +799,7 @@ class GSX {
         return $requestArray;
     }
 
-    private function outputFormat($output, $errorMessage = null, $format = false) {
+    public function outputFormat($output, $errorMessage = null, $format = false) {
         if (!$format) {
             $format = $this->gsxDetails['returnFormat'];
         }
@@ -814,7 +816,7 @@ class GSX {
         return $this->_formatter($finalReturnArray, $format);
     }
 
-    private function _formatter($output, $format) {
+    public function _formatter($output, $format) {
         switch ($format) {
             case 'json' :
                 return json_encode($output);
@@ -828,7 +830,7 @@ class GSX {
         }
     }
 
-    private function _obtainErrorMessage($output) {
+    public function _obtainErrorMessage($output) {
 
         function _softErrorMessage($value, $key) {
             if (isset($key) == 'communicationMessage') {
@@ -892,7 +894,7 @@ class GSX {
                 return '/^[a-z]{5,15}$/i';
                 break;
 
-            // Lazy check… I'm not too fussed about email checks
+// Lazy check… I'm not too fussed about email checks
             case 'email' :
                 return '/^(.+)@(.+)$/i';
                 break;
@@ -934,10 +936,9 @@ class GSX {
         // The API is not very verbose with bad credentials… wrong credentials can throw the "expired session" error.
         $additionalInfo = ( $code == 'ATH.LOG.20' ) ? ' (You may have provided the wrong login credentials)' : '';
         dol_syslog('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo, LOG_ERR);
-        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
-        $this->errors['soap'][] = $this->outputFormat('SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo);
+//        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
+        $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
-
 }
 
 ?>

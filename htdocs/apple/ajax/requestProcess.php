@@ -9,9 +9,12 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/partsCart.class.php';
 
-$userId = 'Corinne@actitec.fr';
-$password = 'cocomart01';
-$serviceAccountNo = '0000100635';
+//$userId = 'Corinne@actitec.fr';
+//$password = 'cocomart01';
+//$serviceAccountNo = '0000100635';
+$userId = 'tysauron@gmail.com';
+$password = 'freeparty';
+$serviceAccountNo = '0000100520';
 
 function fetchPartsList() {
     $parts = array();
@@ -49,11 +52,15 @@ if (isset($_GET['action'])) {
 
         case 'loadRepairForm':
             if (isset($_GET['serial'])) {
-                if (isset($_GET['requestType'])) {
-                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                    echo $datas->getRequestFormHtml($_GET['requestType']);
+                if (isset($_GET['prodId'])) {
+                    if (isset($_GET['requestType'])) {
+                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                        echo $datas->getRequestFormHtml($_GET['requestType'], $_GET['prodId']);
+                    } else {
+                        echo '<p class="error">Une erreur est survenue (Type de requête absent)</p>';
+                    }
                 } else {
-                    echo '<p class="error">Une erreur est survenue (Type de requête absent)</p>';
+                    echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
                 }
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
@@ -136,18 +143,23 @@ if (isset($_GET['action'])) {
             break;
 
         case 'sendGSXRequest':
-            if (isset($_GET['request'])) {
-                $GSXRequest = new GSX_Request($_GET['request']);
-                $result = $GSXRequest->processRequestForm();
-                if ($result !== true) {
-                    llxHeader();
-                    echo '<link type="text/css" rel="stylesheet" href="appleGSX.css"/>' . "\n";
-                    echo '<script type="text/javascript" src="./appleGsxScripts.js"></script>' . "\n";
-                    echo $result;
-                } else if (isset($_REQUEST['chronoId']))
-                    header("Location:" . DOL_URL_ROOT . "/Synopsis_Chrono/fiche.php?id=" . $_REQUEST['chronoId']);
+            if (isset($_GET['serial'])) {
+                if (isset($_GET['request'])) {
+                    if (isset($_GET['prodId'])) {
+                        $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                        $result = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
+                        llxHeader();
+                        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/apple/appleGSX.css"/>' . "\n";
+                        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/apple/appleGsxScripts.js"></script>' . "\n";
+                        echo $result;
+                    } else {
+                        echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
+                    }
+                } else {
+                    echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
+                }
             } else {
-                echo '<p class="error">Une erreur est survenue: type de requête absent.</p>';
+                echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
     }

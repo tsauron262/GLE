@@ -734,7 +734,7 @@ function GSX() {
                         html += '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
                         html += '<div class="partDatasContent partDatasContent_'+i+'">';
                         html += $template.html();
-                        html += '</div>';
+                        html += '</div></div>';
                         $container.append(html);
                         var $div = $container.find('div.partDatasContent_'+i+'');
                         var $partRow = $(this);
@@ -765,6 +765,8 @@ function GSX() {
 
                                     default:
                                         $(this).find('#'+dataName).attr('id', dataName+'_'+i).attr('name', dataName+'_'+i);
+                                        $(this).find('#'+dataName+'_yes').attr('id', dataName+'_yes_'+i).attr('name', dataName+'_'+i);
+                                        $(this).find('#'+dataName+'_no').attr('id', dataName+'_no_'+i).attr('name', dataName+'_'+i);
                                         break;
                                 }
                             });
@@ -831,7 +833,7 @@ function GSX() {
         }
         if (this.products[prodId]) {
             var requestType = $prod.find('.repairTypeSelect').val();
-            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&serial='+this.products[prodId].serial);
+            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&prodId='+prodId+'&serial='+this.products[prodId].serial);
             displayRequestMsg('requestProcess', '', $prod.find('div.repairFormContainer'));
         } else {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $prod.find('.partsRequestResult'));
@@ -1036,8 +1038,21 @@ function checkInput($input, type) {
     }
     assignInputCheckMsg($input, 'ok', '');
 }
-function submitGsxRequestForm($span, request) {
-    $('#repairForm_'+request).submit();
+function submitGsxRequestForm(prodId, request) {
+    var $prod = $('#prod_'+prodId);
+    var $form = null;
+    if (!$prod.length){
+        $form = $('#repairForm_'+request);
+    } else {
+        $form = $prod.find('#repairForm_'+request);
+    }
+    if (!$form.length) {
+        alert('Erreur: échec d\'identification du formulaire. Abandon');
+        return;
+    }
+    var partCount = $form.find('div.partDatasBlock').length;
+    $form.find('#partsCount').val(partCount);
+    $form.submit();
 }
 function getXMLHttpRequest() {
     var xhr = null;

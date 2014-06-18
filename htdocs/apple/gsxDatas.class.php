@@ -8,7 +8,7 @@ class gsxDatas {
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    public static $apiMode = 'ut';
+    public static $apiMode = 'it';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -58,19 +58,19 @@ class gsxDatas {
         $this->serial = $serial;
         if (count($this->gsx->errors['init']) || count($this->gsx->errors['soap'])) {
             $this->errors[] = 'GSX_init_error';
-//            echo 'error';
         } else {
             $this->connect = true;
         }
     }
 
     public function getLookupHtml($prodId) {
-        if (count($this->errors)) {
-            return '<p class="error">Impossible d\'afficher les informations demandées</p>' . "\n";
+        if (count($this->errors) || !$this->connect) {
+            return $this->getGSXErrorsHtml();
         }
 //        echo "<pre>";print_r($this->gsx->obtainCompTIA());die;
         $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
+        $html = '';
         if (isset($response) && count($response)) {
             if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
@@ -370,6 +370,28 @@ class gsxDatas {
         return $html;
     }
 
+    public function getGSXErrorsHtml() {
+        $html = '';
+        if (count($this->gsx->errors['init'])) {
+            $html .= '<p class="error">Erreur(s) de connection: <br/>';
+            $i = 1;
+            foreach ($this->gsx->errors['init'] as $errorMsg) {
+                $html .= $i . '. ' . $errorMsg;
+                $i++;
+            }
+            $html .= '</p>';
+        }
+        if (count($this->gsx->errors['soap'])) {
+            $html .= '<p class="error">Erreur(s) SOAP: <br/>';
+            $i = 1;
+            foreach ($this->gsx->errors['soap'] as $errorMsg) {
+                $html .= $i . '. ' . $errorMsg;
+                $i++;
+            }
+            $html .= '</p>';
+        }
+        return $html;
+    }
 }
 
 ?>

@@ -42,6 +42,8 @@ if (isset($_GET['action'])) {
                     $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                     if ($datas->connect)
                         echo $datas->getLookupHtml($_GET['prodId']);
+                    else
+                        echo $datas->getGSXErrorsHtml ();
                 } else {
                     echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
                 }

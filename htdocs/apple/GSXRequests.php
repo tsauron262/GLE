@@ -464,7 +464,7 @@ class GSX_Request {
         return $datas;
     }
 
-    public function processRequestForm($prodId) {
+    public function processRequestForm($prodId, $serial) {
 //        echo '<div>';
 //        echo '<p>POST:</p>';
 //        echo '<pre>';
@@ -502,7 +502,7 @@ class GSX_Request {
 //            print_r($requestDatas);
 //            echo '</pre>';
             $html .= '<div class="singleRequestFormContainer">' . "\n";
-            $html .= $this->generateRequestFormHtml($requestDatas, $prodId);
+            $html .= $this->generateRequestFormHtml($requestDatas, $prodId, $serial);
             $html .= '</div>';
             return $html;
         }

@@ -8,7 +8,7 @@ class gsxDatas {
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    public static $apiMode = 'it';
+    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -331,7 +331,7 @@ class gsxDatas {
 
     public function processRequestForm($prodId, $requestType) {
         $GSXRequest = new GSX_Request($requestType);
-        $result = $GSXRequest->processRequestForm($prodId);
+        $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
         if ($GSXRequest->isLastRequestOk()) {
 

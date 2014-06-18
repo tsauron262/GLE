@@ -229,30 +229,26 @@ $js .= <<<EOF
 divActCli = initCtrlV = null;
 setInterval("blink(divActCli)",500);
 function initCopyColler(){
-    $(elem).addClass("actif");
+//    $(elem).addClass("actif");
         var ctrlDown = false;
-        var ctrlKey = 17, pommeKey = 9, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
+        var ctrlKey = 17, pommeKey = 91, vKey = 86, cKey = 67, xKey = 88, zKey = 90;
         var survol = false;
-        $(document).keydown(function(e)
-        {
-            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
-                ctrlDown = true;
-        }).keyup(function(e)
-        {
-            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
-                ctrlDown = false;
-        });
+        
         $(".wc-cal-event").mouseover(function()
         {
             survol = $(this).find(".idAction").attr("value");
         }).mouseout(function() {
             survol = null;
         });
-
+        
         $(document).keydown(function(e)
         {
-//        alert(e.keyCode);
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+                ctrlDown = true;
+        
+//        alert(e.keyCode+" | "+ctrlDown);
             if (ctrlDown && (((e.keyCode == cKey || e.keyCode == xKey) && survol) || e.keyCode == zKey)){
+//        alert("copiecoupe");
                 divAct =  $(".idAction[value='"+survol+"']").parent().parent();
                 divActs =  $(".idAction").parent().parent();
                 divActs.css({ 'opacity' : 0.8 });
@@ -273,6 +269,10 @@ function initCopyColler(){
                 alert("Dessiner à l'endroit souhaité");
                 initCtrlV = true;
             }
+        }).keyup(function(e)
+        {
+            if (e.keyCode == ctrlKey || e.keyCode == pommeKey)
+                ctrlDown = false;
         });
         
         

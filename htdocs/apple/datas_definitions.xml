@@ -32,6 +32,9 @@
     <def name="addressLine4" type="text" max="40" jsCheck="text">
         <label>Adresse ligne 4</label>
     </def>
+    <def name="street" type="text" max="40" jsCheck="text">
+        <label>Rue</label>
+    </def>
     <def name="city" type="text" max="40" jsCheck="text">
         <label>Ville</label>
     </def>
@@ -70,7 +73,7 @@
     <def name="zipCode" type="text" max="10" jsCheck="zipCode">
         <label>Code postal</label>
     </def>
-    <def name="emailAdresse" type="email" max="241" jsCheck="email">
+    <def name="emailAddress" type="email" max="241" jsCheck="email">
         <label>Adresse e-mail</label>
     </def>
 

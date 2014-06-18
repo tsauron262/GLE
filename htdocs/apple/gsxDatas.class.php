@@ -353,9 +353,9 @@ class gsxDatas {
                 $html .= '</p>' . "\n";
             } else {
                 $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
-//            $html .= '<pre>';
-//            $html .= print_r($this->gsx->outputFormat($response));
-//            $html .= '</pre>';
+            $html .= '<pre>';
+            $html .= print_r($this->gsx->outputFormat($response));
+            $html .= '</pre>';
             }
 
             $html .= '</div>';

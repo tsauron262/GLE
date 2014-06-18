@@ -30,8 +30,9 @@
                     <data name="addressLine2" required="0"></data>
                     <data name="addressLine3" required="0"></data>
                     <data name="addressLine4" required="0"></data>
+                    <data name="street" required="1"></data>
                     <data name="city" required="1"></data>
-                    <data name="companyName" required="0"></data>
+                    <data name="companyName" required="1"></data>
                     <data name="country" required="1"></data>
                     <data name="firstName" required="1"></data>
                     <data name="lastName" required="1"></data>
@@ -40,7 +41,7 @@
                     <data name="regionCode" required="1" default="004"></data>
                     <data name="state" required="1" default="FRA"></data>
                     <data name="zipCode" required="1"></data>
-                    <data name="emailAdresse" required="1"></data>
+                    <data name="emailAddress" required="1"></data>
                 </datas>
             </data>
             <data name="checkIfOutOfWarrantyCoverage" required="0" default="N"></data>

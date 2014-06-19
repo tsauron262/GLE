@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <request name="CreateCarryInReturnBeforeReplace" type="repair">
+<!--    <request name="CreateCarryInReturnBeforeReplace" type="repair">
         <label>Création d'une réparation de type "Retour avant Remplacement"</label>
         <datas>
             <data name="diagnosedByTechId" required="0"></data>
@@ -49,6 +49,62 @@
             <data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>
             <data name="requestReviewByApple" required="0" default="N"></data>
             <data name="componentCheckReview" required="0" default="N"></data>
+            <data name="fileName" required="0"></data>
+            <data name="fileData" required="0"></data>
+        </datas>
+    </request>-->
+
+    <request name="CreateCarryIn" type="repair">
+        <label>Création d'une réparation en magasin (carry-in repair)"</label>
+        <datas>
+            <data name="diagnosedByTechId" required="1"></data>
+            <data name="serialNumber" required="1"></data>
+            <data name="referenceNumber" required="0"></data>
+            <data name="shipTo" required="1"></data>
+            <data name="billTo" required="0"></data>
+            <data name="poNumber" required="1"></data>
+            <data name="unitReceivedDate" required="1"></data>
+            <data name="unitReceivedTime" required="1"></data>
+            <data name="serviceType" required="0" default=""></data>
+            <data name="diagnosis" required="1"></data>
+            <data name="symptom" required="1"></data>
+            <data name="notes" required="0"></data>
+            <data name="orderLines" required="1">
+                <datas>
+                    <data name="partNumber" required="1"></data>
+                    <data name="comptiaCode" required="1"></data>
+                    <data name="comptiaModifier" required="1"></data>
+                    <data name="abused" required="0" default="N"></data>
+                    <data name="returnableDamage" required="0" default="N"></data>
+                    <data name="coveredByACPlus" required="0" default="N"></data>
+                </datas>
+            </data>
+            <data name="customerAddress" required="1">
+                <datas>
+                    <data name="addressLine1" required="1"></data>
+                    <data name="addressLine2" required="0"></data>
+                    <data name="addressLine3" required="0"></data>
+                    <data name="addressLine4" required="0"></data>
+                    <data name="street" required="1"></data>
+                    <data name="city" required="1"></data>
+                    <data name="companyName" required="1"></data>
+                    <data name="country" required="1"></data>
+                    <data name="firstName" required="1"></data>
+                    <data name="lastName" required="1"></data>
+                    <data name="primaryPhone" required="1"></data>
+                    <data name="secondaryPhone" required="0"></data>
+                    <data name="regionCode" required="1" default="004"></data>
+                    <data name="state" required="1" default="FRA"></data>
+                    <data name="zipCode" required="1"></data>
+                    <data name="emailAddress" required="1"></data>
+                </datas>
+            </data>
+            <data name="checkIfOutOfWarrantyCoverage" required="0" default="N"></data>
+            <data name="popFaxed" required="0" default="N"></data>
+            <data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>
+            <data name="requestReviewByApple" required="0" default="N"></data>
+            <data name="componentCheckReview" required="0" default="N"></data>
+            <data name="isNonReplenished" required="0" default="N"></data>
             <data name="fileName" required="0"></data>
             <data name="fileData" required="0"></data>
         </datas>

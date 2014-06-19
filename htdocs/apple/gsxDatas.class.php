@@ -3,7 +3,6 @@
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 
 class gsxDatas {
-
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
@@ -323,8 +322,30 @@ class gsxDatas {
 
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
-        $valDef['diagnosis'] = $chrono->description;
-        $valDef['unitReceivedTime'] = "14:30";
+//        $valDef['diagnosis'] = $chrono->description;
+        $valDef['diagnosis'] = 'Ecran défectueux (cassé)';
+        $valDef['symptom'] = 'Ecran défectueux (cassé)';
+        $valDef['diagnosedByTechId'] = 'FRA3Q410';
+        $valDef['unitReceivedTime'] = "15:13";
+        $valDef['unitReceivedDate'] = '19/06/2014';
+        $valDef['customerAddress'] = array(
+            'addressLine1' => '549 ROUTE DE LA PETIT JOUX',
+            'city' => 'VALLEIRY',
+            'country' => 'FRANCE',
+            'firstName' => 'KARINE',
+            'lastName' => 'THOMAS',
+            'companyName' => 'KARINE THOMAS',
+            'primaryPhone' => '0601141335',
+            'regionCode' => '004',
+            'state' => 'FRA',
+            'zipCode' => '74520',
+            'emailAddress' => 't.pascal74@orange.fr',
+            'street' => 'ROUTE DE LA PETIT JOUX'
+            );
+        $valDef['shipTo'] = '100520';
+        $valDef['poNumber'] = 'SAV1406004';
+        $valDef['billTo'] = '100520';
+
 //        print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
@@ -337,11 +358,12 @@ class gsxDatas {
 
             $html .= '<div class="requestResponseContainer">';
 
-            $client = $GSXRequest->requestName;
+            $client = $GSXRequest->requestName . 'Repair';
             $request = $GSXRequest->requestName . 'Request';
             $wrapper = 'repairData';
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
+
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";

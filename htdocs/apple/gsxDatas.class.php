@@ -3,7 +3,6 @@
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 
 class gsxDatas {
-
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
@@ -362,17 +361,18 @@ class gsxDatas {
 
     public function processRequestForm($prodId, $requestType) {
         $GSXRequest = new GSX_Request($requestType);
-        $result = $GSXRequest->processRequestForm($prodId);
+        $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
         if ($GSXRequest->isLastRequestOk()) {
 
             $html .= '<div class="requestResponseContainer">';
 
-            $client = $GSXRequest->requestName;
+            $client = $GSXRequest->requestName . 'Repair';
             $request = $GSXRequest->requestName . 'Request';
             $wrapper = 'repairData';
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
+
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";

@@ -67,6 +67,15 @@
             <val val="007">Amérique du sud</val>
         </values>
     </def>
+    <def name="serviceType" type="select">
+        <label>Type de service</label>
+        <values>
+            <val val="0">Non spécifié</val>
+            <val val="RFD">RFD</val>
+            <val val="RPL">RPL</val>
+            <val val="SVC">SVC</val>
+        </values>
+    </def>
     <def name="state" type="text" max="3" jsCheck="text">
         <label>Etat</label>
     </def>
@@ -163,5 +172,8 @@
 
     <def name="isPartDOA" type="YesNo">
         <label>DOA?</label>
+    </def>
+    <def name="isNonReplenished" type="YesNo">
+        <label>Des pièces doivent-elles être rechargées?</label>
     </def>
 </root>

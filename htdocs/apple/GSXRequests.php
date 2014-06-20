@@ -4,7 +4,6 @@ require_once DOL_DOCUMENT_ROOT . '/apple/GSX.class.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/XMLDoc.class.php';
 
 class GSX_Request {
-
     protected $errors = array();
     protected $lastError = null;
     protected $defsDoc = null;
@@ -223,7 +222,7 @@ class GSX_Request {
                 case 'select':
                     if (isset($defs['values'])) {
                         $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' ) . '>';
-                        $html .= '<option value="0">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
+//                        $html .= '<option value="">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
                         foreach ($defs['values'] as $v => $txt) {
                             $html .= '<option value="' . $v . '"';
                             if (isset($values[$name])) {
@@ -464,7 +463,7 @@ class GSX_Request {
         return $datas;
     }
 
-    public function processRequestForm($prodId) {
+    public function processRequestForm($prodId, $serial) {
 //        echo '<div>';
 //        echo '<p>POST:</p>';
 //        echo '<pre>';
@@ -502,7 +501,7 @@ class GSX_Request {
 //            print_r($requestDatas);
 //            echo '</pre>';
             $html .= '<div class="singleRequestFormContainer">' . "\n";
-            $html .= $this->generateRequestFormHtml($requestDatas, $prodId);
+            $html .= $this->generateRequestFormHtml($requestDatas, $prodId, $serial);
             $html .= '</div>';
             return $html;
         }
@@ -518,7 +517,6 @@ class GSX_Request {
     public function isLastRequestOk() {
         return $this->requestOk;
     }
-
 }
 
 ?>

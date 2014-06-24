@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
@@ -29,7 +29,7 @@ while ($ligne = $db->fetch_object($result)) {
     $tabColor = array(50 => "#BBCCFF", 5 => "purple", 2 => "red",
         51 => "red", 54 => "red", 55 => "red", 58 => "red", 66 => "red",
         52 => "blue", 53 => "blue", 56 => "blue", 57 => "blue", 63 => "blue",
-        60 => "green", 63 => "green",
+        60 => "orange", 63 => "green",
         61 => 'purple',
         64 => "gray", 65 => "gray");
     $colorStr = '';

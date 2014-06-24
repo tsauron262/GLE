@@ -1068,7 +1068,7 @@ if ($id > 0)
 
 
         /* deb mod drsi */
-        echo "<h3>Actions liées</h3>";
+        echo "<h3>Participants</h3>";
 //        $object = $object;
         $idObj = $object->id;
         $object->fetch($idObj);

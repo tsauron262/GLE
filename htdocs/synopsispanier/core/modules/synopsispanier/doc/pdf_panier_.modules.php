@@ -79,6 +79,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
 
 
 
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -122,7 +123,6 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //            } else {
 //                $panier->fetch_lines(true);
 //            }
-
             // Definition de $dir et $file
             if (isset($panier->specimen) && $panier->specimen) {
                 $dir = $conf->synopsispanier->dir_output;
@@ -156,15 +156,13 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //                    $pdf = new FPDI('P', 'mm', $this->format);
 //                }
                 $pdf = pdf_getInstance($this->format);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
                     $pdf->setPrintFooter(false);
                 }
 
                 $pdf1 = pdf_getInstance($this->format);
-                if (class_exists('TCPDF'))
-                {
+                if (class_exists('TCPDF')) {
                     $pdf1->setPrintHeader(false);
                     $pdf1->setPrintFooter(false);
                 }
@@ -187,7 +185,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //                }
 //
 //
-//                $pdf->SetAutoPageBreak(1, 0);
+                $pdf->SetAutoPageBreak(1, 0);
 //                if (class_exists('TCPDF')) {
 //                    $pdf->setPrintHeader(false);
 //                    $pdf->setPrintFooter(false);
@@ -204,7 +202,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
 
 
                 $pdf->SetTitle("Panier");
-                
+
                 $pdf->SetSubject($outputlangs->transnoentities("Panier"));
                 $pdf->SetCreator("GLE " . GLE_VERSION);
                 $pdf->SetAuthor($user->getFullName($langs));
@@ -217,7 +215,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
                 global $db;
                 $societe = new Societe($db);
 //                $panier = new Object();
-                require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
                 $panier->societe = new Societe($db);
                 $panier->societe->fetch($panier->id);
                 $this->_pagehead($pdf, $panier, 1, $outputlangs);
@@ -226,26 +224,33 @@ class pdf_panier_ extends ModeleSynopsispanier {
                 //Titre Page 1
                 $pdf->SetXY(49, 42);
                 $pdf->MultiCell(157, 6, 'Panier de ' . $panier->societe->getFullName($outputlangs), 0, 'C');
-                
-                $requeteMomo = "SELECT valeur FROM ".MAIN_DB_PREFIX."Synopsys_Panier where type='tiers' and referent = ".$panier->id.";";
+
+                $requeteMomo = "SELECT valeur FROM " . MAIN_DB_PREFIX . "Synopsys_Panier where type='tiers' and referent = " . $panier->id . ";";
                 $result = $this->db->query($requeteMomo);
                 $g = 70;
-                while ($ligne = $this->db->fetch_object($result))
-                {
+                while ($ligne = $this->db->fetch_object($result)) {
                     $societe->fetch($ligne->valeur);
                     $pdf->SetXY(50, $g);
-                    $pdf->MultiCell(120, 80, 'Nom: ' . $societe->getFullName($outputlangs)."\n".'Adresse: ' . $societe->getFullAddress(), 0, '');
+                    $pdf->MultiCell(120, 40, 'Nom: ' . $societe->getFullName($outputlangs) . "\n" . 'Adresse: ' . $societe->getFullAddress(), 0, '');
 //                    $pdf->SetXY(50, $g+5);
 //                    $pdf->MultiCell(160, 80, 'Adresse: ' . $societe->getFullAddress(), 0, '');
                     $g += 30;
-                    
-                } 
+                    if ($g > 248) {
+                        $this->_pagefoot($pdf, $panier, $outputlangs);
+                        $pdf->AddPage();
+                        $this->_pagehead($pdf, $panier, 1, $outputlangs);
+                $pdf->SetFont('', 'B', 12);
+                        $g = 40;
+                    }
+                }
                 //Titre Page 1
-                
-               
-                
-                
-                if (method_exists($pdf,'AliasNbPages')) $pdf->AliasNbPages();
+
+
+                $this->_pagefoot($pdf, $panier, $outputlangs);
+
+
+                if (method_exists($pdf, 'AliasNbPages'))
+                    $pdf->AliasNbPages();
                 $pdf->Close();
 
                 $this->file = $file;
@@ -335,18 +340,21 @@ class pdf_panier_ extends ModeleSynopsispanier {
         //Société
         global $mysoc;
 
-        $pdf->SetXY(3.5, 269);
+        $Y = 235;
+        $pdf->SetXY(3.5, $Y + 20);
         $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->address), 0, "L");
-        $pdf->SetXY(3.5, 273);
+        $pdf->SetXY(3.5, $Y + 25);
         $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->zip . " " . $mysoc->town), 0, "L");
-        $pdf->SetXY(3.5, 278);
-        $pdf->MultiCell(39, 4, utf8_encodeRien("Tél. : " . $mysoc->phone), 0, "L");
-        $pdf->SetXY(3.5, 282);
-        $pdf->MultiCell(39, 4, "Fax  : " . $mysoc->fax, 0, "L");
+        $pdf->SetXY(3.5, $Y + 30);
+        if ($mysoc->phone != "")
+            $pdf->MultiCell(39, 4, utf8_encodeRien("Tél. : " . $mysoc->phone), 0, "L");
+        $pdf->SetXY(3.5, $Y + 35);
+        if ($mysoc->fax != "")
+            $pdf->MultiCell(39, 4, "Fax  : " . $mysoc->fax, 0, "L");
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('', '', 7);
-        $ligne = "SA OLYS";
+        $ligne = $mysoc->name;
         if (defined('MAIN_INFO_CAPITAL'))
             $ligne .= " au capital de " . MAIN_INFO_CAPITAL;
         if (defined('MAIN_INFO_RCS'))
@@ -357,18 +365,18 @@ class pdf_panier_ extends ModeleSynopsispanier {
             $ligne .= " - APE " . MAIN_INFO_APE;
         if (defined('MAIN_INFO_TVAINTRA'))
             $ligne .= " - TVA/CEE " . MAIN_INFO_TVAINTRA;
-        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
+        $ligne .= "\n\n" . "Document généré par GLE Copyright © DRSI & Maurice PONS";
 
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
 
-        $pdf->SetXY(48, 285);
+        $pdf->SetXY(48, $Y + 50);
         $pdf->MultiCell(157, 3, $ligne, 0, "C");
-        $pdf->line(48, 282, 205, 282);
+        $pdf->line(48, $Y + 44, 205, $Y + 44);
 
         $pdf->SetFont('', 'B', 8);
         $pdf->SetTextColor(255, 63, 50);
-        $pdf->SetXY(192, 292);
+        $pdf->SetXY(192, $Y + 55);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
 
         //return pdf_pagefoot($pdf, $panier,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);

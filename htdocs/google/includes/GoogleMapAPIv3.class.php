@@ -12,6 +12,8 @@
  * @copyright      (c) 2013  Laurent Destailleur
  * @version        2013-07-23
  */
+
+
 class GoogleMapAPI
 {
 	/** GoogleMap ID for the HTML DIV  **/
@@ -391,6 +393,7 @@ class GoogleMapAPI
 		$this->centerLat = (float)($this->minLat + $this->maxLat) / 2;
 
 		$this->contentMarker .= "\t" . 'addMarker(new google.maps.LatLng("' . $lat . '","' . $lng . '"),"' . $this->g_dol_escape_js($title,2) . '","' . $this->g_dol_escape_js($html,2) . '","' . $this->g_dol_escape_js($category,2) . '","' . $icon . '");' . "\n";
+                
 	}
 
 	/**
@@ -472,7 +475,35 @@ class GoogleMapAPI
 			$html.= '<br/>'.$addPropre.'<br/>';
 			if (! empty($elem->url)) $html.= '<a href="'.$elem->url.'">'.$elem->url.'</a><br/>';
 			$html.= '<br/>'.$lienGmaps.'<br/>';
+                        
+                        /* mod drsi(Momo) */ 
+                        $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
+                        $type = 'tiers';
+                        global $db;
+                        $requeteMomo = "SELECT valeur FROM ".MAIN_DB_PREFIX."Synopsys_Panier WHERE type='".$type."' AND referent=".$idReferent.";";
+                        $result = $db->query($requeteMomo);
+                        $present = false;
+                        while ($ligne = $db->fetch_object($result))
+                        {
+                            if ($elem->id == $ligne->valeur)
+                            {
+                            
+                                $present=true;
+                                break;
+                            }
+                        } 
+                        
+                            $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
 
+                            $html .= "<a ".(!$present?"style='display:none;'":"")." class= 'supPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'sup');$(this).hide();$(this).parent().find('.ajPan').show();\">Retirer du Panier.</a>";
+                            $html .= "<a href= '".DOL_URL_ROOT."/synopsispanier/affichePanier.php?idReferent=".$idReferent."&type=".$type."'> Afficher le Panier.</a>";/*fmod drsi*/
+                        
+                            
+                        if ($present)
+                            $icon = 'img/imageMarker2.png ';
+                        else
+                            $icon = false;
+                        /*fmod drsi(Momo) */
 			if(isset($elem->latitude) && isset($elem->longitude)) {
 				$this->addMarkerByCoords($elem->latitude, $elem->longitude, $elem->name, $html, '', $icon);
 			}
@@ -625,6 +656,10 @@ class GoogleMapAPI
 		$this->content .= "\t\t\t" . 'icon:  new google.maps.MarkerImage(icon, new google.maps.Size(' . $this->iconWidth . ',' . $this->iconHeight . ')),' . "\n";
 		$this->content .= "\t\t\t" . 'position: latlng' . "\n";
 		$this->content .= "\t\t" . '});' . "\n";
+                
+                /*mod drsi*/$this->content .= "google.maps.event.addListenerOnce(marker, 'click', function(){
+                markerActif = this;"
+                ."});";/*fmod drsi*/
 
 		// Display direction inputs in the info window
 		if ($this->displayDirectionFields == true) {
@@ -767,6 +802,7 @@ class GoogleMapAPI
 
 		//Goole map Div Id
 		$this->content .= "\t" . 'map = new google.maps.Map(document.getElementById("' . $this->googleMapId . '"), myOptions);' . "\n";
+
 
 		// Center
 		if ($this->enableAutomaticCenterZoom == true) {

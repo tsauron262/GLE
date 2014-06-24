@@ -96,7 +96,7 @@ else
  * View
  */
 
-llxheader();
+llxheader('<script type="text/javascript" src="'.DOL_URL_ROOT.'/synopsispanier/js/Panier.js"></script>');
 
 $form=new Form($db);
 

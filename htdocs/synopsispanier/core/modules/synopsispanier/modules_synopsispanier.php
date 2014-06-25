@@ -109,7 +109,7 @@ class ModeleSynopsispanier extends CommonDocGenerator
         \param        outputlangs        objet lang a utiliser pour traduction
         \return     int             0 si KO, 1 si OK
 */
-function panier_pdf_create($db, $id, $modele='', $outputlangs='')
+function panier_pdf_create($db, $object, $modele='', $outputlangs='')
 {
     global $langs, $conf;
     $langs->load("babel");
@@ -150,14 +150,10 @@ function panier_pdf_create($db, $id, $modele='', $outputlangs='')
 //        $requete = "UPDATE ".MAIN_DB_PREFIX."panier SET modelPdf= '".$modele."' WHERE rowid=".$id;
 //        $db->query($requete);
         $obj = new $classname($db);
-
-        $panier = new Object();
-        $panier->ref = $id;
-        $panier->id = $id;
-        if ($obj->write_file($panier, $outputlangs) > 0)
+        if ($obj->write_file($object, $outputlangs) > 0)
         {
             // on supprime l'image correspondant au preview
-            panier_delete_preview($db, $id);
+            panier_delete_preview($db, $object->ref);
             return 1;
         } else {
             dol_syslog("Erreur dans panier_pdf_create");

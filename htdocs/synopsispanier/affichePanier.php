@@ -6,9 +6,14 @@
  * and open the template in the editor.
  */
 require_once('../main.inc.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsispanier/class/synopsispanier.class.php');
 llxHeader();
 
+$panier= new Synopsispanier($db);
+$panier->fetch($_REQUEST["idReferent"], $_REQUEST["type"]);
 
+$para = "idReferent=" . $_REQUEST['idReferent']."&type=".$_REQUEST['type'];
+echo "<div class='lienHautDroite2'><a class='butAction' href='".DOL_URL_ROOT."/google/gmaps_all.php?".$para."'> Mode Carte </a></div>";
 
 if (isset($_REQUEST['type']) && $_REQUEST['type'] == "tiers" && $_REQUEST['idReferent'] > 0) {
     require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
@@ -55,36 +60,45 @@ if (isset($_REQUEST['type']) && $_REQUEST['type'] == "tiers" && $_REQUEST['idRef
     print "</table></form> ";
 }
 
-$para = "idReferent=" . $_REQUEST['idReferent'] . "&type=" . $_REQUEST['type'];
+
+
+
 
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
-//    if ($conf->global->MAIN_MODULE_BABELGA == 1 && $_REQUEST['id'] > 0 && ($object->typepanier == 6 || $object->typepanier == 5)) {
-//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsispanier/modules_panierGA.php");
-//        panierGA_pdf_create($db, $object->id, $_REQUEST['model']);
-//    } else {//if ($conf->global->MAIN_MODULE_BABELGMAO == 1 && $_REQUEST['id'] > 0 && ($object->typepanier == 7 || $object->typepanier == 2 || $object->typepanier == 3 || $object->typepanier == 4)) {
-    require_once(DOL_DOCUMENT_ROOT . "/synopsispanier/core/modules/synopsispanier/modules_synopsispanier.php");
-    $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+        require_once(DOL_DOCUMENT_ROOT . "/synopsispanier/core/modules/synopsispanier/modules_synopsispanier.php");
+            $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+            panier_pdf_create($db, $panier, $model);
+            header('location: affichePanier.php?'.$para . "#documentAnchor");
+        }
 
-    panier_pdf_create($db, $_REQUEST['idReferent'], $model);
-//    } else {
-//        require_once(DOL_DOCUMENT_ROOT . "/core/modules/synopsispanier/modules_synopsispanier.php");
-//        panier_pdf_create($db, $object->id, $_REQUEST['model']);
-//    }
-    header('location: affichePanier.php?' . $para . "#documentAnchor");
+if(isset($_REQUEST["del_element"])){
+    $panier->deleteElement($_REQUEST["del_element"]);
 }
 
+if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'add_element')
+    $panier->addElement($_REQUEST["addElement"]);
 
-$societe = new Societe($db);
-$requeteMomo = "SELECT valeur FROM " . MAIN_DB_PREFIX . "Synopsys_Panier where type='" . $_REQUEST['type'] . "' and referent = " . $_REQUEST['idReferent'] . ";";
-$result = $db->query($requeteMomo);
-while ($ligne = $db->fetch_object($result)) {
-    $societe->fetch($ligne->valeur);
-    echo $societe->getNomUrl(1);
+
+
+
+foreach ($panier->val as $ligne) {
+    echo $ligne->getNomUrl(1);
     echo "<br/>";
-    echo $societe->getFullAddress();
+    echo $ligne->getFullAddress();
+    echo "<br/>";
+    echo "<a href='?".$para."&del_element=".$ligne->id."'> Supprimer du Panier.</a>";
     echo "<br/>";
     echo "<br/>";
 }
+$filter= array(0);
+foreach ($panier->val as $id => $ligne){
+    $filter[]=$id;
+}
+echo "<form method='post' action='?".$para."&action=add_element'>" ;
+echo $form->select_thirdparty('', 'addElement', "rowid not in(".implode(',',$filter).")")."<br />";
+echo "<input type='submit' class='butAction' value='Ajouter au Panier'/>";
+echo "<br/><br/>";
+echo "</form>";
 
 
 dol_fiche_end();

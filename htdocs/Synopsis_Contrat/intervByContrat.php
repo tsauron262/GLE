@@ -578,7 +578,6 @@ function sec2time($sec) {
 
 
 function duree_to_secondes($duree){
-    echo $duree;
 	$array_duree=explode(":",$duree);
 	$secondes=3600*$array_duree[0]+60*$array_duree[1]+$array_duree[2];
 	return $secondes;

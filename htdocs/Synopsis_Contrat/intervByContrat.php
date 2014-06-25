@@ -262,23 +262,23 @@ print "<td>Réalisé <td " . ($pourcPro > 100 ? "style='color:red'" : "") . "> "
 
 
 print '<tr>';
+$sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` cv WHERE `key_id` = 1037 AND c.model_refid = 100 AND cv.chrono_refid = c.id AND cv.value= " . $contrat->id . $val['Sup'] . " GROUP by c.id");
+$i = 0;
+while ($result = $db->fetch_object($sql)) {
+    $i++;
+    $tabId [] = $result->id;
+}
 $tabDiff = array(array("Titre" => "Appel Total", "Sup" => ""), 
                   array("Titre" => "Appel 1 An", "Sup" => " AND DATE(c.date_create) > DATE_ADD(NOW(), INTERVAL -1 YEAR)"));
 foreach ($tabDiff as $val) {
-    $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c, `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` cv WHERE `key_id` = 1037 AND c.model_refid = 100 AND cv.chrono_refid = c.id AND cv.value= " . $contrat->id . $val['Sup'] . " GROUP by c.id");
-    $i = 0;
-    while ($result = $db->fetch_object($sql)) {
-        $i++;
-        $tabId [] = $result->id;
-    }
     
     $duree = 0;
     if($i > 0){
     $sql2 = $db->query("SELECT SUM(TIMEDIFF(STR_TO_DATE(cv2.value, '%d/%m/%Y %H:%i'), 
 STR_TO_DATE(cv1.value, '%d/%m/%Y %H:%i'))) as sum
  FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value cv1, " . MAIN_DB_PREFIX . "Synopsis_Chrono_value cv2 WHERE cv1.chrono_refid = cv2.chrono_refid AND cv1.key_id = 1031 AND cv2.key_id = 1033 AND cv1.chrono_refid IN(" . implode(",", $tabId) . ") GROUP BY cv1.chrono_refid");
-    $result2 = $db->fetch_object($sql2);
-    $duree = $result2->sum;
+    while($result2 = $db->fetch_object($sql2))
+    $duree += $result2->sum;
 }
     print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $duree / 100 . " minutes)</td>";
 }

@@ -120,6 +120,7 @@ if ($mode=='thirdparty')
     
     
     /* mod drsi*/
+$para = "idReferent=" . $_REQUEST['idReferent']."&type=".$_REQUEST['type'];
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 $htmlother=new FormOther($db);
 	// Filter on categories
@@ -127,7 +128,7 @@ $htmlother=new FormOther($db);
         $search_categ = $_REQUEST['search_categ'];
 	if (! empty($conf->categorie->enabled))
 	{
-		$moreforfilter.='<form>';
+		$moreforfilter.='<form action="?'.$para.'" method="post">';
 		$moreforfilter.=$langs->trans('Categories'). ': ';
 		$moreforfilter.=$htmlother->select_categories(1,$search_categ,'search_categ',1);
 		$moreforfilter.=' &nbsp; &nbsp; &nbsp; ';
@@ -228,7 +229,6 @@ else if ($mode=='patient')
 
 
 
-$para = "idReferent=" . $_REQUEST['idReferent']."&type=".$_REQUEST['type'];
 if (isset($_REQUEST['type']) && $_REQUEST['type'] == "tiers" && $_REQUEST['idReferent'] > 0) { 
     echo "<div class='lienHautDroite2'><a class='butAction' href='".DOL_URL_ROOT."/synopsispanier/affichePanier.php?".$para."'> Mode Liste </a></div>";
     require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';

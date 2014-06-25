@@ -268,19 +268,22 @@ while ($result = $db->fetch_object($sql)) {
     $i++;
     $tabId [] = $result->id;
 }
-$tabDiff = array(array("Titre" => "Appel Total", "Sup" => ""), 
-                  array("Titre" => "Appel 1 An", "Sup" => " AND DATE(c.date_create) > DATE_ADD(NOW(), INTERVAL -1 YEAR)"));
+$tabDiff = array(array("Titre" => "Appel Total", "Sup" => ""),
+    array("Titre" => "Appel 1 An", "Sup" => " AND DATE(c.date_create) > DATE_ADD(NOW(), INTERVAL -1 YEAR)"));
 foreach ($tabDiff as $val) {
-    
     $duree = 0;
-    if($i > 0){
-    $sql2 = $db->query("SELECT SUM(TIMEDIFF(STR_TO_DATE(cv2.value, '%d/%m/%Y %H:%i'), 
-STR_TO_DATE(cv1.value, '%d/%m/%Y %H:%i'))) as sum
+    if ($i > 0) {
+        $sql2 = $db->query("SELECT TIMEDIFF(STR_TO_DATE(cv2.value, '%d/%m/%Y %H:%i'), 
+STR_TO_DATE(cv1.value, '%d/%m/%Y %H:%i')) as sum
  FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value cv1, " . MAIN_DB_PREFIX . "Synopsis_Chrono_value cv2 WHERE cv1.chrono_refid = cv2.chrono_refid AND cv1.key_id = 1031 AND cv2.key_id = 1033 AND cv1.chrono_refid IN(" . implode(",", $tabId) . ") GROUP BY cv1.chrono_refid");
-    while($result2 = $db->fetch_object($sql2))
-    $duree += $result2->sum;
-}
-    print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $duree / 100 . " minutes)</td>";
+        while ($result2 = $db->fetch_object($sql2)){
+            $duree += duree_to_secondes($result2->sum);
+//            $dateT = new DateTime($result2->sum);
+//            echo $dateT.day;
+        }
+    }
+    $duree = sec2time($duree);
+    print "<td>" . $val['Titre'] . "</td><td>" . $i . " (" . $duree . ")</td>";
 }
 
 print "</tr>";
@@ -567,5 +570,17 @@ function sec2time($sec) {
     //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
     //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
     return ($returnstring);
+}
+
+
+
+
+
+
+function duree_to_secondes($duree){
+    echo $duree;
+	$array_duree=explode(":",$duree);
+	$secondes=3600*$array_duree[0]+60*$array_duree[1]+$array_duree[2];
+	return $secondes;
 }
 ?>

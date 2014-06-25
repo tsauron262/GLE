@@ -325,7 +325,7 @@ class gsxDatas {
 //        $valDef['diagnosis'] = $chrono->description;
         $valDef['diagnosis'] = 'Ecran défectueux (cassé)';
         $valDef['symptom'] = 'Ecran défectueux (cassé)';
-        $valDef['diagnosedByTechId'] = 'FRA3Q410';
+        $valDef['diagnosedByTechId'] = 'E93480FC4D';
         $valDef['unitReceivedTime'] = "15:13";
         $valDef['unitReceivedDate'] = '19/06/2014';
         $valDef['customerAddress'] = array(

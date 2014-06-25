@@ -343,6 +343,7 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg = "Bonjour " . $this->user_prisencharge->fullname . ",<br/><br/>";
                     $msg .= "Une nouvelle intervention est pr&eacute;vue chez " . $this->societe->getNomUrl(1, 6) . ".";
+                    $msg .= "<br/>Le ".  dol_print_date($this->date_delivery);
                     $msg .= "<br/>";
                     $msg .= "<br/>";
                     $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);

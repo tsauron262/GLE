@@ -63,3 +63,8 @@ text-align: center;
 .wc-day-column-last {
     border-right: 4px double #BBCCFF !important;
 }
+
+
+div.wc-cal-event div.wc-title,div.wc-cal-event div.wc-title a{
+    color: black!important;
+}

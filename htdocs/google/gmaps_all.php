@@ -226,9 +226,21 @@ else if ($mode=='patient')
 }
 //print $sql;
 
-print_fiche_titre($title);
 
-dol_fiche_head(array(), 'gmaps', '', 0);
+
+$para = "idReferent=" . $_REQUEST['idReferent']."&type=".$_REQUEST['type'];
+if (isset($_REQUEST['type']) && $_REQUEST['type'] == "tiers" && $_REQUEST['idReferent'] > 0) { 
+    echo "<div class='lienHautDroite2'><a class='butAction' href='".DOL_URL_ROOT."/synopsispanier/affichePanier.php?".$para."'> Mode Liste </a></div>";
+    require_once DOL_DOCUMENT_ROOT . '/core/lib/company.lib.php';
+    $object = new Societe($db);
+    $object->fetch($_REQUEST['idReferent']);
+    $head = societe_prepare_head($object);
+    dol_fiche_head($head, 'panier', $langs->trans("ThirdParty"), 0, 'company');
+}
+else {
+    print_fiche_titre($title);
+    dol_fiche_head(array(), 'gmaps', '', 0);
+}
 
 
 // Fill array of contacts

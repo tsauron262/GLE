@@ -12,7 +12,7 @@
  * @copyright      (c) 2013  Laurent Destailleur
  * @version        2013-07-23
  */
-
+require_once(DOL_DOCUMENT_ROOT.'/synopsispanier/class/synopsispanier.class.php');
 
 class GoogleMapAPI
 {
@@ -444,6 +444,11 @@ class GoogleMapAPI
 	 */
 	public function addArrayMarker($tabAddresses, $langs, $mode)
 	{
+                global $db;
+                $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
+                $type = 'tiers'; 
+                $panier= new Synopsispanier($db);
+                $panier->fetch($idReferent, $type);
 		$this->langs = $langs;
 
 		// Detect if we use https
@@ -476,22 +481,9 @@ class GoogleMapAPI
 			if (! empty($elem->url)) $html.= '<a href="'.$elem->url.'">'.$elem->url.'</a><br/>';
 			$html.= '<br/>'.$lienGmaps.'<br/>';
                         
-                        /* mod drsi(Momo) */ 
-                        $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
-                        $type = 'tiers';
-                        global $db;
-                        $requeteMomo = "SELECT valeur FROM ".MAIN_DB_PREFIX."Synopsys_Panier WHERE type='".$type."' AND referent=".$idReferent.";";
-                        $result = $db->query($requeteMomo);
-                        $present = false;
-                        while ($ligne = $db->fetch_object($result))
-                        {
-                            if ($elem->id == $ligne->valeur)
-                            {
-                            
-                                $present=true;
-                                break;
-                            }
-                        } 
+                        /* mod drsi(Momo) */
+                        $present = $panier->getPresenceDB ($elem->id);
+                        
                         
                             $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
 

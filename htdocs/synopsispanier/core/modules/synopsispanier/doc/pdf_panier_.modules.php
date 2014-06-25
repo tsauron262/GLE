@@ -212,12 +212,8 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
 //                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
                 // Tete de page
-                global $db;
-                $societe = new Societe($db);
 //                $panier = new Object();
-                require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
-                $panier->societe = new Societe($db);
-                $panier->societe->fetch($panier->id);
+
                 $this->_pagehead($pdf, $panier, 1, $outputlangs);
                 $pdf->SetFont('', 'B', 12);
 
@@ -225,11 +221,8 @@ class pdf_panier_ extends ModeleSynopsispanier {
                 $pdf->SetXY(49, 42);
                 $pdf->MultiCell(157, 6, 'Panier de ' . $panier->societe->getFullName($outputlangs), 0, 'C');
 
-                $requeteMomo = "SELECT valeur FROM " . MAIN_DB_PREFIX . "Synopsys_Panier where type='tiers' and referent = " . $panier->id . ";";
-                $result = $this->db->query($requeteMomo);
                 $g = 70;
-                while ($ligne = $this->db->fetch_object($result)) {
-                    $societe->fetch($ligne->valeur);
+                foreach ($panier->val as $societe) {
                     $pdf->SetXY(50, $g);
                     $pdf->MultiCell(120, 40, 'Nom: ' . $societe->getFullName($outputlangs) . "\n" . 'Adresse: ' . $societe->getFullAddress(), 0, '');
 //                    $pdf->SetXY(50, $g+5);

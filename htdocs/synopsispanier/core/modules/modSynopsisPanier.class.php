@@ -84,7 +84,7 @@ class modSynopsisPanier extends DolibarrModules
 
         $this->menus = array();            // List of menus to add
         
-        $this->tabs = array('thirdparty:+panier:Panier:synopsisGene@Synopsis_Tools:/google/gmaps_all.php?idReferent=__ID__');
+        $this->tabs = array('thirdparty:+panier:Panier:synopsisGene@Synopsis_Tools:/synopsispanier/affichePanier.php?idReferent=__ID__&type=tiers');
     }
    /**
     *   \brief      Fonction appelee lors de l'activation du module. Insere en base les constantes, boites, permissions du module.

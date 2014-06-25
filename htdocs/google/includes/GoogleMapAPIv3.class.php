@@ -446,9 +446,8 @@ class GoogleMapAPI
 	{
                 global $db;
                 $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
-                $type = 'tiers'; 
                 $panier= new Synopsispanier($db);
-                $panier->fetch($idReferent, $type);
+                $panier->fetch($idReferent, $_REQUEST['type']);
 		$this->langs = $langs;
 
 		// Detect if we use https

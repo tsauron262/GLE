@@ -43,6 +43,8 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 $enJour = false;
 
 
+$tabIdFi = array();
+
 
 $html = new Form($db);
 if ($user->societe_id > 0) {
@@ -300,7 +302,7 @@ if ($resql) {
         $di->fetch($objp->fichid);
 
         $total_ht += $objp->total_ht;
-
+        $tabIdFi[] = $di->id;
         print "<td>" . $di->getNomUrl(1) . "</td>\n";
 
         if (empty($socid)) {
@@ -337,10 +339,6 @@ if ($resql) {
 } else {
     dol_print_error($db);
 }
-$db->close();
-
-llxFooter("<em>Derni&egrave;re modification: 2007/06/22 08:44:46 $ r&eacute;vision: 1.12 $</em>");
-
 print <<<EOF
 	<script>
 	jQuery(document).ready(function(){
@@ -359,4 +357,29 @@ print <<<EOF
 	});
 	</script>
 EOF;
+
+
+$sqlTab = explode("WHERE", $sql);
+
+$requeteType = "SELECT SUM(fdet.`duree`) as duree, `label`".$sqlTab[0].", `".MAIN_DB_PREFIX."synopsis_fichinterdet` fdet  LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fk_typeinterv WHERE ".$sqlTab[1]." AND fdit.fk_fichinter = f.rowid GROUP BY `fk_typeinterv`";
+echo $requeteType;
+$result = $db->query("SELECT SUM(`duree`) as duree, `label` FROM `".MAIN_DB_PREFIX."synopsis_fichinterdet`  LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fk_typeinterv "
+        . "WHERE `rowid` IN (".implode(",",$tabIdFi).") GROUP BY `fk_typeinterv`");
+
+while($ligne = $db->fetch_object($result)){
+    echo $ligne->label." | ";
+        $durStr = convDur($ligne->duree);
+        if ($enJour)
+            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
+        else
+            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm';
+        echo "<br/><br/>";
+        
+}
+
+
+$db->close();
+
+llxFooter("<em>Derni&egrave;re modification: 2007/06/22 08:44:46 $ r&eacute;vision: 1.12 $</em>");
+
 ?>

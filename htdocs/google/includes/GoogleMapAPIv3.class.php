@@ -483,6 +483,7 @@ class GoogleMapAPI
                         /* mod drsi(Momo) */
                         $present = $panier->getPresenceDB ($elem->id);
                         
+                        $type = $_REQUEST['type'];
                         
                             $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
 

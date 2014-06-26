@@ -359,16 +359,33 @@ print <<<EOF
 EOF;
 
 
+$result = $db->query ("SELECT f.rowid ".$sql);
+$tabIdFi = array();
+while($ligne = $db->fetch_object($result)){
+    $tabIdFi[$ligne->rowid] = $ligne->rowid;
+}
+echo "IN (".implode(",", $tabIdFi).")";
+
+die;
+
 $sqlTab = explode("WHERE", $sql);
 
-$requeteType = "SELECT SUM(fdet.`duree`) as duree, `label`".$sqlTab[0].", `".MAIN_DB_PREFIX."synopsis_fichinterdet` fdet  LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fk_typeinterv WHERE ".$sqlTab[1]." AND fdit.fk_fichinter = f.rowid GROUP BY `fk_typeinterv`";
+$requeteType = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(ddet.`duree`) as dureeDI, `label`".$sqlTab[0].", `".MAIN_DB_PREFIX."Synopsis_fichinterdet` fdet LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fdet.fk_typeinterv LEFT JOIN ".MAIN_DB_PREFIX."element_element elel ON elel.fk_target=fdet.fk_fichinter  LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet ddet ON ddet.fk_demandeInterv = elel.fk_source AND elel.targettype='FI' AND elel.sourcetype = 'DI'  WHERE ".$sqlTab[1]." AND fdet.fk_fichinter = f.rowid GROUP BY fdet.`fk_typeinterv`";
+//$requeteType = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(ddet.`duree`) as dureeDI, `label` FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` fdet LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fdet.fk_typeinterv LEFT JOIN ".MAIN_DB_PREFIX."element_element elel ON elel.fk_target=fdet.fk_fichinter  LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet ddet ON ddet.fk_demandeInterv = elel.fk_source AND elel.targettype='FI' AND elel.sourcetype = 'DI'  GROUP BY fdet.`fk_typeinterv`";
 echo $requeteType;
-$result = $db->query("SELECT SUM(`duree`) as duree, `label` FROM `".MAIN_DB_PREFIX."synopsis_fichinterdet`  LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fk_typeinterv "
-        . "WHERE `rowid` IN (".implode(",",$tabIdFi).") GROUP BY `fk_typeinterv`");
+$result = $db->query($requeteType);
 
 while($ligne = $db->fetch_object($result)){
     echo $ligne->label." | ";
-        $durStr = convDur($ligne->duree);
+        $durStr = convDur($ligne->dureeFI);
+        if ($enJour)
+            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
+        else
+            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm';
+        echo " | ";
+        
+        
+        $durStr = convDur($ligne->dureeDI);
         if ($enJour)
             print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
         else
@@ -376,6 +393,8 @@ while($ligne = $db->fetch_object($result)){
         echo "<br/><br/>";
         
 }
+
+
 
 
 $db->close();

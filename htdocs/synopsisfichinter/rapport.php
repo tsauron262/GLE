@@ -194,17 +194,24 @@ $selSoc .= "</select>";
 
 $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` WHERE `active` = 1";
 $sqlpre11 = $db->query($req);
-$selectHtml2 = '<select name="typeInter">';
-$selectHtml2 .= "<option value=''>S&eacute;lectioner -></option>";
-while ($respre11 = $db->fetch_object($sqlpre11)) {
-    $i = $respre11->id;
-    $option = $respre11->label;
-    if (isset($_GET['typeInter']) && $i == $_GET['typeInter']) {
-        $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
-    } else {
-        $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
+$selectHtml2 = '<select name="typeInter">';global $tabSelectNatureIntrv;
+    foreach ($tabSelectNatureIntrv as $i => $option) {
+        if (isset($_GET['typeInter']) && $i == $_GET['typeInter']) {
+            $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
+        } else {
+            $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
+        }
     }
-}
+//$selectHtml2 .= "<option value=''>S&eacute;lectioner -></option>";
+//while ($respre11 = $db->fetch_object($sqlpre11)) {
+//    $i = $respre11->id;
+//    $option = $respre11->label;
+//    if (isset($_GET['typeInter']) && $i == $_GET['typeInter']) {
+//        $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
+//    } else {
+//        $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
+//    }
+//}
 $selectHtml2 .= "</select>";
 
 //TODO si selection société filtrer
@@ -332,9 +339,9 @@ if ($resql) {
     $durStr = convDur($resultCount->duree);
     $total_ht = $resultCount->total;
     if ($enJour)
-        print "<br />" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm' . "  |  " . $total_ht . " &euro;";
+        print "<div class='clear'></div>" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm' . "  |  " . $total_ht . " &euro;";
     else
-        print "<br />" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm' . "  |  " . $total_ht . " &euro;";
+        print "<div class='clear'></div>" . $langs->trans("Total") . ": " . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm' . "  |  " . $total_ht . " &euro;";
 //  print "<br />".$langs->trans("Total")." $DureeTotal jour[s]";
 } else {
     dol_print_error($db);
@@ -394,23 +401,33 @@ while ($ligne = $db->fetch_object($result5)){
 
 $requeteType6 = "SELECT id, label FROM ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv";
 $result6 = $db->query ($requeteType6);
-echo "<br/><br/>";
+echo "<br/><br/><style>"
+. "th, td{"
+        . "padding:8px;"
+        . "}"
+        . "th.titre{"
+        . "font-size:16px;}"
+        . "table{"
+        . ""
+        . "float:left;"
+        . "margin: 10px"
+        . "}</style>";
 $additionP = 0;
 while ($ligne = $db->fetch_object($result6)){
     if ($tabResult[$ligne->id][2]>0 || ($tabResult[$ligne->id][0]/3600)>0 ){
-        $texte = "<table><tr><th colspan = '2' class='ui-widget-header'>".$ligne->label."</th></tr><tr><th class='ui-widget-header'> Realisé</th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][2]) ."€  (". price($tabResult[$ligne->id][0]/3600) ."h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>". price($tabResult[$ligne->id][3]) ."€ (". price($tabResult[$ligne->id][1]/3600) ."h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][4] + $tabResult[$ligne->id][5]) ." €</td></tr>  <br/>";
+        $texte = "<table><tr><th colspan = '2' class='ui-widget-header titre'>".$ligne->label."</th></tr><tr><th class='ui-widget-header'> Réalisé</th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][2]) ."€  (". price($tabResult[$ligne->id][0]/3600) ."h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>". price($tabResult[$ligne->id][3]) ."€ (". price($tabResult[$ligne->id][1]/3600) ."h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][4] + $tabResult[$ligne->id][5]) ." €</td></tr>";
         $pourcent1 = ($tabResult[$ligne->id][2]*100)/$tabResult[$ligne->id][3];
         if ($pourcent1 < 100)
-            $texte.= "<tr><th class='ui-widget-header'>Bonnus réalisé / prévu </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent1) ."%</td></tr>";
+            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent1) ."%</td></tr>";
         elseif ($pourcent1 > 100)
-            $texte.= "<tr><th class='ui-widget-header'>Malus réalisé / prévu </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent1-100) ."%</td></tr>";
-        $texte.= "<br/>";
+            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent1-100) ."%</td></tr>";
+
         $pourcent2 = ($tabResult[$ligne->id][2]*100)/($tabResult[$ligne->id][5]+$tabResult[$ligne->id][4]);
         if ($pourcent2 < 100)
-            $texte.= "<tr><th class='ui-widget-header'>Bonnus réalisé / vendu </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent2) ."%</td></tr>";
+            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent2) ."%</td></tr>";
         elseif ($pourcent2 > 100)
-            $texte.= "<tr><th class='ui-widget-header'>Malus réalisé / vendu </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent2-100) ."%</td></tr>";
-        $texte .= "</table><br/><br/>";
+            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent2-100) ."%</td></tr>";
+        $texte .= "</table>";
         $additionP = $additionP+$tabResult[$ligne->id][2];
         echo $texte;
         
@@ -423,7 +440,7 @@ if ($tabResult[""][2] != 0 )
 {
     $requeteType7 = "SELECT fk_fichinter FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (".implode(",", $tabIdFi).") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
     $result7 = $db->query ($requeteType7);
-    echo "Attention marge d'erreur de ".price($tabResult[""][2]) ."€ (". price($tabResult[""][0]/3600) ."h ) due aux ".$db->num_rows($result7)." interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+    echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de ".price($tabResult[""][2]) ."€ (". price($tabResult[""][0]/3600) ."h ) due aux ".$db->num_rows($result7)." interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
     $i = 0;
     while ($ligne = $db->fetch_object($result7)){
         $fi = new Fichinter($db);

@@ -364,36 +364,78 @@ $tabIdFi = array();
 while($ligne = $db->fetch_object($result)){
     $tabIdFi[$ligne->rowid] = $ligne->rowid;
 }
-echo "IN (".implode(",", $tabIdFi).")";
 
-die;
-
-$sqlTab = explode("WHERE", $sql);
-
-$requeteType = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(ddet.`duree`) as dureeDI, `label`".$sqlTab[0].", `".MAIN_DB_PREFIX."Synopsis_fichinterdet` fdet LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fdet.fk_typeinterv LEFT JOIN ".MAIN_DB_PREFIX."element_element elel ON elel.fk_target=fdet.fk_fichinter  LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet ddet ON ddet.fk_demandeInterv = elel.fk_source AND elel.targettype='FI' AND elel.sourcetype = 'DI'  WHERE ".$sqlTab[1]." AND fdet.fk_fichinter = f.rowid GROUP BY fdet.`fk_typeinterv`";
-//$requeteType = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(ddet.`duree`) as dureeDI, `label` FROM `".MAIN_DB_PREFIX."Synopsis_fichinterdet` fdet LEFT JOIN ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv ON id = fdet.fk_typeinterv LEFT JOIN ".MAIN_DB_PREFIX."element_element elel ON elel.fk_target=fdet.fk_fichinter  LEFT JOIN ".MAIN_DB_PREFIX."Synopsis_demandeIntervdet ddet ON ddet.fk_demandeInterv = elel.fk_source AND elel.targettype='FI' AND elel.sourcetype = 'DI'  GROUP BY fdet.`fk_typeinterv`";
-echo $requeteType;
-$result = $db->query($requeteType);
-
-while($ligne = $db->fetch_object($result)){
-    echo $ligne->label." | ";
-        $durStr = convDur($ligne->dureeFI);
-        if ($enJour)
-            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
-        else
-            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm';
-        echo " | ";
-        
-        
-        $durStr = convDur($ligne->dureeDI);
-        if ($enJour)
-            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] . 'j ' : "") . $durStr['hours']['rel'] . 'h ' . $durStr['minutes']['rel'] . 'm';
-        else
-            print '' . ($durStr['days']['abs'] > 0 ? $durStr['days']['abs'] * 24 + $durStr['hours']['rel'] : $durStr['hours']['rel']) . 'h ' . $durStr['minutes']['rel'] . 'm';
-        echo "<br/><br/>";
-        
+$requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv` ;";
+$result2 = $db->query ($requeteType2);
+$tabResult = array();
+while ($ligne = $db->fetch_object($result2)){
+    $tabResult[$ligne->ty][0] = $ligne->dureeFI;
+    $tabResult[$ligne->ty][2] = $ligne->prix;
 }
 
+
+$requeteType3  = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM ".MAIN_DB_PREFIX."synopsisdemandeintervdet ddet, ".MAIN_DB_PREFIX."element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (".implode(",", $tabIdFi).") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
+$result3 = $db->query ($requeteType3);
+while ($ligne = $db->fetch_object($result3)){
+    $tabResult[$ligne->ty][1] = $ligne->dureeDI;
+    $tabResult[$ligne->ty][3] = $ligne->prix;
+}
+
+$requeteType4 = "SELECT SUM(cdet.total_ht) as prix, fk_typeinterv as ty FROM ".MAIN_DB_PREFIX."commandedet cdet, ".MAIN_DB_PREFIX."Synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv`;";
+$result4 = $db->query ($requeteType4);
+while ($ligne = $db->fetch_object($result4)){
+    $tabResult[$ligne->ty][4] = $ligne->prix;
+}
+$requeteType5 = "SELECT SUM(codet.total_ht) as prix, fk_typeinterv as ty FROM ".MAIN_DB_PREFIX."contratdet codet, ".MAIN_DB_PREFIX."Synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv`;";
+$result5 = $db->query ($requeteType5);
+while ($ligne = $db->fetch_object($result5)){
+    $tabResult[$ligne->ty][5] = $ligne->prix;
+}
+
+$requeteType6 = "SELECT id, label FROM ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv";
+$result6 = $db->query ($requeteType6);
+echo "<br/><br/>";
+$additionP = 0;
+while ($ligne = $db->fetch_object($result6)){
+    if ($tabResult[$ligne->id][2]>0 || ($tabResult[$ligne->id][0]/3600)>0 ){
+        $texte = "<table><tr><th colspan = '2' class='ui-widget-header'>".$ligne->label."</th></tr><tr><th class='ui-widget-header'> Realisé</th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][2]) ."€  (". price($tabResult[$ligne->id][0]/3600) ."h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>". price($tabResult[$ligne->id][3]) ."€ (". price($tabResult[$ligne->id][1]/3600) ."h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][4] + $tabResult[$ligne->id][5]) ." €</td></tr>  <br/>";
+        $pourcent1 = ($tabResult[$ligne->id][2]*100)/$tabResult[$ligne->id][3];
+        if ($pourcent1 < 100)
+            $texte.= "<tr><th class='ui-widget-header'>Bonnus réalisé / prévu </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent1) ."%</td></tr>";
+        elseif ($pourcent1 > 100)
+            $texte.= "<tr><th class='ui-widget-header'>Malus réalisé / prévu </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent1-100) ."%</td></tr>";
+        $texte.= "<br/>";
+        $pourcent2 = ($tabResult[$ligne->id][2]*100)/($tabResult[$ligne->id][5]+$tabResult[$ligne->id][4]);
+        if ($pourcent2 < 100)
+            $texte.= "<tr><th class='ui-widget-header'>Bonnus réalisé / vendu </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent2) ."%</td></tr>";
+        elseif ($pourcent2 > 100)
+            $texte.= "<tr><th class='ui-widget-header'>Malus réalisé / vendu </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent2-100) ."%</td></tr>";
+        $texte .= "</table><br/><br/>";
+        $additionP = $additionP+$tabResult[$ligne->id][2];
+        echo $texte;
+        
+    }
+     
+}
+
+$additionPT = price($total_ht - $additionP - $tabResult[""][2]);
+if ($tabResult[""][2] != 0 )
+{
+    $requeteType7 = "SELECT fk_fichinter FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (".implode(",", $tabIdFi).") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
+    $result7 = $db->query ($requeteType7);
+    echo "Attention marge d'erreur de ".price($tabResult[""][2]) ."€ (". price($tabResult[""][0]/3600) ."h ) due aux ".$db->num_rows($result7)." interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+    $i = 0;
+    while ($ligne = $db->fetch_object($result7)){
+        $fi = new Fichinter($db);
+        $fi->fetch($ligne->fk_fichinter);
+       echo $fi->getNomUrl(1)."<br/>";
+       $i ++;
+       if ($i >= 10)
+           break;
+    }
+}
+if ($additionPT != 0 )
+    echo "Attention problême de calcul merci de contacter votre service technique au plus vite !!! ";
 
 
 

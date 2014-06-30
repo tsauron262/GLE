@@ -492,7 +492,7 @@ class GoogleMapAPI
                         
                             
                         if ($present)
-                            $icon = 'img/imageMarker2.png ';
+                            $icon = 'img/imageMarker_green.png ';
                         else
                             $icon = false;
                         /*fmod drsi(Momo) */

@@ -231,13 +231,13 @@ class GSX {
      *
      */
     protected $gsxDetails = array(
-        'apiMode' => 'production',
+        'apiMode' => 'ut',
         'regionCode' => 'apac',
         'userId' => '',
         'password' => '',
         'serviceAccountNo' => '',
-        'languageCode' => 'en',
-        'userTimeZone' => 'PDT',
+        'languageCode' => 'fr',
+        'userTimeZone' => 'CET',
         'returnFormat' => 'php',
         'gsxWsdl' => '',
     );
@@ -758,7 +758,7 @@ class GSX {
         if (!$clientLookup || !is_string($clientLookup)) {
             $this->error(__METHOD__, __LINE__, 'Invalid data passed: ' . $clientLookup);
         }
-
+//echo "<pre>"; print_r($requestData);
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {

@@ -39,7 +39,7 @@
                     <data name="primaryPhone" required="1"></data>
                     <data name="secondaryPhone" required="0"></data>
                     <data name="regionCode" required="1" default="004"></data>
-                    <data name="state" required="1" default="FRA"></data>
+                    <data name="state" required="1" default="69"></data>
                     <data name="zipCode" required="1"></data>
                     <data name="emailAddress" required="1"></data>
                 </datas>

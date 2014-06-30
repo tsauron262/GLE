@@ -192,8 +192,8 @@ if ($_REQUEST["id"] > 0) {
         }
     }
     $selectHtml2 = '';
-    $tabSelect = array("Choix", "Installation", "Dépannage", "Télémaintenance", "Formation", "Audit", "Suivi");
-    foreach ($tabSelect as $i => $option) {
+    global $tabSelectNatureIntrv;
+    foreach ($tabSelectNatureIntrv as $i => $option) {
         if ($i == $fichinter->natureInter) {
             $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
         } else {

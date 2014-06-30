@@ -14,7 +14,7 @@ function modPan(idReferent, type, id,action){
             else
                 eval(msg);
             if (markerActif && action != 'sup')
-                        markerActif.setIcon (DOL_URL_ROOT + '/google/img/imageMarker2.png' );
+                        markerActif.setIcon (DOL_URL_ROOT + '/google/img/imageMarker_green.png' );
             else if (markerActif && action == 'sup')
                         markerActif.setIcon ('http://maps.gstatic.com/intl/fr_ALL/mapfiles/markers/marker_sprite.png' );
             });

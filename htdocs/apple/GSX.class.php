@@ -236,8 +236,8 @@ class GSX {
         'userId' => '',
         'password' => '',
         'serviceAccountNo' => '',
-        'languageCode' => 'en',
-        'userTimeZone' => 'PDT',
+        'languageCode' => 'fr',
+        'userTimeZone' => 'CET',
         'returnFormat' => 'php',
         'gsxWsdl' => '',
     );

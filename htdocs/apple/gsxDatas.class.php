@@ -368,6 +368,7 @@ class gsxDatas {
             $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
             $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
             $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+            $valDef['customerAddress']['state'] = substr($chrono->contact->zip,0,2);
             $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
         }
         

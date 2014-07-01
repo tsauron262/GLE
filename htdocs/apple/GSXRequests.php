@@ -323,7 +323,7 @@ class GSX_Request {
                             $html .= '<span class="button importParts blueHover"';
                             $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
                             $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
-                            $html .= '<div class="partsImportResults"></div>'."\n";
+                            $html .= '<div class="partsImportResults"></div>' . "\n";
                             $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
                             foreach ($partsDataNodes as $partDataNode) {
                                 $html .= $this->getDataInput($partDataNode, $serial);
@@ -381,42 +381,48 @@ class GSX_Request {
 
                 case 'comptiaCode':
                     $html .= '<div class="comptiaCodeContainer">' . "\n";
-                    if (isset($values[$name])) {
-                        if (isset($values['componentCode']) &&
-                                isset($this->comptiaCodes) &&
-                                isset($this->comptiaCodes['grps'][$values['componentCode']])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
-                                $html .= '<option value="' . $code . '"';
+                    if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
+                        $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
+                        $html .= '<span>Non-applicable</span>';
+                    } else if (isset($values['componentCode']) &&
+                            isset($this->comptiaCodes) &&
+                            isset($this->comptiaCodes['grps'][$values['componentCode']])) {
+                        $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                        $html .= '<option value="0">Code compTIA</option>' . "\n";
+                        foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
+                            $html .= '<option value="' . $code . '"';
+                            if (isset($values[$name])) {
                                 if ($values[$name] == $code)
                                     $html.= ' selected';
-                                $html .= '>' . $desc . '</option>';
                             }
-                            $html .= '</select>' . "\n";
-                        } else {
-                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                            $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                            $html .= '>' . $code . ' - ' . $desc . '</option>';
                         }
+                        $html .= '</select>' . "\n";
+                    } else if (isset($values[$name])) {
+                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
                     }
                     $html .= '</div>';
                     break;
 
                 case 'comptiaModifier':
                     $html .= '<div class="comptiaModifierContainer">' . "\n";
-                    if (isset($values[$name])) {
-                        if (isset($this->comptiaCodes['mods'])) {
-                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                            foreach ($this->comptiaCodes['mods'] as $mod => $desc) {
-                                $html .= '<option value="' . $mod . '"';
+
+                    if (isset($this->comptiaCodes['mods'])) {
+                        $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                        $html .= '<option value="0">Modificateur</option>' . "\n";
+                        foreach ($this->comptiaCodes['mods'] as $mod => $desc) {
+                            $html .= '<option value="' . $mod . '"';
+                            if (isset($values[$name])) {
                                 if ($values[$name] == $mod)
                                     $html.= ' selected';
-                                $html .= '>' . $desc . '</option>';
                             }
-                            $html .= '</select>' . "\n";
-                        } else {
-                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                            $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                            $html .= '>' . $mod . ' - ' . $desc . '</option>';
                         }
+                        $html .= '</select>' . "\n";
+                    } else if (isset($values[$name])) {
+                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
                     }
                     $html .= '</div>';
                     break;

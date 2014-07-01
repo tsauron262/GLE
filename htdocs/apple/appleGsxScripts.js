@@ -138,6 +138,10 @@ function Cart(prodId, serial, PM) {
     this.nbrProds = 0;
     this.$prod = $('#prod_'+prodId);
 
+    this.newProdContainer = function() {
+        this.$prod = $('#prod_'+prodId);
+    };
+
     this.onComptiaLoadingStart = function() {
         var $cart = this.$prod.find('.cartContent');
         if ($cart.length) {
@@ -325,6 +329,9 @@ function Cart(prodId, serial, PM) {
                     if ($span.length) {
                         this.add($span, qty, comptiaCode, comptiaModifier);
                         return;
+                    } else {
+                        alert('Une erreur technique est survenue');
+                        alert('prod: '+this.$prod.length)
                     }
                 }
             }
@@ -340,6 +347,10 @@ function PartsManager(prodId, serial) {
     this.parts = [];
     this.$prod = $('#prod_'+prodId);
     this.$parts = null;
+
+    this.newProdContainer = function() {
+        this.$prod = $('#prod_'+prodId);
+    };
 
     //Gestion de la liste des Parts:
     this.removeParts = function() {
@@ -687,18 +698,18 @@ function PartsManager(prodId, serial) {
 function GSX_Product(id, serial) {
     this.id = id;
     this.serial = serial;
-    this.PM = null;
-    this.cart = null;
+    this.PM = new PartsManager(id, serial);
+    this.cart = new Cart(id, serial, this.PM);
     this.repairPartsDatasDefs = [];
 
     this.loadDatas = function() {
         $('#requestsResponsesContainer').append('<div id="prod_'+this.id+'" class="productDatasContainer"></div>');
+        this.PM.newProdContainer();
+        this.cart.newProdContainer();
         setRequest('GET', 'loadProduct', this.id, '&prodId='+this.id+'&serial='+serial);
         displayRequestMsg('requestProcess', '');
     };
     this.loadParts = function() {
-        this.PM = new PartsManager(this.id, this.serial);
-        this.cart = new Cart(this.id, this.serial, this.PM);
         this.PM.loadParts();
     }
 }
@@ -710,6 +721,7 @@ function GSX() {
     this.importPartsFromCartToRepair = function(repair) {
         var $form = $('#repairForm_'+repair);
         if ($form.length) {
+            $form.find('.partsImportResults').hide().html('');
             var $container = $form.find('div.repairPartsContainer');
             var $template = $form.find('div.repairsPartsInputsTemplate');
             var prodId = $form.parent('div.repairFormContainer').parent('div.repairPopUp').find('input.prodId').val();
@@ -718,12 +730,12 @@ function GSX() {
                 if ($prod.length) {
                     var $cart = $prod.find('div.cartContent');
                     if (!$cart.length) {
-                        $container.html('<p class="alert">Veuillez charger la liste des composants pour afficher le panier</p>').slideDown(250);
+                        $form.find('.partsImportResults').html('<p class="alert">Veuillez charger la liste des composants pour afficher le panier</p>').slideDown(250);
                         return;
                     }
                     var $partsRows = $cart.find('table.cartProducts').find('tbody').find('tr');
                     if (!$partsRows.length) {
-                        $container.html('<p class="alert">Veuillez ajouter des éléments au panier depuis la liste des composants compatibles</p>').slideDown(250);
+                        $form.find('.partsImportResults').html('<p class="alert">Veuillez ajouter des éléments au panier depuis la liste des composants compatibles</p>').slideDown(250);
                         return;
                     }
                     $container.html('');

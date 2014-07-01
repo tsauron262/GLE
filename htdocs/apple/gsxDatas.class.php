@@ -3,6 +3,7 @@
 require_once DOL_DOCUMENT_ROOT . '/apple/GSXRequests.php';
 
 class gsxDatas {
+
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
@@ -207,60 +208,76 @@ class gsxDatas {
         return $html;
     }
 
-    public function getPartsListHtml($prodId, $displayCart = true) {
+    public function getPartsListArray($partNumberAsKey = false) {
         $parts = $this->gsx->part(array('serialNumber' => $this->serial));
-        $check = false;
         if (isset($parts) && count($parts)) {
             if (isset($parts['ResponseArray']) && count($parts['ResponseArray'])) {
                 if (isset($parts['ResponseArray']['responseData']) && count($parts['ResponseArray']['responseData'])) {
-                    $check = true;
                     $parts = $parts['ResponseArray']['responseData'];
-                    $html = '';
-                    if ($displayCart)
-                        $html .= $this->getCartHtml($prodId);
-                    $html .= '<div class="componentsListContainer">' . "\n";
-                    $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
-                    $html .= '<div class="typeFilters searchBloc">' . "\n";
-                    $html .= '<button class="filterTitle">Filtrer par catégorie de composant</button>';
-                    $html .= '<div class="typeFiltersContent">' . "\n";
-                    $html .= '<div style="margin-bottom: 20px;">' . "\n";
-                    $html .= '<span class="filterCheckAll">Tout cocher</span>';
-                    $html .= '<span class="filterHideAll">Tout décocher</span></div></div>';
-                    $html .= '</div>' . "\n";
-                    $html .= '<div class="searchBloc"' . "\n";
-                    $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
-                    $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
-                    $html .= '<select class="keywordFilterType">' . "\n";
-                    $types = array('name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
-                    foreach ($types as $key => $type) {
-                        $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
+                    if ($partNumberAsKey) {
+                        $results = array();
+                        foreach ($parts as $part) {
+                            $results[$part['partNumber']] = $part;
+                        }
+                        return $results;
+                    } else {
+                        return $parts;
                     }
-                    $html .= '</select>' . "\n";
-                    $html .= '<button class="addKeywordFilter" onclick="GSX.products[' . $prodId . '].PM.addKeywordFilter()">Ajouter</button>' . "\n";
-                    $html .= '</div>' . "\n";
-                    $html .= '<div class="searchBloc">' . "\n";
-                    $html .= '<label for="searchPartInput">Recherche par référence: </label>' . "\n";
-                    $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
-                    $html .= '<button class="searchPartSubmit" onclick="GSX.products[' . $prodId . '].PM.searchPartByNum()">Rechercher</button>' . "\n";
-                    $html .= '</div>' . "\n";
-                    $html .= '<div class="curKeywords"></div>' . "\n";
-                    $html .= '<div class="searchResult"></div>';
-                    $html .= '<div class="partsListContainer"></div>' . "\n";
-                    $html .= '</div>' . "\n";
-
-                    $html .= '<script type="text/javascript">' . "\n";
-                    foreach ($parts as $part) {
-                        $html .= 'GSX.addPart(' . $prodId . ', ';
-                        $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
-                        $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
-                        $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
-                        $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
-                        $html .= ', \'' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '') . '\'';
-                        $html .= ');' . "\n";
-                    }
-                    $html .= '</script>' . "\n";
                 }
             }
+        }
+        return null;
+    }
+
+    public function getPartsListHtml($prodId, $displayCart = true) {
+        $parts = $this->getPartsListArray();
+        $check = false;
+        if (isset($parts) && count($parts)) {
+            $check = true;
+            $html = '';
+            if ($displayCart)
+                $html .= $this->getCartHtml($prodId);
+            $html .= '<div class="componentsListContainer">' . "\n";
+            $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
+            $html .= '<div class="typeFilters searchBloc">' . "\n";
+            $html .= '<button class="filterTitle">Filtrer par catégorie de composant</button>';
+            $html .= '<div class="typeFiltersContent">' . "\n";
+            $html .= '<div style="margin-bottom: 20px;">' . "\n";
+            $html .= '<span class="filterCheckAll">Tout cocher</span>';
+            $html .= '<span class="filterHideAll">Tout décocher</span></div></div>';
+            $html .= '</div>' . "\n";
+            $html .= '<div class="searchBloc"' . "\n";
+            $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
+            $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
+            $html .= '<select class="keywordFilterType">' . "\n";
+            $types = array('name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
+            foreach ($types as $key => $type) {
+                $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
+            }
+            $html .= '</select>' . "\n";
+            $html .= '<button class="addKeywordFilter" onclick="GSX.products[' . $prodId . '].PM.addKeywordFilter()">Ajouter</button>' . "\n";
+            $html .= '</div>' . "\n";
+            $html .= '<div class="searchBloc">' . "\n";
+            $html .= '<label for="searchPartInput">Recherche par référence: </label>' . "\n";
+            $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
+            $html .= '<button class="searchPartSubmit" onclick="GSX.products[' . $prodId . '].PM.searchPartByNum()">Rechercher</button>' . "\n";
+            $html .= '</div>' . "\n";
+            $html .= '<div class="curKeywords"></div>' . "\n";
+            $html .= '<div class="searchResult"></div>';
+            $html .= '<div class="partsListContainer"></div>' . "\n";
+            $html .= '</div>' . "\n";
+
+            $html .= '<script type="text/javascript">' . "\n";
+            foreach ($parts as $part) {
+                $html .= 'GSX.addPart(' . $prodId . ', ';
+                $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
+                $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
+                $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
+                $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
+                $html .= ', \'' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '') . '\'';
+                $html .= ');' . "\n";
+            }
+            $html .= '</script>' . "\n";
         }
         if (!$check) {
             $html .= '<p class="error">Echec de la récupération de la liste des composants compatibles depuis la plateforme GSX</p>';
@@ -313,7 +330,7 @@ class gsxDatas {
 
     public function getRequestFormHtml($requestType, $prodId) {
         global $db;
-        $gsxRequest = new GSX_Request($requestType);
+        $gsxRequest = new GSX_Request($this, $requestType);
         $chronoId = $_REQUEST['chronoId'];
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
         $chrono = new Chrono($db);
@@ -360,16 +377,16 @@ class gsxDatas {
     }
 
     public function processRequestForm($prodId, $requestType) {
-        $GSXRequest = new GSX_Request($requestType);
+        $GSXRequest = new GSX_Request($this, $requestType);
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
         if ($GSXRequest->isLastRequestOk()) {
 
             $html .= '<div class="requestResponseContainer">';
 
-            $client = $GSXRequest->requestName . 'Repair';
-            $request = $GSXRequest->requestName . 'Request';
-            $wrapper = 'repairData';
+            $client = $GSXRequest->requestName;
+            $request = $GSXRequest->request;
+            $wrapper = $GSXRequest->wrapper;
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
 
@@ -384,9 +401,9 @@ class gsxDatas {
                 $html .= '</p>' . "\n";
             } else {
                 $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
-            $html .= '<pre>';
-            $html .= print_r($this->gsx->outputFormat($response));
-            $html .= '</pre>';
+                $html .= '<pre>';
+                $html .= print_r($this->gsx->outputFormat($response));
+                $html .= '</pre>';
             }
 
             $html .= '</div>';
@@ -423,6 +440,7 @@ class gsxDatas {
         }
         return $html;
     }
+
 }
 
 ?>

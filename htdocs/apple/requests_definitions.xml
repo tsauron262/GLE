@@ -54,8 +54,8 @@
         </datas>
     </request>
 
-    <request name="CreateCarryIn" type="repair">
-        <label>Création d'une réparation en magasin (carry-in repair)"</label>
+    <request name="CreateCarryInRepair" type="repair" request="CreateCarryInRequest" wrapper="repairData">
+        <label>Création d'une réparation en magasin (carry-in repair)</label>
         <datas>
             <data name="diagnosedByTechId" required="1"></data>
             <data name="serialNumber" required="1"></data>
@@ -94,7 +94,7 @@
                     <data name="primaryPhone" required="1"></data>
                     <data name="secondaryPhone" required="0"></data>
                     <data name="regionCode" required="1" default="004"></data>
-                    <data name="state" required="1" default="FRA"></data>
+                    <data name="state" required="1"></data>
                     <data name="zipCode" required="1"></data>
                     <data name="emailAddress" required="1"></data>
                 </datas>
@@ -111,7 +111,7 @@
     </request>
 
     <request name="UpdateSerialNumber" type="repair">
-        <label>Màj serial</label>
+        <label>Mise à jour du numéro de série</label>
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>
             <data name="partInfo" required="1">

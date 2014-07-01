@@ -348,17 +348,29 @@ textarea.grand{
 }
 
 .liste_articles {
-width: 290px;
+    width: 290px;
 }
 
 .lienHautDroite {
     margin-top: -27px;
     margin-bottom: 20px;
     float: right;
-    
+
 }
 .lienHautDroite2 {
     margin-top: 10px;
     margin-bottom: -10px;
     float: right;
+}
+
+.tabResumeDeuxColl{
+    float:left;
+    margin: 10px;
+    width: 360px;
+}
+.tabResumeDeuxColl th, .tabResumeDeuxColl td{
+    padding:8px;
+}
+.tabResumeDeuxColl th.titre{
+    font-size:16px;
 }

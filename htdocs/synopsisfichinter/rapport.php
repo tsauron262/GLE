@@ -79,11 +79,11 @@ $sortorder = "DESC";
 $sortfield = "f.datei";
 //}
 //if ($page == -1) { 
-$page = (isset($_REQUEST['page'])? $_REQUEST['page'] : 0);
+$page = (isset($_REQUEST['page']) ? $_REQUEST['page'] : 0);
 //}
 //die($conf->liste_limit);
 $limit = $conf->liste_limit;
-$offset = $limit * ($page-0);
+$offset = $limit * ($page - 0);
 $pageprev = $page - 1;
 $pagenext = $page + 1;
 
@@ -194,14 +194,15 @@ $selSoc .= "</select>";
 
 $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` WHERE `active` = 1";
 $sqlpre11 = $db->query($req);
-$selectHtml2 = '<select name="typeInter">';global $tabSelectNatureIntrv;
-    foreach ($tabSelectNatureIntrv as $i => $option) {
-        if (isset($_GET['typeInter']) && $i == $_GET['typeInter']) {
-            $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
-        } else {
-            $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
-        }
+$selectHtml2 = '<select name="typeInter">';
+global $tabSelectNatureIntrv, $total_ht;
+foreach ($tabSelectNatureIntrv as $i => $option) {
+    if (isset($_GET['typeInter']) && $i == $_GET['typeInter']) {
+        $selectHtml2 .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
+    } else {
+        $selectHtml2 .= "<OPTION value='" . $i . "'>" . $option . "</OPTION>";
     }
+}
 //$selectHtml2 .= "<option value=''>S&eacute;lectioner -></option>";
 //while ($respre11 = $db->fetch_object($sqlpre11)) {
 //    $i = $respre11->id;
@@ -219,11 +220,11 @@ $selectHtml2 .= "</select>";
 $resql = $db->query($sql1);
 $resqlCount = $db->query($sql2);
 if ($resql) {
-    $resultCount = $db->fetch_object($resqlCount);// / $limit;
+    $resultCount = $db->fetch_object($resqlCount); // / $limit;
     $num = $resultCount->nbLignes;
 //    $num = 10;
     $title = "Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start));
-    print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $offset+$limit+1, $num);
+    print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $offset + $limit + 1, $num);
     print "<br/><br/>";
 
     echo "<div style='float: left;  margin-top:-18px; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
@@ -366,98 +367,180 @@ print <<<EOF
 EOF;
 
 
-$result = $db->query ("SELECT f.rowid ".$sql);
+$result = $db->query("SELECT f.rowid " . $sql);
 $tabIdFi = array();
-while($ligne = $db->fetch_object($result)){
+while ($ligne = $db->fetch_object($result)) {
     $tabIdFi[$ligne->rowid] = $ligne->rowid;
 }
 
-$requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv` ;";
-$result2 = $db->query ($requeteType2);
-$tabResult = array();
-while ($ligne = $db->fetch_object($result2)){
-    $tabResult[$ligne->ty][0] = $ligne->dureeFI;
-    $tabResult[$ligne->ty][2] = $ligne->prix;
+$tabResult = afficheParType($tabIdFi);
+
+$tabIdErreur = testFi($tabIdFi, $tabResult);
+//echo "<pre>";   
+//print_r($tabIdErreur);
+foreach ($tabIdFi as $val) {
+    if (!isset($tabIdErreur[$val]))
+        $newTabIdFi[$val] = $val;
 }
 
+echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
 
-$requeteType3  = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM ".MAIN_DB_PREFIX."synopsisdemandeintervdet ddet, ".MAIN_DB_PREFIX."element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (".implode(",", $tabIdFi).") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
-$result3 = $db->query ($requeteType3);
-while ($ligne = $db->fetch_object($result3)){
-    $tabResult[$ligne->ty][1] = $ligne->dureeDI;
-    $tabResult[$ligne->ty][3] = $ligne->prix;
-}
-
-$requeteType4 = "SELECT SUM(cdet.total_ht) as prix, fk_typeinterv as ty FROM ".MAIN_DB_PREFIX."commandedet cdet, ".MAIN_DB_PREFIX."Synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv`;";
-$result4 = $db->query ($requeteType4);
-while ($ligne = $db->fetch_object($result4)){
-    $tabResult[$ligne->ty][4] = $ligne->prix;
-}
-$requeteType5 = "SELECT SUM(codet.total_ht) as prix, fk_typeinterv as ty FROM ".MAIN_DB_PREFIX."contratdet codet, ".MAIN_DB_PREFIX."Synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (".implode(",", $tabIdFi).") GROUP BY  `fk_typeinterv`;";
-$result5 = $db->query ($requeteType5);
-while ($ligne = $db->fetch_object($result5)){
-    $tabResult[$ligne->ty][5] = $ligne->prix;
-}
-
-$requeteType6 = "SELECT id, label FROM ".MAIN_DB_PREFIX."synopsisfichinter_c_typeInterv";
-$result6 = $db->query ($requeteType6);
-echo "<br/><br/><style>"
-. "th, td{"
-        . "padding:8px;"
-        . "}"
-        . "th.titre{"
-        . "font-size:16px;}"
-        . "table{"
-        . ""
-        . "float:left;"
-        . "margin: 10px"
-        . "}</style>";
-$additionP = 0;
-while ($ligne = $db->fetch_object($result6)){
-    if ($tabResult[$ligne->id][2]>0 || ($tabResult[$ligne->id][0]/3600)>0 ){
-        $texte = "<table><tr><th colspan = '2' class='ui-widget-header titre'>".$ligne->label."</th></tr><tr><th class='ui-widget-header'> Réalisé</th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][2]) ."€  (". price($tabResult[$ligne->id][0]/3600) ."h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>". price($tabResult[$ligne->id][3]) ."€ (". price($tabResult[$ligne->id][1]/3600) ."h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> ". price($tabResult[$ligne->id][4] + $tabResult[$ligne->id][5]) ." €</td></tr>";
-        $pourcent1 = ($tabResult[$ligne->id][2]*100)/$tabResult[$ligne->id][3];
-        if ($pourcent1 < 100)
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent1) ."%</td></tr>";
-        elseif ($pourcent1 > 100)
-            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent1-100) ."%</td></tr>";
-
-        $pourcent2 = ($tabResult[$ligne->id][2]*100)/($tabResult[$ligne->id][5]+$tabResult[$ligne->id][4]);
-        if ($pourcent2 < 100)
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> ". price(100-$pourcent2) ."%</td></tr>";
-        elseif ($pourcent2 > 100)
-            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> ". price($pourcent2-100) ."%</td></tr>";
-        $texte .= "</table>";
-        $additionP = $additionP+$tabResult[$ligne->id][2];
-        echo $texte;
-        
-    }
-     
-}
-
-$additionPT = price($total_ht - $additionP - $tabResult[""][2]);
-if ($tabResult[""][2] != 0 )
-{
-    $requeteType7 = "SELECT fk_fichinter FROM ".MAIN_DB_PREFIX."Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (".implode(",", $tabIdFi).") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
-    $result7 = $db->query ($requeteType7);
-    echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de ".price($tabResult[""][2]) ."€ (". price($tabResult[""][0]/3600) ."h ) due aux ".$db->num_rows($result7)." interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
-    $i = 0;
-    while ($ligne = $db->fetch_object($result7)){
-        $fi = new Fichinter($db);
-        $fi->fetch($ligne->fk_fichinter);
-       echo $fi->getNomUrl(1)."<br/>";
-       $i ++;
-       if ($i >= 10)
-           break;
-    }
-}
-if ($additionPT != 0 )
-    echo "Attention problême de calcul merci de contacter votre service technique au plus vite !!! ";
-
+$tabResult = afficheParType($newTabIdFi);
+$tabIdErreur = testFi($newTabIdFi, $tabResult);
 
 
 $db->close();
 
 llxFooter("<em>Derni&egrave;re modification: 2007/06/22 08:44:46 $ r&eacute;vision: 1.12 $</em>");
+
+function afficheParType($tabIdFi) {
+    global $db, $additionP;
+    $requeteType2 = "SELECT SUM(fdet.`duree`) as dureeFI, SUM(fdet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv` ;";
+    $result2 = $db->query($requeteType2);
+    $tabResult = array();
+    while ($ligne = $db->fetch_object($result2)) {
+        $tabResult[$ligne->ty][0] = $ligne->dureeFI;
+        $tabResult[$ligne->ty][2] = $ligne->prix;
+    }
+
+
+    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet, " . MAIN_DB_PREFIX . "element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
+    $result3 = $db->query($requeteType3);
+    while ($ligne = $db->fetch_object($result3)) {
+        $tabResult[$ligne->ty][1] = $ligne->dureeDI;
+        $tabResult[$ligne->ty][3] = $ligne->prix;
+    }
+
+    $requeteType4 = "SELECT SUM(cdet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet IS NULL || fk_contratdet = 0) GROUP BY  `fk_typeinterv`;";
+    $result4 = $db->query($requeteType4);
+    while ($ligne = $db->fetch_object($result4)) {
+        $tabResult[$ligne->ty][4] = $ligne->prix;
+    }
+    $requeteType5 = "SELECT SUM(codet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "contratdet codet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv`;";
+    $result5 = $db->query($requeteType5);
+    while ($ligne = $db->fetch_object($result5)) {
+        $tabResult[$ligne->ty][5] = $ligne->prix;
+    }
+
+    if(isset($tabResult[""]))
+    foreach ($tabResult[""] as $clef => $val)
+        $tabResult[0][$clef] += $val;
+
+    echo "<div style='clear:both;'>";
+
+    /* affichage */
+    $requeteType6 = "SELECT id, label FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv";
+    $result6 = $db->query($requeteType6);
+    $additionP = 0;
+    while ($ligne = $db->fetch_object($result6)) {
+        if ($tabResult[$ligne->id][2] > 0 || ($tabResult[$ligne->id][0] / 3600) > 0) {
+            $texte = "<table class='tabResumeDeuxColl'><tr><th colspan = '2' class='ui-widget-header titre'>" . $ligne->label . "</th></tr><tr><th class='ui-widget-header'> Réalisé</th><td class='ui-widget-content'> " . price($tabResult[$ligne->id][2]) . "€  (" . price($tabResult[$ligne->id][0] / 3600) . "h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>" . price($tabResult[$ligne->id][3]) . "€ (" . price($tabResult[$ligne->id][1] / 3600) . "h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> " . price($tabResult[$ligne->id][4] + $tabResult[$ligne->id][5]) . " €</td></tr>";
+            if ($tabResult[$ligne->id][3] > 0)
+                $pourcent1 = 100 - ($tabResult[$ligne->id][2] * 100) / $tabResult[$ligne->id][3];
+            else
+                $pourcent1 = "n/c";
+
+            if (!is_numeric($pourcent1))
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . "</td></tr>";
+            elseif ($pourcent1 >= 0)
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1,2) . "%</td></tr>";
+            else
+                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1,2) . "%</td></tr>";
+
+            if (($tabResult[$ligne->id][5] + $tabResult[$ligne->id][4]) > 0)
+                $pourcent2 = 100 - ($tabResult[$ligne->id][2] * 100) / ($tabResult[$ligne->id][5] + $tabResult[$ligne->id][4]);
+            else
+                $pourcent2 = "n/c";
+            if (!is_numeric($pourcent2))
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent2 . "</td></tr>";
+            elseif ($pourcent2 >= 0)
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent2,2) . "%</td></tr>";
+            else
+                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent2,2) . "%</td></tr>";
+            $texte .= "</table>";
+            $additionP = $additionP + $tabResult[$ligne->id][2];
+            echo $texte;
+        }
+    }
+    return $tabResult;
+}
+
+function testFi($tabIdFi, $tabResult) {
+    global $total_ht, $additionP, $db;
+    /*  test */
+    $additionPT = price($total_ht - $additionP - $tabResult[0][2]);
+    if ($additionPT != 0)
+        echo "Attention problême de calcul merci de contacter votre service technique au plus vite !!! ";
+
+
+    if ($tabResult[0][2] != 0) {
+        $requeteType7 = "SELECT fk_fichinter FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_fichinter";
+        $result7 = $db->query($requeteType7);
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][2]) . "€ (" . price($tabResult[0][0] / 3600) . "h ) sur le réalisé due aux " . $db->num_rows($result7) . " interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+        $i = 0;
+        while ($ligne = $db->fetch_object($result7)) {
+            if ($i < 10) {
+                $fi = new Fichinter($db);
+                $fi->fetch($ligne->fk_fichinter);
+                echo $fi->getNomUrl(1) . "<br/>";
+            }
+            $tabIdErreur[$ligne->fk_fichinter] = $ligne->fk_fichinter;
+            $i ++;
+        }
+    }
+
+
+    if ($tabResult[0][3] != 0) {
+        $requeteType7 = "SELECT fk_synopsisdemandeinterv FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet fdet WHERE fdet.fk_synopsisdemandeinterv IN (" . implode(",", $tabIdFi) . ") AND (fk_typeinterv is NULL || fk_typeinterv= 0 ) Group BY fk_synopsisdemandeinterv";
+        $result7 = $db->query($requeteType7);
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur de " . price($tabResult[0][3]) . "€ (" . price($tabResult[0][1] / 3600) . "h ) sur le prévue due aux " . $db->num_rows($result7) . " demande d'interventions réalisées sans type dont les dix premières sont listées ci dessous<br/>";
+        $i = 0;
+        while ($ligne = $db->fetch_object($result7)) {
+            if ($i < 10) {
+                $fi = new Synopsisdemandeinterv($db);
+                $fi->fetch($ligne->fk_synopsisdemandeinterv);
+                echo $fi->getNomUrl(1) . "<br/>";
+            }
+            $tabIdErreurDI[$ligne->fk_synopsisdemandeinterv] = $ligne->fk_synopsisdemandeinterv;
+            $i ++;
+        }
+    }
+
+
+
+    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet is NULL || fk_contratdet = 0 ) AND (fk_commandedet is NULL || fk_commandedet = 0 ) Group BY fk_fichinter";
+    $resultPasDeDI = $db->query($requetePasDeDI);
+    if ($db->num_rows($resultPasDeDI) > 0) {
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le vendue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans référence à un contrat ou à une commande dont les dix premières sont listées ci dessous<br/>";
+        $i = 0;
+        while ($ligne = $db->fetch_object($resultPasDeDI)) {
+            if ($i < 10) {
+                $fi = new Fichinter($db);
+                $fi->fetch($ligne->fk_fichinter);
+                echo $fi->getNomUrl(1) . "<br/>";
+            }
+            $tabIdErreur[$ligne->fk_fichinter] = $ligne->fk_fichinter;
+            $i ++;
+        }
+    }
+
+
+    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `llx_element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
+    $resultPasDeDI = $db->query($requetePasDeDI);
+    if ($db->num_rows($resultPasDeDI) > 0) {
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";
+        $i = 0;
+        while ($ligne = $db->fetch_object($resultPasDeDI)) {
+            if ($i < 10) {
+                $fi = new Fichinter($db);
+                $fi->fetch($ligne->fk_fichinter);
+                echo $fi->getNomUrl(1) . "<br/>";
+            }
+            $tabIdErreur[$ligne->fk_fichinter] = $ligne->fk_fichinter;
+            $i ++;
+        }
+    }
+    return $tabIdErreur;
+}
 
 ?>

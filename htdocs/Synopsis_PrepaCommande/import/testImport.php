@@ -496,6 +496,7 @@ if (is_dir($dir)) {
 
 //              foreach ($arrayImport as $listFiles => $File) {
                 foreach ($File as $key => $val) {
+                    $val['PlvLib'] = addslashes(stripslashes(stripslashes($val['PlvLib'])));
                     if (is_array($val))
                         foreach ($val as $cle => $val2)
                             $val[$cle] = utf8_encode($val2);

@@ -183,8 +183,8 @@ if ($_REQUEST["id"] > 0) {
     print '</tr>';
 
     $selectHtml = '';
-    global $tabSelectNatureIntrv;
-    foreach ($tabSelectNatureIntrv as $i => $option) {
+    $tabSelect = array(-1 => "Choix", 1 => "Forfait", 2 => "Sous garantie", 3 => "Contrat", 4 => "Temps pass&eacute;");
+    foreach ($tabSelect as $i => $option) {
         if ($i == extra(35)) {
             $selectHtml .= "<OPTION SELECTED value='" . $i . "'>" . $option . "</OPTION>";
         } else {

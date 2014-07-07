@@ -368,6 +368,12 @@ if (is_dir($dir)) {
                 continue;
             //2 ouvre le fichier
             if (is_readable($dir . "/" . $file) && is_file(($dir . "/" . $file))) {
+                if (isset($_REQUEST['deblocker']) && $_REQUEST['deblocker']) {
+                    $resultMv = rename($dir . "/" . $file, $dir . 'quarantaine/' . $file);
+                    echo "<div class='erreur' style='color:red;'>Le fichier ".$file." a été mie en quarentine.</div><br/><br/>";
+                    $_REQUEST['deblocker'] = false;
+                    continue;
+                }
                 $webContent .= "<div class='titre'>fichier : " . $file . "</div>";
                 $mailContent .= '<div style="color: 00FFC6;">' . $file . '</div>' . "\n";
                 $fileArray[] = $file;
@@ -633,7 +639,7 @@ if (is_dir($dir)) {
                                 if (count($sqlUpt) > 0) {
                                     //Creation de la societe ou mise à jour si code client exist
                                     $updtStr = join(',', $sqlUpt);
-                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = '" . $codSoc."'";
+                                    $requete = "UPDATE " . MAIN_DB_PREFIX . "societe SET " . $updtStr . " WHERE code_client = '" . $codSoc . "'";
                                     $sql = requeteWithCache($requete);
                                     if ($sql) {
                                         $webContent .= "<td class='ui-widget-content'>Mise &agrave; jour soci&eacute;t&eacute; OK</td>";

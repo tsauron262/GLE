@@ -598,6 +598,7 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
 //    $("#iFrame" + nbIframe+" iframe").load(function() {
 //        eval("iFrame" + nbIframe + ".CallBackPlus = CallBackPlus;");
 //    });
+
     initTransmission("iFrame" + nbIframe);
     $(".bottomObj").removeClass("actif");
     $("div.notificationObj").append("<div class='bottomObj actif' id='lienIFrame" + nbIframe + "'><span>" + titreNotif + "</span></div>");
@@ -610,9 +611,13 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     });
     var i = 0;
     iFrame.find("iframe").load(function() {
+        $(this).contents().find("input[name='cancel'], input[name='edit']").click(function() {
+//            fermerIframe($(this).parent(), callBack);
+            nbLoad = 1;
+        });
         i++;
         urlStr = iFrame.find("iframe").get(0).contentWindow.location.toString();
-        if (i > nbLoad && urlStr.indexOf("delete",0) === -1) {
+        if (i > nbLoad && urlStr.indexOf("delete", 0) === -1) {
 //        $("#id-container").show();
             fermerIframe($(this).parent(), callBack);
         }

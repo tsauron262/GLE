@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <request name="CreateCarryInReturnBeforeReplace" type="repair">
+<!--    <request name="CreateCarryInReturnBeforeReplace" type="repair">
         <label>Création d'une réparation de type "Retour avant Remplacement"</label>
         <datas>
             <data name="diagnosedByTechId" required="0"></data>
@@ -52,7 +52,7 @@
             <data name="fileName" required="0"></data>
             <data name="fileData" required="0"></data>
         </datas>
-    </request>
+    </request>-->
 
     <request name="CreateCarryInRepair" type="repair" request="CreateCarryInRequest" wrapper="repairData">
         <label>Création d'une réparation en magasin (carry-in repair)</label>

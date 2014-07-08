@@ -112,7 +112,7 @@ if (isset($_POST["Descr"]) && $_POST["Descr"] != "" && isset($_REQUEST['socid'])
     } else {
         echo "Echec de l'Enregistrement";
     }
-} elseif (isset($_POST["Descr"])) {
+} elseif (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
     echo "Renseignez tous les champs";
 }
 
@@ -138,7 +138,7 @@ if ($socid != "") {
     echo "<p>";
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="/gle_dev/htdocs/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
+    echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
     $form->select_contacts($socid, $_REQUEST['contactid']);
     echo "<br />";
     echo "</td>";
@@ -148,7 +148,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' required/>";
+    echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -159,7 +159,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='Machine' value='" . $machine . "' id='Machine' required/>";
+    echo " <input type='text' name='Machine' value='" . $machine . "' id='Machine' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -265,7 +265,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Déscription.</th>";
     echo "<td class='ui-widget-content'>";
-    echo " <textarea class='grand' type='text' name='Descr' id='Descr' required>$descr</textarea>";
+    echo " <textarea class='grand required' type='text' name='Descr' id='Descr'>$descr</textarea>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";

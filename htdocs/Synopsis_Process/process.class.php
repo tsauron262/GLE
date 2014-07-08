@@ -2396,7 +2396,6 @@ class lien extends formulaireSource {
 
     public $valuesArr = array();
     public $socid = 0;
-    public $cssClassM;
     public $hasMultiValue = ture;
     public $cssClassM = ""; //Nom du type de chrono au quelle on ve faire le lien
 

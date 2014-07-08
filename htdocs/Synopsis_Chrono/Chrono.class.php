@@ -41,7 +41,7 @@ class Chrono extends CommonObject {
     public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO) {
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $id;
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = '" . $id ."';";
             $sql = $this->db->query($requete);
             $res = $this->db->fetch_object($sql);
             if ($res) {

@@ -49,7 +49,40 @@ $(window).load(function() {
     if($("textarea.choixAccess").size()){
         textarea = $(".choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Baterie", "Boite complet");
-       textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" onclick="textarea.append($(this).val()+\', \');">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
+        textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" onclick="textarea.append($(this).val()+\', \');">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
     }
+    
+    $("input#NoMachine").focusout(/*function(){
+        
+    },*/ function(){
+        input = $("#NoMachine");
+        inputM = $("#Machine");
+        inputG = $("#Garantie");
+        NoSerie = input.attr('value');
+        datas = "serial="+NoSerie;
+        reponse = valeurM = valeurG = "";
+        jQuery.ajax({
+                    url: DOL_URL_ROOT + '/apple/ajax/requestProcess.php?action=loadSmallInfoProduct',
+                    data: datas,
+                    datatype: "xml",
+                    type: "POST",
+                    cache: false,
+                    success: function(msg) {
+                       if(msg.indexOf("tabResult")!==-1){
+                            eval(msg);
+                            if (typeof(tabResult) != "undefined"){
+                            valeurM = tabResult[0];
+                            valeurG = tabResult[1];
+                           }
+                       }
+                       else
+                           reponse = msg;
+                            inputM.attr("value", valeurM);
+                            inputG.attr("value", valeurG);
+                           $("#reponse").html(reponse);
+                    }
+                });
+        
+    });
 });
 

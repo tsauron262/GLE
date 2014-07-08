@@ -207,13 +207,14 @@ table.wc-time-slots {
   /* IE 5-7 */ filter: alpha(opacity=80);
   /* Netscape */ -moz-opacity: 0.8;
   /* Safari 1 */ -khtml-opacity: 0.8;
-    position: absolute;
+  /*  position: absolute;*/
     text-align: center;
     overflow: hidden;
     cursor: pointer;
     color: #fff;
-    width: 100%;
+    max-width: 50%;
     display: none;
+    float:left;
 }
 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <root>
-    <request name="CreateCarryInReturnBeforeReplace" type="repair">
+<!--    <request name="CreateCarryInReturnBeforeReplace" type="repair">
         <label>Création d'une réparation de type "Retour avant Remplacement"</label>
         <datas>
             <data name="diagnosedByTechId" required="0"></data>
@@ -52,10 +52,10 @@
             <data name="fileName" required="0"></data>
             <data name="fileData" required="0"></data>
         </datas>
-    </request>
+    </request>-->
 
-    <request name="CreateCarryIn" type="repair">
-        <label>Création d'une réparation en magasin (carry-in repair)"</label>
+    <request name="CreateCarryInRepair" type="repair" request="CreateCarryInRequest" wrapper="repairData">
+        <label>Création d'une réparation en magasin (carry-in repair)</label>
         <datas>
             <data name="diagnosedByTechId" required="1"></data>
             <data name="serialNumber" required="1"></data>
@@ -94,7 +94,7 @@
                     <data name="primaryPhone" required="1"></data>
                     <data name="secondaryPhone" required="0"></data>
                     <data name="regionCode" required="1" default="004"></data>
-                    <data name="state" required="1" default="FRA"></data>
+                    <data name="state" required="1"></data>
                     <data name="zipCode" required="1"></data>
                     <data name="emailAddress" required="1"></data>
                 </datas>
@@ -110,8 +110,8 @@
         </datas>
     </request>
 
-    <request name="UpdateSerialNumber" type="repair">
-        <label>Màj serial</label>
+    <request name="UpdateSerialNumber" type="repair"  request="UpdateSerialNumber" wrapper="repairData">
+        <label>Mise à jour du numéro de série</label>
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>
             <data name="partInfo" required="1">

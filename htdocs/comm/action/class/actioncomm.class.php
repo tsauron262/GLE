@@ -110,9 +110,8 @@ class ActionComm extends CommonObject
 
         $error=0;
         $now=dol_now();
-
         
-        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
+        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id && $user->id != $this->author->id)) $this->usertodo = $user; /*fmod drsi*/
         
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);

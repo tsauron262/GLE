@@ -1,4 +1,13 @@
 $(window).load(function() {
+     $("input[name='transparency']").parent().parent().hide();
+     $("input[name='priority']").parent().parent().hide();
+     $("input[name='percentage'], .hideifna").remove();
+    
+    
+    
+    
+    
+    
     if (document.URL.search("comm/propal.php") > 0) {
         $("a.butAction").each(function() {
             if ($(this).html() == "Modifier")

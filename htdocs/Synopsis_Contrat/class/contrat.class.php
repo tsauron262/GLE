@@ -1653,6 +1653,8 @@ class Synopsis_Contrat extends Contrat {
     public function addAnnexe($annexeId) {
         $maxRang = 0;
         $tabEl = array();
+        $req1 = "DELETE FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` NOT IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "contrat)";
+        $result = $this->db->query($req1);
         $req1 = "SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_contrat_annexe` WHERE `contrat_refid` = " . $this->id . " GROUP BY annexe_refid ORDER BY rang";
         $result = $this->db->query($req1);
         while ($res = $this->db->fetch_object($result)) {
@@ -1660,6 +1662,7 @@ class Synopsis_Contrat extends Contrat {
             if ($idAnn != 36 && $idAnn != 25 && $idAnn != 2)
                 $tabEl[] = $idAnn;
         }
+//        echo "<pre>"; print_r($tabEl);echo "ici".$req1;
         if (!in_array($annexeId, $tabEl))
                 $tabEl[] = $annexeId;
         if(stripos($this->ref, "CMED") === false)

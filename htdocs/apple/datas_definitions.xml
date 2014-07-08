@@ -77,7 +77,7 @@
         </values>
     </def>
     <def name="state" type="text" max="3" jsCheck="text">
-        <label>Etat</label>
+        <label>Département (n°)</label>
     </def>
     <def name="zipCode" type="text" max="10" jsCheck="zipCode">
         <label>Code postal</label>

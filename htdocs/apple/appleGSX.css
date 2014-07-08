@@ -742,3 +742,6 @@ div.singleRequestFormContainer {
     background: #FFFBF2;
     width: 700px;
 }
+div.partsImportResults {
+    display: none;
+}

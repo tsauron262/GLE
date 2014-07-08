@@ -372,12 +372,21 @@ class gsxDatas {
             $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
         }
         
+        if($this->serial != ""){
+            $result = $db->query("SELECT confirmNumber FROM `".MAIN_DB_PREFIX."synopsis_apple_parts_cart` WHERE serial_number = '".$this->serial."'");
+            if($db->num_rows($result) > 0){
+                $ligne = $db->fetch_object($result);
+            $valDef['repairConfirmationNumber'] = $ligne->confirmNumber;
+            }
+        }
+        
         
 //        print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
     public function processRequestForm($prodId, $requestType) {
+        global $db;
         $GSXRequest = new GSX_Request($this, $requestType);
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
@@ -401,6 +410,8 @@ class gsxDatas {
                 }
                 $html .= '</p>' . "\n";
             } else {
+                $confirmNumber = $response['ResponseArray']['responseData']['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
+                $db->query("UPDATE  `".MAIN_DB_PREFIX."synopsis_apple_parts_cart` SET  `confirmNumber` =  '".$confirmNumber."' WHERE  serial_number = '".$this->serial."';");
                 $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
                 $html .= '<pre>';
                 $html .= print_r($this->gsx->outputFormat($response));

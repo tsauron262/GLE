@@ -54,6 +54,22 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
+            
+            case 'loadInfoProduct':
+           if (isset($_GET['serial'])) {
+               if (isset($_GET['prodId'])) {
+                   $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                   if ($datas->connect)
+                       echo $datas->getLookupHtml($_GET['prodId']);
+                   else
+                       echo $datas->getGSXErrorsHtml ();
+               } else {
+                   echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
+               }
+           } else {
+               echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
+           }
+           break;
 
         case 'loadRepairForm':
             if (isset($_GET['serial'])) {
@@ -166,6 +182,25 @@ if (isset($_GET['action'])) {
             } else {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
+            break;
+        case 'loadSmallInfoProduct':
+            $GSXdatas = new gsxDatas($_REQUEST["serial"], $userId, $password, $serviceAccountNo);
+            if ($GSXdatas->connect)
+            {
+                $response = $GSXdatas->gsx->lookup($_REQUEST["serial"], 'warranty');
+                if (isset($response) && count($response)) {
+                    if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
+                        if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
+                            $datas = $response['ResponseArray']['responseData'];
+                            $machineinfo = $datas['productDescription'];
+                            $garantie = $datas['warrantyStatus'];
+                            echo "tabResult = Array('".$machineinfo."', '".$garantie."');";
+                        }
+                    }
+                }
+            }
+            else
+                echo $GSXdatas->getGSXErrorsHtml ();
             break;
     }
     die('');

@@ -2398,12 +2398,13 @@ class lien extends formulaireSource {
     public $socid = 0;
     public $cssClassM;
     public $hasMultiValue = ture;
+    public $cssClassM = ""; //Nom du type de chrono au quelle on ve faire le lien
 
     function lien($db) {
         $this->db = $db;
     }
 
-    function fetch($id) {
+    function fetch($id) {//id de l'element lien table lien
         $this->id = $id;
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_lien WHERE rowid = " . $this->id;
         $sql = $this->db->query($requete);

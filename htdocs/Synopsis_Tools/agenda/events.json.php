@@ -29,7 +29,7 @@ while ($ligne = $db->fetch_object($result)) {
     if (!isset($ligne->datep))
         $ligne->datep = $ligne->datep2;
     
-    if($ligne->conf == 1 && $userId != $user->id){
+    if($ligne->conf == 1 && $ligne->fk_user_action != $user->id){
         $text = "Confidentiel";
         $ligne->fk_action = 999;
     }

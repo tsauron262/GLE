@@ -49,7 +49,10 @@ $(window).load(function() {
     if($("textarea.choixAccess").size()){
         textarea = $(".choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Baterie", "Boite complet");
-        textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" onclick="textarea.append($(this).val()+\', \');">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
+        textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
+        $("#sometext").click(function(){
+            textarea.append($(this).val()+', ');
+        });
     }
     
     $("input#NoMachine").focusout(/*function(){
@@ -58,9 +61,12 @@ $(window).load(function() {
         input = $("#NoMachine");
         inputM = $("#Machine");
         inputG = $("#Garantie");
+        inputD = $("#DateAchat");
         NoSerie = input.attr('value');
         datas = "serial="+NoSerie;
-        reponse = valeurM = valeurG = "";
+        roue = $("#patientez");
+        reponse = valeurM = valeurG = valeurD =  "";
+        roue.show();
         jQuery.ajax({
                     url: DOL_URL_ROOT + '/apple/ajax/requestProcess.php?action=loadSmallInfoProduct',
                     data: datas,
@@ -73,13 +79,21 @@ $(window).load(function() {
                             if (typeof(tabResult) != "undefined"){
                             valeurM = tabResult[0];
                             valeurG = tabResult[1];
+                            valeurD = tabResult[2];
                            }
                        }
                        else
                            reponse = msg;
-                            inputM.attr("value", valeurM);
-                            inputG.attr("value", valeurG);
-                           $("#reponse").html(reponse);
+                       
+                        inputM.attr("value", valeurM);
+                        inputG.attr("value", valeurG);
+                        if (valeurD !== "") {
+                            valeurD = valeurD.split("/");
+                            valeurD = valeurD[0] + "-" + valeurD[1] + "-" + valeurD[2];
+                            inputD.attr("value", valeurD);
+                        }
+                        $("#reponse").html(reponse);
+                        roue.hide();
                     }
                 });
         

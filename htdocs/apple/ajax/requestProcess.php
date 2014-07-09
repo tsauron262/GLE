@@ -194,7 +194,8 @@ if (isset($_GET['action'])) {
                             $datas = $response['ResponseArray']['responseData'];
                             $machineinfo = $datas['productDescription'];
                             $garantie = $datas['warrantyStatus'];
-                            echo "tabResult = Array('".$machineinfo."', '".$garantie."');";
+                            $dateAchat = $datas['estimatedPurchaseDate'];
+                            echo "tabResult = Array('".$machineinfo."', '".$garantie."', '".$dateAchat."');";
                         }
                     }
                 }

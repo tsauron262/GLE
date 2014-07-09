@@ -67,7 +67,7 @@ $retour3 = (isset($_POST['Retour']) && $_POST['Retour'] == 3 ? 'selected' : "");
 $symptomes = (isset($_POST['Symptomes']) ? $_POST['Symptomes'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
 
-if (isset($_POST["Descr"]) && $_POST["Descr"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "") {
+if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "") {
     $chronoProd = new Chrono($db);
 
     $chronoProdid = existProd($NoMachine);
@@ -151,6 +151,9 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required'/>";
+    echo "<span id='patientez' style='display:none; margin-left:15px;'>";
+    echo "<img src='".DOL_URL_ROOT."/Synopsis_Tools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
+    echo "</span>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -169,7 +172,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Etat de la garantie.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='Garantie' value='" . $garantie . "' id='Garantie'/>";
+    echo " <input type='text' name='Garantie' value='" . $garantie . "' id='Garantie' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -178,13 +181,13 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Preuve d'achat.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='checkbox' name='Preuve' value='1' id='Preuve'" . $preuve . "/>";
-    echo " <label for='peuvreAchat'/>(Cochez si une preuve d'achat est fournie)</label>";
+    echo " <label for='preuveAchat'/>(Cochez si une preuve d'achat est fournie)</label>";
     echo "</td>";
     echo "</tr>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Date d'achat.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='Date' class = 'datePicker' name='DateAchat' value='" . $DateAchat . "' id='DateAchat'/>";
+    echo " <input type='Date' class = 'datePicker' name='DateAchat' value='" . $DateAchat . "' id='DateAchat' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -192,7 +195,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Etat de la machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <select name='Etat' id='Etat'>";
+    echo " <select name='Etat' id='Etat' class='required'>";
     echo "<option value=''></option> ";
     echo "<option value='1'" . $etat1 . ">Neuf</option> ";
     echo "<option value='2'" . $etat2 . ">Très bon état </option>";
@@ -207,7 +210,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Accesoires.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo "<textarea class=' grand choixAccess' name='Chrono-1041' id='Chrono-1041'>$accessoire</textarea>";
+    echo "<textarea class=' grand choixAccess ' name='Chrono-1041' id='Chrono-1041'>$accessoire</textarea>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -215,7 +218,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Sauvegarde.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <select name='Sauv' id='Sauv'>";
+    echo " <select name='Sauv' id='Sauv' class='required'>";
     echo "<option value=''></option> ";
     echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde</option> ";
     echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
@@ -228,7 +231,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Mot de passe admin.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='pass' value='" . $pass . "' id='pass'/>";
+    echo " <input type='text' name='pass' value='" . $pass . "' id='pass' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -236,7 +239,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Préférence de contact pour le devis.</th>";
     echo "<td class='ui-widget-content'>";
-    echo " <select name='Devis' id='Devis'>";
+    echo " <select name='Devis' id='Devis' class='required'>";
     echo "<option value=''></option> ";
     echo "<option value='1'" . $devis1 . ">Par Mail</option> ";
     echo "<option value='2'" . $devis2 . ">Par Téléphone </option>";
@@ -246,7 +249,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Préférence de contact pour le retour.</th>";
     echo "<td class='ui-widget-content'>"; /* <span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'> */
-    echo " <select name='Retour' id='Retour'>";
+    echo " <select name='Retour' id='Retour' class='required'>";
     echo "<option value=''></option> ";
     echo "<option value='1'" . $retour1 . ">Par Mail</option> ";
     echo "<option value='2'" . $retour2 . ">Par Téléphone </option>";
@@ -259,7 +262,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Symptomes.</th>";
     echo "<td class='ui-widget-content'>";
-    echo " <textarea type='text' class='grand' name='Symptomes' id='Symptomes'>$symptomes</textarea>";
+    echo " <textarea type='text' class='grand required' name='Symptomes' id='Symptomes'>$symptomes</textarea>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -267,7 +270,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Déscription.</th>";
     echo "<td class='ui-widget-content'>";
-    echo " <textarea class='grand required' type='text' name='Descr' id='Descr'>$descr</textarea>";
+    echo " <textarea class='grand' type='text' name='Descr' id='Descr' >$descr</textarea>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -276,7 +279,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'></th>";
     echo "<td class='ui-widget-content'>";
-    echo "<input type='submit' class='butAction' name='Envoyer' id ='Envoyer'>";
+    echo "<input type='submit' class='butAction' name='Envoyer' value='Valider' id ='Envoyer'>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -295,7 +298,7 @@ if ($socid != "") {
     echo "<br />";
     echo "</p>";
     echo "<p>";
-    echo "<input type='submit' name='Envoyer' class='butAction' id ='Envoyer'>";
+    echo "<input type='submit' value='Valider' name='Envoyer' class='butAction' id ='Envoyer'>";
     echo "</p>";
     echo "</form>";
 }

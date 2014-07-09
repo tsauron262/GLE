@@ -47,8 +47,8 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 $langs->load("companies");
 $langs->load("interventions");
 
-$sortorder = isset($_GET["sortorder"]) ? $_GET["sortorder"] : "";
-$sortfield = isset($_GET["sortfield"]) ? $_GET["sortfield"] : "fk_statut, f.datei desc";
+$sortorder = isset($_GET["sortorder"]) ? $_GET["sortorder"] : "DESC";
+$sortfield = isset($_GET["sortfield"]) ? $_GET["sortfield"] : "fk_statut asc, f.datei ";
 $socid = isset($_GET["socid"]) ? $_GET["socid"] : "";
 $page = isset($_GET["page"]) ? $_GET["page"] : "";
 
@@ -58,10 +58,10 @@ if ($user->societe_id)
     $socid = $user->societe_id;
 //$result = restrictedArea($user, 'synopsisdemandeinterv', $synopsisdemandeintervid,'');
 
-if (!$sortorder)
-    $sortorder = "";
-if (!$sortfield)
-    $sortfield = "f.datei";
+//if (!$sortorder)
+//    $sortorder = "DESC";
+//if (!$sortfield)
+//    $sortfield = "f.datei";
 if ($page == -1) {
     $page = 0;
 }

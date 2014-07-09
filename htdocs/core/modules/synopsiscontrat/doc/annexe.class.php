@@ -129,7 +129,7 @@ class annexe {
                 }
                 $tempStr = utf8_encodeRien('Contact-external-CUSTOMER-fullname
 Mail : Contact-external-CUSTOMER-email
-Tél. : Soc-tel
+Tél. : Contact-external-CUSTOMER-tel
 ');
                 foreach (array('fullname', 'civilite', 'nom', 'prenom', 'cp', 'ville', 'email', 'tel', 'fax') as $val0) {
                     $code = "Contact-" . $val['source'] . "-" . $val['code'] . "-" . $val0;

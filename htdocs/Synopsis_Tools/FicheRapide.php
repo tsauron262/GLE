@@ -10,7 +10,7 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/apple/partsCart.class.php';
 require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/process.class.php';
-require_once DOL_DOCUMENT_ROOT . '/Synopsis_Chrono/class/Chrono.class.php';
+require_once DOL_DOCUMENT_ROOT . '/Synopsis_Chrono/Chrono.class.php';
 $js = "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/global.css' />";
 $js.= "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/BIMP.css' />";
 $js.= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";

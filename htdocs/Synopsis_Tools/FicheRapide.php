@@ -104,6 +104,7 @@ if (isset($_POST["Descr"]) && $_POST["Descr"] != "" && isset($_REQUEST['socid'])
                 $lien->fetch(3);
                 $lien->setValue($chrono->id, array($chronoProd->id));
                 $chrono->fetch($chrono->id); 
+                $chronoProd->fetch($chronoProd->id); 
                 echo "Enregistrement effecué avec succés. <br/>SAV : ".$chrono->getNomUrl(1). " <br/>Produit : ".$chronoProd->getNomUrl(1);
             } else {
                 echo "Echec de l'Enregistrement";

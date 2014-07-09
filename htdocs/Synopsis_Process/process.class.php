@@ -2533,7 +2533,7 @@ EOF;
     }
 
     function setValue($idChrono, $tabVal) {
-        print_r($tabVal);
+//        print_r($tabVal);
         delElementElement($this->nomElement, $this->nomElem, $idChrono, null, $this->ordre);
         foreach ($tabVal as $val) {
             if ($val != 0)

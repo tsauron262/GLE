@@ -71,7 +71,7 @@ if (isset($_POST["Descr"]) && $_POST["Descr"] != "" && isset($_REQUEST['socid'])
     $chronoProd = new Chrono($db);
 
     $chronoProdid = existProd($NoMachine);
-    if (chronoProdid < 0) {
+    if ($chronoProdid < 0) {
         $chronoProd->model_refid = 101;
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
@@ -103,7 +103,8 @@ if (isset($_POST["Descr"]) && $_POST["Descr"] != "" && isset($_REQUEST['socid'])
                 $lien->cssClassM = "type:SAV";
                 $lien->fetch(3);
                 $lien->setValue($chrono->id, array($chronoProd->id));
-                echo "Enregistrement effecué avec succés";
+                $chrono->fetch($chrono->id); 
+                echo "Enregistrement effecué avec succés. <br/>SAV : ".$chrono->getNomUrl(1). " <br/>Produit : ".$chronoProd->getNomUrl(1);
             } else {
                 echo "Echec de l'Enregistrement";
             }
@@ -302,7 +303,7 @@ function existProd($nomachine) {
         global $db;
         $requete = "SELECT chrono_refid FROM "  . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE key_id = 1011 and value = '".$nomachine."';";
         $sql = $db->query($requete);
-        if ($sql) {
+        if ($db->num_rows($sql) > 0) {
             $obj = $db->fetch_object($sql);
             $return = $obj->chrono_refid;
             return $return;

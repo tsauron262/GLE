@@ -148,13 +148,13 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
                     $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
-                    $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Créer une réparation</button>' . "\n";
+                    $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Gérer la réparation</button>' . "\n";
                     $html .= '<div class="partsRequestResult"></div>' . "\n";
 
                     $html .= '<div class="repairPopUp">' . "\n";
                     $html .= '<input type="hidden" class="prodId" value="' . $prodId . '"/>' . "\n";
                     $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>' . "\n";
-                    $html .= '<p>Sélectionnez le type de réparation que vous souhaitez créer: <br/></p>';
+                    $html .= '<p>Sélectionnez le type d\'opération que vous souhaitez effectuer: <br/></p>';
                     $html .= '<select class="repairTypeSelect">' . "\n";
 
                     $requests = GSX_Request::getRequestsByType('repair');
@@ -338,8 +338,13 @@ class gsxDatas {
         $chrono->getValues($chronoId);
 
         $valDef = array();
+//        $valDef['repairConfirmationNumbers'] = array(
+//            '1',
+//            '2',
+//            '3'
+//        );
         $valDef['serialNumber'] = $this->serial;
-//        $valDef['diagnosis'] = $chrono->description;
+        $valDef['diagnosis'] = $chrono->description;
         $valDef['diagnosis'] = 'Ecran défectueux (cassé)';
         $valDef['symptom'] = 'Ecran défectueux (cassé)';
         $valDef['diagnosedByTechId'] = 'E93480FC4D';

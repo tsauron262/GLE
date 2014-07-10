@@ -792,10 +792,12 @@ class GSX {
                 'userSession' => array(
                     'userSessionId' => $this->userSessionId
                 ),
-                "$wrapperName" => $details
             )
         );
-
+        if (isset($wrapperName) && ($wrapperName !== ''))
+            $requestArray[$requestName][$wrapperName] = $details;
+        else
+            $requestArray[$requestName] = array_merge($requestArray[$requestName], $details);
         return $requestArray;
     }
 
@@ -939,6 +941,7 @@ class GSX {
 //        echo('<p class="error">SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo . "</p>");
         $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
+
 }
 
 ?>

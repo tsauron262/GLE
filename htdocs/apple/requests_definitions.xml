@@ -130,4 +130,11 @@
             </data>
         </response>
     </request>
+
+    <request name="MarkRepairComplete" type="repair" request="MarkRepairCompleteRequest" wrapper="">
+        <label>Réparation complète</label>
+        <datas>
+            <data name="repairConfirmationNumbers" required="1" multiple="1"></data>
+        </datas>
+    </request>
 </root>

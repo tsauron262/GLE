@@ -1050,6 +1050,29 @@ function checkInput($input, type) {
     }
     assignInputCheckMsg($input, 'ok', '');
 }
+function duplicateInput($span, inputName) {
+    var $container = $span.parent('div.dataBlock');
+    if ($container.length) {
+        var $template = $container.find('div.dataInputTemplate');
+        var $index = $container.find('#'+inputName+'_nextIdx');
+        if ($template.length) {
+            if ($index.length) {
+                var html = $template.html();
+                var index = parseInt($index.val());
+                var regex = new RegExp(inputName, 'g');
+                index++
+                html = html.replace(regex, inputName+'_'+index);
+                var $list = $container.find('div.inputsList');
+                if ($list.length) {
+                    $list.append(html);
+                    $index.val(index);
+                    return;
+                }
+            }
+        }
+    }
+    alert('Une erreur est survenue, opération impossible');
+}
 function submitGsxRequestForm(prodId, request) {
     var $prod = $('#prod_'+prodId);
     var $form = null;

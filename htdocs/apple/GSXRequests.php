@@ -153,10 +153,18 @@ class GSX_Request {
 
     protected function getDataInput($dataNode, $serial, $values = null, $index = null) {
         $name = $dataNode->getAttribute('name');
-        $inputName = $name . (isset($index) ? '_' . $index : '');
+
+        if ($dataNode->hasAttribute('multiple'))
+            $multiple = $dataNode->getAttribute('multiple');
+        else
+            $multiple = false;
+
         if (!$name) {
             return '<p class="error">Erreur de syntaxe dans le fichier xml : 1 attribut "name" non-défini.</p>';
         }
+
+        $inputName = $name . (isset($index) ? '_' . $index : '');
+        $valuesName = $name;
         $defs = $this->getDataDefinitionsArray($name);
 
         if (!isset($defs)) {
@@ -167,6 +175,7 @@ class GSX_Request {
             return '';
 
         $html = '';
+
         $required = $dataNode->getAttribute('required');
         if ($required === '1')
             $required = true;
@@ -190,7 +199,7 @@ class GSX_Request {
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                 foreach ($dataNodes as $node) {
-                    $html .= $this->getDataInput($node, $serial, isset($values[$name]) ? $values[$name] : null, $index);
+                    $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
                 }
             } else {
                 $html .= '<p class="alert">Aucunes définitions pour ces données</p>' . "\n";
@@ -206,230 +215,265 @@ class GSX_Request {
                     $html .= '<div class="labelInfos">' . $defs['infos'] . '</div></span>';
                 }
                 $html .= '</label>';
-            }
-            switch ($defs['type']) {
-                case 'text':
-                case 'number':
-                case 'tel':
-                case 'email':
-                case 'date':
-                case 'time':
-                    $html .= '<br/>' . "\n";
-                    $html .= '<input type="' . $defs['type'] . '" ';
-                case 'textarea':
-                    if ($defs['type'] == 'textarea') {
-                        if (isset($defs['max']))
-                            $html .= '<span style="font-size: 11px; color: #783131">(max ' . $defs['max'] . ' caractères)</span>';
-                        $html .= '<br/>' . "\n";
-                        $html .= '<textarea cols="80" rows="10" ';
-                    }
-                    $html .= 'id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
-
-                    if ($defs['type'] != 'textarea') {
-                        if (isset($values[$name]))
-                            $html .= ' value="' . $values[$name] . '"';
-                        else if (isset($default))
-                            $html .= ' value="' . $default . '"';
-                    }
-
-                    $html .= isset($defs['max']) ? ' maxlength="' . $defs['max'] . '"' : '';
-                    $html .= isset($defs['jsCheck']) ? ' onchange="checkInput($(this), \'' . $defs['jsCheck'] . '\')"' : '';
-
-                    if ($defs['type'] == 'textarea') {
-                        $html .= '>';
-                        if (isset($values[$name]))
-                            $html .= $values[$name];
-                        else if (isset($default))
-                            $html .= $default;
-                        $html .= '</textarea>' . "\n";
-                    }
-                    else
-                        $html .= '/>' . "\n";
-                    break;
-
-                case 'select':
-                    if (isset($defs['values'])) {
-                        $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' ) . '>';
-//                        $html .= '<option value="">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
-                        foreach ($defs['values'] as $v => $txt) {
-                            $html .= '<option value="' . $v . '"';
-                            if (isset($values[$name])) {
-                                if ($values[$name] == $v)
-                                    $html.= ' selected';
-                            } else if (isset($default)) {
-                                if ($default == $v)
-                                    $html .= ' selected';
-                            }
-                            $html .= '>' . $txt . '</option>' . "\n";
+                if ($multiple) {
+                    $valuesArray = null;
+                    if (isset($values[$valuesName])) {
+                        if (is_array($values[$valuesName])) {
+                            $valuesArray = $values[$valuesName];
+                        } else {
+                            $valuesArray = array(
+                                0 => $values[$valuesName]
+                            );
                         }
-                        $html .= '</select>';
-                        break;
+                        $values[$valuesName] = null;
                     }
-                    $html .= '<p class="alert">Aucune valeur défini pour la liste de choix "' . $name . '"</p>' . "\n";
-                    break;
+                    $multipleIndex = 0;
+                    $html .= '<span class="button blueHover duplicateInput" onclick="duplicateInput($(this), \'' . $inputName . '\')">Ajouter</span>' . "\n";
+                    $html .= '<div class="dataInputTemplate">' . "\n";
+                }
+            }
+            while (true) {
+                switch ($defs['type']) {
+                    case 'text':
+                    case 'number':
+                    case 'tel':
+                    case 'email':
+                    case 'date':
+                    case 'time':
+                        $html .= '<br/>' . "\n";
+                        $html .= '<input type="' . $defs['type'] . '" ';
+                    case 'textarea':
+                        if ($defs['type'] == 'textarea') {
+                            if (isset($defs['max']))
+                                $html .= '<span style="font-size: 11px; color: #783131">(max ' . $defs['max'] . ' caractères)</span>';
+                            $html .= '<br/>' . "\n";
+                            $html .= '<textarea cols="80" rows="10" ';
+                        }
+                        $html .= 'id="' . $inputName . '" name="' . $inputName . '"' . ($required ? ' required' : '');
 
-                case 'YesNo':
-                    $defVal = 'Y';
-                    if (isset($values[$name]))
-                        $defVal = $values[$name];
-                    else if (isset($default))
-                        $defVal = $default;
+                        if ($defs['type'] != 'textarea') {
+                            if (isset($values[$valuesName]))
+                                $html .= ' value="' . $values[$valuesName] . '"';
+                            else if (isset($default))
+                                $html .= ' value="' . $default . '"';
+                        }
 
-                    $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
-                    $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
-                    $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
-                    $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
-                    break;
+                        $html .= isset($defs['max']) ? ' maxlength="' . $defs['max'] . '"' : '';
+                        $html .= isset($defs['jsCheck']) ? ' onchange="checkInput($(this), \'' . $defs['jsCheck'] . '\')"' : '';
 
-                case 'fileSelect':
-                    $html .= '<input type="file" id="' . $inputName . '" name="' . $inputName . '"/>';
-                    break;
+                        if ($defs['type'] == 'textarea') {
+                            $html .= '>';
+                            if (isset($values[$valuesName]))
+                                $html .= $values[$valuesName];
+                            else if (isset($default))
+                                $html .= $default;
+                            $html .= '</textarea>' . "\n";
+                        }
+                        else
+                            $html .= '/>' . "\n";
+                        break;
 
-                case 'partsList':
-                    $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
-                    if (count($subDatasNode) == 1) {
-                        $partsDataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                        if (count($partsDataNodes)) {
-                            $orderLines = null;
-                            if (isset($values)) {
-                                if (isset($values[$name])) {
-                                    if (is_array($values[$name])) {
-                                        $lines = $values[$name];
-                                        $orderLines = array();
-                                        foreach ($lines as $line) {
-                                            if (isset($line['partNumber']))
-                                                $orderLines[$line['partNumber']] = $line;
-                                            else
-                                                $orderLines[] = $line;
-                                        }
-                                    }
+                    case 'select':
+                        if (isset($defs['values'])) {
+                            $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' ) . '>';
+//                        $html .= '<option value="">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
+                            foreach ($defs['values'] as $v => $txt) {
+                                $html .= '<option value="' . $v . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $v)
+                                        $html.= ' selected';
+                                } else if (isset($default)) {
+                                    if ($default == $v)
+                                        $html .= ' selected';
                                 }
+                                $html .= '>' . $txt . '</option>' . "\n";
                             }
-                            if (!isset($orderLines)) {
-                                global $db;
-                                $partsCart = new partsCart($db, $serial);
-                                if ($partsCart->loadCart()) {
-                                    $orderLines = array();
-                                    foreach ($partsCart->partsCart as $part) {
-                                        $orderLines[$part['partNumber']] = array(
-                                            'partNumber' => $part['partNumber'],
-                                            'comptiaCode' => $part['comptiaCode'],
-                                            'comptiaModifier' => $part['comptiaModifier']
-                                        );
-                                    }
-                                }
-                            }
+                            $html .= '</select>';
+                            break;
+                        }
+                        $html .= '<p class="alert">Aucune valeur défini pour la liste de choix "' . $name . '"</p>' . "\n";
+                        break;
 
-                            $html .= '<span class="button importParts blueHover"';
-                            $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
-                            $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
-                            $html .= '<div class="partsImportResults"></div>' . "\n";
-                            $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
-                            foreach ($partsDataNodes as $partDataNode) {
-                                $html .= $this->getDataInput($partDataNode, $serial);
-                            }
-                            $html .= '</div>';
-                            $html .= '<div class="repairPartsContainer"';
-                            $partCount = 0;
-                            if (isset($orderLines) && is_array($orderLines)) {
-                                $html .= ' style="display: block;">' . "\n";
-                                $partsList = null;
-                                if (isset($this->gsx)) {
-                                    $partsList = $this->gsx->getPartsListArray(true);
-                                    if (!isset($this->comptiaCodes))
-                                        $this->comptiaCodes = $this->gsx->getCompTIACodesArray();
-                                    if (isset($partsList) && count($partsList)) {
-                                        foreach ($orderLines as $partNumber => $orderLine) {
-                                            if (isset($partsList[$partNumber])) {
-                                                if (isset($partsList[$partNumber]['partDescription']))
-                                                    $orderLines[$partNumber]['partDescription'] = $partsList[$partNumber]['partDescription'];
-                                                if (isset($partsList[$partNumber]['componentCode']))
-                                                    $orderLines[$partNumber]['componentCode'] = $partsList[$partNumber]['componentCode'];
+                    case 'YesNo':
+                        $defVal = 'Y';
+                        if (isset($values[$valuesName]))
+                            $defVal = $values[$valuesName];
+                        else if (isset($default))
+                            $defVal = $default;
+
+                        $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
+                        $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
+                        $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
+                        $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
+                        break;
+
+                    case 'fileSelect':
+                        $html .= '<input type="file" id="' . $inputName . '" name="' . $inputName . '"/>';
+                        break;
+
+                    case 'partsList':
+                        $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                        if (count($subDatasNode) == 1) {
+                            $partsDataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                            if (count($partsDataNodes)) {
+                                $orderLines = null;
+                                if (isset($values)) {
+                                    if (isset($values[$valuesName])) {
+                                        if (is_array($values[$valuesName])) {
+                                            $lines = $values[$valuesName];
+                                            $orderLines = array();
+                                            foreach ($lines as $line) {
+                                                if (isset($line['partNumber']))
+                                                    $orderLines[$line['partNumber']] = $line;
+                                                else
+                                                    $orderLines[] = $line;
                                             }
                                         }
                                     }
                                 }
-
-                                $i = 1;
-                                foreach ($orderLines as $orderLine) {
-                                    $partCount++;
-                                    $html .= '<div class="partDatasBlock">';
-                                    $html .= '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">';
-                                    if (isset($orderLine['partDescription']))
-                                        $html .= $orderLine['partDescription'];
-                                    else
-                                        $html .= 'Composant ' . $i;
-                                    $html .= '</div>';
-                                    $html .= '<div class="partDatasContent partDatasContent_' . $i . '">';
-                                    foreach ($partsDataNodes as $partDataNode) {
-                                        $html .= $this->getDataInput($partDataNode, $serial, $orderLine, $i);
+                                if (!isset($orderLines)) {
+                                    global $db;
+                                    $partsCart = new partsCart($db, $serial);
+                                    if ($partsCart->loadCart()) {
+                                        $orderLines = array();
+                                        foreach ($partsCart->partsCart as $part) {
+                                            $orderLines[$part['partNumber']] = array(
+                                                'partNumber' => $part['partNumber'],
+                                                'comptiaCode' => $part['comptiaCode'],
+                                                'comptiaModifier' => $part['comptiaModifier']
+                                            );
+                                        }
                                     }
-                                    $html .= '</div></div>';
-                                    $i++;
                                 }
-                            } else {
-                                $html .= '>';
+
+                                $html .= '<span class="button importParts blueHover"';
+                                $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
+                                $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
+                                $html .= '<div class="partsImportResults"></div>' . "\n";
+                                $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
+                                foreach ($partsDataNodes as $partDataNode) {
+                                    $html .= $this->getDataInput($partDataNode, $serial);
+                                }
+                                $html .= '</div>';
+                                $html .= '<div class="repairPartsContainer"';
+                                $partCount = 0;
+                                if (isset($orderLines) && is_array($orderLines)) {
+                                    $html .= ' style="display: block;">' . "\n";
+                                    $partsList = null;
+                                    if (isset($this->gsx)) {
+                                        $partsList = $this->gsx->getPartsListArray(true);
+                                        if (!isset($this->comptiaCodes))
+                                            $this->comptiaCodes = $this->gsx->getCompTIACodesArray();
+                                        if (isset($partsList) && count($partsList)) {
+                                            foreach ($orderLines as $partNumber => $orderLine) {
+                                                if (isset($partsList[$partNumber])) {
+                                                    if (isset($partsList[$partNumber]['partDescription']))
+                                                        $orderLines[$partNumber]['partDescription'] = $partsList[$partNumber]['partDescription'];
+                                                    if (isset($partsList[$partNumber]['componentCode']))
+                                                        $orderLines[$partNumber]['componentCode'] = $partsList[$partNumber]['componentCode'];
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    $i = 1;
+                                    foreach ($orderLines as $orderLine) {
+                                        $partCount++;
+                                        $html .= '<div class="partDatasBlock">';
+                                        $html .= '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">';
+                                        if (isset($orderLine['partDescription']))
+                                            $html .= $orderLine['partDescription'];
+                                        else
+                                            $html .= 'Composant ' . $i;
+                                        $html .= '</div>';
+                                        $html .= '<div class="partDatasContent partDatasContent_' . $i . '">';
+                                        foreach ($partsDataNodes as $partDataNode) {
+                                            $html .= $this->getDataInput($partDataNode, $serial, $orderLine, $i);
+                                        }
+                                        $html .= '</div></div>';
+                                        $i++;
+                                    }
+                                } else {
+                                    $html .= '>';
+                                }
+
+                                $html .= '</div>' . "\n";
+                                $html .= '<input type="hidden" id="partsCount" name="partsCount" value="' . $partCount . '"/>' . "\n";
+                                break;
                             }
-
-                            $html .= '</div>' . "\n";
-                            $html .= '<input type="hidden" id="partsCount" name="partsCount" value="' . $partCount . '"/>' . "\n";
-                            break;
                         }
-                    }
-                    $html .= '<p class="alert">Aucune définition trouvée pour les données concernant les composants.</p>';
-                    break;
+                        $html .= '<p class="alert">Aucune définition trouvée pour les données concernant les composants.</p>';
+                        break;
 
-                case 'comptiaCode':
-                    $html .= '<div class="comptiaCodeContainer">' . "\n";
-                    if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
-                        $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
-                        $html .= '<span>Non-applicable</span>';
-                    } else if (isset($values['componentCode']) &&
-                            isset($this->comptiaCodes) &&
-                            isset($this->comptiaCodes['grps'][$values['componentCode']])) {
-                        $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                        $html .= '<option value="0">Code compTIA</option>' . "\n";
-                        foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
-                            $html .= '<option value="' . $code . '"';
-                            if (isset($values[$name])) {
-                                if ($values[$name] == $code)
-                                    $html.= ' selected';
+                    case 'comptiaCode':
+                        $html .= '<div class="comptiaCodeContainer">' . "\n";
+                        if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
+                            $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
+                            $html .= '<span>Non-applicable</span>';
+                        } else if (isset($values['componentCode']) &&
+                                isset($this->comptiaCodes) &&
+                                isset($this->comptiaCodes['grps'][$values['componentCode']])) {
+                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                            $html .= '<option value="0">Code compTIA</option>' . "\n";
+                            foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
+                                $html .= '<option value="' . $code . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $code)
+                                        $html.= ' selected';
+                                }
+                                $html .= '>' . $code . ' - ' . $desc . '</option>';
                             }
-                            $html .= '>' . $code . ' - ' . $desc . '</option>';
+                            $html .= '</select>' . "\n";
+                        } else if (isset($values[$valuesName])) {
+                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                            $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
                         }
-                        $html .= '</select>' . "\n";
-                    } else if (isset($values[$name])) {
-                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
-                    }
-                    $html .= '</div>';
-                    break;
+                        $html .= '</div>';
+                        break;
 
-                case 'comptiaModifier':
-                    $html .= '<div class="comptiaModifierContainer">' . "\n";
+                    case 'comptiaModifier':
+                        $html .= '<div class="comptiaModifierContainer">' . "\n";
 
-                    if (isset($this->comptiaCodes['mods'])) {
-                        $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
-                        $html .= '<option value="0">Modificateur</option>' . "\n";
-                        foreach ($this->comptiaCodes['mods'] as $mod => $desc) {
-                            $html .= '<option value="' . $mod . '"';
-                            if (isset($values[$name])) {
-                                if ($values[$name] == $mod)
-                                    $html.= ' selected';
+                        if (isset($this->comptiaCodes['mods'])) {
+                            $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                            $html .= '<option value="0">Modificateur</option>' . "\n";
+                            foreach ($this->comptiaCodes['mods'] as $mod => $desc) {
+                                $html .= '<option value="' . $mod . '"';
+                                if (isset($values[$valuesName])) {
+                                    if ($values[$valuesName] == $mod)
+                                        $html.= ' selected';
+                                }
+                                $html .= '>' . $mod . ' - ' . $desc . '</option>';
                             }
-                            $html .= '>' . $mod . ' - ' . $desc . '</option>';
+                            $html .= '</select>' . "\n";
+                        } else if (isset($values[$valuesName])) {
+                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                            $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
                         }
-                        $html .= '</select>' . "\n";
-                    } else if (isset($values[$name])) {
-                        $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                        $html .= $values[$name] . '"' . ($required ? ' required' : '') . '/>' . "\n";
-                    }
-                    $html .= '</div>';
-                    break;
+                        $html .= '</div>';
+                        break;
 
-                default:
-                    $html .= '<p class="alert">Type inéxistant pour la donnée "' . $name . '"</p>';
+                    default:
+                        $html .= '<p class="alert">Type inéxistant pour la donnée "' . $name . '"</p>';
+                        break;
+                }
+                if (!$multiple)
                     break;
+                else {
+                    if ($multipleIndex == 0) {
+                        $html .= '</div>' . "\n";
+                        $html .= '<div class="inputsList">' . "\n";
+                    }
+                    $inputName = $name . (isset($index) ? '_' . $index : '');
+                    if (!isset($valuesArray[$multipleIndex])) {
+                        $html .= '</div>' . "\n";
+                        $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="' . $multipleIndex . '"/>' . "\n";
+                        break;
+                    }
+                    $values[$valuesName] = $valuesArray[$multipleIndex];
+                    $multipleIndex++;
+                    $inputName .= '_' . $multipleIndex;
+                }
             }
             if (isset($defs['jsCheck']))
                 $html .= '<span class="dataCheck"></span>';
@@ -504,6 +548,12 @@ class GSX_Request {
                         $required = true;
                     else
                         $required = false;
+
+                    if ($dataNode->hasAttribute('multiple'))
+                        $multiple = $dataNode->getAttribute('multiple');
+                    else
+                        $multiple = false;
+
                     $defs = $this->getDataDefinitionsArray($dataName);
                     if (isset($defs)) {
                         if ($defs['type'] == 'partsList') {
@@ -538,8 +588,27 @@ class GSX_Request {
                             $inputName = $dataName;
                             if (isset($dataIndex))
                                 $inputName .= '_' . $dataIndex;
-
-                            if (isset($_POST[$inputName]) && $_POST[$inputName]) {
+                            if ($multiple) {
+                                $multipleIndex = 1;
+                                $valuesArray = array();
+                                while (true) {
+                                    if (isset($_POST[$inputName . '_' . $multipleIndex])) {
+                                        $value = $this->checkInputData($defs, $_POST[$inputName . '_' . $multipleIndex]);
+                                        $valuesArray[] = $value;
+                                        $multipleIndex++;
+                                    } else
+                                        break;
+                                }
+                                if (!count($valuesArray)) {
+                                    $default = $dataNode->getAttribute('default');
+                                    if (isset($default) && ($default !== '')) {
+                                        $valuesArray[] = $default;
+                                    } else if ($required) {
+                                        $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
+                                    }
+                                }
+                                $datas[$dataName] = $valuesArray;
+                            } else if (isset($_POST[$inputName]) && $_POST[$inputName]) {
                                 $value = $this->checkInputData($defs, $_POST[$inputName]);
                                 $datas[$dataName] = $value;
                             } else {

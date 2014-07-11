@@ -59,3 +59,12 @@ function initNbUser(){
     });
     $(".nbGroup").html(i+" personnes");
 }
+
+
+function initSimult(){
+    $(".wc-cal-event").each(function(){
+//        alert($(this).css("top") + "|"+$(this).position().top);
+        if($(this).css("top").replace("px", "") < $(this).position().top)
+            $(this).parent().find(".wc-cal-event").css("max-width", (100 / $(this).parent().find(".wc-cal-event").size())-1 +"%");
+    });
+}

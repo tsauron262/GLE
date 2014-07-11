@@ -123,6 +123,7 @@ $js .= <<<EOF
         },
         calendarAfterLoad: function(element) {
             initCopyColler();
+            initSimult();
         },
         eventRender : function(calEvent, Oevent) {
           if (calEvent.color != ''){

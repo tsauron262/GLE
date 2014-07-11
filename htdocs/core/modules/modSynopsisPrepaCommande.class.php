@@ -350,7 +350,8 @@ class modSynopsisPrepaCommande extends DolibarrModules {
 (6, 'Sous vendue'),
 (7, 'Bloquée'),
 (8, 'On verra bien'),
-(9, 'Ventilée');",
+(9, 'Ventilée'),
+(10, 'Non vue par le service technique');",
             "CREATE TABLE IF NOT EXISTS `" . MAIN_DB_PREFIX . "Synopsis_commande` (
   `rowid` int(11) NOT NULL AUTO_INCREMENT,
   `logistique_ok` int(11) NOT NULL,

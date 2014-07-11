@@ -1068,7 +1068,6 @@ if ($id > 0)
 
 
         /* deb mod drsi */
-        echo "<h3>Participants</h3>";
 //        $object = $object;
         $idObj = $object->id;
         $object->fetch($idObj);
@@ -1078,13 +1077,24 @@ if ($id > 0)
             $idActionLier[$idMaitre] = $idMaitre;
         } else
             $idMaitre = $idObj;
-
+           
+        
+        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ref_ext = '" . $idMaitre . "'");
+        if ($db->num_rows($sql) > 0) {
+            $idActionLierUser =  array($idMaitre => $object->usertodo->id);
+            while ($result = $db->fetch_object($sql)) {
+                    $idActionLierUser[$result->id] = $result->fk_user_action;
+            }
+        }
+        
         if (isset($_REQUEST['addUser'])) {
-            $objectT = new ActionComm($db);
-            $objectT->fetch($idObj);
-            $objectT->usertodo->id = $_REQUEST['userid'];
-            $objectT->ref_ext = $idMaitre;
-            $objectT->add($user);
+            if (!in_array($_REQUEST['userid'], $idActionLierUser)){
+                $objectT = new ActionComm($db);
+                $objectT->fetch($idObj);
+                $objectT->usertodo->id = $_REQUEST['userid'];
+                $objectT->ref_ext = $idMaitre;
+                $objectT->add($user);
+            }
         } elseif (isset($_REQUEST['removeUser'])) {
             $objectT = new ActionComm($db);
             $objectT->fetch($_REQUEST['removeUser']);
@@ -1095,6 +1105,20 @@ if ($id > 0)
                 $idMaitre = $object->id;
             }
             $objectT->delete(1);
+        } elseif (isset($_REQUEST['addGroup'])) {
+            require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
+            $group = new UserGroup($db);
+            $group->fetch($_REQUEST["groupid"]);
+            $tabUser = $group->listUsersForGroup("statut=1",1);
+            foreach ($tabUser as $key) {
+                if (!in_array($key ,$idActionLierUser )){
+                    $objectT = new ActionComm($db);
+                    $objectT->fetch($idObj);
+                    $objectT->usertodo->id = $key;
+                    $objectT->ref_ext = $idMaitre;
+                    $objectT->add($user);
+                }
+            }
         }
 
 
@@ -1107,18 +1131,31 @@ if ($id > 0)
                     $idActionLier[$result->id] = $result->id;
             }
         }
-
+        
+        
+        $part = 1;
+        $htm = "";
         foreach ($idActionLier as $id) {
             $objectionTmp = new ActionComm($db);
             $objectionTmp->fetch($id);
             $userTmp = new User($db);
             $userTmp->fetch($objectionTmp->usertodo->id);
-            echo $objectionTmp->getNomUrl(1) . " " . $userTmp->getNomUrl(1) . " <a href='?id=" . $idObj . "&removeUser=" . $id . "'>" . img_delete() . "</a><br/>";
+            $htm.= $objectionTmp->getNomUrl(1) . " " . $userTmp->getNomUrl(1) . " <a href='?id=" . $idObj . "&removeUser=" . $id . "'>" . img_delete() . "</a><br/>";
+            $part ++;
         }
-
-        echo "<form>";
+        
+        
+        echo "<h3>Participants (".$part.")</h3>";
+        echo $htm;
+        echo "<form method='post' action='?action=".$_REQUEST["action"]."&optioncss=".$_REQUEST["optioncss"]."' >";
         echo select_dolusersInGroup($form);
         echo "<input type='submit' name='addUser' value='Ajouter' class='butAction'/>";
+        echo "<input type='hidden' name='id' value='" . $idObj . "'/>";
+        echo "</form>";
+        echo "<br/>";
+        echo "<form method='post' action='?action=edit&optioncss=print' >";
+        echo $form->select_dolgroups();
+        echo "<input type='submit' name='addGroup' value='Ajouter' class='butAction'/>";
         echo "<input type='hidden' name='id' value='" . $idObj . "'/>";
         echo "</form>";
 

@@ -212,7 +212,7 @@ table.wc-time-slots {
     overflow: hidden;
     cursor: pointer;
     color: #fff;
-    max-width: 50%;
+    width: 100%;
     display: none;
     float:left;
 }

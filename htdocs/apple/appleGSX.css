@@ -745,3 +745,11 @@ div.singleRequestFormContainer {
 div.partsImportResults {
     display: none;
 }
+div.dataInputTemplate {
+    display: none;
+}
+span.duplicateInput:before {
+    font-family: 'FA';
+    content: '\f055';
+    margin-right: 8px;
+}

@@ -26,15 +26,15 @@ $(window).load(function() {
             $('.listUser').fadeIn();
         }, 500);
     });
-    $('.listUser').hover(function(){
-        setTimeout(function(){
-            $('.listUser').fadeIn();
-        }, 500);
-    }, function(){
-        setTimeout(function(){
-            $('.listUser').fadeOut();
-        }, 500);
-    });
+//    $('.listUser').hover(function(){
+//        setTimeout(function(){
+//            $('.listUser').fadeIn();
+//        }, 500);
+//    }, function(){
+//        setTimeout(function(){
+//            $('.listUser').fadeOut();
+//        }, 500);
+//    });
     
     
     
@@ -58,4 +58,13 @@ function initNbUser(){
         i++;
     });
     $(".nbGroup").html(i+" personnes");
+}
+
+
+function initSimult(){
+    $(".wc-cal-event").each(function(){
+//        alert($(this).css("top") + "|"+$(this).position().top);
+        if($(this).css("top").replace("px", "") < $(this).position().top)
+            $(this).parent().find(".wc-cal-event").css("width", (100 / $(this).parent().find(".wc-cal-event").size())-1 +"%");
+    });
 }

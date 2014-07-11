@@ -158,7 +158,7 @@
         <label>Informations composants</label>
     </def>
 
-    <def name="oldSerialNumber" type="text" max="18" jsCheck="">
+    <def name="oldSerialNumber" type="text" max="18" jsCheck="text">
         <label>Ancien numéro de série</label>
     </def>
 
@@ -175,5 +175,9 @@
     </def>
     <def name="isNonReplenished" type="YesNo">
         <label>Des pièces doivent-elles être rechargées?</label>
+    </def>
+
+    <def name="repairConfirmationNumbers" type="text">
+        <label>Liste des numéros de confirmation</label>
     </def>
 </root>

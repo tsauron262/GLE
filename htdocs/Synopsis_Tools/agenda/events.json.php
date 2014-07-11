@@ -8,7 +8,7 @@ require_once("libAgenda.php");
 $eventsStr = array();
 $sql = ("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm a LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_extrafields on fk_object = a.id WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "
         . "|| (datep2 < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')"
-        . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')) AND fk_user_action IN (" . implode(",", $newTabUser2) . ") order by duree DESC ");
+        . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')) AND fk_user_action IN (" . implode(",", $newTabUser2) . ") order by datep ASC ");
 $result = $db->query($sql);
 //echo $sql;
 $f = 0;

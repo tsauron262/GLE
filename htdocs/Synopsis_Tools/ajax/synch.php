@@ -35,7 +35,7 @@ class Boucle /* extends Thread */ {
         } /*elseif ($db->num_rows($sql2) > 0) {
             $result = $db->fetch_object($sql2);
             if ($result->typeElem == "chrono") {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                 $object = new Chrono($db);
             }
             elseif ($result->typeElem == "commande") {

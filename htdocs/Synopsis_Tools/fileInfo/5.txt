@@ -1,2 +1,2 @@
-ALTER TABLE  `llx_Synopsis_Chrono_conf` ADD  `hasPropal` TINYINT NOT NULL AFTER  `hasSociete` ,
+ALTER TABLE  `llx_synopsischrono_conf` ADD  `hasPropal` TINYINT NOT NULL AFTER  `hasSociete` ,
 ADD  `hasProjet` TINYINT NOT NULL AFTER  `hasPropal`

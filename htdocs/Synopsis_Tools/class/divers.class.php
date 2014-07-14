@@ -168,9 +168,9 @@ class synopsisHook {
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
             $return .= '<div class="blockvmenupair">';
-            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/listDetail.php?mainmenu=Process">
-                     '.img_object("Chrono", "chrono@Synopsis_Chrono").$langs->trans("Chrono").'</a><br></div>';
-            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/Synopsis_Chrono/liste.php?mainmenu=Process">';
+            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
+                     '.img_object("Chrono", "chrono@synopsischrono").$langs->trans("Chrono").'</a><br></div>';
+            $return .= '<form method="post" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
             $return .= '<input type="text" class="flat" name="filtre" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
             $return .= '</div></form>';
@@ -258,7 +258,7 @@ class synopsisHook {
         $tabMenu = array(false, false);
         switch ($type) {
             case 'chrono': {
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $obj = new Chrono($db);
                     $tabMenu[0] = "Process";
                 }

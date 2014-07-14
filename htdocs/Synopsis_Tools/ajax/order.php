@@ -31,9 +31,9 @@ if ($type == "contratdet" && $newRang >= 0) {
 }
 if ($type == "chrono_key" && $newRang >= 0) {
     $champFk = "model_refid = " . $idFk . "";
-    $nomTab = MAIN_DB_PREFIX . "Synopsis_Chrono_key";
+    $nomTab = MAIN_DB_PREFIX . "synopsischrono_key";
     $champId = "id";
-    $header = "Location: ../../admin/Synopsis_Chrono_advMode.php?id=" . $idFk;
+    $header = "Location: ../..//synopsischrono/admin/synopsischrono_advMode.php?id=" . $idFk;
 }
 
 

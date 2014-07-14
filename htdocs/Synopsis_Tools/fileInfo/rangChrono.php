@@ -1,5 +1,5 @@
 <?php
-$tabSql = array("ALTER TABLE  `".MAIN_DB_PREFIX."Synopsis_Chrono_key` ADD  `rang` INT NOT NULL");
+$tabSql = array("ALTER TABLE  `".MAIN_DB_PREFIX."synopsischrono_key` ADD  `rang` INT NOT NULL");
 
 
 $text = "Aj rang chrono";

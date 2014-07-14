@@ -127,11 +127,11 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4M' WHERE `2SLA` = '4 heures ouvrées pour prise en main'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '4' WHERE `2SLA` = '4 heures ouvrées'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "product_extrafields` SET `2SLA` = '16' WHERE `2SLA` = '16 heures ouvrées'");
-    $maj->req("UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono SET fk_societe = (SELECT `fk_soc` FROM " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cd WHERE c.rowid = cd.fk_contrat AND cd.rowid = id)");
-    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id NOT IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `key_id` = 1011) AND id IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `key_id` = 1010 AND value IS NULL)");
-    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`)");
-    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono`) AND targettype = 'productCli'");
-    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "Synopsis_Chrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
+    $maj->req("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_societe = (SELECT `fk_soc` FROM " . MAIN_DB_PREFIX . "contrat c, " . MAIN_DB_PREFIX . "contratdet cd WHERE c.rowid = cd.fk_contrat AND cd.rowid = id)");
+    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id NOT IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `key_id` = 1011) AND id IN (SELECT `chrono_refid` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `key_id` = 1010 AND value IS NULL)");
+    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "synopsischrono`)");
+    $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "synopsischrono`) AND targettype = 'productCli'");
+    $maj->req("UPDATE `" . MAIN_DB_PREFIX . "synopsischrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
     $maj->req("update `" . MAIN_DB_PREFIX . "societe` set status = 1");
     $maj->req("update `".MAIN_DB_PREFIX."product_extrafields` set `2hotline` = 0, `2teleMaintenance` = 0 where `2visiteSurSite` > 0;");
     $maj->req("update `".MAIN_DB_PREFIX."product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
@@ -148,7 +148,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
-    $finReq = "".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid NOT IN (SELECT id FROM ".MAIN_DB_PREFIX."Synopsis_Chrono)";
+    $finReq = "".MAIN_DB_PREFIX."synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM ".MAIN_DB_PREFIX."synopsischrono)";
     $sqlValueChronoSansParent = $db->query("SELECT * FROM " . $finReq);
     while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
         erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
@@ -158,8 +158,8 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 
 
 
-//    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono";
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value";
+//    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono";
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_value";
     $tabFusion = array();
     $sql = $db->query($requete);
     while ($result = $db->fetch_object($sql)) {
@@ -217,10 +217,10 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         }
     }
     foreach ($tabFusion as $idMettre => $tabIdFaible) {
-        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE id = " . $idMettre);
+        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id = " . $idMettre);
         $chrono_maitre = $db->fetch_object($sql);
         foreach ($tabIdFaible as $idFaible) {
-            $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE id = " . $idFaible);
+            $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id = " . $idFaible);
             $chrono_faible = $db->fetch_object($sql);
             if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
                 echo "<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe;
@@ -235,14 +235,14 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     $tabSuppr = $tabSuppri = array();
     //Test des chrono
-    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_key WHERE type_valeur = 10");
+    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_key WHERE type_valeur = 10");
     while ($result = $db->fetch_object($sql)) {
         $tabValOk = array();
         $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Process_lien WHERE rowid = " . $result->type_subvaleur);
         $result2 = $db->fetch_object($sql2);
         if ($result2->sqlFiltreSoc != "") {
             $champId = $result2->champId;
-            $sqlChrono = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE model_refid = " . $result->model_refid);
+            $sqlChrono = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE model_refid = " . $result->model_refid);
             while ($resultChrono = $db->fetch_object($sqlChrono)) {
                 $idSoc = $resultChrono->fk_societe;
 //                if (!$idSoc > 0)
@@ -528,15 +528,15 @@ function getTab() {
             array('rowid', 'fk_propal', 'fk_product', 'description', 'fk_remise_except', 'tva_tx', 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', 'total_ttc', 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang'/* , 'coef', 'dureeLoc' */),
             array('rowid', 'fk_propal', /* 'fk_parent_line', */ 'fk_product', 'description', 'fk_remise_except', 'tva_tx', /* 'localtax1_tx', 'localtax2_tx'*, */ 'qty', 'remise_percent', 'remise', 'price', 'subprice', 'total_ht', 'total_tva', /* 'total_localtax1', 'total_localtax2', */ 'total_ttc'/* , 'product_type', 'date_start', 'date_end' */, 'info_bits', 'pa_ht', 'marge_tx', 'marque_tx', 'special_code', 'rang')
         ),
-//        array("Babel_Chrono", MAIN_DB_PREFIX."Synopsis_Chrono",
+//        array("Babel_Chrono", MAIN_DB_PREFIX."synopsischrono",
 //            array(),
 //            array()
 //        ),
-//        array("Babel_Chrono_group_rights", MAIN_DB_PREFIX."Synopsis_Chrono_group_rights",
+//        array("Babel_Chrono_group_rights", MAIN_DB_PREFIX."synopsischrono_group_rights",
 //            array(),
 //            array()
 //        ),
-//        array("Babel_Chrono_value", MAIN_DB_PREFIX."Synopsis_Chrono_value",
+//        array("Babel_Chrono_value", MAIN_DB_PREFIX."synopsischrono_value",
 //            array(),
 //            array()
 //        ),
@@ -712,11 +712,11 @@ function getTab() {
             array(),
             array()
         ),
-        array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX . "Synopsis_Chrono",
+        array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX . "synopsischrono",
             array("contratdet_refid", "$%101", "$%1"),
             array("id", "model_refid", "fk_user_author")
         ),
-        array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
+        array("Babel_GMAO_contratdet_prop", MAIN_DB_PREFIX . "synopsischrono_value",
             array("contratdet_refid", "fk_prod", "$%1010"),
             array("chrono_refid", "value", "key_id")
         ),
@@ -728,15 +728,15 @@ function getTab() {
             array("linkedTo", "$%commande", "rowid", "$%contrat"),
             array('fk_source', 'sourcetype', 'fk_target', 'targettype')
         ),
-        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
+        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "synopsischrono_value",
             array("element_id", "serial_number", "$%1011"),
             array("chrono_refid", "value", "key_id")
         ),
-        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
+        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "synopsischrono_value",
             array("element_id", "date_creation", "$%1014"),
             array("chrono_refid", "value", "key_id")
         ),
-        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "Synopsis_Chrono_value",
+        array("Babel_product_serial_cont", MAIN_DB_PREFIX . "synopsischrono_value",
             array("element_id", "date_fin_SAV", "$%1015"),
             array("chrono_refid", "value", "key_id")
         ),
@@ -758,14 +758,14 @@ function getTab() {
 function lienFusion($id1, $id2) {
     global $nbIframeMax, $nbIframe;
     echo "<br/>";
-    $lien = DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id1;
+    $lien = DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $id1;
     echo '<a href="' . $lien . '">Prod 1</a>';
     if ($nbIframe < $nbIframeMax) {
         $nbIframe++;
         echo '<iframe width="600" height="600" src="' . $lien . '&nomenu=true"></iframe>';
     }
     echo '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id1 . '"/><input type="hidden" name="id2" value="' . $id2 . '"/><input type="submit" value="Garder 1" class="butAction"/></form>';
-    $lien = DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $id2;
+    $lien = DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $id2;
 
     echo '<a href="' . $lien . '">Prod 2</a>';
     echo '<form action=""><input type="hidden" name="action" value="fusionChrono"/><input type="hidden" name="id1" value="' . $id2 . '"/><input type="hidden" name="id2" value="' . $id1 . '"/><input type="submit" value="Garder 2" class="butAction"/></form>';
@@ -779,15 +779,15 @@ function lienFusion($id1, $id2) {
 
 function supprLigneChronoValue($id, $text) {
     global $db;
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE id =" . $id);
+    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE id =" . $id);
     echo "<br/>1 ligne supprimer " . $text . "<br/>";
 }
 
 function fusionChrono($idMaitre, $idFaible) {
     global $db;
     $db->query("UPDATE ".MAIN_DB_PREFIX."element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Chrono WHERE id=" . $idFaible);
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."Synopsis_Chrono_value WHERE chrono_refid=" . $idFaible);
+    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id=" . $idFaible);
+    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE chrono_refid=" . $idFaible);
     echo "<br/>FUSION OK :" . $idMaitre . "|" . $idFaible;
 }
 

@@ -112,7 +112,7 @@ class autoDi {
             foreach ($tabSite as $numSite => $site) {
                 $nomSite = ($numSite + 1);
                 if ($numSite > 5)
-                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $numSite);
+                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $numSite);
                 if ($this->db->num_rows($sql) > 0) {
                     $result = $this->db->fetch_object($sql);
                     $nomSite = $result->description;
@@ -121,7 +121,7 @@ class autoDi {
                     $this->sortie("<h2>SITE " . $nomSite . ": " . $type . "</h2><br/>");
 
                     $tabTech = $this->idTech;
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
                     if ($this->db->num_rows($sql) > 0) {
                         $tabTech = array();
                         $result = $this->db->fetch_object($sql);
@@ -182,11 +182,11 @@ class autoDi {
             $dureeDep = 0;
             $dureeInt = 2;
             if ($numSite > 5) {
-                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE id = " . $numSite);
+                $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $numSite);
                 if ($this->db->num_rows($sql) > 0) {
                     $result = $this->db->fetch_object($sql);
                     $nomSite = $result->description;
-                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $numSite . " AND key_id = " . CHRONO_KEY_SITE_DUREE_DEP);
+                    $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $numSite . " AND key_id = " . CHRONO_KEY_SITE_DUREE_DEP);
                     if ($this->db->num_rows($sql) > 0) {
                         $result = $this->db->fetch_object($sql);
                         $dureeDep = $result->value;
@@ -195,7 +195,7 @@ class autoDi {
             }
             foreach ($this->tabType as $type) {
                     $tabTech = $this->idTech;
-                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
+                    $sql = $this->db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid =" . $numSite . " AND key_id = 1028");
                     if ($this->db->num_rows($sql) > 0) {
                         $tabTech = array();
                         $result = $this->db->fetch_object($sql);

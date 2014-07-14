@@ -45,7 +45,7 @@ class maj {
     public function rectifId($tabId) {
         $i = 0;
         while ($i + 1 < count($tabId)) {
-            $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
+            $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono_value SET chrono_refid=" . $tabId[$i + 1] . " WHERE id = " . $tabId[$i];
             $result = $this->queryD($requete);
             if (!$result) {
                 $this->erreurL("Impossible de modifier l'id . Requete : " . $requete);

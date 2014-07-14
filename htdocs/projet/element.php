@@ -46,7 +46,7 @@ if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
 
 require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
@@ -100,8 +100,8 @@ if ($_REQUEST['action'] == "addElement") {
         $requete = "UPDATE facture_fournisseur SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addfacture_fournisseur'];
         $sql = $db->query($requete);
     }
-    if ($_REQUEST['addSynopsis_Chrono'] > 0) {
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono SET projetId = " . $_REQUEST['id'] . " WHERE id = " . $_REQUEST['addSynopsis_Chrono'];
+    if ($_REQUEST['addsynopsischrono'] > 0) {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET projetId = " . $_REQUEST['id'] . " WHERE id = " . $_REQUEST['addsynopsischrono'];
         $sql = $db->query($requete);
     }
 }
@@ -167,7 +167,7 @@ print "</center><br/>";
  * Factures
  */
 $listofreferent = array(
-    'Synopsis_Chrono' => array(
+    'synopsischrono' => array(
         'title' => "Liste des chronos associ&eacute;es au projet",
         'class' => 'Chrono',
         'test' => $conf->synopsischrono->enabled),
@@ -254,8 +254,8 @@ foreach ($listofreferent as $key => $value) {
         print '<div class="tabsAction">';
 
         if ($projet->societe->prospect || $projet->societe->client) {
-            if ($key == 'Synopsis_Chrono' && ($conf->projet->enabled || isset($conf->global->MAIN_MODULE_SYNOPSISPROJET))) {
-                print '<a class="butAction" href="' . DOL_URL_ROOT . '/Synopsis_Chrono/nouveau.php?projetid=' . $projet->id . '">' . $langs->trans("AddChrono") . '</a>';
+            if ($key == 'synopsischrono' && ($conf->projet->enabled || isset($conf->global->MAIN_MODULE_SYNOPSISPROJET))) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/synopsischrono/nouveau.php?projetid=' . $projet->id . '">' . $langs->trans("AddChrono") . '</a>';
             }
             if ($key == 'propal' && isset($conf->propal->enabled) && $user->rights->propale->creer) {
                 print '<a class="butAction" href="' . DOL_URL_ROOT . '/comm/addpropal.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddProp") . '</a>';
@@ -291,18 +291,18 @@ print "<table cellpadding=15>";
 $arr['propal'] = "Propositions commerciales";
 $arr['commande'] = "Commandes";
 $arr['facture'] = "Factures";
-$arr['Synopsis_Chrono'] = "Chronos";
+$arr['synopsischrono'] = "Chronos";
 if ($projet->societe->fournisseur && isset($conf->global->MAIN_MODULE_FOURNISSEUR) && $conf->global->MAIN_MODULE_FOURNISSEUR) {
     $arr['commande_fournisseur'] = "Commande fournisseurs";
     $arr['facture_fourn'] = "Factures fournisseurs";
 }
-//foreach(array('Synopsis_Chrono', 'propal','commande','facture') as $val)
+//foreach(array('synopsischrono', 'propal','commande','facture') as $val)
 foreach ($arr as $val => $nom) {
     print "<tr><th class='ui-widget-header ui-state-default'>" . $arr[$val];
     print "<td class='ui-widget-content'> ";
     print "<select name='add" . $val . "'>";
     print "<option value='0'>S&eacute;l&eacute;ctionner-></option>";
-    if ($val == "Synopsis_Chrono")
+    if ($val == "synopsischrono")
         $requete = "SELECT *, id as rowid FROM " . MAIN_DB_PREFIX . "" . $val . " WHERE fk_societe = " . $projet->societe->id;
     else
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "" . $val . " WHERE fk_soc = " . $projet->societe->id;

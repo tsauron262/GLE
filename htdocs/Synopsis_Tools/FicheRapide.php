@@ -7,14 +7,14 @@
  */
 require_once('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
-require_once DOL_DOCUMENT_ROOT . '/apple/gsxDatas.class.php';
-require_once DOL_DOCUMENT_ROOT . '/apple/partsCart.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/process.class.php';
-require_once DOL_DOCUMENT_ROOT . '/Synopsis_Chrono/Chrono.class.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsischrono/Chrono.class.php';
 $js = "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/global.css' />";
 $js.= "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/BIMP.css' />";
 $js.= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
-$js.= "<script type='text/javascript' src='".DOL_URL_ROOT."/Synopsis_Chrono/fiche.js' ></script>";
+$js.= "<script type='text/javascript' src='".DOL_URL_ROOT."/synopsischrono/fiche.js' ></script>";
 $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
         socid = $("select#socid").val();
         dispatchePopObject(socid, "newContact", function() {
@@ -305,7 +305,7 @@ if ($socid != "") {
 }
 function existProd($nomachine) {
         global $db;
-        $requete = "SELECT chrono_refid FROM "  . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE key_id = 1011 and value = '".$nomachine."';";
+        $requete = "SELECT chrono_refid FROM "  . MAIN_DB_PREFIX . "synopsischrono_value WHERE key_id = 1011 and value = '".$nomachine."';";
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             $obj = $db->fetch_object($sql);

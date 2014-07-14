@@ -533,8 +533,8 @@ class Project extends CommonObject {
             $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "commande_fournisseur WHERE fk_projet=" . $this->id;
         if ($type == 'invoice_supplier')
             $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . "facture_fourn WHERE fk_projet=" . $this->id;
-        if ($type == 'Synopsis_Chrono')
-            $sql = "SELECT id as rowid FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono WHERE projetId=" . $this->id;
+        if ($type == 'synopsischrono')
+            $sql = "SELECT id as rowid FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE projetId=" . $this->id;
 
 
         if (!$sql)

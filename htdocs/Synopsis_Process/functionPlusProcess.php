@@ -13,7 +13,7 @@ function getSNChrono($idChrono, $source) {
         $chronoTab = array();
         foreach ($result as $chrono)
             $chronoTab[] = $chrono['d'];
-        $req = "SELECT `value` FROM `" . MAIN_DB_PREFIX . "Synopsis_Chrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` = " . $key;
+        $req = "SELECT `value` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` = " . $key;
         $sql = $db->query($req);
         while ($result = $db->fetch_object($sql))
             $return[] = $result->value;

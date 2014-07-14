@@ -27,8 +27,8 @@ $(window).load(function() {
 ////            resultZone.html('<p class="error">Le format du numéro de série est incorrect</p>');
 //        } else {
             tabT = serial.split(" ");
-            $.getScript(DOL_URL_ROOT + "/apple/appleGsxScripts.js", function() {
-                $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/apple/appleGSX.css"}));
+            $.getScript(DOL_URL_ROOT + "/synopsisapple/appleGsxScripts.js", function() {
+                $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/synopsisapple/appleGSX.css"}));
                 for (i = 0; i < tabT.length; i++) {
                     serial = tabT[i];
                     if(/^[A-Z0-9]{11,12}$/.test(serial)){
@@ -68,7 +68,7 @@ $(window).load(function() {
         reponse = valeurM = valeurG = valeurD =  "";
         roue.show();
         jQuery.ajax({
-                    url: DOL_URL_ROOT + '/apple/ajax/requestProcess.php?action=loadSmallInfoProduct',
+                    url: DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=loadSmallInfoProduct',
                     data: datas,
                     datatype: "xml",
                     type: "POST",

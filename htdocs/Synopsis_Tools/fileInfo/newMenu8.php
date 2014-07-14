@@ -25,7 +25,7 @@ $module = new mod' . $module . '($db);
 echo @$module->init()."<br/>";';
 
 
-//        $tabSql = array("UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 2 where active = 1",
-//        "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 1 where active = 0",
-//        "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 0 where active = 2");
+//        $tabSql = array("UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 2 where active = 1",
+//        "UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 1 where active = 0",
+//        "UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 0 where active = 2");
 ?>

@@ -165,7 +165,7 @@ switch ($type) {
             if (!$user->rights->synopsischrono->read)
                 accessforbidden();
             if ($user->societe_id > 0 && $id > 0) {
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                 $obj = new Chrono($db);
                 $obj->fetch((int) $id);
                 if ($user->societe_id != $obj->socid) {

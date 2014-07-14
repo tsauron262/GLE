@@ -6,7 +6,7 @@
  * Released under the GNU General Public License.  See LICENSE.txt.
  */
 require_once("../../main.inc.php");
-require_once (DOL_DOCUMENT_ROOT."/Synopsis_Chrono/Chrono.class.php");
+require_once (DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
 
 // The get widget handler.
 function widget_listChronoAValider() {
@@ -27,7 +27,7 @@ function widget_listChronoAValider() {
     if ($user->rights->Chrono->Global->Afficher)
     {
         $sql = "SELECT *
-                  FROM ".MAIN_DB_PREFIX."Synopsis_Chrono
+                  FROM ".MAIN_DB_PREFIX."synopsischrono
                  WHERE fk_statut = 999
               ORDER BY c.tms DESC";
 

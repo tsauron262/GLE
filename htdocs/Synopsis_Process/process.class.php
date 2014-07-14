@@ -114,8 +114,8 @@ function printHead($type, $id, $js = '') {
             break;
         case "Chrono": {
 
-                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Chrono/Chrono.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_chrono.lib.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/lib/synopsischrono.lib.php");
                 $obj = new Chrono($db);
                 $obj->fetch($id);
                 $head = chrono_prepare_head($obj);
@@ -2597,7 +2597,7 @@ EOF;
             $keyId = $tabT[0];
             $val = "";
             if (is_numeric($id)) {
-                $result = $db->query("SELECT value FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value WHERE chrono_refid = " . $id . " AND key_id = " . $keyId);
+                $result = $db->query("SELECT value FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $id . " AND key_id = " . $keyId);
                 if ($db->num_rows($result > 0)) {
                     $ligne = $db->fetch_object($result);
                     $val = $ligne->value;
@@ -3121,7 +3121,7 @@ class fct extends formulaireSource {
         if ($modeleId > 0 && $chronoId > 0) {
             //Get Fonction Params
             $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_form_fct_value
+                          FROM " . MAIN_DB_PREFIX . "synopsischrono_form_fct_value
                          WHERE fct_refid = " . $this->id . "
                            AND chrono_conf_refid = " . $modeleId;
             $sql = $this->db->query($requete);
@@ -3135,8 +3135,8 @@ class fct extends formulaireSource {
 
             //Get Fonction Params in the form
             $requete = "SELECT v.valeur
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value as v,
-                               " . MAIN_DB_PREFIX . "Synopsis_Chrono_form_fct_value as f
+                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value as v,
+                               " . MAIN_DB_PREFIX . "synopsischrono_form_fct_value as f
                          WHERE f.label = '" . $this->paramsForHtmlName . "'
                            AND f.fct_refid = '" . $this->id . "'
                            AND v.chrono_refid = " . $chronoId . "
@@ -3177,7 +3177,7 @@ class fct extends formulaireSource {
         } else if ($modeleId > 0) {
             //Get Fonction Params
             $requete = "SELECT *
-                          FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono_value
+                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
                          WHERE fct_refid = " . $this->id . "
                            AND chrono_refid = " . $modeleId;
             $sql = $this->db->query($requete);

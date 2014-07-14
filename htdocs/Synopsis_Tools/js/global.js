@@ -482,7 +482,7 @@ function dispatchePopObject(id, type, callBack, titre, nbLoad) {//Affiche ici ou
 }
 function popOjectAffiche(id, type, callBack, titreNotif, nbLoad) {//Affiche ici
     if (type == 'chrono')
-        urlT = DOL_URL_ROOT + "/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id=";
+        urlT = DOL_URL_ROOT + "/synopsischrono/fiche-nomenu.php?action=Modify&id=";
     else if (type == 'commande')
         urlT = DOL_URL_ROOT + "/Synopsis_PrepaCommande/prepacommande.php?optioncss=print&id=";
     else if (type == 'newContact')
@@ -593,7 +593,7 @@ var nbIframe = 0;
 function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     nbIframe++;
     $("iframe.fullScreen").fadeOut();
-    //    window.open(DOL_URL_ROOT+"/Synopsis_Chrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
+    //    window.open(DOL_URL_ROOT+"/synopsischrono/fiche-nomenu.php?action=Modify&id="+id,'nom_de_ma_popup','menubar=no, scrollbars=yes, top=100, left=100, width=600, height=600');
     $("body").append("<div class='fullScreen' id='iFrame" + nbIframe + "'><span class='fermer' onclick=''>X</span><span class='petit' onclick=''>_</span><iframe src='" + urlIF + "' name='iFrame" + nbIframe + "'></iframe></div>");
 //    $("#iFrame" + nbIframe+" iframe").load(function() {
 //        eval("iFrame" + nbIframe + ".CallBackPlus = CallBackPlus;");
@@ -678,7 +678,7 @@ function ajaxAddChrono(model_refid, socid, tabChamp, callBack) {
     }
     champSup = "&champSup=" + champSup + "&champSupVal=" + valSup;
     jQuery.ajax({
-        url: DOL_URL_ROOT + "/Synopsis_Chrono/ajax/addChrono.php",
+        url: DOL_URL_ROOT + "/synopsischrono/ajax/addChrono.php",
         type: "POST",
         datatype: "xml",
         data: "model=" + model_refid + "&socid=" + socid + champSup,

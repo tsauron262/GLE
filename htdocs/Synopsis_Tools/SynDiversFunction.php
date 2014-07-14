@@ -649,10 +649,10 @@ function getTypeAndId($url = null, $request = null) {
     } elseif (stripos($url, "comm/propal.php") != false) {
         $element_type = 'propal';
         @$element_id = $request['id'];
-    } elseif (stripos($url, "admin/Synopsis_Chrono") != false) {
+    } elseif (stripos($url, "/synopsischrono/admin/synopsischrono") != false) {
         $element_type = 'configChrono';
         @$element_id = $request['id'];
-    } elseif (stripos($url, "Synopsis_Chrono") != false) {
+    } elseif (stripos($url, "synopsischrono") != false) {
         $element_type = 'chrono';
         @$element_id = $request['id'];
     } elseif (stripos($url, "Synopsis_Process") != false) {

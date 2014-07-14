@@ -1332,16 +1332,16 @@ if ($id > 0 || !empty($ref)) {
     /* Modif drsi */
     if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
         $propal = $object;
-        $requete = "SELECT *,b.ref as refb FROM " . MAIN_DB_PREFIX . "Synopsis_Chrono as b, " . MAIN_DB_PREFIX . "propal as l WHERE b.propalid = l.rowid AND l.rowid = " . $propal->id;
+        $requete = "SELECT *,b.ref as refb FROM " . MAIN_DB_PREFIX . "synopsischrono as b, " . MAIN_DB_PREFIX . "propal as l WHERE b.propalid = l.rowid AND l.rowid = " . $propal->id;
         $resql = $db->query($requete);
 
         print '<td>Doc. indicable :<td>';
         if ($db->num_rows($resql) > 0) {
             $res = $db->fetch_object($resql);
-            print '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a>';
+            print '<a href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $res->id . '">' . $res->refb . '</a>';
         } else {
             $res = $db->fetch_object($resql);
-            print '<a href="' . DOL_URL_ROOT . '/Synopsis_Chrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a>';
+            print '<a href="' . DOL_URL_ROOT . '/synopsischrono/nouveau.php?id=' . $propal->socid . '&propalid=' . $propal->id . '&typeid=1">A creer</a>';
         }
     }
     /* /Modif drsi */

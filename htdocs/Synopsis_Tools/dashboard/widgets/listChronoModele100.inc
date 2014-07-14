@@ -18,7 +18,7 @@
   */
 
 require_once("../../main.inc.php");
-require_once(DOL_DOCUMENT_ROOT.'/Synopsis_Chrono/Chrono.class.php');
+require_once(DOL_DOCUMENT_ROOT.'/synopsischrono/Chrono.class.php');
 
 
 // The get widget handler.
@@ -49,7 +49,7 @@ function widget_listChronoModele100() {
         $sql = $db->query($requete);
         $res = $db->fetch_object($sql);
 
-        $sql = " SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Chrono as p
+        $sql = " SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono as p
                   WHERE 1=1";
         if ($res->value."x" != "x")
             $sql .= "    AND fk_statut IN (".$res->value.")";

@@ -1630,7 +1630,7 @@ class modSynopsisProcess extends DolibarrModules {
 (8, \'Commande fournisseur\', \'CommandeFournisseur\', 8, \'/fourn/commande/fiche.php\', \'id\', \'/fourn/class/fournisseur.commande.class.php\'),
 (9, \'Contrat\', \'Contrat\', 9, \'/contrat/fiche.php\', \'id\', \'/contrat/class/contrat.class.php\'),
 (10, \'Campagne\', \'Campagne\', 10, \'/BabelProspect/affichePropection.php\', \'action=list&campagneId=\', \'/BabelProspect/Campagne.class.php\'),
-(11, \'Chrono\', \'Chrono\', 11, \'/Synopsis_Chrono/fiche.php\', \'id\', \'/Synopsis_Chrono/Chrono.class.php\'),
+(11, \'Chrono\', \'Chrono\', 11, \'/synopsischrono/fiche.php\', \'id\', \'/synopsischrono/Chrono.class.php\'),
 (12, \'Tiers\', \'Societe\', 12, \'/soc.php\', \'socid\', \'/societe.class.php\'),
 (13, \'Contact\', \'Contact\', 13, \'/contact/fiche.php\', \'id\', \'/contact.class.php\'),
 (14, \'Demande intervention\', \'synopsisdemandeinterv\', 14, \'/synopsisdemandeinterv/fiche.php\', \'id\', \'/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php\'),
@@ -1788,11 +1788,11 @@ class modSynopsisProcess extends DolibarrModules {
   PRIMARY KEY (`rowid`));",
             "INSERT IGNORE INTO `".MAIN_DB_PREFIX."Synopsis_Process_lien` (`rowid`, `label`, `description`, `table`, `nomElem`, `where`, `ordre`, `champId`, `champVueSelect`, `sqlFiltreSoc`, `urlObj`, `hasMultiValue`) VALUES
 (1, 'ContratLigne (N)', '', '".MAIN_DB_PREFIX."contratdet', 'contratdet', '', 1, 'rowid', 'description', 'fk_contrat IN (SELECT `rowid` FROM `".MAIN_DB_PREFIX."contrat` WHERE `fk_soc` = [id])', 'Synopsis_Contrat/contratDetail.php?id=', 1),
-(2, 'Appel', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(3, 'ProduitCli', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(4, 'Licence', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'Synopsis_Chrono/fiche.php?id=', 1),
-(5, 'Compte Utilisateur', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 1),
-(6, 'Site', '', '".MAIN_DB_PREFIX."Synopsis_Chrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'Synopsis_Chrono/fiche.php?id=', 0);");
+(2, 'Appel', '', '".MAIN_DB_PREFIX."synopsischrono', 'appel', 'model_refid = 100', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
+(3, 'ProduitCli', '', '".MAIN_DB_PREFIX."synopsischrono', 'productCli', 'model_refid = 101', 0, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
+(4, 'Licence', '', '".MAIN_DB_PREFIX."synopsischrono', 'licence', 'model_refid = 102', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', '', 'synopsischrono/fiche.php?id=', 1),
+(5, 'Compte Utilisateur', '', '".MAIN_DB_PREFIX."synopsischrono', 'compteUser', 'model_refid = 103', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 1),
+(6, 'Site', '', '".MAIN_DB_PREFIX."synopsischrono', 'site', 'model_refid = 104', 1, 'id', 'concat(ref,if(description != \"\", concat(\" \", description), \"\"))', 'fk_societe = [id]', 'synopsischrono/fiche.php?id=', 0);");
         $retour = $this->_init($sql);
 
         include_once(DOL_DOCUMENT_ROOT."/Synopsis_Process/process.class.php");

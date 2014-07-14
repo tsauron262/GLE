@@ -1,7 +1,7 @@
 <?php
 $tabSql = array("DROP table ".MAIN_DB_PREFIX."Synopsis_Process_lien",
-        "DROP table ".MAIN_DB_PREFIX."Synopsis_Chrono_conf",
-        "DROP table ".MAIN_DB_PREFIX."Synopsis_Chrono_key",
+        "DROP table ".MAIN_DB_PREFIX."synopsischrono_conf",
+        "DROP table ".MAIN_DB_PREFIX."synopsischrono_key",
         "DROP table ".MAIN_DB_PREFIX."Synopsis_Process",
         "ALTER TABLE  `".MAIN_DB_PREFIX."Synopsis_contrat_annexePdf` ADD  `type` INT NOT NULL DEFAULT  '1'");
     
@@ -14,7 +14,7 @@ $module = new modSynopsisChrono($db);
 echo $module->init()."<br/>";';
 
 
-//        $tabSql = array("UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 2 where active = 1",
-//        "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 1 where active = 0",
-//        "UPDATE ".MAIN_DB_PREFIX."Synopsis_Chrono_conf set active = 0 where active = 2");
+//        $tabSql = array("UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 2 where active = 1",
+//        "UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 1 where active = 0",
+//        "UPDATE ".MAIN_DB_PREFIX."synopsischrono_conf set active = 0 where active = 2");
 ?>

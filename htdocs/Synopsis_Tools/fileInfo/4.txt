@@ -2,4 +2,4 @@ Desinstall
 
 Reinstall module Synopsis_Process
 
-Reinstaal module Synopsis_Chrono
+Reinstaal module synopsischrono

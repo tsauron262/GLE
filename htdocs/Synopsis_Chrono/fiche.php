@@ -44,11 +44,13 @@ if ($action == 'createPC') {
     $db->query("UPDATE " . MAIN_DB_PREFIX . "Synopsis_Chrono SET propalid = '" . $prop->id . "' WHERE id = " . $id);
 }
 
+
+            $para = "id=" . $_REQUEST['id'];
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
-        require_once(DOL_DOCUMENT_ROOT . "/synopsispanier/core/modules/synopsispanier/modules_synopsispanier.php");
+        require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
             $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-            panier_pdf_create($db, $panier, $model);
-            header('location: affichePanier.php?'.$para . "#documentAnchor");
+            synopsischrono_pdf_create($db, $panier, $model);
+            header('location: ?'.$para . "#documentAnchor");
         }
 
 if ($action == 'supprimer') {
@@ -295,8 +297,8 @@ if ($chr->id > 0) {
         dol_fiche_head($head, 'chrono', $chr->model->titre);
     }
 
-    if ($_GET['action'] == 'delete') {
-        $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode($_GET["urlfile"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
+    if ($_GET['action'] == 'delete' || $_GET['action'] == 'remove_file') {
+        $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode((isset($_GET["urlfile"]) && $_GET["urlfile"] != "")? $_GET["urlfile"] : $_GET["file"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
         print '<br>';
     }
 
@@ -907,16 +909,14 @@ EOF;
             $formfile->list_of_documents($filearray, $chr, 'synopsischrono', $param, 1, $chr->id . "/");
             
 //            $object = $chr;
-//            $para = "id=" . $_REQUEST['id'];
-//            $filename = sanitize_string($object->ref);
-//            $filedir = $conf->Synopsis_Chrono->dir_output . '/' . sanitize_string($object->ref);
+//            $filename = sanitize_string($object->id);
 //            $urlsource = $_SERVER["PHP_SELF"] . "?" . $para;
 //            $genallowed = 1;//$user->rights->Synopsis_Chrono->Global->read;
 //            
 //            require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
 //            $html = new Form($db);
 //            $formfile = new FormFile($db);
-//            $somethingshown = $formfile->show_documents('Synopsis_Chrono', $filename, $upload_dir, $urlsource, $genallowed, $genallowed, "Chrono"); //, $object->modelPdf);
+//            $somethingshown = $formfile->show_documents('synopsischrono', $filename, $upload_dir, $urlsource, $genallowed, $genallowed, "Chrono"); //, $object->modelPdf);
         }
     }
 } else {

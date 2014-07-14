@@ -1149,13 +1149,13 @@ if ($id > 0)
         echo $htm;
         echo "<form method='post' action='?action=".$_REQUEST["action"]."&optioncss=".$_REQUEST["optioncss"]."' >";
         echo select_dolusersInGroup($form);
-        echo "<input type='submit' name='addUser' value='Ajouter' class='butAction'/>";
+        echo "<input type='submit' name='addUser' value='Ajouter utilisateur' class='butAction'/>";
         echo "<input type='hidden' name='id' value='" . $idObj . "'/>";
         echo "</form>";
         echo "<br/>";
         echo "<form method='post' action='?action=edit&optioncss=print' >";
         echo $form->select_dolgroups();
-        echo "<input type='submit' name='addGroup' value='Ajouter' class='butAction'/>";
+        echo "<input type='submit' name='addGroup' value='Ajouter utilisateurs' class='butAction'/>";
         echo "<input type='hidden' name='id' value='" . $idObj . "'/>";
         echo "</form>";
 

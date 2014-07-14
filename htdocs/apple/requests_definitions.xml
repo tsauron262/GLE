@@ -110,7 +110,7 @@
         </datas>
     </request>
 
-    <request name="UpdateSerialNumber" type="repair"  request="UpdateSerialNumber" wrapper="repairData">
+    <request name="UpdateSerialNumber" type="repair" request="UpdateSerialNumberRequest" wrapper="repairData">
         <label>Mise à jour du numéro de série</label>
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>

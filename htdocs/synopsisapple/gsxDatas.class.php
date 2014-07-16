@@ -336,7 +336,7 @@ class gsxDatas {
         $chrono = new Chrono($db);
         $chrono->fetch($chronoId);
         $chrono->getValues($chronoId);
-        
+
         $tech = new User($db);
         $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
 
@@ -351,16 +351,16 @@ class gsxDatas {
         $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
         $valDef['unitReceivedDate'] = $dateH[0];
         $valDef['unitReceivedTime'] = $dateH[1];
-        
+
         $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
         $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
         $valDef['billTo'] = $tech->array_options['options_apple_service'];
         $valDef['poNumber'] = $chrono->ref;
-        
+
 //        echo "<pre>"; print_r($chrono->contact);
-        
+
         $valDef['customerAddress']['companyName'] = $chrono->societe->name;
-        if(isset($chrono->contact->id)){
+        if (isset($chrono->contact->id)) {
             $valDef['customerAddress']['street'] = $chrono->contact->address;
             $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
@@ -373,19 +373,21 @@ class gsxDatas {
             $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
             $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
             $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-            $valDef['customerAddress']['state'] = substr($chrono->contact->zip,0,2);
+            $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
             $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
         }
-        
-        if($this->serial != ""){
-            $result = $db->query("SELECT confirmNumber FROM `".MAIN_DB_PREFIX."synopsis_apple_parts_cart` WHERE serial_number = '".$this->serial."'");
-            if($db->num_rows($result) > 0){
+
+        if ($this->serial != "") {
+            $result = $db->query("SELECT confirmNumber FROM `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` WHERE serial_number = '" . $this->serial . "'");
+            if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
-            $valDef['repairConfirmationNumber'] = $ligne->confirmNumber;
+                $valDef['repairConfirmationNumber'] = $ligne->confirmNumber;
+                $valDef['repairConfirmationNumbers'] = array($ligne->confirmNumber);
+                $valDef['returnOrderNumber'] = $ligne->confirmNumber;
             }
         }
-        
-        
+
+
 //        print_r($chrono->extraValue);
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
@@ -410,17 +412,24 @@ class gsxDatas {
                 $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";
                 $i = 1;
                 foreach ($this->gsx->errors['soap'] as $soapError) {
-                    $html .= $i . '. ' . $soapError . '.<br/>' . "\n";
+                    $html .= $i . '. ' . utf8_encode(str_replace("?", "'",$soapError)) . '.<br/>' . "\n";
                     $i++;
                 }
                 $html .= '</p>' . "\n";
             } else {
-                $confirmNumber = $response['ResponseArray']['responseData']['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
-                $db->query("UPDATE  `".MAIN_DB_PREFIX."synopsis_apple_parts_cart` SET  `confirmNumber` =  '".$confirmNumber."' WHERE  serial_number = '".$this->serial."';");
+                if (isset($response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'])) {//Numero de rep
+                    $confirmNumber = $response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
+                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $confirmNumber . "' WHERE  serial_number = '" . $this->serial . "';");
+                }
                 $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
-                $html .= '<pre>';
-                $html .= print_r($this->gsx->outputFormat($response));
-                $html .= '</pre>';
+//                $html .= '<pre>';
+//                $html .= print_r($this->gsx->outputFormat($response), true);
+//                $html .= '</pre>';
+
+                if (isset($response['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
+                    $dossier = "/home/megajean/Bureau/pdf/";
+                    file_put_contents($dossier . $response['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'], $response['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']);
+                }
             }
 
             $html .= '</div>';

@@ -180,4 +180,7 @@
     <def name="repairConfirmationNumbers" type="text">
         <label>Liste des numéros de confirmation</label>
     </def>
+    <def name="returnOrderNumber" type="text">
+        <label>Numéro de retour</label>
+    </def>
 </root>

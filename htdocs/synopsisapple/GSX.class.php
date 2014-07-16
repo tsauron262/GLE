@@ -750,7 +750,7 @@ class GSX {
         if (!$this->userSessionId) {
             $this->authenticate();
         }
-
+//echo "<pre>";print_r($requestData);
         if (!$requestData || !is_array($requestData)) {
             $this->error(__METHOD__, __LINE__, 'Invalid data passed: ' . $requestData);
         }

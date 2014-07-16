@@ -137,4 +137,12 @@
             <data name="repairConfirmationNumbers" required="1" multiple="1"></data>
         </datas>
     </request>
+    
+    <request name="ReturnLabel" type="repair" request="ReturnLabelRequest" wrapper="">
+        <label>Etiquettes de retour</label>
+        <datas>
+            <data name="returnOrderNumber" required="1"></data>
+            <data name="partNumber" required="1"></data>
+        </datas>
+    </request>
 </root>

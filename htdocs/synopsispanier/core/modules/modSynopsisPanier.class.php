@@ -73,17 +73,11 @@ class modSynopsisPanier extends DolibarrModules
         $this->rights[$r][1] = 'Gestion du Panier';
         $this->rights[$r][2] = 'r'; //useless
         $this->rights[$r][3] = 1; // Default
-        $this->rights[$r][4] = 'Global'; // Famille
-        $this->rights[$r][5] = 'read'; // Droit
+        $this->rights[$r][4] = 'read'; // Famille
+//        $this->rights[$r][5] = 'read'; // Droit
         $r ++;
         
-        $this->rights[$r][0] = $this->numero.$r;
-        $this->rights[$r][1] = 'Creer/modifier les Panier';
-        $this->rights[$r][2] = 'w';
-        $this->rights[$r][3] = 1;
-        $this->rights[$r][4] = 'creer';
         
-        $r=1;
         $this->const[$r][0] = "synopsispanier_ADDON_PDF";
         $this->const[$r][1] = "chaine";
         $this->const[$r][2] = "PANIER";

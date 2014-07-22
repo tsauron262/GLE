@@ -542,7 +542,7 @@ if (is_dir($dir)) {
                         $secteurActiv = false;
                         if ($val['CliActivEnu'] . "x" != "x") {
                             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "c_secteur WHERE LOWER(code) = '" . strtolower(SynSanitize($val['CliActivEnu'])) . "' ";
-                            $sql = requeteWithCache($requete);echo $requete;
+                            $sql = requeteWithCache($requete);
                             if ($db->num_rows($sql) > 0) {
                                 $res = fetchWithCache($sql);
                                 $secteurActiv = $res->id;

@@ -988,11 +988,13 @@ class Holiday extends CommonObject
         {
         	dol_syslog(get_class($this).'::createCPusers');
             foreach($this->fetchUsers(false,true) as $users) {
-                $sql = "INSERT INTO ".MAIN_DB_PREFIX."holiday_users";
-                $sql.= " (fk_user, nb_holiday)";
-                $sql.= " VALUES ('".$users['rowid']."','0')";
+                if($users['rowid'] >  0){
+                    $sql = "INSERT INTO ".MAIN_DB_PREFIX."holiday_users";
+                    $sql.= " (fk_user, nb_holiday)";
+                    $sql.= " VALUES ('".$users['rowid']."','0')";
 
-                $this->db->query($sql);
+                    $this->db->query($sql);
+                }
             }
         } else {
             $sql = "INSERT INTO ".MAIN_DB_PREFIX."holiday_users";

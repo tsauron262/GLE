@@ -1287,11 +1287,11 @@ class Holiday extends CommonObject
             if($result) {
 
                 $i = 0;
-                $num = $this->db->num_rows($resql);
+                $num = $this->db->num_rows($result);
 
                 while($i < $num) {
 
-                    $obj = $this->db->fetch_object($resql);
+                    $obj = $this->db->fetch_object($result);
 
                     // On ajoute l'utilisateur
                     $this->createCPusers(true,$obj->rowid);

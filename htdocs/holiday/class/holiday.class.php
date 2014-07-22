@@ -997,11 +997,13 @@ class Holiday extends CommonObject
                 }
             }
         } else {
-            $sql = "INSERT INTO ".MAIN_DB_PREFIX."holiday_users";
-            $sql.= " (fk_user, nb_holiday)";
-            $sql.= " VALUES ('".$userid."','0')";
+            if($userid >  0){
+                $sql = "INSERT INTO ".MAIN_DB_PREFIX."holiday_users";
+                $sql.= " (fk_user, nb_holiday)";
+                $sql.= " VALUES ('".$userid."','0')";
 
-            $this->db->query($sql);
+                $this->db->query($sql);
+            }
         }
 
     }

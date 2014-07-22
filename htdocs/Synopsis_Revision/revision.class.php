@@ -62,6 +62,7 @@ class SynopsisRevision {
 }
 
 class SynopsisRevisionPropal extends SynopsisRevision {
+    private static $oldRefCli = "";
 
     function SynopsisRevisionPropal($propal) {
         global $db;
@@ -85,7 +86,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         $parameters = array('socid' => $socid);
         $oldRef = $propal->ref;
         $oldId = $propal->id;
-        $oldRefCli = $propal->ref_client;
+        self::$oldRefCli = $propal->ref_client;
         $object = $propal;
         $actionHook = 'confirm_clone';
         include_once(DOL_DOCUMENT_ROOT . '/core/class/hookmanager.class.php');
@@ -113,9 +114,9 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         if(!isset($newRef))
         $newRef = self::convertRef($oldRef, "propal");
 //        die($tabT[]);
-
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '" . $oldRefCli . "' WHERE rowid = " . $newId;
-        $db->query($requete);
+        
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '" . self::$oldRefCli . "' WHERE rowid = " . $newId;
+        $db->query($requete);echo $requete;
         $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 3 WHERE rowid = " . $oldId;
         $db->query($requete);
     }

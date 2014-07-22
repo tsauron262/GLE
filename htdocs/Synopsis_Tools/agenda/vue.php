@@ -327,7 +327,7 @@ function printMenu($tabUser) {
     echo "<script>" . $js . "</script>";
 
 
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "usergroup ORDER BY nom");
     while ($result = $db->fetch_object($sql)) {
         $select .= "<option value='" . $result->rowid . "'>" . $result->nom . "</option>";
     }

@@ -110,14 +110,16 @@ class partsCart {
 
     public function loadCart() {
         $this->loadCartRowId();
-        $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
-        $result = $this->db->query($sql);
-        if (isset($result) && $result) {
-            $this->partsCart = array();
-            while ($part = $this->db->fetch_object($result)) {
-                $this->addToCart($part->part_number, $part->comptia_code, $part->comptia_modifier, $part->qty);
+        if ($this->cartRowId != "" && $this->cartRowId > 0) {
+            $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
+            $result = $this->db->query($sql);
+            if (isset($result) && $result) {
+                $this->partsCart = array();
+                while ($part = $this->db->fetch_object($result)) {
+                    $this->addToCart($part->part_number, $part->comptia_code, $part->comptia_modifier, $part->qty);
+                }
+                return true;
             }
-            return true;
         }
         return false;
     }

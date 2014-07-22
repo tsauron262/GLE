@@ -11,7 +11,6 @@ llxHeader();
     <input type="text" name="serialInput" id="serialInput" value="8K140CAM9ZU" onfocus="this.value = ''"/>
     <button id="serialSubmit">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
 </div>
-
 <div id="requestsResponsesContainer"></div>
 <div id="requestResult"></div>
 

@@ -890,9 +890,15 @@ function displayCartRequestResult(prodId, html) {
 function getProdId($obj) {
     if (!$obj.length)
         return 0;
-    var $prod = $obj.parent('.productDatasContainer');
-    if (!$prod.length) return 0;
-    var id = $prod.attr('id').replace(/^prod_(\d+)$/, '$1');
+    var $parent = $obj;
+    while (1) {
+        $parent = $parent.parent();
+        if (!$parent.length)
+            return 0;
+        if ($parent.hasClass("productDatasContainer"))
+            break;
+    }
+    var id = $parent.attr('id').replace(/^prod_(\d+)$/, '$1');
     if (!id) return 0;
     return id;
 }
@@ -962,93 +968,85 @@ function checkInput($input, type) {
     if (!val.length) {
         if ($input.attr('required') !== undefined){
             assignInputCheckMsg($input, 'notOk', 'Information obligatoire');
-            return;
+            return false;
         }
         assignInputCheckMsg($input, '', '');
-        return;
+        return true;
     }
     switch (type) {
         case 'text':
             if (!/^.+$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', '');
-                return;
+                return false;
             }
             break;
 
         case 'alphanum':
             if (!/^[a-zA-Z0-9\-\._ ]+$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
-                return;
+                return false;
             }
             break;
 
         case 'phone':
             val = val.replace(/\./g, '');
             val = val.replace(/\-/g, '');
-            val = val.repalce(/\//g, '');
+            val = val.replace(/\//g, '');
             val = val.replace(/ /g, '');
             $input.val(val);
             if (!/^[0-9]{10}$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format invalide');
-                return;
+                return false;
             }
             break;
 
         case 'email':
             if (!/^[a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]+[.a-z\p{L}0-9!#$%&\'*+\/=?^`{}|~_-]*@[a-z\p{L}0-9]+[._a-z\p{L}0-9-]*\.[a-z\p{L}0-9]+$/i.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format de l\'adresse e-mail invalide');
-                return;
+                return false;
             }
             break;
 
         case 'zipCode':
             if (!/^[0-9]{5}$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format du code postal invalide');
-                return;
+                return false;
             }
             break;
 
         case 'date':
             if (!/^[0-9]{2}\/[0-9]{2}\/[0-9]{2}$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format de la date invalide. (Attendu: JJ/MM/AA)');
-                return;
+                return false;
             }
             break;
 
         case 'time':
-            if (!/^[0-9]{2}:[0-9]{2}( [AP]M)?$/.test(val)) {
-                assignInputCheckMsg($input, 'notOk', 'Format de l\'heure invalide. (Attendu: HH:MM AM/PM)');
-                return;
+            if (!/^[0-9]{2}:[0-9]{2}?$/.test(val)) {
+                assignInputCheckMsg($input, 'notOk', 'Format de l\'heure invalide. (Attendu: HH:MM)');
+                return false;
             }
             var hours = parseInt(val.replace(/^([0-9]{2}):[0-9]{2}.*$/, '$1'));
             var mins = parseInt(val.replace(/^[0-9]{2}:([0-9]{2}).*$/, '$1'));
             if (mins > 59) {
                 assignInputCheckMsg($input, 'notOk', 'Heure incorrecte');
-                return;
+                return false;
             }
-            if (hours > 12) {
-                if (hours < 24) {
-                    hours -= 12;
-                    $input.val(hours+':'+mins+' PM');
-                } else {
-                    assignInputCheckMsg($input, 'notOk', 'Heure incorrecte');
-                    return;
-                }
-            } else {
-                if (!/^[0-9]{2}:[0-9]{2} [AP]M$/.test(val)) {
-                    $input.val(hours+':'+mins+' AM');
-                }
+            if (hours > 23) {
+                assignInputCheckMsg($input, 'notOk', 'Heure incorrecte');
+                return false;
             }
             break;
 
         case 'num':
             if (!/^[0-9]*$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format invalide (Chiffres uniquement).');
-                return;
+                return false;
             }
             break;
     }
     assignInputCheckMsg($input, 'ok', '');
+    return true;
 }
 function duplicateInput($span, inputName) {
     var $container = $span.parent('div.dataBlock');
@@ -1086,6 +1084,36 @@ function submitGsxRequestForm(prodId, request) {
         return;
     }
     var partCount = $form.find('div.partDatasBlock').length;
+
+    var $template = $form.find('div.repairsPartsInputsTemplate');
+    var templateHtml = '';
+    if ($template.length) {
+        templateHtml = $template.html();
+        $template.html('');
+    }
+
+    var check = true;
+    var $inputs = $form.find('input');
+    var $areas = $form.find('textarea')
+    if ($areas.length) {
+        $inputs = $inputs.add($areas);
+    }
+    $inputs.each(function() {
+        if ($(this).attr('onchange')) {
+            var type = $(this).attr('onchange').replace(/^checkInput\(\$\(this\), '(.*)'\)$/, '$1');
+            if (!checkInput($(this), type)) {
+                check = false;
+            }
+        }
+    });
+    if ($template.length) {
+        $template.html(templateHtml);
+    }
+    if (!check) {
+        alert("Des erreurs ont été détectées.\nMerci de corriger ces dernières avant de valider le formulaire.");
+        return;
+    }
+
     $form.find('#partsCount').val(partCount);
     $form.submit();
 }

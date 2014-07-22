@@ -12,9 +12,9 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
-//$userId = 'tysauron@gmail.com';
-//$password = 'freeparty';
-//$serviceAccountNo = '0000100520';
+$userId = 'tysauron@gmail.com';
+$password = 'freeparty';
+$serviceAccountNo = '0000100520';
 
 //ephesussav
 //@Ephe2014#
@@ -46,7 +46,7 @@ if (isset($_GET['action'])) {
                     if ($datas->connect)
                         echo $datas->getLookupHtml($_GET['prodId']);
                     else
-                        echo $datas->getGSXErrorsHtml ();
+                        echo $datas->getGSXErrorsHtml();
                 } else {
                     echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
                 }
@@ -54,22 +54,22 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
-            
-            case 'loadInfoProduct':
-           if (isset($_GET['serial'])) {
-               if (isset($_GET['prodId'])) {
-                   $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                   if ($datas->connect)
-                       echo $datas->getLookupHtml($_GET['prodId']);
-                   else
-                       echo $datas->getGSXErrorsHtml ();
-               } else {
-                   echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
-               }
-           } else {
-               echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
-           }
-           break;
+
+        case 'loadInfoProduct':
+            if (isset($_GET['serial'])) {
+                if (isset($_GET['prodId'])) {
+                    $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
+                    if ($datas->connect)
+                        echo $datas->getLookupHtml($_GET['prodId']);
+                    else
+                        echo $datas->getGSXErrorsHtml();
+                } else {
+                    echo '<p class="error">Une erreur est survenue  : ID produit absent</p>' . "\n";
+                }
+            } else {
+                echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
+            }
+            break;
 
         case 'loadRepairForm':
             if (isset($_GET['serial'])) {
@@ -183,10 +183,10 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (numéro de série absent)</p>' . "\n";
             }
             break;
+
         case 'loadSmallInfoProduct':
             $GSXdatas = new gsxDatas($_REQUEST["serial"], $userId, $password, $serviceAccountNo);
-            if ($GSXdatas->connect)
-            {
+            if ($GSXdatas->connect) {
                 $response = $GSXdatas->gsx->lookup($_REQUEST["serial"], 'warranty');
                 if (isset($response) && count($response)) {
                     if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
@@ -195,13 +195,13 @@ if (isset($_GET['action'])) {
                             $machineinfo = $datas['productDescription'];
                             $garantie = $datas['warrantyStatus'];
                             $dateAchat = $datas['estimatedPurchaseDate'];
-                            echo "tabResult = Array('".$machineinfo."', '".$garantie."', '".$dateAchat."');";
+                            echo "tabResult = Array('" . $machineinfo . "', '" . $garantie . "', '" . $dateAchat . "');";
                         }
                     }
                 }
             }
             else
-                echo $GSXdatas->getGSXErrorsHtml ();
+                echo $GSXdatas->getGSXErrorsHtml();
             break;
     }
     die('');

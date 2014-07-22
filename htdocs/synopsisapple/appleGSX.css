@@ -154,6 +154,7 @@ td.rowTitle {
     margin-top: 20px;
     font-size: 14px;
 }
+
 .loadParts:before {
     font-weight: normal;
     font-size: 18px;
@@ -570,6 +571,11 @@ span.addToCart:before {
     margin-right: 10px;
 }
 
+/*Repair Satus*/
+div.repairStatus {
+    padding: 15px;
+}
+
 /*Repairs*/
 div.repairPopUp {
     display: none;
@@ -753,3 +759,4 @@ span.duplicateInput:before {
     content: '\f055';
     margin-right: 8px;
 }
+

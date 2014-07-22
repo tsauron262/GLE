@@ -110,7 +110,7 @@
         </datas>
     </request>
 
-    <request name="UpdateSerialNumber" type="repair" request="UpdateSerialNumberRequest" wrapper="repairData">
+    <request name="UpdateSerialNumber" type="serialUpdate" request="UpdateSerialNumberRequest" wrapper="repairData">
         <label>Mise à jour du numéro de série</label>
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>
@@ -131,14 +131,14 @@
         </response>
     </request>
 
-    <request name="MarkRepairComplete" type="repair" request="MarkRepairCompleteRequest" wrapper="">
+    <request name="MarkRepairComplete" type="repairComplete" request="MarkRepairCompleteRequest" wrapper="">
         <label>Réparation complète</label>
         <datas>
             <data name="repairConfirmationNumbers" required="1" multiple="1"></data>
         </datas>
     </request>
-    
-    <request name="ReturnLabel" type="repair" request="ReturnLabelRequest" wrapper="">
+
+    <request name="ReturnLabel" type="" request="ReturnLabelRequest" wrapper="">
         <label>Etiquettes de retour</label>
         <datas>
             <data name="returnOrderNumber" required="1"></data>

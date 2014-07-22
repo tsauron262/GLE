@@ -143,7 +143,7 @@
     </def>
     <def name="unitReceivedTime" type="text" jsCheck="time">
         <label>Heure de réception de l'unité</label>
-        <infos>Format: HH:MM AM (matin) / PM (après-midi). Ex: "04:15 PM" pour "16 h 15"</infos>
+        <infos>Format: HH:MM</infos>
     </def>
     <def name="componentCheckReview" type="YesNo">
         <label>Vérification des composants</label>

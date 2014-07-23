@@ -610,7 +610,7 @@ class gsxDatas {
                     if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
                         $direName = '/synopsischrono/'.$_REQUEST['chronoId'].'';
                         $fileNamePure = $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
-                        if(!is_dir($direName))
+                        if(!is_dir(DOL_DATA_ROOT.$direName))
                             mkdir(DOL_DATA_ROOT.$direName);
                         $fileName = $direName ."/". $fileNamePure;
 //                        die(DOL_DATA_ROOT . $fileName);

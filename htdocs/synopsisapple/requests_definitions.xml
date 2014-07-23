@@ -132,17 +132,17 @@
     </request>
 
     <request name="MarkRepairComplete" type="repairComplete" request="MarkRepairCompleteRequest" wrapper="">
-        <label>Réparation complète</label>
+        <label>Fermer la réparation</label>
         <datas>
-            <data name="repairConfirmationNumbers" required="1" multiple="1"></data>
+            <data name="repairConfirmationNumbers" required="1"></data>
         </datas>
     </request>
 
-    <request name="ReturnLabel" type="" request="ReturnLabelRequest" wrapper="">
+<!--    <request name="ReturnLabel" type="returnLabel" request="ReturnLabelRequest" wrapper="">
         <label>Etiquettes de retour</label>
         <datas>
             <data name="returnOrderNumber" required="1"></data>
             <data name="partNumber" required="1"></data>
         </datas>
-    </request>
+    </request>-->
 </root>

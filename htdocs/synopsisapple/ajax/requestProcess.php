@@ -9,12 +9,12 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 
-//$userId = 'Corinne@actitec.fr';
-//$password = 'cocomart01';
-//$serviceAccountNo = '0000100635';
-$userId = 'tysauron@gmail.com';
-$password = 'freeparty';
-$serviceAccountNo = '0000100520';
+$userId = 'Corinne@actitec.fr';
+$password = 'cocomart01';
+$serviceAccountNo = '0000100635';
+//$userId = 'tysauron@gmail.com';
+//$password = 'freeparty';
+//$serviceAccountNo = '0000100520';
 
 //ephesussav
 //@Ephe2014#
@@ -28,7 +28,10 @@ function fetchPartsList() {
                 'partNumber' => $_POST['part_' . $i . '_ref'],
                 'comptiaCode' => (isset($_POST['part_' . $i . '_comptiaCode']) ? $_POST['part_' . $i . '_comptiaCode'] : 0),
                 'comptiaModifier' => (isset($_POST['part_' . $i . '_comptiaModifier']) ? $_POST['part_' . $i . '_comptiaModifier'] : 0),
-                'qty' => (isset($_POST['part_' . $i . '_qty']) ? $_POST['part_' . $i . '_qty'] : 1)
+                'qty' => (isset($_POST['part_' . $i . '_qty']) ? $_POST['part_' . $i . '_qty'] : 1),
+                'componentCode' => (isset($_POST['part_'.$i.'_componentCode'])?$_POST['part_' . $i . '_componentCode'] : ''),
+                'partDescription' => (isset($_POST['part_'.$i.'_partDescription'])?$_POST['part_' . $i . '_partDescription'] : 'Composant '.$i),
+                'stockPrice' => (isset($_POST['part_'.$i.'_stockPrice'])?$_POST['part_' . $i . '_stockPrice'] : '')
             );
         } else
             break;
@@ -145,16 +148,7 @@ if (isset($_GET['action'])) {
                 $cart = new partsCart($db, $_GET['serial'], isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
                 $cart->loadCart();
                 if (count($cart->partsCart)) {
-                    $script = 'if (GSX.products[' . $_GET['prodId'] . ']) {' . "\n";
-                    $jsCart = 'GSX.products[' . $_GET['prodId'] . '].cart';
-                    foreach ($cart->partsCart as $part) {
-                        $script .= $jsCart . '.onPartLoad(\'' . $part['partNumber'] . '\', ';
-                        $script .= '\'' . $part['comptiaCode'] . '\', ';
-                        $script .= '\'' . $part['comptiaModifier'] . '\', ';
-                        $script .= '\'' . $part['qty'] . '\');' . "\n";
-                    }
-                    $script .= '}' . "\n";
-                    echo $script;
+                    echo $cart->getJsScript($_GET['prodId']);
                 } else {
                     die('noPart');
                 }

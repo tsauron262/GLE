@@ -314,6 +314,41 @@ select.compTIAModifierSelect {
     width: 120px;
     height: 20px;
 }
+
+/*Composants en attente de retour*/
+div.partsPendingTitle {
+    margin: 10px 0;
+    font-size: 15px;
+}
+.partsPendingTable {
+    border-collapse: collapse;
+}
+.partsPendingTable th {
+    font-weight: normal;
+    color: #292964;
+    margin-bottom: 5px;
+    border-bottom: 1px solid #9999C8;
+}
+.partsPendingTable td {
+    vertical-align: middle;
+    padding: 5px;
+    border-bottom: 1px dotted #B4B4B4;
+    font-weight: bold;
+    color: #323232;
+}
+.partsPendingTable td.ref {
+    font-weight: normal;
+    text-align: center;
+}
+
+a.getReturnLabel:before {
+    font-family: 'FA';
+    content: '\f02a';
+    margin-right: 8px;
+    font-weight: normal;
+    font-size: 14px;
+}
+
 /*Liste des composants*/
 .partsRequestResult {
     display: none;

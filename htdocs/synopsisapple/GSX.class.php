@@ -942,6 +942,10 @@ class GSX {
         $this->errors['soap'][] = 'SOAP Error: ' . $string . ' (Code: ' . $code . ')' . $additionalInfo;
     }
 
+    public function resetSoapErrors() {
+        unset($this->errors['soap']);
+        $this->errors['soap'] = array();
+    }
 }
 
 ?>

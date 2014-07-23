@@ -607,10 +607,10 @@ class gsxDatas {
                             ));
                     $labelResponse = $this->gsx->request($request, 'ReturnLabel');
                     if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
-                        $direName = '/synopsischrono/'.$_REQUEST['chronoId'].'/';
+                        $direName = '/synopsischrono/'.$_REQUEST['chronoId'].'';
                         if(!is_dir($direName))
-                            mkdir($direName);
-                        $fileName = $direName . $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
+                            mkdir(DOL_DATA_ROOT.$direName);
+                        $fileName = $direName ."/". $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
 //                        die(DOL_DATA_ROOT . $fileName);
                         if (!file_exists(DOL_DATA_ROOT . $fileName)) {
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)

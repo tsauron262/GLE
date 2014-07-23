@@ -38,7 +38,7 @@ if ($action == 'setprop') {
     $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $_REQUEST['prop'] . "' WHERE id = " . $id);
 }
 
-if ($action == 'createPC') {
+if ($action == 'createPC' && $chr->propalid == 0) {
     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
     $chr = new Chrono($db);
     $chr->fetch($_REQUEST['id']);

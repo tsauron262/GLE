@@ -608,21 +608,23 @@ class gsxDatas {
                     $labelResponse = $this->gsx->request($request, 'ReturnLabel');
                     if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
                         $direName = '/synopsischrono/'.$_REQUEST['chronoId'].'';
+                        $fileNamePure = $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
                         if(!is_dir($direName))
                             mkdir(DOL_DATA_ROOT.$direName);
-                        $fileName = $direName ."/". $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
+                        $fileName = $direName ."/". $fileNamePure;
 //                        die(DOL_DATA_ROOT . $fileName);
                         if (!file_exists(DOL_DATA_ROOT . $fileName)) {
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
+                        $fileName2 = "/document.php?modulepart=synopsischrono&file=".  urlencode($_REQUEST['chronoId']."/".$fileNamePure);
                     }
                 }
                 $this->partsPending[] = array(
                     'partDescription' => $part['partDescription'],
                     'partNumber' => $part['partNumber'],
                     'returnOrderNumber' => $part['returnOrderNumber'],
-                    'fileName' => $fileName
+                    'fileName' => $fileName2
                 );
             }
             return true;

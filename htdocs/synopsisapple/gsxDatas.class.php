@@ -3,7 +3,8 @@
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/GSXRequests.php';
 
 class gsxDatas {
-
+    private $userExchangePrice = true;
+    
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
@@ -340,7 +341,7 @@ class gsxDatas {
                 $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
-                $html .= ', \'' . (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '') . '\'';
+                $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
                 $html .= ');' . "\n";
             }
             $html .= '</script>' . "\n";

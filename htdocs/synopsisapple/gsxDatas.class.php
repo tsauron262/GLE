@@ -405,6 +405,8 @@ class gsxDatas {
 
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
+
+        $this->getConfirmNumbers();
         switch ($requestType) {
             case 'CreateCarryInRepair':
                 if (isset($chronoId)) {
@@ -470,8 +472,6 @@ class gsxDatas {
         }
 
 
-
-        $this->getConfirmNumbers();
         if (isset($this->confirmNumbers['repair'])) {
             $valDef['repairConfirmationNumber'] = $this->confirmNumbers['repair'];
             $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
@@ -570,10 +570,10 @@ class gsxDatas {
         $datas = array(
             'repairType' => '',
             'repairStatus' => '',
-            'purchaseOrderNumber' => '83702',
+            'purchaseOrderNumber' => '',
             'sroNumber' => '',
-//            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
-            'repairConfirmationNumber' => '',
+            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
+//            'repairConfirmationNumber' => 'G168575426',
             'serialNumbers' => array(
                 'serialNumber' => ''
             ),
@@ -595,7 +595,7 @@ class gsxDatas {
         if (isset($response['PartsPendingReturnResponse']['partsPendingResponse'])) {
             $partsPending = $response['PartsPendingReturnResponse']['partsPendingResponse'];
             $this->partsPending = array();
-            if (!is_array($partsPending)) {
+            if (isset($partsPending['returnOrderNumber'])) {
                 $partsPending = array($partsPending);
             }
             foreach ($partsPending as $part) {
@@ -607,9 +607,10 @@ class gsxDatas {
                             ));
                     $labelResponse = $this->gsx->request($request, 'ReturnLabel');
                     if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
-                        $fileName = '/synopsisapple/label_pdf/' . $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
-                        if (!file_exists(DOL_DOCUMENT_ROOT . $fileName)) {
-                            if (file_put_contents(DOL_DOCUMENT_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
+                        $fileName = '/synopsischrono/'.$_REQUEST['chronoId'].'/' . $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
+//                        die(DOL_DATA_ROOT . $fileName);
+                        if (!file_exists(DOL_DATA_ROOT . $fileName)) {
+                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
                     }

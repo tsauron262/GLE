@@ -737,6 +737,8 @@ class Chrono extends CommonObject {
                         }
 //                        }
                     }
+                    if(!isset($obj->valuesArrStr) || !is_array($obj->valuesArrStr))
+                        $obj->valuesArrStr = $obj->valuesArr;
                     foreach ($obj->valuesArrStr as $key => $val) {
 //                        if ($res->valueIsSelected && $res->value == $key) {
                         if ($obj->OptGroup . "x" != "x") {

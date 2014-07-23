@@ -390,45 +390,45 @@ class gsxDatas {
         }
 
         $valDef['serialNumber'] = $this->serial;
-//        if (isset($chronoId)) {
-//            require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
-//            $chrono = new Chrono($db);
-//            $chrono->fetch($chronoId);
-//            $chrono->getValues($chronoId);
-//
-//            $tech = new User($db);
-//            $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
-//
-//            $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
-//            $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
-//            $valDef['unitReceivedDate'] = $dateH[0];
-//            $valDef['unitReceivedTime'] = $dateH[1];
-//
-//            $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
-//            $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
-//            $valDef['billTo'] = $tech->array_options['options_apple_service'];
-//            $valDef['poNumber'] = $chrono->ref;
-//
-////        echo "<pre>"; print_r($chrono->contact);
-//
-//            $valDef['customerAddress']['companyName'] = $chrono->societe->name;
-//            if (isset($chrono->contact->id)) {
-//                $valDef['customerAddress']['street'] = $chrono->contact->address;
-//                $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
-////            $valDef['addressLine2'] = $chrono->contact->;
-////            $valDef['addressLine3'] = $chrono->contact->;
-////            $valDef['addressLine4'] = $chrono->contact->;
-//                $valDef['customerAddress']['city'] = $chrono->contact->town;
-//                $valDef['customerAddress']['country'] = "FRANCE";
-//                $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
-//                $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
-//                $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
-//                $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
-//                $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-//                $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
-//                $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
-//            }
-//        }
+        if (isset($chronoId)) {
+            require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+            $chrono = new Chrono($db);
+            $chrono->fetch($chronoId);
+            $chrono->getValues($chronoId);
+
+            $tech = new User($db);
+            $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
+
+            $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
+            $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
+            $valDef['unitReceivedDate'] = $dateH[0];
+            $valDef['unitReceivedTime'] = $dateH[1];
+
+            $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
+            $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+            $valDef['billTo'] = $tech->array_options['options_apple_service'];
+            $valDef['poNumber'] = $chrono->ref;
+
+//        echo "<pre>"; print_r($chrono->contact);
+
+            $valDef['customerAddress']['companyName'] = $chrono->societe->name;
+            if (isset($chrono->contact->id)) {
+                $valDef['customerAddress']['street'] = $chrono->contact->address;
+                $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
+//            $valDef['addressLine2'] = $chrono->contact->;
+//            $valDef['addressLine3'] = $chrono->contact->;
+//            $valDef['addressLine4'] = $chrono->contact->;
+                $valDef['customerAddress']['city'] = $chrono->contact->town;
+                $valDef['customerAddress']['country'] = "FRANCE";
+                $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
+                $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+                $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
+            }
+        }
 //        print_r($chrono->extraValue);
         $this->getConfirmNumbers();
         if (isset($this->confirmNumbers['repair'])) {
@@ -437,26 +437,26 @@ class gsxDatas {
             $valDef['returnOrderNumber'] = $this->confirmNumbers['repair'];
         }
 
-            $valDef['customerAddress'] = array(
-                'companyName' => 'kjhsdk',
-                'street' => 'hkjlkjh',
-                'addressLine1' => 'kjhlkhj',
-                'city' => 'lkjhdsfl',
-                'country' => 'kjhlk',
-                'firstName' => 'kjhlk',
-                'lastName' => 'lkjhlk',
-                'primaryPhone' => '0000000000',
-                'zipCode' => '42000',
-                'state' => '042',
-                'emailAddress' => 'dsfsdf@dsfsf.fr'
-            );
-            $valDef['diagnosis'] = 'sfsdfsd';
-            $valDef['unitReceivedDate'] = '20/04/14';
-            $valDef['unitReceivedTime'] = '02:30 PM';
-            $valDef['diagnosedByTechId'] = 'dgdfg';
-            $valDef['shipTo'] = 'sgsdgs';
-            $valDef['billTo'] = 'sdgsdg';
-            $valDef['poNumber'] = 'dssdg';
+//            $valDef['customerAddress'] = array(
+//                'companyName' => 'kjhsdk',
+//                'street' => 'hkjlkjh',
+//                'addressLine1' => 'kjhlkhj',
+//                'city' => 'lkjhdsfl',
+//                'country' => 'kjhlk',
+//                'firstName' => 'kjhlk',
+//                'lastName' => 'lkjhlk',
+//                'primaryPhone' => '0000000000',
+//                'zipCode' => '42000',
+//                'state' => '042',
+//                'emailAddress' => 'dsfsdf@dsfsf.fr'
+//            );
+//            $valDef['diagnosis'] = 'sfsdfsd';
+//            $valDef['unitReceivedDate'] = '20/04/14';
+//            $valDef['unitReceivedTime'] = '02:30 PM';
+//            $valDef['diagnosedByTechId'] = 'dgdfg';
+//            $valDef['shipTo'] = 'sgsdgs';
+//            $valDef['billTo'] = 'sdgsdg';
+//            $valDef['poNumber'] = 'dssdg';
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 

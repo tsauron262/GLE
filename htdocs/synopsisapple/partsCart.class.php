@@ -91,13 +91,13 @@ class partsCart {
                 $sql .= '(`cart_rowid`, `part_number`, `comptia_code`, `comptia_modifier`, `qty`, `componentCode`, `partDescription`, `stockPrice`)';
                 $sql .= 'VALUES (';
                 $sql .= $this->cartRowId . ', ';
-                $sql .= '"' . $part['partNumber'] . '", ';
-                $sql .= '"' . $part['comptiaCode'] . '", ';
-                $sql .= '"' . $part['comptiaModifier'] . '", ';
-                $sql .= '"' . $part['qty'] . '", ';
-                $sql .= '"' . $part['componentCode'] . '", ';
-                $sql .= '"' . $part['partDescription'] . '", ';
-                $sql .= '"' . $part['stockPrice'] . '"';
+                $sql .= '"' . addslashes($part['partNumber']) . '", ';
+                $sql .= '"' . addslashes($part['comptiaCode']) . '", ';
+                $sql .= '"' . addslashes($part['comptiaModifier']) . '", ';
+                $sql .= '"' . addslashes($part['qty']) . '", ';
+                $sql .= '"' . addslashes($part['componentCode']) . '", ';
+                $sql .= '"' . addslashes($part['partDescription']) . '", ';
+                $sql .= '"' . addslashes($part['stockPrice']) . '"';
                 $sql .= ')';
 
                 if (!$this->db->query($sql)) {

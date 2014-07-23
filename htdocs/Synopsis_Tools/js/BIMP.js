@@ -87,11 +87,11 @@ $(window).load(function() {
                        
                         inputM.attr("value", valeurM);
                         inputG.attr("value", valeurG);
-                        if (valeurD !== "") {
-                            valeurD = valeurD.split("/");
-                            valeurD = valeurD[0] + "-" + valeurD[1] + "-" + valeurD[2];
+//                        if (valeurD !== "") {
+//                            valeurD = valeurD.split("/");
+//                            valeurD = valeurD[0] + "-" + valeurD[1] + "-" + valeurD[2];
                             inputD.attr("value", valeurD);
-                        }
+//                        }
                         $("#reponse").html(reponse);
                         roue.hide();
                     }

@@ -193,8 +193,10 @@ if (isset($_GET['action'])) {
                         if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                             $datas = $response['ResponseArray']['responseData'];
                             $machineinfo = $datas['productDescription'];
-                            $garantie = $datas['warrantyStatus'];
-                            $dateAchat = $datas['estimatedPurchaseDate'];
+//                            $garantie = $datas['warrantyStatus'];
+//                            $garantie = $datas['coverageEndDate'];
+                            $garantie = dateAppleToDate($datas['coverageEndDate']);
+                            $dateAchat = dateAppleToDate($datas['estimatedPurchaseDate']);
                             echo "tabResult = Array('" . $machineinfo . "', '" . $garantie . "', '" . $dateAchat . "');";
                         }
                     }
@@ -205,5 +207,10 @@ if (isset($_GET['action'])) {
             break;
     }
     die('');
+}
+
+function dateAppleToDate($date){
+    $garantieT = explode("/", $date);
+    return $garantieT[0]."/".$garantieT[1]."/20".$garantieT[2];
 }
 ?>

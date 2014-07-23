@@ -23,6 +23,13 @@ $js = "";
 $langs->load("chrono@synopsischrono");
 $msg = "";
 
+if ($id > 0){
+    $chr = new Chrono($db);
+    $chr->fetch($id);
+    global $typeChrono;
+    $typeChrono = $chr->model->id;
+}
+
 if ($action == 'setprojet') {
     $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET projetid = '" . $_REQUEST['projet'] . "' WHERE id = " . $id);
 }
@@ -49,7 +56,7 @@ if ($action == 'createPC') {
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
         require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
             $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-            synopsischrono_pdf_create($db, $panier, $model);
+            synopsischrono_pdf_create($db, $chr, $model);
             header('location: ?'.$para . "#documentAnchor");
         }
 
@@ -238,8 +245,6 @@ if ($action == 'confirm_deletefile' && $_REQUEST['confirm'] == 'yes') {
     $interface = new Interfaces($db);
     $interface->texte = $tmpName;
 
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     $result = $interface->run_triggers('ECM_UL_DEL_CHRONO', $chr, $user, $langs, $conf);
     if ($result < 0) {
         $error++;
@@ -353,14 +358,18 @@ if ($chr->id > 0) {
 
 
         require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoFiche.lib.php");
-        $requete = "SELECT k.id FROM
-                           " . MAIN_DB_PREFIX . "synopsischrono_key AS k
-                      WHERE k.model_refid = " . $chr->model_refid
-                . " ORDER BY k.rang";
-        $sql = $db->query($requete);
-        while ($result = $db->fetch_object($sql)) {
-            getValueForm($chr->id, $result->id, $chr->socid);
-        }
+//        $requete = "SELECT k.id FROM
+//                           " . MAIN_DB_PREFIX . "synopsischrono_key AS k
+//                      WHERE k.model_refid = " . $chr->model_refid
+//                . " ORDER BY k.rang";
+//        $sql = $db->query($requete);
+//        while ($result = $db->fetch_object($sql)) {
+//            echo getValueForm($chr->id, $result->id, $chr->socid);
+//        }
+        
+        $chr->getValuesPlus();
+        foreach($chr->valuesPlus as $res)
+            echo getValueForm2($res, $chr);
 
 //
 //        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
@@ -574,93 +583,17 @@ if ($chr->id > 0) {
 
 
 
-        print '<td colspan="2" rowspan="100" class="zonePlus">';
-
 //Ajoute les extra key/Values
-        $requete = "SELECT k.nom,
-                           k.id,
-                           k.extraCss,
-                           v.`value`,
-                           t.nom as typeNom,
-                           t.hasSubValeur,
-                           t.subValeur_table,
-                           t.subValeur_idx,
-                           t.subValeur_text,
-                           t.htmlTag,
-                           t.htmlEndTag,
-                           t.endNeeded,
-                           t.cssClass,
-                           t.cssScript,
-                           t.jsCode,
-                           t.valueIsChecked,
-                           t.valueIsSelected,
-                           t.valueInTag,
-                           t.valueInValueField,
-                           t.sourceIsOption,
-                           k.type_subvaleur,
-                           k.extraCss,
-                           t.phpClass
-                      FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur AS t,
-                           " . MAIN_DB_PREFIX . "synopsischrono_key AS k
-                      LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $chr->id . "
-                     WHERE t.id = k.type_valeur
-                       AND k.model_refid = " . $chr->model_refid
-                . " ORDER BY k.rang";
-        //print $requete;
-        $sql = $db->query($requete);
-        while ($res = $db->fetch_object($sql)) {
-            $res->value = stripslashes($res->value);
+    $chr->getValuesPlus();
+        print '<td colspan="2" rowspan="100" class="zonePlus">';
+        foreach ($chr->valuesPlus as $res) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
             print '    <td  class="ui-widget-content ' . $res->extraCss . '" colspan="1">';
-            if ($res->hasSubValeur == 1) {
-                if ($res->sourceIsOption) {
-                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
-                    $tmp = $res->phpClass;
-                    $obj = new $tmp($db);
-                    $obj->cssClassM = $res->extraCss;
-                    $obj->idChrono = $id;
-                    $obj->socid = $chr->socid;
-                    $obj->fetch($res->type_subvaleur);
-                    $obj->getValuePlus($res->value);
-                    $html = "";
-                    foreach ($obj->valuesArr as $key => $val) {
-//                        if ($res->valueIsSelected && $res->value == $key) {
-                        if ($obj->OptGroup . "x" != "x") {
-                            $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
-//                                break;
-                        } else {
-                            $html .= $val . "<br/>";
-//                                break;
-                        }
-//                        }
-                    }
-
-                    print $html;
-                } else {
-                    //Beta
-                    if ($res->phpClass == 'fct' || $res->phpClass == 'globalvar')
-                        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
-                    $tmp = $res->phpClass;
-                    $obj = new $tmp($db);
-                    $obj->cssClassM = $res->extraCss;
-                    $obj->idChrono = $id;
-                    $obj->fetch($res->type_subvaleur);
-                    $obj->call_function_chronoModule($chr->model_refid, $chr->id);
-                }
-            } else {
-                //Construct Form
-                $html = "";
-                if ($res->valueIsChecked && $res->value == 1) {
-                    $html .= "OUI";
-                } else if ($res->valueIsChecked && $res->value != 1) {
-                    $html .= "NON";
-                } else {
-                    $html .= $res->value;
-                }
-                print $html;
-            }
+                print $res->valueHtml;
             print '</td>';
         }
+        
+        
         print '</table></div><div class="divButAction">';
         print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
@@ -902,11 +835,11 @@ EOF;
         if ($chr->model->hasFile == 1) {
             require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
             print "<br/><br/>";
-            $filearray = dol_dir_list($upload_dir, "files", 0, '', '\.meta$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_ASC : SORT_DESC), 1);
-            $formfile = new FormFile($db);
-            // List of document
-            $param = '&id=' . $chr->id;
-            $formfile->list_of_documents($filearray, $chr, 'synopsischrono', $param, 1, $chr->id . "/");
+//            $filearray = dol_dir_list($upload_dir, "files", 0, '', '\.meta$', $sortfield, (strtolower($sortorder) == 'desc' ? SORT_ASC : SORT_DESC), 1);
+//            $formfile = new FormFile($db);
+//            // List of document
+//            $param = '&id=' . $chr->id;
+//            $formfile->list_of_documents($filearray, $chr, 'synopsischrono', $param, 1, $chr->id . "/");
             
             $object = $chr;
             $filename = sanitize_string($object->id);
@@ -916,7 +849,7 @@ EOF;
             require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
             $html = new Form($db);
             $formfile = new FormFile($db);
-            $somethingshown = $formfile->show_documents('synopsischrono', $filename, $upload_dir, $urlsource, $genallowed, $genallowed, "Chrono"); //, $object->modelPdf);
+            $somethingshown = $formfile->show_documents('synopsischrono', $filename, $upload_dir, $urlsource, $genallowed, $genallowed, "Chrono", 0); //, $object->modelPdf);
         }
     }
 } else {

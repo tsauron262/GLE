@@ -13,7 +13,7 @@
   \author     Tommy SAURON
   \version    $Id: pdf_panier_bimp.modules.php,v 1.121 2011/08/07  $
  */
-require_once(DOL_DOCUMENT_ROOT . "/synopsispanier/core/modules/synopsispanier/modules_synopsispanier.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
 require_once(DOL_DOCUMENT_ROOT . "/product/class/product.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/lib/company.lib.php");
 require_once DOL_DOCUMENT_ROOT . '/core/lib/functions2.lib.php';
@@ -29,7 +29,7 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_panier_ extends ModeleSynopsispanier {
+class pdf_synopsischrono_chrono1 extends ModeleSynopsischrono {
 
     public $emetteur;    // Objet societe qui emet
 
@@ -38,7 +38,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
       \param        db        Handler acces base de donnee
      */
 
-    function pdf_panier_($db) {
+    function _construct($db) {
 
         global $conf, $langs, $mysoc;
 
@@ -54,7 +54,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
         $this->page_largeur = 210;
         $this->page_hauteur = 297;
         $this->format = array($this->page_largeur, $this->page_hauteur);
-        $this->marge_gauche = 49;
+        $this->marge_gauche = 80;
         $this->marge_droite = 7;
         $this->marge_haute = 39;
         $this->marge_basse = 22;
@@ -96,9 +96,9 @@ class pdf_panier_ extends ModeleSynopsispanier {
       \param        outputlangs        Lang object for output language
       \return        int             1=ok, 0=ko
      */
-    function write_file($panier, $outputlangs = '') {
+    function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
-
+        $this->marge_gauche = 55;
         $afficherPrix = false;
 
         if (!is_object($outputlangs))
@@ -110,29 +110,29 @@ class pdf_panier_ extends ModeleSynopsispanier {
         $outputlangs->load("panier");
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
-        if ($conf->synopsispanier->dir_output) {
-            // Definition de l'objet $panier (pour compatibilite ascendante)
-//            if (!is_object($panier)) {
-//                $id = $panier;
+        if ($conf->synopsischrono->dir_output) {
+            // Definition de l'objet $chrono (pour compatibilite ascendante)
+//            if (!is_object($chrono)) {
+//                $id = $chrono;
 //                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/panierMixte.class.php");
-//                $panier = getContratObj($id);
-//                $panier->fetch($id);
-//                $panier->fetch_lines(true);
-////                $panier = new ContratMixte($this->db);
-////                $ret=$panier->fetch($id);
+//                $chrono = getContratObj($id);
+//                $chrono->fetch($id);
+//                $chrono->fetch_lines(true);
+////                $chrono = new ContratMixte($this->db);
+////                $ret=$chrono->fetch($id);
 //            } else {
-//                $panier->fetch_lines(true);
+//                $chrono->fetch_lines(true);
 //            }
             // Definition de $dir et $file
-            if (isset($panier->specimen) && $panier->specimen) {
-                $dir = $conf->synopsispanier->dir_output;
+            if (isset($chrono->specimen) && $chrono->specimen) {
+                $dir = $conf->synopsischrono->dir_output;
                 $file = $dir . "/SPECIMEN.pdf";
             } else {
-                $propref = sanitize_string($panier->ref);
-                $dir = $conf->synopsispanier->dir_output . "/" . $propref;
+                $propref = sanitize_string($chrono->ref);
+                $dir = $conf->synopsischrono->dir_output . "/" . $chrono->id;
                 $file = $dir . "/" . $propref . ".pdf";
             }
-            $this->panier = $panier;
+            $this->panier = $chrono;
 
             if (!file_exists($dir)) {
                 if (dol_mkdir($dir) < 0) {
@@ -143,7 +143,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
 
             if (file_exists($dir)) {
                 $pdf = "";
-                //$nblignes = sizeof($panier->lines);
+                //$nblignes = sizeof($chrono->lines);
 //                // Protection et encryption du pdf
 //                if ($conf->global->PDF_SECURITY_ENCRYPTION) {
 //                    $pdf = new FPDI_Protection('P', 'mm', $this->format);
@@ -172,7 +172,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //                              FROM " . MAIN_DB_PREFIX . "Synopsis_panier_annexePdf as p,
 //                                   " . MAIN_DB_PREFIX . "Synopsis_panier_annexe as a
 //                             WHERE p.id = a.annexe_refid
-//                               AND a.panier_refid = " . $panier->id . " AND type = 1
+//                               AND a.panier_refid = " . $chrono->id . " AND type = 1
 //                          ORDER BY a.rang";
 //                $sql = $this->db->query($requete);
 //                $rang = 1;
@@ -212,34 +212,46 @@ class pdf_panier_ extends ModeleSynopsispanier {
 //                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
 //                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
                 // Tete de page
-//                $panier = new Object();
+//                $chrono = new Object();
 
-                $this->_pagehead($pdf, $panier, 1, $outputlangs);
+                $this->_pagehead($pdf, $chrono, 1, $outputlangs);
                 $pdf->SetFont('', 'B', 12);
 
                 //Titre Page 1
-                $pdf->SetXY(49, 42);
-                $pdf->MultiCell(157, 6, 'Panier de ' . $panier->societe->getFullName($outputlangs), 0, 'C');
-
-                $g = 70;
-                foreach ($panier->val as $societe) {
-                    $pdf->SetXY(50, $g);
-                    $pdf->MultiCell(120, 40, 'Nom: ' . $societe->getFullName($outputlangs) . "\n" . 'Adresse: ' . $societe->getFullAddress(), 0, '');
-//                    $pdf->SetXY(50, $g+5);
-//                    $pdf->MultiCell(160, 80, 'Adresse: ' . $societe->getFullAddress(), 0, '');
-                    $g += 30;
-                    if ($g > 248) {
-                        $this->_pagefoot($pdf, $panier, $outputlangs);
-                        $pdf->AddPage();
-                        $this->_pagehead($pdf, $panier, 1, $outputlangs);
-                $pdf->SetFont('', 'B', 12);
-                        $g = 40;
-                    }
+                $pdf->SetXY($this->marge_gauche, 42);
+//                $pdf->MultiCell(157, 6, 'Panier de ' . $chrono->societe->getFullName($outputlangs), 0, 'C');
+                $chrono->getValuesPlus();
+//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->ref, 0, 'L');
+                
+                foreach($chrono->valuesPlus as $id => $tabKey){
+                    $pdf->MultiCell(157, 6, $tabKey->nom." : ".$tabKey->valueStr, 0, 'L');
+                    $pdf->MultiCell(157, 6, '', 0, 'L');
                 }
+//                $pdf->MultiCell(157, 6, 'Informations de prise en charge', 0, 'L');
+//                $pdf->MultiCell(157, 6, dol_print_date($chrono->date).' par '.$chrono->user_author->getFullName(), 0, 'L');
+//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
+//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
+//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
+//
+//                $g = 70;
+//                foreach ($chrono->val as $societe) {
+//                    $pdf->SetXY(50, $g);
+//                    $pdf->MultiCell(120, 40, 'Nom: ' . $societe->getFullName($outputlangs) . "\n" . 'Adresse: ' . $societe->getFullAddress(), 0, '');
+////                    $pdf->SetXY(50, $g+5);
+////                    $pdf->MultiCell(160, 80, 'Adresse: ' . $societe->getFullAddress(), 0, '');
+//                    $g += 30;
+//                    if ($g > 248) {
+//                        $this->_pagefoot($pdf, $chrono, $outputlangs);
+//                        $pdf->AddPage();
+//                        $this->_pagehead($pdf, $chrono, 1, $outputlangs);
+//                $pdf->SetFont('', 'B', 12);
+//                        $g = 40;
+//                    }
+//                }
                 //Titre Page 1
 
 
-                $this->_pagefoot($pdf, $panier, $outputlangs);
+                $this->_pagefoot($pdf, $chrono, $outputlangs);
 
 
                 if (method_exists($pdf, 'AliasNbPages'))
@@ -314,7 +326,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
         $pdf->SetXY(3.5, 63);
         $pdf->MultiCell(39, 4, "Code Client : " . $object->societe->code_client, 0, "L");
         $pdf->SetXY(3.5, 54.5);
-        $pdf->MultiCell(39, 4, 'Panier de ' . $object->societe->getFullName($outputlangs), 0, 'L');
+        $pdf->MultiCell(39, 4, 'Client : ' . $object->societe->getFullName($outputlangs), 0, 'L');
         $pdf->Rect(48, 39, 157, 235);
         $pdf->SetFont('', 'B', 7);
     }
@@ -324,7 +336,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
      *   \param      pdf     objet PDF
      */
 
-    function _pagefoot(&$pdf, $panier, $outputlangs) {
+    function _pagefoot(&$pdf, $chrono, $outputlangs) {
 
 
         $pdf->SetFont('', 'B', 9);
@@ -358,7 +370,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
             $ligne .= " - APE " . MAIN_INFO_APE;
         if (defined('MAIN_INFO_TVAINTRA'))
             $ligne .= " - TVA/CEE " . MAIN_INFO_TVAINTRA;
-        $ligne .= "\n\n" . "Document généré par GLE Copyright © DRSI & Maurice PONS";
+        $ligne .= "\n\n" . "Document généré par GLE Copyright © Synopsis & DRSI";
 
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
@@ -372,7 +384,7 @@ class pdf_panier_ extends ModeleSynopsispanier {
         $pdf->SetXY(192, $Y + 55);
         $pdf->MultiCell(19, 3, '' . $pdf->PageNo() . '/{:ptp:}', 0, 'R', 0);
 
-        //return pdf_pagefoot($pdf, $panier,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
+        //return pdf_pagefoot($pdf, $chrono,$outputlangs,'CONTRAT_FREE_TEXT',$this->emetteur,$this->marge_basse,$this->marge_gauche + 40,$this->page_hauteur);
     }
 
     function hex2RGB($hexStr, $returnAsString = false, $seperator = ',') {

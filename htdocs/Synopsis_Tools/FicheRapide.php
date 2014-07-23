@@ -67,7 +67,7 @@ $retour3 = (isset($_POST['Retour']) && $_POST['Retour'] == 3 ? 'selected' : "");
 $symptomes = (isset($_POST['Symptomes']) ? $_POST['Symptomes'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
 
-if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "") {
+if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /*&& isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== ""*/) {
     $chronoProd = new Chrono($db);
 
     $chronoProdid = existProd($NoMachine);
@@ -75,7 +75,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->model_refid = 101;
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
-        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1014 => $DateAchat);
+        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1014 => $DateAchat, 1015 => $garantie);
         $chronoProdNewid = $chronoProd->create();
         $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
     } else {
@@ -83,7 +83,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
         $chronoProd->update($chronoProdid);
-        $dataArrProd = array(1057 => $pass, 1014 => $DateAchat);
+        $dataArrProd = array(1057 => $pass, 1014 => $DateAchat, 1015 => $garantie);
         $testProd = $chronoProd->setDatas($chronoProdid, $dataArrProd);
     }
     if (isset($chronoProdid) && $chronoProdid < 0 && isset($chronoProdNewid) && $chronoProdNewid > 0 || isset($chronoProdid) && $chronoProdid > 0) {
@@ -171,9 +171,9 @@ if ($socid != "") {
     echo "</p>";
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Etat de la garantie.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Date fin de garantie.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='text' name='Garantie' value='" . $garantie . "' id='Garantie' class='required'/>";
+    echo " <input type='text' name='Garantie' value='" . $garantie . "' id='Garantie' class='datepicker'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -188,7 +188,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Date d'achat.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='Date' class = 'datePicker' name='DateAchat' value='" . $DateAchat . "' id='DateAchat' class='required'/>";
+    echo " <input type='text' name='DateAchat' value='" . $DateAchat . "' id='DateAchat' class='datepicker'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";

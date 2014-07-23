@@ -45,7 +45,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commondocgenerator.class.php';
 
 
 /**
-        \class      ModeleSynopsispanier
+        \class      ModeleSynopsissynopsischrono
         \brief      Classe mere des modeles de deplacement
 */
 
@@ -68,7 +68,8 @@ class ModeleSynopsischrono extends CommonDocGenerator
      */
     static function liste_modeles($db, $maxfilenamelength = 0)
     {
-        $type='synopsischrono';
+        global $typeChrono;
+        $type='synopsischrono_'.$typeChrono;
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
         $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
@@ -119,15 +120,15 @@ function synopsischrono_pdf_create($db, $object, $modele='', $outputlangs='')
     $modelisok=0;
 
     // Positionne modele sur le nom du modele de deplacement e utiliser
-    $file = "pdf_panier_".$modele.".modules.php";
+    $file = "pdf_synopsischrono_".$modele.".modules.php";
     if ($modele && file_exists($dir.$file)) $modelisok=1;
-
+//echo $dir.$file;die;
     // Si model pas encore bon
     if (! $modelisok)
     {
         if (isset($conf->global->SYNOPSIS_PANIER_ADDON_PDF))
             $modele = $conf->global->SYNOPSIS_PANIER_ADDON_PDF;
-        $file = "pdf_panier_".$modele.".modules.php";
+        $file = "pdf_synopsischrono_".$modele.".modules.php";
         if (file_exists($dir.$file)) $modelisok=1;
     }
     // Si model pas encore bon
@@ -137,26 +138,26 @@ function synopsischrono_pdf_create($db, $object, $modele='', $outputlangs='')
         $model=new ModeleSynopsischrono();
         $liste=$model->liste_modeles($db);
         $modele=key($liste);        // Renvoie premiere valeur de cle trouve dans le tableau
-        $file = "pdf_panier_".$modele.".modules.php";
+        $file = "pdf_synopsischrono_".$modele.".modules.php";
         if (file_exists($dir.$file)) $modelisok=1;
     }
 
     // Charge le modele
     if ($modelisok)
     {
-        $classname = "pdf_panier_".$modele;
+        $classname = "pdf_synopsischrono_".$modele;
         require_once($dir.$file);
 
-//        $requete = "UPDATE ".MAIN_DB_PREFIX."panier SET modelPdf= '".$modele."' WHERE rowid=".$id;
+//        $requete = "UPDATE ".MAIN_DB_PREFIX."synopsischrono SET modelPdf= '".$modele."' WHERE rowid=".$id;
 //        $db->query($requete);
         $obj = new $classname($db);
         if ($obj->write_file($object, $outputlangs) > 0)
         {
             // on supprime l'image correspondant au preview
-            panier_delete_preview($db, $object->ref);
+            synopsischrono_delete_preview($db, $object->ref);
             return 1;
         } else {
-            dol_syslog("Erreur dans panier_pdf_create");
+            dol_syslog("Erreur dans synopsischrono_pdf_create");
             dol_print_error($db,$obj->pdferror());
             return 0;
         }
@@ -179,22 +180,22 @@ function synopsischrono_pdf_create($db, $object, $modele='', $outputlangs='')
    \param        propalid    id de la propal e effacer
    \param     propalref reference de la propal si besoin
 */
-function panier_delete_preview($db, $panierid, $panierref='')
+function synopsischrono_delete_preview($db, $synopsischronoid, $synopsischronoref='')
 {
         global $langs,$conf;
 
-        if (!$panierref)
+        if (!$synopsischronoref)
         {
-//            $panier = new Object($db);
-//            $panier->fetch($panierid);
-            $panierref = $panierid;
+//            $synopsischrono = new Object($db);
+//            $synopsischrono->fetch($synopsischronoid);
+            $synopsischronoref = $synopsischronoid;
         }
 
-        if ($conf->panier->dir_output)
+        if ($conf->synopsischrono->dir_output)
         {
-            $panierref = sanitize_string($panierref);
-            $dir = $conf->panier->dir_output . "/" . $panierref ;
-            $file = $dir . "/" . $panierref . ".pdf.png";
+            $synopsischronoref = sanitize_string($synopsischronoref);
+            $dir = $conf->synopsischrono->dir_output . "/" . $synopsischronoref ;
+            $file = $dir . "/" . $synopsischronoref . ".pdf.png";
             $multiple = $file . ".";
 
             if ( file_exists( $file ) && is_writable( $file ) )
@@ -230,7 +231,7 @@ function panier_delete_preview($db, $panierid, $panierref='')
             \brief      Classe mere des modeles de numerotation des references de commandes
 */
 
-class ModeleNumRefSynopsispanier
+class ModeleNumRefSynopsischrono
 {
     var $error='';
 

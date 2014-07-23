@@ -551,7 +551,7 @@ class Chrono extends CommonObject {
             $tabT = explode('[KEY|', $this->model->picto);
             $tabT = explode(']', $tabT[1]);
             $keyId = $tabT[0];
-            $this->getValues();
+            $result .= $this->getValues();
 //            echo "<pre>";
 //            print_r($this);
 //            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
@@ -673,7 +673,112 @@ class Chrono extends CommonObject {
             $key = $this->keysList[$res->key_id]['nom'];
             $desc = $this->keysList[$res->key_id]['description'];
             $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
+            $this->values[$key] = $value;
+            $this->values[$res->key_id] = $value;
             $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
+        }
+    }
+    
+    public function getValuesPlus(){
+        $requete = "SELECT k.nom,
+                           k.id,
+                           k.extraCss,
+                           v.`value`,
+                           t.nom as typeNom,
+                           t.hasSubValeur,
+                           t.subValeur_table,
+                           t.subValeur_idx,
+                           t.subValeur_text,
+                           t.htmlTag,
+                           t.htmlEndTag,
+                           t.endNeeded,
+                           t.cssClass,
+                           t.cssScript,
+                           t.jsCode,
+                           t.valueIsChecked,
+                           t.valueIsSelected,
+                           t.valueInTag,
+                           t.valueInValueField,
+                           t.sourceIsOption,
+                           k.type_subvaleur,
+                           k.extraCss,
+                           t.phpClass
+                      FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur AS t,
+                           " . MAIN_DB_PREFIX . "synopsischrono_key AS k
+                      LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_value AS v ON v.key_id = k.id AND v.chrono_refid = " . $this->id . "
+                     WHERE t.id = k.type_valeur
+                       AND k.model_refid = " . $this->model->id
+                . " ORDER BY k.rang";
+        //print $requete;
+        $sql = $this->db->query($requete);
+        while ($res = $this->db->fetch_object($sql)) {
+            $res->value = stripslashes($res->value);
+            if ($res->hasSubValeur == 1) {
+                if ($res->sourceIsOption) {
+                    require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                    $tmp = $res->phpClass;
+                    $obj = new $tmp($this->db);
+                    $obj->cssClassM = $res->extraCss;
+                    $obj->idChrono = $this->id;
+                    $obj->socid = $this->socid;
+                    $obj->fetch($res->type_subvaleur);
+                    $htmlLi = $obj->getValuePlus($res->value);
+                    $html = $obj->formHtml;
+//                    $htmlLi = $obj->getValue($res->value);
+                    $str = "";
+                    foreach ($obj->valuesArr as $key => $val) {
+//                        if ($res->valueIsSelected && $res->value == $key) {
+                        if ($obj->OptGroup . "x" != "x") {
+                            $html .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
+//                                break;
+                        } else {
+                            $html .= $val . "<br/>";
+//                                break;
+                        }
+//                        }
+                    }
+                    foreach ($obj->valuesArrStr as $key => $val) {
+//                        if ($res->valueIsSelected && $res->value == $key) {
+                        if ($obj->OptGroup . "x" != "x") {
+                            $str .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
+//                                break;
+                        } else {
+                            $str .= $val . "<br/>";
+//                                break;
+                        }
+//                        }
+                    }
+                $res->valueHtml = $html;
+                $res->valueStr = $str;
+                $res->valueHtmlLi = $htmlLi;
+                } else {
+                    //Beta
+                    if ($res->phpClass == 'fct' || $res->phpClass == 'globalvar')
+                        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
+                    $tmp = $res->phpClass;
+                    $obj = new $tmp($this->db);
+                    $obj->cssClassM = $res->extraCss;
+                    $obj->idChrono = $this->id;
+                    $obj->fetch($res->type_subvaleur);
+                    $res->valueStr = $obj->call_function_chronoModule($this->model_refid, $this->id);
+                    $res->valueHtml = $obj->call_function_chronoModule($this->model_refid, $this->id);
+                }
+            } else {
+                //Construct Form
+                $html = "";
+                if ($res->valueIsChecked && $res->value == 1) {
+                    $html .= "OUI";
+                } else if ($res->valueIsChecked && $res->value != 1) {
+                    $html .= "NON";
+                } else {
+                    $html .= $res->value;
+                }
+                $res->valueHtml = $html;
+                $res->valueStr = $html;
+            }
+            
+            $res->valueStr = str_replace("<br/>", "\n", $res->valueStr);
+            $this->valuesPlus[$res->id] = $res;
         }
     }
 

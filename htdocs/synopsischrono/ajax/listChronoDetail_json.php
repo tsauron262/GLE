@@ -576,7 +576,7 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
             $obj->cssClassM = $extraCss;
             $obj->idChrono = $val;
                 $obj->fetch($hasSubValeur);
-                $obj->call_function_chronoModule($chr->model_refid, $chr->id);
+                echo $obj->call_function_chronoModule($chr->model_refid, $chr->id);
             } else {
                 //Construct Form
                 $html = "";

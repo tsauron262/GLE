@@ -2339,7 +2339,7 @@ class globalvar extends formulaireSource {
     }
 
     public function call_function_chronoModule($inut, $inut2) {
-        print $this->getValue($inut);
+        return $this->getValue($inut);
     }
 
     public function fetch($id) {
@@ -2441,22 +2441,25 @@ class lien extends formulaireSource {
     }
 
     function displayForm($inValuesArray = true) {
-        print '<div class="formAjax">';
-        print '<span class="showFormChrono editable">' . img_edit() . '</span>';
-        $this->getValues();
-        print '<div class="hide">';
-        print '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
-        print '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElem . '"/>';
-        print '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElement . '"/>';
-        print '<input type="hidden" name="sourceid" class="sourceid" value="' . $this->idChrono . '"/>';
-        print '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
-        print '<select class ="chronoForm">';
+        $return = "";
+        $return .=  '<div class="formAjax">';
+        $return .=  '<span class="showFormChrono editable">' . img_edit() . '</span>';
+        $return .= $this->getValues();
+//            $return .= $this->formHtml;
+        $return .=  '<div class="hide">';
+        $return .=  '<input type="hidden" id="socid" value="' . $this->socid . '"/>';
+        $return .=  '<input type="hidden" name="targettype" class="targettype" value="' . $this->nomElem . '"/>';
+        $return .=  '<input type="hidden" name="sourcetype" class="sourcetype" value="' . $this->nomElement . '"/>';
+        $return .=  '<input type="hidden" name="sourceid" class="sourceid" value="' . $this->idChrono . '"/>';
+        $return .=  '<input type="hidden" name="ordre" class="ordre" value="' . $this->ordre . '"/>';
+        $return .=  '<select class ="chronoForm">';
         foreach ($this->valuesArr as $id => $val)
-            print "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
-        print '</select>';
-        print '</div></div>';
+            $return .=  "<option value='" . $id . "'" . (($id == $idT) ? " selected=\"selected\"" : "") . ">" . $val . "</option>";
+        $return .=  '</select>';
+        $return .=  '</div></div>';
         if (!$inValuesArray)
             $this->valuesArr = array();
+        return $return;
     }
 
     function displayValue() {
@@ -2466,6 +2469,7 @@ class lien extends formulaireSource {
     }
 
     function getValuePlus($id) {
+        $return = "";
         if ($this->id == 1) {
             if (count($this->tabVal) > 0) {
                 $js = <<<EOF
@@ -2479,21 +2483,21 @@ class lien extends formulaireSource {
                     });
                     </script>
 EOF;
-                print "<div id='tabsA'>";
-                print "<ul class='syntab'>";
-                print "<li><a href='#actif' class='default'>Service Actif</a></li>";
-                print "<li><a href='#nonactif'>Service non actif</a></li>";
-                print "</ul>";
-                print "<div id='nonactif'>";
-                print "</div>";
-                print "<div id='actif'>";
+                $return .= "<div id='tabsA'>";
+                $return .= "<ul class='syntab'>";
+                $return .= "<li><a href='#actif' class='default'>Service Actif</a></li>";
+                $return .= "<li><a href='#nonactif'>Service non actif</a></li>";
+                $return .= "</ul>";
+                $return .= "<div id='nonactif'>";
+                $return .= "</div>";
+                $return .= "<div id='actif'>";
 //Drag Drop
-                print "</div>";
-                print "" . $js;
-//                print "<ul class='syntab'>";
-//                print "<li id='#actif' class='default'>Service Actif</li>";
-//                print "<li id='#nonactif'>Service non actif</li>";
-//                print "</ul>";
+                $return .= "</div>";
+                $return .= "" . $js;
+//                $return .= "<ul class='syntab'>";
+//                $return .= "<li id='#actif' class='default'>Service Actif</li>";
+//                $return .= "<li id='#nonactif'>Service non actif</li>";
+//                $return .= "</ul>";
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php");
 //            echo "Produit sous contrat<br/<br/>";
                 foreach ($this->tabVal as $result) {
@@ -2520,15 +2524,18 @@ EOF;
                             $html .= $product->getNomUrl(1) . " " . $product->description;
                             $html .= "<br/>";
                         }
-                        $html .= "SLA : " . $contratdet->SLA . " | Date fin : " . (($contratdet->date_fin_validite > 0) ? date("d M Y", $contratdet->date_fin_validite) : "n/c");
-                        $html .= "<br/>";
+                        $SLA = "SLA : " . $contratdet->SLA . " | Date fin : " . (($contratdet->date_fin_validite > 0) ? date("d M Y", $contratdet->date_fin_validite) : "n/c");
+                        $html .= $SLA."<br/>";
                         $html .= "</div>";
                         $this->valuesArr[] = $html;
+                        $this->valuesArrStr[] = $contratdet->ref." - ".$product->name." ".$SLA;
                     }
                 }
             }
-        } else
-            $this->displayForm(false);
+        } else{
+            $return .= $this->displayForm(false);
+        }
+            $this->formHtml = $return;
         return $this->valuesArr;
     }
 
@@ -2543,7 +2550,7 @@ EOF;
 
     function getValues() {
         global $langs;
-        $sup = "";
+        $sup = $return = "";
         $i = 0;
         $sql = $this->db->query($this->reqValues);
         while ($result = $this->db->fetch_object($sql)) {
@@ -2552,18 +2559,21 @@ EOF;
             if (in_array($result->id, $this->tabVal)) {
                 $i++;
                 if ($this->hasMultiValue || $i == 1)
-                    echo $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+                    $return .=  $this->getOneLigneValue($this->id, $this->nomElement, $i, $result->id, $result->nom);
+                $this->valuesArrStr[$result->id] = $result->nom;
             }
         }
-        echo $this->getOneLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
-//                    echo '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
+        $return .=  $this->getOneLigneValue($this->id, $this->nomElement, "replaceId", "replaceValue", "replaceNom", "model hidden");
+//                    $return .=  '<div class="model" style="display:none;"><input type="hidden" name="ChronoLien-'.$this->id.'-'.$this->nomElement.'-replaceId" value="replaceValue"/><a href="">'."replaceNom"."</a><br/></div>";
         if ($this->hasMultiValue)
             $actionChrono = "add";
         else
             $actionChrono = "change";
         if ($this->typeChrono > 0)
-            echo "<span class='" . $actionChrono . "Chrono chronoForm cp picto' id='addChrono" . $this->typeChrono . "'>" . img_picto($langs->trans("Create"), 'filenew') . "</span>";
-        echo "<button class='" . $actionChrono . "Lien chronoForm'>Ajouter</button>";
+            $return .=  "<span class='" . $actionChrono . "Chrono chronoForm cp picto' id='addChrono" . $this->typeChrono . "'>" . img_picto($langs->trans("Create"), 'filenew') . "</span>";
+        $return .=  "<button class='" . $actionChrono . "Lien chronoForm'>Ajouter</button>";
+        $this->formHtml = $return;
+        return $return;
     }
 
     function getOneLigneValue($id, $nomElement, $i, $idVal, $text, $classDiv = "", $supprAction = "supprLigne(this); ") {
@@ -2622,6 +2632,7 @@ EOF;
                     else
                         $html = $picto . $result->nom;
                     $this->valuesArr[$result->id] = $html;
+                    $this->valuesArrStr[$result->id] = $result->nom;
                 }
         }
     }
@@ -2738,9 +2749,10 @@ class requete extends formulaireSource {
                     while ($res = $this->db->fetch_object($sql)) {
                         $indexField = $this->indexField;
                         $index = $res->$indexField;
-                        $arrTmp = array();
+                        $arrTmp = $arrTmpStr = array();
                         foreach ($this->showFieldsArr as $key => $val) {
                             $result = $res->$val;
+                            $arrTmpStr[] = $res->$val;
                             if ($this->postTraitementArr[$val] . "x" != "x") {
                                 $fctTmp = preg_replace('/\[VAL\]/i', $res->$val, $this->postTraitementArr[$val]);
 
@@ -2753,7 +2765,7 @@ class requete extends formulaireSource {
                             }
                             $arrTmp[] = $result;
                         }
-                        $arr[$index] = join(' ', $arrTmp);
+                        $this->valuesArrStr[$index] = join(' ', $arrTmpStr);
                         $this->valuesArr[$index] = join(' ', $arrTmp);
 
                         if ($this->OptGroup . "x" != "x") {
@@ -2765,7 +2777,6 @@ class requete extends formulaireSource {
                             //var_dump($arr3);
                         }
                     }
-                    $this->valueArr = $arr;
                     if ($this->OptGroup . "x" != "x") {
 //           var_dump($arr);
 //           var_dump($arr2);
@@ -3118,6 +3129,7 @@ class fct extends formulaireSource {
     }
 
     public function call_function_chronoModule($modeleId, $chronoId = false) {
+        $return = "";
         if ($modeleId > 0 && $chronoId > 0) {
             //Get Fonction Params
             $requete = "SELECT *
@@ -3162,9 +3174,9 @@ class fct extends formulaireSource {
                 if ($ret) {
                     if ($this->printVarInsteadOdReturn == 1) {
                         $tmp = $this->VarToBePrinted;
-                        print $this->$tmp;
+                        $return .= $this->$tmp;
                     } else {
-                        print $ret;
+                        $return .= $ret;
                     }
                 } else {
                     $this->error = "FCT Error";
@@ -3198,9 +3210,9 @@ class fct extends formulaireSource {
                 if ($ret) {
                     if ($this->printVarInsteadOdReturn == 1) {
                         $tmp = $this->VarToBePrinted;
-                        print $this->$tmp;
+                        $return .= $this->$tmp;
                     } else {
-                        print $ret;
+                        $return .= $ret;
                     }
                 } else {
                     $this->error = "FCT Error";
@@ -3214,6 +3226,7 @@ class fct extends formulaireSource {
             $this->error = "Pas d'Id";
             return -1;
         }
+        return $return;
     }
 
     public function getNomUrl($withpicto = 0, $option = 0) {

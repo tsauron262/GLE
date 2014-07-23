@@ -109,7 +109,7 @@
     <def name="notes" type="textarea" max="800" jsCheck="text">
         <label>Notes du technicien</label>
     </def>
-    <def name="orderLines" type="partsList">
+    <def name="orderLines" type="partsList" useCart="1">
         <label>Composants</label>
     </def>
     <def name="overrideDiagnosticCodeCheck" type="YesNo">
@@ -154,7 +154,7 @@
         <label>Numéro de confirmation de la réparation</label>
     </def>
 
-    <def name="partInfo" type="partsList">
+    <def name="partInfo" type="partsList" useCart="0">
         <label>Informations composants</label>
     </def>
 
@@ -178,7 +178,7 @@
     </def>
 
     <def name="repairConfirmationNumbers" type="text">
-        <label>Liste des numéros de confirmation</label>
+        <label>Numéro de réparation</label>
     </def>
     <def name="returnOrderNumber" type="text">
         <label>Numéro de retour</label>

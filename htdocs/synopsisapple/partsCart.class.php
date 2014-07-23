@@ -42,12 +42,15 @@ class partsCart {
         return false;
     }
 
-    public function addToCart($partNumber, $comptiaCode, $comptiaModifier, $qty) {
+    public function addToCart($partNumber, $comptiaCode, $comptiaModifier, $qty, $componentCode, $partDescription, $stockPrice) {
         $this->partsCart[] = array(
             'partNumber' => $partNumber,
             'comptiaCode' => $comptiaCode,
             'comptiaModifier' => $comptiaModifier,
-            'qty' => $qty
+            'qty' => $qty,
+            'componentCode' => $componentCode,
+            'partDescription' => $partDescription,
+            'stockPrice' => $stockPrice
         );
     }
 
@@ -85,13 +88,16 @@ class partsCart {
             $check = true;
             foreach ($this->partsCart as $part) {
                 $sql = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail` ';
-                $sql .= '(`cart_rowid`, `part_number`, `comptia_code`, `comptia_modifier`, `qty`)';
+                $sql .= '(`cart_rowid`, `part_number`, `comptia_code`, `comptia_modifier`, `qty`, `componentCode`, `partDescription`, `stockPrice`)';
                 $sql .= 'VALUES (';
                 $sql .= $this->cartRowId . ', ';
                 $sql .= '"' . $part['partNumber'] . '", ';
                 $sql .= '"' . $part['comptiaCode'] . '", ';
                 $sql .= '"' . $part['comptiaModifier'] . '", ';
-                $sql .= $part['qty'];
+                $sql .= '"' . $part['qty'] . '", ';
+                $sql .= '"' . $part['componentCode'] . '", ';
+                $sql .= '"' . $part['partDescription'] . '", ';
+                $sql .= '"' . $part['stockPrice'] . '"';
                 $sql .= ')';
 
                 if (!$this->db->query($sql)) {
@@ -110,18 +116,34 @@ class partsCart {
 
     public function loadCart() {
         $this->loadCartRowId();
-        if ($this->cartRowId != "" && $this->cartRowId > 0) {
-            $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
-            $result = $this->db->query($sql);
-            if (isset($result) && $result) {
-                $this->partsCart = array();
-                while ($part = $this->db->fetch_object($result)) {
-                    $this->addToCart($part->part_number, $part->comptia_code, $part->comptia_modifier, $part->qty);
-                }
-                return true;
+        $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
+        $result = $this->db->query($sql);
+        if (isset($result) && $result) {
+            $this->partsCart = array();
+            while ($part = $this->db->fetch_object($result)) {
+                $this->addToCart($part->part_number, $part->comptia_code, $part->comptia_modifier, $part->qty, $part->componentCode, $part->partDescription, $part->stockPrice);
             }
         }
         return false;
+    }
+
+    public function getJsScript($prodId) {
+        $script = '';
+        if (count($this->partsCart)) {
+            $script = 'if (GSX.products[' . $prodId . ']) {' . "\n";
+            $jsCart = 'GSX.products[' . $prodId . '].cart';
+            foreach ($this->partsCart as $part) {
+                $script .= $jsCart . '.onPartLoad(\'' . addslashes($part['componentCode']) . '\', ';
+                $script .= '\'' . addslashes($part['partDescription']) . '\', ';
+                $script .= '\'' . addslashes($part['partNumber']) . '\', ';
+                $script .= '\'' . addslashes($part['comptiaCode']) . '\', ';
+                $script .= '\'' . addslashes($part['comptiaModifier']) . '\', ';
+                $script .= '\'' . addslashes($part['qty']) . '\', ';
+                $script .= '\'' . addslashes($part['stockPrice']) . '\');' . "\n";
+            }
+            $script .= '}' . "\n";
+        }
+        return $script;
     }
 
 }

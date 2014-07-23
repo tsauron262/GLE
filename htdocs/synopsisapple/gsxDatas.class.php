@@ -9,6 +9,7 @@ class gsxDatas {
     protected $serial = null;
     protected $errors = array();
     protected $confirmNumbers = array();
+    public $partsPending = null;
     public static $apiMode = 'production';
     public static $componentsTypes = array(
         0 => 'Général',
@@ -70,8 +71,8 @@ class gsxDatas {
             $result = $db->query("SELECT `confirmNumber`, `serialUpdateConfNum` FROM `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` WHERE serial_number = '" . $this->serial . "'");
             if ($db->num_rows($result) > 0) {
                 $ligne = $db->fetch_object($result);
-                $this->confirmNumbers['repair'] = ($ligne->confirmNumber != '')?$ligne->confirmNumber:null;
-                $this->confirmNumbers['serialUpdate'] = ($ligne->serialUpdateConfNum != '')?$ligne->serialUpdateConfNum:null;
+                $this->confirmNumbers['repair'] = ($ligne->confirmNumber != '') ? $ligne->confirmNumber : null;
+                $this->confirmNumbers['serialUpdate'] = ($ligne->serialUpdateConfNum != '') ? $ligne->serialUpdateConfNum : null;
             }
         }
     }
@@ -193,6 +194,8 @@ class gsxDatas {
                                 $html .= '<p class="confirmation">Numéro de série des composants à jour</p>' . "\n";
                             }
                             $requests = array_merge($requests, GSX_Request::getRequestsByType('repairComplete'));
+//                          --- Bloc composants en attente de retour --->
+                            $html .= $this->getPartsPendingReturnHtml();
                         }
 
                         $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Gérer la réparation</button>' . "\n";
@@ -215,9 +218,22 @@ class gsxDatas {
                         $html .= '<div class="repairFormContainer"></div>';
                         $html .= '</div>' . "\n";
 
-//                      --- Bloc composants --->
-                        $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
-                        $html .= '<div class="partsRequestResult"></div>' . "\n";
+                        if (!isset($this->confirmNumbers['repair'])) {
+//                          --- Bloc Panier --->
+                            $html .= $this->getCartHtml($prodId);
+                            global $db;
+                            $cart = new partsCart($db, $this->serial);
+                            $cart->loadCart();
+                            if (count($cart->partsCart)) {
+                                $html .= '<script type="text/javascript">' . "\n";
+                                $html .= $cart->getJsScript($prodId);
+                                $html .= '</script>' . "\n";
+                            }
+
+//                          --- Bloc liste des composants compatibles --->
+                            $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
+                            $html .= '<div class="partsRequestResult"></div>' . "\n";
+                        }
                     }
                 }
             }
@@ -281,14 +297,12 @@ class gsxDatas {
         return null;
     }
 
-    public function getPartsListHtml($prodId, $displayCart = true) {
+    public function getPartsListHtml($prodId) {
         $parts = $this->getPartsListArray();
         $check = false;
         if (isset($parts) && count($parts)) {
             $check = true;
             $html = '';
-            if ($displayCart)
-                $html .= $this->getCartHtml($prodId);
             $html .= '<div class="componentsListContainer">' . "\n";
             $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
             $html .= '<div class="typeFilters searchBloc">' . "\n";
@@ -389,74 +403,80 @@ class gsxDatas {
             $chronoId = $_REQUEST['chronoId'];
         }
 
+        $valDef = array();
         $valDef['serialNumber'] = $this->serial;
-        if (isset($chronoId)) {
-            require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
-            $chrono = new Chrono($db);
-            $chrono->fetch($chronoId);
-            $chrono->getValues($chronoId);
+        switch ($requestType) {
+            case 'CreateCarryInRepair':
+                if (isset($chronoId)) {
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                    $chrono = new Chrono($db);
+                    $chrono->fetch($chronoId);
+                    $chrono->getValues($chronoId);
 
-            $tech = new User($db);
-            $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
+                    $tech = new User($db);
+                    $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
 
-            $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
-            $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
-            $valDef['unitReceivedDate'] = $dateH[0];
-            $valDef['unitReceivedTime'] = $dateH[1];
+                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
+                    $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
+                    $valDef['unitReceivedDate'] = $dateH[0];
+                    $valDef['unitReceivedTime'] = $dateH[1];
 
-            $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
-            $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
-            $valDef['billTo'] = $tech->array_options['options_apple_service'];
-            $valDef['poNumber'] = $chrono->ref;
+                    $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
+                    $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+                    $valDef['billTo'] = $tech->array_options['options_apple_service'];
+                    $valDef['poNumber'] = $chrono->ref;
+//
+////        echo "<pre>"; print_r($chrono->contact);
+//        print_r($chrono->extraValue);
 
-//        echo "<pre>"; print_r($chrono->contact);
-
-            $valDef['customerAddress']['companyName'] = $chrono->societe->name;
-            if (isset($chrono->contact->id)) {
-                $valDef['customerAddress']['street'] = $chrono->contact->address;
-                $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
+                    $valDef['customerAddress']['companyName'] = $chrono->societe->name;
+                    if (isset($chrono->contact->id)) {
+                        $valDef['customerAddress']['street'] = $chrono->contact->address;
+                        $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
-                $valDef['customerAddress']['city'] = $chrono->contact->town;
-                $valDef['customerAddress']['country'] = "FRANCE";
-                $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
-                $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
-                $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
-                $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
-                $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-                $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
-                $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
-            }
+                        $valDef['customerAddress']['city'] = $chrono->contact->town;
+                        $valDef['customerAddress']['country'] = "FRANCE";
+                        $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
+                        $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+                        $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                        $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                        $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                        $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                        $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
+                    }
+                }
+                break;
+
+            case 'UpdateSerialNumber':
+                if (!isset($this->partsPending) || !count($this->partsPending)) {
+                    $this->loadPartsPending();
+                    if (count($this->gsx->errors['soap'])) {
+                        return '<p class="alert">La liste des composants en attente de retour n\'a pas pu être obtenue</p>' . $this->getGSXErrorsHtml();
+                    }
+                }
+                if (count($this->partsPending)) {
+                    $valDef['partInfo'] = array();
+                    foreach ($this->partsPending as $partPending) {
+                        $valDef['partInfo'][] = array(
+                            'partNumber' => $partPending['partNumber'],
+                            'partDescription' => $partPending['partDescription'],
+                            'componentCode' => $partPending['componentCode']
+                        );
+                    }
+                }
+                break;
         }
-//        print_r($chrono->extraValue);
+
+
+
         $this->getConfirmNumbers();
         if (isset($this->confirmNumbers['repair'])) {
             $valDef['repairConfirmationNumber'] = $this->confirmNumbers['repair'];
-            $valDef['repairConfirmationNumbers'] = array($this->confirmNumbers['repair']);
-            $valDef['returnOrderNumber'] = $this->confirmNumbers['repair'];
+            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
+//            $valDef['returnOrderNumber'] = $this->confirmNumbers['repair'];
         }
-
-//            $valDef['customerAddress'] = array(
-//                'companyName' => 'kjhsdk',
-//                'street' => 'hkjlkjh',
-//                'addressLine1' => 'kjhlkhj',
-//                'city' => 'lkjhdsfl',
-//                'country' => 'kjhlk',
-//                'firstName' => 'kjhlk',
-//                'lastName' => 'lkjhlk',
-//                'primaryPhone' => '0000000000',
-//                'zipCode' => '42000',
-//                'state' => '042',
-//                'emailAddress' => 'dsfsdf@dsfsf.fr'
-//            );
-//            $valDef['diagnosis'] = 'sfsdfsd';
-//            $valDef['unitReceivedDate'] = '20/04/14';
-//            $valDef['unitReceivedTime'] = '02:30 PM';
-//            $valDef['diagnosedByTechId'] = 'dgdfg';
-//            $valDef['shipTo'] = 'sgsdgs';
-//            $valDef['billTo'] = 'sdgsdg';
-//            $valDef['poNumber'] = 'dssdg';
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
@@ -501,11 +521,6 @@ class gsxDatas {
 //                $html .= '<pre>';
 //                $html .= print_r($this->gsx->outputFormat($response), true);
 //                $html .= '</pre>';
-
-                if (isset($response['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
-                    $dossier = "/home/megajean/Bureau/pdf/";
-                    file_put_contents($dossier . $response['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'], $response['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']);
-                }
             }
 
             $html .= '</div>';
@@ -544,6 +559,111 @@ class gsxDatas {
             }
             $html .= '</p>';
         }
+        return $html;
+    }
+
+    public function loadPartsPending() {
+        if (isset($this->partsPending)) {
+            unset($this->partsPending);
+        }
+        $this->gsx->resetSoapErrors();
+        $datas = array(
+            'repairType' => '',
+            'repairStatus' => '',
+            'purchaseOrderNumber' => '83702',
+            'sroNumber' => '',
+//            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
+            'repairConfirmationNumber' => '',
+            'serialNumbers' => array(
+                'serialNumber' => ''
+            ),
+            'shipToCode' => '',
+            'customerFirstName' => '',
+            'customerLastName' => '',
+            'customerEmailAddress' => '',
+            'createdFromDate' => '',
+            'createdToDate' => '',
+            'warrantyType' => '',
+            'kbbSerialNumberFlag' => '',
+            'comptiaCode' => '',
+        );
+        $request = $this->gsx->_requestBuilder('PartsPendingReturnRequest', 'repairData', $datas);
+        $response = $this->gsx->request($request, 'PartsPendingReturn');
+        if (count($this->gsx->errors['soap'])) {
+            return false;
+        }
+        if (isset($response['PartsPendingReturnResponse']['partsPendingResponse'])) {
+            $partsPending = $response['PartsPendingReturnResponse']['partsPendingResponse'];
+            $this->partsPending = array();
+            if (!is_array($partsPending)) {
+                $partsPending = array($partsPending);
+            }
+            foreach ($partsPending as $part) {
+                $fileName = null;
+                if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {
+                    $request = $this->gsx->_requestBuilder('ReturnLabelRequest', '', array(
+                        'returnOrderNumber' => $part['returnOrderNumber'],
+                        'partNumber' => $part['partNumber']
+                            ));
+                    $labelResponse = $this->gsx->request($request, 'ReturnLabel');
+                    if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
+                        $fileName = '/synopsisapple/label_pdf/' . $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
+                        if (!file_exists(DOL_DOCUMENT_ROOT . $fileName)) {
+                            if (file_put_contents(DOL_DOCUMENT_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
+                                $fileName = null;
+                        }
+                    }
+                }
+                $this->partsPending[] = array(
+                    'partDescription' => $part['partDescription'],
+                    'partNumber' => $part['partNumber'],
+                    'returnOrderNumber' => $part['returnOrderNumber'],
+                    'fileName' => $fileName
+                );
+            }
+            return true;
+        }
+        return false;
+    }
+
+    public function getPartsPendingReturnHtml() {
+        if (!$this->connect)
+            return '<p class="error">Echec de la connexion à la plateforme GSX. <br/>
+                Impossibles d\'obtenir les informations sur les composants en attente de retour</p>';
+
+        if (!$this->loadPartsPending()) {
+            if (count($this->gsx->errors['soap'])) {
+                return $this->getGSXErrorsHtml();
+            }
+            return '';
+        }
+        if (!count($this->partsPending)) {
+            return '<p>Aucun composant en attente de retour</p>';
+        }
+        $html .= '<div class="partsPendingTitle titre">Composant(s) en attente de retour</div>' . "\n";
+        $html .= '<table class="partsPendingTable">' . "\n";
+        $html .= '<thead>' . "\n";
+        $html .= '<th style="min-width: 250px">Nom</th>' . "\n";
+        $html .= '<th style="min-width: 100px">Réf</th>' . "\n";
+        $html .= '<th style="min-width: 100px">N° de retour</th>' . "\n";
+        $html .= '<th></th>' . "\n";
+        $html .= '</thead>' . "\n";
+        $html .= '<tbody>' . "\n";
+        foreach ($this->partsPending as $part) {
+            $html .= '<tr>';
+            $html .= '<td>' . $part['partDescription'] . '</td>';
+            $html .= '<td class="ref">' . $part['partNumber'] . '</td>';
+            $html .= '<td class="ref">' . $part['returnOrderNumber'] . '</td>';
+//            if (isset($part['fileName']) && file_exists($part['fileName'])) {
+            $html .= '<td><a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="button getReturnLabel">Etiquette de retour</a></td>';
+//            } else {
+//                $html .= '<td></td>';
+//            }
+            $html .= '<tr>';
+        }
+        $html .= '</tbody>';
+        $html .= '</table>';
+
         return $html;
     }
 

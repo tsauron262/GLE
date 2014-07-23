@@ -126,6 +126,10 @@ class GSX_Request {
                 if (isset($data) && ($data !== ''))
                     $defs['hidden'] = $data;
 
+                $data = $defsNode->getAttribute('useCart');
+                if (isset($data) && ($data !== ''))
+                    $defs['useCart'] = $data;
+
                 $nodes = XMLDoc::findChildElements($defsNode, 'label', null, null, 1);
                 if (count($nodes) == 1)
                     $defs['label'] = XMLDoc::getElementInnerText($nodes[0]);
@@ -312,6 +316,10 @@ class GSX_Request {
                         break;
 
                     case 'partsList':
+                        $useCart = false;
+                        if (isset($defs['useCart']) && $defs['useCart'] == '1')
+                            $useCart = true;
+
                         $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
                         if (count($subDatasNode) == 1) {
                             $partsDataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
@@ -320,36 +328,33 @@ class GSX_Request {
                                 if (isset($values)) {
                                     if (isset($values[$valuesName])) {
                                         if (is_array($values[$valuesName])) {
-                                            $lines = $values[$valuesName];
-                                            $orderLines = array();
-                                            foreach ($lines as $line) {
-                                                if (isset($line['partNumber']))
-                                                    $orderLines[$line['partNumber']] = $line;
-                                                else
-                                                    $orderLines[] = $line;
-                                            }
+                                            $orderLines = $values[$valuesName];
                                         }
                                     }
                                 }
-                                if (!isset($orderLines)) {
+                                if (!isset($orderLines) && $useCart) {
                                     global $db;
                                     $partsCart = new partsCart($db, $serial);
                                     if ($partsCart->loadCart()) {
                                         $orderLines = array();
                                         foreach ($partsCart->partsCart as $part) {
-                                            $orderLines[$part['partNumber']] = array(
+                                            $orderLines[] = array(
                                                 'partNumber' => $part['partNumber'],
                                                 'comptiaCode' => $part['comptiaCode'],
-                                                'comptiaModifier' => $part['comptiaModifier']
+                                                'comptiaModifier' => $part['comptiaModifier'],
+                                                'partDescription' => $part['partDescription'],
+                                                'componentCode' => $part['componentCode']
                                             );
                                         }
                                     }
                                 }
 
-                                $html .= '<span class="button importParts blueHover"';
-                                $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
-                                $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
-                                $html .= '<div class="partsImportResults"></div>' . "\n";
+                                if ($useCart) {
+                                    $html .= '<span class="button importParts blueHover"';
+                                    $html .= 'onclick="GSX.importPartsFromCartToRepair(\'' . $this->requestName . '\')">';
+                                    $html .= 'Importer la liste des composants depuis le panier</span><br/>' . "\n";
+                                    $html .= '<div class="partsImportResults"></div>' . "\n";
+                                }
                                 $html .= '<div class="repairsPartsInputsTemplate">' . "\n";
                                 foreach ($partsDataNodes as $partDataNode) {
                                     $html .= $this->getDataInput($partDataNode, $serial);
@@ -359,22 +364,6 @@ class GSX_Request {
                                 $partCount = 0;
                                 if (isset($orderLines) && is_array($orderLines)) {
                                     $html .= ' style="display: block;">' . "\n";
-                                    $partsList = null;
-                                    if (isset($this->gsx)) {
-                                        $partsList = $this->gsx->getPartsListArray(true);
-                                        if (!isset($this->comptiaCodes))
-                                            $this->comptiaCodes = $this->gsx->getCompTIACodesArray();
-                                        if (isset($partsList) && count($partsList)) {
-                                            foreach ($orderLines as $partNumber => $orderLine) {
-                                                if (isset($partsList[$partNumber])) {
-                                                    if (isset($partsList[$partNumber]['partDescription']))
-                                                        $orderLines[$partNumber]['partDescription'] = $partsList[$partNumber]['partDescription'];
-                                                    if (isset($partsList[$partNumber]['componentCode']))
-                                                        $orderLines[$partNumber]['componentCode'] = $partsList[$partNumber]['componentCode'];
-                                                }
-                                            }
-                                        }
-                                    }
 
                                     $i = 1;
                                     foreach ($orderLines as $orderLine) {

@@ -9,6 +9,9 @@ require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 
+$coefPrix = 1;
+
+
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
@@ -42,6 +45,29 @@ function fetchPartsList() {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
+        case 'addCardToPropal':
+            if (isset($_GET['chronoId'])) {
+                require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+                require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
+                $chr = new Chrono($db);
+                $chr->fetch($_GET['chronoId']);
+                $propalId = $chr->propalid;
+                if ($propalId > 0) {
+                    $propal = new Propal($db);
+                    $propal->fetch($propalId);
+                    $cards = new partsCart($db, null, $_GET['chronoId']);
+                    $cards->loadCart();
+                    foreach($cards->partsCart as $part)
+                        $propal->addline($part['partNumber']." - ". $part['partDescription'], $part['stockPrice']*$coefPrix, $part['qty'], "0");
+                    echo '<ok>Reload</ok>';
+                } else {
+                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+                }
+            } else {
+                echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
+            }
+            break;
+            
         case 'loadProduct':
             if (isset($_GET['serial'])) {
                 if (isset($_GET['prodId'])) {

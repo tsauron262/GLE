@@ -29,7 +29,7 @@ if (!defined('EURO'))
 
 ini_set('max_execution_time', 600);
 
-class pdf_synopsischrono_chrono1 extends ModeleSynopsischrono {
+class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
     public $emetteur;    // Objet societe qui emet
 

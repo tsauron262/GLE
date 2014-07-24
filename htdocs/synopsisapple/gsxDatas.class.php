@@ -3,8 +3,8 @@
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/GSXRequests.php';
 
 class gsxDatas {
+
     private $userExchangePrice = true;
-    
     public $gsx = null;
     public $connect = false;
     protected $serial = null;
@@ -78,6 +78,32 @@ class gsxDatas {
         }
     }
 
+    public function checkRepairStatus() {
+        if (!count($this->confirmNumbers)) {
+            $this->getConfirmNumbers();
+        }
+        if (!count($this->confirmNumbers)) {
+            global $db;
+            $cart = new partsCart($db, $this->serial, isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
+            if (!isset($cart->cartRowId)) {
+                $cart->saveCart();
+            }
+            $repair = $this->getRepairLookupArray();
+            if (!isset($repair))
+                return;
+
+            if (isset($repair['repairConfirmationNumber'])) {
+                $this->confirmNumbers['repair'] = $repair['repairConfirmationNumber'];
+                $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $this->confirmNumbers['repair'] . "' WHERE  serial_number = '" . $this->serial . "';");
+            }
+            if (isset($repair['repairStatus'])) {
+                if ($repair['repairStatus'] == 'Closed') {
+                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `repairComplete` =  1 WHERE  serial_number = '" . $this->serial . "';");
+                }
+            }
+        }
+    }
+
     public function isRepairComplete() {
         global $db;
         if (isset($this->serial) && $this->serial != "") {
@@ -87,6 +113,23 @@ class gsxDatas {
                 return (int) $ligne->repairComplete;
             }
         }
+    }
+
+    public function getRepairLookupArray() {
+        if (!$this->connect)
+            return null;
+
+        $n = count($this->gsx->errors['soap']);
+        $request = $request = $this->gsx->_requestBuilder('RepairLookupRequest', 'lookupRequestData', array('serialNumber' => $this->serial));
+        $response = $this->gsx->request($request, 'RepairLookup');
+
+        if (!isset($response['RepairLookupResponse']['lookupResponseData']))
+            return null;
+
+        if (count($this->gsx->errors['soap']) > $n)
+            return null;
+
+        return $response['RepairLookupResponse']['lookupResponseData'];
     }
 
     public function getLookupHtml($prodId) {
@@ -175,7 +218,9 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
 
+
 //                  --- Etat de la commande --->
+                    $this->checkRepairStatus();
                     $repairComplete = $this->isRepairComplete();
 
                     $html .= '<div class="repairStatus">' . "\n";
@@ -184,7 +229,6 @@ class gsxDatas {
                         $html .= '</div>' . "\n";
                     } else {
                         $requests = array();
-                        $this->getConfirmNumbers();
                         if (!isset($this->confirmNumbers['repair'])) {
                             $requests = array_merge($requests, GSX_Request::getRequestsByType('repair'));
                         } else {
@@ -608,17 +652,17 @@ class gsxDatas {
                             ));
                     $labelResponse = $this->gsx->request($request, 'ReturnLabel');
                     if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
-                        $direName = '/synopsischrono/'.$_REQUEST['chronoId'].'';
+                        $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
                         $fileNamePure = $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
-                        if(!is_dir(DOL_DATA_ROOT.$direName))
-                            mkdir(DOL_DATA_ROOT.$direName);
-                        $fileName = $direName ."/". $fileNamePure;
+                        if (!is_dir(DOL_DATA_ROOT . $direName))
+                            mkdir(DOL_DATA_ROOT . $direName);
+                        $fileName = $direName . "/" . $fileNamePure;
 //                        die(DOL_DATA_ROOT . $fileName);
                         if (!file_exists(DOL_DATA_ROOT . $fileName)) {
                             if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
-                        $fileName2 = "/document.php?modulepart=synopsischrono&file=".  urlencode($_REQUEST['chronoId']."/".$fileNamePure);
+                        $fileName2 = "/document.php?modulepart=synopsischrono&file=" . urlencode($_REQUEST['chronoId'] . "/" . $fileNamePure);
                     }
                 }
                 $this->partsPending[] = array(

@@ -38,7 +38,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
       \param        db        Handler acces base de donnee
      */
 
-    function _construct($db) {
+    function __construct($db) {
 
         global $conf, $langs, $mysoc;
 
@@ -54,7 +54,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $this->page_largeur = 210;
         $this->page_hauteur = 297;
         $this->format = array($this->page_largeur, $this->page_hauteur);
-        $this->marge_gauche = 80;
+        $this->marge_gauche = 18;
         $this->marge_droite = 7;
         $this->marge_haute = 39;
         $this->marge_basse = 22;
@@ -64,6 +64,14 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $this->emetteur = $mysoc;
         if (!$this->emetteur->pays_code)
             $this->emetteur->pays_code = substr($langs->defaultlang, -2);    // Par defaut, si n'etait pas defini
+
+
+
+
+
+
+
+
 
 
 
@@ -98,7 +106,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
      */
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
-        $this->marge_gauche = 55;
+//        $this->marge_gauche = 55;
         $afficherPrix = false;
 
         if (!is_object($outputlangs))
@@ -111,18 +119,6 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         $outputlangs->load("products");
         //$outputlangs->setPhpLang();
         if ($conf->synopsischrono->dir_output) {
-            // Definition de l'objet $chrono (pour compatibilite ascendante)
-//            if (!is_object($chrono)) {
-//                $id = $chrono;
-//                require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/panierMixte.class.php");
-//                $chrono = getContratObj($id);
-//                $chrono->fetch($id);
-//                $chrono->fetch_lines(true);
-////                $chrono = new ContratMixte($this->db);
-////                $ret=$chrono->fetch($id);
-//            } else {
-//                $chrono->fetch_lines(true);
-//            }
             // Definition de $dir et $file
             if (isset($chrono->specimen) && $chrono->specimen) {
                 $dir = $conf->synopsischrono->dir_output;
@@ -132,7 +128,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
                 $dir = $conf->synopsischrono->dir_output . "/" . $chrono->id;
                 $file = $dir . "/" . $propref . ".pdf";
             }
-            $this->panier = $chrono;
+            $this->chrono = $chrono;
 
             if (!file_exists($dir)) {
                 if (dol_mkdir($dir) < 0) {
@@ -143,18 +139,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 
             if (file_exists($dir)) {
                 $pdf = "";
-                //$nblignes = sizeof($chrono->lines);
-//                // Protection et encryption du pdf
-//                if ($conf->global->PDF_SECURITY_ENCRYPTION) {
-//                    $pdf = new FPDI_Protection('P', 'mm', $this->format);
-//                    $pdfrights = array('print'); // Ne permet que l'impression du document
-//                    $pdfuserpass = ''; // Mot de passe pour l'utilisateur final
-//                    $pdfownerpass = NULL; // Mot de passe du proprietaire, cree aleatoirement si pas defini
-//                    $pdf->SetProtection($pdfrights, $pdfuserpass, $pdfownerpass);
-//                } else {
-//
-//                    $pdf = new FPDI('P', 'mm', $this->format);
-//                }
+
                 $pdf = pdf_getInstance($this->format);
                 if (class_exists('TCPDF')) {
                     $pdf->setPrintHeader(false);
@@ -166,23 +151,7 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
                     $pdf1->setPrintHeader(false);
                     $pdf1->setPrintFooter(false);
                 }
-//                $pdf1 = new FPDI('P', 'mm', $this->format);
-//
-//                $requete = "SELECT *
-//                              FROM " . MAIN_DB_PREFIX . "Synopsis_panier_annexePdf as p,
-//                                   " . MAIN_DB_PREFIX . "Synopsis_panier_annexe as a
-//                             WHERE p.id = a.annexe_refid
-//                               AND a.panier_refid = " . $chrono->id . " AND type = 1
-//                          ORDER BY a.rang";
-//                $sql = $this->db->query($requete);
-//                $rang = 1;
-//                $arrAnnexe = array();
-//                while ($res = $this->db->fetch_object($sql)) {
-//                    if ($res->afficheTitre == 1) {
-//                        $arrAnnexe[$res->ref]['rang'] = $rang;
-//                        $rang++;
-//                    }
-//                }
+
 //
 //
                 $pdf->SetAutoPageBreak(1, 0);
@@ -201,7 +170,8 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
                 // $pdf->SetDrawColor(128, 128, 128);
 
 
-                $pdf->SetTitle("Panier");
+
+                $pdf->SetTitle($chrono->model->titre . ' : ' . $chrono->ref);
 
                 $pdf->SetSubject($outputlangs->transnoentities("Panier"));
                 $pdf->SetCreator("GLE " . GLE_VERSION);
@@ -209,46 +179,35 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 //
                 $pdf->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
-//                $pdf->AddFont('VeraMoBI', 'BI', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/VeraMoBI.php');
-//                $pdf->AddFont('fq-logo', 'Roman', DOL_DOCUMENT_ROOT . '/Synopsis_Tools/font/fq-logo.php');
-                // Tete de page
-//                $chrono = new Object();
+// 
+//                
 
                 $this->_pagehead($pdf, $chrono, 1, $outputlangs);
-                $pdf->SetFont('', 'B', 12);
 
                 //Titre Page 1
-                $pdf->SetXY($this->marge_gauche, 42);
-//                $pdf->MultiCell(157, 6, 'Panier de ' . $chrono->societe->getFullName($outputlangs), 0, 'C');
-                $chrono->getValuesPlus();
-//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->ref, 0, 'L');
-                
-                foreach($chrono->valuesPlus as $id => $tabKey){
-                    $pdf->MultiCell(157, 6, $tabKey->nom." : ".$tabKey->valueStr, 0, 'L');
-                    $pdf->MultiCell(157, 6, '', 0, 'L');
+//                $pdf->MultiCell(155, 6, 'Panier de ' . $chrono->societe->getFullName($outputlangs), 0, 'C');
+
+                $pdf->MultiCell(155, 6, $chrono->model->nomDescription . ' : ' . $chrono->description . "\n\n", 0, 'L');
+
+                if ($chrono->model->hasPropal) {
+                    $pdf->MultiCell(155, 6, 'Propal : ' . $chrono->propal->ref . "\n\n", 0, 'L');
                 }
-//                $pdf->MultiCell(157, 6, 'Informations de prise en charge', 0, 'L');
-//                $pdf->MultiCell(157, 6, dol_print_date($chrono->date).' par '.$chrono->user_author->getFullName(), 0, 'L');
-//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
-//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
-//                $pdf->MultiCell(157, 6, 'Prise en charge : '.$chrono->values["Diagnostique"], 0, 'L');
-//
-//                $g = 70;
-//                foreach ($chrono->val as $societe) {
-//                    $pdf->SetXY(50, $g);
-//                    $pdf->MultiCell(120, 40, 'Nom: ' . $societe->getFullName($outputlangs) . "\n" . 'Adresse: ' . $societe->getFullAddress(), 0, '');
-////                    $pdf->SetXY(50, $g+5);
-////                    $pdf->MultiCell(160, 80, 'Adresse: ' . $societe->getFullAddress(), 0, '');
-//                    $g += 30;
-//                    if ($g > 248) {
-//                        $this->_pagefoot($pdf, $chrono, $outputlangs);
-//                        $pdf->AddPage();
-//                        $this->_pagehead($pdf, $chrono, 1, $outputlangs);
-//                $pdf->SetFont('', 'B', 12);
-//                        $g = 40;
-//                    }
-//                }
-                //Titre Page 1
+
+                if ($chrono->model->hasProjet) {
+                    $pdf->MultiCell(155, 6, 'Projet : ' . $chrono->projet->ref . " - " . $chrono->projet->titre . "\n\n", 0, 'L');
+                }
+
+                $chrono->getValuesPlus();
+                foreach ($chrono->valuesPlus as $id => $tabKey) {
+                    if (intval($pdf->GetY()) > 250) {
+                        $this->_pagefoot($pdf, $chrono, $outputlangs);
+                        $pdf->AddPage();
+                        $this->_pagehead($pdf, $chrono, 0, $outputlangs);
+                    }
+                    $pdf->MultiCell(155, 6, $tabKey->nom . " : " . $tabKey->valueStr . "\n\n", 0, 'L');
+                }
+
+
 
 
                 $this->_pagefoot($pdf, $chrono, $outputlangs);
@@ -321,14 +280,140 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         } else if (defined("FAC_PDF_INTITULE")) {
             $pdf->MultiCell(100, 4, FAC_PDF_INTITULE, 0, 'L');
         }
-        $pdf->SetFont('', 'B', 10);
-        //Société
-        $pdf->SetXY(3.5, 63);
-        $pdf->MultiCell(39, 4, "Code Client : " . $object->societe->code_client, 0, "L");
-        $pdf->SetXY(3.5, 54.5);
-        $pdf->MultiCell(39, 4, 'Client : ' . $object->societe->getFullName($outputlangs), 0, 'L');
-        $pdf->Rect(48, 39, 157, 235);
-        $pdf->SetFont('', 'B', 7);
+
+        $showaddress = $showadress;
+        $usecontact = ($object->model->hasContact && $object->contactid >0);
+        $object->client = $object->societe;
+        $default_font_size = 12;
+
+
+
+        $pdf->SetFont('', 'B', $default_font_size);
+
+        $posx = 100;
+        $posy = 10;
+        $posy+=5;
+        $largCadre = 206 - $this->marge_gauche;
+        $pdf->SetXY($posx, $posy);
+        $pdf->SetTextColor(0, 0, 60);
+        $pdf->MultiCell(100, 4, $outputlangs->transnoentities("Ref") . " : " . $outputlangs->convToOutputCharset($object->ref), '', 'R');
+
+        $posy+=1;
+        $pdf->SetFont('', '', $default_font_size - 2);
+        $pdf->SetTextColor(0, 0, 60);
+
+
+        if ($object->client->code_client) {
+            $posy+=5;
+            $pdf->SetXY($posx, $posy);
+            $pdf->MultiCell(100, 3, $outputlangs->transnoentities("CustomerCode") . " : " . $outputlangs->transnoentities($object->client->code_client), '', 'R');
+        }
+
+        $posy+=5;
+        $pdf->SetXY($posx, $posy);
+        $pdf->MultiCell(100, 3, $outputlangs->transnoentities("Type ") . " : " . $outputlangs->transnoentities($object->model->titre), '', 'R');
+
+
+
+        if ($showadress) {
+
+            // Sender properties
+            $carac_emetteur = pdf_build_address($outputlangs, $this->emetteur);
+
+            // Show sender
+            $posy = 42;
+            $posx = 15;
+            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
+                $posx = $this->page_largeur - $this->marge_droite - 80;
+            $hautcadre = 45;
+
+            // Show sender frame
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetXY($posx, $posy - 5);
+            $pdf->MultiCell(66, 5, $outputlangs->transnoentities("BillFrom") . ":", 0, 'L');
+            $pdf->SetXY($posx, $posy);
+            $pdf->SetFillColor(230, 230, 230);
+            $pdf->MultiCell(82, $hautcadre, "", 0, 'R', 1);
+            $pdf->SetTextColor(0, 0, 60);
+
+            // Show sender name
+            $pdf->SetXY($posx + 2, $posy + 3);
+            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->MultiCell(80, 4, $outputlangs->convToOutputCharset($this->emetteur->name), 0, 'L');
+            $posy = $pdf->getY();
+
+            // Show sender information
+            $pdf->SetXY($posx + 2, $posy);
+            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->MultiCell(80, 4, $carac_emetteur, 0, 'L');
+
+
+
+
+            // Recipient name
+            if (!empty($usecontact)) {
+                // On peut utiliser le nom de la societe du contact
+                if (!empty($conf->global->MAIN_USE_COMPANY_NAME_OF_CONTACT))
+                    $socname = $object->contact->socname;
+                else
+                    $socname = $object->client->nom;
+                $carac_client_name = $outputlangs->convToOutputCharset($socname);
+            }
+            else {
+                $carac_client_name = $outputlangs->convToOutputCharset($object->client->nom);
+            }
+
+            $carac_client = pdf_build_address($outputlangs, $this->emetteur, $object->client, ($usecontact ? $object->contact : ''), $usecontact, 'target');
+
+            // Show recipient
+            $widthrecbox = 100;
+            if ($this->page_largeur < 210)
+                $widthrecbox = 84; // To work with US executive format
+            $posy = 42;
+            $posx = $this->page_largeur - $this->marge_droite - $widthrecbox;
+            if (!empty($conf->global->MAIN_INVERT_SENDER_RECIPIENT))
+                $posx = $this->marge_gauche;
+
+            // Show recipient frame
+            $pdf->SetTextColor(0, 0, 0);
+            $pdf->SetFont('', '', $default_font_size - 2);
+            $pdf->SetXY($posx + 2, $posy - 5);
+            $pdf->MultiCell($widthrecbox, 5, $outputlangs->transnoentities("BillTo") . ":", 0, 'L');
+            $pdf->Rect($posx, $posy, $widthrecbox, $hautcadre);
+
+            // Show recipient name
+            $pdf->SetXY($posx + 2, $posy + 3);
+            $pdf->SetFont('', 'B', $default_font_size);
+            $pdf->MultiCell($widthrecbox, 4, $carac_client_name, 0, 'L');
+
+            // Show recipient information
+            $pdf->SetFont('', '', $default_font_size - 1);
+            $pdf->SetXY($posx + 2, $posy + 4 + (dol_nboflines_bis($carac_client_name, 50) * 4));
+            $pdf->MultiCell($widthrecbox, 4, $carac_client, 0, 'L');
+
+
+
+            $pdf->Rect($this->marge_gauche - 3, 89, $largCadre, 185);
+            $pdf->SetXY($this->marge_gauche, 92);
+        }
+        else {
+            $pdf->SetFont('', 'B', 10);
+            //Société
+            if ($this->marge_gauche > 45) {
+                $pdf->SetXY(3.5, 63);
+                $pdf->MultiCell(39, 4, "Code Client : " . $object->societe->code_client, 0, "L");
+                $pdf->SetXY(3.5, 54.5);
+                $pdf->MultiCell(39, 4, 'Client : ' . $object->societe->getFullName($outputlangs), 0, 'L');
+            }
+
+            $pdf->Rect($this->marge_gauche - 3, 39, $largCadre, 235);
+            $pdf->SetXY($this->marge_gauche, 42);
+        }
+
+
+
+        $pdf->SetFont('', 'B', 12);
     }
 
     /*
@@ -346,16 +431,18 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
         global $mysoc;
 
         $Y = 235;
-        $pdf->SetXY(3.5, $Y + 20);
-        $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->address), 0, "L");
-        $pdf->SetXY(3.5, $Y + 25);
-        $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->zip . " " . $mysoc->town), 0, "L");
-        $pdf->SetXY(3.5, $Y + 30);
-        if ($mysoc->phone != "")
-            $pdf->MultiCell(39, 4, utf8_encodeRien("Tél. : " . $mysoc->phone), 0, "L");
-        $pdf->SetXY(3.5, $Y + 35);
-        if ($mysoc->fax != "")
-            $pdf->MultiCell(39, 4, "Fax  : " . $mysoc->fax, 0, "L");
+        if ($this->marge_gauche > 45) {
+            $pdf->SetXY(3.5, $Y + 20);
+            $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->address), 0, "L");
+            $pdf->SetXY(3.5, $Y + 25);
+            $pdf->MultiCell(39, 4, utf8_encodeRien($mysoc->zip . " " . $mysoc->town), 0, "L");
+            $pdf->SetXY(3.5, $Y + 30);
+            if ($mysoc->phone != "")
+                $pdf->MultiCell(39, 4, utf8_encodeRien("Tél. : " . $mysoc->phone), 0, "L");
+            $pdf->SetXY(3.5, $Y + 35);
+            if ($mysoc->fax != "")
+                $pdf->MultiCell(39, 4, "Fax  : " . $mysoc->fax, 0, "L");
+        }
 
         $pdf->SetTextColor(0, 0, 0);
         $pdf->SetFont('', '', 7);
@@ -375,9 +462,9 @@ class pdf_synopsischrono_ extends ModeleSynopsischrono {
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
 
-        $pdf->SetXY(48, $Y + 50);
-        $pdf->MultiCell(157, 3, $ligne, 0, "C");
-        $pdf->line(48, $Y + 44, 205, $Y + 44);
+        $pdf->SetXY($this->marge_gauche, $Y + 50);
+        $pdf->MultiCell(200 - $this->marge_gauche, 3, $ligne, 0, "C");
+        $pdf->line($this->marge_gauche - 4, $Y + 44, 203, $Y + 44);
 
         $pdf->SetFont('', 'B', 8);
         $pdf->SetTextColor(255, 63, 50);

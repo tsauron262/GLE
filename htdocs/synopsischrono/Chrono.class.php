@@ -76,7 +76,19 @@ class Chrono extends CommonObject {
                 $this->description = $res->description;
                 $this->model_refid = $res->model_refid;
                 $this->propalid = $res->propalid;
+                if ($this->propalid > 0) {
+                    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                    $propal = new Propal($this->db);
+                    $propal->fetch($this->propalid);
+                    $this->propal = $propal;
+                }
                 $this->projetid = $res->projetid;
+                if ($this->projetid > 0) {
+                    require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+                    $projet = new Project($this->db);
+                    $projet->fetch($this->projetid);
+                    $this->projet = $projet;
+                }
                 $this->ref = $res->ref;
                 $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
                 $this->revision = ($res->revision > 0 ? $res->revision : false);
@@ -745,7 +757,9 @@ class Chrono extends CommonObject {
                             $str .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
 //                                break;
                         } else {
-                            $str .= $val . "<br/>";
+                            if($str != "")
+                                $str .= "<br/>";
+                            $str .= $val;
 //                                break;
                         }
 //                        }

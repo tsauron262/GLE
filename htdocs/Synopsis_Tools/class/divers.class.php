@@ -26,7 +26,7 @@ class synopsisHook {
 
         date_default_timezone_set('Europe/Paris');
 
-        $builddoc = (isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
+        $builddoc = 0;//(isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
         $viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
         $modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
 

@@ -303,6 +303,12 @@ span.removeCartProduct {
     margin-right: 10px;
     font-size: 20px;
 }
+.addToPropal:before {
+    content: '\f055';
+    font-family: 'FA';
+    margin-right: 10px;
+    font-size: 20px;
+}
 .cartRequestResults {
     display: none;
     text-align: center;

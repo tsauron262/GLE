@@ -82,7 +82,7 @@ class gsxDatas {
         if (!count($this->confirmNumbers)) {
             $this->getConfirmNumbers();
         }
-        if (!count($this->confirmNumbers)) {
+        if (!count($this->confirmNumbers) || !isset($this->confirmNumbers['repair'])) {
             global $db;
             $cart = new partsCart($db, $this->serial, isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
             if (!isset($cart->cartRowId)) {
@@ -130,6 +130,10 @@ class gsxDatas {
             return null;
 
         return $response['RepairLookupResponse']['lookupResponseData'];
+    }
+
+    public function getRepairStatusArray() {
+
     }
 
     public function getLookupHtml($prodId) {
@@ -218,7 +222,7 @@ class gsxDatas {
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
 
-
+//                    $html .= '<div style="width: 150px; height: 2000px"></div>';
 //                  --- Etat de la commande --->
                     $this->checkRepairStatus();
                     $repairComplete = $this->isRepairComplete();
@@ -263,22 +267,20 @@ class gsxDatas {
                         $html .= '<div class="repairFormContainer"></div>';
                         $html .= '</div>' . "\n";
 
-                        if (!isset($this->confirmNumbers['repair'])) {
 //                          --- Bloc Panier --->
-                            $html .= $this->getCartHtml($prodId);
-                            global $db;
-                            $cart = new partsCart($db, $this->serial);
-                            $cart->loadCart();
-                            if (count($cart->partsCart)) {
-                                $html .= '<script type="text/javascript">' . "\n";
-                                $html .= $cart->getJsScript($prodId);
-                                $html .= '</script>' . "\n";
-                            }
+                        $html .= $this->getCartHtml($prodId);
+                        global $db;
+                        $cart = new partsCart($db, $this->serial);
+                        $cart->loadCart();
+                        if (count($cart->partsCart)) {
+                            $html .= '<script type="text/javascript">' . "\n";
+                            $html .= $cart->getJsScript($prodId);
+                            $html .= '</script>' . "\n";
+                        }
 
 //                          --- Bloc liste des composants compatibles --->
-                            $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
-                            $html .= '<div class="partsRequestResult"></div>' . "\n";
-                        }
+                        $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
+                        $html .= '<div class="partsRequestResult"></div>' . "\n";
                     }
                 }
             }
@@ -315,6 +317,7 @@ class gsxDatas {
         $html .= '<div class="cartSubmitContainer">' . "\n";
         $html .= '<button class="cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
         $html .= '<button class="cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</button>' . "\n";
+        $html .= '<button class="addToPropal" onclick="GSX.products[' . $prodId . '].cart.()">Ajouter à la propal</button>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
         $html .= '</div>' . "\n";
@@ -551,6 +554,10 @@ class gsxDatas {
                 $html .= '</p>' . "\n";
             } else {
                 if (isset($response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'])) {//Numero de rep
+                    $cart = new partsCart($db, $this->serial, isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
+                    if (!$cart->cartRowId)
+                        $cart->saveCart();
+
                     $this->confirmNumbers['repair'] = $response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
                     $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $this->confirmNumbers['repair'] . "' WHERE  serial_number = '" . $this->serial . "';");
                 }

@@ -403,6 +403,10 @@ function Cart(prodId, serial, PM) {
             }
         }
     };
+    this.addToPropal = function() {
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        setRequest('GET', 'addCartToPropal', this.prodId, '');
+    }
 }
 
 function PartsManager(prodId, serial) {
@@ -1309,16 +1313,16 @@ function scrollToAnchor() {
     distance /=  2;
 
     var newScroll = 0;
-    if ((distance > 0) && (distance <= 1))
+    if ((distance > 0) && (distance <= 2))
         newScroll = end;
-    else if ((distance < 0) && (distance >= -1))
+    else if ((distance < 0) && (distance >= -2))
         newScroll = end;
     else  {
         newScroll = start + distance;
         if (newScroll < 0)
             newScroll = 0;
         var maxScroll = $('body').height() - $(window).height();
-        if (newScroll > maxScroll)
+        if ((newScroll > maxScroll) && (maxScroll > 0))
             newScroll = maxScroll;
     }
 
@@ -1327,8 +1331,9 @@ function scrollToAnchor() {
         setTimeout(function() {
             scrollToAnchor();
         }, 100)
-    else
+    else {
         $curAnchor = null;
+    }
 }
 
 function setNewScrollToAnchor($anchor) {

@@ -45,7 +45,7 @@ function fetchPartsList() {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'addCardToPropal':
+        case 'addCartToPropal':
             if (isset($_GET['chronoId'])) {
                 require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
                 require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
@@ -67,7 +67,7 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
             }
             break;
-            
+
         case 'loadProduct':
             if (isset($_GET['serial'])) {
                 if (isset($_GET['prodId'])) {

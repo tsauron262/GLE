@@ -82,7 +82,7 @@ class gsxDatas {
         if (!count($this->confirmNumbers)) {
             $this->getConfirmNumbers();
         }
-        if (!count($this->confirmNumbers)) {
+        if (!count($this->confirmNumbers) || $this->confirmNumbers[0] == "") {
             global $db;
             $cart = new partsCart($db, $this->serial, isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
             if (!isset($cart->cartRowId)) {

@@ -1318,7 +1318,7 @@ function scrollToAnchor() {
         if (newScroll < 0)
             newScroll = 0;
         var maxScroll = $('body').height() - $(window).height();
-        if (newScroll > maxScroll)
+        if ((newScroll > maxScroll) && (maxScroll > 0))
             newScroll = maxScroll;
     }
 

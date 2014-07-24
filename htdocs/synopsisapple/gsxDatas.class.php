@@ -97,7 +97,7 @@ class gsxDatas {
                 $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $this->confirmNumbers['repair'] . "' WHERE  serial_number = '" . $this->serial . "';");
             }
             if (isset($repair['repairStatus'])) {
-                if ($repair['repairStatus'] == 'Closed') {
+                if ($repair['repairStatus'] == 'Closed' || $repair['repairStatus'] == 'Fermée et complétée' || $repair['repairStatus'] == 'La réparation n\'est plus en cours de traitement') {
                     $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `repairComplete` =  1 WHERE  serial_number = '" . $this->serial . "';");
                 }
             }

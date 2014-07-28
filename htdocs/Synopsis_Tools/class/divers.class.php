@@ -193,7 +193,7 @@ class synopsisHook {
         require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
         $groupHotline = new UserGroup($db);
         $groupHotline->fetch('', "Hotline");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupHotline->members[$user->id])) {
             $hrefFin = "#pangridChronoDet100";
             $return .= '<div class="blockvmenupair">';
 //            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);

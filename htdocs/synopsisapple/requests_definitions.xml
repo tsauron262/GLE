@@ -105,24 +105,26 @@
             <data name="requestReviewByApple" required="0" default="N"></data>
             <data name="componentCheckReview" required="0" default="N"></data>
             <data name="isNonReplenished" required="0" default="N"></data>
-            <data name="fileName" required="0"></data>
-            <data name="fileData" required="0"></data>
+            <data name="fileName" required="0" donotprocess="1"></data>
+            <data name="fileData" required="0" donotprocess="1"></data>
+            <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
         </datas>
     </request>
 
     <request name="UpdateSerialNumber" type="serialUpdate" request="UpdateSerialNumberRequest" wrapper="repairData">
-        <label>Mise à jour du numéro de série</label>
+        <label>Mise à jour des numéros de série</label>
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>
             <data name="partInfo" required="1">
                 <datas>
-                    <data name="partNumber"></data>
-                    <data name="oldSerialNumber"></data>
-                    <data name="serialNumber"></data>
-                    <data name="reasonCode"></data>
-                    <data name="isPartDOA"></data>
+                    <data name="partNumber" required="1"></data>
+                    <data name="oldSerialNumber" required="1"></data>
+                    <data name="serialNumber" required="1"></data>
+                    <data name="reasonCode" required="0"></data>
+                    <data name="isPartDOA" required="0"></data>
                 </datas>
             </data>
+            <data name="closeRepair" required="0" donotprocess="1" default="N"></data>
         </datas>
         <response>
             <data>

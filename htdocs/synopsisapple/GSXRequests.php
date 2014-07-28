@@ -471,7 +471,7 @@ class GSX_Request {
         return $html;
     }
 
-    public function generateRequestFormHtml($values, $prodId, $serial) {
+    public function generateRequestFormHtml($values, $prodId, $serial, $repairRowId = null) {
         if (count($this->errors)) {
             $html = '<p class="error">Impossible d\'afficher le formulaire pour cette requête.<br/><br/>';
             $html .= 'Erreurs:<br/><br/>';
@@ -488,8 +488,11 @@ class GSX_Request {
         }
 
         $html .= '<form class="gsxRepairForm" id="repairForm_' . $this->requestName . '" method="POST"';
-        $html .= ' action="' . DOL_URL_ROOT . '/synopsisapple/ajax/requestProcess.php?serial=' . $serial . '&action=sendGSXRequest&prodId=' . $prodId . '&request=' . $this->requestName . '"';
-        $html .= ' enctype="multipart/form-data">' . "\n";
+        $html .= ' action="' . DOL_URL_ROOT . '/synopsisapple/ajax/requestProcess.php?serial=' . $serial;
+        $html .= '&action=sendGSXRequest&prodId=' . $prodId . '&request=' . $this->requestName;
+        if (isset($repairRowId))
+            $html .= '&repairRowId='.$repairRowId;
+        $html .= '" enctype="multipart/form-data">' . "\n";
 
         $html .= '<div class="requestTitle">' . $this->requestLabel . '</div>' . "\n";
         $html .= '<p class="requiredInfos"><sup><span class="required"></span></sup>Champs requis</p>';
@@ -501,7 +504,9 @@ class GSX_Request {
             $html .= $this->getDataInput($dataNode, $serial, $values);
         }
         $html .= '</div>' . "\n";
-        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover" onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\')">Envoyer</span></div>';
+        $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
+        $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\''.(isset($repairRowId)?', \''.$repairRowId.'\'':'').')">';
+        $html .= 'Envoyer</span></div>';
         $html .= '</form>' . "\n";
         return $html;
     }
@@ -529,94 +534,96 @@ class GSX_Request {
     public function processRequestDatas(array $datasNodes, $dataIndex = null) {
         $datas = array();
         foreach ($datasNodes as $dataNode) {
-            if ($dataNode->hasAttribute('name')) {
-                $dataName = $dataNode->getAttribute('name');
-                if ($dataName !== '') {
-                    $required = $dataNode->getAttribute('required');
-                    if ($required == '1')
-                        $required = true;
-                    else
-                        $required = false;
+            if (!$dataNode->hasAttribute('donotprocess')) {
+                if ($dataNode->hasAttribute('name')) {
+                    $dataName = $dataNode->getAttribute('name');
+                    if ($dataName !== '') {
+                        $required = $dataNode->getAttribute('required');
+                        if ($required == '1')
+                            $required = true;
+                        else
+                            $required = false;
 
-                    if ($dataNode->hasAttribute('multiple'))
-                        $multiple = $dataNode->getAttribute('multiple');
-                    else
-                        $multiple = false;
+                        if ($dataNode->hasAttribute('multiple'))
+                            $multiple = $dataNode->getAttribute('multiple');
+                        else
+                            $multiple = false;
 
-                    $defs = $this->getDataDefinitionsArray($dataName);
-                    if (isset($defs)) {
-                        if ($defs['type'] == 'partsList') {
-                            if (isset($_POST['partsCount'])) {
-                                $partCount = (int) $_POST['partsCount'];
-                                $datas[$dataName] = array();
+                        $defs = $this->getDataDefinitionsArray($dataName);
+                        if (isset($defs)) {
+                            if ($defs['type'] == 'partsList') {
+                                if (isset($_POST['partsCount'])) {
+                                    $partCount = (int) $_POST['partsCount'];
+                                    $datas[$dataName] = array();
+                                    $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
+                                    if (count($subDatasNode) == 1) {
+                                        $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
+                                        for ($index = 1; $index <= $partCount; $index++) {
+                                            $results = $this->processRequestDatas($subDatasNodes, $index);
+                                            if (count($results)) {
+                                                $datas[$dataName][] = $results;
+                                            }
+                                        }
+                                    } else {
+                                        $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml":
+                                    liste des données absentes pour le groupe "' . $dataName . '"');
+                                    }
+                                } else {
+                                    $this->addError('Erreur technique: nombre de composants absent.');
+                                }
+                            } else if ($defs['type'] == 'datasGroup') {
                                 $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
                                 if (count($subDatasNode) == 1) {
                                     $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                                    for ($index = 1; $index <= $partCount; $index++) {
-                                        $results = $this->processRequestDatas($subDatasNodes, $index);
-                                        if (count($results)) {
-                                            $datas[$dataName][] = $results;
+                                    $datas[$dataName] = $this->processRequestDatas($subDatasNodes);
+                                } else {
+                                    $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml": liste des données absentes pour le groupe "' . $dataName . '"');
+                                }
+                            } else {
+                                $inputName = $dataName;
+                                if (isset($dataIndex))
+                                    $inputName .= '_' . $dataIndex;
+                                if ($multiple) {
+                                    $multipleIndex = 1;
+                                    $valuesArray = array();
+                                    while (true) {
+                                        if (isset($_POST[$inputName . '_' . $multipleIndex])) {
+                                            $value = $this->checkInputData($defs, $_POST[$inputName . '_' . $multipleIndex]);
+                                            $valuesArray[] = $value;
+                                            $multipleIndex++;
+                                        } else
+                                            break;
+                                    }
+                                    if (!count($valuesArray)) {
+                                        $default = $dataNode->getAttribute('default');
+                                        if (isset($default) && ($default !== '')) {
+                                            $valuesArray[] = $default;
+                                        } else if ($required) {
+                                            $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                         }
                                     }
+                                    $datas[$dataName] = $valuesArray;
+                                } else if (isset($_POST[$inputName]) && $_POST[$inputName]) {
+                                    $value = $this->checkInputData($defs, $_POST[$inputName]);
+                                    $datas[$dataName] = $value;
                                 } else {
-                                    $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml":
-                                    liste des données absentes pour le groupe "' . $dataName . '"');
-                                }
-                            } else {
-                                $this->addError('Erreur technique: nombre de composants absent.');
-                            }
-                        } else if ($defs['type'] == 'datasGroup') {
-                            $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
-                            if (count($subDatasNode) == 1) {
-                                $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                                $datas[$dataName] = $this->processRequestDatas($subDatasNodes);
-                            } else {
-                                $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml": liste des données absentes pour le groupe "' . $dataName . '"');
-                            }
-                        } else {
-                            $inputName = $dataName;
-                            if (isset($dataIndex))
-                                $inputName .= '_' . $dataIndex;
-                            if ($multiple) {
-                                $multipleIndex = 1;
-                                $valuesArray = array();
-                                while (true) {
-                                    if (isset($_POST[$inputName . '_' . $multipleIndex])) {
-                                        $value = $this->checkInputData($defs, $_POST[$inputName . '_' . $multipleIndex]);
-                                        $valuesArray[] = $value;
-                                        $multipleIndex++;
-                                    } else
-                                        break;
-                                }
-                                if (!count($valuesArray)) {
                                     $default = $dataNode->getAttribute('default');
                                     if (isset($default) && ($default !== '')) {
-                                        $valuesArray[] = $default;
+                                        $datas[$dataName] = $default;
                                     } else if ($required) {
                                         $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
                                     }
                                 }
-                                $datas[$dataName] = $valuesArray;
-                            } else if (isset($_POST[$inputName]) && $_POST[$inputName]) {
-                                $value = $this->checkInputData($defs, $_POST[$inputName]);
-                                $datas[$dataName] = $value;
-                            } else {
-                                $default = $dataNode->getAttribute('default');
-                                if (isset($default) && ($default !== '')) {
-                                    $datas[$dataName] = $default;
-                                } else if ($required) {
-                                    $this->addError('Information obligatoire non renseignée : "' . $defs['label'] . '"');
-                                }
                             }
+                        } else {
+                            $this->addError('Definitions absentes pour la donnée "' . $dataName . '"');
                         }
                     } else {
-                        $this->addError('Definitions absentes pour la donnée "' . $dataName . '"');
+                        $this->addError('Erreur de syntaxe XML: 1 attribut "nom" non-spécifié');
                     }
                 } else {
                     $this->addError('Erreur de syntaxe XML: 1 attribut "nom" non-spécifié');
                 }
-            } else {
-                $this->addError('Erreur de syntaxe XML: 1 attribut "nom" non-spécifié');
             }
         }
         return $datas;

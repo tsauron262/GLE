@@ -76,7 +76,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->model_refid = 101;
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
-        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1014 => $DateAchat, 1015 => $garantie, 1060 => $centre);
+        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1014 => $DateAchat, 1015 => $garantie);
         $chronoProdNewid = $chronoProd->create();
         $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
     } else {
@@ -96,7 +96,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
         if ($chronoid > 0) {
-            $dataArr = array(1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0);
+            $dataArr = array(1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
             $test = $chrono->setDatas($chronoid, $dataArr);
             if ($test) {
                 $socid = "";

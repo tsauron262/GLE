@@ -31,9 +31,12 @@ function bouttonEtatSav($idChrono){
     $idEtat = 1056;
     
     
-    if($chrono->values[$idEtat] == 2){
+    if($chrono->values[$idEtat] == 2 && $chrono->propal->id > 0){
         $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisOk'>Devis Accepté</a>";
         $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisKo'>Devis Refué</a>";
+    }
+    elseif($chrono->values[$idEtat] == 2){
+        $return .= '<a href="?id=' . $idChrono . '&action=createPC">Créer devis</a>';
     }
     
     if($chrono->values[$idEtat] == 1){

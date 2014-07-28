@@ -666,9 +666,6 @@ class GSX_Request {
 //            echo '<pre>';
 //            print_r($requestDatas);
 //            echo '</pre>';
-            $html .= '<div class="singleRequestFormContainer">' . "\n";
-            $html .= $this->generateRequestFormHtml($requestDatas, $prodId, $serial);
-            $html .= '</div>';
             return $html;
         }
 

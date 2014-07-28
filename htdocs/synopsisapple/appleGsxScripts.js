@@ -26,8 +26,6 @@ var partDataType = {
 var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
-else
-    extra = extra+ "&chronoId="+3;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';

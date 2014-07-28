@@ -59,7 +59,7 @@ if (isset($_GET['action'])) {
                     $cards->loadCart();
                     foreach ($cards->partsCart as $part)
                         $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
-                    echo 'ok';
+                    echo '<ok>Reload</ok>';
                 } else {
                     echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
                 }
@@ -245,7 +245,10 @@ if (isset($_GET['action'])) {
 
 function dateAppleToDate($date) {
     $garantieT = explode("/", $date);
-    return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
+    if($garentieT[2] > 0)
+        return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
+    else
+        return "";
 }
 
 ?>

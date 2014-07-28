@@ -1293,6 +1293,8 @@ function getXMLHttpRequest() {
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
     var $span = null;
+    if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
+        location.reload();
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {
@@ -1394,7 +1396,7 @@ function onRequestResponse(xhr, requestType, prodId) {
                 $span = $('#prod_'+prodId).find('span.addToPropal');
                 $span.attr('class', 'button addToPropal');
                 $('#prod_'+prodId).find('.cartRequestResults').find('ok').remove();
-                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p><ok>Reload</ok>');
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p>');
             } else
                 displayCartRequestResult(prodId, xhr.responseText);
             break;

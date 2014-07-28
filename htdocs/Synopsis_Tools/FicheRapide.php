@@ -90,7 +90,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
 
         $chrono = new Chrono($db);
         $chrono->model_refid = 105;
-        $chrono->description = addslashes($descr);
+        $chrono->description = ($descr != "" ? addslashes($descr) : "N/C");
         $chrono->socid = $socid;
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
@@ -147,6 +147,23 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Centre</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo "<select name='centre'/>";
+    $centres = array("G"=>"Grenoble", "L" => "Lyon");
+    foreach ($centres as $val => $centre){
+        echo "<option value='".$val."' ".($val == $user->array_options['options_apple_centre']? "selected='selected'" : "") .">".$centre."</option>";
+    }
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+    
+    
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
@@ -158,9 +175,6 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-//        $userId = 'Corinne@actitec.fr';
-//        $password = 'cocomart01';
-//        $serviceAccountNo = '0000100635';
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Machine.</th>";

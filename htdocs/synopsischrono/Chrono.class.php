@@ -590,6 +590,8 @@ class Chrono extends CommonObject {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_conf WHERE id = " . $modelId;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
+        if(isset($_REQUEST['centre']))
+            $res->modele = str_replace("{CENTRE}", $_REQUEST['centre'], $res->modele);
         return($res->modele);
     }
 

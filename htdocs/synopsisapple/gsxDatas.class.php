@@ -455,7 +455,7 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType, $prodId) {
-        global $db;
+        global $db, $user;
         $gsxRequest = new GSX_Request($this, $requestType);
 
         $chronoId = null;
@@ -473,9 +473,11 @@ class gsxDatas {
                     $chrono = new Chrono($db);
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);
+                    
+                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0)? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
 
                     $tech = new User($db);
-                    $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
+                    $tech->fetch($idUser);
 
                     $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
                     $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);

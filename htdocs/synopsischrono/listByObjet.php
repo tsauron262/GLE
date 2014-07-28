@@ -81,13 +81,12 @@ if (isset($_REQUEST['obj'])) {
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 AND `hasPropal` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
     }
 } else {
-    $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1");
-
+    $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 ".(isset($_REQUEST['chronoDet'])? " AND id = ".$_REQUEST['chronoDet'] : ""));
 }
 while ($result = $db->fetch_object($sql)) {
     $nomI = $result->titre;
     $titre = $nomI;
-    if (isset($result->picto) && $result->picto != ''){
+    if (isset($result->picto) && $result->picto != '') {
         $result->picto = preg_replace('/\[KEY\|[0-9]*\]/', "$1", $result->picto);
         $titre = img_picto($nomI, "object_" . $result->picto) . "  " . $nomI;
     }
@@ -108,11 +107,28 @@ foreach ($tabModel as $model => $data) {
 //        $champ[1001] = date("d/m/Y H:i");
 //        $titre = "Appel Hotline";
         $nomOnglet = "hotline";
+        
+        if (isset($_REQUEST['Etat'])) {
+            $titre .= " ".$_REQUEST['Etat'];
+            $champ['1034'] = $_REQUEST['Etat'];
+            $filtre .= "&Etat=" . $_REQUEST['Etat'];
+        }
     }
     elseif ($model == 101) {
 //        $titre = "Produit Client";
         $nomOnglet = "productCli";
+    } elseif ($model == 105) {//SAV
+        if (isset($_REQUEST['Centre'])) {
+            $champ['1060'] = $_REQUEST['Centre'];
+            $filtre .= "&Centre=" . $_REQUEST['Centre'];
+        }
+        if (isset($_REQUEST['Etat'])) {
+            $titre .= " ".$_REQUEST['Etat'];
+            $champ['1056'] = $_REQUEST['Etat'];
+            $filtre .= "&Etat=" . $_REQUEST['Etat'];
+        }
     }
+
 
 
 

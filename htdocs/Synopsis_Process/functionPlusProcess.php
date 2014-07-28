@@ -22,6 +22,35 @@ function getSNChrono($idChrono, $source) {
     return implode(" | ", $return);
 }
 
+function bouttonEtatSav($idChrono){
+    global $db, $user;
+    $return = "";
+    $chrono = new Chrono($db);
+    $chrono->fetch($idChrono);
+    $chrono->getValues();
+    $idEtat = 1056;
+    
+    
+    if($chrono->values[$idEtat] == 2){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisOk'>Devis Accepté</a>";
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisKo'>Devis Refué</a>";
+    }
+    
+    if($chrono->values[$idEtat] == 1){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=pieceOk'>Pièce reçue</a>";
+    }
+    
+    if($chrono->values[$idEtat] == 0){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=attenteClient'>Attente Client</a>";
+    }
+    
+    if($chrono->values[$idEtat] == 9){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=restituer'>Restitué</a>";
+    }
+    
+    return $return;
+}
+
 function pictoSMS($idChrono) {
     global $db;
     $chrono = new Chrono($db);

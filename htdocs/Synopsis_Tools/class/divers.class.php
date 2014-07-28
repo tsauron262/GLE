@@ -26,7 +26,7 @@ class synopsisHook {
 
         date_default_timezone_set('Europe/Paris');
 
-        $builddoc = 0;//(isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
+        $builddoc = 0; //(isset($_REQUEST['action']) && ($_REQUEST['action'] != 'generatePdf' || $_REQUEST['action'] != 'builddoc'));
         $viewDoc = (stripos($_SERVER['REQUEST_URI'], 'document'));
         $modDev = defined('MOD_DEV_SYN') ? MOD_DEV_SYN : 0;
 
@@ -40,7 +40,7 @@ class synopsisHook {
 
         ini_set('display_errors', ($modDev > 0));
         ini_set('log_errors', '1');
-        ini_set('error_log',  str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
+        ini_set('error_log', str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE));
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
@@ -78,8 +78,8 @@ class synopsisHook {
 
         $tabProductType = array("Product", "Service", "Produit de contrat", "Déplacement", "Déplacement contrat");
         $tabTypeLigneSimple = array("Titre", "Sous-Titre", "Sous-Titre avec remise à 0", "Note", "Saut de page", "Sous-total", "Description");
-        
-        
+
+
         $tabSelectNatureIntrv = array("Choix", "Installation", "Dépannage", "Télémaintenance", "Formation", "Audit", "Suivi");
 
         $tabContactPlus = array(1001 => array('id' => 1001, 'nom' => 'Commerciaux Société'), 1002 => array('id' => 1002, 'nom' => 'Techniciens Société'), 1003 => array('id' => 1003, 'nom' => 'Auteur'), 1004 => array('id' => 1004, 'nom' => 'Tech Chrono'));
@@ -129,7 +129,7 @@ class synopsisHook {
     }
 
     static function getMenu() {
-        global $conf, $langs;
+        global $conf, $langs, $user, $db;
         $return = '';
         $tabElem = getTypeAndId();
         $element_type = $tabElem[0];
@@ -156,10 +156,75 @@ class synopsisHook {
             $return .= "</div>";
         }
 
+        require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+        $groupSav = new UserGroup($db);
+        $groupSav->fetch('', "SAV");
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
+            $hrefFin = "#pangridChronoDet105";
+            $return .= '<div class="blockvmenupair">';
+            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+            $tabGroupe = array(array('label'=>"Tous", 'valeur'=>0));
+            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));
+            while ($ligne3 = $db->fetch_object($result3)) {
+                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur);
+            }
+            foreach ($tabGroupe as $ligne3) {
+                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+                $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process&' . ($centre ? 'Centre=' . $centre : "");
+                $return .= '<div class="menu_titre"><a class="vsmenu" href="' . $href . $hrefFin . '">
+                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' SAV ' . $ligne3['label'] . '</a><br></div>';
+
+                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
+                while ($ligne = $db->fetch_object($result)) {
+                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` = '" . $centre . "') AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
+                    $ligne2 = $db->fetch_object($result2);
+                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
+                    $return .= "</span><br/>";
+                }
+//            $return .= '</div>';
+            }
+            $return .= '</div>';
+        }
+        
+        
+        
+
+        require_once(DOL_DOCUMENT_ROOT."/user/class/usergroup.class.php");
+        $groupHotline = new UserGroup($db);
+        $groupHotline->fetch('', "Hotline");
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
+            $hrefFin = "#pangridChronoDet100";
+            $return .= '<div class="blockvmenupair">';
+//            $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+//            $tabGroupe = array(array('label'=>"Tous", 'valeur'=>0));
+//            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));
+//            while ($ligne3 = $db->fetch_object($result3)) {
+//                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur);
+//            }
+//            foreach ($tabGroupe as $ligne3) {
+//                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+                $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=100&mainmenu=Process';
+                $return .= '<div class="menu_titre"><a class="vsmenu" href="' . $href . $hrefFin . '">
+                    ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
+
+                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
+                while ($ligne = $db->fetch_object($result)) {
+                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
+                    $ligne2 = $db->fetch_object($result2);
+                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
+                    $return .= "</span><br/>";
+                }
+//            $return .= '</div>';
+//            }
+            $return .= '</div>';
+        }
+
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $return .= '<div class="blockvmenupair">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts">
-                    '.img_object("Contrat", "contract").' Contrats</a><br></div>';
+                    ' . img_object("Contrat", "contract") . ' Contrats</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
             $return .= '<input type="text" class="flat" name="sall" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
@@ -169,7 +234,7 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
             $return .= '<div class="blockvmenupair">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
-                     '.img_object("Chrono", "chrono@synopsischrono").$langs->trans("Chrono").'</a><br></div>';
+                     ' . img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono") . '</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
             $return .= '<input type="text" class="flat" name="filtre" size="10">';
             $return .= '<input type="submit" value="' . $langs->trans("Go") . '" class="button">';
@@ -202,20 +267,20 @@ class synopsisHook {
         ///js
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
-                . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc'])? $_SESSION['pagePrinc'] : "") . '";'
+                . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 
         $jsSoc = "/Synopsis_Tools/js/" . MAIN_INFO_SOCIETE_NOM . ".js";
         if (is_file(DOL_DOCUMENT_ROOT . $jsSoc))
             $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . $jsSoc . '"></script>';
-        
-        
-        if(is_object($langs)){
-                $langsSoc = "/Synopsis_Tools/langs/fr_FR/" . MAIN_INFO_SOCIETE_NOM . ".lang";
-                if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
-                    $langs->load(MAIN_INFO_SOCIETE_NOM."@Synopsis_Tools");
-                $langs->load("synopsisGene@Synopsis_Tools");
+
+
+        if (is_object($langs)) {
+            $langsSoc = "/Synopsis_Tools/langs/fr_FR/" . MAIN_INFO_SOCIETE_NOM . ".lang";
+            if (is_file(DOL_DOCUMENT_ROOT . $langsSoc))
+                $langs->load(MAIN_INFO_SOCIETE_NOM . "@Synopsis_Tools");
+            $langs->load("synopsisGene@Synopsis_Tools");
         }
 
         return $return;

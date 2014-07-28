@@ -28,7 +28,7 @@ $(window).load(function() {
 //        } else {
             tabT = serial.split(" ");
             $.getScript(DOL_URL_ROOT + "/synopsisapple/appleGsxScripts.js", function() {
-                $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/synopsisapple/appleGSX.css"}));
+                $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/synopsisapple/appleGSX2.css"}));
                 for (i = 0; i < tabT.length; i++) {
                     serial = tabT[i];
                     if(/^[A-Z0-9]{11,12}$/.test(serial)){

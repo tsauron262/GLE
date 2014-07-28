@@ -3,7 +3,7 @@ require_once('../main.inc.php');
 llxHeader();
 ?>
 
-<link type="text/css" rel="stylesheet" href="appleGSX.css"/>
+<link type="text/css" rel="stylesheet" href="appleGSX2.css"/>
 <script type="text/javascript" src="./appleGsxScripts.js"></script>
 
 <div style="background-color: #E6E6E6; width: 100%; padding: 10px; margin-bottom: 30px;">

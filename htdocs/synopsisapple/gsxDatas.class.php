@@ -1,6 +1,6 @@
 <?php
 
-require_once DOL_DOCUMENT_ROOT . '/synopsisapple/GSXRequests.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
 class gsxDatas {
 
@@ -9,7 +9,7 @@ class gsxDatas {
     public $connect = false;
     protected $serial = null;
     protected $errors = array();
-    protected $confirmNumbers = array();
+    protected $repairs = array();
     public $partsPending = null;
     public static $apiMode = 'production';
     public static $componentsTypes = array(
@@ -66,70 +66,56 @@ class gsxDatas {
         }
     }
 
-    public function getConfirmNumbers() {
+    public function loadRepairs($chronoId) {
+        if (!isset($chronoId))
+            return;
+
         global $db;
-        if (isset($this->serial) && $this->serial != "") {
-            $result = $db->query("SELECT `confirmNumber`, `serialUpdateConfNum` FROM `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` WHERE serial_number = '" . $this->serial . "'");
-            if ($db->num_rows($result) > 0) {
-                $ligne = $db->fetch_object($result);
-                $this->confirmNumbers['repair'] = ($ligne->confirmNumber != '') ? $ligne->confirmNumber : null;
-                $this->confirmNumbers['serialUpdate'] = ($ligne->serialUpdateConfNum != '') ? $ligne->serialUpdateConfNum : null;
+        $sql = 'SELECT * FROM `' . MAIN_DB_PREFIX . 'synopsis_apple_repair` WHERE `chronoId` = "'.$chronoId.'"';
+        $rows = $db->query($sql);
+        if ($db->num_rows($rows) > 0) {
+            while ($row = $db->fetch_object($rows)) {
+                $repair = new Repair($db, $this->gsx);
+                $repair->serial = $this->serial;
+                $repair->setDatas($row->repairNumber, $row->repairConfirmNumber, $row->serialUpdateConfirmNumber, $row->closed, $row->rowid);
+                $this->repairs[] = $repair;
             }
         }
     }
 
-    public function checkRepairStatus() {
-        if (!count($this->confirmNumbers)) {
-            $this->getConfirmNumbers();
-        }
-        if (!count($this->confirmNumbers) || $this->confirmNumbers[0] == "") {
-            global $db;
-            $cart = new partsCart($db, $this->serial, isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
-            if (!isset($cart->cartRowId)) {
-                $cart->saveCart();
-            }
-            $repair = $this->getRepairLookupArray();
-            if (!isset($repair))
-                return;
-
-            if (isset($repair['repairConfirmationNumber'])) {
-                $this->confirmNumbers['repair'] = $repair['repairConfirmationNumber'];
-                $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $this->confirmNumbers['repair'] . "' WHERE  serial_number = '" . $this->serial . "';");
-            }
-            if (isset($repair['repairStatus'])) {
-                if ($repair['repairStatus'] == 'Closed' || $repair['repairStatus'] == 'Fermée et complétée' || $repair['repairStatus'] == 'La réparation n\'est plus en cours de traitement') {
-                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `repairComplete` =  1 WHERE  serial_number = '" . $this->serial . "';");
-                }
-            }
-        }
-    }
-
-    public function isRepairComplete() {
-        global $db;
-        if (isset($this->serial) && $this->serial != "") {
-            $result = $db->query("SELECT `repairComplete` FROM `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` WHERE serial_number = '" . $this->serial . "'");
-            if ($db->num_rows($result) > 0) {
-                $ligne = $db->fetch_object($result);
-                return (int) $ligne->repairComplete;
-            }
-        }
-    }
-
-    public function getRepairLookupArray() {
+    public function importRepair($chronoId) {
         if (!$this->connect)
-            return null;
+            return $this->getGSXErrorsHtml();
+        global $db;
+        if (!isset($_GET['importNumber']) || !isset($_GET['importNumberType']))
+            return '<p class="error">Erreur: informations manquantes.</p>';
+        $repair = new Repair($db, $this->gsx);
+        if ($repair->import($chronoId, $_GET['importNumber'], $_GET['importNumberType'])) {
+            return '<p class="confirmation">Les données de la réparation ont été importées avec succès</p><ok>Reload</ok>';
+        }
+        $html = '<p class="error">Echec de l\'importation.</p>';
+        $html .= $repair->displayErrors();
+        if (count($this->gsx->errors['soap']))
+            $html .= $this->getGSXErrorsHtml();
+        return $html;
+    }
 
-        $n = count($this->gsx->errors['soap']);
-        $request = $request = $this->gsx->_requestBuilder('RepairLookupRequest', 'lookupRequestData', array('serialNumber' => $this->serial));
-        $response = $this->gsx->request($request, 'RepairLookup');
+    public function closeRepair($repairRowId) {
+        if (!$this->connect)
+            return $this->getGSXErrorsHtml();
+        global $db;
 
-        if (!isset($response['RepairLookupResponse']['lookupResponseData']))
-            return null;
-
-        if (count($this->gsx->errors['soap']) > $n)
-            return null;
-
-        return $response['RepairLookupResponse']['lookupResponseData'];
+        $repair = new Repair($db, $this->gsx);
+        $repair->rowId = $repairRowId;
+        if ($repair->load()) {
+            if ($repair->close())
+                return 'ok';
+        }
+        $html = '<p class="error">Echec de la fermeture de la réparation</p>';
+        $html .= $repair->displayErrors();
+        if (count($this->gsx->errors['soap']))
+            $html .= $this->getGSXErrorsHtml();
+        return $html;
     }
 
     public function getLookupHtml($prodId) {
@@ -149,9 +135,22 @@ class gsxDatas {
 //                    echo '</pre>';
                     $check = true;
 
-//                  --- Lookup du produit --->
+                    $html .= '<div class="container productContainer">' . "\n";
+                    $html .= '<div class="captionContainer productCaption" onclick="onCaptionClick($(this))">' . "\n";
+                    $html .= '<span class="captionTitle productTile">' . $datas['productDescription'] . '</span>' . "\n";
+                    $html .= '<span class="arrow upArrow"></span>';
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="blocContent productContent">' . "\n";
+
+                    $html .= '<div class="container">' . "\n";
+                    $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
+                    $html .= '<span class="captionTitle infosProdTitle">Informations produit</span>' . "\n";
+                    $html .= '<span class="arrow upArrow"></span>';
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="blocContent">' . "\n";
+
                     $html .= '<table class="productDatas">' . "\n";
-                    $html .= '<thead><caption>' . $datas['productDescription'] . '</caption></thead>' . "\n";
+                    $html .= '<thead></thead>' . "\n";
                     $html .= '<tbody>' . "\n";
                     $html .= '' . "\n";
 
@@ -191,101 +190,48 @@ class gsxDatas {
                     $html .= '<td>' . $datas['onsiteStartDate'] . '</td>' . "\n";
                     $html .= '</tr>' . "\n";
 
-                    $html .= '<tr>' . "\n";
-                    $html .= '<td class="rowTitle">Date de sortie</td>' . "\n";
-                    $html .= '<td>' . $datas['onsiteEndDate'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
-
-//                    $html .= '<tr>'."\n";
-//                    $html .= '<td></td>'."\n";
-//                    $html .= '<td>'.$datas[''].'</td>'."\n";
-//                    $html .= '</tr>'."\n";
-
-                    $html .= '<tr class="oddRow">' . "\n";
-                    $html .= '<td class="rowTitle">Jours restants</td>' . "\n";
-                    $html .= '<td>' . $datas['daysRemaining'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
-
-                    $html .= '<tr style="height: 30px;">' . "\n";
-                    $html .= '<td>' . "\n";
-                    $html .= '<a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a>' . "\n";
-                    $html .= '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
+                    $html .= '<tr><td class="rowTitle">Date de sortie</td><td>' . $datas['onsiteEndDate'] . '</td></tr>' . "\n";
+                    $html .= '<tr class="oddRow"><td class="rowTitle">Jours restants</td><td>' . $datas['daysRemaining'] . '</td></tr>' . "\n";
+                    $html .= '<tr style="height: 30px;"><td><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
 
                     $html .= '</tbody></table>' . "\n";
                     $html .= '</td>' . "\n";
 
                     $html .= '</tr>' . "\n";
                     $html .= '</tbody></table>' . "\n";
+                    $html .= '</div></div>' . "\n";
 
-
-//                  --- Etat de la commande --->
-                    $this->checkRepairStatus();
-                    $repairComplete = $this->isRepairComplete();
-
-                    $html .= '<div class="repairStatus">' . "\n";
-                    if ($repairComplete) {
-                        $html .= '<p class="confirmation">Réparation terminée</p>' . "\n";
-                        $html .= '</div>' . "\n";
-                    } else {
-                        $requests = array();
-                        if (!isset($this->confirmNumbers['repair'])) {
-                            $requests = array_merge($requests, GSX_Request::getRequestsByType('repair'));
-                        } else {
-                            $html .= '<p class="confirmation">Réparation créée</p>' . "\n";
-                            if (!isset($this->confirmNumbers['serialUpdate'])) {
-                                $requests = array_merge($requests, GSX_Request::getRequestsByType('serialUpdate'));
-                            } else {
-                                $html .= '<p class="confirmation">Numéro de série des composants à jour</p>' . "\n";
-                            }
-                            $requests = array_merge($requests, GSX_Request::getRequestsByType('repairComplete'));
-//                          --- Bloc composants en attente de retour --->
-                            $html .= $this->getPartsPendingReturnHtml();
-                        }
-
-                        $html .= '<button class="createRepair" onclick="displayCreateRepairPopUp($(this))">Gérer la réparation</button>' . "\n";
-                        $html .= '</div>' . "\n";
-
-//                      --- Bloc Réparation --->
-                        $html .= '<div class="repairPopUp">' . "\n";
-                        $html .= '<input type="hidden" class="prodId" value="' . $prodId . '"/>' . "\n";
-                        $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>' . "\n";
-                        $html .= '<p>Sélectionnez le type d\'opération que vous souhaitez effectuer: <br/></p>';
-                        $html .= '<select class="repairTypeSelect">' . "\n";
-
-                        foreach ($requests as $name => $label) {
-                            $html .= '<option value="' . $name . '">' . $label . '</option>';
-                        }
-                        $html .= '</select>';
-                        $html .= '<p style="text-align: right">' . "\n";
-                        $html .= '<button class="loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</button>' . "\n";
-                        $html .= '</p>' . "\n";
-                        $html .= '<div class="repairFormContainer"></div>';
-                        $html .= '</div>' . "\n";
-
-                        if (!isset($this->confirmNumbers['repair'])) {
-//                          --- Bloc Panier --->
-                            $html .= $this->getCartHtml($prodId);
-                            global $db;
-                            $cart = new partsCart($db, $this->serial);
-                            $cart->loadCart();
-                            if (count($cart->partsCart)) {
-                                $html .= '<script type="text/javascript">' . "\n";
-                                $html .= $cart->getJsScript($prodId);
-                                $html .= '</script>' . "\n";
-                            }
-
-//                          --- Bloc liste des composants compatibles --->
-                            $html .= '<button class="loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</button>' . "\n";
-                            $html .= '<div class="partsRequestResult"></div>' . "\n";
-                        }
+                    $html .= $this->getRepairsHtml($prodId);
+                    $html .= $this->getCartHtml($prodId);
+                    global $db;
+                    $cart = new partsCart($db, $this->serial);
+                    $cart->loadCart();
+                    if (count($cart->partsCart)) {
+                        $html .= '<script type="text/javascript">' . "\n";
+                        $html .= $cart->getJsScript($prodId);
+                        $html .= '</script>' . "\n";
                     }
+
+                    $html .= '<div class="container">' . "\n";
+                    $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
+                    $html .= '<span class="captionTitle partsListTitle">Liste des composants compatibles</span>' . "\n";
+                    $html .= '<span class="arrow upArrow"></span>';
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="blocContent">' . "\n";
+                    $html .= '<div class="toolBar">' . "\n";
+                    $html .= '<span class="button loadParts" onclick="GSX.loadProductParts($(this))">Charger la liste des composants compatibles</span>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="partsRequestResult"></div>' . "\n";
+                    $html .= '</div></div>' . "\n";
+
+                    $html .= '</div></div>' . "\n";
                 }
             }
         }
         if (!$check) {
             $this->errors[] = 'GSX_lookup_fail';
             $html .= '<p class="error">Echec de la récupération des données depuis la plateforme Apple GSX</p>' . "\n";
+            $html .= $this->getGSXErrorsHtml();
         }
 
 //        $response = $this->gsx->lookup($this->serial, 'model');
@@ -296,11 +242,85 @@ class gsxDatas {
         return $html;
     }
 
-    public function getCartHtml($prodId) {
-        $html = '<div class="cartContainer"><div class="cartTitle">Panier de composants   ';
-        $html .= '<span><span class="nbrCartProducts">0</span> produit(s)</span></div></div>' . "\n";
+    public function getRepairsHtml($prodId) {
+        $html = '<div class="repairsContainer container">' . "\n";
+        $html .= '<div class="rapairsCaption captionContainer" onclick="onCaptionClick($(this))">' . "\n";
+        $html .= '<span class="repairsTitle captionTitle")">Réparations</span>';
+        $html .= '<span class="arrow downArrow"></span>';
+        $html .= '</div>' . "\n";
+        $html .= '<div class="repairsContent blocContent">' . "\n";
+        $html .= '<div class="toolBar">' . "\n";
+        $html .= '<span class="button importRepairDatas" onclick="openRepairImportForm(' . $prodId . ')">Importer depuis GSX</span>';
+        $html .= '<span class="button createNewRepair greenHover" onclick="displayCreateRepairPopUp($(this))">Créer une nouvelle réparation</span>';
+        $html .= '</div>';
+        $html .= '<div class="importRepairForm">' . "\n";
+        $html .= '<p class="info">Afin de récupérer les données d\'une réparation déjà effectuée sur le site gsx.apple.com, ';
+        $html .= 'merci de saisir l\'un des identifiants proposés que vous pourrez trouver dans votre espace GSX.<br/></p>';
+        $html .= '<label for="importNumber">Identifiant: </label>' . "\n";
+        $html .= '<input type="text" name="importNumber" id="importNumber" class="importNumber"';
+        if (isset($this->serial))
+            $html .= ' value="' . $this->serial . '"';
+        $html .= '/>' . "\n";
+        $html .= '<label for="importNumberType">de type: </label>' . "\n";
+        $html .= '<select name="importNumberType" id="importNumberType" class="importNumberType">' . "\n";
+        foreach (Repair::$lookupNumbers as $value => $text) {
+            $html .= '<option value="' . $value . '">' . $text . '</option>';
+        }
+        $html .= '</select>' . "\n";
+        $html .= '<div style="padding: 15px; text-align: right;">' . "\n";
+        $html .= '<span class="button redHover repairImportClose" onclick="closeRepairImportForm(' . $prodId . ')">Annuler</span>';
+        $html .= '<span class="button greenHover repairImportSubmit" onclick="importRepairSubmit(' . $prodId . ')">Importer</span>';
+        $html .= '</div>' . "\n";
+        $html .= '<div class="importRepairResult"></div>' . "\n";
+        $html .= '</div>' . "\n";
+        if (isset($_REQUEST['chronoId'])) {
+            $this->loadRepairs($_REQUEST['chronoId']);
+            if (count($this->repairs)) {
+                foreach ($this->repairs as $repair) {
+                    $repair->prodId = $prodId;
+                    $html .= $repair->getInfosHtml();
+                }
+            } else {
+                $html .= '<p>Aucune réparation enregistrée</p>';
+            }
+        } else {
+            $html .= '<p class="error">Erreur: Les réparations associées à cette fiche n\'ont pas pu être chargées (id chrono absent)</p>' . "\n";
+        }
+        $html .= '</div></div>' . "\n";
 
-        $html .= '<div class="cartContent">' . "\n";
+        $html .= '<div class="repairPopUp">' . "\n";
+        $html .= '<input type="hidden" class="prodId" value="' . $prodId . '"/>' . "\n";
+        $html .= '<span class="hidePopUp" onclick="hideCreateRepairPopUp($(this))">Cacher</span>' . "\n";
+        $html .= '<p>Sélectionnez le type d\'opération que vous souhaitez effectuer: <br/></p>';
+        $html .= '<select class="repairTypeSelect">' . "\n";
+        $requests = GSX_Request::getRequestsByType('repair');
+        foreach ($requests as $name => $label) {
+            $html .= '<option value="' . $name . '">' . $label . '</option>';
+        }
+        $html .= '</select>';
+        $html .= '<p style="text-align: right">' . "\n";
+        $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</span>' . "\n";
+        $html .= '</p>' . "\n";
+        $html .= '<div class="repairFormContainer"></div>' . "\n";
+        $html .= '<div class="repairFormResults"></div>' . "\n";
+        $html .= '</div>' . "\n";
+        return $html;
+    }
+
+    public function getCartHtml($prodId) {
+        $html = '<div class="cartContainer container">' . "\n";
+        $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
+        $html .= '<span class="cartTitle captionTitle">Panier de composants&nbsp;&nbsp;&nbsp;</span>';
+        $html .= '<span class=subtitle><span class="nbrCartProducts">0</span> produit(s)</span>' . "\n";
+        $html .= '<span class="arrow downArrow"></span>';
+        $html .= '</div>' . "\n";
+
+        $html .= '<div class="cartContent blocContent">' . "\n";
+        $html .= '<div class="toolBar">' . "\n";
+        $html .= '<span class="button addToPropal" onclick="GSX.products[' . $prodId . '].cart.addToPropal($(this))">Ajouter à la propal</span>' . "\n";
+        $html .= '<span class="button cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</span>' . "\n";
+        $html .= '<span class="button cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</span>' . "\n";
+        $html .= '</div>' . "\n";
         $html .= '<p class="noProducts">Aucun produit dans votre panier de commande</p>' . "\n";
         $html .= '<table class="cartProducts">' . "\n";
         $html .= '<thead>' . "\n";
@@ -312,12 +332,8 @@ class gsxDatas {
         $html .= '</thead>' . "\n";
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
-        $html .= '<div class="cartSubmitContainer">' . "\n";
-        $html .= '<button class="cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</button>' . "\n";
-        $html .= '<button class="cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</button>' . "\n";
-        $html .= '</div>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
-        $html .= '</div>' . "\n";
+        $html .= '</div></div>' . "\n";
         return $html;
     }
 
@@ -348,10 +364,9 @@ class gsxDatas {
         if (isset($parts) && count($parts)) {
             $check = true;
             $html = '';
-            $html .= '<div class="componentsListContainer">' . "\n";
-            $html .= '<div class="titre">Liste des composants compatibles</div>' . "\n";
+            $html .= '<div class="componentsListContainer container">' . "\n";
             $html .= '<div class="typeFilters searchBloc">' . "\n";
-            $html .= '<button class="filterTitle">Filtrer par catégorie de composant</button>';
+            $html .= '<span class="button filterTitle">Filtrer par catégorie de composant</span>';
             $html .= '<div class="typeFiltersContent">' . "\n";
             $html .= '<div style="margin-bottom: 20px;">' . "\n";
             $html .= '<span class="filterCheckAll">Tout cocher</span>';
@@ -366,12 +381,12 @@ class gsxDatas {
                 $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
             }
             $html .= '</select>' . "\n";
-            $html .= '<button class="addKeywordFilter" onclick="GSX.products[' . $prodId . '].PM.addKeywordFilter()">Ajouter</button>' . "\n";
+            $html .= '<span class="button addKeywordFilter" onclick="GSX.products[' . $prodId . '].PM.addKeywordFilter()">Ajouter</span>' . "\n";
             $html .= '</div>' . "\n";
             $html .= '<div class="searchBloc">' . "\n";
             $html .= '<label for="searchPartInput">Recherche par référence: </label>' . "\n";
             $html .= '<input type="text" name="searchPartInput" class="searchPartInput" size="12" maxlength="24"/>';
-            $html .= '<button class="searchPartSubmit" onclick="GSX.products[' . $prodId . '].PM.searchPartByNum()">Rechercher</button>' . "\n";
+            $html .= '<span class="button searchPartSubmit" onclick="GSX.products[' . $prodId . '].PM.searchPartByNum()">Rechercher</span>' . "\n";
             $html .= '</div>' . "\n";
             $html .= '<div class="curKeywords"></div>' . "\n";
             $html .= '<div class="searchResult"></div>';
@@ -451,7 +466,6 @@ class gsxDatas {
         $valDef = array();
         $valDef['serialNumber'] = $this->serial;
 
-        $this->getConfirmNumbers();
         switch ($requestType) {
             case 'CreateCarryInRepair':
                 if (isset($chronoId)) {
@@ -495,88 +509,113 @@ class gsxDatas {
                     }
                 }
                 break;
-
-            case 'UpdateSerialNumber':
-                if (!isset($this->partsPending) || !count($this->partsPending)) {
-                    $this->loadPartsPending();
-                    if (count($this->gsx->errors['soap'])) {
-                        return '<p class="alert">La liste des composants en attente de retour n\'a pas pu être obtenue</p>' . $this->getGSXErrorsHtml();
-                    }
-                }
-                if (count($this->partsPending)) {
-                    $valDef['partInfo'] = array();
-                    foreach ($this->partsPending as $partPending) {
-                        $valDef['partInfo'][] = array(
-                            'partNumber' => $partPending['partNumber'],
-                            'partDescription' => $partPending['partDescription'],
-                            'componentCode' => $partPending['componentCode']
-                        );
-                    }
-                }
-                break;
         }
 
-
-        if (isset($this->confirmNumbers['repair'])) {
-            $valDef['repairConfirmationNumber'] = $this->confirmNumbers['repair'];
-            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
-//            $valDef['returnOrderNumber'] = $this->confirmNumbers['repair'];
-        }
+//            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
         return $gsxRequest->generateRequestFormHtml($valDef, $prodId, $this->serial);
     }
 
     public function processRequestForm($prodId, $requestType) {
+        if (!$this->connect)
+            return $this->getGSXErrorsHtml();
+
         global $db;
         $GSXRequest = new GSX_Request($this, $requestType);
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
         if ($GSXRequest->isLastRequestOk()) {
-
-            $html .= '<div class="requestResponseContainer">';
-
+            if (isset($_POST['includeFiles'])) {
+                if (($_POST['includeFiles'] == 'Y') && isset($_REQUEST['chronoId'])) {
+                    $dir = DOL_DATA_ROOT . '/synopsischrono/' . $_REQUEST['chronoId'] . '/';
+                    $files = scandir($dir);
+                    if (count($files)) {
+                        $result['fileName'] = $files[0];
+                        $result['fileData'] = file_get_contents($dir . $files[0]);
+                    }
+                }
+            } else if (isset($_FILES['fileName'])) {
+                if (isset($_FILES['fileName']['name']) && isset($_FILES['fileName']['tmp_name'])) {
+                    $result['fileName'] = $_FILES['fileName']['name'];
+                    $result['fileData'] = file_get_contents($_FILES['fileName']['tmp_name']);
+                }
+            }
             $client = $GSXRequest->requestName;
             $request = $GSXRequest->request;
             $wrapper = $GSXRequest->wrapper;
 
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
-
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
-                $html .= '<p class="error">Echec de l\'envoi de la requête<br/>' . "\n";
-                $i = 1;
-                foreach ($this->gsx->errors['soap'] as $soapError) {
-                    $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $soapError)) . '.<br/>' . "\n";
-                    $i++;
-                }
-                $html .= '</p>' . "\n";
+                $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
+                $html .= $this->getGSXErrorsHtml();
             } else {
-                if (isset($response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'])) {//Numero de rep
-                    $this->confirmNumbers['repair'] = $response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
-                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `confirmNumber` =  '" . $this->confirmNumbers['repair'] . "' WHERE  serial_number = '" . $this->serial . "';");
-                }
-                if (isset($response['UpdateSerialNumberResponse']['repairConfirmation']['confirmationNumber'])) {
-                    $this->confirmNumbers['serialUpdate'] = $response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
-                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `serialUpdateConfNum` =  '" . $this->confirmNumbers['serialUpdate'] . "' WHERE  serial_number = '" . $this->serial . "';");
-                }
-                if (isset($response['MarkRepairCompleteResponse'])) {
-                    $db->query("UPDATE  `" . MAIN_DB_PREFIX . "synopsis_apple_parts_cart` SET  `repairComplete` =  1 WHERE  serial_number = '" . $this->serial . "';");
-                }
+                $ok = false;
+                $repair = new Repair($db, $this->gsx);
+                $confirmNumber = null;
+                switch ($requestType) {
+                    case 'CreateCarryInRepair':
+                        if (isset($response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'])) {
+                            $confirmNumber = $response['CreateCarryInResponse']['repairConfirmation']['confirmationNumber'];
+                            if (isset($_REQUEST['chronoId'])) {
+                                if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {
+                                    $ok = true;
+                                }
+                            } else {
+                                $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
+                            }
+                        }
+                        break;
 
-                $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
+                    case 'UpdateSerialNumber':
+                        if (isset($response['UpdateSerialNumberResponse']['repairConfirmation']['confirmationNumber'])) {
+                            $confirmNumber = $response['UpdateSerialNumberResponse']['repairConfirmation']['confirmationNumber'];
+                            if (isset($_GET['repairRowId'])) {
+                                $repair->rowId = $_GET['repairRowId'];
+                                if ($repair->load()) {
+                                    $repair->confirmNumbers['serialUpdate'] = $confirmNumber;
+                                    if ($repair->update()) {
+                                        $ok = true;
+                                    }
+                                } else {
+                                    $html .= '<p class="error">Erreur: échec du chargement des données de la réparation.</p>';
+                                }
+                            } else {
+                                $html .= '<p class="error">Une erreur est survenue (ID réparation manquant).</p>';
+                            }
+                        }
+                        break;
+                }
+                if (!$ok) {
+                    $html .= $repair->displayErrors();
+                    if (count($this->gsx->errors['soap']))
+                        $html .= $this->getGSXErrorsHtml();
+                    $html .= '<p class="error">La requête a été correctement transmise mais les données de retour n\'ont pas pu être enregistrées correctement en base de données.<br/>';
+                    $html .= 'Veuillez noter le numéro suivant (repair confirmation number) et le transmettre  à l\'équipe technique: ';
+                    $html .= '<strong style="color: #3C3C3C">' . $confirmNumber . '</strong></p>';
+                } else {
+                    $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
+                    if ($requestType == 'UpdateSerialNumber') {
+                        if (isset($_POST['closeRepair'])) {
+                            if ($_POST['closeRepair'] == 'Y') {
+                                $ok = false;
+                                $this->gsx->resetSoapErrors();
+                                if ($repair->close()) {
+                                    $html .= '<p class="confirmation">Réparation fermée avec succès</p><ok>Reload</ok>';
+                                } else {
+                                    $html .= '<p class="error">La réparation n\'a pas pu être fermée.</p>';
+                                    $html .= $repair->displayErrors();
+                                    if (count($this->gsx->errors['soap']))
+                                        $html .= $this->getGSXErrorsHtml();
+                                }
+                            }
+                        } else {
+                            $html .= '<ok>Reload</ok>';
+                        }
+                    }
+                }
 //                $html .= '<pre>';
 //                $html .= print_r($this->gsx->outputFormat($response), true);
 //                $html .= '</pre>';
-            }
-
-            $html .= '</div>';
-            if (isset($_REQUEST['chronoId'])) {
-                $html .= '<div style="margin: 30px;">';
-                $html .= '<a class="button" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $_REQUEST['chronoId'] . '">Retour</a>';
-                $html .= '</div>';
-            } else {
-                $html .= '<div style="margin: 30px;">';
-                $html .= '<a class="button" href="' . DOL_URL_ROOT . '/synopsisapple/test.php">Retour</a>';
-                $html .= '</div>';
             }
         } else {
             $html = $result;
@@ -585,137 +624,7 @@ class gsxDatas {
     }
 
     public function getGSXErrorsHtml() {
-        $html = '';
-        if (count($this->gsx->errors['init'])) {
-            $html .= '<p class="error">Erreur(s) de connection: <br/>';
-            $i = 1;
-            foreach ($this->gsx->errors['init'] as $errorMsg) {
-                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
-                $i++;
-            }
-            $html .= '</p>';
-        }
-        if (count($this->gsx->errors['soap'])) {
-            $html .= '<p class="error">Erreur(s) SOAP: <br/>';
-            $i = 1;
-            foreach ($this->gsx->errors['soap'] as $errorMsg) {
-                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
-                $i++;
-            }
-            $html .= '</p>';
-        }
-        return $html;
-    }
-
-    public function loadPartsPending() {
-        if (isset($this->partsPending)) {
-            unset($this->partsPending);
-        }
-        $this->gsx->resetSoapErrors();
-        $datas = array(
-            'repairType' => '',
-            'repairStatus' => '',
-            'purchaseOrderNumber' => '',
-            'sroNumber' => '',
-            'repairConfirmationNumber' => $this->confirmNumbers['repair'],
-//            'repairConfirmationNumber' => 'G168575426',
-            'serialNumbers' => array(
-                'serialNumber' => ''
-            ),
-            'shipToCode' => '',
-            'customerFirstName' => '',
-            'customerLastName' => '',
-            'customerEmailAddress' => '',
-            'createdFromDate' => '',
-            'createdToDate' => '',
-            'warrantyType' => '',
-            'kbbSerialNumberFlag' => '',
-            'comptiaCode' => '',
-        );
-        $request = $this->gsx->_requestBuilder('PartsPendingReturnRequest', 'repairData', $datas);
-        $response = $this->gsx->request($request, 'PartsPendingReturn');
-        if (count($this->gsx->errors['soap'])) {
-            return false;
-        }
-        if (isset($response['PartsPendingReturnResponse']['partsPendingResponse'])) {
-            $partsPending = $response['PartsPendingReturnResponse']['partsPendingResponse'];
-            $this->partsPending = array();
-            if (isset($partsPending['returnOrderNumber'])) {
-                $partsPending = array($partsPending);
-            }
-            foreach ($partsPending as $part) {
-                $fileName = null;
-                if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {
-                    $request = $this->gsx->_requestBuilder('ReturnLabelRequest', '', array(
-                        'returnOrderNumber' => $part['returnOrderNumber'],
-                        'partNumber' => $part['partNumber']
-                            ));
-                    $labelResponse = $this->gsx->request($request, 'ReturnLabel');
-                    if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
-                        $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
-                        $fileNamePure = $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
-                        if (!is_dir(DOL_DATA_ROOT . $direName))
-                            mkdir(DOL_DATA_ROOT . $direName);
-                        $fileName = $direName . "/" . $fileNamePure;
-//                        die(DOL_DATA_ROOT . $fileName);
-                        if (!file_exists(DOL_DATA_ROOT . $fileName)) {
-                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
-                                $fileName = null;
-                        }
-                        $fileName2 = "/document.php?modulepart=synopsischrono&file=" . urlencode($_REQUEST['chronoId'] . "/" . $fileNamePure);
-                    }
-                }
-                $this->partsPending[] = array(
-                    'partDescription' => $part['partDescription'],
-                    'partNumber' => $part['partNumber'],
-                    'returnOrderNumber' => $part['returnOrderNumber'],
-                    'fileName' => $fileName2
-                );
-            }
-            return true;
-        }
-        return false;
-    }
-
-    public function getPartsPendingReturnHtml() {
-        if (!$this->connect)
-            return '<p class="error">Echec de la connexion à la plateforme GSX. <br/>
-                Impossibles d\'obtenir les informations sur les composants en attente de retour</p>';
-
-        if (!$this->loadPartsPending()) {
-            if (count($this->gsx->errors['soap'])) {
-                return $this->getGSXErrorsHtml();
-            }
-            return '';
-        }
-        if (!count($this->partsPending)) {
-            return '<p>Aucun composant en attente de retour</p>';
-        }
-        $html .= '<div class="partsPendingTitle titre">Composant(s) en attente de retour</div>' . "\n";
-        $html .= '<table class="partsPendingTable">' . "\n";
-        $html .= '<thead>' . "\n";
-        $html .= '<th style="min-width: 250px">Nom</th>' . "\n";
-        $html .= '<th style="min-width: 100px">Réf</th>' . "\n";
-        $html .= '<th style="min-width: 100px">N° de retour</th>' . "\n";
-        $html .= '<th></th>' . "\n";
-        $html .= '</thead>' . "\n";
-        $html .= '<tbody>' . "\n";
-        foreach ($this->partsPending as $part) {
-            $html .= '<tr>';
-            $html .= '<td>' . $part['partDescription'] . '</td>';
-            $html .= '<td class="ref">' . $part['partNumber'] . '</td>';
-            $html .= '<td class="ref">' . $part['returnOrderNumber'] . '</td>';
-//            if (isset($part['fileName']) && file_exists($part['fileName'])) {
-            $html .= '<td><a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="button getReturnLabel">Etiquette de retour</a></td>';
-//            } else {
-//                $html .= '<td></td>';
-//            }
-            $html .= '<tr>';
-        }
-        $html .= '</tbody>';
-        $html .= '</table>';
-
-        return $html;
+        return $this->gsx->getGSXErrorsHtml();
     }
 
 }

@@ -26,6 +26,8 @@ var partDataType = {
 var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
+else
+    extra = extra+ "&chronoId="+3;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -145,20 +147,6 @@ function Cart(prodId, serial, PM) {
         this.$prod = $('#prod_'+prodId);
     };
     this.setEvents = function() {
-        ptr.$prod.find('.cartTitle').mouseover(function() {
-            if (ptr.$prod.find('.cartContent').css('display') == 'none')
-                ptr.$prod.find('.cartContent').fadeIn(250);
-            else {
-                ptr.$prod.find('.cartContent').stop().css('opacity', 1);
-            }
-        }).mouseleave(function() {
-            ptr.$prod.find('.cartContent').fadeOut(250);
-        });
-        ptr.$prod.find('.cartContent').mouseover(function() {
-            ptr.$prod.find('.cartContent').stop().css('opacity', 1);
-        }).mouseout(function() {
-            ptr.$prod.find('.cartContent').fadeOut(250);
-        });
     };
     this.onComptiaLoadingStart = function() {
         var $cart = this.$prod.find('.cartContent');
@@ -238,8 +226,8 @@ function Cart(prodId, serial, PM) {
         html += '<td class="ref">'+this.cartProds[curId].num+'</td>';
         html += '<td class="price">'+this.cartProds[curId].price+'&nbsp;&euro;</td>';
         html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
-        html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
-        html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
+        html += '<span class="button prodQtyDown redHover" onclick="prodQtyDown($(this))"></span>';
+        html += '<span class="button prodQtyUp greenHover" onclick="prodQtyUp($(this))"></span></td>';
         html += '<td class="compTIACodes"></td>';
         html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
         html += '</tr>';
@@ -299,10 +287,10 @@ function Cart(prodId, serial, PM) {
         });
     };
     this.activateSave = function() {
-        this.$prod.find('.cartSave').attr('class', 'cartSave greenHover');
+        this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover');
     };
     this.deactivateSave = function() {
-        this.$prod.find('.cartSave').attr('class', 'cartSave greenHover deactivated');
+        this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover deactivated');
     };
     this.save = function() {
         if (!this.cartProds.length)
@@ -330,7 +318,7 @@ function Cart(prodId, serial, PM) {
                 i++;
             }
         }
-        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
     };
     this.load = function() {
@@ -369,8 +357,8 @@ function Cart(prodId, serial, PM) {
         html += '<td class="ref">'+num+'</td>';
         html += '<td class="price">'+price+'&nbsp;&euro;</td>';
         html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
-        html += '<button class="prodQtyDown redHover" onclick="prodQtyDown($(this))"></button>';
-        html += '<button class="prodQtyUp greenHover" onclick="prodQtyUp($(this))"></button></td>';
+        html += '<span class="button prodQtyDown redHover" onclick="prodQtyDown($(this))"></span>';
+        html += '<span class="button prodQtyUp greenHover" onclick="prodQtyUp($(this))"></span></td>';
         html += '<td class="compTIACodes"></td>';
         html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
         html += '</tr>';
@@ -403,6 +391,15 @@ function Cart(prodId, serial, PM) {
             }
         }
     };
+    this.addToPropal = function($span) {
+        if ($span.hasClass('deactivated'))
+            return;
+        $span.attr('class', 'button addToPropal deactivated');
+
+        this.$prod.find('.cartRequestResults').find('ok').remove();
+        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
+        setRequest('GET', 'addCartToPropal', this.prodId, '');
+    }
 }
 
 function PartsManager(prodId, serial) {
@@ -918,6 +915,26 @@ function GSX() {
 
 var GSX = new GSX();
 
+function onCaptionClick($caption) {
+    if (!$caption.length)
+        return;
+
+    var $container = $caption.parent('.container');
+    if (!$container.length)
+        return;
+
+    var $content = $container.find('.blocContent').first();
+    if (!$content.length)
+        return;
+
+    if ($content.css('display') == 'none') {
+        $content.stop().slideDown();
+        $caption.find('span.arrow').attr('class', 'arrow upArrow');
+    } else {
+        $content.stop().slideUp();
+        $caption.find('span.arrow').attr('class', 'arrow downArrow');
+    }
+}
 function displayRequestMsg(type, msg, $div) {
     if ((type == 'requestProcess') && (msg === ''))
         msg = 'Requête en cours de traitement';
@@ -930,24 +947,14 @@ function displayRequestMsg(type, msg, $div) {
     $div.html(html).hide().slideDown(250);
 }
 function displayCartRequestResult(prodId, html) {
-    $('#prod_'+prodId).find('.cartRequestResults').show().animate({
-        'opacity': 0.1
-    }, {
-        'duration' : 250,
-        'complete' : function() {
-            $(this).html(html).animate({
-                'opacity': 1
-            }, {
-                'duration': 250,
-                'complete' : function() {
-                    $(this).fadeOut(5000, function() {
-                        $(this).slideUp(250, function() {
-                            $(this).html('');
-                        });
-                    })
-                }
-            });
-        }
+    var $cart = $('#prod_'+prodId).find('.cartRequestResults');
+    $cart.find('p.requestProcess').first().slideUp(250, function() {
+        $(this).remove();
+        $cart.append(html);
+        var $p = $cart.find('p').last();
+        $p.fadeOut(5000, function() {
+            $(this).remove();
+        });
     });
 }
 function getProdId($obj) {
@@ -1013,6 +1020,35 @@ function displayLabelInfos($span) {
 function hideLabelInfos($span) {
     $span.find('div.labelInfos').fadeOut(250);
 }
+function openRepairImportForm(prodId) {
+    var $form = $('#prod_'+prodId).find('div.importRepairForm');
+    if (!$form.length){
+        alert('Erreur: impossible d\'afficher le formulaire');
+        return;
+    }
+    $form.slideDown(250);
+}
+function closeRepairImportForm(prodId) {
+    var $form = $('#prod_'+prodId).find('div.importRepairForm');
+    if (!$form.length)
+        return;
+    $form.slideUp(250);
+}
+function closeRepairSubmit($span, repairId) {
+    if ($span.hasClass('deactivated'))
+        return;
+
+    if (confirm("La réparation va être indiquée comme complète auprès du service GSX d'Apple.\nVeuillez confirmer")) {
+        var $container = $('#repair_'+repairId).find('.repairRequestsResults');
+        if ($container.length) {
+            $span.attr('class', 'button redHover closeRepair deactivated');
+            displayRequestMsg('requestProcess', '', $container);
+            setRequest('GET', 'closeRepair', repairId, '&repairRowId='+repairId);
+            return;
+        }
+        alert('Une erreur est survenue, opération impossible.');
+    }
+}
 function togglePartDatasBlockDisplay($div) {
     if ($div.hasClass('closed')) {
         $div.parent('div.partDatasBlock').find('div.partDatasContent').slideDown(250);
@@ -1043,7 +1079,7 @@ function checkInput($input, type) {
     switch (type) {
         case 'text':
             if (!/^.+$/.test(val)) {
-                assignInputCheckMsg($input, 'notOk', '');
+                assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
                 return false;
             }
             break;
@@ -1138,13 +1174,23 @@ function duplicateInput($span, inputName) {
     }
     alert('Une erreur est survenue, opération impossible');
 }
-function submitGsxRequestForm(prodId, request) {
+function submitGsxRequestForm(prodId, request, repairRowId) {
     var $prod = $('#prod_'+prodId);
     var $form = null;
-    if (!$prod.length){
-        $form = $('#repairForm_'+request);
+    var $resultContainer = null;
+    if (repairRowId !== undefined) {
+        var $repairContainer = $prod.find('#repair_'+repairRowId);
+        if ($repairContainer.length) {
+            $form = $repairContainer.find('#repairForm_'+request);
+            $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+        }
     } else {
-        $form = $prod.find('#repairForm_'+request);
+        if (!$prod.length){
+            $form = $('#repairForm_'+request);
+        } else {
+            $form = $prod.find('#repairForm_'+request);
+            $resultContainer = $prod.find('.repairFormResults');
+        }
     }
     if (!$form.length) {
         alert('Erreur: échec d\'identification du formulaire. Abandon');
@@ -1182,7 +1228,50 @@ function submitGsxRequestForm(prodId, request) {
     }
 
     $form.find('#partsCount').val(partCount);
-    $form.submit();
+    if ($resultContainer.length) {
+        displayRequestMsg('requestProcess', '', $resultContainer);
+    }
+    $.ajax({
+        type: "POST",
+        url: $form.attr('action'),
+        dataType: 'html',
+        data: $form.serialize(),
+        success: function(html) {
+            if ($resultContainer.length) {
+                $resultContainer.html(html);
+            }
+        },
+        error: function() {
+            displayRequestMsg('error', 'Une erreur technique est survenue', $resultContainer);
+        }
+    });
+}
+function importRepairSubmit(prodId) {
+    var $prod = $('#prod_'+prodId);
+    if ($prod.length) {
+        var $input = $prod.find('#importNumber');
+        if ($input.length) {
+            var $resultContainer = $prod.find('div.importRepairResult');
+            if ($resultContainer.length) {
+                var number = $input.val();
+                if (!number.length) {
+                    displayRequestMsg('error', 'Veuillez indiquer un identifiant et sélectionner le type correspondant.', $resultContainer);
+                    return;
+                } else {
+                    if (checkInput($input, 'text')) {
+                        var params = '&importNumber='+number+'&importNumberType='+$prod.find('#importNumberType').val();
+                        setRequest('GET', 'importRepair', prodId, params);
+                        displayRequestMsg('requestProcess', '', $resultContainer);
+                        return;
+                    } else {
+                        displayRequestMsg('error', 'L\'identifiant indiqué ne respecte pas le bon format', $resultContainer);
+                        return;
+                    }
+                }
+            }
+        }
+    }
+    alert('Une erreur est survenue, opération impossible (ID produit absent)');
 }
 function getXMLHttpRequest() {
     var xhr = null;
@@ -1203,6 +1292,7 @@ function getXMLHttpRequest() {
 }
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
+    var $span = null;
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {
@@ -1224,6 +1314,7 @@ function onRequestResponse(xhr, requestType, prodId) {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
             }
             break;
+
         case 'loadRepairForm':
             $div = $('#prod_'+prodId).find('.repairFormContainer');
             if ($div.length) {
@@ -1265,6 +1356,48 @@ function onRequestResponse(xhr, requestType, prodId) {
                 eval(xhr.responseText);
             }
             break;
+
+        case 'importRepair':
+            var $prod = $('#prod_'+prodId);
+            if ($prod.length) {
+                $('#prod_'+prodId).find('.importRepairResult').slideUp(250, function() {
+                    $(this).html(xhr.responseText).slideDown(250);
+                })
+            } else {
+                displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');
+            }
+            break;
+
+        case 'closeRepair':
+            var repairRowId = prodId;
+            var $repair = $('#repair_'+repairRowId);
+            if ($repair.length) {
+                var $repairResult = $repair.find('div.repairRequestsResults');
+                $span = $repair.find('span.closeRepair');
+                if ($repairResult.length) {
+                    if (xhr.responseText == 'ok') {
+                        displayRequestMsg('confirmation', 'La réparation a été fermée avec succés.<ok>Reload</ok>', $repairResult);
+                        $span.hide();
+                        return;
+                    }
+                    $span.attr('class', 'button redHover closeRepair');
+                    $repairResult.show().html(xhr.responseText);
+                    return;
+                }
+            } else {
+                alert(xhr.responseText);
+            }
+            break;
+
+        case 'addCartToPropal':
+            if (xhr.responseText == 'ok') {
+                $span = $('#prod_'+prodId).find('span.addToPropal');
+                $span.attr('class', 'button addToPropal');
+                $('#prod_'+prodId).find('.cartRequestResults').find('ok').remove();
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p><ok>Reload</ok>');
+            } else
+                displayCartRequestResult(prodId, xhr.responseText);
+            break;
     }
 }
 function setRequest(method, requestType, prodId, requestParams) {
@@ -1293,6 +1426,7 @@ function setRequest(method, requestType, prodId, requestParams) {
 }
 
 var $curAnchor = null;
+var count = 0;
 function scrollToAnchor() {
     // Ne pas appellet directement, passer par setNewScrollToAnchor()
     if (!$curAnchor)
@@ -1309,9 +1443,9 @@ function scrollToAnchor() {
     distance /=  2;
 
     var newScroll = 0;
-    if ((distance > 0) && (distance <= 1))
+    if ((distance > 0) && (distance <= 2))
         newScroll = end;
-    else if ((distance < 0) && (distance >= -1))
+    else if ((distance < 0) && (distance >= -2))
         newScroll = end;
     else  {
         newScroll = start + distance;
@@ -1323,15 +1457,20 @@ function scrollToAnchor() {
     }
 
     $(window).scrollTop(newScroll);
-    if (newScroll != end)
-        setTimeout(function() {
-            scrollToAnchor();
-        }, 100)
-    else
-        $curAnchor = null;
+    count++;
+    if (count < 20) {
+        if (newScroll != end) {
+            setTimeout(function() {
+                scrollToAnchor();
+            }, 100)
+            return;
+        }
+    }
+    $curAnchor = null;
 }
 
 function setNewScrollToAnchor($anchor) {
+    count = 0;
     $curAnchor = $anchor;
     scrollToAnchor();
 }

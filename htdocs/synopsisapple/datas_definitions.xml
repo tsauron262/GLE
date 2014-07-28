@@ -183,4 +183,10 @@
     <def name="returnOrderNumber" type="text">
         <label>Numéro de retour</label>
     </def>
+    <def name="closeRepair" type="YesNo">
+        <label>Fermer cette réparation en cas de succès?</label>
+    </def>
+    <def name="includeFiles" type="YesNo">
+        <label>Inclure automatiquement les fichiers associés à ce produit</label>
+    </def>
 </root>

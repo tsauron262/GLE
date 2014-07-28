@@ -15,9 +15,9 @@ $coefPrix = 1;
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
-    $userId = 'tysauron@gmail.com';
-    $password = 'freeparty';
-    $serviceAccountNo = '0000100520';
+$userId = 'tysauron@gmail.com';
+$password = 'freeparty';
+$serviceAccountNo = '0000100520';
 
 //ephesussav
 //@Ephe2014#
@@ -32,9 +32,9 @@ function fetchPartsList() {
                 'comptiaCode' => (isset($_POST['part_' . $i . '_comptiaCode']) ? $_POST['part_' . $i . '_comptiaCode'] : 0),
                 'comptiaModifier' => (isset($_POST['part_' . $i . '_comptiaModifier']) ? $_POST['part_' . $i . '_comptiaModifier'] : 0),
                 'qty' => (isset($_POST['part_' . $i . '_qty']) ? $_POST['part_' . $i . '_qty'] : 1),
-                'componentCode' => (isset($_POST['part_'.$i.'_componentCode'])?$_POST['part_' . $i . '_componentCode'] : ''),
-                'partDescription' => (isset($_POST['part_'.$i.'_partDescription'])?$_POST['part_' . $i . '_partDescription'] : 'Composant '.$i),
-                'stockPrice' => (isset($_POST['part_'.$i.'_stockPrice'])?$_POST['part_' . $i . '_stockPrice'] : '')
+                'componentCode' => (isset($_POST['part_' . $i . '_componentCode']) ? $_POST['part_' . $i . '_componentCode'] : ''),
+                'partDescription' => (isset($_POST['part_' . $i . '_partDescription']) ? $_POST['part_' . $i . '_partDescription'] : 'Composant ' . $i),
+                'stockPrice' => (isset($_POST['part_' . $i . '_stockPrice']) ? $_POST['part_' . $i . '_stockPrice'] : '')
             );
         } else
             break;
@@ -45,10 +45,10 @@ function fetchPartsList() {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'addCardToPropal':
+        case 'addCartToPropal':
             if (isset($_GET['chronoId'])) {
-                require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
-                require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                 $chr = new Chrono($db);
                 $chr->fetch($_GET['chronoId']);
                 $propalId = $chr->propalid;
@@ -57,9 +57,9 @@ if (isset($_GET['action'])) {
                     $propal->fetch($propalId);
                     $cards = new partsCart($db, null, $_GET['chronoId']);
                     $cards->loadCart();
-                    foreach($cards->partsCart as $part)
-                        $propal->addline($part['partNumber']." - ". $part['partDescription'], $part['stockPrice']*$coefPrix, $part['qty'], "0");
-                    echo '<ok>Reload</ok>';
+                    foreach ($cards->partsCart as $part)
+                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
+                    echo 'ok';
                 } else {
                     echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
                 }
@@ -67,7 +67,7 @@ if (isset($_GET['action'])) {
                 echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
             }
             break;
-            
+
         case 'loadProduct':
             if (isset($_GET['serial'])) {
                 if (isset($_GET['prodId'])) {
@@ -188,11 +188,7 @@ if (isset($_GET['action'])) {
                 if (isset($_GET['request'])) {
                     if (isset($_GET['prodId'])) {
                         $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
-                        $result = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
-                        llxHeader();
-                        echo '<link type="text/css" rel="stylesheet" href="' . DOL_URL_ROOT . '/synopsisapple/appleGSX.css"/>' . "\n";
-                        echo '<script type="text/javascript" src="' . DOL_URL_ROOT . '/synopsisapple/appleGsxScripts.js"></script>' . "\n";
-                        echo $result;
+                        echo $datas->processRequestForm($_GET['prodId'], $_GET['request']);
                     } else {
                         echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";
                     }
@@ -225,12 +221,31 @@ if (isset($_GET['action'])) {
             else
                 echo $GSXdatas->getGSXErrorsHtml();
             break;
+
+        case 'importRepair':
+            if (isset($_GET['chronoId'])) {
+                $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);
+                echo $gsxDatas->importRepair($_GET['chronoId']);
+            } else {
+                echo '<p class="error">Une erreur est survenue (Chrono Id absent)</p>' . "\n";
+            }
+            break;
+
+        case 'closeRepair':
+            if (isset($_GET['repairRowId'])) {
+                $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);
+                echo $gsxDatas->closeRepair($_GET['repairRowId']);
+            } else {
+                echo '<p class="error">Une erreur est survenue (ID réparation absent)</p>' . "\n";
+            }
+            break;
     }
     die('');
 }
 
-function dateAppleToDate($date){
+function dateAppleToDate($date) {
     $garantieT = explode("/", $date);
-    return $garantieT[0]."/".$garantieT[1]."/20".$garantieT[2];
+    return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
 }
+
 ?>

@@ -946,6 +946,29 @@ class GSX {
         unset($this->errors['soap']);
         $this->errors['soap'] = array();
     }
+
+    public function getGSXErrorsHtml() {
+        $html = '';
+        if (count($this->errors['init'])) {
+            $html .= '<p class="error">Erreur(s) de connection: <br/>';
+            $i = 1;
+            foreach ($this->errors['init'] as $errorMsg) {
+                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
+                $i++;
+            }
+            $html .= '</p>';
+        }
+        if (count($this->errors['soap'])) {
+            $html .= '<p class="error">Erreur(s) SOAP: <br/>';
+            $i = 1;
+            foreach ($this->errors['soap'] as $errorMsg) {
+                $html .= $i . '. ' . utf8_encode(str_replace("?", "'", $errorMsg)) . '.<br/>' . "\n";
+                $i++;
+            }
+            $html .= '</p>';
+        }
+        return $html;
+    }
 }
 
 ?>

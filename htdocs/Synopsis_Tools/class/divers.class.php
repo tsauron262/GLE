@@ -171,8 +171,8 @@ class synopsisHook {
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
                 $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process&' . ($centre ? 'Centre=' . $centre : "");
-                $return .= '<div class="menu_titre"><a class="vsmenu" href="' . $href . $hrefFin . '">
-                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' SAV ' . $ligne3['label'] . '</a><br></div>';
+                $return .= '<div class="menu_titre" style="margin:5px 3px 0px;"><a class="vsmenu" href="' . $href . $hrefFin . '">
+                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' SAV ' . $ligne3['label'] . '</a></div>';
 
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
                 while ($ligne = $db->fetch_object($result)) {

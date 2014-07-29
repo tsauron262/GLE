@@ -507,10 +507,11 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
 
 	// If syslog module enabled
 	if (empty($conf->syslog->enabled)) return false;
-        
+        /*mod drsi*/
         $monUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $message = $monUrl . " | " . $message;
-
+        $oldUrl = $_SERVER["HTTP_REFERER"];
+        $message = " | ".$user->login."\n".$monUrl . " | " . $oldUrl . "\n". $message. "\n";
+/*f mod drsi*/
 	if (! empty($level))
 	{
 		// Test log level

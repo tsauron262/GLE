@@ -1080,6 +1080,7 @@ if ($id > 0)
            
         
         $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ref_ext = '" . $idMaitre . "'");
+        $idActionLierUser =  array();
         if ($db->num_rows($sql) > 0) {
             $idActionLierUser =  array($idMaitre => $object->usertodo->id);
             while ($result = $db->fetch_object($sql)) {

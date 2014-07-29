@@ -26,8 +26,8 @@ var partDataType = {
 var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
-else
-    extra = extra+ "&chronoId="+3;
+//else
+//    extra = extra+ "&chronoId="+3;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -288,19 +288,27 @@ function Cart(prodId, serial, PM) {
     };
     this.activateSave = function() {
         this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover');
+        this.$prod.find('.addToPropal').attr('class', 'button addToPropal');
     };
     this.deactivateSave = function() {
         this.$prod.find('.cartSave').attr('class', 'button cartSave greenHover deactivated');
+        this.$prod.find('.addToPropal').attr('class', 'button addToPropal deactivated');
     };
-    this.save = function() {
+    this.save = function(addToPropal) {
+        if (typeof(addToPropal) == 'undefined')
+            addToPropal = false;
+
         if (!this.cartProds.length)
             return;
 
         if (this.$prod.find('.cartSave').hasClass('deactivated'))
-            return;
+            if (!addToPropal)
+                return;
         this.deactivateSave();
 
         var params = 'serial='+this.serial;
+        if (addToPropal)
+            params += '&addToPropal=1';
         var i = 1;
         for (id in this.cartProds) {
             var $tr = this.$prod.find('tr.cartProd_'+id);
@@ -318,6 +326,7 @@ function Cart(prodId, serial, PM) {
                 i++;
             }
         }
+        this.$prod.find('.cartRequestResults').find('ok').remove();
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
     };
@@ -394,11 +403,7 @@ function Cart(prodId, serial, PM) {
     this.addToPropal = function($span) {
         if ($span.hasClass('deactivated'))
             return;
-        $span.attr('class', 'button addToPropal deactivated');
-
-        this.$prod.find('.cartRequestResults').find('ok').remove();
-        this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
-        setRequest('GET', 'addCartToPropal', this.prodId, '');
+        this.save(true);
     }
 }
 
@@ -1118,10 +1123,11 @@ function checkInput($input, type) {
             break;
 
         case 'date':
-            if (!/^[0-9]{2}\/[0-9]{2}\/[0-9]{2}$/.test(val)) {
+            if (!/^[0-9]{2}\/[0-9]{2}\/[0-9]{2,4}$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Format de la date invalide. (Attendu: JJ/MM/AA)');
                 return false;
-            }
+            } else if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(val))
+                    $input.val(val.replace(/^([0-9]{2}\/[0-9]{2}\/)[0-9]{2}([0-9]{2})$/, '$1$2'));
             break;
 
         case 'time':
@@ -1178,7 +1184,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     var $prod = $('#prod_'+prodId);
     var $form = null;
     var $resultContainer = null;
-    if (repairRowId !== undefined) {
+    if (typeof(repairRowId) != 'undefined') {
         var $repairContainer = $prod.find('#repair_'+repairRowId);
         if ($repairContainer.length) {
             $form = $repairContainer.find('#repairForm_'+request);
@@ -1342,7 +1348,11 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'savePartsCart':
-            displayCartRequestResult(prodId, xhr.responseText);
+            if (xhr.responseText == 'ok') {
+                $('#prod_'+prodId).find('.cartRequestResults').find('ok').remove();
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p><ok>Reload</ok>');
+            } else
+                displayCartRequestResult(prodId, xhr.responseText);
             GSX.products[prodId].cart.activateSave();
             break;
 

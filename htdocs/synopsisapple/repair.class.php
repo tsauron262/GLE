@@ -276,7 +276,7 @@ class Repair {
         if (isset($this->repairLookUp['repairConfirmationNumber']) && ($this->repairLookUp['repairConfirmationNumber'] != ''))
             $this->confirmNumbers['repair'] = $this->repairLookUp['repairConfirmationNumber'];
         if (isset($this->repairLookUp['repairStatus']) && ($this->repairLookUp['repairStatus'] != '')) {
-            if ($this->repairLookUp['repairStatus'] == 'closed')
+            if (($this->repairLookUp['repairStatus'] == 'Closed') || ($this->repairLookUp['repairStatus'] == 'Fermée et complétée'))
                 $this->repairComplete = 1;
             else
                 $this->repairComplete = 0;
@@ -302,7 +302,13 @@ class Repair {
         if (!isset($this->confirmNumbers['repair']) || ($this->confirmNumbers['repair'] == ''))
             $html .= '<p class="error">numéro de confirmation absent</p>' . "\n";
         else
-            $html .= '<strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
+            $html .= '<p><strong>N° de confirmation: </strong>' . $this->confirmNumbers['repair'] . '</p>';
+        $html .= '<p><strong>Statut dans GSX: </strong>';
+        if (isset($this->repairLookUp['repairStatus']))
+            $html .= $this->repairLookUp['repairStatus'];
+        else
+            $html .= '<span style="color: #550000">inconnu</span>';
+        $html .= '</p>';
         if ($this->repairComplete)
             $html .= '<p class="confirmation">Réparation terminée</p>' . "\n";
         else {
@@ -326,8 +332,8 @@ class Repair {
             'repairStatus' => '',
             'purchaseOrderNumber' => '',
             'sroNumber' => '',
-            'sroNumber' => isset($this->repairNumber)?$this->repairNumber:'',
-            'repairConfirmationNumber' => isset($this->confirmNumbers['repair'])?$this->confirmNumbers['repair']:'',
+            'sroNumber' => isset($this->repairNumber) ? $this->repairNumber : '',
+            'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
             'serialNumbers' => array(
                 'serialNumber' => ''
             ),

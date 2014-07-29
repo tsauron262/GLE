@@ -8,6 +8,7 @@ class partsCart {
     public $partsCart = array();
     public $cartRowId = null;
     public $confirmNumber = null;
+    public $errors = array();
 
     public function __construct($db, $serial = null, $chronoId = null) {
         $this->serial = $serial;
@@ -16,6 +17,18 @@ class partsCart {
         $this->loadCartRowId();
     }
 
+    public function addError($msg) {
+        $this->errors[] = $msg;
+    }
+
+    public function displayErrors() {
+        $html = '';
+        foreach ($this->errors as $error) {
+            $html .= '<p class="error">'.$error.'</p>';
+        }
+        $this->errors = array();
+        return $html;
+    }
     protected function loadCartRowId() {
         if (isset($this->cartRowId))
             return true;
@@ -59,11 +72,15 @@ class partsCart {
     }
 
     public function saveCart() {
-        if (!isset($this->serial))
-            return '<p class="error">Echec: numéro de série absent</p>';
+        if (!isset($this->serial)) {
+            $this->addError('Echec de l\'enregistrement: numéro de série absent');
+            return false;
+        }
 
-        if (!isset($this->db))
-            return '<p class="error">Impossible d\'accéder à la base de données.</p>';
+        if (!isset($this->db)) {
+            $this->addError('Impossible d\'accéder à la base de données.');
+            return false;
+        }
 
         if (!$this->loadCartRowId()) {
             $sql = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart` (`serial_number`, `chrono_id`) ';
@@ -73,14 +90,17 @@ class partsCart {
             $sql .= ')';
 
             if (!$this->db->query($sql)) {
-                return '<p class="error">Echec de l\'enregistrement en base de données<br/>
-                        Erreur SQL : ' . $this->db->lasterror() . '</p>';
+                $this->addError('Echec de l\'enregistrement en base de données<br/>
+                        Erreur SQL : ' . $this->db->lasterror());
+                return false;
             }
             $this->cartRowId = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsis_apple_parts_cart');
         } else {
             $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
-            if (!$this->db->query($sql))
-                return '<p class="error">Erreur: ' . $this->db->lasterror() . '</p>';
+            if (!$this->db->query($sql)) {
+                $this->addError('Erreur: ' . $this->db->lasterror());
+                return false;
+            }
         }
 
         if (count($this->partsCart)) {
@@ -101,22 +121,20 @@ class partsCart {
                 $sql .= ')';
 
                 if (!$this->db->query($sql)) {
-                    $html .= '<p class="error">Erreur: ' . $this->db->lasterror() . '</p>';
+                    $this->addError('Echec de l\'enregistrement d\'un élément du panier.<br/>Erreur SQL: ' . $this->db->lasterror());
                     $check = false;
                 }
             }
-            if ($check)
-                return '<p class="confirmation">Le panier a été correctement enregistré (' . count($this->partsCart) . ' produits)</p>';
-            else
-                return $html;
+            return $check;
         } else {
-            return '<p class="error">Echec (panier vide ou erreur lors de la récupération des éléments du panier)</p>';
+            $this->addError('Echec de l\'enregistrement du panier (panier vide ou erreur lors de la récupération des éléments du panier)');
+            return false;
         }
     }
 
     public function loadCart() {
         $this->loadCartRowId();
-        if($this->cartRowId > 0){
+        if ($this->cartRowId > 0) {
             $sql = 'SELECT * FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
             $result = $this->db->query($sql);
             if (isset($result) && $result) {
@@ -124,6 +142,7 @@ class partsCart {
                 while ($part = $this->db->fetch_object($result)) {
                     $this->addToCart($part->part_number, $part->comptia_code, $part->comptia_modifier, $part->qty, $part->componentCode, $part->partDescription, $part->stockPrice);
                 }
+                return true;
             }
         }
         return false;

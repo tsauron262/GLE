@@ -11,14 +11,12 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 
 $coefPrix = 1;
 
-
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
-//$userId = 'tysauron@gmail.com';
-//$password = 'freeparty';
-//$serviceAccountNo = '0000100520';
-
+$userId = 'tysauron@gmail.com';
+$password = 'freeparty';
+$serviceAccountNo = '0000100520';
 //ephesussav
 //@Ephe2014#
 
@@ -45,29 +43,6 @@ function fetchPartsList() {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'addCartToPropal':
-            if (isset($_GET['chronoId'])) {
-                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
-                $chr = new Chrono($db);
-                $chr->fetch($_GET['chronoId']);
-                $propalId = $chr->propalid;
-                if ($propalId > 0) {
-                    $propal = new Propal($db);
-                    $propal->fetch($propalId);
-                    $cards = new partsCart($db, null, $_GET['chronoId']);
-                    $cards->loadCart();
-                    foreach ($cards->partsCart as $part)
-                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
-                    echo 'ok';
-                } else {
-                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
-                }
-            } else {
-                echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
-            }
-            break;
-
         case 'loadProduct':
             if (isset($_GET['serial'])) {
                 if (isset($_GET['prodId'])) {
@@ -149,20 +124,39 @@ if (isset($_GET['action'])) {
             break;
 
         case 'savePartsCart':
-            if (isset($_POST['serial'])) {
-                $parts = fetchPartsList();
-                if (count($parts)) {
-                    global $db;
-                    if (!isset($db))
-                        die('<p class="error">Impossible d\'accéder à la base de données.</p>');
-                    $cart = new partsCart($db, $_POST['serial'], isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
-                    $cart->setPartsCart(fetchPartsList());
-                    echo $cart->saveCart();
+            if (!isset($_POST['serial']))
+                die('<p class="error">Une erreur est survenue: numéro de série absent.</p>');
+            if (!isset($_GET['chronoId']))
+                die('<p class="error">Une erreur est survenue (chrono id absent)</p>');
+
+            $parts = fetchPartsList();
+            if (!count($parts))
+                die('<p class="error">Une erreur est survenue: aucun produit dans le panier</p>');
+
+            global $db;
+            $cart = new partsCart($db, $_POST['serial'], $_GET['chronoId']);
+            $cart->setPartsCart($parts);
+            if ($cart->saveCart()) {
+                if (isset($_POST['addToPropal']) && ($_POST['addToPropal'] == 1)) {
+                    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                    $chr = new Chrono($db);
+                    $chr->fetch($_GET['chronoId']);
+                    $propalId = $chr->propalid;
+                    if ($propalId > 0) {
+                        $propal = new Propal($db);
+                        $propal->fetch($propalId);
+                        foreach ($cart->partsCart as $part)
+                            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
+                        echo 'ok';
+                    } else {
+                        echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+                    }
                 } else {
-                    echo '<p class="error">Une erreur est survenue: aucun produit dans le panier</p>';
+                    echo '<p class="confirmation">Panier correctement enregistré ('.count($cart->partsCart).' produit(s))</p>';
                 }
             } else {
-                echo '<p class="error">Une erreur est survenue: numéro de série absent.</p>';
+                echo $cart->displayErrors();
             }
             break;
 

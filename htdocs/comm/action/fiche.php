@@ -1075,7 +1075,7 @@ if ($id > 0)
 
         /* deb mod drsi */
 //        $object = $object;
-        if($object->id > 0){
+        if(1){
         $idObj = $object->id;
         $object->fetch($idObj);
         $idActionLier = array();

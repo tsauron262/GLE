@@ -20,7 +20,7 @@ function getPara(){
     if(!isset($_SESSION['paraAgenda']['workHour']))
         $_SESSION['paraAgenda']['workHour'] = 'false';
     if(!isset($_SESSION['paraAgenda']['timeTranche']))
-        $_SESSION['paraAgenda']['timeTranche'] = '20';
+        $_SESSION['paraAgenda']['timeTranche'] = '4';
     return $_SESSION['paraAgenda'];
 }
 

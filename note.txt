@@ -1,3 +1,15 @@
 Contrat en tete + ligne plus
 
 connect precedent
+
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinter` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_soc` AS `fk_soc`,`f`.`fk_projet` AS `fk_projet`,`f`.`fk_contrat` AS `fk_contrat`,`sf`.`fk_commande` AS `fk_commande`,`f`.`ref` AS `ref`,`f`.`tms` AS `tms`,`f`.`datec` AS `datec`,`f`.`date_valid` AS `date_valid`,`f`.`datei` AS `datei`,`f`.`fk_user_author` AS `fk_user_author`,`f`.`fk_user_valid` AS `fk_user_valid`,`f`.`fk_statut` AS `fk_statut`,`f`.`duree` AS `duree`,`f`.`description` AS `description`,`f`.`note_private` AS `note_private`,`f`.`note_public` AS `note_public`,`f`.`model_pdf` AS `model_pdf`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`natureInter` AS `natureInter`,`f`.`entity` AS `entity` from (`llx_fichinter` `f` left join `llx_synopsisfichinter` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la vue `llx_Synopsis_fichinterdet`
+--
+DROP TABLE IF EXISTS `llx_Synopsis_fichinterdet`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));

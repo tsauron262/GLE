@@ -10,6 +10,19 @@ foreach($tabUser as $idUser => $nomUser){
     $i++;
 }
 
+function getPara(){
+    if(isset($_REQUEST['workHour']))
+        $_SESSION['paraAgenda']['workHour'] = $_REQUEST['workHour'];
+    if(isset($_REQUEST['timeTranche']))
+        $_SESSION['paraAgenda']['timeTranche'] = $_REQUEST['timeTranche'];
+//    echo $_SESSION['paraAgenda']['timeTranche'];die;
+    
+    if(!isset($_SESSION['paraAgenda']['workHour']))
+        $_SESSION['paraAgenda']['workHour'] = 'false';
+    if(!isset($_SESSION['paraAgenda']['timeTranche']))
+        $_SESSION['paraAgenda']['timeTranche'] = '20';
+    return $_SESSION['paraAgenda'];
+}
 
 function getTabUser() {
     global $user, $db, $langs;

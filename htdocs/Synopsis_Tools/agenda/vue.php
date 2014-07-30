@@ -5,6 +5,8 @@ require_once("libAgenda.php");
 
 $tabUserId = array();
 $tabUser = getTabUser();
+$_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
+$tabPara = getPara();
 $i = 0;
 $tabJsIdUser = 'tabUserId = Array();';
 foreach ($tabUser as $userId => $nom) {
@@ -77,11 +79,11 @@ $js .= <<<EOF
         background: none;
     }
   </style>
-
-
-  <script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>
-  <script type="text/javascript">
 EOF;
+
+
+  $js .= '<script type="text/javascript" src="./calendar/jquery.weekcalendar.js"></script>';
+  $js .= '<script type="text/javascript">';
 $js .= $tabJsIdUser;
 $js .= <<<EOF
   (function($) {
@@ -116,7 +118,14 @@ $js .= <<<EOF
 
     $(document).ready(function() {
       var Ocalendar = $('#calendar').weekCalendar({
-        timeslotsPerHour: 4,
+EOF;
+$js .= "
+        timeslotsPerHour: ".$_SESSION['paraAgenda']['timeTranche'].",
+        businessHours: {start: 8, end: 18, limitDisplay: ".$_SESSION['paraAgenda']['workHour']."},
+        timeslotHeight: 25,
+        ";    
+$js .= <<<EOF
+        defaultEventLength: 2,
         date: new Date(toDateUrl(new Date(), 2)+'T08:00:00.000+00:00'),
         height: function(Ocalendar){
           return $(window).height() - $('h1').outerHeight(true) - 110;
@@ -304,8 +313,17 @@ llxHeader($js);
 printMenu($tabUser);
 
 
+echo '<form>Interval : <select name="timeTranche">';
+foreach(array(5,10,15,20,30) as $time)
+    echo '<option value="'.(60/$time).'" '.((60/$time) == $_SESSION['paraAgenda']['timeTranche'] ? 'selected="selected"' : "") .'>'.$time.'</option>';
+echo '</select>';
+echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><input type='checkbox' id='workHour' name='workHour' ".("true" == $_SESSION['paraAgenda']['workHour'] ? 'checked="checked"' : "") .'/>';
+echo "<input type='submit' value='Ok' class='butAction'/></form>";
+
+
 echo '<input type="date" id="dateChange"/>';
 echo "<button class='butAction' onclick='$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date($(\"#dateChange\").attr(\"value\")));' >Ok</button>";
+
 
 echo '
 
@@ -350,11 +368,11 @@ function printMenu($tabUser) {
             echo "</tr><tr>";
         }
     }
-    echo "</tr></table></div></div>";
+    echo "</tr></table><br/></div></div>";
 
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";
-    echo "<br/><br/>";
+    echo "<div class='listUser'><br/><br/></div>";
 }
 
 ?>

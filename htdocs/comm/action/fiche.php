@@ -667,6 +667,12 @@ if ($id > 0)
 		dol_print_error($db,$object->error);
 		exit;
 	}
+        /*mod drsi*/
+	if ($object->id <= 0)
+	{
+		echo "L'objet a été supprimé";
+		exit;
+	}/*fmoddrsi*/
 
 	$societe = new Societe($db);
 	if ($object->societe->id)
@@ -1069,6 +1075,7 @@ if ($id > 0)
 
         /* deb mod drsi */
 //        $object = $object;
+        if($object->id > 0){
         $idObj = $object->id;
         $object->fetch($idObj);
         $idActionLier = array();
@@ -1159,6 +1166,7 @@ if ($id > 0)
         echo "<input type='submit' name='addGroup' value='Ajouter utilisateurs' class='butAction'/>";
         echo "<input type='hidden' name='id' value='" . $idObj . "'/>";
         echo "</form>";
+        }
 
 
         /* fmod drsi */

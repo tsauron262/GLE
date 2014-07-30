@@ -161,6 +161,7 @@ table.wc-time-slots {
 
 .wc-time-slot {
     border-bottom: 1px dotted #ddd;
+/*margin-top: 0.0296em;*/
 }
 
 .wc-hour-header {

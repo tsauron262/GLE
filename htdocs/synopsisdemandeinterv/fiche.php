@@ -1781,7 +1781,7 @@ EOF;
                     $doleditor->Create();
                 } else {
                     /* print '<textarea name="desc" cols="40" class="flat" rows="' . ROWS_2 . '">' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '</textarea>'; */
-                    print '<input type="text" style="width:320px;" name="description" value="' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '"/>';
+                    print '<textarea style="width:320px;" name="description">' . preg_replace('/<br[ ]*\/?>/', "\n", $objp->description) . '</textarea>';
                 }
                 print '</td>';
 

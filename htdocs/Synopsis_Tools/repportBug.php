@@ -59,6 +59,26 @@ if (isset($_GET['action']) && $_GET['action'] == "setAnnuler") {
     $db->query($requete);
 }
 
+
+if (isset($_GET['action']) && $_GET['action'] == "setInfo") {
+    
+    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug where rowid = " . $_GET['id'];
+    $sql = $db->query($requete);
+    $obj = $db->fetch_object($sql);
+    
+    
+    $message = 'Bonjour je n\'ai pas pu traiter votre bug signalé sur GLE merci de le resignaler avec plus d\'informations ou de contacter votre assistance technique. '."\n\n"
+            .'Message : '.$obj->text;
+
+    $userT = new User($db);
+    $userT->fetch($obj->fk_user);
+    mailSyn($userT->email, "Bug Gle Précisions", $message);
+    
+    
+    $requete = "UPDATE ".MAIN_DB_PREFIX."Synopsis_Tools_bug set resolu = 3 where rowid = " . $_GET['id'];
+    $db->query($requete);
+}
+
 function getBug($user) {
     global $db, $langs;
     $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Tools_bug";
@@ -99,10 +119,13 @@ function getBug($user) {
         $html .= "<td>";
         
             $pictoS = img_picto($langs->trans("Annulé"), 'delete');
+            $pictoI = img_picto($langs->trans("Informations"), 'history');
         if ($data->resolu == 1)
             $picto = img_picto($langs->trans("Résolu"), 'on');
         elseif ($data->resolu == 2)
             $picto = $pictoS;
+        elseif ($data->resolu == 3)
+            $picto = $pictoI;
         else
             $picto = img_picto($langs->trans("Non traité"), 'off');
         if ($user->rights->SynopsisTools->Global->adminBug && !$data->resolu)
@@ -111,6 +134,8 @@ function getBug($user) {
             $html .= $picto;
         if ($user->rights->SynopsisTools->Global->adminBug && !$data->resolu == 2)
             $html .= ' <a href="?action=setAnnuler&id=' . $data->rowid . '"> ' . $pictoS . ' </a>';
+        if ($user->rights->SynopsisTools->Global->adminBug && $data->resolu < 1)
+            $html .= ' <a href="?action=setInfo&id=' . $data->rowid . '"> ' . $pictoI . ' </a>';
         $html .= "</td>";
         $html .= "</tr>";
     }

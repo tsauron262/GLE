@@ -569,13 +569,17 @@ class Synopsisfichinter extends Fichinter {
         $this->fetch_lines();
         foreach ($this->lignes as $lignes) {
             if ($lignes->fk_commandedet) {
-                $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE fk_commandedet =" . $lignes->fk_commandedet;
-                $resql = $this->db->query($requete);
-                while ($res = $this->db->fetch_object($resql)) {
-                    if ($lignes->pu_ht != $res->pu_ht || $lignes->isForfait != $res->isForfait) {
-                        $lignes->pu_ht = $res->pu_ht;
-                        $lignes->isForfait = $res->isForfait;
-                        $lignes->update($user);
+                $tabDi = getElementElement("DI", 'FI', null, $this->id);
+                if(isset($tabDi[0]['s'])){
+                    $di = $tabDi[0]['s'];
+                    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE fk_commandedet =" . $lignes->fk_commandedet. " AND fk_synopsisdemandeinterv = ".$di;
+                    $resql = $this->db->query($requete);
+                    while ($res = $this->db->fetch_object($resql)) {
+                        if ($lignes->pu_ht != $res->pu_ht || $lignes->isForfait != $res->isForfait) {
+                            $lignes->pu_ht = $res->pu_ht;
+                            $lignes->isForfait = $res->isForfait;
+                            $lignes->update($user);
+                        }
                     }
                 }
             }

@@ -628,6 +628,7 @@ function saveForm() {
     extra(28, $_POST['desc2']);
     //prestation($_POST['descPrest'], $_POST['fk_typeinterv']);
     $fichinter->info($fichinter->id);
+    echo "lllllllllll11K";
     for ($i = 1; isset($_POST['presta' . $i . "_rowid"]); $i++) {
         $fk_typeinterv = $_POST['presta' . $i . "_fk_typeinterv"];
         $pu_ht = 0;

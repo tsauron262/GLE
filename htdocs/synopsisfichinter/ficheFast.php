@@ -670,9 +670,8 @@ function saveForm() {
                 $fichinterline->fk_typeinterv = $_POST['presta' . $i . "_fk_typeinterv"];
                 $fichinterline->fk_contratdet = (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0);
                 $fichinterline->typeIntervProd = $_POST['presta' . $i . "_fk_prod"];
-                $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on")? '1' : '0';
+                $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
                 $fichinterline->pu_ht = $pu_ht;
-                echo "debut";
                 $result = $fichinterline->update($user);
             } else
                 $fichinterline->delete_line();

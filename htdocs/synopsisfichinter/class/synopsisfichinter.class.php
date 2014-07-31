@@ -570,6 +570,7 @@ class Synopsisfichinter extends Fichinter {
         foreach ($this->lignes as $lignes) {
             if ($lignes->fk_commandedet) {
                 $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet WHERE fk_commandedet =" . $lignes->fk_commandedet;
+                echo $requete;
                 $resql = $this->db->query($requete);
                 while ($res = $this->db->fetch_object($resql)) {
                     if ($lignes->pu_ht != $res->pu_ht || $lignes->isForfait != $res->isForfait) {

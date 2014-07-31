@@ -908,13 +908,19 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery) {
         global $langs, $conf;
         
-        if ($user->rights->synopsisdemandeinterv->creer) {
+        if ($user->rights->synopsisdemandeinterv->creer && $this->statut == 0) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
             if ($this->db->query($sql)) {
                 $this->date_delivery = $date_delivery;
+                
+                
+                $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ";
+                $sql.= " SET date = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
+                $sql.= " WHERE fk_synopsisdemandeinterv = " . $this->id . "";
+                $this->db->query($sql);
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);

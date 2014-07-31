@@ -1208,7 +1208,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
             $sql .= ",fk_depProduct = " . $this->typeIntervProd;
         //else if (!$isDep) $sql .= ",fk_depProduct = NULL";
         $sql.= " WHERE rowid = " . $this->rowid;
-        
+        echo $sql."|".$_POST["presta1_forfait"]."|";
         $resql2 = $this->db->query($sql);        
         
         if ($resql && $resql2) {

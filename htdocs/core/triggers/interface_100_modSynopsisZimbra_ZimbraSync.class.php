@@ -1250,7 +1250,7 @@ class InterfaceZimbraSync {
                                ".MAIN_DB_PREFIX."facture.fk_statut,
                                ".MAIN_DB_PREFIX."societe.nom as socname,
                                ".MAIN_DB_PREFIX."societe.rowid as socid,
-                               ".MAIN_DB_PREFIX."facture.note,
+                               ".MAIN_DB_PREFIX."facture.note_private as note,
                                ".MAIN_DB_PREFIX."facture.note_public
                           FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
                          WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
@@ -1403,7 +1403,7 @@ class InterfaceZimbraSync {
                            ".MAIN_DB_PREFIX."facture.fk_statut,
                            ".MAIN_DB_PREFIX."societe.nom as socname,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           ".MAIN_DB_PREFIX."facture.note,
+                           ".MAIN_DB_PREFIX."facture.note_private as note,
                            ".MAIN_DB_PREFIX."facture.note_public
                       FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
                      WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
@@ -1605,7 +1605,7 @@ class InterfaceZimbraSync {
                            ".MAIN_DB_PREFIX."facture.fk_statut,
                            ".MAIN_DB_PREFIX."societe.nom as socname,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           ".MAIN_DB_PREFIX."facture.note,
+                           ".MAIN_DB_PREFIX."facture.note_private as note,
                            ".MAIN_DB_PREFIX."facture.note_public
                       FROM ".MAIN_DB_PREFIX."facture, ".MAIN_DB_PREFIX."societe
                      WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."facture.fk_soc
@@ -1886,7 +1886,7 @@ class InterfaceZimbraSync {
                            ".MAIN_DB_PREFIX."commande.fk_statut,
                            ".MAIN_DB_PREFIX."societe.nom as socname,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           ".MAIN_DB_PREFIX."commande.note,
+                           ".MAIN_DB_PREFIX."commande.note_private as note,
                            ".MAIN_DB_PREFIX."commande.note_public,
                            ".MAIN_DB_PREFIX."commande.date_livraison
                       FROM ".MAIN_DB_PREFIX."commande, ".MAIN_DB_PREFIX."societe
@@ -2239,7 +2239,7 @@ class InterfaceZimbraSync {
                            ".MAIN_DB_PREFIX."propal.fk_statut,
                            ".MAIN_DB_PREFIX."societe.nom as socname,
                            ".MAIN_DB_PREFIX."societe.rowid as socid,
-                           ".MAIN_DB_PREFIX."propal.note,
+                           ".MAIN_DB_PREFIX."propal.note_private,
                            ".MAIN_DB_PREFIX."propal.note_public,
                            ".MAIN_DB_PREFIX."propal.date_livraison
                       FROM ".MAIN_DB_PREFIX."propal, ".MAIN_DB_PREFIX."societe
@@ -2342,7 +2342,7 @@ class InterfaceZimbraSync {
                             ".MAIN_DB_PREFIX."societe.nom as socname,
                             ".MAIN_DB_PREFIX."societe.rowid as socid
                       FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."actioncomm ".MAIN_DB_PREFIX."actioncomm
-                 LEFT JOIN ".MAIN_DB_PREFIX."projet on ".MAIN_DB_PREFIX."actioncomm.fk_projet = ".MAIN_DB_PREFIX."projet.rowid
+                 LEFT JOIN ".MAIN_DB_PREFIX."projet on ".MAIN_DB_PREFIX."actioncomm.fk_project = ".MAIN_DB_PREFIX."projet.rowid
                  LEFT JOIN ".MAIN_DB_PREFIX."c_actioncomm on ".MAIN_DB_PREFIX."c_actioncomm.id = ".MAIN_DB_PREFIX."actioncomm.fk_action
                  LEFT JOIN ".MAIN_DB_PREFIX."socpeople on ".MAIN_DB_PREFIX."socpeople.rowid = ".MAIN_DB_PREFIX."actioncomm.fk_contact
                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."actioncomm.fk_soc AND ".MAIN_DB_PREFIX."actioncomm.id =" . $object->id;
@@ -3434,19 +3434,19 @@ class InterfaceZimbraSync {
                             ".MAIN_DB_PREFIX."expedition.date_expedition,
                             ".MAIN_DB_PREFIX."expedition.fk_user_author,
                             ".MAIN_DB_PREFIX."expedition.fk_user_valid,
-                            ".MAIN_DB_PREFIX."expedition.fk_expedition_methode,
+                            ".MAIN_DB_PREFIX."expedition.fk_shipping_method,
                             ".MAIN_DB_PREFIX."expedition.fk_statut,
-                            ".MAIN_DB_PREFIX."expedition.note,
-                            ".MAIN_DB_PREFIX."expedition_methode.rowid,
-                            ".MAIN_DB_PREFIX."expedition_methode.code,
-                            ".MAIN_DB_PREFIX."expedition_methode.libelle,
-                            ".MAIN_DB_PREFIX."expedition_methode.description,
+                            ".MAIN_DB_PREFIX."expedition.note_private as note,
+                            ".MAIN_DB_PREFIX."c_shipment_mode.rowid,
+                            ".MAIN_DB_PREFIX."c_shipment_mode.code,
+                            ".MAIN_DB_PREFIX."c_shipment_mode.libelle,
+                            ".MAIN_DB_PREFIX."c_shipment_mode.description,
                             ".MAIN_DB_PREFIX."societe.nom as socname,
                             ".MAIN_DB_PREFIX."societe.rowid as socid,
-                            ".MAIN_DB_PREFIX."expedition_methode.statut
+                            ".MAIN_DB_PREFIX."c_shipment_mode.active
                       FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."expedition
-                 LEFT JOIN  ".MAIN_DB_PREFIX."expedition_methode ".MAIN_DB_PREFIX."expedition_methode
-                        ON  ".MAIN_DB_PREFIX."expedition.fk_expedition_methode = ".MAIN_DB_PREFIX."expedition_methode.rowid
+                 LEFT JOIN  ".MAIN_DB_PREFIX."c_shipment_mode ".MAIN_DB_PREFIX."c_shipment_mode
+                        ON  ".MAIN_DB_PREFIX."expedition.fk_shipping_method = ".MAIN_DB_PREFIX."c_shipment_mode.rowid
                     WHERE ".MAIN_DB_PREFIX."societe.rowid = ".MAIN_DB_PREFIX."expedition.fk_soc AND ".MAIN_DB_PREFIX."expedition.rowid = $object->id";
 
         $resql = $db->query($requete);
@@ -3629,11 +3629,11 @@ class InterfaceZimbraSync {
                             ".MAIN_DB_PREFIX."livraison.fk_soc,
                             ".MAIN_DB_PREFIX."livraison.date_creation,
                             ".MAIN_DB_PREFIX."livraison.date_valid,
-                            ".MAIN_DB_PREFIX."livraison.date_livraison,
+                            ".MAIN_DB_PREFIX."livraison.date_delivery,
                             ".MAIN_DB_PREFIX."livraison.fk_user_author,
                             ".MAIN_DB_PREFIX."livraison.fk_user_valid,
                             ".MAIN_DB_PREFIX."livraison.fk_statut,
-                            ".MAIN_DB_PREFIX."livraison.note,
+                            ".MAIN_DB_PREFIX."livraison.note_private as note,
                             ".MAIN_DB_PREFIX."societe.nom as socname,
                             ".MAIN_DB_PREFIX."societe.rowid as socid
                       FROM  ".MAIN_DB_PREFIX."societe, ".MAIN_DB_PREFIX."livraison

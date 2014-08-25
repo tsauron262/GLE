@@ -66,7 +66,7 @@ class modSynopsisZimbra extends DolibarrModules
 
         // Permissions
         $this->rights = array();
-        $this->rights_class = 'SynopsisZimbra'; //Max 12 lettres
+        $this->rights_class = 'synopsiszimbra'; //Max 12 lettres
 
 
         $r = 0;

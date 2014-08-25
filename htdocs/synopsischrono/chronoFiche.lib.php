@@ -44,7 +44,7 @@ function getValueForm2($res, $chr, $withEntete = true) {
 }
 
 function getValueForm3($res, $chrid, $keyid, $socid, $withEntete = true) {
-    global $db;
+    global $db, $user;
     $res->value = stripslashes($res->value);
     if ($withEntete) {
         print '<tr><th class="ui-state-default ui-widget-header" nowrap class="ui-state-default">' . $res->nom;
@@ -70,7 +70,7 @@ function getValueForm3($res, $chrid, $keyid, $socid, $withEntete = true) {
                 $res->value = $obj->tabVal[0];
                 $res->valueIsSelected = true;
             }
-            if ($res->value == 0 && stripos($obj->cssClassM, "myUser") !== false)
+            if (($res->value == 0 || $res->value == '') && stripos($obj->cssClassM, "myUser") !== false)
                 $res->value = $user->id;
             $extra_extraClass = "";
             if ($obj->OptGroup . "x" != "x") {

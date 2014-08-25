@@ -47,20 +47,20 @@
 //    ".MAIN_DB_PREFIX."expedition.date_expedition,
 //    ".MAIN_DB_PREFIX."expedition.fk_user_author,
 //    ".MAIN_DB_PREFIX."expedition.fk_user_valid,
-//    ".MAIN_DB_PREFIX."expedition.fk_expedition_methode,
+//    ".MAIN_DB_PREFIX."expedition.fk_shipping_method,
 //    ".MAIN_DB_PREFIX."expedition.fk_statut,
-//    ".MAIN_DB_PREFIX."expedition.note,
-//    ".MAIN_DB_PREFIX."expedition_methode.rowid,
-//    ".MAIN_DB_PREFIX."expedition_methode.code,
-//    ".MAIN_DB_PREFIX."expedition_methode.libelle,
-//    ".MAIN_DB_PREFIX."expedition_methode.description,
-//    ".MAIN_DB_PREFIX."expedition_methode.statut
+//    ".MAIN_DB_PREFIX."expedition.note_private as note,
+//    ".MAIN_DB_PREFIX."c_shipment_mode.rowid,
+//    ".MAIN_DB_PREFIX."c_shipment_mode.code,
+//    ".MAIN_DB_PREFIX."c_shipment_mode.libelle,
+//    ".MAIN_DB_PREFIX."c_shipment_mode.description,
+//    ".MAIN_DB_PREFIX."c_shipment_mode.active
 //FROM
 //    ".MAIN_DB_PREFIX."expedition ".MAIN_DB_PREFIX."expedition
 //LEFT JOIN
-//    ".MAIN_DB_PREFIX."expedition_methode ".MAIN_DB_PREFIX."expedition_methode
+//    ".MAIN_DB_PREFIX."c_shipment_mode ".MAIN_DB_PREFIX."c_shipment_mode
 //ON
-//    ".MAIN_DB_PREFIX."expedition.fk_expedition_methode = ".MAIN_DB_PREFIX."expedition_methode.rowid
+//    ".MAIN_DB_PREFIX."expedition.fk_shipping_method = ".MAIN_DB_PREFIX."c_shipment_mode.rowid
 //WHERE
 //    ".MAIN_DB_PREFIX."expedition.fk_soc =
 //" . $socid;

@@ -192,7 +192,7 @@ switch ($action)
         {
             $requete = "SELECT ".MAIN_DB_PREFIX."livraison.rowid,
                                ".MAIN_DB_PREFIX."livraison.ref,
-                               unix_timestamp(".MAIN_DB_PREFIX."livraison.date_livraison) as dl
+                               unix_timestamp(".MAIN_DB_PREFIX."livraison.date_delivery) as dl
                           FROM ".MAIN_DB_PREFIX."livraison,
                                ".MAIN_DB_PREFIX."expedition
                          WHERE ".MAIN_DB_PREFIX."expedition.rowid = ".MAIN_DB_PREFIX."livraison.fk_expedition

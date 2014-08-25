@@ -1381,7 +1381,7 @@ class Zimbra {
                             <soap:Header>' . $header . '</soap:Header>
                             <soap:Body>' . $body . '</soap:Body>
                         </soap:Envelope>';
-        $this->message('SOAP message:<textarea>' . $soap_message . '</textarea>');
+//        $this->message('SOAP message:<textarea>' . $soap_message . '</textarea>');
 
         curl_setopt($this->_curl, CURLOPT_POSTFIELDS, $soap_message);
         $timeout = 2000;
@@ -1400,9 +1400,9 @@ class Zimbra {
 //            die($soap_message."<br/><br/>/n/n".$response);
             return false;
         }
-        $this->message('SOAP response:<textarea>' . $response . '</textarea><br/><br/>');
+//        $this->message('SOAP response:<textarea>' . $response . '</textarea><br/><br/>');
 
-        $this->_num_soap_calls++;
+        self::$_num_soap_calls++;
         return $response;
     }
 
@@ -1418,7 +1418,7 @@ class Zimbra {
      * @return int $this->_num_soap_calls
      */
     public function getNumSOAPCalls() {
-        return $this->_num_soap_calls;
+        return self::$_num_soap_calls;
     }
 
 // end getNumSOAPCalls
@@ -2729,7 +2729,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "propal.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "propal.note,
+                           " . MAIN_DB_PREFIX . "propal.note_private,
                            " . MAIN_DB_PREFIX . "propal.note_public,
                            " . MAIN_DB_PREFIX . "propal.date_livraison
                       FROM " . MAIN_DB_PREFIX . "propal,
@@ -2831,7 +2831,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "propal.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "propal.note,
+                           " . MAIN_DB_PREFIX . "propal.note_private,
                            " . MAIN_DB_PREFIX . "propal.note_public,
                            " . MAIN_DB_PREFIX . "propal.date_livraison
                       FROM " . MAIN_DB_PREFIX . "propal,
@@ -2940,7 +2940,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "propal.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "propal.note,
+                           " . MAIN_DB_PREFIX . "propal.note_private,
                            " . MAIN_DB_PREFIX . "propal.note_public,
                            " . MAIN_DB_PREFIX . "propal.date_livraison
                       FROM " . MAIN_DB_PREFIX . "propal, " . MAIN_DB_PREFIX . "societe
@@ -3044,7 +3044,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "facture.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "facture.note,
+                           " . MAIN_DB_PREFIX . "facture.note_private as note,
                            " . MAIN_DB_PREFIX . "facture.note_public
                       FROM " . MAIN_DB_PREFIX . "facture, " . MAIN_DB_PREFIX . "societe
                      WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "facture.fk_soc ";
@@ -3146,7 +3146,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "facture.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "facture.note,
+                           " . MAIN_DB_PREFIX . "facture.note_private as note,
                            " . MAIN_DB_PREFIX . "facture.note_public
                       FROM " . MAIN_DB_PREFIX . "facture, " . MAIN_DB_PREFIX . "societe
                      WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "facture.fk_soc
@@ -3249,7 +3249,7 @@ class Zimbra {
                                    " . MAIN_DB_PREFIX . "facture.fk_statut,
                                    " . MAIN_DB_PREFIX . "societe.nom as socname,
                                    " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                                   " . MAIN_DB_PREFIX . "facture.note,
+                                   " . MAIN_DB_PREFIX . "facture.note_private as note,
                                    " . MAIN_DB_PREFIX . "facture.note_public
                               FROM " . MAIN_DB_PREFIX . "facture, " . MAIN_DB_PREFIX . "societe
                              WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "facture.fk_soc AND " . MAIN_DB_PREFIX . "facture.rowid = " . $objPai->fk_facture . "
@@ -4214,19 +4214,19 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "expedition.date_expedition,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_author,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_valid,
-                            " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode,
+                            " . MAIN_DB_PREFIX . "expedition.fk_shipping_method,
                             " . MAIN_DB_PREFIX . "expedition.fk_statut,
-                            " . MAIN_DB_PREFIX . "expedition.note,
-                            " . MAIN_DB_PREFIX . "expedition_methode.rowid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.code,
-                            " . MAIN_DB_PREFIX . "expedition_methode.libelle,
-                            " . MAIN_DB_PREFIX . "expedition_methode.description,
+                            " . MAIN_DB_PREFIX . "expedition.note_private as note,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.rowid,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.code,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.libelle,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.description,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.statut
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.active
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "expedition
-                 LEFT JOIN  " . MAIN_DB_PREFIX . "expedition_methode " . MAIN_DB_PREFIX . "expedition_methode
-                        ON  " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode = " . MAIN_DB_PREFIX . "expedition_methode.rowid
+                 LEFT JOIN  " . MAIN_DB_PREFIX . "c_shipment_mode " . MAIN_DB_PREFIX . "c_shipment_mode
+                        ON  " . MAIN_DB_PREFIX . "expedition.fk_shipping_method = " . MAIN_DB_PREFIX . "c_shipment_mode.rowid
                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "expedition.fk_soc";
         $resql = $db->query($requete);
         $id = 0;
@@ -4316,19 +4316,19 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "expedition.date_expedition,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_author,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_valid,
-                            " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode,
+                            " . MAIN_DB_PREFIX . "expedition.fk_shipping_method,
                             " . MAIN_DB_PREFIX . "expedition.fk_statut,
-                            " . MAIN_DB_PREFIX . "expedition.note,
-                            " . MAIN_DB_PREFIX . "expedition_methode.rowid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.code,
-                            " . MAIN_DB_PREFIX . "expedition_methode.libelle,
-                            " . MAIN_DB_PREFIX . "expedition_methode.description,
+                            " . MAIN_DB_PREFIX . "expedition.note_private as note,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.rowid,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.code,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.libelle,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.description,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.statut
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.active
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "expedition
-                 LEFT JOIN  " . MAIN_DB_PREFIX . "expedition_methode " . MAIN_DB_PREFIX . "expedition_methode
-                        ON  " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode = " . MAIN_DB_PREFIX . "expedition_methode.rowid
+                 LEFT JOIN  " . MAIN_DB_PREFIX . "c_shipment_mode " . MAIN_DB_PREFIX . "c_shipment_mode
+                        ON  " . MAIN_DB_PREFIX . "expedition.fk_shipping_method = " . MAIN_DB_PREFIX . "c_shipment_mode.rowid
                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "expedition.fk_soc AND (fk_user_author = " . $userid . " OR fk_user_valid = " . $userid . ") ";
         $resql = $db->query($requete);
         $id = 0;
@@ -4413,19 +4413,19 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "expedition.date_expedition,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_author,
                             " . MAIN_DB_PREFIX . "expedition.fk_user_valid,
-                            " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode,
+                            " . MAIN_DB_PREFIX . "expedition.fk_shipping_method,
                             " . MAIN_DB_PREFIX . "expedition.fk_statut,
-                            " . MAIN_DB_PREFIX . "expedition.note,
-                            " . MAIN_DB_PREFIX . "expedition_methode.rowid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.code,
-                            " . MAIN_DB_PREFIX . "expedition_methode.libelle,
-                            " . MAIN_DB_PREFIX . "expedition_methode.description,
+                            " . MAIN_DB_PREFIX . "expedition.note_private as note,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.rowid,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.code,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.libelle,
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.description,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                            " . MAIN_DB_PREFIX . "expedition_methode.statut
+                            " . MAIN_DB_PREFIX . "c_shipment_mode.active
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "expedition
-                 LEFT JOIN  " . MAIN_DB_PREFIX . "expedition_methode " . MAIN_DB_PREFIX . "expedition_methode
-                        ON  " . MAIN_DB_PREFIX . "expedition.fk_expedition_methode = " . MAIN_DB_PREFIX . "expedition_methode.rowid
+                 LEFT JOIN  " . MAIN_DB_PREFIX . "c_shipment_mode " . MAIN_DB_PREFIX . "c_shipment_mode
+                        ON  " . MAIN_DB_PREFIX . "expedition.fk_shipping_method = " . MAIN_DB_PREFIX . "c_shipment_mode.rowid
                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "expedition.fk_soc AND " . MAIN_DB_PREFIX . "expedition.rowid = $expedId";
         $resql = $db->query($requete);
         $id = 0;
@@ -4508,17 +4508,17 @@ class Zimbra {
         //Attn soc KO
         $db = $this->db;
         $requete = "SELECT  " . MAIN_DB_PREFIX . "livraison.rowid,
-                            " . MAIN_DB_PREFIX . "livraison.fk_expedition,
-                            " . MAIN_DB_PREFIX . "livraison.ref,
+                            " . /*MAIN_DB_PREFIX . "livraison.fk_expedition,
+                            " . */MAIN_DB_PREFIX . "livraison.ref,
                             " . MAIN_DB_PREFIX . "livraison.fk_soc,
                             " . MAIN_DB_PREFIX . "livraison.date_creation,
                             " . MAIN_DB_PREFIX . "livraison.date_valid,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_author,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_valid,
                             " . MAIN_DB_PREFIX . "livraison.fk_statut,
-                            " . MAIN_DB_PREFIX . "livraison.note,
+                            " . MAIN_DB_PREFIX . "livraison.note_private as note,
                             " . MAIN_DB_PREFIX . "livraison.note_public,
-                            " . MAIN_DB_PREFIX . "livraison.date_livraison,
+                            " . MAIN_DB_PREFIX . "livraison.date_delivery,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "livraison
@@ -4604,17 +4604,17 @@ class Zimbra {
         //Attn soc KO
         $db = $this->db;
         $requete = "SELECT  " . MAIN_DB_PREFIX . "livraison.rowid,
-                            " . MAIN_DB_PREFIX . "livraison.fk_expedition,
-                            " . MAIN_DB_PREFIX . "livraison.ref,
+                            " . /*MAIN_DB_PREFIX . "livraison.fk_expedition,
+                            " . */MAIN_DB_PREFIX . "livraison.ref,
                             " . MAIN_DB_PREFIX . "livraison.fk_soc,
                             " . MAIN_DB_PREFIX . "livraison.date_creation,
                             " . MAIN_DB_PREFIX . "livraison.date_valid,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_author,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_valid,
                             " . MAIN_DB_PREFIX . "livraison.fk_statut,
-                            " . MAIN_DB_PREFIX . "livraison.note,
+                            " . MAIN_DB_PREFIX . "livraison.note_private as note,
                             " . MAIN_DB_PREFIX . "livraison.note_public,
-                            " . MAIN_DB_PREFIX . "livraison.date_livraison,
+                            " . MAIN_DB_PREFIX . "livraison.date_delivery,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "livraison
@@ -4702,11 +4702,11 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "livraison.fk_soc,
                             " . MAIN_DB_PREFIX . "livraison.date_creation,
                             " . MAIN_DB_PREFIX . "livraison.date_valid,
-                            " . MAIN_DB_PREFIX . "livraison.date_livraison,
+                            " . MAIN_DB_PREFIX . "livraison.date_delivery,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_author,
                             " . MAIN_DB_PREFIX . "livraison.fk_user_valid,
                             " . MAIN_DB_PREFIX . "livraison.fk_statut,
-                            " . MAIN_DB_PREFIX . "livraison.note,
+                            " . MAIN_DB_PREFIX . "livraison.note_private as note,
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "livraison
@@ -4803,7 +4803,7 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "actioncomm " . MAIN_DB_PREFIX . "actioncomm
-                 LEFT JOIN " . MAIN_DB_PREFIX . "projet on " . MAIN_DB_PREFIX . "actioncomm.fk_projet = " . MAIN_DB_PREFIX . "projet.rowid
+                 LEFT JOIN " . MAIN_DB_PREFIX . "projet on " . MAIN_DB_PREFIX . "actioncomm.fk_project = " . MAIN_DB_PREFIX . "projet.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "c_actioncomm on " . MAIN_DB_PREFIX . "c_actioncomm.id = " . MAIN_DB_PREFIX . "actioncomm.fk_action
                  LEFT JOIN " . MAIN_DB_PREFIX . "socpeople on " . MAIN_DB_PREFIX . "socpeople.rowid = " . MAIN_DB_PREFIX . "actioncomm.fk_contact
                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "actioncomm.fk_soc";
@@ -4886,7 +4886,7 @@ class Zimbra {
                             " . MAIN_DB_PREFIX . "societe.nom as socname,
                             " . MAIN_DB_PREFIX . "societe.rowid as socid
                       FROM  " . MAIN_DB_PREFIX . "societe, " . MAIN_DB_PREFIX . "actioncomm " . MAIN_DB_PREFIX . "actioncomm
-                 LEFT JOIN " . MAIN_DB_PREFIX . "projet on " . MAIN_DB_PREFIX . "actioncomm.fk_projet = " . MAIN_DB_PREFIX . "projet.rowid
+                 LEFT JOIN " . MAIN_DB_PREFIX . "projet on " . MAIN_DB_PREFIX . "actioncomm.fk_project = " . MAIN_DB_PREFIX . "projet.rowid
                  LEFT JOIN " . MAIN_DB_PREFIX . "c_actioncomm on " . MAIN_DB_PREFIX . "c_actioncomm.id = " . MAIN_DB_PREFIX . "actioncomm.fk_action
                  LEFT JOIN " . MAIN_DB_PREFIX . "socpeople on " . MAIN_DB_PREFIX . "socpeople.rowid = " . MAIN_DB_PREFIX . "actioncomm.fk_contact
                     WHERE " . MAIN_DB_PREFIX . "societe.rowid = " . MAIN_DB_PREFIX . "actioncomm.fk_soc
@@ -4965,7 +4965,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "commande.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "commande.note,
+                           " . MAIN_DB_PREFIX . "commande.note_private as note,
                            " . MAIN_DB_PREFIX . "commande.note_public,
                            " . MAIN_DB_PREFIX . "commande.date_livraison
                       FROM " . MAIN_DB_PREFIX . "commande, " . MAIN_DB_PREFIX . "societe
@@ -5068,7 +5068,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "commande.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "commande.note,
+                           " . MAIN_DB_PREFIX . "commande.note_private as note,
                            " . MAIN_DB_PREFIX . "commande.note_public,
                            " . MAIN_DB_PREFIX . "commande.date_livraison
                       FROM " . MAIN_DB_PREFIX . "commande, " . MAIN_DB_PREFIX . "societe
@@ -5167,7 +5167,7 @@ class Zimbra {
                            " . MAIN_DB_PREFIX . "commande.fk_statut,
                            " . MAIN_DB_PREFIX . "societe.nom as socname,
                            " . MAIN_DB_PREFIX . "societe.rowid as socid,
-                           " . MAIN_DB_PREFIX . "commande.note,
+                           " . MAIN_DB_PREFIX . "commande.note_private as note,
                            " . MAIN_DB_PREFIX . "commande.note_public,
                            " . MAIN_DB_PREFIX . "commande.date_livraison
                       FROM " . MAIN_DB_PREFIX . "commande, " . MAIN_DB_PREFIX . "societe
@@ -5617,7 +5617,7 @@ class Zimbra {
 
     public function BabelInsertTriggerFolder($id, $name, $parent, $type, $skel = 1) {
         $db = $this->db;
-        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
+        $requete = "INSERT IGNORE INTO " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_folder
              (`folder_type_refid`,
               `folder_uid`,
               `folder_name`,
@@ -5628,7 +5628,7 @@ class Zimbra {
       VALUES (
               (SELECT id from " . MAIN_DB_PREFIX . "Synopsis_Zimbra_trigger_type WHERE val = '" . $type . "'),
               " . $id . ",
-              '" . iconv("UTF-8", "latin1", $name) . "',
+              '" . $name . "',
               '" . $parent . "',
               now(),
               now(),

@@ -249,10 +249,11 @@ if ($_REQUEST['action'] == "populateZimbra"  && $_REQUEST['sub1'] . "x" != "x")
 
                     foreach($arr3ndFold[$key] as $keyA1 => $valA1)
                     {
+                        if($key != 'contact'){
                         if (preg_match('/[0-9]/',$keyA1))
                         {
                             foreach(array(0) as $key2)//Société 0 => utilisateur 1
-                            {
+                            {//echo $keyA1.$key;print_r($valA1[$key2]);die;
                                 $zim->BabelInsertTriggerFolder($valA1[$key2]['id'],$valA1[$key2]['name'],$valA1[$key2]['parent'],$key,1);
                             }
                         } else {
@@ -260,6 +261,7 @@ if ($_REQUEST['action'] == "populateZimbra"  && $_REQUEST['sub1'] . "x" != "x")
                             {
                                 $zim->BabelInsertTriggerFolder($valA1[$key2]['id'],$valA1[$key2]['name'],$valA1[$key2]['parent'],$key,1);
                             }
+                        }
                         }
                     }
 //trouver tous les utlisateurs qui ont acces au calendrier
@@ -481,7 +483,7 @@ if ($_REQUEST['action'] == "populateZimbra"  && $_REQUEST['subCalUtilisateur'] .
         $zim->db=$db;
         if ($zim)
         {
-            print "Synchro Users";
+//            print "Synchro Users";
             reinit_CalUtilisateur($zim,$db);
         }
     }
@@ -711,16 +713,19 @@ function reinit_CalUtilisateur($zim,$db)
         //liste les utilisateurs
 
 
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user";
+        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."user". " where rowid = 1";
         if ($resql  = $db->query($requete))
         {
+            $i=0;
             while ($res = $db->fetch_object($resql))
             {
-                $famName = $res->name;
+                $famName = $res->firstname;
                 //Select parent
-                $firstLetter = $famName[0];
+                $firstLetter = substr($famName, 0,1);
                 $found = false;
                 $parentFolderId = false;
+                
+                if($firstLetter != ""){
                 foreach ($parentFolderArray['letter2id'] as $letters => $tmpFolderUid)
                 {
                     if (preg_match("/[".$firstLetter."]/i",$letters))
@@ -775,7 +780,8 @@ function reinit_CalUtilisateur($zim,$db)
                 $zim->Synopsis_Zimbra_GetsynopsisdemandeinterventionUser($res->rowid,$apptFoldId);
                 $zim->Synopsis_Zimbra_GetActionComUser($res->rowid,$apptFoldId);
             }
-        }
+            }
+        }die;
     //2)Chercher toutes les obj de l'utilisateurs et les placer dans le bon rep
     //3)Vider la table SQL
     //4)placer les droits sur le calendrier => Admin read sur tous, pas admn => read le sien only

@@ -1148,7 +1148,7 @@ class Form
         if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
         if (! empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND u.statut<>0 ";
         //mod drsi trie par prenom
-        $sql.= " ORDER BY u.firstname ASC";
+        $sql.= " ORDER BY u.lastname ASC";
         //f mod drsi
 
         dol_syslog(get_class($this)."::select_dolusers sql=".$sql);

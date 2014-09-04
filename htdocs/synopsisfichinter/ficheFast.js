@@ -24,6 +24,15 @@ jQuery(document).ready(function() {
     jQuery(".heures").each(function() {
         initHeure(this);
     });
+
+
+    $("form.formFast").submit(function() {
+        if(!($("input[name='date1']").val() != "00:00" && $("input[name='date3']").val() != "00:00") && !($("input[name='date2']").val() != "00:00" && $("input[name='date4']").val() != "00:00")){
+        alert("Merci de remplir les horaire");
+        return false;
+    }
+    });
+
     autoSave();
 });
 function autoSave() {
@@ -35,7 +44,7 @@ function autoSave() {
     });
     enreg = false;
     function boucleSave() {
-        if (new Date().getTime() > timeMax && enreg == false){
+        if (new Date().getTime() > timeMax && enreg == false) {
             enreg = true;
             jQuery("form.formFast").submit();
         }
@@ -134,3 +143,4 @@ if ($(".interTerm").is(":checked"))
     zoneRDV.hide();
 else
     zoneRDV.show();
+

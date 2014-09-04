@@ -13,3 +13,174 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 DROP TABLE IF EXISTS `llx_Synopsis_fichinterdet`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+
+
+
+
+
+
+
+SECU :
+
+Extérieur redirection de port.
+
+Apple ship to crypter
+
+//Delaie 15min
+
+//Activer captcha si distant + pas de stock mdp
+
+Vous étes responsable de votre mdp et de l'utilisation que vous en faite.
+
+SAV :
+
+Piéce recu envoie message 
+
+Lien rapide en haut de SAV TOUS
+
+DX6L7180DPMW : Garantie limitée Apple voir date
+
+Materiel jint case + autre
+
+Description plus haut aprés etat machine
+
+Tous les cadre plus petit
+
+Tous sur un ecran 20pouce 1680*1050
+
+Préférence de contact pour le devis=> envoie devis
+
+=> envoie Mise a dispo
+
+-neuf -trés bon etat -usager
+
+Description ajouter   - rayure -ecran cassé - liquide
+
+Voir temps affichage liste
+
+Envoyer devis
+
+Attenteclient = attente info client
+
+
+S/N ou IMEI => 013711001134904
+
+Recuperer Warning DQGLK7FWDTWG
+
+vérif si accident fonctionne => Déclaration 
+
+simptomes reste symptomes
+
+ajouter symtomes et résolution
+
+
+Dans lien chrono chrono cacher ref
+
+Technicien = si vide user courant.
+
+technicien = hardware et sophtwer
+
+dans fiche rapide liste des tech mais pas remplir
+
+dans date / h date de création
+
+
+
+
+AGENDA
+
+VOIR RDV VENDREDI
+
+bug ligne
+
+par default heures ouvrées 8h 19h
+
+afficher deb rdv a 9h
+
+voir gestion des taches
+
+État / Pourcentage = État
+
+A réaliser = A confirmer
+
+Discription dans agenda plus trunc
+
+dans di ajouter horraire est prendre en compte pour event
+
+ajouter liste des action pour lier + pour intervenant + date de la DI
+
++ créer evenement si existe pas que a la valid de la di
+
+//dans liste des nom classer par nom et par collones et afficher par nom prenom
+
+//dans liste dans evenement classer par nom
+
+//"Classement alphabetique horizontale"
+
+Dans evenement annulé "attention ceci va annulé les rdv des autres participants"
+
+Onglet Congés  + rtt (avec text imposé) + congés exceptionelle
+
+Ds agenda marquer absent pour tous les congés
+
+Fichier joint ds agenda.
+
+Proposiotion commerciale en devis
+
+Atten client => envoie devis + trigger envoie
+
+//Charger le formulaire => valider
+
+Change etat = ouverture message sms
+
+Quand "Réparation en cours" bouton "A dispo"
+aprés "Réparation fermée"
+
+//classer delivrer tous av 2014
+
+bug type urgence
+
+widget info
+
+//dans fiche normal de fi menu nature
+
+//Intervention "Pensser a ajouter une ligne en cas de déplacement."
+
+//fiche rapide verif heure arrivé depart
+
+//changer client FI, DI
+
+ds support ajouter contrat
+
+ds client ajouter onglet Etablissement
+
+
+
+Ds commande apple saut de ligne
+
+Ajouter etat attente piece voir importation du num
+
+prise en charge de 45
+
+
+
+
+
+dans new client   :
+// si individu privé : cacher tva...
+
+
+FLO
+
+enregistrer panier auto 
+voir importation 
+INSERT INTO `llx_synopsis_apple_repair` (`chronoId`, `repairNumber`, `repairConfirmNumber`, `serialUpdateConfirmNumber`, `closed`) VALUES ("2688", NULL, "G170866413", NULL, "0")
+Impossible de mettre à jour les données de la réparation (ID absent)
+
+La requête a été correctement transmise mais les données de retour n'ont pas pu être enregistrées correctement en base de données.
+Veuillez noter le numéro suivant (repair confirmation number) et le transmettre à l'équipe technique: G170866413
+
+ZZ501AAA0WP
+

@@ -1009,5 +1009,21 @@ function select_dolusersInGroup($form, $group = '', $selected = '', $htmlname = 
     return $out;
 }
 
+function traiteHeure($result) {
+    $result = str_replace(array("-", "h", "H", "/", "\\", " "), ":", $result);
+    $tab = explode(":", $result);
+    $result = "";
+
+    if ($tab[0] < 10)
+        $tab[0] = "0" . intval($tab[0]);
+    if (isset($tab[1]) && $tab[1] < 10)
+        $tab[1] = "0" . intval($tab[1]);
+
+    if (!isset($tab[1]))
+        $result .= $tab[0] . ":00";
+    else
+        $result .= $tab[0] . ":" . $tab[1];
+    return $result;
+}
 
 ?>

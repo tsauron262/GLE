@@ -587,27 +587,7 @@ function saveForm() {
     $_POST = addslashes_r($_POST);
 
     for ($i = 1; $i < 5; $i++) {
-        $_POST['date' . $i] = str_replace(array("-", "h", "H", "/", "\\", " "), ":", $_POST['date' . $i]);
-        $tab = explode(":", $_POST['date' . $i]);
-        $result = "";
-        
-        if ($tab[0] < 10)
-            $tab[0] = "0".intval($tab[0]);
-        if (isset($tab[1]) && $tab[1] < 10)
-            $tab[1] = "0".intval($tab[1]);
-        
-        if (!isset($tab[1]))
-            $result .= $tab[0].":00";
-        else
-            $result .= $tab[0].":".$tab[1];
-//        if (!isset($tab[1]))
-//            $result .= "00";
-//        else {
-//            if ($tab[1] < 10)
-//                $result .="0";
-//            $result .= intval($tab[1]);
-//        }
-        $_POST['date' . $i] = $result;  
+        $_POST['date' . $i] = traiteHeure($_POST['date' . $i]);  
     }
 //    $req = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_fichinter where `rowid` =" . $fichinter->id;
 //    $sql = $db->query($req);

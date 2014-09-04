@@ -136,6 +136,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
                            AND typeI = 'FI'
                            AND extra_key_refid= " . $idExtraKey;
             $sql = $db->query($requete);
+            if ($type == 'heure') {
+                $val = traiteHeure($val);
+            }
             if ($type == 'checkbox') {
                 if ($val == 'On' || $val == 'on' || $val == 'ON') {
                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
@@ -949,7 +952,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 default:
                 case "text": {
                         print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><input type="text" name="extraKey-' . $res->id . '">';
-                        print "<input type='hidden' name='type-" . $res->id . "' value='text'>";
+                        print "<input type='hidden' name='type-" . $res->id . "' value='".$res->type."'>";
                     }
                     break;
                 case "datetime": {
@@ -1401,7 +1404,7 @@ EOF;
                         print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $fichinter->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
                         print '<a name="anchor' . $res->id . '"></a>'; // ancre
                         print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
-                        print "<input type='hidden' name='type-" . $res->id . "' value='text'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
+                        print "<input type='hidden' name='type-" . $res->id . "' value='".$res->type."'>&nbsp;&nbsp;&nbsp;<button class='ui-button'>OK</button></FORM>";
                     }
                     break;
                 case "datetime": {

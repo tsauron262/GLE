@@ -293,9 +293,7 @@ class Synopsisdemandeinterv extends CommonObject {
         global $mysoc;
         global $langs;
         require_once(DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php');
-        $mail = new CMailFile($subject, $to, $from, $msg,
-                        $filename_list, $mimetype_list, $mimefilename_list,
-                        $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
+        $mail = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to);
         $res = $mail->sendfile();
         if ($res) {
             return (1);
@@ -335,6 +333,9 @@ class Synopsisdemandeinterv extends CommonObject {
             if ($resql) {
 
                 $this->db->commit();
+
+
+                $this->synchroAction();
                 //notification
                 if (isset($conf->global->BIMP_MAIL_GESTPROD)) {
                     $this->info($this->id);
@@ -343,7 +344,7 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg = "Bonjour " . $this->user_prisencharge->fullname . ",<br/><br/>";
                     $msg .= "Une nouvelle intervention est pr&eacute;vue chez " . $this->societe->getNomUrl(1, 6) . ".";
-                    $msg .= "<br/>Le ".  dol_print_date($this->date);
+                    $msg .= "<br/>Le " . dol_print_date($this->date);
                     $msg .= "<br/>";
                     $msg .= "<br/>";
                     $msg .= "Ref Demande Intervertion : " . $this->getNomUrl(1);
@@ -494,7 +495,7 @@ class Synopsisdemandeinterv extends CommonObject {
 
                     $msg = "Bonjour, <br/><br/>";
                     $msg .= "" . $this->user_prisencharge->fullname . " a bien pris en charge la DI " . $this->ref . " chez " . $this->societe->getNomUrl(1, 6) . ".";
-                    $msg .= "<br/>Le ".  dol_print_date($this->date);
+                    $msg .= "<br/>Le " . dol_print_date($this->date);
                     $msg .= "<br/>";
                     $msg .= "<br/>";
                     $msg .= "<br/>";
@@ -522,38 +523,74 @@ class Synopsisdemandeinterv extends CommonObject {
             return -1;
         }
     }
-    
-    function synchroAction(){
-            global $user;
-            $this->fetch($this->id);
-            require_once(DOL_DOCUMENT_ROOT."/comm/action/class/actioncomm.class.php");
-            
-            $tabAct = ActionComm::getActions($this->db, 0, $this->id, 'synopsisdemandeinterv');
-            $update = (count($tabAct) > 0);
-            
-            if($update)
-                $action = $tabAct[0];
-            else
-                $action = new ActionComm($this->db);
-            
-            $action->datep = $this->db->jdate(date("Y-m-d", $this->date)." 08:00:00");
-            $action->datef = $this->db->jdate(date("Y-m-d", $this->date)." 18:00:00");
-            $action->type_id = 50;
-            $action->elementtype = "synopsisdemandeinterv";
-            $action->fk_element = $this->id;
-            $action->percentage = -1;
-            $soc = new Societe($this->db);
-            $soc->fetch($this->socid);
-            $action->societe = $soc;
-            $action->label = $this->description." DI : ".$this->ref;
-            $action->note = $this->description;
-            $action->usertodo = $this->user_prisencharge;
-            
-            
-            if($update)
-                $action->update($user);
-            else
-                $action->add($user);
+
+    function getExtra() {
+        $this->tabExtra = array();
+        $requete = "SELECT k.label,
+                       k.type,
+                       k.id,
+                       v.extra_value,
+                       k.fullLine
+                  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key as k
+             LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $this->id . " AND typeI = 'DI'
+                 WHERE (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND k.active = 1 AND inDi = 1 ORDER BY rang, label";
+        $sql = $this->db->query($requete);
+        $modulo = false;
+        while ($res = $this->db->fetch_object($sql)) {
+            $this->tabExtra[$res->id] = $res;
+            $this->tabExtraV[$res->id] = $res->extra_value;
+        }
+        return $this->tabExtra;
+    }
+
+    function synchroAction($createIfNot = true) {
+        global $user;
+        $this->fetch($this->id);
+        require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
+
+        $tabAct = ActionComm::getActions($this->db, 0, $this->id, 'synopsisdemandeinterv');
+        $update = (count($tabAct) > 0);
+
+        if ($update)
+            $action = $tabAct[0];
+        else
+            $action = new ActionComm($this->db);
+
+        $this->getExtra();
+        if ($this->tabExtraV[24] != "00:00" && $this->tabExtraV[24] != "") {
+            $heureArr = $this->tabExtraV[24];
+            if ($this->tabExtraV[27] != "00:00" && $this->tabExtraV[27] != "") {
+                $heureDep = $this->tabExtraV[27];
+            } else {
+                $heureDep = $this->tabExtraV[26];
+            }
+        } else {
+            $heureArr = $this->tabExtraV[25];
+            $heureDep = $this->tabExtraV[27];
+        }
+        if($heureArr == '' || $heureArr == '00:00')
+                $heureArr = "08:00";
+        if($heureDep == '' || $heureDep == '00:00')
+                $heureDep = "18:00";//else die($heureDep);
+
+        $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " ".$heureArr.":00");
+        $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " ".$heureDep.":00");
+        $action->type_id = 50;
+        $action->elementtype = "synopsisdemandeinterv";
+        $action->fk_element = $this->id;
+        $action->percentage = -1;
+        $soc = new Societe($this->db);
+        $soc->fetch($this->socid);
+        $action->societe = $soc;
+        $action->label = $this->description . " DI : " . $this->ref;
+        $action->note = $this->description;
+        $action->usertodo = $this->user_prisencharge;
+
+
+        if ($update)
+            $action->update($user);
+        elseif ($createIfNot)
+            $action->add($user);
     }
 
     function preparePrisencharge($userT, $outputdir = "") {
@@ -569,10 +606,8 @@ class Synopsisdemandeinterv extends CommonObject {
         dol_syslog("synopsisdemandeinterv::valid sql=" . $sql);
         $resql = $this->db->query($sql);
         if ($resql) {
-            $this->synchroAction();
-            
+
 //            die("ok");
-            
             // Appel des triggers
             include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
             $interface = new Interfaces($this->db);
@@ -844,7 +879,7 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function delete($user) {
         global $conf, $user, $langs;
-        require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
         $this->db->begin();
 
@@ -907,18 +942,18 @@ class Synopsisdemandeinterv extends CommonObject {
      */
     function set_date_delivery($user, $date_delivery) {
         global $langs, $conf;
-        
+
         if ($user->rights->synopsisdemandeinterv->creer && $this->statut == 0) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
-            $sql.= " SET datei = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
+            $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
             if ($this->db->query($sql)) {
                 $this->date_delivery = $date_delivery;
-                
-                
+
+
                 $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ";
-                $sql.= " SET date = " . ($date_delivery > 0 ? "'".$this->db->idate($date_delivery)."'" : "null");
+                $sql.= " SET date = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
                 $sql.= " WHERE fk_synopsisdemandeinterv = " . $this->id . "";
                 $this->db->query($sql);
                 // Appel des triggers
@@ -929,7 +964,7 @@ class Synopsisdemandeinterv extends CommonObject {
                     $error++;
                     $this->errors = $interface->errors;
                 }
-                $this->synchroAction();
+                $this->synchroAction(false);
                 // Fin appel triggers
                 return 1;
             } else {
@@ -1366,7 +1401,7 @@ class synopsisdemandeintervLigne {
         // Mise a jour ligne en base
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet SET";
         $sql.= " description='" . addslashes($this->desc) . "'";
-        $sql.= ",date='" . $this->db->idate($this->datei)."'";
+        $sql.= ",date='" . $this->db->idate($this->datei) . "'";
         $sql.= ",duree=" . $this->duration;
         $sql.= ",fk_typeinterv=" . ($this->fk_typeinterv > 0 ? $this->fk_typeinterv : 'NULL');
         if ($this->qte . "x" != "x")

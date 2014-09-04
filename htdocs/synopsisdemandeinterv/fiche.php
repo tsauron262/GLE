@@ -126,8 +126,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'confirm_PrisEnCharge' 
     if (isset($_REQUEST['fk_user'])) {
         $tech = new User($db);
         $tech->fetch($_REQUEST['fk_user']);
-    }
-    else
+    } else
         $tech = $user;
     $result = $synopsisdemandeinterv->prisencharge($tech, $conf->synopsisdemandeinterv->outputdir);
     if ($result >= 0 && "x" . $_REQUEST['model'] != "x") {
@@ -338,6 +337,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
                            AND typeI = 'DI'
                            AND extra_key_refid= " . $idExtraKey;
             $sql = $db->query($requete);
+            if ($type == 'heure') {
+                $val = traiteHeure($val);
+            }
             if ($type == 'checkbox') {
                 if ($val == 'On' || $val == 'on' || $val == 'ON') {
                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
@@ -356,6 +358,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'editExtra') {
                                   VALUES (" . $_REQUEST['id'] . "," . $idExtraKey . ",'" . addslashes($val) . "','DI')";
                 $sql = $db->query($requete);
             }
+            $synopsisdemandeinterv = new Synopsisdemandeinterv($db);
+            $synopsisdemandeinterv->fetch($_REQUEST["id"]);
+            $synopsisdemandeinterv->synchroAction();
         }
     }
 }
@@ -770,7 +775,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print '</td></tr>';
         }
 //lié a un contrat de maintenance ou mixte
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE "./*extraparams in (3,7) AND*/" fk_soc =" . $societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "contrat WHERE " . /* extraparams in (3,7) AND */" fk_soc =" . $societe->id;
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             print '<th class="ui-widget-header ui-state-default">' . $langs->trans("Contrat de maintenance") . '</th>';
@@ -1072,7 +1077,7 @@ EOF;
                     default:
                     case "text": {
                             print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><input type="text" name="extraKey-' . $res->id . '">';
-                            print "<input type='hidden' name='type-" . $res->id . "' value='text'>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='" . $res->type . "'>";
                         }
                         break;
                     case "datetime": {
@@ -1464,8 +1469,7 @@ EOF;
     } elseif ($synopsisdemandeinterv->fk_user_prisencharge) {
         $synopsisdemandeinterv->user_prisencharge->fetch($synopsisdemandeinterv->fk_user_prisencharge);
         print ($synopsisdemandeinterv->user_prisencharge ? $synopsisdemandeinterv->user_prisencharge->getNomUrl(1) : "") . '</td>';
-    }
-    else
+    } else
         print "Personne";
 
     print '<th class="ui-widget-header ui-state-default">Effectu&eacute; par :';
@@ -1486,17 +1490,19 @@ EOF;
         print (isset($synopsisdemandeinterv->user_target) ? $synopsisdemandeinterv->user_target->getNomUrl(1) : "") . '</td></tr>';
     }
     // Extra
-    $requete = "SELECT k.label,
-                       k.type,
-                       k.id,
-                       v.extra_value,
-                       k.fullLine
-                  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key as k
-             LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $synopsisdemandeinterv->id . " AND typeI = 'DI'
-                 WHERE (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND k.active = 1 AND inDi = 1 ORDER BY rang, label";
-    $sql = $db->query($requete);
     $modulo = false;
-    while ($res = $db->fetch_object($sql)) {
+    $tabExtra = $synopsisdemandeinterv->getExtra();
+    foreach ($tabExtra as $res) {
+//    $requete = "SELECT k.label,
+//                       k.type,
+//                       k.id,
+//                       v.extra_value,
+//                       k.fullLine
+//                  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key as k
+//             LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $synopsisdemandeinterv->id . " AND typeI = 'DI'
+//                 WHERE (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND k.active = 1 AND inDi = 1 ORDER BY rang, label";
+//    $sql = $db->query($requete);
+//    while ($res = $db->fetch_object($sql)) {
         $colspan = 1;
         $modulo = !$modulo;
         if ($res->fullLine == 1) {
@@ -1532,7 +1538,7 @@ EOF;
                             print '<td colspan="' . $colspan . '" valign="middle" class="ui-widget-content"><form action="fiche.php?id=' . $synopsisdemandeinterv->id . '#anchor' . $res->id . '" method="POST"><input type="hidden" name="action" value="editExtra">';
                             print '<a name="anchor' . $res->id . '"></a>'; // ancre
                             print '&nbsp;&nbsp;<input value="' . $res->extra_value . '" type="text" name="extraKey-' . $res->id . '">';
-                            print "<input type='hidden' name='type-" . $res->id . "' value='text'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
+                            print "<input type='hidden' name='type-" . $res->id . "' value='" . $res->type . "'>&nbsp;&nbsp;&nbsp;<button class='butAction'>OK</button></FORM>";
                         }
                         break;
                     case "datetime": {

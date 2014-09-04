@@ -3,6 +3,10 @@
 require_once('../../main.inc.php');
 require_once("libAgenda.php");
 
+global $isMobile;
+if($isMobile)
+    $conf->global->MAIN_HIDE_LEFT_MENU = true;
+
 $tabUserId = array();
 $tabUser = getTabUser();
 $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
@@ -309,7 +313,6 @@ EOF;
 llxHeader($js);
 
 
-
 printMenu($tabUser);
 
 
@@ -354,14 +357,16 @@ function printMenu($tabUser) {
     echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
 
 
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
-    echo "<div class='listUser'><table><tr>";
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY lastname");
+    echo "<div class='listUser'>"
+    . "Classement alphabétique horizontal<br/><br/>"
+            . "<table><tr>";
     $i = 0;
     while ($result = $db->fetch_object($sql)) {
         $i++;
         echo "<td>";
         echo "<input " . (isset($tabUser[$result->rowid]) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
-        echo "<label for='user" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</label>";
+        echo "<label for='user" . $result->rowid . "'>" . $result->lastname . " " . $result->firstname . "</label>";
         echo "</td>";
         if ($i > 5) {
             $i = 0;

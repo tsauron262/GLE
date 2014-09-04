@@ -299,7 +299,7 @@ class gsxDatas {
         }
         $html .= '</select>';
         $html .= '<p style="text-align: right">' . "\n";
-        $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</span>' . "\n";
+        $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
         $html .= '</p>' . "\n";
         $html .= '<div class="repairFormContainer"></div>' . "\n";
         $html .= '<div class="repairFormResults"></div>' . "\n";

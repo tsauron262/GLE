@@ -27,14 +27,21 @@ jQuery(document).ready(function() {
 
 
     $("form.formFast").submit(function() {
-        if(!($("input[name='date1']").val() != "00:00" && $("input[name='date3']").val() != "00:00") && !($("input[name='date2']").val() != "00:00" && $("input[name='date4']").val() != "00:00")){
-        alert("Merci de remplir les horaire");
+        if((heureNull($("input[name='date1']").val()) || heureNull($("input[name='date3']").val())) 
+                && (heureNull($("input[name='date2']").val()) || heureNull($("input[name='date4']").val()))){
+        alert("Merci de remplir les horaires");
         return false;
     }
     });
 
     autoSave();
 });
+function heureNull(str){
+    if(str == "00:00" || str == "" || str == " ")
+        return true;
+    return false;
+}
+
 function autoSave() {
     jQuery("*").click(function() {
         initTimeSave();

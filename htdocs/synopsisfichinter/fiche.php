@@ -1663,7 +1663,7 @@ EOF;
                 while ($res1 = $db->fetch_object($sql1)) {
                     if (!$fichinter->fk_contrat || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
                         //Si déplacement OptGroup
-                        if ($res1->isDeplacement == 1) {
+                        if (0 && $res1->isDeplacement == 1) {
                             $requete1 = "SELECT " . MAIN_DB_PREFIX . "product.label,
 					  " . MAIN_DB_PREFIX . "product.ref,
 					  " . MAIN_DB_PREFIX . "product.rowid
@@ -1835,7 +1835,7 @@ EOF;
         while ($res1 = $db->fetch_object($sql1)) {
             if (!$fichinter->fk_contrat || $res1->isDeplacement || $res1->id == 14 || $res1->id == 20 || $res1->id == 21) {
                 //Si déplacement OptGroup
-                if ($res1->isDeplacement == 1) {
+                if (0 && $res1->isDeplacement == 1) {
                     $requete1 = "SELECT " . MAIN_DB_PREFIX . "product.label,
 				  " . MAIN_DB_PREFIX . "product.ref,
 				  " . MAIN_DB_PREFIX . "product.rowid

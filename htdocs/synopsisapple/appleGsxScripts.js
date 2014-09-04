@@ -1396,7 +1396,7 @@ function onRequestResponse(xhr, requestType, prodId) {
         case 'savePartsCart':
             if (xhr.responseText == 'ok') {
                 $('#prod_'+prodId).find('.cartRequestResults').find('ok').remove();
-                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p><ok>Reload</ok>');
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p>');
             } else
                 displayCartRequestResult(prodId, xhr.responseText);
             GSX.products[prodId].cart.activateSave();
@@ -1448,6 +1448,7 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'addCartToPropal':
+            alert('kkkkkkk');
             if (xhr.responseText == 'ok') {
                 $span = $('#prod_'+prodId).find('span.addToPropal');
                 $span.attr('class', 'button addToPropal');

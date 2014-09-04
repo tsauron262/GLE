@@ -17,6 +17,7 @@ $coefPrix = 1;
 $userId = 'tysauron@gmail.com';
 $password = 'freeparty';
 $serviceAccountNo = '0000100520';
+
 //ephesussav
 //@Ephe2014#
 
@@ -55,8 +56,10 @@ if (isset($_GET['action'])) {
                     $propal->fetch($propalId);
                     $cards = new partsCart($db, null, $_GET['chronoId']);
                     $cards->loadCart();
-                    foreach ($cards->partsCart as $part)
-                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
+                    foreach ($cards->partsCart as $part) {
+                        $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'],$part['stockPrice']);
+                    }
                     echo '<ok>Reload</ok>';
                 } else {
                     echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
@@ -169,14 +172,16 @@ if (isset($_GET['action'])) {
                     if ($propalId > 0) {
                         $propal = new Propal($db);
                         $propal->fetch($propalId);
-                        foreach ($cart->partsCart as $part)
-                            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $part['stockPrice'] * $coefPrix, $part['qty'], "0");
-                        echo 'ok';
+                        foreach ($cart->partsCart as $part) {
+                            $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+                            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20",0,0,0,0,'HT',0,0,0,0,0,0,0,$part['stockPrice']);
+                        }
+                        echo 'ok<ok>Reload</ok>';
                     } else {
                         echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
                     }
                 } else {
-                    echo '<p class="confirmation">Panier correctement enregistré ('.count($cart->partsCart).' produit(s))</p>';
+                    echo '<p class="confirmation">Panier correctement enregistré (' . count($cart->partsCart) . ' produit(s))</p>';
                 }
             } else {
                 echo $cart->displayErrors();
@@ -234,8 +239,7 @@ if (isset($_GET['action'])) {
                         }
                     }
                 }
-            }
-            else
+            } else
                 echo $GSXdatas->getGSXErrorsHtml();
             break;
 
@@ -262,10 +266,52 @@ if (isset($_GET['action'])) {
 
 function dateAppleToDate($date) {
     $garantieT = explode("/", $date);
-    if($garentieT[2] > 0)
+    if ($garentieT[2] > 0)
         return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
     else
         return "";
+}
+
+function convertPrix($prix, $ref, $desc) {
+    $coefPrix = 1;
+    $constPrix = 0;
+    $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "ZD661", "ZK661");
+    $tabCas2 = array("SVC,IPOD", "Ipod nano");
+    $tabCas3 = array("661");
+    $tabCas4 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");
+
+    $cas = 0;
+    foreach ($tabCas1 as $val)
+        if (stripos($ref, $val) === 0)
+            $cas = 1;
+    foreach ($tabCas2 as $val)
+        if (stripos($desc, $val) === 0)
+            $cas = 1;
+    foreach ($tabCas3 as $val)
+        if (stripos($ref, $val) === 0)
+            $cas = 2;
+    foreach ($tabCas4 as $val)
+        if (stripos($desc, $val) === 0)
+            $cas = 2;
+
+    if ($cas == 0) {
+        if ($prix > 300)
+            $coefPrix = 0.8;
+        elseif ($prix > 150)
+            $coefPrix = 0.7;
+        elseif ($prix > 50)
+            $coefPrix = 0.6;
+        else {
+            $coefPrix = 0.6;
+            $constPrix = 10;
+        }
+    } elseif ($cas == 1) {
+        $constPrix = 45;
+    } elseif ($cas == 2) {
+        $constPrix = 45;
+    }
+    $prix = (($prix + $constPrix) / $coefPrix);
+    return $prix;
 }
 
 ?>

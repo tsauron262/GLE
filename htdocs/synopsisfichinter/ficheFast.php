@@ -587,7 +587,7 @@ function saveForm() {
     $_POST = addslashes_r($_POST);
 
     for ($i = 1; $i < 5; $i++) {
-        $_POST['date' . $i] = str_replace(array("-", "h", "/", "\\", " "), ":", $_POST['date' . $i]);
+        $_POST['date' . $i] = str_replace(array("-", "h", "H", "/", "\\", " "), ":", $_POST['date' . $i]);
         $tab = explode(":", $_POST['date' . $i]);
         $result = "";
         

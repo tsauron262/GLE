@@ -106,7 +106,7 @@ class Repair {
                 $this->addError('Echec de l\'enregistrement en base de données<br/>Erreur SQL: ' . $this->db->lasterror());
                 return false;
             }
-            $this->cartRowId = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsis_apple_repair');
+            $this->rowId = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsis_apple_repair');
         }
         return true;
     }

@@ -75,6 +75,24 @@ $(window).load(function() {
     });
 
 
+
+    //Cacher tva.. quand privé
+    $("#radioprivate, #radiocompany").click(function(){
+        cible = $("input[name='idprof1']");
+        tabCible = Array();
+        tabCible.push(cible.parent().parent());
+        tabCible.push(cible.parent().parent().next("tr"));
+        tabCible.push(cible.parent().parent().next("tr").next("tr"));
+        tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr"));
+        tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr").next("tr"));
+        tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr").next("tr").next("tr"));
+        
+        for (var i in tabCible)
+            if($(this).attr('id') == "radioprivate")
+                tabCible[i].fadeOut();
+            else
+                tabCible[i].fadeIn();
+    });
 });
 
 function ajoutNotification(id, titre, msg) {

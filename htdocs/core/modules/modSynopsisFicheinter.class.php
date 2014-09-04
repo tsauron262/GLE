@@ -540,6 +540,7 @@ class modSynopsisFicheinter extends DolibarrModules {
   `rang` int(11) default '1',
   `isInMainPanel` tinyint(11) default NULL,
   `fullLine` tinyint(4) default '0',
+  `inDi` tinyint(4) default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 ;";
 

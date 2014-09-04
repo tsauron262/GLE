@@ -41,7 +41,7 @@
  */
 $activeLigneContrat = false;
 
-$afficherExtraDi = false;
+$afficherExtraDi = true;
 
 if (!isset($_REQUEST['action']))
     $_REQUEST['action'] = '';
@@ -1041,7 +1041,7 @@ EOF;
         print '</td></tr>';
 //Extra Field
         if ($afficherExtraDi) {
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key WHERE  (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND active = 1 ORDER BY rang,label";
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key WHERE  (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND active = 1 AND inDi = 1 ORDER BY rang,label";
             $sql = $db->query($requete);
             $modulo = false;
             while ($res = $db->fetch_object($sql)) {
@@ -1493,7 +1493,7 @@ EOF;
                        k.fullLine
                   FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_key as k
              LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value as v ON v.extra_key_refid = k.id AND v.interv_refid = " . $synopsisdemandeinterv->id . " AND typeI = 'DI'
-                 WHERE (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND k.active = 1 ORDER BY rang, label";
+                 WHERE (isQuality<>1 OR isQuality is null) AND isInMainPanel = 1 AND k.active = 1 AND inDi = 1 ORDER BY rang, label";
     $sql = $db->query($requete);
     $modulo = false;
     while ($res = $db->fetch_object($sql)) {

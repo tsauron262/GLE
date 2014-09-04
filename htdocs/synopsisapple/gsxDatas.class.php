@@ -333,6 +333,7 @@ class gsxDatas {
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
+        $html .= '<div class="cartRequestResults2"></div>' . "\n";
         $html .= '</div></div>' . "\n";
         return $html;
     }

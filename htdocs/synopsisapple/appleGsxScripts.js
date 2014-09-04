@@ -426,7 +426,7 @@ function Cart(prodId, serial, PM) {
     };
     this.displayModifMsg =function() {
         this.changes = true;
-        var $div = this.$prod.find('.cartRequestResults');
+        var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
             var $p = $div.find('p.changesMsg');
             if ($p.length)
@@ -436,7 +436,7 @@ function Cart(prodId, serial, PM) {
     }
     this.removeModifMsg = function() {
     this.changes = false;
-        var $div = this.$prod.find('.cartRequestResults');
+        var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
             var $p = $div.find('p.changesMsg');
             if ($p.length)

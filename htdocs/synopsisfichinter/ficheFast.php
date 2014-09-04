@@ -255,7 +255,7 @@ if ($_REQUEST["id"] > 0) {
             <td class="ui-widget-content" colspan="3"><input type="text" name="desc" style="width:320px;" value="' . $resultG->description . '"/></td>
         </tr>';
     echo '<tr>
-            <th height="30px">Intervention</th>
+            <th height="30px">Intervention <br/><p class="small"/>Penser à ajouter une ligne en cas de déplacement.</p></th>
         <td class="ui-widget-content" colspan="3" rowspan="2"><table width="100%">
 ';
     $nbPrest = 0;

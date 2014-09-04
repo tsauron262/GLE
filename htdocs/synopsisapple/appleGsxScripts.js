@@ -26,8 +26,8 @@ var partDataType = {
 var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
-//else
-//    extra = extra+ "&chronoId="+3;
+else
+    extra = extra+ "&chronoId="+3;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -64,7 +64,7 @@ function CompTIACodes() {
         }
         setRequest('GET', 'loadCompTIACodes', 0, '');
     };
-    this.appendCompTIACodesSelect = function($div, group) {
+    this.appendCompTIACodesSelect = function(cart, $div, group) {
         if (!$div.length)
             return;
 
@@ -84,6 +84,7 @@ function CompTIACodes() {
         }
         html += '</select>';
         $div.html(html);
+        cart.setChangesEvents($div.parent('tr'));
     };
     this.onLoadFail = function() {
         if (this.loadStatus == 'loading') {
@@ -142,12 +143,23 @@ function Cart(prodId, serial, PM) {
     this.nextCartProdId = 0;
     this.nbrProds = 0;
     this.$prod = $('#prod_'+prodId);
+    this.changes = false;
 
     this.newProdContainer = function() {
         this.$prod = $('#prod_'+prodId);
     };
     this.setEvents = function() {
     };
+    this.setChangesEvents = function($tr) {
+        if (!$tr.length)
+            return;
+        $tr.find('input').change(function() {
+            ptr.displayModifMsg();
+        });
+        $tr.find('select').change(function() {
+            ptr.displayModifMsg();
+        });
+    }
     this.onComptiaLoadingStart = function() {
         var $cart = this.$prod.find('.cartContent');
         if ($cart.length) {
@@ -167,7 +179,7 @@ function Cart(prodId, serial, PM) {
                     if (this.cartProds[id]) {
                         var $td = $cart.find('tr.cartProd_'+id).find('td.compTIACodes');
                         if ($td.length)
-                            CTIA.appendCompTIACodesSelect($td, this.cartProds[id].code);
+                            CTIA.appendCompTIACodesSelect(this, $td, this.cartProds[id].code);
                         this.cartProds[id].setValues($cart.find('tr.cartProd_'+id));
                     }
                 }
@@ -233,9 +245,11 @@ function Cart(prodId, serial, PM) {
         html += '</tr>';
         this.$prod.find('.cartProducts').find('tbody').append(html);
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
+        this.setChangesEvents(this.$prod.find('tr.cartProd_'+curId));
+        this.displayModifMsg();
         this.activateSave();
         if (CTIA.loadStatus == 'loaded') {
-            CTIA.appendCompTIACodesSelect(this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
+            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
             this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_'+curId));
             this.$prod.find('.noProducts').hide();
             this.$prod.find('.cartProducts').show();
@@ -271,6 +285,7 @@ function Cart(prodId, serial, PM) {
         }
         delete this.cartProds[id];
         this.cartProds[id] = null;
+        this.displayModifMsg();
         this.activateSave();
     };
     this.deleteCart = function() {
@@ -326,6 +341,7 @@ function Cart(prodId, serial, PM) {
                 i++;
             }
         }
+        this.removeModifMsg();
         this.$prod.find('.cartRequestResults').find('ok').remove();
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).append('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('POST', 'savePartsCart', this.prodId, params);
@@ -339,6 +355,8 @@ function Cart(prodId, serial, PM) {
                 return;
             this.deleteCart();
         }
+        if (this.changes)
+            this.removeModifMsg();
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
         setRequest('GET', 'loadPartsCart', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
     };
@@ -373,9 +391,10 @@ function Cart(prodId, serial, PM) {
         html += '</tr>';
         this.$prod.find('.cartProducts').find('tbody').append(html);
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
+        this.setChangesEvents(this.$prod.find('tr.cartProd_'+curId));
         this.activateSave();
         if (CTIA.loadStatus == 'loaded') {
-            CTIA.appendCompTIACodesSelect(this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), code);
+            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), code);
             this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_'+curId));
             this.$prod.find('.noProducts').hide();
             this.$prod.find('.cartProducts').show();
@@ -404,6 +423,25 @@ function Cart(prodId, serial, PM) {
         if ($span.hasClass('deactivated'))
             return;
         this.save(true);
+    };
+    this.displayModifMsg =function() {
+        this.changes = true;
+        var $div = this.$prod.find('.cartRequestResults');
+        if ($div.length) {
+            var $p = $div.find('p.changesMsg');
+            if ($p.length)
+                return;
+            $div.stop().css('opacity', 1).append('<p class="alert changesMsg">Votre panier a été modifié. Si vous souhaitez conserver ces modifications, pensez à sauvegarder le panier.</p>').slideDown(250);
+        }
+    }
+    this.removeModifMsg = function() {
+    this.changes = false;
+        var $div = this.$prod.find('.cartRequestResults');
+        if ($div.length) {
+            var $p = $div.find('p.changesMsg');
+            if ($p.length)
+                $p.remove();
+        }
     }
 }
 
@@ -979,8 +1017,9 @@ function getProdId($obj) {
 }
 function checkProdQty($input) {
     var val = $input.val();
-    if (!val)
+    if (!val) {
         $input.val(1);
+    }
     else if (!/^[0-9]+$/.test(val)) {
         $input.val(1);
     } else {
@@ -994,18 +1033,25 @@ function checkProdQty($input) {
 function prodQtyDown($button) {
     var $input = $button.parent().find('input.prodQty');
     var val = parseInt($input.val());
+    if (val == 1)
+        return;
+
     val--;
     if (val < 1)
         val = 1;
     $input.val(val);
+    $input.trigger('change');
 }
 function prodQtyUp($button) {
     var $input = $button.parent().find('input.prodQty');
     var val = parseInt($input.val());
+    if (val == maxProdQty)
+        return;
     val++;
     if (val > maxProdQty)
         val = maxProdQty;
     $input.val(val);
+    $input.trigger('change');
 }
 
 function displayCreateRepairPopUp($button) {
@@ -1083,7 +1129,7 @@ function checkInput($input, type) {
     }
     switch (type) {
         case 'text':
-            if (!/^.+$/.test(val)) {
+            if (!/^[\n\t\s]*.+$/.test(val)) {
                 assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
                 return false;
             }

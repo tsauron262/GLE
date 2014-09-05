@@ -897,7 +897,7 @@ function GSX() {
             return;
         }
 
-        if (!/^[0-9A-Z]{11,12}$/.test(serial)) {
+        if (!/^[0-9A-Z]{11}[0-9A-Z]*$/.test(serial)) {
             displayRequestMsg('error', 'Le format du numéro de série est incorrect');
             return;
         }
@@ -1129,10 +1129,6 @@ function checkInput($input, type) {
     }
     switch (type) {
         case 'text':
-            if (!/^[\n\t\s]*.+$/.test(val)) {
-                assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
-                return false;
-            }
             break;
 
         case 'alphanum':

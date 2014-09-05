@@ -5,7 +5,7 @@
  * Copyright (C) 2012      Christophe Battarel  <christophe.battarel@altairis.fr>
  * Copyright (C) 2010-2011 Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2012-2013 Christophe Battarel  <christophe.battarel@altairis.fr>
- * Copyright (C) 2011-2012 Philippe Grand	      <philippe.grand@atoo-net.com>
+ * Copyright (C) 2011-2014 Philippe Grand	    <philippe.grand@atoo-net.com>
  * Copyright (C) 2012      Marcos García        <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,11 +47,47 @@ abstract class CommonObject
 
     public $array_options=array();
 
-    public $linkedObjectsIds;
-    public $linkedObjects;
+    public $linkedObjectsIds;	// Loaded by ->fetchObjectLinked
+    public $linkedObjects;		// Loaded by ->fetchObjectLinked
 
     // No constructor as it is an abstract class
 
+
+    /**
+     * Check an object id/ref exists
+     * If you don't need/want to instantiate object and just need to know if object exists, use this method instead of fetch
+     *
+	 *  @param	string	$element   	String of element ('product', 'facture', ...)
+	 *  @param	int		$id      	Id of object
+	 *  @param  string	$ref     	Ref of object to check
+	 *  @param	string	$ref_ext	Ref ext of object to check
+	 *  @return int     			<0 if KO, 0 if OK but not found, >0 if OK and exists
+     */
+    static function isExistingObject($element, $id, $ref='', $ref_ext='')
+    {
+    	global $db;
+
+		$sql = "SELECT rowid, ref, ref_ext";
+		$sql.= " FROM ".MAIN_DB_PREFIX.$element;
+		if ($id > 0) $sql.= " WHERE rowid = ".$db->escape($id);
+		else if ($ref) $sql.= " WHERE ref = '".$db->escape($ref)."'";
+		else if ($ref_ext) $sql.= " WHERE ref_ext = '".$db->escape($ref_ext)."'";
+		else {
+			$error='ErrorWrongParameters';
+			dol_print_error(get_class()."::isExistingObject ".$error, LOG_ERR);
+			return -1;
+		}
+
+		dol_syslog(get_class()."::isExistingObject sql=".$sql);
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$num=$db->num_rows($resql);
+			if ($num > 0) return 1;
+			else return 0;
+		}
+		return -1;
+    }
 
     /**
      * Method to output saved errors
@@ -79,14 +115,14 @@ abstract class CommonObject
         //print "lastname=".$this->lastname." name=".$this->name." nom=".$this->nom."<br>\n";
         $lastname=$this->lastname;
         $firstname=$this->firstname;
-        if (empty($lastname))  $lastname=($this->lastname?$this->lastname:($this->name?$this->name:$this->nom));
+        if (empty($lastname))  $lastname=(isset($this->lastname)?$this->lastname:(isset($this->name)?$this->name:(isset($this->nom)?$this->nom:'')));
         if (empty($firstname)) $firstname=$this->firstname;
 
         $ret='';
-        if ($option && $this->civilite_id)
+        if ($option && $this->civility_id)
         {
-            if ($langs->transnoentitiesnoconv("Civility".$this->civilite_id)!="Civility".$this->civilite_id) $ret.=$langs->transnoentitiesnoconv("Civility".$this->civilite_id).' ';
-            else $ret.=$this->civilite_id.' ';
+            if ($langs->transnoentitiesnoconv("Civility".$this->civility_id)!="Civility".$this->civility_id) $ret.=$langs->transnoentitiesnoconv("Civility".$this->civility_id).' ';
+            else $ret.=$this->civility_id.' ';
         }
 
         $ret.=dolGetFirstLastname($firstname, $lastname, $nameorder);
@@ -114,33 +150,6 @@ abstract class CommonObject
     	return dol_format_address($this, $withcountry, $sep);
     }
 
-    /**
-     *  Check if ref is used.
-     *
-     * 	@return		int			<0 if KO, 0 if not found, >0 if found
-     */
-    function verifyNumRef()
-    {
-        global $conf;
-
-        $sql = "SELECT rowid";
-        $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element;
-        $sql.= " WHERE ref = '".$this->ref."'";
-        $sql.= " AND entity = ".$conf->entity;
-        dol_syslog(get_class($this)."::verifyNumRef sql=".$sql, LOG_DEBUG);
-        $resql = $this->db->query($sql);
-        if ($resql)
-        {
-            $num = $this->db->num_rows($resql);
-            return $num;
-        }
-        else
-        {
-            $this->error=$this->db->lasterror();
-            dol_syslog(get_class($this)."::verifyNumRef ".$this->error, LOG_ERR);
-            return -1;
-        }
-    }
 
     /**
      *  Add a link between element $this->element and a contact
@@ -236,6 +245,30 @@ abstract class CommonObject
                 return -1;
             }
         }
+    }
+
+    /**
+     *    Copy contact from one element to current
+     *
+     *    @param    CommonObject    $objFrom    Source element
+     *    @param    string          $source     Nature of contact ('internal' or 'external')
+     *    @return   int                         >0 if OK, <0 if KO
+     */
+    function copy_linked_contact($objFrom, $source='internal')
+    {
+        global $user,$langs,$conf;
+
+        $contacts = $objFrom->liste_contact(-1, $source);
+        foreach($contacts as $contact)
+        {
+            if ($this->add_contact($contact['id'], $contact['fk_c_type_contact'], $contact['source']) < 0)
+            {
+                $this->error=$this->db->lasterror();
+                dol_syslog(get_class($this)."::copy_contact error=".$this->error, LOG_ERR);
+                return -1;
+            }
+        }
+        return 1;
     }
 
     /**
@@ -355,7 +388,7 @@ abstract class CommonObject
 
         $tab=array();
 
-        $sql = "SELECT ec.rowid, ec.statut, ec.fk_socpeople as id";    // This field contains id of llx_socpeople or id of llx_user
+        $sql = "SELECT ec.rowid, ec.statut, ec.fk_socpeople as id, ec.fk_c_type_contact";    // This field contains id of llx_socpeople or id of llx_user
         if ($source == 'internal') $sql.=", '-1' as socid";
         if ($source == 'external' || $source == 'thirdparty') $sql.=", t.fk_soc as socid";
         $sql.= ", t.civilite as civility, t.lastname as lastname, t.firstname, t.email";
@@ -390,7 +423,7 @@ abstract class CommonObject
                     $tab[$i]=array('source'=>$obj->source,'socid'=>$obj->socid,'id'=>$obj->id,
 					               'nom'=>$obj->lastname,      // For backward compatibility
 					               'civility'=>$obj->civility, 'lastname'=>$obj->lastname, 'firstname'=>$obj->firstname, 'email'=>$obj->email,
-					               'rowid'=>$obj->rowid,'code'=>$obj->code,'libelle'=>$libelle_type,'status'=>$obj->statut);
+					               'rowid'=>$obj->rowid,'code'=>$obj->code,'libelle'=>$libelle_type,'status'=>$obj->statut, 'fk_c_type_contact' => $obj->fk_c_type_contact);
                 }
                 else
                 {
@@ -566,7 +599,7 @@ abstract class CommonObject
     }
 
     /**
-     *    	Load the third party of object from id $this->socid into this->thirdpary
+     *    	Load the third party of object, from id $this->socid or $this->fk_soc, into this->thirdpary
      *
      *		@return		int					<0 if KO, >0 if OK
      */
@@ -574,10 +607,10 @@ abstract class CommonObject
     {
         global $conf;
 
-        if (empty($this->socid)) return 0;
+        if (empty($this->socid) && empty($this->fk_soc)) return 0;
 
         $thirdparty = new Societe($this->db);
-        $result=$thirdparty->fetch($this->socid);
+        $result=$thirdparty->fetch(isset($this->socid)?$this->socid:$this->fk_soc);
         $this->client = $thirdparty;  // deprecated
         $this->thirdparty = $thirdparty;
 
@@ -593,9 +626,11 @@ abstract class CommonObject
 
 
     /**
-     *		Load data for barcode
+     *	Load data for barcode into properties ->barcode_type*
+     *	Properties ->barcode_type that is id of barcode type is used to find other properties, but
+     *  if it is not defined, ->element must be defined to know default barcode type.
      *
-     *		@return		int			<0 if KO, >=0 if OK
+     *	@return		int			<0 if KO, 0 if can't guess type of barcode (ISBN, EAN13...), >0 if OK (all barcode properties loaded)
      */
     function fetch_barcode()
     {
@@ -604,11 +639,11 @@ abstract class CommonObject
         dol_syslog(get_class($this).'::fetch_barcode this->element='.$this->element.' this->barcode_type='.$this->barcode_type);
 
         $idtype=$this->barcode_type;
-        if (! $idtype)
+        if (empty($idtype) && $idtype != '0')	// If type of barcode no set, we try to guess. If set to '0' it means we forced to have type remain not defined
         {
             if ($this->element == 'product')      $idtype = $conf->global->PRODUIT_DEFAULT_BARCODE_TYPE;
             else if ($this->element == 'societe') $idtype = $conf->global->GENBARCODE_BARCODETYPE_THIRDPARTY;
-            else dol_print_error('','Call fetch_barcode with barcode_type not defined and cant be guessed');
+            else dol_syslog('Call fetch_barcode with barcode_type not defined and cant be guessed', LOG_WARNING);
         }
 
         if ($idtype > 0)
@@ -790,9 +825,10 @@ abstract class CommonObject
      *
      *      @param	string	$filter		Optional filter
      *	 	@param  int		$fieldid   	Name of field to use for the select MAX and MIN
+     *		@param	int		$nodbprefix	Do not include DB prefix to forge table name
      *      @return int         		<0 if KO, >0 if OK
      */
-    function load_previous_next_ref($filter,$fieldid)
+    function load_previous_next_ref($filter,$fieldid,$nodbprefix=0)
     {
         global $conf, $user;
 
@@ -808,7 +844,7 @@ abstract class CommonObject
         if ($this->element == 'societe') $alias = 'te';
 
         $sql = "SELECT MAX(te.".$fieldid.")";
-        $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as te";
+        $sql.= " FROM ".(empty($nodbprefix)?MAIN_DB_PREFIX:'').$this->table_element." as te";
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && empty($user->rights->societe->client->voir))) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
         $sql.= " WHERE te.".$fieldid." < '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
@@ -821,7 +857,7 @@ abstract class CommonObject
         $result = $this->db->query($sql);
         if (! $result)
         {
-            $this->error=$this->db->error();
+            $this->error=$this->db->lasterror();
             return -1;
         }
         $row = $this->db->fetch_row($result);
@@ -829,7 +865,7 @@ abstract class CommonObject
 
 
         $sql = "SELECT MIN(te.".$fieldid.")";
-        $sql.= " FROM ".MAIN_DB_PREFIX.$this->table_element." as te";
+        $sql.= " FROM ".(empty($nodbprefix)?MAIN_DB_PREFIX:'').$this->table_element." as te";
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ", ".MAIN_DB_PREFIX."societe as s";	// If we need to link to societe to limit select to entity
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe_commerciaux as sc ON ".$alias.".rowid = sc.fk_soc";
         $sql.= " WHERE te.".$fieldid." > '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
@@ -843,7 +879,7 @@ abstract class CommonObject
         $result = $this->db->query($sql);
         if (! $result)
         {
-            $this->error=$this->db->error();
+            $this->error=$this->db->lasterror();
             return -2;
         }
         $row = $this->db->fetch_row($result);
@@ -1479,21 +1515,23 @@ abstract class CommonObject
      *	Update total_ht, total_ttc, total_vat, total_localtax1, total_localtax2 for an object (sum of lines).
      *  Must be called at end of methods addline or updateline.
      *
-     *	@param	int		$exclspec          	Exclude special product (product_type=9)
-     *  @param  int		$roundingadjust    	-1=Use default method (MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND if defined, or 0), 0=Force use total of rounding, 1=Force use rounding of total
+     *	@param	int		$exclspec          	>0 = Exclude special product (product_type=9)
+     *  @param  string	$roundingadjust    	'none'=Do nothing, 'auto'=Use default method (MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND if defined, or '0'), '0'=Force use total of rounding, '1'=Force use rounding of total
      *  @param	int		$nodatabaseupdate	1=Do not update database. Update only properties of object.
-     *  @param	Societe	$seller				If roundingadjust is 0, it means we recalculate total for lines before calculating total for object. For this, we need seller object.
+     *  @param	Societe	$seller				If roundingadjust is '0' or '1', it means we recalculate total for lines before calculating total for object. For this, we need seller object.
      *	@return	int    			           	<0 if KO, >0 if OK
      */
-    function update_price($exclspec=0,$roundingadjust=-1,$nodatabaseupdate=0,$seller='')
+    function update_price($exclspec=0,$roundingadjust='none',$nodatabaseupdate=0,$seller='')
     {
     	global $conf;
 
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
+        if ($roundingadjust == '-1') $roundingadjust='auto';	// For backward compatibility
+
         $forcedroundingmode=$roundingadjust;
-        if ($forcedroundingmode < 0 && isset($conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND)) $forcedroundingmode=$conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND;
-        if ($forcedroundingmode < 0) $forcedroundingmode=0;
+        if ($forcedroundingmode == 'auto' && isset($conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND)) $forcedroundingmode=$conf->global->MAIN_ROUNDOFTOTAL_NOT_TOTALOFROUND;
+        if ($forcedroundingmode == 'auto') $forcedroundingmode='0';
 
         $error=0;
 
@@ -1539,17 +1577,17 @@ abstract class CommonObject
             {
                 $obj = $this->db->fetch_object($resql);
 
-                // By default, no adjustement is required ($forcedroundingmode = -1)
-                if ($forcedroundingmode == 0)	// Check if we need adjustement onto line for vat
+                // Note: There is no check on detail line and no check on total, if $forcedroundingmode = 'none'
+
+                if ($forcedroundingmode == '0')	// Check if data on line are consistent. This may solve lines that were not consistent because set with $forcedroundingmode='auto'
                 {
                 	$localtax_array=array($obj->localtax1_type,$obj->localtax1_tx,$obj->localtax2_type,$obj->localtax2_tx);
                 	$tmpcal=calcul_price_total($obj->qty, $obj->up, $obj->remise_percent, $obj->vatrate, $obj->localtax1_tx, $obj->localtax2_tx, 0, 'HT', $obj->info_bits, $obj->product_type, $seller, $localtax_array);
                 	$diff=price2num($tmpcal[1] - $obj->total_tva, 'MT', 1);
                 	if ($diff)
                 	{
-                	    if (abs($diff) > 0.1) { dol_syslog('','A rounding difference was detected', LOG_WARNING); }
                 		$sqlfix="UPDATE ".MAIN_DB_PREFIX.$this->table_element_line." SET ".$fieldtva." = ".$tmpcal[1].", total_ttc = ".$tmpcal[2]." WHERE rowid = ".$obj->rowid;
-                		dol_syslog('We found a difference of '.$diff.' for line rowid = '.$obj->rowid.". We fix the vat and total_ttc by running sqlfix = ".$sqlfix);
+                		dol_syslog('We found unconsistent data into detailed line (difference of '.$diff.') for line rowid = '.$obj->rowid." (total vat of line calculated=".$tmpcal[1].", database=".$obj->total_tva."). We fix the total_vat and total_ttc of line by running sqlfix = ".$sqlfix);
 						$resqlfix=$this->db->query($sqlfix);
 						if (! $resqlfix) dol_print_error($this->db,'Failed to update line');
 						$obj->total_tva = $tmpcal[1];
@@ -1563,21 +1601,23 @@ abstract class CommonObject
                 $this->total_localtax1 += $obj->total_localtax1;
                 $this->total_localtax2 += $obj->total_localtax2;
                 $this->total_ttc       += $obj->total_ttc;
+                if (! isset($total_ht_by_vats[$obj->vatrate]))  $total_ht_by_vats[$obj->vatrate]=0;
+                if (! isset($total_tva_by_vats[$obj->vatrate])) $total_tva_by_vats[$obj->vatrate]=0;
+                if (! isset($total_ttc_by_vats[$obj->vatrate])) $total_ttc_by_vats[$obj->vatrate]=0;
                 $total_ht_by_vats[$obj->vatrate]  += $obj->total_ht;
                 $total_tva_by_vats[$obj->vatrate] += $obj->total_tva;
                 $total_ttc_by_vats[$obj->vatrate] += $obj->total_ttc;
 
-                if ($forcedroundingmode == 1)	// Check if we need adjustement onto line for vat
+                if ($forcedroundingmode == '1')	// Check if we need adjustement onto line for vat
                 {
                 	$tmpvat=price2num($total_ht_by_vats[$obj->vatrate] * $obj->vatrate / 100, 'MT', 1);
                 	$diff=price2num($total_tva_by_vats[$obj->vatrate]-$tmpvat, 'MT', 1);
                 	//print 'Line '.$i.' rowid='.$obj->rowid.' vat_rate='.$obj->vatrate.' total_ht='.$obj->total_ht.' total_tva='.$obj->total_tva.' total_ttc='.$obj->total_ttc.' total_ht_by_vats='.$total_ht_by_vats[$obj->vatrate].' total_tva_by_vats='.$total_tva_by_vats[$obj->vatrate].' (new calculation = '.$tmpvat.') total_ttc_by_vats='.$total_ttc_by_vats[$obj->vatrate].($diff?" => DIFF":"")."<br>\n";
                 	if ($diff)
                 	{
-                		if (abs($diff) > 0.1) { dol_syslog('','A rounding difference was detected but is too high to be corrected', LOG_WARNING); exit; }
+                		if (abs($diff) > 0.1) { dol_syslog('A rounding difference was detected into TOTAL but is too high to be corrected', LOG_WARNING); exit; }
                 		$sqlfix="UPDATE ".MAIN_DB_PREFIX.$this->table_element_line." SET ".$fieldtva." = ".($obj->total_tva - $diff).", total_ttc = ".($obj->total_ttc - $diff)." WHERE rowid = ".$obj->rowid;
-						//print 'We found a difference of '.$diff.' for line rowid = '.$obj->rowid.". Run sqlfix = ".$sqlfix."<br>\n";
-                		dol_syslog('We found a difference of '.$diff.' for line rowid = '.$obj->rowid.". We fix the vat and total_ttc by running sqlfix = ".$sqlfix);
+                		dol_syslog('We found a difference of '.$diff.' for line rowid = '.$obj->rowid.". We fix the total_vat and total_ttc of line by running sqlfix = ".$sqlfix);
 						$resqlfix=$this->db->query($sqlfix);
 						if (! $resqlfix) dol_print_error($this->db,'Failed to update line');
 						$this->total_tva -= $diff;
@@ -1691,10 +1731,10 @@ abstract class CommonObject
      *	@param  string	$sourcetype		Object source type
      *	@param  int		$targetid		Object target id
      *	@param  string	$targettype		Object target type
-     *	@param  string	$clause			OR, AND clause
+     *	@param  string	$clause			'OR' or 'AND' clause used when both source id and target id are provided
      *	@return	void
      */
-    function fetchObjectLinked($sourceid='',$sourcetype='',$targetid='',$targettype='',$clause='OR')
+	function fetchObjectLinked($sourceid='',$sourcetype='',$targetid='',$targettype='',$clause='OR')
     {
         global $conf;
 
@@ -1796,9 +1836,6 @@ abstract class CommonObject
                     }
                     else if ($objecttype == 'invoice_supplier' || $objecttype == 'order_supplier')	{
                         $classpath = 'fourn/class'; $module = 'fournisseur';
-                    }
-                    else if ($objecttype == 'order_supplier')	{
-                        $classpath = 'fourn/class';
                     }
                     else if ($objecttype == 'fichinter')			{
                         $classpath = 'fichinter/class'; $subelement = 'fichinter'; $module = 'ficheinter';
@@ -2025,7 +2062,7 @@ abstract class CommonObject
 
 
     /**
-     * 	Get special code of line
+     * 	Get special code of a line
      *
      * 	@param	int		$lineid		Id of line
      * 	@return	int					Special code
@@ -2049,7 +2086,7 @@ abstract class CommonObject
      *
      *  @param	int		$rowid			Id of line
      *  @param  array	$optionsArray   Array resulting of call of extrafields->fetch_name_optionals_label()
-     *  @return	void
+     *  @return	int						<0 if error, 0 if no optionals to find nor found, 1 if a line is found and optional loaded
      */
     function fetch_optionals($rowid,$optionsArray='')
     {
@@ -2077,13 +2114,14 @@ abstract class CommonObject
             $resql=$this->db->query($sql);
             if ($resql)
             {
-                if ($this->db->num_rows($resql))
+            	$numrows=$this->db->num_rows($resql);
+                if ($numrows)
                 {
                     $tab = $this->db->fetch_array($resql);
 
                     foreach ($tab as $key => $value)
                     {
-                    	//Test fetch_array ! is_int($key) because fetch_array seult is a mix table with Key as alpha and Key as int (depend db engine)
+                    	// Test fetch_array ! is_int($key) because fetch_array seult is a mix table with Key as alpha and Key as int (depend db engine)
                         if ($key != 'rowid' && $key != 'tms' && $key != 'fk_member' && ! is_int($key))
                         {
                             // we can add this attribute to adherent object
@@ -2093,12 +2131,17 @@ abstract class CommonObject
                 }
 
                 $this->db->free($resql);
+
+                if ($numrows) return $numrows;
+                else return 0;
             }
             else
             {
                 dol_print_error($this->db);
+                return -1;
             }
         }
+        return 0;
     }
 
     /**
@@ -2245,7 +2288,7 @@ abstract class CommonObject
      */
     function showOptionals($extrafields, $mode='view', $params=0, $keyprefix='')
     {
-		global $_POST;
+		global $_POST, $conf;
 
 		$out = '';
 
@@ -2359,7 +2402,8 @@ abstract class CommonObject
 
 
     /**
-     *  Function to check if an object is used by others
+     *  Function to check if an object is used by others.
+     *  Check is done into this->childtables. There is no check into llx_element_element.
      *
      *  @param	int		$id			Id of object
      *  @return	int					<0 if KO, 0 if not used, >0 if already used
@@ -2449,7 +2493,7 @@ abstract class CommonObject
         	$i=0;
         	while ($i < $num)
         	{
-            	$obj = $this->db->fetch_object($query);
+            	$obj = $this->db->fetch_object($resql);
 
             	$pu_ht = $obj->pu_ht;
             	$qty= $obj->qty;
@@ -2632,74 +2676,7 @@ abstract class CommonObject
     /* This is to show add lines */
 
     /**
-     *	Show add predefined products/services form
-     *  TODO Edit templates to use global variables and include them directly in controller call
-     *  But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
-     *
-     *  @param  int	    		$dateSelector       1=Show also date range input fields
-     *  @param	Societe			$seller				Object thirdparty who sell
-     *  @param	Societe			$buyer				Object thirdparty who buy
-     *	@return	void
-     *	@deprecated
-     */
-    function formAddPredefinedProduct($dateSelector,$seller,$buyer)
-    {
-    	global $conf,$langs,$object,$hookmanager;
-    	global $form,$bcnd,$var;
-    	global $user;
-    	//Line extrafield
-    	require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-    	$extrafieldsline = new ExtraFields($this->db);
-    	$extralabelslines=$extrafieldsline->fetch_name_optionals_label($this->table_element_line);
-
-    	// Use global variables + $dateSelector + $seller and $buyer
-    	include(DOL_DOCUMENT_ROOT.'/core/tpl/predefinedproductline_create.tpl.php');
-    }
-
-    /**
-     *	Show add free products/services form
-     *  TODO Edit templates to use global variables and include them directly in controller call
-     *  But for the moment we don't know if it'st possible as we keep a method available on overloaded objects.
-     *
-     *  @param	int		        $dateSelector       1=Show also date range input fields
-     *  @param	Societe			$seller				Object thirdparty who sell
-     *  @param	Societe			$buyer				Object thirdparty who buy
-     *	@return	void
-     *	@deprecated
-     */
-    function formAddFreeProduct($dateSelector,$seller,$buyer)
-    {
-    	global $conf,$langs,$object,$hookmanager;
-    	global $form,$bcnd,$var;
-    	global $user;
-
-    	//Line extrafield
-    	require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
-    	$extrafieldsline = new ExtraFields($this->db);
-    	$extralabelslines=$extrafieldsline->fetch_name_optionals_label($this->table_element_line);
-
-    	// Use global variables + $dateSelector + $seller and $buyer
-        //Mod drsi pour cherchr dans tous les tpl
-        $dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
-			foreach($dirtpls as $reldir)
-			{
-				$tpl = dol_buildpath($reldir.'/freeproductline_create.tpl.php');
-				if (empty($conf->file->strict_mode)) {
-					$res=@include $tpl;
-				} else {
-					$res=include $tpl; // for debug
-				}
-				if ($res) break;
-			}
-//    	include(DOL_DOCUMENT_ROOT.'/core/tpl/freeproductline_create.tpl.php');
-                        //fin mod drsi
-    }
-
-
-    /**
      *	Show add free and predefined products/services form
-     *  TODO Edit templates to use global variables and include them directly in controller call
-     *  But for the moment we don't know if it's possible as we keep a method available on overloaded objects.
      *
      *  @param	int		        $dateSelector       1=Show also date range input fields
      *  @param	Societe			$seller				Object thirdparty who sell
@@ -2721,7 +2698,7 @@ abstract class CommonObject
 		$dirtpls=array_merge($conf->modules_parts['tpl'],array('/core/tpl'));
 		foreach($dirtpls as $reldir)
 		{
-			$tpl = dol_buildpath($reldir.'/objectline_add.tpl.php');
+			$tpl = dol_buildpath($reldir.'/objectline_create.tpl.php');
 			if (empty($conf->file->strict_mode)) {
 				$res=@include $tpl;
 			} else {
@@ -2751,7 +2728,7 @@ abstract class CommonObject
 	 */
 	function printObjectLines($action, $seller, $buyer, $selected=0, $dateSelector=0)
 	{
-		global $conf,$langs,$user,$hookmanager;
+		global $conf,$langs,$user,$object,$hookmanager;
 
 		print '<tr class="liste_titre nodrag nodrop">';
 
@@ -2790,11 +2767,11 @@ abstract class CommonObject
 		// Total HT
 		print '<td align="right" width="50">'.$langs->trans('TotalHTShort').'</td>';
 
-		print '<td width="10"></td>';
+		print '<td></td>';  // No width to allow autodim
 
 		print '<td width="10"></td>';
 
-		print '<td class="nowrap"></td>'; // No width to allow autodim
+		print '<td width="10"></td>';
 
 		print "</tr>\n";
 
@@ -2818,7 +2795,7 @@ abstract class CommonObject
 			{
 				if (empty($line->fk_parent_line))
 				{
-					$parameters = array('line'=>$line,'var'=>$var,'num'=>$num,'i'=>$i,'dateSelector'=>$dateSelector,'seller'=>$seller,'buyer'=>$buyer,'selected'=>$selected);
+					$parameters = array('line'=>$line,'var'=>$var,'num'=>$num,'i'=>$i,'dateSelector'=>$dateSelector,'seller'=>$seller,'buyer'=>$buyer,'selected'=>$selected, 'extrafieldsline'=>$extrafieldsline);
 					$reshook=$hookmanager->executeHooks('printObjectLine', $parameters, $this, $action);    // Note that $action and $object may have been modified by some hooks
 				}
 			}
@@ -2849,7 +2826,7 @@ abstract class CommonObject
 	 */
 	function printObjectLine($action,$line,$var,$num,$i,$dateSelector,$seller,$buyer,$selected=0,$extrafieldsline=0)
 	{
-		global $conf,$langs,$user,$hookmanager;
+		global $conf,$langs,$user,$object,$hookmanager;
 		global $form,$bc,$bcdd;
 
 		$element=$this->element;
@@ -2875,13 +2852,13 @@ abstract class CommonObject
 				$product_static->ref=$line->ref;
 				$text=$product_static->getNomUrl(1);
 
-				// Define output language (TODO Does this works ?)
+				// Define output language and label
 				if (! empty($conf->global->MAIN_MULTILANGS))
 				{
-					if (! is_object($this->client))
+					if (! is_object($this->thirdparty))
 					{
-						// TODO Remove this
-						$this->fetch_thirdparty();	// The fetch_thirdparty should be done before calling $object->printObjectLines, not into function called for each line
+						dol_print_error('','Error: Method printObjectLine was called on an object and object->fetch_thirdparty was not done before');
+						return;
 					}
 
 					$prod = new Product($this->db);
@@ -2890,7 +2867,7 @@ abstract class CommonObject
 					$outputlangs = $langs;
 					$newlang='';
 					if (empty($newlang) && GETPOST('lang_id')) $newlang=GETPOST('lang_id');
-					if (! empty($conf->global->PRODUIT_TEXTS_IN_THIRDPARTY_LANGUAGE) && empty($newlang)) $newlang=$this->client->default_lang;		// For language to language of customer
+					if (! empty($conf->global->PRODUIT_TEXTS_IN_THIRDPARTY_LANGUAGE) && empty($newlang)) $newlang=$this->thirdparty->default_lang;		// For language to language of customer
 					if (! empty($newlang))
 					{
 						$outputlangs = new Translate("",$conf);
@@ -3121,7 +3098,8 @@ abstract class CommonObject
 	 * 	@param 	string 	$force_price	True of not
 	 * 	@return mixed					Array with info
 	 */
-	function getMarginInfos($force_price=false) {
+	function getMarginInfos($force_price=false)
+	{
 		global $conf;
 		require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.product.class.php';
 
@@ -3241,7 +3219,7 @@ abstract class CommonObject
 	}
 
 	/**
-	 * displayMarginInfos
+	 * Show the array with all margin infos
 	 *
 	 * @param 	string 	$force_price	Force price
 	 * @return	void
@@ -3258,7 +3236,8 @@ abstract class CommonObject
 
 		$marginInfo = $this->getMarginInfos($force_price);
 
-		print '<table class="noborder" width="100%">';
+		print '<table class="nobordernopadding" width="100%">';
+
 		print '<tr class="liste_titre">';
 		print '<td width="30%">'.$langs->trans('Margins').'</td>';
 		print '<td width="20%" align="right">'.$langs->trans('SellingPrice').'</td>';
@@ -3272,40 +3251,139 @@ abstract class CommonObject
 		if (! empty($conf->global->DISPLAY_MARK_RATES))
 			print '<td align="right">'.$langs->trans('MarkRate').'</td>';
 		print '</tr>';
-		//if ($marginInfo['margin_on_products'] != 0 && $marginInfo['margin_on_services'] != 0) {
-		print '<tr class="impair">';
-		print '<td>'.$langs->trans('MarginOnProducts').'</td>';
-		print '<td align="right">'.price($marginInfo['pv_products'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['pa_products'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['margin_on_products'], null, null, null, null, $rounding).'</td>';
-		if (! empty($conf->global->DISPLAY_MARGIN_RATES))
-			print '<td align="right">'.(($marginInfo['margin_rate_products'] == '')?'n/a':price($marginInfo['margin_rate_products'], null, null, null, null, $rounding).'%').'</td>';
-		if (! empty($conf->global->DISPLAY_MARK_RATES))
-			print '<td align="right">'.(($marginInfo['mark_rate_products'] == '')?'n/a':price($marginInfo['mark_rate_products'], null, null, null, null, $rounding).'%').'</td>';
-		print '</tr>';
-		print '<tr class="pair">';
-		print '<td>'.$langs->trans('MarginOnServices').'</td>';
-		print '<td align="right">'.price($marginInfo['pv_services'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['pa_services'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['margin_on_services'], null, null, null, null, $rounding).'</td>';
-		if (! empty($conf->global->DISPLAY_MARGIN_RATES))
-			print '<td align="right">'.(($marginInfo['margin_rate_services'] == '')?'n/a':price($marginInfo['margin_rate_services'], null, null, null, null, $rounding).'%').'</td>';
-		if (! empty($conf->global->DISPLAY_MARK_RATES))
-			print '<td align="right">'.(($marginInfo['mark_rate_services'] == '')?'n/a':price($marginInfo['mark_rate_services'], null, null, null, null, $rounding).'%').'</td>';
-		print '</tr>';
-		//}
-		print '<tr class="impair">';
-		print '<td>'.$langs->trans('TotalMargin').'</td>';
-		print '<td align="right">'.price($marginInfo['pv_total'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['pa_total'], null, null, null, null, $rounding).'</td>';
-		print '<td align="right">'.price($marginInfo['total_margin'], null, null, null, null, $rounding).'</td>';
-		if (! empty($conf->global->DISPLAY_MARGIN_RATES))
-			print '<td align="right">'.(($marginInfo['total_margin_rate'] == '')?'n/a':price($marginInfo['total_margin_rate'], null, null, null, null, $rounding).'%').'</td>';
-		if (! empty($conf->global->DISPLAY_MARK_RATES))
-			print '<td align="right">'.(($marginInfo['total_mark_rate'] == '')?'n/a':price($marginInfo['total_mark_rate'], null, null, null, null, $rounding).'%').'</td>';
-		print '</tr>';
+
+		if (! empty($conf->product->enabled))
+		{
+			//if ($marginInfo['margin_on_products'] != 0 && $marginInfo['margin_on_services'] != 0) {
+			print '<tr class="impair">';
+			print '<td>'.$langs->trans('MarginOnProducts').'</td>';
+			print '<td align="right">'.price($marginInfo['pv_products'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['pa_products'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['margin_on_products'], null, null, null, null, $rounding).'</td>';
+			if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+				print '<td align="right">'.(($marginInfo['margin_rate_products'] == '')?'':price($marginInfo['margin_rate_products'], null, null, null, null, $rounding).'%').'</td>';
+			if (! empty($conf->global->DISPLAY_MARK_RATES))
+				print '<td align="right">'.(($marginInfo['mark_rate_products'] == '')?'':price($marginInfo['mark_rate_products'], null, null, null, null, $rounding).'%').'</td>';
+			print '</tr>';
+		}
+
+		if (! empty($conf->service->enabled))
+		{
+			print '<tr class="pair">';
+			print '<td>'.$langs->trans('MarginOnServices').'</td>';
+			print '<td align="right">'.price($marginInfo['pv_services'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['pa_services'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['margin_on_services'], null, null, null, null, $rounding).'</td>';
+			if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+				print '<td align="right">'.(($marginInfo['margin_rate_services'] == '')?'':price($marginInfo['margin_rate_services'], null, null, null, null, $rounding).'%').'</td>';
+			if (! empty($conf->global->DISPLAY_MARK_RATES))
+				print '<td align="right">'.(($marginInfo['mark_rate_services'] == '')?'':price($marginInfo['mark_rate_services'], null, null, null, null, $rounding).'%').'</td>';
+			print '</tr>';
+		}
+
+		if (! empty($conf->product->enabled) && ! empty($conf->service->enabled))
+		{
+			print '<tr class="impair">';
+			print '<td>'.$langs->trans('TotalMargin').'</td>';
+			print '<td align="right">'.price($marginInfo['pv_total'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['pa_total'], null, null, null, null, $rounding).'</td>';
+			print '<td align="right">'.price($marginInfo['total_margin'], null, null, null, null, $rounding).'</td>';
+			if (! empty($conf->global->DISPLAY_MARGIN_RATES))
+				print '<td align="right">'.(($marginInfo['total_margin_rate'] == '')?'':price($marginInfo['total_margin_rate'], null, null, null, null, $rounding).'%').'</td>';
+			if (! empty($conf->global->DISPLAY_MARK_RATES))
+				print '<td align="right">'.(($marginInfo['total_mark_rate'] == '')?'':price($marginInfo['total_mark_rate'], null, null, null, null, $rounding).'%').'</td>';
+			print '</tr>';
+		}
 		print '</table>';
 	}
+
+
+	/**
+	 *	Add resources to the current object : add entry into llx_element_resources
+	 *Need $this->element & $this->id
+	 *
+	 *	@param		int		$resource_id		Resource id
+	 *	@param		string	$resource_element	Resource element
+	 *	@param		int		$busy				Busy or not
+	 *	@param		int		$mandatory			Mandatory or not
+	 *	@return		int							<=0 if KO, >0 if OK
+	 */
+	function add_element_resource($resource_id,$resource_element,$busy=0,$mandatory=0)
+	{
+		$this->db->begin();
+
+		$sql = "INSERT INTO ".MAIN_DB_PREFIX."element_resources (";
+		$sql.= "resource_id";
+		$sql.= ", resource_type";
+		$sql.= ", element_id";
+		$sql.= ", element_type";
+		$sql.= ", busy";
+		$sql.= ", mandatory";
+		$sql.= ") VALUES (";
+		$sql.= $resource_id;
+		$sql.= ", '".$resource_element."'";
+		$sql.= ", '".$this->id."'";
+		$sql.= ", '".$this->element."'";
+		$sql.= ", '".$busy."'";
+		$sql.= ", '".$mandatory."'";
+		$sql.= ")";
+
+		dol_syslog(get_class($this)."::add_element_resource sql=".$sql, LOG_DEBUG);
+		if ($this->db->query($sql))
+		{
+			$this->db->commit();
+			return 1;
+		}
+		else
+		{
+			$this->error=$this->db->lasterror();
+			$this->db->rollback();
+			return  0;
+		}
+	}
+
+	/**
+	 *    Delete a link to resource line
+	 *
+	 *    @param	int		$rowid			Id of resource line to delete
+	 *    @param	int		$element		element name (for trigger) TODO: use $this->element into commonobject class
+	 *    @param	int		$notrigger		Disable all triggers
+	 *    @return   int						>0 if OK, <0 if KO
+	 */
+	function delete_resource($rowid, $element, $notrigger=0)
+	{
+	    global $user,$langs,$conf;
+
+	    $error=0;
+
+	    $sql = "DELETE FROM ".MAIN_DB_PREFIX."element_resources";
+	    $sql.= " WHERE rowid =".$rowid;
+
+	    dol_syslog(get_class($this)."::delete_resource sql=".$sql);
+	    if ($this->db->query($sql))
+	    {
+	        if (! $notrigger)
+	        {
+	            // Call triggers
+	            include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+	            $interface=new Interfaces($this->db);
+	            $result=$interface->run_triggers(strtoupper($element).'_DELETE_RESOURCE',$this,$user,$langs,$conf);
+	            if ($result < 0) {
+	                $error++; $this->errors=$interface->errors;
+	            }
+	            // End call triggers
+	        }
+
+	        return 1;
+	    }
+	    else
+	    {
+	        $this->error=$this->db->lasterror();
+	        dol_syslog(get_class($this)."::delete_resource error=".$this->error, LOG_ERR);
+	        return -1;
+	    }
+	}
+
 
 	/**
 	 * Overwrite magic function to solve problem of cloning object that are kept as references
@@ -3326,4 +3404,3 @@ abstract class CommonObject
     }
 
 }
-?>

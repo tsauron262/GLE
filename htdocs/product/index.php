@@ -2,6 +2,7 @@
 /* Copyright (C) 2001-2006 Rodolphe Quiedeville <rodolphe@quiedeville.org>
  * Copyright (C) 2004-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
+ * Copyright (C)      2014 Charles-Fr BENKE     <charles.fr@benke.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,8 +69,6 @@ llxHeader("",$langs->trans("ProductsAndServices"),$helpurl);
 print_fiche_titre($transAreaType);
 
 
-//print '<table border="0" width="100%" class="notopnoleftnoright">';
-//print '<tr><td valign="top" width="30%" class="notopnoleft">';
 print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
@@ -113,54 +112,119 @@ $sql.= " GROUP BY p.fk_product_type, p.tosell, p.tobuy";
 $result = $db->query($sql);
 while ($objp = $db->fetch_object($result))
 {
-	$status=1;
+	$status=2;
 	if (! $objp->tosell && ! $objp->tobuy) $status=0;	// To sell OR to buy
-	$prodser[$objp->fk_product_type][$status]+=$objp->total;
+	if ((! $objp->tosell && $objp->tobuy) || ($objp->tosell && ! $objp->tobuy)) $status=1;
+	$prodser[$objp->fk_product_type][$status]=$objp->total;
 }
 
 print '<table class="noborder" width="100%">';
 print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("Statistics").'</td></tr>';
 if (! empty($conf->product->enabled))
 {
-	$statProducts = "<tr $bc[0]>";
+	$statProducts = "<tr ".$bc[0].">";
 	$statProducts.= '<td><a href="liste.php?type=0&amp;tosell=0&amp;tobuy=0">'.$langs->trans("ProductsNotOnSell").'</a></td><td align="right">'.round($prodser[0][0]).'</td>';
 	$statProducts.= "</tr>";
-	$statProducts.= "<tr $bc[1]>";
-	$statProducts.= '<td><a href="liste.php?type=0&amp;tosell=1">'.$langs->trans("ProductsOnSell").'</a></td><td align="right">'.round($prodser[0][1]).'</td>';
+	$statProducts.= "<tr ".$bc[1].">";
+	$statProducts.= '<td><a href="liste.php?type=0">'.$langs->trans("ProductsOnSell").'</a></td><td align="right">'.round($prodser[0][1]).'</td>';
 	$statProducts.= "</tr>";
+	$statProducts.= "<tr ".$bc[0].">";
+	$statProducts.= '<td><a href="liste.php?type=0&amp;tosell=1&amp;tobuy=1">'.$langs->trans("ProductsOnSellAndOnBuy").'</a></td><td align="right">'.round($prodser[0][2]).'</td>';
+	$statProducts.= "</tr>";
+
 }
 if (! empty($conf->service->enabled))
 {
-	$statServices = "<tr $bc[0]>";
+	$statServices = "<tr ".$bc[1].">";
 	$statServices.= '<td><a href="liste.php?type=1&amp;tosell=0&amp;tobuy=0">'.$langs->trans("ServicesNotOnSell").'</a></td><td align="right">'.round($prodser[1][0]).'</td>';
 	$statServices.= "</tr>";
-	$statServices.= "<tr $bc[1]>";
-	$statServices.= '<td><a href="liste.php?type=1&amp;tosell=1">'.$langs->trans("ServicesOnSell").'</a></td><td align="right">'.round($prodser[1][1]).'</td>';
+	$statServices.= "<tr ".$bc[0].">";
+	$statServices.= '<td><a href="liste.php?type=1">'.$langs->trans("ServicesOnSell").'</a></td><td align="right">'.round($prodser[1][1]).'</td>';
 	$statServices.= "</tr>";
+	$statServices.= "<tr ".$bc[1].">";
+	$statServices.= '<td><a href="liste.php?type=1&amp;tosell=1&amp;tobuy=1">'.$langs->trans("ServicesOnSellAndOnBuy").'</a></td><td align="right">'.round($prodser[1][2]).'</td>';
+	$statServices.= "</tr>";
+
 }
 $total=0;
 if ($type == '0')
 {
 	print $statProducts;
-	$total=round($prodser[0][0])+round($prodser[0][1]);
+	$total=round($prodser[0][0])+round($prodser[0][1])+round($prodser[0][2]);
 }
 else if ($type == '1')
 {
 	print $statServices;
-	$total=round($prodser[1][0])+round($prodser[1][1]);
+	$total=round($prodser[1][0])+round($prodser[1][1])+round($prodser[1][2]);
 }
 else
 {
 	print $statProducts.$statServices;
-	$total=round($prodser[1][0])+round($prodser[1][1])+round($prodser[0][0])+round($prodser[0][1]);
+	$total=round($prodser[1][0])+round($prodser[1][1])+round($prodser[1][2])+round($prodser[0][0])+round($prodser[0][1])+round($prodser[0][2]);
 }
 print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td align="right">';
 print $total;
 print '</td></tr>';
 print '</table>';
 
-
-//print '</td><td valign="top" width="70%" class="notopnoleftnoright">';
+if (! empty($conf->categorie->enabled))
+{
+	require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
+	print '<br>';
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre"><th colspan="2">'.$langs->trans("Categories").'</th></tr>';
+	print '<tr><td align="center">';
+	$sql = "SELECT c.label, count(*) as nb";
+	$sql.= " FROM ".MAIN_DB_PREFIX."categorie_product as cs";
+	$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."categorie as c ON cs.fk_categorie = c.rowid";
+	$sql.= " WHERE c.type = 0";
+	$sql.= " AND c.entity IN (".getEntity('category',1).")";
+	$sql.= " GROUP BY c.label";
+	$total=0;
+	$result = $db->query($sql);
+	if ($result)
+	{
+		$num = $db->num_rows($result);
+		$i=0;
+		if (! empty($conf->use_javascript_ajax))
+		{
+			$dataseries=array();
+			$rest=0;
+			$nbmax=10;
+			while ($i < $num)
+			{
+				$obj = $db->fetch_object($result);
+				if ($i < $nbmax)
+					$dataseries[]=array('label'=>$obj->label,'data'=>round($obj->nb));
+				else
+					$rest+=$obj->nb;
+				$total+=$obj->nb;
+				$i++;
+			}
+			if ($i > $nbmax)
+				$dataseries[]=array('label'=>$langs->trans("Other"),'data'=>round($rest));
+			$data=array('series'=>$dataseries);
+			dol_print_graph('statscategproduct',300,180,$data,1,'pie',0);
+		}
+		else
+		{
+			$var=true;
+			while ($i < $num)
+			{
+				$obj = $db->fetch_object($result);
+				$var=!$var;
+				print '<tr $bc[$var]><td>'.$obj->label.'</td><td>'.$obj->nb.'</td></tr>';
+				$total+=$obj->nb;
+				$i++;
+			}
+		}
+	}
+	print '</td></tr>';
+	print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td align="right">';
+	print $total;
+	print '</td></tr>';
+	print '</table>';
+}
 print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
 
 
@@ -261,7 +325,7 @@ else
 
 
 // TODO Move this into a page that should be available into menu "accountancy - report - turnover - per quarter"
-// Also method used for counting must provide the 2 possible methods like done by all other reports into menu "accountancy - report - turnover": 
+// Also method used for counting must provide the 2 possible methods like done by all other reports into menu "accountancy - report - turnover":
 // "commitment engagment" method and "cash accounting" method
 if ($conf->global->MAIN_FEATURES_LEVEL)
 {
@@ -270,7 +334,6 @@ if ($conf->global->MAIN_FEATURES_LEVEL)
 }
 
 
-//print '</td></tr></table>';
 print '</div></div></div>';
 
 llxFooter();
@@ -283,8 +346,8 @@ $db->close();
 function activitytrim($product_type)
 {
 	global $conf,$langs,$db;
-	
-	// We display the last 3 years 
+
+	// We display the last 3 years
 	$yearofbegindate=date('Y',dol_time_plus_duree(time(), -3, "y"));
 
 	// breakdown by quarter
@@ -311,7 +374,7 @@ function activitytrim($product_type)
 		$trim4=0;
 		$lgn = 0;
 		$num = $db->num_rows($result);
-		
+
 		if ($num > 0 )
 		{
 			print '<br>';
@@ -353,7 +416,7 @@ function activitytrim($product_type)
 				$trim3=0;
 				$trim4=0;
 			}
-			
+
 			if ($objp->mois == "01" || $objp->mois == "02" || $objp->mois == "03")
 				$trim1 += $objp->Mnttot;
 
@@ -383,4 +446,3 @@ function activitytrim($product_type)
 	}
 }
 
-?>

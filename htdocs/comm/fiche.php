@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2001-2005 Rodolphe Quiedeville        <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2013 Laurent Destailleur         <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2014 Laurent Destailleur         <eldy@users.sourceforge.net>
  * Copyright (C) 2004      Eric Seigne                 <eric.seigne@ryxeo.com>
  * Copyright (C) 2006      Andre Cianfarani            <acianfa@free.fr>
  * Copyright (C) 2005-2012 Regis Houssin               <regis.houssin@capnetworks.com>
@@ -67,11 +67,18 @@ $pagenext = $page + 1;
 if (! $sortorder) $sortorder="ASC";
 if (! $sortfield) $sortfield="nom";
 
+// Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
+$hookmanager->initHooks(array('commcard'));
+
 $object = new Societe($db);
 
 /*
  * Actions
  */
+
+$parameters = array('socid' => $id);
+$reshook = $hookmanager->executeHooks('doActions', $parameters, $object, $action); // Note that $action and $object may have been modified by some
+
 
 if ($action == 'setcustomeraccountancycode')
 {
@@ -187,9 +194,6 @@ if ($id > 0)
 		dol_print_error($db,$object->error);
 	}
 
-	/*
-	 * Affichage onglets
-	 */
 
 	$head = societe_prepare_head($object);
 
@@ -270,11 +274,11 @@ if ($id > 0)
 	// Fax
 	print '<td>'.$langs->trans('Fax').'</td><td style="min-width: 25%;">'.dol_print_phone($object->fax,$object->country_code,0,$object->id,'AC_FAX').'</td></tr>';
 
-  // Skype
-  if (! empty($conf->skype->enabled))
-  {
-	   print '<td>'.$langs->trans('Skype').'</td><td colspan="3">'.dol_print_skype($object->skype,0,$object->id,'AC_SKYPE').'</td></tr>';
-  }
+	// Skype
+  	if (! empty($conf->skype->enabled))
+  	{
+		print '<td>'.$langs->trans('Skype').'</td><td colspan="3">'.dol_print_skype($object->skype,0,$object->id,'AC_SKYPE').'</td></tr>';
+  	}
 
 	// Assujeti a TVA ou pas
 	print '<tr>';
@@ -397,7 +401,6 @@ if ($id > 0)
 		print '</tr>';
 	}
 
-
 	// Multiprice level
 	if (! empty($conf->global->PRODUIT_MULTIPRICES))
 	{
@@ -410,7 +413,11 @@ if ($id > 0)
 			print '<a href="'.DOL_URL_ROOT.'/comm/multiprix.php?id='.$object->id.'">'.img_edit($langs->trans("Modify")).'</a>';
 		}
 		print '</td></tr></table>';
-		print '</td><td colspan="3">'.$object->price_level."</td>";
+		print '</td><td colspan="3">';
+		print $object->price_level;
+		$keyforlabel='PRODUIT_MULTIPRICES_LABEL'.$object->price_level;
+		if (! empty($conf->global->$keyforlabel)) print ' - '.$langs->trans($conf->global->$keyforlabel);
+		print "</td>";
 		print '</tr>';
 	}
 
@@ -908,6 +915,11 @@ if ($id > 0)
 	/*
 	 * Barre d'actions
 	 */
+	
+	$parameters = array();
+	$reshook = $hookmanager->executeHooks('addMoreActionsButtons', $parameters, $object, $action); // Note that $action and $object may have been
+	
+	
 	print '<div class="tabsAction">';
 
 	if (! empty($conf->propal->enabled) && $user->rights->propal->creer)
@@ -981,11 +993,9 @@ if ($id > 0)
 	}
 
 	print '</div>';
-	print "<br>\n";
 
 	if (! empty($conf->global->MAIN_REPEATCONTACTONEACHTAB))
 	{
-	    print '<br>';
 		// List of contacts
 		show_contacts($conf,$langs,$db,$object,$_SERVER["PHP_SELF"].'?socid='.$object->id);
 	}

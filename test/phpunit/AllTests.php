@@ -28,7 +28,7 @@ print "Memory: ". ini_get('memory_limit')."\n";
 
 global $conf,$user,$langs,$db;
 //define('TEST_DB_FORCE_TYPE','mysql');	// This is to force using mysql driver
-require_once 'PHPUnit/Autoload.php';
+//require_once 'PHPUnit/Autoload.php';
 require_once dirname(__FILE__).'/../../htdocs/master.inc.php';
 
 if ($langs->defaultlang != 'en_US')
@@ -36,7 +36,10 @@ if ($langs->defaultlang != 'en_US')
     print "Error: Default language for company to run tests must be set to en_US or auto. Current is ".$langs->defaultlang."\n";
     exit;
 }
-
+if (! empty($conf->google->enabled))
+{
+	print "Warning: Google module should not be enabled.\n";
+}
 if (empty($user->id))
 {
 	print "Load permissions for admin user nb 1\n";
@@ -68,6 +71,8 @@ class AllTests
 		$suite->addTestSuite('DateLibTest');
 		//require_once dirname(__FILE__).'/DateLibTzFranceTest.php';
 		//$suite->addTestSuite('DateLibTzFranceTest');
+		require_once dirname(__FILE__).'/MarginsLibTest.php';
+		$suite->addTestSuite('MarginsLibTest');
 		require_once dirname(__FILE__).'/FilesLibTest.php';
 		$suite->addTestSuite('FilesLibTest');
 		require_once dirname(__FILE__).'/JsonLibTest.php';
@@ -83,6 +88,8 @@ class AllTests
 
 		require_once dirname(__FILE__).'/LangTest.php';
 		$suite->addTestSuite('LangTest');
+		require_once dirname(__FILE__).'/SqlTest.php';
+		$suite->addTestSuite('SqlTest');
 
         require_once dirname(__FILE__).'/SecurityTest.php';
         $suite->addTestSuite('SecurityTest');
@@ -146,10 +153,14 @@ class AllTests
         $suite->addTestSuite('ChargeSocialesTest');
         require_once dirname(__FILE__).'/HolidayTest.php';
         $suite->addTestSuite('HolidayTest');
+        require_once dirname(__FILE__).'/EntrepotTest.php';
+        $suite->addTestSuite('EntrepotTest');
 
         require_once dirname(__FILE__).'/CategorieTest.php';
         $suite->addTestSuite('CategorieTest');
 
+        require_once dirname(__FILE__).'/WebservicesProductsTest.php';
+        $suite->addTestSuite('WebservicesProductsTest');
         require_once dirname(__FILE__).'/WebservicesInvoicesTest.php';
         $suite->addTestSuite('WebservicesInvoicesTest');
         require_once dirname(__FILE__).'/WebservicesOrdersTest.php';
@@ -175,8 +186,13 @@ class AllTests
         require_once dirname(__FILE__).'/ModulesTest.php';  // At end because it's the longer
         $suite->addTestSuite('ModulesTest');
 
+
+        // GUI
+        require_once dirname(__FILE__).'/FormAdminTest.php';
+		$suite->addTestSuite('FormAdminTest');
+
+
         return $suite;
     }
 }
 
-?>

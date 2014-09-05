@@ -454,7 +454,7 @@ function clean_url($url,$http=1)
     {
         $proto=$regs[1];
         $domain=$regs[2];
-        $port=$regs[3];
+        $port=isset($regs[3])?$regs[3]:'';
         //print $url." -> ".$proto." - ".$domain." - ".$port;
         //$url = dol_string_nospecial(trim($url));
         $url = trim($url);
@@ -536,7 +536,7 @@ function array2table($data,$tableMarkup=1,$tableoptions='',$troptions='',$tdopti
  * @param   Societe		$objsoc			The company that own the object we need a counter for
  * @param   string		$date			Date to use for the {y},{m},{d} tags.
  * @param   string		$mode           'next' for next value or 'last' for last value
- * @return 	string					    New value
+ * @return 	string					    New value (numeric) or error message
  */
 function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$mode='next')
 {
@@ -716,7 +716,7 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
     //print "masktri=".$masktri." maskcounter=".$maskcounter." maskraz=".$maskraz." maskoffset=".$maskoffset."<br>\n";
 
     // Define $sqlstring
-    $posnumstart=strpos($maskwithnocode,$maskcounter);	// Pos of counter in final string (from 0 to ...)
+    $posnumstart=strrpos($maskwithnocode,$maskcounter);	// Pos of counter in final string (from 0 to ...)
     if ($posnumstart < 0) return 'ErrorBadMaskFailedToLocatePosOfSequence';
     $sqlstring='SUBSTRING('.$field.', '.($posnumstart+1).', '.dol_strlen($maskcounter).')';
 
@@ -739,7 +739,7 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
     $sql.= " FROM ".MAIN_DB_PREFIX.$table;
     $sql.= " WHERE ".$field." LIKE '".$maskLike."'";
     $sql.= " AND ".$field." NOT LIKE '%PROV%'";
-    if ($table != 'projet_task') $sql.= " AND entity IN (".getEntity($table, 1).")";
+    $sql.= " AND entity IN (".getEntity($table, 1).")";
     if ($where) $sql.=$where;
     if ($sqlwhere) $sql.=' AND '.$sqlwhere;
 
@@ -798,6 +798,12 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
     {
         $counter++;
 
+        // If value for $counter has a length higher than $maskcounter chars
+        if ($counter >= pow(10, dol_strlen($maskcounter)))
+        {
+        	$counter='ErrorMaxNumberReachForThisMask';
+        }
+
         if (! empty($maskrefclient_maskcounter))
         {
             //print "maskrefclient_maskcounter=".$maskrefclient_maskcounter." maskwithnocode=".$maskwithnocode." maskrefclient=".$maskrefclient."\n<br>";
@@ -839,6 +845,7 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
                 $maskrefclient_counter = $maskrefclient_obj->val;
             }
             else dol_print_error($db);
+
             if (empty($maskrefclient_counter) || preg_match('/[^0-9]/i',$maskrefclient_counter)) $maskrefclient_counter=$maskrefclient_maskoffset;
 			$maskrefclient_counter++;
         }
@@ -1286,6 +1293,7 @@ function getListOfModels($db,$type,$maxfilenamelength=0)
     $sql.= " WHERE type = '".$type."'";
     $sql.= " AND entity IN (0,".(! empty($conf->multicompany->enabled) && ! empty($conf->multicompany->transverse_mode)?"1,":"").$conf->entity.")";
 
+    dol_syslog('/core/lib/function2.lib.php::getListOfModels sql='.$sql, LOG_DEBUG);
     $resql = $db->query($sql);
     if ($resql)
     {
@@ -1531,4 +1539,249 @@ function dolGetElementUrl($objectid,$objecttype,$withpicto=0,$option='')
 		}
 	}
 	return $ret;
+}
+
+
+/**
+ * Clean corrupted tree (orphelins linked to a not existing parent), record linked to themself and child-parent loop
+ *
+ * @param	DoliDB	$db					Database handler
+ * @param	string	$tabletocleantree	Table to clean
+ * @param	string	$fieldfkparent		Field name that contains id of parent
+ * @return	int							Nb of records fixed/deleted
+ */
+function cleanCorruptedTree($db, $tabletocleantree, $fieldfkparent)
+{
+	$totalnb=0;
+	$listofid=array();
+	$listofparentid=array();
+
+	// Get list of all id in array listofid and all parents in array listofparentid
+	$sql='SELECT rowid, '.$fieldfkparent.' as parent_id FROM '.MAIN_DB_PREFIX.$tabletocleantree;
+	$resql = $db->query($sql);
+	if ($resql)
+	{
+		$num = $db->num_rows($resql);
+		$i = 0;
+		while ($i < $num)
+		{
+			$obj = $db->fetch_object($resql);
+			$listofid[]=$obj->rowid;
+			if ($obj->parent_id > 0) $listofparentid[$obj->rowid]=$obj->parent_id;
+			$i++;
+		}
+	}
+	else
+	{
+		dol_print_error($db);
+	}
+
+	if (count($listofid))
+	{
+		print 'Code requested to clean tree (may be to solve data corruption), so we check/clean orphelins and loops.'."<br>\n";
+
+		// Check loops on each other
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$tabletocleantree." SET ".$fieldfkparent." = 0 WHERE ".$fieldfkparent." = rowid";	// So we update only records linked to themself
+		dol_syslog("sql=".$sql);
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$nb=$db->affected_rows($sql);
+			if ($nb > 0)
+			{
+				print '<br>Some record that were parent of themself were cleaned.';
+			}
+
+			$totalnb+=$nb;
+		}
+		//else dol_print_error($db);
+
+		// Check other loops
+		$listofidtoclean=array();
+		foreach($listofparentid as $id => $pid)
+		{
+			// Check depth
+			//print 'Analyse record id='.$id.' with parent '.$pid.'<br>';
+
+			$cursor=$id; $arrayidparsed=array();	// We start from child $id
+			while ($cursor > 0)
+			{
+				$arrayidparsed[$cursor]=1;
+				if ($arrayidparsed[$listofparentid[$cursor]])	// We detect a loop. A record with a parent that was already into child
+				{
+					print 'Found a loop between id '.$id.' - '.$cursor.'<br>';
+					unset($arrayidparsed);
+					$listofidtoclean[$cursor]=$id;
+					break;
+				}
+				$cursor=$listofparentid[$cursor];
+			}
+
+			if (count($listofidtoclean)) break;
+		}
+
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$tabletocleantree;
+		$sql.= " SET ".$fieldfkparent." = 0";
+		$sql.= " WHERE rowid IN (".join(',',$listofidtoclean).")";	// So we update only records detected wrong
+		dol_syslog("sql=".$sql);
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$nb=$db->affected_rows($sql);
+			if ($nb > 0)
+			{
+				// Removed orphelins records
+				print '<br>Some records were detected to have parent that is a child, we set them as root record for id: ';
+				print join(',',$listofidtoclean);
+			}
+
+			$totalnb+=$nb;
+		}
+		//else dol_print_error($db);
+
+		// Check and clean orphelins
+		$sql = "UPDATE ".MAIN_DB_PREFIX.$tabletocleantree;
+		$sql.= " SET ".$fieldfkparent." = 0";
+		$sql.= " WHERE ".$fieldfkparent." NOT IN (".join(',',$listofid).")";	// So we update only records linked to a non existing parent
+		dol_syslog("sql=".$sql);
+		$resql = $db->query($sql);
+		if ($resql)
+		{
+			$nb=$db->affected_rows($sql);
+			if ($nb > 0)
+			{
+				// Removed orphelins records
+				print '<br>Some orphelins were found and modified to be parent so records are visible again for id: ';
+				print join(',',$listofid);
+			}
+
+			$totalnb+=$nb;
+		}
+		//else dol_print_error($db);
+
+		print '<br>We fixed '.$totalnb.' record(s). Some records may still be corrupted. New check may be required.';
+		return $totalnb;
+	}
+}
+
+/**
+ *	Get an array with properties of an element
+*
+* @param string $element_type Element type. ex : project_task or object@modulext or object_under@module
+* @return array (module, classpath, element, subelement, classfile, classname)
+*/
+function getElementProperties($element_type)
+{
+    // Parse element/subelement (ex: project_task)
+    $module = $element = $subelement = $element_type;
+
+    // If we ask an resource form external module (instead of default path)
+    if (preg_match('/^([^@]+)@([^@]+)$/i',$element_type,$regs))
+    {
+        $element = $subelement = $regs[1];
+        $module 	= $regs[2];
+    }
+
+    //print '<br />1. element : '.$element.' - module : '.$module .'<br />';
+    if ( preg_match('/^([^_]+)_([^_]+)/i',$element,$regs))
+    {
+        $module = $element = $regs[1];
+        $subelement = $regs[2];
+    }
+
+    $classfile = strtolower($subelement);
+    $classname = ucfirst($subelement);
+    $classpath = $module.'/class';
+
+    // For compat
+    if($element_type == "action") {
+        $classpath = 'comm/action/class';
+        $subelement = 'Actioncomm';
+        $module = 'agenda';
+    }
+
+    // To work with non standard path
+    if ($element_type == 'facture' || $element_type == 'invoice') {
+        $classpath = 'compta/facture/class';
+        $module='facture';
+        $subelement='facture';
+    }
+    if ($element_type == 'commande' || $element_type == 'order') {
+        $classpath = 'commande/class';
+        $module='commande';
+        $subelement='commande';
+    }
+    if ($element_type == 'propal')  {
+        $classpath = 'comm/propal/class';
+    }
+    if ($element_type == 'shipping') {
+        $classpath = 'expedition/class';
+        $subelement = 'expedition';
+        $module = 'expedition_bon';
+    }
+    if ($element_type == 'delivery') {
+        $classpath = 'livraison/class';
+        $subelement = 'livraison';
+        $module = 'livraison_bon';
+    }
+    if ($element_type == 'contract') {
+        $classpath = 'contrat/class';
+        $module='contrat';
+        $subelement='contrat';
+    }
+    if ($element_type == 'member') {
+        $classpath = 'adherents/class';
+        $module='adherent';
+        $subelement='adherent';
+    }
+    if ($element_type == 'cabinetmed_cons') {
+        $classpath = 'cabinetmed/class';
+        $module='cabinetmed';
+        $subelement='cabinetmedcons';
+    }
+    if ($element_type == 'fichinter') {
+        $classpath = 'fichinter/class';
+        $module='ficheinter';
+        $subelement='fichinter';
+    }
+    $classfile = strtolower($subelement);
+    $classname = ucfirst($subelement);
+
+    $element_properties = array(
+        'module' => $module,
+        'classpath' => $classpath,
+        'element' => $element,
+        'subelement' => $subelement,
+        'classfile' => $classfile,
+        'classname' => $classname
+    );
+    return $element_properties;
+}
+
+/**
+ * Fetch an object with element_type and its id
+ * Inclusion classes is automatic
+ *
+ * @param	int     $element_id Element id
+ * @param	string  $element_type Element type
+ * @return 	object || 0 || -1 if error
+ */
+function fetchObjectByElement($element_id,$element_type) {
+
+    global $conf;
+	global $db,$conf;
+
+    $element_prop = getElementProperties($element_type);
+    if (is_array($element_prop) && $conf->$element_prop['module']->enabled)
+    {
+        dol_include_once('/'.$element_prop['classpath'].'/'.$element_prop['classfile'].'.class.php');
+
+		$objectstat = new $element_prop['classname']($db);
+		$ret = $objectstat->fetch($element_id);
+		if ($ret >= 0)
+		{
+			return $objectstat;
+		}
+	}
+	return 0;
 }

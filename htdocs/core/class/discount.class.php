@@ -188,7 +188,7 @@ class DiscountAbsolute
         // Check if we can remove the discount
         if ($this->fk_facture_source)
         {
-            $sql.="SELECT COUNT(rowid) as nb";
+            $sql="SELECT COUNT(rowid) as nb";
             $sql.=" FROM ".MAIN_DB_PREFIX."societe_remise_except";
             $sql.=" WHERE (fk_facture_line IS NOT NULL";	// Not used as absolute simple discount
             $sql.=" OR fk_facture IS NOT NULL)"; 			// Not used as credit note and not used as deposit
@@ -480,4 +480,3 @@ class DiscountAbsolute
 		$this->description    = 'Specimen discount';
 	}
 }
-?>

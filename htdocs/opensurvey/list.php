@@ -1,5 +1,6 @@
 <?php
-/* Copyright (C) 2013      Laurent Destailleur <eldy@users.sourceforge.net>
+/* Copyright (C) 2013-2014 Laurent Destailleur <eldy@users.sourceforge.net>
+ * Copyright (C) 2014      Marcos García       <marcosgdf@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,34 +26,42 @@ require_once('../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
+// Security check
+if (!$user->rights->opensurvey->read) accessforbidden();
+
 $action=GETPOST('action');
 $id=GETPOST('id');
-$numsondage=substr($id, 0, 16);
+$numsondage= $id;
+$surveytitle=GETPOST('surveytitle');
+$status=GETPOST('status');
+//if (! isset($_POST['status']) && ! isset($_GET['status'])) $status='opened';	// If filter unknown, we choose 'opened'
 
-if (! $sortorder) $sortorder="ASC";
+$sortfield = GETPOST("sortfield",'alpha');
+$sortorder = GETPOST("sortorder",'alpha');
+$page = GETPOST("page",'int');
+if ($page == -1) { $page = 0; }
+$offset = $conf->liste_limit * $page;
+$pageprev = $page - 1;
+$pagenext = $page + 1;
 if (! $sortfield) $sortfield="p.titre";
+if (! $sortorder) $sortorder="ASC";
 if ($page < 0) {
 	$page = 0;
 }
 $limit = $conf->liste_limit;
 $offset = $limit * $page;
 
+$langs->load("opensurvey");
 
 /*
  * Actions
  */
 
-if ($action == 'delete_confirm')
+if (GETPOST('button_removefilter'))
 {
-	$db->begin();
-
-	$object=new Opensurveysondage($db);
-	
-	$result=$object->delete($user,'',$numsondageadmin);
-	
-	$db->commit();
+	$status='';
+	$surveytitle='';
 }
-
 
 
 /*
@@ -61,26 +70,52 @@ if ($action == 'delete_confirm')
 
 $form=new Form($db);
 
-$langs->load("opensurvey");
+$now = dol_now();
+
 llxHeader();
 
-print '<div class=corps>'."\n";
+$param='';
+$fieldtosortuser=empty($conf->global->MAIN_FIRSTNAME_NAME_POSITION)?'firstname':'lastname';
+
+print '<div class="corps">'."\n";
 
 print_fiche_titre($langs->trans("OpenSurveyArea"));
 
+// List of surveys into database
 
-if ($action == 'delete')
-{
-	print $form->formconfirm($_SERVER["PHP_SELF"].'?&id='.$id, $langs->trans("RemovePoll"), $langs->trans("ConfirmRemovalOfPoll",$id), 'delete_confirm', '', '', 1);
-}
+print '<form action="'.$_SERVER["PHP_SELF"].'" method="post" name="formulaire">';
+print '<input type="hidden" name="token" value="'.$_SESSION['newtoken'].'">';
+print '<input type="hidden" name="action" value="list">';
+print '<input type="hidden" name="sortfield" value="'.$sortfield.'">';
+print '<input type="hidden" name="sortorder" value="'.$sortorder.'">';
 
-
-// tableau qui affiche tous les sondages de la base
 print '<table class="liste">'."\n";
-print '<tr class="liste_titre"><td>'. $langs->trans("Survey").'</td><td>'. $langs->trans("Type") .'</td><td>'. $langs->trans("Title") .'</td><td>'. $langs->trans("Author") .'</td><td align="center">'. $langs->trans("ExpireDate") .'</td><td align="center">'. $langs->trans("NbOfVoters") .'</td><td colspan=2>&nbsp;</td>'."\n";
+print '<tr class="liste_titre">';
+print_liste_field_titre($langs->trans("Ref"), $_SERVER["PHP_SELF"], "p.id_sondage",$param,"","",$sortfield,$sortorder);
+print_liste_field_titre($langs->trans("Title"), $_SERVER["PHP_SELF"], "p.titre",$param,"","",$sortfield,$sortorder);
+print '<td>'. $langs->trans("Type") .'</td>';
+print_liste_field_titre($langs->trans("Author"), $_SERVER["PHP_SELF"], "u.".$fieldtosortuser,$param,"","",$sortfield,$sortorder);
+print_liste_field_titre($langs->trans("ExpireDate"), $_SERVER["PHP_SELF"], "p.date_fin",$param,"",'align="center"',$sortfield,$sortorder);
+print '<td align="center">'. $langs->trans("NbOfVoters") .'</td>';
+print '</tr>'."\n";
 
-$sql = "SELECT id_sondage, id_sondage_admin, mail_admin, format, origin, date_fin, titre, nom_admin";
+print '<tr class="liste_titre">';
+print '<td></td>';
+print '<td><input type="text" name="surveytitle" value="'.dol_escape_htmltag($surveytitle).'"></td>';
+print '<td></td>';
+print '<td></td>';
+$arraystatus=array(''=>'&nbsp;','expired'=>$langs->trans("Expired"),'opened'=>$langs->trans("Opened"));
+print '<td align="center">'. $form->selectarray('status', $arraystatus, $status).'</td>';
+print '<td class="liste_titre" align="right">';
+print '<input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+print '<input type="image" class="liste_titre" name="button_removefilter" src="'.img_picto($langs->trans("Search"),'searchclear.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
+print '</td>';
+print '</tr>'."\n";
+
+$sql = "SELECT p.id_sondage, p.fk_user_creat, p.format, p.date_fin, p.titre, p.nom_admin,";
+$sql.= " u.login, u.firstname, u.lastname";
 $sql.= " FROM ".MAIN_DB_PREFIX."opensurvey_sondage as p";
+$sql.= " LEFT OUTER JOIN ".MAIN_DB_PREFIX."user u ON u.rowid = p.fk_user_creat";
 // Count total nb of records
 $nbtotalofrecords = 0;
 if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
@@ -88,8 +123,12 @@ if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
 	$result = $db->query($sql);
 	$nbtotalofrecords = $db->num_rows($result);
 }
-$sql.= " ORDER BY $sortfield $sortorder ";
-$sql.= " ".$db->plimit($conf->liste_limit+1, $offset);
+$sql.= " WHERE p.entity = ".getEntity('survey');
+if ($status == 'expired') $sql.=" AND date_fin < '".$db->idate($now)."'";
+if ($status == 'opened') $sql.=" AND date_fin >= '".$db->idate($now)."'";
+if ($surveytitle) $sql.=" AND titre LIKE '%".$db->escape($surveytitle)."%'";
+$sql.= $db->order($sortfield,$sortorder);
+$sql.= $db->plimit($conf->liste_limit+1, $offset);
 
 $resql=$db->query($sql);
 if (! $resql) dol_print_error($db);
@@ -113,28 +152,44 @@ while ($i < min($num,$limit))
 	$var=!$var;
 	print '<tr '.$bc[$var].'>';
 	print '<td>';
-	print '<a href="'.dol_buildpath('/opensurvey/adminstuds.php',1).'?sondage='.$obj->id_sondage_admin.'">'.img_picto('','object_opensurvey').' '.$obj->id_sondage.'</a>';
-	print '</td><td>';
-	$type=($obj->format=='A' || $obj->format=='A+')?'classic':'date';
+	print '<a href="'.dol_buildpath('/opensurvey/card.php',1).'?id='.$obj->id_sondage.'">'.img_picto('','object_opensurvey').' '.$obj->id_sondage.'</a>';
+	print '</td><td>'.dol_htmlentities($obj->titre).'</td><td>';
+	$type=($obj->format=='A')?'classic':'date';
 	print img_picto('',dol_buildpath('/opensurvey/img/'.($type == 'classic'?'chart-32.png':'calendar-32.png'),1),'width="16"',1);
 	print ' '.$langs->trans($type=='classic'?"TypeClassic":"TypeDate");
-	print '</td><td>'.$obj->titre.'</td><td>'.$obj->nom_admin.'</td>';
+	print '</td><td>';
+
+	// Author
+	if ($obj->fk_user_creat) {
+		$userstatic = new User($db);
+		$userstatic->id = $obj->fk_user_creat;
+		$userstatic->firstname = $obj->firstname;
+		$userstatic->lastname = $obj->lastname;
+		$userstatic->login = $userstatic->getFullName($langs, 0, -1, 48);
+
+		print $userstatic->getLoginUrl(1);
+	} else {
+		print dol_htmlentities($obj->nom_admin);
+	}
+
+	print '</td>';
 
 	print '<td align="center">'.dol_print_date($db->jdate($obj->date_fin),'day');
-	if ($db->jdate($obj->date_fin) < time()) { print ' '.img_warning(); }
+	if ($db->jdate($obj->date_fin) < time()) { print ' ('.$langs->trans("Expired").')'; }
 	print '</td>';
 
 	print'<td align="center">'.$nbuser.'</td>'."\n";
-	print '<td align="right"><a href="'.$_SERVER["PHP_SELF"].'?id='.$obj->id_sondage_admin.'&action=delete">'.img_picto('', 'delete.png').'</a></td>'."\n";
 
 	print '</tr>'."\n";
 	$i++;
 }
 
 print '</table>'."\n";
+
+print '</form>';
+
 print '</div>'."\n";
 
 llxFooter();
 
 $db->close();
-?>

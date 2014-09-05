@@ -47,31 +47,44 @@ if ($user->societe_id) $socid=$user->societe_id;
 $result=restrictedArea($user, $origin, $origin_id);
 
 $object = new Expedition($db);
-$object->fetch($id);
-
-
-/******************************************************************************/
-/*                     Actions                                                */
-/******************************************************************************/
-
-if ($action == 'setnote_public' && $user->rights->facture->creer)
+if ($id > 0 || ! empty($ref))
 {
-	$object->fetch($id);
-	$result=$object->update_note(dol_html_entity_decode(GETPOST('note_public'), ENT_QUOTES),'_public');
-	if ($result < 0) dol_print_error($db,$object->error);
+    $object->fetch($id, $ref);
+    $object->fetch_thirdparty();
+
+    if (!empty($object->origin))
+    {
+        $typeobject = $object->origin;
+        $origin = $object->origin;
+        $object->fetch_origin();
+    }
+
+    // Linked documents
+    if ($typeobject == 'commande' && $object->$typeobject->id && ! empty($conf->commande->enabled))
+    {
+        $objectsrc=new Commande($db);
+        $objectsrc->fetch($object->$typeobject->id);
+    }
+    if ($typeobject == 'propal' && $object->$typeobject->id && ! empty($conf->propal->enabled))
+    {
+        $objectsrc=new Propal($db);
+        $objectsrc->fetch($object->$typeobject->id);
+    }
 }
 
-else if ($action == 'setnote_private' && $user->rights->facture->creer)
-{
-	$object->fetch($id);
-	$result=$object->update_note(dol_html_entity_decode(GETPOST('note_private'), ENT_QUOTES),'_private');
-	if ($result < 0) dol_print_error($db,$object->error);
-}
+$permissionnote=$user->rights->expedition->creer;	// Used by the include of actions_setnotes.inc.php
 
 
-/******************************************************************************/
-/* Affichage fiche                                                            */
-/******************************************************************************/
+/*
+ * Actions
+ */
+
+include DOL_DOCUMENT_ROOT.'/core/actions_setnotes.inc.php';	// Must be include, not includ_once
+
+
+/*
+ * View
+ */
 
 llxHeader();
 
@@ -153,4 +166,3 @@ if ($id > 0 || ! empty($ref))
 llxFooter();
 
 $db->close();
-?>

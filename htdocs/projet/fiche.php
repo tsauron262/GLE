@@ -59,124 +59,314 @@ if ($_GET["id"]) {
     $projetid = $_GET["id"];
 }
 
+// Security check
+$socid=GETPOST('socid');
+if ($user->societe_id > 0) $socid=$user->societe_id;
+$result = restrictedArea($user, 'projet', $object->id);
 
 if ($projetid == '' && ($_GET['action'] != "create" && $_POST['action'] != "add" && $_REQUEST['action'] != "update" && !$_POST["cancel"]))
     accessforbidden();
 
-// SecuritrestrictedAreay check
-if ($user->societe_id)
-    $socid = $user->societe_id;
-$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
+$date_start=dol_mktime(0,0,0,GETPOST('projectmonth','int'),GETPOST('projectday','int'),GETPOST('projectyear','int'));
+$date_end=dol_mktime(0,0,0,GETPOST('projectendmonth','int'),GETPOST('projectendday','int'),GETPOST('projectendyear','int'));
 
 
 /*
  * Actions
  */
-if ($_REQUEST['action'] == "valid" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->valid() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut lancer la planification de ce projet " . $pro->error;
-    }
-}
-if ($_REQUEST['action'] == "cloture" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->cloture() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut cl&ocirc;turer ce projet " . $pro->error;
-    }
-}
-if ($_REQUEST['action'] == "launch" && $user->rights->synopsisprojet->creer) {
-    $pro = new Project($db);
-    $pro->fetch($_REQUEST['id']);
-    if ($pro->launch() > 0) {
-        header('location: fiche.php?id=' . $_REQUEST['id']);
-    } else {
-        $msg = "Ne peut lancer ce projet " . $pro->error;
-    }
-}
 
-if ($_REQUEST['action'] == 'add' && $user->rights->synopsisprojet->creer) {
-    //print $_POST["socid"];
-    $pro = new Project($db);
+$parameters=array('id'=>$socid, 'objcanvas'=>$objcanvas);
+$reshook=$hookmanager->executeHooks('doActions',$parameters,$object,$action);    // Note that $action and $object may have been modified by some hooks
+$error=$hookmanager->error; $errors=array_merge($errors, (array) $hookmanager->errors);
 
-    $tmpSoc = new Societe($db);
-    $tmpSoc->fetch($_POST["socid"]);
-    $requete = "SELECT refAddOn FROM ".MAIN_DB_PREFIX."Synopsis_projet_type WHERE id=" . $_POST['type'];
-    $sql = $db->query($requete);
-    $res = $db->fetch_object($sql);
+if (empty($reshook))
+{
 
-    $pro->socid = $_POST["socid"];
-    $pro->title = $_POST["title"];
-    $pro->type_id = $_POST["type"];
-    $pro->type_inRef = $res->refAddOn;
-    $pro->user_resp_id = $_POST["officer_project"];
-    $pro->ref = $pro->getNextNumRef($tmpSoc);
+	// Cancel
+	if (GETPOST("cancel") && ! empty($backtopage))
+	{
+		if (GETPOST("comefromclone")==1)
+		{
+		    $result=$object->delete($user);
+		    if ($result > 0)
+		    {
+		        header("Location: index.php");
+		        exit;
+		    }
+		    else
+		    {
+		        dol_syslog($object->error,LOG_DEBUG);
+		        $mesg='<div class="error">'.$langs->trans("CantRemoveProject").'</div>';
+		    }
+		}
+	    header("Location: ".$backtopage);
+	    exit;
+	}
 
-    $result = $pro->create($user);
-    if ($result > 0) {
-        Header("Location:fiche.php?id=" . $pro->id);
-        exit;
-    } else {
-        $langs->load("errors");
-        //print $pro->error;
-        if (preg_match('/^Duplicate entry/', $pro->error)) {
-            $mesg = '<div class="error ui-state-error">Cette r&eacute;f&eacute;rence est d&eacute;j&agrave; utilis&eacute;</div>';
-        } else {
-            $mesg = '<div class="error ui-state-error">' . $langs->trans($pro->error) . '</div>';
-        }
-        $_REQUEST['action'] = 'create';
-    }
-}
+	//if cancel and come from clone then delete the cloned project
+	if (GETPOST("cancel") && (GETPOST("comefromclone")==1))
+	{
+	    $result=$object->delete($user);
+	    if ($result > 0)
+	    {
+	        header("Location: index.php");
+	        exit;
+	    }
+	    else
+	    {
+	        dol_syslog($object->error,LOG_DEBUG);
+	        $mesg='<div class="error">'.$langs->trans("CantRemoveProject").'</div>';
+	    }
+	}
 
-if ($_REQUEST['action'] == 'update' && $user->rights->synopsisprojet->creer) {
-    if (!$_POST["cancel"]) {
-        $requete = "SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_projet WHERE rowid=" . $_POST['id'];
-        $sql = $db->query($requete);
-        $res = $db->fetch_object($sql);
-        $_POST["ref"] = $res->ref;
+	if ($action == 'add' && $user->rights->projet->creer)
+	{
+	    $error=0;
+	    if (empty($_POST["ref"]))
+	    {
+	        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")).'</div>';
+	        $error++;
+	    }
+	    if (empty($_POST["title"]))
+	    {
+	        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
+	        $error++;
+	    }
 
-        $error = 0;
-        if (empty($_POST["ref"])) {
-            $error++;
-            $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
-            $mesg = '<div class="error ui-state-error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Ref")) . '</div>';
-        }
-        if (empty($_POST["title"])) {
-            $error++;
-            $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
-            $mesg = '<div class="error ui-state-error">' . $langs->trans("ErrorFieldRequired", $langs->transnoentities("Label")) . '</div>';
-        }
-        if (!$error) {
-            $projet = new Project($db);
-            $projet->id = $_POST["id"];
-            $projet->ref = $_POST["ref"];
-            $projet->title = $_POST["title"];
-            $projet->socid = $_POST["socid"];
-            $projet->user_resp_id = $_POST["officer_project"];
-            $projet->update($user);
+	    if (! $error)
+	    {
+	        $error=0;
 
-            $_GET["id"] = $projet->id;  // On retourne sur la fiche projet
-        }
-    } else {
-        $_GET["id"] = $_POST["id"]; // On retourne sur la fiche projet
-    }
-}
+	        $db->begin();
 
-if ($_REQUEST['action'] == 'confirm_delete' && $_POST["confirm"] == "yes" && $user->rights->synopsisprojet->supprimer) {
-    $projet = new Project($db);
-    $projet->id = $_GET["id"];
-    if ($projet->delete($user) == 0) {
-        Header("Location: index.php");
-        exit;
-    } else {
-        Header("Location: fiche.php?id=" . $projet->id);
-        exit;
-    }
+	        $object->ref             = GETPOST('ref','alpha');
+	        $object->title           = GETPOST('title'); // Do not use 'alpha' here, we want field as it is
+	        $object->socid           = GETPOST('socid','int');
+	        $object->description     = GETPOST('description'); // Do not use 'alpha' here, we want field as it is
+	        $object->public          = GETPOST('public','alpha');
+	        $object->datec=dol_now();
+	        $object->date_start=$date_start;
+	        $object->date_end=$date_end;
+
+	        // Fill array 'array_options' with data from add form
+	        $ret = $extrafields->setOptionalsFromPost($extralabels,$object);
+
+	        $result = $object->create($user);
+	        if ($result > 0)
+	        {
+	            // Add myself as project leader
+	            $result = $object->add_contact($user->id, 'PROJECTLEADER', 'internal');
+	            if ($result < 0)
+	            {
+	                $langs->load("errors");
+	                $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
+	                $error++;
+	            }
+	        }
+	        else
+	        {
+	            $langs->load("errors");
+	            $mesg='<div class="error">'.$langs->trans($object->error).'</div>';
+	            $error++;
+	        }
+
+	        if (! $error)
+	        {
+	            $db->commit();
+
+	            header("Location:fiche.php?id=".$object->id);
+	            exit;
+	        }
+	        else
+	        {
+	            $db->rollback();
+
+	            $action = 'create';
+	        }
+	    }
+	    else
+	    {
+	        $action = 'create';
+	    }
+	}
+
+	if ($action == 'update' && ! $_POST["cancel"] && $user->rights->projet->creer)
+	{
+	    $error=0;
+
+	    if (empty($ref))
+	    {
+	        $error++;
+	        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
+	        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Ref")).'</div>';
+	    }
+	    if (empty($_POST["title"]))
+	    {
+	        $error++;
+	        //$_GET["id"]=$_POST["id"]; // On retourne sur la fiche projet
+	        $mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentities("Label")).'</div>';
+	    }
+
+	    $db->begin();
+
+	    if (! $error)
+	    {
+	        $object->oldcopy = dol_clone($object);
+
+			$old_start_date = $object->date_start;
+
+	        $object->ref          = GETPOST('ref','alpha');
+	        $object->title        = GETPOST('title'); // Do not use 'alpha' here, we want field as it is
+	        $object->socid        = GETPOST('socid','int');
+	        $object->description  = GETPOST('description');	// Do not use 'alpha' here, we want field as it is
+	        $object->public       = GETPOST('public','alpha');
+	        $object->date_start   = empty($_POST["project"])?'':$date_start;
+	        $object->date_end     = empty($_POST["projectend"])?'':$date_end;
+
+	        // Fill array 'array_options' with data from add form
+	        $ret = $extrafields->setOptionalsFromPost($extralabels,$object);
+			if ($ret < 0)
+			{
+				$error++;
+			}
+	    }
+
+	    if (! $error)
+	    {
+	    	$result=$object->update($user);
+	    	if ($result < 0)
+	    	{
+	    		$error++;
+	    		setEventMessage($object->errors,'errors');
+	    	}
+	    }
+
+	    if (! $error)
+	    {
+	    	if (GETPOST("reportdate") && ($object->date_start!=$old_start_date))
+	    	{
+	    		$result=$object->shiftTaskDate($old_start_date);
+	    		if ($result < 0)
+	    		{
+	    			$error++;
+	    			$mesg='<div class="error">'.$langs->trans("ErrorShiftTaskDate").':'.$object->error.'</div>';
+	    		}
+	    	}
+	    }
+
+	    if ($error)
+	    {
+			$db->rollback();
+	    	$action='edit';
+	    }
+	    else
+		{
+	    	$db->commit();
+
+			if (GETPOST('socid','int') > 0) $object->societe->fetch(GETPOST('socid','int'));
+			else unset($object->societe);
+	    }
+	}
+
+	// Build doc
+	if ($action == 'builddoc' && $user->rights->projet->creer)
+	{
+		// Save last template used to generate document
+		if (GETPOST('model')) $object->setDocModel($user, GETPOST('model','alpha'));
+
+	    $outputlangs = $langs;
+	    if (GETPOST('lang_id'))
+	    {
+	        $outputlangs = new Translate("",$conf);
+	        $outputlangs->setDefaultLang(GETPOST('lang_id'));
+	    }
+	    $result=project_pdf_create($db, $object, $object->modelpdf, $outputlangs);
+	    if ($result <= 0)
+	    {
+	        dol_print_error($db,$result);
+	        exit;
+	    }
+	}
+
+	// Delete file in doc form
+	if ($action == 'remove_file' && $user->rights->projet->creer)
+	{
+	    require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
+
+	    if ($object->id > 0)
+	    {
+	        $langs->load("other");
+	        $upload_dir =	$conf->projet->dir_output . "/";
+	        $file =	$upload_dir	. '/' .	GETPOST('file');
+	        $ret=dol_delete_file($file);
+	        if ($ret) setEventMessage($langs->trans("FileWasRemoved", GETPOST('urlfile')));
+	        else setEventMessage($langs->trans("ErrorFailToDeleteFile", GETPOST('urlfile')), 'errors');
+	    }
+	}
+
+
+	if ($action == 'confirm_validate' && GETPOST('confirm') == 'yes')
+	{
+	    $result = $object->setValid($user);
+	    if ($result <= 0)
+	    {
+	        $mesg='<div class="error">'.$object->error.'</div>';
+	    }
+	}
+
+	if ($action == 'confirm_close' && GETPOST('confirm') == 'yes')
+	{
+	    $result = $object->setClose($user);
+	    if ($result <= 0)
+	    {
+	        $mesg='<div class="error">'.$object->error.'</div>';
+	    }
+	}
+
+	if ($action == 'confirm_reopen' && GETPOST('confirm') == 'yes')
+	{
+	    $result = $object->setValid($user);
+	    if ($result <= 0)
+	    {
+	        $mesg='<div class="error">'.$object->error.'</div>';
+	    }
+	}
+
+	if ($action == 'confirm_delete' && GETPOST("confirm") == "yes" && $user->rights->projet->supprimer)
+	{
+	    $object->fetch($id);
+	    $result=$object->delete($user);
+	    if ($result > 0)
+	    {
+	        header("Location: index.php");
+	        exit;
+	    }
+	    else
+	    {
+	        dol_syslog($object->error,LOG_DEBUG);
+	        $mesg='<div class="error">'.$langs->trans("CantRemoveProject").'</div>';
+	    }
+	}
+
+	if ($action == 'confirm_clone' && $user->rights->projet->creer && GETPOST('confirm') == 'yes')
+	{
+	    $clone_contacts=GETPOST('clone_contacts')?1:0;
+	    $clone_tasks=GETPOST('clone_tasks')?1:0;
+		$clone_project_files = GETPOST('clone_project_files') ? 1 : 0;
+		$clone_task_files = GETPOST('clone_task_files') ? 1 : 0;
+	    $clone_notes=GETPOST('clone_notes')?1:0;
+	    $result=$object->createFromClone($object->id,$clone_contacts,$clone_tasks,$clone_project_files,$clone_task_files,$clone_notes);
+	    if ($result <= 0)
+	    {
+	        $mesg='<div class="error">'.$object->error.'</div>';
+	    }
+	    else
+	    {
+	    	$object->fetch($result);	// Load new object
+	    	$action='edit';
+	    	$comefromclone=true;
+	    }
+	}
 }
 
 
@@ -253,7 +443,11 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     /*
      * Create
      */
-    print_titre($langs->trans("NewProject"));
+
+	$thirdparty=new Societe($db);
+	if ($socid > 0) $thirdparty->fetch($socid);
+
+    print_fiche_titre($langs->trans("NewProject"));
 
     if (isset($mesg))
         print $mesg;
@@ -262,6 +456,36 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     //if ($_REQUEST["socid"]) print '<input type="hidden" name="socid" value="'.$_REQUEST["socid"].'">';
     print '<table cellpadding=15 class="border" width="100%">';
     print '<input type="hidden" name="action" value="add">';
+    print '<input type="hidden" name="backtopage" value="'.$backtopage.'">';
+
+    print '<table class="border" width="100%">';
+
+    $defaultref='';
+    $modele = empty($conf->global->PROJECT_ADDON)?'mod_project_simple':$conf->global->PROJECT_ADDON;
+
+    // Search template files
+    $file=''; $classname=''; $filefound=0;
+    $dirmodels=array_merge(array('/'),(array) $conf->modules_parts['models']);
+    foreach($dirmodels as $reldir)
+    {
+    	$file=dol_buildpath($reldir."core/modules/project/".$modele.'.php',0);
+    	if (file_exists($file))
+    	{
+    		$filefound=1;
+    		$classname = $modele;
+    		break;
+    	}
+    }
+
+    if ($filefound)
+    {
+	    $result=dol_include_once($reldir."core/modules/project/".$modele.'.php');
+	    $modProject = new $classname;
+
+	    $defaultref = $modProject->getNextValue($thirdparty,$object);
+    }
+
+    if (is_numeric($defaultref) && $defaultref <= 0) $defaultref='';
 
     // Ref
 //    print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("Ref").'</th>
@@ -337,10 +561,11 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
                    <td class="ui-widget-content"><input size="30" name="title" value="' . $projet->title . '"></td></tr>';
 
-        // Client
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Company") . '</th>
-                   <td class="ui-widget-content">';
-        print   $html->select_company($projet->societe->id, 'socid', '', 1);
+        // Customer
+        print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+        $text=$form->select_company($object->societe->id,'socid','',1,1);
+        $texthelp=$langs->trans("IfNeedToUseOhterObjectKeepEmpty");
+        print $form->textwithtooltip($text.' '.img_help(),$texthelp,1);
         print '</td></tr>';
 
         // Responsable du projet
@@ -380,9 +605,11 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
         print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
                    <td class="ui-widget-content" colspan=3>' . $projet->title . '</td></tr>';
 
-        // Project leader
-        print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("OfficerProject") . '</th>
-                   <td class="ui-widget-content" colspan=3>' . $projet->user->getNomUrl(1) . '</td></tr>';
+        // Third party
+        print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+        if ($object->societe->id > 0) print $object->societe->getNomUrl(1);
+        else print'&nbsp;';
+        print '</td></tr>';
 
         //print '<tr><th class="ui-widget-header ui-state-default">'.$langs->trans("ProjectBegin").'</th>
         //         <td class="ui-widget-content">'.date('d/m/Y',strtotime($projet->date_valid)).'</td>';
@@ -487,6 +714,44 @@ if ($_REQUEST['action'] == 'create' && $user->rights->synopsisprojet->creer) {
     }
 
     print "</div>";
+    print "<br>\n";
+
+    if ($action != 'presend')
+    {
+        print '<table width="100%"><tr><td width="50%" valign="top">';
+        print '<a name="builddoc"></a>'; // ancre
+
+
+        /*
+         * Documents generes
+         */
+        $filename=dol_sanitizeFileName($object->ref);
+        $filedir=$conf->projet->dir_output . "/" . dol_sanitizeFileName($object->ref);
+        $urlsource=$_SERVER["PHP_SELF"]."?id=".$object->id;
+        $genallowed=($user->rights->projet->lire && $userAccess > 0);
+        $delallowed=($user->rights->projet->creer && $userWrite > 0);
+
+        $var=true;
+
+        $somethingshown=$formfile->show_documents('project',$filename,$filedir,$urlsource,$genallowed,$delallowed,$object->modelpdf);
+
+        print '</td><td valign="top" width="50%">';
+
+        if (!empty($object->id))
+        {
+	        // List of actions on element
+	        include_once DOL_DOCUMENT_ROOT.'/core/class/html.formactions.class.php';
+	        $formactions=new FormActions($db);
+	        $somethingshown=$formactions->showactions($object,'project',$socid);
+        }
+
+        print '</td></tr></table>';
+    }
+
+    // Hook to add more things on page
+    $parameters=array();
+    $reshook=$hookmanager->executeHooks('mainCardTabAddMore',$parameters,$object,$action); // Note that $action and $object may have been modified by hook
+
 }
 
 $db->close();

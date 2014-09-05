@@ -266,7 +266,7 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 		$object->oldcopy=dol_clone($object);
 
 		// Change values
-		$object->civilite_id = trim($_POST["civilite_id"]);
+		$object->civility_id = trim($_POST["civility_id"]);
 		$object->firstname   = trim($_POST["firstname"]);
 		$object->lastname    = trim($_POST["lastname"]);
 		$object->login       = trim($_POST["login"]);
@@ -328,6 +328,7 @@ if ($action == 'update' && ! $_POST["cancel"] && $user->rights->adherent->creer)
 			{
 				if (GETPOST('deletephoto'))
 				{
+					require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 					$fileimg=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1).'/photos/'.$object->photo;
 					$dirthumbs=$conf->adherent->dir_output.'/'.get_exdir($object->id,2,0,1).'/photos/thumbs';
 					dol_delete_file($fileimg);
@@ -415,7 +416,7 @@ if ($action == 'add' && $user->rights->adherent->creer)
 	}
 
 	$typeid=$_POST["typeid"];
-	$civilite_id=$_POST["civilite_id"];
+	$civility_id=$_POST["civility_id"];
 	$lastname=$_POST["lastname"];
 	$firstname=$_POST["firstname"];
 	$societe=$_POST["societe"];
@@ -441,7 +442,7 @@ if ($action == 'add' && $user->rights->adherent->creer)
 	$userid=$_POST["userid"];
 	$socid=$_POST["socid"];
 
-	$object->civilite_id = $civilite_id;
+	$object->civility_id = $civility_id;
 	$object->firstname   = $firstname;
 	$object->lastname    = $lastname;
 	$object->societe     = $societe;
@@ -583,7 +584,7 @@ if ($user->rights->adherent->creer && $action == 'confirm_valid' && $confirm == 
 	if ($result >= 0 && ! count($object->errors))
 	{
 		// Send confirmation Email (selon param du type adherent sinon generique)
-		if ($object->email && ! empty($_POST["send_mail"]))
+		if ($object->email && GETPOST("send_mail"))
 		{
 			$result=$object->send_an_email($adht->getMailOnValid(),$conf->global->ADHERENT_MAIL_VALID_SUBJECT,array(),array(),array(),"","",0,2);
 			if ($result < 0)
@@ -622,7 +623,7 @@ if ($user->rights->adherent->supprimer && $action == 'confirm_resign')
 
 		if ($result >= 0 && ! count($object->errors))
 		{
-			if ($object->email && $_POST["send_mail"])
+			if ($object->email && GETPOST("send_mail"))
 			{
 				$result=$object->send_an_email($adht->getMailOnResiliate(),$conf->global->ADHERENT_MAIL_RESIL_SUBJECT,array(),array(),array(),"","",0,-1);
 			}
@@ -794,7 +795,7 @@ else
 
 		// Civility
 		print '<tr><td>'.$langs->trans("UserTitle").'</td><td>';
-		print $formcompany->select_civility(GETPOST('civilite_id','int')?GETPOST('civilite_id','int'):$object->civilite_id,'civilite_id').'</td>';
+		print $formcompany->select_civility(GETPOST('civility_id','int')?GETPOST('civility_id','int'):$object->civility_id,'civility_id').'</td>';
 		print '</tr>';
 
 		// Lastname
@@ -812,7 +813,7 @@ else
 		if (empty($conf->global->ADHERENT_LOGIN_NOT_REQUIRED))
 		{
 			require_once DOL_DOCUMENT_ROOT.'/core/lib/security2.lib.php';
-			$generated_password=getRandomPassword('');
+			$generated_password=getRandomPassword(false);
 			print '<tr><td><span class="fieldrequired">'.$langs->trans("Password").'</span></td><td>';
 			print '<input size="30" maxsize="32" type="text" name="password" value="'.$generated_password.'">';
 			print '</td></tr>';
@@ -834,7 +835,7 @@ else
 		$object->country_id=$object->country_id?$object->country_id:$mysoc->country_id;
 		print '<tr><td width="25%">'.$langs->trans('Country').'</td><td>';
 		print $form->select_country(GETPOST('country_id','alpha')?GETPOST('country_id','alpha'):$object->country_id,'country_id');
-		if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
+		if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);
 		print '</td></tr>';
 
 		// State
@@ -1044,9 +1045,9 @@ else
 		// Company
 		print '<tr><td id="tdcompany">'.$langs->trans("Company").'</td><td><input type="text" name="societe" size="40" value="'.(isset($_POST["societe"])?$_POST["societe"]:$object->societe).'"></td></tr>';
 
-		// Civilite
+		// Civility
 		print '<tr><td width="20%">'.$langs->trans("UserTitle").'</td><td width="35%">';
-		print $formcompany->select_civility(isset($_POST["civilite_id"])?$_POST["civilite_id"]:$object->civilite_id)."\n";
+		print $formcompany->select_civility(isset($_POST["civility_id"])?$_POST["civility_id"]:$object->civility_id)."\n";
 		print '</td>';
 		print '</tr>';
 
@@ -1083,7 +1084,7 @@ else
 		//$object->country_id=$object->country_id?$object->country_id:$mysoc->country_id;    // In edit mode we don't force to company country if not defined
 		print '<tr><td width="25%">'.$langs->trans('Country').'</td><td>';
 		print $form->select_country(isset($_POST["country_id"])?$_POST["country_id"]:$object->country_id,'country_id');
-		if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
+		if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);
 		print '</td></tr>';
 
 		// State
@@ -1670,4 +1671,3 @@ else
 llxFooter();
 
 $db->close();
-?>

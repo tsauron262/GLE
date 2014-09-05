@@ -562,7 +562,7 @@ class doc_generic_task_odt extends ModelePDFTask
 					if (!empty($project->fk_soc)) $socid = $project->fk_soc;
 
 					$tmparray=$this->get_substitutionarray_tasks($object,$outputlangs);
-					complete_substitutions_array($tmparray, $outputlangs, $task);
+					complete_substitutions_array($tmparray, $outputlangs, $object);
 					foreach($tmparray as $key => $val)
 					{
 						try
@@ -682,7 +682,7 @@ class doc_generic_task_odt extends ModelePDFTask
 					$listtasksfiles = $odfHandler->setSegment('tasksfiles');
 
 					$upload_dir = $conf->projet->dir_output.'/'.dol_sanitizeFileName($project->ref).'/'.dol_sanitizeFileName($object->ref);
-					$filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$','name',SORT_ASC,1);
+					$filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview\.png)$','name',SORT_ASC,1);
 
 
 					foreach ($filearray as $filedetail)
@@ -724,7 +724,7 @@ class doc_generic_task_odt extends ModelePDFTask
 					$listlines = $odfHandler->setSegment('projectfiles');
 
 					$upload_dir = $conf->projet->dir_output.'/'.dol_sanitizeFileName($object->ref);
-					$filearray=dol_dir_list($upload_dir,"files",0,'','\.meta$','name',SORT_ASC,1);
+					$filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview\.png)$','name',SORT_ASC,1);
 
 
 					foreach ($filearray as $filedetail)
@@ -837,4 +837,3 @@ class doc_generic_task_odt extends ModelePDFTask
 	}
 
 }
-?>

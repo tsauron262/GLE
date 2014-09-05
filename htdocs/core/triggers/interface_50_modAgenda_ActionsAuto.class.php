@@ -1,7 +1,7 @@
 <?php
 /* Copyright (C) 2005-2011 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2009-2011 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2011-2013 Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2011-2014 Juanjo Menent        <jmenent@2byte.es>
  * Copyright (C) 2013	   Cedric GROSS         <c.gross@kreiz-it.fr>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -131,7 +131,7 @@ class InterfaceActionsAuto
 			$object->actiontypecode='AC_OTH_AUTO';
             if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("NewCompanyToDolibarr",$object->nom);
             $object->actionmsg=$langs->transnoentities("NewCompanyToDolibarr",$object->nom);
-            if ($object->prefix_comm) $object->actionmsg.=" (".$object->prefix_comm.")";
+            if (! empty($object->prefix)) $object->actionmsg.=" (".$object->prefix.")";
             //$this->desc.="\n".$langs->transnoentities("Customer").': '.yn($object->client);
             //$this->desc.="\n".$langs->transnoentities("Supplier").': '.yn($object->fournisseur);
             $object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
@@ -380,7 +380,7 @@ class InterfaceActionsAuto
         	$langs->load("other");
         	$langs->load("sendings");
         	$langs->load("agenda");
-        
+
         	$object->actiontypecode='AC_OTH_AUTO';
         	if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("ShippingValidated",$object->ref);
         	if (empty($object->actionmsg))
@@ -388,7 +388,7 @@ class InterfaceActionsAuto
         		$object->actionmsg=$langs->transnoentities("ShippingValidated",$object->ref);
         		$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
         	}
-        
+
         	// Parameters $object->sendtoid defined by caller
         	//$object->sendtoid=0;
         	$ok=1;
@@ -425,6 +425,34 @@ class InterfaceActionsAuto
 
             $object->sendtoid=0;
             $ok=1;
+		}
+		elseif ($action == 'ORDER_SUPPLIER_APPROVE')
+		{
+			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			$langs->load("orders");
+			$langs->load("agenda");
+
+			$object->actiontypecode='AC_OTH_AUTO';
+			if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("OrderApprovedInDolibarr",$object->ref);
+			$object->actionmsg=$langs->transnoentities("OrderApprovedInDolibarr",$object->ref);
+			$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+			$object->sendtoid=0;
+			$ok=1;
+		}
+		elseif ($action == 'ORDER_SUPPLIER_REFUSE')
+		{
+			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			$langs->load("orders");
+			$langs->load("agenda");
+
+			$object->actiontypecode='AC_OTH_AUTO';
+			if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("OrderRefusedInDolibarr",$object->ref);
+			$object->actionmsg=$langs->transnoentities("OrderRefusedInDolibarr",$object->ref);
+			$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+			$object->sendtoid=0;
+			$ok=1;
 		}
         elseif ($action == 'ORDER_SUPPLIER_SENTBYMAIL')
         {
@@ -605,19 +633,73 @@ class InterfaceActionsAuto
         	$ok=1;
         }
 
-		// If not found
-        /*
-        else
-        {
-            dol_syslog("Trigger '".$this->name."' for action '$action' was ran by ".__FILE__." but no handler found for this action.");
+		// Project tasks
+		elseif($action == 'TASK_CREATE') {
+			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			$langs->load("other");
+			$langs->load("projects");
+			$langs->load("agenda");
+
+			$object->actiontypecode='AC_OTH_AUTO';
+
+			if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("TaskCreatedInDolibarr",$object->ref);
+			$object->actionmsg=$langs->transnoentities("TaskCreatedInDolibarr",$object->ref);
+			$object->actionmsg.="\n".$langs->transnoentities("Task").': '.$object->ref;
+			$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+			$ok=1;
+		}
+
+		elseif($action == 'TASK_MODIFY') {
+			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			$langs->load("other");
+			$langs->load("projects");
+			$langs->load("agenda");
+
+			$object->actiontypecode='AC_OTH_AUTO';
+			if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("TaskModifiedInDolibarr",$object->ref);
+			$object->actionmsg=$langs->transnoentities("TaskModifieddInDolibarr",$object->ref);
+			$object->actionmsg.="\n".$langs->transnoentities("Task").': '.$object->ref;
+			$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+			$ok=1;
+		}
+
+		elseif($action == 'TASK_DELETE') {
+			dol_syslog("Trigger '".$this->name."' for action '$action' launched by ".__FILE__.". id=".$object->id);
+			$langs->load("other");
+			$langs->load("projects");
+			$langs->load("agenda");
+
+			$object->actiontypecode='AC_OTH_AUTO';
+			if (empty($object->actionmsg2)) $object->actionmsg2=$langs->transnoentities("TaskDeletedInDolibarr",$object->ref);
+			$object->actionmsg=$langs->transnoentities("TaskDeletedInDolibarr",$object->ref);
+			$object->actionmsg.="\n".$langs->transnoentities("Task").': '.$object->ref;
+			$object->actionmsg.="\n".$langs->transnoentities("Author").': '.$user->login;
+
+			$ok=1;
+		}
+
+		// The trigger was enabled but we are missing the implementation, let the log know
+		else
+		{
+			dol_syslog("Trigger '".$this->name."' for action '$action' was ran by ".__FILE__." but no handler found for this action.", LOG_WARNING);
 			return 0;
-        }
-        */
+		}
 
         // Add entry in event table
         if ($ok)
         {
 			$now=dol_now();
+
+			if(isset($_SESSION['listofnames']))
+			{
+				$attachs=$_SESSION['listofnames'];
+				if($attachs && strpos($action,'SENTBYMAIL'))
+				{
+					 $object->actionmsg.="\n".$langs->transnoentities("AttachedFiles").': '.$attachs;
+				}
+			}
 
             require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
             require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
@@ -641,8 +723,8 @@ class InterfaceActionsAuto
 			$actioncomm->contact     = $contactforaction;
 			$actioncomm->societe     = $societeforaction;
 			$actioncomm->author      = $user;   // User saving action
-			//$actioncomm->usertodo  = $user;	// User affected to action
-			$actioncomm->userdone    = $user;	// User doing action
+			$actioncomm->usertodo    = $user;	// User action is assigned to (owner of action)
+			$actioncomm->userdone    = $user;	// User doing action (deprecated, not used anymore)
 
 			$actioncomm->fk_element  = $object->id;
 			$actioncomm->elementtype = $object->element;
@@ -668,4 +750,3 @@ class InterfaceActionsAuto
     }
 
 }
-?>

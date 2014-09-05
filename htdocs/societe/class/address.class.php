@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2002-2005 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2006 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2011 Regis Houssin        <regis.houssin@capnetworks.com>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,13 +20,14 @@
 /**
  * 	\file       htdocs/societe/class/address.class.php
  * 	\ingroup    societe
- *  \brief      Fichier de la classe des adresses des tiers
+ *  \brief      File of class to manage addresses. This class is deprecated.
  */
 
 
 /**
- *  \class 		Address
- *  \brief 		Class to manage addresses
+ *  Class to manage addresses
+ *
+ *  @deprecated This class is dedicated to a not supported and deprecated feature.
  */
 class Address
 {
@@ -83,7 +84,7 @@ class Address
 			$now=dol_now();
 
 			$sql = "INSERT INTO ".MAIN_DB_PREFIX."societe_address (label, fk_soc, name, datec, fk_user_creat) ";
-			$sql .= " VALUES ('".$this->db->escape($this->label)."', '".$socid."', '".$this->db->escape($this->name)."', ".$this->db->idate($now).", '".$user->id."')";
+			$sql .= " VALUES ('".$this->db->escape($this->label)."', '".$socid."', '".$this->db->escape($this->name)."', '".$this->db->idate($now)."', '".$user->id."')";
 
 			$result=$this->db->query($sql);
 			if ($result)
@@ -264,8 +265,7 @@ class Address
             // Adresses liees a la societe
 			if ($this->socid)
 			{
-				$sql = 'SELECT a.rowid as id, a.label, a.name, a.address, a.datec as dc';
-				$sql .= ', a.tms as date_update, a.fk_soc';
+				$sql = 'SELECT a.rowid as id, a.label, a.name, a.address, a.datec as date_creation, a.tms as date_modification, a.fk_soc';
 				$sql .= ', a.zip, a.town, a.note, a.fk_pays as country_id, a.phone, a.fax';
 				$sql .= ', p.code as country_code, p.libelle as country';
 				$sql .= ' FROM '.MAIN_DB_PREFIX.'societe_address as a';
@@ -284,8 +284,8 @@ class Address
 						$line = new AddressLine($this->db);
 
 						$line->id				= $objp->id;
-						$line->date_creation	= $this->db->jdate($objp->dc);
-						$line->date_update		= $this->db->jdate($objp->date_update);
+						$line->date_creation	 = $this->db->jdate($objp->date_creation);
+						$line->date_modification = $this->db->jdate($objp->date_modification);
 						$line->label			= $objp->label;
 						$line->name				= $objp->name;
 						$line->address			= $objp->address;
@@ -335,8 +335,7 @@ class Address
 		global $langs;
 		global $conf;
 
-		$sql = 'SELECT a.rowid, a.fk_soc, a.label, a.name, a.address, a.datec as date_creation';
-		$sql .= ', a.tms as date_update';
+		$sql = 'SELECT a.rowid, a.fk_soc, a.label, a.name, a.address, a.datec as date_creation, a.tms as date_modification';
 		$sql .= ', a.zip, a.town, a.note, a.fk_pays as country_id, a.phone, a.fax';
 		$sql .= ', p.code as country_code, p.libelle as country';
 		$sql .= ' FROM '.MAIN_DB_PREFIX.'societe_address as a';
@@ -352,7 +351,7 @@ class Address
 				$this->id				= $obj->rowid;
 				$this->socid			= $obj->fk_soc;
 
-				$this->date_update		= $this->db->jdate($obj->date_update);
+				$this->date_modification		= $this->db->jdate($obj->date_modification);
 				$this->date_creation 	= $this->db->jdate($obj->date_creation);
 
 				$this->label 			= $obj->label;
@@ -446,7 +445,7 @@ class Address
 	 */
 	function info($id)
 	{
-		$sql = "SELECT s.rowid, s.nom, datec, datea,";
+		$sql = "SELECT s.rowid, s.nom, datec as date_creation, tms as date_modification,";
 		$sql.= " fk_user_creat, fk_user_modif";
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s";
 		$sql.= " WHERE s.rowid = ".$id;
@@ -472,8 +471,8 @@ class Address
 					$this->user_modification = $muser;
 				}
 				$this->ref			     = $obj->nom;
-				$this->date_creation     = $this->db->jdate($obj->datec);
-				$this->date_modification = $this->db->jdate($obj->datea);
+				$this->date_creation     = $this->db->jdate($obj->date_creation);
+				$this->date_modification = $this->db->jdate($obj->date_modification);
 			}
 
 			$this->db->free($result);
@@ -489,15 +488,14 @@ class Address
 
 
 /**
- *  \class 		AddressLine
- *  \brief 		Class to manage one address line
+ *  Class to manage one address line
  */
 class AddressLine
 {
 
 	var $id;
 	var $date_creation;
-	var $date_update;
+	var $date_modification;
 	var $label;
 	var $name;
 	var $address;
@@ -521,4 +519,3 @@ class AddressLine
 		$this->db = $db;
 	}
 }
-?>

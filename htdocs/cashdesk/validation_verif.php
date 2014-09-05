@@ -53,7 +53,7 @@ switch ($action)
 
 		$invoice=new Facture($db);
 		$invoice->date=dol_now();
-		$invoice->type=0;
+		$invoice->type= Facture::TYPE_STANDARD;
 		$num=$invoice->getNextNumRef($company);
 
 		$obj_facturation->numInvoice($num);
@@ -301,4 +301,3 @@ switch ($action)
 $_SESSION['serObjFacturation'] = serialize($obj_facturation);
 
 header('Location: '.$redirection);
-?>

@@ -298,7 +298,7 @@ class modProjet extends DolibarrModules
 	 */
 	function init($options='')
 	{
-		global $conf;
+		global $conf,$langs;
 
 		// Permissions
 		$this->remove($options);
@@ -368,4 +368,3 @@ class modProjet extends DolibarrModules
     }
 
 }
-?>

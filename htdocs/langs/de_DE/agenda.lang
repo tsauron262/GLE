@@ -1,5 +1,5 @@
 # Dolibarr language file - Source file is en_US - agenda
-# IdAgenda=ID event
+IdAgenda=ID Veranstaltung
 Actions=Aktionen
 ActionsArea=Bereich Maßnahmen (Veranstaltungen und Aufgaben)
 Agenda= Agenda
@@ -10,7 +10,7 @@ LocalAgenda=Lokaler Kalender
 AffectedTo= Zugewiesen an
 DoneBy= Erldedigt von
 Events= Veranstaltungen
-# EventsNb=Number of events
+EventsNb=Anzahl Veranstaltungen
 MyEvents=Meine Veranstaltungen
 OtherEvents=Weitere Veranstaltungen
 ListOfActions=Veranstaltungsliste
@@ -25,12 +25,15 @@ ListOfEvents= Veranstaltungsliste
 ActionsAskedBy=Maßnahmen erbeten von
 ActionsToDoBy=Maßnahmen zugewiesen an
 ActionsDoneBy=Maßnahmen erledigt von
+ActionsForUser=Maßnahmen für Benutzer
+ActionsForUsersGroup=Maßnahmen für alle Benutzer der Gruppe
 AllMyActions= Alle meine Maßnahmen / Aufgaben
 AllActions= Alle Maßnahmen / Aufgaben
 ViewList=Listenansicht
 ViewCal=Kalenderansicht
 ViewDay=Tagesansicht
 ViewWeek=Wochenansicht
+ViewPerUser=Per user
 ViewWithPredefinedFilters= Ansicht mit vordefinierten Filtern
 AutoActions= Automatische Befüllung der Tagesordnung
 AgendaAutoActionDesc= Definieren Sie hier Maßnahmen zur automatischen Übernahme in die Agenda. Ist nichts aktviert (Standard), umfasst die Agenda nur manuell eingetragene Maßnahmen.
@@ -40,9 +43,10 @@ ActionsEvents= Veranstaltungen zur automatischen Übernahme in die Agenda
 PropalValidatedInDolibarr= Angebot freigegeben
 InvoiceValidatedInDolibarr= Rechnung freigegeben
 InvoiceBackToDraftInDolibarr=Rechnung %s in den Entwurf Status zurücksetzen
-# InvoiceDeleteDolibarr=Invoice %s deleted
+InvoiceDeleteDolibarr=Rechnung %s gelöscht
 OrderValidatedInDolibarr= Bestellung %s freigegeben
 OrderApprovedInDolibarr=Bestellen %s genehmigt
+OrderRefusedInDolibarr=Bestellung %s abgelehnt
 OrderBackToDraftInDolibarr=Bestellen %s zurück nach Draft-Status
 OrderCanceledInDolibarr=Auftrag storniert %s
 InterventionValidatedInDolibarr=Service %s freigegeben
@@ -52,7 +56,9 @@ InvoiceSentByEMail=Kundenrechnung %s per E-Mail versendet
 SupplierOrderSentByEMail=Lieferantenbestellung %s per E-Mail versendet
 SupplierInvoiceSentByEMail=Lieferantenrechnung %s per E-Mail versendet
 ShippingSentByEMail=Lieferschein %s per E-Mail versendet
+ShippingValidated= Versand %s freigegeben
 InterventionSentByEMail=Service %s per E-Mail versendet
+InterventionClassifiedBilled=Eingriff %s als verrechnet eingestuft
 NewCompanyToDolibarr= Partner erstellt
 DateActionPlannedStart= Geplantes Startdatum
 DateActionPlannedEnd= Geplantes Enddatum
@@ -67,8 +73,8 @@ AgendaUrlOptions4=<b>logint=%s</b> begrenzt die Ausgabe auf von Benutzer <b>%s</
 AgendaUrlOptions5=<b>logind=%s</b> begrenzt die Ausgabe auf von Benutzer <b>%s</b> erledigte Maßnahmen.
 AgendaShowBirthdayEvents=Zeige Geburtstage
 AgendaHideBirthdayEvents=Geburtstage ausblenden
-# Busy=Busy
-# ExportDataset_event1=List of agenda events
+Busy=Besetzt
+ExportDataset_event1=Liste der Massnahmen
 
 # External Sites ical
 ExportCal=Export Kalender

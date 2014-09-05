@@ -403,13 +403,13 @@ class Menubase
     /**
      * 	Load entries found from database in this->newmenu array.
      *
-     * 	@param	array	$newmenu        Menu array to complete (in most cases, it's empty, may be already initialized with some menu manager like eldy)
+     * 	@param	Menu	$newmenu        Menu array to complete (in most cases, it's empty, may be already initialized with some menu manager like eldy)
      * 	@param	string	$mymainmenu		Value for mainmenu to filter menu to load (often $_SESSION["mainmenu"])
      * 	@param	string	$myleftmenu		Value for leftmenu to filter menu to load (always '')
      * 	@param	int		$type_user		0=Menu for backoffice, 1=Menu for front office
      * 	@param	string	$menu_handler	Filter on name of menu_handler used (auguria, eldy...)
      * 	@param  array	&$tabMenu       Array with menu entries already loaded
-     * 	@return array    		       	Menu array for particular mainmenu value or full tabArray
+     * 	@return Menu    		       	Menu array for particular mainmenu value or full tabArray
      */
     function menuLeftCharger($newmenu, $mymainmenu, $myleftmenu, $type_user, $menu_handler, &$tabMenu)
     {
@@ -547,7 +547,6 @@ class Menubase
                 	$tmpcond=$menu['enabled'];
                 	if ($leftmenu == 'all') $tmpcond=preg_replace('/\$leftmenu\s*==\s*["\'a-zA-Z_]+/','1==1',$tmpcond);	// Force part of condition to true
                     $enabled = verifCond($tmpcond);
-                    //if ($conf->use_javascript_ajax && ! empty($conf->global->MAIN_MENU_USE_JQUERY_ACCORDION) && empty($conf->dol_use_jmobile) && preg_match('/^\$leftmenu/',$menu['enabled'])) $enabled=1;
                 }
 
                 // Define $title
@@ -644,4 +643,3 @@ class Menubase
 
 }
 
-?>

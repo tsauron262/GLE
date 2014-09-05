@@ -1,12 +1,13 @@
 <?php
 /* Copyright (C) 2006-2011	Laurent Destailleur		<eldy@users.sourceforge.net>
- * Copyright (C) 2006		Rodolphe Quiedeville	<rodolphe@quiedeville.org>
- * Copyright (C) 2007		Patrick Raguin			<patrick.raguin@gmail.com>
- * Copyright (C) 2010-2012	Regis Houssin			<regis.houssin@capnetworks.com>
- * Copyright (C) 2013       Florian Henry		  	<florian.henry@open-concept.pro>
- * Copyright (C) 2013       Juanjo Menent		  	<jmenent@2byte.es>
+ * Copyright (C) 2006		    Rodolphe Quiedeville	<rodolphe@quiedeville.org>
+ * Copyright (C) 2007		    Patrick Raguin			  <patrick.raguin@gmail.com>
+ * Copyright (C) 2010-2012	Regis Houssin			    <regis.houssin@capnetworks.com>
+ * Copyright (C) 2013-2014  Florian Henry		  	  <florian.henry@open-concept.pro>
+ * Copyright (C) 2013       Juanjo Menent		  	  <jmenent@2byte.es>
  * Copyright (C) 2013       Christophe Battarel		<contact@altairis.fr>
- *  *
+ * Copyright (C) 2013       Alexandre Spangaro    <alexandre.spangaro@gmail.com>
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 3 of the License, or
@@ -127,12 +128,22 @@ function societe_prepare_head($object)
         // Attached files
         require_once DOL_DOCUMENT_ROOT.'/core/lib/files.lib.php';
         $upload_dir = $conf->societe->dir_output . "/" . $object->id;
-        $nbFiles = count(dol_dir_list($upload_dir,'files'));
+        $nbFiles = count(dol_dir_list($upload_dir,'files',0,'','(\.meta|_preview\.png)$'));
         $head[$h][0] = DOL_URL_ROOT.'/societe/document.php?socid='.$object->id;
         $head[$h][1] = $langs->trans("Documents");
 		if($nbFiles > 0) $head[$h][1].= ' ('.$nbFiles.')';
         $head[$h][2] = 'document';
         $h++;
+    }
+
+    if (($object->client==1 || $object->client==2 || $object->client==3) && (! empty ( $conf->global->PRODUIT_CUSTOMER_PRICES )))
+    {
+    	$langs->load("products");
+	    // price
+	    $head[$h][0] = DOL_URL_ROOT.'/societe/price.php?socid='.$object->id;
+	    $head[$h][1] = $langs->trans("CustomerPrices");
+	    $head[$h][2] = 'price';
+	    $h++;
     }
 
     // Log
@@ -167,7 +178,7 @@ function societe_prepare_head2($object)
     if (empty($conf->global->SOCIETE_DISABLE_BANKACCOUNT))
     {
 	    $head[$h][0] = DOL_URL_ROOT .'/societe/rib.php?socid='.$object->id;
-	    $head[$h][1] = $langs->trans("BankAccount")." $account->number";
+	    $head[$h][1] = $langs->trans("BankAccount");
 	    $head[$h][2] = 'rib';
 	    $h++;
     }
@@ -577,14 +588,14 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
     print_liste_field_titre($langs->trans("EMail"),$_SERVER["PHP_SELF"],"p.email","",$param,'',$sortfield,$sortorder);
     if (! empty($conf->skype->enabled))
     {
-      $colspan++;
-      print '<td>'.$langs->trans("Skype").'</td>';
+		$colspan++;
+		print '<td>'.$langs->trans("Skype").'</td>';
     }
     print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],"p.statut","",$param,'',$sortfield,$sortorder);
     // Copy to clipboard
     print "<td>&nbsp;</td>";
     // Add to agenda
-    if (! empty($conf->agenda->enabled) && $user->rights->agenda->myactions->create)
+    if (! empty($conf->agenda->enabled) && ! empty($user->rights->agenda->myactions->create))
     {
     	$colspan++;
         print '<td>&nbsp;</td>';
@@ -609,8 +620,8 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
     print '<td>&nbsp;</td>';
     if (! empty($conf->skype->enabled))
     {
-      $colspan++;
-      print '<td>&nbsp;</td>';
+		$colspan++;
+		print '<td>&nbsp;</td>';
     }
 
     // Status
@@ -636,22 +647,22 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
     print "</tr>";
 
 
-    $sql = "SELECT p.rowid, p.lastname, p.firstname, p.fk_pays, p.poste, p.phone, p.phone_mobile, p.fax, p.email, p.skype, p.statut ";
-    $sql .= ", p.civilite, p.address, p.zip, p.town";
+    $sql = "SELECT p.rowid, p.lastname, p.firstname, p.fk_pays as country_id, p.poste, p.phone, p.phone_mobile, p.fax, p.email, p.skype, p.statut ";
+    $sql .= ", p.civilite as civility_id, p.address, p.zip, p.town";
     $sql .= " FROM ".MAIN_DB_PREFIX."socpeople as p";
     $sql .= " WHERE p.fk_soc = ".$object->id;
     if ($search_status!='') $sql .= " AND p.statut = ".$db->escape($search_status);
-    if ($search_name)   $sql .= " AND (p.lastname LIKE '%".$db->escape($search_name)."%' OR p.firstname LIKE '%".$db->escape($search_name)."%')";
+    if ($search_name)       $sql .= " AND (p.lastname LIKE '%".$db->escape($search_name)."%' OR p.firstname LIKE '%".$db->escape($search_name)."%')";
     $sql.= " ORDER BY $sortfield $sortorder";
 
     dol_syslog('core/lib/company.lib.php :: show_contacts sql='.$sql,LOG_DEBUG);
     $result = $db->query($sql);
     $num = $db->num_rows($result);
 
-    if ($num)
+	$var=true;
+	if ($num)
     {
         $i=0;
-        $var=true;
 
         while ($i < $num)
         {
@@ -664,13 +675,13 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
             $contactstatic->statut = $obj->statut;
             $contactstatic->lastname = $obj->lastname;
             $contactstatic->firstname = $obj->firstname;
-            $contactstatic->civilite = $obj->civilite;
+            $contactstatic->civility_id = $obj->civility_id;
             print $contactstatic->getNomUrl(1);
             print '</td>';
 
             print '<td>'.$obj->poste.'</td>';
 
-            $country_code = getCountry($obj->fk_pays, 'all');
+            $country_code = getCountry($obj->country_id, 'all');
 
             // Lien click to dial
             print '<td>';
@@ -695,42 +706,34 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
             // Status
 			print '<td>'.$contactstatic->getLibStatut(5).'</td>';
 
-			// Copy to clipboard
-			$coords = '';
-			if (!empty($object->name))
-				$coords .= addslashes($object->name)."<br />";
-			if (!empty($obj->civilite))
-				$coords .= addslashes($obj->civilite).' ';
-			if (!empty($obj->firstname))
-				$coords .= addslashes($obj->firstname).' ';
-			if (!empty($obj->lastname))
-				$coords .= addslashes($obj->lastname);
-			$coords .= "<br />";
-			if (!empty($obj->address))
-			{
-				$coords .= addslashes(dol_nl2br($obj->address,1,true))."<br />";
-				if (!empty($obj->cp))
-					$coords .= addslashes($obj->zip).' ';
-				if (!empty($obj->ville))
-					$coords .= addslashes($obj->town);
-				if (!empty($obj->pays))
-					$coords .= "<br />".addslashes($country_code['label']);
-			}
-			elseif (!empty($object->address))
-			{
-				$coords .= addslashes(dol_nl2br($object->address,1,true))."<br />";
-				if (!empty($object->zip))
-					$coords .= addslashes($object->zip).' ';
-				if (!empty($object->town))
-					$coords .= addslashes($object->town);
-				if (!empty($object->country))
-					$coords .= "<br />".addslashes($object->country);
-			}
-
-            print '<td align="center">';	// hideonsmatphone because copyToClipboard call jquery dialog that does not work with jmobile
-            print '<a href="#" class="hideonsmartphone" onclick="return copyToClipboard(\''.$coords.'\');">';
-            print img_picto($langs->trans("Address"), 'object_address.png');
-            print '</a></td>';
+            print '<td align="center">';
+            if (! empty($conf->use_javascript_ajax))
+            {
+       			// Copy to clipboard
+				$coords = '';
+				if (!empty($object->name))   $coords .= $object->name."<br>";
+				$coords .= $contactstatic->getFullName($langs,1).' ';
+				$coords .= "<br>";
+				if (!empty($obj->address))
+				{
+					$coords .= dol_nl2br($obj->address,1,true)."<br>";
+					if (!empty($obj->zip))  $coords .= $obj->zip.' ';
+					if (!empty($obj->town)) $coords .= $obj->town;
+					if (!empty($obj->country_id)) $coords .= "<br>".$country_code['label'];
+				}
+				else if (!empty($object->address))
+				{
+					$coords .= dol_nl2br($object->address,1,true)."<br>";
+					if (!empty($object->zip))  $coords .= $object->zip.' ';
+					if (!empty($object->town)) $coords .= $object->town;
+					if (!empty($object->country_id)) $coords .= "<br>".$country_code['label'];
+				}
+				// hideonsmatphone because copyToClipboard call jquery dialog that does not work with jmobile
+				print '<a href="#" class="hideonsmartphone" onclick="return copyToClipboard(\''.dol_escape_js($coords).'\',\''.dol_escape_js($langs->trans("HelpCopyToClipboard")).'\');">';
+            	print img_picto($langs->trans("Address"), 'object_address.png');
+            	print '</a>';
+            }
+            print '</td>';
 
             // Add to agenda
             if (! empty($conf->agenda->enabled) && $user->rights->agenda->myactions->create)
@@ -762,7 +765,7 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
         }
     }
     else
-    {
+	{
         print "<tr ".$bc[$var].">";
         print '<td colspan="'.$colspan.'">'.$langs->trans("None").'</td>';
         print "</tr>\n";
@@ -775,16 +778,6 @@ function show_contacts($conf,$langs,$db,$object,$backtopage='')
 ?>
 <div id="dialog" title="<?php echo dol_escape_htmltag($langs->trans('Address')); ?>" style="display: none;"></div>
 <?php
-	print '<script type="text/javascript">
-		function copyToClipboard (text) {
-			  text = text.replace(/<br \/>/g,"\n");
-			  var newElem = "<textarea id=\"coords\" style=\"border: none; width: 90%; height: 120px;\">"+text+"</textarea><br/><br/>'.$langs->trans('HelpCopyToClipboard').'";
-			  $("#dialog").html(newElem);
-			  $("#dialog").dialog();
-			  $("#coords").select();
-			  return false;
-		}
-	</script>';
 
     return $i;
 }
@@ -1394,4 +1387,3 @@ function show_subsidiaries($conf,$langs,$db,$object)
 	return $i;
 }
 
-?>

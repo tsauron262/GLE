@@ -537,7 +537,13 @@ $header .= <<< EOF
 
 EOF;
 
-//Affiche un form :> choix user par autocomplete dans zimbra
+	// Files list constructor
+	$filearray=dol_dir_list($upload_dir,"files",0,'','(\.meta|_preview\.png)$',$sortfield,(strtolower($sortorder)=='desc'?SORT_DESC:SORT_ASC),1);
+	$totalsize=0;
+	foreach($filearray as $key => $file)
+	{
+		$totalsize+=$file['size'];
+	}
 
 
 $header .= <<< EOF
@@ -692,9 +698,11 @@ function getDocs()
                         }
                     });
 
-                jQuery(msg).find('DocInGrp').find('file').each(function(){
-                    var text = jQuery(this).find('filename').text();
-                    var id = jQuery(this).find('id').text();
+	// Company
+	print '<tr><td>'.$langs->trans("ThirdParty").'</td><td>';
+	if (! empty($object->societe->id)) print $object->societe->getNomUrl(1);
+	else print '&nbsp;';
+	print '</td></tr>';
 
                     var item = jQuery('<div style=" width: 100px; height: 36px;  " class="droppabledraggable ui-widget-header ui-state-default" id='+id+'><h5 style="margin-bottom:0px; margin-top: 4px;">'+recycle_icon+text+'</h5></div>');
                         item.appendTo(list).fadeIn(function() {

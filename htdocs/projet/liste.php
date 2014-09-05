@@ -203,8 +203,94 @@ jQuery(document).ready(function(){
 </script>
 EOF;
 
-$js .= $jqgridJs;
-llxHeader($js,$langs->trans("Projects"));
+	print '<table class="noborder" width="100%">';
+	print '<tr class="liste_titre">';
+	print_liste_field_titre($langs->trans("Ref"),$_SERVER["PHP_SELF"],"p.ref","","","",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("Label"),$_SERVER["PHP_SELF"],"p.title","","","",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("ThirdParty"),$_SERVER["PHP_SELF"],"s.nom","","","",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("Visibility"),$_SERVER["PHP_SELF"],"p.public","","","",$sortfield,$sortorder);
+	print_liste_field_titre($langs->trans("Status"),$_SERVER["PHP_SELF"],'p.fk_statut',"","",'align="right"',$sortfield,$sortorder);
+	print "</tr>\n";
+
+	print '<tr class="liste_titre">';
+	print '<td class="liste_titre">';
+	print '<input type="text" class="flat" name="search_ref" value="'.$search_ref.'" size="6">';
+	print '</td>';
+	print '<td class="liste_titre">';
+	print '<input type="text" class="flat" name="search_label" value="'.$search_label.'">';
+	print '</td>';
+	print '<td class="liste_titre">';
+	print '<input type="text" class="flat" name="search_societe" value="'.$search_societe.'">';
+	print '</td>';
+	print '<td class="liste_titre">&nbsp;</td>';
+	print '<td class="liste_titre" align="right"><input class="liste_titre" type="image" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'" value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'"></td>';
+	print "</tr>\n";
+
+	while ($i < $num)
+	{
+		$objp = $db->fetch_object($resql);
+
+		$projectstatic->id = $objp->projectid;
+		$projectstatic->user_author_id = $objp->fk_user_creat;
+		$projectstatic->public = $objp->public;
+
+		$userAccess = $projectstatic->restrictedProjectArea($user);
+
+		if ($userAccess >= 0)
+		{
+			$var=!$var;
+			print "<tr ".$bc[$var].">";
+
+			// Project url
+			print "<td>";
+			$projectstatic->ref = $objp->ref;
+			print $projectstatic->getNomUrl(1);
+			print "</td>";
+
+			// Title
+			print '<td>';
+			print dol_trunc($objp->title,24);
+			print '</td>';
+
+			// Company
+			print '<td>';
+			if ($objp->socid)
+			{
+				$socstatic->id=$objp->socid;
+				$socstatic->nom=$objp->nom;
+				print $socstatic->getNomUrl(1);
+			}
+			else
+			{
+				print '&nbsp;';
+			}
+			print '</td>';
+
+			// Visibility
+			print '<td align="left">';
+			if ($objp->public) print $langs->trans('SharedProject');
+			else print $langs->trans('PrivateProject');
+			print '</td>';
+
+			// Status
+			$projectstatic->statut = $objp->fk_statut;
+			print '<td align="right">'.$projectstatic->getLibStatut(3).'</td>';
+
+			print "</tr>\n";
+
+		}
+
+		$i++;
+	}
+
+	$db->free($resql);
+}
+else
+{
+	dol_print_error($db);
+}
+
+print "</table>";
 
 
 
@@ -311,7 +397,3 @@ print '<div id="gridListProjPager" class="scroll" style="text-align:center;"></d
 
 $db->close();
 
-
-llxFooter('$Date: 2008/03/02 22:20:46 $ - $Revision: 1.16 $');
-
-?>

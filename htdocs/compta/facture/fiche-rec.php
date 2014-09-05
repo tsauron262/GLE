@@ -1,6 +1,6 @@
 <?php
 /* Copyright (C) 2002-2003 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2012 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2004-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
  * Copyright (C) 2005-2012 Regis Houssin        <regis.houssin@capnetworks.com>
  * Copyright (C) 2013      Florian Henry		<florian.henry@open-concept.pro>
  * Copyright (C) 2013      Juanjo Menent		<jmenent@2byte.es>
@@ -31,6 +31,8 @@ require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
 require_once DOL_DOCUMENT_ROOT.'/product/class/product.class.php';
 
 $langs->load('bills');
+$langs->load('compta');
+$langs->load('products');
 
 // Security check
 $id=(GETPOST('facid','int')?GETPOST('facid','int'):GETPOST('id','int'));
@@ -385,13 +387,13 @@ else
 			print "<tr><td>".$langs->trans("Author").'</td><td colspan="3">'.$author->getFullName($langs)."</td></tr>";
 
 			print '<tr><td>'.$langs->trans("AmountHT").'</td>';
-			print '<td align="right" colspan="2"><b>'.price($object->total_ht).'</b></td>';
-			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
+			print '<td colspan="3"><b>'.price($object->total_ht,'',$langs,1,-1,-1,$conf->currency).'</b></td>';
+			print '</tr>';
 
-			print '<tr><td>'.$langs->trans("AmountVAT").'</td><td align="right" colspan="2">'.price($object->total_tva).'</td>';
-			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
-			print '<tr><td>'.$langs->trans("AmountTTC").'</td><td align="right" colspan="2">'.price($object->total_ttc).'</td>';
-			print '<td>'.$langs->trans("Currency".$conf->currency).'</td></tr>';
+			print '<tr><td>'.$langs->trans("AmountVAT").'</td><td colspan="3">'.price($object->total_tva,'',$langs,1,-1,-1,$conf->currency).'</td>';
+			print '</tr>';
+			print '<tr><td>'.$langs->trans("AmountTTC").'</td><td colspan="3">'.price($object->total_ttc,'',$langs,1,-1,-1,$conf->currency).'</td>';
+			print '</tr>';
 
 
 			// Payment term
@@ -604,4 +606,3 @@ else
 llxFooter();
 
 $db->close();
-?>

@@ -32,7 +32,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
  */
 class Entrepot extends CommonObject
 {
-	public $element='label';
+	public $element='stock';
 	public $table_element='entrepot';
 
 	var $id;
@@ -524,5 +524,31 @@ class Entrepot extends CommonObject
 		return $result;
 	}
 
+	/**
+     *  Initialise an instance with random values.
+     *  Used to build previews or test instances.
+     *	id must be 0 if object instance is a specimen.
+     *
+     *  @return	void
+     */
+    function initAsSpecimen()
+    {
+        global $user,$langs,$conf,$mysoc;
+
+        $now=dol_now();
+
+        // Initialize parameters
+        $this->id=0;
+        $this->libelle = 'WAREHOUSE SPECIMEN';
+        $this->description = 'WAREHOUSE SPECIMEN '.dol_print_date($now,'dayhourlog');
+		$this->statut=1;
+        $this->specimen=1;
+		
+		$this->lieu='Location test';
+        $this->address='21 jump street';
+        $this->zip='99999';
+        $this->town='MyTown';
+        $this->country_id=1;
+        $this->country_code='FR';
+    }
 }
-?>

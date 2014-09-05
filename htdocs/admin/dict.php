@@ -66,13 +66,13 @@ $pagenext = $page + 1;
 // Initialize technical object to manage hooks of thirdparties. Note that conf->hooks_modules contains array array
 $hookmanager->initHooks(array('admin'));
 
-// This page is a generic page to edit dictionnaries
-// Put here declaration of dictionnaries properties
+// This page is a generic page to edit dictionaries
+// Put here declaration of dictionaries properties
 
-// Sort order to show dictionnary (0 is space). All other dictionnaries (added by modules) will be at end of this.
-$taborder=array(9,0,4,3,2,0,1,8,19,16,0,5,11,0,6,0,10,25,12,13,0,14,0,7,17,0,22,20,18,21,0,15,0,24,23);
+// Sort order to show dictionary (0 is space). All other dictionaries (added by modules) will be at end of this.
+$taborder=array(9,0,4,3,2,0,1,8,19,16,0,5,11,0,6,0,10,25,12,13,0,14,0,7,17,0,22,20,18,21,0,15,0,24,23,0,26);
 
-// Name of SQL tables of dictionnaries
+// Name of SQL tables of dictionaries
 $tabname=array();
 $tabname[1] = MAIN_DB_PREFIX."c_forme_juridique";
 $tabname[2] = MAIN_DB_PREFIX."c_departements";
@@ -99,34 +99,36 @@ $tabname[22]= MAIN_DB_PREFIX."c_input_reason";
 $tabname[23]= MAIN_DB_PREFIX."accountingaccount";
 $tabname[24]= MAIN_DB_PREFIX."accounting_system";
 $tabname[25]= MAIN_DB_PREFIX."c_revenuestamp";
+$tabname[26]= MAIN_DB_PREFIX."c_type_resource";
 
 // Dictionary labels
 $tablib=array();
-$tablib[1] = "DictionnaryCompanyJuridicalType";
-$tablib[2] = "DictionnaryCanton";
-$tablib[3] = "DictionnaryRegion";
-$tablib[4] = "DictionnaryCountry";
-$tablib[5] = "DictionnaryCivility";
-$tablib[6] = "DictionnaryActions";
-$tablib[7] = "DictionnarySocialContributions";
-$tablib[8] = "DictionnaryCompanyType";
-$tablib[9] = "DictionnaryCurrency";
-$tablib[10]= "DictionnaryVAT";
-$tablib[11]= "DictionnaryTypeContact";
-$tablib[12]= "DictionnaryPaymentConditions";
-$tablib[13]= "DictionnaryPaymentModes";
-$tablib[14]= "DictionnaryEcotaxe";
-$tablib[15]= "DictionnaryPaperFormat";
-$tablib[16]= "DictionnaryProspectLevel";
-$tablib[17]= "DictionnaryFees";
-$tablib[18]= "DictionnarySendingMethods";
-$tablib[19]= "DictionnaryStaff";
-$tablib[20]= "DictionnaryOrderMethods";
-$tablib[21]= "DictionnaryAvailability";
-$tablib[22]= "DictionnarySource";
-$tablib[23]= "DictionnaryAccountancyplan";
-$tablib[24]= "DictionnaryAccountancysystem";
-$tablib[25]= "DictionnaryRevenueStamp";
+$tablib[1] = "DictionaryCompanyJuridicalType";
+$tablib[2] = "DictionaryCanton";
+$tablib[3] = "DictionaryRegion";
+$tablib[4] = "DictionaryCountry";
+$tablib[5] = "DictionaryCivility";
+$tablib[6] = "DictionaryActions";
+$tablib[7] = "DictionarySocialContributions";
+$tablib[8] = "DictionaryCompanyType";
+$tablib[9] = "DictionaryCurrency";
+$tablib[10]= "DictionaryVAT";
+$tablib[11]= "DictionaryTypeContact";
+$tablib[12]= "DictionaryPaymentConditions";
+$tablib[13]= "DictionaryPaymentModes";
+$tablib[14]= "DictionaryEcotaxe";
+$tablib[15]= "DictionaryPaperFormat";
+$tablib[16]= "DictionaryProspectLevel";
+$tablib[17]= "DictionaryFees";
+$tablib[18]= "DictionarySendingMethods";
+$tablib[19]= "DictionaryStaff";
+$tablib[20]= "DictionaryOrderMethods";
+$tablib[21]= "DictionaryAvailability";
+$tablib[22]= "DictionarySource";
+$tablib[23]= "DictionaryAccountancyplan";
+$tablib[24]= "DictionaryAccountancysystem";
+$tablib[25]= "DictionaryRevenueStamp";
+$tablib[26]= "DictionaryResourceType";
 
 // Requete pour extraction des donnees des dictionnaires
 $tabsql=array();
@@ -155,6 +157,7 @@ $tabsql[22]= "SELECT rowid   as rowid, code, label, active FROM ".MAIN_DB_PREFIX
 $tabsql[23]= "SELECT rowid   as rowid, fk_pcg_version, pcg_type, pcg_subtype, account_number as accountancy_code, account_parent, label, active FROM ".MAIN_DB_PREFIX."accountingaccount";
 $tabsql[24]= "SELECT s.rowid as rowid, pcg_version, s.fk_pays as country_id, p.code as country_code, p.libelle as pays, s.label, s.active FROM ".MAIN_DB_PREFIX."accounting_system as s, ".MAIN_DB_PREFIX."c_pays as p WHERE s.fk_pays=p.rowid and p.active=1";
 $tabsql[25]= "SELECT t.rowid, t.taux, p.libelle as country, p.code as country_code, t.fk_pays as country_id, t.note, t.active, t.accountancy_code_sell, t.accountancy_code_buy FROM ".MAIN_DB_PREFIX."c_revenuestamp as t, ".MAIN_DB_PREFIX."c_pays as p WHERE t.fk_pays=p.rowid";
+$tabsql[26]= "SELECT rowid   as rowid, code, label, active FROM ".MAIN_DB_PREFIX."c_type_resource";
 
 // Critere de tri du dictionnaire
 $tabsqlsort=array();
@@ -183,6 +186,7 @@ $tabsqlsort[22]="code ASC, label ASC";
 $tabsqlsort[23]="fk_pcg_version ASC, accountancy_code ASC";
 $tabsqlsort[24]="pcg_version ASC";
 $tabsqlsort[25]="country ASC, taux ASC";
+$tabsqlsort[26]="code ASC,label ASC";
 
 // Nom des champs en resultat de select pour affichage du dictionnaire
 $tabfield=array();
@@ -211,6 +215,7 @@ $tabfield[22]= "code,label";
 $tabfield[23]= "fk_pcg_version,accountancy_code,account_parent,pcg_type,pcg_subtype,label";
 $tabfield[24]= "pcg_version,country_id,country,label";
 $tabfield[25]= "country_id,country,taux,accountancy_code_sell,accountancy_code_buy,note";
+$tabfield[26]= "code,label";
 
 // Nom des champs d'edition pour modification d'un enregistrement
 $tabfieldvalue=array();
@@ -239,6 +244,7 @@ $tabfieldvalue[22]= "code,label";
 $tabfieldvalue[23]= "fk_pcg_version,accountancy_code,account_parent,pcg_type,pcg_subtype,label";
 $tabfieldvalue[24]= "pcg_version,country,label";
 $tabfieldvalue[25]= "country,taux,accountancy_code_sell,accountancy_code_buy,note";
+$tabfieldvalue[26]= "code,label";
 
 // Nom des champs dans la table pour insertion d'un enregistrement
 $tabfieldinsert=array();
@@ -267,6 +273,7 @@ $tabfieldinsert[22]= "code,label";
 $tabfieldinsert[23]= "fk_pcg_version,account_number,account_parent,pcg_type,pcg_subtype,label";
 $tabfieldinsert[24]= "pcg_version,fk_pays,label";
 $tabfieldinsert[25]= "fk_pays,taux,accountancy_code_sell,accountancy_code_buy,note";
+$tabfieldinsert[26]= "code,label";
 
 // Nom du rowid si le champ n'est pas de type autoincrement
 // Example: "" if id field is "rowid" and has autoincrement on
@@ -297,8 +304,9 @@ $tabrowid[22]= "rowid";
 $tabrowid[23]= "";
 $tabrowid[24]= "";
 $tabrowid[25]= "";
+$tabrowid[25]= "";
 
-// Condition to show dictionnary in setup page
+// Condition to show dictionary in setup page
 $tabcond=array();
 $tabcond[1] = true;
 $tabcond[2] = true;
@@ -322,9 +330,10 @@ $tabcond[19]= ! empty($conf->societe->enabled);
 $tabcond[20]= ! empty($conf->fournisseur->enabled);
 $tabcond[21]= ! empty($conf->propal->enabled);
 $tabcond[22]= (! empty($conf->commande->enabled) || ! empty($conf->propal->enabled));
-$tabcond[23]= (! empty($conf->global->ACCOUNTING_USEDICTTOEDIT) && ! empty($conf->accounting->enabled));	// The accountancy plan should be edited with specific pages. You can set ACCOUNTING_USEDICTTOEDIT to 1 if you want to use dictionnary editor.
-$tabcond[24]= (! empty($conf->global->ACCOUNTING_USEDICTTOEDIT) && ! empty($conf->accounting->enabled));	// The accountancy system should be edited with specific pages. You can set ACCOUNTING_USEDICTTOEDIT to 1 if you want to use dictionnary editor.
+$tabcond[23]= (! empty($conf->global->ACCOUNTING_USEDICTTOEDIT) && ! empty($conf->accounting->enabled));	// The accountancy plan should be edited with specific pages. You can set ACCOUNTING_USEDICTTOEDIT to 1 if you want to use dictionary editor.
+$tabcond[24]= (! empty($conf->global->ACCOUNTING_USEDICTTOEDIT) && ! empty($conf->accounting->enabled));	// The accountancy system should be edited with specific pages. You can set ACCOUNTING_USEDICTTOEDIT to 1 if you want to use dictionary editor.
 $tabcond[25]= true;
+$tabcond[26]= ! empty($conf->resource->enabled);
 
 // List of help for fields
 $tabhelp=array();
@@ -353,12 +362,13 @@ $tabhelp[22] = array();
 $tabhelp[23] = array();
 $tabhelp[24] = array();
 $tabhelp[25] = array();
+$tabhelp[26] = array();
 
 // Complete all arrays with entries found into modules
-complete_dictionnary_with_modules($taborder,$tabname,$tablib,$tabsql,$tabsqlsort,$tabfield,$tabfieldvalue,$tabfieldinsert,$tabrowid,$tabcond,$tabhelp);
+complete_dictionary_with_modules($taborder,$tabname,$tablib,$tabsql,$tabsqlsort,$tabfield,$tabfieldvalue,$tabfieldinsert,$tabrowid,$tabcond,$tabhelp);
 
 
-// Define elementList and sourceList (used for dictionnary "type of contacts")
+// Define elementList and sourceList (used for dictionary "type of contacts")
 $elementList = array();
 $sourceList=array();
 if ($id == 11)
@@ -389,7 +399,7 @@ if ($id == 11)
 	);
 }
 
-// Define localtax_typeList (used for dictionnary "c_tva")
+// Define localtax_typeList (used for dictionary "c_tva")
 $localtax_typeList = array();
 if ($id == 10)
 {
@@ -463,7 +473,8 @@ if (GETPOST('actionadd') || GETPOST('actionmodify'))
 	    	$msg .= $langs->transnoentities('ErrorFieldFormat', $langs->transnoentities('Code')).'<br />';
 	    }*/
     }
-    if (isset($_POST["country"]) && $_POST["country"]=='0') {
+    if (isset($_POST["country"]) && $_POST["country"]=='0')
+    {
         $ok=0;
         setEventMessage($langs->transnoentities("ErrorFieldRequired",$langs->transnoentities("Country")),'errors');
     }
@@ -522,9 +533,8 @@ if (GETPOST('actionadd') || GETPOST('actionmodify'))
         $result = $db->query($sql);
         if ($result)	// Add is ok
         {
-            //$oldid=$id;
-            //$_POST=array('id'=>$oldid);	// Clean $_POST array, we keep only
-            //$_GET["id"]=$_POST["id"];   // Force affichage dictionnaire en cours d'edition
+            setEventMessage($langs->transnoentities("RecordSaved"));
+        	$_POST=array('id'=>$id);	// Clean $_POST array, we keep only
         }
         else
         {
@@ -656,18 +666,18 @@ $formadmin=new FormAdmin($db);
 
 llxHeader();
 
-$titre=$langs->trans("DictionnarySetup");
+$titre=$langs->trans("DictionarySetup");
 $linkback='';
 if ($id)
 {
     $titre.=' - '.$langs->trans($tablib[$id]);
-    $linkback='<a href="'.$_SERVER['PHP_SELF'].'">'.$langs->trans("BackToDictionnaryList").'</a>';
+    $linkback='<a href="'.$_SERVER['PHP_SELF'].'">'.$langs->trans("BackToDictionaryList").'</a>';
 }
 print_fiche_titre($titre,$linkback,'setup');
 
 if (empty($id))
 {
-    print $langs->trans("DictionnaryDesc");
+    print $langs->trans("DictionaryDesc");
     print " ".$langs->trans("OnlyActiveElementsAreShown")."<br>\n";
 }
 print "<br>\n";
@@ -680,7 +690,7 @@ if ($action == 'delete')
 }
 
 /*
- * Show a dictionnary
+ * Show a dictionary
  */
 if ($id)
 {
@@ -772,7 +782,7 @@ if ($id)
             if ($valuetoshow != '')
             {
                 print '<td align="'.$align.'">';
-            	if (! empty($tabhelp[$id][$value]) && preg_match('/http:/i',$tabhelp[$id][$value])) print '<a href="'.$tabhelp[$id][$value].'" target="_blank">'.$valuetoshow.'</a>';
+            	if (! empty($tabhelp[$id][$value]) && preg_match('/^http(s*):/i',$tabhelp[$id][$value])) print '<a href="'.$tabhelp[$id][$value].'" target="_blank">'.$valuetoshow.' '.img_help(1,$valuetoshow).'</a>';
             	else if (! empty($tabhelp[$id][$value])) print $form->textwithpicto($valuetoshow,$tabhelp[$id][$value]);
             	else print $valuetoshow;
                 print '</td>';
@@ -1143,7 +1153,7 @@ if ($id)
 else
 {
     /*
-     * Show list of dictionnary to show
+     * Show list of dictionary to show
      */
 
     $var=true;
@@ -1151,7 +1161,7 @@ else
     print '<table class="noborder" width="100%">';
     print '<tr class="liste_titre">';
     //print '<td>'.$langs->trans("Module").'</td>';
-    print '<td colspan="2">'.$langs->trans("Dictionnary").'</td>';
+    print '<td colspan="2">'.$langs->trans("Dictionary").'</td>';
     print '<td>'.$langs->trans("Table").'</td>';
     print '</tr>';
 
@@ -1184,7 +1194,7 @@ else
             print '<td>';
             /*if (empty($tabcond[$i]))
              {
-             print info_admin($langs->trans("DictionnaryDisabledSinceNoModuleNeedIt"),1);
+             print info_admin($langs->trans("DictionaryDisabledSinceNoModuleNeedIt"),1);
              }*/
             print '</td>';
             print '<td>'.$tabname[$i].'</td></tr>';
@@ -1327,4 +1337,3 @@ function fieldList($fieldlist,$obj='',$tabname='')
 	}
 }
 
-?>

@@ -8,7 +8,7 @@
  * Copyright (C) 2008      Raphael Bertrand			<raphael.bertrand@resultic.fr>
  * Copyright (C) 2010-2013 Juanjo Menent			<jmenent@2byte.es>
  * Copyright (C) 2010-2011 Philippe Grand			<philippe.grand@atoo-net.com>
- * Copyright (C) 2012      Christophe Battarel  	<christophe.battarel@altairis.fr>
+ * Copyright (C) 2012-214  Christophe Battarel  	<christophe.battarel@altairis.fr>
  * Copyright (C) 2013      Florian Henry		  	<florian.henry@open-concept.pro>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -200,7 +200,7 @@ class Propal extends CommonObject
             $line->remise_percent=$remise_percent;
             $line->tva_tx=$tva_tx;
 
-            $this->products[]=$line;
+            $this->lines[]=$line;
         }
     }
 
@@ -315,9 +315,8 @@ class Propal extends CommonObject
 	function addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0, $label='',$date_start='', $date_end='',$array_option=0)
     {
     	global $mysoc;
-        $propalid=$this->id;
 
-        dol_syslog(get_class($this)."::addline propalid=$propalid, desc=$desc, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, fk_product=$fk_product, remise_except=$remise_percent, price_base_type=$price_base_type, pu_ttc=$pu_ttc, info_bits=$info_bits, type=$type");
+        dol_syslog(get_class($this)."::addline propalid=$this->id, desc=$desc, pu_ht=$pu_ht, qty=$qty, txtva=$txtva, fk_product=$fk_product, remise_except=$remise_percent, price_base_type=$price_base_type, pu_ttc=$pu_ttc, info_bits=$info_bits, type=$type");
         include_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 
         // Clean parameters
@@ -386,7 +385,7 @@ class Propal extends CommonObject
             // Insert line
             $this->line=new PropaleLigne($this->db);
 
-            $this->line->fk_propal=$propalid;
+            $this->line->fk_propal=$this->id;
             $this->line->label=$label;
             $this->line->desc=$desc;
             $this->line->qty=$qty;
@@ -435,7 +434,7 @@ class Propal extends CommonObject
                 if (! empty($fk_parent_line)) $this->line_order(true,'DESC');
 
                 // Mise a jour informations denormalisees au niveau de la propale meme
-                $result=$this->update_price(1);
+                $result=$this->update_price(1,'auto');	// This method is designed to add line from user input so total calculation must be done using 'auto' mode.
                 if ($result > 0)
                 {
                     $this->db->commit();
@@ -547,6 +546,7 @@ class Propal extends CommonObject
             $this->line->label				= $label;
             $this->line->desc				= $desc;
             $this->line->qty				= $qty;
+            $this->line->product_type			= $type;
             $this->line->tva_tx				= $txtva;
             $this->line->localtax1_tx		= $txlocaltax1;
             $this->line->localtax2_tx		= $txlocaltax2;
@@ -673,15 +673,25 @@ class Propal extends CommonObject
             dol_syslog(get_class($this)."::create ".$this->error, LOG_ERR);
             return -3;
         }
+
+        // Check parameters
+		if (! empty($this->ref))	// We check that ref is not already used
+		{
+			$result=self::isExistingObject($this->element, 0, $this->ref);	// Check ref is not yet used
+			if ($result > 0)
+			{
+				$this->error='ErrorRefAlreadyExists';
+				dol_syslog(get_class($this)."::create ".$this->error,LOG_WARNING);
+				$this->db->rollback();
+				return -1;
+			}
+		}
+
         if (empty($this->date))
         {
             $this->error="Date of proposal is required";
             dol_syslog(get_class($this)."::create ".$this->error, LOG_ERR);
             return -4;
-        }
-        if (! empty($this->ref))
-        {
-            $result=$this->verifyNumRef();	// Check ref is not yet used
         }
 
 
@@ -945,6 +955,9 @@ class Propal extends CommonObject
                 $this->fk_delivery_address	= '';
             }
 
+            // reset ref_client
+             $this->ref_client  = '';
+
             // TODO Change product price if multi-prices
         }
         else
@@ -967,7 +980,7 @@ class Propal extends CommonObject
         $this->date			= $now;
         $this->datep		= $now;    // deprecated
         $this->fin_validite	= $this->date + ($this->duree_validite * 24 * 3600);
-        $this->ref_client	= '';
+        if (empty($conf->global->MAIN_KEEP_REF_CUSTOMER_ON_CLONING)) $this->ref_client	= '';
 
         // Set ref
         require_once DOL_DOCUMENT_ROOT ."/core/modules/propale/".$conf->global->PROPALE_ADDON.'.php';
@@ -978,6 +991,19 @@ class Propal extends CommonObject
         // Create clone
         $result=$this->create($user);
         if ($result < 0) $error++;
+        else
+        {
+			// copy internal contacts
+    		if ($this->copy_linked_contact($objFrom, 'internal') < 0)
+            	$error++;
+
+            // copy external contacts if same company
+            elseif ($objFrom->socid == $this->socid)
+            {
+		        if ($this->copy_linked_contact($objFrom, 'external') < 0)
+					$error++;
+            }
+        }
 
         if (! $error)
         {
@@ -1292,9 +1318,6 @@ class Propal extends CommonObject
             $soc = new Societe($this->db);
             $soc->fetch($this->socid);
 
-            // Class of company linked to propal
-            $result=$soc->set_as_client();
-
             // Define new ref
             if (! $error && (preg_match('/^[\(]?PROV/i', $this->ref)))
             {
@@ -1332,10 +1355,10 @@ class Propal extends CommonObject
 					{
 						// Rename of propal directory ($this->ref = old ref, $num = new ref)
 						// to  not lose the linked files
-						$facref = dol_sanitizeFileName($this->ref);
-						$snumfa = dol_sanitizeFileName($num);
-						$dirsource = $conf->propal->dir_output.'/'.$facref;
-						$dirdest = $conf->propal->dir_output.'/'.$snumfa;
+						$oldref = dol_sanitizeFileName($this->ref);
+						$newref = dol_sanitizeFileName($num);
+						$dirsource = $conf->propal->dir_output.'/'.$oldref;
+						$dirdest = $conf->propal->dir_output.'/'.$newref;
 						if (file_exists($dirsource))
 						{
 							dol_syslog(get_class($this)."::validate rename dir ".$dirsource." into ".$dirdest);
@@ -1345,15 +1368,17 @@ class Propal extends CommonObject
 
 								dol_syslog("Rename ok");
 								// Deleting old PDF in new rep
-								dol_delete_file($conf->propal->dir_output.'/'.$snumfa.'/'.$facref.'*.*');
+								dol_delete_file($conf->propal->dir_output.'/'.$newref.'/'.$oldref.'*.*');
 							}
 						}
 					}
 
+					$this->ref=$num;
                     $this->brouillon=0;
                     $this->statut = 1;
                     $this->user_valid_id=$user->id;
                     $this->datev=$now;
+
                     $this->db->commit();
                     return 1;
                 }
@@ -1708,7 +1733,7 @@ class Propal extends CommonObject
         $this->db->begin();
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."propal";
-        $sql.= " SET fk_statut = ".$statut.", note_private = '".$this->db->escape($note)."', date_cloture=".$this->db->idate($now).", fk_user_cloture=".$user->id;
+        $sql.= " SET fk_statut = ".$statut.", note_private = '".$this->db->escape($note)."', date_cloture='".$this->db->idate($now)."', fk_user_cloture=".$user->id;
         $sql.= " WHERE rowid = ".$this->id;
 
         $resql=$this->db->query($sql);
@@ -2291,51 +2316,23 @@ class Propal extends CommonObject
      *    	@param      int			$mode      	0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto
      *    	@return     string		Label
      */
-    function LibStatut($statut,$mode=1)
+     function LibStatut($statut,$mode=1)
     {
-        global $langs;
-        $langs->load("propal");
+	global $langs;
+	$langs->load("propal");
 
-        if ($mode == 0)
-        {
-            return $this->labelstatut[$statut];
-        }
-        if ($mode == 1)
-        {
-            return $this->labelstatut_short[$statut];
-        }
-        if ($mode == 2)
-        {
-            if ($statut==0) return img_picto($langs->trans('PropalStatusDraftShort'),'statut0').' '.$this->labelstatut_short[$statut];
-            if ($statut==1) return img_picto($langs->trans('PropalStatusOpenedShort'),'statut1').' '.$this->labelstatut_short[$statut];
-            if ($statut==2) return img_picto($langs->trans('PropalStatusSignedShort'),'statut3').' '.$this->labelstatut_short[$statut];
-            if ($statut==3) return img_picto($langs->trans('PropalStatusNotSignedShort'),'statut5').' '.$this->labelstatut_short[$statut];
-            if ($statut==4) return img_picto($langs->trans('PropalStatusBilledShort'),'statut6').' '.$this->labelstatut_short[$statut];
-        }
-        if ($mode == 3)
-        {
-            if ($statut==0) return img_picto($langs->trans('PropalStatusDraftShort'),'statut0');
-            if ($statut==1) return img_picto($langs->trans('PropalStatusOpenedShort'),'statut1');
-            if ($statut==2) return img_picto($langs->trans('PropalStatusSignedShort'),'statut3');
-            if ($statut==3) return img_picto($langs->trans('PropalStatusNotSignedShort'),'statut5');
-            if ($statut==4) return img_picto($langs->trans('PropalStatusBilledShort'),'statut6');
-        }
-        if ($mode == 4)
-        {
-            if ($statut==0) return img_picto($langs->trans('PropalStatusDraft'),'statut0').' '.$this->labelstatut[$statut];
-            if ($statut==1) return img_picto($langs->trans('PropalStatusOpened'),'statut1').' '.$this->labelstatut[$statut];
-            if ($statut==2) return img_picto($langs->trans('PropalStatusSigned'),'statut3').' '.$this->labelstatut[$statut];
-            if ($statut==3) return img_picto($langs->trans('PropalStatusNotSigned'),'statut5').' '.$this->labelstatut[$statut];
-            if ($statut==4) return img_picto($langs->trans('PropalStatusBilled'),'statut6').' '.$this->labelstatut[$statut];
-        }
-        if ($mode == 5)
-        {
-            if ($statut==0) return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($langs->trans('PropalStatusDraftShort'),'statut0');
-            if ($statut==1) return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($langs->trans('PropalStatusOpenedShort'),'statut1');
-            if ($statut==2) return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($langs->trans('PropalStatusSignedShort'),'statut3');
-            if ($statut==3) return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($langs->trans('PropalStatusNotSignedShort'),'statut5');
-            if ($statut==4) return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($langs->trans('PropalStatusBilledShort'),'statut6');
-        }
+	if ($statut==0) $statuttrans='statut0';
+	if ($statut==1) $statuttrans='statut1';
+	if ($statut==2) $statuttrans='statut3';
+	if ($statut==3) $statuttrans='statut5';
+	if ($statut==4) $statuttrans='statut6';
+
+	if ($mode == 0)	return $this->labelstatut[$statut];
+	if ($mode == 1)	return $this->labelstatut_short[$statut];
+	if ($mode == 2)	return img_picto($this->labelstatut_short[$statut], $statuttrans).' '.$this->labelstatut_short[$statut];
+	if ($mode == 3)	return img_picto($this->labelstatut[$statut], $statuttrans);
+	if ($mode == 4)	return img_picto($this->labelstatut[$statut],$statuttrans).' '.$this->labelstatut[$statut];
+	if ($mode == 5)	return '<span class="hideonsmartphone">'.$this->labelstatut_short[$statut].' </span>'.img_picto($this->labelstatut_short[$statut],$statuttrans);
     }
 
 
@@ -2795,7 +2792,7 @@ class PropaleLigne  extends CommonObject
 		$sql.= ' pd.info_bits, pd.total_ht, pd.total_tva, pd.total_ttc, pd.fk_product_fournisseur_price as fk_fournprice, pd.buy_price_ht as pa_ht, pd.special_code, pd.rang,';
 		$sql.= ' pd.localtax1_tx, pd.localtax2_tx, pd.total_localtax1, pd.total_localtax2,';
 		$sql.= ' p.ref as product_ref, p.label as product_label, p.description as product_desc,';
-		$sql.= ' pd.date_start, pd.date_end';
+		$sql.= ' pd.date_start, pd.date_end, pd.product_type';
 		$sql.= ' FROM '.MAIN_DB_PREFIX.'propaldet as pd';
 		$sql.= ' LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON pd.fk_product = p.rowid';
 		$sql.= ' WHERE pd.rowid = '.$rowid;
@@ -2832,6 +2829,7 @@ class PropaleLigne  extends CommonObject
 			$this->marque_tx		= $marginInfos[2];
 
 			$this->special_code		= $objp->special_code;
+			$this->product_type		= $objp->product_type;
 			$this->rang				= $objp->rang;
 
 			$this->ref				= $objp->product_ref;      // deprecated
@@ -3066,6 +3064,7 @@ class PropaleLigne  extends CommonObject
         $sql = "UPDATE ".MAIN_DB_PREFIX."propaldet SET";
         $sql.= " description='".$this->db->escape($this->desc)."'";
         $sql.= " , label=".(! empty($this->label)?"'".$this->db->escape($this->label)."'":"null");
+        $sql.= " , product_type=".$this->product_type;
         $sql.= " , tva_tx='".price2num($this->tva_tx)."'";
         $sql.= " , localtax1_tx=".price2num($this->localtax1_tx);
         $sql.= " , localtax2_tx=".price2num($this->localtax2_tx);
@@ -3168,4 +3167,3 @@ class PropaleLigne  extends CommonObject
 
 }
 
-?>

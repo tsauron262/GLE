@@ -22,9 +22,10 @@ create table llx_bookmark
   fk_soc      integer,
   fk_user     integer NOT NULL,
   dateb       datetime,
-  url         varchar(128) NOT NULL,
+  url         varchar(255) NOT NULL,
   target      varchar(16),
   title       varchar(64),
   favicon     varchar(24),
-  position    integer DEFAULT 0
+  position    integer DEFAULT 0,
+  entity      integer DEFAULT 1 NOT NULL -- multicompany ID
 )ENGINE=innodb;

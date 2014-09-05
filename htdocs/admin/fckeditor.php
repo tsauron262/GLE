@@ -32,6 +32,13 @@ $langs->load("admin");
 $langs->load("fckeditor");
 
 $action = GETPOST('action','alpha');
+// Possible modes are:
+// dolibarr_details
+// dolibarr_notes
+// dolibarr_readonly
+// dolibarr_mailings
+// Full (not sure this one is used)
+$mode=GETPOST('mode')?GETPOST('mode','alpha'):'dolibarr_notes';
 
 if (!$user->admin) accessforbidden();
 
@@ -152,13 +159,34 @@ else
     print '</table>'."\n";
 
     print '<br>'."\n";
-    print_fiche_titre($langs->trans("TestSubmitForm"),'','');
+    print_fiche_titre($langs->trans("TestSubmitForm"),'(mode='.$mode.')','');
     print '<form name="formtest" method="POST" action="'.$_SERVER["PHP_SELF"].'">'."\n";
+    print '<input type="hidden" name="mode" value="'.dol_escape_htmltag($mode).'">';
     $uselocalbrowser=true;
-    $editor=new DolEditor('formtestfield',isset($conf->global->FCKEDITOR_TEST)?$conf->global->FCKEDITOR_TEST:'Test','',200,'dolibarr_notes','In', true, $uselocalbrowser);
+    $readonly=($mode=='dolibarr_readonly'?1:0);
+    $editor=new DolEditor('formtestfield',isset($conf->global->FCKEDITOR_TEST)?$conf->global->FCKEDITOR_TEST:'Test','',200,$mode,'In', true, $uselocalbrowser, 1, 120, 8, $readonly);
     $editor->Create();
     print '<center><br><input class="button" type="submit" name="save" value="'.$langs->trans("Save").'"></center>'."\n";
+    print '<div id="divforlog"></div>';
     print '</form>'."\n";
+
+    // Add env of ckeditor
+    // This is to show how CKEditor detect browser to understand why editor is disabled or not
+    if (1 == 2)		// Change this to enable output
+    {
+	    print '<br><script language="javascript">
+	    function jsdump(obj, id) {
+		    var out = \'\';
+		    for (var i in obj) {
+		        out += i + ": " + obj[i] + "<br>\n";
+		    }
+
+		    jQuery("#"+id).html(out);
+		}
+
+	    jsdump(CKEDITOR.env, "divforlog");
+	    </script>';
+    }
 
     /*
      print '<!-- Result -->';
@@ -171,4 +199,3 @@ else
 
 llxFooter();
 $db->close();
-?>

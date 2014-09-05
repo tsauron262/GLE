@@ -58,7 +58,7 @@ $originid=GETPOST('originid','int');
 $socid = GETPOST('socid','int');
 $id = GETPOST('id','int');
 if ($user->societe_id) $socid=$user->societe_id;
-$result = restrictedArea($user, 'agenda', $id, 'actioncomm&societe', 'myactions&allactions', 'fk_soc', 'id');
+$result = restrictedArea($user, 'agenda', $id, 'actioncomm&societe', 'myactions|allactions', 'fk_soc', 'id');
 if ($user->societe_id && $socid) $result = restrictedArea($user,'societe',$socid);
 
 $error=GETPOST("error");
@@ -203,12 +203,6 @@ if ($objection == 'add_action')
 		$objection = 'create';
 		$mesg='<div class="error">'.$langs->trans("ErrorFieldRequired",$langs->transnoentitiesnoconv("DateEnd")).'</div>';
 	}
-	if (! empty($datea) && GETPOST('percentage') == 0)
-	{
-		$error++;
-		$objection = 'create';
-		$mesg='<div class="error">'.$langs->trans("ErrorStatusCantBeZeroIfStarted").'</div>';
-	}
 
 	if (! GETPOST('apyear') && ! GETPOST('adyear'))
 	{
@@ -261,9 +255,11 @@ if ($objection == 'add_action')
 		{
 			$db->rollback();
 			$langs->load("errors");
+
 			if (! empty($object->error)) setEventMessage($langs->trans($object->error), 'errors');
 			if (count($object->errors)) setEventMessage($object->errors, 'errors');
-			$objection = 'create';
+
+			$action = 'create';
 		}
 	}
 }
@@ -522,17 +518,17 @@ if ($objection == 'create')
     // Location
     print '<tr><td>'.$langs->trans("Location").'</td><td colspan="3"><input type="text" name="location" size="50" value="'.$object->location.'"></td></tr>';
 
+	// Assigned to
+	$var=false;
+	print '<tr><td class="nowrap">'.$langs->trans("ActionAffectedTo").'</td><td>';
+	$form->select_users(GETPOST("affectedto")?GETPOST("affectedto"):(! empty($object->usertodo->id) && $object->usertodo->id > 0 ? $object->usertodo->id : $user->id),'affectedto',1);
+	print '</td></tr>';
+
 	print '</table>';
 
 	print '<br><br>';
 
 	print '<table class="border" width="100%">';
-
-	// Assigned to
-	$var=false;
-	print '<tr><td width="30%" class="nowrap">'.$langs->trans("ActionAffectedTo").'</td><td>';
-	$form->select_users(GETPOST("affectedto")?GETPOST("affectedto"):(! empty($object->usertodo->id) && $object->usertodo->id > 0 ? $object->usertodo->id : $user->id),'affectedto',1);
-	print '</td></tr>';
 
 	// Busy
 	print '<tr><td width="30%" class="nowrap">'.$langs->trans("Busy").'</td><td>';
@@ -628,7 +624,7 @@ if ($objection == 'create')
 
     // Other attributes
     $parameters=array('id'=>$object->id);
-    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
+    $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 
 
 	if (empty($reshook) && ! empty($extrafields->attribute_label))
@@ -787,15 +783,15 @@ if ($id > 0)
         // Location
         print '<tr><td>'.$langs->trans("Location").'</td><td colspan="3"><input type="text" name="location" size="50" value="'.$object->location.'"></td></tr>';
 
-		print '</table><br><br><table class="border" width="100%">';
-
 		// Assigned to
-		print '<tr><td width="30%" class="nowrap">'.$langs->trans("ActionAffectedTo").'</td><td colspan="3">';
+		print '<tr><td class="nowrap">'.$langs->trans("ActionAffectedTo").'</td><td colspan="3">';
 		print $form->select_dolusers($object->usertodo->id>0?$object->usertodo->id:-1,'affectedto',1);
 		print '</td></tr>';
 
+        print '</table><br><br><table class="border" width="100%">';
+
 		// Busy
-		print '<tr><td class="nowrap">'.$langs->trans("Busy").'</td><td>';
+		print '<tr><td width="30%" class="nowrap">'.$langs->trans("Busy").'</td><td>';
 		print '<input id="transparency" type="checkbox" name="transparency"'.($object->transparency?' checked="checked"':'').'">';
 		print '</td></tr>';
 
@@ -868,11 +864,10 @@ if ($id > 0)
 
         // Other attributes
         $parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$object->id);
-        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 		if (empty($reshook) && ! empty($extrafields->attribute_label))
 		{
 			print $object->showOptionals($extrafields,'edit');
-
 		}
 
 		print '</table>';
@@ -963,15 +958,15 @@ if ($id > 0)
         // Location
         print '<tr><td>'.$langs->trans("Location").'</td><td colspan="2">'.$object->location.'</td></tr>';
 
-		print '</table><br><br><table class="border" width="100%">';
-
 		// Assigned to
 		print '<tr><td width="30%" class="nowrap">'.$langs->trans("ActionAffectedTo").'</td><td colspan="3">';
 		if ($object->usertodo->id > 0) print $object->usertodo->getNomUrl(1);
 		print '</td></tr>';
 
+		print '</table><br><br><table class="border" width="100%">';
+
 		// Busy
-		print '<tr><td class="nowrap">'.$langs->trans("Busy").'</td><td colspan="3">';
+		print '<tr><td width="30%" class="nowrap">'.$langs->trans("Busy").'</td><td colspan="3">';
 		if ($object->usertodo->id > 0) print yn(($object->transparency > 0)?1:0);	// We show nothing if event is assigned to nobody
 		print '</td></tr>';
 
@@ -1050,7 +1045,7 @@ if ($id > 0)
 
         // Other attributes
 		$parameters=array('colspan'=>' colspan="3"', 'colspanvalue'=>'3', 'id'=>$object->id);
-        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
+        $reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 
 		print '</table>';
 
@@ -1180,10 +1175,10 @@ if ($id > 0)
 	print '<div class="tabsAction">';
 
 	$parameters=array();
-	$reshook=$hookmanager->executeHooks('addMoreActionsButtons',$parameters,$object,$objection);    // Note that $objection and $object may have been modified by hook
+	$reshook=$hookmanager->executeHooks('addMoreActionsButtons',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
 	if (empty($reshook))
 	{
-		if ($objection != 'edit')
+		if ($action != 'edit')
 		{
 			if ($user->rights->agenda->allactions->create ||
 			   (($object->author->id == $user->id || $object->usertodo->id == $user->id) && $user->rights->agenda->myactions->create))
@@ -1214,4 +1209,3 @@ if ($id > 0)
 llxFooter();
 
 $db->close();
-?>

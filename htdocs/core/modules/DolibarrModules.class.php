@@ -1381,4 +1381,3 @@ abstract class DolibarrModules
     }
 
 }
-?>

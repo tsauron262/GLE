@@ -122,7 +122,7 @@ class MenuManager
 			$this->menu->add("/admin/pdf.php?mainmenu=home", $langs->trans("PDF"),1);
 			$this->menu->add("/admin/mails.php?mainmenu=home", $langs->trans("Emails"),1);
 			$this->menu->add("/admin/sms.php?mainmenu=home", $langs->trans("SMS"),1);
-			$this->menu->add("/admin/dict.php?mainmenu=home", $langs->trans("DictionnarySetup"),1);
+			$this->menu->add("/admin/dict.php?mainmenu=home", $langs->trans("DictionarySetup"),1);
 			$this->menu->add("/admin/const.php?mainmenu=home", $langs->trans("OtherSetup"),1);
 
 			// ***** END *****
@@ -300,7 +300,7 @@ function print_start_menu_entry_empty($idsel,$classname,$showmode)
  */
 function print_text_menu_entry_empty($text, $showmode, $url, $id, $idsel, $classname, $atarget)
 {
-	global $conf;
+	global $conf,$langs;
 
 	if ($showmode == 1)
 	{
@@ -347,4 +347,3 @@ function print_end_menu_array_empty()
 	print "\n";
 }
 
-?>

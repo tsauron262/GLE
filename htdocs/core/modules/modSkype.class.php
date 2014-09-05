@@ -16,11 +16,11 @@
  */
 
 /**
- * 	\defgroup   Skype   Module Skype
+ * 	\defgroup   Skype   Module skype
  *  \brief      Add a skype button.
  *  \file       htdocs/core/modules/modSkype.class.php
  *  \ingroup    Skype
- *  \brief      Description and activation file for module Skype
+ *  \brief      Description and activation file for module skype
  */
 include_once DOL_DOCUMENT_ROOT .'/core/modules/DolibarrModules.class.php';
 
@@ -47,12 +47,12 @@ class modSkype extends DolibarrModules
         $this->family = "crm";
         // Module label (no space allowed), used if translation string 'ModuleXXXName' not found (where XXX is value of numeric property 'numero' of module)
         $this->name = preg_replace('/^mod/i','',get_class($this));
-        $this->description = "Enable Skype button into contact";
-        $this->version = 'experimental';                        // 'experimental' or 'dolibarr' or version
+        $this->description = "Enable Skype links into contacts";
+        $this->version = 'dolibarr';                        // 'experimental' or 'dolibarr' or version
         // Key used in llx_const table to save module status enabled/disabled (where MYMODULE is value of property name of module in uppercase)
         $this->const_name = 'MAIN_MODULE_'.strtoupper($this->name);
         // Where to store the module in setup page (0=common,1=interface,2=others,3=very specific)
-        $this->special = 2;
+        $this->special = 1;
         // Name of image file used for this module.
         $this->picto='skype';
 
@@ -83,18 +83,6 @@ class modSkype extends DolibarrModules
         //------
         $this->boxes = array();
 
-    		// Permissions
-        //------------
-    		$this->rights = array();		// Permission array used by this module
-    		$this->rights_class = 'skype';
-    		$r=0;
-    
-    		$this->rights[$r][0] = 3101;
-    		$this->rights[$r][1] = 'View skype link';
-    		$this->rights[$r][3] = 1;
-    		$this->rights[$r][4] = 'view';
-    		$r++;
-
         // Main menu entries
         //------------------
         $this->menu = array();
@@ -111,6 +99,8 @@ class modSkype extends DolibarrModules
      */
     function init($options='')
     {
+		$sql = array();
+
         // Prevent pb of modules not correctly disabled
         //$this->remove($options);
 
@@ -133,4 +123,3 @@ class modSkype extends DolibarrModules
     }
 
 }
-?>

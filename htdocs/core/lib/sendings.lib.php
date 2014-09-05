@@ -110,16 +110,15 @@ function delivery_prepare_head($object)
 	$head[$h][2] = 'delivery';
 	$h++;
 
-	/* We are on id of delivery, no shipment
-	$head[$h][0] = DOL_URL_ROOT."/expedition/contact.php?id=".$object->id;
+	$head[$h][0] = DOL_URL_ROOT."/expedition/contact.php?id=".$object->origin_id;
 	$head[$h][1] = $langs->trans("ContactsAddresses");
 	$head[$h][2] = 'contact';
 	$h++;
 
-	$head[$h][0] = DOL_URL_ROOT."/expedition/note.php?id=".$object->id;
+	$head[$h][0] = DOL_URL_ROOT."/expedition/note.php?id=".$object->origin_id;
 	$head[$h][1] = $langs->trans("Notes");
 	$head[$h][2] = 'note';
-	$h++;*/
+	$h++;
 
 	// Show more tabs from modules
 	// Entries must be declared in modules descriptor with line
@@ -227,7 +226,11 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 						$object = new $origin($db);
 						$object->fetch($origin_id);
 						$object->fetch_thirdparty();
-						$prod = new Product($db, $objp->fk_product);
+
+						$prod = new Product($db);
+						$prod->id=$objp->fk_product;
+						$prod->getMultiLangs();
+
 						$outputlangs = $langs;
 						$newlang='';
 						if (empty($newlang) && ! empty($_REQUEST['lang_id'])) $newlang=$_REQUEST['lang_id'];
@@ -364,4 +367,3 @@ function show_list_sending_receive($origin,$origin_id,$filter='')
 	return 1;
 }
 
-?>

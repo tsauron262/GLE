@@ -57,7 +57,7 @@ $entitytolang=array(		// Translation code
 	'order'=>'Order','order_line'=>'OrderLine',
 	'intervention'=>'Intervention' ,'inter_line'=>'InterLine',
 	'member'=>'Member','member_type'=>'MemberType','subscription'=>'Subscription',
-	'tax'=>'SocialContribution','tax_type'=>'DictionnarySocialContributions',
+	'tax'=>'SocialContribution','tax_type'=>'DictionarySocialContributions',
 	'account'=>'BankTransactions',
 	'payment'=>'Payment',
 	'product'=>'Product','stock'=>'Stock','warehouse'=>'Warehouse',
@@ -352,10 +352,13 @@ if ($step == 1 || ! $datatoimport)
 	{
 		foreach ($objimport->array_import_code as $key => $value)
 		{
+			//var_dump($objimport->array_import_code[$key]);
 			$val=!$val;
 			print '<tr '.$bc[$val].'><td nospan="nospan">';
-			//print img_object($objimport->array_import_module[$key]->getName(),$import->array_import_module[$key]->picto).' ';
-			print $objimport->array_import_module[$key]->getName();
+			$titleofmodule=$objimport->array_import_module[$key]->getName();
+			// Special cas for import common to module/services
+			if (in_array($objimport->array_import_code[$key], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+			print $titleofmodule;
 			print '</td><td>';
 			//print $value;
 			print img_object($objimport->array_import_module[$key]->getName(),$objimport->array_import_icon[$key]).' ';
@@ -407,8 +410,10 @@ if ($step == 2 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_module[0]->picto).' ';
-	print $objimport->array_import_module[0]->getName();
+	$titleofmodule=$objimport->array_import_module[0]->getName();
+	// Special cas for import common to module/services
+	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+	print $titleofmodule;
 	print '</td></tr>';
 
 	// Lot de donnees a importer
@@ -482,7 +487,7 @@ if ($step == 3 && $datatoimport)
 	if ($action == 'delete')
 	{
 		print $form->formconfirm($_SERVER["PHP_SELF"].'?urlfile='.urlencode(GETPOST('urlfile')).'&step=3'.$param, $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile', '', 0, 1);
-		
+
 	}
 
 	print '<table width="100%" class="border">';
@@ -490,8 +495,10 @@ if ($step == 3 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_module[0]->picto).' ';
-	print $objimport->array_import_module[0]->getName();
+	$titleofmodule=$objimport->array_import_module[0]->getName();
+	// Special cas for import common to module/services
+	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+	print $titleofmodule;
 	print '</td></tr>';
 
 	// Lot de donnees a importer
@@ -695,8 +702,10 @@ if ($step == 4 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_module[0]->picto).' ';
-	print $objimport->array_import_module[0]->getName();
+	$titleofmodule=$objimport->array_import_module[0]->getName();
+	// Special cas for import common to module/services
+	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+	print $titleofmodule;
 	print '</td></tr>';
 
 	// Lot de donnees a importer
@@ -824,7 +833,7 @@ if ($step == 4 && $datatoimport)
 	}
 
 	print "</div>\n";
-	print "<!-- End box container -->\n";
+	print "<!-- End box left container -->\n";
 
 
 	print '</td><td width="50%">';
@@ -890,7 +899,7 @@ if ($step == 4 && $datatoimport)
 		else
 		{
 		    if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromref')    $htmltext.=$langs->trans("SourceExample").': <b>'.$langs->transnoentitiesnoconv("ExampleAnyRefFoundIntoElement",$entitylang).($example?' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')':'').'</b><br>';
-		    if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromcodeid') $htmltext.=$langs->trans("SourceExample").': <b>'.$langs->trans("ExampleAnyCodeOrIdFoundIntoDictionnary",$langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).($example?' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')':'').'</b><br>';
+		    if ($objimport->array_import_convertvalue[0][$code]['rule']=='fetchidfromcodeid') $htmltext.=$langs->trans("SourceExample").': <b>'.$langs->trans("ExampleAnyCodeOrIdFoundIntoDictionary",$langs->transnoentitiesnoconv($objimport->array_import_convertvalue[0][$code]['dict'])).($example?' ('.$langs->transnoentitiesnoconv("Example").': '.$example.')':'').'</b><br>';
 		}
 		$htmltext.='<br>';
 		// Target field info
@@ -1144,8 +1153,10 @@ if ($step == 5 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_module[0]->picto).' ';
-	print $objimport->array_import_module[0]->getName();
+	$titleofmodule=$objimport->array_import_module[0]->getName();
+	// Special cas for import common to module/services
+	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+	print $titleofmodule;
 	print '</td></tr>';
 
 	// Lot de donnees a importer
@@ -1307,7 +1318,10 @@ if ($step == 5 && $datatoimport)
         $result=$obj->import_open_file($pathfile,$langs);
         if ($result > 0)
         {
-            $sourcelinenb=0; $endoffile=0;
+            global $tablewithentity_cache;
+            $tablewithentity_cache=array();
+        	$sourcelinenb=0; $endoffile=0;
+
             // Loop on each input file record
             while ($sourcelinenb < $nboflines && ! $endoffile)
             {
@@ -1484,8 +1498,10 @@ if ($step == 6 && $datatoimport)
 	// Module
 	print '<tr><td width="25%">'.$langs->trans("Module").'</td>';
 	print '<td>';
-	//print img_object($objimport->array_import_module[0]->getName(),$objimport->array_import_module[0]->picto).' ';
-	print $objimport->array_import_module[0]->getName();
+	$titleofmodule=$objimport->array_import_module[0]->getName();
+	// Special cas for import common to module/services
+	if (in_array($objimport->array_import_code[0], array('produit_supplierprices','produit_multiprice'))) $titleofmodule=$langs->trans("ProductOrService");
+	print $titleofmodule;
 	print '</td></tr>';
 
 	// Lot de donnees a importer
@@ -1621,7 +1637,10 @@ if ($step == 6 && $datatoimport)
 	$result=$obj->import_open_file($pathfile,$langs);
 	if ($result > 0)
 	{
+        global $tablewithentity_cache;
+        $tablewithentity_cache=array();
 		$sourcelinenb=0; $endoffile=0;
+
 		while ($sourcelinenb < $nboflines && ! $endoffile)
 		{
 			$sourcelinenb++;
@@ -1766,4 +1785,3 @@ function getnewkey(&$fieldssource,&$listofkey)
 	$listofkey[$i]=1;
 	return $i;
 }
-?>

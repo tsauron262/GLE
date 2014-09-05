@@ -9,7 +9,7 @@ FONTSIZEFORPDF=9
 SeparatorDecimal=.
 SeparatorThousand=None
 FormatDateShort=%d/%m/%Y
-# FormatDateShortInput=%m/%d/%Y
+FormatDateShortInput=%m/%d/%Y
 FormatDateShortJava=dd/MM/yyyy
 FormatDateShortJavaInput=dd/MM/yyyy
 FormatDateShortJQuery=dd/mm/yy
@@ -19,12 +19,12 @@ FormatHourShortDuration=%H:%M
 FormatDateTextShort=%d %b %Y
 FormatDateText=%d %B %Y
 FormatDateHourShort=%d/%m/%Y %H:%M
-# FormatDateHourSecShort=%m/%d/%Y %I:%M:%S %p
+FormatDateHourSecShort=%m/%d/%Y %I:%M:%S %p
 FormatDateHourTextShort=%d %b %Y %H:%M
 FormatDateHourText=%d %B %Y %H:%M
 DatabaseConnection=قاعدة بيانات الصدد
-# NoTranslation=No translation
-# NoRecordFound=No record found
+NoTranslation=No translation
+NoRecordFound=No record found
 NoError=أي خطأ
 Error=خطأ
 ErrorFieldRequired=الميدان '٪ ق' مطلوب
@@ -34,7 +34,7 @@ ErrorFailedToOpenFile=فشل في فتح الملف ٪ ق
 ErrorCanNotCreateDir=لا يمكن إنشاء دير ق
 ErrorCanNotReadDir=لا يمكن قراءة دير ق
 ErrorConstantNotDefined=معلمة ٪s ق لم تحدد
-ErrorUnknown=Unkown خطأ
+ErrorUnknown=Unknown error
 ErrorSQL=خطأ SQL
 ErrorLogoFileNotFound=شعار ملف '٪ ق' لم يتم العثور على
 ErrorGoToGlobalSetup=اذهب إلى 'شركة / مؤسسة' الإعداد لتثبيت هذا
@@ -60,14 +60,16 @@ ErrorNoSocialContributionForSellerCountry=خطأ ، لا يوجد نوع الم�
 ErrorFailedToSaveFile=خطأ ، وفشلت في انقاذ الملف.
 ErrorOnlyPngJpgSupported=خطأ فقط. بابوا نيو غينيا ، وجيه. شكل صورة ملف الدعم.
 ErrorImageFormatNotSupported=PHP الخاص بك لا يدعم وظائف لتحويل الصور من هذا الشكل.
-# SeeAlso=See also %s
+SetDate=Set date
+SelectDate=Select a date
+SeeAlso=See also %s
 BackgroundColorByDefault=لون الخلفية الافتراضي
 FileWasNotUploaded=يتم تحديد ملف مرفق لكنه لم يكن بعد تحميلها. انقر على "ملف إرفاق" لهذا الغرض.
 NbOfEntries=ملاحظة : إدخالات
 GoToWikiHelpPage=الانترنت تساعد على قراءة (على ضرورة الوصول إلى الإنترنت)
 GoToHelpPage=قراءة مساعدة
 RecordSaved=سجل المحفوظة
-# RecordDeleted=Record deleted
+RecordDeleted=Record deleted
 LevelOfFeature=مستوى الملامح
 NotDefined=غير معرف
 DefinedAndHasThisValue=وحددت قيمة
@@ -92,6 +94,7 @@ InformationLastAccessInError=آخر المعلومات عن الوصول إلى 
 DolibarrHasDetectedError=Dolibarr اكتشفت خطأ فني
 InformationToHelpDiagnose=هذه هي المعلومات التي يمكن أن تساعد على تشخيص
 MoreInformation=مزيد من المعلومات
+TechnicalInformation=Technical information
 NotePublic=علما (العامة)
 NotePrivate=المذكرة (الخاصة)
 PrecisionUnitIsLimitedToXDecimals=Dolibarr كان الإعداد بدقة للحد من أسعار الوحدات إلى <b>٪ ق</b> عشرية.
@@ -117,7 +120,7 @@ Activated=تفعيل
 Closed=مغلقة
 Closed2=مغلقة
 Enabled=مكن
-# Deprecated=Deprecated
+Deprecated=Deprecated
 Disable=يعطل
 Disabled=المعاقين
 Add=إضافة
@@ -144,8 +147,8 @@ ToClone=استنساخ
 ConfirmClone=اختر البيانات التي تريد استنساخ :
 NoCloneOptionsSpecified=لا توجد بيانات محددة للاستنساخ.
 Of=من
-# Go=Go
-# Run=Run
+Go=Go
+Run=Run
 CopyOf=نسخة من
 Show=يظهر
 ShowCardHere=وتظهر البطاقة
@@ -155,7 +158,7 @@ Valid=صحيح
 Approve=الموافقة
 ReOpen=إعادة فتح
 Upload=ارسال الملف
-# ToLink=Link
+ToLink=Link
 Select=رتخا
 Choose=يختار
 ChooseLangage=من فضلك اختر اللغة
@@ -203,6 +206,7 @@ Limit=الحد
 Limits=حدود
 DevelopmentTeam=فريق التطوير
 Logout=خروج
+NoLogoutProcessWithAuthMode=No applicative disconnect feature with authentication mode <b>%s</b>
 Connection=صلة
 Setup=الإعداد
 Alert=حالة تأهب
@@ -257,11 +261,13 @@ Seconds=ثانية
 Today=اليوم
 Yesterday=أمس
 Tomorrow=غدا
+Morning=Morning
+Afternoon=Afternoon
 Quadri=قادري
 MonthOfDay=خلال شهر من اليوم
 HourShort=حاء
 Rate=سعر
-# UseLocalTax=Include tax
+UseLocalTax=Include tax
 Bytes=بايت
 KiloBytes=كيلو بايت
 MegaBytes=ميغا بايت
@@ -293,8 +299,8 @@ AmountTTCShort=المبلغ (شركة الضريبية)
 AmountHT=المبلغ (صافي الضرائب)
 AmountTTC=المبلغ (شركة الضريبية)
 AmountVAT=مبلغ الضريبة على القيمة المضافة
-# AmountLT1=Amount tax 2
-# AmountLT2=Amount tax 3
+AmountLT1=Amount tax 2
+AmountLT2=Amount tax 3
 AmountLT1ES=كمية الطاقة المتجددة
 AmountLT2ES=مبلغ IRPF
 AmountTotal=المبلغ الإجمالي
@@ -309,11 +315,12 @@ SubTotal=المجموع الفرعي
 TotalHTShort=المجموع (الصافي)
 TotalTTCShort=المجموع (شركة الضريبية)
 TotalHT=المجموع (الصافي للضريبة)
+TotalHTforthispage=Total (net of tax) for this page
 TotalTTC=المجموع (شركة الضريبية)
 TotalTTCToYourCredit=المجموع (شركة الضريبية) الائتمان الخاصة بك
 TotalVAT=مجموع الضريبة على القيمة المضافة
-# TotalLT1=Total tax 2
-# TotalLT2=Total tax 3
+TotalLT1=Total tax 2
+TotalLT2=Total tax 3
 TotalLT1ES=مجموع الطاقة المتجددة
 TotalLT2ES=مجموع IRPF
 IncludedVAT=وتشمل الضريبة على القيمة المضافة
@@ -333,7 +340,7 @@ FullList=القائمة الكاملة
 Statistics=احصاءات
 OtherStatistics=آخر الإحصاءات
 Status=حالة
-# ShortInfo=Info.
+ShortInfo=Info.
 Ref=المرجع.
 RefSupplier=المرجع. المورد
 RefPayment=المرجع. الدفع
@@ -349,10 +356,11 @@ ActionNotApplicable=لا ينطبق
 ActionRunningNotStarted=لم تبدأ
 ActionRunningShort=بدأت
 ActionDoneShort=انتهى
+ActionUncomplete=Uncomplete
 CompanyFoundation=الشركة / المؤسسة
 ContactsForCompany=اتصالات لهذا الطرف الثالث
-# ContactsAddressesForCompany=Contacts/addresses for this third party
-# AddressesForCompany=Addresses for this third party
+ContactsAddressesForCompany=Contacts/addresses for this third party
+AddressesForCompany=Addresses for this third party
 ActionsOnCompany=الأعمال حول هذا الطرف الثالث
 ActionsOnMember=أحداث حول هذا العضو
 NActions=ق ٪ الإجراءات
@@ -388,7 +396,7 @@ OtherInformations=معلومات أخرى
 Quantity=الكمية
 Qty=الكمية
 ChangedBy=تغيير
-# ReCalculate=Recalculate
+ReCalculate=Recalculate
 ResultOk=النجاح
 ResultKo=فشل
 Reporting=الإبلاغ
@@ -483,8 +491,8 @@ Report=تقرير
 Keyword=الفحص السنوي clé
 Legend=أسطورة
 FillTownFromZip=شغل البلدة من الرمز البريدي
-# Fill=Fill
-# Reset=Reset
+Fill=Fill
+Reset=Reset
 ShowLog=وتظهر الدخول
 File=ملف
 Files=ملفات
@@ -499,8 +507,8 @@ NbOfThirdParties=عدد من الأطراف الثالثة
 NbOfCustomers=عدد من العملاء
 NbOfLines=عدد الخطوط
 NbOfObjects=عدد الأجسام
-# NbOfReferers=Number of referrers
-# Referers=Consumption
+NbOfReferers=Number of referrers
+Referers=Refering objects
 TotalQuantity=الكمية الإجمالية
 DateFromTo=ل٪ من ق ق ٪
 DateFrom=من ق ٪
@@ -544,6 +552,7 @@ MailSentBy=البريد الإلكتروني التي بعث بها
 TextUsedInTheMessageBody=هيئة البريد الإلكتروني
 SendAcknowledgementByMail=ارسال Ack. عن طريق البريد الإلكتروني
 NoEMail=أي بريد إلكتروني
+NoMobilePhone=No mobile phone
 Owner=مالك
 DetectedVersion=اكتشاف نسخة
 FollowingConstantsWillBeSubstituted=الثوابت التالية ستكون بديلا المقابلة القيمة.
@@ -553,7 +562,7 @@ GoBack=العودة
 CanBeModifiedIfOk=يمكن تعديلها إذا كان صحيحا
 CanBeModifiedIfKo=يمكن تعديلها إذا لم يكن صحيحا
 RecordModifiedSuccessfully=سجل تعديل بنجاح
-# RecordsModified=%s records modified
+RecordsModified=%s records modified
 AutomaticCode=مدونة الآلي
 NotManaged=لم يفلح
 FeatureDisabled=سمة المعوقين
@@ -569,7 +578,7 @@ TotalWoman=المجموع
 TotalMan=المجموع
 NeverReceived=لم يتلق
 Canceled=ألغى
-YouCanChangeValuesForThisListFromDictionnarySetup=يمكنك تغيير القيم لهذه القائمة من قائمة الإعداد -- dictionnary
+YouCanChangeValuesForThisListFromDictionarySetup=You can change values for this list from menu setup - dictionary
 Color=لون
 Documents=ربط الملفات
 DocumentsNb=ملفات مرتبطة (%s)
@@ -584,7 +593,7 @@ ThisLimitIsDefinedInSetup=Dolibarr الحد (القائمة المنزل الإ�
 NoFileFound=لا الوثائق المحفوظة في هذا المجلد
 CurrentUserLanguage=الصيغة الحالية
 CurrentTheme=الموضوع الحالي
-# CurrentMenuManager=Current menu manager
+CurrentMenuManager=Current menu manager
 DisabledModules=والمعوقين وحدات
 For=لأجل
 ForCustomer=الزبون
@@ -598,12 +607,13 @@ Notes=وتلاحظ
 AddNewLine=إضافة خط جديد
 AddFile=إضافة ملف
 ListOfFiles=قائمة الملفات المتوفرة
-FreeZone=نص حر
+FreeZone=Free entry
+FreeLineOfType=Free entry of type
 CloneMainAttributes=استنساخ وجوه مع السمات الرئيسية
 PDFMerge=دمج الشعبي
 Merge=دمج
 PrintContentArea=وتظهر الصفحة الرئيسية لطباعة ناحية المحتوى
-# MenuManager=Menu manager
+MenuManager=Menu manager
 NoMenu=لا القائمة الفرعية
 WarningYouAreInMaintenanceMode=انذار ، كنت في وضع الصيانة ، <b>%s</b> الدخول فقط بحيث يتم السماح لاستخدام التطبيق في الوقت الراهن.
 CoreErrorTitle=نظام خطأ
@@ -645,23 +655,29 @@ ByYear=بحلول العام
 ByMonth=من قبل شهر
 ByDay=بعد يوم
 BySalesRepresentative=بواسطة مندوب مبيعات
-# LinkedToSpecificUsers=Linked to a particular user contact
-# DeleteAFile=Delete a file
-# ConfirmDeleteAFile=Are you sure you want to delete file
-# NoResults=No results
-# ModulesSystemTools=Modules tools
-# Test=Test
-# Element=Element
-# NoPhotoYet=No pictures available yet
-# HomeDashboard=Home summary
-# Deductible=Deductible
-# from=from
-# toward=toward
-# Access=Access
-# HelpCopyToClipboard=Use Ctrl+C to copy to clipboard
-# SaveUploadedFileWithMask=Save file on server with name "<strong>%s</strong>" (otherwise "%s")
-# OriginFileName=Original filename
-# SetDemandReason=Set source
+LinkedToSpecificUsers=Linked to a particular user contact
+DeleteAFile=Delete a file
+ConfirmDeleteAFile=Are you sure you want to delete file
+NoResults=No results
+ModulesSystemTools=Modules tools
+Test=Test
+Element=Element
+NoPhotoYet=No pictures available yet
+HomeDashboard=Home summary
+Deductible=Deductible
+from=from
+toward=toward
+Access=Access
+HelpCopyToClipboard=Use Ctrl+C to copy to clipboard
+SaveUploadedFileWithMask=Save file on server with name "<strong>%s</strong>" (otherwise "%s")
+OriginFileName=Original filename
+SetDemandReason=Set source
+SetBankAccount=Define Bank Account
+AccountCurrency=Account Currency
+ViewPrivateNote=View notes
+XMoreLines=%s line(s) hidden
+PublicUrl=Public URL
+AddBox=Add box
 
 # Week day
 Monday=يوم الاثنين

@@ -80,7 +80,7 @@ $entitytolang = array(
     'member_type'  => 'MemberType',
     'subscription' => 'Subscription',
 	'tax'          => 'SocialContribution',
-    'tax_type'     => 'DictionnarySocialContributions',
+    'tax_type'     => 'DictionarySocialContributions',
 	'account'      => 'BankTransactions',
 	'payment'      => 'Payment',
 	'product'      => 'Product',
@@ -94,7 +94,8 @@ $entitytolang = array(
     'shipment_line'=> 'ShipmentLine',
     'project'      => 'Projects',
     'projecttask'  => 'Tasks',
-    'task_time'    => 'TaskTimeSpent'
+    'task_time'    => 'TaskTimeSpent',
+	'action'       => 'Action'
 );
 
 $array_selected=isset($_SESSION["export_selected_fields"])?$_SESSION["export_selected_fields"]:array();
@@ -1029,7 +1030,7 @@ if ($step == 5 && $datatoexport)
     if ($action == 'remove_file')
     {
     	print $form->formconfirm($_SERVER["PHP_SELF"].'?step=5&datatoexport='.$datatoexport.'&file='.urlencode(GETPOST("file")), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile', '', 0, 1);
-    	
+
     }
 
     print '<table width="100%" class="border">';
@@ -1093,13 +1094,21 @@ if ($step == 5 && $datatoexport)
     print '</tr>'."\n";
 
     $liste=$objmodelexport->liste_modeles($db);
-    foreach($liste as $key => $val)
+    $listeall=$liste;
+    foreach($listeall as $key => $val)
     {
+    	if (preg_match('/__\(Disabled\)__/',$listeall[$key]))
+    	{
+    		$listeall[$key]=preg_replace('/__\(Disabled\)__/','('.$langs->transnoentitiesnoconv("Disabled").')',$listeall[$key]);
+    		unset($liste[$key]);
+    	}
+
         $var=!$var;
         print '<tr '.$bc[$var].'>';
         print '<td width="16">'.img_picto_common($key,$objmodelexport->getPictoForKey($key)).'</td>';
 	    $text=$objmodelexport->getDriverDescForKey($key);
-    	print '<td>'.$form->textwithpicto($objmodelexport->getDriverLabelForKey($key),$text).'</td>';
+	    $label=$listeall[$key];
+	    print '<td>'.$form->textwithpicto($label,$text).'</td>';
         print '<td>'.$objmodelexport->getLibLabelForKey($key).'</td><td align="right">'.$objmodelexport->getLibVersionForKey($key).'</td></tr>'."\n";
     }
     print '</table>';
@@ -1157,4 +1166,3 @@ function getablenamefromfield($code,$sqlmaxforexport)
 	else return '';
 }
 
-?>

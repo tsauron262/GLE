@@ -27,6 +27,8 @@
 require '../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/categories.lib.php';
+require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+
 
 $langs->load("categories");
 
@@ -49,6 +51,7 @@ $result = restrictedArea($user, 'categorie', $id, '&category');
 
 $object = new Categorie($db);
 $result=$object->fetch($id);
+$object->fetch_optionals($id,$extralabels);
 if ($result <= 0)
 {
 	dol_print_error($db,$object->error);
@@ -57,6 +60,8 @@ if ($result <= 0)
 
 $type=$object->type;
 
+$extrafields = new ExtraFields($db);
+$extralabels = $extrafields->fetch_name_optionals_label($object->table_element);
 
 /*
  *	Actions
@@ -92,13 +97,13 @@ if ($id > 0 && $removeelem > 0)
 		$elementtype = 'member';
 	}
 	else if ($type == 4 && $user->rights->societe->creer) {
-		
+
 		require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 		$tmpobject = new Contact($db);
 		$result = $tmpobject->fetch($removeelem);
 		$elementtype = 'contact';
 	}
-	
+
 	$result=$object->del_type($tmpobject,$elementtype);
 	if ($result < 0) dol_print_error('',$object->error);
 }
@@ -165,6 +170,12 @@ print '<tr><td width="20%" class="notopnoleft">';
 print $langs->trans("Description").'</td><td>';
 print nl2br($object->description);
 print '</td></tr>';
+
+$reshook=$hookmanager->executeHooks('formObjectOptions',$parameters,$object,$action);    // Note that $action and $object may have been modified by hook
+if (empty($reshook) && ! empty($extrafields->attribute_label))
+{
+	print $object->showOptionals($extrafields);
+}
 
 print '</table>';
 
@@ -247,7 +258,7 @@ else
 if ($object->type == 0)
 {
 
-	$prods = $object->get_type("product","Product");
+	$prods = $object->getObjectsInCateg("product");
 	if ($prods < 0)
 	{
 		dol_print_error();
@@ -297,7 +308,7 @@ if ($object->type == 0)
 
 if ($object->type == 1)
 {
-	$socs = $object->get_type("societe","Fournisseur","fournisseur");
+	$socs = $object->getObjectsInCateg("supplier");
 	if ($socs < 0)
 	{
 		dol_print_error();
@@ -334,7 +345,7 @@ if ($object->type == 1)
 					print $langs->trans("DeleteFromCat")."</a>";
 				}
 				print '</td>';
-				
+
 				print "</tr>\n";
 			}
 		}
@@ -348,7 +359,7 @@ if ($object->type == 1)
 
 if($object->type == 2)
 {
-	$socs = $object->get_type("societe","Societe");
+	$socs = $object->getObjectsInCateg("customer");
 	if ($socs < 0)
 	{
 		dol_print_error();
@@ -404,7 +415,7 @@ if ($object->type == 3)
 {
 	require_once DOL_DOCUMENT_ROOT.'/adherents/class/adherent.class.php';
 
-	$prods = $object->get_type("member","Adherent","","adherent");
+	$prods = $object->getObjectsInCateg("member");
 	if ($prods < 0)
 	{
 		dol_print_error($db,$object->error);
@@ -456,7 +467,7 @@ if ($object->type == 3)
 //Categorie contact
 if($object->type == 4)
 {
-	$contacts = $object->get_type("socpeople","Contact",'contact',"socpeople");
+	$contacts = $object->getObjectsInCateg("contact");
 	if ($contacts < 0)
 	{
 		dol_print_error();

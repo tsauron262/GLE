@@ -34,9 +34,11 @@ class Cotisation extends CommonObject
 	public $table_element='cotisation';
 
 	var $id;
-	var $datec;
-	var $datem;
-	var $dateh;				// Subscription start date
+	var $ref;
+
+	var $datec;				// Date creation
+	var $datem;				// Date modification
+	var $dateh;				// Subscription start date (date subscription)
 	var $datef;				// Subscription end date
 	var $fk_adherent;
 	var $amount;
@@ -105,7 +107,7 @@ class Cotisation extends CommonObject
 	{
         $sql ="SELECT rowid, fk_adherent, datec,";
 		$sql.=" tms,";
-		$sql.=" dateadh,";
+		$sql.=" dateadh as dateh,";
 		$sql.=" datef,";
 		$sql.=" cotisation, note, fk_bank";
 		$sql.=" FROM ".MAIN_DB_PREFIX."cotisation";
@@ -125,7 +127,7 @@ class Cotisation extends CommonObject
 				$this->fk_adherent    = $obj->fk_adherent;
 				$this->datec          = $this->db->jdate($obj->datec);
 				$this->datem          = $this->db->jdate($obj->tms);
-				$this->dateh          = $this->db->jdate($obj->dateadh);
+				$this->dateh          = $this->db->jdate($obj->dateh);
 				$this->datef          = $this->db->jdate($obj->datef);
 				$this->amount         = $obj->cotisation;
 				$this->note           = $obj->note;
@@ -312,4 +314,3 @@ class Cotisation extends CommonObject
 		}
 	}
 }
-?>

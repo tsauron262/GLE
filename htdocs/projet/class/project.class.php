@@ -68,8 +68,845 @@ class Project extends CommonObject {
 
 
     /**
-     *    \brief  Constructeur de la classe
-     *    \param  DB          handler acces base de donnees
+     *  Constructor
+     *
+     *  @param      DoliDB		$db      Database handler
+     */
+    function __construct($db)
+    {
+        $this->db = $db;
+        $this->societe = new Societe($db);
+
+        $this->statuts_short = array(0 => 'Draft', 1 => 'Opened', 2 => 'Closed');
+        $this->statuts = array(0 => 'Draft', 1 => 'Opened', 2 => 'Closed');
+    }
+
+    /**
+     *    Create a project into database
+     *
+     *    @param    User	$user       	User making creation
+     *    @param	int		$notrigger		Disable triggers
+     *    @return   int         			<0 if KO, id of created project if OK
+     */
+    function create($user, $notrigger=0)
+    {
+        global $conf, $langs;
+
+        $error = 0;
+        $ret = 0;
+
+        $now=dol_now();
+
+        // Check parameters
+        if (!trim($this->ref))
+        {
+            $this->error = 'ErrorFieldsRequired';
+            dol_syslog(get_class($this)."::create error -1 ref null", LOG_ERR);
+            return -1;
+        }
+
+        $this->db->begin();
+
+        $sql = "INSERT INTO " . MAIN_DB_PREFIX . "projet (";
+        $sql.= "ref";
+        $sql.= ", title";
+        $sql.= ", description";
+        $sql.= ", fk_soc";
+        $sql.= ", fk_user_creat";
+        $sql.= ", fk_statut";
+        $sql.= ", public";
+        $sql.= ", datec";
+        $sql.= ", dateo";
+        $sql.= ", datee";
+        $sql.= ", entity";
+        $sql.= ") VALUES (";
+        $sql.= "'" . $this->db->escape($this->ref) . "'";
+        $sql.= ", '" . $this->db->escape($this->title) . "'";
+        $sql.= ", '" . $this->db->escape($this->description) . "'";
+        $sql.= ", " . ($this->socid > 0 ? $this->socid : "null");
+        $sql.= ", " . $user->id;
+        $sql.= ", 0";
+        $sql.= ", " . ($this->public ? 1 : 0);
+        $sql.= ", '".$this->db->idate($now)."'";
+        $sql.= ", " . ($this->date_start != '' ? "'".$this->db->idate($this->date_start)."'" : 'null');
+        $sql.= ", " . ($this->date_end != '' ? "'".$this->db->idate($this->date_end)."'" : 'null');
+        $sql.= ", ".$conf->entity;
+        $sql.= ")";
+
+        dol_syslog(get_class($this)."::create sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . "projet");
+            $ret = $this->id;
+
+            if (!$notrigger)
+            {
+                // Call triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_CREATE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // End call triggers
+            }
+        }
+        else
+        {
+            $this->error = $this->db->lasterror();
+            $this->errno = $this->db->lasterrno();
+            dol_syslog(get_class($this)."::create error -2 " . $this->error, LOG_ERR);
+            $error++;
+        }
+
+        //Update extrafield
+        if (!$error) {
+        	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+        	{
+        		$result=$this->insertExtraFields();
+        		if ($result < 0)
+        		{
+        			$error++;
+        		}
+        	}
+        }
+
+        if (!$error && !empty($conf->global->MAIN_DISABLEDRAFTSTATUS))
+        {
+            $res = $this->setValid($user);
+            if ($res < 0) $error++;
+        }
+
+        if (!$error)
+        {
+            $this->db->commit();
+            return $ret;
+        }
+        else
+        {
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    /**
+     * Update a project
+     *
+     * @param  User		$user       User object of making update
+     * @param  int		$notrigger  1=Disable all triggers
+     * @return int
+     */
+    function update($user, $notrigger=0)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        // Clean parameters
+        $this->title = trim($this->title);
+        $this->description = trim($this->description);
+
+        if (dol_strlen(trim($this->ref)) > 0)
+        {
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet SET";
+            $sql.= " ref='" . $this->db->escape($this->ref) . "'";
+            $sql.= ", title = '" . $this->db->escape($this->title) . "'";
+            $sql.= ", description = '" . $this->db->escape($this->description) . "'";
+            $sql.= ", fk_soc = " . ($this->socid > 0 ? $this->socid : "null");
+            $sql.= ", fk_statut = " . $this->statut;
+            $sql.= ", public = " . ($this->public ? 1 : 0);
+            $sql.= ", datec=" . ($this->date_c != '' ? "'".$this->db->idate($this->date_c)."'" : 'null');
+            $sql.= ", dateo=" . ($this->date_start != '' ? "'".$this->db->idate($this->date_start)."'" : 'null');
+            $sql.= ", datee=" . ($this->date_end != '' ? "'".$this->db->idate($this->date_end)."'" : 'null');
+            $sql.= " WHERE rowid = " . $this->id;
+
+            dol_syslog(get_class($this)."::Update sql=" . $sql, LOG_DEBUG);
+            if ($this->db->query($sql))
+            {
+                if (!$notrigger)
+                {
+                    // Call triggers
+                    include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                    $interface = new Interfaces($this->db);
+                    $result = $interface->run_triggers('PROJECT_MODIFY', $this, $user, $langs, $conf);
+                    if ($result < 0)
+                    {
+                        $error++;
+                        $this->errors = $interface->errors;
+                    }
+                    // End call triggers
+                }
+
+                //Update extrafield
+                if (!$error) {
+                	if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+                	{
+                		$result=$this->insertExtraFields();
+                		if ($result < 0)
+                		{
+                			$error++;
+                		}
+                	}
+                }
+
+                if (! $error && (is_object($this->oldcopy) && $this->oldcopy->ref != $this->ref))
+                {
+                	// We remove directory
+                	if ($conf->projet->dir_output)
+                	{
+                		$olddir = $conf->projet->dir_output . "/" . dol_sanitizeFileName($this->oldcopy->ref);
+                		$newdir = $conf->projet->dir_output . "/" . dol_sanitizeFileName($this->ref);
+                		if (file_exists($olddir))
+                		{
+							include_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+							$res=dol_move($olddir, $newdir);
+							if (! $res)
+                			{
+                				$this->error='ErrorFailToMoveDir';
+                				$error++;
+                			}
+                		}
+                	}
+                }
+
+                $result = 1;
+            }
+            else
+            {
+                $this->error = $this->db->lasterror();
+                $this->errors[] = $this->error;
+                dol_syslog(get_class($this)."::Update error -2 " . $this->error, LOG_ERR);
+                $result = -2;
+            }
+        }
+        else
+        {
+            dol_syslog(get_class($this)."::Update ref null");
+            $result = -1;
+        }
+
+        return $result;
+    }
+
+    /**
+     * 	Get object and lines from database
+     *
+     * 	@param      int		$id       	Id of object to load
+     * 	@param		string	$ref		Ref of project
+     * 	@return     int      		   	>0 if OK, 0 if not found, <0 if KO
+     */
+    function fetch($id, $ref='')
+    {
+        if (empty($id) && empty($ref)) return -1;
+
+        $sql = "SELECT rowid, ref, title, description, public, datec";
+        $sql.= ", tms, dateo, datee, fk_soc, fk_user_creat, fk_statut, note_private, note_public,model_pdf";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "projet";
+        if (! empty($id))
+        {
+        	$sql.= " WHERE rowid=".$id;
+        }
+        else if (! empty($ref))
+        {
+        	$sql.= " WHERE ref='".$ref."'";
+        	$sql.= " AND entity IN (".getEntity('project').")";
+        }
+
+        dol_syslog(get_class($this)."::fetch sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            if ($this->db->num_rows($resql))
+            {
+                $obj = $this->db->fetch_object($resql);
+
+                $this->id = $obj->rowid;
+                $this->ref = $obj->ref;
+                $this->title = $obj->title;
+                $this->titre = $obj->title; // TODO deprecated
+                $this->description = $obj->description;
+                $this->date_c = $this->db->jdate($obj->datec);
+                $this->datec = $this->db->jdate($obj->datec); // TODO deprecated
+                $this->date_m = $this->db->jdate($obj->tms);
+                $this->datem = $this->db->jdate($obj->tms);  // TODO deprecated
+                $this->date_start = $this->db->jdate($obj->dateo);
+                $this->date_end = $this->db->jdate($obj->datee);
+                $this->note_private = $obj->note_private;
+                $this->note_public = $obj->note_public;
+                $this->socid = $obj->fk_soc;
+                $this->societe->id = $obj->fk_soc; // TODO For backward compatibility
+                $this->user_author_id = $obj->fk_user_creat;
+                $this->public = $obj->public;
+                $this->statut = $obj->fk_statut;
+                $this->modelpdf	= $obj->model_pdf;
+
+                $this->db->free($resql);
+
+                return 1;
+            }
+            else
+            {
+                return 0;
+            }
+        }
+        else
+        {
+            $this->error = $this->db->lasterror();
+            dol_syslog(get_class($this)."::fetch " . $this->error, LOG_ERR);
+            return -1;
+        }
+    }
+
+    /**
+     * 	Return list of projects
+     *
+     * 	@param		int		$socid		To filter on a particular third party
+     * 	@return		array				List of projects
+     */
+    function liste_array($socid='')
+    {
+        global $conf;
+
+        $projects = array();
+
+        $sql = "SELECT rowid, title";
+        $sql.= " FROM " . MAIN_DB_PREFIX . "projet";
+        $sql.= " WHERE entity = " . $conf->entity;
+        if (! empty($socid)) $sql.= " AND fk_soc = " . $socid;
+
+        $resql = $this->db->query($sql);
+        if ($resql)
+        {
+            $nump = $this->db->num_rows($resql);
+
+            if ($nump)
+            {
+                $i = 0;
+                while ($i < $nump)
+                {
+                    $obj = $this->db->fetch_object($resql);
+
+                    $projects[$obj->rowid] = $obj->title;
+                    $i++;
+                }
+            }
+            return $projects;
+        }
+        else
+        {
+            print $this->db->lasterror();
+        }
+    }
+
+    /**
+     * 	Return list of elements for type linked to project
+     *
+     * 	@param		string		$type		'propal','order','invoice','order_supplier','invoice_supplier'
+     * 	@param		string		$tablename	name of table associated of the type
+     * 	@return		array					List of orders linked to project, <0 if error
+     */
+    function get_element_list($type, $tablename)
+    {
+        $elements = array();
+
+        if ($type == 'agenda')
+            $sql = "SELECT id as rowid FROM " . MAIN_DB_PREFIX . "actioncomm WHERE fk_project=" . $this->id;
+        else
+            $sql = "SELECT rowid FROM " . MAIN_DB_PREFIX . $tablename." WHERE fk_projet=" . $this->id;
+        if (! $sql) return -1;
+
+        //print $sql;
+        dol_syslog(get_class($this)."::get_element_list sql=" . $sql);
+        $result = $this->db->query($sql);
+        if ($result)
+        {
+            $nump = $this->db->num_rows($result);
+            if ($nump)
+            {
+                $i = 0;
+                while ($i < $nump)
+                {
+                    $obj = $this->db->fetch_object($result);
+
+                    $elements[$i] = $obj->rowid;
+
+                    $i++;
+                }
+                $this->db->free($result);
+
+                /* Return array */
+                return $elements;
+            }
+        }
+        else
+        {
+            dol_print_error($this->db);
+        }
+    }
+
+    /**
+     *    Delete a project from database
+     *
+     *    @param       User		$user            User
+     *    @param       int		$notrigger       Disable triggers
+     *    @return      int       			      <0 if KO, 0 if not possible, >0 if OK
+     */
+    function delete($user, $notrigger=0)
+    {
+        global $langs, $conf;
+        require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
+
+        $error = 0;
+
+        $this->db->begin();
+
+        if (!$error)
+        {
+            // Delete linked contacts
+            $res = $this->delete_linked_contact();
+            if ($res < 0)
+            {
+                $this->error = 'ErrorFailToDeleteLinkedContact';
+                //$error++;
+                $this->db->rollback();
+                return 0;
+            }
+        }
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task_extrafields";
+        $sql.= " WHERE fk_object IN (SELECT rowid FROM " . MAIN_DB_PREFIX . "projet_task WHERE fk_projet=" . $this->id . ")";
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if (!$resql)
+        {
+        	$this->errors[] = $this->db->lasterror();
+        	$error++;
+        }
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_task";
+        $sql.= " WHERE fk_projet=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if (!$resql)
+        {
+        	$this->errors[] = $this->db->lasterror();
+        	$error++;
+        }
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet";
+        $sql.= " WHERE rowid=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if (!$resql)
+        {
+        	$this->errors[] = $this->db->lasterror();
+        	$error++;
+        }
+
+        $sql = "DELETE FROM " . MAIN_DB_PREFIX . "projet_extrafields";
+        $sql.= " WHERE fk_object=" . $this->id;
+
+        dol_syslog(get_class($this) . "::delete sql=" . $sql, LOG_DEBUG);
+        $resql = $this->db->query($sql);
+        if (! $resql)
+        {
+        	$this->errors[] = $this->db->lasterror();
+        	$error++;
+        }
+
+        if (empty($error))
+        {
+            // We remove directory
+            $projectref = dol_sanitizeFileName($this->ref);
+            if ($conf->projet->dir_output)
+            {
+                $dir = $conf->projet->dir_output . "/" . $projectref;
+                if (file_exists($dir))
+                {
+                    $res = @dol_delete_dir_recursive($dir);
+                    if (!$res)
+                    {
+                        $this->errors[] = 'ErrorFailToDeleteDir';
+                        $error++;
+                    }
+                }
+            }
+
+            if (!$notrigger)
+            {
+                // Call triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_DELETE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+            		foreach ($interface->errors as $errmsg ) {
+            			dol_syslog(get_class($this) . "::delete " . $errmsg, LOG_ERR);
+            			$this->errors[] =$errmsg;
+            		}
+                }
+                // End call triggers
+            }
+        }
+
+    	if (empty($error))
+    	{
+            $this->db->commit();
+            return 1;
+        }
+        else
+       {
+        	foreach ( $this->errors as $errmsg )
+        	{
+				dol_syslog(get_class($this) . "::delete " . $errmsg, LOG_ERR);
+				$this->error .= ($this->error ? ', ' . $errmsg : $errmsg);
+			}
+            dol_syslog(get_class($this) . "::delete " . $this->error, LOG_ERR);
+            $this->db->rollback();
+            return -1;
+        }
+    }
+
+    /**
+     * 		Validate a project
+     *
+     * 		@param		User	$user		User that validate
+     * 		@return		int					<0 if KO, >0 if OK
+     */
+    function setValid($user)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        if ($this->statut != 1)
+        {
+            $this->db->begin();
+
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet";
+            $sql.= " SET fk_statut = 1";
+            $sql.= " WHERE rowid = " . $this->id;
+            $sql.= " AND entity = " . $conf->entity;
+
+            dol_syslog(get_class($this)."::setValid sql=" . $sql);
+            $resql = $this->db->query($sql);
+            if ($resql)
+            {
+                // Appel des triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_VALIDATE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // Fin appel triggers
+
+                if (!$error)
+                {
+                	$this->statut=1;
+                	$this->db->commit();
+                    return 1;
+                }
+                else
+                {
+                    $this->db->rollback();
+                    $this->error = join(',', $this->errors);
+                    dol_syslog(get_class($this)."::setValid " . $this->error, LOG_ERR);
+                    return -1;
+                }
+            }
+            else
+            {
+                $this->db->rollback();
+                $this->error = $this->db->lasterror();
+                dol_syslog(get_class($this)."::setValid " . $this->error, LOG_ERR);
+                return -1;
+            }
+        }
+    }
+
+    /**
+     * 		Close a project
+     *
+     * 		@param		User	$user		User that validate
+     * 		@return		int					<0 if KO, >0 if OK
+     */
+    function setClose($user)
+    {
+        global $langs, $conf;
+
+		$error=0;
+
+        if ($this->statut != 2)
+        {
+            $this->db->begin();
+
+            $sql = "UPDATE " . MAIN_DB_PREFIX . "projet";
+            $sql.= " SET fk_statut = 2";
+            $sql.= " WHERE rowid = " . $this->id;
+            $sql.= " AND entity = " . $conf->entity;
+            $sql.= " AND fk_statut = 1";
+
+            dol_syslog(get_class($this)."::setClose sql=" . $sql);
+            $resql = $this->db->query($sql);
+            if ($resql)
+            {
+                // Appel des triggers
+                include_once DOL_DOCUMENT_ROOT . '/core/class/interfaces.class.php';
+                $interface = new Interfaces($this->db);
+                $result = $interface->run_triggers('PROJECT_CLOSE', $this, $user, $langs, $conf);
+                if ($result < 0)
+                {
+                    $error++;
+                    $this->errors = $interface->errors;
+                }
+                // Fin appel triggers
+
+                if (!$error)
+                {
+                    $this->statut = 2;
+                    $this->db->commit();
+                    return 1;
+                }
+                else
+                {
+                    $this->db->rollback();
+                    $this->error = join(',', $this->errors);
+                    dol_syslog(get_class($this)."::setClose " . $this->error, LOG_ERR);
+                    return -1;
+                }
+            }
+            else
+            {
+                $this->db->rollback();
+                $this->error = $this->db->lasterror();
+                dol_syslog(get_class($this)."::setClose " . $this->error, LOG_ERR);
+                return -1;
+            }
+        }
+    }
+
+    /**
+     *  Return status label of object
+     *
+     *  @param  int			$mode       0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto
+     * 	@return string      			Label
+     */
+    function getLibStatut($mode=0)
+    {
+        return $this->LibStatut($this->statut, $mode);
+    }
+
+    /**
+     *  Renvoi status label for a status
+     *
+     *  @param	int		$statut     id statut
+     *  @param  int		$mode       0=long label, 1=short label, 2=Picto + short label, 3=Picto, 4=Picto + long label, 5=Short label + Picto
+     * 	@return string				Label
+     */
+    function LibStatut($statut, $mode=0)
+    {
+        global $langs;
+
+        if ($mode == 0)
+        {
+            return $langs->trans($this->statuts[$statut]);
+        }
+        if ($mode == 1)
+        {
+            return $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 2)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 3)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0');
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4');
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6');
+        }
+        if ($mode == 4)
+        {
+            if ($statut == 0)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut0') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 1)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut4') . ' ' . $langs->trans($this->statuts_short[$statut]);
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+        if ($mode == 5)
+        {
+            if ($statut == 0)
+                return $langs->trans($this->statuts_short[$statut]) . ' ' . img_picto($langs->trans($this->statuts_short[$statut]), 'statut0');
+            if ($statut == 1)
+                return $langs->trans($this->statuts_short[$statut]) . ' ' . img_picto($langs->trans($this->statuts_short[$statut]), 'statut1');
+            if ($statut == 2)
+                return img_picto($langs->trans($this->statuts_short[$statut]), 'statut6') . ' ' . $langs->trans($this->statuts_short[$statut]);
+        }
+    }
+
+    /**
+     * 	Renvoie nom clicable (avec eventuellement le picto)
+     *
+     * 	@param	int		$withpicto		0=Pas de picto, 1=Inclut le picto dans le lien, 2=Picto seul
+     * 	@param	string	$option			Variant ('', 'nolink')
+     * 	@param	int		$addlabel		0=Default, 1=Add label into string
+     * 	@return	string					Chaine avec URL
+     */
+    function getNomUrl($withpicto=0, $option='', $addlabel=0)
+    {
+        global $langs;
+
+        $result = '';
+        $lien = '';
+        $lienfin = '';
+
+        if ($option != 'nolink')
+        {
+        	if (preg_match('/\.php$/',$option))
+        	{
+            	$lien = '<a href="' . dol_buildpath($option,1) . '?id=' . $this->id . '">';
+            	$lienfin = '</a>';
+        	}
+        	else
+        	{
+            	$lien = '<a href="' . DOL_URL_ROOT . '/projet/fiche.php?id=' . $this->id . '">';
+            	$lienfin = '</a>';
+        	}
+        }
+
+        $picto = 'projectpub';
+        if (!$this->public) $picto = 'project';
+
+        $label = $langs->trans("ShowProject") . ': ' . $this->ref . ($this->title ? ' - ' . $this->title : '');
+
+        if ($withpicto) $result.=($lien . img_object($label, $picto) . $lienfin);
+        if ($withpicto && $withpicto != 2) $result.=' ';
+        if ($withpicto != 2) $result.=$lien . $this->ref . $lienfin . (($addlabel && $this->title) ? ' - ' . $this->title : '');
+        return $result;
+    }
+
+    /**
+     *  Initialise an instance with random values.
+     *  Used to build previews or test instances.
+     * 	id must be 0 if object instance is a specimen.
+     *
+     *  @return	void
+     */
+    function initAsSpecimen()
+    {
+        global $user, $langs, $conf;
+
+        $now=dol_now();
+
+        // Initialise parameters
+        $this->id = 0;
+        $this->ref = 'SPECIMEN';
+        $this->specimen = 1;
+        $this->socid = 1;
+        $this->date_c = $now;
+        $this->date_m = $now;
+        $this->date_start = $now;
+        $this->note_public = 'SPECIMEN';
+        /*
+        $nbp = rand(1, 9);
+        $xnbp = 0;
+        while ($xnbp < $nbp)
+        {
+            $line = new Task($this->db);
+            $line->fk_project = 0;
+            $line->label = $langs->trans("Label") . " " . $xnbp;
+            $line->description = $langs->trans("Description") . " " . $xnbp;
+
+            $this->lines[]=$line;
+            $xnbp++;
+        }
+        */
+    }
+
+    /**
+     * 	Check if user has permission on current project
+     *
+     * 	@param	User	$user		Object user to evaluate
+     * 	@param  string	$mode		Type of permission we want to know: 'read', 'write'
+     * 	@return	int					>0 if user has permission, <0 if user has no permission
+     */
+    function restrictedProjectArea($user, $mode='read')
+    {
+        // To verify role of users
+        $userAccess = 0;
+        if (($mode == 'read' && ! empty($user->rights->projet->all->lire)) || ($mode == 'write' && ! empty($user->rights->projet->all->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->all->supprimer)))
+        {
+            $userAccess = 1;
+        }
+        else if ($this->public && (($mode == 'read' && ! empty($user->rights->projet->lire)) || ($mode == 'write' && ! empty($user->rights->projet->creer)) || ($mode == 'delete' && ! empty($user->rights->projet->supprimer))))
+        {
+            $userAccess = 1;
+        }
+        else
+		{
+            foreach (array('internal', 'external') as $source)
+            {
+                $userRole = $this->liste_contact(4, $source);
+                $num = count($userRole);
+
+                $nblinks = 0;
+                while ($nblinks < $num)
+                {
+                    if ($source == 'internal' && preg_match('/^PROJECT/', $userRole[$nblinks]['code']) && $user->id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }
+                    // Permission are supported on users only. To have an external thirdparty contact to see a project, its user must allowed to contacts of projects.
+                    /*if ($source == 'external' && preg_match('/PROJECT/', $userRole[$nblinks]['code']) && $user->contact_id == $userRole[$nblinks]['id'])
+                    {
+                        if ($mode == 'read'   && $user->rights->projet->lire)      $userAccess++;
+                        if ($mode == 'write'  && $user->rights->projet->creer)     $userAccess++;
+                        if ($mode == 'delete' && $user->rights->projet->supprimer) $userAccess++;
+                    }*/
+                    $nblinks++;
+                }
+            }
+            //if (empty($nblinks))	// If nobody has permission, we grant creator
+            //{
+            //	if ((!empty($this->user_author_id) && $this->user_author_id == $user->id))
+            //	{
+            //		$userAccess = 1;
+            //	}
+            //}
+        }
+
+        return ($userAccess?$userAccess:-1);
+    }
+
+    /**
+     * Return array of projects a user has permission on, is affected to, or all projects
+     *
+     * @param 	User	$user			User object
+     * @param 	int		$mode			0=All project I have permission on, 1=Projects affected to me only, 2=Will return list of all projects with no test on contacts
+     * @param 	int		$list			0=Return array,1=Return string list
+     * @param	int		$socid			0=No filter on third party, id of third party
+     * @return 	array or string			Array of projects id, or string with projects id separated with ","
      */
     function getProjectsAuthorizedForUser($user, $mode=0, $list=0, $socid=0)
     {
@@ -800,23 +1637,25 @@ class Project extends CommonObject {
         $sql .= " WHERE t.fk_projet =" . $this->id;
         $sql .= " ORDER BY t.fk_task_parent";
 
-        $var = true;
-        $resql = $this->db->query($sql);
-        if ($resql) {
-            $num = $this->db->num_rows($resql);
-            $i = 0;
-            while ($i < $num) {
-                $obj = $this->db->fetch_object($resql);
-                $tasks[$i]->id = $obj->rowid;
-                $tasks[$i]->title = $obj->title;
-                $tasks[$i]->fk_parent = $obj->fk_task_parent;
-                $tasks[$i]->duration = $obj->duration_effective;
-                $i++;
-            }
-            $this->db->free();
-        } else {
-            dol_print_error($this->db);
-        }
+				if (dol_mkdir($clone_project_dir) >= 0)
+				{
+					$filearray=dol_dir_list($ori_project_dir,"files",0,'','(\.meta|_preview\.png)$','',SORT_ASC,1);
+					foreach($filearray as $key => $file)
+					{
+						$rescopy = dol_copy($ori_project_dir . '/' . $file['name'], $clone_project_dir . '/' . $file['name'],0,1);
+						if (is_numeric($rescopy) && $rescopy < 0)
+						{
+							$this->error.=$langs->trans("ErrorFailToCopyFile",$ori_project_dir . '/' . $file['name'],$clone_project_dir . '/' . $file['name']);
+							$error++;
+						}
+					}
+				}
+				else
+				{
+					$this->error.=$langs->trans('ErrorInternalErrorDetected').':dol_mkdir';
+					$error++;
+				}
+			}
 
         return $tasks;
     }
@@ -2206,240 +3045,39 @@ class Project extends CommonObject {
         $minutes = intval(($sec - (($days * 86400) + ($hours * 3600))) / 60);
         $seconds = $sec - ( ($days * 86400) + ($hours * 3600) + ($minutes * 60));
 
-        $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-        $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-        $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-        $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-        $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-        //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-        //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-        return ($returnstring);
-    }
 
-    public function sec2hour($sec) {
-        if (!is_numeric($sec)) {
-            $sec = 0;
-        }
-        $days = false;
-        $returnstring = " ";
-        $hours = intval(($sec / 3600));
-        $minutes = intval(($sec - ( ($hours * 3600))) / 60);
-        $seconds = $sec - ( ($hours * 3600) + ($minutes * 60));
+	 /**
+	  *    Associate element to a project
+	  *
+	  *    @param	string	$TableName			Table of the element to update
+	  *    @param	int		$ElementSelectId	Key-rowid of the line of the element to update
+	  *    @return	int							1 if OK or < 0 if KO
+	  */
+	function update_element($TableName, $ElementSelectId)
+	{
+		$sql="UPDATE ".MAIN_DB_PREFIX.$TableName;
 
-        $returnstring .= ($days) ? (($days == 1) ? "1 j" : $days . "j") : "";
-        $returnstring .= ($days && $hours && !$minutes && !$seconds) ? "" : "";
-        $returnstring .= ($hours) ? ( ($hours == 1) ? " 1h" : " " . $hours . "h") : "";
-        $returnstring .= (($days || $hours) && ($minutes && !$seconds)) ? "  " : " ";
-        $returnstring .= ($minutes) ? ( ($minutes == 1) ? " 1 min" : " " . $minutes . "min") : "";
-        //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
-        //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
-        return ($returnstring);
-    }
+		if ($TableName=="actioncomm")
+		{
+			$sql.= " SET fk_project=".$this->id;
+			$sql.= " WHERE id=".$ElementSelectId;
+		}
+		else
+		{
+			$sql.= " SET fk_projet=".$this->id;
+			$sql.= " WHERE rowid=".$ElementSelectId;
+		}
 
+		dol_syslog(get_class($this)."::update_element sql=" . $sql, LOG_DEBUG);
+		$resql=$this->db->query($sql);
+		if (!$resql) {
+			$this->error=$this->db->lasterror();
+			dol_syslog(get_class($this)."::update_element error : " . $this->error, LOG_ERR);
+			return -1;
+		}else {
+			return 1;
+		}
+
+	}
 }
 
-class ProjectTask extends commonObject {
-
-    public $db;
-    public $id;
-    public $fk_projet;
-    public $fk_task_parent;
-    public $title;
-    public $duration_effective;
-    public $user_creat;
-    public $statut;
-    public $note;
-    public $progress;
-    public $description;
-    public $task_type;
-    public $color;
-    public $url;
-    public $fk_task_type;
-    public $shortDesc;
-    public $level;
-    public $dateDeb;
-    public $dateDebFR;
-    public $dateDebFRFull;
-    public $projet_id;
-    public $labelstatut = array();
-    public $labelstatut_short = array();
-
-    public function ProjectTask($db) {
-        $this->db = $db;
-        global $langs;
-        $langs->load("project@projet");
-        $this->labelstatut['open'] = $langs->trans("Open");
-        $this->labelstatut["closed"] = $langs->trans("Closed");
-        $this->labelstatut_short["open"] = $langs->trans("Open");
-        $this->labelstatut_short["closed"] = $langs->trans("Closed");
-    }
-
-    public function fetch($id) {
-        $this->id = $id;
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_projet,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.title,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.duration_effective,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.duration,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_user_creat,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.statut,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.note,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.progress,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.description,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.color,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.url,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.shortDesc,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.level,
-                           " . MAIN_DB_PREFIX . "Synopsis_projet_task.dateDeb,
-                           " . MAIN_DB_PREFIX . "Synopsis_task_type.label
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task,
-                           " . MAIN_DB_PREFIX . "Synopsis_task_type
-                     WHERE rowid = " . $id . "
-                       AND " . MAIN_DB_PREFIX . "Synopsis_task_type.id = " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_type";
-        $sql = $this->db->query($requete);
-        if ($sql) {
-            $res = $this->db->fetch_object($sql);
-
-            $this->fk_projet = $res->fk_projet;
-            $this->projet_id = $res->fk_projet;
-            $tmpProj = new Project($this->db);
-            $tmpProj->fetch($res->fk_projet);
-            $res->project = $tmpProj;
-            $this->dateDeb = strtotime($res->dateDeb);
-            $this->dateDebFR = date('d/m/Y', strtotime($res->dateDeb));
-            $this->dateDebFRFull = date('d/m/Y H:i', strtotime($res->dateDeb));
-            $this->fk_task_parent = $res->fk_task_parent;
-            $this->title = $res->title;
-            $this->duration_effective = $res->duration_effective;
-            $this->duration = $res->duration;
-            $this->fk_user_creat = $res->fk_user_creat;
-            $tmpUser = new User($this->db);
-            $tmpUser->fetch($res->fk_user_creat);
-            $this->user_creat = $tmpUser;
-            $this->statut = $res->statut;
-            $this->note = $res->note;
-            $this->progress = $res->progress;
-            $this->description = $res->description;
-            $this->color = $res->color;
-            $this->url = $res->url;
-            $this->fk_task_type = $res->fk_task_type;
-            $this->task_type = $res->label;
-            $this->shortDesc = $res->shortDesc;
-            $this->level = $res->level;
-            return($this->id);
-        } else {
-            return -1;
-        }
-    }
-
-    public $childArray = array();
-
-    public function getChildsTree() {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $this->id;
-        $sql = $this->db->query($requete);
-        $count = $this->db->num_rows($sql);
-        while ($res = $this->db->fetch_object($sql)) {
-            array_push($this->childArray, $res->rowid);
-            $this->recursTask($res->rowid);
-        }
-    }
-
-    public $directChildArray = array();
-
-    public function getDirectChildsTree() {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $this->id;
-        $sql = $this->db->query($requete);
-        $count = $this->db->num_rows($sql);
-        while ($res = $this->db->fetch_object($sql)) {
-            array_push($this->directChildArray, $res->rowid);
-        }
-    }
-
-    private function recursTask($parentId, $js) {
-        $requete = "SELECT " . MAIN_DB_PREFIX . "Synopsis_projet_task.rowid
-                      FROM " . MAIN_DB_PREFIX . "Synopsis_projet_task
-                     WHERE " . MAIN_DB_PREFIX . "Synopsis_projet_task.fk_task_parent = " . $parentId;
-        $sql = $this->db->query($requete);
-        while ($res = $this->db->fetch_object($sql)) {
-            array_push($this->childArray, $res->rowid);
-            $this->recursTask($res->rowid);
-        }
-    }
-
-    /**
-     *        \brief      Renvoie nom clicable (avec eventuellement le picto)
-     *        \param        withpicto        Inclut le picto dans le lien
-     *        \param        option            Sur quoi pointe le lien
-     *        \param        maxlen            Longueur max libelle
-     *        \return        string            Chaine avec URL
-     */
-    public function getNomUrl($withpicto = 0, $option = '', $maxlen = 0) {
-        global $langs;
-
-        $result = '';
-        $lien = "";
-        $lien = '<a href="' . DOL_URL_ROOT . '/projet/tasks/task.php?id=' . $this->id . '">';
-        $lienfin = '</a>';
-
-        if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowProject") . ': ' . $this->title, 'task') . $lienfin . ' ');
-        $result.=$lien . ($maxlen ? dol_trunc($this->title, $maxlen) : $this->title) . $lienfin;
-        return $result;
-    }
-
-    public function getLibStatut($mode = 0) {
-        return $this->LibStatut($this->statut, $mode);
-    }
-
-    /**
-     *        \brief      Renvoi le libelle d'un statut donne
-     *        \param      statut        id statut
-     *        \param      mode        0=libelle long, 1=libelle court, 2=Picto + Libelle court, 3=Picto, 4=Picto + Libelle long, 5=Libelle court + Picto
-     *        \return     string        Libelle
-     */
-    private function LibStatut($statut = 0, $mode = 1) {
-        global $langs;
-        $langs->load("project@projet");
-        if ($mode == 0) {
-            return $this->labelstatut[$statut];
-        }
-        if ($mode == 1) {
-            return $this->labelstatut_short[$statut];
-        }
-        if ($mode == 2) {
-            if ($statut == 'open')
-                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelstatut_short[$statut];
-            if ($statut == 'closed')
-                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelstatut_short[$statut];
-        }
-        if ($mode == 3) {
-            if ($statut == 'open')
-                return img_picto($langs->trans('Open'), 'statut4');
-            if ($statut == 'closed')
-                return img_picto($langs->trans('Close'), 'statut5');
-        }
-        if ($mode == 4) {
-            if ($statut == 'open')
-                return img_picto($langs->trans('Open'), 'statut4') . ' ' . $this->labelstatut[$statut];
-            if ($statut == 'closed')
-                return img_picto($langs->trans('Close'), 'statut5') . ' ' . $this->labelstatut[$statut];
-        }
-        if ($mode == 5) {
-            if ($statut == 'open')
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('Open'), 'statut4');
-            if ($statut == 'closed')
-                return $this->labelstatut_short[$statut] . ' ' . img_picto($langs->trans('Close'), 'statut5');
-        }
-    }
-
-}
-
-class Projet extends Project {
-    
-}
-?>

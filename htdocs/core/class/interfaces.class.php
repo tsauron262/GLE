@@ -102,7 +102,7 @@ class Interfaces
                         if (in_array($modName,$modules))
                         {
                             $langs->load("errors");
-                            dol_syslog(get_class($this)."::run_triggers action=".$action." ".$langs->trans("ErrorDuplicateTrigger",$modName,"/htdocs/core/triggers/"),LOG_ERR);
+                            dol_syslog(get_class($this)."::run_triggers action=".$action." ".$langs->trans("ErrorDuplicateTrigger",$modName,"/htdocs/core/triggers/"), LOG_ERR);
                             continue;
                         }
                         else
@@ -123,7 +123,7 @@ class Interfaces
 
                         if (! $qualified)
                         {
-                            dol_syslog(get_class($this)."::run_triggers action=".$action." Triggers for file '".$file."' need module to be enabled",LOG_INFO);
+                            dol_syslog(get_class($this)."::run_triggers action=".$action." Triggers for file '".$file."' need module to be enabled", LOG_DEBUG);
                             continue;
                         }
 
@@ -148,7 +148,7 @@ class Interfaces
             $objMod = new $modName($this->db);
             if ($objMod)
             {
-                dol_syslog(get_class($this)."::run_triggers action=".$action." Launch triggers for file '".$files[$key]."'",LOG_INFO);
+                dol_syslog(get_class($this)."::run_triggers action=".$action." Launch triggers for file '".$files[$key]."'", LOG_INFO);
 
                 $result=$objMod->run_trigger($action,$object,$user,$langs,$conf);
                 if ($result > 0)
@@ -173,7 +173,7 @@ class Interfaces
             }
             else
             {
-                dol_syslog(get_class($this)."::run_triggers action=".$action." Failed to instantiate trigger for file '".$files[$key]."'",LOG_ERR);
+                dol_syslog(get_class($this)."::run_triggers action=".$action." Failed to instantiate trigger for file '".$files[$key]."'", LOG_ERR);
             }
         }
 
@@ -200,6 +200,9 @@ class Interfaces
         global $conf, $langs;
 
         $files = array();
+        $fullpath = array();
+        $relpath = array();
+        $iscoreorexternal = array();
         $modules = array();
         $orders = array();
         $i = 0;
@@ -238,6 +241,9 @@ class Interfaces
                         }
 
                         $files[$i] = $file;
+                        $fullpath[$i] = $dir.'/'.$file;
+                        $relpath[$i] = preg_replace('/^\//','',$reldir).'/'.$file;
+                        $iscoreorexternal[$i] = ($reldir == '/core/triggers/'?'internal':'external');
                         $modules[$i] = $modName;
                         $orders[$i] = $part1.'_'.$part2.'_'.$part3;   // Set sort criteria value
 
@@ -264,7 +270,7 @@ class Interfaces
 				print 'Error: A trigger file was found but its class "'.$modName.'" was not found.'."<br>\n";
             	continue;
             }
-            
+
             $objMod = new $modName($this->db);
 
             // Define disabledbyname and disabledbymodule
@@ -286,6 +292,9 @@ class Interfaces
 			// We set info of modules
             $triggers[$j]['picto'] = $objMod->picto?img_object('',$objMod->picto):img_object('','generic');
             $triggers[$j]['file'] = $files[$key];
+            $triggers[$j]['fullpath'] = $fullpath[$key];
+            $triggers[$j]['relpath'] = $relpath[$key];
+            $triggers[$j]['iscoreorexternal'] = $iscoreorexternal[$key];
             $triggers[$j]['version'] = $objMod->getVersion();
             $triggers[$j]['status'] = img_picto($langs->trans("Active"),'tick');
             if ($disabledbyname > 0 || $disabledbymodule > 1) $triggers[$j]['status'] = "&nbsp;";
@@ -312,4 +321,3 @@ class Interfaces
     }
 
 }
-?>

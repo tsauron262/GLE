@@ -20,3 +20,6 @@ YouAreCurrentlyInSandboxMode=Attualmente sei in modalità sandbox
 NewPaypalPaymentReceived=Nuovo pagamento Paypal ricevuto
 NewPaypalPaymentFailed=Nuovo pagamento Paypal tentato ma fallito
 PAYPAL_PAYONLINE_SENDEMAIL=Email di avviso dopo un pagamento (a buon fine o no)
+ReturnURLAfterPayment=URL di ritorno dopo il pagamento
+ValidationOfPaypalPaymentFailed=Conferma del pagamento fallito di Paypal
+PaypalConfirmPaymentPageWasCalledButFailed=La pagina di conferma del pagamento è stata interrogata da Paypal ma la conferma è fallita.

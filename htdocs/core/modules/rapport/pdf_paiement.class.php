@@ -38,7 +38,7 @@ class pdf_paiement
 	 */
 	function __construct($db)
 	{
-		global $langs;
+		global $langs,$conf;
 		$langs->load("bills");
 		$langs->load("compta");
 
@@ -361,4 +361,3 @@ class pdf_paiement
 
 }
 
-?>

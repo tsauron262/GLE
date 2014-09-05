@@ -64,9 +64,9 @@ class ActionComm extends CommonObject
     var $usertodo;		// Object user that must do action
     var $userdone;	 	// Object user that did action
 
-    var $societe;		// Company linked to action (optionnal)
-    var $contact;		// Contact linked tot action (optionnal)
-    var $fk_project;	// Id of project (optionnal)
+    var $societe;		// Company linked to action (optional)
+    var $contact;		// Contact linked to action (optional)
+    var $fk_project;	// Id of project (optional)
 
 
     // Properties for links to other objects
@@ -145,7 +145,7 @@ class ActionComm extends CommonObject
             }
             else if ($result == 0)
             {
-                $this->error='Failed to get record with code '.$this->type_code.' from dictionnary "type of events"';
+                $this->error='Failed to get record with code '.$this->type_code.' from dictionary "type of events"';
                 return -1;
             }
             else
@@ -833,7 +833,7 @@ class ActionComm extends CommonObject
         require_once (DOL_DOCUMENT_ROOT ."/core/lib/xcal.lib.php");
         require_once (DOL_DOCUMENT_ROOT ."/core/lib/date.lib.php");
         require_once (DOL_DOCUMENT_ROOT ."/core/lib/files.lib.php");
-        
+
         dol_syslog(get_class($this)."::build_exportfile Build export file format=".$format.", type=".$type.", cachedelay=".$cachedelay.", filename=".$filename.", filters size=".count($filters), LOG_DEBUG);
 
         // Check parameters

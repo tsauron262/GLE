@@ -155,7 +155,8 @@ print '<tr '.$bc[$var].'><td width="300">&nbsp; => price(1234.56)</td><td>'.pric
 // Timezone
 $txt =$langs->trans("OSTZ").' (variable system TZ): '.(! empty($_ENV["TZ"])?$_ENV["TZ"]:$langs->trans("NotDefined")).'<br>'."\n";
 $txt.=$langs->trans("PHPTZ").' (php.ini date.timezone): '.(ini_get("date.timezone")?ini_get("date.timezone"):$langs->trans("NotDefined")).''."<br>\n"; // date.timezone must be in valued defined in http://fr3.php.net/manual/en/timezones.europe.php
-$txt.=$langs->trans("YouCanEditPHPTZ");
+$txt.=$langs->trans("Dolibarr constant MAIN_SERVER_TZ").': '.(empty($conf->global->MAIN_SERVER_TZ)?$langs->trans("NotDefined"):$conf->global->MAIN_SERVER_TZ);
+//$txt.=$langs->trans("YouCanEditPHPTZ"); // deprecated
 $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CurrentTimeZone").'</td><td>';	// Timezone server PHP
 $a=getServerTimeZoneInt('now');
@@ -177,13 +178,20 @@ $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">&nbsp; => dol_get_first_day(1970,1,false)</td><td>'.dol_get_first_day(1970,1,false).' &nbsp; &nbsp; (=> dol_print_date() or idate() of this value = '.dol_print_date(dol_get_first_day(1970,1,false),'dayhour').')</td>';
 $var=!$var;
 print '<tr '.$bc[$var].'><td width="300">&nbsp; => dol_get_first_day(1970,1,true)</td><td>'.dol_get_first_day(1970,1,true).' &nbsp; &nbsp; (=> dol_print_date() or idate() of this value = '.dol_print_date(dol_get_first_day(1970,1,true),'dayhour').')</td>';
-// Parent company
-/*
-$var=!$var;
-print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("CompanyTZ").'</td><td>'.$langs->trans("FeatureNotYetAvailable").'</td></tr>'."\n";
-$var=!$var;
-print '<tr '.$bc[$var].'><td width="300">&nbsp; => '.$langs->trans("CompanyHour").'</td><td>'.$langs->trans("FeatureNotYetAvailable").'</td></tr>'."\n";
-*/
+// Database timezone
+if ($conf->db->type == 'mysql' || $conf->db->type == 'mysqli')
+{
+	$var=!$var;
+	print '<tr '.$bc[$var].'><td width="300">'.$langs->trans("MySQLTimeZone").' (database)</td><td>';	// Timezone server base
+	$sql="SHOW VARIABLES where variable_name = 'system_time_zone'";
+	$resql = $db->query($sql);
+	if ($resql)
+	{
+		$obj = $db->fetch_object($resql);
+		print $form->textwithtooltip($obj->Value,$langs->trans('TZHasNoEffect'),2,1,img_info(''));
+	}
+	print '</td></tr>'."\n";
+}
 // Client
 $var=!$var;
 $tz=(int) $_SESSION['dol_tz'] + (int) $_SESSION['dol_dst'];

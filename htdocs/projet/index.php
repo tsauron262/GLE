@@ -253,4 +253,171 @@ function sec2hour($sec){
 }
 
 
-?>
+
+print '<div class="fichecenter"><div class="fichethirdleft">';
+
+
+print_projecttasks_array($db,$socid,$projectsListId);
+
+
+print '</div><div class="fichetwothirdright"><div class="ficheaddleft">';
+
+
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre">';
+print_liste_field_titre($langs->trans("ThirdParties"),$_SERVER["PHP_SELF"],"s.nom","","","",$sortfield,$sortorder);
+print_liste_field_titre($langs->trans("NbOfProjects"),"","","","",'align="right"',$sortfield,$sortorder);
+print "</tr>\n";
+
+$sql = "SELECT count(p.rowid) as nb";
+$sql.= ", s.nom, s.rowid as socid";
+$sql.= " FROM ".MAIN_DB_PREFIX."projet as p";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on p.fk_soc = s.rowid";
+$sql.= " WHERE p.entity = ".$conf->entity;
+if ($mine || empty($user->rights->projet->all->lire)) $sql.= " AND p.rowid IN (".$projectsListId.")";
+if ($socid)	$sql.= "  AND (p.fk_soc IS NULL OR p.fk_soc = 0 OR p.fk_soc = ".$socid.")";
+$sql.= " GROUP BY s.nom, s.rowid";
+
+$var=true;
+$resql = $db->query($sql);
+if ( $resql )
+{
+	$num = $db->num_rows($resql);
+	$i = 0;
+
+	while ($i < $num)
+	{
+		$obj = $db->fetch_object($resql);
+		$var=!$var;
+		print "<tr ".$bc[$var].">";
+		print '<td class="nowrap">';
+		if ($obj->socid)
+		{
+			$socstatic->id=$obj->socid;
+			$socstatic->nom=$obj->nom;
+			print $socstatic->getNomUrl(1);
+		}
+		else
+		{
+			print $langs->trans("OthersNotLinkedToThirdParty");
+		}
+		print '</td>';
+		print '<td align="right"><a href="'.DOL_URL_ROOT.'/projet/liste.php?socid='.$obj->socid.'">'.$obj->nb.'</a></td>';
+		print "</tr>\n";
+
+		$i++;
+	}
+
+	$db->free($resql);
+}
+else
+{
+	dol_print_error($db);
+}
+print "</table>";
+
+
+print '</div></div></div>';
+
+
+// Tasks for all resources of all opened projects and time spent for each task/resource
+print '<div class="fichecenter">';
+
+$sql = "SELECT p.title, p.rowid as projectid, t.label, t.rowid as taskid, u.rowid as userid, t.planned_workload, t.dateo, t.datee, SUM(tasktime.task_duration) as timespent";
+$sql.= " FROM ".MAIN_DB_PREFIX."projet as p";
+$sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s on p.fk_soc = s.rowid";
+$sql.= " INNER JOIN ".MAIN_DB_PREFIX."projet_task as t on t.fk_projet = p.rowid";
+$sql.= " INNER JOIN ".MAIN_DB_PREFIX."projet_task_time as tasktime on tasktime.fk_task = t.rowid";
+$sql.= " INNER JOIN ".MAIN_DB_PREFIX."user as u on tasktime.fk_user = u.rowid";
+$sql.= " WHERE p.entity = ".$conf->entity;
+if ($mine || ! $user->rights->projet->all->lire) $sql.= " AND p.rowid IN (".$projectsListId.")";
+if ($socid)	$sql.= "  AND (p.fk_soc IS NULL OR p.fk_soc = 0 OR p.fk_soc = ".$socid.")";
+$sql.= " AND p.fk_statut=1";
+$sql.= " GROUP BY p.title, p.rowid, t.label, t.rowid, u.rowid, t.planned_workload, t.dateo, t.datee";
+$sql.= " ORDER BY u.rowid, t.dateo, t.datee";
+
+$userstatic=new User($db);
+
+dol_syslog('projet:index.php: affectationpercent sql='.$sql,LOG_DEBUG);
+$resql = $db->query($sql);
+if ( $resql )
+{
+	$num = $db->num_rows($resql);
+	$i = 0;
+
+	if ($num > (empty($conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA)?1000:$conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA))
+	{
+/*		print '<tr '.$bc[0].'>';
+		print '<td colspan="9">';
+		print $langs->trans("TooManyDataPleaseUseMoreFilters");
+		print '</td></tr>';*/
+	}
+	else
+	{
+		print '<br>';
+
+		print_fiche_titre($langs->trans("TimeSpent"),'','').'<br>';
+
+		print '<table class="noborder" width="100%">';
+		print '<tr class="liste_titre">';
+		print '<th>'.$langs->trans('TaskRessourceLinks').'</th>';
+		print '<th>'.$langs->trans('Projects').'</th>';
+		print '<th>'.$langs->trans('Task').'</th>';
+		print '<th>'.$langs->trans('DateStart').'</th>';
+		print '<th>'.$langs->trans('DateEnd').'</th>';
+		print '<th>'.$langs->trans('TimeSpent').'</th>';
+		print '</tr>';
+
+		while ($i < $num)
+		{
+			$obj = $db->fetch_object($resql);
+			$var=!$var;
+
+			$username='';
+			if ($obj->userid && $userstatic->id != $obj->userid)	// We have a user and it is not last loaded user
+			{
+				$result=$userstatic->fetch($obj->userid);
+				if (! $result) $userstatic->id=0;
+			}
+			if ($userstatic->id) $username = $userstatic->getNomUrl(0,0);
+
+			print "<tr ".$bc[$var].">";
+			print '<td>'.$username.'</td>';
+			print '<td><a href="'.DOL_URL_ROOT.'/projet/fiche.php?id='.$obj->projectid.'">'.$obj->title.'</a></td>';
+			print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/task.php?id='.$obj->taskid.'&withproject=1">'.$obj->label.'</a></td>';
+			print '<td>'.dol_print_date($db->jdate($obj->dateo)).'</td>';
+			print '<td>'.dol_print_date($db->jdate($obj->datee)).'</td>';
+			/* I disable this because information is wrong. This percent has no meaning for a particular resource. What do we want ?
+			 * Percent of completion ?
+			 * If we want to show completion, we must remove "user" into list,
+			if (empty($obj->planned_workload)) {
+				$percentcompletion = $langs->trans("Unknown");
+			} else {
+				$percentcompletion = intval($obj->task_duration*100/$obj->planned_workload);
+			}*/
+			print '<td><a href="'.DOL_URL_ROOT.'/projet/tasks/time.php?id='.$obj->taskid.'&withproject=1">';
+			//print $percentcompletion.' %';
+			print convertSecondToTime($obj->timespent, 'all');
+			print '</a></td>';
+			print "</tr>\n";
+
+			$i++;
+		}
+
+		print "</table>";
+	}
+
+	$db->free($resql);
+}
+else
+{
+	dol_print_error($db);
+}
+
+print '</div>';
+
+
+
+llxFooter();
+
+$db->close();

@@ -431,7 +431,7 @@ class pdf_merou extends ModelePdfExpedition
 	 */
 	function _pagehead(&$pdf, $object, $showaddress, $outputlangs)
 	{
-		global $conf, $langs;
+		global $conf, $langs,$hookmanager;
 
 		$default_font_size = pdf_getPDFFontSize($outputlangs);
 
@@ -602,8 +602,7 @@ class pdf_merou extends ModelePdfExpedition
 			$carac_client_name=$outputlangs->convToOutputCharset($object->client->nom);
 		}
 
-		$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,$object->contact,$usecontact,'target');
-
+		$carac_client=pdf_build_address($outputlangs,$this->emetteur,$object->client,((!empty($object->contact))?$object->contact:null),$usecontact,'targetwithdetails');
 
 		$blDestX=$blExpX+55;
 		$blW=50;
@@ -626,4 +625,3 @@ class pdf_merou extends ModelePdfExpedition
 		$pdf->MultiCell($blW,2, $carac_client, 0, 'L');
 	}
 }
-?>

@@ -1,5 +1,5 @@
 <?php
-/* Copyright (C) 2013 Laurent Destailleur  <eldy@users.sourceforge.net>
+/* Copyright (C) 2013-2014 Laurent Destailleur  <eldy@users.sourceforge.net>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,8 @@ require_once('../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT."/core/lib/admin.lib.php");
 require_once(DOL_DOCUMENT_ROOT."/core/lib/files.lib.php");
 
-
+// Security check
+if (!$user->rights->opensurvey->read) accessforbidden();
 
 /*
  * View
@@ -45,26 +46,39 @@ if ($resql)
 }
 else dol_print_error($db,'');
 
+
+
 print_fiche_titre($langs->trans("OpenSurveyArea"));
 
-echo $langs->trans("NoSurveysInDatabase",$nbsondages).'<br><br>'."\n";
+
+print '<div class="fichecenter"><div class="fichethirdleft">';
 
 
-// Link
-print img_picto('','object_globe.png').' '.$langs->trans("PublicLinkToCreateSurvey").':<br>';
+$nbsondages=0;
+$sql='SELECT COUNT(*) as nb FROM '.MAIN_DB_PREFIX.'opensurvey_sondage';
+$resql=$db->query($sql);
+if ($resql)
+{
+	$obj=$db->fetch_object($resql);
+	$nbsondages=$obj->nb;
+}
+else dol_print_error($db,'');
 
-// Define $urlwithroot
-$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));
-$urlwithroot=$urlwithouturlroot.DOL_URL_ROOT;		// This is to use external domain name found into config file
-//$urlwithroot=DOL_MAIN_URL_ROOT;					// This is to use same domain name than current
+print '<table class="noborder" width="100%">';
+print '<tr class="liste_titre"><td colspan="2">'.$langs->trans("OpenSurveyArea").'</td></tr>';
+print "<tr ".$bc[0].">";
+print '<td>'.$langs->trans("NbOfSurveys").'</td><td align="right"><a href="list.php">'.$nbsondages.'</a></td>';
+print "</tr>";
+//print '<tr class="liste_total"><td>'.$langs->trans("Total").'</td><td align="right">';
+//print $total;
+//print '</td></tr>';
+print '</table>';
 
-$url=$urlwithouturlroot.dol_buildpath('/opensurvey/public/index.php',1);
-$urllink='<a href="'.$url.'" target="_blank">'.$url.'</a>';
-print $urllink;
+
+print '</div></div></div>';
 
 
 
 llxFooter();
 
 $db->close();
-?>

@@ -181,14 +181,15 @@ if ($viewstatut <> '') {
 }
 if ($ordermonth > 0) {
     if ($orderyear > 0 && empty($day))
-        $sql.= " AND c.date_valid BETWEEN '" . $db->idate(dol_get_first_day($orderyear, $ordermonth, false)) . "' AND '" . $db->idate(dol_get_last_day($orderyear, $ordermonth, false)) . "'";
-    else if ($orderyear > 0 && !empty($day))
-        $sql.= " AND c.date_valid BETWEEN '" . $db->idate(dol_mktime(0, 0, 0, $ordermonth, $day, $orderyear)) . "' AND '" . $db->idate(dol_mktime(23, 59, 59, $ordermonth, $day, $orderyear)) . "'";
+    $sql.= " AND c.date_commande BETWEEN '".$db->idate(dol_get_first_day($orderyear,$ordermonth,false))."' AND '".$db->idate(dol_get_last_day($orderyear,$ordermonth,false))."'";
+    else if ($orderyear > 0 && ! empty($day))
+    $sql.= " AND c.date_commande BETWEEN '".$db->idate(dol_mktime(0, 0, 0, $ordermonth, $day, $orderyear))."' AND '".$db->idate(dol_mktime(23, 59, 59, $ordermonth, $day, $orderyear))."'";
     else
-        $sql.= " AND date_format(c.date_valid, '%m') = '" . $ordermonth . "'";
+    $sql.= " AND date_format(c.date_commande, '%m') = '".$ordermonth."'";
 }
-else if ($orderyear > 0) {
-    $sql.= " AND c.date_valid BETWEEN '" . $db->idate(dol_get_first_day($orderyear, 1, false)) . "' AND '" . $db->idate(dol_get_last_day($orderyear, 12, false)) . "'";
+else if ($orderyear > 0)
+{
+    $sql.= " AND c.date_commande BETWEEN '".$db->idate(dol_get_first_day($orderyear,1,false))."' AND '".$db->idate(dol_get_last_day($orderyear,12,false))."'";
 }
 if ($deliverymonth > 0) {
     if ($deliveryyear > 0 && empty($day))
@@ -214,8 +215,17 @@ if ($search_user > 0) {
     $sql.= " AND ec.fk_c_type_contact = tc.rowid AND tc.element='commande' AND tc.source='internal' AND ec.element_id = c.rowid AND ec.fk_socpeople = " . $search_user;
 }
 
-$sql.= ' ORDER BY ' . $sortfield . ' ' . $sortorder;
-$sql.= $db->plimit($limit + 1, $offset);
+$sql.= ' ORDER BY '.$sortfield.' '.$sortorder;
+
+$nbtotalofrecords = 0;
+if (empty($conf->global->MAIN_DISABLE_FULL_SCANLIST))
+{
+	$result = $db->query($sql);
+	$nbtotalofrecords = $db->num_rows($result);
+}
+
+
+$sql.= $db->plimit($limit + 1,$offset);
 
 //print $sql;
 $resql = $db->query($sql);
@@ -264,9 +274,9 @@ if ($resql) {
     if ($search_sale > 0)
         $param.='&search_sale=' . $search_sale;
 
-    $num = $db->num_rows($resql);
-    print_barre_liste($title, $page, $_SERVER["PHP_SELF"], $param, $sortfield, $sortorder, '', $num);
-    $i = 0;
+	$num = $db->num_rows($resql);
+	print_barre_liste($title, $page,$_SERVER["PHP_SELF"],$param,$sortfield,$sortorder,'',$num,$nbtotalofrecords);
+	$i = 0;
 
     // Lignes des champs de filtre
     print '<form method="GET" action="' . $_SERVER["PHP_SELF"] . '">';
@@ -314,8 +324,14 @@ if ($resql) {
 	print '<td class="liste_titre" align="left">';
 	print '<input class="flat" type="text" name="snom" value="'.$snom.'">';
 	print '</td>';
-	print '<td class="liste_titre">&nbsp;';
-	print '</td><td class="liste_titre">&nbsp;';
+	print '<td class="liste_titre">';
+    if (! empty($conf->global->MAIN_LIST_FILTER_ON_DAY)) print '<input class="flat" type="text" size="1" maxlength="2" name="orderday" value="'.$orderday.'">';
+    print '<input class="flat" type="text" size="1" maxlength="2" name="ordermonth" value="'.$ordermonth.'">';
+    $formother->select_year($orderyear?$orderyear:-1,'orderyear',1, 20, 5);
+	print '</td><td class="liste_titre">';
+    if (! empty($conf->global->MAIN_LIST_FILTER_ON_DAY)) print '<input class="flat" type="text" size="1" maxlength="2" name="deliveryday" value="'.$deliveryday.'">';
+    print '<input class="flat" type="text" size="1" maxlength="2" name="deliverymonth" value="'.$deliverymonth.'">';
+    $formother->select_year($deliveryyear?$deliveryyear:-1,'deliveryyear',1, 20, 5);
 	print '</td><td class="liste_titre">&nbsp;';
 	print '</td><td align="right" class="liste_titre">';
 	print '<input type="image" class="liste_titre" name="button_search" src="'.img_picto($langs->trans("Search"),'search.png','','',1).'"  value="'.dol_escape_htmltag($langs->trans("Search")).'" title="'.dol_escape_htmltag($langs->trans("Search")).'">';
@@ -365,7 +381,7 @@ print '<tr '.$bc[$var].'>';
 		print '</td>';
 
 		print '<td style="min-width: 20px" class="nobordernopadding nowrap">';
-		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_valid),$db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
+		if (($objp->fk_statut > 0) && ($objp->fk_statut < 3) && max($db->jdate($objp->date_commande),$db->jdate($objp->date_livraison)) < ($now - $conf->commande->client->warning_delay))
 			print img_picto($langs->trans("Late"),"warning");
 		if(!empty($objp->note_private))
 		{
@@ -412,19 +428,15 @@ print '<tr '.$bc[$var].'>';
 		}
 		print '</td>';
 
-        // Delivery date
-        $y = dol_print_date($db->jdate($objp->date_livraison), '%Y');
-        $m = dol_print_date($db->jdate($objp->date_livraison), '%m');
-        $ml = dol_print_date($db->jdate($objp->date_livraison), '%B');
-        $d = dol_print_date($db->jdate($objp->date_livraison), '%d');
-        print '<td align="right">';
-        print $d;
-        print ' <a href="' . $_SERVER['PHP_SELF'] . '?deliveryyear=' . $y . '&amp;deliverymonth=' . $m . '">' . $ml . '</a>';
-        print ' <a href="' . $_SERVER['PHP_SELF'] . '?deliveryyear=' . $y . '">' . $y . '</a>';
-        print '</td>';
+		// Order date
+		print '<td align="right">';
+		print dol_print_date($db->jdate($objp->date_commande), 'day');
+		print '</td>';
 
-        // Amount HT
-        print '<td align="right" class="nowrap">' . price($objp->total_ht) . '</td>';
+		// Delivery date
+		print '<td align="right">';
+		print dol_print_date($db->jdate($objp->date_delivery), 'day');
+		print '</td>';
 
         // Statut
         print '<td align="right" class="nowrap">' . $generic_commande->LibStatut($objp->fk_statut, $objp->facturee, 5) . '</td>';
@@ -450,12 +462,17 @@ print '<tr '.$bc[$var].'>';
 
     print '</form>';
 
-    $db->free($resql);
-} else {
-    print dol_print_error($db);
+	print '</form>'."\n";
+
+	print '<br>'.img_help(1,'').' '.$langs->trans("ToBillSeveralOrderSelectCustomer", $langs->transnoentitiesnoconv("CreateInvoiceForThisCustomer")).'<br>';
+	
+	$db->free($resql);
+}
+else
+{
+	print dol_print_error($db);
 }
 
 llxFooter();
 
 $db->close();
-?>

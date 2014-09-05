@@ -18,6 +18,7 @@ NewCompany=New company (prospect, customer, supplier)
 NewThirdParty=New third party (prospect, customer, supplier)
 NewSocGroup=New company group
 NewPrivateIndividual=New private individual (prospect, customer, supplier)
+CreateDolibarrThirdPartySupplier=Create a third party (supplier)
 ProspectionArea=Prospection area
 SocGroup=Group of companies
 IdThirdParty=Id third party
@@ -68,6 +69,7 @@ CountryId=Country id
 Phone=Phone
 Skype=Skype
 Call=Call
+Chat=Chat
 PhonePro=Prof. phone
 PhonePerso=Pers. phone
 PhoneMobile=Mobile
@@ -81,6 +83,7 @@ DefaultLang=Language by default
 VATIsUsed=VAT is used
 VATIsNotUsed=VAT is not used
 CopyAddressFromSoc=Fill address with thirdparty address
+NoEmailDefined=There is no email defined
 ##### Local Taxes #####
 LocalTax1IsUsedES= RE is used
 LocalTax1IsNotUsedES= RE is not used
@@ -397,11 +400,10 @@ UniqueThirdParties=Total of unique third parties
 InActivity=Open
 ActivityCeased=Closed
 ActivityStateFilter=Activity status
-ProductsIntoElements=List of products into
+ProductsIntoElements=List of products into %s
 CurrentOutstandingBill=Current outstanding bill
 OutstandingBill=Max. for outstanding bill
 OutstandingBillReached=Reached max. for outstanding bill
-# Monkey
 MonkeyNumRefModelDesc=Return numero with format %syymm-nnnn for customer code and %syymm-nnnn for supplier code where yy is year, mm is month and nnnn is a sequence with no break and no return to 0.
-# Leopard
 LeopardNumRefModelDesc=The code is free. This code can be modified at any time.
+ManagingDirectors=Manager(s) name (CEO, director, president...)

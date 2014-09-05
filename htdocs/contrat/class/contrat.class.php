@@ -29,6 +29,7 @@
  */
 
 require_once DOL_DOCUMENT_ROOT.'/core/class/commonobject.class.php';
+require_once DOL_DOCUMENT_ROOT.'/core/lib/price.lib.php';
 require_once(DOL_DOCUMENT_ROOT ."/margin/lib/margins.lib.php");
 require_once(DOL_DOCUMENT_ROOT ."/core/lib/price.lib.php");
 
@@ -449,6 +450,14 @@ class Contrat extends CommonObject
 
 				$this->db->free($resql);
 
+				// Retreive all extrafield for thirdparty
+				// fetch optionals attributes and labels
+				require_once(DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php');
+				$extrafields=new ExtraFields($this->db);
+				$extralabels=$extrafields->fetch_name_optionals_label($this->table_element,true);
+				$this->fetch_optionals($this->id,$extralabels);
+
+
 				return $this->id;
 			}
 			else
@@ -719,8 +728,8 @@ class Contrat extends CommonObject
 		$sql = "INSERT INTO ".MAIN_DB_PREFIX."contrat (datec, fk_soc, fk_user_author, date_contrat,";
 		$sql.= " fk_commercial_signature, fk_commercial_suivi, fk_projet,";
 		$sql.= " ref, entity, note_private, note_public)";
-		$sql.= " VALUES (".$this->db->idate($now).",".$this->socid.",".$user->id;
-		$sql.= ",".$this->db->idate($this->date_contrat);
+		$sql.= " VALUES ('".$this->db->idate($now)."',".$this->socid.",".$user->id;
+		$sql.= ", '".$this->db->idate($this->date_contrat)."'";
 		$sql.= ",".($this->commercial_signature_id>0?$this->commercial_signature_id:"NULL");
 		$sql.= ",".($this->commercial_suivi_id>0?$this->commercial_suivi_id:"NULL");
 		$sql.= ",".($this->fk_project>0?$this->fk_project:"NULL");
@@ -753,6 +762,19 @@ class Contrat extends CommonObject
 			// Insert contacts commerciaux ('SALESREPFOLL','contrat')
 			$result=$this->add_contact($this->commercial_suivi_id,'SALESREPFOLL','internal');
 			if ($result < 0) $error++;
+
+
+			if (! $error)
+			{
+				if (empty($conf->global->MAIN_EXTRAFIELDS_DISABLED)) // For avoid conflicts if trigger used
+				{
+					$result=$this->insertExtraFields();
+					if ($result < 0)
+					{
+						$error++;
+					}
+				}
+			}
 
 			if (! $error)
 			{
@@ -812,6 +834,7 @@ class Contrat extends CommonObject
 	function delete($user)
 	{
 		global $conf, $langs;
+		require_once DOL_DOCUMENT_ROOT . '/core/lib/files.lib.php';
 
 		$error=0;
 
@@ -1155,11 +1178,11 @@ class Contrat extends CommonObject
 		$this->db->begin();
 
 		// Calcul du total TTC et de la TVA pour la ligne a partir de
-		// qty, pu, remise_percent et txtva
+		// qty, pu, remise_percent et tvatx
 		// TRES IMPORTANT: C'est au moment de l'insertion ligne qu'on doit stocker
 		// la part ht, tva et ttc, et ce au niveau de la ligne qui a son propre taux tva.
 
-		$localtaxes_type=getLocalTaxesFromRate(/*mod drsi*/$tvatx/*fmoddrsi*/,0,$mysoc);
+		$localtaxes_type=getLocalTaxesFromRate($tvatx,0,$mysoc);
 
 		$tabprice=calcul_price_total($qty, $pu, $remise_percent, $tvatx, $localtaxtx1, $txlocaltaxtx2, 0, $price_base_type, $info_bits, 1, '', $localtaxes_type);
 		$total_ht  = $tabprice[0];
@@ -1693,7 +1716,7 @@ class Contrat extends CommonObject
 		$this->id=0;
 		$this->specimen=1;
 
-		$this->ref = 'DOLIBARR';
+		$this->ref = 'SPECIMEN';
 		$this->socid = 1;
 		$this->statut= 0;
 		$this->date_contrat = dol_now();
@@ -2211,4 +2234,3 @@ class ContratLigne
 }
 
 
-?>

@@ -42,7 +42,7 @@ class Contact extends CommonObject
 
 	var $id;
     var $ref_ext;
-	var $civilite_id;  // In fact we store civility_code
+	var $civility_id;  // In fact we store civility_code
     var $lastname;
 	var $firstname;
 	var $address;
@@ -251,7 +251,7 @@ class Contact extends CommonObject
 		$sql = "UPDATE ".MAIN_DB_PREFIX."socpeople SET ";
 		if ($this->socid > 0) $sql .= " fk_soc='".$this->db->escape($this->socid)."',";
 		else if ($this->socid == -1) $sql .= " fk_soc=null,";
-		$sql .= "  civilite='".$this->db->escape($this->civilite_id)."'";
+		$sql .= "  civilite='".$this->db->escape($this->civility_id)."'";
 		$sql .= ", lastname='".$this->db->escape($this->lastname)."'";
 		$sql .= ", firstname='".$this->db->escape($this->firstname)."'";
 		$sql .= ", address='".$this->db->escape($this->address)."'";
@@ -274,7 +274,7 @@ class Contact extends CommonObject
 		$sql .= ", fk_user_modif=".($user->id > 0 ? "'".$user->id."'":"NULL");
 		$sql .= ", default_lang=".($this->default_lang?"'".$this->default_lang."'":"NULL");
 		$sql .= ", no_email=".($this->no_email?"'".$this->no_email."'":"0");
-		$sql .= " WHERE rowid=".$id;
+		$sql .= " WHERE rowid=".$this->db->escape($id);
 
 		dol_syslog(get_class($this)."::update sql=".$sql,LOG_DEBUG);
 		$result = $this->db->query($sql);
@@ -442,7 +442,7 @@ class Contact extends CommonObject
 		$sql = "UPDATE ".MAIN_DB_PREFIX."socpeople SET";
 		$sql.= " birthday=".($this->birthday ? "'".$this->db->idate($this->birthday)."'" : "null");
 		if ($user) $sql .= ", fk_user_modif=".$user->id;
-		$sql.= " WHERE rowid=".$id;
+		$sql.= " WHERE rowid=".$this->db->escape($id);
 
 		dol_syslog(get_class($this)."::update_perso this->birthday=".$this->birthday." - sql=".$sql);
 		$resql = $this->db->query($sql);
@@ -456,13 +456,13 @@ class Contact extends CommonObject
 		if ($this->birthday_alert)
 		{
 			//check existing
-			$sql_check = "SELECT * FROM ".MAIN_DB_PREFIX."user_alert WHERE type=1 AND fk_contact=".$id." AND fk_user=".$user->id;
+			$sql_check = "SELECT * FROM ".MAIN_DB_PREFIX."user_alert WHERE type=1 AND fk_contact=".$this->db->escape($id)." AND fk_user=".$user->id;
 			$result_check = $this->db->query($sql_check);
 			if (! $result_check || ($this->db->num_rows($result_check)<1))
 			{
 				//insert
 				$sql = "INSERT INTO ".MAIN_DB_PREFIX."user_alert(type,fk_contact,fk_user) ";
-				$sql.= "VALUES (1,".$id.",".$user->id.")";
+				$sql.= "VALUES (1,".$this->db->escape($id).",".$user->id.")";
 				$result = $this->db->query($sql);
 				if (! $result)
 				{
@@ -478,7 +478,7 @@ class Contact extends CommonObject
 		else
 		{
 			$sql = "DELETE FROM ".MAIN_DB_PREFIX."user_alert ";
-			$sql.= "WHERE type=1 AND fk_contact=".$id." AND fk_user=".$user->id;
+			$sql.= "WHERE type=1 AND fk_contact=".$this->db->escape($id)." AND fk_user=".$user->id;
 			$result = $this->db->query($sql);
 			if (! $result)
 			{
@@ -504,7 +504,7 @@ class Contact extends CommonObject
 
 		$langs->load("companies");
 
-		$sql = "SELECT c.rowid, c.fk_soc, c.ref_ext, c.civilite as civilite_id, c.lastname, c.firstname,";
+		$sql = "SELECT c.rowid, c.fk_soc, c.ref_ext, c.civilite as civility_id, c.lastname, c.firstname,";
 		$sql.= " c.address, c.statut, c.zip, c.town,";
 		$sql.= " c.fk_pays as country_id,";
 		$sql.= " c.fk_departement,";
@@ -534,7 +534,7 @@ class Contact extends CommonObject
 				$this->id				= $obj->rowid;
 				$this->ref				= $obj->rowid;
 				$this->ref_ext			= $obj->ref_ext;
-				$this->civilite_id		= $obj->civilite_id;
+				$this->civility_id		= $obj->civility_id;
 				$this->lastname			= $obj->lastname;
 				$this->firstname		= $obj->firstname;
 				$this->address			= $obj->address;
@@ -608,7 +608,7 @@ class Contact extends CommonObject
 				{
 					$sql = "SELECT fk_user";
 					$sql .= " FROM ".MAIN_DB_PREFIX."user_alert";
-					$sql .= " WHERE fk_user = ".$user->id." AND fk_contact = ".$id;
+					$sql .= " WHERE fk_user = ".$user->id." AND fk_contact = ".$this->db->escape($id);
 
 					$resql=$this->db->query($sql);
 					if ($resql)
@@ -819,7 +819,7 @@ class Contact extends CommonObject
 		$sql = "SELECT c.rowid, c.datec as datec, c.fk_user_creat,";
 		$sql.= " c.tms as tms, c.fk_user_modif";
 		$sql.= " FROM ".MAIN_DB_PREFIX."socpeople as c";
-		$sql.= " WHERE c.rowid = ".$id;
+		$sql.= " WHERE c.rowid = ".$this->db->escape($id);
 
 		$resql=$this->db->query($sql);
 		if ($resql)
@@ -887,7 +887,7 @@ class Contact extends CommonObject
 
 	/**
 	 *  Return name of contact with link (and eventually picto)
-	 *	Use $this->id, $this->lastname, $this->firstname, this->civilite_id
+	 *	Use $this->id, $this->lastname, $this->firstname, this->civility_id
 	 *
 	 *	@param		int			$withpicto		Include picto with link
 	 *	@param		string		$option			Where the link point to
@@ -924,7 +924,7 @@ class Contact extends CommonObject
 		global $langs;
 		$langs->load("dict");
 
-		$code=(! empty($this->civilite_id)?$this->civilite_id:(! empty($this->civility_id)?$this->civility_id:''));
+		$code=(! empty($this->civility_id)?$this->civility_id:(! empty($this->civility_id)?$this->civility_id:''));
 		if (empty($code)) return '';
         return $langs->getLabelFromKey($this->db, "Civility".$code, "c_civilite", "code", "civilite", $code);
 	}
@@ -1010,21 +1010,14 @@ class Contact extends CommonObject
 	{
 		global $user,$langs;
 
-		// Charge tableau des id de societe socids
-		$socids = array();
-		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."societe LIMIT 10";
+		// Get first id of existing company and save it into $socid
+		$socid = 0;
+		$sql = "SELECT rowid FROM ".MAIN_DB_PREFIX."societe ORDER BY rowid LIMIT 1";
 		$resql = $this->db->query($sql);
 		if ($resql)
 		{
-			$num_socs = $this->db->num_rows($resql);
-			$i = 0;
-			while ($i < $num_socs)
-			{
-				$i++;
-
-				$row = $this->db->fetch_row($resql);
-				$socids[$i] = $row[0];
-			}
+			$obj = $this->db->fetch_object($resql);
+			if ($obj) $socid=$obj->rowid;
 		}
 
 		// Initialise parameters
@@ -1039,7 +1032,7 @@ class Contact extends CommonObject
 		$this->country_code = 'FR';
 		$this->country = 'France';
 		$this->email = 'specimen@specimen.com';
-    $this->skype = 'tom.hanson';
+    	$this->skype = 'tom.hanson';
 
 		$this->phone_pro = '0909090901';
 		$this->phone_perso = '0909090902';
@@ -1049,8 +1042,7 @@ class Contact extends CommonObject
 		$this->note_public='This is a comment (public)';
 		$this->note_private='This is a comment (private)';
 
-		$socid = rand(1, $num_socs);
-		$this->socid = $socids[$socid];
+		$this->socid = $socid;
 		$this->statut=1;
 	}
 
@@ -1102,4 +1094,3 @@ class Contact extends CommonObject
 	}
 
 }
-?>

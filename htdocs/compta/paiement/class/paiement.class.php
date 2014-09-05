@@ -224,7 +224,15 @@ class Paiement extends CommonObject
                             if (!in_array($invoice->type, $affected_types)) dol_syslog("Invoice ".$facid." is not a standard, nor replacement invoice, nor credit note, nor deposit invoice. We do nothing more.");
                             else if ($remaintopay) dol_syslog("Remain to pay for invoice ".$facid." not null. We do nothing more.");
                             else if ($mustwait) dol_syslog("There is ".$mustwait." differed payment to process, we do nothing more.");
-                            else $result=$invoice->set_paid($user,'','');
+                            else 
+                            {
+                                $result=$invoice->set_paid($user,'','');
+                                if ($result<0)
+                                {
+                                    $this->error=$invoice->error;
+                                    $error++;
+                                }
+                            }
 					    }
 					}
 					else
@@ -581,7 +589,7 @@ class Paiement extends CommonObject
         if (!empty($date) && $this->statut!=1)
         {
             $sql = "UPDATE ".MAIN_DB_PREFIX.$this->table_element;
-            $sql.= " SET datep = ".$this->db->idate($date);
+            $sql.= " SET datep = '".$this->db->idate($date)."'";
             $sql.= " WHERE rowid = ".$this->id;
 
             dol_syslog(get_class($this)."::update_date sql=".$sql);
@@ -814,4 +822,3 @@ class Paiement extends CommonObject
 	}
 
 }
-?>

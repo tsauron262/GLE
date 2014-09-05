@@ -84,7 +84,7 @@ print "<br>\n";
 
 $head=agenda_prepare_head();
 
-dol_fiche_head($head, 'other', $langs->trans("Agenda"));
+dol_fiche_head($head, 'other', $langs->trans("Agenda"), 0, 'action');
 
 print_titre($langs->trans("OtherOptions"));
 
@@ -110,11 +110,11 @@ if ($conf->use_javascript_ajax)
 }
 else
 {
-	if($conf->global->AGENDA_USE_EVENT_TYPE == 0)
+	if (empty($conf->global->AGENDA_USE_EVENT_TYPE))
 	{
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=set_AGENDA_USE_EVENT_TYPE">'.img_picto($langs->trans("Disabled"),'off').'</a>';
 	}
-	else if($conf->global->BUSINESS_VISIBLE_TO_ALL_BY_DEFAULT == 1)
+	else
 	{
 		print '<a href="'.$_SERVER['PHP_SELF'].'?action=del_AGENDA_USE_EVENT_TYPE">'.img_picto($langs->trans("Enabled"),'on').'</a>';
 	}
@@ -130,4 +130,3 @@ print "<br>";
 llxFooter();
 
 $db->close();
-?>

@@ -940,9 +940,7 @@ else if ($action == 'addline' && $user->rights->contrat->creer)
     if ($result >= 0) {
         header("Location: " . $_SERVER['PHP_SELF'] . "?id=" . $object->id);
         exit;
-    } else {
-        $mesg = $object->error;
-    }
+    } 
     else
     {
     	setEventMessage($object->error,'errors');
@@ -1112,7 +1110,7 @@ else if ($action == 'confirm_move' && $confirm == 'yes' && $user->rights->contra
 			setEventMessage($object->error,'errors');
 		}
 	}
-}
+//}
 
 
 /*
@@ -2405,4 +2403,4 @@ $(document).ready(function() {
 </script>
 
 <?php
-}
+}}

@@ -677,7 +677,7 @@ if (is_dir($dir)) {
                                     (nom,
                                      code_client,
                                      datec,
-                                     datea,
+                                    "./* datea,*/"
                                      siret,
                                      address,
                                      zip,
@@ -694,7 +694,7 @@ if (is_dir($dir)) {
                              VALUES ('" . $nomSoc . "',
                                      '" . $codSoc . "',
                                      now(),
-                                     now(),
+                                    "./* now(),*/"
                                      '" . (strlen($val['CliSIRET']) > 0 ? $val['CliSIRET'] : "NULL") . "',
                                      '" . (strlen($socAdresse) > 1 ? $socAdresse : "NULL") . "',
                                      '" . (strlen($val['CliFAdrZip']) > 0 ? $val['CliFAdrZip'] : "NULL") . "','" . (strlen($val['CliFAdrCity']) > 0 ? $val['CliFAdrCity'] : "NULL") . "',
@@ -974,8 +974,8 @@ if (is_dir($dir)) {
                                   |                                                                                                              |
                                   +--------------------------------------------------------------------------------------------------------------+
                                  */
-//                            updateCategorie($val['PlvCode'], $prodId, $val);
-//                            updateType($val['PlvCode'], $prodId);
+                            updateCategorie($val['PlvCode'], $prodId, $val);
+                            updateType($val['PlvCode'], $prodId);
                             } else {
                                 $requete = "INSERT " . MAIN_DB_PREFIX . "product
                                    (datec,

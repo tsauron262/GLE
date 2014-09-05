@@ -184,3 +184,12 @@ Veuillez noter le numéro suivant (repair confirmation number) et le transmettre
 
 ZZ501AAA0WP
 
+Famille => Famillematérielle
+
+Nature => Categorie SAV
+
+Categorie => famille prestation
+
+Libre3 => produit réservé
+
+

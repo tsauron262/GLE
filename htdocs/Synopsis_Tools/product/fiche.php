@@ -571,15 +571,15 @@ if ($_GET["action"] == 'cloneToLocation' && $user->rights->produit->creer) {
 /*
  * Suppression d'un produit/service pas encore affect
  */
-if ($_POST['action'] == 'confirm_delete' && $_POST['confirm'] == 'yes' && $user->rights->produit->supprimer) {
+if ($_REQUEST['action'] == 'confirm_delete' && $_REQUEST['confirm'] == 'yes' && $user->rights->produit->supprimer) {
     $product = new Product($db);
     $product->fetch($_GET['id']);
     $result = $product->delete($_GET['id']);
-
-    if ($result == 0) {
-        Header('Location: ' . DOL_URL_ROOT . '/product/liste_orig.php?delprod=' . $product->ref);
+    if ($result >= 0) {
+        Header('Location: ' . DOL_URL_ROOT . '/product/index.php?delprod=' . $product->ref);
         exit;
     } else {
+        print_r($product->errors);
         $reload = 0;
         $_GET['action'] = '';
     }

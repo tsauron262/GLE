@@ -504,7 +504,7 @@ if ($id > 0) {
 //    $lien->displayValue();
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Produits concerné</th>';
     print '<td colspan="3" class="ui-widget-content">';
-    $lien->displayForm();
+    print $lien->displayForm();
     print "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js'></script>";
 
 
@@ -519,12 +519,12 @@ if ($id > 0) {
     print "    </th>";
     print "</table>";
     print "<div id='delDialog'>&Ecirc;tes vous sur de vouloir supprimer <b><span class='ui-state-error'>d&eacute;finitivement</span></b> cette ligne ?</div>";
-    print "<script>";
+    print "<script>
+    jQuery(document).ready(function(){";
     print 'var socid = "' . $contrat->socid . '";';
     print 'var fk_contrat = "' . $contrat->id . '";';
     print 'var fk_contratdet = "' . $_REQUEST['id'] . '";';
     print <<<EOF
-    jQuery(document).ready(function(){
         jQuery('#NouvDI').click(function(){
             location.href=DOL_URL_ROOT+"/synopsisdemandeinterv/fiche.php?action=create&leftmenu=ficheinter&fk_contrat="+fk_contrat+"&fk_contratdet="+fk_contratdet+"&socid="+socid;
         });

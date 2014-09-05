@@ -12,5 +12,5 @@ require_once(DOL_DOCUMENT_ROOT."/Synopsis_Contrat/class/contrat.class.php");
     $lien->socid = $contrat->socid;
     $lien->cssClassM = "type:contratdet";
     $lien->fetch(3);
-    $lien->displayForm();
+    echo $lien->displayForm();
     ?>

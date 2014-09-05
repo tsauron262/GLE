@@ -1043,7 +1043,7 @@ class Synopsis_Contrat extends Contrat {
         $lien->socid = $this->socid;
         $lien->cssClassM = "type:contratdet";
         $lien->fetch(3);
-        $lien->displayForm();
+        echo $lien->displayForm();
         if ($ligne->GMAO_Mixte['nbVisiteAn'] > 0) {
             echo "</td><td>";
             echo "Nb Visite sur site : ";

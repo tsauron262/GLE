@@ -269,7 +269,8 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->author = $obj->fk_user_author;
                 $this->fk_user_prisencharge = $obj->fk_user_prisencharge;
                 $this->user_prisencharge = new User($this->db);
-                $this->user_prisencharge->fetch($this->fk_user_prisencharge);
+                if($this->fk_user_prisencharge)
+                    $this->user_prisencharge->fetch($this->fk_user_prisencharge);
                 $this->user_author_id = $obj->fk_user_author;
 
                 if ($this->statut == 0)

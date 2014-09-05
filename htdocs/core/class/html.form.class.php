@@ -1176,6 +1176,7 @@ class Form
         if (is_array($include) && $includeUsers) $sql.= " AND u.rowid IN ('".$includeUsers."')";
         if (! empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND u.statut <> 0";
         if (! empty($morefilter)) $sql.=$morefilter;
+        //mod drsi trie nom annuler
         $sql.= " ORDER BY u.lastname ASC";
         //f mod drsi
 

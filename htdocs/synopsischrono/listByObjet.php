@@ -6,7 +6,7 @@
  *
  * Name : listDetail.php.php
  * GLE-1.2
- */echo session_save_path();die;
+ */
 require_once('../main.inc.php');
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/chronoDetailList.php");

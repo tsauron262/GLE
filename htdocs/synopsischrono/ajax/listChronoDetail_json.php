@@ -424,9 +424,9 @@ switch ($action) {
             $requete .= $wh;
 
 
-            $sql = $db->query($requete);
-            if ($sql) {
-                $i = 0;
+//            $sql = $db->query($requete);
+//            if ($sql) {
+//                $i = 0;
 
                 class general {
                     
@@ -435,7 +435,7 @@ switch ($action) {
                 $responce = new general();
                 $responce->page = $page;
                 $responce->total = $total_pages;
-            }
+//            }
             $requete .= "      ORDER BY $sidx $sord";
             if ($sidx != "chrono_id" || $searchField) {
                 $responce->records = $i;

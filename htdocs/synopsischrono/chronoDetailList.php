@@ -11,7 +11,8 @@ class htmlOld {
 
     public function listjqGrid($arr, $id = 'grid', $pager = true, $display = true, $pagerArr = array(view => false, add => false, edit => false, search => true, position => "left"), $optionSearch) {
         $this->arrLigne = array();
-        $js = 'jQuery(document).ready(function(){eventList_init'.$id.' = false;';
+        $js = 'function initpan'.$id.'(){'
+                . 'eventList_init' . $id . ' = false;';
         $js .= 'var grid = jQuery("#' . $id . '").jqGrid({';
 
         $this->listjqGrid_base($arr);
@@ -20,16 +21,16 @@ class htmlOld {
         }
 
         $js .= join(',' . "\n\t", $this->arrLigne);
-        
+
         $js .= ', loadComplete : function() { 
             
-            if (eventList_init'.$id.' > 0)
-                saveGridToCookie("'.$id.$optionSearch.'", jQuery("#' . $id . '"));
-            if (eventList_init'.$id.' == 1)
-                eventList_init'.$id.' =2;
-            if (eventList_init'.$id.' == false){
-                loadGridFromCookie("'.$id.$optionSearch.'");
-                eventList_init'.$id.' =1;
+            if (eventList_init' . $id . ' > 0)
+                saveGridToCookie("' . $id . $optionSearch . '", jQuery("#' . $id . '"));
+            if (eventList_init' . $id . ' == 1)
+                eventList_init' . $id . ' =2;
+            if (eventList_init' . $id . ' == false){
+                loadGridFromCookie("' . $id . $optionSearch . '");
+                eventList_init' . $id . ' =1;
             }
             }';
 
@@ -45,7 +46,7 @@ class htmlOld {
             $js .= '         position:"' . ($pagerArr['position'] . "x" != "x" ? $pagerArr['position'] : 'left') . '"';
             $js .= '       });'
                     . ''
-          . "jQuery('#" . $id . "').jqGrid('navButtonAdd', '#" . $id . "Pager', {
+                    . "jQuery('#" . $id . "').jqGrid('navButtonAdd', '#" . $id . "Pager', {
                 caption: '',
                 buttonicon: \"ui-icon-calculator\",
                 title: \"Choose columns\",
@@ -59,11 +60,12 @@ class htmlOld {
                         }
                     });
                 }
-            });";
+                    });
+                    }";
         } else {
             $js .= ';';
         }
-$js .='function saveGridToCookie(name, grid) {
+        $js .='function saveGridToCookie(name, grid) {
 var gridInfo = new Object();
 name = name + window.location.pathname;
 gridInfo.url = grid.jqGrid(\'getGridParam\', \'url\');
@@ -92,9 +94,9 @@ setTimeout(function(){
 grid.trigger("reloadGrid");
 }, 200);
 }';
-        $js .= '});';
-        
-        
+//        $js .= '});';
+
+
         if ($display) {
             print $js;
         }
@@ -161,14 +163,29 @@ grid.trigger("reloadGrid");
 
 function tabChronoDetail($id, $nomDiv, $optionSearch = "") {
     global $db, $user;
-    
+
     $width = 1300;
+    $js = '';
 
 
     $htmlOld = new htmlOld();
 //$html = new form($db);
+    
+    
+    if ($id > 0 && !defined('INCLUDE_JSQGRIDE')) {
+        define('INCLUDE_JSQGRIDE', true);
+        $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";
+        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
+        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
+        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/css/ui.multiselect.css" />';
+        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
+        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
+        $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
+    }
 
-    $js = "<script>";
+    $js .= "<script>";
     $js .= <<<EOF
    jQuery(document).ready(function(){
         jQuery('#typeChrono').change(function(){
@@ -191,7 +208,7 @@ EOF;
 
         $colModel = array();
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList = 1 AND model_refid = " . $id/*. " ORDER BY rang"*/;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList = 1 AND model_refid = " . $id/* . " ORDER BY rang" */;
         $sql = $db->query($requete);
         $colModelArr = array();
         $colModelArr[0] = array('name' => "id", "index" => "id", "width" => 0, 'hidden' => true, "search" => false, "align" => "left", "key" => true, "hidedlg" => true);
@@ -199,7 +216,7 @@ EOF;
         $colModelArr[2] = array('name' => "hasRev", "index" => "hasRev", 'hidden' => true, "search" => false, "hidedlg" => true);
         $i = 3;
         if ($chronoRef->hasDescription) {
-            $colModelArr[$i] = array('name' => $chronoRef->nomDescription, "index" => "description", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => $chronoRef->nomDescription, "index" => "description", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
             $i++;
         }
         while ($res = $db->fetch_object($sql)) {
@@ -246,14 +263,14 @@ EOF;
                 $colModelArr[$i]['searchoptions'] = '{sopt:["eq","ne","nc","cn","bw","ew","nb","ne"]}';
                 $colModelArr[$i]['formoptions'] = '{ elmprefix:"*  " }';
             }
-            if($res1->nom == "Liste"){
+            if ($res1->nom == "Liste") {
 //                print_r($res1);
-                $tabVal= array();
-                $sql2 = $db->query("SELECT label as val, valeur as id FROM ".MAIN_DB_PREFIX."Synopsis_Process_form_list_members WHERE list_refid = ".$res->type_subvaleur);
-                while($result= $db->fetch_object($sql2))
-                        $tabVal[] = "".$result->val . ":".$result->val."";
+                $tabVal = array();
+                $sql2 = $db->query("SELECT label as val, valeur as id FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members WHERE list_refid = " . $res->type_subvaleur);
+                while ($result = $db->fetch_object($sql2))
+                    $tabVal[] = "" . $result->val . ":" . $result->val . "";
 //                die(implode("','", $tabVal));
-                $colModelArr[$i]['searchoptions'] = '{ value: ": ;'.implode(";", $tabVal).'" }';
+                $colModelArr[$i]['searchoptions'] = '{ value: ": ;' . implode(";", $tabVal) . '" }';
                 $colModelArr[$i]['stype'] = 'select';
             }
 
@@ -261,23 +278,23 @@ EOF;
         }
         if ($chronoRef->hasSociete) {
             $i++;
-            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
         }
-        if ($chronoRef->hasPropal){
+        if ($chronoRef->hasPropal) {
             $i++;
-            $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "left", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "left", "search" => true, "sortable" => false);
         }
-        if ($chronoRef->hasProjet){
+        if ($chronoRef->hasProjet) {
             $i++;
-            $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "left", "search" => true, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
         }
-        if ($chronoRef->hasStatut){
+        if ($chronoRef->hasStatut) {
             $i++;
-        $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right", "stype" => 'select', 'searchoptionspp' => "{sopt:['eq','ne']}", 'searchoptions' => "{value: statutRess}", 'formoptions' => '{ elmprefix:"*  " }');
+            $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right", "stype" => 'select', 'searchoptionspp' => "{sopt:['eq','ne']}", 'searchoptions' => "{value: statutRess}", 'formoptions' => '{ elmprefix:"*  " }');
         }
-        if ($chronoRef->hasFile){
+        if ($chronoRef->hasFile) {
             $i++;
-        $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false, "sortable"=>false);
+            $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false, "sortable" => false);
         }
 
 
@@ -286,7 +303,7 @@ EOF;
             datatype => "json",
             height => "100%",
             rowNum => 20,
-            width => ($width-40),
+            width => ($width - 40),
             sortname => 'id',
             sortorder => "desc",
             colModel => $colModelArr
@@ -337,7 +354,7 @@ EOF;
 
         $js .= $htmlOld->listjqGrid($arr, $nomDiv, true, false, array(view => false, add => false, edit => false, search => false, position => "left"), $optionSearch);
 
-        $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
+//        $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
     }
 
 
@@ -357,19 +374,6 @@ EOF;
     $js .= '";';
 
     $js .= "</script>";
-
-
-    if ($id > 0) {
-        $jspath = DOL_URL_ROOT . "/Synopsis_Common/jquery";
-        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/ui.jqgrid.css" />';
-        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . $jspath . '/jqGrid-3.5/css/jquery.searchFilter.css" />';
-        $js .= '<link rel="stylesheet" type="text/css" media="screen" href="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/css/ui.multiselect.css" />';
-        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/multiselect/js/ui.multiselect.js" type="text/javascript"></script>';
-        $js .= ' <script src="' . DOL_URL_ROOT . '/includes/jquery/plugins/jstree/jquery.cookie.js" type="text/javascript"></script>';
-        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/src/i18n/grid.locale-fr.js" type="text/javascript"></script>';
-        $js .= ' <script src="' . $jspath . '/jqGrid-3.5/jquery.jqGrid.min.js" type="text/javascript"></script>';
-         $js .= ' <script type="text/javascript" src="http://www.ok-soft-gmbh.com/jqGrid/json2.js"></script>';
-    }
 
     return $js;
 }

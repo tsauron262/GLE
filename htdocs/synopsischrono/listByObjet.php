@@ -184,11 +184,18 @@ jQuery(document).ready(function(){
         select: function(event, ui) {                   
             window.location.hash = ui.tab.hash;
             $.cookie("currentTab", ui.tab.hash, { expires: 7 });
+            
+            eval("init"+ui.tab.hash.replace("#", "")+"();");
         }
     });
-        
-    $("li[aria-controls='" + ($.cookie("currentTab").replace("#", "")) + "'] a").click();
-        
+    if(typeof($.cookie("currentTab")) == 'string'){
+        id = $.cookie("currentTab").replace("#", "");
+    }
+    else{
+        id = $(".ui-tabs-nav a").attr("href").replace("#", "");
+    }
+    eval("init"+id+"();");
+    $("li[aria-controls='" + id + "'] a").click();
 });
 </script>
 EOF;

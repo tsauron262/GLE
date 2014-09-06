@@ -1800,7 +1800,7 @@ EOF;
     /*
      * Ajouter une ligne
      */
-    if (( $user->rights->synopsisficheinter->modifAfterValid) && $user->rights->synopsisficheinter->creer && (!isset($_REQUEST['action']) || $_REQUEST['action'] <> 'editline')) {
+    if ($fichinter->statut == 0 && ( $user->rights->synopsisficheinter->modifAfterValid) && $user->rights->synopsisficheinter->creer && (!isset($_REQUEST['action']) || $_REQUEST['action'] <> 'editline')) {
         print "</table>";
         print '<form action="' . $_SERVER["PHP_SELF"] . '?id=' . $fichinter->id . '#add" name="addinter" id="addinter" method="post">';
         print '<input type="hidden" name="fichinterid" value="' . $fichinter->id . '">';

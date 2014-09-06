@@ -188,7 +188,8 @@ jQuery(document).ready(function(){
             eval("init"+ui.tab.hash.replace("#", "")+"();");
         }
     });
-    if(typeof($.cookie("currentTab")) == 'string'){
+    id = 0;
+    if(typeof($.cookie("currentTab")) == 'string' && $($.cookie("currentTab")).size() > 0){
         id = $.cookie("currentTab").replace("#", "");
     }
     else{
@@ -201,8 +202,8 @@ jQuery(document).ready(function(){
 EOF;
 
 
-llxHeader($js, $titre);
-dol_fiche_head($head, 'chrono', $langs->trans($titre));
+llxHeader($js, $nomOnglet);
+dol_fiche_head($head, 'chrono', $langs->trans($nomOnglet));
 
 $form = new Form($db);
 if ($obj) {

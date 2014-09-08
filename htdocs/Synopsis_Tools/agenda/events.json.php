@@ -17,13 +17,14 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $userId = $newTabUser[$ligne->fk_user_action];
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
         $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
-        $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
-        $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "' onclick=\"dispatchePopIFrame('" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "&action=edit&optioncss=print', function(){ $('#calendar').weekCalendar('refresh');}, '" . $ligne->label . "', 100); return false;\">" . $ligne->label;
+//        $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
+        $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . substr($ligne->id, 0,30) . "' onclick=\"\">" . $ligne->label."</a>";
         if ($ligne->fk_soc > 0) {
             $soc = new Societe($db);
             $soc->fetch($ligne->fk_soc);
             $text .= "<br/><br/>" . $soc->getNomUrl(1);
         }
+        $text .= "<br/><br/>" . substr($ligne->note, 0,40);
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         if (!isset($ligne->datep2))
@@ -62,6 +63,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             if(isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true' && intval($hour) < 8)
             $date1->setTime(8,0);
 //            die;
+            
 
             if(intval($hour2))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';

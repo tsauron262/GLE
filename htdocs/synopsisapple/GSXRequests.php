@@ -305,10 +305,12 @@ class GSX_Request {
                         else if (isset($default))
                             $defVal = $default;
 
+                        $html .= '<div class="yesNoBlock" onmouseover="onYesNoBlockMouseOver($(this))" onmouseout="onYesNoBlockMouseOut($(this))">'."\n";
                         $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
                         $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
                         $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
                         $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
+                        $html .= '</div>'."\n";
                         break;
 
                     case 'fileSelect':
@@ -369,7 +371,7 @@ class GSX_Request {
                                     foreach ($orderLines as $orderLine) {
                                         $partCount++;
                                         $html .= '<div class="partDatasBlock">';
-                                        $html .= '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">';
+                                        $html .= '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">';
                                         if (isset($orderLine['partDescription']))
                                             $html .= $orderLine['partDescription'];
                                         else

@@ -171,7 +171,7 @@
     </def>
 
     <def name="isPartDOA" type="YesNo">
-        <label>DOA?</label>
+        <label>Pièce endommagée à l'arrivée?</label>
     </def>
     <def name="isNonReplenished" type="YesNo">
         <label>Des pièces doivent-elles être rechargées?</label>

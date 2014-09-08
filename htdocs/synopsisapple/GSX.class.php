@@ -868,7 +868,7 @@ class GSX {
                 break;
 
             case 'serialNumber' :
-                return '/^[A-Z0-9]{11,12}$/';
+                return '/^[A-Z0-9]{11,15}$/';
                 break;
 
             case 'diagnosticEventNumber' :

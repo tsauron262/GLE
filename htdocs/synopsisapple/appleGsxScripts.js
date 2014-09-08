@@ -26,8 +26,8 @@ var partDataType = {
 var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
-else
-    extra = extra+ "&chronoId="+3;
+//else
+//    extra = extra+ "&chronoId="+4;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -842,7 +842,7 @@ function GSX() {
                     $partsRows.each(function() {
                         var partName = $(this).find('td:first').text();
                         var html = '<div class="partDatasBlock">';
-                        html += '<div class="partDatasBlockTitle closed" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
+                        html += '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
                         html += '<div class="partDatasContent partDatasContent_'+i+'">';
                         html += $template.html();
                         html += '</div></div>';
@@ -897,7 +897,7 @@ function GSX() {
             return;
         }
 
-        if (!/^[0-9A-Z]{11,12}$/.test(serial)) {
+        if (!/^[0-9A-Z]{11}[0-9A-Z]*$/.test(serial)) {
             displayRequestMsg('error', 'Le format du numéro de série est incorrect');
             return;
         }
@@ -1053,6 +1053,25 @@ function prodQtyUp($button) {
     $input.val(val);
     $input.trigger('change');
 }
+function onYesNoBlockMouseOver($div) {
+    $div.parent('div.dataBlock').css({
+        'padding': '4px 0',
+        'border-bottom': '1px solid #B4B1AD',
+        'border-top': '1px solid #B4B1AD'
+    }).find('label.dataTitle').css({
+        'color': '#1E1E1E'
+    });
+
+}
+function onYesNoBlockMouseOut($div) {
+    $div.parent('div.dataBlock').css({
+        'padding': '5px 0',
+        'border-bottom': 'none',
+        'border-top': 'none'
+    }).find('label.dataTitle').css({
+        'color': '#505050'
+    });
+}
 
 function displayCreateRepairPopUp($button) {
     var prodId = getProdId($button);
@@ -1129,10 +1148,6 @@ function checkInput($input, type) {
     }
     switch (type) {
         case 'text':
-            if (!/^[\n\t\s]*.+$/.test(val)) {
-                assignInputCheckMsg($input, 'notOk', 'Caractères interdits');
-                return false;
-            }
             break;
 
         case 'alphanum':

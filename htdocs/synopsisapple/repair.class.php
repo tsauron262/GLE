@@ -101,7 +101,6 @@ class Repair {
             $sql .= '"' . $this->repairComplete . '"';
             $sql .= ')';
 
-            echo $sql;
             if (!$this->db->query($sql)) {
                 $this->addError('Echec de l\'enregistrement en base de données<br/>Erreur SQL: ' . $this->db->lasterror());
                 return false;
@@ -290,15 +289,15 @@ class Repair {
 
         $html = '<div class="repairInfos" id="repair_' . $this->rowId . '">' . "\n";
         $html .= '<div class="repairCaption">' . "\n";
-        $html .= '<span class="repairTitle">Réparation n° ' . (isset($this->repairNumber) && ($this->repairNumber != '') ? $this->repairNumber : '<span style="color: #550000;">(inconnu)</span>') . '</span>' . "\n";
+        $html .= '<span class="repairTitle">Réparation n° ' . (isset($this->repairNumber) && ($this->repairNumber != '') ? $this->repairNumber : '<span style="color: #550000;">(En attente de validation par Apple)</span>') . '</span>' . "\n";
         $html .= '<div class="repairToolbar">' . "\n";
         if (!$this->repairComplete)
             $html .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'' . $this->rowId . '\')">Fermer cette réparation</span>';
         $html .= '</div>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<p class="confirmation">Réparation créée' . (isset($this->repairLookUp['createdOn']) ? ' le ' . $this->repairLookUp['createdOn'] : '') . '</p>' . "\n";
-        if (!isset($this->repairNumber) || ($this->repairNumber == ''))
-            $html .= '<p class="error">Erreur: numéro de réparation absent</p>';
+//        if (!isset($this->repairNumber) || ($this->repairNumber == ''))
+//            $html .= '<p class="error">Erreur: numéro de réparation absent</p>';
         if (!isset($this->confirmNumbers['repair']) || ($this->confirmNumbers['repair'] == ''))
             $html .= '<p class="error">numéro de confirmation absent</p>' . "\n";
         else
@@ -399,7 +398,7 @@ class Repair {
 
         if (!count($this->partsPending)) {
             if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
-                $html .= '<p class="confirmation">Numéros de série des composants retournés à jour (n° de confirmation: ' . $this->confirmNumbers['serialUpdate'] . ')</p>' . "\n";
+                $html .= '<p class="confirmation">Numéros de série des composants retournés à jour</p>' . "\n";
             $html .= '<p>Aucun composant en attente de retour</p>';
             return $html;
         }
@@ -409,7 +408,7 @@ class Repair {
         $html .= '<span class="partsPendingTitle">Composant(s) en attente de retour</span>' . "\n";
         $html .= '<div class="repairToolbar">' . "\n";
         if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
-            $html .= '<span class="confirmation" style="color: #DDE2E6; font-size: 12px; font-weight: normal">Numéros de série à jour (n° de confirmation: ' . $this->confirmNumbers['serialUpdate'] . ')</span>' . "\n";
+            $html .= '<span class="confirmation" style="color: #DDE2E6; font-size: 12px; font-weight: normal">Numéros de série à jour</span>' . "\n";
         else {
             $html .= '<span class="button blueHover updateSerials"';
             $html .= 'onclick="$(\'#repair_' . $this->rowId . '\').find(\'.serialUpdateFormContainer\').stop().slideDown(250);"';
@@ -441,7 +440,6 @@ class Repair {
         $html .= '</tbody>' . "\n";
         $html .= '</table>' . "\n";
         if (!isset($this->confirmNumbers['serialUpdate']) || ($this->confirmNumbers['serialUpdate'] == '')) {
-
             $html .= '<div class="serialUpdateFormContainer">' . "\n";
             $html .= '<span class="closeSerialUpdateForm"';
             $html .= 'onclick="$(this).parent(\'.serialUpdateFormContainer\').stop().slideUp(250);"';

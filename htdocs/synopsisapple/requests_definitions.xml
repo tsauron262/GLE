@@ -121,7 +121,7 @@
                     <data name="oldSerialNumber" required="1"></data>
                     <data name="serialNumber" required="1"></data>
                     <data name="reasonCode" required="0"></data>
-                    <data name="isPartDOA" required="0"></data>
+                    <data name="isPartDOA" required="0" default="N"></data>
                 </datas>
             </data>
             <data name="closeRepair" required="0" donotprocess="1" default="N"></data>

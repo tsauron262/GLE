@@ -71,7 +71,7 @@ class gsxDatas {
             return;
 
         global $db;
-        $sql = 'SELECT * FROM `' . MAIN_DB_PREFIX . 'synopsis_apple_repair` WHERE `chronoId` = "'.$chronoId.'"';
+        $sql = 'SELECT * FROM `' . MAIN_DB_PREFIX . 'synopsis_apple_repair` WHERE `chronoId` = "' . $chronoId . '"';
         $rows = $db->query($sql);
         if ($db->num_rows($rows) > 0) {
             while ($row = $db->fetch_object($rows)) {
@@ -131,7 +131,7 @@ class gsxDatas {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                     $datas = $response['ResponseArray']['responseData'];
 //                    echo '<pre>';
-//                    echo print_r($datas);
+//                    print_r($datas);
 //                    echo '</pre>';
                     $check = true;
 
@@ -165,34 +165,36 @@ class gsxDatas {
 
                     $html .= '<td>' . "\n";
                     $html .= '<table><thead></thead><tbody>' . "\n";
-                    $html .= '<tr class="oddRow">' . "\n";
-                    $html .= '<td class="rowTitle">Numéro de série</td>' . "\n";
-                    $html .= '<td>' . $datas['serialNumber'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
 
-                    $html .= '<tr>' . "\n";
-                    $html .= '<td class="rowTitle">Configuration</td>' . "\n";
-                    $html .= '<td>' . $datas['configDescription'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
+                    if (isset($datas['serialNumber']) && $datas['serialNumber'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Numéro de série</td><td>' . $datas['serialNumber'] . '</td></tr>' . "\n";
 
-                    $html .= '<tr class="oddRow">' . "\n";
-                    $html .= '<td class="rowTitle">Numéro de garantie</td>' . "\n";
-                    $html .= '<td>' . $datas['warrantyReferenceNo'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
+                    if (isset($datas['configDescription']) && $datas['configDescription'] !== '')
+                        $html .= '<tr><td class="rowTitle">Configuration</td><td>' . $datas['configDescription'] . '</td></tr>' . "\n";
 
-                    $html .= '<tr>' . "\n";
-                    $html .= '<td class="rowTitle">Garantie</td>' . "\n";
-                    $html .= '<td>' . $datas['warrantyStatus'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
+                    if (isset($datas['warrantyReferenceNo']) && $datas['warrantyReferenceNo'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Numéro de garantie</td><td>' . $datas['warrantyReferenceNo'] . '</td></tr>' . "\n";
 
-                    $html .= '<tr class="oddRow">' . "\n";
-                    $html .= '<td class="rowTitle">Date d\'entrée</td>' . "\n";
-                    $html .= '<td>' . $datas['onsiteStartDate'] . '</td>' . "\n";
-                    $html .= '</tr>' . "\n";
+                    if (isset($datas['warrantyStatus']) && $datas['warrantyStatus'] !== '')
+                        $html .= '<tr><td class="rowTitle">Garantie</td><td>' . $datas['warrantyStatus'] . '</td></tr>' . "\n";
 
-                    $html .= '<tr><td class="rowTitle">Date de sortie</td><td>' . $datas['onsiteEndDate'] . '</td></tr>' . "\n";
-                    $html .= '<tr class="oddRow"><td class="rowTitle">Jours restants</td><td>' . $datas['daysRemaining'] . '</td></tr>' . "\n";
-                    $html .= '<tr style="height: 30px;"><td><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
+                    if (isset($datas['onsiteStartDate']) && $datas['onsiteStartDate'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Date d\'entrée</td><td>' . $datas['onsiteStartDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['onsiteEndDate']) && $datas['onsiteEndDate'] !== '')
+                        $html .= '<tr><td class="rowTitle">Date de sortie</td><td>' . $datas['onsiteEndDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['coverageStartDate']) && $datas['coverageStartDate'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Début de la garantie</td><td>' . $datas['coverageStartDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['coverageEndDate']) && $datas['coverageEndDate'] !== '')
+                        $html .= '<tr><td class="rowTitle">Fin de la garantie</td><td>' . $datas['coverageEndDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['daysRemaining']) && $datas['daysRemaining'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Jours restants</td><td>' . $datas['daysRemaining'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['manualURL']) && $datas['manualURL'] !== '')
+                        $html .= '<tr style="height: 30px;"><td><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
 
                     $html .= '</tbody></table>' . "\n";
                     $html .= '</td>' . "\n";
@@ -318,8 +320,9 @@ class gsxDatas {
         $html .= '<div class="cartContent blocContent">' . "\n";
         $html .= '<div class="toolBar">' . "\n";
         $html .= '<span class="button addToPropal" onclick="GSX.products[' . $prodId . '].cart.addToPropal($(this))">Ajouter à la propal</span>' . "\n";
-        $html .= '<span class="button cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder le panier</span>' . "\n";
-        $html .= '<span class="button cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger le panier</span>' . "\n";
+        $html .= '<span class="button cartSave greenHover deactivated" onclick="GSX.products[' . $prodId . '].cart.save()">Sauvegarder</span>' . "\n";
+        $html .= '<span class="button cartLoad blueHover" onclick="GSX.products[' . $prodId . '].cart.load()">Charger</span>' . "\n";
+        $html .= '<span class="button createNewRepair greenHover" onclick="displayCreateRepairPopUp($(this))">Nouvelle réparation</span>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<p class="noProducts">Aucun produit dans votre panier de commande</p>' . "\n";
         $html .= '<table class="cartProducts">' . "\n";
@@ -567,14 +570,19 @@ class gsxDatas {
                         break;
 
                     case 'UpdateSerialNumber':
-                        if (isset($response['UpdateSerialNumberResponse']['repairConfirmation']['confirmationNumber'])) {
-                            $confirmNumber = $response['UpdateSerialNumberResponse']['repairConfirmation']['confirmationNumber'];
+//                        echo '<pre>';
+//                        print_r($response);
+//                        echo '</pre>';
+                        if (isset($response['UpdateSerialNumberResponse']['repairConfirmation']['repairConfirmationNumber'])) {
+                            $confirmNumber = $response['UpdateSerialNumberResponse']['repairConfirmation']['repairConfirmationNumber'];
                             if (isset($_GET['repairRowId'])) {
                                 $repair->rowId = $_GET['repairRowId'];
                                 if ($repair->load()) {
                                     $repair->confirmNumbers['serialUpdate'] = $confirmNumber;
                                     if ($repair->update()) {
                                         $ok = true;
+                                    } else {
+                                        $html .= '<p class="error">Update Fail</p>';
                                     }
                                 } else {
                                     $html .= '<p class="error">Erreur: échec du chargement des données de la réparation.</p>';
@@ -582,6 +590,8 @@ class gsxDatas {
                             } else {
                                 $html .= '<p class="error">Une erreur est survenue (ID réparation manquant).</p>';
                             }
+                        } else {
+                            $html .= '<p class="error">Aucun numéro de confirmation retourné par GSX</p>';
                         }
                         break;
                 }

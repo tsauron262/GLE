@@ -813,7 +813,8 @@ div.requestFormInputs span.required:before {
     margin-left: 5px;
 }
 div.requestFormInputs div.dataBlock {
-    margin-bottom: 15px;
+    margin-bottom: 6px;
+    padding: 5px 0;
 }
 span.displayInfos:before {
     color: #3574B4;
@@ -908,7 +909,6 @@ div.partDatasBlockTitle.open:before {
     content: '\f146';
 }
 div.partDatasContent {
-    display: none;
     padding: 10px 20px;
     border-left: 1px dotted #B4B4B4;
 }
@@ -930,4 +930,7 @@ span.duplicateInput:before {
     content: '\f055';
     margin-right: 8px;
 }
-
+div.yesNoBlock {
+    float: right;
+    display: inline-block;
+}

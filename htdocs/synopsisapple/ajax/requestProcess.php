@@ -14,9 +14,9 @@ $coefPrix = 1;
 //$userId = 'Corinne@actitec.fr';
 //$password = 'cocomart01';
 //$serviceAccountNo = '0000100635';
-$userId = 'tysauron@gmail.com';
-$password = 'freeparty';
-$serviceAccountNo = '0000100520';
+//$userId = 'tysauron@gmail.com';
+//$password = 'freeparty';
+//$serviceAccountNo = '0000100520';
 //ephesussav
 //@Ephe2014#
 

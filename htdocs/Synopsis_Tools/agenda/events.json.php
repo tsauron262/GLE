@@ -59,12 +59,12 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $date1 = new DateTime($ligne->datep);
             $date2 = new DateTime($ligne->datep2);
             
-            $hour = $date1->format("h");
-            $hour2 = $date2->format("h");
+            $hour = $date1->format("H");
+            $hour2 = $date2->format("H");
             if($heureOuvree && intval($hour) < 8)
                 $date1->setTime(8,0);
            
-            $text = $hour2."|".$text;
+            
 
             if(!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';

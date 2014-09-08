@@ -96,7 +96,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
         if ($chronoid > 0) {
-            $dataArr = array(1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
+            $dataArr = array(1045 => 'now()', 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
             $test = $chrono->setDatas($chronoid, $dataArr);
             if ($test) {
                 $socid = "";

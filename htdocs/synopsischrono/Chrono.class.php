@@ -556,7 +556,12 @@ class Chrono extends CommonObject {
 
         $result = '';
 
-        $lien = '<a title="' . $this->ref . " : " . $this->description . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
+        if($this->description != '' && stripos($this->ref, 'prod') !== null)
+        $titre = $this->description;
+        else
+        $titre = $this->ref . " : " . $this->description;
+        
+        $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
         
         if(stripos($this->model->picto, '[KEY|')){
@@ -576,11 +581,11 @@ class Chrono extends CommonObject {
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $this->ref, $this->model->picto, false, false, false, true) . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $titre, $this->model->picto, false, false, false, true) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $this->ref, $this->model->picto) . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $titre, $this->model->picto) . $lienfin . ' ');
 
-        $result.=$lien . ($maxlen ? dol_trunc($this->ref, $maxlen) : $this->ref) . $lienfin;
+        $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;
     }
 

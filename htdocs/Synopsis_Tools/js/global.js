@@ -93,6 +93,11 @@ $(window).load(function() {
             else
                 tabCible[i].fadeIn();
     });
+    
+    selector = "input[name='viewday'], input[name='viewweek'], input[name='viewcal']";
+    $(selector).prev().hide();
+    $(selector).next().hide();
+    $(selector).hide();
 });
 
 function ajoutNotification(id, titre, msg) {

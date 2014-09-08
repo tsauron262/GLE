@@ -9,7 +9,8 @@ if($isMobile)
 
 $tabUserId = array();
 $tabUser = getTabUser();
-$_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
+if(isset($_REQUEST['timeTranche']))
+    $_REQUEST['workHour'] = (isset($_REQUEST['workHour']) && $_REQUEST['workHour'] == 'on')? 'true' : 'false';
 $tabPara = getPara();
 $i = 0;
 $tabJsIdUser = 'tabUserId = Array();';

@@ -678,7 +678,7 @@ class Form
      * 	@param		int			$forcecombo				Force to use combo box
      *  @return		string								Return select box for thirdparty.
      */
-    function select_thirdparty($selected='', $htmlname='productid', $filter='', $limit=20, $ajaxoptions=array(), $forcecombo=0)
+    function select_thirdparty($selected='', $htmlname='productid', $filter='', $limit=/*20moddrsi*/20000, $ajaxoptions=array(), $forcecombo=0)
     {
     	global $langs,$conf;
 

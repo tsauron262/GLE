@@ -48,6 +48,10 @@ if ($action == 'createPC' && $chr->propal->id == 0) {
     $prop->cond_reglement_id = 0;
     $prop->mode_reglement_id = 0;
     $prop->create($user);
+    if($chr->contactid){
+        $prop->add_contact($chr->contactid, 40);
+        $prop->add_contact($chr->contactid, 41);
+    }
     $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $id);
 }
 

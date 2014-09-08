@@ -193,3 +193,22 @@ Categorie => famille prestation
 Libre3 => produit réservé
 
 
+
+
+
+Doubler boutons Créer Réparation    
+
+Voir date prise en charge date création chrono.
+
+Inverser diago + 
+
+
+Aligner les oui non
+
+Requéte maj num série dérouler 
+
+Aligner oui non raprocher checkbox et texte
+
+Prôbléme de retour
+
+Bug fichier joint

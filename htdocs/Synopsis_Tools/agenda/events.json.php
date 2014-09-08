@@ -55,15 +55,15 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
 
 
         if (isset($ligne->datep)) {
-            $heureOuvree = isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true';
+            $heureOuvree = (isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true');
             $date1 = new DateTime($ligne->datep);
             $date2 = new DateTime($ligne->datep2);
-//            echo $date1->format('c');
+            
             $hour = $date1->format("h");
             $hour2 = $date2->format("h");
             if($heureOuvree && intval($hour) < 8)
-            $date1->setTime(8,0);
-//            die;
+                $date1->setTime(8,0);
+           
             
 
             if(!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))

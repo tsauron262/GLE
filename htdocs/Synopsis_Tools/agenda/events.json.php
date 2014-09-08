@@ -55,17 +55,18 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
 
 
         if (isset($ligne->datep)) {
+            $heureOuvree = isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true';
             $date1 = new DateTime($ligne->datep);
             $date2 = new DateTime($ligne->datep2);
 //            echo $date1->format('c');
             $hour = $date1->format("h");
             $hour2 = $date2->format("h");
-            if(isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true' && intval($hour) < 8)
+            if($heureOuvree && intval($hour) < 8)
             $date1->setTime(8,0);
 //            die;
             
 
-            if(intval($hour2))
+            if(!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';
         }
         $f = $f + 1;

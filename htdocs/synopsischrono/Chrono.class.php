@@ -556,7 +556,7 @@ class Chrono extends CommonObject {
 
         $result = '';
 
-        if($this->description != '' && stripos($this->ref, 'prod') !== null)
+        if($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
         $titre = $this->description;
         else
         $titre = $this->ref . " : " . $this->description;

@@ -567,6 +567,7 @@ class gsxDatas {
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {
                                     $ok = true;
+                                    $html .= "<ok>Reload commande ok</ok>";
                                 }
                             } else {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';

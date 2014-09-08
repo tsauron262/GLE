@@ -25,6 +25,14 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 3));
         $ok = true;
     }
+    
+    if ($action == "commandeOK" && $chrono->propal->id > 0) {
+        $chrono->description = (($chrono->description != "")? $chrono->description."\n\n" : "");
+        $chrono->description .= "Piéce commandée le ".  date('d-m-y H:i');
+        $chrono->update($chrono->id);
+        $chrono->setDatas($chrono->id, array($idEtat => 1));
+        $ok = true;
+    }
     if ($action == "devisKo" && $chrono->propal->id > 0) {
         $chrono->description = (($chrono->description != "")? $chrono->description."\n\n" : "");
         $chrono->description .= "Devis refusé le ".  date('d-m-y H:i');

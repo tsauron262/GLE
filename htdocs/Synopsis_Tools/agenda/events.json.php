@@ -64,7 +64,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             if($heureOuvree && intval($hour) < 8)
                 $date1->setTime(8,0);
            
-            
+            $text = $hour2."|".$text;
 
             if(!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';

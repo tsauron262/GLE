@@ -58,6 +58,7 @@ $accessoire = (isset($_POST['Chrono-1041']) ? $_POST['Chrono-1041'] : "");
 $sauv0 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 0 ? 'selected' : "");
 $sauv1 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 1 ? 'selected' : "");
 $sauv2 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 2 ? 'selected' : "");
+$sauv3 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 3 ? 'selected' : "");
 $pass = (isset($_POST['pass']) ? $_POST['pass'] : "");
 $devis1 = (isset($_POST['Devis']) && $_POST['Devis'] == 1 ? 'selected' : "");
 $devis2 = (isset($_POST['Devis']) && $_POST['Devis'] == 2 ? 'selected' : "");
@@ -96,7 +97,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
         if ($chronoid > 0) {
-            $dataArr = array(1045 => 'now()', 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
+            $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
             $test = $chrono->setDatas($chronoid, $dataArr);
             if ($test) {
                 $socid = "";
@@ -224,7 +225,7 @@ if ($socid != "") {
     echo "</p>";
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Accesoires.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Accessoires.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo "<textarea class=' grand choixAccess ' name='Chrono-1041' id='Chrono-1041'>$accessoire</textarea>";
     echo "</td>";
@@ -236,6 +237,7 @@ if ($socid != "") {
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <select name='Sauv' id='Sauv' class='required'>";
     echo "<option value=''></option> ";
+    echo "<option value='3'" . $sauv3 . ">Dispose d'une sauvegarde Time machine</option> ";
     echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde</option> ";
     echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
     echo "<option value='0'" . $sauv0 . ">Non Applicable</option> ";

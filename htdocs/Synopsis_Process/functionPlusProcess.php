@@ -43,8 +43,12 @@ function bouttonEtatSav($idChrono){
         $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=pieceOk'>Pièce reçue</a>";
     }
     
-    if($chrono->values[$idEtat] == 0){
-        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=attenteClient'>Attente Client</a>";
+    if($chrono->values[$idEtat] == 0 && $chrono->propalid){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=attenteClient1'>Envoyer Devis</a>";
+    }
+    
+    if($chrono->values[$idEtat] == 4){
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=repOk'>Terminé</a>";
     }
     
     if($chrono->values[$idEtat] == 9){

@@ -22,7 +22,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
         $chrono->propal->cloture($user, 2, "Auto via SAV");
-        $chrono->setDatas($chrono->id, array($idEtat => 0));
+        $chrono->setDatas($chrono->id, array($idEtat => 3));
         $ok = true;
     }
     if ($action == "devisKo" && $chrono->propal->id > 0) {
@@ -38,14 +38,22 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->description = (($chrono->description != "")? $chrono->description."\n\n" : "");
         $chrono->description .= "Pièce reçue le ".  date('d-m-y H:i');
         $chrono->update($chrono->id);
-        $chrono->setDatas($chrono->id, array($idEtat => 0));
+        $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
     }
-    if($action == "attenteClient"){
+    if($action == "repOk"){
+        $chrono->description = (($chrono->description != "")? $chrono->description."\n\n" : "");
+        $chrono->description .= "Réparation terminée le ".  date('d-m-y H:i');
+        $chrono->update($chrono->id);
+        $chrono->setDatas($chrono->id, array($idEtat => 9));
+        $ok = true;
+    }
+    if($action == "attenteClient1"){
         $chrono->description = (($chrono->description != "")? $chrono->description."\n\n" : "");
         $chrono->description .= "Attente client depuis le ".  date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 2));
+        //afaire envoyer le devis
         $ok = true;
     }
     

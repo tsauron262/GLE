@@ -97,10 +97,10 @@
         <label>Adresse du client</label>
     </def>
     <def name="diagnosedByTechId" type="text" max="15" jsCheck="text">
-        <label>ID du technicien à l'origine du diagnostique</label>
+        <label>ID du technicien à l'origine du diagnostic</label>
     </def>
     <def name="diagnosis" type="textarea" max="1500" jsCheck="text">
-        <label>Diagnostique du technicien</label>
+        <label>Diagnostic du technicien</label>
     </def>
     <def name="fileName" type="fileSelect" max="30">
         <label>Fichier à envoyer</label>
@@ -113,8 +113,8 @@
         <label>Composants</label>
     </def>
     <def name="overrideDiagnosticCodeCheck" type="YesNo">
-        <label>Ne pas effectuer la vérification du code du diagnostique</label>
-        <infos>Si Oui, le code de diagnostique n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>
+        <label>Ne pas effectuer la vérification du code du diagnostic</label>
+        <infos>Si Oui, le code de diagnostic n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>
     </def>
     <def name="poNumber" type="text" max="35" jsCheck="text">
         <label>Purchase order number</label>

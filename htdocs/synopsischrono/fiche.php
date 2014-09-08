@@ -39,20 +39,9 @@ if ($action == 'setprop') {
 }
 
 if ($action == 'createPC' && $chr->propal->id == 0) {
-    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
     $chr = new Chrono($db);
     $chr->fetch($_REQUEST['id']);
-    $prop = new Propal($db);
-    $prop->socid = $chr->socid;
-    $prop->date = dol_now();
-    $prop->cond_reglement_id = 0;
-    $prop->mode_reglement_id = 0;
-    $prop->create($user);
-    if($chr->contactid){
-        $prop->add_contact($chr->contactid, 40);
-        $prop->add_contact($chr->contactid, 41);
-    }
-    $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $id);
+    $chr->createPropal();
 }
 
 

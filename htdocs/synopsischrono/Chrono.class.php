@@ -610,6 +610,23 @@ class Chrono extends CommonObject {
         }
         return($tmp->getNextValue($objsoc, $this, $this->getModeleMask()));
     }
+    
+    public function createPropal(){
+        global $user;
+        require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+        $prop = new Propal($this->db);
+        $prop->socid = $this->socid;
+        $prop->date = dol_now();
+        $prop->cond_reglement_id = 0;
+        $prop->mode_reglement_id = 0;
+        $prop->create($user);
+        if($this->contactid){
+            $prop->add_contact($this->contactid, 40);
+            $prop->add_contact($this->contactid, 41);
+        }
+        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $this->id);
+        return $prop->id;
+    }
 
     public function create() {
         global $user;

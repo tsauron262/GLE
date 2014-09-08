@@ -50,19 +50,21 @@ if (isset($_GET['action'])) {
                 $chr = new Chrono($db);
                 $chr->fetch($_GET['chronoId']);
                 $propalId = $chr->propalid;
-                if ($propalId > 0) {
-                    $propal = new Propal($db);
-                    $propal->fetch($propalId);
-                    $cards = new partsCart($db, null, $_GET['chronoId']);
-                    $cards->loadCart();
-                    foreach ($cards->partsCart as $part) {
-                        $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'],$part['stockPrice']);
-                    }
-                    echo '<ok>Reload</ok>';
-                } else {
-                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+                if (!$propalId > 0)
+                    $propalId = $chr->createPropal();
+
+                $propal = new Propal($db);
+                $propal->fetch($propalId);
+                $cards = new partsCart($db, null, $_GET['chronoId']);
+                $cards->loadCart();
+                foreach ($cards->partsCart as $part) {
+                    $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+                    $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], $part['stockPrice']);
                 }
+                echo '<ok>Reload</ok>';
+//                } else {
+//                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+//                }
             } else {
                 echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
             }
@@ -168,17 +170,19 @@ if (isset($_GET['action'])) {
                     $chr = new Chrono($db);
                     $chr->fetch($_GET['chronoId']);
                     $propalId = $chr->propalid;
-                    if ($propalId > 0) {
-                        $propal = new Propal($db);
-                        $propal->fetch($propalId);
-                        foreach ($cart->partsCart as $part) {
-                            $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-                            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20",0,0,0,0,'HT',0,0,0,0,0,0,0,$part['stockPrice']);
-                        }
-                        echo 'ok<ok>Reload</ok>';
-                    } else {
-                        echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+                    if (!$propalId > 0)
+                        $propalId = $chr->createPropal();
+
+                    $propal = new Propal($db);
+                    $propal->fetch($propalId);
+                    foreach ($cart->partsCart as $part) {
+                        $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+                        $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
                     }
+                    echo 'ok<ok>Reload</ok>';
+//                    } else {
+//                        echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+//                    }
                 } else {
                     echo '<p class="confirmation">Panier correctement enregistré (' . count($cart->partsCart) . ' produit(s))</p>';
                 }
@@ -265,7 +269,7 @@ if (isset($_GET['action'])) {
 
 function dateAppleToDate($date) {
     $garantieT = explode("/", $date);
-    if ($garentieT[2] > 0)
+    if (isset($garantieT[2]))
         return $garantieT[0] . "/" . $garantieT[1] . "/20" . $garantieT[2];
     else
         return "";

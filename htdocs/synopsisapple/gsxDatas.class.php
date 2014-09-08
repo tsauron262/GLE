@@ -122,7 +122,6 @@ class gsxDatas {
         if (count($this->errors) || !$this->connect) {
             return $this->getGSXErrorsHtml();
         }
-//        echo "<pre>";print_r($this->gsx->obtainCompTIA());die;
         $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
         $html = '';
@@ -183,6 +182,9 @@ class gsxDatas {
 
                     if (isset($datas['onsiteEndDate']) && $datas['onsiteEndDate'] !== '')
                         $html .= '<tr><td class="rowTitle">Date de sortie</td><td>' . $datas['onsiteEndDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['estimatedPurchaseDate']) && $datas['estimatedPurchaseDate'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Date d\'achat estimé</td><td>' . $datas['estimatedPurchaseDate'] . '</td></tr>' . "\n";
 
                     if (isset($datas['coverageStartDate']) && $datas['coverageStartDate'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Début de la garantie</td><td>' . $datas['coverageStartDate'] . '</td></tr>' . "\n";

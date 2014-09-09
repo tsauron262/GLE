@@ -17,7 +17,7 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $userId = $newTabUser[$ligne->fk_user_action];
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
         $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
-//        $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
+        $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
         $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . substr($ligne->id, 0,30) . "'>" . $ligne->label."</a>";
         if ($ligne->fk_soc > 0) {
             $soc = new Societe($db);

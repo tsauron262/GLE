@@ -640,7 +640,10 @@ class gsxDatas {
     }
 
     public function getGSXErrorsHtml() {
-        return $this->gsx->getGSXErrorsHtml();
+        if(is_object($this->gsx))
+            return $this->gsx->getGSXErrorsHtml();
+        else
+            return '';
     }
 
 }

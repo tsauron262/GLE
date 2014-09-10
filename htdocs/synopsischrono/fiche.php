@@ -44,6 +44,14 @@ if ($action == 'createPC' && $chr->propal->id == 0) {
     $chr->createPropal();
 }
 
+if($action == "cancel"){
+    if($chr->socid == 0 && $chr->description == ''){
+        $result = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE `value` is not null AND `chrono_refid` =".$chr->id);
+        if($db->num_rows($result) == 0)
+            $action = 'supprimer';
+    }
+}
+
 
             $para = "id=" . $_REQUEST['id'];
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
@@ -69,7 +77,7 @@ if ($action == 'supprimer') {
             elseif ($chr->socid)
                 header('Location: ' . DOL_URL_ROOT . "/synopsischrono/listByObjet.php?obj=soc&id=" . $chr->socid);
             else
-                header('Location: liste.php');
+                header('Location: ' . DOL_URL_ROOT . '/synopsischrono/listByObjet.php');
         } else {
             header('Location: ?id=' . $id);
         }
@@ -367,7 +375,7 @@ if ($chr->id > 0) {
 //
 //        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
         print '</table></div><div class="divButAction">';
-        print "<button onClick='location.href=\"?id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
+        print "<button onClick='location.href=\"?action=cancel&id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
         print "<button class='butAction'>Modifier</button>";
         print '</div></form>';
 

@@ -27,7 +27,7 @@ div.deconnect{
 div.notificationText,div.notificationObj{
     position: fixed;
     bottom: 0;
-    right: 0;
+    left: 0;
     z-index:1130;
 }
 div.notificationText{

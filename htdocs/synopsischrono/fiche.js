@@ -95,11 +95,16 @@ jQuery(document).ready(function() {
     setTimeout(function() {
         socid = jQuery('#socid').find(':selected').val();
         majDoubleSoc(socid, true);
+        jQuery('#socid').change(function() {
+            socid = jQuery(this).find(':selected').val();
+            ajax_updater_postFct2(socid);
+        });
+
+        $("#inputautocompletesocid").focusout(function() {
+            socid = jQuery('#socid').find(':selected').val();
+            ajax_updater_postFct2(socid);
+        });
     }, 200);
-    jQuery('#socid').change(function() {
-        socid = jQuery(this).find(':selected').val();
-        ajax_updater_postFct2(socid);
-    });
 
     $(".addContact").click(function() {
         socid = $("select#socid").val();
@@ -223,9 +228,10 @@ function initFormChrono() {
         addChronoAj($(this));
         return false;
     });
-    $("form #chronoTable .addChrono").click(function(event) {alert("ee");
-		event.cancelBubble = true;
-		event.returnValue = false;
+    $("form #chronoTable .addChrono").click(function(event) {
+        alert("ee");
+        event.cancelBubble = true;
+        event.returnValue = false;
         event.stopPropagation();
         parentDiv = $(this).parent();
         model = $(parentDiv).find(".model").html();

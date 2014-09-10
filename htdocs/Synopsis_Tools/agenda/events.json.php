@@ -15,6 +15,11 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
     $f = 0;
     while ($ligne = $db->fetch_object($result)) {
         $userId = $newTabUser[$ligne->fk_user_action];
+        
+        if($ligne->label == "")
+            $ligne->label = "N/C";
+        
+        
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
         $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
         $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
@@ -28,6 +33,8 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);
+        
+        
         if (!isset($ligne->datep2))
             $ligne->datep2 = $ligne->datep;
         if (!isset($ligne->datep))

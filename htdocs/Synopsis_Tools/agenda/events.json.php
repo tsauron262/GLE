@@ -64,6 +64,8 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $hour2 = $date2->format("H");
             if($heureOuvree && intval($hour) < 8)
                 $date1->setTime(8,0);
+            if($heureOuvree && intval($hour2) > 17)
+                $date2->setTime(18,0);
            
             
 

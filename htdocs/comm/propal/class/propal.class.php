@@ -1790,6 +1790,7 @@ class Propal extends CommonObject
             			$outputlangs->setDefaultLang($newlang);
             		}
             		//$ret=$object->fetch($id);    // Reload to get new records
+                        require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
             		propale_pdf_create($this->db, $this, $conf->global->PROPALE_ADDON_PDF_ODT_CLOSED?$conf->global->PROPALE_ADDON_PDF_ODT_CLOSED:$this->modelpdf, $outputlangs, $hidedetails, $hidedesc, $hideref);
             	}
 

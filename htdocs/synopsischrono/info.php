@@ -125,6 +125,9 @@
 
 
       }
+      
+      print "<tr><th class='ui-widget-header ui-state-default' style='border-top-style: double;border-top-width: 3px;' rowspan='". $rowspan ."'>Note</th>";
+      print "<td align=left class='ui-widget-content' colspan='3'>".str_replace("\n", "<br/>", $chr->note)."</td></tr>";
 
       print "</table>";
 

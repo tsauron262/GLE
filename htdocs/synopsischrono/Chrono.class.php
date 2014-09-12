@@ -50,6 +50,7 @@ class Chrono extends CommonObject {
                 $this->date_modif = strtotime($res->tms);
                 $this->socid = $res->fk_societe;
                 $this->statut = $res->fk_statut;
+                $this->note = $res->note;
                 $this->validation_number = $res->validation_number;
 
                 $this->fk_user_author = $res->fk_user_author;
@@ -298,6 +299,7 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople =  " . $contactid;
         else
             $requete .= ", fk_socpeople = NULL ";
+        $requete .= ", note = '".addslashes($this->note)."'";
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;
         $sql = $this->db->query($requete);
@@ -557,9 +559,9 @@ class Chrono extends CommonObject {
         $result = '';
 
         if($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
-        $titre = $this->description;
+        $titre = dol_trunc ($this->description,40);
         else
-        $titre = $this->ref . " : " . $this->description;
+        $titre = $this->ref . " : " . dol_trunc ($this->description,25);
         
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
@@ -625,6 +627,8 @@ class Chrono extends CommonObject {
             $prop->add_contact($this->contactid, 41);
         }
         $this->db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = '" . $prop->id . "' WHERE id = " . $this->id);
+        $this->propalid = $prop->id;
+        $this->propal = $prop;
         return $prop->id;
     }
 

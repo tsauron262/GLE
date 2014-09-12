@@ -11,10 +11,10 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
 require_once DOL_DOCUMENT_ROOT . '/Synopsis_Process/process.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsischrono/Chrono.class.php';
-$js = "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/global.css' />";
-$js.= "<link rel='stylesheet' type='text/css' href='".DOL_URL_ROOT."/Synopsis_Tools/css/BIMP.css' />";
+$js = "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/Synopsis_Tools/css/global.css' />";
+$js.= "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/Synopsis_Tools/css/BIMP.css' />";
 $js.= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
-$js.= "<script type='text/javascript' src='".DOL_URL_ROOT."/synopsischrono/fiche.js' ></script>";
+$js.= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js' ></script>";
 $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
         socid = $("select#socid").val();
         dispatchePopObject(socid, "newContact", function() {
@@ -34,7 +34,7 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
 }
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] == "max") {
-    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=".$_REQUEST["socid"] );
+    $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "socpeople WHERE fk_soc=" . $_REQUEST["socid"]);
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $_REQUEST['contactid'] = $result->max;
@@ -66,10 +66,12 @@ $retour1 = (isset($_POST['Retour']) && $_POST['Retour'] == 1 ? 'selected' : "");
 $retour2 = (isset($_POST['Retour']) && $_POST['Retour'] == 2 ? 'selected' : "");
 $retour3 = (isset($_POST['Retour']) && $_POST['Retour'] == 3 ? 'selected' : "");
 $symptomes = (isset($_POST['Symptomes']) ? $_POST['Symptomes'] : "");
+$modeP = (isset($_REQUEST['paiementtype']) ? $_REQUEST['paiementtype'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
+$accompte = (isset($_POST['accompte']) ? $_POST['accompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : "");
 
-if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /*&& isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== ""*/) {
+if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /* && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "" */) {
     $chronoProd = new Chrono($db);
 
     $chronoProdid = existProd($NoMachine);
@@ -92,7 +94,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
 
         $chrono = new Chrono($db);
         $chrono->model_refid = 105;
-        $chrono->description = ($descr != "" ? addslashes($descr) : "N/C");
+        $chrono->description = ($descr != "" ? addslashes($descr) : $machine);
         $chrono->socid = $socid;
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
@@ -105,9 +107,73 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
                 $lien->cssClassM = "type:SAV";
                 $lien->fetch(3);
                 $lien->setValue($chrono->id, array($chronoProd->id));
-                $chrono->fetch($chrono->id); 
-                $chronoProd->fetch($chronoProd->id); 
-                echo "Enregistrement effecué avec succés. <br/>SAV : ".$chrono->getNomUrl(1). " <br/>Produit : ".$chronoProd->getNomUrl(1);
+                $chrono->fetch($chrono->id);
+                $chronoProd->fetch($chronoProd->id);
+
+                //Propal facture accompte
+                $chrono->createPropal();
+                $propal = new Propal($db);
+                $propal = $chrono->propal;
+
+                $accompte = intval($accompte);
+                if ($accompte > 0) {
+                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                    $factureA = new Facture($db);
+                    $factureA->type = 3;
+                    $factureA->date = dol_now();
+                    $factureA->socid = $chrono->socid;
+                    $factureA->create($user);
+                    $factureA->addline("Accompte", $accompte, 1, 0, 0, 0, 0, 0, null, null);
+                    $factureA->validate($user);
+
+                    addElementElement("propal", "facture", $chrono->propalid, $factureA->id);
+
+//                $factureA->add
+                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                    $payement = new Paiement($db);
+                    $payement->amounts = array($factureA->id => $accompte);
+                    $payement->datepaye = dol_now();
+                    $payement->paiementid = $modeP;
+                    $payement->create($user);
+
+                    $factureA->set_paid($user);
+                    facture_pdf_create($db, $factureA, null, $langs);
+
+                    require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
+                    $discount = new DiscountAbsolute($db);
+                    $discount->description = "Accompte";
+                    $discount->fk_soc = $factureA->socid;
+                    $discount->fk_facture_source = $factureA->id;
+                    $discount->amount_ht = $discount->amount_ttc = $accompte;
+                    $discount->amount_tva = $discount->tva_tx = 0;
+                    $discount->create($user);
+//                $propal->addline("Accompte", -$accompte, 1, 0, 0, 0, 0, 0, 0, -$accompte);
+                    $propal->insert_discount($discount->id);
+                }
+                propale_pdf_create($db, $propal, null, $langs);
+
+                require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";
+
+                synopsischrono_pdf_create($db, $chrono, "pc");
+                $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
+                mkdir($repDest);
+                link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
+                link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
+//                echo DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
+
+
+                echo "<h3>Enregistrement effecué avec succés. </h3>"
+                . "SAV : " . $chrono->getNomUrl(1) . " <br/>"
+                . "Produit : " . $chronoProd->getNomUrl(1);
+
+                // List of document
+                echo "<br/><br/>";
+                require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
+                require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
+                $formfile = new FormFile($db);
+                $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
+                $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
+                echo "<h3>Nouvelle prise en charge</h3>";
             } else {
                 echo "Echec de l'Enregistrement";
             }
@@ -143,36 +209,36 @@ if ($socid != "") {
     echo "<p>";
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
+    echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
     $form->select_contacts($socid, $_REQUEST['contactid']);
     echo "<br />";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
-    
+
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Centre</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo "<select name='centre'/>";
-    $centres = array("G"=>"Grenoble", "L" => "Lyon");
-    foreach ($centres as $val => $centre){
-        echo "<option value='".$val."' ".($val == $user->array_options['options_apple_centre']? "selected='selected'" : "") .">".$centre."</option>";
+    $centres = array("G" => "Grenoble", "L" => "Lyon");
+    foreach ($centres as $val => $centre) {
+        echo "<option value='" . $val . "' " . ($val == $user->array_options['options_apple_centre'] ? "selected='selected'" : "") . ">" . $centre . "</option>";
     }
     echo "</select>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
-    
+
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>N° de série de la machine.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='text' name='NoMachine' value='" . $NoMachine . "' id='NoMachine' class='required'/>";
     echo "<span id='patientez' style='display:none; margin-left:15px;'>";
-    echo "<img src='".DOL_URL_ROOT."/Synopsis_Tools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
+    echo "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
     echo "</span>";
     echo "</td>";
     echo "</tr>";
@@ -292,6 +358,15 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Accompte.</th>";
+    echo "<td class='ui-widget-content'>";
+    echo " <input type='text' name='accompte' id='accompte' value='$accompte'/>";
+    echo $form->select_types_paiements($modeP);
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
     echo "</div>";
     echo "<p>";
     echo "<tr>";
@@ -312,7 +387,7 @@ if ($socid != "") {
     echo "<p>";
     echo "<label for='client'>Client : </label>";
     echo $form->select_thirdparty('', 'socid');
-    echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='".DOL_URL_ROOT."/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
+    echo "<span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'><img src='" . DOL_URL_ROOT . "/theme/eldy/img/filenew.png' border='0' alt='Create' title='Create'></span>";
     echo "<br />";
     echo "</p>";
     echo "<p>";
@@ -320,17 +395,18 @@ if ($socid != "") {
     echo "</p>";
     echo "</form>";
 }
+
 function existProd($nomachine) {
-        global $db;
-        $requete = "SELECT chrono_refid FROM "  . MAIN_DB_PREFIX . "synopsischrono_value WHERE key_id = 1011 and value = '".$nomachine."';";
-        $sql = $db->query($requete);
-        if ($db->num_rows($sql) > 0) {
-            $obj = $db->fetch_object($sql);
-            $return = $obj->chrono_refid;
-            return $return;
-        } else {
-            return -1;
-        }
-        
+    global $db;
+    $requete = "SELECT chrono_refid FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE key_id = 1011 and value = '" . $nomachine . "';";
+    $sql = $db->query($requete);
+    if ($db->num_rows($sql) > 0) {
+        $obj = $db->fetch_object($sql);
+        $return = $obj->chrono_refid;
+        return $return;
+    } else {
+        return -1;
+    }
 }
+
 ?>

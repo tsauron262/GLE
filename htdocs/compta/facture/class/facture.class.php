@@ -3417,6 +3417,7 @@ class FactureLigne  extends CommonInvoiceLine
 	 */
 	function insert($notrigger=0)
 	{
+		include_once DOL_DOCUMENT_ROOT.'/core/class/discount.class.php';
 		global $langs,$user,$conf;
 
 		$error=0;

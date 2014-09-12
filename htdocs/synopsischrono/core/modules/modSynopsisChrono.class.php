@@ -278,6 +278,7 @@ class modSynopsisChrono extends DolibarrModules
   `propalid` int(11) DEFAULT NULL,
   `projetid` int(11) DEFAULT NULL,
   `entity` int(11) DEFAULT 1,
+  `note` varchar(10000),
   PRIMARY KEY (`id`),
   KEY `model_refid` (`model_refid`),
   KEY `fk_user_author` (`fk_user_author`),

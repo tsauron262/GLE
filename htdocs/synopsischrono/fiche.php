@@ -23,11 +23,20 @@ $js = "";
 $langs->load("chrono@synopsischrono");
 $msg = "";
 
-if ($id > 0){
+if ($id > 0) {
     $chr = new Chrono($db);
     $chr->fetch($id);
     global $typeChrono;
     $typeChrono = $chr->model->id;
+}
+
+if ($action == 'addLnProp' && $chr->propalid) {
+    $prod = new Product($db);
+    $prod->fetch($_REQUEST['idprod']);
+    $prod->tva_tx = ($prod->tva_tx > 0)? $prod->tva_tx : 0;
+    $chr->propal->addline($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id);
+    require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
+    propale_pdf_create($db, $chr->propal, null, $langs);
 }
 
 if ($action == 'setprojet') {
@@ -44,22 +53,22 @@ if ($action == 'createPC' && $chr->propal->id == 0) {
     $chr->createPropal();
 }
 
-if($action == "cancel"){
-    if($chr->socid == 0 && $chr->description == ''){
-        $result = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE `value` is not null AND `chrono_refid` =".$chr->id);
-        if($db->num_rows($result) == 0)
+if ($action == "cancel") {
+    if ($chr->socid == 0 && $chr->description == '') {
+        $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE `value` is not null AND `chrono_refid` =" . $chr->id);
+        if ($db->num_rows($result) == 0)
             $action = 'supprimer';
     }
 }
 
 
-            $para = "id=" . $_REQUEST['id'];
+$para = "id=" . $_REQUEST['id'];
 if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQUEST['action'] == 'builddoc')) {
-        require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
-            $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
-            synopsischrono_pdf_create($db, $chr, $model);
-            header('location: ?'.$para . "#documentAnchor");
-        }
+    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php");
+    $model = (isset($_REQUEST['model']) ? $_REQUEST['model'] : '');
+    synopsischrono_pdf_create($db, $chr, $model);
+    header('location: ?' . $para . "#documentAnchor");
+}
 
 if ($action == 'supprimer') {
     $chr = new Chrono($db);
@@ -304,7 +313,7 @@ if ($chr->id > 0) {
     }
 
     if ($_GET['action'] == 'delete' || $_GET['action'] == 'remove_file') {
-        $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode((isset($_GET["urlfile"]) && $_GET["urlfile"] != "")? $_GET["urlfile"] : $_GET["file"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
+        $html->form_confirm($_SERVER["PHP_SELF"] . '?id=' . $_GET["id"] . '&amp;urlfile=' . urldecode((isset($_GET["urlfile"]) && $_GET["urlfile"] != "") ? $_GET["urlfile"] : $_GET["file"]), $langs->trans('DeleteFile'), $langs->trans('ConfirmDeleteFile'), 'confirm_deletefile');
         print '<br>';
     }
 
@@ -367,9 +376,9 @@ if ($chr->id > 0) {
 //        while ($result = $db->fetch_object($sql)) {
 //            echo getValueForm($chr->id, $result->id, $chr->socid);
 //        }
-        
+
         $chr->getValuesPlus();
-        foreach($chr->valuesPlus as $res)
+        foreach ($chr->valuesPlus as $res)
             echo getValueForm2($res, $chr);
 
 //
@@ -383,7 +392,7 @@ if ($chr->id > 0) {
         . '$( document ).ready(function() {'
         . '});'
         . '</script>';
-    } else if($chr->id > 0){
+    } else if ($chr->id > 0) {
         print "<table id='chronoTable' class='border' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print '<tr><th class="ui-state-default ui-widget-header">' . $langs->trans('Ref') . '</th>
                      <td colspan=1 class=" ui-widget-content" >' . $chr->getNomUrl(1) . '</td>
@@ -465,7 +474,7 @@ if ($chr->id > 0) {
         }
 
         if ($chr->model->hasPropal) {
-            print '<tr><th class="ui-widget-header ui-state-default">Proposition comm.';
+            print '<tr><th class="ui-widget-header ui-state-default">Proposition comm';
             // print '<td colspan=1 class="ui-widget-content">';
             $requete = "SELECT *
                   FROM " . MAIN_DB_PREFIX . "synopsischrono,
@@ -500,9 +509,23 @@ if ($chr->id > 0) {
                 if ($db->num_rows($resql) > 0) {
                     while ($res = $db->fetch_object($resql)) {
                         require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
                         $propal = new Propal($db);
                         $propal->fetch($res->rowid);
-                        print "<td class='ui-widget-content'>" .$propal->getNomUrl(1) ." ". $propal->getLibStatut() . "<br/>Total : " . price($res->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT</td>";
+                        $tabT = getElementElement("propal", "facture", $propal->id);
+                        print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($res->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT<br/>";
+                        if ($propal->statut == 0) {
+                            $form = new Form($db);
+                            echo "<form method='POST'><input type='hidden' name='idProp' value='" . $propal->id . "'/><input name='action' type='hidden' value='addLnProp'/>";
+                            $form->select_produits('', "idprod", '', $conf->product->limit_size);
+                            echo "<input class='butAction' type='submit' value='Ajouter'/></form></td>";
+                        }
+                        foreach ($tabT as $val) {
+                            $propal = new Facture($db);
+                            $propal->fetch($val['d']);
+                            print '<tr><th class="ui-widget-header ui-state-default">Facture';
+                            print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($propal->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT</td>";
+                        }
                     }
                 } else {
                     echo "<td class='ui-widget-content'>";
@@ -585,16 +608,16 @@ if ($chr->id > 0) {
 
 
 //Ajoute les extra key/Values
-    $chr->getValuesPlus();
+        $chr->getValuesPlus();
         print '<td colspan="2" rowspan="100" class="zonePlus">';
         foreach ($chr->valuesPlus as $res) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $res->nom;
             print '    <td  class="ui-widget-content ' . $res->extraCss . '" colspan="1">';
-                print str_replace("\n", "<br/>", $res->valueHtml);
+            print str_replace("\n", "<br/>", $res->valueHtml);
             print '</td>';
         }
-        
-        
+
+
         print '</table></div><div class="divButAction">';
         print '<tr><th align=right nowrap colspan=4  class="ui-state-default">';
         if (($user->rights->synopsischrono->Modifier || $rightChrono->modifier ) && $chr->statut == 0) {
@@ -841,12 +864,12 @@ EOF;
 //            // List of document
 //            $param = '&id=' . $chr->id;
 //            $formfile->list_of_documents($filearray, $chr, 'synopsischrono', $param, 1, $chr->id . "/");
-            
+
             $object = $chr;
             $filename = sanitize_string($object->id);
             $urlsource = $_SERVER["PHP_SELF"] . "?" . $para;
-            $genallowed = 1;//$user->rights->synopsischrono->Global->read;
-            
+            $genallowed = 1; //$user->rights->synopsischrono->Global->read;
+
             require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
             $html = new Form($db);
             $formfile = new FormFile($db);

@@ -43,32 +43,34 @@ function fetchPartsList() {
 
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
-        case 'addCartToPropal':
-            if (isset($_GET['chronoId'])) {
-                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
-                $chr = new Chrono($db);
-                $chr->fetch($_GET['chronoId']);
-                $propalId = $chr->propalid;
-                if (!$propalId > 0)
-                    $propalId = $chr->createPropal();
-
-                $propal = new Propal($db);
-                $propal->fetch($propalId);
-                $cards = new partsCart($db, null, $_GET['chronoId']);
-                $cards->loadCart();
-                foreach ($cards->partsCart as $part) {
-                    $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-                    $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], $part['stockPrice']);
-                }
-                echo '<ok>Reload</ok>';
-//                } else {
-//                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+//        case 'addCartToPropal':
+//            if (isset($_GET['chronoId'])) {
+//                require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+//                require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+//                $chr = new Chrono($db);
+//                $chr->fetch($_GET['chronoId']);
+//                $propalId = $chr->propalid;
+//                if (!$propalId > 0)
+//                    $propalId = $chr->createPropal();
+//
+//                $propal = new Propal($db);
+//                $propal->fetch($propalId);
+//                $cards = new partsCart($db, null, $_GET['chronoId']);
+//                $cards->loadCart();
+//                foreach ($cards->partsCart as $part) {
+//                    $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+//                    $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], $part['stockPrice']);
 //                }
-            } else {
-                echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
-            }
-            break;
+//                require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+//                propale_pdf_create($db, $propal, null, $langs);
+//                echo '<ok>Reload</ok>';
+////                } else {
+////                    echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";
+////                }
+//            } else {
+//                echo '<p class="error">Une erreur est survenue (chrono id absent)</p>' . "\n";
+//            }
+//            break;
 
         case 'loadProduct':
             if (isset($_GET['serial'])) {
@@ -179,6 +181,8 @@ if (isset($_GET['action'])) {
                         $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
                         $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
                     }
+                    require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+                    propale_pdf_create($db, $propal, null, $langs);
                     echo 'ok<ok>Reload</ok>';
 //                    } else {
 //                        echo '<p class="error">Une erreur est survenue  : Pas de Propal</p>' . "\n";

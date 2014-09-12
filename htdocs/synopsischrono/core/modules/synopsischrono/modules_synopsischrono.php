@@ -74,7 +74,7 @@ class ModeleSynopsischrono extends CommonDocGenerator
         $liste=array();
         $sql ="SELECT nom as id, ifnull(libelle,nom) as lib";
         $sql.=" FROM ".MAIN_DB_PREFIX."document_model";
-        $sql.=" WHERE type = '".$type."' OR type = '".$type2."'";
+        $sql.=" WHERE type = '".$type."' OR type = '".$type2."' ORDER BY type DESC";
 
         $resql = $db->query($sql);
         if ($resql)

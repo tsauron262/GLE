@@ -401,6 +401,12 @@ if (! defined('NOLOGIN'))
                 exit;
             }
         }
+        
+        /*mod drsi*/
+        $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+        if(isset($tabT[0]) && $tabT[0]['d'] > 2)
+            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+        /*f mod drsi*/
 
         // Verification security graphic code
         if (GETPOST("username","alpha",2) && ! empty($conf->global->MAIN_SECURITY_ENABLECAPTCHA))
@@ -479,6 +485,20 @@ if (! defined('NOLOGIN'))
                 $langs->load('main');
                 $langs->load('errors');
 
+                
+                /*mod drsi*/
+                $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+                if(isset($tabT[0])){
+                    delElementElement("userErr", GETPOST("username","alpha",2));
+                    addElementElement("userErr", GETPOST("username","alpha",2), intval($tabT[0]['s'])+1, intval($tabT[0]['d'])+1);
+                }
+                else
+                    addElementElement("userErr", GETPOST("username","alpha",2), "1", "1");
+                if(isset($tabT[0]) && $tabT[0]['d'] > 1)
+                    $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+                /*f mod drsi*/
+                
+                
                 // Bad password. No authmode has found a good password.
                 $user->trigger_mesg=$langs->trans("ErrorBadLoginPassword").' - login='.GETPOST("username","alpha",2);
                 // We set a generic message if not defined inside function checkLoginPassEntity or subfunctions
@@ -599,6 +619,17 @@ if (! defined('NOLOGIN'))
     // If we are here, this means authentication was successfull.
     if (! isset($_SESSION["dol_login"]))
     {
+        
+        
+        /*mod drsi*/
+        $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
+        if(isset($tabT[0])){
+                    delElementElement("userErr", GETPOST("username","alpha",2));
+                    addElementElement("userErr", GETPOST("username","alpha",2), $tabT[0]['s'], "1");
+        }
+        /*f mod drsi*/
+                
+                
         // New session for this login.
     	$error=0;
 

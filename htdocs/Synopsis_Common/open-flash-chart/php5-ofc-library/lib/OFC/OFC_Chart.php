@@ -99,7 +99,7 @@ class OFC_Chart
     {
         if (function_exists('json_encode'))
         {
-            return json_encode($this);
+            return /*amodifierdrsi*/@json_encode($this);
         }
         else
         {

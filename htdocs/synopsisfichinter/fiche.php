@@ -641,7 +641,9 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 }
                 print '</tr></table>';
             } else {
-                select_projects($societe->id, '', 'projetidp');
+                require_once(DOL_DOCUMENT_ROOT."/core/class/html.formprojet.class.php");
+                $form = new FormProjets($db);
+                $form->select_projects($societe->id, '', 'projetidp');
             }
             print '</td></tr>';
         }

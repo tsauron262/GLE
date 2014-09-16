@@ -527,20 +527,32 @@ class gsxDatas {
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
         if ($GSXRequest->isLastRequestOk()) {
-            if (isset($_POST['includeFiles'])) {
-                if (($_POST['includeFiles'] == 'Y') && isset($_REQUEST['chronoId'])) {
-                    $dir = DOL_DATA_ROOT . '/synopsischrono/' . $_REQUEST['chronoId'] . '/';
-                    $files = scandir($dir);
-                    if (count($files)) {
-                        $result['fileName'] = $files[0];
-                        $result['fileData'] = file_get_contents($dir . $files[0]);
-                    }
+            $filesError = false;
+            if (isset($_POST['includeFiles']) && ($_POST['includeFiles'] == 'Y') && isset($_REQUEST['chronoId'])) {
+                $dir = DOL_DATA_ROOT . '/synopsischrono/' . $_REQUEST['chronoId'] . '/';
+                $files = scandir($dir);
+                if (count($files)) {
+                    $result['fileName'] = $files[0];
+                    $result['fileData'] = file_get_contents($dir . $files[0]);
+                } else {
+                    $html .= '<p class="error">Aucun fichier-joint n\'a été trouvé</p>';
+                    $filesError = true;
                 }
             } else if (isset($_FILES['fileName'])) {
                 if (isset($_FILES['fileName']['name']) && isset($_FILES['fileName']['tmp_name'])) {
                     $result['fileName'] = $_FILES['fileName']['name'];
-                    $result['fileData'] = file_get_contents($_FILES['fileName']['tmp_name']);
+                    $result['fileData'] = false;
+                    if (file_exists($_FILES['fileName']['tmp_name']))
+                        $result['fileData'] = file_get_contents($_FILES['fileName']['tmp_name']);
+
+                    if ($result['fileData'] === false) {
+                        $filesError = true;
+                        $html .= '<p class="error">Echec du transfert du fichier-joint:  "'.$_FILES['fileName']['name'].'"</p>';
+                    }
                 }
+            }
+            if ($filesError) {
+                return $html;
             }
             $client = $GSXRequest->requestName;
             $request = $GSXRequest->request;
@@ -628,7 +640,7 @@ class gsxDatas {
 //                $html .= '</pre>';
             }
         } else {
-            $html = $result;
+            $html .= $result;
         }
         return $html;
     }

@@ -19,6 +19,10 @@ $coefPrix = 1;
 //$serviceAccountNo = '0000100520';
 //ephesussav
 //@Ephe2014#
+//
+//$userId = 's.trerieux@bimp.fr';
+//$password = '30Amelie38';
+//$serviceAccountNo = '0000100520';
 
 function fetchPartsList() {
     $parts = array();

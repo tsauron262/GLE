@@ -27,7 +27,7 @@ var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
 //else
-//    extra = extra+ "&chronoId="+4;
+//    extra = extra+ "&chronoId="+6;
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1188,7 +1188,7 @@ function checkInput($input, type) {
                 assignInputCheckMsg($input, 'notOk', 'Format de la date invalide. (Attendu: JJ/MM/AA)');
                 return false;
             } else if (/^[0-9]{2}\/[0-9]{2}\/[0-9]{4}$/.test(val))
-                    $input.val(val.replace(/^([0-9]{2}\/[0-9]{2}\/)[0-9]{2}([0-9]{2})$/, '$1$2'));
+                $input.val(val.replace(/^([0-9]{2}\/[0-9]{2}\/)[0-9]{2}([0-9]{2})$/, '$1$2'));
             break;
 
         case 'time':
@@ -1244,6 +1244,7 @@ function duplicateInput($span, inputName) {
 function submitGsxRequestForm(prodId, request, repairRowId) {
     var $prod = $('#prod_'+prodId);
     var $form = null;
+    var formElement = null;
     var $resultContainer = null;
     if (typeof(repairRowId) != 'undefined') {
         var $repairContainer = $prod.find('#repair_'+repairRowId);
@@ -1263,6 +1264,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         alert('Erreur: échec d\'identification du formulaire. Abandon');
         return;
     }
+    formElement = document.getElementById($form.attr('id'));
     var partCount = $form.find('div.partDatasBlock').length;
 
     var $template = $form.find('div.repairsPartsInputsTemplate');
@@ -1302,7 +1304,9 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         type: "POST",
         url: $form.attr('action'),
         dataType: 'html',
-        data: $form.serialize(),
+        processData: false,
+        contentType: false,
+        data: new FormData(formElement), // Non compatible pour les IE < 10
         success: function(html) {
             if ($resultContainer.length) {
                 $resultContainer.html(html);

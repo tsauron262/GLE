@@ -445,9 +445,13 @@ class GoogleMapAPI
 	public function addArrayMarker($tabAddresses, $langs, $mode)
 	{
                 global $db;
-                $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
-                $panier= new Synopsispanier($db);
-                $panier->fetch($idReferent, $_REQUEST['type']);
+                
+                global $user;
+                if(isset($user->rights->synopsispanier) && $user->rights->synopsispanier->read){
+                    $idReferent = (isset($_REQUEST['idReferent'])?$_REQUEST['idReferent']:0);
+                    $panier= new Synopsispanier($db);
+                    $panier->fetch($idReferent, $_REQUEST['type']);
+                }
 		$this->langs = $langs;
 
 		// Detect if we use https
@@ -481,20 +485,22 @@ class GoogleMapAPI
 			$html.= '<br/>'.$lienGmaps.'<br/>';
                         
                         /* mod drsi(Momo) */
-                        $present = $panier->getPresenceDB ($elem->id);
-                        
-                        $type = $_REQUEST['type'];
-                        
-                            $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
+                        if(isset($user->rights->synopsispanier) && $user->rights->synopsispanier->read){
+                            $present = $panier->getPresenceDB ($elem->id);
 
-                            $html .= "<a ".(!$present?"style='display:none;'":"")." class= 'supPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'sup');$(this).hide();$(this).parent().find('.ajPan').show();\">Retirer du Panier.</a>";
-                            $html .= "<a href= '".DOL_URL_ROOT."/synopsispanier/affichePanier.php?idReferent=".$idReferent."&type=".$type."'> Afficher le Panier.</a>";/*fmod drsi*/
-                        
-                            
-                        if ($present)
-                            $icon = 'img/imageMarker_green.png ';
-                        else
-                            $icon = false;
+                            $type = $_REQUEST['type'];
+
+                                $html .= "<br/><a ".($present?"style='display:none;'":"")." class= 'ajPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'add');$(this).hide();$(this).parent().find('.supPan').show();\">Ajouter au Panier.</a>";
+
+                                $html .= "<a ".(!$present?"style='display:none;'":"")." class= 'supPan' onClick=\"modPan(".$idReferent.",'".$type."',".$elem->id.", 'sup');$(this).hide();$(this).parent().find('.ajPan').show();\">Retirer du Panier.</a>";
+                                $html .= "<a href= '".DOL_URL_ROOT."/synopsispanier/affichePanier.php?idReferent=".$idReferent."&type=".$type."'> Afficher le Panier.</a>";/*fmod drsi*/
+
+
+                            if ($present)
+                                $icon = 'img/imageMarker_green.png ';
+                            else
+                                $icon = false;
+                        }
                         /*fmod drsi(Momo) */
 			if(isset($elem->latitude) && isset($elem->longitude)) {
 				$this->addMarkerByCoords($elem->latitude, $elem->longitude, $elem->name, $html, '', $icon);

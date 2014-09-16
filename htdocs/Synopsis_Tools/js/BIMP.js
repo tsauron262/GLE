@@ -46,12 +46,22 @@ $(window).load(function() {
                     resultZone.html('<p class="error">Pas de numéro de série</p>');
     }
     
+    if($("textarea#Descr").size()){
+        textarea2 = $("textarea#Descr");
+        tabAccess = Array("Rayure", "Écran cassé", "Liquide");
+        textarea2.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext2">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
+        $("#sometext2").click(function(){
+            textarea2.val(textarea2.val()+$(this).val()+', ');
+        });
+    }
+    
+    
     if($("textarea.choixAccess").size()){
-        textarea = $(".choixAccess");
+        textarea = $("textarea.choixAccess");
         tabAccess = Array("Housse", "Alim", "Carton", "Clavier", "Souris", "Dvd", "Baterie", "Boite complet");
         textarea.parent().append(' <select name="sometext" multiple="multiple" class="grand" id="sometext">    <option>'+tabAccess.join('</option><option>')+'</option></select>'); 
         $("#sometext").click(function(){
-            textarea.append($(this).val()+', ');
+            textarea.val(textarea.val()+$(this).val()+', ');
         });
     }
     
@@ -97,6 +107,19 @@ $(window).load(function() {
                     }
                 });
         
+    });
+    
+    
+    $("td:contains('Pass Apple')").each(function(){
+       $(this).next("td").each(function(){
+            if($(this).find("input").size() > 0){
+                val = $(this).find("input").val();
+                $(this).parent().append("<input type='password' name='options_apple_mdp' value='"+val+"'/>");
+                $(this).remove();
+            }
+            else
+                $(this).html("*******");
+       });
     });
 });
 

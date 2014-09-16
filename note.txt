@@ -26,7 +26,7 @@ SECU :
 
 Extérieur redirection de port.
 
-Apple ship to crypter
+- Apple ship to crypter
 
 //Delaie 15min
 
@@ -36,15 +36,15 @@ Vous étes responsable de votre mdp et de l'utilisation que vous en faite.
 
 SAV :
 
-Piéce recu envoie message 
+- Piéce recu envoie message 
 
-Lien rapide en haut de SAV TOUS
+- Lien rapide en haut de SAV TOUS
 
 DX6L7180DPMW : Garantie limitée Apple voir date
 
 Materiel jint case + autre
 
-Description plus haut aprés etat machine
+- Description plus haut aprés etat machine
 
 Tous les cadre plus petit
 
@@ -52,11 +52,11 @@ Tous sur un ecran 20pouce 1680*1050
 
 Préférence de contact pour le devis=> envoie devis
 
-=> envoie Mise a dispo
+- => envoie Mise a dispo
 
 -neuf -trés bon etat -usager
 
-Description ajouter   - rayure -ecran cassé - liquide
+- Description ajouter   "Rayure", "Écran cassé", "Liquide"
 
 Voir temps affichage liste
 
@@ -67,7 +67,7 @@ Attenteclient = attente info client
 
 S/N ou IMEI => 013711001134904
 
-Recuperer Warning DQGLK7FWDTWG
+- Recuperer Warning DQGLK7FWDTWG
 
 vérif si accident fonctionne => Déclaration 
 
@@ -76,7 +76,7 @@ simptomes reste symptomes
 ajouter symtomes et résolution
 
 
-Dans lien chrono chrono cacher ref
+- Dans lien chrono chrono cacher ref
 
 Technicien = si vide user courant.
 
@@ -84,7 +84,7 @@ technicien = hardware et sophtwer
 
 dans fiche rapide liste des tech mais pas remplir
 
-dans date / h date de création
+- dans date / h date de création
 
 
 
@@ -95,19 +95,19 @@ VOIR RDV VENDREDI
 
 bug ligne
 
-par default heures ouvrées 8h 19h
+- par default heures ouvrées 8h 19h
 
-afficher deb rdv a 9h
+- afficher deb rdv a 9h
 
 voir gestion des taches
 
-État / Pourcentage = État
+- État / Pourcentage = État
 
-A réaliser = A confirmer
+- A réaliser = A confirmer
 
-Discription dans agenda plus trunc
+- Discription dans agenda plus trunc
 
-dans di ajouter horraire est prendre en compte pour event
+- dans di ajouter horraire est prendre en compte pour event
 
 ajouter liste des action pour lier + pour intervenant + date de la DI
 
@@ -129,14 +129,14 @@ Fichier joint ds agenda.
 
 Proposiotion commerciale en devis
 
-Atten client => envoie devis + trigger envoie
+- Atten client => envoie devis + trigger envoie
 
 //Charger le formulaire => valider
 
-Change etat = ouverture message sms
+- Change etat = ouverture message sms
 
-Quand "Réparation en cours" bouton "A dispo"
-aprés "Réparation fermée"
+- Quand "Réparation en cours" bouton "A dispo"
+- aprés "Réparation fermée"
 
 //classer delivrer tous av 2014
 
@@ -158,17 +158,17 @@ ds client ajouter onglet Etablissement
 
 
 
-Ds commande apple saut de ligne
+- Ds commande apple saut de ligne
 
-Ajouter etat attente piece voir importation du num
+- Ajouter etat attente piece voir importation du num
 
-prise en charge de 45
-
-
+- prise en charge de 45
 
 
 
-dans new client   :
+
+
+- dans new client   :
 // si individu privé : cacher tva...
 
 
@@ -196,19 +196,41 @@ Libre3 => produit réservé
 
 
 
-Doubler boutons Créer Réparation    
+- Doubler boutons Créer Réparation    
 
-Voir date prise en charge date création chrono.
+- Voir date prise en charge date création chrono.
 
-Inverser diago + 
+- Inverser diago + 
 
 
-Aligner les oui non
+- Aligner les oui non
 
-Requéte maj num série dérouler 
+- Requéte maj num série dérouler 
 
-Aligner oui non raprocher checkbox et texte
+- Aligner oui non raprocher checkbox et texte
 
-Prôbléme de retour
+- Prôbléme de retour
 
-Bug fichier joint
+- Bug fichier joint
+
+
+
+
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_synopsischrono_key_value_view` AS select `v`.`id` AS `id`,`k`.`nom` AS `nom`,`k`.`description` AS `description`,`k`.`model_refid` AS `model_refid`,`k`.`type_valeur` AS `type_valeur`,`k`.`type_subvaleur` AS `type_subvaleur`,`k`.`extraCss` AS `extraCss`,`k`.`inDetList` AS `inDetList`,`k`.`id` AS `key_id`,`c`.`id` AS `chrono_id`,`v`.`value` AS `chrono_value`,`c`.`date_create` AS `date_create`,`c`.`ref` AS `ref`,`c`.`description` AS `desc_chrono`,`c`.`fk_societe` AS `fk_soc`,`c`.`fk_user_author` AS `fk_user_create`,`c`.`fk_socpeople` AS `fk_socpeople`,`c`.`fk_user_modif` AS `fk_user_modif`,`c`.`fk_statut` AS `fk_statut`,`c`.`validation_number` AS `validation_number`,`c`.`revision` AS `revision`,`c`.`model_refid` AS `chrono_conf_id`,`c`.`orig_ref` AS `orig_ref` from (`llx_synopsischrono` `c` left join (`llx_synopsischrono_key` `k` left join `llx_synopsischrono_value` `v` on((`v`.`key_id` = `k`.`id`))) on((`c`.`id` = `v`.`chrono_refid`)))
+
+
+
+
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_projet` AS (select `llx_Synopsis_projet`.`rowid` AS `rowid`,`llx_Synopsis_projet`.`fk_soc` AS `fk_soc`,`llx_Synopsis_projet`.`date_create` AS `datec`,`llx_Synopsis_projet`.`tms` AS `tms`,`llx_Synopsis_projet`.`dateo` AS `dateo`,`llx_Synopsis_projet`.`date_cloture` AS `datee`,`llx_Synopsis_projet`.`ref` AS `ref`,`llx_Synopsis_projet`.`entity` AS `entity`,`llx_Synopsis_projet`.`title` AS `title`,`llx_Synopsis_projet`.`note` AS `description`,`llx_Synopsis_projet`.`fk_user_creat` AS `fk_user_creat`,_utf8'' AS `public`,`llx_Synopsis_projet`.`fk_statut` AS `fk_statut`,_utf8'' AS `note_private`,_utf8'' AS `note_public`,_utf8'' AS `model_pdf` from `llx_Synopsis_projet`);
+
+
+DROP TABLE IF EXISTS `llx_synopsis_fichinter`;
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinter` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_soc` AS `fk_soc`,`f`.`fk_projet` AS `fk_projet`,`f`.`fk_contrat` AS `fk_contrat`,`sf`.`fk_commande` AS `fk_commande`,`f`.`ref` AS `ref`,`f`.`tms` AS `tms`,`f`.`datec` AS `datec`,`f`.`date_valid` AS `date_valid`,`f`.`datei` AS `datei`,`f`.`fk_user_author` AS `fk_user_author`,`f`.`fk_user_valid` AS `fk_user_valid`,`f`.`fk_statut` AS `fk_statut`,`f`.`duree` AS `duree`,`f`.`description` AS `description`,`f`.`note_private` AS `note_private`,`f`.`note_public` AS `note_public`,`f`.`model_pdf` AS `model_pdf`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`natureInter` AS `natureInter`,`f`.`entity` AS `entity` from (`llx_fichinter` `f` left join `llx_synopsisfichinter` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+DROP TABLE IF EXISTS `llx_synopsis_fichinterdet`;
+
+CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));

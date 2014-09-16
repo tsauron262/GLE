@@ -496,7 +496,7 @@ if ($objection == 'create')
 	print '</td></tr>';
 
 	// Status
-	print '<tr><td width="10%">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td>';
+	print '<tr><td width="10%">'.$langs->trans("Status")./*moddrsi' / '.$langs->trans("Percentage").fmoddrsi*/'</td>';
 	print '<td>';
 	$percent=-1;
 	if (isset($_GET['status']) || isset($_POST['status']))
@@ -775,7 +775,7 @@ if ($id > 0)
 		print '</td></tr>';
 
 		// Status
-		print '<tr><td class="nowrap">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td><td colspan="3">';
+		print '<tr><td class="nowrap">'.$langs->trans("Status")./*moddrsi' / '.$langs->trans("Percentage").fmoddrsi*/'</td><td colspan="3">';
 		$percent=GETPOST("percentage")?GETPOST("percentage"):$object->percentage;
 		$htmlactions->form_select_status_action('formaction',$percent,1);
 		print '</td></tr>';
@@ -951,7 +951,7 @@ if ($id > 0)
 		print '</td></tr>';
 
 		// Status
-		print '<tr><td class="nowrap">'.$langs->trans("Status").' / '.$langs->trans("Percentage").'</td><td colspan="2">';
+		print '<tr><td class="nowrap">'.$langs->trans("Status")./*moddrsi' / '.$langs->trans("Percentage").fmoddrsi*/'</td><td colspan="2">';
 		print $object->getLibStatut(4);
 		print '</td></tr>';
 

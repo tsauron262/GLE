@@ -179,6 +179,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $payement->paiementid = $_REQUEST['modeP'];
         $payement->create($user);
         $facture->set_paid($user);
+        facture_pdf_create($db, $facture, null, $langs);
     }
 }
 

@@ -60,6 +60,7 @@ $sauv1 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 1 ? 'selected' : "");
 $sauv2 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 2 ? 'selected' : "");
 $sauv3 = (isset($_POST['Sauv']) && $_POST['Sauv'] == 3 ? 'selected' : "");
 $pass = (isset($_POST['pass']) ? $_POST['pass'] : "");
+$loginA = (isset($_POST['loginA']) ? $_POST['loginA'] : "");
 $devis1 = (isset($_POST['Devis']) && $_POST['Devis'] == 1 ? 'selected' : "");
 $devis2 = (isset($_POST['Devis']) && $_POST['Devis'] == 2 ? 'selected' : "");
 $retour1 = (isset($_POST['Retour']) && $_POST['Retour'] == 1 ? 'selected' : "");
@@ -79,7 +80,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->model_refid = 101;
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
-        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1014 => $DateAchat, 1015 => $garantie);
+        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie);
         $chronoProdNewid = $chronoProd->create();
         $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
     } else {
@@ -320,6 +321,14 @@ if ($socid != "") {
     echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
     echo "<option value='0'" . $sauv0 . ">Non Applicable</option> ";
     echo " </select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Login admin.</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo " <input type='text' name='loginA' value='" . $loginA . "' id='loginA' class='required'/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";

@@ -222,8 +222,12 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Centre</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo "<select name='centre'/>";
-    $centres = array("G" => "Grenoble", "L" => "Lyon");
-    foreach ($centres as $val => $centre) {
+    $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
+    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
+//    foreach ($centres as $val => $centre) {
+        while($ligne = $db->fetch_object($result)){
+            $val = $ligne->valeur;
+            $centre = $ligne->label;
         echo "<option value='" . $val . "' " . ($val == $user->array_options['options_apple_centre'] ? "selected='selected'" : "") . ">" . $centre . "</option>";
     }
     echo "</select>";

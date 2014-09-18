@@ -531,8 +531,7 @@ class gsxDatas {
         $GSXRequest = new GSX_Request($this, $requestType);
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
-        if ($GSXRequest->isLastRequestOk()) {
-            $filesError = false;
+        if ($GSXRequest->isLastRequestOk()) { $filesError = false;
             if (isset($_POST['includeFiles']) && ($_POST['includeFiles'] == 'Y') && isset($_REQUEST['chronoId'])) {
                 $dir = DOL_DATA_ROOT . '/synopsischrono/' . $_REQUEST['chronoId'] . '/';
                 $files = scandir($dir);
@@ -543,17 +542,18 @@ class gsxDatas {
                     $html .= '<p class="error">Aucun fichier-joint n\'a été trouvé</p>';
                     $filesError = true;
                 }
-            } else if (isset($_FILES['fileName'])) {
-                if (isset($_FILES['fileName']['name']) && isset($_FILES['fileName']['tmp_name'])) {
-                    $result['fileName'] = $_FILES['fileName']['name'];
-                    $result['fileData'] = false;
-                    if (file_exists($_FILES['fileName']['tmp_name']))
-                        $result['fileData'] = file_get_contents($_FILES['fileName']['tmp_name']);
+            } else if (isset($_FILES['fileName']) &&
+                    isset($_FILES['fileName']['name']) &&
+                    isset($_FILES['fileName']['tmp_name']) &&
+                    $_FILES['fileName']['name'] != '') {
+                $result['fileName'] = $_FILES['fileName']['name'];
+                $result['fileData'] = false;
+                if (file_exists($_FILES['fileName']['tmp_name']))
+                    $result['fileData'] = file_get_contents($_FILES['fileName']['tmp_name']);
 
-                    if ($result['fileData'] === false) {
-                        $filesError = true;
-                        $html .= '<p class="error">Echec du transfert du fichier-joint:  "'.$_FILES['fileName']['name'].'"</p>';
-                    }
+                if ($result['fileData'] === false) {
+                    $filesError = true;
+                    $html .= '<p class="error">Echec du transfert du fichier-joint:  "' . $_FILES['fileName']['name'] . '"</p>';
                 }
             }
             if ($filesError) {

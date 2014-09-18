@@ -34,10 +34,10 @@ class partsCart {
             return true;
 
         $sql = 'SELECT `rowid` as id FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart WHERE ';
-        if (isset($this->serial)) {
-            $sql .= '`serial_number` = \'' . $this->serial . '\'';
-        } else if (isset($this->chronoId)) {
+        if (isset($this->chronoId)) {
             $sql .= '`chrono_id` = ' . $this->chronoId;
+        } else if (isset($this->serial)) {
+            $sql .= '`serial_number` = \'' . $this->serial . '\'';
         } else {
             return false;
         }

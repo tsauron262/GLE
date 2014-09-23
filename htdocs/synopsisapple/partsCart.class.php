@@ -9,7 +9,6 @@ class partsCart {
     public $cartRowId = null;
     public $confirmNumber = null;
     public $errors = array();
-
     public function __construct($db, $serial = null, $chronoId = null) {
         $this->serial = $serial;
         $this->chronoId = $chronoId;
@@ -29,15 +28,16 @@ class partsCart {
         $this->errors = array();
         return $html;
     }
+
     protected function loadCartRowId() {
         if (isset($this->cartRowId))
             return true;
 
         $sql = 'SELECT `rowid` as id FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart WHERE ';
-        if (isset($this->serial)) {
-            $sql .= '`serial_number` = \'' . $this->serial . '\'';
-        } else if (isset($this->chronoId)) {
+        if (isset($this->chronoId)) {
             $sql .= '`chrono_id` = ' . $this->chronoId;
+        } else if (isset($this->serial)) {
+            $sql .= '`serial_number` = \'' . $this->serial . '\'';
         } else {
             return false;
         }
@@ -72,8 +72,8 @@ class partsCart {
     }
 
     public function saveCart() {
-        if (!isset($this->serial)) {
-            $this->addError('Echec de l\'enregistrement: numéro de série absent');
+        if (!isset($this->serial) || !isset($this->chronoId)) {
+            $this->addError('Echec de l\'enregistrement: numéro de série ou chronoId absent');
             return false;
         }
 
@@ -85,7 +85,8 @@ class partsCart {
         if (!$this->loadCartRowId()) {
             $sql = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart` (`serial_number`, `chrono_id`) ';
             $sql .= 'VALUES (';
-            $sql .= '"' . $this->serial . '", ';
+//            $sql .= '123456, 23456';
+            $sql .= (isset($this->serial) ? '"' . $this->serial . '"' : '').', ';
             $sql .= (isset($this->chronoId) ? '"' . $this->chronoId . '"' : 'NULL');
             $sql .= ')';
 
@@ -98,13 +99,12 @@ class partsCart {
         } else {
             $sql = 'DELETE FROM ' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail WHERE `cart_rowid` = ' . $this->cartRowId;
             if (!$this->db->query($sql)) {
-                $this->addError('Erreur: ' . $this->db->lasterror());
+                $this->addError('Erreur SQL: ' . $this->db->lasterror());
                 return false;
             }
         }
 
         if (count($this->partsCart)) {
-            $html = '';
             $check = true;
             foreach ($this->partsCart as $part) {
                 $sql = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart_detail` ';

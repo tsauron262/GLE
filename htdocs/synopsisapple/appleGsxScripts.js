@@ -27,7 +27,7 @@ var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
 //else
-//    extra = extra+ "&chronoId="+6;
+//    extra = extra+ "&chronoId=7";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1264,7 +1264,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         alert('Erreur: échec d\'identification du formulaire. Abandon');
         return;
     }
-    formElement = document.getElementById($form.attr('id'));
+    formElement = $form.get(0);
     var partCount = $form.find('div.partDatasBlock').length;
 
     var $template = $form.find('div.repairsPartsInputsTemplate');

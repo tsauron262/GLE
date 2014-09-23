@@ -396,6 +396,9 @@ class GSX {
     protected function assign_wsdl() {
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
+        $type = "Asp";
+//        $type = "IPhone";
+        
         if ($this->gsxDetails['gsxWsdl'] != '') {
             return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
         } elseif ($api_mode == 'it') {
@@ -403,7 +406,7 @@ class GSX {
         } elseif ($api_mode == 'ut') {
             return $this->wsdlUrl = 'https://gsxwsut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
-            $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+            $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) .$type. '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $type. '.wsdl';
 
             return $this->wsdlUrl;
         }

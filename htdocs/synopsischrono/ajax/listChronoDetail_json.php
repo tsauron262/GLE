@@ -468,7 +468,7 @@ switch ($action) {
                         $arr[] = ('<div class="hasRev">0</div>');
                     }
 
-                    if ($chrono->model->hasDescription)
+                    if ($chrono->model->hasDescription && $chrono->model->descInList)
                         $arr[] = ($chrono->description ? $chrono->description : '');
 
                     foreach ($arrKeyName as $keyid => $keyname) {
@@ -501,7 +501,7 @@ switch ($action) {
                         }
                         $arr[] = $html;
                     }
-                    if ($chrono->model->hasProjet && $chrono->model->descInList) {
+                    if ($chrono->model->hasProjet) {
                         $html = "";
                         if ($chrono->projetid > 0) {
                             require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");

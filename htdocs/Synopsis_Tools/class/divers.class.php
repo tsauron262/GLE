@@ -153,12 +153,12 @@ class synopsisHook {
             $return .= '<div class="menu_titre">';
             $return .= '<a href="#" class="vmenu">Consigne Commande</a>';
             $return .= "</div>";
-            $return .= '<div class="editable consigne">';
+            $return .= '<div class="menu_contenu editable consigne">';
             global $db;
             $consigne = new consigneCommande($db);
             $consigne->fetch($element_type, $element_id);
             $return .= $consigne->note;
-            $return .= "</div>";
+            $return .= '</div><div class="menu_end"></div>';
             $return .= "</div>";
         }
 
@@ -168,7 +168,10 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
             $hrefFin = "#pangridChronoDet105";
             $return .= '<div class="blockvmenupair">';
+            $return .= '<div class="menu_titre">'.img_object("SAV", "drap0@Synopsis_Tools").' Fiche SAV</div>';
+            $return .= '<div class="menu_contenu">';
             $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="'.DOL_URL_ROOT.'/Synopsis_Tools/FicheRapide.php"> <img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
+            $return .= '</div>';
             $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
             $tabGroupe = array(array('label' => "Tous", 'valeur' => 0));
             $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));
@@ -178,8 +181,8 @@ class synopsisHook {
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
                 $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process&' . ($centre ? 'Centre=' . $centre : "");
-                $return .= '<div class="menu_titre" style="margin:5px 3px 0px;"><a class="vsmenu" href="' . $href . $hrefFin . '">
-                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' SAV ' . $ligne3['label'] . '</a></div>';
+                $return .= '<div class="menu_contenu"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
+                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
                 while ($ligne = $db->fetch_object($result)) {
@@ -189,9 +192,10 @@ class synopsisHook {
                     $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
                     $return .= "</span><br/>";
                 }
-//            $return .= '</div>';
+                $return .= '</div>';
             }
-            $return .= '</div>';
+            
+            $return .= '<div class="menu_end"></div></div>';
         }
 
 
@@ -212,9 +216,9 @@ class synopsisHook {
 //            foreach ($tabGroupe as $ligne3) {
 //                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
             $href = DOL_URL_ROOT . '/synopsischrono/index.php?idmenu=845&chronoDet=100&mainmenu=Process';
-            $return .= '<div class="menu_titre"><a class="vsmenu" href="' . $href . $hrefFin . '">
+            $return .= '<div class="menu_titre"><a class="vmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
-
+            $return .= '<div class="menu_contenu">';
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
             while ($ligne = $db->fetch_object($result)) {
                 $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
@@ -223,13 +227,13 @@ class synopsisHook {
                 $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
                 $return .= "</span><br/>";
             }
-//            $return .= '</div>';
+            $return .= '</div><div class="menu_end"></div>';
 //            }
             $return .= '</div>';
         }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
-            $return .= '<div class="blockvmenupair">';
+            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/contrat/liste.php?leftmenu=contracts">
                     ' . img_object("Contrat", "contract") . ' Contrats</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/contrat/liste.php">';
@@ -239,7 +243,7 @@ class synopsisHook {
         }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
-            $return .= '<div class="blockvmenupair">';
+            $return .= '<div id="blockvmenusearch" class="blockvmenusearch">';
             $return .= '<div class="menu_titre"><a class="vsmenu" href="' . DOL_URL_ROOT . '/synopsischrono/listDetail.php?mainmenu=Process">
                      ' . img_object("Chrono", "chrono@synopsischrono") . $langs->trans("Chrono") . '</a><br></div>';
             $return .= '<form method="post" action="' . DOL_URL_ROOT . '/synopsischrono/liste.php?mainmenu=Process">';
@@ -779,7 +783,7 @@ class histoNavigation {
             if ($ret)
                 $return .= "<div class='menu_contenu'>  " . $ret . "</div>";
         }
-        $return .= "</div>";
+        $return .= "<div class=\"menu_end\"></div></div>";
         return $return;
     }
 

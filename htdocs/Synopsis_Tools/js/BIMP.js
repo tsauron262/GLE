@@ -37,6 +37,12 @@ $(window).load(function() {
 //                        setRequest('newSerial', '&serial=' + serial);
                         ok = true;
                     }
+                    if(/^[0-9]{15}$/.test(serial)){
+                        resultZone.append('<div id="requestsResponsesContainer"></div><div id="requestResult"></div>');
+                        GSX.loadProduct(serial);
+//                        setRequest('newSerial', '&serial=' + serial);
+                        ok = true;
+                    }
                 }
                 if(!ok)
                     resultZone.html('<p class="error">Pas de numéro de série correct</p>');

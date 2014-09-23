@@ -8,7 +8,8 @@ class Repair {
         'serialNumber' => 'Numéro de série',
         'repairNumber' => 'Numéro de réparation (repair #)',
         'repairConfirmationNumber' => 'Numéro de confirmation (Dispatch ID)',
-        'purchaseOrderNumber' => 'Numéro de bon de commande (Purchase Order)'
+        'purchaseOrderNumber' => 'Numéro de bon de commande (Purchase Order)',
+        'imeiNumber' => 'Numéro IMEI (IPhone)'
     );
     public $gsx = null;
     public $db = null;
@@ -22,10 +23,20 @@ class Repair {
     public $repairComplete = 0;
     protected $repairLookUp = null;
     protected $errors = array();
+    public $isIphone;
 
-    public function __construct($db, $gsx) {
+    public function __construct($db, $gsx, $isIphone) {
         $this->db = $db;
         $this->gsx = $gsx;
+        $this->isIphone = $isIphone;
+    }
+
+    public function setSerial($serial) {
+        if (preg_match('/^[0-9]{15,16}$/', $serial))
+            $this->isIphone = true;
+        else
+            $this->isIphone = false;
+        $this->serial = $serial;
     }
 
     public function addError($msg) {
@@ -181,10 +192,21 @@ class Repair {
                 return false;
             }
 
-            $request = $this->gsx->_requestBuilder('MarkRepairCompleteRequest', '', array('repairConfirmationNumbers' => $this->confirmNumbers['repair']));
-            $response = $this->gsx->request($request, 'MarkRepairComplete');
+            $client = '';
+            $requestName = '';
 
-            if (!isset($response['MarkRepairCompleteResponse']['repairConfirmationNumbers'])) {
+            if ($this->isIphone) {
+                $client = 'IPhoneMarkRepairComplete';
+                $requestName = 'IPhoneMarkRepairCompleteRequest';
+            } else {
+                $client = 'MarkRepairComplete';
+                $requestName = 'MarkRepairCompleteRequest';
+            }
+
+            $request = $this->gsx->_requestBuilder($requestName, '', array('repairConfirmationNumbers' => $this->confirmNumbers['repair']));
+            $response = $this->gsx->request($request, $client);
+
+            if (!isset($response[$client . 'Response']['repairConfirmationNumbers'])) {
                 return false;
             }
         }
@@ -254,22 +276,33 @@ class Repair {
             'technicianLastName' => '',
             'unreceivedModules' => '',
         );
+        if ($this->isIphone)
+            $datas['imeiNumber'] = '';
         if (isset($data) && isset($dataType)) {
             if (isset($datas[$dataType])) {
                 $datas[$dataType] = $data;
             }
         }
 
-        $request = $this->gsx->_requestBuilder('RepairLookupRequest', 'lookupRequestData', $datas);
-        $response = $this->gsx->request($request, 'RepairLookup');
+        $client = '';
+        $requestName = '';
+        if ($this->isIphone) {
+            $client = 'IPhoneRepairLookup';
+            $requestName = 'IPhoneRepairLookupRequest';
+        } else {
+            $client = 'RepairLookup';
+            $requestName = 'RepairLookupRequest';
+        }
+        $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $datas);
+        $response = $this->gsx->request($request, $client);
 
         if (count($this->gsx->errors['soap']) > $n)
             return false;
 
-        if (!isset($response['RepairLookupResponse']['lookupResponseData']))
+        if (!isset($response[$client . 'Response']['lookupResponseData']))
             return false;
 
-        $this->repairLookUp = $response['RepairLookupResponse']['lookupResponseData'];
+        $this->repairLookUp = $response[$client . 'Response']['lookupResponseData'];
         if (isset($this->repairLookUp['repairNumber']) && ($this->repairLookUp['repairNumber'] != ''))
             $this->repairNumber = $this->repairLookUp['repairNumber'];
         if (isset($this->repairLookUp['repairConfirmationNumber']) && ($this->repairLookUp['repairConfirmationNumber'] != ''))
@@ -346,13 +379,22 @@ class Repair {
             'kbbSerialNumberFlag' => '',
             'comptiaCode' => '',
         );
-        $request = $this->gsx->_requestBuilder('PartsPendingReturnRequest', 'repairData', $datas);
-        $response = $this->gsx->request($request, 'PartsPendingReturn');
+
+        if ($this->isIphone) {
+            $client = 'IPhonePartsPendingReturn';
+            $requestName = 'IPhonePartsPendingReturnRequest';
+        } else {
+            $client = 'PartsPendingReturn';
+            $requestName = 'PartsPendingReturnRequest';
+        }
+
+        $request = $this->gsx->_requestBuilder($requestName, 'repairData', $datas);
+        $response = $this->gsx->request($request, $client);
         if (count($this->gsx->errors['soap'])) {
             return false;
         }
-        if (isset($response['PartsPendingReturnResponse']['partsPendingResponse'])) {
-            $partsPending = $response['PartsPendingReturnResponse']['partsPendingResponse'];
+        if (isset($response[$client . 'Response']['partsPendingResponse'])) {
+            $partsPending = $response[$client . 'Response']['partsPendingResponse'];
             $this->partsPending = array();
             if (isset($partsPending['returnOrderNumber'])) {
                 $partsPending = array($partsPending);
@@ -360,20 +402,27 @@ class Repair {
             foreach ($partsPending as $part) {
                 $fileName = null;
                 if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {
-                    $request = $this->gsx->_requestBuilder('ReturnLabelRequest', '', array(
+                    if ($this->isIphone) {
+                        $client2 = 'IPhoneReturnLabel';
+                    } else {
+                        $client2 = 'ReturnLabel';
+                    }
+                    $requestName2 = $client2 . 'Request';
+
+                    $request = $this->gsx->_requestBuilder($requestName2, '', array(
                         'returnOrderNumber' => $part['returnOrderNumber'],
                         'partNumber' => $part['partNumber']
                             ));
-                    $labelResponse = $this->gsx->request($request, 'ReturnLabel');
-                    if (isset($labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'])) {
+                    $labelResponse = $this->gsx->request($request, $client2);
+                    if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
-                        $fileNamePure = $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileName'];
+                        $fileNamePure = $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'];
                         if (!is_dir(DOL_DATA_ROOT . $direName))
                             mkdir(DOL_DATA_ROOT . $direName);
                         $fileName = $direName . "/" . $fileNamePure;
 //                        die(DOL_DATA_ROOT . $fileName);
                         if (!file_exists(DOL_DATA_ROOT . $fileName)) {
-                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse['ReturnLabelResponse']['returnLabelData']['returnLabelFileData']) === false)
+                            if (file_put_contents(DOL_DATA_ROOT . $fileName, $labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileData']) === false)
                                 $fileName = null;
                         }
                         $fileName2 = "/document.php?modulepart=synopsischrono&file=" . urlencode($_REQUEST['chronoId'] . "/" . $fileNamePure);
@@ -393,14 +442,19 @@ class Repair {
 
     public function getPartsPendingReturnHtml() {
         $html = '';
-        if (!count($this->partsPending))
-            $this->loadPartsPending();
-
         if (!count($this->partsPending)) {
-            if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
-                $html .= '<p class="confirmation">Numéros de série des composants retournés à jour</p>' . "\n";
-            $html .= '<p>Aucun composant en attente de retour</p>';
-            return $html;
+            if (!$this->loadPartsPending()) {
+                if (count($this->gsx->errors['soap'])) {
+                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
+                    $html .= $this->gsx->getGSXErrorsHtml();
+                    return $html;
+                } else if (!count($this->partsPending)) {
+                    if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
+                        $html .= '<p class="confirmation">Numéros de série des composants retournés à jour</p>' . "\n";
+                    $html .= '<p>Aucun composant en attente de retour</p>';
+                    return $html;
+                }
+            }
         }
 
         $html .= '<div class="partsPendingBloc">' . "\n";

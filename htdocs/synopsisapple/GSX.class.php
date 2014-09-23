@@ -309,8 +309,11 @@ class GSX {
      * @access public
      *
      */
-    public function __construct($_gsxDetailsArray = array()) {
+    public $isIphone = false;
+
+    public function __construct($_gsxDetailsArray = array(), $isIphone = false) {
 // We default to using production mode for GSX
+        $this->isIphone = $isIphone;
         if (!isset($_gsxDetailsArray['apiMode'])) {
             $_gsxDetailsArray['apiMode'] = 'production';
         }
@@ -394,6 +397,8 @@ class GSX {
      *
      */
     protected function assign_wsdl() {
+//        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:glob="http://gsxws.apple.com/elements/global">
+//        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iph="http://gsxws.apple.com/elements/iphone">
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
         $type = "Asp";
@@ -404,9 +409,16 @@ class GSX {
         } elseif ($api_mode == 'it') {
             return $this->wsdlUrl = 'https://gsxwsit.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } elseif ($api_mode == 'ut') {
-            return $this->wsdlUrl = 'https://gsxwsut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
+            if ($this->isIphone) {
+                return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
+            }
+            else
+                return $this->wsdlUrl = 'https://gsxwsut.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
         } else {
-            $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) .$type. '/gsx-' . strtolower($this->gsxDetails['regionCode']) . $type. '.wsdl';
+            if ($this->isIphone)
+                return $this->wsdlUrl = 'https://gsxws2.apple.com/wsdl/emeaIPhone/gsx-emeaIPhone.wsdl';
+            else
+                $this->wsdlUrl = 'https://gsxws2' . $api_mode . '.apple.com/wsdl/' . strtolower($this->gsxDetails['regionCode']) . 'Asp/gsx-' . strtolower($this->gsxDetails['regionCode']) . 'Asp.wsdl';
 
             return $this->wsdlUrl;
         }
@@ -426,6 +438,7 @@ class GSX {
      *
      */
     private function initiate_soap_client() {
+
         if (empty($this->wsdlUrl)) {
             $this->assign_wsdl();
         }
@@ -517,9 +530,15 @@ class GSX {
                 $clientLookup = 'FetchProductModel';
                 $requestName = 'FetchProductModelRequest';
                 $wrapperName = 'productModelRequest';
-                $details = array(
-                    'serialNumber' => $serial
-                );
+                if ($this->isIphone) {
+                    $details = array(
+                        'serialNumber' => $serial
+                    );
+                } else {
+                    $details = array(
+                        'alternateDeviceId' => $serial
+                    );
+                }
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
 
@@ -533,20 +552,27 @@ class GSX {
 
             default :
             case 'warranty' :
-                $clientLookup = 'WarrantyStatus';
+                if ($this->isIphone) {
+                    $clientLookup = 'IPhoneWarrantyStatus';
+                    $wrapperName = 'iphoneUnitDetail';
+                    $details = array(
+                        'serialNumber' => '',
+                        'imeiNumber' => $serial
+                    );
+                    $responseName = 'iphoneWarrantyDetailInfo';
+                } else {
+                    $clientLookup = 'WarrantyStatus';
+                    $wrapperName = 'unitDetail';
+                    $details = array(
+                        'serialNumber' => $serial
+                    );
+                    $responseName = 'warrantyDetailInfo';
+                }
                 $requestName = $clientLookup . 'Request';
-                $wrapperName = 'unitDetail';
-                $details = array(
-                    'serialNumber' => $serial
-                );
-
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-
                 $warrantyDetails = $this->request($requestData, $clientLookup);
-
-//$errorMessage = $this->_obtainErrorMessage ( $warrantyDetails );
-
-                return $this->outputFormat($warrantyDetails['WarrantyStatusResponse']['warrantyDetailInfo'], $errorMessage, $returnFormat);
+//                $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
+                return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);
 
                 break;
         }
@@ -584,8 +610,11 @@ class GSX {
                 $finalParams['eeeCode'] = $params;
             } elseif (preg_match($this->_regex('partNumber'), $params)) {
                 $finalParams['partNumber'] = $params;
-            } elseif (preg_match($this->_regex('serialNumber'), $params)) {
-                $finalParams['serialNumber'] = $params;
+            } elseif (preg_match($this->_regex('imeiNumber'), $params)) {
+                if ($this->isIphone)
+                    $finalParams['imeiNumber'] = $params;
+                else
+                    $finalParams['serialNumber'] = $params;
             } elseif (preg_match($this->_regex('partDescription'), $params)) {
                 $finalParams['partDescription'] = $params;
             }
@@ -593,19 +622,29 @@ class GSX {
             $finalParams = $params;
         }
 
-        $clientLookup = 'PartsLookup';
-        $requestName = $clientLookup . 'Request';
+        if ($this->isIphone) {
+            $clientLookup = 'IPhonePartsLookup';
+        } else {
+            $clientLookup = 'PartsLookup';
+        }
         $wrapperName = 'lookupRequestData';
-        $details = $finalParams;
+        $requestName = $clientLookup . 'Request';
 
-        $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
+        $requestData = $this->_requestBuilder($requestName, $wrapperName, $finalParams);
+
+//        echo '<pre>';
+//        print_r($requestData);
+//        echo '</pre>';
 
         $partsLookup = $this->request($requestData, $clientLookup);
 
+//        echo '<pre>';
+//        print_r($partsLookup);
+//        echo '</pre>';
 //var_dump($partsLookup);
 //$errorMessage = $this->_obtainErrorMessage ( $partsLookup );
 
-        return $this->outputFormat($partsLookup['PartsLookupResponse']['parts'], $errorMessage, $returnFormat);
+        return $this->outputFormat($partsLookup[$clientLookup . 'Response']['parts'], $errorMessage, $returnFormat);
     }
 
     public function repairs($type, $params, $returnFormat = false) {
@@ -613,10 +652,16 @@ class GSX {
             /* ! Repair Lookup */
             case 'lookup' :
             default :
-                $clientLookup = 'RepairLookup';
+                $details = $params;
+                if ($this->isIphone) {
+                    $clientLookup = 'IPhoneRepairLookup';
+                } else {
+                    $clientLookup = 'RepairLookup';
+                }
+
                 $requestName = $clientLookup . 'Request';
                 $wrapperName = 'lookupRequestData';
-                $details = $params;
+
 
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
 
@@ -630,8 +675,11 @@ class GSX {
 
             /* ! Repair Details */
             case 'details' :
-
-                $clientLookup = 'RepairDetails';
+                if ($this->isIphone) {
+                    $clientLookup = 'IPhoneRepairDetails';
+                } else {
+                    $clientLookup = 'RepairDetails';
+                }
                 $requestName = $clientLookup . 'Request';
                 $wrapperName = 'dispatchId';
                 $details = $params;
@@ -642,7 +690,7 @@ class GSX {
 
 //$errorMessage = $this->_obtainErrorMessage ( $repairLookup );
 
-                return $this->outputFormat($repairLookup['RepairDetailsResponse']['lookupResponseData'], $errorMessage, $returnFormat);
+                return $this->outputFormat($repairLookup[$clientLookup . 'Response']['lookupResponseData'], $errorMessage, $returnFormat);
 
                 break;
 
@@ -652,42 +700,42 @@ class GSX {
         }
     }
 
-    public function createStockingOrder($purchaseOrderNumber, $shipToCode, $parts) {
-        $clientLookup = 'CreateStockingOrder';
-        $requestName = $clientLookup . 'Request';
-        $wrapperName = 'orderData';
-        $details = array(
-            'purchaseOrderNumber' => $purchaseOrderNumber,
-            'shipToCode' => $shipToCode,
-            'orderLines' => $parts
-        );
-
-        $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-        $response = $this->request($requestData, $clientLookup);
-        return $this->outputFormat($response['CreateStockingOrderResponse']);
-    }
-
-    public function createSRFOrder($serial, $purchaseOrderNumber, $shipToCode, $reasonForOrder, $parts) {
-        if (!preg_match($this->_regex('serialNumber'), $serial)) {
-            $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
-            return false;
-        }
-
-        $clientLookup = 'CreateSRFOrder';
-        $requestName = $clientLookup . 'Request';
-        $wrapperName = 'orderData';
-        $details = array(
-            'purchaseOrderNumber' => $purchaseOrderNumber,
-            'shipToCode' => $shipToCode,
-            'serialNumber' => $serial,
-            'reasonForOrder' => $reasonForOrder,
-            'orderLines' => $parts
-        );
-
-        $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
-        $response = $this->request($requestData, $clientLookup);
-        return $this->outputFormat($response['CreateSRFOrderResponse']);
-    }
+//    public function createStockingOrder($purchaseOrderNumber, $shipToCode, $parts) {
+//        $clientLookup = 'CreateStockingOrder';
+//        $requestName = $clientLookup . 'Request';
+//        $wrapperName = 'orderData';
+//        $details = array(
+//            'purchaseOrderNumber' => $purchaseOrderNumber,
+//            'shipToCode' => $shipToCode,
+//            'orderLines' => $parts
+//        );
+//
+//        $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
+//        $response = $this->request($requestData, $clientLookup);
+//        return $this->outputFormat($response['CreateStockingOrderResponse']);
+//    }
+//
+//    public function createSRFOrder($serial, $purchaseOrderNumber, $shipToCode, $reasonForOrder, $parts) {
+//        if (!preg_match($this->_regex('serialNumber'), $serial)) {
+//            $this->error(__METHOD__, __LINE__, 'Numéro de série invalide.');
+//            return false;
+//        }
+//
+//        $clientLookup = 'CreateSRFOrder';
+//        $requestName = $clientLookup . 'Request';
+//        $wrapperName = 'orderData';
+//        $details = array(
+//            'purchaseOrderNumber' => $purchaseOrderNumber,
+//            'shipToCode' => $shipToCode,
+//            'serialNumber' => $serial,
+//            'reasonForOrder' => $reasonForOrder,
+//            'orderLines' => $parts
+//        );
+//
+//        $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
+//        $response = $this->request($requestData, $clientLookup);
+//        return $this->outputFormat($response['CreateSRFOrderResponse']);
+//    }
 
     /**
      *
@@ -765,7 +813,8 @@ class GSX {
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
-            return $this->soap_error($f->faultcode, $f->faultstring);
+            $this->soap_error($f->faultcode, $f->faultstring);
+            return null;
         }
 
         return $this->_objToArr($SOAPRequest);
@@ -865,13 +914,17 @@ class GSX {
      */
     private function _regex($pattern) {
         switch ($pattern) {
+            case 'imeiNumber':
+                '/^[0-9]{15,16}$/';
+                break;
+
             case 'dispatchId' :
             case 'gsxId' :
                 return '/^[G]{1}[0-9]{9}$/ ';
                 break;
 
             case 'serialNumber' :
-                return '/^[A-Z0-9]{11,15}$/';
+                return '/^[A-Z0-9]{11,16}$/';
                 break;
 
             case 'diagnosticEventNumber' :
@@ -969,9 +1022,11 @@ class GSX {
                 $i++;
             }
             $html .= '</p>';
-        }
+        } else
+            $html .= 'pas d\'erreurs!';
         return $html;
     }
+
 }
 
 ?>

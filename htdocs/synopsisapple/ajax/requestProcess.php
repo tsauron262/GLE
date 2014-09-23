@@ -1,13 +1,12 @@
 <?php
-
-error_reporting(E_ALL);
-//error_reporting(E_ERROR);
-ini_set('display_errors', 1);
-
 require_once '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/partsCart.class.php';
+
+//error_reporting(E_ALL);
+////error_reporting(E_ERROR);
+//ini_set('display_errors', 1);
 
 $coefPrix = 1;
 
@@ -45,6 +44,11 @@ function fetchPartsList() {
     return $parts;
 }
 
+function isIphone($serial) {
+    if (preg_match('/^[0-9]{15,16}$/', $serial))
+            return true;
+    return false;
+}
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
 //        case 'addCartToPropal':
@@ -256,7 +260,8 @@ if (isset($_GET['action'])) {
 
         case 'importRepair':
             if (isset($_GET['chronoId'])) {
-                $gsxDatas = new gsxDatas(null, $userId, $password, $serviceAccountNo);
+                $gsxDatas = new gsxDatas(isset($_GET['importNumber'])?$_GET['importNumber']:null,
+                        $userId, $password, $serviceAccountNo);
                 echo $gsxDatas->importRepair($_GET['chronoId']);
             } else {
                 echo '<p class="error">Une erreur est survenue (Chrono Id absent)</p>' . "\n";

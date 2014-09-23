@@ -740,6 +740,7 @@ class Chrono extends CommonObject {
                            t.valueInTag,
                            t.valueInValueField,
                            t.sourceIsOption,
+                           k.type_valeur,
                            k.type_subvaleur,
                            k.extraCss,
                            t.phpClass
@@ -753,6 +754,17 @@ class Chrono extends CommonObject {
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
             $res->value = stripslashes($res->value);
+            if($res->type_valeur == 10){
+                $sqlT = $this->db->query("SELECT `nomElem` FROM `".MAIN_DB_PREFIX."Synopsis_Process_lien` WHERE `rowid` = ".$res->type_subvaleur);
+                if($this->db->num_rows($sqlT) > 0){
+                $resultT = $this->db->fetch_object($sqlT);
+                $tabT = getElementElement(getParaChaine($res->extraCss, "type:"),$resultT->nomElem,$this->id);
+                if(isset($tabT[0]))
+                    $res->value = $tabT[0]['d'];
+                }
+            }
+            
+            
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");

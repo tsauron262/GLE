@@ -168,7 +168,7 @@ class synopsisHook {
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
             $hrefFin = "#pangridChronoDet105";
             $return .= '<div class="blockvmenupair">';
-            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="'.DOL_URL_ROOT.'/Synopsis_Tools/FicheRapide.php"> <img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="" title=""> New SAV</a>';
+            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="'.DOL_URL_ROOT.'/Synopsis_Tools/FicheRapide.php"> <img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
             $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
             $tabGroupe = array(array('label' => "Tous", 'valeur' => 0));
             $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur='" . $centre . "'" : ""));

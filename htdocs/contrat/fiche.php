@@ -76,17 +76,17 @@ $object = new Synopsis_Contrat($db);
 /*
  * Deb mod drsi les action     generer pdf    -    suprimer fichier       - envoyer par mail
  */
-if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
+if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT) && (isset($_REQUEST["id"]) || isset($_REQUEST["ref"]))) {
     $object->fetch($_REQUEST["id"], (isset($_REQUEST['ref'])) ? $_REQUEST['ref'] : '');
     $_REQUEST["id"] = $object->id;
     $id = $object->id;
     if (isset($_REQUEST["id"])) {
         $object->fetch($_REQUEST["id"]);
         $object->fetch_lines();
-        $contratSyn = new Synopsis_Contrat($db);
-        $contratSyn->fetch($object->id);
+//        $contratSyn = new Synopsis_Contrat($db);
+//        $contratSyn->fetch($object->id);
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'renouvSimple') {
-            $id = $contratSyn->renouvellementSimple($user);
+            $id = $object->renouvellementSimple($user);
             header('location: fiche.php?id=' . $id);
         }
         if(isset($_REQUEST['action']) && $_REQUEST['action'] == "setContact"){
@@ -97,7 +97,7 @@ if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT)) {
             $object->add_contact($_REQUEST['contactid'], 22, "external");            
         }
         if (isset($_REQUEST['action']) && $_REQUEST['action'] == 'reconduction') {
-            $contratSyn->reconduction($user);
+            $object->reconduction($user);
             header('location: fiche.php?id=' . $_REQUEST["id"]);
         }
 
@@ -2045,7 +2045,7 @@ if ($action == 'create')
             }
             /* deb mod drsi */
             if (isset($conf->global->MAIN_MODULE_SYNOPSISCONTRAT))
-                print $contratSyn->lignePlus($objp);
+                print $object->lignePlus($objp);
             /* fin mod drsi */
 
             $cursorline++;

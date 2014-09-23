@@ -491,7 +491,7 @@ switch ($action) {
                         }
                         $arr[] = $html;
                     }
-                    if ($chrono->model->hasPropal) {
+                    if ($chrono->model->hasPropal && $chrono->model->propInList) {
                         $html = "";
                         if ($chrono->propalid > 0) {
                             require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");

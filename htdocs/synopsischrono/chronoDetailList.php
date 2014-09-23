@@ -280,7 +280,7 @@ EOF;
             $i++;
             $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
         }
-        if ($chronoRef->hasPropal) {
+        if ($chronoRef->hasPropal && $chronoRef->propInList) {
             $i++;
             $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "left", "search" => true, "sortable" => false);
         }

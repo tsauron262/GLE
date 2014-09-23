@@ -208,7 +208,8 @@ class gsxDatas {
                     $html .= $this->getRepairsHtml($prodId);
                     $html .= $this->getCartHtml($prodId);
                     global $db;
-                    $cart = new partsCart($db, $this->serial);
+                    $chronoId = (isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
+                    $cart = new partsCart($db, $this->serial, $chronoId);
                     $cart->loadCart();
                     if (count($cart->partsCart)) {
                         $html .= '<script type="text/javascript">' . "\n";

@@ -41,7 +41,7 @@ class partsCart {
         } else {
             return false;
         }
-
+//die($sql);
         if (isset($this->db)) {
             $result = $this->db->query($sql);
             if ($this->db->num_rows($result) > 0) {

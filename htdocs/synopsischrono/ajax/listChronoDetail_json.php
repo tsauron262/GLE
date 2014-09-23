@@ -501,7 +501,7 @@ switch ($action) {
                         }
                         $arr[] = $html;
                     }
-                    if ($chrono->model->hasProjet) {
+                    if ($chrono->model->hasProjet && $chrono->model->descInList) {
                         $html = "";
                         if ($chrono->projetid > 0) {
                             require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");

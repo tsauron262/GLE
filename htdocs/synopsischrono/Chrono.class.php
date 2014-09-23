@@ -893,6 +893,7 @@ class ChronoRef {
     public function ChronoRef($DB) {
         $this->db = $DB;
         $this->propInList = 0;
+        $this->descInList = 0;
     }
 
     public function fetch($id) {

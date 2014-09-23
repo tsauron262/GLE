@@ -215,7 +215,7 @@ EOF;
         $colModelArr[1] = array('name' => "Réf", "index" => "ref", "width" => 150, "align" => "left");
         $colModelArr[2] = array('name' => "hasRev", "index" => "hasRev", 'hidden' => true, "search" => false, "hidedlg" => true);
         $i = 3;
-        if ($chronoRef->hasDescription) {
+        if ($chronoRef->hasDescription && $chronoRef->descInList) {
             $colModelArr[$i] = array('name' => $chronoRef->nomDescription, "index" => "description", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
             $i++;
         }

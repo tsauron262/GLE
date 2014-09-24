@@ -35,6 +35,7 @@ if ($action == 'addLnProp' && $chr->propalid) {
     $prod->fetch($_REQUEST['idprod']);
     $prod->tva_tx = ($prod->tva_tx > 0)? $prod->tva_tx : 0;
     $chr->propal->addline($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id);
+    $chr->propal->fetch($chr->propal->id);
     require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
     propale_pdf_create($db, $chr->propal, null, $langs);
 }

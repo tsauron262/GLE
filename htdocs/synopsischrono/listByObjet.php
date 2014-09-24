@@ -118,6 +118,8 @@ foreach ($tabModel as $model => $data) {
 //        $titre = "Produit Client";
         $nomOnglet = "productCli";
     } elseif ($model == 105) {//SAV
+        $nomOnglet = "SAV";
+        $titre = "SAV";
         if (isset($_REQUEST['Centre'])) {
             $champ['1060'] = $_REQUEST['Centre'];
             $filtre .= "&Centre=" . $_REQUEST['Centre'];
@@ -168,7 +170,7 @@ foreach ($tabModel as $model => $data) {
 }
 
 if (count($tabModel) > 1) {
-    $nomOnglet = "chrono";
+    $nomOnglet = "Chrono";
     $titre = "Chrono";
 }
 

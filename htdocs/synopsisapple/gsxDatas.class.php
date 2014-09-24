@@ -4,7 +4,7 @@ require_once DOL_DOCUMENT_ROOT . '/synopsisapple/repair.class.php';
 
 class gsxDatas {
 
-    private $userExchangePrice = false;
+    private $userExchangePrice = true;
     public $gsx = null;
     public $connect = false;
     protected $serial = null;

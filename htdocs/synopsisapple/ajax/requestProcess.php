@@ -189,6 +189,7 @@ if (isset($_GET['action'])) {
                         $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
                         $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
                     }
+                    $propal->fetch($propalId);
                     require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
                     propale_pdf_create($db, $propal, null, $langs);
                     echo 'ok<ok>Reload</ok>';

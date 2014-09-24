@@ -98,7 +98,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         if ($result > 0) {
             echo $oldRef; //.print_r($propal, true);
             self::setLienRevision($oldRef, $oldId, $result);
-
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsischrono SET propalid = ".$object->id." WHERE propalid = ".$oldId);
 
             header("Location: " . '../comm/propal.php?id=' . $result);
             exit;

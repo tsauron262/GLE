@@ -136,6 +136,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $propal = new Propal($db);
         $propal = $chrono->propal;
 
+        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
         $facture = new Facture($db);
         $facture->createFromOrder($propal);
 //        $facture->create($user);

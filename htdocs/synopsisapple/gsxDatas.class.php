@@ -624,6 +624,8 @@ class gsxDatas {
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
                     case 'CreateIPhoneCarryInRepair':
+                        if($requestType == 'CreateCarryInRepair')
+                            $requestType = 'CreateCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
                             if (isset($_REQUEST['chronoId'])) {

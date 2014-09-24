@@ -65,7 +65,7 @@
             <data name="poNumber" required="1"></data>
             <data name="unitReceivedDate" required="1"></data>
             <data name="unitReceivedTime" required="1"></data>
-            <!--<data name="serviceType" required="0" default=""></data>-->
+            <data name="serviceType" required="0" default=""></data>
             <data name="diagnosis" required="1"></data>
             <data name="symptom" required="1"></data>
             <data name="notes" required="0"></data>

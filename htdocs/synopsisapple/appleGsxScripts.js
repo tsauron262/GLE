@@ -27,7 +27,7 @@ var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
 //else
-//    extra = extra+ "&chronoId=7";
+//    extra = extra+ "&chronoId=8";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1104,16 +1104,20 @@ function closeRepairImportForm(prodId) {
         return;
     $form.slideUp(250);
 }
-function closeRepairSubmit($span, repairId) {
+function closeRepairSubmit($span, repairId, checkRepair) {
     if ($span.hasClass('deactivated'))
         return;
 
-    if (confirm("La réparation va être indiquée comme complète auprès du service GSX d'Apple.\nVeuillez confirmer")) {
+    if (checkRepair)
+        checkRepair = 1;
+    else
+        checkRepair = 0;
+    if (confirm("Attention, La réparation va être indiquée comme complète auprès du service GSX d'Apple.\nVeuillez confirmer")) {
         var $container = $('#repair_'+repairId).find('.repairRequestsResults');
         if ($container.length) {
             $span.attr('class', 'button redHover closeRepair deactivated');
             displayRequestMsg('requestProcess', '', $container);
-            setRequest('GET', 'closeRepair', repairId, '&repairRowId='+repairId);
+            setRequest('GET', 'closeRepair', repairId, '&repairRowId='+repairId+'&checkRepair='+checkRepair);
             return;
         }
         alert('Une erreur est survenue, opération impossible.');

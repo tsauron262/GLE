@@ -118,7 +118,8 @@ class gsxDatas {
         $repair = new Repair($db, $this->gsx, $this->isIphone);
         $repair->rowId = $repairRowId;
         if ($repair->load()) {
-            if ($repair->close())
+            if ($repair->close(true,
+                    (isset($_GET['checkRepair']) && ($_GET['checkRepair'] != ''))?$_GET['checkRepair']: true))
                 return 'ok';
         }
         $html = '<p class="error">Echec de la fermeture de la réparation</p>';
@@ -670,7 +671,7 @@ class gsxDatas {
                             if ($_POST['closeRepair'] == 'Y') {
                                 $ok = false;
                                 $this->gsx->resetSoapErrors();
-                                if ($repair->close()) {
+                                if ($repair->close(true, 0)) {
                                     $html .= '<p class="confirmation">Réparation fermée avec succès</p><ok>Reload</ok>';
                                 } else {
                                     $html .= '<p class="error">La réparation n\'a pas pu être fermée.</p>';

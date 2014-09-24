@@ -100,7 +100,7 @@
                 </datas>
             </data>
             <!--<data name="checkIfOutOfWarrantyCoverage" required="0" default="N"></data>-->
-            <!--<data name="popFaxed" required="0" default="N"></data>-->
+            <data name="popFaxed" required="0" default="N"></data>
             <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
             <data name="requestReviewByApple" required="0" default="N"></data>
             <!--<data name="componentCheckReview" required="0" default="N"></data>-->

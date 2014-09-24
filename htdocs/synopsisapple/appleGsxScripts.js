@@ -1,5 +1,5 @@
 var maxProdQty = 99;
-
+var importCart = false;
 var partsGroup = {
     0 : 'Général',
     1 :'Visuel',
@@ -27,7 +27,7 @@ var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
 //else
-//    extra = extra+ "&chronoId=8";
+//    extra = extra+ "&chronoId=10";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1395,6 +1395,9 @@ function onRequestResponse(xhr, requestType, prodId) {
             if ($div.length) {
                 $div.slideUp(250, function(){
                     $(this).html(xhr.responseText).show();
+                    if (importCart) {
+                        $(this).find('span.importParts').click();
+                    }
                 });
             } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');

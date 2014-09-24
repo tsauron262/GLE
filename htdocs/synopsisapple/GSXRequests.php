@@ -20,9 +20,10 @@ class GSX_Request {
     protected $requestOk = false;
     protected $comptiaCodes = null;
 
-    public function __construct($gsx, $requestName) {
+    public function __construct($gsx, $requestName, $comptiaCodes = null) {
         $this->gsx = $gsx;
         $this->requestName = $requestName;
+        $this->comptiaCodes = $comptiaCodes;
 
         // Chargement des définitions:
         $fileName = dirname(__FILE__) . '/datas_definitions.xml';
@@ -336,7 +337,7 @@ class GSX_Request {
                                 }
                                 if (!isset($orderLines) && $useCart) {
                                     global $db;
-                                    $partsCart = new partsCart($db, $serial);
+                                    $partsCart = new partsCart($db, $serial, isset($_GET['chronoId'])?$_GET['chronoId']:null);
                                     if ($partsCart->loadCart()) {
                                         $orderLines = array();
                                         foreach ($partsCart->partsCart as $part) {
@@ -386,6 +387,12 @@ class GSX_Request {
                                     }
                                 } else {
                                     $html .= '>';
+                                }
+
+                                if (!$partCount) {
+                                    $html .= '<script type="text/javascript">importCart = true;</script>';
+                                } else {
+                                    $html .= '<script type="text/javascript">importCart = false;</script>';
                                 }
 
                                 $html .= '</div>' . "\n";

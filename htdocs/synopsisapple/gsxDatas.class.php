@@ -220,7 +220,7 @@ class gsxDatas {
                     $html .= $this->getRepairsHtml($prodId);
                     $html .= $this->getCartHtml($prodId);
                     global $db;
-                    $cart = new partsCart($db, $this->serial);
+                    $cart = new partsCart($db, $this->serial, isset($_GET['chronoId'])?$_GET['chronoId']:null);
                     $cart->loadCart();
                     if (count($cart->partsCart)) {
                         $html .= '<script type="text/javascript">' . "\n";
@@ -488,7 +488,8 @@ class gsxDatas {
 
     public function getRequestFormHtml($requestType, $prodId) {
         global $db;
-        $gsxRequest = new GSX_Request($this, $requestType);
+        $comptiaCodes = $this->getCompTIACodesArray();
+        $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail')?$comptiaCodes:null);
 
         $chronoId = null;
         if (isset($_REQUEST['chronoId'])) {

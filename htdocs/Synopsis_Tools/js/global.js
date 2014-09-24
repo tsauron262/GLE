@@ -103,7 +103,7 @@ $(window).load(function() {
 function ajoutNotification(id, titre, msg) {
     $("div.notificationText").append("<div class='oneNotification'><input type='hidden' class='idNotification' value='" + id + "'/><div class='titreNotification'><table style='width:100%'><tr><td>" + titre + "</td><td style='text-align:right;'><span class='marqueVueNotification editable'>X</span></td></tr></table></div>" + msg + "</div>");
     $("span.marqueVueNotification").click(function() {
-        notifHtml = $(this).parent().parent();
+        notifHtml = $(this).parent().parent().parent().parent().parent().parent();
         datas = 'idVue=' + notifHtml.find(".idNotification").val();
         jQuery.ajax({
             url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/synch.php',
@@ -112,7 +112,8 @@ function ajoutNotification(id, titre, msg) {
             type: "POST",
             cache: false,
             success: function(msg) {
-                notifHtml.fadeOut();
+                if (msg.indexOf('<ok>ok</ok>') !== -1)
+                    notifHtml.fadeOut();
             }
         });
     });
@@ -187,7 +188,7 @@ function boucleSynchServ(idAction) {
             else {
                 setTimeout(function() {
                     boucleSynchServ(idAction);
-                }, 50000);
+                }, 10*1000);
             }
         },
         error: function() {

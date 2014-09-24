@@ -46,7 +46,10 @@ class Repair {
     public function displayErrors() {
         $html = '';
         foreach ($this->errors as $error) {
-            $html .= '<p class="error">' . $error . '</p>';
+            if (!preg_match('/^<p/', $error))
+                $html .= '<p class="error">' . $error . '</p>';
+            else
+                $html .= $error;
         }
         $this->errors = array();
         return $html;
@@ -170,7 +173,7 @@ class Repair {
         return false;
     }
 
-    public function close($sendRequest = true) {
+    public function close($sendRequest = true, $checkRepair = 1) {
         if (!$this->rowId)
             if (!$this->load()) {
                 $this->addError('Erreur: réparation non enregistrée');
@@ -190,6 +193,30 @@ class Repair {
             if (!isset($this->gsx)) {
                 $this->addError('connection à gsx non initialisée.');
                 return false;
+            }
+
+            if ($checkRepair) {
+                if (!isset($this->confirmNumbers['serialUpdate']) ||
+                        (!$this->confirmNumbers['serialUpdate']) ||
+                        ($this->confirmNumbers['serialUpdate'] === '')) {
+                    $this->loadPartsPending();
+                    if (count($this->partsPending)) {
+                        $this->addError('La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour');
+                        $button .= '<p style="text-align: center; padding: 30px">';
+                        $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
+                        $button .= $this->rowId . '\', false)">Forcer la fermeture</span></p>';
+                        $this->addError($button);
+                        return false;
+                    } else {
+                        $this->addError('Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.');
+                        $button .= '<p style="text-align: center; padding: 30px">';
+                        $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
+                        $button .= $this->rowId . '\', false)">Confirmer la fermeture</span></p>';
+                        $this->addError($button);
+                        $this->gsx->resetSoapErrors();
+                        return false;
+                    }
+                }
             }
 
             $client = '';
@@ -325,7 +352,7 @@ class Repair {
         $html .= '<span class="repairTitle">Réparation n° ' . (isset($this->repairNumber) && ($this->repairNumber != '') ? $this->repairNumber : '<span style="color: #550000;">(En attente de validation par Apple)</span>') . '</span>' . "\n";
         $html .= '<div class="repairToolbar">' . "\n";
         if (!$this->repairComplete)
-            $html .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'' . $this->rowId . '\')">Fermer cette réparation</span>';
+            $html .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'' . $this->rowId . '\', true)">Fermer cette réparation</span>';
         $html .= '</div>' . "\n";
         $html .= '</div>' . "\n";
         $html .= '<p class="confirmation">Réparation créée' . (isset($this->repairLookUp['createdOn']) ? ' le ' . $this->repairLookUp['createdOn'] : '') . '</p>' . "\n";
@@ -357,13 +384,13 @@ class Repair {
 
         if (isset($this->partsPending)) {
             unset($this->partsPending);
+            $this->partsPending = null;
         }
         $this->gsx->resetSoapErrors();
         $datas = array(
             'repairType' => '',
             'repairStatus' => '',
             'purchaseOrderNumber' => '',
-            'sroNumber' => '',
             'sroNumber' => isset($this->repairNumber) ? $this->repairNumber : '',
             'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : '',
             'serialNumbers' => array(

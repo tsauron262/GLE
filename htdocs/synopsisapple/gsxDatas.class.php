@@ -118,7 +118,8 @@ class gsxDatas {
         $repair = new Repair($db, $this->gsx, $this->isIphone);
         $repair->rowId = $repairRowId;
         if ($repair->load()) {
-            if ($repair->close())
+            if ($repair->close(true,
+                    (isset($_GET['checkRepair']) && ($_GET['checkRepair'] != ''))?$_GET['checkRepair']: true))
                 return 'ok';
         }
         $html = '<p class="error">Echec de la fermeture de la réparation</p>';
@@ -221,8 +222,7 @@ class gsxDatas {
                     $html .= $this->getRepairsHtml($prodId);
                     $html .= $this->getCartHtml($prodId);
                     global $db;
-                    $chronoId = (isset($_REQUEST['chronoId']) ? $_REQUEST['chronoId'] : null);
-                    $cart = new partsCart($db, $this->serial, $chronoId);
+                    $cart = new partsCart($db, $this->serial, isset($_GET['chronoId'])?$_GET['chronoId']:null);
                     $cart->loadCart();
                     if (count($cart->partsCart)) {
                         $html .= '<script type="text/javascript">' . "\n";
@@ -490,8 +490,9 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType, $prodId) {
-        global $db, $user;
-        $gsxRequest = new GSX_Request($this, $requestType);
+        global $db;
+        $comptiaCodes = $this->getCompTIACodesArray();
+        $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail')?$comptiaCodes:null);
 
         $chronoId = null;
         if (isset($_REQUEST['chronoId'])) {
@@ -677,7 +678,7 @@ class gsxDatas {
                             if ($_POST['closeRepair'] == 'Y') {
                                 $ok = false;
                                 $this->gsx->resetSoapErrors();
-                                if ($repair->close()) {
+                                if ($repair->close(true, 0)) {
                                     $html .= '<p class="confirmation">Réparation fermée avec succès</p><ok>Reload</ok>';
                                 } else {
                                     $html .= '<p class="error">La réparation n\'a pas pu être fermée.</p>';

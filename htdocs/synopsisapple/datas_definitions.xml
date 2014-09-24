@@ -189,7 +189,17 @@
     <def name="includeFiles" type="YesNo">
         <label>Inclure automatiquement les fichiers associés à ce produit</label>
     </def>
-    <def name="consumerLawEligible" type="YesNo">
+<!--    <def name="consumerLawEligible" type="YesNo">
         <label>Eligible à la loi de consommation</label>
+    </def>-->
+    
+    
+    <def name="consumerLawEligible" type="select">
+        <label>Eligible à la loi de consommation</label>
+        <values>
+            <val val=""></val>
+            <val val="Y">Oui</val>
+            <val val="N">Non</val>
+        </values>
     </def>
 </root>

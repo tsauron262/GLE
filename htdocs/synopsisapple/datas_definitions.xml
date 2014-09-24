@@ -197,7 +197,7 @@
     <def name="consumerLawEligible" type="select">
         <label>Eligible à la loi de consommation</label>
         <values>
-            <val val=""></val>
+            <val val="">N/C</val>
             <val val="Y">Oui</val>
             <val val="N">Non</val>
         </values>

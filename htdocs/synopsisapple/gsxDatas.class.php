@@ -514,7 +514,8 @@ class gsxDatas {
                     $tech = new User($db);
                     $tech->fetch($idUser);
 
-                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
+                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
+                    $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptômes']['value'];
                     $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
                     $valDef['unitReceivedDate'] = $dateH[0];
                     $valDef['unitReceivedTime'] = $dateH[1];

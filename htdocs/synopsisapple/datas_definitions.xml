@@ -67,7 +67,7 @@
             <val val="007">Amérique du sud</val>
         </values>
     </def>
-    <def name="serviceType" type="select" hidden="1">
+    <def name="serviceType" type="select">
         <label>Type de service</label>
         <values>
             <val val="0">Non spécifié</val>

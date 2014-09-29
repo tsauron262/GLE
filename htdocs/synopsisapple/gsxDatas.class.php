@@ -428,10 +428,11 @@ class gsxDatas {
             $html .= '</div>' . "\n";
 
             $html .= '<script type="text/javascript">' . "\n";
+//            print_r($parts);
             foreach ($parts as $part) {
                 $html .= 'GSX.addPart(' . $prodId . ', ';
                 $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
-                $html .= ', \'' . (isset($part['partDescription']) ? addslashes($part['partDescription']) : '') . '\'';
+                $html .= ', \'' . (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '') . '\'';
                 $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
                 $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';

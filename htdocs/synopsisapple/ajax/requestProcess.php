@@ -307,11 +307,12 @@ function convertPrix($prix, $ref, $desc) {
     foreach ($tabCas3 as $val)
         if (stripos($ref, $val) === 0)
             $cas = 2;
-    foreach ($tabCas4 as $val)
-        if (stripos($desc, $val) === 0)
-            $cas = 2;
+    if($cas == 2)
+        foreach ($tabCas4 as $val)
+            if (stripos($desc, $val) === 0)
+                $cas = 3;
 
-    if ($cas == 0) {
+    if ($cas == 0 || $cas == 2) {
         if ($prix > 300)
             $coefPrix = 0.8;
         elseif ($prix > 150)
@@ -324,7 +325,7 @@ function convertPrix($prix, $ref, $desc) {
         }
     } elseif ($cas == 1) {
         $constPrix = 45;
-    } elseif ($cas == 2) {
+    } elseif ($cas == 3) {
         $constPrix = 45;
     }
     $prix = (($prix + $constPrix) / $coefPrix);

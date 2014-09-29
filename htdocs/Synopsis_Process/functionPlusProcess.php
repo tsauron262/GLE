@@ -32,6 +32,11 @@ function bouttonEtatSav($idChrono){
     
     $form = new Form($db);
     
+    if($chrono->values[1059] == 3)
+    $sms = "&sendSms=\"+confirm(\"Envoyer SMS ?\");";
+    else
+        $sms = "\"";
+    
     
     if($chrono->values[$idEtat] == 2 && $chrono->propal->id > 0){
         $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisOk'>Devis Accepté</a>";
@@ -42,22 +47,19 @@ function bouttonEtatSav($idChrono){
     }
     
     if($chrono->values[$idEtat] == 1){
-        $return .= 'Envoyer SMS <input type="checkbox" id="sendsms" name="sendsms" checked="checked"/>';
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=pieceOk&sendSms=\"+$(\"#sendsms\").attr(\"checked\");'>Pièce reçue</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=pieceOk".$sms."'>Pièce reçue</a>";
     }
     
     if($chrono->values[$idEtat] == 0){
-        $return .= 'Envoyer SMS <input type="checkbox" id="sendsms" name="sendsms" checked="checked"/>';
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=debDiago&sendSms=\"+$(\"#sendsms\").attr(\"checked\");'>Commencer diagnostic</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=debDiago".$sms."'>Commencer diagnostic</a>";
     }
     
     if($chrono->values[$idEtat] == 5 && $chrono->propalid){
-        $return .= 'Envoyer SMS <input type="checkbox" id="sendsms" name="sendsms" checked="checked"/>';
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient1&sendSms=\"+$(\"#sendsms\").attr(\"checked\");'>Envoyer Devis</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient1".$sms."'>Envoyer Devis</a>";
     }
     
     if($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3){
-        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=repOk'>Terminé (Facturer)</a>";
+        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=repOk".$sms."'>Terminé (Facturer)</a>";
     }
     
     if($chrono->values[$idEtat] == 9){

@@ -2,6 +2,9 @@
 
 require '../main.inc.php';
 
+
+global $tabCentre;
+
 require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
 $chrono = new Chrono($db);
 $chrono->fetch($_REQUEST['id']);
@@ -60,6 +63,8 @@ $idEtat = 1056;
 
 $ok = false;
 
+$tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
+
 if (isset($_REQUEST['actionEtat'])) {
     $action = $_REQUEST['actionEtat'];
 
@@ -89,7 +94,7 @@ if (isset($_REQUEST['actionEtat'])) {
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
         $chrono->setDatas($chrono->id, array($idEtat => 5));
         $ok = true;
-        mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi Ephesus en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le 04 76 23 05 18.\n\n Cordialement."
+        mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le ".$tel.".\n\n Cordialement."
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
@@ -101,7 +106,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 1));
         $ok = true;
         mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
-\nNous venons de commander la/les pièce(s) pour votre 'ModèleMachine' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au 04 76 23 05 18.
+\nNous venons de commander la/les pièce(s) pour votre 'ModèleMachine' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au ".$tel.".
 \nCordialement.
 \nL'équipe BIMP");
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
@@ -145,6 +150,9 @@ if (isset($_REQUEST['actionEtat'])) {
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
         $propal->cloture($user, 4, '');
+        mailSyn2("Prise en charge " . $chrono->ref." terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel dès maintenant, si vous souhaitez plus de renseignements, contactez le ".$tel.".\n\n Cordialement. \n L'Equipe BIMP."
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
+        sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel dès maintenant. L'Equipe BIMP.");
     }
     if ($action == "attenteClient1") {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
@@ -155,7 +163,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
-\nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au 04 76 23 05 18 (Appel non surtaxé).
+\nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au ".$tel." (Appel non surtaxé).
 \nCordialement.
 \nL'équipe BIMP", $tabFileProp, $tabFileProp2, $tabFileProp3);
     }
@@ -180,6 +188,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $payement->paiementid = $_REQUEST['modeP'];
         $payement->create($user);
         $facture->set_paid($user);
+        include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
         facture_pdf_create($db, $facture, null, $langs);
     }
 }
@@ -187,8 +196,8 @@ if (isset($_REQUEST['actionEtat'])) {
 if ($ok)
     header("Location:fiche.php?id=" . $_GET['id']);
 
-function sendSms($chrono, $text) {
-    if ($_REQUEST['sendSms']) {
+function sendSms($chrono, $text) {die($text);
+    if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms']) {
         if (is_object($chrono->contact) && $chrono->contact->phone_mobile != "")
             $to = $chrono->contact->phone_mobile;
         elseif (is_object($chrono->societe) && $chrono->societe->phone != "")

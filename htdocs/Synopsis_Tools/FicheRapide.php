@@ -100,7 +100,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chrono->contactid = $_REQUEST["contactid"];
         $chronoid = $chrono->create();
         if ($chronoid > 0) {
-            $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, 1058 => $_POST['Devis'], 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
+            $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /*1058 => $_POST['Devis'],*/ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
             $test = $chrono->setDatas($chronoid, $dataArr);
             if ($test) {
                 $socid = "";
@@ -224,7 +224,7 @@ if ($socid != "") {
     echo "<td class='ui-widget-content' colspan='1'>";
     echo "<select name='centre'/>";
     $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
-    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
+//    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
 //    foreach ($centres as $val => $centre) {
         while($ligne = $db->fetch_object($result)){
             $val = $ligne->valeur;
@@ -341,18 +341,18 @@ if ($socid != "") {
     echo "</tr>";
     echo "</p>";
     echo "<p>";
+//    echo "<tr>";
+//    echo "<th class='ui-state-default ui-widget-header'>Préférence de contact pour le devis.</th>";
+//    echo "<td class='ui-widget-content'>";
+//    echo " <select name='Devis' id='Devis' class='required'>";
+//    echo "<option value=''></option> ";
+//    echo "<option value='1'" . $devis1 . ">Par Mail</option> ";
+//    echo "<option value='2'" . $devis2 . ">Par Téléphone </option>";
+//    echo " </select>";
+//    echo "</td>";
+//    echo "</tr>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Préférence de contact pour le devis.</th>";
-    echo "<td class='ui-widget-content'>";
-    echo " <select name='Devis' id='Devis' class='required'>";
-    echo "<option value=''></option> ";
-    echo "<option value='1'" . $devis1 . ">Par Mail</option> ";
-    echo "<option value='2'" . $devis2 . ">Par Téléphone </option>";
-    echo " </select>";
-    echo "</td>";
-    echo "</tr>";
-    echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Préférence de contact pour le retour.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Préférence de contact.</th>";
     echo "<td class='ui-widget-content'>"; /* <span class='addSoc editable' style='float: left; padding : 3px 15px 0 0;'> */
     echo " <select name='Retour' id='Retour' class='required'>";
     echo "<option value=''></option> ";

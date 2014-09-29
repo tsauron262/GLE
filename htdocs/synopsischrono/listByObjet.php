@@ -148,13 +148,19 @@ foreach ($tabModel as $model => $data) {
 
 
     $html .= '<div id="pan' . $nomDiv . '">';
+    
+    if($model == 105){
+        $html .= "<a class='butAction' href='".DOL_URL_ROOT."/Synopsis_Tools/FicheRapide.php/'>Créer SAV</a><br/><br/>";
+    }
+    else{
     $html .= "<a class='butAction' onclick='" . $champJs . " "
             . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"
             . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
             . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
             . "                                                                     }, \"New " . $nomModel . "\", 1); "
             . "                                                                  });'>Créer " . $titre . "</a><br/><br/>";
-
+    }
+    
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 
     if (($user->rights->synopsischrono->read || $user->rights->chrono_user->$tmp->voir)) {

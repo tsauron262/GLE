@@ -107,7 +107,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
         
-        $tabCentre = array("M"=>array("0101", "fgfdg@dfgdfgdf.fr"));
+        global $tabCentre;
 
         if (!is_object($outputlangs))
             $outputlangs = $langs;
@@ -258,7 +258,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1011]->value, 0, 'L');
                 
                 $pdf->SetXY('145', '84');
-                $pdf->MultiCell(100, 6, dol_print_date($chrono2->valuesPlus[1015]->value), 0, 'L');
+                $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
                 
                 $pdf->SetXY('131.5', '88');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr, 0, 'L');

@@ -13,10 +13,10 @@ class synopsisHook {
     private static $reload = false;
 
     function synopsisHook() {
-        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv;
+        global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
         
         
-        
+        $tabCentre = array("M"=>array("04 50 22 15 55", "sav74@bimp.fr"), 'L'=>array("04 78 17 30 28", "sav69@bimp.fr"), "S"=>array("04 77 81 58 12", "sav42@bimp.fr"), "GA"=>array("04 76 23 05 18", "sav38@bimp.fr"), "B"=>array("03 81 47 11 71", "sav250@bimp.fr"), "MO"=>array("03 81 95 19 20", "sav252@bimp.fr"));
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -171,6 +171,7 @@ class synopsisHook {
             $return .= '<div class="menu_titre">'.img_object("SAV", "drap0@Synopsis_Tools").' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
             $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="'.DOL_URL_ROOT.'/Synopsis_Tools/FicheRapide.php"> <img src="'.DOL_URL_ROOT.'/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
+            $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="'.DOL_URL_ROOT.'/synopsisapple/test.php"> <img src="'.DOL_URL_ROOT.'/theme/eldy/img/on.png" border="0" alt="" title=""> Garentie Apple</a>';
             $return .= '</div>';
             $centre = ((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
             $tabGroupe = array(array('label' => "Tous", 'valeur' => 0));

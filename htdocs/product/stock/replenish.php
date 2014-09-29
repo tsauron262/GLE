@@ -65,7 +65,7 @@ $limit = $conf->liste_limit;
 $offset = $limit * $page ;
 
 // Force limit to no (currently solution to solve loosing selection when using pagination. No pagination on this page)
-$limit = 0;
+//$limit = 0;
 
 
 /*

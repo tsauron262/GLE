@@ -628,6 +628,7 @@ if (! empty($conf->facture->enabled) && ! empty($conf->commande->enabled) && $us
 	$sql.= " AND c.facture = 0";
 	$sql.= " GROUP BY s.nom, s.rowid, c.rowid, c.ref, c.facture, c.fk_statut, c.total_ht, c.total_ttc";
 
+	$sql.= $db->plimit($max, 0);
 	$resql = $db->query($sql);
 	if ( $resql )
 	{

@@ -382,5 +382,5 @@ textarea.grand{
 
 
 .ui-jqgrid-btable .hideonsmartphone {
-    hidden: true;
+    display: none;
 }

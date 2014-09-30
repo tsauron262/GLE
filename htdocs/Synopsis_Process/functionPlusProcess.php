@@ -59,7 +59,7 @@ function bouttonEtatSav($idChrono){
     }
     
     if($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3){
-        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=repOk".$sms."'>Terminé (Facturer)</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=repOk".$sms."'>Terminé (Facturer)</a>";
     }
     
     if($chrono->values[$idEtat] == 9){

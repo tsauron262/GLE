@@ -72,7 +72,7 @@ $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
 $accompte = (isset($_POST['accompte']) ? $_POST['accompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : "");
 
-if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" && isset($_POST['Devis']) && $_POST['Devis'] !== "" && isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /* && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "" */) {
+if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" &&/* isset($_POST['Devis']) && $_POST['Devis'] !== "" && */isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /* && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "" */) {
     $chronoProd = new Chrono($db);
 
     $chronoProdid = existProd($NoMachine);

@@ -146,6 +146,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $facture->createFromOrder($propal);
 //        $facture->create($user);
         $facture->validate($user);
+        include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
         facture_pdf_create($db, $facture, null, $langs);
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");

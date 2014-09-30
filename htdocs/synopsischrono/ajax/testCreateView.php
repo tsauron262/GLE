@@ -40,8 +40,8 @@ if ($_REQUEST['withRev'] > 0)
 
 $user->fetch($user_id);
 $user->getrights();
-$page = $_REQUEST['page']; // get the requested page
-$limit = $_REQUEST['rows']; // get how many rows we want to have into the grid
+$page = (isset($_REQUEST['page'])) ? $_REQUEST['page'] : 1; // get the requested page
+$limit = (isset($_REQUEST['rows'])) ? $_REQUEST['rows'] : 300; // get how many rows we want to have into the grid
 $sidx = $_REQUEST['sidx']; // get index row - i.e. user click to sort
 $sord = $_REQUEST['sord']; // get the direction
 
@@ -130,6 +130,7 @@ if ($searchOn == 'true') {
                     $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
                 }
             }
+        $wh1 .= " AND rowid in (SELECT DISTINCT(chrono_id) FROM llx_synopsischrono_key_value_view WHERE nom = '" . $searchField . "' AND chrono_value LIKE $'" . $searchString . "'$";
         }
 //    }
 //    if ($searchField == "c.date_create")
@@ -210,7 +211,35 @@ switch ($action) {
             $arrvalueIsSelected = array();
             $tabLien = array();
             $tabGlobalVar = array();
+            
+            
+            $createView1 = $createView2 = $createView3 = ""; $i = 0;
+            $requeteView0 = "DROP VIEW IF EXISTS llx_vuetest;";
             while ($resPre = $db->fetch_object($sqlPre)) {
+                
+                $i++;
+//                $createView1 .= ','.;
+                $resPre->nom = urlencode(str_replace(array(" ", "\\", "/", "ô"), "_", $resPre->nom));
+                $createView3 .= ' LEFT JOIN llx_synopsischrono_value tab'.$i. ' on tab'.$i.'.chrono_refid = chrono.id AND tab'.$i.'.key_id = '.$resPre->id;
+                if($resPre->type_valeur == 8){//Liste
+                    $createView3 .= ' LEFT JOIN llx_Synopsis_Process_form_list_members tab'.$i.'list ON tab'.$i.'list.list_refid = '.$resPre->type_subvaleur.' AND tab'.$i.'list.valeur = tab'.$i.'.value';
+                            $createView2 .= ',tab'.$i.'list.label as '.$resPre->nom;
+                }
+                else{
+                $createView2 .= ',tab'.$i.'.value as '.$resPre->nom;
+                }
+            }
+                $requeteView = "Create view llx_vuetest as (SELECT chrono.* ".$createView2." FROM llx_synopsischrono chrono".$createView3." WHERE model_refid = ".$id.");";
+                $db->query($requeteView0);
+                $db->query($requeteView);
+                echo $requeteView0.$requeteView;die;
+                if(1){
+                
+                
+                
+                
+                
+                
                 $nom = sanitize_string($resPre->nom);
                 $arrPre[$resPre->id] = $resPre->id;
                 $arrKeyName[$resPre->id] = $nom;
@@ -261,7 +290,7 @@ switch ($action) {
 
 
 
-
+//die($requete1);
             $sql1 = $db->query($requete1); //Juste pour le nb de ligne
             $count = $db->num_rows($sql1);
 
@@ -357,7 +386,7 @@ switch ($action) {
                 if ($val == 'datetime')
                     $requeteArr[] .= "`" . $key . "` datetime DEFAULT NULL";
                 else
-                    $requeteArr[] .= "`" . $key . "` VARCHAR(1000) DEFAULT NULL";
+                    $requeteArr[] .= "`" . $key . "` VARCHAR(3000) DEFAULT NULL";
             }
             if (count($requeteArr) > 0)
                 $requete .= "," . join(',', $requeteArr);
@@ -365,7 +394,7 @@ switch ($action) {
             $sql = $db->query($requete);
 //Insert datas
 
-            $insArr = array("id", "chrono_id,ref", "fk_statut");
+            $insArr = array("id", "chrono_id", "ref", "fk_statut");
             $insStr = "";
             $insStr2 = "";
             foreach ($arrKeyName as $key => $val) {
@@ -405,36 +434,42 @@ switch ($action) {
                         } else {
                             $dateUS = $date;
                         }
-                        $insArr2[] = "'" . addslashes($dateUS) . "'";
+                        $insArr2[] = $dateUS;
                     } else
-                        $insArr2[] = "'" . addslashes($chrono_arr_value_by_key_name[$keyname]['value']) . "'";
+                        $insArr2[] = $chrono_arr_value_by_key_name[$keyname]['value'];
                 }
                 $insStr2 = join(',', $insArr2);
                 $requete = "INSERT INTO tempchronovalue
                             (" . $insStr . ")
                      VALUES (" . $insStr2 . ")";
 //print $requete;
-                $sql = $db->query($requete);
+//                $sql = $db->query($requete);
                 $i++;
-            }
 
+
+                $object = new stdClass();
+                foreach ($insArr as $key => $value) {
+                    $object->$value = stripslashes($insArr2[$key]);
+                }
+                $grandTab[] = $object;
+            }
+//print_r($grandTab);die;
 
 //Select datas
             $requete = "SELECT * FROM tempchronovalue WHERE 1=1 ";
             $requete .= $wh;
 
-
 //            $sql = $db->query($requete);
 //            if ($sql) {
 //                $i = 0;
 
-                class general {
-                    
-                }
+            class general {
+                
+            }
 
-                $responce = new general();
-                $responce->page = $page;
-                $responce->total = $total_pages;
+            $responce = new general();
+            $responce->page = $page;
+            $responce->total = $total_pages;
 //            }
             $requete .= "      ORDER BY $sidx $sord";
             if ($sidx != "chrono_id" || $searchField) {
@@ -443,10 +478,11 @@ switch ($action) {
             } else
                 $responce->records = $count;
 
-            $sql = $db->query($requete);
-            if ($sql) {
+//            $sql = $db->query($requete);
+            if (1){//$sql) {
                 $i = 0;
-                while ($res = $db->fetch_object($sql)) {
+//                while ($res = $db->fetch_object($sql)) {
+                foreach ($grandTab as $res){
                     $arr = array();
                     $arr[] = $res->chrono_id;
                     $chrono = new Chrono($db);
@@ -565,16 +601,16 @@ function parseValue($val, $extraCss, $hasSubValeur = false, $sourceIsOption = fa
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                 $tmp = $phpClass;
                 $obj = new $tmp($db);
-            $obj->cssClassM = $extraCss;
-            $obj->idChrono = $val;
+                $obj->cssClassM = $extraCss;
+                $obj->idChrono = $val;
                 $obj->fetch($hasSubValeur);
                 return $obj->getValue($val);
             } elseif ($phpClass == 'fct') {
                 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
                 $tmp = $phpClass;
                 $obj = new $tmp($db);
-            $obj->cssClassM = $extraCss;
-            $obj->idChrono = $val;
+                $obj->cssClassM = $extraCss;
+                $obj->idChrono = $val;
                 $obj->fetch($hasSubValeur);
                 echo $obj->call_function_chronoModule($chr->model_refid, $chr->id);
             } else {

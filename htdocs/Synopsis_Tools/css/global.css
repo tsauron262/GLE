@@ -379,3 +379,8 @@ textarea.grand{
     font-size: 90%;
     font-style : italic;
 }
+
+
+.ui-jqgrid-btable .hideonsmartphone {
+    hidden: true;
+}

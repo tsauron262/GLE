@@ -196,7 +196,7 @@ if (isset($_REQUEST['actionEtat'])) {
 if ($ok)
     header("Location:fiche.php?id=" . $_GET['id']);
 
-function sendSms($chrono, $text) {die($text);
+function sendSms($chrono, $text) {
     if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms']) {
         if (is_object($chrono->contact) && $chrono->contact->phone_mobile != "")
             $to = $chrono->contact->phone_mobile;

@@ -33,6 +33,7 @@ class Chrono extends CommonObject {
     public $keysListId = array();
     public $keysList = array();
     public $extraValue = array();
+    public $loadObject = true;
 
     public function Chrono($DB) {
         $this->db = $DB;
@@ -41,7 +42,7 @@ class Chrono extends CommonObject {
     public function fetch($id) {
         global $conf;
         if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO) {
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = '" . $id ."';";
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = '" . $id . "';";
             $sql = $this->db->query($requete);
             $res = $this->db->fetch_object($sql);
             if ($res) {
@@ -54,20 +55,22 @@ class Chrono extends CommonObject {
                 $this->validation_number = $res->validation_number;
 
                 $this->fk_user_author = $res->fk_user_author;
-                $tmpUser = new User($this->db);
-                if ($this->fk_user_author > 0) {
-                    $tmpUser->fetch($this->fk_user_author);
+                if ($this->fk_user_author && $this->loadObject) {
+                    $tmpUser = new User($this->db);
+                    if ($this->fk_user_author > 0) {
+                        $tmpUser->fetch($this->fk_user_author);
+                    }
                 }
                 $this->user_author = $tmpUser;
                 $this->user_modif_id = $res->fk_user_modif;
-                if ($this->user_modif_id > 0) {
+                if ($this->user_modif_id > 0 && $this->loadObject) {
                     $tmpUser = new User($this->db);
                     $tmpUser->fetch($this->user_modif_id);
                     $this->user_modif = $tmpUser;
                 }
 
                 $this->contactid = $res->fk_socpeople;
-                if ($this->contactid > 0) {
+                if ($this->contactid > 0 && $this->loadObject) {
                     require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
                     $contact = new Contact($this->db);
                     $contact->fetch($this->contactid);
@@ -77,14 +80,14 @@ class Chrono extends CommonObject {
                 $this->description = $res->description;
                 $this->model_refid = $res->model_refid;
                 $this->propalid = $res->propalid;
-                if ($this->propalid > 0) {
+                if ($this->propalid > 0 && $this->loadObject) {
                     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
                     $propal = new Propal($this->db);
                     $propal->fetch($this->propalid);
                     $this->propal = $propal;
                 }
                 $this->projetid = $res->projetid;
-                if ($this->projetid > 0) {
+                if ($this->projetid > 0 && $this->loadObject) {
                     require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
                     $projet = new Project($this->db);
                     $projet->fetch($this->projetid);
@@ -93,13 +96,13 @@ class Chrono extends CommonObject {
                 $this->ref = $res->ref;
                 $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
                 $this->revision = ($res->revision > 0 ? $res->revision : false);
-                if ($this->model_refid > 0) {
+                if ($this->model_refid > 0 && $this->loadObject) {
                     $this->model = new ChronoRef($this->db);
                     $this->model->fetch($res->model_refid);
                     $this->mask = $this->model->modele;
                 }
 
-                if ($this->socid > 0 && $this->model->hasSociete) {
+                if ($this->socid > 0 && $this->model->hasSociete && $this->loadObject) {
                     $soc = new Societe($this->db);
                     $soc->fetch($this->socid);
                     $this->societe = $soc;
@@ -299,7 +302,7 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople =  " . $contactid;
         else
             $requete .= ", fk_socpeople = NULL ";
-        $requete .= ", note = '".addslashes($this->note)."'";
+        $requete .= ", note = '" . addslashes($this->note) . "'";
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;
         $sql = $this->db->query($requete);
@@ -558,15 +561,15 @@ class Chrono extends CommonObject {
 
         $result = '';
 
-        if($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
-        $titre = dol_trunc ($this->description,40);
+        if ($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
+            $titre = dol_trunc($this->description, 40);
         else
-        $titre = $this->ref . " : " . dol_trunc ($this->description,25);
-        
+            $titre = $this->ref . " : " . dol_trunc($this->description, 25);
+
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
-        
-        if(stripos($this->model->picto, '[KEY|')){
+
+        if (stripos($this->model->picto, '[KEY|')) {
             $tabT = explode('[KEY|', $this->model->picto);
             $tabT = explode(']', $tabT[1]);
             $keyId = $tabT[0];
@@ -575,7 +578,7 @@ class Chrono extends CommonObject {
 //            print_r($this);
 //            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
             $val = $this->extraValueById[$this->id][$keyId]['value'];
-            $this->model->picto = str_replace('[KEY|'.$keyId.']', $val, $this->model->picto);
+            $this->model->picto = str_replace('[KEY|' . $keyId . ']', $val, $this->model->picto);
         }
 
         if ($option == 6) {
@@ -597,7 +600,7 @@ class Chrono extends CommonObject {
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_conf WHERE id = " . $modelId;
         $sql = $this->db->query($requete);
         $res = $this->db->fetch_object($sql);
-        if(isset($_REQUEST['centre']))
+        if (isset($_REQUEST['centre']))
             $res->modele = str_replace("{CENTRE}", $_REQUEST['centre'], $res->modele);
         return($res->modele);
     }
@@ -612,8 +615,8 @@ class Chrono extends CommonObject {
         }
         return($tmp->getNextValue($objsoc, $this, $this->getModeleMask()));
     }
-    
-    public function createPropal(){
+
+    public function createPropal() {
         global $user;
         require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
         $prop = new Propal($this->db);
@@ -622,7 +625,7 @@ class Chrono extends CommonObject {
         $prop->cond_reglement_id = 0;
         $prop->mode_reglement_id = 0;
         $prop->create($user);
-        if($this->contactid){
+        if ($this->contactid) {
             $prop->add_contact($this->contactid, 40);
             $prop->add_contact($this->contactid, 41);
         }
@@ -697,7 +700,7 @@ class Chrono extends CommonObject {
     }
 
     public function getValues($chrono_id = null) {
-        if($chrono_id == null)
+        if ($chrono_id == null)
             $chrono_id = $this->id;
         if (count($this->keysListId) < 1) {
             $this->getKeys();
@@ -718,8 +721,8 @@ class Chrono extends CommonObject {
             $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
         }
     }
-    
-    public function getValuesPlus(){
+
+    public function getValuesPlus() {
         $requete = "SELECT k.nom,
                            k.id,
                            k.extraCss,
@@ -754,17 +757,17 @@ class Chrono extends CommonObject {
         $sql = $this->db->query($requete);
         while ($res = $this->db->fetch_object($sql)) {
             $res->value = stripslashes($res->value);
-            if($res->type_valeur == 10){
-                $sqlT = $this->db->query("SELECT `nomElem` FROM `".MAIN_DB_PREFIX."Synopsis_Process_lien` WHERE `rowid` = ".$res->type_subvaleur);
-                if($this->db->num_rows($sqlT) > 0){
-                $resultT = $this->db->fetch_object($sqlT);
-                $tabT = getElementElement(getParaChaine($res->extraCss, "type:"),$resultT->nomElem,$this->id);
-                if(isset($tabT[0]))
-                    $res->value = $tabT[0]['d'];
+            if ($res->type_valeur == 10) {
+                $sqlT = $this->db->query("SELECT `nomElem` FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_lien` WHERE `rowid` = " . $res->type_subvaleur);
+                if ($this->db->num_rows($sqlT) > 0) {
+                    $resultT = $this->db->fetch_object($sqlT);
+                    $tabT = getElementElement(getParaChaine($res->extraCss, "type:"), $resultT->nomElem, $this->id);
+                    if (isset($tabT[0]))
+                        $res->value = $tabT[0]['d'];
                 }
             }
-            
-            
+
+
             if ($res->hasSubValeur == 1) {
                 if ($res->sourceIsOption) {
                     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Process/process.class.php");
@@ -789,7 +792,7 @@ class Chrono extends CommonObject {
                         }
 //                        }
                     }
-                    if(!isset($obj->valuesArrStr) || !is_array($obj->valuesArrStr))
+                    if (!isset($obj->valuesArrStr) || !is_array($obj->valuesArrStr))
                         $obj->valuesArrStr = $obj->valuesArr;
                     foreach ($obj->valuesArrStr as $key => $val) {
 //                        if ($res->valueIsSelected && $res->value == $key) {
@@ -797,16 +800,16 @@ class Chrono extends CommonObject {
                             $str .= $obj->valuesGroupArrDisplay[$key]['label'] . " - " . $val;
 //                                break;
                         } else {
-                            if($str != "")
+                            if ($str != "")
                                 $str .= "<br/>";
                             $str .= $val;
 //                                break;
                         }
 //                        }
                     }
-                $res->valueHtml = $html;
-                $res->valueStr = $str;
-                $res->valueHtmlLi = $htmlLi;
+                    $res->valueHtml = $html;
+                    $res->valueStr = $str;
+                    $res->valueHtmlLi = $htmlLi;
                 } else {
                     //Beta
                     if ($res->phpClass == 'fct' || $res->phpClass == 'globalvar')
@@ -832,7 +835,7 @@ class Chrono extends CommonObject {
                 $res->valueHtml = $html;
                 $res->valueStr = $html;
             }
-            
+
             $res->valueStr = str_replace("<br/>", "\n", $res->valueStr);
             $this->valuesPlus[$res->id] = $res;
         }
@@ -933,7 +936,7 @@ class ChronoRef {
             $this->tms = $res->tms;
             $this->revision_model_refid = $res->revision_model_refid;
             $this->active = $res->active;
-            $this->picto = (isset($res->picto) && $res->picto != "")? $res->picto : 'chrono@synopsischrono';
+            $this->picto = (isset($res->picto) && $res->picto != "") ? $res->picto : 'chrono@synopsischrono';
         }
     }
 

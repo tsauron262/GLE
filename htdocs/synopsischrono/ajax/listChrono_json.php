@@ -39,6 +39,11 @@ $sord = $_REQUEST['sord']; // get the direction
 if(!$sidx) $sidx =1; // connect to the database
 
 
+
+//if(!isset($_REQUEST['filtre']) && isset($_REQUEST['filtre2']))
+//  $_REQUEST['filtre'] = $_REQUEST['filtre2'];
+
+
 $wh = "";
 $searchOn = $_REQUEST['_search'];
 if($searchOn=='true')
@@ -173,7 +178,7 @@ $wh .= " AND revision is NULL ";
 if(isset($_REQUEST['filtre']))
     $wh .= "AND (id IN (SELECT chrono_refid 
 FROM  `llx_synopsischrono_value` 
-WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%') ";
+WHERE  `value` LIKE  '%".$_REQUEST['filtre']."%') OR ref LIKE  '%".$_REQUEST['filtre']."%' OR description LIKE  '%".$_REQUEST['filtre']."%' OR nom LIKE  '%".$_REQUEST['filtre']."%') ";
 
 switch ($action)
 {

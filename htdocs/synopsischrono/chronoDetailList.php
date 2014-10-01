@@ -29,7 +29,7 @@ class htmlOld {
             if (eventList_init' . $id . ' == 1)
                 eventList_init' . $id . ' =2;
             if (eventList_init' . $id . ' == false){
-                loadGridFromCookie("' . $id . $optionSearch . '");
+//                loadGridFromCookie("' . $id . $optionSearch . '");
                 eventList_init' . $id . ' =1;
             }
             }';
@@ -217,7 +217,7 @@ EOF;
         $i = 3;
         
         if ($chronoRef->hasSociete) {
-            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
+            $colModelArr[$i] = array('name' => "Société", "index" => "socname", "width" => 130, "align" => "left", "search" => true, "sortable" => true);
             $i++;
         }
         
@@ -311,15 +311,26 @@ EOF;
             colModel => $colModelArr
         );
         $subGrid = $htmlOld->listjqGrid_subGrid($arr2);
+        
+        $nomCookie =  str_replace(".", "_", "gridChronoDet".$id.$_SERVER['PHP_SELF']);
+        $valDef = json_decode($_COOKIE[$nomCookie]);
+        
+        
+        $url = (isset($valDef->url)? $valDef->url : DOL_URL_ROOT . "/synopsischrono/ajax/listChronoDetail_json_1.php?userId=" . $user->id . "&id=" . $id . $optionSearch);
+        $sortname = (isset($valDef->sortname)? $valDef->sortname : 'id');
+        $sortorder = (isset($valDef->sortorder)? $valDef->sortorder : 'desc');
+        $page = (isset($valDef->page)? $valDef->page : '1');
+        $rowNum = (isset($valDef->rowNum)? $valDef->rowNum : '25');
 
         $arr = array(
-            url => DOL_URL_ROOT . "/synopsischrono/ajax/listChronoDetail_json_1.php?userId=" . $user->id . "&id=" . $id . $optionSearch,
+            url => $url,
             caption => '<span style="padding:4px; font-size: 16px; ">Chrono ' . addslashes($chronoRef->titre) . "</span>",
-            sortname => 'id',
-            sortorder => "desc",
+            sortname => $sortname,
+            sortorder => $sortorder,
+            page => $page,
             datatype => 'json',
-            rowNum => 25,
-            rowList => "[25,50,100]",
+            rowNum => $rowNum,
+            rowList => "[10,25,50,100]",
             beforeRequest => "function(){
                 jQuery('#" . $nomDiv . "').find('.ui-jqgrid-titlebar').addClass('ui-state-default');
             }",

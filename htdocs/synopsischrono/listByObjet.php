@@ -50,7 +50,8 @@ if (isset($_REQUEST['obj'])) {
         $ctr = new Contrat($db);
         $ctr->fetch($_REQUEST['id']);
         $obj = $ctr;
-        $filtre = "Contrat=" . urlencode($ctr->ref);
+//        $filtre = "Contrat=" . urlencode($ctr->ref);
+        $filtre = "fk_contrat=" . $ctr->id;
         $head = contract_prepare_head($ctr);
         $socid = $ctr->socid;
         $ctrId = $_REQUEST['id'];

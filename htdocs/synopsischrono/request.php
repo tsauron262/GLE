@@ -9,6 +9,7 @@ require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
 $chrono = new Chrono($db);
 $chrono->fetch($_REQUEST['id']);
 $chrono->getValues();
+$chrono->getValuesPlus();
 $nomMachine = '';
 
 $_REQUEST['sendSms'] = (isset($_REQUEST['sendSms']) && ($_REQUEST['sendSms'] == "checked") || $_REQUEST['sendSms'] == "true");
@@ -54,11 +55,12 @@ if (is_file($fileProp)) {
 
 
 
-if (isset($chrono->extraValue[$chrono->id]['Materiel']['value']) && $chrono->extraValue[$chrono->id]['Materiel']['value']) {
+if (isset($chrono->valuesPlus[1039]->value) && $chrono->valuesPlus[1039]->value) {
     $prod = new Chrono($db);
-    $prod->fetch($chrono->extraValue[$chrono->id]['Materiel']['value']);
+    $prod->fetch($chrono->valuesPlus[1039]->value);
     $nomMachine = $prod->description;
 }
+
 $idEtat = 1056;
 
 $ok = false;

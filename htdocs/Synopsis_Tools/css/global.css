@@ -384,3 +384,8 @@ textarea.grand{
 .ui-jqgrid-btable .hideonsmartphone {
     display: none;
 }
+
+.ui-jqgrid-btable .butAction {
+    display: inherit;
+}
+

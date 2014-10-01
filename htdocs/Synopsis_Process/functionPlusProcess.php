@@ -56,6 +56,7 @@ function bouttonEtatSav($idChrono){
     
     if($chrono->values[$idEtat] == 5 && $chrono->propalid){
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient1".$sms."'>Envoyer Devis</a>";
+        $return .= "</br>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient2".$sms."'>Envoyer Devis Garantie</a>";
     }
     
@@ -67,6 +68,7 @@ function bouttonEtatSav($idChrono){
         ob_start();
         $return .= $form->select_types_paiements("SAV");
         $return .= ob_get_clean();
+        $return .= "</br>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=restituer&modeP=\"+$(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
     }
     

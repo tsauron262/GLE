@@ -8,7 +8,7 @@ require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 
 $resultModel = $db->query("SELECT * FROM llx_synopsischrono_conf");
 while ($ligneModel = $db->fetch_object($resultModel)) {
-    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList = 1 AND model_refid =  " . $ligneModel->id;
+    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE model_refid =  " . $ligneModel->id;
     $sqlPre = $db->query($requetePre);
     $arrPre = array();
     $arrKeyName = array();

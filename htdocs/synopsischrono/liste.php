@@ -111,7 +111,6 @@ if ('x' . $_REQUEST['type'] != 'x') {
 }
 
 
-
 $jqgridJs .= <<<EOF
 
 
@@ -120,7 +119,6 @@ jQuery.datepicker.setDefaults($.datepicker.regional['fr']);
 jQuery.jgrid.edit.msg.minValue="Ce champs est requis";
 var sg;
 jQuery(document).ready(function() {
-
 //    jQuery('#changeChrono').change(function(){
 //        if (jQuery('#changeChrono :selected').val() > 0 )
 //        {
@@ -141,10 +139,23 @@ jQuery(document).ready(function() {
     {
         extra="&type="+type;
     }
+        urlGrid = "ajax/listChrono_json.php?userId="+userId+extra;
+EOF;
+
+
+
+$js .= "\n\n".'var extra2 = \''.($_REQUEST['filtre']? "&filtre=".$_REQUEST['filtre']."" : "").'\';'
+        . 'setTimeout(function(){'
+            . 'jQuery("#gridListProspect").jqGrid(\'setGridParam\', { url: urlGrid });'
+        . '}, 500);';
+
+$jqgridJs .= <<<EOF
 var grid = jQuery("#gridListProspect").jqGrid({
             datatype: "json",
 EOF;
-        $jqgridJs .=    'url: "ajax/listChrono_json.php?userId="+userId+extra'.($_REQUEST['filtre']? "+'&filtre=".$_REQUEST['filtre']."'" : "").',';
+
+
+        $jqgridJs .=    'url: urlGrid+extra2,';
 if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
     $jqgridJs .= "colNames:['id' ,'hasRev','Ref', 'Type','Tiers','Contact','Date cr&eacute;ation','Dern. modif.','Statut', 'Nb Doc'],";
 else
@@ -454,6 +465,17 @@ $jqgridJs .= "    sg = jQuery('#mysearch').filterGrid('#gridListProspect',{
                                                             enableSearch:true,
                                                             enableClear: true,
                                                       });";
+$jqgridJs .= "    sg = jQuery('#mysearch2').filterGrid('#gridListProspect',{
+                                                            gridModel:false,
+                                                            filterModel: [{label:'', stype:'text',sopt:{value: '".$_REQUEST['filtre']."'},name:'filtre' }],
+                                                            gridNames:false,
+                                                            searchButton: 'Filtrer',
+                                                            clearButton: 'Annuler',
+                                                            autosearch:true,
+                                                            buttonclass: 'butAction',
+                                                            enableSearch:true,
+                                                            enableClear: true,
+                                                      });";
 //$jqgridJs .= "  jQuery('select:not(.maxWidthSelect):not(.noSelDeco)').selectmenu({style: 'dropdown', maxHeight: 300 }); ";
 $jqgridJs.= '   });' . "\n";
 $js .= $jqgridJs . "</script>";
@@ -462,8 +484,8 @@ llxHeader($js, 'Liste chrono', '');
 dol_fiche_head('', 'Chrono', $langs->trans("Liste des Chrono"));
 
 print '<div id="mysearch"></div>';
-print '<br/><div><form action="?"><input type="text" name="filtre" value="'.$_REQUEST['filtre'].'"/>'
-. '<input type="submit" class="butAction" name="valider" value="Filtrer"/></form></div>';
+print "<br/>";
+print '<div id="mysearch2"></div>';
 
 print "<br/>";
 

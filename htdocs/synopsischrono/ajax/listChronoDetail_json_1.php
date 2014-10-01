@@ -88,6 +88,10 @@ if ($searchOn == 'true') {
     if ($_REQUEST['fk_contrat'] != "") {
         $wh1 .= " AND Contrat = ".$_REQUEST['fk_contrat'];
     }
+    
+    if ($_REQUEST['Centre'] != "") {
+        $wh1 .= " AND Centre LIKE '".$_REQUEST['Centre']."'";
+    }
 
     if ($_REQUEST['propal'] != "") {
         $searchStringT = "(SELECT id FROM " . MAIN_DB_PREFIX . "propal p, " . MAIN_DB_PREFIX . "synopsischrono WHERE propalid = p.rowid AND (p.ref LIKE \"%" . $_REQUEST['propal'] . "%\"))";

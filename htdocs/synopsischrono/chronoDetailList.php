@@ -25,11 +25,11 @@ class htmlOld {
         $js .= ', loadComplete : function() { 
             
             if (eventList_init' . $id . ' > 0)
-                saveGridToCookie("' . $id . $optionSearch . '", jQuery("#' . $id . '"));
+                saveGridToCookie("' . $id . '", jQuery("#' . $id . '"));
             if (eventList_init' . $id . ' == 1)
                 eventList_init' . $id . ' =2;
             if (eventList_init' . $id . ' == false){
-//                loadGridFromCookie("' . $id . $optionSearch . '");
+//                loadGridFromCookie("' . $id . '");
                 eventList_init' . $id . ' =1;
             }
             }';
@@ -67,7 +67,7 @@ class htmlOld {
         }
         $js .='function saveGridToCookie(name, grid) {
 var gridInfo = new Object();
-name = name + window.location.pathname;
+name = name + nomCookie;
 gridInfo.url = grid.jqGrid(\'getGridParam\', \'url\');
 gridInfo.sortname = grid.jqGrid(\'getGridParam\', \'sortname\');
 gridInfo.sortorder = grid.jqGrid(\'getGridParam\', \'sortorder\');
@@ -311,10 +311,10 @@ EOF;
             colModel => $colModelArr
         );
         $subGrid = $htmlOld->listjqGrid_subGrid($arr2);
-        
-        $nomCookie =  str_replace(".", "_", "gridChronoDet".$id.$_SERVER['PHP_SELF']);
-        $valDef = json_decode($_COOKIE[$nomCookie]);
-        
+
+        $nomCookie =  str_replace(".", "_", $_SERVER['REQUEST_URI']);
+        $valDef = json_decode($_COOKIE["gridChronoDet".$id.$nomCookie]);
+        $js .= 'nomCookie = "'.$nomCookie."\";";
         
         $url = (isset($valDef->url)? $valDef->url : DOL_URL_ROOT . "/synopsischrono/ajax/listChronoDetail_json_1.php?userId=" . $user->id . "&id=" . $id . $optionSearch);
         $sortname = (isset($valDef->sortname)? $valDef->sortname : 'id');

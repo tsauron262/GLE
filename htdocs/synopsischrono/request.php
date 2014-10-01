@@ -189,6 +189,7 @@ if (isset($_REQUEST['actionEtat'])) {
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
         $tabT = getElementElement("propal", "facture", $chrono->propalid);
+        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
         $facture = new Facture($db);
         $facture->fetch($tabT[count($tabT) - 1]['d']);
         require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");

@@ -76,7 +76,8 @@ $(window).load(function() {
     },*/ function(){
         input = $("#NoMachine");
         inputM = $("#Machine");
-        inputG = $("#Garantie");
+        inputG = $("#Garantie")
+        inputTG = $("#typeGarantie");
         inputD = $("#DateAchat");
         NoSerie = input.attr('value');
         datas = "serial="+NoSerie;
@@ -94,14 +95,16 @@ $(window).load(function() {
                             eval(msg);
                             if (typeof(tabResult) != "undefined"){
                             valeurM = tabResult[0];
-                            valeurG = tabResult[1];
-                            valeurD = tabResult[2];
+                            valeurTG = tabResult[1];
+                            valeurG = tabResult[2];
+                            valeurD = tabResult[3];
                            }
                        }
                        else
                            reponse = msg;
                        
                         inputM.attr("value", valeurM);
+                        inputTG.attr("value", valeurTG);
                         inputG.attr("value", valeurG);
 //                        if (valeurD !== "") {
 //                            valeurD = valeurD.split("/");

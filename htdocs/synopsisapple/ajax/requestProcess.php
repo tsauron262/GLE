@@ -247,11 +247,11 @@ if (isset($_GET['action'])) {
                         if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                             $datas = $response['ResponseArray']['responseData'];
                             $machineinfo = $datas['productDescription'];
-//                            $garantie = $datas['warrantyStatus'];
+                            $typeGarantie = $datas['warrantyStatus'];
 //                            $garantie = $datas['coverageEndDate'];
                             $garantie = dateAppleToDate($datas['coverageEndDate']);
                             $dateAchat = dateAppleToDate($datas['estimatedPurchaseDate']);
-                            echo "tabResult = Array('" . $machineinfo . "', '" . $garantie . "', '" . $dateAchat . "');";
+                            echo "tabResult = Array('" . $machineinfo . "', '" . $typeGarantie . "', '" . $garantie . "', '" . $dateAchat . "');";
                         }
                     }
                 }

@@ -1026,4 +1026,14 @@ function traiteHeure($result) {
     return $result;
 }
 
+
+function traiteCarac($str, $replace = "_") {
+    $str = str_replace(array("é", "è", "ê"), "e", $str);
+    $str = str_replace(array("ù", "û"), "u", $str);
+    $str = str_replace(array("ô"), "o", $str);
+    $str = str_replace(array("ç"), "c", $str);
+    $str = str_replace(array("à", "â"), "a", $str);
+    return urlencode(str_replace(array(" ", "\\", "/", "°", "'", "(", ")"), $replace, $str));
+}
+
 ?>

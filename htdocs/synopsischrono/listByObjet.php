@@ -81,7 +81,7 @@ if (isset($_REQUEST['obj'])) {
         $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 AND `hasPropal` = 1" . (isset($modelT) ? " AND id=" . $modelT : ""));
     }
 } else {
-    $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 ".(isset($_REQUEST['chronoDet'])? " AND id = ".$_REQUEST['chronoDet'] : ""));
+    $sql = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "synopsischrono_conf` WHERE active= 1 " . (isset($_REQUEST['chronoDet']) ? " AND id = " . $_REQUEST['chronoDet'] : ""));
 }
 while ($result = $db->fetch_object($sql)) {
     $nomI = $result->titre;
@@ -107,25 +107,24 @@ foreach ($tabModel as $model => $data) {
 //        $champ[1001] = date("d/m/Y H:i");
 //        $titre = "Appel Hotline";
         $nomOnglet = "hotline";
-        
+
         if (isset($_REQUEST['Etat'])) {
-            $titre .= " ".$_REQUEST['Etat'];
+            $titre .= " " . $_REQUEST['Etat'];
             $champ['1034'] = $_REQUEST['Etat'];
             $filtre .= "&Etat=" . $_REQUEST['Etat'];
         }
-    }
-    elseif ($model == 101) {
+    } elseif ($model == 101) {
 //        $titre = "Produit Client";
         $nomOnglet = "productCli";
     } elseif ($model == 105) {//SAV
         $nomOnglet = "SAV";
-        $titre = "SAV";
+//        $titre = "SAV";
         if (isset($_REQUEST['Centre'])) {
             $champ['1060'] = $_REQUEST['Centre'];
             $filtre .= "&Centre=" . $_REQUEST['Centre'];
         }
         if (isset($_REQUEST['Etat'])) {
-            $titre .= " ".$_REQUEST['Etat'];
+            $titre .= " " . $_REQUEST['Etat'];
             $champ['1056'] = $_REQUEST['Etat'];
             $filtre .= "&Etat=" . $_REQUEST['Etat'];
         }
@@ -148,19 +147,18 @@ foreach ($tabModel as $model => $data) {
 
 
     $html .= '<div id="pan' . $nomDiv . '">';
-    
-    if($model == 105){
-        $html .= "<a class='butAction' href='".DOL_URL_ROOT."/Synopsis_Tools/FicheRapide.php/'>Créer SAV</a><br/><br/>";
+
+    if ($model == 105) {
+//        $html .= "<a class='butAction' href='".DOL_URL_ROOT."/Synopsis_Tools/FicheRapide.php/'>Créer SAV</a><br/><br/>";
+    } else {
+        $html .= "<a class='butAction' onclick='" . $champJs . " "
+                . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"
+                . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
+                . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
+                . "                                                                     }, \"New " . $nomModel . "\", 1); "
+                . "                                                                  });'>Créer " . $titre . "</a><br/><br/>";
     }
-    else{
-    $html .= "<a class='butAction' onclick='" . $champJs . " "
-            . "         ajaxAddChrono(" . $model . ", \"" . $socid . "\", tabChamp, function(id){"
-            . "                                                                     dispatchePopObject(id, \"chrono\", function(){ "
-            . "                                                                             $(\".ui-icon-refresh\").trigger(\"click\");"
-            . "                                                                     }, \"New " . $nomModel . "\", 1); "
-            . "                                                                  });'>Créer " . $titre . "</a><br/><br/>";
-    }
-    
+
     $html .= '<script language="javascript"  src="' . DOL_URL_ROOT . '/Synopsis_Common/js/wz_tooltip/wz_tooltip.js"></script>' . "\n";
 
     if (($user->rights->synopsischrono->read || $user->rights->chrono_user->$tmp->voir)) {
@@ -178,11 +176,11 @@ foreach ($tabModel as $model => $data) {
 if (count($tabModel) > 1) {
     $nomOnglet = "Chrono";
     $titre = "Chrono";
+
+
+
 }
-
-
-
-$js .=<<<EOF
+    $js .=<<<EOF
 <script>
 jQuery(document).ready(function(){
     jQuery('#tabs').tabs({
@@ -209,7 +207,6 @@ jQuery(document).ready(function(){
 </script>
 EOF;
 
-
 llxHeader($js, $nomOnglet);
 dol_fiche_head($head, 'chrono', $langs->trans($nomOnglet));
 
@@ -234,16 +231,19 @@ if ($obj) {
 
     print '</table></br>';
 }
+    print "<div id='tabs'>";
+if (count($tabModel) > 1) {
+    print "<ul>";
+} else {
+    print "<ul style='display:none;'>";
+}
+    echo $html2;
 
-print "<div id='tabs'>";
-print "<ul>";
-echo $html2;
+    print "</ul>";
 
-print "</ul>";
+    echo $html;
 
-echo $html;
-
-echo "</div>";
+    echo "</div>";
 //2 liste les details des chrono dans Grid
 //    jQgrid Definition en fonction du type de Chrono
 //     Alimentation Grid en fonction du type de Chrono

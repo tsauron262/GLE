@@ -71,6 +71,7 @@ $modeP = (isset($_REQUEST['paiementtype']) ? $_REQUEST['paiementtype'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
 $accompte = (isset($_POST['accompte']) ? $_POST['accompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : "");
+$typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "");
 
 if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" &&/* isset($_POST['Devis']) && $_POST['Devis'] !== "" && */isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /* && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "" */) {
     $chronoProd = new Chrono($db);
@@ -80,7 +81,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->model_refid = 101;
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
-        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie);
+        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
         $chronoProdNewid = $chronoProd->create();
         $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
     } else {
@@ -88,7 +89,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
         $chronoProd->socid = $socid;
         $chronoProd->description = $machine;
         $chronoProd->update($chronoProdid);
-        $dataArrProd = array(1057 => $pass, 1014 => $DateAchat, 1015 => $garantie);
+        $dataArrProd = array(1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
         $testProd = $chronoProd->setDatas($chronoProdid, $dataArrProd);
     }
     if (isset($chronoProdid) && $chronoProdid < 0 && isset($chronoProdNewid) && $chronoProdNewid > 0 || isset($chronoProdid) && $chronoProdid > 0) {
@@ -248,6 +249,7 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Machine.</th>";
@@ -256,6 +258,18 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Type garantie.</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo " <input type='text' name='typeGarantie' value='" . $typeGarantie . "' id='typeGarantie' class=''/>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+    
+    
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Date fin de garantie.</th>";

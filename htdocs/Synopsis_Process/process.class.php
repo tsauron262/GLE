@@ -2419,7 +2419,7 @@ class lien extends formulaireSource {
         $this->picto = $result->picto;
         $this->cssClass = $result->cssClass;
         $this->sqlFiltreSoc = $result->sqlFiltreSoc;
-        $this->idChrono = (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : (isset($_REQUEST['id']) ? $_REQUEST['id'] : $this->idChrono));
+        $this->idChrono = (isset($this->idChrono) && $this->idChrono > 0) ? $this->idChrono : (isset($_REQUEST['chrono_id']) ? $_REQUEST['chrono_id'] : (isset($_REQUEST['id']) ? $_REQUEST['id'] : $this->idChrono));
 
         $this->nomElement = getParaChaine($this->cssClassM, "type:");
         $this->tabVal = array();

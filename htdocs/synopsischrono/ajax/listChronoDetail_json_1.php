@@ -219,6 +219,13 @@ $requete = "SELECT * FROM llx_synopsischrono_view_" . $id . " WHERE 1 " . $wh . 
 
 //echo($requete);
 $result = $db->query($requete);
+if(!$result){
+    
+    require(DOL_DOCUMENT_ROOT."/synopsischrono/ajax/testCreateView.php");
+$result = $db->query($requete);
+if(!$result)
+    die("Impossible de construire les vue");
+}
 
 //switch ($action) {
 //    default : {

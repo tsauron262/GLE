@@ -45,6 +45,6 @@ while ($ligneModel = $db->fetch_object($resultModel)) {
     $requeteView = "Create view ".$view." as (SELECT chrono.* " . $createView2 . " FROM llx_synopsischrono chrono" . $createView3 . " WHERE model_refid = " . $ligneModel->id . ");";
     $db->query($requeteView0);
     $db->query($requeteView);
-    echo $requeteView0 . $requeteView;
+//    echo $requeteView0 . $requeteView;
 }
 

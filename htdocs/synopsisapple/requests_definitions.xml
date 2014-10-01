@@ -79,6 +79,12 @@
                     <data name="coveredByACPlus" required="0" default="N"></data>
                 </datas>
             </data>
+            <data name="componentCheckDetails" required="0">
+                <datas>
+                    <data name="component" required="0"></data>
+                    <data name="serialNumber" required="0"></data>
+                </datas>
+            </data>
             <data name="customerAddress" required="1">
                 <datas>
                     <data name="addressLine1" required="1"></data>

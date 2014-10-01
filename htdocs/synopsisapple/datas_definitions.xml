@@ -119,7 +119,7 @@
     <def name="poNumber" type="text" max="35" jsCheck="text">
         <label>Purchase order number</label>
     </def>
-    <def name="popFaxed" type="YesNo">
+    <def name="popFaxed" type="YesNo" hidden="1">
         <label>Preuve d'achat faxé</label>
     </def>
     <def name="referenceNumber" type="text" max="15" jsCheck="text">
@@ -191,5 +191,11 @@
     </def>
     <def name="consumerLawEligible" type="YesNo">
         <label>Eligible à la loi de consommation</label>
+    </def>
+    <def name="componentCheckDetails" type="datasGroup" max="20" jsCheck="text">
+        <label>Détails du composant</label>
+    </def>
+    <def name="component" type="text" max="20" jsCheck="text">
+        <label>Composant</label>
     </def>
 </root>

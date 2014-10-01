@@ -27,7 +27,7 @@ var extra = "";
 if (typeof(chronoId) != 'undefined')
     extra = extra+ "&chronoId="+chronoId;
 //else
-//    extra = extra+ "&chronoId=10";
+//    extra = extra+ "&chronoId=11";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';

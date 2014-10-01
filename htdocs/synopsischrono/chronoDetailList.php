@@ -215,6 +215,12 @@ EOF;
         $colModelArr[1] = array('name' => "Réf", "index" => "ref", "width" => 150, "align" => "left");
         $colModelArr[2] = array('name' => "hasRev", "index" => "hasRev", 'hidden' => true, "search" => false, "hidedlg" => true);
         $i = 3;
+        
+        if ($chronoRef->hasSociete) {
+            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
+            $i++;
+        }
+        
         if ($chronoRef->hasDescription && $chronoRef->descInList) {
             $colModelArr[$i] = array('name' => $chronoRef->nomDescription, "index" => "description", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
             $i++;
@@ -276,25 +282,21 @@ EOF;
 
             $i++;
         }
-        if ($chronoRef->hasSociete) {
-            $i++;
-            $colModelArr[$i] = array('name' => "Société", "index" => "soc", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
-        }
         if ($chronoRef->hasPropal && $chronoRef->propInList) {
-            $i++;
             $colModelArr[$i] = array('name' => "Propal", "index" => "propal", "width" => 100, "align" => "left", "search" => true, "sortable" => false);
+            $i++;
         }
         if ($chronoRef->hasProjet) {
-            $i++;
             $colModelArr[$i] = array('name' => "Projet", "index" => "fkprojet", "width" => 130, "align" => "left", "search" => true, "sortable" => false);
+            $i++;
         }
         if ($chronoRef->hasStatut) {
-            $i++;
             $colModelArr[$i] = array('name' => "Statut", "index" => "fk_statut", "width" => 80, "align" => "right", "stype" => 'select', 'searchoptionspp' => "{sopt:['eq','ne']}", 'searchoptions' => "{value: statutRess}", 'formoptions' => '{ elmprefix:"*  " }');
-        }
-        if ($chronoRef->hasFile) {
             $i++;
+        }
+        if ($chronoRef->hasFile && $i < $chronoRef->maxForNbDoc) {
             $colModelArr[$i] = array('name' => "NbDoc", "index" => "nb_doc", "width" => 60, "align" => "right", "search" => false, "sortable" => false);
+            $i++;
         }
 
 

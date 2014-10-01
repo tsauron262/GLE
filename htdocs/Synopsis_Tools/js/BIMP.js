@@ -82,7 +82,7 @@ $(window).load(function() {
         NoSerie = input.attr('value');
         datas = "serial="+NoSerie;
         roue = $("#patientez");
-        reponse = valeurM = valeurG = valeurD =  "";
+        reponse = valeurM = valeurG = valeurTG = valeurD =  "";
         roue.show();
         jQuery.ajax({
                     url: DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=loadSmallInfoProduct',
@@ -106,11 +106,7 @@ $(window).load(function() {
                         inputM.attr("value", valeurM);
                         inputTG.attr("value", valeurTG);
                         inputG.attr("value", valeurG);
-//                        if (valeurD !== "") {
-//                            valeurD = valeurD.split("/");
-//                            valeurD = valeurD[0] + "-" + valeurD[1] + "-" + valeurD[2];
-                            inputD.attr("value", valeurD);
-//                        }
+                        inputD.attr("value", valeurD);
                         $("#reponse").html(reponse);
                         roue.hide();
                     }

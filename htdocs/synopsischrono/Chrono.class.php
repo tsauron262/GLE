@@ -290,7 +290,7 @@ class Chrono extends CommonObject {
         $description = $this->description;
         $socid = ($this->socid > 0 ? $this->socid : false);
         $contactid = ($this->contactid > 0 ? $this->contactid : false);
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET description = '" . $description . "'";
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET description = '" . addslashes($description) . "'";
         if ($socid)
             $requete .= ", fk_societe =  " . $socid;
         else
@@ -901,6 +901,7 @@ class ChronoRef {
     public $tms;
     public $active;
     public $revision_model_refid;
+    public $maxForNbDoc = 8;
 
     public function ChronoRef($DB) {
         $this->db = $DB;

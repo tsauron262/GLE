@@ -243,3 +243,77 @@ DROP view IF EXISTS `llx_Synopsis_fichinterdet`;
 
 
 CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet` AS (select `f`.`rowid` AS `rowid`,`f`.`fk_fichinter` AS `fk_fichinter`,`f`.`date` AS `date`,`f`.`description` AS `description`,`f`.`duree` AS `duree`,`f`.`rang` AS `rang`,`sf`.`fk_typeinterv` AS `fk_typeinterv`,`sf`.`fk_depProduct` AS `fk_depProduct`,`sf`.`tx_tva` AS `tx_tva`,`sf`.`pu_ht` AS `pu_ht`,`sf`.`qte` AS `qte`,`sf`.`total_ht` AS `total_ht`,`sf`.`total_tva` AS `total_tva`,`sf`.`total_ttc` AS `total_ttc`,`sf`.`fk_contratdet` AS `fk_contratdet`,`sf`.`fk_commandedet` AS `fk_commandedet`,`sf`.`isForfait` AS `isForfait` from (`llx_fichinterdet` `f` left join `llx_synopsisfichinterdet` `sf` on((`f`.`rowid` = `sf`.`rowid`))));
+
+
+
+
+//Voir pdf date fin garentie
+
+
+//Voir prix 
+
+
+//Restituer bug page blanche
+
+
+//envoyer sms oui non
+
+//ds sms numero du centre
+
+
+
+
+//sms quand terminer (rediger) 
+
+
+//preference de contact tous court.
+
+//Test apple (garentie apple)
+
+//creer sav (fiche rapide)
+
+//virer creer sav
+
+
+//pdf type de garentie (hors garentie)
+
+
+//Garentie
+
+
+//Devis ajouter text
+
+
+//ajouter champ gsx
+
+//fin garentie et date debut
+
+
+
+//deplacer client au debut
+
+
+//virer nbDoc
+
+
+//Prise en charge sous garentie - total
+
+
+//Ajouter symptomes a la propal
+
+
+
+//Jean christophe ajouter text propal
+
+
+
+//Boutons restituer dans la liste
+
+//Ajouter SAVM ds pdf*
+
+Valence et boutique
+
+Christian voir mail
+
+
+dominique horno 0695035348

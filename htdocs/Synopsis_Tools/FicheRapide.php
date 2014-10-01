@@ -116,6 +116,15 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
                 $chrono->createPropal();
                 $propal = new Propal($db);
                 $propal = $chrono->propal;
+                
+                
+        $propal->addline("Prise en charge :  : ".$chrono->ref."\n"."Garantie :
+Pour du matériel couvert par Apple, la garantie initiale s'applique.
+Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
+Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
+Une garantie de 30 jours est appliquée pour les réparations logicielles.
+Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
+", 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
 
                 $accompte = intval($accompte);
                 if ($accompte > 0) {
@@ -154,6 +163,9 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
 //                $propal->addline("Accompte", -$accompte, 1, 0, 0, 0, 0, 0, 0, -$accompte);
                     $propal->insert_discount($discount->id);
                 }
+                $propal->fetch($propal->id);
+                
+                require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
                 propale_pdf_create($db, $propal, null, $langs);
 
                 require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";

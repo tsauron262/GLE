@@ -492,6 +492,17 @@ if ($sql) {
         } else {
             $arr[] = ('<div class="hasRev">0</div>');
         }
+        
+        if ($chrono->model->hasSociete) {
+            $html = "";
+            if ($chrono->socid > 0) {
+                require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
+                $obj = new Societe($db);
+                $obj->fetch($chrono->socid);
+                $html = $obj->getNomUrl(1, '', 20);
+            }
+            $arr[] = $html;
+        }
 
         if ($chrono->model->hasDescription && $chrono->model->descInList)
             $arr[] = ($chrono->description ? $chrono->description : '');
@@ -512,16 +523,6 @@ if ($sql) {
             } else {
                 $arr[] = $value;
             }
-        }
-        if ($chrono->model->hasSociete) {
-            $html = "";
-            if ($chrono->socid > 0) {
-                require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
-                $obj = new Societe($db);
-                $obj->fetch($chrono->socid);
-                $html = $obj->getNomUrl(1, '', 20);
-            }
-            $arr[] = $html;
         }
         if ($chrono->model->hasPropal && $chrono->model->propInList) {
             $html = "";
@@ -545,7 +546,7 @@ if ($sql) {
         }
         if ($chrono->model->hasStatut)
             $arr[] = $chrono->getLibStatut(6);
-        if ($chrono->model->hasFile)
+        if ($chrono->model->hasFile && count($arr) < $chrono->model->maxForNbDoc)
             $arr[] = count_files($conf->synopsischrono->dir_output . "/" . $chrono->id);
 
         $responce->rows[$i]['cell'] = $arr;

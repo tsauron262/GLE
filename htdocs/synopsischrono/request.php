@@ -155,12 +155,18 @@ if (isset($_REQUEST['actionEtat'])) {
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel dès maintenant. L'Equipe BIMP.");
     }
-    if ($action == "attenteClient1" && $action == "attenteClient2") {
+    if ($action == "attenteClient1" || $action == "attenteClient2") {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Attente client depuis le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 2));
-//        if ($action == "attenteClient2")
+        if ($action == "attenteClient2"){
+            $chrono->propal->addline("Garentie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / $chrono->propal->total_ht * 100), 0, 0);
+        }
+        $chrono->propal->addline("Symptômes : ".$chrono->extraValue[$chrono->id]['Symptômes']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
+        $chrono->propal->fetch($chrono->propal->id);
+        require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
+        propale_pdf_create($db, $chrono->propal, null, $langs);
         $chrono->propal->valid($user);
         $ok = true;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
@@ -176,7 +182,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 999));
         $ok = true;
-        mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Ephésus pour votre 'ModèleMachine'.
+        mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Ephésus pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);

@@ -1036,4 +1036,41 @@ function traiteCarac($str, $replace = "_") {
     return urlencode(str_replace(array(" ", "\\", "/", "°", "'", "(", ")"), $replace, $str));
 }
 
+
+
+function select_type_of_lines2($selected = '', $htmlname = 'type', $showempty = 0, $hidetext = 0, $forceall = 0) {
+    global $db, $langs, $user, $conf;
+
+    // If product & services are enabled or both disabled.
+    if ($forceall || (!empty($conf->product->enabled) && !empty($conf->service->enabled))
+            || (empty($conf->product->enabled) && empty($conf->service->enabled))) {
+        if (empty($hidetext))
+            print $langs->trans("Type") . ': ';
+        print '<select class="flat" id="select_' . $htmlname . '" name="' . $htmlname . '">';
+        if ($showempty) {
+            print '<option value="-1"';
+            if ($selected == -1)
+                print ' selected="selected"';
+            print '>&nbsp;</option>';
+        }
+
+        global $tabTypeLigne;
+        foreach ($tabTypeLigne as $id => $type) {
+            print '<option value="' . $id . '"';
+            if ($id == $selected)
+                print ' selected="selected"';
+            print '>' . $langs->trans($type);
+        }
+
+        print '</select>';
+        //if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionnarySetup"),1);
+    }
+    if (!$forceall && empty($conf->product->enabled) && !empty($conf->service->enabled)) {
+        print '<input type="hidden" name="' . $htmlname . '" value="1">';
+    }
+    if (!$forceall && !empty($conf->product->enabled) && empty($conf->service->enabled)) {
+        print '<input type="hidden" name="' . $htmlname . '" value="0">';
+    }
+}
+
 ?>

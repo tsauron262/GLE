@@ -139,6 +139,8 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
                     $payement->create($user);
 
                     $factureA->set_paid($user);
+                    
+                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
                     facture_pdf_create($db, $factureA, null, $langs);
 
                     require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';

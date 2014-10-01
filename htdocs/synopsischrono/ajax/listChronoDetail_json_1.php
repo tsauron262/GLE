@@ -555,7 +555,7 @@ if ($sql) {
     var_dump($db);
 }
 
-echo json_encode($responce);
+echo @json_encode($responce);
 
 //        }
 //        break;

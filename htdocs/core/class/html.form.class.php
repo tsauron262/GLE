@@ -564,13 +564,14 @@ class Form
                 print '>&nbsp;</option>';
             }
 
-            print '<option value="0"';
-            if (0 == $selected) print ' selected="selected"';
-            print '>'.$langs->trans("Product");
-
-            print '<option value="1"';
-            if (1 == $selected) print ' selected="selected"';
-            print '>'.$langs->trans("Service");
+            
+        global $tabTypeLigne;
+        foreach ($tabTypeLigne as $id => $type) {
+            print '<option value="' . $id . '"';
+            if ($id == $selected)
+                print ' selected="selected"';
+            print '>' . $langs->trans($type);
+        }
 
             print '</select>';
             //if ($user->admin) print info_admin($langs->trans("YouCanChangeValuesForThisListFromDictionarySetup"),1);

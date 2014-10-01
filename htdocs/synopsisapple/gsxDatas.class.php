@@ -32,7 +32,15 @@ class gsxDatas {
 
     public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
         global $user;
-        if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']))
+        
+        
+        $userId = 'sav@bimp.fr';
+        $password = '@Savbimp2014#';
+        $serviceAccountNo = '100520';
+        
+        
+        if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']) &&
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_mdp'] != "" && $user->array_options['options_apple_service'] != "")
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
@@ -491,7 +499,7 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType, $prodId) {
-        global $db;
+        global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail')?$comptiaCodes:null);
 
@@ -627,6 +635,8 @@ class gsxDatas {
                     case 'CreateIPhoneCarryInRepair':
                         if($requestType == 'CreateCarryInRepair')
                             $requestType = 'CreateCarryIn';
+                        if($requestType == 'CreateIPhoneCarryInRepair')
+                            $requestType = 'CreateIPhoneCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
                             if (isset($_REQUEST['chronoId'])) {

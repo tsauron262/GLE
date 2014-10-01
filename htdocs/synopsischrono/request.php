@@ -92,7 +92,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-        $chrono->setDatas($chrono->id, array($idEtat => 5));
+        $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le ".$tel.".\n\n Cordialement."
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
@@ -155,11 +155,12 @@ if (isset($_REQUEST['actionEtat'])) {
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel dès maintenant. L'Equipe BIMP.");
     }
-    if ($action == "attenteClient1") {
+    if ($action == "attenteClient1" && $action == "attenteClient2") {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Attente client depuis le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 2));
+//        if ($action == "attenteClient2")
         $chrono->propal->valid($user);
         $ok = true;
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.

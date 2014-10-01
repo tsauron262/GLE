@@ -243,10 +243,10 @@ switch ($action)
             if ($conf->global->CHRONO_DISPLAY_SOC_AND_CONTACT)
                 $responce->rows[$i]['cell']=array($obj->id,
                                                   ($hasRev?'<div class="hasRev">1</div>':'<div class="hasRev">0</div>'),
-                                                  utf8_encode($chrono->getNomUrl(1)),
+                                                  utf8_encodeRien($chrono->getNomUrl(1)),
                                                   htmlspecialchars($chrono->model->titre),
-                                                  utf8_encode(($obj->fk_societe > 0?$tmpSoc->getNomUrl(1):'')),
-                                                  utf8_encode(($obj->fk_socpeople > 0?$contact->getNomUrl(1):'')),
+                                                  utf8_encodeRien(($obj->fk_societe > 0?$tmpSoc->getNomUrl(1):'')),
+                                                  utf8_encodeRien(($obj->fk_socpeople > 0?$contact->getNomUrl(1):'')),
                                                   $obj->date_create,
                                                   $obj->tms,
                                                   $chrono->getLibStatut(4)
@@ -254,7 +254,7 @@ switch ($action)
             else
                 $responce->rows[$i]['cell']=array($obj->id,
                                                   ($hasRev?'<div class="hasRev">1</div>':'<div class="hasRev">0</div>'),
-                                                  utf8_encode($chrono->getNomUrl(1)),
+                                                  utf8_encodeRien($chrono->getNomUrl(1)),
                                                   htmlspecialchars($chrono->model->titre),
                                                   ($obj->date_create? $obj->date_create : ""),
                                                   ($obj->tms? $obj->tms : ""),

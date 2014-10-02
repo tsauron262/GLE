@@ -16,7 +16,7 @@ class synopsisHook {
         global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
 
-        $tabCentre = array("M" => array("04 50 22 15 55", "sav74@bimp.fr"), 'L' => array("04 78 17 30 28", "sav69@bimp.fr"), "S" => array("04 77 81 58 12", "sav42@bimp.fr"), "GA" => array("04 76 23 05 18", "sav38@bimp.fr"), "B" => array("03 81 47 11 71", "sav250@bimp.fr"), "MO" => array("03 81 95 19 20", "sav252@bimp.fr"));
+        $tabCentre = array("M" => array("04 50 22 15 55", "sav74@bimp.fr"), 'L' => array("04 78 17 30 28", "sav69@bimp.fr"), "S" => array("04 77 81 58 12", "sav42@bimp.fr"), "GB" => array("04 76 23 05 18", "sav38@bimp.fr"), "GA" => array("04 76 23 05 18", "sav38@bimp.fr"), "B" => array("03 81 47 11 71", "sav250@bimp.fr"), "MO" => array("03 81 95 19 20", "sav252@bimp.fr"));
 
 
         if (is_object($db) && isset($conf->global->MAIN_MODULE_SYNOPSISTOOLS)) {
@@ -99,6 +99,7 @@ class synopsisHook {
 
         $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
+if (! defined('NOLOGIN'))
         $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
 
         if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)

@@ -208,4 +208,12 @@ class PropaleStats extends Stats
 
 		return $this->_getAllByProduct($sql);
 	}	
+        description état machine
+        batTerie
+        desire une sauv si necessaire
+        examin examain
+        prop pas symptomes remplacer diago
+        devis sous garentie pas de mail devis excepté
+        
+        voir safari   aj centre + capcha
 }

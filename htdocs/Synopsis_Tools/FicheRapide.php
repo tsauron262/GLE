@@ -326,7 +326,7 @@ if ($socid != "") {
     echo "</p>";
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Déscription.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Description état machine.</th>";
     echo "<td class='ui-widget-content'>";
     echo " <textarea class='grand' type='text' name='Descr' id='Descr' >$descr</textarea>";
     echo "</td>";

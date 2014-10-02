@@ -558,6 +558,8 @@ class Chrono extends CommonObject {
 
     public function getNomUrl($withpicto = 0, $option = '', $maxlen = 0) {
         global $langs;
+        
+        $this->picto = $this->model->picto;
 
         $result = '';
 
@@ -569,8 +571,8 @@ class Chrono extends CommonObject {
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
 
-        if (stripos($this->model->picto, '[KEY|')) {
-            $tabT = explode('[KEY|', $this->model->picto);
+        if (stripos($this->picto, '[KEY|')) {
+            $tabT = explode('[KEY|', $this->picto);
             $tabT = explode(']', $tabT[1]);
             $keyId = $tabT[0];
             $result .= $this->getValues();
@@ -578,7 +580,7 @@ class Chrono extends CommonObject {
 //            print_r($this);
 //            die("ici".$this->extraValueById[$this->id][$keyId]['value']);
             $val = $this->extraValueById[$this->id][$keyId]['value'];
-            $this->model->picto = str_replace('[KEY|' . $keyId . ']', $val, $this->model->picto);
+            $this->picto = str_replace('[KEY|' . $keyId . ']', $val, $this->picto);
         }
 
         if ($option == 6) {
@@ -586,9 +588,9 @@ class Chrono extends CommonObject {
             $lienfin = '</a>';
         }
         if ($option == 6 && $withpicto) {
-            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $titre, $this->model->picto, false, false, false, true) . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("Chrono") . ': ' . $titre, $this->picto, false, false, false, true) . $lienfin . ' ');
         } else if ($withpicto)
-            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $titre, $this->model->picto) . $lienfin . ' ');
+            $result.=($lien . img_object($langs->trans("ShowChrono") . ': ' . $titre, $this->picto) . $lienfin . ' ');
 
         $result.=$lien . ($maxlen ? dol_trunc($titre, $maxlen) : $titre) . $lienfin;
         return $result;

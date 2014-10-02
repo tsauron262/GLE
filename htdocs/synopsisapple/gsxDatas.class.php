@@ -604,6 +604,16 @@ class gsxDatas {
                         if (isset($result['serialNumber']))
                             $result['serialNumber'] = '';
                         $result['imeiNumber'] = $this->serial;
+
+                        if (isset($result['componentCheckDetails'])) {
+                            if (!isset($result['componentCheckDetails']['componentSerialNumber']) ||
+                                    ($result['componentCheckDetails']['componentSerialNumber'] == '')) {
+                                unset($result['componentCheckDetails']);
+                            } else {
+                                $result['componentCheckDetails']['serialNumber'] = $result['componentCheckDetails']['componentSerialNumber'];
+                                unset($result['componentCheckDetails']['componentSerialNumber']);
+                            }
+                        }
                         break;
 
                     case 'UpdateSerialNumber':
@@ -619,6 +629,8 @@ class gsxDatas {
                             'CreateCarryInResponse',
                             'CreateCarryInRepairResponse'
                         );
+                        if (isset($result['componentCheckDetails']))
+                            unset($result['componentCheckDetails']);
                         break;
 
                     case 'UpdateSerialNumber':

@@ -198,4 +198,7 @@
     <def name="component" type="text" max="20" jsCheck="text">
         <label>Composant</label>
     </def>
+    <def name="componentSerialNumber" type="text" max="20" jsCheck="text">
+        <label>Numéro de série du composant</label>
+    </def>
 </root>

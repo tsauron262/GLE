@@ -82,7 +82,7 @@
             <data name="componentCheckDetails" required="0">
                 <datas>
                     <data name="component" required="0"></data>
-                    <data name="serialNumber" required="0"></data>
+                    <data name="componentSerialNumber" required="0"></data>
                 </datas>
             </data>
             <data name="customerAddress" required="1">

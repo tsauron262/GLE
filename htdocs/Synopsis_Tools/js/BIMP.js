@@ -129,7 +129,7 @@ $(window).load(function() {
     
     inputCentre = $('input[name="options_apple_centre"]');
     inputCentre.after(selectCentre);
-    $("select[name='centreRapide'").change(function(){
+    $("select[name='centreRapide']").change(function(){
         inputCentre.val(inputCentre.val() + " " + $(this).val());
     });
 });

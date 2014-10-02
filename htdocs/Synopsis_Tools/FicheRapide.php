@@ -347,7 +347,7 @@ if ($socid != "") {
     echo " <select name='Sauv' id='Sauv' class='required'>";
     echo "<option value=''></option> ";
     echo "<option value='3'" . $sauv3 . ">Dispose d'une sauvegarde Time machine</option> ";
-    echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde</option> ";
+    echo "<option value='2'" . $sauv2 . ">Désire une sauvegarde si necessaire</option> ";
     echo "<option value='1'" . $sauv1 . ">Dispose d'une sauvegarde </option>";
     echo "<option value='0'" . $sauv0 . ">Non Applicable</option> ";
     echo " </select>";

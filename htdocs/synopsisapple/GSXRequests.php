@@ -548,7 +548,7 @@ class GSX_Request {
                     $dataName = $dataNode->getAttribute('name');
                     if ($dataName !== '') {
                         $required = $dataNode->getAttribute('required');
-                        if ($required == '1')
+                        if ($required === '1')
                             $required = true;
                         else
                             $required = false;

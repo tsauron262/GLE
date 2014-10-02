@@ -163,7 +163,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 2));
         if ($action == "attenteClient2"){
-            $chrono->propal->addline("Garentie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / $chrono->propal->total_ht * 100), 0, 0);
+            $chrono->propal->addline("Garentie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht == 0 ? $chrono->propal->total_ht :1) * 100), 0, 0);
         }
         $chrono->propal->addline("Symptômes : ".$chrono->extraValue[$chrono->id]['Symptômes']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         $chrono->propal->fetch($chrono->propal->id);

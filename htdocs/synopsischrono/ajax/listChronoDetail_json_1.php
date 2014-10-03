@@ -154,7 +154,11 @@ if ($searchOn == 'true') {
 
 
         if ($sidx == $nom) {
-            if ($res1->cssClass == 'datetimepicker')
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur WHERE id = " . $resPre->type_valeur;
+
+            $sql1 = $db->query($requete);
+            $res1 = $db->fetch_object($sql1);
+            if ($res1->cssClass == 'datetimepicker' || $res1->cssClass == 'datepicker')
                 $sidx = "STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i')";
         }
 //    }

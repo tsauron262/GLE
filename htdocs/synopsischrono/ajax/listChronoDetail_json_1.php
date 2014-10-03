@@ -83,14 +83,14 @@ if ($searchOn == 'true') {
         $operT = '=';
         $wh1 .= " AND " . $searchFieldT . " " . $operT . " " . $searchStringT . "";
     }
-    
-    
+
+
     if ($_REQUEST['fk_contrat'] != "") {
-        $wh1 .= " AND Contrat = ".$_REQUEST['fk_contrat'];
+        $wh1 .= " AND Contrat = " . $_REQUEST['fk_contrat'];
     }
-    
+
     if ($_REQUEST['Centre'] != "") {
-        $wh1 .= " AND Centre LIKE '".$_REQUEST['Centre']."'";
+        $wh1 .= " AND Centre LIKE '" . $_REQUEST['Centre'] . "'";
     }
 
     if ($_REQUEST['propal'] != "") {
@@ -151,6 +151,12 @@ if ($searchOn == 'true') {
                 }
             }
         }
+
+
+        if ($sidx == $nom) {
+            if ($res1->cssClass == 'datetimepicker')
+                $sidx = "STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i')";
+        }
 //    }
 //    if ($searchField == "c.date_create")
 //    {
@@ -208,6 +214,7 @@ if ($searchOn == 'true') {
 
 
 $requetePre = "SELECT *, k.id as key_id, k.nom as key_name FROM " . MAIN_DB_PREFIX . "synopsischrono_key k LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tv ON tv.id = type_valeur  WHERE inDetList = 1 AND model_refid =  " . $id;
+
 $sqlPre = $db->query($requetePre);
 $arrPre = $arrKeyName = $arrKeyType = array();
 while ($resPre = $db->fetch_object($sqlPre)) {
@@ -229,7 +236,7 @@ if (!$withRev) {
 $requete = "SELECT view.*, soc.nom as socname, soc.rowid as socid FROM llx_synopsischrono_view_" . $id . " view LEFT JOIN llx_societe soc ON soc.rowid = fk_societe WHERE 1 " . $wh;
 
 $requete .= $wh1;
-$requete .=  " ORDER BY " . $sidx . " " . $sord . "";
+$requete .= " ORDER BY " . $sidx . " " . $sord . "";
 
 //echo($requete);die;
 $result = $db->query($requete);
@@ -240,7 +247,6 @@ if (!$result) {
     if (!$result)
         die("Impossible de construire les vue");
 }
-
 
 class general {
     

@@ -188,7 +188,7 @@ if (! defined('NOLOGIN'))
 
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
                 while ($ligne = $db->fetch_object($result)) {
-                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` = '" . $centre . "') AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
+                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` = '" . $centre . "') AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE model_refid = 105 AND  `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
                     $ligne2 = $db->fetch_object($result2);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";

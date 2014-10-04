@@ -162,7 +162,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note .= "Attente client depuis le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         if ($action == "attenteClient2") {
-            $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht == 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0);
+            $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht > 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0);
             $chrono->setDatas($chrono->id, array($idEtat => 3));
         } else {
             mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.

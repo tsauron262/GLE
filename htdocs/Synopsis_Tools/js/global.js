@@ -398,6 +398,10 @@ function ajNoteAjax() {
         cache: false,
         success: function(msg) {
             if (msg != "0") {
+                if($("a#note").size() > 0)
+                        tab = "note";
+                    else
+                        tab = "info";
                 //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 //                $('.tabBar').append(htmlDiv);
                 classEdit = "";
@@ -410,8 +414,8 @@ function ajNoteAjax() {
                 //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
                 //                $('a#note').append(htmlDiv);
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
-                $('a#note, .noteAjax').hover(shownNote, hideNote);
-                $('a#note').addClass("lienNote");
+                $('a#'+tab+', .noteAjax').hover(shownNote, hideNote);
+                $('a#'+tab+'').addClass("lienNote");
 
                 //                $(".controlBut").click(function(){
                 //                    if($(this).val() == "<"){

@@ -9,6 +9,7 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
     $url = $_POST['url'];
 
     $nomId = "id";
+    $nomChampId = 'rowid';
     $nomChampNote = "note_public";
 
 
@@ -25,6 +26,13 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $table = MAIN_DB_PREFIX . "commande";
         $droit1 = $user->rights->commande->lire;
         $droit2 = $user->rights->commande->creer;
+    }
+    if (stripos($url, '/synopsischrono/fiche.php') !== false) {
+        $table = MAIN_DB_PREFIX . "synopsischrono";
+        $droit1 = true;
+        $droit2 = true;
+        $nomChampNote = "note";
+        $nomChampId = "id";
     }
     if (stripos($url, '/fichinter/') !== false || stripos($url, '/synopsisfichinter/') !== false) {
         $table = MAIN_DB_PREFIX . "fichinter";
@@ -68,11 +76,11 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
 
     if (isset($table) && isset($id) && $id > 0 && $droit1) {
         if (isset($_POST['note']) && $droit2) {//Onupload
-            $requete = "UPDATE " . $table . " SET " . $nomChampNote . " = '" . addslashes(trim($_POST['note'])) . "' WHERE rowid = " . $id;
+            $requete = "UPDATE " . $table . " SET " . $nomChampNote . " = '" . addslashes(trim($_POST['note'])) . "' WHERE ".$nomChampId." = " . $id;
             $db->query($requete);
         }
 
-        $requete = "SELECT " . $nomChampNote . " as note FROM " . $table . " WHERE rowid = " . $id;
+        $requete = "SELECT " . $nomChampNote . " as note FROM " . $table . " WHERE ".$nomChampId." = " . $id;
         $sql = $db->query($requete);
         $result = $db->fetch_object($sql);
         $return = str_replace("\n", "<br/>", $result->note);

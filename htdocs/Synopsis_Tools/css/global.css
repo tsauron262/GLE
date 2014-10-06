@@ -234,7 +234,7 @@ div.mainmenu.synopsisficheinter {
 .editable, .cp{
     cursor: pointer;    
 }
-a#note.lienNote{
+.lienNote{
     background-color: #FAE580;
     background-image: none;
 }

@@ -148,7 +148,6 @@ class gsxDatas {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                     $datas = $response['ResponseArray']['responseData'];
                     $urgentMsg = $response['ResponseArray']['urgentMessage'];
-                    $urgentMsg = 'Message test';
 //                    echo '<pre>';
 //                    print_r($datas);
 //                    echo '</pre>';

@@ -79,12 +79,12 @@
                     <data name="coveredByACPlus" required="0" default="N"></data>
                 </datas>
             </data>
-            <data name="componentCheckDetails" required="0">
+<!--            <data name="componentCheckDetails" required="0">
                 <datas>
                     <data name="component" required="0"></data>
                     <data name="componentSerialNumber" required="0"></data>
                 </datas>
-            </data>
+            </data>-->
             <data name="customerAddress" required="1">
                 <datas>
                     <data name="addressLine1" required="1"></data>
@@ -106,7 +106,7 @@
                 </datas>
             </data>
             <!--<data name="checkIfOutOfWarrantyCoverage" required="0" default="N"></data>-->
-            <!--<data name="popFaxed" required="0" default="N"></data>-->
+            <data name="popFaxed" required="0" default="N"></data>
             <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
             <data name="requestReviewByApple" required="0" default="N"></data>
             <!--<data name="componentCheckReview" required="0" default="N"></data>-->

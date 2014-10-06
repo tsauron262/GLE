@@ -11,7 +11,7 @@ class gsxDatas {
     protected $errors = array();
     protected $repairs = array();
     public $partsPending = null;
-    public static $apiMode = 'production';
+//    public static $apiMode = 'ut';
     public static $componentsTypes = array(
         0 => 'Général',
         1 => 'Visuel',
@@ -406,7 +406,7 @@ class gsxDatas {
             $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
             $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
             $html .= '<select class="keywordFilterType">' . "\n";
-            $types = array('name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
+            $types = array('eeeCode' => 'eeeCode', 'name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
             foreach ($types as $key => $type) {
                 $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
             }
@@ -431,6 +431,7 @@ class gsxDatas {
                 $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
                 $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
+                $html .= ', \'' . (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '') . '\'';
                 $html .= ');' . "\n";
             }
             $html .= '</script>' . "\n";
@@ -669,6 +670,8 @@ class gsxDatas {
                             } else {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
                             }
+                        } else {
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple.</p>';
                         }
                         break;
 
@@ -695,7 +698,7 @@ class gsxDatas {
                                 $html .= '<p class="error">Une erreur est survenue (ID réparation manquant).</p>';
                             }
                         } else {
-                            $html .= '<p class="error">Aucun numéro de confirmation retourné par GSX</p>';
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple</p>';
                         }
                         break;
                 }
@@ -703,9 +706,11 @@ class gsxDatas {
                     $html .= $repair->displayErrors();
                     if (count($this->gsx->errors['soap']))
                         $html .= $this->getGSXErrorsHtml();
-                    $html .= '<p class="error">La requête a été correctement transmise mais les données de retour n\'ont pas pu être enregistrées correctement en base de données.<br/>';
-                    $html .= 'Veuillez noter le numéro suivant (repair confirmation number) et le transmettre  à l\'équipe technique: ';
-                    $html .= '<strong style="color: #3C3C3C">' . $confirmNumber . '</strong></p>';
+                    if (isset($confirmNumber)) {
+                        $html .= '<p class="error">La requête a été correctement transmise mais les données de retour n\'ont pas pu être enregistrées correctement en base de données.<br/>';
+                        $html .= 'Veuillez noter le numéro suivant (repair confirmation number) et le transmettre  à l\'équipe technique: ';
+                        $html .= '<strong style="color: #3C3C3C">' . $confirmNumber . '</strong></p>';
+                    }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
                     if ($requestType == 'UpdateSerialNumber') {

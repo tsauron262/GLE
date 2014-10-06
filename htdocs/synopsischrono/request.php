@@ -65,12 +65,17 @@ $idEtat = 1056;
 
 $ok = false;
 
-$tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
+if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']])) {
+    $tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
+    $fromMail = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][1];
+} else {
+    $tel = "N/C";
+    $fromMail = "SAV BIMP<no-replay@bimp.fr>";
+}
 
 if (isset($_REQUEST['actionEtat'])) {
     $action = $_REQUEST['actionEtat'];
 
-    $fromMail = "SAV BIMP<no-replay@bimp.fr>";
     if (isset($chrono->contact) && isset($chrono->contact->email) && $chrono->contact->email != '')
         $toMail = $chrono->contact->email;
     else

@@ -302,7 +302,7 @@ class pdf_crabe extends ModelePDFFactures
 				{
                                     
                                         /*mod drsi*/
-                                        if($object->lines[$i]->desc == "Accompte"){
+                                        if($object->lines[$i]->desc == "Acompte"){
                                             $accTht = $object->lines[$i]->total_ht;
                                             $accTtva = $object->lines[$i]->total_tva;
                                             continue;
@@ -1082,7 +1082,7 @@ class pdf_crabe extends ModelePDFFactures
                                         $pdf->SetFillColor(248,248,248);
                                         $index++;
                                         $pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
-                                        $pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Accompte"), 0, 'L', 0);
+                                        $pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Acompte"), 0, 'L', 0);
                                         $pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
                                         $pdf->MultiCell($largcol2, $tab2_hl, price(-($accTht+$accTtva), 0, $outputlangs), 0, 'R', 0);
                                 }

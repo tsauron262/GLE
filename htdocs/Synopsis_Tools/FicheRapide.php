@@ -69,7 +69,7 @@ $retour3 = (isset($_POST['Retour']) && $_POST['Retour'] == 3 ? 'selected' : "");
 $symptomes = (isset($_POST['Symptomes']) ? $_POST['Symptomes'] : "");
 $modeP = (isset($_REQUEST['paiementtype']) ? $_REQUEST['paiementtype'] : "");
 $descr = (isset($_POST['Descr']) ? $_POST['Descr'] : "");
-$accompte = (isset($_POST['accompte']) ? $_POST['accompte'] : "");
+$acompte = (isset($_POST['acompte']) ? $_POST['acompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : "");
 $typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "");
 
@@ -112,7 +112,7 @@ if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['
                 $chrono->fetch($chrono->id);
                 $chronoProd->fetch($chronoProd->id);
 
-                //Propal facture accompte
+                //Propal facture acompte
                 $chrono->createPropal();
                 $propal = new Propal($db);
                 $propal = $chrono->propal;
@@ -126,15 +126,15 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
 ", 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
 
-                $accompte = intval($accompte);
-                if ($accompte > 0) {
+                $acompte = intval($acompte);
+                if ($acompte > 0) {
                     require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
                     $factureA = new Facture($db);
                     $factureA->type = 3;
                     $factureA->date = dol_now();
                     $factureA->socid = $chrono->socid;
                     $factureA->create($user);
-                    $factureA->addline("Accompte", $accompte, 1, 0, 0, 0, 0, 0, null, null);
+                    $factureA->addline("Acompte", $acompte, 1, 0, 0, 0, 0, 0, null, null);
                     $factureA->validate($user);
 
                     addElementElement("propal", "facture", $chrono->propalid, $factureA->id);
@@ -142,7 +142,7 @@ Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
 //                $factureA->add
                     require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
                     $payement = new Paiement($db);
-                    $payement->amounts = array($factureA->id => $accompte);
+                    $payement->amounts = array($factureA->id => $acompte);
                     $payement->datepaye = dol_now();
                     $payement->paiementid = $modeP;
                     $payement->create($user);
@@ -154,13 +154,13 @@ Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
 
                     require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
                     $discount = new DiscountAbsolute($db);
-                    $discount->description = "Accompte";
+                    $discount->description = "Acompte";
                     $discount->fk_soc = $factureA->socid;
                     $discount->fk_facture_source = $factureA->id;
-                    $discount->amount_ht = $discount->amount_ttc = $accompte;
+                    $discount->amount_ht = $discount->amount_ttc = $acompte;
                     $discount->amount_tva = $discount->tva_tx = 0;
                     $discount->create($user);
-//                $propal->addline("Accompte", -$accompte, 1, 0, 0, 0, 0, 0, 0, -$accompte);
+//                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
                     $propal->insert_discount($discount->id);
                 }
                 $propal->fetch($propal->id);
@@ -403,9 +403,9 @@ if ($socid != "") {
     echo "</p>";
     echo "<p>";
     echo "<tr>";
-    echo "<th class='ui-state-default ui-widget-header'>Accompte.</th>";
+    echo "<th class='ui-state-default ui-widget-header'>Acompte.</th>";
     echo "<td class='ui-widget-content'>";
-    echo " <input type='text' name='accompte' id='accompte' value='$accompte'/>";
+    echo " <input type='text' name='acompte' id='acompte' value='$acompte'/>";
     echo $form->select_types_paiements($modeP);
     echo "</td>";
     echo "</tr>";

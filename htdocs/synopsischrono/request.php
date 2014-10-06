@@ -84,7 +84,7 @@ if (isset($_REQUEST['actionEtat'])) {
     if ($chrono->note == "N/C")
         $chrono->note = "";
 
-    if ($action == "devisOk" && $chrono->propal->id > 0) {
+    if ($action == "devisOk" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 3) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis accepté le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -94,7 +94,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
     }
 
-    if ($action == "debDiago") {
+    if ($action == "debDiago" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 5) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -106,7 +106,7 @@ if (isset($_REQUEST['actionEtat'])) {
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
 
-    if ($action == "commandeOK" && $chrono->propal->id > 0) {
+    if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Piéce commandée le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -118,7 +118,7 @@ if (isset($_REQUEST['actionEtat'])) {
 \nL'équipe BIMP");
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     }
-    if ($action == "devisKo" && $chrono->propal->id > 0) {
+    if ($action == "devisKo" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis refusé le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -127,7 +127,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 9));
         $ok = true;
     }
-    if ($action == "pieceOk") {
+    if ($action == "pieceOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Pièce reçue le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -138,7 +138,7 @@ if (isset($_REQUEST['actionEtat'])) {
 \nL'équipe BIMP");
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     }
-    if ($action == "repOk") {
+    if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Réparation terminée le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -162,7 +162,7 @@ if (isset($_REQUEST['actionEtat'])) {
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel dès maintenant. L'Equipe BIMP.");
     }
-    if ($action == "attenteClient1" || $action == "attenteClient2") {
+    if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 ||  $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Attente client depuis le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
@@ -185,7 +185,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
     }
 
-    if ($action == "restituer") {
+    if ($action == "restituer" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 999) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Restitué le " . date('d-m-y H:i');
         $chrono->update($chrono->id);

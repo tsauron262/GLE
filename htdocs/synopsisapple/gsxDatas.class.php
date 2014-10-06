@@ -659,6 +659,7 @@ class gsxDatas {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
             } else {
+                dol_syslog("iciici".print_r($response, true), 4);
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;

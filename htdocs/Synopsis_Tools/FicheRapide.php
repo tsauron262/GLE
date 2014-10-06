@@ -244,7 +244,7 @@ if ($socid != "") {
         while($ligne = $db->fetch_object($result)){
             $val = $ligne->valeur;
             $centre = $ligne->label;
-            $tabT = explode(" ", $user->array_options['options_apple_centre']);
+            $tabT = explode(" ", trim($user->array_options['options_apple_centre']));
             $myCentre = (isset($tabT[0])? $tabT[0] : 'false');
         echo "<option value='" . $val . "' " . ($val == $myCentre ? "selected='selected'" : "") . ">" . $centre . "</option>";
     }

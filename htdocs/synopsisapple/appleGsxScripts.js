@@ -16,6 +16,8 @@ var partsGroup = {
     'E' :'iPod',
     'F' :'iPad'
 };
+
+
 var partDataType = {
     'eeeCode': 'eeeCode',
     'name': 'Nom',
@@ -104,9 +106,10 @@ function CompTIACodes() {
 
 var CTIA = new CompTIACodes();
 
-function Part(name, num, type, price, eeeCode) {
+function Part(name, num, type, price, eeeCode, newNum) {
     this.name = name;
     this.num = num;
+    this.newNum = newNum;
     this.type = type;
     this.price = price;
     this.eeeCode = eeeCode;
@@ -470,12 +473,12 @@ function PartsManager(prodId, serial) {
         delete this.parts;
         this.parts = [];
     };
-    this.addPart = function(group, name, num, type, price, eeeCode) {
+    this.addPart = function(group, name, num, type, price, eeeCode, newNum) {
         if (group === ' ')
             group = 0;
         if (!this.parts[group])
             this.parts[group] = [];
-        this.parts[group].push(new Part(name, num, type, price, eeeCode));
+        this.parts[group].push(new Part(name, num, type, price, eeeCode, newNum));
     };
     this.loadParts = function () {
         displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
@@ -486,6 +489,7 @@ function PartsManager(prodId, serial) {
         this.$parts = this.$prod.find('.partsListContainer');
         var ths = '<th style="min-width: 250px">Nom</th>';
         ths += '<th style="min-width: 100px">Ref.</th>';
+        ths += '<th style="min-width: 100px">Nouvelle Ref.</th>';
         ths += '<th style="min-width: 100px">eeeCode</th>';
         ths += '<th style="min-width: 100px">Type</th>';
         ths += '<th style="min-width: 100px">Prix</th>';
@@ -507,6 +511,7 @@ function PartsManager(prodId, serial) {
                 html += '">';
                 html += '<td class="partName">'+this.parts[gpe][id].name+'</td>';
                 html += '<td>'+this.parts[gpe][id].num+'</td>';
+                html += '<td>'+this.parts[gpe][id].newNum+'</td>';
                 html += '<td>'+this.parts[gpe][id].eeeCode+'</td>';
                 html += '<td>'+this.parts[gpe][id].type+'</td>';
                 html += '<td>'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
@@ -699,7 +704,7 @@ function PartsManager(prodId, serial) {
             this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('');
             var check = false;
             for (id in this.parts[gpe]) {
-                if (this.parts[gpe][id].num == search) {
+                if ((this.parts[gpe][id].num == search) || (this.parts[gpe][id].newNum == search)) {
                     check = true;
                     n++;
                     this.$prod.find('.partGroup_'+gpe).find('tr.partRow_'+id).show();
@@ -753,6 +758,7 @@ function PartsManager(prodId, serial) {
                         case 'num':
                             regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
                             str = ptr.parts[gpe][id].num;
+                            str += ' '+ptr.parts[gpe][id].newNum;
                             break;
 
                         case 'price':
@@ -937,8 +943,8 @@ function GSX() {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod'+prodId).find('.partsRequestResult'));
         }
     };
-    this.addPart = function(prodId, group, name, num, type, price, eeeCode) {
-        this.products[prodId].PM.addPart(group, name, num, type, price, eeeCode);
+    this.addPart = function(prodId, group, name, num, type, price, eeeCode, newNum) {
+        this.products[prodId].PM.addPart(group, name, num, type, price, eeeCode, newNum);
     };
     this.displayParts = function(prodId) {
         this.products[prodId].PM.displayParts();

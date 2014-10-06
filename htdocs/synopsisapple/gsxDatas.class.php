@@ -147,6 +147,8 @@ class gsxDatas {
             if (isset($response['ResponseArray']) && count($response['ResponseArray'])) {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                     $datas = $response['ResponseArray']['responseData'];
+                    $urgentMsg = $response['ResponseArray']['urgentMessage'];
+                    $urgentMsg = 'Message test';
 //                    echo '<pre>';
 //                    print_r($datas);
 //                    echo '</pre>';
@@ -159,6 +161,11 @@ class gsxDatas {
                     $html .= '</div>' . "\n";
                     $html .= '<div class="blocContent productContent">' . "\n";
 
+                    if (isset($urgentMsg) && ($urgentMsg != '')) {
+                        $html .= '<p class="alert">Message urgent du service Apple GSX: <br/>';
+                        $html .= '"'.$urgentMsg.'"';
+                        $html .= '</p>';
+                    }
                     $html .= '<div class="container">' . "\n";
                     $html .= '<div class="captionContainer" onclick="onCaptionClick($(this))">' . "\n";
                     $html .= '<span class="captionTitle infosProdTitle">Informations produit</span>' . "\n";
@@ -437,6 +444,11 @@ class gsxDatas {
             $html .= '<script type="text/javascript">' . "\n";
 //            print_r($parts);
             foreach ($parts as $part) {
+                $partNewNumber = '';
+                if (isset($part['originalPartNumber']) && $part['originalPartNumber'] != '') {
+                    $partNewNumber = $part['partNumber'];
+                    $part['partNumber'] = $part['originalPartNumber'];
+                }
                 $html .= 'GSX.addPart(' . $prodId . ', ';
                 $html .= '\'' . (isset($part['componentCode']) ? addslashes($part['componentCode']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '') . '\'';
@@ -444,6 +456,7 @@ class gsxDatas {
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
                 $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
                 $html .= ', \'' . (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '') . '\'';
+                $html .= ', \'' . addslashes($partNewNumber) . '\'';
                 $html .= ');' . "\n";
             }
             $html .= '</script>' . "\n";

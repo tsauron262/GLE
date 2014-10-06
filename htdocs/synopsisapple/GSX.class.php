@@ -544,7 +544,7 @@ class GSX {
 
                 $modelData = $this->request($requestData, $clientLookup);
 
-//$errorMessage = $this->_obtainErrorMessage ( $modelData );
+//                $errorMessage = $this->_obtainErrorMessage($modelData);
 
                 return $this->outputFormat($modelData['FetchProductModelResponse']['productModelResponse'], $errorMessage, $returnFormat);
 
@@ -571,7 +571,7 @@ class GSX {
                 $requestName = $clientLookup . 'Request';
                 $requestData = $this->_requestBuilder($requestName, $wrapperName, $details);
                 $warrantyDetails = $this->request($requestData, $clientLookup);
-//                $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
+                $errorMessage = $this->_obtainErrorMessage($warrantyDetails);
                 return $this->outputFormat($warrantyDetails[$clientLookup . 'Response'][$responseName], $errorMessage, $returnFormat);
 
                 break;

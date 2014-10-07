@@ -453,7 +453,7 @@ class gsxDatas {
                 $html .= ', \'' . (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '') . '\'';
                 $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
-                $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
+                $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice && $part['exchangePrice'] > 0 ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
                 $html .= ', \'' . (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '') . '\'';
                 $html .= ', \'' . addslashes($partNewNumber) . '\'';
                 $html .= ');' . "\n";

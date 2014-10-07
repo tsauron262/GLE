@@ -385,7 +385,7 @@ textarea.grand{
     display: none;
 }
 
-.ui-jqgrid-btable .butAction {
+.ui-jqgrid-btable .butAction, #chronoTable .butAction {
     display: inherit;
 }
 

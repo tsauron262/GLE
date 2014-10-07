@@ -67,7 +67,7 @@ $ok = false;
 
 if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']])) {
     $tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
-    $fromMail = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][1];
+    $fromMail = "SAV BIMP<".$tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][1].">";
 } else {
     $tel = "N/C";
     $fromMail = "SAV BIMP<no-replay@bimp.fr>";

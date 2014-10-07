@@ -348,3 +348,20 @@ boutons entrer pas valider dans soc
 
 
 dans numero client ajouter centre
+
+prix d'achat import
+
+
+non de soc contact adresse
+
+
+ECHANGE = 0 PRIX D'ACHAT
+
+
+KBB VIDE = NIM SERIE SAV
+
+
+DS SAV BOUTON HORS GARENTIE 
+
+
+AJ TEXT NOTE avec date

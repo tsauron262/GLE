@@ -126,7 +126,7 @@ $js .= <<<EOF
 EOF;
 $js .= "
         timeslotsPerHour: ".$_SESSION['paraAgenda']['timeTranche'].",
-        businessHours: {start: 8, end: 18, limitDisplay: ".$_SESSION['paraAgenda']['workHour']."},
+        businessHours: {start: 8, end: 20, limitDisplay: ".$_SESSION['paraAgenda']['workHour']."},
         timeslotHeight: 25,
         ";    
 $js .= <<<EOF

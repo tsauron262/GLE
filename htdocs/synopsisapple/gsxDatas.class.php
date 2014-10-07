@@ -423,7 +423,7 @@ class gsxDatas {
             $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
             $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
             $html .= '<select class="keywordFilterType">' . "\n";
-            $types = array('eeeCode' => 'eeeCode', 'name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
+            $types = array('name' => 'Nom', 'eeeCode' => 'eeeCode', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
             foreach ($types as $key => $type) {
                 $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
             }

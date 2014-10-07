@@ -88,6 +88,8 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
+
+
             
 // Defini position des colonnes
         $this->posxdesc = $this->marge_gauche + 1;
@@ -106,7 +108,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
      */
     function write_file($chrono, $outputlangs = '') {
         global $user, $langs, $conf;
-        
+
         global $tabCentre;
 
         if (!is_object($outputlangs))
@@ -161,11 +163,11 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                }
 //
 //
-                
+
                 $chrono->getValuesPlus();
-                
-                
-                
+
+
+
                 $pdf->Open();
                 $pdf1->Open();
                 $pdf->AddPage();
@@ -186,29 +188,29 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf1->SetMargins($this->marge_gauche, $this->marge_haute, $this->marge_droite);   // Left, Top, Right
 // 
 //                
-                
-                
-                
+
+
+
                 $pagecountTpl = $pdf->setSourceFile(DOL_DOCUMENT_ROOT . '/synopsischrono/core/modules/synopsischrono/doc/PCMod.pdf');
                 $tplidx = $pdf->importPage(1, "/MediaBox");
                 $pdf->useTemplate($tplidx, 0, 0, 0, 0, true);
-                
-                
+
+
                 $chrono2 = new Chrono($this->db);
                 $chrono2->fetch($chrono->valuesPlus[1039]->value);
                 $chrono2->getValuesPlus();
-                
-                
+
+
 //                echo "<pre>";print_r($chrono->valuesPlus);die;
-                
+
 
                 $pdf->SetXY('148', '34.4');
                 $pdf->SetFont('', '', 14);
                 $pdf->MultiCell(100, 6, $chrono->ref, 0, 'L');
-                
-                
-                
-                
+
+
+
+
                 //centre
                 $pdf->SetFont('', '', 12);
                 $pdf->SetXY('30', '37.5');
@@ -218,87 +220,85 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('22', '49');
                 $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');
 //                $tabCentre
-                
-                
-                
                 //client
-                if($chrono->contactid > 0){
+                $contact = "";
+                if ($chrono->contactid > 0) {
                     $addr = $chrono->contact;
-                    $nom = $addr->getFullName();
-                }
-                else{
+                    $contact = $addr->getFullName();
+                    $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
+                    $mail = $addr->mail;
+                } else {
                     $addr = $chrono->societe;
-                    $nom = $addr->name;
+                    $tel = $addr->phone;
+                    $mail = $addr->email;
                 }
-                $address = $addr->address."\n".$addr->zip." ".$addr->town;
-                
+                $address = $chrono->societe->name . "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
+
                 $pdf->SetXY('20', '71');
                 $pdf->SetFont('', '', 12);
-                $pdf->MultiCell(300, 6, $nom."\n".$address, 0, 'L');
-                
-                
-                
-                
+                $pdf->MultiCell(300, 6, ($contact != "" && $contact != $chrono->societe->name ? $contact . "\n" : "") . $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+
+
+
+
                 $pdf->SetXY('119.3', '49.1');
                 $pdf->SetFont('', '', 9);
                 $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
-                
-                if($chrono->fk_user_author > 0){
+
+                if ($chrono->fk_user_author > 0) {
                     $pdf->SetXY('147.5', '49');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
-                
-                
+
+
                 //le prod
                 $pdf->SetXY('121', '71.4');
                 $pdf->SetFont('', '', 9);
                 $pdf->MultiCell(100, 6, $chrono2->description, 0, 'L');
-                
+
                 $pdf->SetXY('137', '75');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1011]->value, 0, 'L');
-                
+
                 $pdf->SetXY('137', '79.4');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1064]->value, 0, 'L');
-                
+
                 $pdf->SetXY('145', '84');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
-                
+
                 $pdf->SetXY('131.5', '88');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr, 0, 'L');
-                
+
                 $pdf->SetXY('143', '92.8');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
-                
-                
+
+
                 //symptom et sauv
                 $pdf->SetXY('15', '125');
                 $pdf->SetFont('', '', 12);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
-                
+
                 $pdf->SetXY('27.5', '146');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
-                
-                
+
+
                 //etiquette ref
                 $pdf->SetFont('', '', 11);
-                for($i=0;$i<6;$i++){
-                    $pdf->SetXY('15.5'+($i*29), '264.6');
+                for ($i = 0; $i < 6; $i++) {
+                    $pdf->SetXY('15.5' + ($i * 29), '264.6');
                     $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
                 }
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
-                
-                
 //                for($i=0;$i<1000;$i = $i+5){
 //                $pdf->SetXY($i,$i);
 //                $pdf->MultiCell(155, 6, $i, 0, 'L');
 //                
 //                }
-                
-                
-                
-                
-                
-                
+
+
+
+
+
+
 
                 if (method_exists($pdf, 'AliasNbPages'))
                     $pdf->AliasNbPages();
@@ -369,7 +369,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
         }
 
         $showaddress = $showadress;
-        $usecontact = ($object->model->hasContact && $object->contactid >0);
+        $usecontact = ($object->model->hasContact && $object->contactid > 0);
         $object->client = $object->societe;
         $default_font_size = 12;
 

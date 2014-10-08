@@ -654,6 +654,10 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     });
     var i = 0;
     iFrame.find("iframe").load(function() {
+        if($(this).contents().find("#username").size() > 0)
+            $nbLoad++;
+        
+        
         $(this).contents().find("input[name='cancel'], input[name='edit'], input[value='Ajouter'], input[value='Ajouter'], div.ui-dialog-buttonset span.ui-button-text").click(function() {
 //            fermerIframe($(this).parent(), callBack);
             nbLoad = 1;

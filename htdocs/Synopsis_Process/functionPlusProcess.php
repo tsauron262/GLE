@@ -58,7 +58,7 @@ function bouttonEtatSav($idChrono){
     if($chrono->values[$idEtat] == 5 && $chrono->propalid){
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient1".$sms."'>Envoyer Devis</a>";
         $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient2".$sms."'>Envoyer Devis Garantie</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient2".$sms."'>Devis Garantie</a>";
     }
     
     if($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3){

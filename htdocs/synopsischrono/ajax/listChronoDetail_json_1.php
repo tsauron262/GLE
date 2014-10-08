@@ -90,6 +90,12 @@ if ($searchOn == 'true') {
     }
 
     if ($_REQUEST['Centre'] != "") {
+        if($_REQUEST['Centre'] == "Tous"){
+            
+            $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
+        $wh1 .= " AND CentreVal IN ('" . $centre . "')";
+        }
+        else
         $wh1 .= " AND Centre LIKE '" . $_REQUEST['Centre'] . "'";
     }
 

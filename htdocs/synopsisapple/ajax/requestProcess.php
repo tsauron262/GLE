@@ -1,4 +1,5 @@
 <?php
+
 require_once '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT . '/includes/nusoap/lib/nusoap.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisapple/gsxDatas.class.php';
@@ -46,9 +47,10 @@ function fetchPartsList() {
 
 function isIphone($serial) {
     if (preg_match('/^[0-9]{15,16}$/', $serial))
-            return true;
+        return true;
     return false;
 }
+
 if (isset($_GET['action'])) {
     switch ($_GET['action']) {
 //        case 'addCartToPropal':
@@ -185,6 +187,17 @@ if (isset($_GET['action'])) {
 
                     $propal = new Propal($db);
                     $propal->fetch($propalId);
+
+
+
+                    $prod = new Product($db);
+                    $prod->fetch(3175);
+                    $prod->get_buyprice();
+                    $prod->tva_tx = ($prod->tva_tx > 0) ? $prod->tva_tx : 0;
+                    print_r($prod);die;
+                    $chr->propal->addline($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id);
+
+
                     foreach ($cart->partsCart as $part) {
                         $prix = convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
                         $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
@@ -261,8 +274,7 @@ if (isset($_GET['action'])) {
 
         case 'importRepair':
             if (isset($_GET['chronoId'])) {
-                $gsxDatas = new gsxDatas(isset($_GET['importNumber'])?$_GET['importNumber']:null,
-                        $userId, $password, $serviceAccountNo);
+                $gsxDatas = new gsxDatas(isset($_GET['importNumber']) ? $_GET['importNumber'] : null, $userId, $password, $serviceAccountNo);
                 echo $gsxDatas->importRepair($_GET['chronoId']);
             } else {
                 echo '<p class="error">Une erreur est survenue (Chrono Id absent)</p>' . "\n";
@@ -307,7 +319,7 @@ function convertPrix($prix, $ref, $desc) {
     foreach ($tabCas3 as $val)
         if (stripos($ref, $val) === 0)
             $cas = 2;
-    if($cas == 2)
+    if ($cas == 2)
         foreach ($tabCas4 as $val)
             if (stripos($desc, $val) === 0)
                 $cas = 3;

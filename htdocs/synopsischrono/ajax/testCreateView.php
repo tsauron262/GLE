@@ -37,7 +37,7 @@ while ($ligneModel = $db->fetch_object($resultModel)) {
         $createView3 .= ' LEFT JOIN llx_synopsischrono_value tab' . $i . ' on tab' . $i . '.chrono_refid = chrono.id AND tab' . $i . '.key_id = ' . $resPre->id;
         if ($resPre->type_valeur == 8) {//Liste
             $createView3 .= ' LEFT JOIN llx_Synopsis_Process_form_list_members tab' . $i . 'list ON tab' . $i . 'list.list_refid = ' . $resPre->type_subvaleur . ' AND tab' . $i . 'list.valeur = tab' . $i . '.value';
-            $createView2 .= ',tab' . $i . 'list.label as ' . $resPre->nom;
+            $createView2 .= ',tab' . $i . 'list.label as ' . $resPre->nom.', tab' . $i . 'list.valeur as ' . $resPre->nom."Val";
         } else {
             $createView2 .= ',tab' . $i . '.value as ' . $resPre->nom;
         }

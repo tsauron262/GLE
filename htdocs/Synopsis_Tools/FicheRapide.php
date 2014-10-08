@@ -73,52 +73,73 @@ $acompte = (isset($_POST['acompte']) ? $_POST['acompte'] : "");
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : "");
 $typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "");
 
-if (isset($_POST["Symptomes"]) && $_POST["Symptomes"] != "" && isset($_REQUEST['socid']) && $_REQUEST['socid'] !== "" && isset($_REQUEST['contactid']) && $_REQUEST['contactid'] !== "" && isset($_POST['Machine']) && $_POST['Machine'] !== "" && isset($_POST['NoMachine']) && $_POST['NoMachine'] !== "" &&/* isset($_POST['Devis']) && $_POST['Devis'] !== "" && */isset($_POST['Retour']) && $_POST['Retour'] !== "" && isset($_POST['pass']) && $_POST['pass'] !== "" && isset($_POST['Sauv']) && $_POST['Sauv'] !== "" && isset($_POST['Etat']) && $_POST['Etat'] !== "" /* && isset($_POST['DateAchat']) && $_POST['DateAchat'] !== "" && isset($_POST['Garantie']) && $_POST['Garantie'] !== "" */) {
-    $chronoProd = new Chrono($db);
+//die($_REQUEST['socid']);
 
-    $chronoProdid = existProd($NoMachine);
-    if ($chronoProdid < 0) {
-        $chronoProd->model_refid = 101;
-        $chronoProd->socid = $socid;
-        $chronoProd->description = $machine;
-        $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
-        $chronoProdNewid = $chronoProd->create();
-        $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
-    } else {
-        $chronoProd->fetch($chronoProdid);
-        $chronoProd->socid = $socid;
-        $chronoProd->description = $machine;
-        $chronoProd->update($chronoProdid);
-        $dataArrProd = array(1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
-        $testProd = $chronoProd->setDatas($chronoProdid, $dataArrProd);
-    }
-    if (isset($chronoProdid) && $chronoProdid < 0 && isset($chronoProdNewid) && $chronoProdNewid > 0 || isset($chronoProdid) && $chronoProdid > 0) {
+if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
+    if (!isset($_POST["Symptomes"]) || $_POST["Symptomes"] == "")
+        echo "Renseignez les Sympomes";
+    elseif (!isset($_REQUEST['socid']) || $_REQUEST['socid'] < 1)
+        echo "Renseignez le Client";
+    elseif (!isset($_REQUEST['contactid']) || $_REQUEST['contactid'] == "")
+        echo "Renseignez le Contact";
+    elseif (!isset($_POST['Machine']) || $_POST['Machine'] == "")
+        echo "Renseignez la Machine";
+    elseif (!isset($_POST['NoMachine']) || $_POST['NoMachine'] == "")
+        echo "Renseignez le numéro de série";
+    elseif (!isset($_POST['Retour']) || $_POST['Retour'] == "")
+        echo "Renseignez le mode de contact";
+    elseif (!isset($_POST['pass']) || $_POST['pass'] == "")
+        echo "Renseignez le mot de passe";
+    elseif (!isset($_POST['Sauv']) || $_POST['Sauv'] == "")
+        echo "Renseignez l'état de la sauvegarde";
+    elseif (!isset($_POST['Etat']) || $_POST['Etat'] == "")
+        echo "Renseignez l'état de la machine";
+    else {
+        $chronoProd = new Chrono($db);
 
-        $chrono = new Chrono($db);
-        $chrono->model_refid = 105;
-        $chrono->description = ($descr != "" ? addslashes($descr) : $machine);
-        $chrono->socid = $socid;
-        $chrono->contactid = $_REQUEST["contactid"];
-        $chronoid = $chrono->create();
-        if ($chronoid > 0) {
-            $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /*1058 => $_POST['Devis'],*/ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
-            $test = $chrono->setDatas($chronoid, $dataArr);
-            if ($test) {
-                $socid = "";
-                $lien = new lien($db);
-                $lien->cssClassM = "type:SAV";
-                $lien->fetch(3);
-                $lien->setValue($chrono->id, array($chronoProd->id));
-                $chrono->fetch($chrono->id);
-                $chronoProd->fetch($chronoProd->id);
+        $chronoProdid = existProd($NoMachine);
+        if ($chronoProdid < 0) {
+            $chronoProd->model_refid = 101;
+            $chronoProd->socid = $socid;
+            $chronoProd->description = $machine;
+            $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
+            $chronoProdNewid = $chronoProd->create();
+            $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
+        } else {
+            $chronoProd->fetch($chronoProdid);
+            $chronoProd->socid = $socid;
+            $chronoProd->description = $machine;
+            $chronoProd->update($chronoProdid);
+            $dataArrProd = array(1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
+            $testProd = $chronoProd->setDatas($chronoProdid, $dataArrProd);
+        }
+        if (isset($chronoProdid) && $chronoProdid < 0 && isset($chronoProdNewid) && $chronoProdNewid > 0 || isset($chronoProdid) && $chronoProdid > 0) {
 
-                //Propal facture acompte
-                $chrono->createPropal();
-                $propal = new Propal($db);
-                $propal = $chrono->propal;
-                
-                
-        $propal->addline("Prise en charge :  : ".$chrono->ref."\n"."Garantie :
+            $chrono = new Chrono($db);
+            $chrono->model_refid = 105;
+            $chrono->description = ($descr != "" ? addslashes($descr) : $machine);
+            $chrono->socid = $socid;
+            $chrono->contactid = $_REQUEST["contactid"];
+            $chronoid = $chrono->create();
+            if ($chronoid > 0) {
+                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
+                $test = $chrono->setDatas($chronoid, $dataArr);
+                if ($test) {
+                    $socid = "";
+                    $lien = new lien($db);
+                    $lien->cssClassM = "type:SAV";
+                    $lien->fetch(3);
+                    $lien->setValue($chrono->id, array($chronoProd->id));
+                    $chrono->fetch($chrono->id);
+                    $chronoProd->fetch($chronoProd->id);
+
+                    //Propal facture acompte
+                    $chrono->createPropal();
+                    $propal = new Propal($db);
+                    $propal = $chrono->propal;
+
+
+                    $propal->addline("Prise en charge :  : " . $chrono->ref . "\n" . "Garantie :
 Pour du matériel couvert par Apple, la garantie initiale s'applique.
 Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
 Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
@@ -126,81 +147,80 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
 ", 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
 
-                $acompte = intval($acompte);
-                if ($acompte > 0) {
-                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-                    $factureA = new Facture($db);
-                    $factureA->type = 3;
-                    $factureA->date = dol_now();
-                    $factureA->socid = $chrono->socid;
-                    $factureA->create($user);
-                    $factureA->addline("Acompte", $acompte, 1, 0, 0, 0, 0, 0, null, null);
-                    $factureA->validate($user);
+                    $acompte = intval($acompte);
+                    if ($acompte > 0) {
+                        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                        $factureA = new Facture($db);
+                        $factureA->type = 3;
+                        $factureA->date = dol_now();
+                        $factureA->socid = $chrono->socid;
+                        $factureA->create($user);
+                        $factureA->addline("Acompte", $acompte, 1, 0, 0, 0, 0, 0, null, null);
+                        $factureA->validate($user);
 
-                    addElementElement("propal", "facture", $chrono->propalid, $factureA->id);
+                        addElementElement("propal", "facture", $chrono->propalid, $factureA->id);
 
 //                $factureA->add
-                    require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                    $payement = new Paiement($db);
-                    $payement->amounts = array($factureA->id => $acompte);
-                    $payement->datepaye = dol_now();
-                    $payement->paiementid = $modeP;
-                    $payement->create($user);
+                        require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                        $payement = new Paiement($db);
+                        $payement->amounts = array($factureA->id => $acompte);
+                        $payement->datepaye = dol_now();
+                        $payement->paiementid = $modeP;
+                        $payement->create($user);
 
-                    $factureA->set_paid($user);
-                    
-                    include_once(DOL_DOCUMENT_ROOT.'/core/modules/facture/modules_facture.php');
-                    facture_pdf_create($db, $factureA, null, $langs);
+                        $factureA->set_paid($user);
 
-                    require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
-                    $discount = new DiscountAbsolute($db);
-                    $discount->description = "Acompte";
-                    $discount->fk_soc = $factureA->socid;
-                    $discount->fk_facture_source = $factureA->id;
-                    $discount->amount_ht = $discount->amount_ttc = $acompte;
-                    $discount->amount_tva = $discount->tva_tx = 0;
-                    $discount->create($user);
+                        include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
+                        facture_pdf_create($db, $factureA, null, $langs);
+
+                        require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
+                        $discount = new DiscountAbsolute($db);
+                        $discount->description = "Acompte";
+                        $discount->fk_soc = $factureA->socid;
+                        $discount->fk_facture_source = $factureA->id;
+                        $discount->amount_ht = $discount->amount_ttc = $acompte;
+                        $discount->amount_tva = $discount->tva_tx = 0;
+                        $discount->create($user);
 //                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
-                    $propal->insert_discount($discount->id);
-                }
-                $propal->fetch($propal->id);
-                
-                require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
-                propale_pdf_create($db, $propal, null, $langs);
+                        $propal->insert_discount($discount->id);
+                    }
+                    $propal->fetch($propal->id);
 
-                require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";
+                    require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+                    propale_pdf_create($db, $propal, null, $langs);
 
-                synopsischrono_pdf_create($db, $chrono, "pc");
-                $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
-                mkdir($repDest);
-                link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
-                link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
+                    require_once DOL_DOCUMENT_ROOT . "/synopsischrono/core/modules/synopsischrono/modules_synopsischrono.php";
+
+                    synopsischrono_pdf_create($db, $chrono, "pc");
+                    $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/";
+                    mkdir($repDest);
+                    link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
+                    link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
 //                echo DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 
-                echo "<h3>Enregistrement effecué avec succés. </h3>"
-                . "SAV : " . $chrono->getNomUrl(1) . " <br/>"
-                . "Produit : " . $chronoProd->getNomUrl(1);
+                    echo "<h3>Enregistrement effecué avec succés. </h3>"
+                    . "SAV : " . $chrono->getNomUrl(1) . " <br/>"
+                    . "Produit : " . $chronoProd->getNomUrl(1);
 
-                // List of document
-                echo "<br/><br/>";
-                require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
-                require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-                $formfile = new FormFile($db);
-                $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
-                $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
-                echo "<h3>Nouvelle prise en charge</h3>";
+                    // List of document
+                    echo "<br/><br/>";
+                    require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
+                    require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
+                    $formfile = new FormFile($db);
+                    $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
+                    $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
+                    echo "<h3>Nouvelle prise en charge</h3>";
+                } else {
+                    echo "Echec de l'Enregistrement";
+                }
             } else {
                 echo "Echec de l'Enregistrement";
             }
         } else {
             echo "Echec de l'Enregistrement";
         }
-    } else {
-        echo "Echec de l'Enregistrement";
     }
-} elseif (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
-    echo "Renseignez tous les champs";
 }
 
 
@@ -241,11 +261,11 @@ if ($socid != "") {
     $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
 //    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
 //    foreach ($centres as $val => $centre) {
-        while($ligne = $db->fetch_object($result)){
-            $val = $ligne->valeur;
-            $centre = $ligne->label;
-            $tabT = explode(" ", trim($user->array_options['options_apple_centre']));
-            $myCentre = (isset($tabT[0])? $tabT[0] : 'false');
+    while ($ligne = $db->fetch_object($result)) {
+        $val = $ligne->valeur;
+        $centre = $ligne->label;
+        $tabT = explode(" ", trim($user->array_options['options_apple_centre']));
+        $myCentre = (isset($tabT[0]) ? $tabT[0] : 'false');
         echo "<option value='" . $val . "' " . ($val == $myCentre ? "selected='selected'" : "") . ">" . $centre . "</option>";
     }
     echo "</select>";
@@ -265,7 +285,7 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Machine.</th>";
@@ -274,8 +294,8 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
-    
+
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Type garantie.</th>";
@@ -284,8 +304,8 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
-    
+
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Date fin de garantie.</th>";

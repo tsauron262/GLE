@@ -565,8 +565,10 @@ class Chrono extends CommonObject {
 
         if ($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
             $titre = dol_trunc($this->description, 40);
-        else
+        else if($this->model->id != 105)
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
+        else
+            $titre = $this->ref;
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';

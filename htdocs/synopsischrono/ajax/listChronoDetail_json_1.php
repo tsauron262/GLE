@@ -38,7 +38,11 @@ $withRev = false;
 if ($_REQUEST['withRev'] > 0)
     $withRev = true;
 
-$user->fetch($user_id);
+if (isset($_REQUEST['userId']))
+    $user->fetch($_REQUEST['userId']);
+else
+    global $user;
+
 $user->getrights();
 $page = (isset($_REQUEST['page']) ? $_REQUEST['page'] : 1); // get the requested page
 $limit = (isset($_REQUEST['rows']) ? $_REQUEST['rows'] : 23); // get how many rows we want to have into the grid
@@ -56,6 +60,29 @@ if ($start < 0)
 
 $wh = "";
 $wh1 = "";
+
+
+
+
+
+
+if ($_REQUEST['FiltreCentre'] != "") {
+    if ($_REQUEST['FiltreCentre'] == "Tous") {
+
+        $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
+        $wh1 .= " AND CentreVal IN ('" . $centre . "')";
+    } else
+        $wh1 .= " AND CentreVal LIKE '" . $_REQUEST['FiltreCentre'] . "'";
+}
+
+//die($wh1."ll".$_REQUEST['FiltreCentre']);
+
+
+
+
+
+
+
 $searchOn = ($_REQUEST['_search'] || $_REQUEST['_search2']);
 if ($searchOn == 'true') {
     $oper = "";
@@ -87,16 +114,6 @@ if ($searchOn == 'true') {
 
     if ($_REQUEST['fk_contrat'] != "") {
         $wh1 .= " AND Contrat = " . $_REQUEST['fk_contrat'];
-    }
-
-    if ($_REQUEST['Centre'] != "") {
-        if($_REQUEST['Centre'] == "Tous"){
-            
-            $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
-        $wh1 .= " AND CentreVal IN ('" . $centre . "')";
-        }
-        else
-        $wh1 .= " AND Centre LIKE '" . $_REQUEST['Centre'] . "'";
     }
 
     if ($_REQUEST['propal'] != "") {
@@ -247,7 +264,7 @@ $requete = "SELECT view.*, soc.nom as socname, soc.rowid as socid FROM llx_synop
 
 $requete .= $wh1;
 $requete .= " ORDER BY " . $sidx . " " . $sord . "";
-echo $requete;
+
 //echo($requete);die;
 $result = $db->query($requete);
 if (!$result) {

@@ -373,21 +373,26 @@ while ($ligne = $db->fetch_object($result)) {
     $tabIdFi[$ligne->rowid] = $ligne->rowid;
 }
 
-$tabResult = afficheParType($tabIdFi);
+if (count($tabIdFi) > 0) {
+    $tabResult = afficheParType($tabIdFi);
 
-$tabIdErreur = testFi($tabIdFi, $tabResult);
+    $tabIdErreur = testFi($tabIdFi, $tabResult);
 //echo "<pre>";   
 //print_r($tabIdErreur);
-foreach ($tabIdFi as $val) {
-    if (!isset($tabIdErreur[$val]))
-        $newTabIdFi[$val] = $val;
+
+    $newTabIdFi = array();
+    foreach ($tabIdFi as $val) {
+        if (!isset($tabIdErreur[$val]))
+            $newTabIdFi[$val] = $val;
+    }
+
+    echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
+
+    if (count($newTabIdFi) > 0) {
+        $tabResult = afficheParType($newTabIdFi);
+        $tabIdErreur = testFi($newTabIdFi, $tabResult);
+    }
 }
-
-echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
-
-$tabResult = afficheParType($newTabIdFi);
-$tabIdErreur = testFi($newTabIdFi, $tabResult);
-
 
 $db->close();
 
@@ -422,9 +427,9 @@ function afficheParType($tabIdFi) {
         $tabResult[$ligne->ty][5] = $ligne->prix;
     }
 
-    if(isset($tabResult[""]))
-    foreach ($tabResult[""] as $clef => $val)
-        $tabResult[0][$clef] += $val;
+    if (isset($tabResult[""]))
+        foreach ($tabResult[""] as $clef => $val)
+            $tabResult[0][$clef] += $val;
 
     echo "<div style='clear:both;'>";
 
@@ -443,9 +448,9 @@ function afficheParType($tabIdFi) {
             if (!is_numeric($pourcent1))
                 $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . "</td></tr>";
             elseif ($pourcent1 >= 0)
-                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1,2) . "%</td></tr>";
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1, 2) . "%</td></tr>";
             else
-                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1,2) . "%</td></tr>";
+                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1, 2) . "%</td></tr>";
 
             if (($tabResult[$ligne->id][5] + $tabResult[$ligne->id][4]) > 0)
                 $pourcent2 = 100 - ($tabResult[$ligne->id][2] * 100) / ($tabResult[$ligne->id][5] + $tabResult[$ligne->id][4]);
@@ -454,9 +459,9 @@ function afficheParType($tabIdFi) {
             if (!is_numeric($pourcent2))
                 $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent2 . "</td></tr>";
             elseif ($pourcent2 >= 0)
-                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent2,2) . "%</td></tr>";
+                $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent2, 2) . "%</td></tr>";
             else
-                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent2,2) . "%</td></tr>";
+                $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent2, 2) . "%</td></tr>";
             $texte .= "</table>";
             $additionP = $additionP + $tabResult[$ligne->id][2];
             echo $texte;

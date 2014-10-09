@@ -120,9 +120,9 @@ foreach ($tabModel as $model => $data) {
     } elseif ($model == 105) {//SAV
         $nomOnglet = "SAV";
 //        $titre = "SAV";
-        if (isset($_REQUEST['Centre'])) {
-            $champ['1060'] = $_REQUEST['Centre'];
-            $filtre .= "&Centre=" . $_REQUEST['Centre'];
+        if (isset($_REQUEST['FiltreCentre'])) {
+            $champ['1060'] = $_REQUEST['FiltreCentre'];
+            $filtre .= "&FiltreCentre=" . $_REQUEST['FiltreCentre'];
         }
         if (isset($_REQUEST['Etat'])) {
             $titre .= " " . $_REQUEST['Etat'];

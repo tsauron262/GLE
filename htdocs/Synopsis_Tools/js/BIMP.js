@@ -71,10 +71,22 @@ $(window).load(function() {
         });
     }
     
-    $("input#NoMachine").focusout(/*function(){
+    $("input[name='lastname'], input[name='options_apple_centre']").focusout(function(){
+        input = $(this);
+        input.val(input.val().toUpperCase());
+    });
+    
+    $("input[name='firstname']").focusout(function(){
+        input = $(this);
+        input.val(input.val().substring(0,1).toUpperCase()+input.val().substring(1,100));
+    });
         
-    },*/ function(){
-        input = $("#NoMachine");
+        
+        
+    
+    $("input#NoMachine").focusout(function(){
+        input = $(this);
+        input.val(input.val().toUpperCase());
         inputM = $("#Machine");
         inputG = $("#Garantie")
         inputTG = $("#typeGarantie");
@@ -84,6 +96,7 @@ $(window).load(function() {
         roue = $("#patientez");
         reponse = valeurM = valeurG = valeurTG = valeurD =  "";
         roue.show();
+        
         jQuery.ajax({
                     url: DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=loadSmallInfoProduct',
                     data: datas,

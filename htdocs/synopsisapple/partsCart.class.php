@@ -34,7 +34,7 @@ class partsCart {
         global $db, $langs;
         $qte = 1;
         $prod = new Product($db);
-        $prod->fetch(3175);
+        $prod->fetch(3436);
         require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
         $prodF = new ProductFournisseur($db);
         $prodF->find_min_price_product_fournisseur($prod->id, $qte);

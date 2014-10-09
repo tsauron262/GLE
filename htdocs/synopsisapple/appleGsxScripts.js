@@ -1322,7 +1322,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     $.ajax({
         type: "POST",
         url: $form.attr('action'),
-        dataType: 'html',
+        dataType: 'xml',
         processData: false,
         contentType: false,
         data: new FormData(formElement), // Non compatible pour les IE < 10
@@ -1331,7 +1331,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
                 prix = $(html).find("prix").html();
                 $(html).find("prix").html("");
                 if(prix > 0)
-                    alert("Attention la réparation n'est pas prise garantie. Prix : "+prix+" €");
+                    alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
                 
                 window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
             }

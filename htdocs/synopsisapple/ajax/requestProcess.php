@@ -233,7 +233,7 @@ if (isset($_GET['action'])) {
                             $return .= "return";
                         }
                         
-                        return $return;
+                        echo $return;
                         
                     } else {
                         echo '<p class="error">Une erreur est survenue (prodId absent)</p>' . "\n";

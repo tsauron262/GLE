@@ -311,7 +311,37 @@ CREATE ALGORITHM=UNDEFINED SQL SECURITY DEFINER VIEW `llx_Synopsis_fichinterdet`
 
 //Ajouter SAVM ds pdf*
 
-Valence et boutique
+//Valence et boutique
+
+//voir chambery   B
+
+
+RFD   Remboursement ou Remplacement
+RPL   Remboursement ou Remplacement.
+
+
+devis
+
+//dans pc ajouter tel et mail
+
+0381471171
+
+
+//dans chrono ajouter note
+
+
+
+
+//dans numero client ajouter centre
+
+
+//non de soc contact adresse
+
+
+//ECHANGE = 0 PRIX D'ACHAT
+
+
+//DS SAV BOUTON HORS GARENTIE 
 
 Christian voir mail
 
@@ -320,48 +350,59 @@ dominique horno 0695035348
 
 
 
-voir chambery   B
 
-trie des dates
-
-0471076211
-        
-
-mail
-
-
-devis
-
-dans pc ajouter tel et mail
-
-majuscule sn nom client prenom premier lettre
-
-0381471171
-
-
-dans chrono ajouter note
-
-
+AJ TEXT NOTE avec date
 
 a coté du client modifier
 boutons entrer pas valider dans soc
 
 
-dans numero client ajouter centre
+KBB VIDE = NIM SERIE SAV
 
 prix d'achat import
 
-
-non de soc contact adresse
-
-
-ECHANGE = 0 PRIX D'ACHAT
+majuscule sn nom client prenom premier lettre
 
 
-KBB VIDE = NIM SERIE SAV
+
+escla 3003854
 
 
-DS SAV BOUTON HORS GARENTIE 
+
+//quand ajout ligne apple ajouter service 
 
 
-AJ TEXT NOTE avec date
+
+//mail et tel ds propal
+
+
+//tous les centres que ceux
+
+devis ss garentie 
+commande piece
+
+si req ou 0€  ou verifier par apple click envoyer devis
+
+
+//mail cc centre
+
+
+
+
+
+voir pour confirmation hors garentie
+
+
+
+requete create mailin 
+
+
+si loi europeen refusé => ajouter certif loie uro + facture choix garentie n/c + verifier par apple
+
+
+
+
+//ajouter résolution
+
+
+//voir deco + fiche rapide new client

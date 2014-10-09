@@ -155,7 +155,10 @@ Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
                         $factureA->date = dol_now();
                         $factureA->socid = $chrono->socid;
                         $factureA->create($user);
-                        $factureA->addline("Acompte", $acompte, 1, 0, 0, 0, 0, 0, null, null);
+                        $factureA->addline("Acompte", $acompte, 1, 0, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte);
+                                
+                                
+//                                ("Acompte", $acompte, 1, 0, 0, 0, $prod->id, 0, 'HT', null, null,null, null, null, null, null, null, null, null, null, null, null, $acompte);
                         $factureA->validate($user);
 
                         addElementElement("propal", "facture", $chrono->propalid, $factureA->id);

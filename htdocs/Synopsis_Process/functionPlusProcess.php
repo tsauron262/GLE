@@ -22,57 +22,64 @@ function getSNChrono($idChrono, $source) {
     return implode(" | ", $return);
 }
 
-function bouttonEtatSav($idChrono){
+function bouttonEtatSav($idChrono) {
     global $db, $user;
     $return = "";
     $chrono = new Chrono($db);
     $chrono->fetch($idChrono);
     $chrono->getValues();
     $idEtat = 1056;
-    
+    if ($chrono->propalid) {
+        $propal = new Propal($db);
+        $propal->fetch($chrono->propalid);
+    }
+//    print_r($propal);
+
     $form = new Form($db);
-    
-    if($chrono->values[1059] == 3)
-    $sms = "&sendSms=\"+confirm(\"Envoyer SMS ?\");";
+
+    if ($chrono->values[1059] == 3)
+        $sms = "&sendSms=\"+confirm(\"Envoyer SMS ?\");";
     else
         $sms = "\"";
-    
-    
-    if($chrono->values[$idEtat] == 2 && $chrono->propal->id > 0){
-        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisOk'>Devis Accepté</a>";
+
+
+    if (/*$chrono->values[$idEtat] == 2 && */$chrono->propalid && $propal->statut == 1) {
+        $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=devisOk'>Devis Accepté</a>";
         $return .= "<br/>";
-        $return .= "<a class='butAction' href='request.php?id=".$idChrono."&actionEtat=devisKo'>Devis Refué</a>";
-    }
-    elseif($chrono->values[$idEtat] == 2){
+        $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=devisKo'>Devis Refué</a>";
+    } 
+    
+    if (/*$chrono->values[$idEtat] == 2 && */!$chrono->propalid) {
         $return .= '<a class="butAction" href="?id=' . $idChrono . '&action=createPC">Créer devis</a>';
     }
-    
-    if($chrono->values[$idEtat] == 1){
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=pieceOk".$sms."'>Pièce reçue</a>";
+
+    if ($chrono->values[$idEtat] == 1) {
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=pieceOk" . $sms . "'>Pièce reçue</a>";
     }
-    
-    if($chrono->values[$idEtat] == 0){
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=debDiago".$sms."'>Commencer diagnostic</a>";
+
+    if ($chrono->values[$idEtat] == 0) {
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=debDiago" . $sms . "'>Commencer diagnostic</a>";
     }
-    
-    if($chrono->values[$idEtat] == 5 && $chrono->propalid){
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient1".$sms."'>Envoyer Devis</a>";
+
+    if ($chrono->values[$idEtat] > 0 && $chrono->propalid && $propal->statut == 0) {
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "'>Envoyer Devis</a>";
         $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=attenteClient2".$sms."'>Devis Garantie</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
-    
-    if($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3){
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=repOk".$sms."'>Terminé (Facturer)</a>";
+
+    if ($chrono->propalid && $propal->statut > 1 && ($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3)) {
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=repOk" . $sms . "'>Terminé</a>";
+        $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
     }
-    
-    if($chrono->values[$idEtat] == 9){
+
+    if ($chrono->values[$idEtat] == 9) {
         ob_start();
         $return .= $form->select_types_paiements("SAV");
         $return .= ob_get_clean();
         $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=".$idChrono."&actionEtat=restituer&modeP=\"+$(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
     }
-    
+
     return $return;
 }
 

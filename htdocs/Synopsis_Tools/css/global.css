@@ -381,7 +381,7 @@ textarea.grand{
 }
 
 
-.ui-jqgrid-btable .hideonsmartphone {
+.ui-jqgrid-btable .hideonsmartphone, .ui-jqgrid-btable .titInfo {
     display: none;
 }
 

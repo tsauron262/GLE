@@ -928,7 +928,9 @@ else if ($action == 'down' && $user->rights->propale->creer) {
 if ($action == 'confirm_reviser' && $user->rights->SynopsisRevProp->SynopsisRevProp->Push) {
     require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
     $revisionPropal = new SynopsisRevisionPropal($object);
-    $revisionPropal->reviserPropal();
+    $newId = $revisionPropal->reviserPropal();
+    if($newId)
+            header("Location: " . DOL_URL_ROOT.'/comm/propal.php?id=' . $newId);
 }
 /* /MOdif drsi */
 

@@ -1322,11 +1322,21 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     $.ajax({
         type: "POST",
         url: $form.attr('action'),
-        dataType: 'html',
+        dataType: 'xml',
         processData: false,
         contentType: false,
         data: new FormData(formElement), // Non compatible pour les IE < 10
         success: function(html) {
+            if($(html).find("prix").size() > 0){
+                prix = $(html).find("prix").html();
+                $(html).find("prix").html("");
+                if(prix > 0)
+                    alert("Attention la réparation n'est pas prise garantie. Prix : "+prix+" €");
+                
+                window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
+            }
+            
+            
             if ($resultContainer.length) {
                 $resultContainer.html(html);
             }
@@ -1385,8 +1395,6 @@ function onRequestResponse(xhr, requestType, prodId) {
     var $span = null;
     if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
         location.reload();
-    if (xhr.responseText.indexOf('<ok>Reload commande ok</ok>') !== -1)
-        window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?"));
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {

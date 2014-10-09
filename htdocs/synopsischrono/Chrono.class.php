@@ -293,6 +293,30 @@ class Chrono extends CommonObject {
         $description = $this->description;
         $socid = ($this->socid > 0 ? $this->socid : false);
         $contactid = ($this->contactid > 0 ? $this->contactid : false);
+
+
+        $result = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $id);
+        $ligne = $this->db->fetch_object($result);
+        if ($socid && $ligne->fk_societe != $socid) {
+            if ($ligne->propalid) {
+                $tabModif = array(array("propal", "fk_soc", $ligne->propalid, $socid));
+//            $db->query("UPDATE ");
+                $tab = getElementElement("propal", null, $ligne->propalid);
+                foreach ($tab as $ligne2) {
+                    $tabModif[] = array($ligne2['td'], "fk_soc", $ligne2['d'], $socid);
+                }
+
+
+                foreach ($tabModif as $ligne3) {
+                    $this->db->query("UPDATE " . MAIN_DB_PREFIX . $ligne3[0] . " SET " . $ligne3[1] . " = " . $ligne3[3] . " WHERE rowid = " . $ligne3[2]);
+                }
+            }
+        }
+
+
+
+
+
         $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET description = '" . addslashes($description) . "'";
         if ($socid)
             $requete .= ", fk_societe =  " . $socid;
@@ -558,14 +582,14 @@ class Chrono extends CommonObject {
 
     public function getNomUrl($withpicto = 0, $option = '', $maxlen = 0) {
         global $langs;
-        
+
         $this->picto = $this->model->picto;
 
         $result = '';
 
         if ($option == "desc" && $this->description != '' && stripos($this->ref, 'prod') !== null)
             $titre = dol_trunc($this->description, 40);
-        else if($this->model->id != 105)
+        else if ($this->model->id != 105)
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
         else
             $titre = $this->ref;
@@ -624,6 +648,7 @@ class Chrono extends CommonObject {
         global $user;
         require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
         $prop = new Propal($this->db);
+        $prop->modelpdf = "azurSAV";
         $prop->socid = $this->socid;
         $prop->date = dol_now();
         $prop->cond_reglement_id = 0;

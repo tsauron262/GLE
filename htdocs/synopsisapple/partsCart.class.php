@@ -9,6 +9,7 @@ class partsCart {
     public $cartRowId = null;
     public $confirmNumber = null;
     public $errors = array();
+
     public function __construct($db, $serial = null, $chronoId = null) {
         $this->serial = $serial;
         $this->chronoId = $chronoId;
@@ -23,10 +24,73 @@ class partsCart {
     public function displayErrors() {
         $html = '';
         foreach ($this->errors as $error) {
-            $html .= '<p class="error">'.$error.'</p>';
+            $html .= '<p class="error">' . $error . '</p>';
         }
         $this->errors = array();
         return $html;
+    }
+
+    public function addThisToPropal($propal) {
+        global $db, $langs;
+        $qte = 1;
+        $prod = new Product($db);
+        $prod->fetch(3175);
+        require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+        $prodF = new ProductFournisseur($db);
+        $prodF->find_min_price_product_fournisseur($prod->id, $qte);
+        $propal->addline($prod->description . 'rr', $prod->price, $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+
+
+        foreach ($this->partsCart as $part) {
+            $prix = $this->convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
+            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
+        }
+        $propal->fetch($propal->id);
+        require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
+        propale_pdf_create($db, $propal, null, $langs);
+    }
+
+    private function convertPrix($prix, $ref, $desc) {
+        $coefPrix = 1;
+        $constPrix = 0;
+        $tabCas1 = array("DN661", "FD661", "NF661", "RA", "RB", "RC", "RD", "RE", "RG", "SA", "SB", "SC", "SD", "SE", "X661", "XB", "XC", "XD", "XE", "XF", "ZD661", "ZK661");
+        $tabCas2 = array("SVC,IPOD", "Ipod nano");
+        $tabCas3 = array("661");
+        $tabCas4 = array("iphone", "BAT,IPHONE", "SVC,IPHONE");
+
+        $cas = 0;
+        foreach ($tabCas1 as $val)
+            if (stripos($ref, $val) === 0)
+                $cas = 1;
+        foreach ($tabCas2 as $val)
+            if (stripos($desc, $val) === 0)
+                $cas = 1;
+        foreach ($tabCas3 as $val)
+            if (stripos($ref, $val) === 0)
+                $cas = 2;
+        if ($cas == 2)
+            foreach ($tabCas4 as $val)
+                if (stripos($desc, $val) === 0)
+                    $cas = 3;
+
+        if ($cas == 0 || $cas == 2) {
+            if ($prix > 300)
+                $coefPrix = 0.8;
+            elseif ($prix > 150)
+                $coefPrix = 0.7;
+            elseif ($prix > 50)
+                $coefPrix = 0.6;
+            else {
+                $coefPrix = 0.6;
+                $constPrix = 10;
+            }
+        } elseif ($cas == 1) {
+            $constPrix = 45;
+        } elseif ($cas == 3) {
+            $constPrix = 45;
+        }
+        $prix = (($prix + $constPrix) / $coefPrix);
+        return $prix;
     }
 
     protected function loadCartRowId() {
@@ -86,7 +150,7 @@ class partsCart {
             $sql = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsis_apple_parts_cart` (`serial_number`, `chrono_id`) ';
             $sql .= 'VALUES (';
 //            $sql .= '123456, 23456';
-            $sql .= (isset($this->serial) ? '"' . $this->serial . '"' : '').', ';
+            $sql .= (isset($this->serial) ? '"' . $this->serial . '"' : '') . ', ';
             $sql .= (isset($this->chronoId) ? '"' . $this->chronoId . '"' : 'NULL');
             $sql .= ')';
 

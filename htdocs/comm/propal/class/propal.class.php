@@ -237,6 +237,9 @@ class Propal extends CommonObject
             $propalligne->desc=$remise->description;   	// Description ligne
             $propalligne->tva_tx=$remise->tva_tx;
             $propalligne->subprice=-$remise->amount_ht;
+            /*moàd drsi*/
+            $propalligne->pa_ht=-$remise->amount_ht;
+            /*fmoddrsi*/
             $propalligne->fk_product=0;					// Id produit predefini
             $propalligne->qty=1;
             $propalligne->remise=0;

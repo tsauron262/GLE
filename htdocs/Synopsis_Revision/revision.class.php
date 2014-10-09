@@ -94,18 +94,25 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         $hookmanager->initHooks(array('propalcard'));
         $hookmanager->executeHooks('doActions', $parameters, $object, $actionHook);    // Note that $action and $object may have been modified by some hooks
 
-        $result = $object->createFromClone($socid, $hookmanager);
-        if ($result > 0) {
+        $newId = $object->createFromClone($socid, $hookmanager);
+        if ($newId > 0) {
             echo $oldRef; //.print_r($propal, true);
-            self::setLienRevision($oldRef, $oldId, $result);
+            self::setLienRevision($oldRef, $oldId, $newId);
             $db->query("UPDATE ".MAIN_DB_PREFIX."synopsischrono SET propalid = ".$object->id." WHERE propalid = ".$oldId);
+            
+            $tab = getElementElement("propal", null, $oldId);
+            foreach ($tab as $ligne)
+                addElementElement($ligne['ts'], $ligne['td'], $newId, $ligne['d']);
+            $tab = getElementElement("propal", null, $oldId, null, 0);
+            foreach ($tab as $ligne)
+                addElementElement($ligne['ts'], $ligne['td'], $newId, $ligne['d'], 0);
 
-            header("Location: " . '../comm/propal.php?id=' . $result);
-            exit;
+            return $newId;
         } else {
             $mesg = $object->error;
         }
         print ($mesg . " Erreur" . $socid);
+        return 0;
     }
 
     public static function setLienRevision($oldRef, $oldId, $newId, $newRef = null) {

@@ -2227,6 +2227,9 @@ function processUser($import_key) {
 //    return 59;
     global $remUserArray, $db;
     if ($import_key > 0) {
+        $result = $db->query("SELECT `fk_object` FROM `llx_user_extrafields` WHERE `id8sens` = '".$import_key."'");
+        while($ligne = $db->fetch_object($result))
+                return $ligne->fk_object;
         $result = getElementElement("idUser8Sens", "idUserGle", $import_key);
         if (isset($result[0]['d']))
             return $result[0]['d'];

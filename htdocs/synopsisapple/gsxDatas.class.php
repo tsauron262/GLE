@@ -665,7 +665,10 @@ class gsxDatas {
                         break;
                 }
             }
-
+if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
+    echo "<prix>150</prix>";
+    die();
+}
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
@@ -694,6 +697,8 @@ class gsxDatas {
                             $requestType = 'CreateIPhoneCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
+                            $prixTot = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
+                            $html .= "<prix>".$prixTot."</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {
                                     $ok = true;

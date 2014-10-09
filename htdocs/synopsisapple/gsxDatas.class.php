@@ -665,10 +665,10 @@ class gsxDatas {
                         break;
                 }
             }
-if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
-    echo "<prix>150</prix>";
-    die();
-}
+//if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
+//    echo "<prix>150</prix>";
+//    die();
+//}
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {

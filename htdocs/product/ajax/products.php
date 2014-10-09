@@ -187,6 +187,6 @@ if (! empty($action) && $action == 'fetch' && ! empty($id)) {
 	$db->close();
 	
 	if ($outjson)
-		print json_encode($arrayresult);
+		print @json_encode($arrayresult);
 }
 

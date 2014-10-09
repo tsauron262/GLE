@@ -343,30 +343,7 @@ devis
 
 //DS SAV BOUTON HORS GARENTIE 
 
-Christian voir mail
-
-
-dominique horno 0695035348
-
-
-
-
-AJ TEXT NOTE avec date
-
-a coté du client modifier
-boutons entrer pas valider dans soc
-
-
-KBB VIDE = NIM SERIE SAV
-
-prix d'achat import
-
-majuscule sn nom client prenom premier lettre
-
-
-
-escla 3003854
-
+//majuscule sn nom client prenom premier lettre
 
 
 //quand ajout ligne apple ajouter service 
@@ -378,10 +355,10 @@ escla 3003854
 
 //tous les centres que ceux
 
-devis ss garentie 
-commande piece
+//devis ss garentie 
+//commande piece
 
-si req ou 0€  ou verifier par apple click envoyer devis
+/si req ou 0€  ou verifier par apple click envoyer devis
 
 
 //mail cc centre
@@ -390,7 +367,43 @@ si req ou 0€  ou verifier par apple click envoyer devis
 
 
 
-voir pour confirmation hors garentie
+//voir pour confirmation hors garentie
+
+
+//ajouter résolution
+
+
+//voir deco + fiche rapide new client
+
+
+//tableau  virer     centre  ajouter symptomes et deplacer résolution
+
+
+
+Christian voir mail
+
+
+dominique horno 0695035348
+
+
+
+
+AJ TEXT NOTE avec date
+
+a coté du client modifier
+
+
+boutons entrer pas valider dans soc
+
+
+KBB VIDE = NIM SERIE SAV
+
+prix d'achat import
+
+
+
+escla 3003854
+
 
 
 
@@ -402,20 +415,11 @@ si loi europeen refusé => ajouter certif loie uro + facture choix garentie n/c 
 
 
 
-//ajouter résolution
-
-
-//voir deco + fiche rapide new client
-
-
 
 quand devis accepté reparation en cours
 
 
 voir devis accepté et pas devis
-
-
-tableau  virer     centre  ajouter symptomes et deplacer résolution
 
 
 
@@ -434,7 +438,6 @@ voir devis refusé
 
 numero foire 
 G172827814
-
 
 
 dans liste prod chrono allonger texte

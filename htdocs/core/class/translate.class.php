@@ -345,7 +345,7 @@ class Translate
 	{
 		global $db;
 
-		if (! is_string($key)) return 'ErrorBadValueForParamNotAString';	// Avoid multiple errors with code not using function correctly.
+		if (! is_string($key)) return 'ErrorBadValueForParamNotAString : '.$key;	// Avoid multiple errors with code not using function correctly.
 
 		//print 'xx'.$key;
 		$newstr=$key;

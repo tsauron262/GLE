@@ -204,7 +204,7 @@ if (isset($conf->file->main_authentication) && preg_match('/openid/',$conf->file
 {
 ?>
 	<div class="center" class="login_main_home" style="max-width: 80%">
-	<?php echo $main_home; ?>
+	<?php echo str_replace("\n", "<br/>", $main_home); ?>
 	</div><br>
 <?php
 }

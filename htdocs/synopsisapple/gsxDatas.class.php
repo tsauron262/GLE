@@ -691,13 +691,15 @@ class gsxDatas {
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
                     case 'CreateIPhoneCarryInRepair':
+                    case 'CreateCarryIn':
+                    case 'CreateIPhoneCarryIn':
                         if($requestType == 'CreateCarryInRepair')
                             $requestType = 'CreateCarryIn';
                         if($requestType == 'CreateIPhoneCarryInRepair')
                             $requestType = 'CreateIPhoneCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
-                            $prixTot = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
+                            $prixTot = $response[$requestType . 'Response']['repairConfirmation']['netPrice'];
                             $html .= "<prix>".$prixTot."</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {

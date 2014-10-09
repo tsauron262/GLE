@@ -674,6 +674,7 @@ class gsxDatas {
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
+                dol_syslog("erreur GSX".print_r($response, true), 4);
             } else {
                 dol_syslog("iciici".print_r($response, true), 4);
                 $ok = false;

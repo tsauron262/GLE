@@ -1322,7 +1322,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
     $.ajax({
         type: "POST",
         url: $form.attr('action'),
-        dataType: 'xml',
+        dataType: 'html',
         processData: false,
         contentType: false,
         data: new FormData(formElement), // Non compatible pour les IE < 10

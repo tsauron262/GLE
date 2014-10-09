@@ -208,7 +208,7 @@ EOF;
 
         $colModel = array();
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList = 1 AND model_refid = " . $id/* . " ORDER BY rang" */;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList > 0 AND model_refid = " . $id . " ORDER BY inDetList" ;
         $sql = $db->query($requete);
         $colModelArr = array();
         $colModelArr[0] = array('name' => "id", "index" => "id", "width" => 0, 'hidden' => true, "search" => false, "align" => "left", "key" => true, "hidedlg" => true);

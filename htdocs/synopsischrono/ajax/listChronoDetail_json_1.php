@@ -147,7 +147,7 @@ if ($searchOn == 'true') {
 
 
 
-    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList = 1 AND model_refid =  " . $id;
+    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList > 0 AND model_refid =  " . $id. " ORDER BY inDetList";
     $sqlPre = $db->query($requetePre);
     while ($resPre = $db->fetch_object($sqlPre)) {
         $nom = sanitize_string($resPre->nom);
@@ -240,7 +240,7 @@ if ($searchOn == 'true') {
 
 
 
-$requetePre = "SELECT *, k.id as key_id, k.nom as key_name FROM " . MAIN_DB_PREFIX . "synopsischrono_key k LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tv ON tv.id = type_valeur  WHERE inDetList = 1 AND model_refid =  " . $id;
+$requetePre = "SELECT *, k.id as key_id, k.nom as key_name FROM " . MAIN_DB_PREFIX . "synopsischrono_key k LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tv ON tv.id = type_valeur  WHERE inDetList > 0 AND model_refid =  " . $id. " ORDER BY inDetList";
 
 $sqlPre = $db->query($requetePre);
 $arrPre = $arrKeyName = $arrKeyType = array();

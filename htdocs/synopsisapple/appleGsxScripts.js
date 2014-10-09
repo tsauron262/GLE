@@ -1342,7 +1342,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
             }
         },
         error: function() {
-            displayRequestMsg('error', 'Une erreur technique est survenue', $resultContainer);
+            displayRequestMsg('error', 'Une erreur technique est survenue. Ajax', $resultContainer);
         }
     });
 }

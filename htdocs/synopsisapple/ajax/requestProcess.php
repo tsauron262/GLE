@@ -226,12 +226,6 @@ if (isset($_GET['action'])) {
                         $datas = new gsxDatas($_GET['serial'], $userId, $password, $serviceAccountNo);
                         $return = $datas->processRequestForm($_GET['prodId'], $_GET['request']);
                         
-                        if(stripos($return, "<prix>150</prix>") !== -1){
-                            $return .= "garentie";
-                        }
-                        else{
-                            $return .= "return";
-                        }
                         
                         echo $return;
                         

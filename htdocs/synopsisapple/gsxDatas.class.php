@@ -700,7 +700,7 @@ class gsxDatas {
                             $requestType = 'CreateIPhoneCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
-                            $prixTot = $response[$requestType . 'Response']['repairConfirmation']['netPrice'];
+                            $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$requestType . 'Response']['repairConfirmation']['totalFromOrder']);
                             $html .= "<prix>".$prixTot."</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {

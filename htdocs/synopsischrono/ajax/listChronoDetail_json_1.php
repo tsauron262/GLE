@@ -247,7 +247,7 @@ $requete = "SELECT view.*, soc.nom as socname, soc.rowid as socid FROM llx_synop
 
 $requete .= $wh1;
 $requete .= " ORDER BY " . $sidx . " " . $sord . "";
-
+echo $requete;
 //echo($requete);die;
 $result = $db->query($requete);
 if (!$result) {

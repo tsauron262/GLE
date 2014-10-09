@@ -406,3 +406,38 @@ si loi europeen refusé => ajouter certif loie uro + facture choix garentie n/c 
 
 
 //voir deco + fiche rapide new client
+
+
+
+quand devis accepté reparation en cours
+
+
+voir devis accepté et pas devis
+
+
+tableau  virer     centre  ajouter symptomes et deplacer résolution
+
+
+
+voir prod accompte
+
+
+acompte ht a 20     taper en ttc
+
+
+voir pour payer 30 jours
+
+
+
+voir devis refusé
+
+
+numero foire 
+G172827814
+
+
+
+dans liste prod chrono allonger texte
+
+
+annecy

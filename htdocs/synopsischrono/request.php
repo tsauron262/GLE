@@ -106,7 +106,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
 
@@ -130,7 +130,7 @@ $attentePiece = 1;
         mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
 \nNous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel . ".
 \nCordialement.
-\nL'équipe BIMP", array(), array(), array(), $fromMail);
+\nL'équipe BIMP", array(), array(), array());
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     }
 
@@ -150,7 +150,7 @@ $attentePiece = 1;
         $ok = true;
         mailSyn2("Pièces reçues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.
 \nCordialement.
-\nL'équipe BIMP", array(), array(), array(), $fromMail);
+\nL'équipe BIMP", array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     }
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
@@ -175,7 +175,7 @@ $attentePiece = 1;
         $propal->cloture($user, 4, '');
         $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
         mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     }
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
@@ -211,7 +211,7 @@ $attentePiece = 1;
         mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Ephésus pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
 \nCordialement.
-\nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3, $fromMail);
+\nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
         $tabT = getElementElement("propal", "facture", $chrono->propalid);
         $facture = new Facture($db);
         $facture->fetch($tabT[count($tabT) - 1]['d']);

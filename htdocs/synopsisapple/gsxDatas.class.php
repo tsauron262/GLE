@@ -626,6 +626,7 @@ class gsxDatas {
                             'IPhoneCreateCarryInRepairResponse',
                             'CreateIPhoneCarryInRepairResponse'
                         );
+                        $requestType = "CreateIPhoneCarryInRepair";
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
                         if (isset($result['serialNumber']))
@@ -666,7 +667,7 @@ class gsxDatas {
                 }
             }
 //if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
-//    echo "<prix>150</prix>";
+//    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
 //    die();
 //}
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
@@ -696,8 +697,8 @@ class gsxDatas {
                     case 'CreateIPhoneCarryIn':
                         if($requestType == 'CreateCarryInRepair')
                             $requestType = 'CreateCarryIn';
-                        if($requestType == 'CreateIPhoneCarryInRepair')
-                            $requestType = 'CreateIPhoneCarryIn';
+//                        if($requestType == 'CreateIPhoneCarryInRepair')
+//                            $requestType = 'CreateIPhoneCarryIn';
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$requestType . 'Response']['repairConfirmation']['totalFromOrder']);
@@ -711,7 +712,7 @@ class gsxDatas {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
                             }
                         } else {
-                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple.</p>';
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : '.$requestType.'</p>';
                         }
                         break;
 

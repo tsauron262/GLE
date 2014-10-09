@@ -155,7 +155,7 @@ Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
                         $factureA->date = dol_now();
                         $factureA->socid = $chrono->socid;
                         $factureA->create($user);
-                        $factureA->addline("Acompte", $acompte, 1, 0, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte);
+                        $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte);
                                 
                                 
 //                                ("Acompte", $acompte, 1, 0, 0, 0, $prod->id, 0, 'HT', null, null,null, null, null, null, null, null, null, null, null, null, null, $acompte);
@@ -181,8 +181,10 @@ Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
                         $discount->description = "Acompte";
                         $discount->fk_soc = $factureA->socid;
                         $discount->fk_facture_source = $factureA->id;
-                        $discount->amount_ht = $discount->amount_ttc = $acompte;
-                        $discount->amount_tva = $discount->tva_tx = 0;
+                        $discount->amount_ht = $acompte / 1.2;
+                        $discount->amount_ttc = $acompte;
+                        $discount->amount_tva = $acompte - ($acompte / 1.2);
+                        $discount->tva_tx = 20;
                         $discount->create($user);
 //                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
                         $propal->insert_discount($discount->id);

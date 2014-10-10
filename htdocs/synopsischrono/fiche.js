@@ -146,6 +146,15 @@ jQuery(document).ready(function() {
     setTimeout(function() {
         majOldSelect();
     }, 500);
+
+
+
+    $("#search_idprod").keydown(function(e) {
+        if (e.which == 13) {
+            $(this).parent().find(".butAction").click();
+            return false;
+        }
+    });
 });
 
 

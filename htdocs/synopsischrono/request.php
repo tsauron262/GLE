@@ -113,18 +113,18 @@ if (isset($_REQUEST['actionEtat'])) {
     if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         //Si commmande apple a 0 on passse la propal sous garenti.
         if (isset($_REQUEST['prix']) && $_REQUEST['prix'] == 0 && is_object($chrono->propal) && $chrono->propal->total_ht <= 0) {
-            require_once(DOL_DOCUMENT_ROOT."/synopsisapple/partsCart.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/partsCart.class.php");
             $part = new partsCart($db);
             $part->chronoId = $chrono->id;
             $part->loadCart();
             $part->addThisToPropal($chrono->propal);
-            $action = "attenteClient2";//Pour simuler click bouton Sous garentie
+            $action = "attenteClient2"; //Pour simuler click bouton Sous garentie
         }
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Piéce commandée le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 1));
-$attentePiece = 1;
+        $attentePiece = 1;
 
         $ok = true;
         mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
@@ -180,15 +180,21 @@ $attentePiece = 1;
     }
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Attente client depuis le " . date('d-m-y H:i');
+        $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
             $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht > 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0);
-            if($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
+            if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
+            $chrono->propal->valid($user);
             $chrono->propal->cloture($user, 2, "Auto via SAV sous garentie");
+            $chrono->propal->fetch($chrono->propal->id);
+            propale_pdf_create($db, $chrono->propal, null, $langs);
         } else {
+            $chrono->propal->valid($user);
+            $chrono->propal->fetch($chrono->propal->id);
+            propale_pdf_create($db, $chrono->propal, null, $langs);
             mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
 \nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).
@@ -196,9 +202,6 @@ $attentePiece = 1;
 \nL'équipe BIMP", $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
             $chrono->setDatas($chrono->id, array($idEtat => 2));
         }
-        $chrono->propal->fetch($chrono->propal->id);
-        propale_pdf_create($db, $chrono->propal, null, $langs);
-        $chrono->propal->valid($user);
         $ok = true;
     }
 
@@ -229,8 +232,8 @@ $attentePiece = 1;
 if ($ok)
     header("Location:fiche.php?id=" . $_GET['id']);
 else {
-    dol_syslog("Page request des chrono sav sans parametre action vamide trouvé", 4);
-    echo "Quelque chose c'est mal passé";
+    dol_syslog("Page request des chrono sav sans parametre action vamide trouvé Ancien etat : " . $chrono->extraValue[$chrono->id]['Etat']['value'] . " Nouveau : " . $action, 4);
+    echo "Quelque chose c'est mal passé : ";
 }
 
 function sendSms($chrono, $text) {

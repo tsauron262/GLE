@@ -30,7 +30,7 @@ if ($id > 0) {
     $typeChrono = $chr->model->id;
 }
 
-if ($action == 'addLnProp' && $chr->propalid) {
+if ($action == 'addLnProp' && $chr->propalid  && isset($_REQUEST['idprod']) && $_REQUEST['idprod'] > 0) {
     $prod = new Product($db);
     $prod->fetch($_REQUEST['idprod']);
     $prod->tva_tx = ($prod->tva_tx > 0)? $prod->tva_tx : 0;

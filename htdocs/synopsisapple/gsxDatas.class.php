@@ -702,6 +702,8 @@ class gsxDatas {
                         if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$requestType . 'Response']['repairConfirmation']['totalFromOrder']);
+                            if(isset($_REQUEST['requestReviewByApple']) && $_REQUEST['requestReviewByApple'] == "Y")
+                                $prixTot = 0;
                             $html .= "<prix>".$prixTot."</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {

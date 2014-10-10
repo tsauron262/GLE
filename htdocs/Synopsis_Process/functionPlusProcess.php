@@ -55,6 +55,7 @@ function bouttonEtatSav($idChrono) {
 
     if ($chrono->values[$idEtat] == 1) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=pieceOk" . $sms . "'>Pièce reçue</a>";
+        $return .= "<br/>";
     }
 
     if ($chrono->values[$idEtat] == 0) {
@@ -64,7 +65,7 @@ function bouttonEtatSav($idChrono) {
     if ($chrono->values[$idEtat] > 0 && $chrono->propalid && $propal->statut == 0) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "'>Envoyer Devis</a>";
         $return .= "</br>";
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
+//        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
 
     if ($chrono->propalid && $propal->statut > 1 && ($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3)) {

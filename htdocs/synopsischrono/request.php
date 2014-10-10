@@ -112,7 +112,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         //Si commmande apple a 0 on passse la propal sous garenti.
-        if (isset($_REQUEST['prix']) && $_REQUEST['prix'] == 0 && is_object($chrono->propal) && $chrono->propal->total_ht <= 0) {
+        if (isset($_REQUEST['prix']) && $_REQUEST['prix'] == 0 && is_object($chrono->propal)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/partsCart.class.php");
             $part = new partsCart($db);
             $part->chronoId = $chrono->id;

@@ -22,7 +22,10 @@ $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContac
         $(".required").removeClass("required");
         $("#form").submit();
         }, "Contact", 1)
-    });});</script>';
+    });
+$("#inputautocompletesocid").focus();    
+
+});</script>';
 llxHeader($js);
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
@@ -139,7 +142,9 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
                     $propal = $chrono->propal;
 
 
-                    $propal->addline("Prise en charge :  : " . $chrono->ref . "\n" . "Garantie :
+                    $propal->addline("Prise en charge :  : " . $chrono->ref . 
+                            "\n"."S/N : ".$NoMachine.
+                            "\n" . "Garantie :
 Pour du matériel couvert par Apple, la garantie initiale s'applique.
 Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
 Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.

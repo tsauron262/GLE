@@ -426,7 +426,7 @@ voir devis accepté et pas devis
 voir prod accompte
 
 
-acompte ht a 20     taper en ttc
+// acompte ht a 20     taper en ttc
 
 
 voir pour payer 30 jours
@@ -436,11 +436,28 @@ voir pour payer 30 jours
 voir devis refusé
 
 
-numero foire 
-G172827814
+//numero foire 
+//G172827814
 
 
 dans liste prod chrono allonger texte
 
 
 annecy
+
+
+date reception = haujourd'hui
+
+devis refusé
+
+
+//cocher virifier par apple = 0€
+
+
+
+//ajout prod entrer bug
+
+//voir géneration avant envoie
+
+
+ajouter les id

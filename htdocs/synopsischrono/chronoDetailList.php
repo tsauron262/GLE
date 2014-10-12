@@ -217,7 +217,7 @@ EOF;
         $i = 3;
         
         if ($chronoRef->hasSociete) {
-            $colModelArr[$i] = array('name' => "Société", "index" => "socname", "width" => 130, "align" => "left", "search" => true, "sortable" => true);
+            $colModelArr[$i] = array('name' => "Société", "index" => "socname", "width" => 130, "align" => "left", "search" => false, "sortable" => true);
             $i++;
         }
         
@@ -236,12 +236,16 @@ EOF;
                 "index" => sanitize_string($res->nom),
                 "width" => 130,
                 'hidden' => false,
-                "search" => true,
+                "stype" => 'text',
                 "align" => $align,
                 "key" => false,
                 "hidedlg" => false
             );
 //var_dump($sql);
+            
+            $colModelArr[$i]['search'] = ($res1->id != 10 && $res1->id != 7);
+            
+            
             if ($res1->cssClass == "datepicker") {
                 $colModelArr[$i]['sorttype'] = "date";
                 $colModelArr[$i]['formatter'] = "date";
@@ -367,7 +371,7 @@ EOF;
 
         $js .= $htmlOld->listjqGrid($arr, $nomDiv, true, false, array(view => false, add => false, edit => false, search => false, position => "left"), $optionSearch);
 
-//        $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
+        $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
     }
 
 

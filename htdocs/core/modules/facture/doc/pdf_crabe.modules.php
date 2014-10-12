@@ -1101,14 +1101,16 @@ class pdf_crabe extends ModelePDFFactures
                 
 		if ($object->paye) $resteapayer=0;
 
-		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0)
+		if ($deja_regle > 0 || $creditnoteamount > 0 || $depositsamount > 0  /*moddrs*/|| -$accTht > 0/*fmoddrsi*/)
 		{
 			// Already paid + Deposits
+                    if(($deja_regle + $depositsamount) > 0){
 			$index++;
 			$pdf->SetXY($col1x, $tab2_top + $tab2_hl * $index);
 			$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("Paid"), 0, 'L', 0);
 			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 			$pdf->MultiCell($largcol2, $tab2_hl, price($deja_regle + $depositsamount, 0, $outputlangs), 0, 'R', 0);
+                    }
 
 			// Credit note
 			if ($creditnoteamount)

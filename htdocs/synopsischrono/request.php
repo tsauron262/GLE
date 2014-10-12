@@ -79,6 +79,12 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
     $fromMail = "SAV BIMP<no-replay@bimp.fr>";
 }
 
+if (isset($chrono->extraValue[$chrono->id]['Technicien']['value'])) {
+    $user = new User($db);
+    $user->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
+    $tech = $user->getFullName($langs);
+}
+
 if (isset($_REQUEST['actionEtat'])) {
     $action = $_REQUEST['actionEtat'];
 
@@ -195,11 +201,16 @@ if (isset($_REQUEST['actionEtat'])) {
             $chrono->propal->valid($user);
             $chrono->propal->fetch($chrono->propal->id);
             propale_pdf_create($db, $chrono->propal, null, $langs);
-            mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
+            $text = "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
-\nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).
-\nCordialement.
-\nL'équipe BIMP", $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
+\nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
+
+            if (isset($tech))
+                $text .= "\nTechnicien en charge de la réparation : " . $tech;
+
+            $text .= "\n\nCordialement.
+\nL'équipe BIMP";
+            mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
             $chrono->setDatas($chrono->id, array($idEtat => 2));
         }
         $ok = true;

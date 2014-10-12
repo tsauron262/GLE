@@ -188,7 +188,7 @@ class gsxDatas {
 
                     $html .= '<td>' . "\n";
                     $html .= '<table><thead></thead><tbody>' . "\n";
-
+//echo "<pre>"; print_r($datas);die;
                     if (isset($datas['serialNumber']) && $datas['serialNumber'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Numéro de série</td><td>' . $datas['serialNumber'] . '</td></tr>' . "\n";
 
@@ -214,16 +214,22 @@ class gsxDatas {
                         $html .= '<tr class="oddRow"><td class="rowTitle">Date d\'achat estimé</td><td>' . $datas['estimatedPurchaseDate'] . '</td></tr>' . "\n";
 
                     if (isset($datas['coverageStartDate']) && $datas['coverageStartDate'] !== '')
-                        $html .= '<tr class="oddRow"><td class="rowTitle">Début de la garantie</td><td>' . $datas['coverageStartDate'] . '</td></tr>' . "\n";
+                        $html .= '<tr><td class="rowTitle">Début de la garantie</td><td>' . $datas['coverageStartDate'] . '</td></tr>' . "\n";
 
                     if (isset($datas['coverageEndDate']) && $datas['coverageEndDate'] !== '')
-                        $html .= '<tr><td class="rowTitle">Fin de la garantie</td><td>' . $datas['coverageEndDate'] . '</td></tr>' . "\n";
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Fin de la garantie</td><td>' . $datas['coverageEndDate'] . '</td></tr>' . "\n";
 
                     if (isset($datas['daysRemaining']) && $datas['daysRemaining'] !== '')
-                        $html .= '<tr class="oddRow"><td class="rowTitle">Jours restants</td><td>' . $datas['daysRemaining'] . '</td></tr>' . "\n";
+                        $html .= '<tr><td class="rowTitle">Jours restants</td><td>' . $datas['daysRemaining'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['notes']) && $datas['notes'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Note</td><td>' . $datas['notes'] . '</td></tr>' . "\n";
+                    
+                    if (isset($datas['activationLockStatus']) && $datas['activationLockStatus'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Localisé</td><td>' . $datas['activationLockStatus'] . '</td></tr>' . "\n";
 
                     if (isset($datas['manualURL']) && $datas['manualURL'] !== '')
-                        $html .= '<tr style="height: 30px;"><td><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
+                        $html .= '<tr style="height: 30px;"><td colspan="2"><a class="productPdfLink" href="' . $datas['manualURL'] . '">Manuel</a></td></tr>' . "\n";
 
                     $html .= '</tbody></table>' . "\n";
                     $html .= '</td>' . "\n";

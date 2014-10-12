@@ -142,20 +142,21 @@ if ($searchOn == 'true') {
     }
 
 
-    if ($_REQUEST['ref'] > 0)
+    if (isset($_REQUEST['ref']))
         $wh .= searchtext('ref');
 
-
+//die($wh.$_REQUEST['ref']);
 
     $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList > 0 AND model_refid =  " . $id. " ORDER BY inDetList";
     $sqlPre = $db->query($requetePre);
     while ($resPre = $db->fetch_object($sqlPre)) {
+        $searchField = "";
         $nom = sanitize_string($resPre->nom);
 //        if ($nom == $searchField) {
         if (isset($_REQUEST[sanitize_string($nom)])) {
 //            die($_REQUEST[sanitize_string($nom)]);
 //            die("cool");
-            $searchField = sanitize_string($nom);
+            $searchField = str_replace("ô", "o", sanitize_string($nom));
             $searchString = $_REQUEST[sanitize_string($nom)];
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur WHERE id = " . $resPre->type_valeur;
 
@@ -168,9 +169,10 @@ if ($searchOn == 'true') {
                 }
             }
             if ($res1->cssClass == 'datetimepicker') {
-                $searchField = "date_format(" . $nom . ",'%Y-%m-%d %H:%i')";
+                $searchField = "date_format(STR_TO_DATE(`" . $nom . "`, '%d/%m/%Y %H:%i'),'%d/%m/%Y') ";
                 if (preg_match('/([0-9]{2})[\W]([0-9]{2})[\W]([0-9]{4})[\W]([0-9]{2})[\W]([0-9]{2})/', $searchString, $arr)) {
-                    $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
+                    $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1];
+//                    $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
                 }
             }
         }
@@ -194,7 +196,7 @@ if ($searchOn == 'true') {
 //        }
 //    }.
         $searchString = addslashes($searchString);
-        if (isset($searchField)) {
+        if (isset($searchField) && $searchField != "") {
             if ($_REQUEST['searchOper'] == 'eq') {
                 $oper = '=';
                 $wh .= " AND " . $searchField . " " . $oper . " '" . $searchString . "'";
@@ -236,7 +238,6 @@ if ($searchOn == 'true') {
         }
     }
 }
-
 
 
 

@@ -120,7 +120,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
 
             $chrono = new Chrono($db);
             $chrono->model_refid = 105;
-            $chrono->description = ($descr != "" ? addslashes($descr) : $machine);
+            $chrono->description = ($descr != "" ? addslashes($descr) : "");
             $chrono->socid = $socid;
             $chrono->contactid = $_REQUEST["contactid"];
             $chronoid = $chrono->create();

@@ -487,13 +487,14 @@ function PartsManager(prodId, serial) {
     };
     this.displayParts = function() {
         this.$parts = this.$prod.find('.partsListContainer');
-        var ths = '<th style="min-width: 250px">Nom</th>';
-        ths += '<th style="min-width: 100px">Ref.</th>';
-        ths += '<th style="min-width: 100px">Nouvelle Ref.</th>';
-        ths += '<th style="min-width: 100px">eeeCode</th>';
-        ths += '<th style="min-width: 100px">Type</th>';
-        ths += '<th style="min-width: 100px">Prix</th>';
+        var ths =  '';
         ths += '<th></th>';
+        ths += '<th style="min-width: 250px">Nom</th>';
+        ths += '<th style="min-width: 80px">Ref.</th>';
+        ths += '<th style="min-width: 80px">Nouvelle Ref.</th>';
+        ths += '<th style="min-width: 80px">eeeCode</th>';
+        ths += '<th style="min-width: 80px">Type</th>';
+        ths += '<th style="min-width: 80px">Prix</th>';
 
         for (gpe in this.parts) {
             this.$prod.find('.typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_' + ptr.prodId + '_' + gpe + '"/><label for="typeFilter_' + ptr.prodId + '_' + gpe + '">' + partsGroup[gpe] + '</label><br/>');
@@ -509,13 +510,13 @@ function PartsManager(prodId, serial) {
                 else
                     html += ' evenRow';
                 html += '">';
+                html += '<td><span id="add_' + this.prodId + '_' + gpe + '_' + id + '" class="addToCart activated" onclick="GSX.products[' + this.prodId + '].cart.add($(this))">Ajouter au panier</span></td>';
                 html += '<td class="partName">' + this.parts[gpe][id].name + '</td>';
                 html += '<td>' + this.parts[gpe][id].num + '</td>';
                 html += '<td>' + this.parts[gpe][id].newNum + '</td>';
                 html += '<td>' + this.parts[gpe][id].eeeCode + '</td>';
                 html += '<td>' + this.parts[gpe][id].type + '</td>';
                 html += '<td>' + this.parts[gpe][id].price + '&nbsp;&euro;</td>';
-                html += '<td><span id="add_' + this.prodId + '_' + gpe + '_' + id + '" class="addToCart activated" onclick="GSX.products[' + this.prodId + '].cart.add($(this))">Ajouter au panier</span></td>';
                 html += '</tr>';
                 odd = !odd;
             }

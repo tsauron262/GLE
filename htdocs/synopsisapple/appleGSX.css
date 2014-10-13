@@ -490,6 +490,15 @@ span.closeSerialUpdateForm:before {
     content: '\f057';
 }
 
+select.updateFormSelect {
+    margin: 30px;
+}
+
+div.updateSerialFormBlock {
+    padding: 20px;
+    display: none;
+}
+
 /*Liste des composants*/
 .partsRequestResult {
     display: none;
@@ -933,18 +942,4 @@ span.duplicateInput:before {
 div.yesNoBlock {
     float: right;
     display: inline-block;
-}
-
-span.displayKgbSerialUpdate:before {
-    font-family: 'FA';
-    content: '\f14c';
-    margin-right: 8px;
-}
-
-div.kgbSerialUpdateFormContainer {
-    display: none;
-    padding: 30px;
-    margin: 20px;
-    border: 1px solid #DCDCDC;
-    border-radius: 12px;
 }

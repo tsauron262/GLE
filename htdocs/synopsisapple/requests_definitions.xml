@@ -222,6 +222,7 @@
         <datas>
             <data name="repairConfirmationNumber" required="1"></data>
             <data name="serialNumber" required="1"></data>
+            <data name="closeRepair" required="0" donotprocess="1" default="N"></data>
         </datas>
     </request>
 

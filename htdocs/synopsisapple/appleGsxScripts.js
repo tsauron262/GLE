@@ -29,8 +29,8 @@ var partDataType = {
 var extra = "";
 if (typeof (chronoId) != 'undefined')
     extra = extra + "&chronoId=" + chronoId;
-else
-    extra = extra+ "&chronoId=12";
+//else
+//    extra = extra+ "&chronoId=12";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1107,13 +1107,24 @@ function onComptiaGroupSelect($select) {
         });
     }
 }
-function displayKgbSerialUpdateForm($span) {
-    var $div = $span.parent('div').parent('.kgbUpdateBlock').find('.kgbSerialUpdateFormContainer');
-    if ($div.css('display') == 'none')
-        $div.slideDown(250);
-    else
-        $div.slideUp(250);
+function switchUpdateSerialForm($span) {
+    var $container = $span.parent('div.serialUpdateFormContainer');
+    var val = $container.find('select.updateFormSelect').val();
+    $container.find('.updateSerialFormBlock').each(function() {
+        if ($(this).css('display') == 'none') {
+            if ($(this).hasClass(val))
+                $(this).stop().slideDown(250);
+            else
+                $(this).stop().hide();
+        } else {
+            if ($(this).hasClass(val))
+                $(this).stop().show();
+            else
+                $(this).stop().slideUp(250);
+        }
+    });
 }
+
 function displayCreateRepairPopUp($button) {
     var prodId = getProdId($button);
     var $popUp = $('#prod_' + prodId).find('div.repairPopUp')
@@ -1300,8 +1311,8 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
                     $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
                     break;
 
-                case 'UpdateKGBSerialNumber':
-                    $resultContainer = $repairContainer.find('.KGBSerialNumberUpdate');
+                case 'KGBSerialNumberUpdate':
+                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
                     break;
             }
         }

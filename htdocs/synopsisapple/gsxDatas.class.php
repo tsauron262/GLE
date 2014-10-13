@@ -659,7 +659,7 @@ class gsxDatas {
                             'IPhoneUpdateKGBSerialNumberResponse',
                             'IPhoneKGBSerialNumberUpdateResponse'
                         );
-                        $client = 'UpdateIPhoneKGBSerialNumber';
+                        $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
                         if (isset($result['serialNumber']))
                             $result['serialNumber'] = '';

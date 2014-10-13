@@ -1,7 +1,7 @@
 <?php
 
 class SynopsisRevision {
-    
+
     static $separateur = "–";
 
     static function alpha2num($a) {
@@ -14,11 +14,11 @@ class SynopsisRevision {
         }
         return $r - 1;
     }
-    
-    static function updateRef($id, $oldRef, $table){
+
+    static function updateRef($id, $oldRef, $table) {
         global $db;
         $result = self::convertRef($oldRef, $table);
-        $db->query("UPDATE ". MAIN_DB_PREFIX . $table ." set ref ='".$result."' WHERE rowid=".$id);
+        $db->query("UPDATE " . MAIN_DB_PREFIX . $table . " set ref ='" . $result . "' WHERE rowid=" . $id);
     }
 
     static function convertRef($oldRef, $table) {
@@ -62,6 +62,7 @@ class SynopsisRevision {
 }
 
 class SynopsisRevisionPropal extends SynopsisRevision {
+
     private static $oldRefCli = "";
 
     function SynopsisRevisionPropal($propal) {
@@ -98,8 +99,17 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         if ($newId > 0) {
             echo $oldRef; //.print_r($propal, true);
             self::setLienRevision($oldRef, $oldId, $newId);
-            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsischrono SET propalid = ".$object->id." WHERE propalid = ".$oldId);
-            
+            $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE propalid = " . $oldId);
+            if ($db->num_rows($result) > 0) {
+                $ligne = $db->fetch_object($result);
+                $object->fetch($newId);
+                propale_pdf_create($db, $object, null, $outputlangs);
+                $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $ligne->id . "/";
+                mkdir($repDest);//die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");
+                link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
+                $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = " . $object->id . " WHERE propalid = " . $oldId);
+            }
+
             $tab = getElementElement("propal", null, $oldId);
             foreach ($tab as $ligne)
                 addElementElement($ligne['ts'], $ligne['td'], $newId, $ligne['d']);
@@ -118,12 +128,13 @@ class SynopsisRevisionPropal extends SynopsisRevision {
     public static function setLienRevision($oldRef, $oldId, $newId, $newRef = null) {
         global $conf, $db;
 
-        if(!isset($newRef))
-        $newRef = self::convertRef($oldRef, "propal");
+        if (!isset($newRef))
+            $newRef = self::convertRef($oldRef, "propal");
 //        die($tabT[]);
-        
+
         $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set ref = '" . $newRef . "', import_key = " . $oldId . ", ref_client = '" . self::$oldRefCli . "' WHERE rowid = " . $newId;
-        $db->query($requete);echo $requete;
+        $db->query($requete);
+//        echo $requete;
         $requete = "UPDATE " . MAIN_DB_PREFIX . "propal set extraparams = " . $newId . ", fk_statut = 3 WHERE rowid = " . $oldId;
         $db->query($requete);
     }

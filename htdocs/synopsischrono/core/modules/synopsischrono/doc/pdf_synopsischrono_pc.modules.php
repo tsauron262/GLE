@@ -256,7 +256,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetFont('', '', 9);
                 $pdf->MultiCell(100, 6, $chrono2->description, 0, 'L');
 
-                $pdf->SetXY('137', '75');
+                $pdf->SetXY('137', '75.1');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1011]->value, 0, 'L');
 
                 $pdf->SetXY('137', '79.4');
@@ -265,15 +265,15 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('145', '84');
                 $pdf->MultiCell(100, 6, $chrono2->valuesPlus[1015]->value, 0, 'L');
 
-                $pdf->SetXY('131.5', '88');
+                $pdf->SetXY('131.5', '88.2');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1040]->valueStr . "    " . $chrono->description, 0, 'L');
 
-                $pdf->SetXY('143', '92.5');
+                $pdf->SetXY('143', '104.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
 
 
                 //symptom et sauv
-                $pdf->SetXY('15', '125');
+                $pdf->SetXY('15', '125.2');
                 $pdf->SetFont('', '', 12);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
 
@@ -282,10 +282,16 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
                 //etiquette ref
+                for ($i = 0; $i < 5; $i++) {
                 $pdf->SetFont('', '', 11);
-                for ($i = 0; $i < 6; $i++) {
-                    $pdf->SetXY('15.5' + ($i * 29), '264.6');
-                    $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
+                $pdf->SetTextColor(256,0,0);
+                    $x = ('8' + ($i * 38.8));
+                    $pdf->SetXY($x, '269.9');
+                    $pdf->MultiCell(38, 6, $chrono->ref, 0, 'C');
+                $pdf->SetFont('', '', 10);
+                $pdf->SetTextColor("black");
+                    $pdf->SetXY($x, '278');
+                    $pdf->MultiCell(38, 6, $chrono->societe->nom, 0, 'C');
                 }
 //                $pdf->MultiCell(30, 6, $chrono->ref, 0, 'L');
 //                for($i=0;$i<1000;$i = $i+5){

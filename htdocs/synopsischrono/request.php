@@ -80,9 +80,9 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
 }
 
 if (isset($chrono->extraValue[$chrono->id]['Technicien']['value'])) {
-    $user = new User($db);
-    $user->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
-    $tech = $user->getFullName($langs);
+    $userT = new User($db);
+    $userT->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
+    $tech = $userT->getFullName($langs);
 }
 
 if (isset($_REQUEST['actionEtat'])) {
@@ -198,8 +198,8 @@ if (isset($_REQUEST['actionEtat'])) {
             $chrono->propal->fetch($chrono->propal->id);
             propale_pdf_create($db, $chrono->propal, null, $langs);
         } else {
-            $chrono->propal->valid($user);
             $chrono->propal->fetch($chrono->propal->id);
+            $chrono->propal->valid($user);
             propale_pdf_create($db, $chrono->propal, null, $langs);
             $text = "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.

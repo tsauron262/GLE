@@ -193,11 +193,11 @@ $js .= <<<EOF
         displayOddEven: true,
         displayFreeBusys: true,
 EOF;
-$js .= 'daysToShow: ' . ((count($tabUser) < 6) ? '5' : '3') . ',';
+$js .= 'daysToShow: ' . ((count($tabUser) < 6) ? '6' : '3') . ',';
 
 $js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
 if (count($tabUser) < 6)
-    $js .= ", 'work week': 5, 'full week': 7";
+    $js .= ", 'work week': 6, 'full week': 7";
 $js .= "},";
 
 $js .= <<<EOF

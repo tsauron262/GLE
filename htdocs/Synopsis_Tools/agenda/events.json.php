@@ -10,31 +10,31 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
     $sql = ("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm a LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_extrafields on fk_object = a.id WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep >= '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "//Rdv dbut ds periode fin aprés
             . "|| (datep2 <= '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')" //fin ds la periode
             . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')) AND fk_user_action IN (" . implode(",", $newTabUser2) . ") AND (fk_action > 40 || fk_action < 9) order by datep ASC ");
-    $result = $db->query($sql);//avant et aprés periode
+    $result = $db->query($sql); //avant et aprés periode
 //echo $sql;
     $f = 0;
     while ($ligne = $db->fetch_object($result)) {
         $userId = $newTabUser[$ligne->fk_user_action];
-        
-        if($ligne->label == "")
+
+        if ($ligne->label == "")
             $ligne->label = "N/C";
-        
-        
+
+
 //        $text = "<a href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . $ligne->id . "'>" . $ligne->label;
         $text = "<input type='hidden' class='idAction' value='" . $ligne->id . "'/>";
         $text .= "<input type='hidden' class='percent' value='" . $ligne->percent . "'/>";
-        $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . substr($ligne->id, 0,30) . "'>" . $ligne->label."</a>";
+        $text .= "<a title='" . $ligne->label . "' href='" . DOL_URL_ROOT . "/comm/action/fiche.php?id=" . substr($ligne->id, 0, 30) . "'>" . $ligne->label . "</a>";
         if ($ligne->fk_soc > 0) {
             $soc = new Societe($db);
             $soc->fetch($ligne->fk_soc);
             $text .= "<br/><br/>" . $soc->getNomUrl(1);
         }
-        $text .= "<br/><br/>" . substr($ligne->note, 0,40);
+        $text .= "<br/><br/>" . substr($ligne->note, 0, 40);
         $text = str_replace(array("\r\n", "\r", "\n"), "<br />", $text);
         $text = str_replace('"', '\"', $text);
         $text = str_replace("'", '\'', $text);
-        
-        
+
+
         if (!isset($ligne->datep2))
             $ligne->datep2 = $ligne->datep;
         if (!isset($ligne->datep))
@@ -66,17 +66,17 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
             $heureOuvree = (isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true');
             $date1 = new DateTime($ligne->datep);
             $date2 = new DateTime($ligne->datep2);
-            
+
             $hour = $date1->format("H");
             $hour2 = $date2->format("H");
-            if($heureOuvree && intval($hour) < 8)
-                $date1->setTime(8,0);
-            if($heureOuvree && intval($hour2) >= 20)
-                $date2->setTime(20,0);
-           
-            
+            if ($heureOuvree && intval($hour) < 8)
+                $date1->setTime(8, 0);
+            if ($heureOuvree && intval($hour2) >= 20)
+                $date2->setTime(20, 0);
 
-            if(!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
+
+
+            if (!$heureOuvree || (intval($hour2) == 0 || intval($hour2) > 8))
                 $eventsStr[] = '{"id":' . $ligne->id . ', "start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"' . $text . '", "userId": ' . $userId . $colorStr . '}';
         }
         $f = $f + 1;
@@ -93,8 +93,16 @@ if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
         if ($tabFerie[$i][1] >= $start && $tabFerie[$i][1] <= $fin) {
             $g = 0;
             while ($g < count($newTabUser)) {
-                $finjours = date('Y-m-d 23:59:59', $tabFerie[$i][1]);
-                $text2 = '{"start":"' . date('c', $db->jdate($tabFerie[$i][0])) . '", "end":"' . date('c', $db->jdate($finjours)) . '", "title":"<font color=\"white\"> Ferié </font><font size=5><font color=\"black\"><b><br/><br/>F<br/><br/>É<br/><br/>R<br/><br/>I<br/><br/>É<br/><br/></b></font></font>" ,"userId": ' . $g . ', "color":"grey" }';
+                $date1 = new DateTime($tabFerie[$i][0]);
+                $date2 = new DateTime(date('Y-m-d 23:59:59', $tabFerie[$i][1]));
+                $hour = $date1->format("H");
+                $hour2 = $date2->format("H");
+                if ($heureOuvree && intval($hour) < 8)
+                    $date1->setTime(8, 0);
+                if ($heureOuvree && intval($hour2) >= 20)
+                    $date2->setTime(20, 0);
+                $text2 = '{"start":"' . $date1->format('c') . '", "end":"' . $date2->format('c') . '", "title":"<font color=\"white\"> Ferié </font><font size=5><font color=\"black\"><b><br/><br/>F<br/><br/>É<br/><br/>R<br/><br/>I<br/><br/>É<br/><br/></b></font></font>" ,"userId": ' . $g . ', "color":"grey" }';
+//                die($text2);
                 $eventsStr[] = $text2;
                 $g = $g + 1;
             }

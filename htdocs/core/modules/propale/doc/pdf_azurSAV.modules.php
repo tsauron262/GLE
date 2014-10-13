@@ -1308,8 +1308,15 @@ class pdf_azurSAV extends ModelePDFPropales
                             if(isset($ligne->Centre)){
                                 global $tabCentre;
                                 $centre = $tabCentre[$ligne->CentreVal];
+                                $tech = "";
+                                if (isset($ligne->Technicien)) {
+                                    $userT = new User($this->db);
+                                    $userT->fetch($ligne->Technicien);
+                                    $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
+                                }
+                                
                                 $pdf->SetXY(12,64);
-                                $pdf->MultiCell(50, 30, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1], 0, '', 0);
+                                $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
                             }
                         }
                         

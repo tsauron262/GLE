@@ -280,7 +280,10 @@ class GSX_Request {
 
                     case 'select':
                         if (isset($defs['values'])) {
-                            $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' ) . '>';
+                            $html .= '<select name="' . $inputName . '" id="' . $inputName . '"' . ($required ? ' required' : '' );
+                            if ($name == 'comptiaGroup')
+                                $html .= ' onchange="onComptiaGroupSelect($(this));"';
+                            $html .= '>';
 //                        $html .= '<option value="">&nbsp;&nbsp;---&nbsp;&nbsp;</option>';
                             foreach ($defs['values'] as $v => $txt) {
                                 $html .= '<option value="' . $v . '"';
@@ -306,12 +309,12 @@ class GSX_Request {
                         else if (isset($default))
                             $defVal = $default;
 
-                        $html .= '<div class="yesNoBlock" onmouseover="onYesNoBlockMouseOver($(this))" onmouseout="onYesNoBlockMouseOut($(this))">'."\n";
+                        $html .= '<div class="yesNoBlock" onmouseover="onYesNoBlockMouseOver($(this))" onmouseout="onYesNoBlockMouseOut($(this))">' . "\n";
                         $html .= '<input type="radio" id="' . $inputName . '_yes" name="' . $inputName . '" value="Y" ' . (($defVal == 'Y') ? 'checked' : '' ) . '/>' . "\n";
                         $html .= '<label for="' . $inputName . '_yes">Oui</label>' . "\n";
                         $html .= '<input type="radio" id="' . $inputName . '_no" name="' . $inputName . '" value="N" ' . (($defVal == 'N') ? 'checked' : '' ) . '/>' . "\n";
                         $html .= '<label for="' . $inputName . '_no">Non</label>' . "\n";
-                        $html .= '</div>'."\n";
+                        $html .= '</div>' . "\n";
                         break;
 
                     case 'fileSelect':
@@ -337,7 +340,7 @@ class GSX_Request {
                                 }
                                 if (!isset($orderLines) && $useCart) {
                                     global $db;
-                                    $partsCart = new partsCart($db, $serial, isset($_GET['chronoId'])?$_GET['chronoId']:null);
+                                    $partsCart = new partsCart($db, $serial, isset($_GET['chronoId']) ? $_GET['chronoId'] : null);
                                     if ($partsCart->loadCart()) {
                                         $orderLines = array();
                                         foreach ($partsCart->partsCart as $part) {
@@ -405,26 +408,51 @@ class GSX_Request {
 
                     case 'comptiaCode':
                         $html .= '<div class="comptiaCodeContainer">' . "\n";
-                        if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
-                            $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
-                            $html .= '<span>Non-applicable</span>';
-                        } else if (isset($values['componentCode']) &&
-                                isset($this->comptiaCodes) &&
-                                isset($this->comptiaCodes['grps'][$values['componentCode']])) {
+                        $allComptia = false;
+                        if ($dataNode->hasAttribute('allComptia')) {
+                            if ($dataNode->getAttribute('allComptia') === '1')
+                                $allComptia = true;
+                        }
+                        if ($allComptia && isset($this->comptiaCodes) &&
+                                isset($this->comptiaCodes['grps'])) {
                             $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
                             $html .= '<option value="0">Code compTIA</option>' . "\n";
-                            foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
-                                $html .= '<option value="' . $code . '"';
-                                if (isset($values[$valuesName])) {
-                                    if ($values[$valuesName] == $code)
-                                        $html.= ' selected';
+                            foreach (gsxDatas::$componentsTypes as $compCode => $label) {
+                                foreach ($this->comptiaCodes['grps'][$compCode] as $code => $desc) {
+                                    $html .= '<option value="' . $code . '" class="comptiaGroup_'.$compCode.'"';
+                                    if (isset($values[$valuesName])) {
+                                        if ($values[$valuesName] == $code)
+                                            $html.= ' selected';
+                                    }
+                                    if ($compCode != '0') {
+                                        $html .= ' style="display: none"';
+                                    }
+                                    $html .= '>' . $code . ' - ' . $desc . '</option>';
                                 }
-                                $html .= '>' . $code . ' - ' . $desc . '</option>';
                             }
                             $html .= '</select>' . "\n";
-                        } else if (isset($values[$valuesName])) {
-                            $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
-                            $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                        } else {
+                            if (($values['componentCode'] === ' ') || ($values['componentCode'] == '')) {
+                                $html .= '<input type="hidden" id="' . $inputName . '" name="' . $inputName . '" value="000"/>' . "\n";
+                                $html .= '<span>Non-applicable</span>';
+                            } else if (isset($values['componentCode']) &&
+                                    isset($this->comptiaCodes) &&
+                                    isset($this->comptiaCodes['grps'][$values['componentCode']])) {
+                                $html .= '<select id="' . $inputName . '" name="' . $inputName . '">' . "\n";
+                                $html .= '<option value="0">Code compTIA</option>' . "\n";
+                                foreach ($this->comptiaCodes['grps'][$values['componentCode']] as $code => $desc) {
+                                    $html .= '<option value="' . $code . '"';
+                                    if (isset($values[$valuesName])) {
+                                        if ($values[$valuesName] == $code)
+                                            $html.= ' selected';
+                                    }
+                                    $html .= '>' . $code . ' - ' . $desc . '</option>';
+                                }
+                                $html .= '</select>' . "\n";
+                            } else if (isset($values[$valuesName])) {
+                                $html .= '<input type="text" id="' . $inputName . '" name="' . $inputName . '" value="';
+                                $html .= $values[$valuesName] . '"' . ($required ? ' required' : '') . '/>' . "\n";
+                            }
                         }
                         $html .= '</div>';
                         break;
@@ -500,7 +528,7 @@ class GSX_Request {
         $html .= ' action="' . DOL_URL_ROOT . '/synopsisapple/ajax/requestProcess.php?serial=' . $serial;
         $html .= '&action=sendGSXRequest&prodId=' . $prodId . '&request=' . $this->requestName;
         if (isset($repairRowId))
-            $html .= '&repairRowId='.$repairRowId;
+            $html .= '&repairRowId=' . $repairRowId;
         $html .= '" enctype="multipart/form-data">' . "\n";
 
         $html .= '<div class="requestTitle">' . $this->requestLabel . '</div>' . "\n";
@@ -514,7 +542,7 @@ class GSX_Request {
         }
         $html .= '</div>' . "\n";
         $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
-        $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\''.(isset($repairRowId)?', \''.$repairRowId.'\'':'').')">';
+        $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\'' . (isset($repairRowId) ? ', \'' . $repairRowId . '\'' : '') . ')">';
         $html .= 'Envoyer</span></div>';
         $html .= '</form>' . "\n";
         return $html;

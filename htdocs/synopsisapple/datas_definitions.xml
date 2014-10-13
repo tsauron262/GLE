@@ -10,6 +10,24 @@
     <def name="comptiaModifier" type="comptiaModifier">
         <label>Modificateur</label>
     </def>
+    <def name="comptiaGroup" type="select">
+        <label>Groupe de composant</label>
+        <values>
+            <val val="0">Général</val>
+            <val val="1">Visuel</val>
+            <val val="2">Moniteur</val>
+            <val val="3">Mémoire auxiliaire</val>
+            <val val="4">Périphériques d'entrées</val>
+            <val val="5">Carte</val>
+            <val val="6">Alimentation</val>
+            <val val="7">Imprimantes</val>
+            <val val="8">Périphériques multi-fonctions</val>
+            <val val="9">Périphériques de communication</val>
+            <val val="B">iPhone</val>
+            <val val="E">iPod</val>
+            <val val="F">iPad</val>
+        </values>
+    </def>
     <def name="abused" type="YesNo">
         <label>Pièce endommagée non-retournable (abus)</label>
     </def>
@@ -67,7 +85,7 @@
             <val val="007">Amérique du sud</val>
         </values>
     </def>
-    <def name="serviceType" type="select">
+    <def name="serviceType" type="select" hidden="1">
         <label>Type de service</label>
         <values>
             <val val="0">Non spécifié</val>
@@ -97,10 +115,10 @@
         <label>Adresse du client</label>
     </def>
     <def name="diagnosedByTechId" type="text" max="15" jsCheck="text">
-        <label>ID du technicien à l'origine du diagnostique</label>
+        <label>ID du technicien à l'origine du diagnostic</label>
     </def>
     <def name="diagnosis" type="textarea" max="1500" jsCheck="text">
-        <label>Diagnostique du technicien</label>
+        <label>Diagnostic du technicien</label>
     </def>
     <def name="fileName" type="fileSelect" max="30">
         <label>Fichier à envoyer</label>
@@ -113,8 +131,8 @@
         <label>Composants</label>
     </def>
     <def name="overrideDiagnosticCodeCheck" type="YesNo">
-        <label>Ne pas effectuer la vérification du code du diagnostique</label>
-        <infos>Si Oui, le code de diagnostique n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>
+        <label>Ne pas effectuer la vérification du code du diagnostic</label>
+        <infos>Si Oui, le code de diagnostic n'est pas vérifié lors la création de la réparation et aucun message n'est affiché.</infos>
     </def>
     <def name="poNumber" type="text" max="35" jsCheck="text">
         <label>Purchase order number</label>
@@ -189,10 +207,20 @@
     <def name="includeFiles" type="YesNo">
         <label>Inclure automatiquement les fichiers associés à ce produit</label>
     </def>
-    <def name="consumerLawEligible" type="YesNo">
+    <!--    <def name="consumerLawEligible" type="YesNo">
         <label>Eligible à la loi de consommation</label>
+    </def>-->
+
+
+    <def name="consumerLawEligible" type="select">
+        <label>Eligible à la loi de consommation</label>
+        <values>
+            <val val=" ">N/C</val>
+            <val val="Y">Oui</val>
+            <val val="N">Non</val>
+        </values>
     </def>
-    <def name="componentCheckDetails" type="datasGroup" max="20" jsCheck="text">
+    <def name="componentCheckDetails" type="datasGroup">
         <label>Détails du composant</label>
     </def>
     <def name="component" type="text" max="20" jsCheck="text">
@@ -200,5 +228,84 @@
     </def>
     <def name="componentSerialNumber" type="text" max="20" jsCheck="text">
         <label>Numéro de série du composant</label>
+    </def>
+    <def name="accidentalDamage" type="YesNo">
+        <label>Dommages accidentels</label>
+    </def>
+    <def name="addressCosmeticDamage" type="YesNo">
+        <label>Adress cosmetic damage</label>
+    </def>
+    <def name="comptia" type="datasGroup">
+        <label>Codes compTIA</label>
+    </def>
+    <def name="dataTransferRequired" type="YesNo" hidden="1">
+        <label>Transfert de données requis</label>
+    </def>
+    <def name="technicianNote" type="textarea" max="4000" jsCheck="text">
+        <label>Notes du technicien AASP</label>
+    </def>
+    <def name="hardDrive" type="text" max="25" jsCheck="text">
+        <label>Notes du technicien AASP</label>
+    </def>
+    <def name="hardwareDiagnosisCode" type="text" max="30" jsCheck="text">
+        <label>Code diagnostique du Hardware</label>
+    </def>
+    <def name="machinePassword" type="text" max="30" jsCheck="text">
+        <label>Mot de passe de la machine</label>
+    </def>
+    <def name="osVersion" type="text" max="10" jsCheck="text">
+        <label>Version de l'OS</label>
+    </def>
+    <def name="purchaseOrderNumber" type="text" max="35" jsCheck="text">
+        <label>Purchase order number</label>
+    </def>
+    <def name="ram" type="text" max="25" jsCheck="text">
+        <label>RAM</label>
+    </def>
+    <def name="shipBox" type="YesNo">
+        <label>Boîte d'envoi</label>
+    </def>
+    <def name="shipUnitToCustomer" type="YesNo">
+        <label>Envoyer l'unité au client</label>
+    </def>
+    <def name="soldToContact" type="text" max="40" jsCheck="text">
+        <label>Nom du contact (sold-to)</label>
+    </def>
+    <def name="soldToContactPhone" type="tel" max="30" jsCheck="phone">
+        <label>Numéro de téléphone du contact (sold-to)</label>
+    </def>
+    <def name="trackingNumber" type="text" max="14" jsCheck="text">
+        <label>Numéro de suivi</label>
+    </def>
+    <def name="shipper" type="select">
+        <label>Expéditeur</label>
+        <values>
+            <val val="XAER">Aero 2000</val>
+            <val val="XAIRBEC">Airborne</val>
+            <val val="XARM">Aramex</val>
+            <val val="XOZP">Australia Post</val>
+            <val val="XBAX">BAX GLOBAL PTE LTD</val>
+            <val val="XCPW">CPW Internal</val>
+            <val val="XCL">Citylink</val>
+            <val val="XDHL">DHL</val>
+            <val val="XDZNA">Danzas-AEI</val>
+            <val val="XEAS">EAS</val>
+            <val val="XEGL">Eagle ASIA PACIFIC HOLDINGS</val>
+            <val val="XEXXN">Exel</val>
+            <val val="XFEDE">FedEx</val>
+            <val val="XFDE">FedEx Air</val>
+            <val val="XGLS">GLS-General Logistics Systems</val>
+            <val val="XHNF">H and Friends</val>
+            <val val="XNGLN">Nightline</val>
+            <val val="XPL">Parceline</val>
+            <val val="XPRLA">Purolator</val>
+            <val val="SDS">SDS An Post</val>
+            <val val="XSNO">Seino Transportation Co.,Ltd.</val>
+            <val val="XSTE">Star Track Express</val>
+            <val val="XTNT">TNT</val>
+            <val val="XUPSN">UPS</val>
+            <val val="XUTI">UTi (Japan) K.K.</val>
+            <val val="XYMT">YAMATO</val>
+        </values>
     </def>
 </root>

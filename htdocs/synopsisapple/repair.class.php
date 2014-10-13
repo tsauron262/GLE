@@ -89,6 +89,11 @@ class Repair {
 
         if (!$this->update())
             return false;
+
+        require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+        $chrono = new Chrono($this->db);
+        $chrono->fetch($chronoId);
+        $chrono->setDatas($chronoId, array(1056 => 1));
         return true;
     }
 
@@ -367,6 +372,21 @@ class Repair {
             $html .= '<p class="confirmation">Réparation terminée</p>' . "\n";
         else {
             $html .= $this->getPartsPendingReturnHtml();
+            if (!isset($this->confirmNumbers['serialUpdate'])) {
+//                    && !count($this->partsPending)) {
+                $html .= '<div class="kgbUpdateBlock">'."\n";
+                $html .= '<div style="text-align: center; margin: 30px">' . "\n";
+                $html .= '<span class="button blueHover displayKgbSerialUpdate" onclick="displayKgbSerialUpdateForm($(this))">Mettre à jour le numéro de série de l\'unité</span>' . "\n";
+                $html .= '</div>' . "\n";
+
+                $html .= '<div class="kgbSerialUpdateFormContainer">' . "\n";
+                $gsxReq = new GSX_Request($this->gsx, 'UpdateKGBSerialNumber');
+                $html .= $gsxReq->generateRequestFormHtml(array(
+                    'repairConfirmationNumber' => isset($this->confirmNumbers['repair'])?$this->confirmNumbers['repair']:''
+                ), $this->prodId, $this->serial, $this->rowId);
+                $html .= '<div class="kgbSerialUpdateResults"></div>' . "\n";
+                $html .= '</div></div>' . "\n";
+            }
         }
         $html .= '<div class="repairRequestsResults"></div>' . "\n";
         $html .= '</div>' . "\n";
@@ -463,12 +483,15 @@ class Repair {
     }
 
     public function getPartsPendingReturnHtml() {
+        if (!isset($this->repairNumber) || $this->repairNumber == '')
+            return '';
+
         $html = '';
         if (!count($this->partsPending)) {
             if (!$this->loadPartsPending()) {
                 if (count($this->gsx->errors['soap'])) {
-                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
-                    $html .= $this->gsx->getGSXErrorsHtml();
+//                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
+//                    $html .= $this->gsx->getGSXErrorsHtml();
                     return $html;
                 } else if (!count($this->partsPending)) {
                     if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))

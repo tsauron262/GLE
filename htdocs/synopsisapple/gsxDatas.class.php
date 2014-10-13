@@ -32,7 +32,15 @@ class gsxDatas {
 
     public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
         global $user;
-        if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']))
+
+
+//        $userId = 'sav@bimp.fr';
+//        $password = '@Savbimp2014#';
+//        $serviceAccountNo = '100520';
+
+
+        if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']) &&
+                $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_mdp'] != "" && $user->array_options['options_apple_service'] != "")
             $details = array(
                 'apiMode' => self::$apiMode,
                 'regionCode' => 'emea',
@@ -132,7 +140,6 @@ class gsxDatas {
         if (count($this->errors) || !$this->connect) {
             return $this->getGSXErrorsHtml();
         }
-//        echo "<pre>";print_r($this->gsx->obtainCompTIA());die;
         $response = $this->gsx->lookup($this->serial, 'warranty');
         $check = false;
         $html = '';
@@ -141,7 +148,6 @@ class gsxDatas {
                 if (isset($response['ResponseArray']['responseData']) && count($response['ResponseArray']['responseData'])) {
                     $datas = $response['ResponseArray']['responseData'];
                     $urgentMsg = $response['ResponseArray']['urgentMessage'];
-                    $urgentMsg = 'Message test';
 //                    echo '<pre>';
 //                    print_r($datas);
 //                    echo '</pre>';
@@ -156,7 +162,7 @@ class gsxDatas {
 
                     if (isset($urgentMsg) && ($urgentMsg != '')) {
                         $html .= '<p class="alert">Message urgent du service Apple GSX: <br/>';
-                        $html .= '"'.$urgentMsg.'"';
+                        $html .= '"' . $urgentMsg . '"';
                         $html .= '</p>';
                     }
                     $html .= '<div class="container">' . "\n";
@@ -203,6 +209,9 @@ class gsxDatas {
 
                     if (isset($datas['onsiteEndDate']) && $datas['onsiteEndDate'] !== '')
                         $html .= '<tr><td class="rowTitle">Date de sortie</td><td>' . $datas['onsiteEndDate'] . '</td></tr>' . "\n";
+
+                    if (isset($datas['estimatedPurchaseDate']) && $datas['estimatedPurchaseDate'] !== '')
+                        $html .= '<tr class="oddRow"><td class="rowTitle">Date d\'achat estimé</td><td>' . $datas['estimatedPurchaseDate'] . '</td></tr>' . "\n";
 
                     if (isset($datas['coverageStartDate']) && $datas['coverageStartDate'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Début de la garantie</td><td>' . $datas['coverageStartDate'] . '</td></tr>' . "\n";
@@ -322,12 +331,14 @@ class gsxDatas {
         $html .= '<select class="repairTypeSelect">' . "\n";
         $requests = GSX_Request::getRequestsByType('repair');
         foreach ($requests as $name => $label) {
-            $html .= '<option value="' . $name . '">' . $label . '</option>';
+            if (!$this->isIphone ||
+                    ($this->isIphone && ($name != 'CreateMailInRepair')))
+                $html .= '<option value="' . $name . '">' . $label . '</option>';
         }
         $html .= '</select>';
 //        $html .= '</div>'."\n";
         $html .= '<p style="text-align: right">' . "\n";
-        $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Charger le formulaire</span>' . "\n";
+        $html .= '<span class="button loadRepairForm greenHover" onclick="GSX.loadRepairForm($(this))">Valider</span>' . "\n";
         $html .= '</p>' . "\n";
         $html .= '<div class="repairFormContainer"></div>' . "\n";
         $html .= '<div class="repairFormResults"></div>' . "\n";
@@ -362,6 +373,7 @@ class gsxDatas {
         $html .= '<tbody></tbody>' . "\n";
         $html .= '</table>' . "\n";
         $html .= '<div class="cartRequestResults"></div>' . "\n";
+        $html .= '<div class="cartRequestResults2"></div>' . "\n";
         $html .= '</div></div>' . "\n";
         return $html;
     }
@@ -413,7 +425,7 @@ class gsxDatas {
             $html .= '<label for="keywordFilter">Filtrer par mots-clés: </label>' . "\n";
             $html .= '<input type="text max="80" name="keywordFilter" class="keywordFilter"/>' . "\n";
             $html .= '<select class="keywordFilterType">' . "\n";
-            $types = array('eeeCode' => 'eeeCode', 'name' => 'Nom', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
+            $types = array('name' => 'Nom', 'eeeCode' => 'eeeCode', 'num' => 'Référence', 'type' => 'Type', 'price' => 'Prix');
             foreach ($types as $key => $type) {
                 $html .= '<option value="' . $key . '">' . $type . '</option>' . "\n";
             }
@@ -431,6 +443,7 @@ class gsxDatas {
             $html .= '</div>' . "\n";
 
             $html .= '<script type="text/javascript">' . "\n";
+//            print_r($parts);
             foreach ($parts as $part) {
                 $partNewNumber = '';
                 if (isset($part['originalPartNumber']) && $part['originalPartNumber'] != '') {
@@ -442,7 +455,7 @@ class gsxDatas {
                 $html .= ', \'' . (isset($part['partDescription']) ? addslashes(str_replace(" ", "", $part['partDescription'])) : '') . '\'';
                 $html .= ', \'' . (isset($part['partNumber']) ? addslashes($part['partNumber']) : '') . '\'';
                 $html .= ', \'' . (isset($part['partType']) ? addslashes($part['partType']) : '') . '\'';
-                $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
+                $html .= ', \'' . (isset($part['exchangePrice']) && $this->userExchangePrice && $part['exchangePrice'] > 0 ? addslashes($part['exchangePrice']) : (isset($part['stockPrice']) ? addslashes($part['stockPrice']) : '')) . '\'';
                 $html .= ', \'' . (isset($part['eeeCode']) ? addslashes($part['eeeCode']) : '') . '\'';
                 $html .= ', \'' . addslashes($partNewNumber) . '\'';
                 $html .= ');' . "\n";
@@ -500,7 +513,7 @@ class gsxDatas {
     }
 
     public function getRequestFormHtml($requestType, $prodId) {
-        global $db;
+        global $db, $user;
         $comptiaCodes = $this->getCompTIACodesArray();
         $gsxRequest = new GSX_Request($this, $requestType, ($comptiaCodes !== 'fail') ? $comptiaCodes : null);
 
@@ -520,10 +533,13 @@ class gsxDatas {
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);
 
-                    $tech = new User($db);
-                    $tech->fetch($chrono->extraValue[$chronoId]['Technicien']['value']);
+                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
 
-                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostique']['value'];
+                    $tech = new User($db);
+                    $tech->fetch($idUser);
+
+                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
+                    $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptômes']['value'];
                     $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
                     $valDef['unitReceivedDate'] = $dateH[0];
                     $valDef['unitReceivedTime'] = $dateH[1];
@@ -613,6 +629,7 @@ class gsxDatas {
                             'IPhoneCreateCarryInRepairResponse',
                             'CreateIPhoneCarryInRepairResponse'
                         );
+//                        $requestType = "CreateIPhoneCarryInRepair";
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
                         if (isset($result['serialNumber']))
@@ -635,6 +652,19 @@ class gsxDatas {
                         $client = 'IPhoneUpdateSerialNumber';
                         $request = 'IPhoneUpdateSerialNumberRequest';
                         break;
+
+                    case 'KGBSerialNumberUpdate':
+                        $responseNames = array(
+                            'UpdateIPhoneKGBSerialNumberResponse',
+                            'IPhoneUpdateKGBSerialNumberResponse',
+                            'IPhoneKGBSerialNumberUpdateResponse'
+                        );
+                        $client = 'UpdateIPhoneKGBSerialNumber';
+                        $request = 'UpdateIPhoneKGBSerialNumberRequest';
+                        if (isset($result['serialNumber']))
+                            $result['serialNumber'] = '';
+                        $result['imeiNumber'] = $this->serial;
+                        break;
                 }
             } else {
                 switch ($requestType) {
@@ -647,18 +677,34 @@ class gsxDatas {
                             unset($result['componentCheckDetails']);
                         break;
 
+                    case 'CreateMailInRepair':
+                        $responseName = 'CreateMailInRepairResponse';
+                        break;
+
                     case 'UpdateSerialNumber':
                         $responseName = 'UpdateSerialNumberResponse';
                         break;
+
+                    case 'KGBSerialNumberUpdate':
+                        $responseNames = array(
+                            'UpdateKGBSerialNumberResponse',
+                            'KGBSerialNumberUpdateResponse'
+                        );
+                        break;
                 }
             }
-
+//if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
+//    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
+//    die();
+//}
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
+                dol_syslog("erreur GSX" . print_r($response, true), 4);
             } else {
+                dol_syslog("iciici" . print_r($response, true), 4);
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;
@@ -673,23 +719,26 @@ class gsxDatas {
                 }
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
-                    case 'CreateIPhoneCarryInRepair':
-                        if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
+                    case 'CreateMailInRepair':
+                        if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
+                            $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);
+                            $html .= "<prix>" . $prixTot . "</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {
                                     $ok = true;
+                                    $html .= "<ok>Reload commande ok</ok>";
                                 }
                             } else {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
                             }
                         } else {
-                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple.</p>';
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : ' . $client . '</p>';
                         }
                         break;
 
                     case 'UpdateSerialNumber':
-                    case 'IPhoneUpdateSerialNumber':
+                    case 'KGBSerialNumberUpdate':
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';
@@ -726,7 +775,8 @@ class gsxDatas {
                     }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
-                    if ($requestType == 'UpdateSerialNumber') {
+                    if (($requestType == 'UpdateSerialNumber') ||
+                            ($requestType == 'KGBSerialNumberUpdate')) {
                         if (isset($_POST['closeRepair'])) {
                             if ($_POST['closeRepair'] == 'Y') {
                                 $ok = false;
@@ -756,7 +806,10 @@ class gsxDatas {
     }
 
     public function getGSXErrorsHtml() {
-        return $this->gsx->getGSXErrorsHtml();
+        if (is_object($this->gsx))
+            return $this->gsx->getGSXErrorsHtml();
+        else
+            return '';
     }
 
 }

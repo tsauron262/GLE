@@ -934,3 +934,17 @@ div.yesNoBlock {
     float: right;
     display: inline-block;
 }
+
+span.displayKgbSerialUpdate:before {
+    font-family: 'FA';
+    content: '\f14c';
+    margin-right: 8px;
+}
+
+div.kgbSerialUpdateFormContainer {
+    display: none;
+    padding: 30px;
+    margin: 20px;
+    border: 1px solid #DCDCDC;
+    border-radius: 12px;
+}

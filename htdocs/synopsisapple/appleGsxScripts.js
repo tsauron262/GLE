@@ -1,20 +1,20 @@
 var maxProdQty = 99;
 var importCart = false;
 var partsGroup = {
-    0 : 'Général',
-    1 :'Visuel',
-    2 :'Affichage',
-    3 :'Stockage',
-    4 :'Périphériques d\'entrées',
-    5 :'Cartes',
-    6 :'Alimentation',
-    7 :'Impression',
-    8 :'Périphériques multi-fonctions',
-    9 :'Périphériques de communication',
-    'A' :'Partage',
-    'B' :'iPhone',
-    'E' :'iPod',
-    'F' :'iPad'
+    0: 'Général',
+    1: 'Visuel',
+    2: 'Affichage',
+    3: 'Stockage',
+    4: 'Périphériques d\'entrées',
+    5: 'Cartes',
+    6: 'Alimentation',
+    7: 'Impression',
+    8: 'Périphériques multi-fonctions',
+    9: 'Périphériques de communication',
+    'A': 'Partage',
+    'B': 'iPhone',
+    'E': 'iPod',
+    'F': 'iPad'
 };
 
 
@@ -27,10 +27,10 @@ var partDataType = {
 }
 
 var extra = "";
-if (typeof(chronoId) != 'undefined')
-    extra = extra+ "&chronoId="+chronoId;
-//else
-//    extra = extra+ "&chronoId=11";
+if (typeof (chronoId) != 'undefined')
+    extra = extra + "&chronoId=" + chronoId;
+else
+    extra = extra+ "&chronoId=12";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -77,13 +77,13 @@ function CompTIACodes() {
         var html = '<select class="compTIACodeSelect">';
         html += '<option value="0">Code symptôme</option>';
         for (code in this.codes[group]) {
-            html += '<option value="'+code+'">'+code+' - '+this.codes[group][code]+'</option>';
+            html += '<option value="' + code + '">' + code + ' - ' + this.codes[group][code] + '</option>';
         }
         html += '</select>';
         html += '<select class="compTIAModifierSelect">';
         html += '<option value="0">Modificateur</option>';
         for (mod in this.modifiers) {
-            html += '<option value="'+mod+'">'+mod+' - '+this.modifiers[mod]+'</option>';
+            html += '<option value="' + mod + '">' + mod + ' - ' + this.modifiers[mod] + '</option>';
         }
         html += '</select>';
         $div.html(html);
@@ -147,11 +147,11 @@ function Cart(prodId, serial, PM) {
     this.cartProds = [];
     this.nextCartProdId = 0;
     this.nbrProds = 0;
-    this.$prod = $('#prod_'+prodId);
+    this.$prod = $('#prod_' + prodId);
     this.changes = false;
 
     this.newProdContainer = function() {
-        this.$prod = $('#prod_'+prodId);
+        this.$prod = $('#prod_' + prodId);
     };
     this.setEvents = function() {
     };
@@ -182,10 +182,10 @@ function Cart(prodId, serial, PM) {
             if (this.nbrProds) {
                 for (id in this.cartProds) {
                     if (this.cartProds[id]) {
-                        var $td = $cart.find('tr.cartProd_'+id).find('td.compTIACodes');
+                        var $td = $cart.find('tr.cartProd_' + id).find('td.compTIACodes');
                         if ($td.length)
                             CTIA.appendCompTIACodesSelect(this, $td, this.cartProds[id].code);
-                        this.cartProds[id].setValues($cart.find('tr.cartProd_'+id));
+                        this.cartProds[id].setValues($cart.find('tr.cartProd_' + id));
                     }
                 }
                 $cart.find('.noProducts').hide();
@@ -238,24 +238,24 @@ function Cart(prodId, serial, PM) {
 
         this.nbrProds++;
 
-        var html = '<tr class="cartProd_'+curId+'">';
-        html += '<td>'+this.cartProds[curId].name+'</td>';
-        html += '<td class="ref">'+this.cartProds[curId].num+'</td>';
-        html += '<td class="price">'+this.cartProds[curId].price+'&nbsp;&euro;</td>';
+        var html = '<tr class="cartProd_' + curId + '">';
+        html += '<td>' + this.cartProds[curId].name + '</td>';
+        html += '<td class="ref">' + this.cartProds[curId].num + '</td>';
+        html += '<td class="price">' + this.cartProds[curId].price + '&nbsp;&euro;</td>';
         html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
         html += '<span class="button prodQtyDown redHover" onclick="prodQtyDown($(this))"></span>';
         html += '<span class="button prodQtyUp greenHover" onclick="prodQtyUp($(this))"></span></td>';
         html += '<td class="compTIACodes"></td>';
-        html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
+        html += '<td><span class="removeCartProduct" onclick="GSX.products[' + this.prodId + '].cart.remove($(this))"></span></td>';
         html += '</tr>';
         this.$prod.find('.cartProducts').find('tbody').append(html);
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
-        this.setChangesEvents(this.$prod.find('tr.cartProd_'+curId));
+        this.setChangesEvents(this.$prod.find('tr.cartProd_' + curId));
         this.displayModifMsg();
         this.activateSave();
         if (CTIA.loadStatus == 'loaded') {
-            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), gpe);
-            this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_'+curId));
+            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_' + curId).find('td.compTIACodes'), gpe);
+            this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_' + curId));
             this.$prod.find('.noProducts').hide();
             this.$prod.find('.cartProducts').show();
             this.$prod.find('.cartSubmitContainer').show();
@@ -273,7 +273,7 @@ function Cart(prodId, serial, PM) {
         $span.attr('class', 'removeCartProduct deactivated');
         var $tr = $span.parent('td').parent('tr');
         var id = $tr.attr('class').replace(/^cartProd_(\d+)$/, '$1');
-        $tr.fadeOut(250, function(){
+        $tr.fadeOut(250, function() {
             $(this).remove();
             if (!ptr.$prod.find('.cartProducts').find('tbody').find('tr').length) {
                 ptr.$prod.find('.cartProducts').hide();
@@ -282,7 +282,7 @@ function Cart(prodId, serial, PM) {
         });
         this.nbrProds--;
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
-        var $addSpan = this.$prod.find('.partGroup_'+this.cartProds[id].code).find('tr.partRow_'+this.cartProds[id].listId).find('span.addToCart');
+        var $addSpan = this.$prod.find('.partGroup_' + this.cartProds[id].code).find('tr.partRow_' + this.cartProds[id].listId).find('span.addToCart');
         if ($addSpan.length) {
             $addSpan.attr('class', 'addToCart activated').click(function() {
                 ptr.add($(this));
@@ -302,7 +302,7 @@ function Cart(prodId, serial, PM) {
         delete this.cartProds;
         this.cartProds = [];
         this.$prod.find('.cartProducts').find('tbody').html('');
-        this.$prod.find('span.addToCart.deactivated').each(function(){
+        this.$prod.find('span.addToCart.deactivated').each(function() {
             $(this).attr('class', 'addToCart activated');
         });
     };
@@ -315,7 +315,7 @@ function Cart(prodId, serial, PM) {
         this.$prod.find('.addToPropal').attr('class', 'button addToPropal deactivated');
     };
     this.save = function(addToPropal) {
-        if (typeof(addToPropal) == 'undefined')
+        if (typeof (addToPropal) == 'undefined')
             addToPropal = false;
 
         if (!this.cartProds.length)
@@ -326,23 +326,23 @@ function Cart(prodId, serial, PM) {
                 return;
         this.deactivateSave();
 
-        var params = 'serial='+this.serial;
+        var params = 'serial=' + this.serial;
         if (addToPropal)
             params += '&addToPropal=1';
         var i = 1;
         for (id in this.cartProds) {
-            var $tr = this.$prod.find('tr.cartProd_'+id);
+            var $tr = this.$prod.find('tr.cartProd_' + id);
             if (this.cartProds[id]) {
-                params += '&part_'+i+'_ref='+this.cartProds[id].num;
+                params += '&part_' + i + '_ref=' + this.cartProds[id].num;
                 if ($tr.find('select.compTIACodeSelect'))
-                    params += '&part_'+i+'_comptiaCode='+$tr.find('select.compTIACodeSelect').val();
+                    params += '&part_' + i + '_comptiaCode=' + $tr.find('select.compTIACodeSelect').val();
                 if ($tr.find('select.compTIAModifierSelect'))
-                    params += '&part_'+i+'_comptiaModifier='+$tr.find('select.compTIAModifierSelect').val();
+                    params += '&part_' + i + '_comptiaModifier=' + $tr.find('select.compTIAModifierSelect').val();
                 if ($tr.find('input.prodQty'))
-                    params += '&part_'+i+'_qty='+$tr.find('input.prodQty').val();
-                params += '&part_'+i+'_componentCode='+this.cartProds[id].code;
-                params += '&part_'+i+'_partDescription='+encodeURIComponent(this.cartProds[id].name);
-                params += '&part_'+i+'_stockPrice='+this.cartProds[id].price;
+                    params += '&part_' + i + '_qty=' + $tr.find('input.prodQty').val();
+                params += '&part_' + i + '_componentCode=' + this.cartProds[id].code;
+                params += '&part_' + i + '_partDescription=' + encodeURIComponent(this.cartProds[id].name);
+                params += '&part_' + i + '_stockPrice=' + this.cartProds[id].price;
                 i++;
             }
         }
@@ -363,7 +363,7 @@ function Cart(prodId, serial, PM) {
         if (this.changes)
             this.removeModifMsg();
         this.$prod.find('.cartRequestResults').stop().css('opacity', 1).html('<p class="requestProcess">Requête en cours de traitement</p>').slideDown(250);
-        setRequest('GET', 'loadPartsCart', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
+        setRequest('GET', 'loadPartsCart', this.prodId, '&serial=' + this.serial + '&prodId=' + this.prodId);
     };
     this.onPartLoad = function(code, name, num, comptiaCode, comptiaModifier, qty, price) {
         var curId = this.nextCartProdId;
@@ -371,7 +371,7 @@ function Cart(prodId, serial, PM) {
 
         var listId = this.PM.getPartListId(code, num);
         if (listId !== null) {
-            var $span = this.$prod.find('#add_'+ptr.prodId+'_'+code+'_'+listId);
+            var $span = this.$prod.find('#add_' + ptr.prodId + '_' + code + '_' + listId);
             if ($span.length)
                 $span.attr('class', 'addToCart deactivated');
         }
@@ -384,23 +384,23 @@ function Cart(prodId, serial, PM) {
 
         this.nbrProds++;
 
-        var html = '<tr class="cartProd_'+curId+'">';
-        html += '<td>'+name+'</td>';
-        html += '<td class="ref">'+num+'</td>';
-        html += '<td class="price">'+price+'&nbsp;&euro;</td>';
+        var html = '<tr class="cartProd_' + curId + '">';
+        html += '<td>' + name + '</td>';
+        html += '<td class="ref">' + num + '</td>';
+        html += '<td class="price">' + price + '&nbsp;&euro;</td>';
         html += '<td><input type="text" value="1" class="prodQty" size="8" onchange="checkProdQty($(this))"/>';
         html += '<span class="button prodQtyDown redHover" onclick="prodQtyDown($(this))"></span>';
         html += '<span class="button prodQtyUp greenHover" onclick="prodQtyUp($(this))"></span></td>';
         html += '<td class="compTIACodes"></td>';
-        html += '<td><span class="removeCartProduct" onclick="GSX.products['+this.prodId+'].cart.remove($(this))"></span></td>';
+        html += '<td><span class="removeCartProduct" onclick="GSX.products[' + this.prodId + '].cart.remove($(this))"></span></td>';
         html += '</tr>';
         this.$prod.find('.cartProducts').find('tbody').append(html);
         this.$prod.find('.nbrCartProducts').html(ptr.nbrProds);
-        this.setChangesEvents(this.$prod.find('tr.cartProd_'+curId));
+        this.setChangesEvents(this.$prod.find('tr.cartProd_' + curId));
         this.activateSave();
         if (CTIA.loadStatus == 'loaded') {
-            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_'+curId).find('td.compTIACodes'), code);
-            this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_'+curId));
+            CTIA.appendCompTIACodesSelect(this, this.$prod.find('tr.cartProd_' + curId).find('td.compTIACodes'), code);
+            this.cartProds[curId].setValues(this.$prod.find('tr.cartProd_' + curId));
             this.$prod.find('.noProducts').hide();
             this.$prod.find('.cartProducts').show();
             this.$prod.find('.cartSubmitContainer').show();
@@ -417,7 +417,7 @@ function Cart(prodId, serial, PM) {
                 var listId = ptr.PM.getPartListId(ptr.cartProds[id].code, ptr.cartProds[id].num);
                 if (listId !== null) {
                     ptr.cartProds[id].listId = listId;
-                    var $span = this.$prod.find('#add_'+ptr.prodId+'_'+ptr.cartProds[id].code+'_'+listId);
+                    var $span = this.$prod.find('#add_' + ptr.prodId + '_' + ptr.cartProds[id].code + '_' + listId);
                     if ($span.length)
                         $span.attr('class', 'addToCart deactivated');
                 }
@@ -429,9 +429,9 @@ function Cart(prodId, serial, PM) {
             return;
         this.save(true);
     };
-    this.displayModifMsg =function() {
+    this.displayModifMsg = function() {
         this.changes = true;
-        var $div = this.$prod.find('.cartRequestResults');
+        var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
             var $p = $div.find('p.changesMsg');
             if ($p.length)
@@ -441,7 +441,7 @@ function Cart(prodId, serial, PM) {
     }
     this.removeModifMsg = function() {
         this.changes = false;
-        var $div = this.$prod.find('.cartRequestResults');
+        var $div = this.$prod.find('.cartRequestResults2');
         if ($div.length) {
             var $p = $div.find('p.changesMsg');
             if ($p.length)
@@ -455,11 +455,11 @@ function PartsManager(prodId, serial) {
     this.serial = serial;
     var ptr = this;
     this.parts = [];
-    this.$prod = $('#prod_'+prodId);
+    this.$prod = $('#prod_' + prodId);
     this.$parts = null;
 
     this.newProdContainer = function() {
-        this.$prod = $('#prod_'+prodId);
+        this.$prod = $('#prod_' + prodId);
     };
 
     //Gestion de la liste des Parts:
@@ -480,10 +480,10 @@ function PartsManager(prodId, serial) {
             this.parts[group] = [];
         this.parts[group].push(new Part(name, num, type, price, eeeCode, newNum));
     };
-    this.loadParts = function () {
+    this.loadParts = function() {
         displayRequestMsg('requestProcess', '', this.$prod.find('.partsRequestResult'));
         this.removeParts();
-        setRequest('GET', 'loadParts', this.prodId, '&serial='+this.serial+'&prodId='+this.prodId);
+        setRequest('GET', 'loadParts', this.prodId, '&serial=' + this.serial + '&prodId=' + this.prodId);
     };
     this.displayParts = function() {
         this.$parts = this.$prod.find('.partsListContainer');
@@ -496,26 +496,26 @@ function PartsManager(prodId, serial) {
         ths += '<th></th>';
 
         for (gpe in this.parts) {
-            this.$prod.find('.typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_'+ptr.prodId+'_'+gpe+'"/><label for="typeFilter_'+ptr.prodId+'_'+gpe+'">'+partsGroup[gpe]+'</label><br/>');
-            var html = '<div class="partGroup_'+gpe+' partGroup">';
-            html += '<div class="partGroupName closed">'+partsGroup[gpe]+'<span class="partsNbr">('+this.parts[gpe].length+' produits)</span></div>';
+            this.$prod.find('.typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_' + ptr.prodId + '_' + gpe + '"/><label for="typeFilter_' + ptr.prodId + '_' + gpe + '">' + partsGroup[gpe] + '</label><br/>');
+            var html = '<div class="partGroup_' + gpe + ' partGroup">';
+            html += '<div class="partGroupName closed">' + partsGroup[gpe] + '<span class="partsNbr">(' + this.parts[gpe].length + ' produits)</span></div>';
             html += '<div class="partsList">';
-            html += '<table><thead>'+ths+'</thead><tbody>';
+            html += '<table><thead>' + ths + '</thead><tbody>';
             var odd = true;
-            for (id in this.parts[gpe]){
-                html += '<tr class="partRow_'+id+' partRow';
+            for (id in this.parts[gpe]) {
+                html += '<tr class="partRow_' + id + ' partRow';
                 if (odd)
                     html += '  oddRow';
                 else
                     html += ' evenRow';
                 html += '">';
-                html += '<td class="partName">'+this.parts[gpe][id].name+'</td>';
-                html += '<td>'+this.parts[gpe][id].num+'</td>';
-                html += '<td>'+this.parts[gpe][id].newNum+'</td>';
-                html += '<td>'+this.parts[gpe][id].eeeCode+'</td>';
-                html += '<td>'+this.parts[gpe][id].type+'</td>';
-                html += '<td>'+this.parts[gpe][id].price+'&nbsp;&euro;</td>';
-                html += '<td><span id="add_'+this.prodId+'_'+gpe+'_'+id+'" class="addToCart activated" onclick="GSX.products['+this.prodId+'].cart.add($(this))">Ajouter au panier</span></td>';
+                html += '<td class="partName">' + this.parts[gpe][id].name + '</td>';
+                html += '<td>' + this.parts[gpe][id].num + '</td>';
+                html += '<td>' + this.parts[gpe][id].newNum + '</td>';
+                html += '<td>' + this.parts[gpe][id].eeeCode + '</td>';
+                html += '<td>' + this.parts[gpe][id].type + '</td>';
+                html += '<td>' + this.parts[gpe][id].price + '&nbsp;&euro;</td>';
+                html += '<td><span id="add_' + this.prodId + '_' + gpe + '_' + id + '" class="addToCart activated" onclick="GSX.products[' + this.prodId + '].cart.add($(this))">Ajouter au panier</span></td>';
                 html += '</tr>';
                 odd = !odd;
             }
@@ -546,12 +546,12 @@ function PartsManager(prodId, serial) {
                 'color': '#464646'
             });
         });
-        ptr.$prod.find('.filterTitle').mouseover(function(){
+        ptr.$prod.find('.filterTitle').mouseover(function() {
             ptr.showTypeFilters();
         }).mouseout(function() {
             ptr.hideTypeFilters();
         });
-        ptr.$prod.find('.typeFiltersContent').mouseover(function(){
+        ptr.$prod.find('.typeFiltersContent').mouseover(function() {
             ptr.showTypeFilters();
         }).mouseout(function() {
             ptr.hideTypeFilters();
@@ -565,9 +565,9 @@ function PartsManager(prodId, serial) {
         ptr.$prod.find('.typeFiltersContent input').change(function() {
             var gpe = $(this).attr('id').replace(/^typeFilter_(\d+)_(.+)$/, '$2');
             if ($(this).prop('checked')) {
-                ptr.$prod.find('.partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
+                ptr.$prod.find('.partGroup_' + gpe).stop().css('display', 'none').slideDown(250);
             } else {
-                ptr.$prod.find('.partGroup_'+gpe).slideUp(250);
+                ptr.$prod.find('.partGroup_' + gpe).slideUp(250);
             }
         });
     };
@@ -601,12 +601,12 @@ function PartsManager(prodId, serial) {
         });
     };
     this.showPartsGroup = function(gpe) {
-        $('#typeFilter_'+ptr.prodId+'_'+gpe).attr('checked', '');
-        this.$prod.find('.partGroup_'+gpe).stop().css('display', 'none').slideDown(250);
+        $('#typeFilter_' + ptr.prodId + '_' + gpe).attr('checked', '');
+        this.$prod.find('.partGroup_' + gpe).stop().css('display', 'none').slideDown(250);
     };
     this.hidePartsGroup = function(gpe) {
-        $('#typeFilter_'+ptr.prodId+'_'+gpe).removeAttr('checked');
-        this.$prod.find('.partGroup_'+gpe).stop().hide();
+        $('#typeFilter_' + ptr.prodId + '_' + gpe).removeAttr('checked');
+        this.$prod.find('.partGroup_' + gpe).stop().hide();
     };
     this.showAllPartsGroup = function() {
         this.$prod.find('.typeFiltersContent').find('input').each(function() {
@@ -630,7 +630,7 @@ function PartsManager(prodId, serial) {
             $(this).show();
         });
         for (gpe in this.parts) {
-            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
+            this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('(' + this.parts[gpe].length + ' produits)').css('color', '#505050');
         }
     };
 
@@ -639,30 +639,30 @@ function PartsManager(prodId, serial) {
         var kw = this.$prod.find('.keywordFilter').val();
         if (!kw) {
             this.$prod.find('.curKeywords').append('<p class="error">Veuillez entrer un mot-clé</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(2000, function(){
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(2000, function() {
                 $(this).remove();
             });
             return;
         }
         if (/ +/.test(kw)) {
             this.$prod.find('.curKeywords').append('<p class="error">Veuillez n\'entrer qu\'un seul mot à la fois</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function(){
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function() {
                 $(this).remove();
             });
             return;
         }
         if (!/^[a-zA-Z0-9\.,\-]+$/.test(kw)) {
             this.$prod.find('.curKeywords').append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques</p>');
-            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function(){
+            this.$prod.find('.curKeywords').find('p.error').fadeOut(5000, function() {
                 $(this).remove();
             });
             return;
         }
         var kwType = this.$prod.find('select.keywordFilterType').val();
         this.$prod.find('.curKeywords').find('p.error').stop().remove();
-        var html = '<div><span class="keyword">'+kw+'</span>';
-        html += '<span class="kwType kwt_'+kwType+'">&nbsp;&nbsp;('+partDataType[kwType]+')</span>';
-        html += '<span class="removeKeyWord" onclick="GSX.products['+this.prodId+'].PM.removeKeywordFilter($(this))"></span></div>';
+        var html = '<div><span class="keyword">' + kw + '</span>';
+        html += '<span class="kwType kwt_' + kwType + '">&nbsp;&nbsp;(' + partDataType[kwType] + ')</span>';
+        html += '<span class="removeKeyWord" onclick="GSX.products[' + this.prodId + '].PM.removeKeywordFilter($(this))"></span></div>';
         this.$prod.find('.curKeywords').append(html);
         this.$prod.find('.keywordFilter').val('');
         this.filterByKeywords();
@@ -679,20 +679,20 @@ function PartsManager(prodId, serial) {
         var search = this.$prod.find('.searchPartInput').val();
         if (!search) {
             $result.append('<p class="error">Veuillez entrer un code produit</p>');
-            $result.find('p.error').fadeOut(2000, function(){
+            $result.find('p.error').fadeOut(2000, function() {
                 $(this).remove();
             });
             return;
         }
         if (!/^[a-zA-Z0-9\-\_ ]+$/.test(search)) {
             $result.append('<p class="error">Caractères interdits. Merci de n\'utiliser que des caractères aplha-numériques ainsi que "-" ou "_"</p>');
-            $result.find('p.error').fadeOut(5000, function(){
+            $result.find('p.error').fadeOut(5000, function() {
                 $(this).remove();
             });
             return;
         }
         this.unsetSearch();
-        this.$prod.find('.searchResult').html('<div class="partSearchNum"><span class="searchNum">'+search+'</span><span class="removeSearch" onclick="GSX.products['+this.prodId+'].PM.unsetSearch()"></span></div>');
+        this.$prod.find('.searchResult').html('<div class="partSearchNum"><span class="searchNum">' + search + '</span><span class="removeSearch" onclick="GSX.products[' + this.prodId + '].PM.unsetSearch()"></span></div>');
         this.$prod.find('.curKeywords').find('div').each(function() {
             $(this).remove();
         });
@@ -701,22 +701,22 @@ function PartsManager(prodId, serial) {
         });
         var n = 0;
         for (gpe in this.parts) {
-            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('');
+            this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('');
             var check = false;
             for (id in this.parts[gpe]) {
                 if ((this.parts[gpe][id].num == search) || (this.parts[gpe][id].newNum == search)) {
                     check = true;
                     n++;
-                    this.$prod.find('.partGroup_'+gpe).find('tr.partRow_'+id).show();
+                    this.$prod.find('.partGroup_' + gpe).find('tr.partRow_' + id).show();
                 }
             }
             if (check) {
                 this.showPartsGroup(gpe);
-                this.openPartsGroup(this.$prod.find('.partGroup_'+gpe).find('div.partGroupName'));
+                this.openPartsGroup(this.$prod.find('.partGroup_' + gpe).find('div.partGroupName'));
             } else {
                 this.hidePartsGroup(gpe);
-                this.closePartsGroup(this.$prod.find('.partGroup_'+gpe).find('div.partGroupName'));
-                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('');
+                this.closePartsGroup(this.$prod.find('.partGroup_' + gpe).find('div.partGroupName'));
+                this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('');
             }
         }
         if (!n) {
@@ -726,12 +726,12 @@ function PartsManager(prodId, serial) {
     this.filterByKeywords = function() {
         this.unsetSearch();
         var kw = [];
-        this.$prod.find('.curKeywords').children('div').each(function(){
+        this.$prod.find('.curKeywords').children('div').each(function() {
             var txt = $(this).find('span.keyword').text();
             var type = $(this).find('.kwType').attr('class').replace(/^kwType kwt_(.*)$/, '$1');
             kw.push({
-                'txt' : txt,
-                'type' : type
+                'txt': txt,
+                'type': type
             });
         });
         $('tr.partRow').each(function() {
@@ -746,29 +746,29 @@ function PartsManager(prodId, serial) {
                     var regex = null;
                     switch (kw[i].type) {
                         case 'eeeCode':
-                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
+                            regex = new RegExp('^(.*)' + kw[i].txt + '(.*)$', 'i');
                             str = ptr.parts[gpe][id].eeeCode;
                             break;
 
                         case 'name':
-                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
+                            regex = new RegExp('^(.*)' + kw[i].txt + '(.*)$', 'i');
                             str = ptr.parts[gpe][id].name;
                             break;
 
                         case 'num':
-                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
+                            regex = new RegExp('^(.*)' + kw[i].txt + '(.*)$', 'i');
                             str = ptr.parts[gpe][id].num;
-                            str += ' '+ptr.parts[gpe][id].newNum;
+                            str += ' ' + ptr.parts[gpe][id].newNum;
                             break;
 
                         case 'price':
                             kw[i].txt = kw[i].txt.replace(/,/g, '.');
-                            regex = new RegExp('^'+kw[i].txt+'\.*\d*$', 'i');
+                            regex = new RegExp('^' + kw[i].txt + '\.*\d*$', 'i');
                             str = ptr.parts[gpe][id].price;
                             break;
 
                         case 'type':
-                            regex = new RegExp('^(.*)'+kw[i].txt+'(.*)$', 'i');
+                            regex = new RegExp('^(.*)' + kw[i].txt + '(.*)$', 'i');
                             str = ptr.parts[gpe][id].type;
                             break;
                     }
@@ -777,17 +777,17 @@ function PartsManager(prodId, serial) {
                             display = false;
                         }
                         if (display) {
-                            this.$prod.find('.partGroup_'+gpe).find('tr.partRow_'+id).show();
+                            this.$prod.find('.partGroup_' + gpe).find('tr.partRow_' + id).show();
                             n++;
                         }
                     }
                 }
             }
-            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+n+' produits)');
+            this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('(' + n + ' produits)');
             if (n > 0)
-                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').css('color', '#00780A');
+                this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').css('color', '#00780A');
             else
-                this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').css('color', '#960000');
+                this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').css('color', '#960000');
         }
     };
     this.unsetKeywordsFilter = function() {
@@ -795,11 +795,11 @@ function PartsManager(prodId, serial) {
             $(this).remove();
         });
         this.$prod.find('.searchResult').html('');
-        $('tr.partRow').each(function(){
+        $('tr.partRow').each(function() {
             $(this).show();
         });
         for (gpe in this.parts) {
-            this.$prod.find('.partGroup_'+gpe).find('span.partsNbr').html('('+this.parts[gpe].length+' produits)').css('color', '#505050');
+            this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('(' + this.parts[gpe].length + ' produits)').css('color', '#505050');
         }
     };
     this.unsetSearch = function() {
@@ -817,10 +817,10 @@ function GSX_Product(id, serial) {
     this.cart = new Cart(id, serial, this.PM);
 
     this.loadDatas = function() {
-        $('#requestsResponsesContainer').append('<div id="prod_'+this.id+'" class="productDatasContainer"></div>');
+        $('#requestsResponsesContainer').append('<div id="prod_' + this.id + '" class="productDatasContainer"></div>');
         this.PM.newProdContainer();
         this.cart.newProdContainer();
-        setRequest('GET', 'loadProduct', this.id, '&prodId='+this.id+'&serial='+serial);
+        setRequest('GET', 'loadProduct', this.id, '&prodId=' + this.id + '&serial=' + serial);
         displayRequestMsg('requestProcess', '');
     };
     this.loadParts = function() {
@@ -833,14 +833,14 @@ function GSX() {
     this.nextProdId = 1;
 
     this.importPartsFromCartToRepair = function(repair) {
-        var $form = $('#repairForm_'+repair);
+        var $form = $('#repairForm_' + repair);
         if ($form.length) {
             $form.find('.partsImportResults').hide().html('');
             var $container = $form.find('div.repairPartsContainer');
             var $template = $form.find('div.repairsPartsInputsTemplate');
             var prodId = $form.parent('div.repairFormContainer').parent('div.repairPopUp').find('input.prodId').val();
             if (prodId && $container.length && $template.length) {
-                var $prod = $('#prod_'+prodId);
+                var $prod = $('#prod_' + prodId);
                 if ($prod.length) {
                     var $cart = $prod.find('div.cartContent');
                     if (!$cart.length) {
@@ -857,12 +857,12 @@ function GSX() {
                     $partsRows.each(function() {
                         var partName = $(this).find('td:first').text();
                         var html = '<div class="partDatasBlock">';
-                        html += '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">'+partName+'</div>';
-                        html += '<div class="partDatasContent partDatasContent_'+i+'">';
+                        html += '<div class="partDatasBlockTitle open" onclick="togglePartDatasBlockDisplay($(this))">' + partName + '</div>';
+                        html += '<div class="partDatasContent partDatasContent_' + i + '">';
                         html += $template.html();
                         html += '</div></div>';
                         $container.append(html);
-                        var $div = $container.find('div.partDatasContent_'+i+'');
+                        var $div = $container.find('div.partDatasContent_' + i + '');
                         var $partRow = $(this);
                         if ($div.length) {
                             $div.find('div.dataBlock').each(function() {
@@ -870,11 +870,11 @@ function GSX() {
                                 var select = null;
                                 switch (dataName) {
                                     case 'partNumber':
-                                        $(this).find('input').val($partRow.find('td.ref').text()).attr('id', 'partNumber_'+i).attr('name', 'partNumber_'+i);
+                                        $(this).find('input').val($partRow.find('td.ref').text()).attr('id', 'partNumber_' + i).attr('name', 'partNumber_' + i);
                                         break;
 
                                     case 'comptiaCode':
-                                        select = '<select id="comptiaCode_'+i+'" name="comptiaCode_'+i+'">';
+                                        select = '<select id="comptiaCode_' + i + '" name="comptiaCode_' + i + '">';
                                         select += $partRow.find('select.compTIACodeSelect').html();
                                         select += '</select>';
                                         $(this).find('div.comptiaCodeContainer').html(select);
@@ -882,7 +882,7 @@ function GSX() {
                                         break;
 
                                     case 'comptiaModifier':
-                                        select = '<select id="comptiaModifier_'+i+'" name="comptiaModifier_'+i+'">';
+                                        select = '<select id="comptiaModifier_' + i + '" name="comptiaModifier_' + i + '">';
                                         select += $partRow.find('select.compTIAModifierSelect').html();
                                         select += '</select>';
                                         $(this).find('div.comptiaModifierContainer').html(select);
@@ -890,9 +890,9 @@ function GSX() {
                                         break;
 
                                     default:
-                                        $(this).find('#'+dataName).attr('id', dataName+'_'+i).attr('name', dataName+'_'+i);
-                                        $(this).find('#'+dataName+'_yes').attr('id', dataName+'_yes_'+i).attr('name', dataName+'_'+i);
-                                        $(this).find('#'+dataName+'_no').attr('id', dataName+'_no_'+i).attr('name', dataName+'_'+i);
+                                        $(this).find('#' + dataName).attr('id', dataName + '_' + i).attr('name', dataName + '_' + i);
+                                        $(this).find('#' + dataName + '_yes').attr('id', dataName + '_yes_' + i).attr('name', dataName + '_' + i);
+                                        $(this).find('#' + dataName + '_no').attr('id', dataName + '_no_' + i).attr('name', dataName + '_' + i);
                                         break;
                                 }
                             });
@@ -906,7 +906,7 @@ function GSX() {
         }
         alert('Une erreur est survenue');
     };
-    this.loadProduct = function (serial) {
+    this.loadProduct = function(serial) {
         if (!serial) {
             displayRequestMsg('error', 'Veuillez entrer un numéro de série');
             return;
@@ -940,7 +940,7 @@ function GSX() {
             $button.slideUp(250);
             this.products[prodId].loadParts();
         } else {
-            displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod'+prodId).find('.partsRequestResult'));
+            displayRequestMsg('error', 'Erreur : produit non initialisé', $('#prod' + prodId).find('.partsRequestResult'));
         }
     };
     this.addPart = function(prodId, group, name, num, type, price, eeeCode, newNum) {
@@ -956,14 +956,14 @@ function GSX() {
             alert('Erreur : ID produit absent');
             return;
         }
-        var $prod = $('#prod_'+prodId);
+        var $prod = $('#prod_' + prodId);
         if (!$prod.length) {
             alert('Une erreur est survenue, opération impossible');
             return;
         }
         if (this.products[prodId]) {
             var requestType = $prod.find('.repairTypeSelect').val();
-            setRequest('GET', 'loadRepairForm', prodId, '&requestType='+requestType+'&prodId='+prodId+'&serial='+this.products[prodId].serial);
+            setRequest('GET', 'loadRepairForm', prodId, '&requestType=' + requestType + '&prodId=' + prodId + '&serial=' + this.products[prodId].serial);
             displayRequestMsg('requestProcess', '', $prod.find('div.repairFormContainer'));
         } else {
             displayRequestMsg('error', 'Erreur : produit non initialisé', $prod.find('.partsRequestResult'));
@@ -1000,12 +1000,12 @@ function displayRequestMsg(type, msg, $div) {
     if (!$div)
         $div = $('#requestResult');
 
-    var html = '<p class="'+type+'">'+msg+'</p>';
+    var html = '<p class="' + type + '">' + msg + '</p>';
 
     $div.html(html).hide().slideDown(250);
 }
 function displayCartRequestResult(prodId, html) {
-    var $cart = $('#prod_'+prodId).find('.cartRequestResults');
+    var $cart = $('#prod_' + prodId).find('.cartRequestResults');
     $cart.find('p.requestProcess').first().slideUp(250, function() {
         $(this).remove();
         $cart.append(html);
@@ -1027,7 +1027,8 @@ function getProdId($obj) {
             break;
     }
     var id = $parent.attr('id').replace(/^prod_(\d+)$/, '$1');
-    if (!id) return 0;
+    if (!id)
+        return 0;
     return id;
 }
 function checkProdQty($input) {
@@ -1087,10 +1088,35 @@ function onYesNoBlockMouseOut($div) {
         'color': '#505050'
     });
 }
-
+function onComptiaGroupSelect($select) {
+    var val = $select.val();
+    if (typeof (val) != 'undefined') {
+        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
+        var classe = 'comptiaGroup_'+val;
+        var newVal = null;
+        $options.each(function() {
+            if ($(this).hasClass(classe)) {
+                if (newVal == null) {
+                    newVal = $(this).attr('value');
+                    $(this).parent('select').val(newVal)
+                }
+                $(this).show();
+            }
+            else
+                $(this).hide();
+        });
+    }
+}
+function displayKgbSerialUpdateForm($span) {
+    var $div = $span.parent('div').parent('.kgbUpdateBlock').find('.kgbSerialUpdateFormContainer');
+    if ($div.css('display') == 'none')
+        $div.slideDown(250);
+    else
+        $div.slideUp(250);
+}
 function displayCreateRepairPopUp($button) {
     var prodId = getProdId($button);
-    var $popUp = $('#prod_'+prodId).find('div.repairPopUp')
+    var $popUp = $('#prod_' + prodId).find('div.repairPopUp')
     if ($popUp.length) {
         $popUp.show();
         setNewScrollToAnchor($popUp);
@@ -1106,15 +1132,15 @@ function hideLabelInfos($span) {
     $span.find('div.labelInfos').fadeOut(250);
 }
 function openRepairImportForm(prodId) {
-    var $form = $('#prod_'+prodId).find('div.importRepairForm');
-    if (!$form.length){
+    var $form = $('#prod_' + prodId).find('div.importRepairForm');
+    if (!$form.length) {
         alert('Erreur: impossible d\'afficher le formulaire');
         return;
     }
     $form.slideDown(250);
 }
 function closeRepairImportForm(prodId) {
-    var $form = $('#prod_'+prodId).find('div.importRepairForm');
+    var $form = $('#prod_' + prodId).find('div.importRepairForm');
     if (!$form.length)
         return;
     $form.slideUp(250);
@@ -1128,11 +1154,11 @@ function closeRepairSubmit($span, repairId, checkRepair) {
     else
         checkRepair = 0;
     if (confirm("Attention, La réparation va être indiquée comme complète auprès du service GSX d'Apple.\nVeuillez confirmer")) {
-        var $container = $('#repair_'+repairId).find('.repairRequestsResults');
+        var $container = $('#repair_' + repairId).find('.repairRequestsResults');
         if ($container.length) {
             $span.attr('class', 'button redHover closeRepair deactivated');
             displayRequestMsg('requestProcess', '', $container);
-            setRequest('GET', 'closeRepair', repairId, '&repairRowId='+repairId+'&checkRepair='+checkRepair);
+            setRequest('GET', 'closeRepair', repairId, '&repairRowId=' + repairId + '&checkRepair=' + checkRepair);
             return;
         }
         alert('Une erreur est survenue, opération impossible.');
@@ -1148,7 +1174,7 @@ function togglePartDatasBlockDisplay($div) {
     }
 }
 function assignInputCheckMsg($input, type, msg) {
-    var html = '<span class="'+type+'">'+msg+'</span>';
+    var html = '<span class="' + type + '">' + msg + '</span>';
     var $checkSpan = $input.parent('div.dataBlock').find('span.dataCheck');
     if ($checkSpan.length) {
         $checkSpan.slideUp(250);
@@ -1158,7 +1184,7 @@ function assignInputCheckMsg($input, type, msg) {
 function checkInput($input, type) {
     var val = $input.val();
     if (!val.length) {
-        if ($input.attr('required') !== undefined){
+        if ($input.attr('required') !== undefined) {
             assignInputCheckMsg($input, 'notOk', 'Information obligatoire');
             return false;
         }
@@ -1241,14 +1267,14 @@ function duplicateInput($span, inputName) {
     var $container = $span.parent('div.dataBlock');
     if ($container.length) {
         var $template = $container.find('div.dataInputTemplate');
-        var $index = $container.find('#'+inputName+'_nextIdx');
+        var $index = $container.find('#' + inputName + '_nextIdx');
         if ($template.length) {
             if ($index.length) {
                 var html = $template.html();
                 var index = parseInt($index.val());
                 var regex = new RegExp(inputName, 'g');
                 index++
-                html = html.replace(regex, inputName+'_'+index);
+                html = html.replace(regex, inputName + '_' + index);
                 var $list = $container.find('div.inputsList');
                 if ($list.length) {
                     $list.append(html);
@@ -1261,21 +1287,29 @@ function duplicateInput($span, inputName) {
     alert('Une erreur est survenue, opération impossible');
 }
 function submitGsxRequestForm(prodId, request, repairRowId) {
-    var $prod = $('#prod_'+prodId);
+    var $prod = $('#prod_' + prodId);
     var $form = null;
     var formElement = null;
     var $resultContainer = null;
-    if (typeof(repairRowId) != 'undefined') {
-        var $repairContainer = $prod.find('#repair_'+repairRowId);
+    if (typeof (repairRowId) != 'undefined') {
+        var $repairContainer = $prod.find('#repair_' + repairRowId);
         if ($repairContainer.length) {
-            $form = $repairContainer.find('#repairForm_'+request);
-            $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+            $form = $repairContainer.find('#repairForm_' + request);
+            switch (request) {
+                case 'UpdateSerialNumber':
+                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+                    break;
+
+                case 'UpdateKGBSerialNumber':
+                    $resultContainer = $repairContainer.find('.KGBSerialNumberUpdate');
+                    break;
+            }
         }
     } else {
-        if (!$prod.length){
-            $form = $('#repairForm_'+request);
+        if (!$prod.length) {
+            $form = $('#repairForm_' + request);
         } else {
-            $form = $prod.find('#repairForm_'+request);
+            $form = $prod.find('#repairForm_' + request);
             $resultContainer = $prod.find('.repairFormResults');
         }
     }
@@ -1327,17 +1361,33 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         contentType: false,
         data: new FormData(formElement), // Non compatible pour les IE < 10
         success: function(html) {
-            if ($resultContainer.length) {
-                $resultContainer.html(html);
-            }
+            traiteCommandeRetour(html, $resultContainer);
         },
-        error: function() {
-            displayRequestMsg('error', 'Une erreur technique est survenue', $resultContainer);
+        error: function(html) {
+            alert("passage en erreur" + html);
+            traiteCommandeRetour(html, $resultContainer);
+            displayRequestMsg('error', 'Une erreur technique est survenue. Ajax', $resultContainer);
         }
     });
 }
+
+function traiteCommandeRetour(html, $resultContainer) {
+    if ($resultContainer.length) {
+        $resultContainer.html(html);
+        if ($resultContainer.find("prix").size() > 0) {
+            prix = $resultContainer.find("prix").html();
+            $resultContainer.find("prix").html("");
+            if(prix > 0)
+                alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
+
+            window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
+        }
+    }
+
+}
+
 function importRepairSubmit(prodId) {
-    var $prod = $('#prod_'+prodId);
+    var $prod = $('#prod_' + prodId);
     if ($prod.length) {
         var $input = $prod.find('#importNumber');
         if ($input.length) {
@@ -1349,7 +1399,7 @@ function importRepairSubmit(prodId) {
                     return;
                 } else {
                     if (checkInput($input, 'text')) {
-                        var params = '&importNumber='+number+'&importNumberType='+$prod.find('#importNumberType').val();
+                        var params = '&importNumber=' + number + '&importNumberType=' + $prod.find('#importNumberType').val();
                         setRequest('GET', 'importRepair', prodId, params);
                         displayRequestMsg('requestProcess', '', $resultContainer);
                         return;
@@ -1370,7 +1420,7 @@ function getXMLHttpRequest() {
             try {
                 xhr = new ActiveXObject("msxml2.XMLHTTP");
             }
-            catch(e) {
+            catch (e) {
                 xhr = new ActiveXObject("Microsoft.XMLHTTP");
             }
         }
@@ -1383,6 +1433,8 @@ function getXMLHttpRequest() {
 function onRequestResponse(xhr, requestType, prodId) {
     var $div = null;
     var $span = null;
+    if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
+        location.reload();
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {
@@ -1395,7 +1447,7 @@ function onRequestResponse(xhr, requestType, prodId) {
 
         case 'loadProduct':
             $('#requestResult').slideUp(250);
-            $div = $('#prod_'+prodId);
+            $div = $('#prod_' + prodId);
             if ($div.length) {
                 $div.html(xhr.responseText).slideDown(250).show();
                 GSX.onProductLoad(prodId);
@@ -1406,9 +1458,9 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'loadRepairForm':
-            $div = $('#prod_'+prodId).find('.repairFormContainer');
+            $div = $('#prod_' + prodId).find('.repairFormContainer');
             if ($div.length) {
-                $div.slideUp(250, function(){
+                $div.slideUp(250, function() {
                     $(this).html(xhr.responseText).show();
                     if (importCart) {
                         $(this).find('span.importParts').click();
@@ -1420,7 +1472,7 @@ function onRequestResponse(xhr, requestType, prodId) {
             break;
 
         case 'loadParts':
-            $div = $('#prod_'+prodId).find('.partsRequestResult');
+            $div = $('#prod_' + prodId).find('.partsRequestResult');
             if ($div.length) {
                 $div.slideUp(250, function() {
                     $(this).html(xhr.responseText);
@@ -1434,8 +1486,8 @@ function onRequestResponse(xhr, requestType, prodId) {
 
         case 'savePartsCart':
             if (xhr.responseText == 'ok') {
-                $('#prod_'+prodId).find('.cartRequestResults').find('ok').remove();
-                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p><ok>Reload</ok>');
+                $('#prod_' + prodId).find('.cartRequestResults').find('ok').remove();
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p>');
             } else
                 displayCartRequestResult(prodId, xhr.responseText);
             GSX.products[prodId].cart.activateSave();
@@ -1446,18 +1498,18 @@ function onRequestResponse(xhr, requestType, prodId) {
                 displayCartRequestResult(prodId, '<p class="error">Erreur: numéro de série absent</p>');
             } else if (xhr.responseText == 'noPart') {
                 displayCartRequestResult(prodId, '<p class="alert">Aucun composant enregistré pour ce numéro de série</p>');
-            } else if (xhr.responseText == 'noDb'){
+            } else if (xhr.responseText == 'noDb') {
                 displayCartRequestResult(prodId, '<p class="error">Impossible d\'accéder à la base de données.</p>');
             } else {
-                $('#prod_'+prodId).find('.cartRequestResults').html('').hide();
+                $('#prod_' + prodId).find('.cartRequestResults').html('').hide();
                 eval(xhr.responseText);
             }
             break;
 
         case 'importRepair':
-            var $prod = $('#prod_'+prodId);
+            var $prod = $('#prod_' + prodId);
             if ($prod.length) {
-                $('#prod_'+prodId).find('.importRepairResult').slideUp(250, function() {
+                $('#prod_' + prodId).find('.importRepairResult').slideUp(250, function() {
                     $(this).html(xhr.responseText).slideDown(250);
                 })
             } else {
@@ -1467,7 +1519,7 @@ function onRequestResponse(xhr, requestType, prodId) {
 
         case 'closeRepair':
             var repairRowId = prodId;
-            var $repair = $('#repair_'+repairRowId);
+            var $repair = $('#repair_' + repairRowId);
             if ($repair.length) {
                 var $repairResult = $repair.find('div.repairRequestsResults');
                 $span = $repair.find('span.closeRepair');
@@ -1485,28 +1537,39 @@ function onRequestResponse(xhr, requestType, prodId) {
                 alert(xhr.responseText);
             }
             break;
+
+        case 'addCartToPropal':
+            alert('kkkkkkk');
+            if (xhr.responseText == 'ok') {
+                $span = $('#prod_' + prodId).find('span.addToPropal');
+                $span.attr('class', 'button addToPropal');
+                $('#prod_' + prodId).find('.cartRequestResults').find('ok').remove();
+                displayCartRequestResult(prodId, '<p class="confirmation">Ajout à la propal effectué</p>');
+            } else
+                displayCartRequestResult(prodId, xhr.responseText);
+            break;
     }
 }
 function setRequest(method, requestType, prodId, requestParams) {
     var xhr = getXMLHttpRequest();
 
-    xhr.onreadystatechange = function(){
+    xhr.onreadystatechange = function() {
         //alert('state: ' + xhr.readyState + ', status: ' +xhr.status);
         var RT = requestType;
         var ID = prodId;
-        if((xhr.readyState == 4) && ((xhr.status == 200) || (xhr.status == 0))) {
+        if ((xhr.readyState == 4) && ((xhr.status == 200) || (xhr.status == 0))) {
             onRequestResponse(xhr, RT, ID);
         }
     }
     switch (method) {
         case 'GET':
-            xhr.open(method, DOL_URL_ROOT+'/synopsisapple/ajax/requestProcess.php?action='+requestType+requestParams+extra);
+            xhr.open(method, DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=' + requestType + requestParams + extra);
             xhr.send();
             break;
 
         case 'POST':
-            xhr.open(method, DOL_URL_ROOT+'/synopsisapple/ajax/requestProcess.php?action='+requestType+extra);
-            xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
+            xhr.open(method, DOL_URL_ROOT + '/synopsisapple/ajax/requestProcess.php?action=' + requestType + extra);
+            xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
             xhr.send(requestParams);
             break;
     }
@@ -1519,7 +1582,7 @@ function scrollToAnchor() {
     if (!$curAnchor)
         return;
 
-    if (!$curAnchor.length)  {
+    if (!$curAnchor.length) {
         $curAnchor = null;
         return;
     }
@@ -1527,14 +1590,14 @@ function scrollToAnchor() {
     var start = $(window).scrollTop();
     var end = $curAnchor.offset().top;
     var distance = end - start;
-    distance /=  2;
+    distance /= 2;
 
     var newScroll = 0;
     if ((distance > 0) && (distance <= 2))
         newScroll = end;
     else if ((distance < 0) && (distance >= -2))
         newScroll = end;
-    else  {
+    else {
         newScroll = start + distance;
         if (newScroll < 0)
             newScroll = 0;

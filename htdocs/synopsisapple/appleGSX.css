@@ -873,7 +873,7 @@ div.requestFormInputs input {
     width: 250px;
 }
 div.requestFormInputs input[type="radio"] {
-    width: 80px;
+    width: 34px;
 }
 div.requestFormInputs fieldset {
     border: 1px solid #CDCDCD;

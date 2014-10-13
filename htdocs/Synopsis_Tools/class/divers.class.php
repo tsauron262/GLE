@@ -192,7 +192,7 @@ if (! defined('NOLOGIN'))
                 $return .= '<div class="menu_contenu"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@Synopsis_Tools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
-                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7");
+                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7"." ORDER BY id ASC");
                 while ($ligne = $db->fetch_object($result)) {
                     $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` IN ('" . $centre . "')) AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE model_refid = 105 AND  `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
                     $ligne2 = $db->fetch_object($result2);

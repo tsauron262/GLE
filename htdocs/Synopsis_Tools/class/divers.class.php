@@ -9,7 +9,7 @@ class object {
 class synopsisHook {
 
     static $timeDeb = 0;
-    private static $MAX_meTIME_LOG = 10;
+    private static $MAX_TIME_LOG = 10;
     private static $reload = false;
 
     function synopsisHook() {

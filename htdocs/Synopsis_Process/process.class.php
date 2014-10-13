@@ -2106,7 +2106,7 @@ class listform extends formulaireSource {
                 $this->label = $res->label;
                 $this->description = $res->description;
             }
-            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members WHERE list_refid = " . $id;
+            $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members WHERE list_refid = " . $id." ORDER BY id ASC";
             $sql = $this->db->query($requete);
             $this->lignes = array();
             if ($this->db->num_rows($sql) > 0) {

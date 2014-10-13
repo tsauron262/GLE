@@ -196,11 +196,11 @@ if (isset($_REQUEST['actionEtat'])) {
             $chrono->propal->valid($user);
             $chrono->propal->cloture($user, 2, "Auto via SAV sous garentie");
             $chrono->propal->fetch($chrono->propal->id);
-            propale_pdf_create($db, $chrono->propal, null, $langs);
+            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
         } else {
             $chrono->propal->fetch($chrono->propal->id);
             $chrono->propal->valid($user);
-            propale_pdf_create($db, $chrono->propal, null, $langs);
+            propale_pdf_create($db, $chrono->propal, "azurSAV", $langs);
             $text = "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
 \nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";

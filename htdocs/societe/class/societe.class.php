@@ -1083,7 +1083,7 @@ class Societe extends CommonObject
             else
             {
                 $this->error='Fetch no third party found for id='.$rowid;
-                dol_syslog($this->error, LOG_ERR);
+                dol_syslog($this->error, LOG_INFO);
                 $result = -2;
             }
 

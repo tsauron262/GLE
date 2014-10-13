@@ -91,26 +91,28 @@ function execute_op_save_columns() {
     $nonNul = false;
     $cols = $GLOBALS['_POST']['columns'];
     // Parse out strings "1" and "0" as ints/booleans.
-    foreach ($cols as $c => $widgets) {
-        foreach ($widgets as $wid => $is_minimized) {
-            $nonNul = true;
-            $cols[$c][$wid] = (int) $is_minimized;
+    if (is_array($cols)) {
+        foreach ($cols as $c => $widgets) {
+            foreach ($widgets as $wid => $is_minimized) {
+                $nonNul = true;
+                $cols[$c][$wid] = (int) $is_minimized;
+            }
         }
-    }
-    global $db, $user, $type;
-    //Store to DB
-    // Par userId
-    $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard
+        global $db, $user, $type;
+        //Store to DB
+        // Par userId
+        $requete = "DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Dashboard
                        WHERE user_refid = " . $user->id . "
                          AND dash_type_refid ='" . $type . "'";
-    $sql = $db->query($requete);
-    if ($nonNul) {
-        $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Dashboard
+        $sql = $db->query($requete);
+        if ($nonNul) {
+            $requete = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_Dashboard
                       (params,user_refid,dash_type_refid)
                VALUES ('" . serialize($cols) . "'," . $user->id . ",'" . $type . "')";
-        $sql = $db->query($requete);
+            $sql = $db->query($requete);
+        }
+        return "OK";
     }
-    return "OK";
 }
 
 // Operation handler for widget_settings operation.

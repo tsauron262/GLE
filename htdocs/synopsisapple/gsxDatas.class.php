@@ -341,7 +341,7 @@ class gsxDatas {
         $requests = GSX_Request::getRequestsByType('repair');
         foreach ($requests as $name => $label) {
             if (!$this->isIphone ||
-                    ($this->isIphone && ($name != 'CreateMailInRepair')))
+                    ($this->isIphone && ($name == 'CreateCarryInRepair')))
                 $html .= '<option value="' . $name . '">' . $label . '</option>';
         }
         $html .= '</select>';

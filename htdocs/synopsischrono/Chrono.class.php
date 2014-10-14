@@ -326,6 +326,7 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople =  " . $contactid;
         else
             $requete .= ", fk_socpeople = NULL ";
+        if($this->note != "")
         $requete .= ", note = '" . addslashes($this->note) . "'";
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;

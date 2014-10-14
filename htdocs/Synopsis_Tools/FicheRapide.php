@@ -149,7 +149,6 @@ Pour du matériel couvert par Apple, la garantie initiale s'applique.
 Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
 Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
 Une garantie de 30 jours est appliquée pour les réparations logicielles.
-Nous gardons une copie des sauvegardes effectuées pendant 10 jours.
 ", 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
 
                     $acompte = intval($acompte);

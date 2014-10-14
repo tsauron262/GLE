@@ -726,6 +726,7 @@ class gsxDatas {
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
                     case 'CreateMailInRepair':
+                dol_syslog("mlailiniciici" . print_r($response, true), 4);
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);
@@ -747,6 +748,7 @@ class gsxDatas {
 
                     case 'UpdateSerialNumber':
                     case 'KGBSerialNumberUpdate':
+                dol_syslog("iciici" . print_r($response, true), 4);
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';

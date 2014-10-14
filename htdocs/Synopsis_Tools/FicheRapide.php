@@ -178,7 +178,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $factureA->set_paid($user);
 
                         include_once(DOL_DOCUMENT_ROOT . '/core/modules/facture/modules_facture.php');
-                        facture_pdf_create($db, $factureA, null, $langs);
+                        facture_pdf_create($db, $factureA, "crabe", $langs);
 
                         require_once DOL_DOCUMENT_ROOT . '/core/class/discount.class.php';
                         $discount = new DiscountAbsolute($db);

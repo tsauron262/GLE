@@ -554,7 +554,10 @@ class gsxDatas {
                     $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
                     $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
                     $valDef['billTo'] = $tech->array_options['options_apple_service'];
+                    $valDef['soldToContact'] = $tech->getFullName();
+                    $valDef['soldToContactPhone'] = $tech->office_phone;
                     $valDef['poNumber'] = $chrono->ref;
+                    $valDef['purchaseOrderNumber'] = $chrono->ref;
 //
 ////        echo "<pre>"; print_r($chrono->contact);
 //        print_r($chrono->extraValue);

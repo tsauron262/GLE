@@ -34,9 +34,9 @@ class gsxDatas {
         global $user;
 
 
-        $userId = 'sav@bimp.fr';
-        $password = '@Savbimp2014#';
-        $serviceAccountNo = '100520';
+//        $userId = 'sav@bimp.fr';
+//        $password = '@Savbimp2014#';
+//        $serviceAccountNo = '100520';
 
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']) &&
@@ -537,6 +537,7 @@ class gsxDatas {
         switch ($requestType) {
             case 'CreateCarryInRepair':
             case 'CreateMailInRepair':
+            case 'CreateIndirectOnsiteRepair':
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $chrono = new Chrono($db);
@@ -690,6 +691,10 @@ class gsxDatas {
                         $responseName = 'CreateMailInRepairResponse';
                         break;
 
+                    case 'CreateIndirectOnsiteRepair':
+                        $responseName = 'CreateIndirectOnsiteRepairResponse';
+                        break;
+
                     case 'UpdateSerialNumber':
                         $responseName = 'UpdateSerialNumberResponse';
                         break;
@@ -729,6 +734,7 @@ class gsxDatas {
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
                     case 'CreateMailInRepair':
+                    case 'CreateIndirectOnsiteRepair':
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);

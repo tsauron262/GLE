@@ -89,7 +89,7 @@ class Repair {
 
         if (!$this->update())
             return false;
-        
+
 //        require_once(DOL_DOCUMENT_ROOT."/synopsischrono/Chrono.class.php");
 //        $chrono = new Chrono($this->db);
 //        $chrono->fetch($chronoId);
@@ -475,8 +475,11 @@ class Repair {
         if (!count($this->partsPending)) {
             if (!$this->loadPartsPending()) {
                 if (count($this->gsx->errors['soap'])) {
-//                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
-//                    $html .= $this->gsx->getGSXErrorsHtml();
+
+                    $html .= '<p>Aucun composant en attente de retour n\'a été trouvé. <span class="displaySoapMsg" onclick="displaySoapMessage($(this))">Voir le message soap</span></p>';
+                    $html .= '<div class="soapMessageContainer">';
+                    $html .= $this->gsx->getGSXErrorsHtml();
+                    $html .= '</div>';
                     return $html;
                 } else if (!count($this->partsPending)) {
                     if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
@@ -495,8 +498,8 @@ class Repair {
             $html .= '<span class="confirmation" style="color: #DDE2E6; font-size: 12px; font-weight: normal">Numéros de série à jour</span>' . "\n";
         else {
             $html .= '<span class="button blueHover updateSerials"';
-            $html .= 'onclick="$(\'#repair_' . $this->rowId . '\').find(\'.serialUpdateFormContainer\').stop().slideDown(250);"';
-            $html .= (isset($this->repairNumber) ? '"' . $this->repairNumber . '"' : 'null') . ')">';
+            $html .= ' onclick="$(\'#repair_' . $this->rowId . '\').find(\'.serialUpdateFormContainer\').stop().slideDown(250);">';
+//            $html .= (isset($this->repairNumber) ? '"' . $this->repairNumber . '"' : 'null') . ')">';
             $html .= 'Mettre à jour les numéros de série</span>' . "\n";
         }
         $html .= '</div>' . "\n";
@@ -531,11 +534,11 @@ class Repair {
             if (!isset($this->confirmNumbers['repair']))
                 $html .= '<p class="error">Erreur interne: numéro de confirmation de la réparation absent.</p>';
             else {
-                $html .= '<select class="updateFormSelect">'."\n";
-                $html .= '<option value="partsPendingUpdateBlock">Mise à jour des numéros de série des composants</option>'."\n";
-                $html .= '<option value="kgbUpdateBlock">Mise à jour du numéro de série de l\'unité</option>'."\n";
-                $html .= '</select>'."\n";
-                $html .= '<span class="button greenHover" onclick="switchUpdateSerialForm($(this))">Afficher le formulaire</span>'."\n";
+                $html .= '<select class="updateFormSelect">' . "\n";
+                $html .= '<option value="partsPendingUpdateBlock">Mise à jour des numéros de série des composants</option>' . "\n";
+                $html .= '<option value="kgbUpdateBlock">Mise à jour du numéro de série de l\'unité</option>' . "\n";
+                $html .= '</select>' . "\n";
+                $html .= '<span class="button greenHover" onclick="switchUpdateSerialForm($(this))">Afficher le formulaire</span>' . "\n";
                 $valDef = array();
                 $valDef['repairConfirmationNumber'] = $this->confirmNumbers['repair'];
 

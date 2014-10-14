@@ -140,16 +140,25 @@
     <def name="popFaxed" type="YesNo" hidden="1">
         <label>Preuve d'achat faxé</label>
     </def>
+    <def name="proofOfPurchaseFaxed" type="YesNo" hidden="1">
+        <label>Preuve d'achat faxé</label>
+    </def>
     <def name="referenceNumber" type="text" max="15" jsCheck="text">
         <label>Référence</label>
     </def>
     <def name="requestReviewByApple" type="YesNo">
         <label>Vérification de la requête par Apple</label>
     </def>
+    <def name="requestReview" type="YesNo">
+        <label>Vérification de la requête par Apple</label>
+    </def>
     <def name="serialNumber" type="text" max="18" jsCheck="text">
         <label>Numéro de série</label>
     </def>
     <def name="shipTo" type="text" max="10" jsCheck="text">
+        <label>Numéro "Ship to"</label>
+    </def>
+    <def name="shippingLocation" type="text" max="10" jsCheck="text">
         <label>Numéro "Ship to"</label>
     </def>
     <def name="symptom" type="textarea" max="1500" jsCheck="text">
@@ -210,8 +219,8 @@
 <!--    <def name="consumerLawEligible" type="YesNo">
         <label>Eligible à la loi de consommation</label>
     </def>-->
-    
-    
+
+
     <def name="consumerLawEligible" type="select">
         <label>Eligible à la loi de consommation</label>
         <values>
@@ -276,6 +285,9 @@
     </def>
     <def name="trackingNumber" type="text" max="14" jsCheck="text">
         <label>Numéro de suivi</label>
+    </def>
+    <def name="technicianName" type="text" max="15" jsCheck="text">
+        <label>Nom du technicien en charge de la réparation</label>
     </def>
     <def name="shipper" type="select">
         <label>Expéditeur</label>

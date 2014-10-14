@@ -493,9 +493,27 @@ span.closeSerialUpdateForm:before {
 select.updateFormSelect {
     margin: 30px;
 }
-
 div.updateSerialFormBlock {
     padding: 20px;
+    display: none;
+}
+
+span.displaySoapMsg {
+    color: #A0A0A0;
+    font-weight: bold;
+    font-size: 11px;
+    cursor: pointer;
+    margin-left: 10px;
+}
+span.displaySoapMsg:hover {
+    color: #0050A0;
+}
+span.displaySoapMsg:after {
+    font-family: 'FA';
+    margin-left: 10px;
+    content: '\f0a9';
+}
+div.soapMessageContainer {
     display: none;
 }
 

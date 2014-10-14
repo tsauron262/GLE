@@ -535,56 +535,56 @@ class gsxDatas {
         $valDef['serialNumber'] = $this->serial;
 
         switch ($requestType) {
-        case 'CreateCarryInRepair':
-        case 'CreateMailInRepair':
-        if (isset($chronoId)) {
-            require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
-            $chrono = new Chrono($db);
-            $chrono->fetch($chronoId);
-            $chrono->getValues($chronoId);
+            case 'CreateCarryInRepair':
+            case 'CreateMailInRepair':
+                if (isset($chronoId)) {
+                    require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+                    $chrono = new Chrono($db);
+                    $chrono->fetch($chronoId);
+                    $chrono->getValues($chronoId);
 
-            $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
+                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
 
-            $tech = new User($db);
-            $tech->fetch($idUser);
+                    $tech = new User($db);
+                    $tech->fetch($idUser);
 
-            $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
-            $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptômes']['value'];
-            $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
-            $valDef['unitReceivedDate'] = $dateH[0];
-            $valDef['unitReceivedTime'] = $dateH[1];
+                    $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
+                    $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptômes']['value'];
+                    $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
+                    $valDef['unitReceivedDate'] = $dateH[0];
+                    $valDef['unitReceivedTime'] = $dateH[1];
 
-            $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
-            $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
-            $valDef['billTo'] = $tech->array_options['options_apple_service'];
-            $valDef['poNumber'] = $chrono->ref;
+                    $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
+                    $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+                    $valDef['billTo'] = $tech->array_options['options_apple_service'];
+                    $valDef['poNumber'] = $chrono->ref;
 //
 ////        echo "<pre>"; print_r($chrono->contact);
 //        print_r($chrono->extraValue);
-            if ($this->isIphone) {
-                $valDef['componentCheckDetails'] = array(
-                    'component' => $this->serial
-                );
-            }
-            $valDef['customerAddress']['companyName'] = $chrono->societe->name;
-            if (isset($chrono->contact->id)) {
-                $valDef['customerAddress']['street'] = $chrono->contact->address;
-                $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
+                    if ($this->isIphone) {
+                        $valDef['componentCheckDetails'] = array(
+                            'component' => $this->serial
+                        );
+                    }
+                    $valDef['customerAddress']['companyName'] = $chrono->societe->name;
+                    if (isset($chrono->contact->id)) {
+                        $valDef['customerAddress']['street'] = $chrono->contact->address;
+                        $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
-                $valDef['customerAddress']['city'] = $chrono->contact->town;
-                $valDef['customerAddress']['country'] = "FRANCE";
-                $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
-                $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
-                $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
-                $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
-                $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-                $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
-                $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
-            }
-        }
-        break;
+                        $valDef['customerAddress']['city'] = $chrono->contact->town;
+                        $valDef['customerAddress']['country'] = "FRANCE";
+                        $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
+                        $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+                        $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                        $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                        $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                        $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                        $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
+                    }
+                }
+                break;
         }
 
 //            $valDef['repairConfirmationNumbers'] = $this->confirmNumbers['repair'];
@@ -728,7 +728,7 @@ class gsxDatas {
                 }
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
-                        case 'CreateMailInRepair':
+                    case 'CreateMailInRepair':
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);

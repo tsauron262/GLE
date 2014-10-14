@@ -162,7 +162,7 @@ class gsxDatas {
 
                     if (isset($urgentMsg) && ($urgentMsg != '')) {
                         $html .= '<p class="alert">Message urgent du service Apple GSX: <br/>';
-                        $html .= '"'.$urgentMsg.'"';
+                        $html .= '"' . $urgentMsg . '"';
                         $html .= '</p>';
                     }
                     $html .= '<div class="container">' . "\n";
@@ -337,7 +337,9 @@ class gsxDatas {
         $html .= '<select class="repairTypeSelect">' . "\n";
         $requests = GSX_Request::getRequestsByType('repair');
         foreach ($requests as $name => $label) {
-            $html .= '<option value="' . $name . '">' . $label . '</option>';
+            if (!$this->isIphone ||
+                    ($this->isIphone && ($name != 'CreateMailInRepair')))
+                $html .= '<option value="' . $name . '">' . $label . '</option>';
         }
         $html .= '</select>';
 //        $html .= '</div>'."\n";
@@ -632,7 +634,7 @@ class gsxDatas {
                             'IPhoneCreateCarryInRepairResponse',
                             'CreateIPhoneCarryInRepairResponse'
                         );
-                        $requestType = "CreateIPhoneCarryInRepair";
+//                        $requestType = "CreateIPhoneCarryInRepair";
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
                         if (isset($result['serialNumber']))
@@ -655,6 +657,19 @@ class gsxDatas {
                         $client = 'IPhoneUpdateSerialNumber';
                         $request = 'IPhoneUpdateSerialNumberRequest';
                         break;
+
+                    case 'KGBSerialNumberUpdate':
+                        $responseNames = array(
+                            'UpdateIPhoneKGBSerialNumberResponse',
+                            'IPhoneUpdateKGBSerialNumberResponse',
+                            'IPhoneKGBSerialNumberUpdateResponse'
+                        );
+                        $client = 'IPhoneKGBSerialNumberUpdate';
+                        $request = 'UpdateIPhoneKGBSerialNumberRequest';
+                        if (isset($result['serialNumber']))
+                            $result['serialNumber'] = '';
+                        $result['imeiNumber'] = $this->serial;
+                        break;
                 }
             } else {
                 switch ($requestType) {
@@ -667,8 +682,19 @@ class gsxDatas {
                             unset($result['componentCheckDetails']);
                         break;
 
+                    case 'CreateMailInRepair':
+                        $responseName = 'CreateMailInRepairResponse';
+                        break;
+
                     case 'UpdateSerialNumber':
                         $responseName = 'UpdateSerialNumberResponse';
+                        break;
+
+                    case 'KGBSerialNumberUpdate':
+                        $responseNames = array(
+                            'UpdateKGBSerialNumberResponse',
+                            'KGBSerialNumberUpdateResponse'
+                        );
                         break;
                 }
             }
@@ -725,7 +751,7 @@ class gsxDatas {
                         break;
 
                     case 'UpdateSerialNumber':
-                    case 'IPhoneUpdateSerialNumber':
+                    case 'KGBSerialNumberUpdate':
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';
@@ -762,7 +788,8 @@ class gsxDatas {
                     }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';
-                    if ($requestType == 'UpdateSerialNumber') {
+                    if (($requestType == 'UpdateSerialNumber') ||
+                            ($requestType == 'KGBSerialNumberUpdate')) {
                         if (isset($_POST['closeRepair'])) {
                             if ($_POST['closeRepair'] == 'Y') {
                                 $ok = false;

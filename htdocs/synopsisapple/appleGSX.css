@@ -490,6 +490,15 @@ span.closeSerialUpdateForm:before {
     content: '\f057';
 }
 
+select.updateFormSelect {
+    margin: 30px;
+}
+
+div.updateSerialFormBlock {
+    padding: 20px;
+    display: none;
+}
+
 /*Liste des composants*/
 .partsRequestResult {
     display: none;

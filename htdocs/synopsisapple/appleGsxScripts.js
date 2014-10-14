@@ -30,7 +30,7 @@ var extra = "";
 if (typeof (chronoId) != 'undefined')
     extra = extra + "&chronoId=" + chronoId;
 //else
-//    extra = extra+ "&chronoId=11";
+//    extra = extra+ "&chronoId=12";
 
 function CompTIACodes() {
     this.loadStatus = 'unloaded';
@@ -1087,6 +1087,42 @@ function onYesNoBlockMouseOut($div) {
         'border-top': 'none'
     }).find('label.dataTitle').css({
         'color': '#505050'
+    });
+}
+function onComptiaGroupSelect($select) {
+    var val = $select.val();
+    if (typeof (val) != 'undefined') {
+        var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
+        var classe = 'comptiaGroup_'+val;
+        var newVal = null;
+        $options.each(function() {
+            if ($(this).hasClass(classe)) {
+                if (newVal == null) {
+                    newVal = $(this).attr('value');
+                    $(this).parent('select').val(newVal)
+                }
+                $(this).show();
+            }
+            else
+                $(this).hide();
+        });
+    }
+}
+function switchUpdateSerialForm($span) {
+    var $container = $span.parent('div.serialUpdateFormContainer');
+    var val = $container.find('select.updateFormSelect').val();
+    $container.find('.updateSerialFormBlock').each(function() {
+        if ($(this).css('display') == 'none') {
+            if ($(this).hasClass(val))
+                $(this).stop().slideDown(250);
+            else
+                $(this).stop().hide();
+        } else {
+            if ($(this).hasClass(val))
+                $(this).stop().show();
+            else
+                $(this).stop().slideUp(250);
+        }
     });
 }
 

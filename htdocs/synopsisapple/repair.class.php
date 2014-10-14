@@ -468,12 +468,15 @@ class Repair {
     }
 
     public function getPartsPendingReturnHtml() {
+        if (!isset($this->repairNumber) || $this->repairNumber == '')
+            return '';
+
         $html = '';
         if (!count($this->partsPending)) {
             if (!$this->loadPartsPending()) {
                 if (count($this->gsx->errors['soap'])) {
-                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
-                    $html .= $this->gsx->getGSXErrorsHtml();
+//                    $html .= '<p class="error">La tentative de récupération des composants en attente de retour a échoué.</p>';
+//                    $html .= $this->gsx->getGSXErrorsHtml();
                     return $html;
                 } else if (!count($this->partsPending)) {
                     if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
@@ -528,20 +531,39 @@ class Repair {
             if (!isset($this->confirmNumbers['repair']))
                 $html .= '<p class="error">Erreur interne: numéro de confirmation de la réparation absent.</p>';
             else {
+                $html .= '<select class="updateFormSelect">'."\n";
+                $html .= '<option value="partsPendingUpdateBlock">Mise à jour des numéros de série des composants</option>'."\n";
+                $html .= '<option value="kgbUpdateBlock">Mise à jour du numéro de série de l\'unité</option>'."\n";
+                $html .= '</select>'."\n";
+                $html .= '<span class="button greenHover" onclick="switchUpdateSerialForm($(this))">Afficher le formulaire</span>'."\n";
                 $valDef = array();
                 $valDef['repairConfirmationNumber'] = $this->confirmNumbers['repair'];
-            }
 
-            $valDef['partInfo'] = array();
-            foreach ($this->partsPending as $partPending) {
-                $valDef['partInfo'][] = array(
-                    'partNumber' => $partPending['partNumber'],
-                    'partDescription' => $partPending['partDescription'],
-                );
+                $valDef['partInfo'] = array();
+                foreach ($this->partsPending as $partPending) {
+                    $valDef['partInfo'][] = array(
+                        'partNumber' => $partPending['partNumber'],
+                        'partDescription' => $partPending['partDescription'],
+                    );
+                }
+                $gsxRequest = new GSX_Request($this->gsx, 'UpdateSerialNumber');
+                $html .= '<div class="partsPendingUpdateBlock updateSerialFormBlock">' . "\n";
+                $html .= $gsxRequest->generateRequestFormHtml($valDef, $this->prodId, $this->serial, $this->rowId);
+                $html .= '<div class="partsPendingSerialUpdateResults"></div>' . "\n";
+                $html .= '</div>' . "\n";
+
+
+                unset($gsxRequest);
+                $gsxRequest = new GSX_Request($this->gsx, 'KGBSerialNumberUpdate');
+                $html .= '<div class="kgbUpdateBlock updateSerialFormBlock">' . "\n";
+                $html .= $gsxRequest->generateRequestFormHtml(array(
+                    'repairConfirmationNumber' => isset($this->confirmNumbers['repair']) ? $this->confirmNumbers['repair'] : ''
+                        ), $this->prodId, $this->serial, $this->rowId);
+                $html .= '<div class="kgbSerialUpdateResults"></div>' . "\n";
+                $html .= '</div>' . "\n";
+
+                $html .= '</div>' . "\n";
             }
-            $gsxRequest = new GSX_Request($this->gsx, 'UpdateSerialNumber');
-            $html .= $gsxRequest->generateRequestFormHtml($valDef, $this->prodId, $this->serial, $this->rowId);
-            $html .= '<div class="partsPendingSerialUpdateResults"></div></div>' . "\n";
         }
         $html .= '</div>' . "\n";
         return $html;

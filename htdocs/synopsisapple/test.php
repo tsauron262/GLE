@@ -8,6 +8,8 @@ llxHeader();
 
 <div style="background-color: #E6E6E6; width: 100%; padding: 10px; margin-bottom: 30px;">
     <label for="serialInput">Entrez un numéro de série: </label>
+    <!--013409004309660-->
+    <!--C2QMDSAVFH00-->
     <input type="text" name="serialInput" id="serialInput" value="013409004309660" onfocus="this.value = ''"/>
     <button id="serialSubmit">&nbsp;&nbsp;OK&nbsp;&nbsp;</button>
 </div>

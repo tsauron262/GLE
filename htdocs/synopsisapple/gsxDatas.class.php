@@ -32,13 +32,13 @@ class gsxDatas {
 
     public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
         global $user;
-        
-        
+
+
         $userId = 'sav@bimp.fr';
         $password = '@Savbimp2014#';
         $serviceAccountNo = '100520';
-        
-        
+
+
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']) &&
                 $user->array_options['options_apple_id'] != "" && $user->array_options['options_apple_mdp'] != "" && $user->array_options['options_apple_service'] != "")
             $details = array(
@@ -224,7 +224,7 @@ class gsxDatas {
 
                     if (isset($datas['notes']) && $datas['notes'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Note</td><td>' . $datas['notes'] . '</td></tr>' . "\n";
-                    
+
                     if (isset($datas['activationLockStatus']) && $datas['activationLockStatus'] !== '')
                         $html .= '<tr class="oddRow"><td class="rowTitle">Localisé</td><td>' . $datas['activationLockStatus'] . '</td></tr>' . "\n";
 
@@ -533,13 +533,14 @@ class gsxDatas {
 
         switch ($requestType) {
             case 'CreateCarryInRepair':
+            case 'CreateMailInRepair':
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $chrono = new Chrono($db);
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);
-                    
-                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0)? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
+
+                    $idUser = ($chrono->extraValue[$chronoId]['Technicien']['value'] > 0) ? $chrono->extraValue[$chronoId]['Technicien']['value'] : $user->id;
 
                     $tech = new User($db);
                     $tech->fetch($idUser);
@@ -595,7 +596,8 @@ class gsxDatas {
         $GSXRequest = new GSX_Request($this, $requestType);
         $result = $GSXRequest->processRequestForm($prodId, $this->serial);
         $html = '';
-        if ($GSXRequest->isLastRequestOk()) { $filesError = false;
+        if ($GSXRequest->isLastRequestOk()) {
+            $filesError = false;
             if (isset($_POST['includeFiles']) && ($_POST['includeFiles'] == 'Y') && isset($_REQUEST['chronoId'])) {
                 $dir = DOL_DATA_ROOT . '/synopsischrono/' . $_REQUEST['chronoId'] . '/';
                 $files = scandir($dir);
@@ -634,7 +636,6 @@ class gsxDatas {
                             'IPhoneCreateCarryInRepairResponse',
                             'CreateIPhoneCarryInRepairResponse'
                         );
-//                        $requestType = "CreateIPhoneCarryInRepair";
                         $client = 'IPhoneCreateCarryInRepair';
                         $request = 'CreateIPhoneCarryInRepairRequest';
                         if (isset($result['serialNumber']))
@@ -707,9 +708,9 @@ class gsxDatas {
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
-                dol_syslog("erreur GSX".print_r($response, true), 4);
+                dol_syslog("erreur GSX" . print_r($response, true), 4);
             } else {
-                dol_syslog("iciici".print_r($response, true), 4);
+                dol_syslog("iciici" . print_r($response, true), 4);
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;
@@ -724,19 +725,13 @@ class gsxDatas {
                 }
                 switch ($requestType) {
                     case 'CreateCarryInRepair':
-                    case 'CreateIPhoneCarryInRepair':
-                    case 'CreateCarryIn':
-                    case 'CreateIPhoneCarryIn':
-                        if($requestType == 'CreateCarryInRepair')
-                            $requestType = 'CreateCarryIn';
-//                        if($requestType == 'CreateIPhoneCarryInRepair')
-//                            $requestType = 'CreateIPhoneCarryIn';
-                        if (isset($response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'])) {
-                            $confirmNumber = $response[$requestType . 'Response']['repairConfirmation']['confirmationNumber'];
-                            $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$requestType . 'Response']['repairConfirmation']['totalFromOrder']);
-                            if(isset($_REQUEST['requestReviewByApple']) && $_REQUEST['requestReviewByApple'] == "Y")
+                    case 'CreateMailInRepair':
+                        if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
+                            $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
+                            $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);
+                            if (isset($_REQUEST['requestReviewByApple']) && $_REQUEST['requestReviewByApple'] == "Y")
                                 $prixTot = 0;
-                            $html .= "<prix>".$prixTot."</prix>";
+                            $html .= "<prix>" . $prixTot . "</prix>";
                             if (isset($_REQUEST['chronoId'])) {
                                 if ($repair->create($_REQUEST['chronoId'], $confirmNumber)) {
                                     $ok = true;
@@ -746,7 +741,7 @@ class gsxDatas {
                                 $html .= '<p class="error">Une erreur est survenue (chronoId manquant).</p>';
                             }
                         } else {
-                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : '.$requestType.'</p>';
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple. Requete : ' . $client . '</p>';
                         }
                         break;
 
@@ -819,7 +814,7 @@ class gsxDatas {
     }
 
     public function getGSXErrorsHtml() {
-        if(is_object($this->gsx))
+        if (is_object($this->gsx))
             return $this->gsx->getGSXErrorsHtml();
         else
             return '';

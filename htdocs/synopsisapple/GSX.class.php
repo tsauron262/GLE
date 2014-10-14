@@ -401,6 +401,9 @@ class GSX {
 //        <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:iph="http://gsxws.apple.com/elements/iphone">
         $api_mode = ( $this->gsxDetails['apiMode'] == 'production' ) ? '' : $this->gsxDetails['apiMode'];
 
+        $type = "Asp";
+//        $type = "IPhone";
+        
         if ($this->gsxDetails['gsxWsdl'] != '') {
             return $this->wsdlUrl = $this->gsxDetails['gsxWsdl'];
         } elseif ($api_mode == 'it') {

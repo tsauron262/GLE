@@ -487,13 +487,14 @@ function PartsManager(prodId, serial) {
     };
     this.displayParts = function() {
         this.$parts = this.$prod.find('.partsListContainer');
-        var ths = '<th style="min-width: 250px">Nom</th>';
-        ths += '<th style="min-width: 100px">Ref.</th>';
-        ths += '<th style="min-width: 100px">Nouvelle Ref.</th>';
-        ths += '<th style="min-width: 100px">eeeCode</th>';
-        ths += '<th style="min-width: 100px">Type</th>';
-        ths += '<th style="min-width: 100px">Prix</th>';
+        var ths =  '';
         ths += '<th></th>';
+        ths += '<th style="min-width: 250px">Nom</th>';
+        ths += '<th style="min-width: 80px">Ref.</th>';
+        ths += '<th style="min-width: 80px">Nouvelle Ref.</th>';
+        ths += '<th style="min-width: 80px">eeeCode</th>';
+        ths += '<th style="min-width: 80px">Type</th>';
+        ths += '<th style="min-width: 80px">Prix</th>';
 
         for (gpe in this.parts) {
             this.$prod.find('.typeFiltersContent').append('<input type="checkbox" checked id="typeFilter_' + ptr.prodId + '_' + gpe + '"/><label for="typeFilter_' + ptr.prodId + '_' + gpe + '">' + partsGroup[gpe] + '</label><br/>');
@@ -1306,15 +1307,7 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         var $repairContainer = $prod.find('#repair_' + repairRowId);
         if ($repairContainer.length) {
             $form = $repairContainer.find('#repairForm_' + request);
-            switch (request) {
-                case 'UpdateSerialNumber':
-                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
-                    break;
-
-                case 'KGBSerialNumberUpdate':
-                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
-                    break;
-            }
+            $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
         }
     } else {
         if (!$prod.length) {
@@ -1386,16 +1379,18 @@ function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
         $resultContainer.html(html);
         if ($resultContainer.find("prix").size() > 0) {
-            prix = $resultContainer.find("prix").html();
-            $resultContainer.find("prix").html("");
-            if(prix > 0)
-                alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
-
-            window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
+                prix = $resultContainer.find("prix").html();
+                $resultContainer.find("prix").html("");
+                if(prix > 0)
+                    alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
+                
+                window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
         }
     }
 
 }
+
+
 
 function importRepairSubmit(prodId) {
     var $prod = $('#prod_' + prodId);

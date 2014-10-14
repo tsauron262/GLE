@@ -510,6 +510,7 @@ class pdf_crabeSav extends ModelePDFFactures
                                 
                                                
                                 /*mod drsi ajout signature*/
+                                $pdf->SetFont('','', $default_font_size);
                                 $pdf->SetXY("29", "237");
                                 $pdf->MultiCell("50", "10", "Matériel récupéré\nLe : ", 0, 'L');
                                 $pdf->SetXY("30", "247");

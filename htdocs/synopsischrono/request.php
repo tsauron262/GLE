@@ -29,6 +29,7 @@ if (isset($chrono->propal) && isset($chrono->propal->ref)) {
         $tabFileProp2[] = ".pdf";
         $tabFileProp3[] = $chrono->propal->ref . ".pdf";
     }
+    $propal = $chrono->propal;
 }
 
 
@@ -140,12 +141,60 @@ if (isset($_REQUEST['actionEtat'])) {
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     }
 
+    if ($action == "revProp" && $chrono->propal->id > 0) {
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
+        $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
+        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i');
+        $chrono->update($chrono->id);
+
+        $revision = new SynopsisRevisionPropal($chrono->propal);
+        $revision->reviserPropal($_REQUEST['ligne']? array( array('Diagnostic'), null) : array(null, array('acompte')));
+//$propal = new Propal();
+        if ($_REQUEST['ligne'] == 0) {//Création de la facture de frais de prise en charge.
+            $propal->addline("Prise en charge :  : " . $chrono->ref .
+                    "\n" . "Machine : " . $nomMachine .
+                    "\n" . "Frais de gestion devis refusé.
+", $_REQUEST['frais']/1.20, 1, 20, 0, 0, 0, 0, 'HT', null, null, 1);
+
+
+
+            $propal->fetch($chrono->propal->id);
+            propale_pdf_create($db, $propal, "azurSAV", $langs);
+
+
+
+            $facture = new Facture($db);
+            $facture->createFromOrder($propal);
+            $facture->validate($user);
+            $facture->fetch($facture->id);
+            facture_pdf_create($db, $facture, null, $langs);
+            link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+            $propal->cloture($user, 4, '');
+            $chrono->setDatas($chrono->id, array($idEtat => 9));
+            
+            $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
+            mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+                    , $tabFilePc, $tabFilePc2, $tabFilePc3);
+            sendSms($chrono, "Bonjour, la réparation de votre produit  est refusé. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
+    
+        } else {
+
+            $chrono->setDatas($chrono->id, array($idEtat => 5));
+        }
+
+
+
+//        $chrono->propal->cloture($user, 5, "Auto via SAV");
+        $ok = true;
+    }
+
+
     if ($action == "devisKo" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis refusé le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 3, "Auto via SAV");
-        $chrono->setDatas($chrono->id, array($idEtat => 9));
+        $chrono->setDatas($chrono->id, array($idEtat => 6));
         $ok = true;
     }
     if ($action == "pieceOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
@@ -166,8 +215,6 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 9));
         $ok = true;
 
-        $propal = new Propal($db);
-        $propal = $chrono->propal;
 
         $facture = new Facture($db);
         $facture->createFromOrder($propal);

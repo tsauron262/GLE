@@ -80,7 +80,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
             $this->propalSui->fetch($obj->sui);
     }
 
-    function reviserPropal() {
+    function reviserPropal($ajoutLigne = true) {
         global $conf, $db;
         $propal = $this->propal;
         $socid = $propal->socid;
@@ -95,6 +95,35 @@ class SynopsisRevisionPropal extends SynopsisRevision {
         $hookmanager->initHooks(array('propalcard'));
         $hookmanager->executeHooks('doActions', $parameters, $object, $actionHook);    // Note that $action and $object may have been modified by some hooks
 
+        if (is_array($ajoutLigne)) {
+            if (is_array($ajoutLigne[1])) {
+                $tabT = array();
+                foreach ($object->lines as $line) {
+                    foreach ($ajoutLigne[1] as $valAAjouter)
+                        if (stripos($line->desc, $valAAjouter) !== false)
+                            $tabT[] = $line;
+                }
+            } else
+                $tabT = $object->lines;
+
+
+            $newLine = array();
+            if (is_array($ajoutLigne[0])) {
+                $tabT = array();
+                foreach ($object->lines as $line) {
+                    $trouver = false;
+                    foreach ($ajoutLigne[0] as $valAVirer)
+                        if (stripos($line->desc, $valAVirer) !== false)
+                            $trouver = true;
+                    if (!$trouver)
+                        $newLine[] = $line;
+                }
+            } else
+                $newLine = $tabT;
+            $object->lines = $newLine;
+        }
+        else if (!$ajoutLigne)
+            $object->lines = array();
         $newId = $object->createFromClone($socid, $hookmanager);
         if ($newId > 0) {
             echo $oldRef; //.print_r($propal, true);
@@ -105,7 +134,7 @@ class SynopsisRevisionPropal extends SynopsisRevision {
                 $object->fetch($newId);
                 propale_pdf_create($db, $object, null, $outputlangs);
                 $repDest = DOL_DATA_ROOT . "/synopsischrono/" . $ligne->id . "/";
-                mkdir($repDest);//die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");
+                mkdir($repDest); //die(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf". $repDest . $propal->ref . ".pdf");
                 link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
                 $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET propalid = " . $object->id . " WHERE propalid = " . $oldId);
             }

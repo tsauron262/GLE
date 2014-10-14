@@ -46,7 +46,16 @@ function bouttonEtatSav($idChrono) {
     if (/*$chrono->values[$idEtat] == 2 && */$chrono->propalid && $propal->statut == 1) {
         $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=devisOk'>Devis Accepté</a>";
         $return .= "<br/>";
-        $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=devisKo'>Devis Refué</a>";
+        $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=devisKo'>Devis Refusé</a>";
+    } 
+
+    if (/*$chrono->values[$idEtat] == 2 && */$chrono->propalid && $chrono->values[$idEtat] == 6) {
+        $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/>";
+        $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").attr(\"value\")+\"&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=revProp&ligne=0\"'>Fermé</a>";
+        $return .= "<br/>";
+        $return .= "<a class='butAction' href='request.php?id=" . $idChrono . "&actionEtat=revProp&ligne=1'>Réviser devis</a>";
+        $return .= "<br/>";
     } 
     
     if (/*$chrono->values[$idEtat] == 2 && */!$chrono->propalid) {

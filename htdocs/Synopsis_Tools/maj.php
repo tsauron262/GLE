@@ -37,62 +37,55 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
     exit(0);
 }
 
+function verifOBj($objT, $text, $sqlReq) {
+    global $db, $totalFact;
+    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+    $req = $db->query($sqlReq);
+    $obj = new $objT($db);
+    echo "<h2>" . $objT . "</h2>"
+    ;
+    while ($result = $db->fetch_object($req)) {
+        $obj->fetch($result->rowid);
+        echo $text . " : " . $obj->getNomUrl(1) . "</br>";
+        if ($objT == "Propal") {
+            $tabT = getElementElement("propal", "facture", $result->rowid);
+            $obj2 = new Facture($db);
+            foreach ($tabT as $ligne) {
+                $obj2->fetch($ligne['d']);
+                echo "- Fact" . $obj2->getNomUrl(1) . "</br>";
+                $totalFact[$obj->id] = $obj->total_ttc;
+            }
+        }
 
-
+        if ($objT == "Facture") {
+            $totalFact[$obj->id] = $obj->total_ttc;
+        }
+        echo "</br>";
+    }
+    echo "</br>";
+    echo "</br>";
+}
 
 if (isset($_GET['action']) && $_GET['action'] == "majSav") {
-    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  group by p.rowid having nb > 1");
-    while($result = $db->fetch_object($sql)){
-        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
-            $obj = new Propal($db);
-            $obj->fetch($result->rowid);
-            echo "Propal avec de Facture FAxx : ".$obj->getNomUrl(1)."</br>";
-    }
-    
-    echo "</br>";
-    
-    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  group by p.rowid having nb > 1");
-    while($result = $db->fetch_object($sql)){
-        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
-            $obj = new Propal($db);
-            $obj->fetch($result->rowid);
-            echo "Propal avec deux accompte ACxx : ".$obj->getNomUrl(1)."</br>";
-    }
-    
-    echo "</br>";
-    
-    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' group by p.rowid having nb > 2");
-    while($result = $db->fetch_object($sql)){
-        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
-            $obj = new Propal($db);
-            $obj->fetch($result->rowid);
-            echo "Propal avec trois facture ACxx : ".$obj->getNomUrl(1)."</br>";
-    }
-    
-    echo "</br>";
-    
-    $sql = $db->query("SELECT * from llx_propal where rowid not in (select propalid from llx_synopsischrono_view_105) AND extraparams is null");
-    while($result = $db->fetch_object($sql)){
-        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
-            $obj = new Propal($db);
-            $obj->fetch($result->rowid);
-            echo "Propal sans Sav : ".$obj->getNomUrl(1)."</br>";
-    }
-    
-    echo "</br>";
-    
-    $sql = $db->query("select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')");
-    while($result = $db->fetch_object($sql)){
-        require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
-            $obj = new Facture($db);
-            $obj->fetch($result->rowid);
-            echo "Facture sans propal : ".$obj->getNomUrl(1)."</br>";
-    }
-    
-    echo "</br>";
-    
+    global $totalFact;
 
-    
+    verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  group by p.rowid having nb > 1");
+    verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  group by p.rowid having nb > 1");
+    verifOBj("Propal", "Propal avec trois facture", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' group by p.rowid having nb > 2");
+    verifOBj("Propal", "Propal sans Sav", "SELECT * from llx_propal where rowid not in (select propalid from llx_synopsischrono_view_105) AND extraparams is null");
+    verifOBj("Facture", "Facture sans propal", "select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')");
+//    verifOBj("Propal", "", );
+//    verifOBj("Propal", "", );
+//    verifOBj("Propal", "", );
+
+
+    $totG = 0;
+    foreach($totalFact as $id => $totI)
+        $totG += $totI;
+
+    echo "Total : " . $totG." € </br></br>";
+
     echo "Fin maj";
 }
 
@@ -101,24 +94,24 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
 
 if (isset($_GET['action']) && $_GET['action'] == "majExpedition") {
     $sql = $db->query("SELECT * FROM `llx_expeditiondet` WHERE `fk_origin_line` NOT IN (SELECT `rowid` FROM `llx_commandedet` WHERE 1)");
-    while($result = $db->fetch_object($sql)){
+    while ($result = $db->fetch_object($sql)) {
 //        echo($result->fk_expedition."  ".$result->fk_origin_line."  <br/>");
 //        $sql2 = $db->query("SELECT * FROM llx_expedition WHERE rowid = ".$result->fk_expedition ."");
 //        $result2 = $db->fetch_object($sql2);
         $sql3 = $db->query("SELECT * FROM llx_commandedet WHERE fk_commande = (SELECT fk_source 
 FROM  `llx_element_element` 
 WHERE  `sourcetype` LIKE  'commande'
-AND  `targettype` LIKE  'shipping' AND fk_target = ".$result->fk_expedition.")");
-        while($result3 = $db->fetch_object($sql3)){
-            if($result3->qty == $result->qty){
-                if(!isset($tabUtiliser[$result->rowid])){
-                if(!isset($tabUtiliser2[$result3->rowid])){
-                    $tabUtiliser[$result->rowid] = true;
-                    $tabUtiliser2[$result3->rowid] = true;
-                    echo $result->rowid."|".$result->fk_origin_line."|".$result3->rowid."expe ".$result->fk_expedition."<br/>";
-                    $db->query("UPDATE  `llx_expeditiondet` SET  `fk_origin_line` =  ".$result3->rowid." WHERE  `rowid` = ".$result->rowid." AND fk_origin_line = ".$result->fk_origin_line);
+AND  `targettype` LIKE  'shipping' AND fk_target = " . $result->fk_expedition . ")");
+        while ($result3 = $db->fetch_object($sql3)) {
+            if ($result3->qty == $result->qty) {
+                if (!isset($tabUtiliser[$result->rowid])) {
+                    if (!isset($tabUtiliser2[$result3->rowid])) {
+                        $tabUtiliser[$result->rowid] = true;
+                        $tabUtiliser2[$result3->rowid] = true;
+                        echo $result->rowid . "|" . $result->fk_origin_line . "|" . $result3->rowid . "expe " . $result->fk_expedition . "<br/>";
+                        $db->query("UPDATE  `llx_expeditiondet` SET  `fk_origin_line` =  " . $result3->rowid . " WHERE  `rowid` = " . $result->rowid . " AND fk_origin_line = " . $result->fk_origin_line);
 //                    break;
-                }
+                    }
                 }
             }
         }
@@ -192,9 +185,9 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     $maj->req("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE fk_target NOT IN (SELECT `id` FROM `" . MAIN_DB_PREFIX . "synopsischrono`) AND targettype = 'productCli'");
     $maj->req("UPDATE `" . MAIN_DB_PREFIX . "synopsischrono` c SET `ref` = CONCAT('PROD-', (SELECT `value` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` = c.id AND `key_id` = 1011 LIMIT 1)) WHERE ref IS NULL");
     $maj->req("update `" . MAIN_DB_PREFIX . "societe` set status = 1");
-    $maj->req("update `".MAIN_DB_PREFIX."product_extrafields` set `2hotline` = 0, `2teleMaintenance` = 0 where `2visiteSurSite` > 0;");
-    $maj->req("update `".MAIN_DB_PREFIX."product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
-    $maj->req("INSERT INTO `".MAIN_DB_PREFIX."usergroup_user` (fk_usergroup, fk_user) VALUES(14,1)");
+    $maj->req("update `" . MAIN_DB_PREFIX . "product_extrafields` set `2hotline` = 0, `2teleMaintenance` = 0 where `2visiteSurSite` > 0;");
+    $maj->req("update `" . MAIN_DB_PREFIX . "product_extrafields` set `2hotline` = 0 where `2teleMaintenance` > 0;");
+    $maj->req("INSERT INTO `" . MAIN_DB_PREFIX . "usergroup_user` (fk_usergroup, fk_user) VALUES(14,1)");
 
     $maj->ajoutDroitGr(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 14), array(80000, 80001, 80002, 80003, 80004, 80005, 80885,
         342, 343, 230001, 161881, 161882, 229201,
@@ -207,7 +200,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
     fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $_REQUEST['action'] = "majChrono";
 } if (isset($_REQUEST['action']) && $_REQUEST['action'] == "majChrono") {
-    $finReq = "".MAIN_DB_PREFIX."synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM ".MAIN_DB_PREFIX."synopsischrono)";
+    $finReq = "" . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid NOT IN (SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono)";
     $sqlValueChronoSansParent = $db->query("SELECT * FROM " . $finReq);
     while ($resultValueChronoSansParent = $db->fetch_object($sqlValueChronoSansParent))
         erreur("Valeur chrono sans lien a un chrono. " . $resultValueChronoSansParent->id . "|" . $resultValueChronoSansParent->chrono_refid);
@@ -218,7 +211,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 
 
 //    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono";
-    $requete = "SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_value";
+    $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value";
     $tabFusion = array();
     $sql = $db->query($requete);
     while ($result = $db->fetch_object($sql)) {
@@ -276,10 +269,10 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
         }
     }
     foreach ($tabFusion as $idMettre => $tabIdFaible) {
-        $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id = " . $idMettre);
+        $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idMettre);
         $chrono_maitre = $db->fetch_object($sql);
         foreach ($tabIdFaible as $idFaible) {
-            $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id = " . $idFaible);
+            $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $idFaible);
             $chrono_faible = $db->fetch_object($sql);
             if ($chrono_maitre->fk_societe != $chrono_faible->fk_societe) {
                 echo "<br/><br/>Gros probléme, mem ref, mem prode mais pas meme soc " . $chrono_maitre->fk_societe . "|" . $chrono_faible->fk_societe;
@@ -294,14 +287,14 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     $tabSuppr = $tabSuppri = array();
     //Test des chrono
-    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_key WHERE type_valeur = 10");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE type_valeur = 10");
     while ($result = $db->fetch_object($sql)) {
         $tabValOk = array();
-        $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."Synopsis_Process_lien WHERE rowid = " . $result->type_subvaleur);
+        $sql2 = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_lien WHERE rowid = " . $result->type_subvaleur);
         $result2 = $db->fetch_object($sql2);
         if ($result2->sqlFiltreSoc != "") {
             $champId = $result2->champId;
-            $sqlChrono = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono WHERE model_refid = " . $result->model_refid);
+            $sqlChrono = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE model_refid = " . $result->model_refid);
             while ($resultChrono = $db->fetch_object($sqlChrono)) {
                 $idSoc = $resultChrono->fk_societe;
 //                if (!$idSoc > 0)
@@ -387,7 +380,7 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
 //        netoyeDet("product", "babel_categorie_product", "babel_");
 
 
-    $sql = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."socpeople");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "socpeople");
     $tabFusion = array();
     while ($result = $db->fetch_object($sql)) {
         $clef = $result->fk_soc . $result->zip . $result->town . $result->poste . $result->phone . $result->phone_perso . $result->phone_mobile . $result->fax . $result->emil;
@@ -427,8 +420,8 @@ else if (isset($_GET['action']) && $_GET['action'] == "verif") {
     $nbFusion = 0;
     foreach ($tabFusion as $idM => $tab) {
         foreach ($tab as $idF => $inut) {
-            $db->query("UPDATE ".MAIN_DB_PREFIX."element_contact SET fk_socpeople =" . $idM . " WHERE fk_socpeople = " . $idF);
-            $db->query("DELETE FROM ".MAIN_DB_PREFIX."socpeople WHERE rowid = " . $idF);
+            $db->query("UPDATE " . MAIN_DB_PREFIX . "element_contact SET fk_socpeople =" . $idM . " WHERE fk_socpeople = " . $idF);
+            $db->query("DELETE FROM " . MAIN_DB_PREFIX . "socpeople WHERE rowid = " . $idF);
             echo "contact  " . $idM . " et " . $idF . " fusionné. </br>";
             $nbFusion++;
         }
@@ -840,15 +833,15 @@ function lienFusion($id1, $id2) {
 
 function supprLigneChronoValue($id, $text) {
     global $db;
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE id =" . $id);
+    $db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE id =" . $id);
     echo "<br/>1 ligne supprimer " . $text . "<br/>";
 }
 
 function fusionChrono($idMaitre, $idFaible) {
     global $db;
-    $db->query("UPDATE ".MAIN_DB_PREFIX."element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono WHERE id=" . $idFaible);
-    $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsischrono_value WHERE chrono_refid=" . $idFaible);
+    $db->query("UPDATE " . MAIN_DB_PREFIX . "element_element SET fk_target = " . $idMaitre . " WHERE targettype = 'productCli' AND fk_target = " . $idFaible);
+    $db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id=" . $idFaible);
+    $db->query("DELETE FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid=" . $idFaible);
     echo "<br/>FUSION OK :" . $idMaitre . "|" . $idFaible;
 }
 

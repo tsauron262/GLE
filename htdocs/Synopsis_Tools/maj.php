@@ -40,6 +40,65 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 
 
 
+if (isset($_GET['action']) && $_GET['action'] == "majSav") {
+    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  group by p.rowid having nb > 1");
+    while($result = $db->fetch_object($sql)){
+        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+            $obj = new Propal($db);
+            $obj->fetch($result->rowid);
+            echo "Propal avec de Facture FAxx : ".$obj->getNomUrl(1)."</br>";
+    }
+    
+    echo "</br>";
+    
+    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  group by p.rowid having nb > 1");
+    while($result = $db->fetch_object($sql)){
+        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+            $obj = new Propal($db);
+            $obj->fetch($result->rowid);
+            echo "Propal avec deux accompte ACxx : ".$obj->getNomUrl(1)."</br>";
+    }
+    
+    echo "</br>";
+    
+    $sql = $db->query("SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' group by p.rowid having nb > 2");
+    while($result = $db->fetch_object($sql)){
+        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+            $obj = new Propal($db);
+            $obj->fetch($result->rowid);
+            echo "Propal avec trois facture ACxx : ".$obj->getNomUrl(1)."</br>";
+    }
+    
+    echo "</br>";
+    
+    $sql = $db->query("SELECT * from llx_propal where rowid not in (select propalid from llx_synopsischrono_view_105) AND extraparams is null");
+    while($result = $db->fetch_object($sql)){
+        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
+            $obj = new Propal($db);
+            $obj->fetch($result->rowid);
+            echo "Propal sans Sav : ".$obj->getNomUrl(1)."</br>";
+    }
+    
+    echo "</br>";
+    
+    $sql = $db->query("select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')");
+    while($result = $db->fetch_object($sql)){
+        require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+            $obj = new Facture($db);
+            $obj->fetch($result->rowid);
+            echo "Facture sans propal : ".$obj->getNomUrl(1)."</br>";
+    }
+    
+    echo "</br>";
+    
+
+    
+    echo "Fin maj";
+}
+
+
+
+
 if (isset($_GET['action']) && $_GET['action'] == "majExpedition") {
     $sql = $db->query("SELECT * FROM `llx_expeditiondet` WHERE `fk_origin_line` NOT IN (SELECT `rowid` FROM `llx_commandedet` WHERE 1)");
     while($result = $db->fetch_object($sql)){
@@ -394,6 +453,8 @@ echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="verif"/><input type="submit" value="Vérif général" class="butAction"/></form>';
 echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="majFile"/><input type="submit" value="Migration fichiers" class="butAction"/></form>';
+echo "<br/>";
+echo '<form action=""><input type="hidden" name="action" value="majSav"/><input type="submit" value="Verif Sav" class="butAction"/></form>';
 
 
 

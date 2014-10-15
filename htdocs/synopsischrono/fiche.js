@@ -92,13 +92,16 @@ function majDoubleSoc(socid, ifVide) {
     }
 }
 jQuery(document).ready(function() {
-    $("a.butAction").click(function(){
-        $(this).removeAttr('href');
-        $(this).removeAttr('onclick');
+    $("a.butAction").click(function() {
+        lien = this;
+        setTimeout(function() {
+            $(lien).removeAttr('href');
+            $(lien).removeAttr('onclick');
+        }, 100);
     });
-    
-    
-    
+
+
+
     setTimeout(function() {
         socid = jQuery('#socid').find(':selected').val();
         majDoubleSoc(socid, true);

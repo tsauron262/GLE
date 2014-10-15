@@ -556,7 +556,7 @@ class gsxDatas {
                     $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
                     $valDef['shippingLocation'] = $tech->array_options['options_apple_shipto'];
                     $valDef['billTo'] = $tech->array_options['options_apple_service'];
-                    $valDef['soldToContact'] = $tech->getFullName();
+                    $valDef['soldToContact'] = $tech->getFullName($langs);
                     $valDef['technicianName'] = $tech->lastname;
                     $valDef['soldToContactPhone'] = $tech->office_phone;
                     $valDef['poNumber'] = $chrono->ref;

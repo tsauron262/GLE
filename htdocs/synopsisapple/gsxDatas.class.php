@@ -756,7 +756,6 @@ class gsxDatas {
 
                     case 'UpdateSerialNumber':
                     case 'KGBSerialNumberUpdate':
-                dol_syslog("iciici" . print_r($response, true), 4);
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';

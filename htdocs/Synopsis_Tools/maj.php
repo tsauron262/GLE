@@ -70,11 +70,11 @@ function verifOBj($objT, $text, $sqlReq) {
 if (isset($_GET['action']) && $_GET['action'] == "majSav") {
     global $totalFact;
 
-    verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  group by p.rowid having nb > 1");
-    verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  group by p.rowid having nb > 1");
-    verifOBj("Propal", "Propal avec trois facture", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' group by p.rowid having nb > 2");
+    verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  AND close_code is null group by p.rowid having nb > 1");
+    verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  AND close_code is null group by p.rowid having nb > 1");
+    verifOBj("Propal", "Propal avec trois facture", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND close_code is null group by p.rowid having nb > 2");
     verifOBj("Propal", "Propal sans Sav", "SELECT * from llx_propal where rowid not in (select propalid from llx_synopsischrono_view_105) AND extraparams is null AND ref LIKE 'PR%'");
-    verifOBj("Facture", "Facture sans propal", "select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')");
+    verifOBj("Facture", "Facture sans propal", "select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture') AND close_code is null ");
 //    verifOBj("Propal", "", );
 //    verifOBj("Propal", "", );
 //    verifOBj("Propal", "", );

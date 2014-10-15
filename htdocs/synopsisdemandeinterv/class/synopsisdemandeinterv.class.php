@@ -253,9 +253,11 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->fk_soc = $obj->fk_soc;
                 $this->fk_contrat = $obj->fk_contrat;
                 $this->fk_commande = $obj->fk_commande;
-                $tmpSoc = new Societe($this->db);
-                $tmpSoc->fetch($obj->fk_soc);
-                $this->societe = $tmpSoc;
+                if ($obj->fk_soc > 0) {
+                    $tmpSoc = new Societe($this->db);
+                    $tmpSoc->fetch($obj->fk_soc);
+                    $this->societe = $tmpSoc;
+                }
                 $this->statut = $obj->fk_statut;
                 $this->date = $this->db->jdate($obj->di);
                 $this->duree = $obj->duree;
@@ -269,7 +271,7 @@ class Synopsisdemandeinterv extends CommonObject {
                 $this->author = $obj->fk_user_author;
                 $this->fk_user_prisencharge = $obj->fk_user_prisencharge;
                 $this->user_prisencharge = new User($this->db);
-                if($this->fk_user_prisencharge)
+                if ($this->fk_user_prisencharge)
                     $this->user_prisencharge->fetch($this->fk_user_prisencharge);
                 $this->user_author_id = $obj->fk_user_author;
 
@@ -569,13 +571,13 @@ class Synopsisdemandeinterv extends CommonObject {
             $heureArr = $this->tabExtraV[25];
             $heureDep = $this->tabExtraV[27];
         }
-        if($heureArr == '' || $heureArr == '00:00')
-                $heureArr = "08:00";
-        if($heureDep == '' || $heureDep == '00:00')
-                $heureDep = "18:00";//else die($heureDep);
+        if ($heureArr == '' || $heureArr == '00:00')
+            $heureArr = "08:00";
+        if ($heureDep == '' || $heureDep == '00:00')
+            $heureDep = "18:00"; //else die($heureDep);
 
-        $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " ".$heureArr.":00");
-        $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " ".$heureDep.":00");
+        $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
+        $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
         $action->type_id = 50;
         $action->elementtype = "synopsisdemandeinterv";
         $action->fk_element = $this->id;

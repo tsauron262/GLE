@@ -38,9 +38,9 @@ function bouttonEtatSav($idChrono) {
     $form = new Form($db);
 
     if ($chrono->values[1059] == 3)
-        $sms = "&sendSms=\"+confirm(\"Envoyer SMS ?\");";
+        $sms = "&sendSms=\"+confirm(\"Envoyer mail + sms ?\");";
     else
-        $sms = "\"";
+        $sms = "&sendSms=\"+confirm(\"Envoyer mail ?\");";
 
 
     if (/*$chrono->values[$idEtat] == 2 && */$chrono->propalid && $propal->statut == 1) {
@@ -68,10 +68,10 @@ function bouttonEtatSav($idChrono) {
     }
 
     if ($chrono->values[$idEtat] == 0) {
-        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=debDiago" . $sms . "'>Commencer diagnostic</a>";
+        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=debDiago" . $sms . "'>Commencer diagnostic</a><br/>";
     }
 
-    if ($chrono->values[$idEtat] > 0 && $chrono->propalid && $propal->statut == 0) {
+    if ($chrono->propalid && $propal->statut == 0) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient1" . $sms . "'>Envoyer Devis</a>";
         $return .= "</br>";
 //        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";

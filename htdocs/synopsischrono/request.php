@@ -80,7 +80,7 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
     $fromMail = "SAV BIMP<no-replay@bimp.fr>";
 }
 
-if (isset($chrono->extraValue[$chrono->id]['Technicien']['value'])) {
+if (isset($chrono->extraValue[$chrono->id]['Technicien']['value']) && $chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
     $userT = new User($db);
     $userT->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
     $tech = $userT->getFullName($langs);
@@ -112,8 +112,9 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
-        mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3);
+        if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+            mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement."
+                    , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
 
@@ -134,7 +135,8 @@ if (isset($_REQUEST['actionEtat'])) {
         $attentePiece = 1;
 
         $ok = true;
-        mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
+        if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+            mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
 \nNous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel . ".
 \nCordialement.
 \nL'équipe BIMP", array(), array(), array());
@@ -148,13 +150,13 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
 
         $revision = new SynopsisRevisionPropal($chrono->propal);
-        $revision->reviserPropal($_REQUEST['ligne']? array( array('Diagnostic'), null) : array(null, array('acompte')));
+        $revision->reviserPropal($_REQUEST['ligne'] ? array(array('Diagnostic'), null) : array(null, array('acompte')));
 //$propal = new Propal();
         if ($_REQUEST['ligne'] == 0) {//Création de la facture de frais de prise en charge.
             $propal->addline("Prise en charge :  : " . $chrono->ref .
                     "\n" . "Machine : " . $nomMachine .
                     "\n" . "Frais de gestion devis refusé.
-", $_REQUEST['frais']/1.20, 1, 20, 0, 0, 0, 0, 'HT', null, null, 1);
+", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, 0, 'HT', null, null, 1);
 
 
 
@@ -171,12 +173,12 @@ if (isset($_REQUEST['actionEtat'])) {
             link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
             $propal->cloture($user, 4, '');
             $chrono->setDatas($chrono->id, array($idEtat => 9));
-            
+
             $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
-            mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
-                    , $tabFilePc, $tabFilePc2, $tabFilePc3);
+            if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+                mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+                        , $tabFilePc, $tabFilePc2, $tabFilePc3);
             sendSms($chrono, "Bonjour, la réparation de votre produit  est refusé. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
-    
         } else {
 
             $chrono->setDatas($chrono->id, array($idEtat => 5));
@@ -203,7 +205,8 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
-        mailSyn2("Pièces reçues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.
+        if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+            mailSyn2("Pièces reçues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.
 \nCordialement.
 \nL'équipe BIMP", array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
@@ -227,8 +230,9 @@ if (isset($_REQUEST['actionEtat'])) {
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
         $propal->cloture($user, 4, '');
         $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
-        mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3);
+        if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+            mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+                    , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     }
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
@@ -253,11 +257,12 @@ if (isset($_REQUEST['actionEtat'])) {
 \nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
 
             if (isset($tech))
-                $text .= "\nTechnicien en charge de la réparation : " . $tech;
+                $text .= "\nTechnicien en charge de la réparation : " . $tech.". \n";
 
             $text .= "\n\nCordialement.
 \nL'équipe BIMP";
-            mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
+            if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
+                mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
             $chrono->setDatas($chrono->id, array($idEtat => 2));
         }
         $ok = true;
@@ -274,22 +279,27 @@ if (isset($_REQUEST['actionEtat'])) {
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
         $tabT = getElementElement("propal", "facture", $chrono->propalid);
-        $facture = new Facture($db);
-        $facture->fetch($tabT[count($tabT) - 1]['d']);
-        require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-        $payement = new Paiement($db);
-        $payement->amounts = array($facture->id => $facture->total_ttc);
-        $payement->datepaye = dol_now();
-        $payement->paiementid = $_REQUEST['modeP'];
-        $payement->create($user);
-        $facture->set_paid($user);
-        facture_pdf_create($db, $facture, "crabeSav", $langs);
+
+        $idFact = $tabT[count($tabT) - 1]['d'];
+        if ($idFact > 0) {
+            $facture = new Facture($db);
+            $facture->fetch($idFact);
+            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+            $payement = new Paiement($db);
+            $payement->amounts = array($facture->id => $facture->total_ttc);
+            $payement->datepaye = dol_now();
+            $payement->paiementid = $_REQUEST['modeP'];
+            $payement->create($user);
+            $facture->set_paid($user);
+            facture_pdf_create($db, $facture, "crabeSav", $langs);
+        } else
+            die("Il n'y a pas de facture");
     }
 }
 
 if ($ok)
 //    header("Location:fiche.php?id=" . $_GET['id']);
-    header("Location:".$_SERVER["HTTP_REFERER"]);
+    header("Location:" . $_SERVER["HTTP_REFERER"]);
 else {
     dol_syslog("Page request des chrono sav sans parametre action vamide trouvé Ancien etat : " . $chrono->extraValue[$chrono->id]['Etat']['value'] . " Nouveau : " . $action, 4);
     echo "Quelque chose c'est mal passé : ";

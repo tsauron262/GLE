@@ -814,7 +814,7 @@ class GSX {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
             $this->soap_error($f->faultcode, $f->faultstring);
-            return null;
+            return array();
         }
 
         return $this->_objToArr($SOAPRequest);

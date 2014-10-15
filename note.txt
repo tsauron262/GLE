@@ -429,26 +429,26 @@ voir prod accompte
 // acompte ht a 20     taper en ttc
 
 
-voir pour payer 30 jours
+//voir pour payer 30 jours
 
 
 
-voir devis refusé
+//voir devis refusé
 
 
 //numero foire 
 //G172827814
 
 
-dans liste prod chrono allonger texte
+//dans liste prod chrono allonger texte
 
 
-annecy
+//annecy
 
 
 date reception = haujourd'hui
 
-devis refusé
+//devis refusé
 
 
 //cocher virifier par apple = 0€
@@ -461,3 +461,38 @@ devis refusé
 
 
 ajouter les id
+
+
+
+
+ds facture ajouter signature Récupérer le
+
+
+
+prix de reivens dans chrono
+
+
+vvoir regelemnt quand deja regler
+si pas de mode de reglement pas de reglemnt.
+
+
+voir cadre pdf et chéque
+
+prix de reviens dans 8sens
+
+
+
+Réparation marquée comme complète
+
+
+Attente signature devis => Attente client
+aligner 
+
+
+changement => reparation en cours
+
+
+nouveau envoyer devis
+
+
+voir fermeture repa

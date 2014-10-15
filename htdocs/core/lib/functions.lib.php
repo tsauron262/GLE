@@ -516,6 +516,11 @@ function dol_strtoupper($utf8_string)
 function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='')
 {
 	global $conf, $user;
+        
+        
+        
+        if(stripos(array("FROM llx_user as u WHERE u.entity IN (0,1) AND u.rowid ="), $message) !== false)
+                $suffixinfilename = "_recur";
 
 	// If syslog module enabled
 	if (empty($conf->syslog->enabled)) return false;

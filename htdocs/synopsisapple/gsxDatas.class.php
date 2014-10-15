@@ -791,6 +791,7 @@ class gsxDatas {
                         $html .= '<p class="error">La requête a été correctement transmise mais les données de retour n\'ont pas pu être enregistrées correctement en base de données.<br/>';
                         $html .= 'Veuillez noter le numéro suivant (repair confirmation number) et le transmettre  à l\'équipe technique: ';
                         $html .= '<strong style="color: #3C3C3C">' . $confirmNumber . '</strong></p>';
+                dol_syslog("Erreur GSX : ".$html."  |   ". $this->getGSXErrorsHtml() . print_r($response, true), 4,0,"_apple");
                     }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';

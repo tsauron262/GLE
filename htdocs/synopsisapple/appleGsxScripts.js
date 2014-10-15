@@ -1125,6 +1125,19 @@ function switchUpdateSerialForm($span) {
         }
     });
 }
+function displaySoapMessage($span) {
+    var $container = $span.parent('p').parent('div.repairInfos').find('.soapMessageContainer');
+    if (!$container.length) {
+        alert('ici');
+        return;
+    }
+
+    if ($container.css('display') == 'none') {
+        $container.stop().slideDown(250);
+    } else {
+        $container.stop().slideUp(250);
+    }
+}
 
 function displayCreateRepairPopUp($button) {
     var prodId = getProdId($button);
@@ -1307,7 +1320,16 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
         var $repairContainer = $prod.find('#repair_' + repairRowId);
         if ($repairContainer.length) {
             $form = $repairContainer.find('#repairForm_' + request);
-            $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+            switch (request) {
+                case 'UpdateSerialNumber':
+                    $resultContainer = $repairContainer.find('.partsPendingSerialUpdateResults');
+                    break;
+
+                case 'KGBSerialNumberUpdate':
+                    $resultContainer = $repairContainer.find('.kgbSerialUpdateResults');
+                    break;
+            }
+
         }
     } else {
         if (!$prod.length) {
@@ -1379,18 +1401,16 @@ function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
         $resultContainer.html(html);
         if ($resultContainer.find("prix").size() > 0) {
-                prix = $resultContainer.find("prix").html();
-                $resultContainer.find("prix").html("");
-                if(prix > 0)
-                    alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
-                
-                window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
+            prix = $resultContainer.find("prix").html();
+            $resultContainer.find("prix").html("");
+            if(prix > 0)
+                alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
+
+            window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
         }
     }
 
 }
-
-
 
 function importRepairSubmit(prodId) {
     var $prod = $('#prod_' + prodId);

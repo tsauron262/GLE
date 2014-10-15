@@ -196,6 +196,66 @@
         </datas>
     </request>
 
+    <request name="CreateIndirectOnsiteRepair" type="repair" request="CreateIndirectOnsiteRepairRequest" wrapper="repairData">
+        <label>Création d'une réparation indirecte sur place (indirect onsite repair)</label>
+        <datas>
+            <data name="technicianName" required="1"></data>
+            <data name="serialNumber" required="1"></data>
+            <!--            <data name="referenceNumber" required="0"></data>-->
+            <data name="shippingLocation" required="1"></data>
+            <data name="purchaseOrderNumber" required="1"></data>
+            <data name="unitReceivedDate" required="1"></data>
+            <data name="unitReceivedTime" required="1"></data>
+            <data name="serviceType" required="0" default=""></data>
+            <data name="diagnosis" required="1"></data>
+            <data name="symptom" required="1"></data>
+            <data name="notes" required="0"></data>
+            <data name="orderLines" required="1">
+                <datas>
+                    <data name="partNumber" required="1"></data>
+                    <data name="comptiaCode" required="1"></data>
+                    <data name="comptiaModifier" required="1"></data>
+                    <data name="abused" required="0" default="N"></data>
+                    <data name="returnableDamage" required="0" default="N"></data>
+                    <data name="coveredByACPlus" required="0" default="N"></data>
+                </datas>
+            </data>
+            <data name="componentCheckDetails" required="0">
+                <datas>
+                    <data name="component" required="0"></data>
+                    <data name="componentSerialNumber" required="0"></data>
+                </datas>
+            </data>
+            <data name="customerAddress" required="1">
+                <datas>
+                    <data name="addressLine1" required="1"></data>
+                    <data name="addressLine2" required="0"></data>
+                    <data name="addressLine3" required="0"></data>
+                    <data name="addressLine4" required="0"></data>
+                    <data name="street" required="1"></data>
+                    <data name="city" required="1"></data>
+                    <data name="companyName" required="1"></data>
+                    <data name="country" required="1"></data>
+                    <data name="firstName" required="1"></data>
+                    <data name="lastName" required="1"></data>
+                    <data name="primaryPhone" required="1"></data>
+                    <data name="secondaryPhone" required="0"></data>
+                    <data name="regionCode" required="1" default="004"></data>
+                    <data name="state" required="1"></data>
+                    <data name="zipCode" required="1"></data>
+                    <data name="emailAddress" required="1"></data>
+                </datas>
+            </data>
+            <data name="proofOfPurchaseFaxed" required="0" default="N"></data>
+            <data name="requestReview" required="0" default="N"></data>
+            <!--<data name="componentCheckReview" required="0" default="N"></data>-->
+            <data name="consumerLawEligible" required="0" default=" "></data>
+            <data name="fileName" required="0" donotprocess="1"></data>
+            <data name="fileData" required="0" donotprocess="1"></data>
+            <data name="includeFiles" required="0" donotprocess="1" default="N"></data>
+        </datas>
+    </request>
+
     <request name="UpdateSerialNumber" type="serialUpdate" request="UpdateSerialNumberRequest" wrapper="repairData">
         <label>Mise à jour des numéros de série</label>
         <datas>
@@ -211,11 +271,6 @@
             </data>
             <data name="closeRepair" required="0" donotprocess="1" default="N"></data>
         </datas>
-        <response>
-            <data>
-
-            </data>
-        </response>
     </request>
 
     <request name="KGBSerialNumberUpdate" type="kgbSerialUpdate" request="UpdateKGBSerialNumberRequest" wrapper="">

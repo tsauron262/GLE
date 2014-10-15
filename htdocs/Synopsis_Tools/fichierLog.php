@@ -28,7 +28,7 @@ require_once('../main.inc.php');
 
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 llxHeader("", "Fichier de log");
-dol_fiche_head('', 'SynopsisTools', $langs->trans("Voir le fichier de log"));
+dol_fiche_head('', 'SynopsisTools', $langs->trans("Voir les fichiers de log"));
 
 
 if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
@@ -37,19 +37,32 @@ if ($user->rights->SynopsisTools->Global->fileInfo != 1) {
     exit(0);
 }
 
+$prefixe = (isset($_REQUEST['prefixe']) ? $_REQUEST['prefixe'] : "");
 
-$filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, SYSLOG_FILE);
+$filename = str_replace("DOL_DATA_ROOT", DOL_DATA_ROOT, str_replace(".log", $prefixe . ".log", SYSLOG_FILE));
 
 if (isset($textSave))
     file_put_contents($filename, $textSave);
 
-$text = file_get_contents($filename);
+if (is_file($filename))
+    $text = file_get_contents($filename);
+
 if ($inverser) {
     $textT = explode("\n", $text);
     $textT = array_reverse($textT);
     $text = implode("\n", $textT);
 }
+
+$tabPrefixe = array("" => "Général", "_sms" => "SMS", "_apple" => "Apple", "_time" => "Pages lentes", "_sauv" => "Sauv");
+
+foreach ($tabPrefixe as $prefV => $pref) {
+    echo "<a style='margin:2px 8px;' href='?prefixe=" . $prefV . "'>" . $pref . "</a>";
+}
+
+
+
 echo "<form action='./fichierLog.php?action=save' method='post'>";
+echo "<input type='hidden' name='prefixe' value='" . $prefixe . "'/>";
 echo "<textarea name='text' style='width:100%; height:400px;'>" . $text . "</textarea>";
 echo "<br/><div class='divButAction'><input type='submit' class='butAction' value='Enregistrer'/></div></form>";
 

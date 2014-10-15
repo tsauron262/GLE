@@ -344,7 +344,7 @@ if (! defined('NOLOGIN'))
 
         $time = (microtime(true) - self::$timeDeb);
         if ($time > self::$MAX_TIME_LOG && (!isset($logLongTime) || $logLongTime))
-            dol_syslog("Pages lente " . $time . " s", 4);
+            dol_syslog("Pages lente " . $time . " s", 4, 0, "_time");
         echo "<span class='timePage'>" . $time . " s</span>";
         if (isset($_REQUEST['optioncss']) && $_REQUEST['optioncss'] == "print") {
             echo "<br/>";

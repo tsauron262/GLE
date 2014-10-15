@@ -156,7 +156,7 @@ if ($searchOn == 'true') {
         if (isset($_REQUEST[sanitize_string($nom)])) {
 //            die($_REQUEST[sanitize_string($nom)]);
 //            die("cool");
-            $searchField = str_replace("ô", "o", sanitize_string($nom));
+            $searchField = traiteCarac(sanitize_string($nom));
             $searchString = $_REQUEST[sanitize_string($nom)];
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur WHERE id = " . $resPre->type_valeur;
 
@@ -343,7 +343,7 @@ if ($sql) {
 //echo $valeur;print_r($arrKeyName);die;
         foreach ($arrKeyName as $keyid => $keyname) {
             $model = $arrKeyType[$keyid];
-            $value = $res->$keyname;
+            $value = stripslashes($res->$keyname);
 //            if(!$value > 0)
 //                die($keyname.print_r($res, true));
             if ($model->type_valeur == 3) {

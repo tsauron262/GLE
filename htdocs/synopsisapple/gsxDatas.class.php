@@ -554,8 +554,10 @@ class gsxDatas {
 
                     $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
                     $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];
+                    $valDef['shippingLocation'] = $tech->array_options['options_apple_shipto'];
                     $valDef['billTo'] = $tech->array_options['options_apple_service'];
                     $valDef['soldToContact'] = $tech->getFullName();
+                    $valDef['technicianName'] = $tech->lastname;
                     $valDef['soldToContactPhone'] = $tech->office_phone;
                     $valDef['poNumber'] = $chrono->ref;
                     $valDef['purchaseOrderNumber'] = $chrono->ref;
@@ -716,7 +718,7 @@ class gsxDatas {
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
-                dol_syslog("erreur GSX" . print_r($response, true), 4,0,"_apple");
+                dol_syslog("erreur GSX : ". $this->getGSXErrorsHtml() . print_r($response, true), 4,0,"_apple");
             } else {
                 dol_syslog("iciici" . print_r($response, true), 4,0,"_apple");
                 $ok = false;

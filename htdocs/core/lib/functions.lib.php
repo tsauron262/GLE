@@ -519,7 +519,7 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
         
         
         
-        if(stripos(array("FROM llx_user as u WHERE u.entity IN (0,1) AND u.rowid ="), $message) !== false)
+        if(stripos("FROM llx_user as u WHERE u.entity IN (0,1) AND u.rowid =", $message) !== false)
                 $suffixinfilename = "_recur";
 
 	// If syslog module enabled

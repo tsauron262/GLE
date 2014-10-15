@@ -211,6 +211,17 @@ if (isset($_REQUEST['actionEtat'])) {
 \nL'équipe BIMP", array(), array(), array());
         sendSms($chrono, "Bonjour, nous venons de recevoir la pièce ou le produit pour votre réparation, nous vous contacterons quand votre matériel sera prêt. L'Equipe BIMP.");
     }
+
+
+    if ($action == "repEnCours" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
+        $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
+        $chrono->note .= "Réparation en cours depuis le " . date('d-m-y H:i');
+        $chrono->update($chrono->id);
+        $chrono->setDatas($chrono->id, array($idEtat => 4));
+        $ok = true;
+    }
+
+
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Réparation terminée le " . date('d-m-y H:i');
@@ -257,7 +268,7 @@ if (isset($_REQUEST['actionEtat'])) {
 \nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";
 
             if (isset($tech))
-                $text .= "\nTechnicien en charge de la réparation : " . $tech.". \n";
+                $text .= "\nTechnicien en charge de la réparation : " . $tech . ". \n";
 
             $text .= "\n\nCordialement.
 \nL'équipe BIMP";
@@ -281,19 +292,21 @@ if (isset($_REQUEST['actionEtat'])) {
         $tabT = getElementElement("propal", "facture", $chrono->propalid);
 
         $idFact = $tabT[count($tabT) - 1]['d'];
-        if ($idFact > 0) {
-            $facture = new Facture($db);
-            $facture->fetch($idFact);
-            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-            $payement = new Paiement($db);
-            $payement->amounts = array($facture->id => $facture->total_ttc);
-            $payement->datepaye = dol_now();
-            $payement->paiementid = $_REQUEST['modeP'];
-            $payement->create($user);
-            $facture->set_paid($user);
-            facture_pdf_create($db, $facture, "crabeSav", $langs);
-        } else
-            die("Il n'y a pas de facture");
+        if(isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
+            if ($idFact > 0) {
+                $facture = new Facture($db);
+                $facture->fetch($idFact);
+                require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+                $payement = new Paiement($db);
+                $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
+                $payement->datepaye = dol_now();
+                $payement->paiementid = $_REQUEST['modeP'];
+                $payement->create($user);
+                $facture->set_paid($user);
+                facture_pdf_create($db, $facture, "crabeSav", $langs);
+            } else
+                die("Il n'y a pas de facture");
+        }
     }
 }
 

@@ -465,15 +465,15 @@ ajouter les id
 
 
 
-ds facture ajouter signature Récupérer le
+//ds facture ajouter signature Récupérer le
 
 
 
-prix de reivens dans chrono
+//prix de reivens dans chrono
 
 
-vvoir regelemnt quand deja regler
-si pas de mode de reglement pas de reglemnt.
+//vvoir regelemnt quand deja regler
+//si pas de mode de reglement pas de reglemnt.
 
 
 voir cadre pdf et chéque
@@ -485,14 +485,14 @@ prix de reviens dans 8sens
 Réparation marquée comme complète
 
 
-Attente signature devis => Attente client
-aligner 
+//Attente signature devis => Attente client
+//aligner 
 
 
-changement => reparation en cours
+//changement => reparation en cours
 
 
-nouveau envoyer devis
+//nouveau envoyer devis
 
 
 voir fermeture repa

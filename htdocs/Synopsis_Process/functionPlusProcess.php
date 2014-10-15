@@ -61,6 +61,10 @@ function bouttonEtatSav($idChrono) {
     if (/*$chrono->values[$idEtat] == 2 && */!$chrono->propalid) {
         $return .= '<a class="butAction" href="?id=' . $idChrono . '&action=createPC">Créer devis</a>';
     }
+    
+    if ($chrono->values[$idEtat] == 3 && $propal->statut > 0) {
+        $return .= '<a class="butAction" href="request.php?id=' . $idChrono . '&actionEtat=repEnCours">Réparation en cours</a><br/>';
+    }
 
     if ($chrono->values[$idEtat] == 1) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=pieceOk" . $sms . "'>Pièce reçue</a>";
@@ -77,7 +81,7 @@ function bouttonEtatSav($idChrono) {
 //        $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=attenteClient2" . $sms . "'>Devis Garantie</a>";
     }
 
-    if ($chrono->propalid && $propal->statut > 1 && ($chrono->values[$idEtat] == 4 || $chrono->values[$idEtat] == 3)) {
+    if ($chrono->propalid && $propal->statut > 1 && ($chrono->values[$idEtat] == 4)) {
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=repOk" . $sms . "'>Terminé</a>";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
     }

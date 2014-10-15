@@ -38,7 +38,7 @@ if ($user->rights->SynopsisTools->Global->import != 1) {
 }
 
 function verifOBj($objT, $text, $sqlReq) {
-    global $db, $totalFact;
+    global $db, $totalFact, $tabTech;
     require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
     require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
     $req = $db->query($sqlReq);
@@ -54,12 +54,14 @@ function verifOBj($objT, $text, $sqlReq) {
             foreach ($tabT as $ligne) {
                 $obj2->fetch($ligne['d']);
                 echo "- Fact" . $obj2->getNomUrl(1) . "</br>";
-                $totalFact[$obj->id] = $obj->total_ttc;
+                $totalFact[$obj2->id] = $obj2->total_ttc;
+                $tabTech[$obj2->user_author][$obj2->id] = $text . " : " . $obj2->getNomUrl(0);
             }
         }
 
         if ($objT == "Facture") {
             $totalFact[$obj->id] = $obj->total_ttc;
+            $tabTech[$obj->user_author][$obj->id] = $text . " : " . $obj->getNomUrl(0);
         }
         echo "</br>";
     }
@@ -68,7 +70,8 @@ function verifOBj($objT, $text, $sqlReq) {
 }
 
 if (isset($_GET['action']) && $_GET['action'] == "majSav") {
-    global $totalFact;
+    global $totalFact, $tabTech;
+    $totalFact = $tabTech = array();
 
     verifOBj("Propal", "Propal avec deux Facture FAxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'FA%'  AND close_code is null group by p.rowid having nb > 1");
     verifOBj("Propal", "Propal avec deux accompte ACxx", "SELECT p.rowid, count(f.rowid) as nb from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture' AND f.facnumber LIKE 'AC%'  AND close_code is null group by p.rowid having nb > 1");
@@ -81,10 +84,31 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
 
 
     $totG = 0;
-    foreach($totalFact as $id => $totI)
+    foreach ($totalFact as $id => $totI)
         $totG += $totI;
 
-    echo "Total : " . $totG." € </br></br>";
+
+    $tech = new User($db);
+    foreach ($tabTech as $idTech => $tabFact) {
+        if ($idTech < 1)
+            $idTech = 1;
+
+        $html = "Bonjour, GLE a détécté des problémes avec certaines factures, merci de vérifier ces factures et de 'Classer Abandonnée' éventuellement les factures qui sont remplacées ou inutiles. Ou de ratacher le SAV a la bonne Propal.<br/><br/> Merci.<br/><br/>";
+
+        $tech->fetch($idTech);
+        echo "<br/>" . $tech->getNomUrl(1) . "</br>";
+        foreach ($tabFact as $nom) {
+            $html .= "<br/>" . $nom;
+        }
+
+        if (isset($_REQUEST['mail']) && $_REQUEST['mail'] == "true" && $tech->email != '')
+            mailSyn2("GLE problémes factures", $tech->email, "Application GLE <tommy@drsi.fr>", $html);
+        echo $html;
+    }
+echo "<br/>";
+echo '<form action="" method="post"><input type="hidden" name="mail" value="true"/><input type="hidden" name="action" value="majSav"/><input type="submit" value="Envoie mail" class="butAction"/></form>';
+
+    echo "Total : " . $totG . " € </br></br>";
 
     echo "Fin maj";
 }

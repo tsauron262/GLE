@@ -496,3 +496,9 @@ Réparation marquée comme complète
 
 
 voir fermeture repa
+
+
+
+
+req verif : 
+select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f, llx_element_element ee, llx_propal p WHERE p.rowid = ee.fk_source AND f.rowid = ee.fk_target AND ee.sourcetype = 'propal' AND ee.targettype = 'facture')

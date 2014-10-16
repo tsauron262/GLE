@@ -88,6 +88,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
         $totG += $totI;
 
 
+    $i=0;
     $tech = new User($db);
     foreach ($tabTech as $idTech => $tabFact) {
         if ($idTech < 1)
@@ -98,6 +99,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
         $tech->fetch($idTech);
         echo "<br/>" . $tech->getNomUrl(1) . "</br>";
         foreach ($tabFact as $nom) {
+            $i++;
             $html .= "<br/>" . $nom;
         }
 
@@ -108,7 +110,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
 echo "<br/>";
 echo '<form action="" method="post"><input type="hidden" name="mail" value="true"/><input type="hidden" name="action" value="majSav"/><input type="submit" value="Envoie mail" class="butAction"/></form>';
 
-    echo "Total : " . $totG . " € </br></br>";
+    echo "Total : " . $totG . " € ".$i." factures</br></br>";
 
     echo "Fin maj";
 }

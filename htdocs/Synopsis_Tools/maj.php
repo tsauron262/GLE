@@ -103,7 +103,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
             $html .= "<br/>" . $nom;
         }
 
-        sleep(0.5);
+        sleep(1);
         if (isset($_REQUEST['mail']) && $_REQUEST['mail'] == "true" && $tech->email != '')
             mailSyn2("GLE problémes factures", "teufheur@gmail.com", "Application GLE <tommy@drsi.fr>", $html);
         echo $html;

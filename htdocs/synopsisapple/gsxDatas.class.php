@@ -714,11 +714,12 @@ class gsxDatas {
 //    die();
 //}
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
+//            echo "<pre>";print_r($requestData);die;
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
-                dol_syslog("erreur GSX : ". $this->getGSXErrorsHtml() . print_r($response, true), 4,0,"_apple");
+                dol_syslog("erreur GSX : ". $this->getGSXErrorsHtml() ."Requete :". print_r($response, true) ." Reponsse : ". print_r($response, true), 4,0,"_apple");
             } else {
                 dol_syslog("iciici" . print_r($response, true), 4,0,"_apple");
                 $ok = false;

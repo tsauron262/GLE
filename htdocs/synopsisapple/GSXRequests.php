@@ -640,7 +640,7 @@ class GSX_Request {
                                         }
                                     }
                                     $datas[$dataName] = $valuesArray;
-                                } else if (isset($_POST[$inputName]) && $_POST[$inputName]) {
+                                } else if (isset($_POST[$inputName]) && $_POST[$inputName] == "") {
                                     $value = $this->checkInputData($defs, $_POST[$inputName]);
                                     $datas[$dataName] = $value;
                                 } else {

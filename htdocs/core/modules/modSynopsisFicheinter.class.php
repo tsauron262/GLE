@@ -549,7 +549,7 @@ class modSynopsisFicheinter extends DolibarrModules {
 (14, 'Bon remis', 'text', 1, NULL, NULL, 1, NULL, 0),
 (15, 'Total pièce', 'text', 1, NULL, NULL, 1, NULL, 0),
 (16, 'Récupération de données', 'text', 1, NULL, NULL, 3, NULL, 0),
-(17, 'Intervention terminé', 'checkbox', 1, NULL, NULL, 4, 1, 0),
+(17, 'Intervention terminée', 'checkbox', 1, NULL, NULL, 4, 1, 0),
 (18, 'Date prochain RDV', 'date', 1, NULL, NULL, 5, 1, 0),
 (19, 'Attentes clients', 'textarea', 1, NULL, NULL, 7, 1, 0),
 (20, 'Mise en relation', 'radio', 1, 'Mise en relation avec un service particulier ?', 1, 8, NULL, 0),

@@ -99,6 +99,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
         $tech->fetch($idTech);
         echo "<br/>" . $tech->getNomUrl(1) . "</br>";
         foreach ($tabFact as $nom) {
+            if(stripos($nom, "FA1410-0075") === false)
             $i++;
             $html .= "<br/>" . $nom;
         }

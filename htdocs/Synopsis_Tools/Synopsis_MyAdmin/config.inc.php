@@ -47,6 +47,7 @@ $cfg['Servers'][$i]['auth_type'] = 'config';
 $cfg['Servers'][$i]['host'] = $dolibarr_main_db_host;
  $cfg['Servers'][$i]['user'] = $dolibarr_main_db_user;
  $cfg['Servers'][$i]['password'] = $dolibarr_main_db_pass;
+ $cfg['Servers'][$i]['port'] = $dolibarr_main_db_port;
 
 /* Storage database and tables */
 // $cfg['Servers'][$i]['pmadb'] = 'phpmyadmin';

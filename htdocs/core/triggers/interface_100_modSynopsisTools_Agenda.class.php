@@ -100,46 +100,50 @@ class InterfaceAgenda {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
-        require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
-        $idActionLier = array();
-        $idRef = $object->id;
-        if (isset($object->ref_ext) && $object->ref_ext > 0) {
-            $idMaitre = $object->ref_ext;
-            $idActionLier[] = $idMaitre;
-        } else
-            $idMaitre = $object->id;
+        if (in_array($action, array("ACTION_DELETE", "ACTION_MODIFY"))) {
 
 
-        $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ref_ext = '" . $idMaitre . "'");
-        if ($this->db->num_rows($sql) > 0) {
-            while ($result = $this->db->fetch_object($sql)) {
-                if ($result->id != $idRef)
-                    $idActionLier[] = $result->id;
+            require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
+            $idActionLier = array();
+            $idRef = $object->id;
+            if (isset($object->ref_ext) && $object->ref_ext > 0) {
+                $idMaitre = $object->ref_ext;
+                $idActionLier[] = $idMaitre;
+            } else
+                $idMaitre = $object->id;
+
+
+            $sql = $this->db->query("SELECT * FROM " . MAIN_DB_PREFIX . "actioncomm WHERE ref_ext = '" . $idMaitre . "'");
+            if ($this->db->num_rows($sql) > 0) {
+                while ($result = $this->db->fetch_object($sql)) {
+                    if ($result->id != $idRef)
+                        $idActionLier[] = $result->id;
+                }
             }
+
+            foreach ($idActionLier as $id) {
+                $actionTmp = new ActionComm($this->db);
+                $actionTmp->fetch($id);
+                if ($action == "ACTION_DELETE") {
+                    $actionTmp->delete();
+                }
+
+
+                if ($action == "ACTION_MODIFY") {
+                    $actionTmp->datec = $object->datec;
+                    $actionTmp->datef = $object->datef;
+                    $actionTmp->datem = $object->datem;
+                    $actionTmp->datep = $object->datep;
+                    $actionTmp->datep = $object->datep;
+                    $actionTmp->note = $object->note;
+                    $actionTmp->label = $object->label;
+                    $actionTmp->fk_action = $object->fk_action;
+
+                    $actionTmp->update($user, 1);
+                }
+            }
+            return 0;
         }
-
-        foreach ($idActionLier as $id) {
-            $actionTmp = new ActionComm($this->db);
-            $actionTmp->fetch($id);
-            if ($action == "ACTION_DELETE") {
-                $actionTmp->delete();
-            }
-
-
-            if ($action == "ACTION_MODIFY") {
-                $actionTmp->datec = $object->datec;
-                $actionTmp->datef = $object->datef;
-                $actionTmp->datem = $object->datem;
-                $actionTmp->datep = $object->datep;
-                $actionTmp->datep = $object->datep;
-                $actionTmp->note = $object->note;
-                $actionTmp->label = $object->label;
-                $actionTmp->fk_action = $object->fk_action;
-
-                $actionTmp->update($user, 1);
-            }
-        }
-        return 0;
     }
 
 }

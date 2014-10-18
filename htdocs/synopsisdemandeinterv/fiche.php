@@ -753,6 +753,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print "    <td colspan=3 class='ui-widget-content'><input name=\"ref\" value=\"" . $numpr . "\"></td></tr>\n";
 
         if ($conf->projet->enabled) {
+            require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsis_project.lib.php");
             // Projet associe
             $langs->load("project");
 

@@ -5,7 +5,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -14,20 +14,37 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+*/
+/*
+  ** GLE by Synopsis et DRSI
+  *
+  * Author: Tommy SAURON <tommy@drsi.fr>
+  * Licence : Artistic Licence v2.0
+  *
+  * Version 1.0
+  * Create on : 4-1-2009
+  *
+  * Infos on http://www.finapro.fr
+  *
+  */
+/*
+ *
+ * $Id: index.php,v 1.9 2008/03/01 01:26:51 eldy Exp $
+ * $Source: /cvsroot/dolibarr/dolibarr/htdocs/projet/tasks/index.php,v $
  */
 
 /**
- *	\file       htdocs/projet/tasks/index.php
- *	\ingroup    project
- *	\brief      List all task of a project
- */
+   \file       htdocs/projet/tasks/index.php
+   \ingroup    projet
+   \brief      Page des taches du module projet
+   \version    $Revision: 1.9 $
+*/
 
-require ("../../main.inc.php");
-require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
-require_once DOL_DOCUMENT_ROOT.'/projet/class/task.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
+require("./pre.inc.php");
+require_once(DOL_DOCUMENT_ROOT.'/projet/class/project.class.php');
+if (!$user->rights->synopsisprojet->lire) accessforbidden();
 
 $langs->load('projects');
 $langs->load('users');
@@ -43,9 +60,9 @@ $socid=0;
 if ($user->societe_id > 0) $socid = $user->societe_id;
 if (!$user->rights->projet->lire) accessforbidden();
 
-$sortfield = GETPOST("sortfield");
-$sortorder = GETPOST("sortorder");
-$page = GETPOST("page");
+$sortfield = isset($_GET["sortfield"])?$_GET["sortfield"]:$_POST["sortfield"];
+$sortorder = isset($_GET["sortorder"])?$_GET["sortorder"]:$_POST["sortorder"];
+$page = isset($_GET["page"])? $_GET["page"]:$_POST["page"];
 $page = is_numeric($page) ? $page : 0;
 $page = $page == -1 ? 0 : $page;
 
@@ -68,8 +85,8 @@ llxHeader("",$title,"Projet");
 
 if ($id)
 {
-	$projectstatic->fetch($id);
-	$projectstatic->societe->fetch($projectstatic->societe->id);
+  $action = '';
+  $socid = $user->societe_id;
 }
 
 print_barre_liste($title, $page, $_SERVER["PHP_SELF"], "", $sortfield, $sortorder, "", $num);
@@ -128,10 +145,9 @@ print "</tr>\n";
 
 if (count($tasksarray) > (empty($conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA)?1000:$conf->global->PROJECT_LIMIT_TASK_PROJECT_AREA))
 {
-	$langs->load("errors");
 	print '<tr '.$bc[0].'>';
 	print '<td colspan="9">';
-	print $langs->trans("WarningTooManyDataPleaseUseMoreFilters");
+	print $langs->trans("TooManyDataPleaseUseMoreFilters");
 	print '</td></tr>';
 }
 else
@@ -158,6 +174,33 @@ if ($user->rights->projet->creer)
 }
 
 
-llxFooter();
+$jQueryDashBoardPath = DOL_URL_ROOT.'/Synopsis_Common/jquery/dashboard/';
+
+$js = '
+    <script>var DOL_URL_ROOT="'.DOL_URL_ROOT.'";</script>
+    <script>var DOL_DOCUMENT_ROOT="'.DOL_DOCUMENT_ROOT.'";</script>
+    <script type="text/javascript" src="'.$jQueryDashBoardPath.'jquery.dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'dashboard.css" />
+
+    <script type="text/javascript" src="'.$jQueryDashBoardPath.'dashboard.js"></script>
+    <link rel="stylesheet" type="text/css" href="'.$jQueryDashBoardPath.'demo.css" />
+    <script type="text/javascript">var userid='.$user->id.';</script>
+    <script type="text/javascript">var dashtype="37";</script>
+
+';
+
+    llxHeader($js,$langs->trans("Projects"),1);
+
+
+
+
+    print '<div class="titre">Mon tableau de bord - '.$langs->trans('ProjectsArea').' - t&acirc;ches</div>';
+    print "<br/>";
+    print "<br/>";
+    print "<div style='padding: 5px 10px; width: 270px;' class='butAction ui-state-default ui-widget-header ui-corner-all'><em><span style='float: left; margin: -1px 3px 0px 0px' class='ui-icon ui-icon-info'></span><a href='#' onClick='addWidget()'>Ajouter des widgets &agrave; votre tableau de bord.</a></em></div>";
+    print "<br/>";
+    print '<div id="dashboard">';
+    print '  You need javascript to use the dashboard.';
+    print '</div>';
 
 $db->close();

@@ -228,7 +228,7 @@ function select_projects($socid=false, $selected='', $htmlname='projectid')
     }
     else
     {
-        dol_print_error($this->db);
+        dol_print_error($db);
         return -1;
     }
 }

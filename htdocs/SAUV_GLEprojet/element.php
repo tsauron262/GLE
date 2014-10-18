@@ -1,12 +1,12 @@
 <?php
+
 /* Copyright (C) 2001-2004 Rodolphe Quiedeville <rodolphe@quiedeville.org>
- * Copyright (C) 2004-2010 Laurent Destailleur  <eldy@users.sourceforge.net>
- * Copyright (C) 2005-2010 Regis Houssin        <regis.houssin@capnetworks.com>
- * Copyright (C) 2012	   Juanjo Menent        <jmenent@2byte.es>
+ * Copyright (C) 2004-2008 Laurent Destailleur  <eldy@users.sourceforge.net>
+ * Copyright (C) 2005-2008 Regis Houssin        <regis@dolibarr.fr>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 3 of the License, or
+ * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
  *
  * This program is distributed in the hope that it will be useful,
@@ -15,92 +15,143 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+ */
+/*
+ * * GLE by Synopsis et DRSI
+ *
+ * Author: Tommy SAURON <tommy@drsi.fr>
+ * Licence : Artistic Licence v2.0
+ *
+ * Version 1.1
+ * Create on : 4-1-2009
+ *
+ * Infos on http://www.finapro.fr
+ *
+ */
+/*
  */
 
 /**
- *      \file       htdocs/projet/element.php
- *      \ingroup    projet facture
- *		\brief      Page of project referrers
+  \file       htdocs/projet/element.php
+  \ingroup    projet facture
+  \brief      Page des elements par projet
+  \version    $Id: element.php,v 1.3 2008/04/29 06:23:29 hregis Exp $
  */
+require("./pre.inc.php");
 
-require '../main.inc.php';
-require_once DOL_DOCUMENT_ROOT.'/projet/class/project.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/class/html.formprojet.class.php';
-require_once DOL_DOCUMENT_ROOT.'/core/lib/project.lib.php';
-if (! empty($conf->propal->enabled))      require_once DOL_DOCUMENT_ROOT.'/comm/propal/class/propal.class.php';
-if (! empty($conf->facture->enabled))     require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture.class.php';
-if (! empty($conf->facture->enabled))     require_once DOL_DOCUMENT_ROOT.'/compta/facture/class/facture-rec.class.php';
-if (! empty($conf->commande->enabled))    require_once DOL_DOCUMENT_ROOT.'/commande/class/commande.class.php';
-if (! empty($conf->fournisseur->enabled)) require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.facture.class.php';
-if (! empty($conf->fournisseur->enabled)) require_once DOL_DOCUMENT_ROOT.'/fourn/class/fournisseur.commande.class.php';
-if (! empty($conf->contrat->enabled))     require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
-if (! empty($conf->ficheinter->enabled))  require_once DOL_DOCUMENT_ROOT.'/fichinter/class/fichinter.class.php';
-if (! empty($conf->deplacement->enabled)) require_once DOL_DOCUMENT_ROOT.'/compta/deplacement/class/deplacement.class.php';
-if (! empty($conf->agenda->enabled))      require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 
-$langs->load("projects");
+if (!isset($_REQUEST['action']))
+    $_REQUEST['action'] = '';
+
+require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.facture.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.commande.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/core/lib/synopsis_project.lib.php");
+
+$langs->load("project@projet");
 $langs->load("companies");
 $langs->load("suppliers");
-if (! empty($conf->facture->enabled))  	$langs->load("bills");
-if (! empty($conf->commande->enabled)) 	$langs->load("orders");
-if (! empty($conf->propal->enabled))   	$langs->load("propal");
-if (! empty($conf->ficheinter->enabled))	$langs->load("interventions");
+if (isset($conf->facture->enabled))
+    $langs->load("bills");
+if (isset($conf->commande->enabled))
+    $langs->load("orders");
+if (isset($conf->propal->enabled))
+    $langs->load("propal");
 
-$projectid=GETPOST('id','int');
-$ref=GETPOST('ref','alpha');
-$action=GETPOST('action','alpha');
-
-if ($projectid == '' && $ref == '')
-{
-	dol_print_error('','Bad parameter');
-	exit;
+// Securite acces client
+$projetid = '';
+if ($_GET["id"]) {
+    $projetid = $_GET["id"];
 }
 
-$mine = $_REQUEST['mode']=='mine' ? 1 : 0;
-//if (! $user->rights->projet->all->lire) $mine=1;	// Special for projects
-
-$project = new Project($db);
-if ($ref)
-{
-    $project->fetch(0,$ref);
-    $projectid=$project->id;
-}else {
-	$project->fetch($projectid);
-}
+if ($projetid == '')
+    accessforbidden();
 
 // Security check
-$socid=0;
-if ($user->societe_id > 0) $socid=$user->societe_id;
-$result = restrictedArea($user, 'projet', $projectid);
+if ($user->societe_id)
+    $socid = $user->societe_id;
+$result = restrictedArea($user, 'synopsisprojet', $projetid, 'Synopsis_projet');
 
+
+if ($_REQUEST['action'] == "addElement") {
+    if ($_REQUEST['addpropal'] > 0) {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "propal SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addpropal'];
+        $sql = $db->query($requete);
+    }
+    if ($_REQUEST['addcommande'] > 0) {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "commande SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addcommande'];
+        $sql = $db->query($requete);
+    }
+    if ($_REQUEST['addfacture'] > 0) {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "facture SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addfacture'];
+        $sql = $db->query($requete);
+    }
+    if ($_REQUEST['addcommande_fournisseur'] > 0) {
+        $requete = "UPDATE commande_fournisseur SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addcommande_fournisseur'];
+        $sql = $db->query($requete);
+    }
+    if ($_REQUEST['addfacture_fournisseur'] > 0) {
+        $requete = "UPDATE facture_fournisseur SET fk_projet = " . $_REQUEST['id'] . " WHERE rowid = " . $_REQUEST['addfacture_fournisseur'];
+        $sql = $db->query($requete);
+    }
+    if ($_REQUEST['addsynopsischrono'] > 0) {
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET projetId = " . $_REQUEST['id'] . " WHERE id = " . $_REQUEST['addsynopsischrono'];
+        $sql = $db->query($requete);
+    }
+}
 
 /*
- *	View
+ *    View
  */
+$js = <<< EOF
+<script>
+jQuery(document).ready(function(){
+    jQuery('#addElement').click(function(){
+        jQuery('#dialAddElement').dialog('open');
+    });
+    jQuery('#dialAddElement').dialog({
+        autoOpen: false,
+        width: 560,
+        maxWidth: 560,
+        minWidth: 560,
+        modal: true,
+        title: "Ajouter un &eacute;l&eacute;ment",
+        buttons: {
+            "OK":function(){
+                jQuery('#dialForm').submit();
+                jQuery('#dialAddElement').dialog('close');
+            },
+            "Annuler":function(){
+                jQuery('#dialAddElement').dialog('close');
+            }
+        }
+    });
+});
 
-$help_url="EN:Module_Projects|FR:Module_Projets|ES:M&oacute;dulo_Proyectos";
-llxHeader("",$langs->trans("Referers"),$help_url);
+</script>
+EOF;
+llxHeader($js, $langs->trans("Referers"));
 
-$form = new Form($db);
-$formproject=new FormProjets($db);
+$projet = new Project($db);
+$projet->fetch($_GET["id"]);
+$projet->societe->fetch($projet->societe->id);
 
-$userstatic=new User($db);
-
-$project = new Project($db);
-$project->fetch($projectid,$ref);
-$project->societe->fetch($project->societe->id);
-
-// To verify role of users
-$userAccess = $project->restrictedProjectArea($user);
-
-$head=project_prepare_head($project);
-dol_fiche_head($head, 'element', $langs->trans("Project"),0,($project->public?'projectpub':'project'));
+$head = synopsis_project_prepare_head($projet);
+dol_fiche_head($head, 'element', $langs->trans("Project"));
 
 
-print '<table class="border" width="100%">';
+print '<table class="border" width="100%" cellpadding=15>';
 
-$linkback = '<a href="'.DOL_URL_ROOT.'/projet/liste.php">'.$langs->trans("BackToList").'</a>';
+print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Ref") . '</th>
+           <td class="ui-widget-content">' . $projet->ref . '</td></tr>';
+print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Label") . '</th>
+           <td class="ui-widget-content">' . $projet->title . '</td></tr>';
 
 print '<tr><td width="30%">'.$langs->trans("Ref").'</td><td>';
 // Define a complementary filter for search of next/prev ref.
@@ -140,12 +191,133 @@ print '</td></tr>';
 
 print '</table>';
 
+print "<br><br><center>";
+
+print "<button id='addElement' class='butAction'>Ajouter un &eacute;l&eacute;ment</button>";
+
+print "</center><br/>";
+/*
+ * Factures
+ */
+$listofreferent = array(
+    'synopsischrono' => array(
+        'title' => "Liste des chronos associ&eacute;es au projet",
+        'class' => 'Chrono',
+        'test' => $conf->synopsischrono->enabled),
+    'propal' => array(
+        'title' => "ListProposalsAssociatedProject",
+        'class' => 'Propal',
+        'test' => $conf->propal->enabled),
+    'order' => array(
+        'title' => "ListOrdersAssociatedProject",
+        'class' => 'Commande',
+        'test' => $conf->commande->enabled),
+    'invoice' => array(
+        'title' => "ListInvoicesAssociatedProject",
+        'class' => 'Facture',
+        'test' => isset($conf->facture->enabled)),
+    'order_supplier' => array(
+        'title' => "ListSupplierOrdersAssociatedProject",
+        'class' => 'CommandeFournisseur',
+        'test' => isset($conf->fournisseur->enabled)),
+    'invoice_supplier' => array(
+        'title' => "ListSupplierInvoicesAssociatedProject",
+        'class' => 'FactureFournisseur',
+        'test' => isset($conf->fournisseur->enabled))
+//'product'=>array(
+//    'title'=>"ProductAssociatedProject",
+//    'class'=>'Products',
+//    'test'=>true)
+);
+
+foreach ($listofreferent as $key => $value) {
+    $title = $value['title'];
+    $class = $value['class'];
+    $qualified = $value['test'];
+    if ($qualified) {
+        print '<br>';
+
+        print_titre($langs->trans($title));
+        print '<table class="noborder" width="100%">';
+
+        print '<tr class="liste_titre">';
+        print '<td width="150">' . $langs->trans("Ref") . '</td>';
+        print '<td>' . $langs->trans("Date") . '</td>';
+        print '<td align="right">' . $langs->trans("Amount") . '</td>';
+        print '</tr>';
+        $elementarray = $projet->get_element_list($key);
+        if (sizeof($elementarray) > 0 && is_array($elementarray)) {
+            $var = true;
+            $total = 0;
+            for ($i = 0; $i < sizeof($elementarray); $i++) {
+                $element = new $class($db);
+                $element->fetch($elementarray[$i]);
+
+                $var = !$var;
+                print "<tr $bc[$var]>";
+                print "<td width=30%>";
+                print $element->getNomUrl(1);
+                print "</td>\n";
+                $date = $element->date;
+                if (empty($date))
+                    $date = $element->datep;
+                print '<td width=30%>' . dol_print_date($date, 'day') . '</td>';
+                print '<td width=30% align="right">' . price($element->total_ht) . '</td>';
+                print '</tr>';
+
+                $total = $total + $element->total_ht;
+            }
+            if ($class == "CommandeFournisseur" || $class == 'Commande') {
+                print '<tr class="liste_total"><td colspan="2">' . $i . ' ' . $langs->trans("Orders") . '</td>';
+            } else if ($class == "Propal") {
+                print '<tr class="liste_total"><td colspan="2">' . $i . ' ' . $langs->trans("Proposals") . '</td>';
+            } else if ($class == "Facture" || $class == "FactureFournisseur") {
+                print '<tr class="liste_total"><td colspan="2">' . $i . ' ' . $langs->trans("Bills") . '</td>';
+            } else if ($class == "Chrono") {
+                print '<tr class="liste_total"><td colspan="2">' . $i . ' ' . $langs->trans("Chronos") . '</td>';
+            }
+            print '<td align="right" width="100">' . $langs->trans("TotalHT") . ' : ' . price($total) . '</td>';
+            print '</tr>';
+        }
+        print "</table>";
+
+        /*
+         * Barre d'action
+         */
+        print '<div class="tabsAction">';
+
+        if ($projet->societe->prospect || $projet->societe->client) {
+            if ($key == 'synopsischrono' && ($conf->projet->enabled || isset($conf->global->MAIN_MODULE_SYNOPSISPROJET))) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/synopsischrono/nouveau.php?projetid=' . $projet->id . '">' . $langs->trans("AddChrono") . '</a>';
+            }
+            if ($key == 'propal' && isset($conf->propal->enabled) && $user->rights->propale->creer) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/comm/addpropal.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddProp") . '</a>';
+            }
+            if ($key == 'order' && isset($conf->commande->enabled) && $user->rights->commande->creer) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/commande/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddCustomerOrder") . '</a>';
+            }
+            if ($key == 'invoice' && isset($conf->facture->enabled) && $user->rights->facture->creer) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/compta/facture.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddCustomerInvoice") . '</a>';
+            }
+        }
+        if ($projet->societe->fournisseur) {
+            if ($key == 'order_supplier' && isset($conf->fournisseur->enabled) && $user->rights->fournisseur->commande->creer) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/facture/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierInvoice") . '</a>';
+            }
+            if ($key == 'invoice_supplier' && isset($conf->fournisseur->enabled) && $user->rights->fournisseur->facture->creer) {
+                print '<a class="butAction" href="' . DOL_URL_ROOT . '/fourn/commande/fiche.php?socid=' . $projet->societe->id . '&amp;action=create&amp;projetid=' . $projet->id . '">' . $langs->trans("AddSupplierOrder") . '</a>';
+            }
+        }
+        print '</div>';
+    }
+}
+
+// Juste pour eviter bug IE qui reorganise mal div precedents si celui-ci absent
+print '<div class="tabsAction">';
 print '</div>';
 
 
-/*
- * Referers types
- */
+print "<div id='dialAddElement'>";
 
 $listofreferent=array(
 'propal'=>array(
@@ -372,6 +544,28 @@ foreach ($listofreferent as $key => $value)
 		print '</div>';
 	}
 }
+//if ($projet->societe->fournisseur)
+//{
+//    foreach(array('commande_fournisseur','facture_fournisseur') as $val)
+//    {
+//        print "<tr><th class='ui-widget-header ui-state-default'>".$arr[$val];
+//        print "<td class='ui-widget-content'> ";
+//        print "<select name='add".$val."'>";
+//        print "<option value='0'>S&eacute;l&eacute;ctionner-></option>";
+//        $requete= "SELECT * FROM ".MAIN_DB_PREFIX."".$val." WHERE fk_soc = ".$projet->societe->id;
+//        $sql = $db->query($requete);
+//        while($res = $db->fetch_object($sql))
+//        {
+//            if($val == 'facture_fournisseur')
+//            {
+//                print "<option value='".$res->rowid."'>".$res->facnumber."</option>";
+//            } else {
+//                print "<option value='".$res->rowid."'>".$res->ref."</option>";
+//            }
+//        }
+//        print "</select>";
+//    }
+//}
 
 // Margin display of the project
 print_titre("Margin");
@@ -446,3 +640,6 @@ print "</table>";
 llxFooter();
 
 $db->close();
+
+llxFooter('$Date: 2008/04/29 06:23:29 $ - $Revision: 1.3 $');
+?>

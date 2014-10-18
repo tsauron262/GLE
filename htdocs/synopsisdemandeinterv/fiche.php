@@ -753,7 +753,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print "    <td colspan=3 class='ui-widget-content'><input name=\"ref\" value=\"" . $numpr . "\"></td></tr>\n";
 
         if ($conf->projet->enabled) {
-            require_once(DOL_DOCUMENT_ROOT."/core/lib/synopsis_project.lib.php");
+            require_once(DOL_DOCUMENT_ROOT."/core/class/html.formprojet.class.php");
             // Projet associe
             $langs->load("project");
 
@@ -771,7 +771,8 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
                 }
                 print '</tr></table>';
             } else {
-                select_projects($societe->id, '', 'projetidp');
+                $formP = new FormProjets($db);
+                $formP->select_projects($societe->id, '', 'projetidp');
             }
             print '</td></tr>';
         }

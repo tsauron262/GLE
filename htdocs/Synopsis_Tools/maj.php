@@ -53,9 +53,11 @@ function verifOBj($objT, $text, $sqlReq) {
             $obj2 = new Facture($db);
             foreach ($tabT as $ligne) {
                 $obj2->fetch($ligne['d']);
-                echo "- Fact" . $obj2->getNomUrl(1) . "</br>";
-                $totalFact[$obj2->id] = $obj2->total_ttc;
-                $tabTech[$obj2->user_author][$obj2->id] = $text . " : " . $obj2->getNomUrl(0);
+                if (is_null($obj2->close_code)) {
+                    echo "- Fact" . $obj2->getNomUrl(1) . "</br>";
+                    $totalFact[$obj2->id] = $obj2->total_ttc;
+                    $tabTech[$obj2->user_author][$obj2->id] = $text . " : " . $obj2->getNomUrl(0);
+                }
             }
         }
 
@@ -88,7 +90,7 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
         $totG += $totI;
 
 
-    $i=0;
+    $i = 0;
     $tech = new User($db);
     foreach ($tabTech as $idTech => $tabFact) {
         if ($idTech < 1)
@@ -99,20 +101,21 @@ if (isset($_GET['action']) && $_GET['action'] == "majSav") {
         $tech->fetch($idTech);
         echo "<br/>" . $tech->getNomUrl(1) . "</br>";
         foreach ($tabFact as $nom) {
-            if(stripos($nom, "FA1410-0075") === false)
-            $i++;
+            if (stripos($nom, "FA1410-0075") === false)
+                $i++;
             $html .= "<br/>" . $nom;
         }
 
-        sleep(1);
-        if (isset($_REQUEST['mail']) && $_REQUEST['mail'] == "true" && $tech->email != '')
+        if (isset($_REQUEST['mail']) && $_REQUEST['mail'] == "true" && $tech->email != '') {
+            sleep(1);
             mailSyn2("GLE problémes factures", $tech->email, "Application GLE <tommy@drsi.fr>", $html);
+        }
         echo $html;
     }
-echo "<br/>";
-echo '<form action="" method="post"><input type="hidden" name="mail" value="true"/><input type="hidden" name="action" value="majSav"/><input type="submit" value="Envoie mail" class="butAction"/></form>';
+    echo "<br/>";
+    echo '<form action="" method="post"><input type="hidden" name="mail" value="true"/><input type="hidden" name="action" value="majSav"/><input type="submit" value="Envoie mail" class="butAction"/></form>';
 
-    echo "Total : " . $totG . " € ".$i." factures</br></br>";
+    echo "Total : " . $totG . " € " . $i . " factures</br></br>";
 
     echo "Fin maj";
 }

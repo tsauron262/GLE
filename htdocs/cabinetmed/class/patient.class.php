@@ -160,7 +160,7 @@ class Patient extends Societe
      *	@param		int		$allowmodcodefournisseur	Inclut modif code fournisseur et code compta fournisseur
      *  @return     int      			       			<0 si ko, >=0 si ok
      */
-    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0)
+    function update($id, $user='', $call_trigger=1, $allowmodcodeclient=0, $allowmodcodefournisseur=0, $action='update', $nosyncmember=1)
     {
         require_once(DOL_DOCUMENT_ROOT."/core/lib/functions2.lib.php");
 
@@ -353,7 +353,7 @@ class Patient extends Societe
      *    @param      int		$idprof4		Prof id 4 of third party (Warning, this can return several records)
      *    @return     $int						>0 if OK, <0 if KO or if two records found for same ref or idprof.
      */
-    function fetch($rowid, $ref='', $ref_ext='', $idprof1='',$idprof2='',$idprof3='',$idprof4='')
+    function fetch($rowid, $ref='', $ref_ext='', $ref_int='', $idprof1='',$idprof2='',$idprof3='',$idprof4='')
     {
         global $langs;
         global $conf;

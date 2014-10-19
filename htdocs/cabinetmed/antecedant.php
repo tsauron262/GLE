@@ -226,6 +226,7 @@ if ($socid > 0)
     print '<div class="fichecenter"><div class="fichehalfleft">';
     print '<table class="border" width="100%" style="margin-bottom: 2px !important;">';
 
+    if(isset($conf->fckeditor) && $conf->fckeditor->enabled)
     $conf->fckeditor->enabled=false;	// Disable fckeditor
     $height=120;
 

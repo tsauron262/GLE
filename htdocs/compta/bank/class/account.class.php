@@ -683,7 +683,7 @@ class Account extends CommonObject
      *
      *    @return      int         <0 if KO, >0 if OK
      */
-    function delete()
+    function delete($user = '')
     {
         global $conf;
 

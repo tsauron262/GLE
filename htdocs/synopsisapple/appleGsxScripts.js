@@ -1434,8 +1434,8 @@ function traiteCommandeRetour(html, $resultContainer) {
 
             window.location.replace(window.location.href.replace("fiche.php", "request.php") + "&actionEtat=commandeOK&sendSms=" + confirm("Envoyer SMS ?") + "&prix=" + prix);
         }
-        if (xhr.responseText.indexOf('<formSus>OK</formSus>') !== -1) {
-            htmlFormSus = xhr.responseText.replace("<formSus>OK</formSus>", "");
+        if (html.indexOf('<formSus>OK</formSus>') !== -1) {
+            htmlFormSus = html.replace("<formSus>OK</formSus>", "");
             alert(htmlFormSus);
             $("#formSus").append(htmlFormSus);
         }

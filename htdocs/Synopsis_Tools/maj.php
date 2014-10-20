@@ -169,7 +169,7 @@ if (isset($_GET['action']) && $_GET['action'] == "import") {
 if (isset($_REQUEST['action']))
 $cron->sortieHtml();
 
-
+echo "<br/><br/>";
 
 echo '<form action=""><input type="hidden" name="action" value="sauvBdd"/><input type="submit" value="Sauv BDD" class="butAction"/></form>';
 echo "<br/>";

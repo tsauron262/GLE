@@ -240,17 +240,18 @@ class CronSynopsis {
                             $tabSoc[$idSoc][] = $result4->$champId;
                         }
                     }
-                    if (!isset($tabValOK)) {
-                        $tabValOK = array();
+                    if (!isset($tabValOK[$result2->table])) {
+                        $tabValOK[$result2->table] = array();
                         $sql4 = $this->db->query("SELECT " . $champId . " FROM " . $result2->table);
                         while ($result4 = $this->db->fetch_object($sql4)) {
-                            $tabValOK[] = $result4->$champId;
+                            echo "<br/><br/><br/>SELECT " . $champId . " FROM " . $result2->table; print_r($result2);
+                            $tabValOK[$result2->table][] = $result4->$champId;
                         }
                     }
 
                     $tabLien = getElementElement($result2->nomElem, getParaChaine($result->extraCss, "type:"), null, $resultChrono->id);
                     foreach ($tabLien as $lien) {
-                        if (!in_array($lien['s'], $tabValOK)) {
+                        if (!in_array($lien['s'], $tabValOK[$result2->table])) {
                             $tabSuppr['elementElement'][$result2->nomElem][$lien['s']] = $lien['s'];
                             $this->erreur("[AUTOCORRECT] Lien vers element existant plus." . ($result2->nomElem . "|" . getParaChaine($result->extraCss, "type:") . "|" . $lien['s'] . "|" . $resultChrono->id) . "</br>");
                         }

@@ -34,9 +34,9 @@ class gsxDatas {
         global $user;
 
 
-//        $userId = 'sav@bimp.fr';
-//        $password = '@Savbimp2014#';
-//        $serviceAccountNo = '100520';
+        $userId = 'sav@bimp.fr';
+        $password = '@Savbimp2014#';
+        $serviceAccountNo = '100520';
 
 
         if (isset($user->array_options['options_apple_id']) && isset($user->array_options['options_apple_mdp']) && isset($user->array_options['options_apple_service']) &&

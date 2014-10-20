@@ -37,7 +37,6 @@
     <def name="coveredByACPlus" type="YesNo">
         <label>Dommages couverts par AppleCare+</label>
     </def>
-    </def>
     <def name="replacementSerialNumber" type="text">
         <label>Remplacement S/N</label>
     </def>

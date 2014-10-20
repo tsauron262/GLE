@@ -543,6 +543,7 @@ class GSX_Request {
         $html .= '</div>' . "\n";
         $html .= '<div style="text-align: right; margin: 15px 30px"><span class="button submit greenHover"';
         $html .= 'onclick="submitGsxRequestForm(' . $prodId . ', \'' . $this->requestName . '\'' . (isset($repairRowId) ? ', \'' . $repairRowId . '\'' : '') . ')">';
+        $html .= '<div id="formSus"></div>';
         $html .= 'Envoyer</span></div>';
         $html .= '</form>' . "\n";
         return $html;

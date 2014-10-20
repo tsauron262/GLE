@@ -1461,6 +1461,11 @@ function onRequestResponse(xhr, requestType, prodId) {
     var $span = null;
     if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
         location.reload();
+    if (xhr.responseText.indexOf('<formSus>OK</formSus>') !== -1){
+        htmlFormSus = xhr.responseText.replace("<formSus>OK</formSus>", "");
+        alert(htmlFormSus);
+        $("#formSus").append(htmlFormSus);
+    }
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {

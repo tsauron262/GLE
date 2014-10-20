@@ -111,7 +111,7 @@
             <data name="popFaxed" required="0" default="N"></data>
             <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
             <data name="requestReviewByApple" required="0" default="N"></data>
-            <!--<data name="componentCheckReview" required="0" default="N"></data>-->
+            <data name="componentCheckReview" required="0" default="N"></data>
             <!--<data name="isNonReplenished" required="0" default="N"></data>-->
             <data name="consumerLawEligible" required="0" default=" "></data>
             <data name="fileName" required="0" donotprocess="1"></data>

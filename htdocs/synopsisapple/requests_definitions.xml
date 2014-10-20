@@ -78,28 +78,14 @@
                     <data name="abused" required="0" default="N"></data>
                     <data name="returnableDamage" required="0" default="N"></data>
                     <data name="coveredByACPlus" required="0" default="N"></data>
-                    <data name="replacementSerialNumber" required="0" default=""></data>
                 </datas>
             </data>
             <data name="componentCheckDetails" required="0">
-                <!--<datas>-->
-                    <!--<data name="0" required="0">-->
-                        <datas>
-                            <data name="component_1" required="0" default="IPHONE COMP MLB"></data>
-                            <data name="componentSerialNumber_1" required="0"></data>
-
-                            <data name="component_2" required="0" default="IMEI"></data>
-                            <data name="componentSerialNumber_2" required="0"></data>
-                        </datas>
-                    <!--</data>-->
-                <!--</datas>-->
-            </data>
-<!--            <data name="componentCheckDetails" required="0">
                 <datas>
-                    <data name="component" required="0" default="IMEI"></data>
+                    <data name="component" required="0"></data>
                     <data name="componentSerialNumber" required="0"></data>
                 </datas>
-            </data>-->
+            </data>
             <data name="customerAddress" required="1">
                 <datas>
                     <data name="addressLine1" required="1"></data>
@@ -124,7 +110,7 @@
             <data name="popFaxed" required="0" default="N"></data>
             <!--<data name="overrideDiagnosticCodeCheck" required="0" default="Y"></data>-->
             <data name="requestReviewByApple" required="0" default="N"></data>
-            <data name="componentCheckReview" required="0" default="N"></data>
+            <!--<data name="componentCheckReview" required="0" default="N"></data>-->
             <!--<data name="isNonReplenished" required="0" default="N"></data>-->
             <data name="consumerLawEligible" required="0" default=" "></data>
             <data name="fileName" required="0" donotprocess="1"></data>
@@ -232,7 +218,7 @@
                     <data name="abused" required="0" default="N"></data>
                     <data name="returnableDamage" required="0" default="N"></data>
                     <data name="coveredByACPlus" required="0" default="N"></data>
-                    <data name="replacementSerialNumber" required="0" default=""></data>
+                    <data name="replacementSerialNumber" required="0" default="N"></data>
                 </datas>
             </data>
             <data name="componentCheckDetails" required="0">

@@ -326,6 +326,7 @@ class Repair {
         $request = $this->gsx->_requestBuilder($requestName, 'lookupRequestData', $datas);
         $response = $this->gsx->request($request, $client);
 
+            echo "<pre>";print_r($response);
         if (count($this->gsx->errors['soap']) > $n)
             return false;
 
@@ -430,6 +431,7 @@ class Repair {
             if (isset($partsPending['returnOrderNumber'])) {
                 $partsPending = array($partsPending);
             }
+            echo "<pre>";print_r($partsPending);
             foreach ($partsPending as $part) {
                 $fileName = null;
                 if (isset($part['returnOrderNumber']) && isset($part['partNumber'])) {

@@ -634,7 +634,7 @@ class GSX_Request {
                                 if (count($subDatasNode) == 1) {
                                     $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                                     if ($multiple) {
-                                        if (isset($_POST[$dataName . '_nextIdx']))
+                                        if (!isset($_POST[$dataName . '_nextIdx']))
                                             $_POST[$dataName . '_nextIdx'] = 0;
                                         if (isset($_POST[$dataName . '_nextIdx'])){
                                             $datas[$dataName] = array();

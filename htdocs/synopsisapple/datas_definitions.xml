@@ -37,6 +37,10 @@
     <def name="coveredByACPlus" type="YesNo">
         <label>Dommages couverts par AppleCare+</label>
     </def>
+    </def>
+    <def name="replacementSerialNumber" type="text">
+        <label>Remplacement S/N</label>
+    </def>
     <!--Adresses-->
     <def name="addressLine1" type="text" max="60" jsCheck="text">
         <label>Adresse ligne 1</label>

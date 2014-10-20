@@ -639,7 +639,7 @@ class GSX_Request {
                                         if (isset($_POST[$dataName . '_nextIdx'])){
                                             $datas[$dataName] = array();
                                             for ($i = 1; $i < (int) $_POST[$dataName . '_nextIdx']; $i++) {
-                                                $datas[$dataName] = $this->processRequestDatas($subDatasNodes, $i);
+                                                $datas[$dataName][] = $this->processRequestDatas($subDatasNodes, $i);
                                             }
                                         } else {
                                             $this->addError('Une erreur est survenu, impossible de déterminer le nombre de champs ajoutés pour : "' . $dataName . '"');

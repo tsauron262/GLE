@@ -827,7 +827,7 @@ class GSX {
                    <input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_'.$i.'" maxlength="20" onchange="checkInput($(this), \'text\')">
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
                 }
-                echo "<input type='hidden' name'component_nextIdx' value='".$i."'/>";
+                echo "<input type='hidden' name='component_nextIdx' value='".$i."'/>";
                 echo '</div></fieldset>';
                 die;
                 return array();

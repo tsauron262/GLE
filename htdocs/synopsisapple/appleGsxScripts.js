@@ -487,7 +487,7 @@ function PartsManager(prodId, serial) {
     };
     this.displayParts = function() {
         this.$parts = this.$prod.find('.partsListContainer');
-        var ths =  '';
+        var ths = '';
         ths += '<th></th>';
         ths += '<th style="min-width: 250px">Nom</th>';
         ths += '<th style="min-width: 80px">Ref.</th>';
@@ -1093,7 +1093,7 @@ function onComptiaGroupSelect($select) {
     var val = $select.val();
     if (typeof (val) != 'undefined') {
         var $options = $select.parent('.dataBlock').parent('fieldset').find('#comptiaCode').find('option');
-        var classe = 'comptiaGroup_'+val;
+        var classe = 'comptiaGroup_' + val;
         var newVal = null;
         $options.each(function() {
             if ($(this).hasClass(classe)) {
@@ -1323,7 +1323,7 @@ function duplicateDatasGroup($span, inputName) {
                 html += '</div>';
                 var index = parseInt($index.val());
                 var regex = new RegExp('_idx', 'g');
-                html = html.replace(regex, '_'+index);
+                html = html.replace(regex, '_' + index);
                 index++
                 var $list = $container.find('div.inputsList');
                 if ($list.length) {
@@ -1429,10 +1429,15 @@ function traiteCommandeRetour(html, $resultContainer) {
         if ($resultContainer.find("prix").size() > 0) {
             prix = $resultContainer.find("prix").html();
             $resultContainer.find("prix").html("");
-            if(prix > 0)
-                alert("Attention la réparation n'est pas prise sous garantie. Prix : "+prix+" €");
+            if (prix > 0)
+                alert("Attention la réparation n'est pas prise sous garantie. Prix : " + prix + " €");
 
-            window.location.replace(window.location.href.replace("fiche.php", "request.php")+"&actionEtat=commandeOK&sendSms="+confirm("Envoyer SMS ?")+"&prix="+prix);
+            window.location.replace(window.location.href.replace("fiche.php", "request.php") + "&actionEtat=commandeOK&sendSms=" + confirm("Envoyer SMS ?") + "&prix=" + prix);
+        }
+        if (xhr.responseText.indexOf('<formSus>OK</formSus>') !== -1) {
+            htmlFormSus = xhr.responseText.replace("<formSus>OK</formSus>", "");
+            alert(htmlFormSus);
+            $("#formSus").append(htmlFormSus);
         }
     }
 
@@ -1487,11 +1492,6 @@ function onRequestResponse(xhr, requestType, prodId) {
     var $span = null;
     if (xhr.responseText.indexOf('<ok>Reload</ok>') !== -1)
         location.reload();
-    if (xhr.responseText.indexOf('<formSus>OK</formSus>') !== -1){
-        htmlFormSus = xhr.responseText.replace("<formSus>OK</formSus>", "");
-        alert(htmlFormSus);
-        $("#formSus").append(htmlFormSus);
-    }
     switch (requestType) {
         case 'loadCompTIACodes':
             if (xhr.responseText == 'fail') {

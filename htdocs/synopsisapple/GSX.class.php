@@ -818,13 +818,15 @@ class GSX {
                 $tabTmp = explode(",", $temp);
                 echo '<formSus>OK</formSus><fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
                     <div class="dataBlock">';
-                foreach($tabTmp as $i => $nom)   
+                foreach($tabTmp as $i => $nom){   
+                    $i++;
                    echo '
-                   <label class="dataTitle" for="component_'.$i.'">Composant</label><br><input type="text" id="component_1" name="component_'.$i.'" value="'.$nom.'" maxlength="20" onchange="checkInput($(this), \'text\')">
+                   <label class="dataTitle" for="component_'.$i.'">Composant</label><br><input type="text" id="component_'.$i.'" name="component_'.$i.'" value="'.$nom.'" maxlength="20" onchange="checkInput($(this), \'text\')">
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
                    <label class="dataTitle" for="componentSerialNumber_'.$i.'">Numéro de série du composant</label><br>
-                   <input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_1" maxlength="20" onchange="checkInput($(this), \'text\')">
+                   <input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_'.$i.'" maxlength="20" onchange="checkInput($(this), \'text\')">
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
+                }
                 
                 echo '</div></fieldset>';
                 return array();

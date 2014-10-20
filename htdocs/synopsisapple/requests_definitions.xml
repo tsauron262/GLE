@@ -62,7 +62,7 @@
             <data name="serialNumber" required="1"></data>
             <!--            <data name="referenceNumber" required="0"></data>-->
             <data name="shipTo" required="1"></data>
-            <data name="billTo" required="0" multiple="1"></data>
+            <data name="billTo" required="0"></data>
             <data name="poNumber" required="1"></data>
             <data name="unitReceivedDate" required="1"></data>
             <data name="unitReceivedTime" required="1"></data>

@@ -699,7 +699,7 @@ class GSX_Request {
         }
         $newData = array();
         foreach($datas as $key => $val)
-            $newData[str_replace("componentSerialNumber","serialNumber",$key)] = $val;
+            $newData[str_replace("componentSerialNumberdd","serialNumber",$key)] = $val;
         return $newData;
     }
 

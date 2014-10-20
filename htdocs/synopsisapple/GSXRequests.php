@@ -634,13 +634,14 @@ class GSX_Request {
                                 if (count($subDatasNode) == 1) {
                                     $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
                                     if ($multiple) {
-//                                        if (!isset($_POST[$dataName . '_nextIdx']))
-//                                            $_POST[$dataName . '_nextIdx'] = 0;
+                                        if (!isset($_POST[$dataName . '_nextIdx']))
+                                            $_POST[$dataName . '_nextIdx'] = 0;
                                         if (isset($_POST[$dataName . '_nextIdx'])){
                                             $datas[$dataName] = array();
                                             for ($i = 1; $i < (int) $_POST[$dataName . '_nextIdx']; $i++) {
                                                 $datas[$dataName][] = $this->processRequestDatas($subDatasNodes, $i);
                                             }
+                                            echo "<pre>".print_r($datas[$dataName], true).print_r($_POST, true);
                                         } else {
                                             $this->addError('Une erreur est survenu, impossible de déterminer le nombre de champs ajoutés pour : "' . $dataName . '"');
                                         }

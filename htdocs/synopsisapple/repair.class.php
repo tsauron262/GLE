@@ -24,6 +24,7 @@ class Repair {
     protected $repairLookUp = null;
     protected $errors = array();
     public $isIphone;
+    public $majSerialOk = false;
 
     public function __construct($db, $gsx, $isIphone) {
         $this->db = $db;
@@ -200,21 +201,23 @@ class Repair {
                         (!$this->confirmNumbers['serialUpdate']) ||
                         ($this->confirmNumbers['serialUpdate'] === '')) {
                     $this->loadPartsPending();
-                    if (count($this->partsPending)) {
-                        $this->addError('La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour');
-                        $button .= '<p style="text-align: center; padding: 30px">';
-                        $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
-                        $button .= $this->rowId . '\', false)">Forcer la fermeture</span></p>';
-                        $this->addError($button);
-                        return false;
-                    } else {
-                        $this->addError('Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.');
-                        $button .= '<p style="text-align: center; padding: 30px">';
-                        $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
-                        $button .= $this->rowId . '\', false)">Confirmer la fermeture</span></p>';
-                        $this->addError($button);
-                        $this->gsx->resetSoapErrors();
-                        return false;
+                    if ($this->majSerialOk == false) {
+                        if (count($this->partsPending)) {
+                            $this->addError('La réparation ne peut pas être fermée, les numéros de série de certains composants semblent ne pas avoir été mis à jour');
+                            $button .= '<p style="text-align: center; padding: 30px">';
+                            $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
+                            $button .= $this->rowId . '\', false)">Forcer la fermeture</span></p>';
+                            $this->addError($button);
+                            return false;
+                        } else {
+                            $this->addError('Veuillez confirmer que plus aucune opération n\'est à effectuer sur cette réparation.');
+                            $button .= '<p style="text-align: center; padding: 30px">';
+                            $button .= '<span class="button redHover closeRepair" onclick="closeRepairSubmit($(this), \'';
+                            $button .= $this->rowId . '\', false)">Confirmer la fermeture</span></p>';
+                            $this->addError($button);
+                            $this->gsx->resetSoapErrors();
+                            return false;
+                        }
                     }
                 }
             }
@@ -417,6 +420,7 @@ class Repair {
 
         $request = $this->gsx->_requestBuilder($requestName, 'repairData', $datas);
         $response = $this->gsx->request($request, $client);
+        
         if (count($this->gsx->errors['soap'])) {
             return false;
         }
@@ -439,7 +443,7 @@ class Repair {
                     $request = $this->gsx->_requestBuilder($requestName2, '', array(
                         'returnOrderNumber' => $part['returnOrderNumber'],
                         'partNumber' => $part['partNumber']
-                            ));
+                    ));
                     $labelResponse = $this->gsx->request($request, $client2);
                     if (isset($labelResponse[$client2 . 'Response']['returnLabelData']['returnLabelFileName'])) {
                         $direName = '/synopsischrono/' . $_REQUEST['chronoId'] . '';
@@ -455,12 +459,16 @@ class Repair {
                         $fileName2 = "/document.php?modulepart=synopsischrono&file=" . urlencode($_REQUEST['chronoId'] . "/" . $fileNamePure);
                     }
                 }
-                $this->partsPending[] = array(
-                    'partDescription' => $part['partDescription'],
-                    'partNumber' => $part['partNumber'],
-                    'returnOrderNumber' => $part['returnOrderNumber'],
-                    'fileName' => $fileName2
-                );
+                if ($part['registeredForReturn'] == "Y") {
+                    $this->partsPending[] = array(
+                        'partDescription' => $part['partDescription'],
+                        'partNumber' => $part['partNumber'],
+                        'returnOrderNumber' => $part['returnOrderNumber'],
+                        'fileName' => $fileName2
+                    );
+                }
+                if(count($this->partsPending) == 0)
+                    $this->majSerialOk = true;
             }
             return true;
         }
@@ -472,8 +480,8 @@ class Repair {
             return '';
 
         $html = '';
-        if (!count($this->partsPending)) {
-            if (!$this->loadPartsPending()) {
+        if (!count($this->partsPending) || count($this->partsPending) == 0) {
+            if ($this->loadPartsPending()) {
                 if (count($this->gsx->errors['soap'])) {
 
                     $html .= '<p>Aucun composant en attente de retour n\'a été trouvé. <span class="displaySoapMsg" onclick="displaySoapMessage($(this))">Voir le message soap</span></p>';
@@ -481,7 +489,7 @@ class Repair {
                     $html .= $this->gsx->getGSXErrorsHtml();
                     $html .= '</div>';
                     return $html;
-                } else if (!count($this->partsPending)) {
+                } else if (!count($this->partsPending) || count($this->partsPending) == 0) {
                     if (isset($this->confirmNumbers['serialUpdate']) && ($this->confirmNumbers['serialUpdate'] != ''))
                         $html .= '<p class="confirmation">Numéros de série des composants retournés à jour</p>' . "\n";
                     $html .= '<p>Aucun composant en attente de retour</p>';

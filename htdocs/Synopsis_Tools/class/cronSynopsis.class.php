@@ -244,7 +244,6 @@ class CronSynopsis {
                         $tabValOK[$result2->table] = array();
                         $sql4 = $this->db->query("SELECT " . $champId . " FROM " . $result2->table);
                         while ($result4 = $this->db->fetch_object($sql4)) {
-                            echo "<br/><br/><br/>SELECT " . $champId . " FROM " . $result2->table; print_r($result2);
                             $tabValOK[$result2->table][] = $result4->$champId;
                         }
                     }

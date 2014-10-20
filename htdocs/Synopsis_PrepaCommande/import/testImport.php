@@ -1010,7 +1010,6 @@ if (is_dir($dir)) {
                                     '" . $prodId . "',
                                     '" . $val['ArtDureeGar'] . "',
                                     " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") ";
-                                $sql2 = requeteWithCache($requete);
 
                                 if ($sql && $sql2) {
                                     $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
@@ -1034,6 +1033,16 @@ if (is_dir($dir)) {
                                     $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit KO</td>" . "\n";
                                 }
                                 //$webContent .=  $requete . "<br/>";
+                            }
+                            
+                            if($val['PlvPA'] > 0 && $prodId > 0){
+                                require_once(DOL_DOCUMENT_ROOT."/fourn/class/fournisseur.product.class.php");
+                                $sql2 = requeteWithCache($requete);
+                                $prodF = new ProductFournisseur($db);
+                                $fourn = new Fournisseur($db);
+                                $fourn->fetch(5862);
+                                $prodF->fetch($prodId);
+                                $prodF->update_buyprice(1, floatval($val['PlvPA']), $user, 'HT', $fourn, $availability, $val['ArtID'], $val['TaxTaux']);
                             }
                         }
 

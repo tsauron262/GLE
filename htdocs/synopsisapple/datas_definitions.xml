@@ -232,7 +232,7 @@
             <val val="N">Non</val>
         </values>
     </def>
-    <def name="componentCheckDetails" type="datasGroup"  hidden="1">
+    <def name="componentCheckDetails" type="datasGroup">
         <label>Détails du composant</label>
     </def>
     <def name="component" type="text" max="20" jsCheck="text">

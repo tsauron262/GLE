@@ -817,7 +817,9 @@ class GSX {
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
                 echo '<formSus>OK</formSus><fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
-                    <div class="dataBlock">';
+                    <div class="inputsList">
+<div class="subInputsList">
+<div class="dataBlock">';
                 foreach($tabTmp as $i => $nom){   
                     $i++;
                    echo '
@@ -828,7 +830,7 @@ class GSX {
                    <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
                 }
                 echo "<input type='hidden' name='componentCheckDetails_nextIdx' value='".$i."'/>";
-                echo '</div></fieldset>';
+                echo '</div></div></div></fieldset>';
                 die;
                 return array();
             }

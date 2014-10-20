@@ -726,7 +726,7 @@ class GSX_Request {
         }
 
         $requestDatas = $this->processRequestDatas($this->datas['request']);
-        print_r($requestDatas);
+        echo "<pre>";print_r($requestDatas);
 
         if (count($this->errors)) {
             $html = '<p class="error">Des erreurs ont été détectées:<br/><br/>';

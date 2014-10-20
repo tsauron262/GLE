@@ -697,7 +697,10 @@ class GSX_Request {
                 }
             }
         }
-        return $datas;
+        $newData = array();
+        foreach($datas as $key => $val)
+            $newData[str_replace("componentSerialNumber","serialNumber",$key)] = $val;
+        return $newData;
     }
 
     public function processRequestForm($prodId, $serial) {

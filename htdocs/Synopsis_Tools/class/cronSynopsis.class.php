@@ -103,7 +103,10 @@ class CronSynopsis {
             if ($idTech < 1)
                 $idTech = 1;
 
-            $html = "Bonjour, GLE a détécté des problémes avec certaines factures, merci de vérifier ces factures et de 'Classer Abandonnée' éventuellement les factures qui sont remplacées ou inutiles (seul les factures positives peuvent étre fermée, ajoutez une ligne a 1€ pour les factures a 0 avant de les 'Classer Abandonnée'). Ou de ratacher le SAV a la bonne Propal.<br/><br/> Merci.<br/><br/>";
+            $html = "Bonjour, GLE a détécté des problèmes avec certaines factures, merci de vérifier ces factures et de 'Classer Abandonnée' éventuellement les factures qui sont remplacées ou inutiles "
+                    . "(seul les factures positives peuvent étre fermées, ajoutez une ligne à 1€ pour les factures à 0 avant de les 'Classer Abandonnée'). "
+                    . "<br/>Si les factures sont classées payées merci de cliquer sur 'Demande Annulation'"
+                    . "<br/>Si le SAV n'est pas lié à la bonne propal, merci de modifier ce dernier pour choisir la propal.<br/><br/> Merci.<br/><br/>";
 
             $tech->fetch($idTech);
             $this->titre("<br/>" . $tech->getNomUrl(1) . "</br>");

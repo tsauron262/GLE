@@ -189,7 +189,7 @@ class Synopsis_Contrat extends Contrat {
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
             if (stripos($ligne->description, "suivi") !== false)
-                $suivie = true;
+                $suivie = true; 
             if ($ligne->GMAO_Mixte['isSAV'])
                 $isSav = true;
             if ($ligne->GMAO_Mixte['maintenance'])
@@ -213,6 +213,17 @@ class Synopsis_Contrat extends Contrat {
                 $isMed8 = true;
             if (stripos($prod->ref, "fpr") !== false)
                 $fpr = true;
+            
+            
+            if (stripos($prod->ref, "SERV-CMT") !== false)
+                $suivie = true;
+            if (stripos($prod->ref, "SERV-CMV") !== false)
+                $suivie = true;
+            if (stripos($prod->ref, "cmb-zen") !== false)
+                $suivie = true;
+            if (stripos($prod->ref, "serv-cmzen") !== false)
+                $suivie = true;
+            
             if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
                 $is8h = true;
 //            else echo $ligne->GMAO_Mixte['SLA']."|";

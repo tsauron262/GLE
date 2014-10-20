@@ -511,3 +511,5 @@ select * from llx_facture where rowid not in (SELECT f.rowid from llx_facture f,
 voir di avec thera 
 
 virer horraire sur fi
+
+voir check if not garentie

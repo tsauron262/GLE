@@ -711,6 +711,9 @@ class gsxDatas {
 //    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
 //    die();
 //}
+//            echo '<pre>';
+//            print_r($result);
+//            echo '</pre>';
             $requestData = $this->gsx->_requestBuilder($request, $wrapper, $result);
             $response = $this->gsx->request($requestData, $client);
             if (count($this->gsx->errors['soap'])) {

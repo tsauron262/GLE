@@ -635,15 +635,15 @@ class gsxDatas {
             $wrapper = $GSXRequest->wrapper;
             
             
-            if (isset($result['componentCheckDetails'])) {
-                if (!isset($result['componentCheckDetails']['componentSerialNumber']) ||
-                        ($result['componentCheckDetails']['componentSerialNumber'] == '')) {
-                    unset($result['componentCheckDetails']);
-                } else {
-                    $result['componentCheckDetails']['serialNumber'] = $result['componentCheckDetails']['componentSerialNumber'];
-                    unset($result['componentCheckDetails']['componentSerialNumber']);
-                }
-            }
+//            if (isset($result['componentCheckDetails'])) {
+//                if (!isset($result['componentCheckDetails']['componentSerialNumber']) ||
+//                        ($result['componentCheckDetails']['componentSerialNumber'] == '')) {
+//                    unset($result['componentCheckDetails']);
+//                } else {
+//                    $result['componentCheckDetails']['serialNumber'] = $result['componentCheckDetails']['componentSerialNumber'];
+//                    unset($result['componentCheckDetails']['componentSerialNumber']);
+//                }
+//            }
             
             
             

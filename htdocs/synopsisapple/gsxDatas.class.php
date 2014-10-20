@@ -564,11 +564,10 @@ class gsxDatas {
 //
 ////        echo "<pre>"; print_r($chrono->contact);
 //        print_r($chrono->extraValue);
-                    if ($this->isIphone) {
-                        $valDef['componentCheckDetails'] = array(
-                            'component' => $this->serial
-                        );
-                    }
+//                    if ($this->isIphone) {
+//                        if($valDef['componentCheckDetails']['conponent'] == "IMEI")
+//                        $valDef['componentCheckDetails']['componentSerialNumber'] = $this->serial;
+//                    }
                     $valDef['customerAddress']['companyName'] = $chrono->societe->name;
                     if (isset($chrono->contact->id)) {
                         $valDef['customerAddress']['street'] = $chrono->contact->address;

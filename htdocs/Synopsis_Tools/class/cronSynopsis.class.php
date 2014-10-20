@@ -44,7 +44,7 @@ class CronSynopsis {
             $erreur = true;
 
 
-            if ($opion == 'ligneSav' && ($objT != "Propal" || $objT != "Facture")) {
+            if ($option == 'ligneSav' && ($objT != "Propal" || $objT != "Facture")) {
                 $erreur = false;
                 foreach ($obj->lines as $ligne) {
                     if (stripos($ligne->desc, "SAV") !== false)

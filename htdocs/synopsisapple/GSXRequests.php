@@ -704,12 +704,6 @@ class GSX_Request {
     }
 
     public function processRequestForm($prodId, $serial) {
-//        echo '<div>';
-//        echo '<p>POST:</p>';
-//        echo '<pre>';
-//        print_r($_POST);
-//        echo '</pre>';
-//        echo '</div>';
         $this->requestOk = false;
         if (count($this->errors)) {
             $html = '<p class="error">Impossible d\'éxécuter la  requête.<br/><br/>';
@@ -726,7 +720,6 @@ class GSX_Request {
         }
 
         $requestDatas = $this->processRequestDatas($this->datas['request']);
-        echo "<pre>";print_r($requestDatas);
 
         if (count($this->errors)) {
             $html = '<p class="error">Des erreurs ont été détectées:<br/><br/>';
@@ -738,16 +731,9 @@ class GSX_Request {
             $html .= '</p><br/><br/>';
             unset($this->errors);
             $this->errors = array();
-//            echo '<pre>';
-//            print_r($requestDatas);
-//            echo '</pre>';
             return $html;
         }
 
-//        echo '<p>Données traitées: </p>' . "\n";
-//        echo '<pre>';
-//        print_r($requestDatas);
-//        echo '</pre>';
         $this->requestOk = true;
         return $requestDatas;
     }

@@ -813,8 +813,15 @@ class GSX {
         try {
             $SOAPRequest = $this->soapClient->$clientLookup($requestData);
         } catch (SoapFault $f) {
-            $this->soap_error($f->faultcode, $f->faultstring);
+            if(stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false){
+                $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
+                $tabTmp = explode(",", $temp);
+                print_r($tabTmp);
+            }
+            else{
+            $this->soap_error($f->faultcode, $f->faultstring." <pre> ".print_r($SOAPRequest, true));
             return array();
+            }
         }
 
         return $this->_objToArr($SOAPRequest);

@@ -1425,7 +1425,6 @@ function submitGsxRequestForm(prodId, request, repairRowId) {
 
 function traiteCommandeRetour(html, $resultContainer) {
     if ($resultContainer.length) {
-        $resultContainer.html(html);
         if ($resultContainer.find("prix").size() > 0) {
             prix = $resultContainer.find("prix").html();
             $resultContainer.find("prix").html("");
@@ -1436,9 +1435,10 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
         if (html.indexOf('<formSus>OK</formSus>') !== -1) {
             htmlFormSus = html.replace("<formSus>OK</formSus>", "");
-            alert(htmlFormSus);
             $("#formSus").append(htmlFormSus);
         }
+        else
+        $resultContainer.html(html);
     }
 
 }

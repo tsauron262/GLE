@@ -203,6 +203,8 @@ class Synopsis_Contrat extends Contrat {
             $prod->fetch($ligne->fk_product);
             if (stripos($prod->ref, "YO1sante") !== false)
                 $isMed = true;
+            if (stripos($prod->ref, "SERV-CMB-MED") !== false)
+                $isMed = true;
             if (stripos($prod->ref, "FPR77") !== false)
                 $isMed = true;
             if (stripos($prod->ref, "FCR04") !== false)

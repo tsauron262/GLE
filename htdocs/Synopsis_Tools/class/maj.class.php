@@ -29,13 +29,13 @@ class maj {
             mkdir($dir);
         $backup = $dir . $date . "_" . $dolibarr_main_db_name . ".sql";
         $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P $dolibarr_main_db_port --user=" . $dolibarr_main_db_user . " --password=$dolibarr_main_db_pass $dolibarr_main_db_name > $backup";
-        echo "Votre base est en cours de sauvegarde.......<br/>";
+//        echo "Votre base est en cours de sauvegarde.......<br/>";
         $result = "inc";
         $retour = system($command, $result);
         if (!$result)
-            echo "Sauvegarde OK !!!!<br/>";
+            return "Sauvegarde OK !!!!<br/>";
         else
-            echo "Il y a eu une erreur !!!" . $result . "|" . $command;
+            return "Il y a eu une erreur !!!" . $result . "|" . $command;
     }
 
     public function req($req) {

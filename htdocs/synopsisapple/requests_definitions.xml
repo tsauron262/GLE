@@ -80,7 +80,7 @@
                     <data name="coveredByACPlus" required="0" default="N"></data>
                 </datas>
             </data>
-            <data name="componentCheckDetails" required="0">
+            <data name="componentCheckDetails" required="1">
                 <datas>
                     <data name="component" required="0"></data>
                     <data name="componentSerialNumber" required="0"></data>

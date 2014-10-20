@@ -202,7 +202,7 @@ class HookManager
                     	if (! is_array($result) && ! is_numeric($result))
                     	{
                     		//print 'Error: Bug into module '.get_class($actionclassinstance).' hook must not return a string but an int and set string into ->resprints';
-                    		dol_syslog('Error: Bug into module '.get_class($actionclassinstance).' hook must not return a string but an int and set string into ->resprints return : '.$result, LOG_ERR);
+                    		dol_syslog('Error: Bug into module '.get_class($actionclassinstance).' hook must not return a string but an int and set string into ->resprints. Methode : '.$method.' Return : '.$result, LOG_ERR);
                     		if (empty($actionclassinstance->resprints)) { $this->resPrint.=$result; $result=0; }
                     	}
                     }

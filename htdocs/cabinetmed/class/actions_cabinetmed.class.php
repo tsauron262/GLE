@@ -283,7 +283,7 @@ class ActionsCabinetmed
     {
         global $langs, $user, $conf, $form;
 
-        if (empty($parameters['modulepart']) || $parameters['modulepart'] != 'company') return '';	// Add nothing
+        if (empty($parameters['modulepart']) || $parameters['modulepart'] != 'company') return 0;	// Add nothing
 
         include_once(DOL_DOCUMENT_ROOT.'/core/modules/societe/modules_societe.class.php');
         $modellist=ModeleThirdPartyDoc::liste_modeles($this->db);

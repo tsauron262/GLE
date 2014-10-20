@@ -198,13 +198,33 @@ class GSX_Request {
                     $html .= '<span class="displayInfos" onmouseover="displayLabelInfos($(this))" onmouseout="hideLabelInfos($(this))">';
                     $html .= '<div class="labelInfos">' . $defs['infos'] . '</div></span>';
                 }
+                if ($multiple) {
+                    $html .= '<span class="button blueHover duplicateInput" style="margin-left: 15px" onclick="duplicateDatasGroup($(this), \'' . $inputName . '\')">Ajouter</span>' . "\n";
+                }
                 $html .= '</legend>' . "\n";
             }
+
             $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
             if (count($subDatasNode) == 1) {
                 $dataNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                foreach ($dataNodes as $node) {
-                    $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
+                if ($multiple) {
+                    $html .= '<div class="dataInputTemplate">' . "\n";
+                    foreach ($dataNodes as $node) {
+                        $html .= $this->getDataInput($node, $serial, null, 'idx');
+                    }
+                    $html .= '</div>' . "\n";
+                    $html .= '<div class="inputsList">' . "\n";
+                    $html .= '<div class="subInputsList">' . "\n";
+                    foreach ($dataNodes as $node) {
+                        $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, 1);
+                    }
+                    $html .= '</div>' . "\n";
+                    $html .= '</div>' . "\n";
+                    $html .= '<input type="hidden" id="' . $inputName . '_nextIdx" name="' . $inputName . '_nextIdx" value="2"/>' . "\n";
+                } else {
+                    foreach ($dataNodes as $node) {
+                        $html .= $this->getDataInput($node, $serial, isset($values[$valuesName]) ? $values[$valuesName] : null, $index);
+                    }
                 }
             } else {
                 $html .= '<p class="alert">Aucunes définitions pour ces données</p>' . "\n";
@@ -419,7 +439,7 @@ class GSX_Request {
                             $html .= '<option value="0">Code compTIA</option>' . "\n";
                             foreach (gsxDatas::$componentsTypes as $compCode => $label) {
                                 foreach ($this->comptiaCodes['grps'][$compCode] as $code => $desc) {
-                                    $html .= '<option value="' . $code . '" class="comptiaGroup_'.$compCode.'"';
+                                    $html .= '<option value="' . $code . '" class="comptiaGroup_' . $compCode . '"';
                                     if (isset($values[$valuesName])) {
                                         if ($values[$valuesName] == $code)
                                             $html.= ' selected';
@@ -613,7 +633,18 @@ class GSX_Request {
                                 $subDatasNode = XMLDoc::findChildElements($dataNode, 'datas', null, null, 1);
                                 if (count($subDatasNode) == 1) {
                                     $subDatasNodes = XMLDoc::findChildElements($subDatasNode[0], 'data', null, null, 1);
-                                    $datas[$dataName] = $this->processRequestDatas($subDatasNodes);
+                                    if ($multiple) {
+                                        if (isset($_POST[$dataName . '_nextIdx'])) {
+                                            $datas[$dataName] = array();
+                                            for ($i = 1; $i < (int) $_POST[$dataName . '_nextIdx']; $i++) {
+                                                $datas[$dataName][] = $this->processRequestDatas($subDatasNodes, $i);
+                                            }
+                                        } else {
+                                            $this->addError('Une erreur est survenu, impossible de déterminer le nombre de champs ajoutés pour : "' . $dataName . '"');
+                                        }
+                                    } else {
+                                        $datas[$dataName] = $this->processRequestDatas($subDatasNodes);
+                                    }
                                 } else {
                                     $this->addError('Erreur de syntax XML dans le fichier "requestes_definitions.xml": liste des données absentes pour le groupe "' . $dataName . '"');
                                 }
@@ -641,7 +672,7 @@ class GSX_Request {
                                         }
                                     }
                                     $datas[$dataName] = $valuesArray;
-                                } else if (isset($_POST[$inputName]) && $_POST[$inputName] != "") {
+                                } else if (isset($_POST[$inputName]) && ($_POST[$inputName] != '')) {
                                     $value = $this->checkInputData($defs, $_POST[$inputName]);
                                     $datas[$dataName] = $value;
                                 } else {

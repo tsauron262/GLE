@@ -1311,6 +1311,32 @@ function duplicateInput($span, inputName) {
     }
     alert('Une erreur est survenue, opération impossible');
 }
+function duplicateDatasGroup($span, inputName) {
+    var $container = $span.parent('legend').parent('fieldset');
+    if ($container.length) {
+        var $template = $container.find('div.dataInputTemplate');
+        var $index = $container.find('#' + inputName + '_nextIdx');
+        if ($template.length) {
+            if ($index.length) {
+                var html = '<div class="subInputsList">';
+                html += $template.html();
+                html += '</div>';
+                var index = parseInt($index.val());
+                var regex = new RegExp('_idx', 'g');
+                html = html.replace(regex, '_'+index);
+                index++
+                var $list = $container.find('div.inputsList');
+                if ($list.length) {
+                    $list.append(html);
+                    $index.val(index);
+                    return;
+                }
+            }
+        }
+    }
+    alert('Une erreur est survenue, opération impossible');
+}
+
 function submitGsxRequestForm(prodId, request, repairRowId) {
     var $prod = $('#prod_' + prodId);
     var $form = null;

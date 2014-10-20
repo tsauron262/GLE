@@ -62,7 +62,7 @@
             <data name="serialNumber" required="1"></data>
             <!--            <data name="referenceNumber" required="0"></data>-->
             <data name="shipTo" required="1"></data>
-            <data name="billTo" required="0"></data>
+            <data name="billTo" required="0" multiple="1"></data>
             <data name="poNumber" required="1"></data>
             <data name="unitReceivedDate" required="1"></data>
             <data name="unitReceivedTime" required="1"></data>
@@ -80,7 +80,7 @@
                     <data name="coveredByACPlus" required="0" default="N"></data>
                 </datas>
             </data>
-            <data name="componentCheckDetails" required="0">
+            <data name="componentCheckDetails" required="0" multiple="1">
                 <datas>
                     <data name="component" required="0"></data>
                     <data name="componentSerialNumber" required="0"></data>
@@ -223,7 +223,7 @@
             </data>
             <data name="componentCheckDetails" required="0">
                 <datas>
-                    <data name="component" required="0"></data>
+                    <data name="component" required="0" multiple="1"></data>
                     <data name="componentSerialNumber" required="0"></data>
                 </datas>
             </data>

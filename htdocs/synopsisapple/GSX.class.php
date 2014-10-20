@@ -816,7 +816,7 @@ class GSX {
             if(stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false){
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
-                echo '<formSus>OK</formSus><fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
+                echo '<formSus>OK</formSus>'.$f->faultstring.'<fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
                     <div class="inputsList">
 <div class="subInputsList">
 <div class="dataBlock">';

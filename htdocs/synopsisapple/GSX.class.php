@@ -816,18 +816,18 @@ class GSX {
             if(stripos($f->faultstring, "Veuillez saisir les informations relatives au(x) composant(s) ") !== false){
                 $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
                 $tabTmp = explode(",", $temp);
-                print_r($tabTmp);
-                echo '<fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
-<div class="dataBlock">
-<label class="dataTitle" for="component_'.$i.'">Composant</label><br>';
-             foreach($tabTmp as $i => $nom)   
-echo '<input type="text" id="component_1" name="component_'.$i.'" value="'.$nom.'" maxlength="20" onchange="checkInput($(this), \'text\')">
-<span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
-<label class="dataTitle" for="componentSerialNumber_'.$i.'">Numéro de série du composant</label><br>
-<input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_1" maxlength="20" onchange="checkInput($(this), \'text\')">
-<span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
-
-echo '</div></fieldset>';
+                echo '<formSus>OK</formSus><fieldset id="componentCheckDetails"><legend>Détails du composant</legend>
+                    <div class="dataBlock">';
+                foreach($tabTmp as $i => $nom)   
+                   echo '
+                   <label class="dataTitle" for="component_'.$i.'">Composant</label><br><input type="text" id="component_1" name="component_'.$i.'" value="'.$nom.'" maxlength="20" onchange="checkInput($(this), \'text\')">
+                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">
+                   <label class="dataTitle" for="componentSerialNumber_'.$i.'">Numéro de série du composant</label><br>
+                   <input type="text" id="componentSerialNumber_'.$i.'" name="componentSerialNumber_1" maxlength="20" onchange="checkInput($(this), \'text\')">
+                   <span class="dataCheck" style="display: inline-block;"><span class="ok"></span></span></div><div class="dataBlock">';
+                
+                echo '</div></fieldset>';
+                return array();
             }
             else{
             $this->soap_error($f->faultcode, $f->faultstring." <pre> ".print_r($SOAPRequest, true));

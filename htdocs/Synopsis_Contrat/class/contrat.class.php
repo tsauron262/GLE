@@ -205,6 +205,8 @@ class Synopsis_Contrat extends Contrat {
                 $isMed = true;
             if (stripos($prod->ref, "SERV-CMB-MED") !== false)
                 $isMed = true;
+            if (stripos($prod->ref, "SERV-CMA-MAC-SANTE") !== false)
+                $isMed = true;
             if (stripos($prod->ref, "FPR77") !== false)
                 $isMed = true;
             if (stripos($prod->ref, "FCR04") !== false)

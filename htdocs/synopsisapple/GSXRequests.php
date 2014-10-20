@@ -641,7 +641,6 @@ class GSX_Request {
                                             for ($i = 1; $i < (int) $_POST[$dataName . '_nextIdx']; $i++) {
                                                 $datas[$dataName][] = $this->processRequestDatas($subDatasNodes, $i);
                                             }
-                                            echo "<pre>".print_r($datas[$dataName], true).print_r($_POST, true);
                                         } else {
                                             $this->addError('Une erreur est survenu, impossible de déterminer le nombre de champs ajoutés pour : "' . $dataName . '"');
                                         }
@@ -724,6 +723,7 @@ class GSX_Request {
         }
 
         $requestDatas = $this->processRequestDatas($this->datas['request']);
+        print_r($requestDatas);
 
         if (count($this->errors)) {
             $html = '<p class="error">Des erreurs ont été détectées:<br/><br/>';

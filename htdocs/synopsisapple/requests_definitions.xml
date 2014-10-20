@@ -82,17 +82,24 @@
                 </datas>
             </data>
             <data name="componentCheckDetails" required="0">
-                <datas>
-                    <data name="component" required="0" default="IPHONE COMP MLB"></data>
-                    <data name="componentSerialNumber" required="0"></data>
-                </datas>
+                <!--<datas>-->
+                    <!--<data name="0" required="0">-->
+                        <datas>
+                            <data name="component_1" required="0" default="IPHONE COMP MLB"></data>
+                            <data name="componentSerialNumber_1" required="0"></data>
+
+                            <data name="component_2" required="0" default="IMEI"></data>
+                            <data name="componentSerialNumber_2" required="0"></data>
+                        </datas>
+                    <!--</data>-->
+                <!--</datas>-->
             </data>
-            <data name="componentCheckDetails" required="0">
+<!--            <data name="componentCheckDetails" required="0">
                 <datas>
                     <data name="component" required="0" default="IMEI"></data>
                     <data name="componentSerialNumber" required="0"></data>
                 </datas>
-            </data>
+            </data>-->
             <data name="customerAddress" required="1">
                 <datas>
                     <data name="addressLine1" required="1"></data>

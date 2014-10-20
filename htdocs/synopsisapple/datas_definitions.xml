@@ -241,6 +241,18 @@
     <def name="componentSerialNumber" type="text" max="20" jsCheck="text">
         <label>Numéro de série du composant</label>
     </def>
+    <def name="component_1" type="text" max="20" jsCheck="text">
+        <label>Composant</label>
+    </def>
+    <def name="componentSerialNumber_1" type="text" max="20" jsCheck="text">
+        <label>Numéro de série du composant</label>
+    </def>
+    <def name="component_2" type="text" max="20" jsCheck="text">
+        <label>Composant</label>
+    </def>
+    <def name="componentSerialNumber_2" type="text" max="20" jsCheck="text">
+        <label>Numéro de série du composant</label>
+    </def>
     <def name="accidentalDamage" type="YesNo">
         <label>Dommages accidentels</label>
     </def>

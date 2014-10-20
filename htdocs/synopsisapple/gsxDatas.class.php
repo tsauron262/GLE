@@ -665,13 +665,15 @@ class gsxDatas {
                         $responseNames = array(
                             'UpdateIPhoneKGBSerialNumberResponse',
                             'IPhoneUpdateKGBSerialNumberResponse',
-                            'IPhoneKGBSerialNumberUpdateResponse'
+                            'IPhoneKGBSerialNumberUpdateResponse',
+                            'UpdateIPhoneKGBSerialNumberRequestResponse'
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
-                        if (isset($result['serialNumber']))
+                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
+                            $result['imeiNumber'] = $result['serialNumber'];
                             $result['serialNumber'] = '';
-                        $result['imeiNumber'] = $this->serial;
+                        }
                         break;
                 }
             } else {
@@ -761,8 +763,8 @@ class gsxDatas {
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';
-                        if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
-                            $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
+                        if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
+                            $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
                             if (isset($_GET['repairRowId'])) {
                                 $repair->rowId = $_GET['repairRowId'];
                                 if ($repair->load()) {

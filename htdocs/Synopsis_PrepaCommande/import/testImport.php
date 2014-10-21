@@ -1082,7 +1082,7 @@ if (is_dir($dir)) {
                                     }
                                     break;
                                 case "126": {
-                                        $modReg = 12;
+                                        $modReg = 55;
                                         $condReg = 24;
                                     }
                                     break;
@@ -1102,7 +1102,7 @@ if (is_dir($dir)) {
                                     }
                                     break;
                                 case "353": {
-                                        $modReg = 8;
+                                        $modReg = 51;
                                         $condReg = 7;
                                     }
                                     break;
@@ -1193,47 +1193,47 @@ if (is_dir($dir)) {
                                     break;
                                 case "398": {
                                         $condReg = 2;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "399": {
                                         $condReg = 3;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "400": {
                                         $condReg = 10;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "401": {
                                         $condReg = 4;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "402": {
                                         $condReg = 5;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "403": {
                                         $condReg = 12;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "404": {
                                         $condReg = 19;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "405": {
                                         $condReg = 18;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "406": {
                                         $condReg = 15;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "407": {
@@ -1268,7 +1268,7 @@ if (is_dir($dir)) {
                                     break;
                                 case "414": {
                                         $condReg = 9;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "415": {
@@ -1293,7 +1293,7 @@ if (is_dir($dir)) {
                                     break;
                                 case "420": {
                                         $condReg = 13;
-                                        $modReg = 8;
+                                        $modReg = 51;
                                     }
                                     break;
                                 case "421": {

@@ -1439,6 +1439,14 @@ function traiteCommandeRetour(html, $resultContainer) {
             $("#formSus").append(htmlFormSus);
             $resultContainer.html("Renseignez les Composants");
         }
+        if (html.indexOf('<horsgarantie>OK</horsgarantie>') !== -1) {
+            $resultContainer.html("La réparation est hors garantie. Veuillez vérifier.");
+            if(confirm("La réparation est hors garantie, voulez vous continuer ?")){
+                $("#checkIfOutOfWarrantyCoverage_no").attr("checked", "checked");
+                $("#checkIfOutOfWarrantyCoverage_yes").removeAttr("checked");
+                submitGsxRequestForm(1, 'CreateCarryInRepair');
+            }
+        }
     }
 
 }

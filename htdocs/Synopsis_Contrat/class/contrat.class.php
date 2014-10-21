@@ -185,7 +185,7 @@ class Synopsis_Contrat extends Contrat {
         global $conf;
         $pref = "CHM";
         $oldPref = "CT";
-        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = false;
+        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = $isEph = $isMedEPg = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
             if (stripos($ligne->description, "suivi") !== false)
@@ -204,7 +204,11 @@ class Synopsis_Contrat extends Contrat {
             if (stripos($prod->ref, "YO1sante") !== false)
                 $isMed = true;
             if (stripos($prod->ref, "SERV-CMB-MED") !== false)
-                $isMed = true;
+                $isMedEph = true;
+            if (stripos($prod->ref, "SERV-CMB") !== false)
+                $isEph = true;
+            if (stripos($prod->ref, "SERV-CMS") !== false)
+                $isEph = true;
             if (stripos($prod->ref, "SERV-CMA-MAC-SANTE") !== false)
                 $isMed = true;
             if (stripos($prod->ref, "FPR77") !== false)
@@ -248,6 +252,10 @@ class Synopsis_Contrat extends Contrat {
             $pref = "CMED";
         if ($isMed8)
             $pref = "CMED8";
+        if ($isEph)
+            $pref = "C8-EPH";
+        if ($isMedEph)
+            $pref = "CMED-EPH";
         $this->prefRef = substr($pref, 0, 2);
         if (isset($conf->global->CONTRACT_MAGRE_MASK))
             $conf->global->CONTRACT_MAGRE_MASK = str_replace($oldPref, $pref, $conf->global->CONTRACT_MAGRE_MASK);

@@ -125,6 +125,14 @@ if (isset($_REQUEST['actionEtat'])) {
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
 
+    if ($action == "commandeOK" && $chrono->extraValue[$chrono->id]['Etat']['value'] == 1) {
+        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Attention, le SAV été deja au statut Attente Pièce !"));
+        die;        
+    }
+        
+        
+        
+
     if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         //Si commmande apple a 0 on passse la propal sous garenti.
         if (isset($_REQUEST['prix']) && $_REQUEST['prix'] == 0 && is_object($chrono->propal)) {
@@ -272,7 +280,13 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->update($chrono->id);
         $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
-            $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht > 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0);
+            $totPa = 0;
+            foreach($chrono->propal->lines as $lines)
+                $totPa += $lines->pa_ht;
+            
+//            die($totPa);
+//            ($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0
+            $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht > 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0, 0, 0, 'HT', 0,0,0,-1,0,0,0,-$totPa);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);

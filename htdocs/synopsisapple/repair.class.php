@@ -16,7 +16,7 @@ class Repair {
     public $serial = null;
     public $prodId = null;
     public $rowId = null;
-    public $partsPending = null;
+    public $partsPending = array();
     public $confirmNumbers = array();
     public $repairStatus = null;
     public $repairNumber = null;

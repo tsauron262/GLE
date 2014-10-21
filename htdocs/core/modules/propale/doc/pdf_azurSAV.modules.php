@@ -1309,7 +1309,7 @@ class pdf_azurSAV extends ModelePDFPropales
                                 global $tabCentre;
                                 $centre = $tabCentre[$ligne->CentreVal];
                                 $tech = "";
-                                if (isset($ligne->Technicien)) {
+                                if (isset($ligne->Technicien) && $ligne->Technicien > 0) {
                                     $userT = new User($this->db);
                                     $userT->fetch($ligne->Technicien);
                                     $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);

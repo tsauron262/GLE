@@ -834,6 +834,13 @@ class GSX {
                 die;
                 return array();
             }
+            if(stripos($f->faultstring, "La réparation est hors garantie") !== false){
+                $temp = str_replace(array("Veuillez saisir les informations relatives au(x) composant(s) ", "."), "", $f->faultstring);
+                $tabTmp = explode(",", $temp);
+                echo '<horsgarantie>OK</horsgarantie>';
+                die;
+                return array();
+            }
             else{
             $this->soap_error($f->faultcode, $f->faultstring." <pre> ".print_r($SOAPRequest, true));
             return array();

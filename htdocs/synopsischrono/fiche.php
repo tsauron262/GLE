@@ -364,7 +364,7 @@ if ($chr->id > 0) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '<td  class="ui-widget-content" colspan="3">';
             if ($chr->model->typeDescription == 2)
-                print '<textarea style="width: 98%; min-height: 8em;" class="required" name="description">' . $chr->description . '</textarea>';
+                print '<textarea style="width: 98%; min-height: 8em;" class="" name="description">' . $chr->description . '</textarea>';
             else
                 print '<input type="text" name="description" class="required" value="' . $chr->description . '"/>';
             print '</td>';
@@ -840,6 +840,12 @@ if ($chr->id > 0) {
         print "var chronoId = " . $chr->id . ";";
         print <<<EOF
           jQuery(document).ready(function(){
+EOF;
+        if(isset($_REQUEST['msg'])){
+            print("alert('".urldecode($_REQUEST['msg'])."');");
+        }
+        
+        print <<<EOF
                 jQuery('#delDialog').dialog({
                     autoOpen: false,
                     width: 520,

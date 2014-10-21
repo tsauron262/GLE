@@ -1317,6 +1317,10 @@ class pdf_azurSAV extends ModelePDFPropales
                                 
                                 $pdf->SetXY(12,64);
                                 $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                $pdf->SetXY(30,28);
+                                $pdf->SetFont('','', $default_font_size + 5);
+                                $pdf->SetTextColor(204,51,153);
+                                $pdf->MultiCell(157, 10, $ligne->ref, 0, 'C', 0);
                             }
                         }
                         

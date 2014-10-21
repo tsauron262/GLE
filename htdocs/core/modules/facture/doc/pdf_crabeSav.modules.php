@@ -244,6 +244,40 @@ class pdf_crabeSav extends ModelePDFFactures
 				$pagenb++;
 
 				$this->_pagehead($pdf, $object, 1, $outputlangs);
+                                
+                                
+                                
+                                $tabT = getElementElement("propal", "facture", null, $object->id);
+                                if(count($tabT) > 0){
+                                $result = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsischrono_view_105 WHERE propalid = ".$tabT[0]['s']);
+                                if($this->db->num_rows($result) > 0 ){
+                                    $ligne = $this->db->fetch_object($result);
+                                    if(isset($ligne->Centre)){
+                                        global $tabCentre;
+                                        $centre = $tabCentre[$ligne->CentreVal];
+                                        $tech = "";
+                                        if (isset($ligne->Technicien)) {
+                                            $userT = new User($this->db);
+                                            $userT->fetch($ligne->Technicien);
+                                            $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
+                                        }
+
+//                                        $pdf->SetXY(12,64);
+//                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
+                                        $pdf->SetXY(30,28);
+                                        $pdf->SetFont('','', $default_font_size + 5);
+                                        $pdf->SetTextColor(204,51,153);
+                                        $pdf->MultiCell(157, 10, $ligne->ref, 0, 'C', 0);
+                                    }
+                                }
+                                }
+                                
+                                
+                                
+                                
+                                
+                                
+                                
 				$pdf->SetFont('','', $default_font_size - 1);
 				$pdf->MultiCell(0, 3, '');		// Set interline to 3
 				$pdf->SetTextColor(0,0,0);

@@ -72,9 +72,16 @@ $idEtat = 1056;
 
 $ok = $attentePiece = false;
 
+$idEntrepot = null;
+
 if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']])) {
     $tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
     $fromMail = "SAV BIMP<" . $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][1] . ">";
+    $sql = $db->query("SELECT * FROM  `" . MAIN_DB_PREFIX . "entrepot` WHERE  `label` LIKE  'SAV" . $chrono->extraValue[$chrono->id]['Centre']['value'] . "'");
+    if ($db->num_rows($sql) > 0) {
+        $result = $db->fetch_object($sql);
+        $idEntrepot = $result->rowid;
+    }
 } else {
     $tel = "N/C";
     $fromMail = "SAV BIMP<no-replay@bimp.fr>";
@@ -167,7 +174,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
             $facture = new Facture($db);
             $facture->createFromOrder($propal);
-            $facture->validate($user);
+            $facture->validate($user, '', $idEntrepot);
             $facture->fetch($facture->id);
             facture_pdf_create($db, $facture, "crabeSav", $langs);
             link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
@@ -220,6 +227,11 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
     }
+    
+    if($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Etat']['value'] == ""){
+        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Veuillez compléter résolution svp!"));
+        die;
+    }
 
 
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
@@ -234,7 +246,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $facture->createFromOrder($propal);
 //        $facture->create($user);
         $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Résolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-        $facture->validate($user);
+        $facture->validate($user, '', $idEntrepot);
         $facture->fetch($facture->id);
         facture_pdf_create($db, $facture, "crabeSav", $langs);
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
@@ -246,6 +258,14 @@ if (isset($_REQUEST['actionEtat'])) {
                     , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     }
+    
+    
+    if($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Diagnostic']['value'] == ""){
+        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Veuillez compléter diagnostic svp!"));
+        die;
+    }
+    
+    
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i');
@@ -292,7 +312,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $tabT = getElementElement("propal", "facture", $chrono->propalid);
 
         $idFact = $tabT[count($tabT) - 1]['d'];
-        if(isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
+        if (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
             if ($idFact > 0) {
                 $facture = new Facture($db);
                 $facture->fetch($idFact);

@@ -255,7 +255,7 @@ while ($resPre = $db->fetch_object($sqlPre)) {
 
 
 if (!$withRev) {
-    $wh .= " AND revision is NULL ";
+    $wh .= " AND 1";//revision is NULL ";
 } else {
     $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
 }

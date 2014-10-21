@@ -249,6 +249,11 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $pdf->SetXY('147.5', '49');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
+                
+                if($chrono->valuesPlus[1066]->value != ""){
+                    $pdf->SetXY(114, 42);
+                    $pdf->MultiCell(100, 6, "N° de dossier prestataire : ".$chrono->valuesPlus[1066]->value, 0, 'L');
+                }
 
 
                 //le prod
@@ -283,6 +288,19 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('27.5', '146');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
 
+                
+                
+                
+                //info pour prise en charge
+                $pdf->SetFont('', '', 9);
+                $pdf->SetTextColor(0,0,0);
+                $pdf->SetXY(25, 257);
+                $pdf->MultiCell(90, 6, "Login : ".$chrono2->valuesPlus[1063]->valueStr, 0, '');
+                $pdf->SetXY(25, 262);
+                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
+                $pdf->SetXY(100, 260);
+                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
+                
 
                 //etiquette ref
                 for ($i = 0; $i < 5; $i++) {

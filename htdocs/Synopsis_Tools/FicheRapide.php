@@ -49,6 +49,8 @@ echo "<h1 font size='20' align='center' ><B> Fiche Rapide </B></h1>";
 $socid = (isset($_REQUEST['socid']) ? $_REQUEST['socid'] : "");
 $NoMachine = (isset($_POST['NoMachine']) ? $_POST['NoMachine'] : "");
 $machine = (isset($_POST['Machine']) ? $_POST['Machine'] : "");
+$numExt = (isset($_POST['NumExt']) ? $_POST['NumExt'] : "");
+$systeme = (isset($_POST['systeme']) ? $_POST['systeme'] : "");
 $garantie = (isset($_POST['Garantie']) ? $_POST['Garantie'] : "");
 $preuve = (isset($_POST['Preuve']) && $_POST['Preuve'] == 1 ? 'checked' : "");
 $DateAchat = (isset($_POST['DateAchat']) ? $_POST['DateAchat'] : "");
@@ -105,7 +107,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chronoProd->model_refid = 101;
             $chronoProd->socid = $socid;
             $chronoProd->description = $machine;
-            $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
+            $dataArrProd = array(1011 => $NoMachine, 1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie, 1067 => $systeme);
             $chronoProdNewid = $chronoProd->create();
             $testProd = $chronoProd->setDatas($chronoProdNewid, $dataArrProd);
         } else {
@@ -113,7 +115,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chronoProd->socid = $socid;
             $chronoProd->description = $machine;
             $chronoProd->update($chronoProdid);
-            $dataArrProd = array(1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie);
+            $dataArrProd = array(1057 => $pass, 1063 => $loginA, 1014 => $DateAchat, 1015 => $garantie, 1064 => $typeGarantie, 1067 => $systeme);
             $testProd = $chronoProd->setDatas($chronoProdid, $dataArrProd);
         }
         if (isset($chronoProdid) && $chronoProdid < 0 && isset($chronoProdNewid) && $chronoProdNewid > 0 || isset($chronoProdid) && $chronoProdid > 0) {
@@ -125,7 +127,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->contactid = $_REQUEST["contactid"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
-                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre);
+                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt);
                 $test = $chrono->setDatas($chronoid, $dataArr);
                 if ($test) {
                     $socid = "";
@@ -266,7 +268,7 @@ if ($socid != "") {
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Centre</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo "<select name='centre'/>";
+    echo "<select name='centre'>";
     $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
 //    $centres = array("G" => "Grenoble", "L" => "Lyon", "M" => "Meythet");
 //    foreach ($centres as $val => $centre) {
@@ -291,6 +293,15 @@ if ($socid != "") {
     echo "<span id='patientez' style='display:none; margin-left:15px;'>";
     echo "<img src='" . DOL_URL_ROOT . "/Synopsis_Tools/img/load.gif' title='Chargement des informations GSX en cours' alt='Chargement des informations GSX en cours'/>";
     echo "</span>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>N° de dossier prestataire.</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo " <input type='text' name='NumExt' value='" . $numExt . "' id='NumExt' class=''/>";
     echo "</td>";
     echo "</tr>";
     echo "</p>";
@@ -383,6 +394,22 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+
+
+    echo "<p>";
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Système</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo "<select name='systeme' class='required'>";
+    $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 12 ");
+    while ($ligne = $db->fetch_object($result))
+        echo "<option value='" . $ligne->valeur . "' " . ($ligne->valeur == $systeme ? "selected='selected'" : "") . ">" . $ligne->label . "</option>";
+    echo "</select>";
+    echo "</td>";
+    echo "</tr>";
+    echo "</p>";
+    
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Login admin.</th>";

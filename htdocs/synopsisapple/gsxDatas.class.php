@@ -707,10 +707,10 @@ class gsxDatas {
                         break;
                 }
             }
-//if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
-//    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
-//    die();
-//}
+if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
+    echo '<prix>0.00</prix><ok>Reload commande ok</ok><p class="confirmation">Requête envoyé avec succès.</p>';
+    die();
+}
 //            echo '<pre>';
 //            print_r($result);
 //            echo '</pre>';

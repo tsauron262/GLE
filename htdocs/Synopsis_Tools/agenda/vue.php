@@ -358,23 +358,25 @@ function printMenu($tabUser) {
     echo "<div class='contentListUser'><a href='#'><span class='nbGroup'></span></a>";
 
 
-    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY lastname");
+    $sql = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "user WHERE statut = 1 ORDER BY firstname");
     echo "<div class='listUser'>"
     . "Classement alphabétique horizontal<br/><br/>"
             . "<table><tr>";
     $i = 0;
+        echo "<td>";
     while ($result = $db->fetch_object($sql)) {
         $i++;
-        echo "<td>";
         echo "<input " . (isset($tabUser[$result->rowid]) ? "checked='checked'" : "") . " type='checkbox' class='userCheck' id='user" . $result->rowid . "' name='user" . $result->rowid . "' value='" . $result->rowid . "'/>";
-        echo "<label for='user" . $result->rowid . "'>" . $result->lastname . " " . $result->firstname . "</label>";
-        echo "</td>";
-        if ($i > 5) {
+        echo "<label for='user" . $result->rowid . "'>" . $result->firstname . " " . $result->lastname . "</label>";
+        if ($i > 20) {
             $i = 0;
-            echo "</tr><tr>";
+        echo "</td><td>";
+//            echo "</tr><tr>";
         }
+        else
+            echo "<br/>";
     }
-    echo "</tr></table><br/></div></div>";
+    echo "</td></tr></table><br/></div></div>";
 
     echo "<input type='submit' class='butAction' name='val' value='Valider'/>";
     echo "</form>";

@@ -1509,6 +1509,8 @@ EOF;
                                <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2visiteSurSite'] > 0) {
                     print 'OUI ' . $product->array_options['options_2visiteSurSite'];
+                }elseif ($product->array_options['options_2visiteSurSite'] == -1) {
+                    print 'OUI Illimité';
                 } else {
                     print 'NON';
                 }
@@ -1517,6 +1519,8 @@ EOF;
                                <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2teleMaintenance'] > 0) {
                     print 'OUI '.$product->array_options['options_2teleMaintenance'];
+                }elseif ($product->array_options['options_2teleMaintenance'] == -1) {
+                    print 'OUI Illimité';
                 }else {
                     print 'NON';
                 }

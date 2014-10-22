@@ -513,3 +513,63 @@ voir di avec thera
 virer horraire sur fi
 
 voir check if not garentie
+
+
+
+
+
+synopsis-erp.com
+
+gle.synopsis-erp.com
+
+
+
+CSR -  demande de certificat   apache2
+
+
+
+
+annulation dela premiere facture qquand revision
+
+
+
+Ligne qty a 0 quand devis refusé
+
+
+jonatan beloutchi thawte verisign soo mandrile
+
+
+//cacher composant + verifier cog
+
+
+
+//reenvoyer devis
+
+
+
+//Num de tel et mail pro.
+
+
+//Facture quand valider payer
+
+
+//Facture aprés révision
+
+
+//Vérifier facture negative. Accompte sous garentie.
+
+//montant ttc
+
+
+
+voir list utilisateur du même centre
+
+//Attribué a -  participant
+
+//agenda collones trie par prenom
+
+
+//voir contrat -1 visite + bug affichage
+
+
+//voir mode de reglement mail flo

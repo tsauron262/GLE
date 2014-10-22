@@ -50,7 +50,7 @@ function bouttonEtatSav($idChrono) {
     } 
 
     if (/*$chrono->values[$idEtat] == 2 && */$chrono->propalid && $chrono->values[$idEtat] == 6) {
-        $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/>";
+        $return .= "<p class='titInfo'>Frais de gestion : </p><input type='text' id='frais' value='0'/> TTC";
         $return .= "<p class='titInfo'>Dispo sous : </p><input type='text' id='nbJours' value='0'/><p class='titInfo'>jours</p>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&frais=\"+$(\"#frais\").attr(\"value\")+\"&nbJours=\"+$(\"#nbJours\").attr(\"value\")+\"&actionEtat=revProp&ligne=0\"'>Fermé</a>";
         $return .= "<br/>";

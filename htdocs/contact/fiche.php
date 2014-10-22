@@ -411,6 +411,7 @@ else
 								$(\'select[name="country_id"]\').val("'.dol_escape_js($objsoc->country_id).'");
 								$(\'select[name="state_id"]\').val("'.dol_escape_js($objsoc->state_id).'");
 								$(\'input[name="email"]\').val("'.dol_escape_js($objsoc->email).'");
+								$(\'input[name="phone_pro"]\').val("'.dol_escape_js($objsoc->phone).'");
             			});
 						})'."\n";
 				print '</script>'."\n";

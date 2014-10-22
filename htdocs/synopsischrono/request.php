@@ -33,19 +33,6 @@ if (isset($chrono->propal) && isset($chrono->propal->ref)) {
 }
 
 
-$tabFileFact = $tabFileFact2 = $tabFileFact3 = array();
-if (isset($chrono->propal)) {
-    $tabT = $chrono->propal->InvoiceArrayList($chrono->propal->id);
-    if (isset($tabT[0]) && isset($tabT[0]->facnumber)) {
-        $fact = $tabT[count($tabT) - 1];
-        $fileProp = DOL_DATA_ROOT . "/facture/" . $fact->facnumber . "/" . $fact->facnumber . ".pdf";
-        if (is_file($fileProp)) {
-            $tabFileFact[] = $fileProp;
-            $tabFileFact2[] = ".pdf";
-            $tabFileFact3[] = $fact->facnumber . ".pdf";
-        }
-    }
-}
 
 
 $tabFilePc = $tabFilePc2 = $tabFilePc3 = array();
@@ -126,12 +113,12 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "commandeOK" && $chrono->extraValue[$chrono->id]['Etat']['value'] == 1) {
-        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Attention, le SAV été deja au statut Attente Pièce !"));
-        die;        
+        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, le SAV été deja au statut Attente Pièce !"));
+        die;
     }
-        
-        
-        
+
+
+
 
     if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         //Si commmande apple a 0 on passse la propal sous garenti.
@@ -146,6 +133,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Piéce commandée le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
+        
         $chrono->setDatas($chrono->id, array($idEtat => 1));
         $attentePiece = 1;
 
@@ -180,14 +168,15 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-            $facture = new Facture($db);
-            $facture->createFromOrder($propal);
-            $facture->validate($user, '', $idEntrepot);
-            $facture->fetch($facture->id);
-            facture_pdf_create($db, $facture, "crabeSav", $langs);
-            link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
-            $propal->cloture($user, 4, '');
+//            $facture = new Facture($db);
+//            $facture->createFromOrder($propal);
+//            $facture->validate($user, '', $idEntrepot);
+//            $facture->fetch($facture->id);
+//            facture_pdf_create($db, $facture, "crabeSav", $langs);
+//            link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+//            $propal->cloture($user, 4, '');
             $chrono->setDatas($chrono->id, array($idEtat => 9));
+            $chrono->propal->cloture($user, 2, "Auto via SAV");
 
             $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
             if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
@@ -235,9 +224,9 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
     }
-    
-    if($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Etat']['value'] == ""){
-        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Veuillez compléter résolution svp!"));
+
+    if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Résolution']['value'] == "") {
+        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter  résolution svp!"));
         die;
     }
 
@@ -250,30 +239,21 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
 
 
-        $facture = new Facture($db);
-        $facture->createFromOrder($propal);
-//        $facture->create($user);
-        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Résolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
-        $facture->validate($user, '', $idEntrepot);
-        $facture->fetch($facture->id);
-        facture_pdf_create($db, $facture, "crabeSav", $langs);
-//        addElementElement("propal", "facture", $propal->id, $facture->id);
-        link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
-        $propal->cloture($user, 4, '');
+//        $propal->cloture($user, 3, '');
         $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
         if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
             mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
                     , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     }
-    
-    
-    if($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Diagnostic']['value'] == ""){
-        header("Location:fiche.php?id=" . $_GET['id']."&msg=".  urlencode("Veuillez compléter diagnostic svp!"));
+
+
+    if ($action == "attenteClient1" && $chrono->extraValue[$chrono->id]['Diagnostic']['value'] == "") {
+        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Veuillez compléter diagnostic svp!"));
         die;
     }
-    
-    
+
+
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i');
@@ -281,12 +261,21 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
             $totPa = 0;
-            foreach($chrono->propal->lines as $lines)
+            foreach ($chrono->propal->lines as $lines)
                 $totPa += $lines->pa_ht;
-            
+
 //            die($totPa);
 //            ($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0
-            $chrono->propal->addline("Garantie", -($chrono->propal->total_ht), 1, (($chrono->propal->total_ttc - $chrono->propal->total_ht) / ($chrono->propal->total_ht > 0 ? $chrono->propal->total_ht : 1) * 100), 0, 0, 0, 0, 'HT', 0,0,0,-1,0,0,0,-$totPa);
+
+            $totHt = $chrono->propal->total_ht;
+            $totTtc = $chrono->propal->total_ttc;
+            $tabT = $chrono->propal->InvoiceArrayList($chrono->propal->id);
+            if (isset($tabT[0]) && isset($tabT[0]->facnumber) && stripos($tabT[0]->facnumber, "AC") !== false) {
+                $totHt += $tabT[0]->total;
+                $totTtc += $tabT[0]->total*1.2;
+            }
+//die("mmmmmmmm".print_r($tabT, true));
+            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1)-1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totHt);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);
@@ -313,34 +302,61 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
     }
 
+
+
     if ($action == "restituer" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 999) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Restitué le " . date('d-m-y H:i');
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 999));
         $ok = true;
+
+
+
+        $facture = new Facture($db);
+        $facture->createFromOrder($propal);
+//        $facture->create($user);
+        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Résolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+        $facture->validate($user, '', $idEntrepot);
+        $facture->fetch($facture->id);
+
+
+
+
+        if (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
+            require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
+            $payement = new Paiement($db);
+            $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
+            $payement->datepaye = dol_now();
+            $payement->paiementid = $_REQUEST['modeP'];
+            $payement->create($user);
+            $facture->set_paid($user);
+            facture_pdf_create($db, $facture, "crabeSav", $langs);
+        }
+
+
+        $chrono->propal->cloture($user, 2, "Auto via SAV");
+
+
+
+        //Generation
+        facture_pdf_create($db, $facture, "crabeSav", $langs);
+//        addElementElement("propal", "facture", $propal->id, $facture->id);
+        link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
+
+        //Envoie mail
+        $tabFileFact = $tabFileFact2 = $tabFileFact3 = array();
+        $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->facnumber . "/" . $facture->facnumber . ".pdf";
+        if (is_file($fileProp)) {
+            $tabFileFact[] = $fileProp;
+            $tabFileFact2[] = ".pdf";
+            $tabFileFact3[] = $facture->facnumber . ".pdf";
+        }
+
         mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Ephésus pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
-        $tabT = getElementElement("propal", "facture", $chrono->propalid);
-
-        $idFact = $tabT[count($tabT) - 1]['d'];
-        if (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
-            if ($idFact > 0) {
-                $facture = new Facture($db);
-                $facture->fetch($idFact);
-                require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
-                $payement = new Paiement($db);
-                $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());
-                $payement->datepaye = dol_now();
-                $payement->paiementid = $_REQUEST['modeP'];
-                $payement->create($user);
-                $facture->set_paid($user);
-                facture_pdf_create($db, $facture, "crabeSav", $langs);
-            } else
-                die("Il n'y a pas de facture");
-        }
     }
 }
 

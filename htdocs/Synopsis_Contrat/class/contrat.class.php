@@ -1067,14 +1067,20 @@ class Synopsis_Contrat extends Contrat {
         $lien->cssClassM = "type:contratdet";
         $lien->fetch(3);
         echo $lien->displayForm();
-        if ($ligne->GMAO_Mixte['nbVisiteAn'] > 0) {
+        if ($ligne->GMAO_Mixte['nbVisiteAn'] <> 0) {
             echo "</td><td>";
             echo "Nb Visite sur site : ";
+            if ($ligne->GMAO_Mixte['nbVisiteAn'] == -1)
+                echo "illimité";
+            else
             echo $ligne->GMAO_Mixte['nbVisiteAn'] * $ligne->qty;
         }
-        if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
+        if ($ligne->GMAO_Mixte['telemaintenance'] <> 0) {
             echo "</td><td>";
             echo "Nb Télémaintenance : ";
+            if ($ligne->GMAO_Mixte['telemaintenance'] == -1)
+                echo "illimité";
+            else
             echo $ligne->GMAO_Mixte['telemaintenance'] * $ligne->qty;
         }
         if ($ligne->GMAO_Mixte['hotline'] <> 0) {

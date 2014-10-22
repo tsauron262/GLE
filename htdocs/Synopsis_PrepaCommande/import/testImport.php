@@ -1050,280 +1050,399 @@ if (is_dir($dir)) {
                             $condReg = false;
                             $modReg = false;
 
+//                            switch ($val['PcvGRgmID']) {
+//                                default: {
+//                                        $modReg = 0;
+//                                        $condReg = 1;
+//                                    }
+//                                    break;
+//                                case "6": {
+//                                        $modReg = 0;
+//                                        $condReg = 24;
+//                                    }
+//                                    break;
+//                                case "16": {
+//                                        $modReg = 11;
+//                                        $condReg = 15;
+//                                    }
+//                                    break;
+//                                case "42": {
+//                                        $modReg = 11;
+//                                        $condReg = 4;
+//                                    }
+//                                    break;
+//                                case "77": {
+//                                        $modReg = 11;
+//                                        $condReg = 13;
+//                                    }
+//                                    break;
+//                                case "79": {
+//                                        $modReg = 11;
+//                                        $condReg = 12;
+//                                    }
+//                                    break;
+//                                case "126": {
+//                                        $modReg = 55;
+//                                        $condReg = 24;
+//                                    }
+//                                    break;
+//                                case "291": {
+//                                        $modReg = 11;
+//                                        $condReg = 3;
+//                                    }
+//                                    break;
+//                                case "337": {
+//                                        $modReg = 7;
+//                                        $condReg = 7;
+//                                    }
+//                                    break;
+//                                case "341": {
+//                                        $modReg = 7;
+//                                        $condReg = 20;
+//                                    }
+//                                    break;
+//                                case "353": {
+//                                        $modReg = 51;
+//                                        $condReg = 7;
+//                                    }
+//                                    break;
+//                                case "357": {
+//                                        $modReg = 11;
+//                                        $condReg = 2;
+//                                    }
+//                                    break;
+//                                case "382": {
+//                                        $modReg = 0;
+//                                        $condReg = 1;
+//                                    }
+//                                    break;
+//                                case "383": {
+//                                        $modReg = 0;
+//                                        $condReg = 20;
+//                                    }
+//                                    break;
+//                                case "384": {
+//                                        $modReg = 6;
+//                                        $condReg = 26;
+//                                    }
+//                                    break;
+//                                case "385": {
+//                                        $modReg = 7;
+//                                        $condReg = 1;
+//                                    }
+//                                    break;
+//                                case "386": {
+//                                        $modReg = 7;
+//                                        $condReg = 25;
+//                                    }
+//                                    break;
+//                                case "387": {
+//                                        $modReg = 7;
+//                                        $condReg = 2;
+//                                    }
+//                                    break;
+//                                case "388": {
+//                                        $modReg = 7;
+//                                        $condReg = 4;
+//                                    }
+//                                    break;
+//                                case "389": {
+//                                        $modReg = 7;
+//                                        $condReg = 2;
+//                                    }
+//                                    break;
+//                                case "390": {
+//                                        $modReg = 7;
+//                                        $condReg = 3;
+//                                    }
+//                                    break;
+//                                case "391": {
+//                                        $modReg = 0;
+//                                        $condReg = 8;
+//                                    }
+//                                    break;
+//                                case "392": {
+//                                        $condReg = 4;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "393": {
+//                                        $condReg = 5;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "394": {
+//                                        $condReg = 12;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "395": {
+//                                        $condReg = 19;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "396": {
+//                                        $condReg = 18;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "397": {
+//                                        $condReg = 15;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "398": {
+//                                        $condReg = 2;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "399": {
+//                                        $condReg = 3;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "400": {
+//                                        $condReg = 10;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "401": {
+//                                        $condReg = 4;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "402": {
+//                                        $condReg = 5;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "403": {
+//                                        $condReg = 12;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "404": {
+//                                        $condReg = 19;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "405": {
+//                                        $condReg = 18;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "406": {
+//                                        $condReg = 15;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "407": {
+//                                        $condReg = 1;
+//                                        $modReg = 2;
+//                                    }
+//                                    break;
+//                                case "408": {
+//                                        $condReg = 21;
+//                                        $modReg = 3;
+//                                    }
+//                                    break;
+//                                case "409": {
+//                                        $condReg = 1;
+//                                        $modReg = 4;
+//                                    }
+//                                    break;
+//                                case "411": {
+//                                        $condReg = 14;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "412": {
+//                                        $condReg = 4;
+//                                        $modReg = 2;
+//                                    }
+//                                    break;
+//                                case "413": {
+//                                        $condReg = 5;
+//                                        $modReg = 2;
+//                                    }
+//                                    break;
+//                                case "414": {
+//                                        $condReg = 9;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "415": {
+//                                        $condReg = 26;
+//                                        $modReg = 0;
+//                                    }
+//                                    break;
+//                                case "416": {
+//                                        $condReg = 3;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "417": {
+//                                        $condReg = 1;
+//                                        $modReg = 0;
+//                                    }
+//                                    break;
+//                                case "418": {
+//                                        $condReg = 27;
+//                                        $modReg = 0;
+//                                    }
+//                                    break;
+//                                case "420": {
+//                                        $condReg = 13;
+//                                        $modReg = 51;
+//                                    }
+//                                    break;
+//                                case "421": {
+//                                        $condReg = 25;
+//                                        $modReg = 0;
+//                                    }
+//                                    break;
+//                                case "422": {
+//                                        $condReg = 12;
+//                                        $modReg = 2;
+//                                    }
+//                                    break;
+//                                case "423": {
+//                                        $condReg = 22;
+//                                        $modReg = 13;
+//                                    }
+//                                    break;
+//                                case "426": {
+//                                        $condReg = 10;
+//                                        $modReg = 7;
+//                                    }
+//                                    break;
+//                                case "427": {
+//                                        $condReg = 9;
+//                                        $modReg = 0;
+//                                    }
+//                                    break;
+//                            }
+                            
+                            
                             switch ($val['PcvGRgmID']) {
                                 default: {
                                         $modReg = 0;
-                                        $condReg = 1;
                                     }
                                     break;
-                                case "6": {
-                                        $modReg = 0;
-                                        $condReg = 24;
-                                    }
-                                    break;
-                                case "16": {
-                                        $modReg = 11;
-                                        $condReg = 15;
-                                    }
-                                    break;
-                                case "42": {
-                                        $modReg = 11;
-                                        $condReg = 4;
-                                    }
-                                    break;
-                                case "77": {
-                                        $modReg = 11;
-                                        $condReg = 13;
-                                    }
-                                    break;
-                                case "79": {
-                                        $modReg = 11;
-                                        $condReg = 12;
-                                    }
-                                    break;
-                                case "126": {
-                                        $modReg = 55;
-                                        $condReg = 24;
-                                    }
-                                    break;
-                                case "291": {
-                                        $modReg = 11;
-                                        $condReg = 3;
-                                    }
-                                    break;
-                                case "337": {
-                                        $modReg = 7;
-                                        $condReg = 7;
-                                    }
-                                    break;
-                                case "341": {
-                                        $modReg = 7;
-                                        $condReg = 20;
-                                    }
-                                    break;
-                                case "353": {
-                                        $modReg = 51;
-                                        $condReg = 7;
-                                    }
-                                    break;
-                                case "357": {
-                                        $modReg = 11;
-                                        $condReg = 2;
-                                    }
-                                    break;
-                                case "382": {
-                                        $modReg = 0;
-                                        $condReg = 1;
-                                    }
-                                    break;
-                                case "383": {
-                                        $modReg = 0;
-                                        $condReg = 20;
-                                    }
-                                    break;
-                                case "384": {
-                                        $modReg = 6;
-                                        $condReg = 26;
-                                    }
-                                    break;
-                                case "385": {
-                                        $modReg = 7;
-                                        $condReg = 1;
-                                    }
-                                    break;
-                                case "386": {
-                                        $modReg = 7;
-                                        $condReg = 25;
-                                    }
-                                    break;
-                                case "387": {
-                                        $modReg = 7;
-                                        $condReg = 2;
-                                    }
-                                    break;
-                                case "388": {
-                                        $modReg = 7;
-                                        $condReg = 4;
-                                    }
-                                    break;
-                                case "389": {
-                                        $modReg = 7;
-                                        $condReg = 2;
-                                    }
-                                    break;
-                                case "390": {
-                                        $modReg = 7;
-                                        $condReg = 3;
-                                    }
-                                    break;
-                                case "391": {
-                                        $modReg = 0;
-                                        $condReg = 8;
-                                    }
-                                    break;
-                                case "392": {
-                                        $condReg = 4;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "393": {
-                                        $condReg = 5;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "394": {
-                                        $condReg = 12;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "395": {
-                                        $condReg = 19;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "396": {
-                                        $condReg = 18;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "397": {
-                                        $condReg = 15;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "398": {
-                                        $condReg = 2;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "399": {
-                                        $condReg = 3;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "400": {
-                                        $condReg = 10;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "401": {
-                                        $condReg = 4;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "402": {
-                                        $condReg = 5;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "403": {
-                                        $condReg = 12;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "404": {
-                                        $condReg = 19;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "405": {
-                                        $condReg = 18;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "406": {
-                                        $condReg = 15;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "407": {
-                                        $condReg = 1;
-                                        $modReg = 2;
-                                    }
-                                    break;
-                                case "408": {
-                                        $condReg = 21;
-                                        $modReg = 3;
-                                    }
-                                    break;
-                                case "409": {
-                                        $condReg = 1;
+                                case "28": {
                                         $modReg = 4;
                                     }
                                     break;
-                                case "411": {
-                                        $condReg = 14;
+                                case "12":{
+                                        $modReg = 6;
+                                    }
+                                    break;
+                                case "13":
+                                case "14":
+                                case "15":
+                                case "16":
+                                case "17":
+                                case "18":
+                                case "19":
+                                case "20":
+                                case "33": {
                                         $modReg = 7;
                                     }
                                     break;
-                                case "412": {
-                                        $condReg = 4;
-                                        $modReg = 2;
-                                    }
-                                    break;
-                                case "413": {
-                                        $condReg = 5;
-                                        $modReg = 2;
-                                    }
-                                    break;
-                                case "414": {
-                                        $condReg = 9;
+                                case "21":
+                                case "22":
+                                case "23":
+                                case "24":
+                                case "25":{
                                         $modReg = 51;
                                     }
                                     break;
-                                case "415": {
-                                        $condReg = 26;
-                                        $modReg = 0;
-                                    }
-                                    break;
-                                case "416": {
-                                        $condReg = 3;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "417": {
-                                        $condReg = 1;
-                                        $modReg = 0;
-                                    }
-                                    break;
-                                case "418": {
-                                        $condReg = 27;
-                                        $modReg = 0;
-                                    }
-                                    break;
-                                case "420": {
-                                        $condReg = 13;
-                                        $modReg = 51;
-                                    }
-                                    break;
-                                case "421": {
-                                        $condReg = 25;
-                                        $modReg = 0;
-                                    }
-                                    break;
-                                case "422": {
-                                        $condReg = 12;
+                                case "26":
+                                case "29":
+                                case "30":
+                                case "32":
+                                case "35":{
                                         $modReg = 2;
                                     }
                                     break;
-                                case "423": {
-                                        $condReg = 22;
-                                        $modReg = 13;
+                                case "27":{
+                                        $modReg = 3;
                                     }
                                     break;
-                                case "426": {
-                                        $condReg = 10;
-                                        $modReg = 7;
-                                    }
-                                    break;
-                                case "427": {
-                                        $condReg = 9;
-                                        $modReg = 0;
+                                case "2":{
+                                        $modReg = 55;
                                     }
                                     break;
                             }
 
 
+                            //manque mod 10 11 27 34
+                            
+                            
+                            
+                            switch ($val['PcvGRgmID']) {
+                                default: {
+                                        $condReg = 0;
+                                    }
+                                    break;
+                                case "34": {
+                                        $condReg = 11;
+                                    }
+                                    break;
+                                case "18": {
+                                        $condReg = 5;
+                                    }
+                                    break;
+                                case "35":
+                                case "21":
+                                case "16": {
+                                        $condReg = 2;
+                                    }
+                                    break;
+                                case "32":
+                                case "20": {
+                                        $condReg = 12;
+                                    }
+                                    break;
+                                case "30":
+                                case "25": {
+                                        $condReg = 5;
+                                    }
+                                    break;
+                                case "29":
+                                case "24":
+                                case "19": {
+                                        $condReg = 4;
+                                    }
+                                    break;
+                                case "23":
+                                case "33": {
+                                        $condReg = 10;
+                                    }
+                                    break;
+                                case "22":
+                                case "17": {
+                                        $condReg = 3;
+                                    }
+                                    break;
+                                case "13":
+                                case "14": {
+                                        $condReg = 25;
+                                    }
+                                    break;
+                                case "11": {
+                                        $condReg = 20;
+                                    }
+                                    break;
+                                case "12":
+                                case "9": {
+                                        $condReg = 26;
+                                    }
+                                    break;
+                            }
+                            
+                            //manque cond paiement 2   27   26   15   28
+                            
                             /*
                               +--------------------------------------------------------------------------------------------------------------+
                               |                                                                                                              |

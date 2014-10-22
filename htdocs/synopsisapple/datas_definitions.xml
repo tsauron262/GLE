@@ -111,7 +111,7 @@
     <def name="billTo" type="text" max="10" jsCheck="text">
         <label>Numéro "Bill To"</label>
     </def>
-    <def name="checkIfOutOfWarrantyCoverage" type="YesNo">
+    <def name="checkIfOutOfWarrantyCoverage" type="YesNo"  hidden="1">
         <label>Vérifier la couverture hors garantie</label>
     </def>
     <def name="customerAddress" type="datasGroup">
@@ -232,7 +232,7 @@
             <val val="N">Non</val>
         </values>
     </def>
-    <def name="componentCheckDetails" type="datasGroup">
+    <def name="componentCheckDetails" type="datasGroup" hidden="1">
         <label>Détails du composant</label>
     </def>
     <def name="component" type="text" max="20" jsCheck="text">

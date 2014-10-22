@@ -165,12 +165,16 @@ class box_synopsisNextsynopsisdemandeinterv extends ModeleBoxes {
                         $this->info_box_contents[$i][2] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][3] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][4] = array('text' => '&nbsp;');
+                        $this->info_box_contents[$i][5] = array('text' => '&nbsp;');
                     } else {
                         $this->info_box_contents[$i][0] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][1] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][2] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][3] = array('text' => '&nbsp;');
                         $this->info_box_contents[$i][4] = array('text' => '&nbsp;');
+                        $this->info_box_contents[$i][5] = array('text' => '&nbsp;');
+                        if (isset($_REQUEST['lien_commande']))
+                            $this->info_box_contents[$i][6] = array('text' => '&nbsp;');
                     }
                     $i++;
                 }

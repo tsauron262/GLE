@@ -181,8 +181,11 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                             'width' => 18,
                             'text' => $objp->cref,
                             'url' => DOL_URL_ROOT . "/commande/fiche.php?id=" . $objp->fk_commande);
-                    $y++;
                     }
+                    else
+                        $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');
+                    
+                    
                     if ($objp->fk_contrat > 0) {
                         $this->info_box_contents[$i][$y] = array(
                             'logo' => 'contract',
@@ -190,8 +193,10 @@ class box_synopsisdemandeinterv extends ModeleBoxes {
                             'width' => 18,
                             'text' => $objp->ctref,
                             'url' => DOL_URL_ROOT . "/contrat/fiche.php?id=" . $objp->fk_contrat);
-                    $y++;
                     }
+                    else
+                        $this->info_box_contents[$i][$y] = array('text' => '&nbsp;');
+                    $y++;
 
                     $i++;
                 }

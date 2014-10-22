@@ -55,6 +55,9 @@ while ($ligne = $db->fetch_array($result)) {
 
 echo "FIN";
 
+
+echo "<br/><br/><a href='".$_SERVER["HTTP_REFERER"]."'>Retour</a>";
+
 function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true) {
     $return = "";
     $tabCacher = array('factid', 'rowid');

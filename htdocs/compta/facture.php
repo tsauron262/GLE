@@ -3507,7 +3507,7 @@ if ($action == 'create')
 			} else {
 				print '<div class="inline-block divButAction"><a class="butActionRefused" href="#" title="' . $langs->trans("NotAllowed") . '">' . $langs->trans('Delete') . '</a></div>';
 			}
-					print '<div class="inline-block divButAction"><a class="butActionDelete" href="' . DOL_URL_ROOT.'/Synopsis_Tools/mailRequest.php?action=annulObj">' . $langs->trans('Demande Annulation') . '</a></div>';
+					print '<div class="inline-block divButAction"><a class="butActionDelete" href="' . DOL_URL_ROOT.'/Synopsis_Tools/mailRequest.php?action=annulObj&id='.$id.'">' . $langs->trans('Demande Annulation') . '</a></div>';
 
 			print '</div>';
 		}

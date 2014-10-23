@@ -763,8 +763,8 @@ if($requestType == 'CreateCarryInRepair' || $requestType == 'CreateCarryIn'){
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';
-                        if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
-                            $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
+                        if (isset($responseName) && isset($response[$responseName]['repairConfirmation']['repairConfirmationNumber'])) {
+                            $confirmNumber = $response[$responseName]['repairConfirmation']['repairConfirmationNumber'];
                             if (isset($_GET['repairRowId'])) {
                                 $repair->rowId = $_GET['repairRowId'];
                                 if ($repair->load()) {

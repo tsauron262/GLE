@@ -503,6 +503,7 @@ if (! defined('NOLOGIN'))
                 }
                 break;
         }
+        $obj->loadObject = false;
         return array($obj, $tabMenu);
     }
 

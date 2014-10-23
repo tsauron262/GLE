@@ -53,6 +53,7 @@ $numExt = (isset($_POST['NumExt']) ? $_POST['NumExt'] : "");
 $systeme = (isset($_POST['systeme']) ? $_POST['systeme'] : "");
 $garantie = (isset($_POST['Garantie']) ? $_POST['Garantie'] : "");
 $preuve = (isset($_POST['Preuve']) && $_POST['Preuve'] == 1 ? 'checked' : "");
+$prio = (isset($_POST['Prio']) && $_POST['Prio'] == 1 ? 'checked' : "");
 $DateAchat = (isset($_POST['DateAchat']) ? $_POST['DateAchat'] : "");
 $etat1 = (isset($_POST['Etat']) && $_POST['Etat'] == 1 ? 'selected' : "");
 $etat2 = (isset($_POST['Etat']) && $_POST['Etat'] == 2 ? 'selected' : "");
@@ -127,7 +128,7 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
             $chrono->contactid = $_REQUEST["contactid"];
             $chronoid = $chrono->create();
             if ($chronoid > 0) {
-                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt);
+                $dataArr = array(1045 => date("d/m/Y H:i"), 1055 => $_POST["Sauv"], 1040 => $_POST["Etat"], 1041 => $accessoire, 1047 => $symptomes, /* 1058 => $_POST['Devis'], */ 1059 => $_POST['Retour'], 1056 => 0, 1060 => $centre, 1066 => $numExt, 1068 => ($prio == "" ? 0 : 1));
                 $test = $chrono->setDatas($chronoid, $dataArr);
                 if ($test) {
                     $socid = "";
@@ -283,6 +284,15 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
+    
+    
+    echo "<tr>";
+    echo "<th class='ui-state-default ui-widget-header'>Prise en charge prioritaire.</th>";
+    echo "<td class='ui-widget-content' colspan='1'>";
+    echo " <input type='checkbox' name='Prio' value='0' id='Prio'" . $prio . "/>";
+    echo " <label for='preuveAchat'/>(Cochez si une preuve d'achat est fournie)</label>";
+    echo "</td>";
+    echo "</tr>";
 
 
     echo "<p>";

@@ -538,6 +538,7 @@ class gsxDatas {
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $chrono = new Chrono($db);
+                    $chrono->loadObject = false;
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);
 
@@ -548,9 +549,9 @@ class gsxDatas {
 
                     $valDef['diagnosis'] = $chrono->extraValue[$chronoId]['Diagnostic']['value'];
                     $valDef['symptom'] = $chrono->extraValue[$chronoId]['Symptômes']['value'];
-                    $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
-                    $valDef['unitReceivedDate'] = $dateH[0];
-                    $valDef['unitReceivedTime'] = $dateH[1];
+//                    $dateH = explode(" ", $chrono->extraValue[$chronoId]['Date / Heure']['value']);
+                    $valDef['unitReceivedDate'] = date("d/m/Y");
+                    $valDef['unitReceivedTime'] = "08:00";
 
                     $valDef['diagnosedByTechId'] = $tech->array_options['options_apple_techid'];
                     $valDef['shipTo'] = $tech->array_options['options_apple_shipto'];

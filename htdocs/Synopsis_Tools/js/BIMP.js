@@ -71,7 +71,7 @@ $(window).load(function() {
         });
     }
     
-    $("input[name='lastname'], input[name='options_apple_centre']").focusout(function(){
+    $("input[name='lastname'], input[name='options_apple_centre'], #serialInput").focusout(function(){
         input = $(this);
         input.val(input.val().toUpperCase());
     });

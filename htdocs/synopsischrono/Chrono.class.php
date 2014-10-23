@@ -96,7 +96,7 @@ class Chrono extends CommonObject {
                 $this->ref = $res->ref;
                 $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
                 $this->revision = ($res->revision > 0 ? $res->revision : false);
-                if ($this->model_refid > 0 && $this->loadObject) {
+                if ($this->model_refid > 0) {
                     $this->model = new ChronoRef($this->db);
                     $this->model->fetch($res->model_refid);
                     $this->mask = $this->model->modele;
@@ -109,7 +109,8 @@ class Chrono extends CommonObject {
                 }
 
                 global $user;
-                $this->getRights($user);
+                if($this->loadObject)
+                    $this->getRights($user);
                 return($id);
             } else {
                 return -1;
@@ -594,6 +595,13 @@ class Chrono extends CommonObject {
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
         else
             $titre = $this->ref;
+        
+        
+        $this->getValues();
+        
+        if(isset($this->extraValueById[$this->id][1068]['value']) && $this->extraValueById[$this->id][1068]['value'] == 1)
+        $titre = "<span style='color:red'>".$titre."</span>";
+        
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
@@ -602,7 +610,6 @@ class Chrono extends CommonObject {
             $tabT = explode('[KEY|', $this->picto);
             $tabT = explode(']', $tabT[1]);
             $keyId = $tabT[0];
-            $result .= $this->getValues();
 //            echo "<pre>";
 //            print_r($this);
 //            die("ici".$this->extraValueById[$this->id][$keyId]['value']);

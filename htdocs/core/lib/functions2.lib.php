@@ -754,14 +754,14 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
     else dol_print_error($db);
     
     
-    $tabResa = getElementElement("resa", $table);
+    $tabResa = getElementElement("resa", $table.$maskLike);
     for ($i = 1; $i < 100; $i++) {
         $numTemp = $counter + 1;
         $change = false;
         foreach ($tabResa as $resa) {
             if ($resa['s'] == $numTemp) {
                 if ($resa['d'] == 1)
-                    setElementElement("resa", $table, $numTemp, "2");
+                    setElementElement("resa", $table.$maskLike, $numTemp, "2");
                 else {
                     $counter++;
                     $change = true;
@@ -769,7 +769,7 @@ function get_next_value($db,$mask,$table,$field,$where='',$objsoc='',$date='',$m
             }
         }
         if (!$change) {
-            addElementElement("resa", $table, $numTemp, "1");
+            addElementElement("resa", $table.$maskLike, $numTemp, "1");
             break;
         }
     }

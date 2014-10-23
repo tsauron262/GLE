@@ -52,8 +52,6 @@ if ($action == 'setprop') {
 }
 
 if ($action == 'createPC' && $chr->propal->id == 0) {
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     $chr->createPropal();
 }
 
@@ -75,8 +73,6 @@ if (isset($_REQUEST['action']) && ($_REQUEST['action'] == 'generatePdf' || $_REQ
 }
 
 if ($action == 'supprimer') {
-    $chr = new Chrono($db);
-    $chr->fetch($id);
     $tmpChr = 'chrono' . $chr->model_refid;
     $rightChrono = $user->rights->chrono_user->$tmpChr;
 
@@ -99,8 +95,6 @@ if ($action == 'supprimer') {
 
 
 if ($action == 'multiValider') {
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     $def = $_REQUEST['def'];
     $note = addslashes($_REQUEST['note']);
     $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_rights_def WHERE id = " . $def;
@@ -115,8 +109,6 @@ if ($action == 'multiValider') {
     $res = $chr->multivalidate();
 }
 if ($action == 'Valider') {
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     $res = false;
     if ($chr->statut == 999) {
         //On multivalide les manquants
@@ -150,8 +142,6 @@ if ($action == 'Valider') {
     }
 }
 if ($action == 'AskValider') {
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     $res = $chr->attenteValidate();
     if ($res > 0) {
         header('location: ?id=' . $chr->id);
@@ -162,8 +152,6 @@ if ($action == 'AskValider') {
 
 if ($action == 'ModifyAfterValid') {
     //Si chrono revisable
-    $chr = new Chrono($db);
-    $chr->fetch($_REQUEST['id']);
     if ($chr->model->hasRevision) {
         if ($chr->model->revision_model_refid > 0) {
             $res = $chr->revised();
@@ -182,8 +170,8 @@ if ($action == 'ModifyAfterValid') {
 }
 
 if ($action == 'modifier') {
-    $chr = new Chrono($db);
-    $chr->id = $_REQUEST['id'];
+    $chr->note = (($chr->note != "") ? $chr->note . "\n\n" : "");
+    $chr->note .= "Modifié le " . date('d-m-y H:i')." par ".$user->getFullName();
     $chr->description = addslashes($_REQUEST['description']);
     $chr->socid = addslashes($_REQUEST['socid']);
     $chr->contactid = addslashes($_REQUEST['contactid']);
@@ -279,10 +267,8 @@ $js .= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/
 define('REQUIRE_JQUERY_TIMEPICKER', true);
 define('REQUIRE_JQUERY_MULTISELECT', true);
 
-$chr = new Chrono($db);
-if ($id > 0) {
-    $chr->fetch($id);
-}
+
+
 if ($chr->id > 0) {
     if (isset($_REQUEST['nomenu'])) {
         top_htmlhead($js, 'Fiche ' . $chr->model->titre);

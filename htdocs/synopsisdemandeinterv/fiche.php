@@ -759,7 +759,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
 
             print '<tr><th valign="top" class="ui-widget-header ui-state-default">' . $langs->trans("Project") . '</td><td class="ui-widget-content" colspan=3>';
 
-            if ($_REQUEST["socid"])
+            if ($societe->id)
                 $numprojet = $societe->has_projects();
 
             if (!$numprojet) {
@@ -1354,7 +1354,7 @@ EOF;
 //        print '<td colspan="3" class="ui-widget-content">' . $contrat->getNomUrl(1);
 //    }
     // Projet
-    if (isset($conf->projet->enabled)) {
+    if (isset($conf->projet->enabled) && $synopsisdemandeinterv->socid) {
         $langs->load("projects");
         print '<tr><th class="ui-widget-header ui-state-default">';
 //        print '<table class="nobordernopadding" width="100%"><tr><th class="ui-widget-header ui-state-default">';

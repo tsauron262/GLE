@@ -26,12 +26,15 @@ function bouttonEtatSav($idChrono) {
     global $db, $user;
     $return = "";
     $chrono = new Chrono($db);
+    $chrono->loadObject = false;
     $chrono->fetch($idChrono);
     $chrono->getValues();
     $idEtat = 1056;
     if ($chrono->propalid) {
+        require_once(DOL_DOCUMENT_ROOT."/comm/propal/class/propal.class.php");
         $propal = new Propal($db);
         $propal->fetch($chrono->propalid);
+        $chrono->propal = $propal;
     }
 //    print_r($propal);
 

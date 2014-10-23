@@ -93,7 +93,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "devisOk" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 3) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis accepté le " . date('d-m-y H:i');
+        $chrono->note .= "Devis accepté le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 2, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 3));
@@ -102,7 +102,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "debDiago" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 5) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i');
+        $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
@@ -131,7 +131,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $action = "attenteClient2"; //Pour simuler click bouton Sous garentie
         }
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Piéce commandée le " . date('d-m-y H:i');
+        $chrono->note .= "Piéce commandée le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         
         $chrono->setDatas($chrono->id, array($idEtat => 1));
@@ -149,7 +149,7 @@ if (isset($_REQUEST['actionEtat'])) {
     if ($action == "revProp" && $chrono->propal->id > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i');
+        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
 
         $revision = new SynopsisRevisionPropal($chrono->propal);
@@ -197,7 +197,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "devisKo" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis refusé le " . date('d-m-y H:i');
+        $chrono->note .= "Devis refusé le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 3, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 6));
@@ -205,7 +205,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
     if ($action == "pieceOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Pièce reçue le " . date('d-m-y H:i');
+        $chrono->note .= "Pièce reçue le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
@@ -219,7 +219,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "repEnCours" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Réparation en cours depuis le " . date('d-m-y H:i');
+        $chrono->note .= "Réparation en cours depuis le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
@@ -233,7 +233,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Réparation terminée le " . date('d-m-y H:i');
+        $chrono->note .= "Réparation terminée le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 9));
         $ok = true;
@@ -256,7 +256,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i');
+        $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
@@ -306,7 +306,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "restituer" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 999) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Restitué le " . date('d-m-y H:i');
+        $chrono->note .= "Restitué le " . date('d-m-y H:i')." par ".$user->getFullName();
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 999));
         $ok = true;

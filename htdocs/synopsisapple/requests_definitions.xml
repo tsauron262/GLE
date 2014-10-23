@@ -155,11 +155,11 @@
                 </datas>
             </data>
 
-<!--            <data name="orderLines" required="1">
+            <data name="orderLines" required="1">
                 <datas>
-                    <data name="partNumber" required="1"></data>
+                    <!--<data name="partNumber" required="1"></data>-->
                 </datas>
-            </data>-->
+            </data>
 
             <data name="customerAddress" required="1">
                 <datas>

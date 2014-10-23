@@ -388,7 +388,7 @@ class Repair {
 
         if (isset($this->partsPending)) {
             unset($this->partsPending);
-            $this->partsPending = null;
+            $this->partsPending = array();
         }
         $this->gsx->resetSoapErrors();
         $datas = array(

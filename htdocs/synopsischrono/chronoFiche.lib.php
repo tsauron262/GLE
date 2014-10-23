@@ -170,7 +170,14 @@ EOF;
     } else {
         //Construct Form
         $tag = preg_replace('/>$/', "", $res->htmlTag);
-        $html = "";
+        $html = $suffixe = "";
+        
+        
+        if ($res->valueIsChecked){
+            $html .= "<input type='hidden' name='Chrono-" . $res->id . "' value='forChecked'/>";
+            $suffixe = "_check";
+        }
+        
         $html .= $tag;
 
         if ($res->cssClass == 'datetimepicker') {
@@ -188,7 +195,7 @@ EOF;
         if ($res->valueIsChecked) {
             $html .= ($res->value == 1 ? " CHECKED " : "");
         }
-        $html .= " name='Chrono-" . $res->id . "' ";
+        $html .= " name='Chrono-" . $res->id .$suffixe. "' ";
         $html .= " id='Chrono-" . $res->id . "' ";
         $html.=">";
         if ($res->valueInTag) {

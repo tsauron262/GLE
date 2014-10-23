@@ -203,6 +203,8 @@ if ($action == 'modifier') {
                 $res = $db->fetch_object($sql);
             if ($sql && $res->valueIsChecked == 1 && ($val == 'on' || $val == 'On' || $val == 'oN' || $val == 'ON'))
                 $dataArr[$arrTmp[1]] = 1;
+            else if ($sql && $res->valueIsChecked == 1 && isset($_REQUEST[$key."_check"]) && ($_REQUEST[$key."_check"] == 'on' || $_REQUEST[$key."_check"] == 'On' || $_REQUEST[$key."_check"] == 'oN' || $_REQUEST[$key."_check"] == 'ON'))
+                $dataArr[$arrTmp[1]] = 1;
             else if ($sql && $res->valueIsChecked == 1)
                 $dataArr[$arrTmp[1]] = 0;
             else

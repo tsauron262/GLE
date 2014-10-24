@@ -1,7 +1,7 @@
 <?php
 
 require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/divers.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/diverFunction.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/SynDiversFunction.php");
 
 class CronSynopsis {
 
@@ -25,6 +25,8 @@ class CronSynopsis {
         $this->majSav();
         $this->verif();
         $this->sortieMail();
+        
+        return 1;
     }
 
     public function sortieMail() {

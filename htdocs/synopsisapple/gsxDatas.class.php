@@ -538,7 +538,6 @@ class gsxDatas {
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $chrono = new Chrono($db);
-                    $chrono->loadObject = false;
                     $chrono->fetch($chronoId);
                     $chrono->getValues($chronoId);
 

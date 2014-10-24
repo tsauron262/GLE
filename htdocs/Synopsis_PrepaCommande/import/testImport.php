@@ -1011,7 +1011,7 @@ if (is_dir($dir)) {
                                     '" . $val['ArtDureeGar'] . "',
                                     " . ($val['PlvPA'] > 0 ? $val['PlvPA'] : 0) . ") ";
 
-                                if ($sql && $sql2) {
+                                if ($sql) {
                                     $webContent .= "<td  class='ui-widget-content'>Cr&eacute;ation produit OK</td>";
                                     $mailContent .= "<td style='background-color: #FFF;'>Cr&eacute;ation produit OK</td>" . "\n";
 

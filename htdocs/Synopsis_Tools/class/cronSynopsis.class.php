@@ -26,7 +26,7 @@ class CronSynopsis {
         $this->verif();
         $this->sortieMail();
         
-        return 1;
+        echo 1;
     }
 
     public function sortieMail() {

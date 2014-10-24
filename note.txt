@@ -614,3 +614,38 @@ pas propal revisé
 
 
 //voir code postal pour ville
+
+
+
+dans prepacommande  les contrat  trie des nom  .
+
+
+
+
+fi horraire pourrie.  mail
+
+
+
+ne pas repporter horraire sur fi
+
+
+update `llx_societe` set nom = replace(nom, "-BI", "") WHERE 1
+ssh port 1022
+
+
+
+ds tier num de tel et mail, 
+
+
+ds fiche rapide annuler "touche rapide"
+
+
+
+cheque pas sur propal et que si c'est chec
+
+
+(PROV932) en normal
+
+
+
+stat

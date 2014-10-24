@@ -1,5 +1,8 @@
 <?php
 
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/divers.class.php");
+require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/diverFunction.php");
+
 class CronSynopsis {
 
     var $nbErreur = 0;

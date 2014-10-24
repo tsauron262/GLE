@@ -171,7 +171,7 @@ if ($action == 'ModifyAfterValid') {
 
 if ($action == 'modifier') {
     $chr->note = (($chr->note != "") ? $chr->note . "\n\n" : "");
-    $chr->note .= "Modifié le " . date('d-m-y H:i')." par ".$user->getFullName();
+    $chr->note .= "Modifié le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
     $chr->description = addslashes($_REQUEST['description']);
     $chr->socid = addslashes($_REQUEST['socid']);
     $chr->contactid = addslashes($_REQUEST['contactid']);

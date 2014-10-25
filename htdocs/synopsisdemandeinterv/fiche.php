@@ -248,10 +248,12 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value WHERE typeI = 'DI' AND interv_refid =" . $synopsisdemandeinterv->id;
             $sql1 = $db->query($requete);
             while ($res1 = $db->fetch_object($sql1)) {
-                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
+                if (!in_array(array(24, 25, 26, 27), $res1->extra_key_id)) {
+                    $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                             (typeI, interv_refid,extra_key_refid,extra_value)
                                      VALUES ('FI'," . $result . "," . $res1->extra_key_refid . ",'" . addslashes($res1->extra_value) . "')";
-                $db->query($requete);
+                    $db->query($requete);
+                }
             }
             $synopsisdemandeinterv->fetch_lines();
             //all lines id if lignes[]
@@ -753,7 +755,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
         print "    <td colspan=3 class='ui-widget-content'><input name=\"ref\" value=\"" . $numpr . "\"></td></tr>\n";
 
         if ($conf->projet->enabled) {
-            require_once(DOL_DOCUMENT_ROOT."/core/class/html.formprojet.class.php");
+            require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formprojet.class.php");
             // Projet associe
             $langs->load("project");
 

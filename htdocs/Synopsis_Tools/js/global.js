@@ -22,6 +22,13 @@ $(window).load(function() {
 //    }, 5000);
 
 
+    if (window.location.pathname.indexOf("societe/soc.php") !== false || window.location.pathname.indexOf("contact/fiche.php") !== false) {
+        $("body").keypress(function(e) {
+            if (e.which == 13)
+                return false
+        });
+    }
+
 
 
 
@@ -73,26 +80,26 @@ $(window).load(function() {
         $(".editDateDiv").fadeIn();
         $(this).fadeOut();
     });
-    
-    
-    
+
+
+
     //Cacher prix quand ligne de text
-    $("#select_type").change(function(){
+    $("#select_type").change(function() {
         elems = $(this).parent().parent().parent().find("#tva_tx, input[name|='price_ht'], input[name|='qty'],  input[name|='remise_percent']");
-        if($(this).val() != 0 && $(this).val() != 1 && $(this).val() != 2){
+        if ($(this).val() != 0 && $(this).val() != 1 && $(this).val() != 2) {
             $("input[name|='price_ht']").val("0");
             elems.hide();
         }
         else
             elems.show();
     });
-    
-    
+
+
 
 
 
     //Cacher tva.. quand privé
-    $("#radioprivate, #radiocompany").click(function(){
+    $("#radioprivate, #radiocompany").click(function() {
         cible = $("input[name='idprof1']");
         tabCible = Array();
         tabCible.push(cible.parent().parent());
@@ -101,14 +108,14 @@ $(window).load(function() {
         tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr"));
         tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr").next("tr"));
         tabCible.push(cible.parent().parent().next("tr").next("tr").next("tr").next("tr").next("tr"));
-        
+
         for (var i in tabCible)
-            if($(this).attr('id') == "radioprivate")
+            if ($(this).attr('id') == "radioprivate")
                 tabCible[i].fadeOut();
             else
                 tabCible[i].fadeIn();
     });
-    
+
     selector = "input[name='viewday'], input[name='viewweek'], input[name='viewcal']";
     $(selector).prev().hide();
     $(selector).next().hide();
@@ -203,7 +210,7 @@ function boucleSynchServ(idAction) {
             else {
                 setTimeout(function() {
                     boucleSynchServ(idAction);
-                }, 10*1000);
+                }, 10 * 1000);
             }
         },
         error: function() {
@@ -398,10 +405,10 @@ function ajNoteAjax() {
         cache: false,
         success: function(msg) {
             if (msg != "0") {
-                if($("a#note").size() > 0)
-                        tab = "note";
-                    else
-                        tab = "info";
+                if ($("a#note").size() > 0)
+                    tab = "note";
+                else
+                    tab = "info";
                 //                var htmlDiv  = '<div class="noteAjax"><div class="control"><input class="controlBut" type="button" value="<"/></div><div class="note">Note (publique) :<br><div class="editable" id="notePublicEdit" title="Editer">'+msg+'</div></div></div>';
                 //                $('.tabBar').append(htmlDiv);
                 classEdit = "";
@@ -414,8 +421,8 @@ function ajNoteAjax() {
                 //                var htmlDiv  = '<div class="control"><input class="controlBut" type="button" value="<"/></div>';
                 //                $('a#note').append(htmlDiv);
                 //                $('.tabBar > table > tbody').first("td").append('<td rowspan"9">'+htmlDiv+'</td>');
-                $('a#'+tab+', .noteAjax').hover(shownNote, hideNote);
-                $('a#'+tab+'').addClass("lienNote");
+                $('a#' + tab + ', .noteAjax').hover(shownNote, hideNote);
+                $('a#' + tab + '').addClass("lienNote");
 
                 //                $(".controlBut").click(function(){
                 //                    if($(this).val() == "<"){
@@ -654,10 +661,10 @@ function popIFrame(urlIF, callBack, titreNotif, nbLoad) {
     });
     var i = 0;
     iFrame.find("iframe").load(function() {
-        if($(this).contents().find("#username").size() > 0)
+        if ($(this).contents().find("#username").size() > 0)
             $nbLoad++;
-        
-        
+
+
         $(this).contents().find("input[name='cancel'], input[name='edit'], input[value='Ajouter'], input[value='Ajouter'], div.ui-dialog-buttonset span.ui-button-text").click(function() {
 //            fermerIframe($(this).parent(), callBack);
             nbLoad = 1;

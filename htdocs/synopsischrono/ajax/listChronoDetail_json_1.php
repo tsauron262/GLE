@@ -296,11 +296,8 @@ $responce->records = $count;
 require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
 $socStatique = new Societe($db);
 
-$model = new ChronoRef($db);
-$model->fetch($id);
 
 $chrono = new Chrono($db);
-$chrono->model = $model;
 $chrono->loadObject = false;
 
 //echo $requete;
@@ -311,6 +308,7 @@ if ($sql) {
         $arr = array();
         $arr[] = $res->id;
         $chrono->fetch($res->id);
+        $model = $chrono->model;
 
         $arr[] = $chrono->getNomUrl(1);
 
@@ -422,6 +420,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
         $obj = new $tmp($db);
         $obj->cssClassM = $extraCss;
         $obj->idChrono = $idChrono;
+        
         $obj->fetch($hasSubValeur, $extraCss);
         if ($phpClass == 'globalvar') {
             return $obj->getValue($val);

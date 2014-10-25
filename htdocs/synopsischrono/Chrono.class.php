@@ -34,6 +34,7 @@ class Chrono extends CommonObject {
     public $keysList = array();
     public $extraValue = array();
     public $loadObject = true;
+    private static $tabModelStat = array();
 
     public function Chrono($DB) {
         $this->db = $DB;
@@ -44,79 +45,89 @@ class Chrono extends CommonObject {
         if ($conf->global->MAIN_MODULE_SYNOPSISCHRONO) {
             $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = '" . $id . "';";
             $sql = $this->db->query($requete);
-            $res = $this->db->fetch_object($sql);
-            if ($res) {
-                $this->id = $id;
-                $this->date = strtotime($res->date_create);
-                $this->date_modif = strtotime($res->tms);
-                $this->socid = $res->fk_societe;
-                $this->statut = $res->fk_statut;
-                $this->note = $res->note;
-                $this->validation_number = $res->validation_number;
+            if ($this->db->num_rows($sql) > 0) {
+                $res = $this->db->fetch_object($sql);
+                if ($res) {
+                    $this->id = $id;
+                    $this->date = strtotime($res->date_create);
+                    $this->date_modif = strtotime($res->tms);
+                    $this->socid = $res->fk_societe;
+                    $this->statut = $res->fk_statut;
+                    $this->note = $res->note;
+                    $this->validation_number = $res->validation_number;
 
-                $this->fk_user_author = $res->fk_user_author;
-                if ($this->fk_user_author && $this->loadObject) {
-                    $tmpUser = new User($this->db);
-                    if ($this->fk_user_author > 0) {
-                        $tmpUser->fetch($this->fk_user_author);
+                    $this->fk_user_author = $res->fk_user_author;
+                    if ($this->fk_user_author && $this->loadObject) {
+                        $tmpUser = new User($this->db);
+                        if ($this->fk_user_author > 0) {
+                            $tmpUser->fetch($this->fk_user_author);
+                        }
                     }
-                }
-                $this->user_author = $tmpUser;
-                $this->user_modif_id = $res->fk_user_modif;
-                if ($this->user_modif_id > 0 && $this->loadObject) {
-                    $tmpUser = new User($this->db);
-                    $tmpUser->fetch($this->user_modif_id);
-                    $this->user_modif = $tmpUser;
-                }
+                    $this->user_author = $tmpUser;
+                    $this->user_modif_id = $res->fk_user_modif;
+                    if ($this->user_modif_id > 0 && $this->loadObject) {
+                        $tmpUser = new User($this->db);
+                        $tmpUser->fetch($this->user_modif_id);
+                        $this->user_modif = $tmpUser;
+                    }
 
-                $this->contactid = $res->fk_socpeople;
-                if ($this->contactid > 0 && $this->loadObject) {
-                    require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
-                    $contact = new Contact($this->db);
-                    $contact->fetch($this->contactid);
-                    $this->contact = $contact;
-                }
-                $this->file_path = $res->file_path;
-                $this->description = $res->description;
-                $this->model_refid = $res->model_refid;
-                $this->propalid = $res->propalid;
-                if ($this->propalid > 0 && $this->loadObject) {
-                    require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
-                    $propal = new Propal($this->db);
-                    $propal->fetch($this->propalid);
-                    $this->propal = $propal;
-                }
-                $this->projetid = $res->projetid;
-                if ($this->projetid > 0 && $this->loadObject) {
-                    require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
-                    $projet = new Project($this->db);
-                    $projet->fetch($this->projetid);
-                    $this->projet = $projet;
-                }
-                $this->ref = $res->ref;
-                $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
-                $this->revision = ($res->revision > 0 ? $res->revision : false);
-                if ($this->model_refid > 0) {
-                    $this->model = new ChronoRef($this->db);
-                    $this->model->fetch($res->model_refid);
-                    $this->mask = $this->model->modele;
-                }
+                    $this->contactid = $res->fk_socpeople;
+                    if ($this->contactid > 0 && $this->loadObject) {
+                        require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
+                        $contact = new Contact($this->db);
+                        $contact->fetch($this->contactid);
+                        $this->contact = $contact;
+                    }
+                    $this->file_path = $res->file_path;
+                    $this->description = $res->description;
+                    $this->model_refid = $res->model_refid;
+                    $this->propalid = $res->propalid;
+                    if ($this->propalid > 0 && $this->loadObject) {
+                        require_once(DOL_DOCUMENT_ROOT . "/comm/propal/class/propal.class.php");
+                        $propal = new Propal($this->db);
+                        $propal->fetch($this->propalid);
+                        $this->propal = $propal;
+                    }
+                    $this->projetid = $res->projetid;
+                    if ($this->projetid > 0 && $this->loadObject) {
+                        require_once(DOL_DOCUMENT_ROOT . "/projet/class/project.class.php");
+                        $projet = new Project($this->db);
+                        $projet->fetch($this->projetid);
+                        $this->projet = $projet;
+                    }
+                    $this->ref = $res->ref;
+                    $this->orig_ref = (isset($res->orig_ref) && $res->orig_ref != '' ? $res->orig_ref : $this->ref);
+                    $this->revision = ($res->revision > 0 ? $res->revision : false);
+                    if ($this->model_refid > 0) {
+                        if (isset(self::$tabModelStat[$res->model_refid])) {
+                            $this->model = self::$tabModelStat[$res->model_refid];
+                        } else {
+                            $this->model = new ChronoRef($this->db);
+                            $this->model->fetch($res->model_refid);
+                            self::$tabModelStat[$res->model_refid] = $this->model;
+                        }
+                        $this->mask = $this->model->modele;
+                    }
 
-                if ($this->socid > 0 && $this->model->hasSociete && $this->loadObject) {
-                    $soc = new Societe($this->db);
-                    $soc->fetch($this->socid);
-                    $this->societe = $soc;
-                }
+                    if ($this->socid > 0 && $this->model->hasSociete && $this->loadObject) {
+                        $soc = new Societe($this->db);
+                        $soc->fetch($this->socid);
+                        $this->societe = $soc;
+                    }
 
-                global $user;
-                if($this->loadObject)
-                    $this->getRights($user);
-                return($id);
+                    global $user;
+                    if ($this->loadObject) {
+                        if (!isset($this->model->rightsLoad))
+                            $this->getRights($user);
+                        $this->model->rightsLoad = true;
+                    }
+                    return($id);
+                } else {
+                    return -1;
+                }
             } else {
                 return -1;
             }
-        } else {
-            return -1;
         }
     }
 
@@ -327,8 +338,8 @@ class Chrono extends CommonObject {
             $requete .= ", fk_socpeople =  " . $contactid;
         else
             $requete .= ", fk_socpeople = NULL ";
-        if($this->note != "")
-        $requete .= ", note = '" . addslashes($this->note) . "'";
+        if ($this->note != "")
+            $requete .= ", note = '" . addslashes($this->note) . "'";
         $requete .= ", fk_user_modif = " . $user->id;
         $requete .= " WHERE id = " . $id;
         $sql = $this->db->query($requete);
@@ -595,13 +606,13 @@ class Chrono extends CommonObject {
             $titre = $this->ref . " : " . dol_trunc($this->description, 25);
         else
             $titre = $this->ref;
-        
-        
+
+
         $this->getValues();
-        
-        if(isset($this->extraValueById[$this->id][1068]['value']) && $this->extraValueById[$this->id][1068]['value'] == 1)
-        $titre = "<span style='color:red'>".$titre."</span>";
-        
+
+        if (isset($this->extraValueById[$this->id][1068]['value']) && $this->extraValueById[$this->id][1068]['value'] == 1)
+            $titre = "<span style='color:red'>" . $titre . "</span>";
+
 
         $lien = '<a title="' . $titre . '" href="' . DOL_URL_ROOT . '/synopsischrono/fiche.php?id=' . $this->id . '">';
         $lienfin = '</a>';
@@ -742,20 +753,22 @@ class Chrono extends CommonObject {
         if (count($this->keysListId) < 1) {
             $this->getKeys();
         }
-        $keyStr = join(',', $this->keysListId);
+        if (count($this->keysListId) > 0) {
+            $keyStr = join(',', $this->keysListId);
 
-        $requete = "SELECT *
-                      FROM " . MAIN_DB_PREFIX . "synopsischrono_value
-                     WHERE chrono_refid = " . $chrono_id . " AND key_id in (" . $keyStr . ")";
-        $sql = $this->db->query($requete);
-        while ($res = $this->db->fetch_object($sql)) {
-            $value = $res->value;
-            $key = $this->keysList[$res->key_id]['nom'];
-            $desc = $this->keysList[$res->key_id]['description'];
-            $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
-            $this->values[$key] = $value;
-            $this->values[$res->key_id] = $value;
-            $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
+            $requete = "SELECT *
+                          FROM " . MAIN_DB_PREFIX . "synopsischrono_value
+                         WHERE chrono_refid = " . $chrono_id . " AND key_id in (" . $keyStr . ")";
+            $sql = $this->db->query($requete);
+            while ($res = $this->db->fetch_object($sql)) {
+                $value = $res->value;
+                $key = $this->keysList[$res->key_id]['nom'];
+                $desc = $this->keysList[$res->key_id]['description'];
+                $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);
+                $this->values[$key] = $value;
+                $this->values[$res->key_id] = $value;
+                $this->extraValueById[$chrono_id][$res->key_id] = array('value' => $value, 'description' => $desc);
+            }
         }
     }
 

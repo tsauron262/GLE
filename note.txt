@@ -626,18 +626,18 @@ fi horraire pourrie.  mail
 
 
 
-ne pas repporter horraire sur fi
+//ne pas repporter horraire sur fi
 
 
-update `llx_societe` set nom = replace(nom, "-BI", "") WHERE 1
-ssh port 1022
+//update `llx_societe` set nom = replace(nom, "-BI", "") WHERE 1
+//ssh port 1022
 
 
 
-ds tier num de tel et mail, 
+//ds tier num de tel et mail, 
 
 
-ds fiche rapide annuler "touche rapide"
+//ds fiche rapide annuler "touche rapide"
 
 
 
@@ -649,3 +649,5 @@ cheque pas sur propal et que si c'est chec
 
 
 stat
+
+

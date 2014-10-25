@@ -26,6 +26,8 @@ $msg = "";
 if ($id > 0) {
     $chr = new Chrono($db);
     $chr->fetch($id);
+    if(!$chr->id > 0)
+        header('Location: ' . DOL_URL_ROOT . '/synopsischrono/listByObjet.php');
     global $typeChrono;
     $typeChrono = $chr->model->id;
 }

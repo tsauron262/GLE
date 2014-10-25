@@ -668,7 +668,7 @@ class Synopsisfichinter extends Fichinter {
                       AND e.interv_refid = " . $this->id;
         $sql = $this->db->query($requete);
         $arr = array();
-        file_put_contents("/tmp/titi", $requete);
+//        file_put_contents("/tmp/titi", $requete);
         while ($res = $this->db->fetch_object($sql)) {
             $arr[$res->extra_key_refid] = $res->val;
         }

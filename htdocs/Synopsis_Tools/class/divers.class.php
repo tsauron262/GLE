@@ -171,7 +171,7 @@ if (! defined('NOLOGIN'))
 
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
         $groupSav = new UserGroup($db);
-        $groupSav->fetch('', "SAV");
+        $groupSav->fetch('', "XX SAV");
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id])) {
             $hrefFin = "#pangridChronoDet105";
             $return .= '<div class="blockvmenupair">';
@@ -212,7 +212,7 @@ if (! defined('NOLOGIN'))
 
         require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
         $groupHotline = new UserGroup($db);
-        $groupHotline->fetch('', "Hotline");
+        $groupHotline->fetch('', "XX Hotline");
         if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupHotline->members[$user->id])) {
             $hrefFin = "#pangridChronoDet100";
             $return .= '<div class="blockvmenupair">';

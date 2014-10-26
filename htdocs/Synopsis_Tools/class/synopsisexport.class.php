@@ -45,7 +45,7 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
         }
     }
 
-    public function exportChronoSav($centre = null) {
+    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null) {
 
         $where = "1";
 
@@ -53,14 +53,19 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
             $where = "centreVal = '" . $centre . "'";
 
 
-        $partReq1 = "SELECT prod.ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
-        $partReqFin = "";
-
-        $partReq1 = "SELECT prod.ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
-        $partReqFin = "Group BY factdet.fk_product LIMIT 0,100";
-
-//        $partReq1 = "SELECT count(*)";
+//        $partReq1 = "SELECT prod.ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
 //        $partReqFin = "";
+//
+//        $partReq1 = "SELECT prod.ref as ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
+//        $partReqFin = " Group BY factdet.fk_product LIMIT 0,1000";
+
+        if ($typeAff2 == "ca") {
+            $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
+            $partReqFin = " Group BY factdet.fk_product, factdet.description LIMIT 0,10000";
+        } else {
+            $partReq1 = "SELECT COUNT(DISTINCT(chrono.id)) as NB_PC";
+            $partReqFin = " LIMIT 0,10000";
+        }
 
 
         $partReq5 = " FROM  `llx_facture` fact, llx_propal prop, llx_element_element el1, llx_synopsischrono_view_105 chrono, " .
@@ -69,54 +74,97 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
                 "llx_facturedet factdet left join llx_product prod on factdet.fk_product = prod.rowid
 WHERE fact.rowid = el1.fk_target AND prop.rowid = el1.fk_source AND el1.sourcetype='propal' AND el1.targettype='facture'
 AND chrono.propalid = prop.rowid AND factdet.fk_facture = fact.Rowid
-AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
+AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
 //"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
 //"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
-                "AND ";
+                "AND factdet.total_ht != 0 AND ";
+global $totTT;$totTT= 0;
+        if ($typeAff == "parTypeMat") {
+            $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
 
-
-        $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
-
-        $tabMateriel = array();
-        while ($ligne = $this->db->fetch_object($result)) {
-            $tabT = explode("(", $ligne->description);
-            $description = trim($tabT[0]);
-            $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
-            if (count($tabT) > 0)
-                $tabMateriel[$description][] = $tabT[0]['s'];
-        }
+            $tabMateriel = array();
+            while ($ligne = $this->db->fetch_object($result)) {
+                $tabT = explode(" ", $ligne->description);
+                $description = trim($tabT[0]);
+                $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
+                if (count($tabT) > 0)
+                    $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
+            }
 //        print_r($tabMateriel);die;
-        ksort($tabMateriel, SORT_STRING);
+            ksort($tabMateriel, SORT_STRING);
 
-        $j = 0;
-        foreach ($tabMateriel as $titre => $tabChrono) {
-            $j++;
+            $j = 0;
+            foreach ($tabMateriel as $titre => $tabChrono) {
+                $j++;
 //            if($j > 50)
 //                break;
-            $return1 = $return2 = "";
-//            $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
-//            $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
-            $result2 = $this->db->query($partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
-//
-            $i = 0;
-            $this->textSortie($titre, "titre");
-            
-            while ($ligne2 = $this->db->fetch_object($result2)) {
-                $i++;
-                if ($i == 1)
-                    $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
-                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", false);
-            }
-            
-            $this->textSortie($return1 . $return2);
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
 
 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+            }
+        } elseif ($typeAff == "parTypeGar") {
+            $result = $this->db->query("SELECT Type_garantie as description, id FROM llx_synopsischrono_view_101");
+
+            $tabMateriel = array();
+            while ($ligne = $this->db->fetch_object($result)) {
+                $tabT = explode("(", $ligne->description);
+                $description = trim($tabT[0]);
+                $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
+                if (count($tabT) > 0)
+                    $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
+            }
+//        print_r($tabMateriel);die;
+            ksort($tabMateriel, SORT_STRING);
+
+            $j = 0;
+            foreach ($tabMateriel as $titre => $tabChrono) {
+                $j++;
+//            if($j > 50)
+//                break;
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND chrono.id in (" . implode(",", $tabChrono) . ") " . $partReqFin);
+
+
+//            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+            }
+        } else {
+            $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
+
+echo "kkkk".$totTT;
         $this->sortie("c pas encore", "statSav");
     }
-    
-    public function textSortie($text, $type = "tab"){
+
+    private function statLigneFacture($titre, $req) {
+        $return1 = $return2 = "";
+        $result2 = $this->db->query($req);
+//
+        if ($this->db->num_rows($result2) > 0 && (1)) {
+            $i = 0;
+
+            while ($ligne2 = $this->db->fetch_object($result2)) {
+                $i++;
+                if ($i == 1) {
+                    if(isset($ligne2->NB_PC) && $ligne2->NB_PC == 0 && $this->db->num_rows($result2) == 1)
+                        return '';
+                    $this->textSortie($titre, "titre");
+                    $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
+                }
+                global $totTT;
+                if(isset($ligne2->NB_PC))
+                    $totTT += $ligne2->NB_PC;
+                    
+                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", false);
+                $oldLigne = $ligne2;
+            }
+            if ($i > 1)
+                $return2 .= $this->textTable($oldLigne, $this->separateur, $this->sautDeLigne, "", "Total");
+
+            $this->textSortie($return1 . $return2);
+        }
+    }
+
+    public function textSortie($text, $type = "tab") {
         if ($this->sortie == 'html' && $type == "tab")
             $this->textSortie .= "<table><tr><td>" . $text . "</td></tr></table>";
         elseif ($this->sortie == 'html' && $type == "titre")
@@ -129,15 +177,19 @@ AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is nu
         $text = $this->textSortie;
 
         if ($this->sortie == 'file') {
-            $folder = "exportGle";
+            $folder2 = "exportGle";
             if ($type == "factureSav") {
                 $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $ligne['factid']);
-                $folder = "extractFactGle";
+                $folder2 = "extractFactGle";
             }
-            $folder = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT ) . $folder;
-            if (!is_dir($folder))
-                mkdir($folder);
-            file_put_contents($folder . $nom . ".txt", $text);
+            $folder2 .= "/";
+            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/1" ) . "/";
+            if (!is_dir($folder1 . $folder2))
+                mkdir($folder1 . $folder2);
+            $nom = str_replace(" ", "_", $nom); //die($folder . $nom . ".txt");
+            $file = $folder2 . $nom . ".txt";
+            file_put_contents($folder1 . $file, $text);
+            echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=export&file=" . $file . "' class='butAction'>Fichier</a>";
         } else {
             echo "<style>"
             . "td{"
@@ -145,7 +197,6 @@ AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is nu
             . "}"
             . "</style>";
             echo $text;
-            
         }
         $this->textSortie = "";
     }
@@ -153,7 +204,19 @@ AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is nu
     private function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true) {
         $return = "";
         $tabCacher = array('factid', 'rowid');
-        if ($afficheTitre) {
+        if ($afficheTitre === "Total") {
+            $return .= $prefLigne . $separateur;
+            foreach ($ligne as $nom => $valeur) {
+//            if($nom == 'product_type')
+//                $nom = 'ref_prod';
+
+
+                if (!is_int($nom) && !in_array($nom, $tabCacher))
+                    $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", (isset($this->tabTot[$nom]) ? price($this->tabTot[$nom]) : "TOTAL")) . $separateur;
+            }
+            $return .= $sautDeLigne;
+        }
+        elseif ($afficheTitre) {
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
 //            if($nom == 'product_type')
@@ -164,6 +227,7 @@ AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is nu
                     $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", $nom) . $separateur;
             }
             $return .= $sautDeLigne;
+            $this->tabTot = array();
         }
         else {
             $return .= $prefLigne . $separateur;
@@ -177,16 +241,19 @@ AND fact.`extraparams` IS NULL AND fact.fk_statut = 2 AND  fact.close_code is nu
                         $valeur = "";
                 }
 
-                if ((stripos($nom, "_ht") !== false
-                         || stripos($nom, "_ttc") !== false
-                         || stripos($nom, "Total") !== false
-                        )&& is_numeric($valeur))
+                if ((stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
+                        ) && is_numeric($valeur)) {
+                    $this->tabTot[$nom] += $valeur;
                     $valeur = price($valeur);
+                }
 
 
                 if (!is_int($nom) && !in_array($nom, $tabCacher))
                     $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", $valeur) . $separateur;
             }
+
+
+
             $return .= $sautDeLigne;
         }
         return $return;

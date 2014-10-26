@@ -26,7 +26,7 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_R
     $db->query("UPDATE ".MAIN_DB_PREFIX."commande SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
     $db->query("UPDATE ".MAIN_DB_PREFIX."facture SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
     $db->query("UPDATE ".MAIN_DB_PREFIX."contrat SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
-    $db->query("UPDATE ".MAIN_DB_PREFIX."Synopsis_demandeinterv SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
+    $db->query("UPDATE ".MAIN_DB_PREFIX."synopsisdemandeinterv SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
     $db->query("UPDATE ".MAIN_DB_PREFIX."fichinter SET fk_soc = ".$id2." WHERe fk_soc = ".$id);
 
     header("Location:" .DOL_URL_ROOT."/comm/fiche.php?socid=".$id);

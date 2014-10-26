@@ -15,6 +15,8 @@ class synopsisHook {
     function synopsisHook() {
         global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
+        if(defined('MAX_TIME_LOG'))
+            self::$MAX_TIME_LOG = MAX_TIME_LOG;
 
         $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr"), "VB" => array("04 75 81 81 54", "sav07@bimp.fr"), 
             "M" => array("04 50 22 15 55", "sav74@bimp.fr"), "AB" => array("04 50 22 15 55", "sav74@bimp.fr"), "C" => array("04 50 22 15 55", "sav74@bimp.fr"), "CB" => array("04 50 22 15 55", "sav74@bimp.fr"), 

@@ -60,7 +60,7 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
 //        $partReqFin = " Group BY factdet.fk_product LIMIT 0,1000";
 
         if ($typeAff2 == "ca") {
-            $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
+            $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, concat(prod.label,concat(' ',factdet.description)), SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
             $partReqFin = " Group BY factdet.fk_product, factdet.description LIMIT 0,10000";
         } else {
             $partReq1 = "SELECT COUNT(DISTINCT(chrono.id)) as NB_PC";
@@ -78,13 +78,13 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
 //"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
 //"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
                 "AND factdet.total_ht != 0 AND ";
-global $totTT;$totTT= 0;
+        
         if ($typeAff == "parTypeMat") {
             $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
-                $tabT = explode(" ", $ligne->description);
+                $tabT = explode("(", $ligne->description);
                 $description = trim($tabT[0]);
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
                 if (count($tabT) > 0)
@@ -131,7 +131,6 @@ global $totTT;$totTT= 0;
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
 
-echo "kkkk".$totTT;
         $this->sortie("c pas encore", "statSav");
     }
 
@@ -145,15 +144,12 @@ echo "kkkk".$totTT;
             while ($ligne2 = $this->db->fetch_object($result2)) {
                 $i++;
                 if ($i == 1) {
-                    if(isset($ligne2->NB_PC) && $ligne2->NB_PC == 0 && $this->db->num_rows($result2) == 1)
+                    if (isset($ligne2->NB_PC) && $ligne2->NB_PC == 0 && $this->db->num_rows($result2) == 1)
                         return '';
                     $this->textSortie($titre, "titre");
                     $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
                 }
-                global $totTT;
-                if(isset($ligne2->NB_PC))
-                    $totTT += $ligne2->NB_PC;
-                    
+
                 $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", false);
                 $oldLigne = $ligne2;
             }

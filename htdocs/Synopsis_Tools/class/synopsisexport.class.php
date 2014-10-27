@@ -20,28 +20,28 @@ class synopsisexport {
     }
 
     public function exportFactureSav() {
-        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, fact.datec, fact.rowid as factid 
+        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 FROM  `llx_facture` fact, llx_societe soc
 WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null");
 
-        while ($ligne = $this->db->fetch_array($result)) {
+        while ($ligne = $this->db->fetch_object($result)) {
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
             $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
-            $result2 = $this->db->query("SELECT ref, fd.product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne['factid']);
+            $result2 = $this->db->query("SELECT ref, fd.product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
 
             $i = 0;
-            while ($ligne2 = $this->db->fetch_array($result2)) {
+            while ($ligne2 = $this->db->fetch_object($result2)) {
                 $i++;
                 if ($i == 1)
                     $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "L", true);
                 $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "L", false);
             }
             $return = $return1 . $return2;
+//            echo $return;
+            $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid);
 
-            $this->sortie($return, $ligne['facnumber'], "factureSav");
-
-            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
+            echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
         }
     }
 
@@ -78,7 +78,7 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
 //"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
 //"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
                 "AND factdet.total_ht != 0 AND ";
-        
+
         if ($typeAff == "parTypeMat") {
             $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
 
@@ -131,7 +131,7 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
 
-        $this->sortie("c pas encore", "statSav");
+        $this->sortie("", "statSav");
     }
 
     private function statLigneFacture($titre, $req) {
@@ -169,18 +169,19 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
             $this->textSortie .= $text;
     }
 
-    public function sortie($text, $nom = "temp", $type = "n/c") {
+    public function sortie($text, $nom = "temp", $type = "n/c", $idObj = null) {
         global $user;
-        $text = $this->textSortie;
+        $text .= $this->textSortie;
 
         if ($this->sortie == 'file') {
             $folder2 = "exportGle";
             if ($type == "factureSav") {
-                $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $ligne['factid']);
+                if ($idObj > 0)
+                    $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $idObj);
                 $folder2 = "extractFactGle";
             }
             $folder2 .= "/";
-            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/".$user->id ) . "/";
+            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/" . $user->id ) . "/";
             if (!is_dir($folder1))
                 mkdir($folder1);
             if (!is_dir($folder1 . $folder2))

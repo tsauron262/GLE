@@ -290,7 +290,6 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Prise en charge prioritaire.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo " <input type='checkbox' name='Prio' value='0' id='Prio'" . $prio . "/>";
-    echo " <label for='preuveAchat'/>(Cochez si une preuve d'achat est fournie)</label>";
     echo "</td>";
     echo "</tr>";
 

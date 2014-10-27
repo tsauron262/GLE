@@ -1485,7 +1485,7 @@ if (is_dir($dir)) {
                                  VALUES (now(),'" . $ref . "'," . ($internalUserId > 0 ? $internalUserId : 'NULL') . "," . $socid . "," . $condReg . ",'" . date('Y-m-d', $val['PcvDate']) . "'," . $modReg . ",'" . $livAdd . "'," . $val['PcvID'] . ")";
                                     $sql = requeteWithCache($requete);
                                     $comId = $db->last_insert_id("" . MAIN_DB_PREFIX . "propal");
-                                    if (isset($oldRef) && $oldRef)
+                                    if (isset($oldRef) && $oldRef && $oldId > 0)
                                         SynopsisRevisionPropal::setLienRevision($oldRef, $oldId, $comId, $newRef);
                                     if ($sql) {
                                         $mode = "PROPAL_CREATE";

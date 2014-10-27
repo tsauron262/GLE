@@ -204,7 +204,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 //                echo "<pre>";print_r($chrono->valuesPlus);die;
 
 
-                $pdf->SetXY('148', '34.4');
+                $pdf->SetXY('50', '37');
                 $pdf->SetFont('', '', 14);
                 $pdf->MultiCell(100, 6, $chrono->ref, 0, 'L');
 
@@ -213,11 +213,11 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
                 //centre
                 $pdf->SetFont('', '', 12);
-                $pdf->SetXY('30', '37.5');
+                $pdf->SetXY('147', '32.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1060]->valueStr, 0, 'L');
-                $pdf->SetXY('20', '42.8');
+                $pdf->SetXY('147', '38.5');
                 $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][0], 0, 'L');
-                $pdf->SetXY('22', '49');
+                $pdf->SetXY('147', '44.1');
                 $pdf->MultiCell(100, 6, $tabCentre[$chrono->valuesPlus[1060]->value][1], 0, 'L');
 //                $tabCentre
                 //client
@@ -241,17 +241,17 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
 
 
 
-                $pdf->SetXY('119.3', '49.1');
+                $pdf->SetXY('16', '53.5');
                 $pdf->SetFont('', '', 9);
                 $pdf->MultiCell(50, 6, dol_print_date($chrono->date), 0, 'L');
 
                 if ($chrono->fk_user_author > 0) {
-                    $pdf->SetXY('147.5', '49');
+                    $pdf->SetXY('41', '53.5');
                     $pdf->MultiCell(100, 6, $chrono->user_author->getFullName($langs), 0, 'L');
                 }
                 
                 if($chrono->valuesPlus[1066]->value != ""){
-                    $pdf->SetXY(114, 42);
+                    $pdf->SetXY(12, 45);
                     $pdf->MultiCell(100, 6, "N° de dossier prestataire : ".$chrono->valuesPlus[1066]->value, 0, 'L');
                 }
 
@@ -276,30 +276,42 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $pdf->SetXY('143', '104.5');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1041]->valueStr, 0, 'L');
 
+                $pdf->SetXY(130, 109);
+                $pdf->MultiCell(80, 6, $chrono2->valuesPlus[1067]->valueStr, 0, '');
 
                 //symptom et sauv
-                $pdf->SetXY('15', '125.2');
+                $pdf->SetXY('15', '138.5');
                 $pdf->SetFont('', '', 12);
                 $pdf->MultiCell(170, 6, $chrono->valuesPlus[1047]->valueStr, 0, 'L');
                 
                 if($chrono->valuesPlus[1055]->value == 2)
                     $pdf->SetTextColor(256,0,0);
                     
-                $pdf->SetXY('27.5', '146');
+                $pdf->SetXY('28.5', '160.3');
                 $pdf->MultiCell(100, 6, $chrono->valuesPlus[1055]->valueStr, 0, 'L');
-
                 
-                
-                
-                //info pour prise en charge
+                if($chrono->valuesPlus[1068]->value == 1){
                 $pdf->SetFont('', '', 9);
-                $pdf->SetTextColor(0,0,0);
-                $pdf->SetXY(25, 257);
-                $pdf->MultiCell(90, 6, "Login : ".$chrono2->valuesPlus[1063]->valueStr, 0, '');
-                $pdf->SetXY(25, 262);
-                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
-                $pdf->SetXY(100, 260);
-                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
+                $pdf->SetTextColor("black");
+                $pdf->SetXY('6', '245');
+                $pdf->MultiCell(100, 6, "- J'accepte les frais de 96 TTC de prise en charge urgente", 0, 'L');
+                $pdf->SetXY('62', '115');
+                $pdf->SetFont('', '', 20);
+                $pdf->SetTextColor(255,102,0);
+                $pdf->MultiCell(100, 6, "Prise en charge urgente", 0, 'L');
+                }
+                
+                
+                
+//                //info pour prise en charge
+//                $pdf->SetFont('', '', 9);
+//                $pdf->SetTextColor(0,0,0);
+//                $pdf->SetXY(25, 257);
+//                $pdf->MultiCell(90, 6, "Login : ".$chrono2->valuesPlus[1063]->valueStr, 0, '');
+//                $pdf->SetXY(25, 262);
+//                $pdf->MultiCell(90, 6, "Mdp : ".$chrono2->valuesPlus[1057]->valueStr, 0, '');
+//                $pdf->SetXY(100, 260);
+//                $pdf->MultiCell(90, 6, "Systéme : ".$chrono2->valuesPlus[1067]->valueStr, 0, '');
                 
 
                 //etiquette ref

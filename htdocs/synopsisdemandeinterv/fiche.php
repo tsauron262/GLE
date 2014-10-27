@@ -248,7 +248,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST['action'] == 'createFI') {
             $requete = "SELECT *  FROM " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value WHERE typeI = 'DI' AND interv_refid =" . $synopsisdemandeinterv->id;
             $sql1 = $db->query($requete);
             while ($res1 = $db->fetch_object($sql1)) {
-                if (!in_array(array(24, 25, 26, 27), $res1->extra_key_id)) {
+                if (!in_array($res1->extra_key_id, array(24, 25, 26, 27))) {
                     $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
                                             (typeI, interv_refid,extra_key_refid,extra_value)
                                      VALUES ('FI'," . $result . "," . $res1->extra_key_refid . ",'" . addslashes($res1->extra_value) . "')";

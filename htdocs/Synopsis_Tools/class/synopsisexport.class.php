@@ -170,6 +170,7 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
     }
 
     public function sortie($text, $nom = "temp", $type = "n/c") {
+        global $user;
         $text = $this->textSortie;
 
         if ($this->sortie == 'file') {
@@ -179,7 +180,7 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
                 $folder2 = "extractFactGle";
             }
             $folder2 .= "/";
-            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/1" ) . "/";
+            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/".$user->id ) . "/";
             if (!is_dir($folder1 . $folder2))
                 mkdir($folder1 . $folder2);
             $nom = str_replace(" ", "_", $nom); //die($folder . $nom . ".txt");

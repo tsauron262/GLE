@@ -22,7 +22,7 @@ $(window).load(function() {
 //    }, 5000);
 
 
-    if (window.location.pathname.indexOf("societe/soc.php") !== false || window.location.pathname.indexOf("contact/fiche.php") !== false) {
+    if (window.location.pathname.indexOf("societe/soc.php") > -1 || window.location.pathname.indexOf("contact/fiche.php") > -1) {
         $("body").keypress(function(e) {
             if (e.which == 13)
                 return false

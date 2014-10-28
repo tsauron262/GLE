@@ -1363,7 +1363,8 @@ EOF;
         print $langs->trans('Project');
         $societe = new Societe($db);
         $societe->fetch($synopsisdemandeinterv->socid);
-        $numprojet = $societe->has_projects();
+        if ($societe->id)
+            $numprojet = $societe->has_projects();
         if (!$numprojet) {
 //            print '</td></tr></table>';
             print '<td class="ui-widget-content" colspan=3>';

@@ -323,7 +323,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-        if (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0) {
+        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0)) {
             require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
             $payement = new Paiement($db);
             $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());

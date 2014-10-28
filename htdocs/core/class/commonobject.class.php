@@ -876,7 +876,12 @@ abstract class CommonObject
         $sql.= " WHERE te.".$fieldid." > '".$this->db->escape(/*mod drsi*/$this->id/*f mod drsi*/)."'";
         if (empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir) $sql.= " AND sc.fk_user = " .$user->id;
         if (! empty($filter)) $sql.=" AND ".$filter;
-        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir)) $sql.= ' AND te.fk_soc = s.rowid';			// If we need to link to societe to limit select to entity
+        if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 2 || ($this->element != 'societe' && empty($this->isnolinkedbythird) && !$user->rights->societe->client->voir))/*mod drsi*/{
+            if($this->table_element == "user")
+            $sql.= ' AND te.fk_societe = s.rowid';
+            else
+            $sql.= ' AND te.fk_soc = s.rowid';// If we need to link to societe to limit select to entity
+        }/*fmoddrsi*/
         if (isset($this->ismultientitymanaged) && $this->ismultientitymanaged == 1) $sql.= ' AND te.entity IN ('.getEntity($this->element, 1).')';
         // Rem: Bug in some mysql version: SELECT MIN(rowid) FROM llx_socpeople WHERE rowid > 1 when one row in database with rowid=1, returns 1 instead of null
 

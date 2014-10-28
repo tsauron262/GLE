@@ -21,7 +21,7 @@ class synopsisexport {
 
     public function exportFactureSav() {
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-FROM  `llx_facture` fact, llx_societe soc
+, email , total, total_ttc FROM  `llx_facture` fact, llx_societe soc
 WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null");
 
         while ($ligne = $this->db->fetch_object($result)) {

@@ -93,7 +93,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "devisOk" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 3) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis accepté le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Devis accepté le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 2, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 3));
@@ -102,7 +102,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "debDiago" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 5) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Diagnostique commencé le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
@@ -131,9 +131,9 @@ if (isset($_REQUEST['actionEtat'])) {
             $action = "attenteClient2"; //Pour simuler click bouton Sous garentie
         }
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Piéce commandée le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Piéce commandée le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
-        
+
         $chrono->setDatas($chrono->id, array($idEtat => 1));
         $attentePiece = 1;
 
@@ -149,7 +149,7 @@ if (isset($_REQUEST['actionEtat'])) {
     if ($action == "revProp" && $chrono->propal->id > 0) {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Revision/revision.class.php");
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Devis révisé aprés fermeture le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
 
         $revision = new SynopsisRevisionPropal($chrono->propal);
@@ -197,7 +197,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "devisKo" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis refusé le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Devis refusé le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->propal->cloture($user, 3, "Auto via SAV");
         $chrono->setDatas($chrono->id, array($idEtat => 6));
@@ -205,7 +205,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
     if ($action == "pieceOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Pièce reçue le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Pièce reçue le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
@@ -219,7 +219,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "repEnCours" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 4) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Réparation en cours depuis le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Réparation en cours depuis le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 4));
         $ok = true;
@@ -233,7 +233,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if ($action == "repOk" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 9) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Réparation terminée le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Réparation terminée le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 9));
         $ok = true;
@@ -256,26 +256,32 @@ if (isset($_REQUEST['actionEtat'])) {
 
     if (($action == "attenteClient1" || $action == "attenteClient2") && ($chrono->extraValue[$chrono->id]['Etat']['value'] != 3 || $chrono->extraValue[$chrono->id]['Etat']['value'] != 2)) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
-            $totPa = 0;
-            foreach ($chrono->propal->lines as $lines)
-                $totPa += $lines->pa_ht;
-
 //            die($totPa);
 //            ($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0
-
-            $totHt = $chrono->propal->total_ht;
-            $totTtc = $chrono->propal->total_ttc;
-            $tabT = $chrono->propal->InvoiceArrayList($chrono->propal->id);
-            if (isset($tabT[0]) && isset($tabT[0]->facnumber) && stripos($tabT[0]->facnumber, "AC") !== false) {
-                $totHt += $tabT[0]->total;
-                $totTtc += $tabT[0]->total*1.2;
+//            $totHt = $chrono->propal->total_ht;
+//            $totTtc = $chrono->propal->total_ttc;
+//            $tabT = $chrono->propal->InvoiceArrayList($chrono->propal->id);
+//            if (isset($tabT[0]) && isset($tabT[0]->facnumber) && stripos($tabT[0]->facnumber, "AC") !== false) {
+//                $totHt += $tabT[0]->total;
+//                $totTtc += $tabT[0]->total*1.2;
+//            } 
+            $totPa = 0;
+            $totHt = 0;
+            $totTtc = 0;
+            foreach ($propal->lines as $ligne) {
+                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
+                    $totHt += $ligne->total_ht;
+                    $totTtc += $ligne->total_ttc;
+                    $totPa += $lines->pa_ht;
+                }
             }
-//die("mmmmmmmm".print_r($tabT, true));
-            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1)-1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totHt);
+
+
+            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totHt);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);
@@ -302,11 +308,15 @@ if (isset($_REQUEST['actionEtat'])) {
         $ok = true;
     }
 
+    if ($action == "restituer" && $propal->total_ttc > 0 && !(isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0)) {
+        header("Location:fiche.php?id=" . $_GET['id'] . "&msg=" . urlencode("Attention, " . price($propal->total_ttc) . " € A payer, merci de remplir le moyen de paiement !"));
+        die;
+    }
 
 
     if ($action == "restituer" && $chrono->extraValue[$chrono->id]['Etat']['value'] != 999) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
-        $chrono->note .= "Restitué le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+        $chrono->note .= "Restitué le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
         $chrono->setDatas($chrono->id, array($idEtat => 999));
         $ok = true;
@@ -323,7 +333,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0)) {
+        if ($facture->total_ttc - $facture->getSommePaiement() == 0 || (isset($_REQUEST['modeP']) && $_REQUEST['modeP'] > 0 && $_REQUEST['modeP'] != 56)) {
             require_once(DOL_DOCUMENT_ROOT . "/compta/paiement/class/paiement.class.php");
             $payement = new Paiement($db);
             $payement->amounts = array($facture->id => $facture->total_ttc - $facture->getSommePaiement());

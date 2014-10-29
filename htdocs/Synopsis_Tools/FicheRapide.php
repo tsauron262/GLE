@@ -52,8 +52,8 @@ $machine = (isset($_POST['Machine']) ? $_POST['Machine'] : "");
 $numExt = (isset($_POST['NumExt']) ? $_POST['NumExt'] : "");
 $systeme = (isset($_POST['systeme']) ? $_POST['systeme'] : "");
 $garantie = (isset($_POST['Garantie']) ? $_POST['Garantie'] : "");
-$preuve = (isset($_POST['Preuve']) && $_POST['Preuve'] == 1 ? 'checked' : "");
-$prio = (isset($_POST['Prio']) && $_POST['Prio'] == 1 ? 'checked' : "");
+$preuve = (isset($_POST['Preuve']) && ($_POST['Preuve'] == 1 || $_POST['Preuve'] == "on") ? 'checked' : "");
+$prio = (isset($_POST['Prio']) && ($_POST['Prio'] == 1 || $_POST['Prio'] == 'on') ? 'checked' : "");
 $DateAchat = (isset($_POST['DateAchat']) ? $_POST['DateAchat'] : "");
 $etat1 = (isset($_POST['Etat']) && $_POST['Etat'] == 1 ? 'selected' : "");
 $etat2 = (isset($_POST['Etat']) && $_POST['Etat'] == 2 ? 'selected' : "");
@@ -145,8 +145,8 @@ if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
                     $propal = $chrono->propal;
 
 
-                    $propal->addline("Prise en charge :  : " . $chrono->ref . 
-                            "\n"."S/N : ".$NoMachine.
+                    $propal->addline("Prise en charge :  : " . $chrono->ref .
+                            "\n" . "S/N : " . $NoMachine .
                             "\n" . "Garantie :
 Pour du matériel couvert par Apple, la garantie initiale s'applique.
 Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
@@ -163,8 +163,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $factureA->socid = $chrono->socid;
                         $factureA->create($user);
                         $factureA->addline("Acompte", $acompte / 1.2, 1, 20, null, null, null, 0, null, null, null, null, null, 'HT', null, 1, null, null, null, null, null, null, $acompte / 1.2);
-                                
-                                
+
 //                                ("Acompte", $acompte, 1, 0, 0, 0, $prod->id, 0, 'HT', null, null,null, null, null, null, null, null, null, null, null, null, null, $acompte);
                         $factureA->validate($user);
 
@@ -196,6 +195,16 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 //                $propal->addline("Acompte", -$acompte, 1, 0, 0, 0, 0, 0, 0, -$acompte);
                         $propal->insert_discount($discount->id);
                     }
+
+                    if ($prio) {
+                        require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+                        $prodF = new ProductFournisseur($db);
+                        $prodF->fetch(3422);
+                        $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
+                        $prodF->find_min_price_product_fournisseur($prodF->id, 1);
+                        $propal->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $prodF->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+                    }
+
                     $propal->fetch($propal->id);
 
                     require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
@@ -284,12 +293,12 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
-    
+
+
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Prise en charge prioritaire.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
-    echo " <input type='checkbox' name='Prio' value='0' id='Prio'" . $prio . "/>";
+    echo " <input type='checkbox' name='Prio' id='Prio' " . $prio . "/>";
     echo "</td>";
     echo "</tr>";
 
@@ -403,7 +412,7 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
+
 
 
     echo "<p>";
@@ -418,7 +427,7 @@ if ($socid != "") {
     echo "</td>";
     echo "</tr>";
     echo "</p>";
-    
+
     echo "<p>";
     echo "<tr>";
     echo "<th class='ui-state-default ui-widget-header'>Login admin.</th>";

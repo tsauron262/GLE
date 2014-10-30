@@ -14,6 +14,7 @@ class CronSynopsis {
 
     public function netoyage() {
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
+        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '".$this->db->idate(strtotime ("-3 day"))."'");
     }
 
     public function testGlobal() {
@@ -21,10 +22,10 @@ class CronSynopsis {
         $this->sortie .= maj::sauvBdd();
 
         $this->netoyage();
-        $this->majChrono();
-        $this->majSav();
-        $this->verif();
-        $this->sortieMail();
+//        $this->majChrono();
+//        $this->majSav();
+//        $this->verif();
+//        $this->sortieMail();
         
         echo 1;
     }

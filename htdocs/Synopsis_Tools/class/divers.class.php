@@ -197,7 +197,7 @@ if (! defined('NOLOGIN'))
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7"." ORDER BY id ASC");
                 while ($ligne = $db->fetch_object($result)) {
 //                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` IN ('" . $centre . "')) AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE model_refid = 105 AND  `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
-                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " EtatVal = '" . $ligne->valeur . "'");
+                    $result2 = $db->query("SELECT COUNT(rowid) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " EtatVal = '" . $ligne->valeur . "'");
                     $ligne2 = $db->fetch_object($result2);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     $nbStr = ($ligne2->nb < 10 ? "&nbsp;&nbsp;".$ligne2->nb : ($ligne2->nb < 100 ? "&nbsp;".$ligne2->nb : $ligne2->nb));

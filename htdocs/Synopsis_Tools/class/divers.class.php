@@ -234,7 +234,7 @@ if (! defined('NOLOGIN'))
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
             while ($ligne = $db->fetch_object($result)) {
 //                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
-                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` WHERE  EtatVal = '" . $ligne->valeur . "'");
+                $result2 = $db->query("SELECT COUNT(rowid) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` WHERE  EtatVal = '" . $ligne->valeur . "'");
                 $ligne2 = $db->fetch_object($result2);
                 $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                 $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
@@ -317,8 +317,8 @@ if (! defined('NOLOGIN'))
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
                 . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'
-                . 'var selectCentre = "'.$listCentre.'";
-    alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
+                . 'var selectCentre = "'.$listCentre.'";'
+//                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
 

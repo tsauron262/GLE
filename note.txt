@@ -1,3 +1,16 @@
+Synopsis_Tools/mailRequest.php?action=fusionCli&id="AVIDER"&id2=
+
+
+
+
+
+
+
+
+
+
+
+
 Contrat en tete + ligne plus
 
 connect precedent
@@ -664,3 +677,37 @@ ref
 
 
 //fichier exel
+
+
+
+
+Voir réglement a 30 jours      empécher quand   montant est pas de mode de paiement.
+
+
+script payer facture a 0
+
+voir mail - suppr chéque ....
+
+Boutons régénérer les documents.
+
+Dans propal du chrono ajouter ttc
+
+
+Reste a payer que si != 0
+
+//quand verifier âr apple pas de verif
+
+
+
+
+
+dans action modifier suppr vboton modifier
+
+
+a confirmé    clignoter rdv
+
+
+Di choix du type
+
+
+Commande quand terminer 

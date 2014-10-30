@@ -507,7 +507,7 @@ if ($chr->id > 0) {
                         $propal = new Propal($db);
                         $propal->fetch($res->rowid);
                         $tabT = getElementElement("propal", "facture", $propal->id);
-                        print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($res->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT<br/>";
+                        print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($res->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT " . price($res->total, 1, '', 1, -1, -1, $conf->currency) . " TTC<br/>";
                         if ($propal->statut == 0) {
                             $form = new Form($db);
                             echo "<form method='POST'><input type='hidden' name='idProp' value='" . $propal->id . "'/><input name='action' type='hidden' value='addLnProp'/>";

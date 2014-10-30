@@ -8,7 +8,7 @@ class fileInfo {
         $this->pathFileInfo = DOL_DOCUMENT_ROOT . "/Synopsis_Tools/fileInfo/";
         $this->db = $db;
         $this->fileVue = array();
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Tools_fileInfo";
+        $requete = "SELECT rowid, file, date FROM " . MAIN_DB_PREFIX . "Synopsis_Tools_fileInfo";
         $sql = $this->db->query($requete);
         if ($sql) {
             while ($result = $db->fetch_object($sql))

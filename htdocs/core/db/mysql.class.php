@@ -169,7 +169,7 @@ class DoliDBMysql extends DoliDB
 	 *	@param	    string	$database	Name of database
 	 *	@return	    boolean  		    true if OK, false if KO
 	 */
-	function select_db($database)
+	function                                     select_db($database)
 	{
 		dol_syslog(get_class($this)."::select_db database=".$database, LOG_DEBUG);
 		return mysql_select_db($database, $this->db);

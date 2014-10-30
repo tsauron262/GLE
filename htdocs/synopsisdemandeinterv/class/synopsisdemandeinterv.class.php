@@ -576,6 +576,7 @@ class Synopsisdemandeinterv extends CommonObject {
         if ($heureDep == '' || $heureDep == '00:00')
             $heureDep = "18:00"; //else die($heureDep);
 
+        if($this->date > 0){
         $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
         $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
         $action->type_id = 50;
@@ -594,6 +595,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $action->update($user);
         elseif ($createIfNot)
             $action->add($user);
+        }
     }
 
     function preparePrisencharge($userT, $outputdir = "") {

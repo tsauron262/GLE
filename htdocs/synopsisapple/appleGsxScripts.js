@@ -1436,7 +1436,7 @@ function traiteCommandeRetour(html, $resultContainer) {
         }
         if (html.indexOf('<formSus>OK</formSus>') !== -1) {
             htmlFormSus = html.replace("<formSus>OK</formSus>", "");
-            $("#formSus").append(htmlFormSus);
+            $("#formSus_CreateCarryInRepair").append(htmlFormSus);
             $resultContainer.html("Renseignez les Composants");
         }
         if (html.indexOf('<horsgarantie>OK</horsgarantie>') !== -1) {

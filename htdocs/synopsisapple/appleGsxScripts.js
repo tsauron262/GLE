@@ -1529,7 +1529,10 @@ function onRequestResponse(xhr, requestType, prodId) {
                     $(this).html(xhr.responseText).show();
                     if (importCart) {
                         $(this).find('span.importParts').click();
-                    }
+                    }  
+                    $("#requestReviewByApple_yes").click(function(){
+                        $("#checkIfOutOfWarrantyCoverage_no").click();
+                    });
                 });
             } else {
                 displayRequestMsg('error', 'Erreur : container absent pour cet ID produit, impossible d\'afficher les données');

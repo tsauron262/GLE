@@ -259,7 +259,7 @@ class DoliDBMysql extends DoliDB
 		}
 		else
 		{
-			mysql_select_db($this->database_name);
+//			mysql_select_db($this->database_name);
 			$ret = mysql_query($query, $this->db);
 		}
 

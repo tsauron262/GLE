@@ -202,7 +202,8 @@ if (! defined('NOLOGIN'))
                     
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
-                $href = DOL_URL_ROOT . '/s<synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
+                $href = DOL_URL_ROOT . '/'
+                        . 'synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
                 $return .= '<div class="menu_contenu"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@Synopsis_Tools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 

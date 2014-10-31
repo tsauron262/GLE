@@ -1183,6 +1183,8 @@ class pdf_crabeSav extends ModelePDFFactures
 				$resteapayer=0;
 			}
 
+                        
+                        if($resteapayer != 0){
 			$index++;
 			$pdf->SetTextColor(0,0,60);
 			$pdf->SetFillColor(224,224,224);
@@ -1190,6 +1192,7 @@ class pdf_crabeSav extends ModelePDFFactures
 			$pdf->MultiCell($col2x-$col1x, $tab2_hl, $outputlangs->transnoentities("RemainderToPay"), $useborder, 'L', 1);
 			$pdf->SetXY($col2x, $tab2_top + $tab2_hl * $index);
 			$pdf->MultiCell($largcol2, $tab2_hl, price($resteapayer, 0, $outputlangs), $useborder, 'R', 1);
+                        }
 
 			// Fin
 			$pdf->SetFont('','', $default_font_size - 1);

@@ -329,7 +329,7 @@ class pdf_azurSAV extends ModelePDFPropales
                                     
                                     
                                         /*mod drsi*/
-                                        if($object->lines[$i]->desc == "Acompte"){
+                                        if($object->lines[$i]->desc == "Acompte" && $object->lines[$i]->total < 0){
                                             $accTht = $object->lines[$i]->total_ht;
                                             $accTtva = $object->lines[$i]->total_tva;
                                             continue;

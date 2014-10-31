@@ -183,11 +183,23 @@ if (! defined('NOLOGIN'))
             $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
             $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
+            
+            
+            
             $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
             $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
             while ($ligne3 = $db->fetch_object($result3)) {
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
+            $tabResult = array();
+            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " 1 GROUP BY CentreVal, EtatVal");
+            while ($ligne2 = $db->fetch_object($result2)) {
+                $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
+                if(!isset($tabResult[$centre][$ligne2->EtatVal]))
+                    $tabResult[$centre][$ligne2->EtatVal] = 0;
+                $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
+            }
+                    
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
                 $href = DOL_URL_ROOT . '/s<synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
@@ -196,16 +208,41 @@ if (! defined('NOLOGIN'))
 
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7"." ORDER BY id ASC");
                 while ($ligne = $db->fetch_object($result)) {
-//                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` IN ('" . $centre . "')) AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE model_refid = 105 AND  `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
-                    $result2 = $db->query("SELECT COUNT(id) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " EtatVal = '" . $ligne->valeur . "'");
-                    $ligne2 = $db->fetch_object($result2);
+                    $nb = $tabResult[$centre][$ligne->valeur];
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                    $nbStr = ($ligne2->nb < 10 ? "&nbsp;&nbsp;".$ligne2->nb : ($ligne2->nb < 100 ? "&nbsp;".$ligne2->nb : $ligne2->nb));
+                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;".$nb : ($nb < 100 ? "&nbsp;".$nb : $nb));
                     $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';
             }
+            
+            
+            
+            
+//            $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
+//            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
+//            while ($ligne3 = $db->fetch_object($result3)) {
+//                $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
+//            }
+//            foreach ($tabGroupe as $ligne3) {
+//                $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
+//                $href = DOL_URL_ROOT . '/s<synopsischrono/index.php?idmenu=845&chronoDet=105&mainmenu=Process' . ($ligne3['valeur'] ? '&FiltreCentre=' . $ligne3['forUrl'] : "");
+//                $return .= '<div class="menu_contenu"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
+//                    ' . img_object("SAV", "drap0@Synopsis_Tools") . ' ' . $ligne3['label'] . '</a></span><br/>';
+//
+//                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7"." ORDER BY id ASC");
+//                while ($ligne = $db->fetch_object($result)) {
+////                    $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE " . ($centre ? "`id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1060 AND `value` IN ('" . $centre . "')) AND" : "") . " `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE model_refid = 105 AND  `key_id` = 1056 AND `value` = '" . $ligne->valeur . "')");
+//                    $result2 = $db->query("SELECT COUNT(id) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " EtatVal = '" . $ligne->valeur . "'");
+//                    $ligne2 = $db->fetch_object($result2);
+//                    $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+//                    $nbStr = ($ligne2->nb < 10 ? "&nbsp;&nbsp;".$ligne2->nb : ($ligne2->nb < 100 ? "&nbsp;".$ligne2->nb : $ligne2->nb));
+//                    $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
+//                    $return .= "</span><br/>";
+//                }
+//                $return .= '</div>';
+//            }
 
             $return .= '<div class="menu_end"></div></div>';
         }
@@ -232,14 +269,33 @@ if (! defined('NOLOGIN'))
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
             $return .= '<div class="menu_contenu">';
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
+            
+            
+                $result2 = $db->query("SELECT COUNT(id) as nb, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` group by EtatVal");
+                $tabResult = array();
+            while ($ligne2 = $db->fetch_object($result2)) {
+                $tabResult[$ligne2->EtatVal] = $ligne2->nb;
+            }
+            
             while ($ligne = $db->fetch_object($result)) {
 //                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
-                $result2 = $db->query("SELECT COUNT(id) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` WHERE  EtatVal = '" . $ligne->valeur . "'");
-                $ligne2 = $db->fetch_object($result2);
+                
+                    $nb = $tabResult[$ligne->valeur];
+                
                 $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
+                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nb . " : " . $ligne->label . "</a>";
                 $return .= "</span><br/>";
             }
+            
+            
+//            while ($ligne = $db->fetch_object($result)) {
+////                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
+//                $result2 = $db->query("SELECT COUNT(id) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` WHERE  EtatVal = '" . $ligne->valeur . "'");
+//                $ligne2 = $db->fetch_object($result2);
+//                $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+//                $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $ligne2->nb . " : " . $ligne->label . "</a>";
+//                $return .= "</span><br/>";
+//            }
             $return .= '</div><div class="menu_end"></div>';
 //            }
             $return .= '</div>';

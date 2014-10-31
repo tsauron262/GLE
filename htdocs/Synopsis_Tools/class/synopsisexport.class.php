@@ -28,7 +28,7 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
             $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
-            $result2 = $this->db->query("SELECT ref, fd.product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
+            $result2 = $this->db->query("SELECT ref, if(fd.description = 'Acompte', -100, fd.product_type) as product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
 
             $i = 0;
             while ($ligne2 = $this->db->fetch_object($result2)) {
@@ -233,7 +233,9 @@ AND fact.fk_statut = 2 AND  fact.close_code is null AND fact.paye = 1 " .
             $return .= $prefLigne . $separateur;
             foreach ($ligne as $nom => $valeur) {
                 if ($nom == 'product_type') {
-                    if ($valeur == 1)
+                    if ($valeur == -100)
+                        $valeur = "GEN-SAV-ACOMPTE";
+                    elseif ($valeur == 1)
                         $valeur = "GEN-SAV-MO";
                     elseif ($valeur == 0)
                         $valeur = "GEN-SAV-PIECES";

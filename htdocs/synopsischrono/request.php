@@ -107,7 +107,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 5, 1046 => $user->id));
         $ok = true;
         if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
-            mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement."
+            mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n\n Cordialement."
                     , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     }
@@ -120,8 +120,9 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
 
-    if ($action == "commandeOK" && $chrono->propal->id > 0 && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
+    if ($action == "commandeOK" && $chrono->propal->id > 0){// && $chrono->extraValue[$chrono->id]['Etat']['value'] != 1) {
         //Si commmande apple a 0 on passse la propal sous garenti.
+        if($chrono->extraValue[$chrono->id]['Etat']['value'] < 9){
         if (isset($_REQUEST['prix']) && $_REQUEST['prix'] == 0 && is_object($chrono->propal)) {
             require_once(DOL_DOCUMENT_ROOT . "/synopsisapple/partsCart.class.php");
             $part = new partsCart($db);
@@ -137,13 +138,14 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->setDatas($chrono->id, array($idEtat => 1));
         $attentePiece = 1;
 
-        $ok = true;
         if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
-            mailSyn2("Commande pièce(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
+            mailSyn2("Commande piece(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,
 \nNous venons de commander la/les pièce(s) pour votre '" . $nomMachine . "' ou l'échange de votre iPod,iPad,iPhone. Nous restons à votre disposition pour toutes questions au " . $tel . ".
 \nCordialement.
 \nL'équipe BIMP", array(), array(), array());
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
+        }
+        $ok = true;
     }
 
     if ($action == "revProp" && $chrono->propal->id > 0) {
@@ -363,7 +365,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $tabFileFact3[] = $facture->facnumber . ".pdf";
         }
 
-        mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Ephésus pour votre '" . $nomMachine . "'.
+        mailSyn2("Fermeture du dossier " . $chrono->ref, $toMail, $fromMail, "Nous vous remercions d'avoir choisi Bimp pour votre '" . $nomMachine . "'.
 \nDans les prochains jours, vous allez peut-être recevoir une enquête satisfaction de la part d'APPLE, votre retour est important afin d'améliorer la qualité de notre Centre de Services.
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);

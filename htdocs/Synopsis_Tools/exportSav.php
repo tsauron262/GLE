@@ -11,6 +11,7 @@ $centre = (isset($_POST['centre']) ? $_POST['centre'] : null);
 $typeAff = (isset($_POST['typeAff']) ? $_POST['typeAff'] : null);
 $typeAff2 = (isset($_POST['typeAff2']) ? $_POST['typeAff2'] : null);
 $sortie = (isset($_REQUEST['sortie']) ? $_REQUEST['sortie'] : 'html');
+$paye = (isset($_REQUEST['paye']) ? 1: 0);
 
 
 echo "<form method='POST'>";
@@ -23,7 +24,7 @@ foreach(array("html" => "Affichage", "file" => "Fichier Exel") as $val=> $label)
 echo "</select>";
 
 echo "<select name='typeAff2'>";
-foreach(array("ca" => "CA", "nb" => "Nombre PC") as $val=> $label) {
+foreach(array("sav" => "SAV", "ca" => "CA", "nb" => "Nombre PC") as $val=> $label) {
     $valSelect = $typeAff2;
     echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
 }
@@ -31,11 +32,11 @@ echo "</select>";
 
 echo "<select name='typeAff'>";
     echo "<option value=''></option>";
-foreach(array("parTypeMat" => "Par materiel", "parTypeGar" => "Par type de garantie") as $val=> $label) {
+foreach(array("parTypeMat" => "Par materiel", "parTypeGar" => "Par type de garantie", "parCentre" => "Par centre") as $val=> $label) {
     $valSelect = $typeAff;
     echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
 }
-echo "</select>";
+echo "</select><br/>";
 
 
 echo "<select name='centre'>";
@@ -49,9 +50,9 @@ while ($ligne = $db->fetch_object($result)) {
 }
 echo "</select>";
 
+echo "<label for='paye'>Paye</label><input type='checkbox' name='paye' id='paye'".($paye? " checked='ckecked'" : "")."/>";
 
-
-echo "<input class='butAction' type='submit' value='Valider'/></form><br/><br/>";
+echo "<br/><input class='butAction' type='submit' value='Valider'/></form><br/><br/>";
 
 
 
@@ -66,7 +67,7 @@ echo "<input class='butAction' type='submit' value='Valider'/></form><br/><br/>"
 
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
 $export = new synopsisexport($db, $sortie);
-$export->exportChronoSav($centre, $typeAff, $typeAff2);
+$export->exportChronoSav($centre, $typeAff, $typeAff2, $paye);
 
 
 llxFooter();

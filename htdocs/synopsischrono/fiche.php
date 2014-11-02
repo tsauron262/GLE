@@ -23,6 +23,15 @@ $js = "";
 $langs->load("chrono@synopsischrono");
 $msg = "";
 
+if(!$id > 0 && isset($_REQUEST['ref'])){
+    $result = $db->query("SELECT id FROM ".MAIN_DB_PREFIX."synopsischrono WHERE ref LIKE '".$_REQUEST['ref']."'");
+    if($db->num_rows($result) > 0){
+        $ligne = $db->fetch_object($result);
+        $id = $ligne->id;
+    }
+}
+    
+
 if ($id > 0) {
     $chr = new Chrono($db);
     $chr->fetch($id);
@@ -518,7 +527,7 @@ if ($chr->id > 0) {
                             $propal = new Facture($db);
                             $propal->fetch($val['d']);
                             print '<tr><th class="ui-widget-header ui-state-default">Facture';
-                            print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($propal->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT</td>";
+                            print "<td class='ui-widget-content'>" . $propal->getNomUrl(1) . " " . $propal->getLibStatut() . "<br/>Total : " . price($propal->total_ht, 1, '', 1, -1, -1, $conf->currency) . " HT " . price($propal->total_ttc, 1, '', 1, -1, -1, $conf->currency) . " TTC</td>";
                         }
                     }
                 } else {

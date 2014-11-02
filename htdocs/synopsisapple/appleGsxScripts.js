@@ -547,8 +547,11 @@ function PartsManager(prodId, serial) {
                 'color': '#464646'
             });
         });
-        ptr.$prod.find('.filterTitle').mouseover(function() {
+        ptr.$prod.find('.filterTitle').click(function() {
             ptr.showTypeFilters();
+        });
+        ptr.$prod.find('.filterTitle').mouseover(function() {
+//            ptr.showTypeFilters();
         }).mouseout(function() {
             ptr.hideTypeFilters();
         });
@@ -741,7 +744,7 @@ function PartsManager(prodId, serial) {
         for (gpe in ptr.parts) {
             var n = 0;
             for (id in ptr.parts[gpe]) {
-                var display = true;
+                var display = false;
                 for (i in kw) {
                     var str = null;
                     var regex = null;
@@ -774,14 +777,14 @@ function PartsManager(prodId, serial) {
                             break;
                     }
                     if (str) {
-                        if (!regex.test(str)) {
-                            display = false;
-                        }
-                        if (display) {
-                            this.$prod.find('.partGroup_' + gpe).find('tr.partRow_' + id).show();
-                            n++;
+                        if (regex.test(str)) {
+                            display = true;
                         }
                     }
+                }
+                if (display) {
+                    this.$prod.find('.partGroup_' + gpe).find('tr.partRow_' + id).show();
+                    n++;
                 }
             }
             this.$prod.find('.partGroup_' + gpe).find('span.partsNbr').html('(' + n + ' produits)');

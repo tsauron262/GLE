@@ -86,7 +86,7 @@ AND  fact.close_code is null " .
         } else {
             $totalAchat = "SUM(DISTINCT(factdet.buy_price_ht*factdet.qty))";
             $totalVendu = "MAX(if(fact2.total, fact2.total+fact.total, fact.total))";
-            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, ".$totalVendu." as Total_Facture, ".$totalAchat." as Total_Achat, ".$totalVendu." - ".$totalAchat." as Total_Marge, fact.datec as Date, fact.paye as Paye";
+            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, ".$totalVendu." as Total_Facture, ".$totalAchat." as Total_Achat, ".$totalVendu." - ".$totalAchat." as Total_Marge, MAX(fact.datec) as Date, MAX(fact.paye) as Paye";
             $partReqFin = " Group BY chrono.id LIMIT 0,10000";
   
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid "

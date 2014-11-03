@@ -88,7 +88,7 @@ echo "<br/><input class='butAction' type='submit' value='Valider'/></form><br/><
 
 
 
-if (isset($_request['reinitGarantiePa'])) {
+if (isset($_REQUEST['reinitGarantiePa'])) {
     $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_facture` fact, llx_facturedet factdet WHERE factdet.fk_facture = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total = 0 GROUP BY fact.rowid");
     while ($ligne = $db->fetch_object($result)) {
 //    if($ligne->nbGar == 1){

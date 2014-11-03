@@ -114,7 +114,7 @@ AND  fact.close_code is null " .
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
                 $tabT = explode("(", $ligne->description);
-                $description = trim($tabT[0]);
+                $description = traiteCarac(trim($tabT[0]), " ");
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
                 if (count($tabT) > 0)
                     $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];
@@ -138,7 +138,7 @@ AND  fact.close_code is null " .
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
                 $tabT = explode("(", $ligne->description);
-                $description = trim($tabT[0]);
+                $description = traiteCarac(trim($tabT[0]), " ");
                 $tabT = getElementElement("SAV", "productCli", null, $ligne->id);
                 if (count($tabT) > 0)
                     $tabMateriel[strtoupper($description)][] = $tabT[0]['s'];

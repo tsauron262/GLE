@@ -1033,7 +1033,13 @@ function traiteCarac($str, $replace = "_") {
     $str = str_replace(array("ô"), "o", $str);
     $str = str_replace(array("ç"), "c", $str);
     $str = str_replace(array("à", "â"), "a", $str);
-    return urlencode(str_replace(array(" ", "\\", "/", "°", "'", "(", ")"), $replace, $str));
+    $replaceArr = array("\\", "/", "°", "'", "(", ")");
+    if($replace != " ")
+        $replaceArr[] = " ";
+    $return = str_replace($replaceArr, $replace, $str);
+    if($replace != " ")
+    $return =  urlencode($return);
+    return $return; 
 }
 
 

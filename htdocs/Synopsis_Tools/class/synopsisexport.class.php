@@ -84,10 +84,12 @@ AND  fact.close_code is null " .
             $partReqFin = " LIMIT 0,10000";
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
-            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, SUM(fact.total) as Total_Facture, fact.paye as Paye";
+            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, SUM(fact.total+fact2.total) as Total_Facture, SUM(buy_price_ht) as Total_Achat, SUM(fact.total+fact2.total) - SUM(buy_price_ht) as Total_Marge, fact.paye as Paye";
             $partReqFin = " Group BY chrono.id LIMIT 0,10000";
   
-            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid "
+                    . "LEFT JOIN  llx_element_element el1 on el1.sourcetype = 'propal' AND el1.targettype = 'facture' AND el1.fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = el1.fk_target AND fact.facnumber LIKE 'FA%' LEFT JOIN llx_facturedet ON fk_facture = fact.rowid"
+                    . "LEFT JOIN  llx_element_element e2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid LEFT JOIN llx_facture fact2 ON fact2.rowid = el2.fk_target AND fact2.facnumber LIKE 'AC%' WHERE fact.close_code is null AND ";
         }
 
 

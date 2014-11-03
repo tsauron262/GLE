@@ -125,11 +125,13 @@ if (! defined('NOLOGIN'))
         
          
         //bimp pas de logo pour sav
-        require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
-        $groupSav = new UserGroup($db);
-        $groupSav->fetch('', "XX SAV");
-        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id]))
-            $conf->global->MAIN_SHOW_LOGO = false;
+        if($user->id){
+            require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
+            $groupSav = new UserGroup($db);
+            $groupSav->fetch('', "XX SAV");
+            if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO) && isset($groupSav->members[$user->id]))
+                $conf->global->MAIN_SHOW_LOGO = false;
+        }
 
         if (isset($conf->global->MAIN_MODULE_SYNOPSISPROCESS)) {
             $tab = getTypeAndId();

@@ -45,7 +45,7 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
         }
     }
 
-    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false) {
+    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null) {
 
         $where = "1";
 
@@ -53,7 +53,11 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
             $where .= " AND centreVal = '" . $centre . "'";
         if ($paye)
             $where .= " AND fact.fk_statut = 2 AND fact.paye = '1'";
-
+        if ($dateDeb)
+            $where .= " AND fact.datec > STR_TO_DATE('".$dateDeb." 00:00','%d/%m/%Y %H:%i') ";
+        if ($dateFin)
+            $where .= " AND fact.datec < STR_TO_DATE('".$dateFin." 23:59','%d/%m/%Y %H:%i') ";
+//die($where);
 
 //        $partReq1 = "SELECT prod.ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
 //        $partReqFin = "";
@@ -62,52 +66,60 @@ WHERE fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_
 //        $partReqFin = " Group BY factdet.fk_product LIMIT 0,1000";
 
 
-        
-        
+
+
         $partReq5 = " FROM  `llx_facture` fact, llx_propal prop, llx_element_element el1, llx_synopsischrono_view_105 chrono, " .
 //                "llx_synopsischrono_view_101 chrono2, llx_element_element el2, ".
 //                "llx_synopsischrono_view_101 chrono2, ".
-                "llx_facturedet factdet left join llx_product prod on factdet.fk_product = prod.rowid
+                "llx_facturedet factdet left join llx_product prod on factdet.fk_product = prod.rowid 
 WHERE fact.rowid = el1.fk_target AND prop.rowid = el1.fk_source AND el1.sourcetype='propal' AND el1.targettype='facture'
 AND chrono.propalid = prop.rowid AND factdet.fk_facture = fact.Rowid
 AND  fact.close_code is null " .
 //"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
 //"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
                 "AND factdet.total_ht != 0 AND ";
-        
-        
+
+        $tableSus = "";
+        $chargeAccompte = true;
         if ($typeAff2 == "ca") {
-            $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, concat(prod.label,concat(' ',factdet.description)), SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
+            $partReq1 = "SELECT IF(prod.ref is null, factdet.description, prod.ref) as ref, concat(prod.label,concat(' ',factdet.description)) as label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht*factdet.qty) as Total_Achat, SUM(factdet.total_ht - (factdet.buy_price_ht*factdet.qty)) as Total_Marge";
             $partReqFin = " Group BY factdet.fk_product, factdet.description LIMIT 0,10000";
+            $tableSus = "left join llx_product prod on factdet.fk_product = prod.rowid";
         } elseif ($typeAff2 == "nb") {
             $partReq1 = "SELECT COUNT(DISTINCT(chrono.id)) as NB_PC";
             $partReqFin = " LIMIT 0,10000";
-            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
+            $chargeAccompte = false;
+//            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
-            $totalAchat = "SUM(DISTINCT(factdet.buy_price_ht*factdet.qty))";
-            $totalVendu = "MAX(if(fact2.total, fact2.total+fact.total, fact.total))";
-            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, ".$totalVendu." as Total_Facture, ".$totalAchat." as Total_Achat, ".$totalVendu." - ".$totalAchat." as Total_Marge, MAX(fact.datec) as Date, MAX(fact.paye) as Paye";
-            $partReqFin = " Group BY chrono.id LIMIT 0,10000";
-  
-            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid "
-                    . " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid LEFT JOIN llx_facture fact2 ON fact2.rowid = el2.fk_target AND fact2.facnumber LIKE 'AC%'"
-                    . " LEFT JOIN  llx_element_element el1 on el1.sourcetype = 'propal' AND el1.targettype = 'facture' AND el1.fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = el1.fk_target AND fact.facnumber LIKE 'FA%' LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact.rowid WHERE fact.close_code is null AND ";
+            $totalAchat = "SUM((factdet.buy_price_ht*factdet.qty))";
+            $totalVendu = "SUM(factdet.total_ht)";
+            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, " . $totalVendu . " as Total_Facture, " . $totalAchat . " as Total_Achat, " . $totalVendu . " - " . $totalAchat . " as Total_Marge, MAX(fact.datec) as Date, MAX(fact.paye) as Paye";
+//            if ($paye)
+//                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
+//            else
+            $partReqFin = "  Group BY chrono.id LIMIT 0,10000";
         }
 
 
-        
-        
-        
-            
 
-        
-        
-        
-        
-        
-        
-        
-        
+        $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid ";
+        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
+            $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
+            $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%')";
+        $partReq5 .= " LEFT JOIN llx_facture fact ON fact.close_code is null AND fact.rowid = el.fk_target AND fact.facnumber LIKE 'FA%' ";
+        $partReq5 .= " LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
+
+
+
+
+
+
+
+
+//die($partReq1 . $partReq5 . $where . $partReqFin);
+
+
+
         if ($typeAff == "parTypeMat") {
             $result = $this->db->query("SELECT description, id FROM llx_synopsischrono_view_101");
 
@@ -163,7 +175,7 @@ WHERE  `list_refid` =11");
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
-                    $tabMateriel[strtoupper($ligne->label)] = $ligne->valeur;
+                $tabMateriel[strtoupper($ligne->label)] = $ligne->valeur;
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
@@ -293,8 +305,8 @@ WHERE  `list_refid` =11");
                     else
                         $valeur = "";
                 }
-                if($nom == "refSav" && $this->sortie == "html")
-                    $valeur = "<a href='".DOL_URL_ROOT."/synopsischrono/fiche.php?ref=".$valeur."'>".$valeur."</a>";
+                if ($nom == "refSav" && $this->sortie == "html")
+                    $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/fiche.php?ref=" . $valeur . "'>" . $valeur . "</a>";
 
                 if ((stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
                         ) && is_numeric($valeur)) {

@@ -151,7 +151,7 @@ if ($searchOn == 'true') {
     $sqlPre = $db->query($requetePre);
     while ($resPre = $db->fetch_object($sqlPre)) {
         $searchField = "";
-        $nom = sanitize_string($resPre->nom);
+        $nom = traiteCarac(sanitize_string($resPre->nom));
 //        if ($nom == $searchField) {
         if (isset($_REQUEST[sanitize_string($nom)])) {
 //            die($_REQUEST[sanitize_string($nom)]);

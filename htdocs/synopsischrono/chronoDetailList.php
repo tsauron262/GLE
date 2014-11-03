@@ -232,8 +232,8 @@ EOF;
             $align = "left";
             $colModelArr[$i] = array(
 //            "name" => str_replace("'", "`", $res->nom),
-                "name" => sanitize_string($res->nom),
-                "index" => sanitize_string($res->nom),
+                "name" => traiteCarac(sanitize_string($res->nom)),
+                "index" => traiteCarac(sanitize_string($res->nom)),
                 "width" => 130,
                 'hidden' => false,
                 "stype" => 'text',

@@ -84,7 +84,7 @@ AND  fact.close_code is null " .
             $partReqFin = " LIMIT 0,10000";
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
-            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, if(fact2.total, fact2.total+fact.total, fact.total) as Total_Facture, SUM(buy_price_ht*qty) as Total_Achat, (if(fact2.total, fact2.total+fact.total, fact.total) - SUM(buy_price_ht*qty)) as Total_Marge, fact.paye as Paye";
+            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, if(fact2.total, fact2.total+fact.total, fact.total) as Total_Facture, SUM(buy_price_ht*qty) as Total_Achat, (if(fact2.total, fact2.total+fact.total, fact.total) - SUM(buy_price_ht*qty)) as Total_Marge, fact.datec as Date, fact.paye as Paye";
             $partReqFin = " Group BY chrono.id LIMIT 0,10000";
   
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid "

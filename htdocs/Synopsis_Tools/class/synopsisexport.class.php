@@ -84,12 +84,14 @@ AND  fact.close_code is null " .
             $partReqFin = " LIMIT 0,10000";
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         } else {
-            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, if(fact2.total, fact2.total+fact.total, fact.total) as Total_Facture, SUM(factdet.buy_price_ht*factdet.qty) as Total_Achat, (if(fact2.total, fact2.total+fact.total, fact.total) - SUM(buy_price_ht*qty)) as Total_Marge, fact.datec as Date, fact.paye as Paye";
+            $totalAchat = "SUM(DISTINCT(factdet.buy_price_ht*factdet.qty))";
+            $totalVendu = "MAX(if(fact2.total, fact2.total+fact.total, fact.total))";
+            $partReq1 = "SELECT chrono.ref as refSav, chrono.Centre, propal.total_ht as Total_Propal, ".$totalVendu." as Total_Facture, ".$totalAchat." as Total_Achat, ".$totalVendu." - ".$totalAchat." as Total_Marge, fact.datec as Date, fact.paye as Paye";
             $partReqFin = " Group BY chrono.id LIMIT 0,10000";
   
             $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid "
-                    . " LEFT JOIN  llx_element_element el1 on el1.sourcetype = 'propal' AND el1.targettype = 'facture' AND el1.fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = el1.fk_target AND fact.facnumber LIKE 'FA%' LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact.rowid"
-                    . " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid LEFT JOIN llx_facture fact2 ON fact2.rowid = el2.fk_target AND fact2.facnumber LIKE 'AC%' WHERE fact.close_code is null AND ";
+                    . " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid LEFT JOIN llx_facture fact2 ON fact2.rowid = el2.fk_target AND fact2.facnumber LIKE 'AC%'"
+                    . " LEFT JOIN  llx_element_element el1 on el1.sourcetype = 'propal' AND el1.targettype = 'facture' AND el1.fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = el1.fk_target AND fact.facnumber LIKE 'FA%' LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact.rowid WHERE fact.close_code is null AND ";
         }
 
 

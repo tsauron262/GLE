@@ -710,4 +710,52 @@ a confirmé    clignoter rdv
 Di choix du type
 
 
-Commande quand terminer 
+//Commande quand terminer 
+
+//mail pc   "Si vous souhaiter comuniquer d'autre informations merci de repondre ce mail ou de contacter le " + tel
+
+
+//mail finit    "Ephesus
+
+
+//mail objet piece pice
+
+
+//cloturer toute inter a 0
+
+marge 0 quand ---
+
+stat moteur de recherche de date, date pc pour nb et Ca sur facture
+menu deroulant date fact dat pc
+//nb pc pas facturer
+
+
+Raprochement filtre centre, collones sav
+
+
+
+Filtre par centre par date de pc
+//num sav - centre - montant propal - statut fa -date - marge
+
+//TOTAUX nb - total
+
+
+
+
+veerouiller double envoie des pc
+
+modifier chrono   -    desactiver boutons
+
+
+
+//repasser dans commande plusieurs foix
+
+
+//facture  dans chrono ajouter ttc
+
+
+
+//recherche gsx l'un ou l'autre
+//click pour ouvrir filtrer par catégories 
+
+domingo   lister date depasser logistique 

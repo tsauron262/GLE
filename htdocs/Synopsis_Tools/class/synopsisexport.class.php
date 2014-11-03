@@ -228,7 +228,7 @@ WHERE  `list_refid` =11");
                 $folder2 = "extractFactGle";
             }
             $folder2 .= "/";
-            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/export/temp/" . $user->id ) . "/";
+            $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/";
             if (!is_dir($folder1))
                 mkdir($folder1);
             if (!is_dir($folder1 . $folder2))
@@ -236,7 +236,7 @@ WHERE  `list_refid` =11");
             $nom = str_replace(" ", "_", $nom); //die($folder . $nom . ".txt");
             $file = $folder2 . $nom . ".txt";
             file_put_contents($folder1 . $file, $text);
-            echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=export&file=" . $file . "' class='butAction'>Fichier</a>";
+            echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
         } else {
             echo "<style>"
             . "td{"

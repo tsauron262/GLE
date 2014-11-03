@@ -70,6 +70,9 @@ $export = new synopsisexport($db, $sortie);
 $export->exportChronoSav($centre, $typeAff, $typeAff2, $paye);
 
 
+global $logLongTime;
+$logLongTime = false;
+
 llxFooter();
 
 

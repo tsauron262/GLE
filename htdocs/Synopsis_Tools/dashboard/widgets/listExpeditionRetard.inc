@@ -11,7 +11,7 @@ require_once (DOL_DOCUMENT_ROOT . "/expedition/class/expedition.class.php");
 
 
 // The get widget handler.
-function widget_listExpeditionAValider() {
+function widget_listExpeditionRetard() {
   // A widget object as per jquery.dashboard.js.
     global $db, $conf,$langs, $user,$bc;
     if ($user->societe_id > 0)

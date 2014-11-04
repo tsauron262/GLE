@@ -3154,9 +3154,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_products'] += $pv - $pa;
 				}
 				elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '2') { // remise globale considérée comme service
@@ -3165,9 +3165,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_services'] += $pv - $pa;
 				}
 				elseif ($conf->global->MARGIN_METHODE_FOR_DISCOUNT == '3') { // remise globale prise en compte uniqt sur total
@@ -3185,9 +3185,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_products'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_products'] += $pv - $pa;
 				}
 				elseif ($type == 1) {  // service
@@ -3198,9 +3198,9 @@ abstract class CommonObject
 					$marginInfos['pa_total'] +=  $pa;
 					$marginInfos['pv_total'] +=  $pv;
 					// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-					if ($pv < 0)
-						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
-					else
+//					if ($pv < 0)
+//						$marginInfos['margin_on_services'] += -1 * (abs($pv) - $pa);
+//					else
 						$marginInfos['margin_on_services'] += $pv - $pa;
 				}
 			}

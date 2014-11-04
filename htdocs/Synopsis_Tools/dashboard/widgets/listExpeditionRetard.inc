@@ -127,7 +127,7 @@ function widget_listExpeditionRetard() {
                     //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                     //$table .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                    $table .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
+                    $table .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'#pppart3a">'.$obj->ref.'</a></td>';
                     $table .= '<td>'.$obj->date_livraison.'</td>';
                     $table .= '<td>'.$log_ok.' , '.$log_stat.'</td>';
                     $table .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';
@@ -136,7 +136,7 @@ function widget_listExpeditionRetard() {
                 //$table .= '<tr $bc[$var]><td nowrap=\"nowrap\"><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->commande_id.'">'.$obj->ref.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/comm/fiche.php?socid='.$obj->socid.'">'.$obj->nom.'</a></td>';
                 //$table2 .= '<td><a href="'.DOL_URL_ROOT.'/commande/fiche.php?id='.$obj->commande_id.'">'.$obj->commande_ref.'</a></td></tr>';
-                $table2 .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'">'.$obj->ref.'</a></td>';
+                $table2 .= '<tr $bc[$var]><td><a href="'.DOL_URL_ROOT.'/Synopsis_PrepaCommande/prepacommande.php?id='.$obj->rowid.'#pppart3a">'.$obj->ref.'</a></td>';
                 $table2 .= '<td>'.$obj->date_livraison.'</td>';
                 $table2 .= '<td>'.$log_ok.', '.$log_stat.'</td>';
                 $table2 .= '<td>'.$fin_ok.' , '.$fin_stat.'</td></tr>';
@@ -152,7 +152,7 @@ function widget_listExpeditionRetard() {
         $table .="</p>";
         $table2 .="</p>";
       return array(
-        'title' => 'Exp&eacute;dition - 10 derni&egrave;res exp&eacute;ditions &agrave; valider',
+        'title' => 'Exp&eacute;dition - 10 derni&egrave;res exp&eacute;ditions en retard',
         'content' => utf8_encode($table),
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',
@@ -164,7 +164,7 @@ function widget_listExpeditionRetard() {
 
     } else {
       return array(
-        'title' => 'Exp&eacute;dition - 10 derni&egrave;res exp&eacute;ditions &agrave; valider',
+        'title' => 'Exp&eacute;dition - 10 derni&egrave;res exp&eacute;ditions en retard',
         'content' => 'Vous ne possedez pas les droits requis pour ce module',
         'initScript' => "",
         'classes' => 'ui-state-default ui-widget-header',

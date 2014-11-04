@@ -440,6 +440,7 @@ if (! defined('NOLOGIN'))
     public static function getObjAndMenu($type) {
         global $db, $conf;
         $tabMenu = array(false, false);
+        $obj = false;
         switch ($type) {
             case 'chrono': {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
@@ -575,7 +576,8 @@ if (! defined('NOLOGIN'))
                 }
                 break;
         }
-        $obj->loadObject = false;
+        if(is_object($obj))
+        @$obj->loadObject = false;
         return array($obj, $tabMenu);
     }
 

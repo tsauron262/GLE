@@ -33,7 +33,7 @@ function widget_listExpeditionRetard() {
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."co_exp as ce ON e.rowid = ce.fk_expedition";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."commande as c ON ce.fk_commande = c.rowid";
         $sql.= " LEFT JOIN ".MAIN_DB_PREFIX."societe as s ON s.rowid = e.fk_soc";*/
-        $sql = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_commandedet` commdet2, ".MAIN_DB_PREFIX."commandedet commdet, ".MAIN_DB_PREFIX."commande comm WHERE fk_commande = comm.rowid ANd commdet2.`logistique_ok` < 1 ANd `logistique_date_dispo` < now() AND commdet2.rowid = commdet.rowid AND commdet2.`logistique_date_dispo` != '0000-00-00'";
+        $sql = "SELECT * FROM `".MAIN_DB_PREFIX."Synopsis_commandedet` commdet2, ".MAIN_DB_PREFIX."commandedet commdet, ".MAIN_DB_PREFIX."commande comm WHERE fk_commande = comm.rowid ANd commdet2.`logistique_ok` < 1 ANd `logistique_date_dispo` < now() AND commdet2.rowid = commdet.rowid AND commdet2.`logistique_date_dispo` != '0000-00-00' AND fk_statut < 3 ";
         $sql.= " ORDER BY logistique_date_dispo asc";
         $sql.= " LIMIT 50";
         /*$sql.= "MINUS";

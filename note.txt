@@ -734,7 +734,7 @@ Raprochement filtre centre, collones sav
 
 
 
-Filtre par centre par date de pc
+//Filtre par centre par date de pc
 //num sav - centre - montant propal - statut fa -date - marge
 
 //TOTAUX nb - total
@@ -759,3 +759,16 @@ modifier chrono   -    desactiver boutons
 //click pour ouvrir filtrer par catégories 
 
 domingo   lister date depasser logistique 
+
+
+//ajouter acompte   
+//ajouter marge
+date fa
+
+
+//compte captcha
+
+
+
+
+10 €   pas quand unité entiére

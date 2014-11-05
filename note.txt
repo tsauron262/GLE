@@ -723,7 +723,7 @@ Di choix du type
 
 //cloturer toute inter a 0
 
-marge 0 quand ---
+//marge 0 quand ---
 
 stat moteur de recherche de date, date pc pour nb et Ca sur facture
 menu deroulant date fact dat pc
@@ -758,12 +758,12 @@ modifier chrono   -    desactiver boutons
 //recherche gsx l'un ou l'autre
 //click pour ouvrir filtrer par catégories 
 
-domingo   lister date depasser logistique 
+//domingo   lister date depasser logistique 
 
 
 //ajouter acompte   
 //ajouter marge
-date fa
+//date fa
 
 
 //compte captcha
@@ -772,3 +772,18 @@ date fa
 
 
 10 €   pas quand unité entiére
+
+canal+ ou canal sat 
+service reiliation
+TSA 95905 Sergie pontoise
+Cedex 9
+
+31 janvier 2015
+
+
+
+
+
+envoie mail facture, devis, mise a dispo
+
+maj kbb iphone imei

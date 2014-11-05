@@ -663,17 +663,21 @@ class gsxDatas {
 
                     case 'KGBSerialNumberUpdate':
                         $responseNames = array(
-                            'UpdateIPhoneKGBSerialNumberResponse',
-                            'IPhoneUpdateKGBSerialNumberResponse',
-                            'IPhoneKGBSerialNumberUpdateResponse',
-                            'UpdateIPhoneKGBSerialNumberRequestResponse'
+                            'UpdateKGBSerialNumberResponse',
+                            'KGBSerialNumberUpdateResponse'
                         );
-                        $client = 'IPhoneKGBSerialNumberUpdate';
-                        $request = 'UpdateIPhoneKGBSerialNumberRequest';
-                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
-                            $result['imeiNumber'] = $result['serialNumber'];
-                            $result['serialNumber'] = '';
-                        }
+//                        $responseNames = array(
+//                            'UpdateIPhoneKGBSerialNumberResponse',
+//                            'IPhoneUpdateKGBSerialNumberResponse',
+//                            'IPhoneKGBSerialNumberUpdateResponse',
+//                            'UpdateIPhoneKGBSerialNumberRequestResponse'
+//                        );
+//                        $client = 'IPhoneKGBSerialNumberUpdate';
+//                        $request = 'UpdateIPhoneKGBSerialNumberRequest';
+//                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
+//                            $result['imeiNumber'] = $result['serialNumber'];
+//                            $result['serialNumber'] = '';
+//                        }
                         break;
                 }
             } else {

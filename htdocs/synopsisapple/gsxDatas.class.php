@@ -674,10 +674,13 @@ class gsxDatas {
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
-//                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
-//                            $result['imeiNumber'] = $result['serialNumber'];
-//                            $result['serialNumber'] = '';
-//                        }
+                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
+                            $result['imeiNumber'] = $result['serialNumber'];
+                            $result['serialNumber'] = '';
+                        }
+                        else{
+                            $result['imeiNumber'] = "";
+                        }
                         break;
                 }
             } else {

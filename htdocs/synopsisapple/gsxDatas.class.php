@@ -766,8 +766,36 @@ class gsxDatas {
                         }
                         break;
 
-                    case 'UpdateSerialNumber':
                     case 'KGBSerialNumberUpdate':
+//                        echo '<pre>';
+//                        print_r($response);
+//                        echo '</pre>';
+                        if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
+                            if($response[$responseName]['updateStatus'] == "Y"){
+                                $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
+                                if (isset($_GET['repairRowId'])) {
+                                    $repair->rowId = $_GET['repairRowId'];
+                                    if ($repair->load()) {
+                                        $repair->confirmNumbers['serialUpdate'] = $confirmNumber;
+                                        if ($repair->update()) {
+                                            $ok = true;
+                                        } else {
+                                            $html .= '<p class="error">Update Fail</p>';
+                                        }
+                                    } else {
+                                        $html .= '<p class="error">Erreur: échec du chargement des données de la réparation.</p>';
+                                    }
+                                } else {
+                                    $html .= '<p class="error">Une erreur est survenue (ID réparation manquant).</p>';
+                                }
+                            } else {
+                                $html .= '<p class="error">Une Erreur est survenue: echec de la maj</p>';
+                            }
+                        } else {
+                            $html .= '<p class="error">Une Erreur est survenue: aucun numéro de confirmation retourné par Apple</p>';
+                        }
+                        break;
+                    case 'UpdateSerialNumber':
 //                        echo '<pre>';
 //                        print_r($response);
 //                        echo '</pre>';

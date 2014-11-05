@@ -255,9 +255,10 @@ while ($resPre = $db->fetch_object($sqlPre)) {
 
 
 if (!$withRev) {
-    $wh .= " AND 1";//revision is NULL ";
+    $wh .= " AND revisionNext < 1";//revision is NULL ";
 } else {
-    $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND orig_ref = (SELECT ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
+    $sousReq = "(SELECT orig_ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
+    $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = ".$sousReq." || ref = ".$sousReq.")";
 }
 
 
@@ -314,13 +315,14 @@ if ($sql) {
 
         //hasRev => 1 si oui, rien sinon
         if (!$withRev) {
-            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE orig_ref = '" . addslashes($chrono->ref) . "' AND revision > 0";
-//                        die($requete1);
-            $sql1 = $db->query($requete1);
-            $hasRev = false;
-            if ($db->fetch_object($sql1))
-                $hasRev = true;
+//            $requete1 = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE orig_ref = '" . addslashes($chrono->ref) . "' AND revision > 0";
+////                        die($requete1);
+//            $sql1 = $db->query($requete1);
+//            $hasRev = false;
+//            if ($db->fetch_object($sql1))
+//                $hasRev = true;
 //            if ($res1->cnt > 0) $hasRev = true;
+                $hasRev = ($res->orig_ref && $res->orig_ref != "");
             $arr[] = ($hasRev ? '<div class="hasRev">1</div>' : '<div class="hasRev">0</div>');
         } else {
             $arr[] = ('<div class="hasRev">0</div>');

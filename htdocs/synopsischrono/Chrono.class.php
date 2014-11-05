@@ -249,8 +249,6 @@ class Chrono extends CommonObject {
 
     public function revised() {
         $this->db->begin();
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3 WHERE id = " . $this->id;
-        $sqlA = $this->db->query($requete);
         $requete = "SELECT *
                      FROM " . MAIN_DB_PREFIX . "Synopsis_revision_model
                     WHERE id = " . $this->model->revision_model_refid;
@@ -262,11 +260,12 @@ class Chrono extends CommonObject {
         $revision = $obj->convert_revision(($this->revision ? $this->revision + 1 : 1));
         //Nouvelle ref
         //$this->ref = substr($this->ref,0,7);
-        $newRef = substr($this->ref, 0, 7) . "-" . $revision;
+        $newRef = $this->ref . "-" . $revision;
         if ($this->orig_ref . "x" != "x") {
-            $newRef = substr($this->orig_ref, 0, 7) . "-" . $revision;
+            $newRef = $this->orig_ref . "-" . $revision;
         }
         //Nouvelle revision
+        $oldId = $this->id;
         $newId = $this->create_revision_from($newRef, ($this->revision ? $this->revision + 1 : 1));
         //Copie extra value
         $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_value WHERE chrono_refid = " . $_REQUEST['id'];
@@ -281,6 +280,10 @@ class Chrono extends CommonObject {
                                       " . $res->key_id . " )";
             $sql1 = $this->db->query($requete);
         }
+        
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = ".$newId." WHERE id = " . $oldId;
+        $sqlA = $this->db->query($requete);
+        
         if ($sqlA && $newId > 0) {
             global $user, $langs, $conf;
             // Appel des triggers

@@ -32,5 +32,16 @@ if(isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_R
     header("Location:" .DOL_URL_ROOT."/comm/fiche.php?socid=".$id);
 }
 
+if(isset($_REQUEST['action']) && $_REQUEST['action'] == "majRevision"){
+    $sql = $db->query("SELECT * FROM llx_synopsischrono WHERE orig_ref is not null AND revision > 0");
+    while($ligne = $db->fetch_object($sql)){
+        if($ligne->revision == 1)
+            $where = "ref = '".$ligne->orig_ref."'";
+        else
+            $where = "orig_ref = '".$ligne->orig_ref."' AND revision = ".($ligne->revision-1);
+        $db->query("Update llx_synopsischrono SET revisionNext = ".$ligne->id." WHERE ".$where)."<br/>";
+    }
+}
+
 
 echo "Rien a faire";

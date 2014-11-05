@@ -260,7 +260,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
-        $chrono->propal->addline("Diagnostic : " . stripslashes($chrono->extraValue[$chrono->id]['Diagnostic']['value']), 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
+        $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
 //            die($totPa);
 //            ($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0
@@ -328,7 +328,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $facture = new Facture($db);
         $facture->createFromOrder($propal);
 //        $facture->create($user);
-        $facture->addline("Résolution : " . stripslashes($chrono->extraValue[$chrono->id]['Résolution']['value']), 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
+        $facture->addline("Résolution : " . $chrono->extraValue[$chrono->id]['Résolution']['value'], 0, 1, 0, 0, 0, 0, 0, null, null, null, null, null, 'HT', 0, 3);
         $facture->validate($user, '', $idEntrepot);
         $facture->fetch($facture->id);
 

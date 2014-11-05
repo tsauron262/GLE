@@ -761,7 +761,7 @@ class Chrono extends CommonObject {
                          WHERE chrono_refid = " . $chrono_id . " AND key_id in (" . $keyStr . ")";
             $sql = $this->db->query($requete);
             while ($res = $this->db->fetch_object($sql)) {
-                $value = $res->value;
+                $value = stripslashes($res->value);
                 $key = $this->keysList[$res->key_id]['nom'];
                 $desc = $this->keysList[$res->key_id]['description'];
                 $this->extraValue[$chrono_id][$key] = array('value' => $value, 'description' => $desc);

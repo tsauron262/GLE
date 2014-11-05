@@ -363,9 +363,9 @@ if ($chr->id > 0) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '<td  class="ui-widget-content" colspan="3">';
             if ($chr->model->typeDescription == 2)
-                print '<textarea style="width: 98%; min-height: 8em;" class="" name="description">' . $chr->description . '</textarea>';
+                print '<textarea style="width: 98%; min-height: 8em;" class="" name="description">' . stripslashes ($chr->description) . '</textarea>';
             else
-                print '<input type="text" name="description" class="required" value="' . $chr->description . '"/>';
+                print '<input type="text" name="description" class="required" value="' . stripslashes ($chr->description) . '"/>';
             print '</td>';
         }
 
@@ -605,7 +605,7 @@ if ($chr->id > 0) {
         if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
-            print '    <td  class="ui-widget-content" colspan="1">' . str_replace("\n", "<br/>", $chr->description) . '</td>';
+            print '    <td  class="ui-widget-content" colspan="1">' . str_replace("\n", "<br/>", stripslashes ($chr->description)) . '</td>';
         }
 
 

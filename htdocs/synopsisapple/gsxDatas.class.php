@@ -535,6 +535,7 @@ class gsxDatas {
             case 'CreateCarryInRepair':
             case 'CreateMailInRepair':
             case 'CreateIndirectOnsiteRepair':
+            case 'CreateWholeUnitExchange':
                 if (isset($chronoId)) {
                     require_once(DOL_DOCUMENT_ROOT . "/synopsischrono/Chrono.class.php");
                     $chrono = new Chrono($db);
@@ -688,23 +689,11 @@ class gsxDatas {
                     case 'CreateCarryInRepair':
                         $responseNames = array(
                             'CreateCarryInResponse',
-                            'CreateCarryInRepairResponse'
                         );
-//                        if (isset($result['componentCheckDetails']))
-//                            unset($result['componentCheckDetails']);
-//                        break;
-
-                    case 'CreateMailInRepair':
-                        $responseName = 'CreateMailInRepairResponse';
                         break;
 
-                    case 'CreateIndirectOnsiteRepair':
-                        $responseName = 'CreateIndirectOnsiteRepairResponse';
-                        break;
 
-                    case 'UpdateSerialNumber':
-                        $responseName = 'UpdateSerialNumberResponse';
-                        break;
+
 
                     case 'KGBSerialNumberUpdate':
                         $responseNames = array(
@@ -734,6 +723,7 @@ class gsxDatas {
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;
+                $responseName = $requestType . "Response";
                 if (isset($responseNames) && is_array($responseNames)) {
                     foreach ($responseNames as $respName) {
                         if (isset($response[$respName])) {
@@ -747,6 +737,7 @@ class gsxDatas {
                     case 'CreateCarryInRepair':
                     case 'CreateMailInRepair':
                     case 'CreateIndirectOnsiteRepair':
+                    case 'CreateWholeUnitExchange':
                         if (isset($response[$responseName]['repairConfirmation']['confirmationNumber'])) {
                             $confirmNumber = $response[$responseName]['repairConfirmation']['confirmationNumber'];
                             $prixTot = str_replace(array("EUR ", "EUR"), "", $response[$responseName]['repairConfirmation']['totalFromOrder']);

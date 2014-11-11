@@ -793,3 +793,108 @@ maj kbb iphone imei
 
 filtre des nom 
 garder les nomp cocher cookie
+
+
+Voir pour visite  (ajouter nb visite en plus)
+Sur facture est devis garantie .... en bas.
+Ne pas transfert de facture a 0 mais client
+
+Supprimer en cumulant avec code client
+
+
+gle.   ftp.bimp.fr
+Dossier GLE_8sens dans 38sensGle
+
+ip siege 178.23.154.59
+49  -  69
+
+
+hotline transfert a choix d'utilisateur envoie mail
+
+C8 en rouge
+
+
+voir crono vide 
+
+
+dans ho
+
+
+
+possibilité d'invité des participant. sous forme d'ics
+
+
+desactiver projet
+
+liste des type dans di
+dans di ajouter liste type
+- interv garantie
+- install
+- atelier
+- visite contrat
+- telemaint
+- avant vente
+
+
+Dans l'action trie par prenom
+dans liste agenda prenom
+
+
+
+
+
+
+agenda pas de date fin  dureee 1h
+14 2014
+
+dans agenda new date deb et fin dans safari
+
+recurence
+
+
+ajouter participant plus vite.
+
+
+dans agenda a conf voir visuelle
+
+sauvegarde config de l'agenda date + nbJours
+
+ne pas repercuté les horraire sur FI
+
+supprimmer di supprimerer rdv
+
+voir supprimé
+
+
+Document indicable style annexe + fichier joint   + specimen
+
+
+
+agenda date datepicker
+
+
+dans supprimer agenda "Attention en continouant vous allez suprimé le rdv pour tous les participant."
+
+
+voir suppr agenda message siparticipant
+
+
+stat 60 €
+
+
+fiche utilisateur : horraire + numéro cour fixe + portable + listeSite + dteEntree dateSortie
+
+
+cacher type
+
+
+demde congé agenda + remplacer par tech + mail + agenda remplacent
+
+
+
+
+grh pas decompté évenement familiaux
+prevoir zone de text.
+
+
+mail compte fermer

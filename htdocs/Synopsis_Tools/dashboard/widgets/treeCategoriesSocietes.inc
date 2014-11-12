@@ -40,7 +40,7 @@ function widget_treeCategoriesSocietes() {
             $table .= '<tr><td colspan="2">';
             if (sizeof($cate_arbo))
             {
-                require_once(DOL_DOCUMENT_ROOT.'/includes/treemenu/TreeMenu.php');
+//                require_once(DOL_DOCUMENT_ROOT.'/includes/treemenu/TreeMenu.php');
                 // Ajoute id_mere sur tableau cate_arbo
                 $i=0;
                 $table .= "<ul id='treeviewCat' class='treeview'>";

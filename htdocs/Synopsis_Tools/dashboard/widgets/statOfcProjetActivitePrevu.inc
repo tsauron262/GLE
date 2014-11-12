@@ -76,7 +76,7 @@ function widget_statOfcProjetActivitePrevu() {
                 $var = !$var;
                 $table2 .= "<tr $bc[$var]>";
                 $table2 .= '<td><a href="' . DOL_URL_ROOT . '/product/stats/fiche.php?id=' . $objp->rowid . '">' . $objp->title . "</a>";
-                $table2 .= '<td>' . $projet->sec2time($objp->td);
+                $table2 .= '<td>' . sec2time($objp->td);
                 $i++;
             }
             $db->free();
@@ -121,3 +121,26 @@ function widget_statOfcProjetActivitePrevu_settings() {
 //    return ' value="' . $color . '"';
 //  }
 //}
+if (!function_exists('sec2time'))
+{
+    function sec2time($sec){
+        if (!is_numeric($sec))
+        {
+            $sec = 0;
+        }
+        $returnstring = " ";
+        $days = intval($sec/86400);
+        $hours = intval ( ($sec/3600) - ($days*24));
+        $minutes = intval( ($sec - (($days*86400)+ ($hours*3600)))/60);
+        $seconds = $sec - ( ($days*86400)+($hours*3600)+($minutes * 60));
+
+        $returnstring .= ($days)?(($days == 1)? "1 j":$days."j"):"";
+        $returnstring .= ($days && $hours && !$minutes && !$seconds)?"":"";
+        $returnstring .= ($hours)?( ($hours == 1)?" 1h":" " .$hours."h"):"";
+        $returnstring .= (($days || $hours) && ($minutes && !$seconds))?"  ":" ";
+        $returnstring .= ($minutes)?( ($minutes == 1)?" 1 min":" ".$minutes."min"):"";
+        //$returnstring .= (($days || $hours || $minutes) && $seconds)?" et ":" ";
+        //$returnstring .= ($seconds)?( ($seconds == 1)?"1 second":"$seconds seconds"):"";
+        return ($returnstring);
+    }
+}

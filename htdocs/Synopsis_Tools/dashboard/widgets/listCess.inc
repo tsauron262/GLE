@@ -37,6 +37,7 @@ function widget_listCess() {
         $requete.= " FROM ".MAIN_DB_PREFIX."societe as s";
         if (!$user->rights->societe->client->voir && !$socid) $requete .= ", ".MAIN_DB_PREFIX."societe_commerciaux as sc";
 //        $requete.= " WHERE s.cessionnaire = 1";
+        $requete .= " WHERE 1 ";
         if ($socid)
         {
             $requete .= " AND s.rowid = $socid";

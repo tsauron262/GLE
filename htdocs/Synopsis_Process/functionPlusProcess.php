@@ -2,24 +2,31 @@
 
 function getSNChrono($idChrono, $source) {
     global $db;
-    $key = 1011;
+    $key = array("" => 1011, "Mdp : " => 1057, "Login : " => 1063);
+    $keyI = array();
+    foreach($key as $un => $deux)
+        $keyI[$deux] =  $un;
     $dest = "productCli";
     $ordre = 1;
 
-
+    $returnStr = "";
     $return = array();
     $result = getElementElement($source, $dest, $idChrono, null, $ordre);
     if (count($result) > 0) {
+        $return1 = array();
         $chronoTab = array();
-        foreach ($result as $chrono)
+        foreach ($result as $chrono) 
+//            {
             $chronoTab[] = $chrono['d'];
-        $req = "SELECT `value` FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` = " . $key;
+        $req = "SELECT `value`, key_id  FROM `" . MAIN_DB_PREFIX . "synopsischrono_value` WHERE `chrono_refid` IN (" . implode(",", $chronoTab) . ") AND `key_id` IN (" . implode(",", $key) . ") Order BY chrono_refid";
         $sql = $db->query($req);
+//        print_r($req);die;
         while ($result = $db->fetch_object($sql))
-            $return[] = $result->value;
+            $returnStr .= $keyI[$result->key_id]." ".$result->value."\n";
+//        }
     }
 
-    return implode(" | ", $return);
+    return $returnStr;
 }
 
 function bouttonEtatSav($idChrono) {

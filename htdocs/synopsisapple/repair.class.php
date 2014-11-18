@@ -528,7 +528,7 @@ class Repair {
             $html .= '<td class="ref">' . $part['partNumber'] . '</td>';
             $html .= '<td class="ref">' . $part['returnOrderNumber'] . '</td>';
 //            if (isset($part['fileName']) && file_exists($part['fileName'])) {
-            $html .= '<td><a target="_blank" href="' . DOL_URL_ROOT . $part['fileName'] . '" class="button getReturnLabel">Etiquette de retour</a></td>';
+            $html .= '<td><a href="' . DOL_URL_ROOT . $part['fileName'] . '" class="button getReturnLabel">Etiquette de retour</a></td>';
 //            } else {
 //                $html .= '<td></td>';
 //            }

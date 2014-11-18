@@ -33,11 +33,12 @@ $(window).load(function() {
 
             $(".loadApple").click(function() {
                 $(".loadApple").remove();
-                tabT = serial.split(" ");
+                tabT = serial.split("<br>");
+//                tabT = serial.split("\n");
                 $.getScript(DOL_URL_ROOT + "/synopsisapple/appleGsxScripts.js", function() {
                     $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/synopsisapple/appleGSX.css"}));
                     for (i = 0; i < tabT.length; i++) {
-                        serial = tabT[i];
+                        serial = tabT[i].replace(/^\s+/g,'').replace(/\s+$/g,'');
                         if (/^[A-Z0-9]{11,12}$/.test(serial)) {
                             resultZone.append('<div id="requestsResponsesContainer"></div><div id="requestResult"></div>');
                             GSX.loadProduct(serial);

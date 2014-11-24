@@ -261,13 +261,20 @@ class pdf_crabeSav extends ModelePDFFactures
                                             $userT->fetch($ligne->Technicien);
                                             $tech = "\nTechnicien en charge  : " . $userT->getFullName($langs);
                                         }
-
+                                        $req = "SELECT N__Serie 
+FROM  `llx_element_element`, llx_synopsischrono_view_101 v 
+WHERE  `sourcetype` LIKE  'sav' AND v.id = fk_target AND fk_source = ".$ligne->id."
+AND  `targettype` LIKE  'productCli'";
+                                        $result2 = $this->db->query($req);
+                                        if($this->db->num_rows($result2) > 0){
+                                            $ligne2 = $this->db->fetch_object($result2);
 //                                        $pdf->SetXY(12,64);
 //                                        $pdf->MultiCell(80, 10, "Centre SAV : ".$ligne->Centre."\nTél : ".$centre[0]."\nMail : ".$centre[1].$tech, 0, '', 0);
-                                        $pdf->SetXY(30,28);
+                                        $pdf->SetXY(30,20);
                                         $pdf->SetFont('','', $default_font_size + 5);
-                                        $pdf->SetTextColor(204,51,153);
-                                        $pdf->MultiCell(157, 10, $ligne->ref, 0, 'C', 0);
+                                        $pdf->SetTextColor(234,119,2);
+                                        $pdf->MultiCell(157, 10, $ligne->ref."\n".$ligne2->N__Serie, 0, 'C', 0);
+                                        }
                                     }
                                 }
                                 }

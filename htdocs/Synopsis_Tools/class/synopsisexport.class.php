@@ -51,14 +51,17 @@ WHERE ue.fk_object = fact.fk_user_author AND  fk_soc = soc.rowid AND `extraparam
 
         if ($centre)
             $where .= " AND centreVal = '" . $centre . "'";
-        if ($paye)
+        if ($paye) {
             $where .= " AND fact.fk_statut = 2 AND fact.paye = '1'";
+            $champDate = "fact.datec";
+        } else {
+            $champDate = "propal.datec";
+        }
         if ($dateDeb)
-            $where .= " AND fact.datec > STR_TO_DATE('".$dateDeb." 00:00','%d/%m/%Y %H:%i') ";
+            $where .= " AND ".$champDate." > STR_TO_DATE('" . $dateDeb . " 00:00','%d/%m/%Y %H:%i') ";
         if ($dateFin)
-            $where .= " AND fact.datec < STR_TO_DATE('".$dateFin." 23:59','%d/%m/%Y %H:%i') ";
+            $where .= " AND ".$champDate." < STR_TO_DATE('" . $dateFin . " 23:59','%d/%m/%Y %H:%i') ";
 //die($where);
-
 //        $partReq1 = "SELECT prod.ref, prod.label, SUM(factdet.qty) as QTE, SUM(factdet.total_ht) as Total_Vendu, SUM(factdet.buy_price_ht) as Total_Achat";
 //        $partReqFin = "";
 //
@@ -104,8 +107,8 @@ AND  fact.close_code is null " .
 
         $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid ";
         $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
-            $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
-            $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%')";
+        $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
+        $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%')";
         $partReq5 .= " LEFT JOIN llx_facture fact ON fact.close_code is null AND fact.rowid = el.fk_target AND fact.facnumber LIKE 'FA%' ";
         $partReq5 .= " LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
 

@@ -23,7 +23,7 @@ class synopsisHook {
             'L' => array("04 78 17 30 28", "sav69@bimp.fr"), 
             "S" => array("04 77 81 58 12", "sav42@bimp.fr"), 
             "GB" => array("04 76 23 05 18", "sav38@bimp.fr"), "GA" => array("04 76 23 05 18", "sav38@bimp.fr"), 
-            "B" => array("03 81 47 11 71", "sav250@bimp.fr"), 
+            "B" => array("09 70 72 12 33", "sav250@bimp.fr"), 
             "MO" => array("03 81 95 19 20", "sav252@bimp.fr"));
 
 

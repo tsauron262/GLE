@@ -898,3 +898,13 @@ prevoir zone de text.
 
 
 mail compte fermer
+
+
+//voi r login mdp 
+
+voir photo pc
+
+//mofiifer boutons actif derriere ancienne page
+
+
+etiquette voir new page

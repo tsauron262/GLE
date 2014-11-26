@@ -161,7 +161,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $chrono->propal->cloture($user, 2, "Auto via SAV");
 
             if (isset($_REQUEST['sendSms']) && $_REQUEST['sendSms'])
-                envoieMail("revPropRefu", $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine);
+                envoieMail("revPropRefu", $chrono, null, $toMail, $fromMail, $tel, $nomMachine);
         } else {
 
             $chrono->setDatas($chrono->id, array($idEtat => 5));
@@ -320,6 +320,11 @@ if (isset($_REQUEST['actionEtat'])) {
 
         envoieMail("Facture", $chrono, $facture, $toMail, $fromMail, $tel, $nomMachine);
     }
+
+    if ($action == "mailSeul" && isset($_REQUEST['mailType'])) {
+        envoieMail($_REQUEST['mailType'], $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine);
+        $ok = true;
+    }
 }
 
 if ($ok)
@@ -358,6 +363,7 @@ function sendSms($chrono, $text) {
 }
 
 function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine) {
+    global $db;
     $delai = (isset($_REQUEST['nbJours']) && $_REQUEST['nbJours'] > 0 ? "dans " . $_REQUEST['nbJours'] . " jours" : "dès maintenant");
 
     $tabFilePc = $tabFilePc2 = $tabFilePc3 = array();
@@ -371,7 +377,16 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
 
 
     if ($type == "Facture") {
-        $facture = $obj;
+        if (is_object($obj))
+            $facture = $obj;
+        elseif (isset($chrono->propal) && $chrono->propal->id > 0) {
+            $tabT = getElementElement("propal", "facture", $chrono->propal->id);
+            if (count($tabT) > 0) {
+                $facture = new Facture($db);
+                $facture->fetch($tabT[count($tabT)-1]['d']);
+                $facture->facnumber = $facture->ref;
+            }
+        }
         //Envoie mail
         $tabFileFact = $tabFileFact2 = $tabFileFact3 = array();
         $fileProp = DOL_DATA_ROOT . "/facture/" . $facture->facnumber . "/" . $facture->facnumber . ".pdf";
@@ -414,7 +429,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
 \nL'équipe BIMP", $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     } elseif ($type == "repOk") {
-        mailSyn2("Réparation " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+        mailSyn2("Reparation " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
                 , $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "revPropFerm") {

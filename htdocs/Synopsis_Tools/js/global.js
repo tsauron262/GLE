@@ -120,6 +120,11 @@ $(window).load(function() {
     $(selector).prev().hide();
     $(selector).next().hide();
     $(selector).hide();
+    
+    $(".butCache").click(function(){
+        $(".panCache#"+$(this).attr("id").replace("but", "pan")).show();
+        $(this).hide();
+    });
 });
 
 function ajoutNotification(id, titre, msg) {

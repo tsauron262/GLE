@@ -389,3 +389,6 @@ textarea.grand{
     display: inherit;
 }
 
+.panCache{
+    display: none;
+}

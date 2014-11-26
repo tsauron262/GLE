@@ -109,6 +109,12 @@ function bouttonEtatSav($idChrono) {
         $return .= "</br>";
         $return .= "<a class='butAction' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=restituer&modeP=\"+$(\"#selectpaiementtype\").attr(\"value\");' >Restitué (Payer)</a>";
     }
+    
+    $return .= "<a class='butCache' id='butCacheReMail'>Recontacter</a>";
+    $return .= "<div class='panCache' id='panCacheReMail'><select id='mailType'>";
+    foreach (array("Facture" => "Facture", "Devis" => "Devis", "PC" => "Pc", "commOk" => "Piéce commandé", "repOk" => "Réparation OK", "revPropFerm" => "Devis refusé", "pieceOk"=>"Piéce reçue") as $val => $nom)
+        $return .= "<option value='".$val."'>".$nom."</option>";
+    $return .= "</select><a class='butAction' style='display: inline;' onclick='window.location = \"request.php?id=" . $idChrono . "&actionEtat=mailSeul&mailType=\"+$(\"#mailType\").attr(\"value\")'>Réenvoyer</a>";
 
     return $return;
 }

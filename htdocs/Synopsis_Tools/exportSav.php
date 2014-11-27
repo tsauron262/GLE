@@ -100,7 +100,7 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
 //    else
 //        echo "Plusieurs Garantie (".$ligne->nbGar.") facture ".$ligne->rowid;
     }
-    die;
+    die("reinit ok");
 }
 
 

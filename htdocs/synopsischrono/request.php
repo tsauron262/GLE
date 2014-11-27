@@ -60,11 +60,6 @@ if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCent
     $fromMail = "SAV BIMP<no-replay@bimp.fr>";
 }
 
-if (isset($chrono->extraValue[$chrono->id]['Technicien']['value']) && $chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
-    $userT = new User($db);
-    $userT->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
-    $tech = $userT->getFullName($langs);
-}
 
 if (isset($_REQUEST['actionEtat'])) {
     $action = $_REQUEST['actionEtat'];
@@ -254,7 +249,7 @@ if (isset($_REQUEST['actionEtat'])) {
             }
 
 
-            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totHt);
+            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);
@@ -305,7 +300,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $payement->paiementid = $_REQUEST['modeP'];
             $payement->create($user);
             $facture->set_paid($user);
-            facture_pdf_create($db, $facture, "crabeSav", $langs);
+//            facture_pdf_create($db, $facture, "crabeSav", $langs);
         }
 
 
@@ -314,6 +309,7 @@ if (isset($_REQUEST['actionEtat'])) {
 
 
         //Generation
+        $facture->fetch($facture->id);
         facture_pdf_create($db, $facture, "crabeSav", $langs);
 //        addElementElement("propal", "facture", $propal->id, $facture->id);
         link(DOL_DATA_ROOT . "/facture/" . $facture->ref . "/" . $facture->ref . ".pdf", DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id . "/" . $facture->ref . ".pdf");
@@ -375,6 +371,12 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
     }
 
 
+    if (isset($chrono->extraValue[$chrono->id]['Technicien']['value']) && $chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
+        $userT = new User($db);
+        $userT->fetch($chrono->extraValue[$chrono->id]['Technicien']['value']);
+        $tech = $userT->getFullName($langs);
+    }
+
 
     if ($type == "Facture") {
         if (is_object($obj))
@@ -383,7 +385,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
             $tabT = getElementElement("propal", "facture", $chrono->propal->id);
             if (count($tabT) > 0) {
                 $facture = new Facture($db);
-                $facture->fetch($tabT[count($tabT)-1]['d']);
+                $facture->fetch($tabT[count($tabT) - 1]['d']);
                 $facture->facnumber = $facture->ref;
             }
         }

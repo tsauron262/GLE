@@ -32,19 +32,28 @@ class partsCart {
 
     public function addThisToPropal($propal) {
         global $db, $langs;
-        $qte = 1;
-        $prod = new Product($db);
-        $prod->fetch(3436);
-        require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-        $prodF = new ProductFournisseur($db);
-        $prodF->find_min_price_product_fournisseur($prod->id, $qte);
-        $propal->addline($prod->description, $prod->price, $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+
+        $this->fraisP = -1;
 
 
         foreach ($this->partsCart as $part) {
             $prix = $this->convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
             $propal->addline($part['partNumber'] . " - " . $part['partDescription'], $prix, $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
         }
+
+        if ($this->fraisP > 0) {
+            $qte = $this->fraisP;
+            $prod = new Product($db);
+            $prod->fetch(3436);
+            require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+            $prodF = new ProductFournisseur($db);
+            $prodF->find_min_price_product_fournisseur($prod->id, $qte);
+            $propal->addline($prod->description, $prod->price, $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+        }
+
+
+
+
         $propal->fetch($propal->id);
         require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
         propale_pdf_create($db, $propal, null, $langs);
@@ -90,6 +99,12 @@ class partsCart {
             $constPrix = 45;
         }
         $prix = (($prix + $constPrix) / $coefPrix);
+
+        if (($cas == 1 || $cas == 3) && $this->fraisP < 1)
+            $this->fraisP = 0;
+        else
+            $this->fraisP = 1;
+
         return $prix;
     }
 

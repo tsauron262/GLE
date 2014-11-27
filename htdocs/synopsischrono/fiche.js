@@ -99,6 +99,15 @@ jQuery(document).ready(function() {
             $(lien).removeAttr('onclick');
         }, 100);
     });
+    
+    
+    
+    $(".desactiveButtons").click(function(){
+        setTimeout(function() {
+            $(".butAction").removeAttr('href');
+            $(".butAction").removeAttr('onclick');
+        }, 100);
+    });
 
 
 

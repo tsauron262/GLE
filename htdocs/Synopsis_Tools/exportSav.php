@@ -100,6 +100,21 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
 //    else
 //        echo "Plusieurs Garantie (".$ligne->nbGar.") facture ".$ligne->rowid;
     }
+    
+    
+    
+    e("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_propal` fact, llx_propaldet factdet WHERE factdet.fk_propal = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
+    while ($ligne = $db->fetch_object($result)) {
+//    if($ligne->nbGar == 1){
+        $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM llx_propaldet WHERE description not like 'Garantie' AND fk_propal = " . $ligne->rowid);
+        $ligne2 = $db->fetch_object($result2);
+
+        $db->query("UPDATe llx_propaldet SET buy_price_ht = -" . ($ligne2->tot / $ligne->nbGar) . " WHERE fk_propal = " . $ligne->rowid . " AND description LIKE 'Garantie'");
+//    }
+//    else
+//        echo "Plusieurs Garantie (".$ligne->nbGar.") facture ".$ligne->rowid;
+    }
+    
     die("reinit ok");
 }
 

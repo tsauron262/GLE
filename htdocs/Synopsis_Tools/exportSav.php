@@ -103,7 +103,7 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
     
     
     
-    e("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_propal` fact, llx_propaldet factdet WHERE factdet.fk_propal = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
+    $result = $db->query("SELECT fact.rowid, COUNT(factdet.rowid) as nbGar FROM `llx_propal` fact, llx_propaldet factdet WHERE factdet.fk_propal = fact.rowid AND factdet.`description` LIKe 'Garantie' AND fact.total > -0.1 AND fact.total < 0.1 GROUP BY fact.rowid");
     while ($ligne = $db->fetch_object($result)) {
 //    if($ligne->nbGar == 1){
         $result2 = $db->query("SELECt SUM(buy_price_ht) as tot FROM llx_propaldet WHERE description not like 'Garantie' AND fk_propal = " . $ligne->rowid);

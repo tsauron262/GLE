@@ -20,10 +20,25 @@ class synopsisexport {
     }
 
     public function exportFactureSav() {
-        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, id8Sens FROM  `llx_facture` fact, llx_societe soc, llx_user_extrafields ue
-WHERE ue.fk_object = fact.fk_user_author AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null");
+//        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+//, email , total, total_ttc, id8Sens FROM  `llx_facture` fact, llx_societe soc
+//LEFT JOIN llx_element_element el, llx_user_extrafields ue, llx_synopsischrono_view_105 chrono 
+// WHERE `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author) AND el.targettype = 'facture' AND el.sourcetype = 'propal' AND el.fk_source = chrono.propalid AND fk_target = fact.rowid
+//  AND  fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
 
+        
+        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
+, email , total, total_ttc, id8Sens FROM  `llx_facture` fact
+
+
+LEFT JOIN llx_element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
+LEFT JOIN llx_synopsischrono_view_105 chrono ON el.fk_source = chrono.propalid
+LEFt JOIN llx_user_extrafields ue ON `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author)
+
+, llx_societe soc
+WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null AND paye = 1 AND extraparams is null GROUP BY fact.rowid");
+        
+        
         while ($ligne = $this->db->fetch_object($result)) {
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);

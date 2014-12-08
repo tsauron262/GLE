@@ -244,8 +244,11 @@ if ($action == 'modifier') {
     
     
     /*special bimp appel*/
-    if(isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on")
-        mailSyn2 ("Transfert Appel", "tommy@drsi.fr", null, "Bonjour l'appel ".$chr->getNomUrl(1)." vous a été transmis.");
+    if(isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on"){
+        $tech = new User($db);
+        $tech->fetch($_REQUEST["Chrono-1070"]);
+        mailSyn2 ("Transfert Appel", $tech->email, null, "Bonjour ".$tech->getFullName($langs)." l'appel ".$chr->getNomUrl(1)." vous a été transmis.");
+    }
     /*fin special bimp appel*/
     
     

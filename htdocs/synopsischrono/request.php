@@ -240,14 +240,13 @@ if (isset($_REQUEST['actionEtat'])) {
             $totPa = 0;
             $totHt = 0;
             $totTtc = 0;
-            foreach ($propal->lines as $ligne) {
-                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
+            foreach ($chrono->propal->lines as $ligne) {
+                if (/*$ligne->desc != "Acompte" &&*/ $ligne->ref != "SAV-PCU") {
                     $totHt += $ligne->total_ht;
                     $totTtc += $ligne->total_ttc;
-                    $totPa += $lines->pa_ht;
+                    $totPa += $ligne->pa_ht;
                 }
             }
-
 
             $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie

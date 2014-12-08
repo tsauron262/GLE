@@ -1117,7 +1117,7 @@ EOF;
                                 print "<table width=100%>";
                                 while ($res1 = $db->fetch_object($sql1)) {
                                     print "<tr><td width=100%>" . $res1->label . "<td>";
-                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
+                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "' >";
                                 }
                                 print "</table>";
                             }
@@ -1586,7 +1586,7 @@ EOF;
                                 print "<table width=100%>";
                                 while ($res1 = $db->fetch_object($sql1)) {
                                     print "<tr><td width=100%>" . $res1->label . "<td>";
-                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "'>";
+                                    print "<input type='radio' value='" . $res1->value . "' name='extraKey-" . $res->id . "' ".($res->extra_value == $res1->value ? "checked='checked'" : "").">";
                                 }
                                 print "</table>";
                             }

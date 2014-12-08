@@ -241,6 +241,14 @@ if ($action == 'modifier') {
             }
         }
     }
+    
+    
+    /*special bimp appel*/
+    if(isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on")
+        mailSyn2 ("Transfert Appel", "tommy@drsi.fr", null, "Bonjour l'appel ".$chr->getNomUrl(1)." vous a été transmis.");
+    /*fin special bimp appel*/
+    
+    
     if ($res > 0) {
         header('location:?id=' . $id . ($action2 != "" ? "&action=$action2" : ""));
     } else {

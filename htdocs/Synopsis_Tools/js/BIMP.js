@@ -154,5 +154,23 @@ $(window).load(function() {
     $("select[name='centreRapide']").change(function() {
         inputCentre.val(inputCentre.val() + " " + $(this).val());
     });
+    
+    
+    elem = "#Chrono-1034, #inputautocompleteChrono-1034";
+    $(elem).focusout(function(){
+        initTrans(elem);
+    });
+    initTrans(elem);
+    $("#inputautocompleteChrono-1070").focusout(function(){
+        $("#mailTrans").attr("checked", "checked");
+    });
 });
 
+
+function initTrans(elem){
+    elemA = "select.hideTrans, input.hideTrans";
+        if($(elem).val() == "1")
+            $(elemA).parent().parent().show();
+        else
+            $(elemA).parent().parent().hide();
+}

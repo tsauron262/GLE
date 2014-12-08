@@ -918,3 +918,46 @@ quand prix +45 pas de fr de port
 voir garantie pa
 
 tech ds mail
+
+adresse retour a la ligne  dans modifier et dans   pdf   PC   retour a la ligne 
+
+
+dans bas de PR imac S/N : ...
+
+
+devis refusé accompte passe produit
+
+
+
+diago ds note du tech
+
+
+mail au debut
++ changer
+
+
+virer diago quand revision
+
+
+
+
+voir commpte_v est caisse_v
+
+
+exdport des factures.
+
+
+ajouter initial du tech
+102252
+80.63
+ay526be
+
+
+
+
+
+
+
+
+
+UPDATE `llx_facturedet` SET `buy_price_ht` = 30 WHERE `fk_product` = 3325

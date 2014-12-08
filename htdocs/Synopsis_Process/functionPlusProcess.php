@@ -145,3 +145,7 @@ function pictoSMS($idChrono) {
         return $return;
     }
 }
+
+function transfertA($chronoId){
+   return "<input type='checkbox' class='hideTrans' value='on' id='mailTrans' name='mailTrans'/>";
+}

@@ -642,6 +642,11 @@ class gsxDatas {
             
             if ($this->isIphone) {
                 switch ($requestType) {
+                    case 'CreateIPhoneWholeUnitExchangeRequest':
+                        $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
+                        $client = "CreateIPhoneWholeUnitExchange";
+                        $request = "CreateIPhoneWholeUnitExchangeRequest";
+                    
                     case 'CreateCarryInRepair':
                         $responseNames = array(
                             'IPhoneCreateCarryInResponse',

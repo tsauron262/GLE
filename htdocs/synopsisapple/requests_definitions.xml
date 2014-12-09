@@ -197,7 +197,7 @@
         </datas>
     </request>
 
-    <request name="CreateIPhoneWholeUnitExchange" type="repair" request="CreateIPhoneWholeUnitExchangeRequest" wrapper="repairData">
+    <request name="CreateWholeUnitExchange" type="repair" request="CreateWholeUnitExchangeRequest" wrapper="repairData">
         <label>Création d'une réparation par courrier (mail-in repair)2</label>
         <datas>
             <data name="billTo" required="0"></data>

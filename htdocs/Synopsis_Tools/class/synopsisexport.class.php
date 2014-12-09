@@ -333,6 +333,7 @@ WHERE  `list_refid` =11");
                 }
                 
                 if($nom == 'objSoc'){
+                    require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
                     $tabT = explode("|", $valeur);
                     $socStat = new Societe(null);
                     $socStat->nom = $tabT[0];
@@ -341,6 +342,7 @@ WHERE  `list_refid` =11");
                 }
                 
                 if($nom == 'objFact'){
+                    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
                     $tabT = explode("|", $valeur);
                     $socStat = new Facture(null);
                     $socStat->ref = $tabT[0];

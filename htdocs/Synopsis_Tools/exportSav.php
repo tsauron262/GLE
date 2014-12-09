@@ -49,7 +49,7 @@ foreach (array("html" => "Affichage", "file" => "Fichier Exel") as $val => $labe
 echo "</select>";
 
 echo "<select name='typeAff2'>";
-foreach (array("sav" => "SAV", "ca" => "CA", "nb" => "Nombre PC") as $val => $label) {
+foreach (array("sav" => "SAV", "ca" => "CA", "nb" => "Nombre PC", "fact" => "Facture") as $val => $label) {
     $valSelect = $typeAff2;
     echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
 }

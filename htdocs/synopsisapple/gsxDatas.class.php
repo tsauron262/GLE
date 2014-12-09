@@ -642,7 +642,7 @@ class gsxDatas {
             
             if ($this->isIphone) {
                 switch ($requestType) {
-                    case 'CreateWholeUnitExchangeRequest':
+                    case 'CreateWholeUnitExchange':
                         $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
                         $client = "CreateIPhoneWholeUnitExchange";
                         $request = "CreateIPhoneWholeUnitExchangeRequest";

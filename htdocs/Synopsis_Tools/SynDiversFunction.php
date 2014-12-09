@@ -801,7 +801,7 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
     $msg = str_replace(DOL_URL_ROOT, $dolibarr_main_url_root, $msg);
 
     if ($from == '')
-        $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . str_replace(" ", "", MAIN_INFO_SOCIETE_NOM) . '.fr>';
+        $from = 'Application GLE ' . MAIN_INFO_SOCIETE_NOM . ' <gle@' . strtolower(str_replace(" ", "", MAIN_INFO_SOCIETE_NOM)) . '.fr>';
 
     $toReplay = "Tommy SAURON <tommy@drsi.fr>";
     $ccAdmin = $toReplay . ", Christian CONSTANTIN-BERTIN <cconstantin@finapro.fr>";

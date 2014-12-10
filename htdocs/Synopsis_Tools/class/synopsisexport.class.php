@@ -209,12 +209,14 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
+                $tabMaterielTot[$ligne->propalid] = $ligne->propalid;
                 $tabMateriel[strtoupper($ligne->label)][$ligne->propalid] = $ligne->propalid;
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
 
             $j = 0;
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND el.fk_source NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)

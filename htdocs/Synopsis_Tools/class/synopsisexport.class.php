@@ -131,7 +131,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
             $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, "
                     . "CONCAT(facnumber,CONCAT('|', fact.rowid)) as objFact, "
                     . "total,"
-                    . "SUM((det.buy_price_ht - det.subprice) * det.qty) as total_marge, "
+                    . "SUM((det.subprice - det.buy_price_ht) * det.qty) as total_marge, "
                     . "fact.fk_statut";
             $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
             $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";

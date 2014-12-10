@@ -114,7 +114,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
-            $partReqFin = "  Group BY chrono.id LIMIT 0,100";
+            $partReqFin = "  Group BY chrono.id LIMIT 0,100000";
         }
 
 

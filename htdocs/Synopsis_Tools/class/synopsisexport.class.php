@@ -217,12 +217,12 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             ksort($tabMateriel, SORT_STRING);
 
             $j = 0;
-                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND el.fk_source NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)
 //                break;
-                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND el.fk_source IN ('" . implode("','", $val) . "') " . $partReqFin);
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 
 

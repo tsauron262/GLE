@@ -36,7 +36,7 @@ LEFT JOIN llx_synopsischrono_view_105 chrono ON el.fk_source = chrono.propalid
 LEFt JOIN llx_user_extrafields ue ON `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author)
 
 , llx_societe soc
-WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null GROUP BY fact.rowid");
+WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
 
         while ($ligne = $this->db->fetch_object($result)) {
@@ -64,19 +64,17 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
 
         $where = "1";
 
-        if ($centre)
-            $where .= " AND centreVal = '" . $centre . "'";
         $champDate = "fact.datec";
         if ($paye) {
             $where .= " AND fact.fk_statut = 2 AND fact.paye = '1'";
-        } elseif($typeAff2 != "fact") {
+        } elseif ($typeAff2 != "fact") {
             $champDate = "propal.datec";
         }
-        
-        if($typeAff2 == "fact") {
+
+        if ($typeAff2 == "fact" && $typeAff != "parCentre") {
             $typeAff = null;
         }
-        
+
         if ($dateDeb)
             $where .= " AND " . $champDate . " > STR_TO_DATE('" . $dateDeb . " 00:00','%d/%m/%Y %H:%i') ";
         if ($dateFin)
@@ -116,12 +114,12 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
 //            if ($paye)
 //                $partReqFin = "  Group BY fact.rowid, chrono.id LIMIT 0,10000";
 //            else
-            $partReqFin = "  Group BY chrono.id LIMIT 0,10000";
+            $partReqFin = "  Group BY chrono.id LIMIT 0,100";
         }
 
 
 
-        $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid ";
+        $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%')";
@@ -130,9 +128,16 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
 
 
         if ($typeAff2 == "fact") {
-            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, CONCAT(facnumber,CONCAT('|', fact.rowid)) as objFact, total, fk_statut";
-            $partReq5 = " FROM llx_facture fact, llx_societe soc WHERE soc.rowid = fact.fk_soc AND ";
-            $partReqFin = " GROUP BY fact.rowid LIMIT 0,10000";
+            $partReq1 = "SELECT CONCAT(soc.nom, CONCAT('|', soc.rowid)) as objSoc, "
+                    . "CONCAT(facnumber,CONCAT('|', fact.rowid)) as objFact, "
+                    . "total,"
+                    . "SUM((det.buy_price_ht - det.subprice) * det.qty) as total_marge, "
+                    . "fact.fk_statut";
+            $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
+            $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
+//            $partReq5 .= " LEFT JOIN  llx_synopsischrono_view_105 chrono on  chrono.propalId = el.fk_source";
+            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND ";
+            $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
         }
@@ -194,14 +199,17 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }
-        } elseif ($typeAff == "parCentre") {
-            $result = $this->db->query("SELECT label, valeur 
-FROM  `llx_Synopsis_Process_form_list_members` 
-WHERE  `list_refid` =11");
+        } elseif ($typeAff == "parCentre" || $centre) {
+            $req = "SELECT label, valeur, propalid
+FROM  `llx_Synopsis_Process_form_list_members` ls, llx_synopsischrono_view_105 chrono
+WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
+            if($centre)
+                $req .= " AND centreVal = '" . $centre . "'";
+            $result = $this->db->query($req);
 
             $tabMateriel = array();
             while ($ligne = $this->db->fetch_object($result)) {
-                $tabMateriel[strtoupper($ligne->label)] = $ligne->valeur;
+                $tabMateriel[strtoupper($ligne->label)][$ligne->propalid] = $ligne->propalid;
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
@@ -211,7 +219,8 @@ WHERE  `list_refid` =11");
                 $j++;
 //            if($j > 50)
 //                break;
-                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND el.fk_source IN ('" . implode("','", $val) . "') " . $partReqFin);
+//                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 
 
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
@@ -331,25 +340,25 @@ WHERE  `list_refid` =11");
                     else
                         $valeur = "";
                 }
-                
-                if($nom == 'objSoc'){
-                    require_once(DOL_DOCUMENT_ROOT."/societe/class/societe.class.php");
+
+                if ($nom == 'objSoc') {
+                    require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
                     $tabT = explode("|", $valeur);
                     $socStat = new Societe(null);
                     $socStat->nom = $tabT[0];
                     $socStat->id = $tabT[1];
                     $valeur = $socStat->getNomUrl(1);
                 }
-                
-                if($nom == 'objFact'){
-                    require_once(DOL_DOCUMENT_ROOT."/compta/facture/class/facture.class.php");
+
+                if ($nom == 'objFact') {
+                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
                     $tabT = explode("|", $valeur);
                     $socStat = new Facture(null);
                     $socStat->ref = $tabT[0];
                     $socStat->id = $tabT[1];
                     $valeur = $socStat->getNomUrl(1);
                 }
-                
+
                 if ($nom == "refSav" && $this->sortie == "html")
                     $valeur = "<a href='" . DOL_URL_ROOT . "/synopsischrono/fiche.php?ref=" . $valeur . "'>" . $valeur . "</a>";
 

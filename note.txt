@@ -961,3 +961,15 @@ ay526be
 
 
 UPDATE `llx_facturedet` SET `buy_price_ht` = 30 WHERE `fk_product` = 3325
+
+013346009165368
+
+
+voir impression quand lon symptomes http://gle.bimp.fr/bimp/synopsischrono/fiche.php?action=cancel&id=9308 
++ nom colient en maj
+
+create whoml
+
+04
+
+marge et par centree

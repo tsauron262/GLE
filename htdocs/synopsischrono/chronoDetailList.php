@@ -60,8 +60,10 @@ class htmlOld {
                         }
                     });
                 }
-                    });
-                    }";
+                    });";
+            
+        $js .= "  setTimeout(function(){   jQuery('#" . $id . "').filterToolbar('');},500);";
+                    $js .="}";
         } else {
             $js .= ';';
         }
@@ -371,7 +373,6 @@ EOF;
 
         $js .= $htmlOld->listjqGrid($arr, $nomDiv, true, false, array(view => false, add => false, edit => false, search => false, position => "left"), $optionSearch);
 
-        $js .= "  setTimeout(function(){   jQuery('#" . $nomDiv . "').filterToolbar('');},500);";
     }
 
 

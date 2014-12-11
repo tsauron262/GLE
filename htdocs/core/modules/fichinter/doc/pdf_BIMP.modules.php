@@ -224,7 +224,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                     if ($val->fk_typeinterv == 13) {
                         $isTelemaint = true;
                     }
-                    if ($val->fk_typeinterv == 4) {
+                    if ($val->isDeplacement) {
                         $totDeplacementHT+= $val->total_ht;
                         $totDeplacementTva+= $val->total_tva;
                         $totDeplacementTime+= $val->duration;

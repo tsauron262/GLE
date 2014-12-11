@@ -993,7 +993,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
         
         $sql = 'SELECT ft.rowid, ft.fk_fichinter, ft.description, ft.duree, ft.rang, ft.fk_typeinterv, f.label as typeinterv ';
         $sql .= ',`tx_tva`,`pu_ht` ,`qte`,`total_ht`,`total_tva`,`total_ttc`,`fk_contratdet`,`fk_commandedet`,`isForfait`';
-        $sql.= ' ,ft.date as datei,fk_depProduct';
+        $sql.= ' ,ft.date as datei,fk_depProduct,f.isDeplacement';
         $sql.= " FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet as ft";
         $sql.= " LEFT JOIN " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv as f ON f.id = ft.fk_typeinterv";
 
@@ -1023,6 +1023,7 @@ class SynopsisfichinterLigne extends FichinterLigne{
             $this->fk_commandedet = $objp->fk_commandedet;
             $this->isForfait = $objp->isForfait;
             $this->typeIntervProd = $objp->fk_depProduct;
+            $this->isDeplacement = $objp->isDeplacement;
 
             $this->db->free($result);
             return 1;

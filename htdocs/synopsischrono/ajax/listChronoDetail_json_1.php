@@ -147,7 +147,7 @@ if ($searchOn == 'true') {
 
 //die($wh.$_REQUEST['ref']);
 
-    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList > 0 AND model_refid =  " . $id. " ORDER BY inDetList";
+    $requetePre = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsischrono_key WHERE inDetList > 0 AND model_refid =  " . $id . " ORDER BY inDetList";
     $sqlPre = $db->query($requetePre);
     while ($resPre = $db->fetch_object($sqlPre)) {
         $searchField = "";
@@ -174,6 +174,21 @@ if ($searchOn == 'true') {
                     $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1];
 //                    $searchString = $arr[3] . '-' . $arr[2] . '-' . $arr[1] . " " . $arr[4] . ":" . $arr[5];
                 }
+            }
+            if ($resPre->type_valeur == 6) {
+                $_REQUEST['searchOper'] = "eq";
+$oper = "=";
+                $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_requete WHERE id = " . $resPre->type_subvaleur);
+                $ligne = $db->fetch_object($result);
+                $champs = unserialize($ligne->showFields);
+                $champs2 = array();
+                foreach($champs as $champ){
+                    $champs2[] = $champ ." LIKE '%".$searchString."%' ";
+                }
+                $result2 = $db->query(str_replace("[[indexField]]", "(".implode(" || ",$champs2).")", $ligne->requeteValue));
+                $ligne2 = $db->fetch_object($ligne2);
+                $champIdNom = $ligne->indexField;
+                $searchString = $ligne2->$champIdNom;
             }
         }
 
@@ -241,7 +256,7 @@ if ($searchOn == 'true') {
 
 
 
-$requetePre = "SELECT *, k.id as key_id, k.nom as key_name FROM " . MAIN_DB_PREFIX . "synopsischrono_key k LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tv ON tv.id = type_valeur  WHERE inDetList > 0 AND model_refid =  " . $id. " ORDER BY inDetList";
+$requetePre = "SELECT *, k.id as key_id, k.nom as key_name FROM " . MAIN_DB_PREFIX . "synopsischrono_key k LEFT JOIN " . MAIN_DB_PREFIX . "synopsischrono_key_type_valeur tv ON tv.id = type_valeur  WHERE inDetList > 0 AND model_refid =  " . $id . " ORDER BY inDetList";
 
 $sqlPre = $db->query($requetePre);
 $arrPre = $arrKeyName = $arrKeyType = array();
@@ -255,10 +270,10 @@ while ($resPre = $db->fetch_object($sqlPre)) {
 
 
 if (!$withRev) {
-    $wh .= " AND revisionNext < 1";//revision is NULL ";
+    $wh .= " AND revisionNext < 1"; //revision is NULL ";
 } else {
     $sousReq = "(SELECT orig_ref FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE id = " . $_REQUEST['chrono_refid'] . ")";
-    $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = ".$sousReq." || ref = ".$sousReq.")";
+    $wh .= " AND id <>" . $_REQUEST['chrono_refid'] . " AND  (orig_ref = " . $sousReq . " || ref = " . $sousReq . ")";
 }
 
 
@@ -322,7 +337,7 @@ if ($sql) {
 //            if ($db->fetch_object($sql1))
 //                $hasRev = true;
 //            if ($res1->cnt > 0) $hasRev = true;
-                $hasRev = ($res->orig_ref && $res->orig_ref != "");
+            $hasRev = ($res->orig_ref && $res->orig_ref != "");
             $arr[] = ($hasRev ? '<div class="hasRev">1</div>' : '<div class="hasRev">0</div>');
         } else {
             $arr[] = ('<div class="hasRev">0</div>');
@@ -422,7 +437,7 @@ function parseValue($idChrono, $val, $extraCss, $hasSubValeur = false, $sourceIs
         $obj = new $tmp($db);
         $obj->cssClassM = $extraCss;
         $obj->idChrono = $idChrono;
-        
+
         $obj->fetch($hasSubValeur, $extraCss);
         if ($phpClass == 'globalvar') {
             return $obj->getValue($val);

@@ -295,6 +295,9 @@ function initCopyColler(){
         $(".percent[value='-2']").each(function(){
             $(this).parent().parent().css("background-image", "url("+DOL_URL_ROOT+"/Synopsis_Tools/agenda/barrer.png)");  
         });
+        $(".percent[value='0']").each(function(){
+            $(this).parent().parent().css("background-image", "url("+DOL_URL_ROOT+"/Synopsis_Tools/agenda/point.png)");  
+        });
 }
         
 function blink(ob) { 

@@ -317,6 +317,7 @@ if (isset($_REQUEST['actionEtat'])) {
     }
 
     if ($action == "mailSeul" && isset($_REQUEST['mailType'])) {
+        $_REQUEST['sendSms'] = true;
         envoieMail($_REQUEST['mailType'], $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine);
         $ok = true;
     }
@@ -431,11 +432,11 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     } elseif ($type == "repOk") {
         mailSyn2("Reparation " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3);
-        sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
+                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
+        sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez le récupérer " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "revPropFerm") {
         mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3);
+                , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
         sendSms($chrono, "Bonjour, la réparation de votre produit  est refusé. Vous pouvez récupérer votre matériel " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "pieceOk") {
         mailSyn2("Pieces recues " . $chrono->ref, $toMail, $fromMail, "La pièce/le produit que nous avions commandé pour votre Machine est arrivé aujourd'hui. Nous allons commencer la réparation de votre appareil. Vous serez prévenu dès que l'appareil sera prêt.

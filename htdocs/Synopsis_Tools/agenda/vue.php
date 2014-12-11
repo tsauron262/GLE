@@ -193,7 +193,24 @@ $js .= <<<EOF
         displayOddEven: true,
         displayFreeBusys: true,
 EOF;
-$js .= 'daysToShow: ' . ((count($tabUser) < 6) ? '6' : '3') . ',';
+if(isset($_SESSION['dateDebStr'])){
+    $dateDebStr = $_SESSION['dateDebStr'];
+}
+else{
+    $dateDeb = new DateTime("");
+    $dateDebStr = $dateDeb->getTimestamp();
+}
+
+
+if(isset($_SESSION['nbJour'])){
+    $nbJour = $_SESSION['nbJour'];
+}
+else{
+    $nbJour = 6;
+}
+$js .= '
+        date: '.$dateDebStr.'000,
+        daysToShow: ' . ((count($tabUser) > 5 && $nbJour > 3) ? '3' : $nbJour) . ',';
 
 $js .= "switchDisplay: {'1 journée': 1, '3 journées': 3";
 if (count($tabUser) < 6)

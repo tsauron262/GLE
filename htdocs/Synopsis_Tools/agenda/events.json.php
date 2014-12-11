@@ -7,7 +7,12 @@ require_once("libAgenda.php");
 
 $eventsStr = array();
 if ($_REQUEST['end'] != "NaN" && $_REQUEST['start'] != "NaN") {
-            $heureOuvree = (isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true');
+    $_SESSION['dateDebStr'] = $_REQUEST['start'];
+    
+    $_SESSION['nbJour'] = ($_REQUEST['end'] - $_REQUEST['start'])/(3600*24);
+    
+    
+    $heureOuvree = (isset($_SESSION['paraAgenda']['workHour']) && $_SESSION['paraAgenda']['workHour'] == 'true');
     $sql = ("SELECT *, (`datep2` - `datep`) as duree FROM " . MAIN_DB_PREFIX . "actioncomm a LEFT JOIN " . MAIN_DB_PREFIX . "actioncomm_extrafields on fk_object = a.id WHERE ((datep < '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep >= '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "') "//Rdv dbut ds periode fin aprés
             . "|| (datep2 <= '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep2 > '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')" //fin ds la periode
             . "|| (datep2 > '" . date('Y-m-d 23:59:00', $_REQUEST['end']) . "' AND datep < '" . date('Y-m-d 00:00:00', $_REQUEST['start']) . "')) AND fk_user_action IN (" . implode(",", $newTabUser2) . ") AND (fk_action > 40 || fk_action < 9) order by datep ASC ");

@@ -576,25 +576,26 @@ class Synopsisdemandeinterv extends CommonObject {
         if ($heureDep == '' || $heureDep == '00:00')
             $heureDep = "18:00"; //else die($heureDep);
 
-        if($this->date > 0){
-        $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
-        $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
-        $action->type_id = 50;
-        $action->elementtype = "synopsisdemandeinterv";
-        $action->fk_element = $this->id;
-        $action->percentage = -1;
-        $soc = new Societe($this->db);
-        $soc->fetch($this->socid);
-        $action->societe = $soc;
-        $action->label = $this->description . " DI : " . $this->ref;
-        $action->note = $this->description;
-        $action->usertodo = $this->user_prisencharge;
+        if ($this->date > 0) {
+            $action->fk_action = $this->tabExtraV[37];
+            $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
+            $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
+            $action->type_id = 50;
+            $action->elementtype = "synopsisdemandeinterv";
+            $action->fk_element = $this->id;
+            $action->percentage = -1;
+            $soc = new Societe($this->db);
+            $soc->fetch($this->socid);
+            $action->societe = $soc;
+            $action->label = $this->description . " DI : " . $this->ref;
+            $action->note = $this->description;
+            $action->usertodo = $this->user_prisencharge;
 
 
-        if ($update)
-            $action->update($user);
-        elseif ($createIfNot)
-            $action->add($user);
+            if ($update)
+                $action->update($user);
+            elseif ($createIfNot)
+                $action->add($user);
         }
     }
 

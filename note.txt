@@ -944,13 +944,13 @@ virer diago quand revision
 voir commpte_v est caisse_v
 
 
-exdport des factures.
+//exdport des factures.
 
 
-ajouter initial du tech
-102252
-80.63
-ay526be
+//ajouter initial du tech
+//102252
+//80.63
+//ay526be
 
 
 
@@ -972,4 +972,4 @@ create whoml
 
 04
 
-marge et par centree
+//marge et par centree

@@ -55,7 +55,9 @@ class synopsisHook {
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
-
+        
+        if(defined("TAB_IP_INTERNE") && in_array($_SERVER['REMOTE_ADDR'], explode(",", str_replace(" ", "", TAB_IP_INTERNE))))
+            $conf->global->MAIN_SESSION_TIMEOUT = $conf->global->MAIN_SESSION_TIMEOUT * 6;
 
         include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
 

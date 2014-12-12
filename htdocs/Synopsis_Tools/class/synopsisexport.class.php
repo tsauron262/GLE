@@ -204,7 +204,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND 
             $req = "SELECT label, valeur, propalid
 FROM  `llx_Synopsis_Process_form_list_members` ls, llx_synopsischrono_view_105 chrono
 WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
-            if($centre)
+            if ($centre)
                 $req .= " AND centreVal = '" . $centre . "'";
             $result = $this->db->query($req);
 
@@ -217,15 +217,13 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             ksort($tabMateriel, SORT_STRING);
 
             $j = 0;
-                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
+            $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)
 //                break;
                 $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
-
-
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }
         } else {
@@ -345,21 +343,31 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                 }
 
                 if ($nom == 'objSoc') {
-                    require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
-                    $tabT = explode("|", $valeur);
-                    $socStat = new Societe(null);
-                    $socStat->nom = $tabT[0];
-                    $socStat->id = $tabT[1];
-                    $valeur = $socStat->getNomUrl(1);
+                        $tabT = explode("|", $valeur);
+                    if ($this->sortie == "html") {
+                        require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
+                        $socStat = new Societe(null);
+                        $socStat->nom = $tabT[0];
+                        $socStat->id = $tabT[1];
+                        $valeur = $socStat->getNomUrl(1);
+                    }
+                    else{
+                        $valeur = $tabT[0];
+                    }
                 }
 
                 if ($nom == 'objFact') {
-                    require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
-                    $tabT = explode("|", $valeur);
-                    $socStat = new Facture(null);
-                    $socStat->ref = $tabT[0];
-                    $socStat->id = $tabT[1];
-                    $valeur = $socStat->getNomUrl(1);
+                        $tabT = explode("|", $valeur);
+                    if ($this->sortie == "html") {
+                        require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
+                        $socStat = new Facture(null);
+                        $socStat->ref = $tabT[0];
+                        $socStat->id = $tabT[1];
+                        $valeur = $socStat->getNomUrl(1);
+                    }
+                    else{
+                        $valeur = $tabT[0];
+                    }
                 }
 
                 if ($nom == "refSav" && $this->sortie == "html")

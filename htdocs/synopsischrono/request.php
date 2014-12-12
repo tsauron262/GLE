@@ -431,9 +431,9 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
 \nL'équipe BIMP", $tabFilePc, $tabFilePc2, $tabFilePc3);
         sendSms($chrono, "Bonjour, la pièce/le produit nécessaire à votre réparation vient d'être commandé(e), nous vous contacterons dès réception de celle-ci. L'Equipe BIMP.");
     } elseif ($type == "repOk") {
-        mailSyn2("Reparation " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
+        mailSyn2("Reparation " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
                 , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);
-        sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est fini. Vous pouvez le récupérer " . $delai . ". L'Equipe BIMP.");
+        sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que la réparation de votre produit est finie. Vous pouvez le récupérer " . $delai . ". L'Equipe BIMP.");
     } elseif ($type == "revPropFerm") {
         mailSyn2("Prise en charge " . $chrono->ref . " terminé", $toMail, $fromMail, "Bonjour, la réparation de votre produit est refusé. Vous pouvez récupérer votre matériel " . $delai . ", si vous souhaitez plus de renseignements, contactez le " . $tel . ".\n\n Cordialement. \n L'Equipe BIMP."
                 , $tabFilePc, $tabFilePc2, $tabFilePc3, $fromMail);

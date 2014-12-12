@@ -153,7 +153,7 @@ if ($searchOn == 'true') {
         $searchField = "";
         $nom = traiteCarac(sanitize_string($resPre->nom));
 //        if ($nom == $searchField) {
-        if (isset($_REQUEST[sanitize_string($nom)])) {
+        if (isset($_REQUEST[sanitize_string($nom)]) && $_REQUEST[sanitize_string($nom)] != "") {
 //            die($_REQUEST[sanitize_string($nom)]);
 //            die("cool");
             $searchField = traiteCarac(sanitize_string($nom));
@@ -176,19 +176,22 @@ if ($searchOn == 'true') {
                 }
             }
             if ($resPre->type_valeur == 6) {
-                $_REQUEST['searchOper'] = "eq";
-$oper = "=";
                 $result = $db->query("SELECT * FROM " . MAIN_DB_PREFIX . "Synopsis_Process_form_requete WHERE id = " . $resPre->type_subvaleur);
                 $ligne = $db->fetch_object($result);
                 $champs = unserialize($ligne->showFields);
                 $champs2 = array();
-                foreach($champs as $champ){
-                    $champs2[] = $champ ." LIKE '%".$searchString."%' ";
+                foreach ($champs as $champ) {
+                    $champs2[] = $champ . " LIKE '%" . $searchString . "%' ";
                 }
-                $result2 = $db->query(str_replace("[[indexField]]", "(".implode(" || ",$champs2).")", $ligne->requeteValue));
-                $ligne2 = $db->fetch_object($ligne2);
-                $champIdNom = $ligne->indexField;
-                $searchString = $ligne2->$champIdNom;
+                $result2 = $db->query(str_replace("[[indexField]]", "(" . implode(" || ", $champs2) . ")", $ligne->requeteValue));
+                if ($db->num_rows($result2 > 0)) {
+                    $searchString = array();
+                    while ($ligne2 = $db->fetch_object($result2)) {
+                        $champIdNom = $ligne->indexField;
+                        $searchString[] = $ligne2->$champIdNom;
+                    }
+                    $_REQUEST['searchOper'] = "in";
+                }
             }
         }
 
@@ -210,7 +213,8 @@ $oper = "=";
 //            $searchString = $arr[3].'-'.$arr[2].'-'.$arr[1];
 //        }
 //    }.
-        $searchString = addslashes($searchString);
+        if (!is_array($searchString))
+            $searchString = addslashes($searchString);
         if (isset($searchField) && $searchField != "") {
             if ($_REQUEST['searchOper'] == 'eq') {
                 $oper = '=';
@@ -234,6 +238,8 @@ $oper = "=";
                 $wh .= ' AND ' . $searchField . " LIKE  '" . $searchString . "%'";
             } else if ($_REQUEST['searchOper'] == 'bn') {
                 $wh .= ' AND ' . $searchField . " NOT LIKE  '" . $searchString . "%'";
+            } else if ($_REQUEST['searchOper'] == 'in' && is_array($searchString)) {
+                $wh .= ' AND ' . $searchField . " IN  ('" . implode("','", $searchString) . "')";
             } else if ($_REQUEST['searchOper'] == 'in') {
                 $wh .= ' AND ' . $searchField . " IN  ('" . $searchString . "')";
             } else if ($_REQUEST['searchOper'] == 'ni') {

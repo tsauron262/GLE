@@ -257,6 +257,7 @@ if ($resql) {
             $com = new Commande($db);
             $com->fetch($synopsisdemandeinterv->fk_commande);
 //        $com->fetch_group_lines(0, 0, 0, 0, 1);//Groupe commande
+            if($com->id > 0){
             $arrGrpCom = array($com->id => $com->id);
 //        $arrGrp = $com->listGroupMember(true);
 //        foreach ($arrGrp as $key => $commandeMember) {
@@ -319,6 +320,7 @@ if ($resql) {
             $totReel += $res->totHT;
             $totTReel += $res->durTot;
         }
+    }
         $htmlTab .= '<td align="center">' . price($prevuEuro) . " &euro; / " . $arr1['hours']['abs'] . "h " . ($arr1['minutes']['rel'] > 0 ? $arr1['minutes']['rel'] . "m" : "") . '</td>';
         $htmlTab .= '<td align="center">' . price($vendu) . " &euro; </td>";
         $htmlTab .= '<td align="center">' . price($realEuro) . " &euro; / " . $arr2['hours']['abs'] . "h " . ($arr2['minutes']['rel'] > 0 ? $arr2['minutes']['rel'] . "m" : "") . '</td>';

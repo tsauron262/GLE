@@ -605,7 +605,23 @@ class ImportCsv extends ModeleImports
 					if ($listfields)
 					{
 					    //var_dump($objimport->array_import_convertvalue); exit;
-
+                                            $update = false;
+                                            $updateTab = array();
+                                                foreach($sort_array_match_file_to_database as $id => $valeur){
+                                                    if($valeur == "s.code_client" ){
+                                                        $where = $valeur ." = '".$arrayrecord[($id-1)]['val']."'";
+                                                        $result = $this->db->query("SELECT * FROM ".$tablename." s WHERE ".$where);
+                                                        if($this->db->num_rows($result) > 0)
+                                                        $update = true;
+                                                    }
+                                                    if($valeur != "s.barcode" && $arrayrecord[($id-1)]['val'] == "")
+                                                        $updateTab[] = $valeur ." = '".addslashes($arrayrecord[($id-1)]['val'])."'";
+                                                }
+                                            if($update){
+                                                $sql = "UPDATE ".$tablename." s SET ".implode(",",$updateTab)." WHERE ".$where;
+//                                                echo $sql;
+                                            }
+                                            else{
 						// Build SQL request
 						if (empty($tablewithentity[$tablename]))
 						{
@@ -621,12 +637,13 @@ class ImportCsv extends ModeleImports
 						}
 						if (! empty($objimport->array_import_tables_creator[0][$alias])) $sql.=', '.$user->id;
 						$sql.=')';
+                                            }
 						dol_syslog("import_csv.modules sql=".$sql);
 
 						//print '> '.join(',',$arrayrecord);
 						//print 'sql='.$sql;
 						//print '<br>'."\n";
-
+//$sql = "";
 						// Run insert request
 						if ($sql)
 						{
@@ -637,7 +654,7 @@ class ImportCsv extends ModeleImports
 							}
 							else
 							{
-								//print 'E';
+								print 'E'.$sql;
 								$this->errors[$error]['lib']=$this->db->lasterror();
 								$this->errors[$error]['type']='SQL';
 								$error++;

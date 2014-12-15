@@ -614,7 +614,7 @@ class ImportCsv extends ModeleImports
                                                         if($this->db->num_rows($result) > 0)
                                                         $update = true;
                                                     }
-                                                    if($valeur != "s.barcode" && $arrayrecord[($id-1)]['val'] == "")
+                                                    if($valeur != "s.barcode" || $arrayrecord[($id-1)]['val'] != "")
                                                         $updateTab[] = $valeur ." = '".addslashes($arrayrecord[($id-1)]['val'])."'";
                                                 }
                                             if($update){

@@ -90,13 +90,13 @@ else
 	$searchkey=(GETPOST($id)?GETPOST($id):(GETPOST($htmlname)?GETPOST($htmlname):''));
 
 	$form = new Form($db);
-	if (empty($mode) || $mode == 'customer')
+	if (empty($mode) || $mode == 'customer' || $mode == "1")
 	{
-		$arrayresult=$form->select_company_html($socid,$htmlname,"client IN (1,3)",0,0,0,null,$searchkey,$outjson);
+		$arrayresult=$form->select_thirdparty_list($socid,$htmlname,"client IN (1,3)",0,0,0,null,$searchkey,$outjson);
 	}
 	elseif ($mode == 'supplier')
 	{
-		$arrayresult=$form->select_company_html($socid,$htmlname,"fournisseur=1",0,0,0,null,$searchkey,$outjson);
+		$arrayresult=$form->select_company_list($socid,$htmlname,"fournisseur=1",0,0,0,null,$searchkey,$outjson);
 	}
 
 	$db->close();

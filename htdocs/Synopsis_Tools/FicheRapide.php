@@ -16,7 +16,7 @@ $js.= "<link rel='stylesheet' type='text/css' href='" . DOL_URL_ROOT . "/Synopsi
 $js.= '<script language="javascript" src="' . DOL_URL_ROOT . '/Synopsis_Common/jquery/jquery.validate.js"></script>' . "\n";
 $js.= "<script type='text/javascript' src='" . DOL_URL_ROOT . "/synopsischrono/fiche.js' ></script>";
 $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContact2").click(function() {
-        socid = $("select#socid").val();
+        socid = $("#socid").val();
         dispatchePopObject(socid, "newContact", function() {
         $("#form").append(\'<input type="hidden" name="action2" value="Modify"/><input type="hidden" name="contactid" value="max"/>\');
         $(".required").removeClass("required");

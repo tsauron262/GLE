@@ -8,6 +8,8 @@ function ajax_updater_postFct(socid, valueSelected)
 
 function ajax_updater_postFct2(socid, valueSelected)
 {
+    if (!socid > 0)
+        socid = $("#socid").val();
     if (socid > 0)
     {
         majDoubleSoc(socid, false);
@@ -60,13 +62,19 @@ function majOldSelect() {
 }
 
 function majDoubleSoc(socid, ifVide) {
+    if (!socid > 0)
+        socid = $("#socid").val();
     if (socid > 0) {
-        valueStr = jQuery('#socid').find('option[value=' + socid + ']').html().replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
+        if (jQuery('#socid').find('option[value=' + socid + ']').size() > 0)
+            valueStr = jQuery('#socid').find('option[value=' + socid + ']').html();
+        else
+            valueStr = jQuery("#search_socid").val();
+        valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
         $("select.double").each(function() {
             val = jQuery(this).find(':selected').val();
             if (!(ifVide && val > 1)) {
                 select = $(this);
-                $(this).find('option[value=' + valueStr + ']').each(function() {
+                $(this).find('option[value="' + valueStr + '"]').each(function() {
                     $(this).attr("selected", "selected");
                     $(select).val(valueStr);
                     $(select).change();
@@ -99,10 +107,10 @@ jQuery(document).ready(function() {
             $(lien).removeAttr('onclick');
         }, 100);
     });
-    
-    
-    
-    $(".desactiveButtons").click(function(){
+
+
+
+    $(".desactiveButtons").click(function() {
         setTimeout(function() {
             $(".butAction").removeAttr('href');
             $(".butAction").removeAttr('onclick');
@@ -113,14 +121,20 @@ jQuery(document).ready(function() {
 
     setTimeout(function() {
         socid = jQuery('#socid').find(':selected').val();
+        if (!socid > 0)
+            socid = $("#socid").val();
         majDoubleSoc(socid, true);
         jQuery('#socid').change(function() {
-            socid = jQuery(this).find(':selected').val();
-            ajax_updater_postFct2(socid);
+            setTimeout(function() {
+                socid = jQuery(this).find(':selected').val();
+                ajax_updater_postFct2(socid);
+            }, 200);
         });
 
         $("#inputautocompletesocid").focusout(function() {
             socid = jQuery('#socid').find(':selected').val();
+            if (!socid > 0)
+                socid = $("#socid").val();
             ajax_updater_postFct2(socid);
         });
     }, 200);

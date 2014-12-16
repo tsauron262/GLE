@@ -973,3 +973,20 @@ create whoml
 04
 
 //marge et par centree
+
+
+
+deplacement => deplacement sous contrat
+
+ajout a conf conf ou annulé
+
+
+voir nb inter max par ligne 
+
+
+
+
+
+
+CAISSE BAHADOURIAN
+

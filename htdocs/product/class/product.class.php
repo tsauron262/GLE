@@ -168,7 +168,7 @@ class Product extends CommonObject
 
 		$this->db = $db;
 		$this->status = 0;
-		$this->status_buy = 0;
+		$this->status_buy = 1;
 		$this->nbphoto = 0;
 		$this->stock_reel = 0;
 		$this->seuil_stock_alerte = 0;

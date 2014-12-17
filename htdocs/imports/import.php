@@ -1337,6 +1337,8 @@ if ($step == 5 && $datatoimport)
                 	continue;
                 }
                 if ($excludefirstline && $sourcelinenb == 1) continue;
+                if ($excludefirstline >= 2 && $sourcelinenb == 2) continue;
+                if ($excludefirstline == 3 && $sourcelinenb == 3) continue;
 
                 //
                 $result=$obj->import_insert($arrayrecord,$array_match_file_to_database,$objimport,count($fieldssource),$importid);

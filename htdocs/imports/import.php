@@ -33,6 +33,7 @@ require_once DOL_DOCUMENT_ROOT.'/core/lib/images.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/import.lib.php';
 
 set_time_limit(150);
+ini_set("memory_limit","1200M");
 
 $langs->load("exports");
 $langs->load("errors");

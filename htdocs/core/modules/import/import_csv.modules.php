@@ -620,7 +620,7 @@ class ImportCsv extends ModeleImports
                                                         $arrayrecord[($id-1)]['val'] = 0;
                                                     if($valeur != "s.barcode" || $arrayrecord[($id-1)]['val'] != "")
                                                         $updateTab[] = $valeur ." = '".addslashes($arrayrecord[($id-1)]['val'])."'";
-                                                    if($valeur == "s.nom")echo json_decode($arrayrecord[($id-1)]['val'], "UTF-8");echo "Cabinet	LEXCASE Soci&#142;t&#142; d'avocats";
+//                                                    if($valeur == "s.nom")echo json_decode($arrayrecord[($id-1)]['val'], "UTF-8");echo "Cabinet	LEXCASE Soci&#142;t&#142; d'avocats";
                                                 }
                                             if($update){
                                                 $sql = "UPDATE ".$tablename." s SET ".implode(",",$updateTab)." WHERE ".$where;

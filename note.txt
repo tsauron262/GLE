@@ -990,3 +990,6 @@ voir nb inter max par ligne
 
 CAISSE BAHADOURIAN
 
+
+
+UPDATE `llx_societe` SET datec = now() WHERE  `datec` < '2010-12-01 00:00:00' || datec is null

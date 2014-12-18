@@ -67,20 +67,22 @@ function majDoubleSoc(socid, ifVide) {
     if (socid > 0) {
         if (jQuery('#socid').find('option[value=' + socid + ']').size() > 0)
             valueStr = jQuery('#socid').find('option[value=' + socid + ']').html();
-        else
+        else if(jQuery("#search_socid").size() > 0)
             valueStr = jQuery("#search_socid").val();
-        valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
-        $("select.double").each(function() {
-            val = jQuery(this).find(':selected').val();
-            if (!(ifVide && val > 1)) {
-                select = $(this);
-                $(this).find('option[value="' + valueStr + '"]').each(function() {
-                    $(this).attr("selected", "selected");
-                    $(select).val(valueStr);
-                    $(select).change();
-                });
-            }
-        });
+        if (typeof valueStr !== 'undefined' && valueStr + "x" != "x") {
+            valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
+            $("select.double").each(function() {
+                val = jQuery(this).find(':selected').val();
+                if (!(ifVide && val > 1)) {
+                    select = $(this);
+                    $(this).find('option[value="' + valueStr + '"]').each(function() {
+                        $(this).attr("selected", "selected");
+                        $(select).val(valueStr);
+                        $(select).change();
+                    });
+                }
+            });
+        }
         $(".chrid-keyid").each(function() {
             var div = $(this).parent();
             jQuery.ajax({

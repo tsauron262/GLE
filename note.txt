@@ -999,3 +999,13 @@ virer en cours non applicable => confirmé
 
 
 drapeau dans recherche.
+
+
+nb chrono quand reviser
+
+
+quand commande dpiece envoyer devis
+
+quand terminer envoyer devis
+
+en dessous de loginmdp ajouter sav

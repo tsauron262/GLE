@@ -36,7 +36,7 @@ LEFT JOIN llx_synopsischrono_view_105 chrono ON el.fk_source = chrono.propalid
 LEFt JOIN llx_user_extrafields ue ON `fk_object` = IF(chrono.Technicien > 0, chrono.Technicien, fact.fk_user_author)
 
 , llx_societe soc
-WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut = 2 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
+WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND  close_code is null "/* AND paye = 1 */ . " AND extraparams is null AND total != 0 GROUP BY fact.rowid");
 
 
         while ($ligne = $this->db->fetch_object($result)) {

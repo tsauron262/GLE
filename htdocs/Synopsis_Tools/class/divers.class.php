@@ -204,7 +204,7 @@ if (! defined('NOLOGIN'))
                 $tabGroupe[] = array("label" => $ligne3->label, "valeur" => $ligne3->valeur, "forUrl" => $ligne3->valeur);
             }
             $tabResult = array();
-            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " 1 GROUP BY CentreVal, EtatVal");
+            $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY CentreVal, EtatVal");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
                 if(!isset($tabResult[$centre][$ligne2->EtatVal]))
@@ -223,6 +223,8 @@ if (! defined('NOLOGIN'))
                 while ($ligne = $db->fetch_object($result)) {
                     $nb = $tabResult[$centre][$ligne->valeur];
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
+                    if($nb == "")
+                        $nb = "0";
                     $nbStr = ($nb < 10 ? "&nbsp;&nbsp;".$nb : ($nb < 100 ? "&nbsp;".$nb : $nb));
                     $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
                     $return .= "</span><br/>";

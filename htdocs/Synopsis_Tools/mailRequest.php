@@ -46,9 +46,10 @@ function setIdComm($soc, $idComm) {
     $db->query("UPDATE llx_societe SET idprof4 = '' WHERE rowid = '" . $soc . "';");
 }
 
-if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_REQUEST['id']) && isset($_REQUEST['id2'])) {
+if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_REQUEST['id']) && $_REQUEST['id'] > 0 && isset($_REQUEST['id2'])) {
     $id = $_REQUEST['id'];
     $id2 = $_REQUEST['id2'];
+    if($id2 > 0){
     $db->query("UPDATE " . MAIN_DB_PREFIX . "propal SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_societe = " . $id2 . " WHERe fk_societe = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "commande SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
@@ -58,6 +59,7 @@ if (isset($_REQUEST['action']) && $_REQUEST['action'] == "fusionCli" && isset($_
     $db->query("UPDATE " . MAIN_DB_PREFIX . "fichinter SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "socpeople SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
     $db->query("UPDATE " . MAIN_DB_PREFIX . "actioncomm SET fk_soc = " . $id2 . " WHERe fk_soc = " . $id);
+    }
 
     header("Location:" . DOL_URL_ROOT . "/comm/fiche.php?socid=" . $id);
 }

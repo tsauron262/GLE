@@ -50,7 +50,14 @@ $idEntrepot = null;
 if (isset($chrono->extraValue[$chrono->id]['Centre']['value']) && isset($tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']])) {
     $tel = $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][0];
     $fromMail = "SAV BIMP<" . $tabCentre[$chrono->extraValue[$chrono->id]['Centre']['value']][1] . ">";
-    $sql = $db->query("SELECT * FROM  `" . MAIN_DB_PREFIX . "entrepot` WHERE  `label` LIKE  'SAV" . $chrono->extraValue[$chrono->id]['Centre']['value'] . "'");
+    $lettreCentre = $chrono->extraValue[$chrono->id]['Centre']['value'];
+    if($lettreCentre == "GB")
+        $lettreCentre = "GA";
+    if($lettreCentre == "CB")
+        $lettreCentre = "M";
+    if($lettreCentre == "AB")
+        $lettreCentre = "M";
+    $sql = $db->query("SELECT * FROM  `" . MAIN_DB_PREFIX . "entrepot` WHERE  `label` LIKE  'SAV" . $lettreCentre . "'");
     if ($db->num_rows($sql) > 0) {
         $result = $db->fetch_object($sql);
         $idEntrepot = $result->rowid;

@@ -410,13 +410,13 @@ function afficheParType($tabIdFi) {
 
 
     
-//    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet, " . MAIN_DB_PREFIX . "element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
+    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet, " . MAIN_DB_PREFIX . "element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
 
 
-    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, SUM(ddet2.total_ht) as prixT, ddet.fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "element_element elel, " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet left join  " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet2 on (ddet2.fk_contratdet = ddet.fk_contratdet || ddet2.fk_commandedet = ddet.fk_commandedet)"
-            . "WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' "
-//            . " AND (ddet2.fk_contratdet = ddet.fk_contratdet) "
-            . "GROUP BY  ddet.fk_typeinterv ;";
+//    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, SUM(ddet2.total_ht) as prixT, ddet.fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "element_element elel, " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet left join  " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet2 on (ddet2.fk_contratdet = ddet.fk_contratdet || ddet2.fk_commandedet = ddet.fk_commandedet)"
+//            . "WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' "
+////            . " AND (ddet2.fk_contratdet = ddet.fk_contratdet) "
+//            . "GROUP BY  ddet.fk_typeinterv ;";
     
     
     $tabResult[$ligne->ty][10] = 0;

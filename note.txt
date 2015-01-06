@@ -1011,3 +1011,5 @@ quand terminer envoyer devis
 en dessous de loginmdp ajouter sav
 
 dans vendu prorata du réalisé total.
+
+da&ns stat aj fk_commande fk_contrat

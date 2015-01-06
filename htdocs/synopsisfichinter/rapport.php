@@ -409,36 +409,48 @@ function afficheParType($tabIdFi) {
     }
 
 
-    
+
     $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet, " . MAIN_DB_PREFIX . "element_element elel WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' GROUP BY  `fk_typeinterv` ;";
 
 
-//    $requeteType3 = "SELECT SUM(ddet.`duree`) as dureeDI, SUM(ddet.total_ht) as prix, SUM(ddet2.total_ht) as prixT, ddet.fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "element_element elel, " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet left join  " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet2 on (ddet2.fk_contratdet = ddet.fk_contratdet || ddet2.fk_commandedet = ddet.fk_commandedet)"
-//            . "WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' "
-////            . " AND (ddet2.fk_contratdet = ddet.fk_contratdet) "
-//            . "GROUP BY  ddet.fk_typeinterv ;";
-    
-    
-    $tabResult[$ligne->ty][10] = 0;
+
+
     $result3 = $db->query($requeteType3);
     while ($ligne = $db->fetch_object($result3)) {
         $tabResult[$ligne->ty][1] = $ligne->dureeDI;
         $tabResult[$ligne->ty][3] = $ligne->prix;
+    }
+
+
+    $requeteType3 = "SELECT SUM(ddet2.total_ht) as prixT, ddet2.fk_typeinterv as ty  FROM " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet2 WHERE rowid IN (SELECT distinct(ddet2.rowid) FROM " . MAIN_DB_PREFIX . "element_element elel, " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet left join  " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ddet2 on (ddet2.fk_contratdet = ddet.fk_contratdet || ddet2.fk_commandedet = ddet.fk_commandedet)"
+            . "WHERE ddet.fk_synopsisdemandeinterv = elel.fk_source AND elel.fk_target IN (" . implode(",", $tabIdFi) . ") AND sourcetype = 'DI' AND targettype= 'FI' "
+//            . " AND (ddet2.fk_contratdet = ddet.fk_contratdet) "
+            . ") GROUP BY  ddet2.fk_typeinterv ;";
+
+
+    $tabResult[$ligne->ty][10] = 0;
+    $result3 = $db->query($requeteType3);
+    while ($ligne = $db->fetch_object($result3)) {
         $tabResult[$ligne->ty][10] = $ligne->prixT;
     }
 
-    
+
     $requeteType4 = "SELECT SUM(cdet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "commandedet cdet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_commandedet = cdet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet IS NULL || fk_contratdet = 0) GROUP BY  `fk_typeinterv`;";
     $result4 = $db->query($requeteType4);
     while ($ligne = $db->fetch_object($result4)) {
-        $coef = $tabResult[$ligne->ty][10] / $tabResult[$ligne->ty][3];
+        if ($tabResult[$ligne->ty][3] > 0 && $tabResult[$ligne->ty][10] > 0 && $tabResult[$ligne->ty][3] < $tabResult[$ligne->ty][10])
+            $coef = $tabResult[$ligne->ty][3] / $tabResult[$ligne->ty][10];
+        else
+            $coef = 1;
         $tabResult[$ligne->ty][4] = $ligne->prix * $coef;
     }
     $requeteType5 = "SELECT SUM(codet.subprice) as prix, fk_typeinterv as ty FROM " . MAIN_DB_PREFIX . "contratdet codet, " . MAIN_DB_PREFIX . "Synopsis_fichinterdet  fdet  WHERE fdet.fk_contratdet = codet.rowid AND fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") GROUP BY  `fk_typeinterv`;";
     $result5 = $db->query($requeteType5);
     while ($ligne = $db->fetch_object($result5)) {
-        $coef = $tabResult[$ligne->ty][10] / $tabResult[$ligne->ty][3];
-        $coef = 1;
+        if ($tabResult[$ligne->ty][3] > 0 && $tabResult[$ligne->ty][10] > 0 && $tabResult[$ligne->ty][3] < $tabResult[$ligne->ty][10])
+            $coef = $tabResult[$ligne->ty][3] / $tabResult[$ligne->ty][10];
+        else
+            $coef = 1;
         $tabResult[$ligne->ty][5] = $ligne->prix * $coef;
     }
 

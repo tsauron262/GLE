@@ -38,7 +38,7 @@ class gsxDatas {
 //        $password = '@Savbimp2014#';
 //        $serviceAccountNo = '100520';
         $userId = 'tysauron@gmail.com';
-        $password = 'freeparty';
+        $password = 'freeparty9294';
         $serviceAccountNo = '100520';
 
 

@@ -33,9 +33,12 @@ class gsxDatas {
     public function __construct($serial, $userId = null, $password = null, $serviceAccountNo = null) {
         global $user;
 
-
-        $userId = 'sav@bimp.fr';
-        $password = '@Savbimp2014#';
+//
+//        $userId = 'sav@bimp.fr';
+//        $password = '@Savbimp2014#';
+//        $serviceAccountNo = '100520';
+        $userId = 'tysauron@gmail.com';
+        $password = 'freeparty';
         $serviceAccountNo = '100520';
 
 

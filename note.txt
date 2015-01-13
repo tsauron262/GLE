@@ -1008,8 +1008,12 @@ quand commande dpiece envoyer devis
 
 quand terminer envoyer devis
 
-en dessous de loginmdp ajouter sav
+//en dessous de loginmdp ajouter sav
 
-dans vendu prorata du réalisé total.
+//dans vendu prorata du réalisé total.
 
-da&ns stat aj fk_commande fk_contrat
+//da&ns stat aj fk_commande fk_contrat
+
+//piece apple (trunc 2 chiffres)
+
+voir stat marge par user

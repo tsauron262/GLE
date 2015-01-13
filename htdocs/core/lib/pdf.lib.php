@@ -730,7 +730,11 @@ function pdf_pagefoot(&$pdf,$outputlangs,$paramfreetext,$fromcompany,$marge_bass
 	}
 
 	// Line 3 of company infos
-	$line3="";
+        if($fromcompany->name == "BIMP")
+	$line3="OLYS ";
+    else {
+        
+    $line3 = "";}
 	// Juridical status
 	if ($fromcompany->forme_juridique_code)
 	{

@@ -89,6 +89,8 @@ $pagenext = $page + 1;
 
 $sql1 = "SELECT s.nom,
             s.rowid as socid,
+            f.fk_commande,
+            f.fk_contrat,
             f.description,
             f.ref,
             f.datei as dp,
@@ -293,6 +295,7 @@ if ($resql) {
     print '<td>Ref</td>';
     if (empty($socid))
         print '<td>Soci&eacute;t&eacute;</td>';
+    print '<td align="center">' . $langs->trans("Commande / Contrat") . '</td>';
     print '<td align="center">' . $langs->trans("Description") . '</td>';
 
     print '<td align="center">Date</td>';
@@ -303,6 +306,11 @@ if ($resql) {
     $var = true;
     $DureeTotal = 0;
     $total_ht = 0;
+    
+    require_once(DOL_DOCUMENT_ROOT."/commande/class/commande.class.php");
+    require_once(DOL_DOCUMENT_ROOT."/contrat/class/contrat.class.php");
+    $commande = new Commande($db);
+    $contrat = new Contrat($db);
     while ($objp = $db->fetch_object($resql)) {
         $var = !$var;
         print "<tr $bc[$var]>";
@@ -321,6 +329,23 @@ if ($resql) {
             print '<td><a href="rapport.php?socid=' . $objp->socid . $filter . '"><img src="' . DOL_URL_ROOT . '/theme/' . $conf->theme . '/img/filter.png" border="0"></a>&nbsp;';
             print $tmpSoc->getNomUrl(1) . "</TD>\n";
         }
+        
+        
+        print "<td>";
+        if($objp->fk_commande){
+            $commande->fetch($objp->fk_commande);
+            print $commande->getNomUrl(1);
+            
+        }
+        if($objp->fk_contrat){
+            $contrat->fetch($objp->fk_contrat);
+            print $contrat->getNomUrl(1);
+            
+        }
+        print "</td>";
+        
+        
+        
         print '<td>' . nl2br($objp->description) . '</td>';
         print "<td>" . dol_print_date($objp->dp) . "</td>\n";
         $durStr = convDur($objp->duree);

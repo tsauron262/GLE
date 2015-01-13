@@ -755,10 +755,20 @@ function getElementElement($typeS = null, $typeD = null, $idS = null, $idD = nul
         $tabWhere[] = "targettype = '" . $typeD . "'";
     $req .= implode(" AND ", $tabWhere);
 
-    if (isset($idS))
+    if (isset($idS)){
+        if(is_array($idS))
+        $req .= " AND fk_source IN ('" . implode("','",$idS)."')";
+        else
         $req .= " AND fk_source = " . $idS;
-    if (isset($idD))
+    }
+    if (isset($idD)){
+        if(is_array($idD))
+        $req .= " AND fk_target IN ('" . implode("','",$idD)."')";
+        else
         $req .= " AND fk_target = " . $idD;
+        
+    }
+    
 //    echo $req;
     $sql = $db->query($req);
     $tab = array();

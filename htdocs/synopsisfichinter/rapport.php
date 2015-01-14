@@ -434,7 +434,7 @@ function afficheParType($tabIdFi) {
     }
     
     
-    $tabDi = getElementElement("DI", "FI", null, $tabIdFI);
+    $tabDi = getElementElement("DI", "FI", null, $tabIdFi);
     foreach($tabDi as $tabT)
         $tabIdDi[] = $tabT['s'];
 

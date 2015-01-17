@@ -44,6 +44,8 @@ foreach ($_REQUEST as $key => $val) {
         }
         elseif(isset($_REQUEST['logistiqueKODate-' . $arr[1]]))
             $set .= ", logistique_date_dispo='null'";
+        
+            $set .= ", liv_direct = '".((isset($_REQUEST['livdirect-'. $arr[1]]))? "1" : "0")."'";
             
         $requete = "UPDATE " . MAIN_DB_PREFIX . "Synopsis_commandedet SET " . $set . " WHERE rowid = " . $arr[1];
         $sql = $db->query($requete);

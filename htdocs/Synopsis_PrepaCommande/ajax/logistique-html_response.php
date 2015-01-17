@@ -222,6 +222,8 @@ print <<<EOF
                     if (!findJquery) findJquery = "";
                     else findJquery= " "+findJquery;
                     var data=jQuery('#resDisp'+findJquery).find('select').serialize();
+                    data = data +"&"+ jQuery('#resDisp'+findJquery).find('input.livdirect').serialize();
+
                     var data1="";
                     jQuery('#resDisp'+findJquery).find('.datepicker').each(function(){
                         var id = jQuery(this).attr('id');
@@ -289,6 +291,7 @@ print <<<EOF
                     if (!findJquery) findJquery = "";
                     else findJquery= " "+findJquery;
                     var data=jQuery('#resDisp'+findJquery).find('select').serialize();
+                    data = data +"&"+ jQuery('#resDisp'+findJquery).find('input.livdirect').serialize();
                     var data1="";
                     jQuery('#resDisp'+findJquery).find('.datepicker').each(function(){
                         var id = jQuery(this).attr('id');
@@ -449,6 +452,14 @@ function displayLogistique($com) {
                     } else {
                         print "<br/>" . $text . "&nbsp;" . $date;
                     }
+                    $livDirect = $val->liv_direct;
+                    print "<br/><br/>Livraison direct : ";
+                    
+                    if ($user->rights->SynopsisPrepaCom->exped->Modifier && $com->logistique_statut < 1)
+                    print "<input type='checkbox' class='livdirect' name='livdirect-" . $val->rowid . "' ".($livDirect?"checked='checked'" : "")."/>";
+                    else
+                        print ($livDirect? "Oui" : "Non");
+                    
                     print '</div>';
 //                }
                     print "    <td width=100 class='ui-widget-content'>" . utf8_encodeRien($prod->getNomUrl(1));

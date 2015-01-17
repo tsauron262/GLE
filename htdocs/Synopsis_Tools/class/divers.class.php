@@ -858,6 +858,7 @@ class Synopsis_OrderLine extends OrderLine {
             $this->finance_ok = $result->finance_ok;
             $this->coef = $result->coef;
             $this->logistique_date_dispo = $result->logistique_date_dispo;
+            $this->liv_direct = $result->liv_direct;
         }
         return $return;
     }

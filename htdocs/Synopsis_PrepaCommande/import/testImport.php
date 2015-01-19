@@ -22,7 +22,8 @@ $tempDeb = microtime(true);
 global $tabStat;
 $tabStat = array('c' => 0, 'd' => 0, 'pc' => 0, 'pd' => 0, 'pcd' => 0, 'ef' => 0);
 
-ini_set('max_execution_time', 0);
+ini_set('max_execution_time', 40000);
+ini_set("memory_limit","1200M");
 $displayHTML = true;
 if ($_REQUEST['modeCli'] == 1) {
     $displayHTML = false;

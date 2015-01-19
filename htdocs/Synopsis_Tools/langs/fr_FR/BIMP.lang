@@ -10,3 +10,7 @@ Tous les fichier joint=Fichiers
 Referers=Historique
 
 ActionRunningNotStarted=A confirmer
+
+ActionNotApplicable=Confirmer
+
+ActionRunningShort=_

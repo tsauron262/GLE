@@ -1386,6 +1386,10 @@ if (is_dir($dir)) {
                                         $condReg = 0;
                                     }
                                     break;
+                                case "10": {
+                                        $condReg = 38;
+                                    }
+                                    break;
                                 case "34": {
                                         $condReg = 11;
                                     }

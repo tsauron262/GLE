@@ -76,9 +76,13 @@ $sql = $db->query($requete);
 $js .= 'var socRess = "';
 $js .= "-1:" . html_entity_decode("S&eacute;lection ->") . ";";
 
+if($db->num_rows($sql) < 1000){
 while ($res = $db->fetch_object($sql)) {
-    $js .= $res->rowid . ":" . addslashes(html_entity_decode($res->nom)) . ";";
+    $js .= $res->rowid . ":" . html_entity_decode($res->nom) . ";";
 }
+}
+else
+    $js .= "0 : Trop de résultat;";
 
 $js = preg_replace('/;$/', '', $js);
 $js .= '";';

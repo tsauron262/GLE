@@ -77,7 +77,7 @@ $js .= 'var socRess = "';
 $js .= "-1:" . html_entity_decode("S&eacute;lection ->") . ";";
 
 while ($res = $db->fetch_object($sql)) {
-    $js .= $res->rowid . ":" . html_entity_decode($res->nom) . ";";
+    $js .= $res->rowid . ":" . addslashes(html_entity_decode($res->nom)) . ";";
 }
 
 $js = preg_replace('/;$/', '', $js);

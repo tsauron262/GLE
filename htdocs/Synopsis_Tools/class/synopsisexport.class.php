@@ -28,7 +28,7 @@ class synopsisexport {
 
 
         $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
-, email , total, total_ttc, IF(idtech8sens > 0, idtech8sens, id8Sens) as id8Sens, remise_percent FROM  `llx_facture` fact
+, email , total, total_ttc, IF(idtech8sens > 0, idtech8sens, id8Sens) as id8Sens FROM  `llx_facture` fact
 
 
 LEFT JOIN llx_element_element el ON  el.targettype = 'facture' AND el.sourcetype = 'propal' AND fk_target = fact.rowid
@@ -43,7 +43,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $return1 = $return2 = "";
             $return1 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', true);
             $return2 .= $this->textTable($ligne, $this->separateur, $this->sautDeLigne, 'E', false);
-            $result2 = $this->db->query("SELECT ref, if(fd.description = 'Acompte', -100, fd.product_type) as product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
+            $result2 = $this->db->query("SELECT ref, if(fd.description = 'Acompte', -100, fd.product_type) as product_type, fd.qty, fd.subprice, fd.description, fd.buy_price_ht, fd.tva_tx, fd.remise_percent FROM  `llx_facturedet` fd left join llx_product p ON p.rowid = fd.fk_product WHERE  `fk_facture` =  " . $ligne->factid);
 
             $i = 0;
             while ($ligne2 = $this->db->fetch_object($result2)) {

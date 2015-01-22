@@ -1017,3 +1017,6 @@ quand terminer envoyer devis
 //piece apple (trunc 2 chiffres)
 
 voir stat marge par user
+
+
+voir quand pas de mail client

@@ -100,7 +100,22 @@ class InterfaceAgenda {
      *      @return int         			<0 if KO, 0 if no triggered ran, >0 if OK
      */
     function run_trigger($action, $object, $user, $langs, $conf) {
+        global $user;
         if (in_array($action, array("ACTION_DELETE", "ACTION_MODIFY"))) {
+            if ($action == "ACTION_MODIFY") {
+                $object->fetch($object->id);
+                if ($object->elementtype == "synopsisdemandeinterv" && $object->fk_element > 0) {
+                    require_once (DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+                    $di = new Synopsisdemandeinterv($this->db);
+                    $di->fetch($object->fk_element);
+                    $di->set_date_delivery($user, $object->datep, true);
+//                    $di->getExtra();
+                    if($di->fk_user_prisencharge != $object->usertodo->id)
+                            $di->preparePrisencharge($object->usertodo);
+                    $di->update();
+                    return false;
+                }
+            }
 
 
             require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';

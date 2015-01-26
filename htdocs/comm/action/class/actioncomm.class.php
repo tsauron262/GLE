@@ -453,7 +453,7 @@ class ActionComm extends CommonObject
         //if ($this->percentage == 100 && ! $this->dateend) $this->dateend = $this->date;
         if ($this->datep && $this->datef)   $this->durationp=($this->datef - $this->datep);
         //if ($this->date  && $this->dateend) $this->durationa=($this->dateend - $this->date);
-        if ($this->datep && $this->datef && $this->datep > $this->datef) $this->datef=$this->datep;
+        if ($this->datep && $this->datef && $this->datep > $this->datef) $this->datef=$this->datep+3600;
         //if ($this->date  && $this->dateend && $this->date > $this->dateend) $this->dateend=$this->date;
         if ($this->fk_project < 0) $this->fk_project = 0;
 

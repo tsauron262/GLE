@@ -191,8 +191,10 @@ class Synopsisdemandeinterv extends CommonObject {
      *    \return        int        <0 si ko, >0 si ok
      */
 
-    function update($id) {
+    function update($id = null) {
         global $user, $langs, $conf;
+        if($id == null)
+            $id = $this->id;
         if (!is_numeric($this->duree)) {
             $this->duree = 0;
         }
@@ -469,6 +471,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function prisencharge($user, $outputdir = "") {
         global $langs, $conf;
 
+                    die($object->usertodo->id);
         $this->db->begin();
 
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";
@@ -946,7 +949,7 @@ class Synopsisdemandeinterv extends CommonObject {
      *      \param      date_creation   date de livraison
      *      \return     int                 <0 si ko, >0 si ok
      */
-    function set_date_delivery($user, $date_delivery) {
+    function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
         if ($user->rights->synopsisdemandeinterv->creer && $this->statut == 0) {
@@ -962,6 +965,9 @@ class Synopsisdemandeinterv extends CommonObject {
                 $sql.= " SET date = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
                 $sql.= " WHERE fk_synopsisdemandeinterv = " . $this->id . "";
                 $this->db->query($sql);
+                
+                
+                if(!$no_trigger){
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
                 $interface = new Interfaces($this->db);
@@ -971,6 +977,9 @@ class Synopsisdemandeinterv extends CommonObject {
                     $this->errors = $interface->errors;
                 }
                 $this->synchroAction(false);
+                }
+                $this->date = $date_delivery;
+                
                 // Fin appel triggers
                 return 1;
             } else {

@@ -1020,3 +1020,19 @@ voir stat marge par user
 
 
 voir quand pas de mail client
+
+
+
+voir raprocher ajouter dans selection tech prepacoimmande
+
+
+
+voir clonner DI 
+
+voir pour les info DI voir pour les info ligne
+
+
+dans chrono chiffres du mois + chiffres du moi precedent
+
+
+arrondit prepacommande

@@ -2645,11 +2645,12 @@ class Synopsis_ContratLigne extends ContratLigne {
         $tabExiste = getElementElement("contratdet", "fichinter", $_REQUEST['fk_contratdet']);
         $nbExiste += count($tabExiste);
         while ($result = $this->db->fetch_object($sql)) {
+//            print_r($result);
             $qte = $result->qte * $result->qty;
             if ($result->nb)
-                $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb . " Contrat : " . $result->ref;
+                $dsc = "Visite sur site " . ($nbExiste + 1) . " / " . $result->nb * $result->qty . " Contrat : " . $result->ref;
             elseif ($result->telemaintenance)
-                $dsc = "Télémaintenance " . ($nbExiste + 1) . " / " . $qte . " Contrat : " . $result->ref;
+                $dsc = "Télémaintenance " . ($nbExiste + 1) . " / " . $result->telemaintenance * $result->qty . " Contrat : " . $result->ref;
             elseif ($result->hotline)
                 $dsc = "Hotline " . ($nbExiste + 1) . " / " . $qte . " Contrat : " . $result->ref;
         }

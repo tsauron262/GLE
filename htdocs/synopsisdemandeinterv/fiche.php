@@ -1316,7 +1316,7 @@ EOF;
         $contrat = new Contrat($db);
         $contrat->fetch($synopsisdemandeinterv->fk_contrat);
         print "    <td class='ui-widget-content'>" . $contrat->getNomUrl(1) . "</td> ";
-        $tab = getElementElement("contratdet", "synopsisdemandeinterv", NULL, $synopsisdemandeinterv->rowid);
+        $tab = getElementElement("contratdet", "synopsisdemandeinterv", NULL, $synopsisdemandeinterv->id);
         if (isset($tab[0])) {
             print "<th class='ui-widget-header ui-state-default'>Ligne Contrat</th>";
             print "    <td class='ui-widget-content'><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $tab[0]['s'] . "'>" . $contrat->ref . "-" . $tab[0]['s'] . "</a></td> ";

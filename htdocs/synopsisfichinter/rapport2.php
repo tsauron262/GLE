@@ -226,7 +226,11 @@ if ($resql) {
     $num = $resultCount->nbLignes;
 //    $num = 10;
     $title = "Rapport d'activit&eacute; de " . strftime("%B %Y", strtotime($start));
-    print_barre_liste($title, $page, "rapport.php", "&socid=$socid", $sortfield, $sortorder, '', $offset + $limit + 1, $num);
+    $param = "";
+    foreach($_GET as $valT => $valT2)
+        if($valT != "page")
+        $param .= "&".$valT."=".$valT2;
+    print_barre_liste($title, $page, "rapport.php", "&".$param, $sortfield, $sortorder, '', $offset + $limit + 1, $num);
     print "<br/><br/>";
 
     echo "<div style='float: left;  margin-top:-18px; padding: 10px;' class='noprint ui-widget-content ui-state-default'>";
@@ -403,17 +407,20 @@ if (count($tabIdFi) > 0) {
 //echo "<pre>";   
 //print_r($tabIdErreur);
 
-    $newTabIdFi = array();
-    foreach ($tabIdFi as $val) {
-        if (!isset($tabIdErreur[$val]))
-            $newTabIdFi[$val] = $val;
-    }
+    if (count($tabIdErreur) > 0) {
 
-    echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
+        $newTabIdFi = array();
+        foreach ($tabIdFi as $val) {
+            if (!isset($tabIdErreur[$val]))
+                $newTabIdFi[$val] = $val;
+        }
 
-    if (count($newTabIdFi) > 0) {
-        $tabResult = afficheParType($newTabIdFi);
-        $tabIdErreur = testFi($newTabIdFi, $tabResult);
+        echo "<br/><br/>Ce qui donne sans comptabiliser ces interventions : <br/><br/>";
+
+        if (count($newTabIdFi) > 0) {
+            $tabResult = afficheParType($newTabIdFi);
+            $tabIdErreur = testFi($newTabIdFi, $tabResult);
+        }
     }
 }
 
@@ -515,51 +522,81 @@ function afficheParType($tabIdFi) {
     while ($ligne = $db->fetch_object($result6)) {
         if ($tabResult[$ligne->id][2] > 0 || ($tabResult[$ligne->id][0] / 3600) > 0) {
             $tabType[$ligne->id] = $ligne->label;
-            if($ligne->isVendue == 0)
+            if ($ligne->isVendue == 0)
                 $tabTypeNonVendue[] = $ligne->id;
         }
     }
-    
+
+    foreach ($tabType as $idT => $valT) {
+        if (in_array($idT, $tabTypeNonVendue))
+            $str2 .= $valT . ", ";
+        else
+            $str1 .= $valT . ", ";
+    }
+
+    echo "<br/>Rappel types considérés comme vendu : <br/>";
+    echo $str1 . "<br/>";
+
+    echo "<br/>Rappel types considérés comme non-vendu : <br/>";
+    echo $str2 . "<br/>";
+
     foreach ($tabType as $idType => $labelType) {
-        if(in_array($idType, $tabTypeNonVendue))
-                $newId = -1001;
+        if (in_array($idType, $tabTypeNonVendue))
+            $newId = -1001;
         else
             $newId = -1000;
-        foreach($tabResult[$idType] as $idT => $valT)
+        foreach ($tabResult[$idType] as $idT => $valT)
             $tabResult[$newId][$idT] += $valT;
     }
-    $tabType[-1000] = "TOTAL Vendue";
-    $tabType[-1001] = "TOTAL Non-Vendue";
+    $tabType[-1000] = "TOTAL Vendu";
+    $tabType[-1001] = "TOTAL Non-Vendu";
+
+
+
+    $coef1 = 0.025;
+    $coef2 = 0.10;
+    $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
+    echo "<br/><table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
+    echo "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
     
+    echo "<br/>";
+
+
+
     ksort($tabType);
 
     foreach ($tabType as $idType => $labelType) {
-        $texte = "<table class='tabResumeDeuxColl'><tr><th colspan = '2' class='ui-widget-header titre'>" . $labelType . "</th></tr><tr><th class='ui-widget-header'> Réalisé</th><td class='ui-widget-content'> " . price($tabResult[$idType][2]) . "€  (" . price($tabResult[$idType][0] / 3600) . "h) </td></tr><tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>" . price($tabResult[$idType][3]) . "€ (" . price($tabResult[$idType][1] / 3600) . "h )</td></tr><tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> " . price($tabResult[$idType][4] + $tabResult[$idType][5]) . " €</td></tr>";
+        $texte = "<table class='tabResumeDeuxColl'><tr><th colspan = '2' class='ui-widget-header titre'>" . $labelType . "</th></tr>"
+                . "<tr><th class='ui-widget-header'> Réalisé</th><td class='ui-widget-content'> " . price($tabResult[$idType][2]) . "€  (" . price($tabResult[$idType][0] / 3600) . "h) </td></tr>";
+        $texte .= "<tr><th class='ui-widget-header'>  Prévu </th> <td class='ui-widget-content'>" . price($tabResult[$idType][3]) . "€ (" . price($tabResult[$idType][1] / 3600) . "h )</td></tr>";
+//        $texte .=  "<tr><th class='ui-widget-header'> Vendu </th><td class='ui-widget-content'> " . price($tabResult[$idType][4] + $tabResult[$idType][5]) . " €</td></tr>";
         if ($tabResult[$idType][3] > 0)
             $pourcent1 = 100 - ($tabResult[$idType][2] * 100) / $tabResult[$idType][3];
         else
             $pourcent1 = "n/c";
 
+        $precision = " (" . price($tabResult[$idType][3] - $tabResult[$idType][2]) . " € | " . (price($tabResult[$idType][1] / 3600) - price($tabResult[$idType][0] / 3600)) . " h)";
+
         if (!is_numeric($pourcent1))
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . "</td></tr>";
+            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . $precision . "</td></tr>";
         elseif ($pourcent1 >= 0)
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1, 2) . "%</td></tr>";
+            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / prévu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent1, 2) . "%" . $precision . "</td></tr>";
         else
-            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1, 2) . "%</td></tr>";
+            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / prévu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent1, 2) . "%" . $precision . "</td></tr>";
 
         if (($tabResult[$idType][5] + $tabResult[$idType][4]) > 0)
             $pourcent2 = 100 - ($tabResult[$idType][2] * 100) / ($tabResult[$idType][5] + $tabResult[$idType][4]);
         else
             $pourcent2 = "n/c";
-        if (!is_numeric($pourcent2))
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent2 . "</td></tr>";
-        elseif ($pourcent2 >= 0)
-            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent2, 2) . "%</td></tr>";
-        else
-            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent2, 2) . "%</td></tr>";
+//        if (!is_numeric($pourcent2))
+//            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent2 . "</td></tr>";
+//        elseif ($pourcent2 >= 0)
+//            $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:green;'> " . price2num($pourcent2, 2) . "%</td></tr>";
+//        else
+//            $texte.= "<tr><th class='ui-widget-header'>Malus (réalisé / vendu) </th><td class='ui-widget-content' style='color:red;'> " . price2num(-$pourcent2, 2) . "%</td></tr>";
         $texte .= "</table>";
-        if($idType > 0)
-        $additionP = $additionP + $tabResult[$idType][2];
+        if ($idType > 0)
+            $additionP = $additionP + $tabResult[$idType][2];
         echo $texte;
     }
     return $tabResult;
@@ -606,29 +643,29 @@ function testFi($tabIdFi, $tabResult) {
         }
     }
 
-
-
-    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet is NULL || fk_contratdet = 0 ) AND (fk_commandedet is NULL || fk_commandedet = 0 ) AND (fk_depProduct is NULL || fk_depProduct = 0 ) Group BY fk_fichinter";
-    $resultPasDeDI = $db->query($requetePasDeDI);
-    if ($db->num_rows($resultPasDeDI) > 0) {
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le vendue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans référence à un contrat ou à une commande dont les dix premières sont listées ci dessous<br/>";
-        $i = 0;
-        while ($ligne = $db->fetch_object($resultPasDeDI)) {
-            if ($i < 10) {
-                $fi = new Fichinter($db);
-                $fi->fetch($ligne->fk_fichinter);
-                echo $fi->getNomUrl(1) . "<br/>";
-            }
-            $tabIdErreur[$ligne->fk_fichinter] = $ligne->fk_fichinter;
-            $i ++;
-        }
-    }
+//
+//
+//    $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND (fk_contratdet is NULL || fk_contratdet = 0 ) AND (fk_commandedet is NULL || fk_commandedet = 0 ) AND (fk_depProduct is NULL || fk_depProduct = 0 ) Group BY fk_fichinter";
+//    $resultPasDeDI = $db->query($requetePasDeDI);
+//    if ($db->num_rows($resultPasDeDI) > 0) {
+//        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le vendue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans référence à un contrat ou à une commande dont les dix premières sont listées ci dessous<br/>";
+//        $i = 0;
+//        while ($ligne = $db->fetch_object($resultPasDeDI)) {
+//            if ($i < 10) {
+//                $fi = new Fichinter($db);
+//                $fi->fetch($ligne->fk_fichinter);
+//                echo $fi->getNomUrl(1) . "<br/>";
+//            }
+//            $tabIdErreur[$ligne->fk_fichinter] = $ligne->fk_fichinter;
+//            $i ++;
+//        }
+//    }
 
 
     $requetePasDeDI = "SELECT fk_fichinter, SUM(total_ht) as tot FROM " . MAIN_DB_PREFIX . "Synopsis_fichinterdet fdet WHERE fdet.fk_fichinter IN (" . implode(",", $tabIdFi) . ") AND fk_fichinter NOT IN (SELECT `fk_target`  FROM `llx_element_element` WHERE `sourcetype` LIKE 'DI' AND `targettype` LIKE 'FI') Group BY fk_fichinter";
     $resultPasDeDI = $db->query($requetePasDeDI);
     if ($db->num_rows($resultPasDeDI) > 0) {
-        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevue due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";
+        echo "<div style='clear:both;'></div><br/>Attention marge d'erreur sur le prevu due aux " . $db->num_rows($resultPasDeDI) . " interventions réalisées sans DI dont les dix premières sont listées ci dessous<br/>";
         $i = 0;
         while ($ligne = $db->fetch_object($resultPasDeDI)) {
             if ($i < 10) {

@@ -95,10 +95,14 @@ if (!$user->rights->societe->client->voir && !$socid)
 if ($socid > 0) {
     $sql .= " AND s.rowid = " . $socid;
 }
+if(isset($_REQUEST['ref']))
+    $sql .= " AND f.ref LIKE '%".$_REQUEST['ref']."%'";
+
 if ($filtreUser)
     $sql .= ' AND fk_user_author = ' . $user->id;
 $sql.= " ORDER BY $sortfield $sortorder ";
 $sql.= $db->plimit($limit + 1, $offset);
+
 
 $result = $db->query($sql);
 if ($result) {
@@ -107,12 +111,15 @@ if ($result) {
     $fichinter_static = new Synopsisfichinter($db);
 
     $urlparam = "&amp;socid=$socid";
+if(isset($_REQUEST['ref']))
+    $urlparam .= "&ref=".$_REQUEST['ref'];
     
     if ($filtreUser)
         print_barre_liste($langs->trans("ListOfMyInterventions"), $page, "liste.php", $urlparam, $sortfield, $sortorder, '', $num);
     else
         print_barre_liste($langs->trans("ListOfInterventions"), $page, "liste.php", $urlparam, $sortfield, $sortorder, '', $num);
 
+echo "<form action=''><input name='ref' value='".$_REQUEST['ref']."'/></form>";
     $i = 0;
     print '<table class="noborder" width="100%">';
     print "<tr class=\"liste_titre\">";

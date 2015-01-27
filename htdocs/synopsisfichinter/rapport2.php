@@ -419,7 +419,7 @@ if (count($tabIdFi) > 0) {
 
         if (count($newTabIdFi) > 0) {
             $tabResult = afficheParType($newTabIdFi);
-            $tabIdErreur = testFi($newTabIdFi, $tabResult);
+            $tabIdErreur = testFi($newTabIdFi, $tabResult, false);
         }
     }
 }
@@ -519,6 +519,7 @@ function afficheParType($tabIdFi) {
     $requeteType6 = "SELECT * FROM " . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv";
     $result6 = $db->query($requeteType6);
     $additionP = 0;
+    $tabTypeNonVendue = array();
     while ($ligne = $db->fetch_object($result6)) {
         if ($tabResult[$ligne->id][2] > 0 || ($tabResult[$ligne->id][0] / 3600) > 0) {
             $tabType[$ligne->id] = $ligne->label;
@@ -545,9 +546,12 @@ function afficheParType($tabIdFi) {
             $newId = -1001;
         else
             $newId = -1000;
-        foreach ($tabResult[$idType] as $idT => $valT)
+        foreach ($tabResult[$idType] as $idT => $valT){
+            $tabResult[-1111][$idT] += $valT;
             $tabResult[$newId][$idT] += $valT;
+        }
     }
+    $tabType[-1111] = "TOTAL";
     $tabType[-1000] = "TOTAL Vendu";
     $tabType[-1001] = "TOTAL Non-Vendu";
 
@@ -575,7 +579,7 @@ function afficheParType($tabIdFi) {
         else
             $pourcent1 = "n/c";
 
-        $precision = " (" . price($tabResult[$idType][3] - $tabResult[$idType][2]) . " € | " . (price($tabResult[$idType][1] / 3600) - price($tabResult[$idType][0] / 3600)) . " h)";
+        $precision = " (" . price($tabResult[$idType][3] - $tabResult[$idType][2]) . " € | " . (price($tabResult[$idType][1] / 3600 - $tabResult[$idType][0] / 3600)) . " h)";
 
         if (!is_numeric($pourcent1))
             $texte.= "<tr><th class='ui-widget-header'>Bonus (réalisé / vendu) </th><td class='ui-widget-content' style='color:orange;'> " . $pourcent1 . $precision . "</td></tr>";
@@ -602,11 +606,11 @@ function afficheParType($tabIdFi) {
     return $tabResult;
 }
 
-function testFi($tabIdFi, $tabResult) {
+function testFi($tabIdFi, $tabResult, $alert = true) {
     global $total_ht, $additionP, $db;
     /*  test */
     $additionPT = price($total_ht - $additionP - $tabResult[0][2]);
-    if ($additionPT != 0)
+    if ($additionPT != 0 && $alert)
         echo "Attention problême de calcul merci de contacter votre service technique au plus vite !!! ";
 
 

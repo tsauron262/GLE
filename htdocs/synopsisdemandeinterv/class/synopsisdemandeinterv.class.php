@@ -471,7 +471,6 @@ class Synopsisdemandeinterv extends CommonObject {
     function prisencharge($user, $outputdir = "") {
         global $langs, $conf;
 
-                    die($object->usertodo->id);
         $this->db->begin();
 
         $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv";

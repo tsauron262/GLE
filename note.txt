@@ -1036,3 +1036,6 @@ dans chrono chiffres du mois + chiffres du moi precedent
 
 
 arrondit prepacommande
+
+
+dans stat voir ajouter appel hotline

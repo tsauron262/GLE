@@ -65,6 +65,9 @@ $filterUser = $user->id;
 if ($user->rights->synopsisficheinter->rapportTous) {
     $filterUser = false;
 }
+    else
+        $_REQUEST['filterUser'] = $filterUser;
+
 
 if (isset($_REQUEST['filterUser']) && $_REQUEST['filterUser'] > 0) {
     $filterUser = $_REQUEST['filterUser'];
@@ -566,6 +569,16 @@ function afficheParType($tabIdFi) {
     echo "<br/>";
 
 
+    $req = "SELECT COUNT(id) as nb, SUM(TO_SECONDS(STR_TO_DATE(`Date_H_Fin`, '%d/%m/%Y %H:%i')) - TO_SECONDS(STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i')))/3600 as sum FROM `llx_synopsischrono_view_100` WHERE Date_H_Debut > 0 AND Date_H_Fin > 0 ";
+    
+    if($_REQUEST['filterUser'] > 0)
+        $req .= " AND `fk_user_author` = ".$_REQUEST['filterUser'];
+    if (isset($_GET['dateDeb']) && isset($_GET['dateFin']) && $_GET['dateDeb'] != '' && $_GET['dateFin'] != '')
+        $req .= " AND STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i') < STR_TO_DATE('".$_GET['dateFin']."', '%d/%m/%Y') AND STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i') > STR_TO_DATE('".$_GET['dateDeb']."', '%d/%m/%Y')";
+//    die($req);
+    $sql = $db->query($req);
+    $result = $db->fetch_object($sql);
+    echo "<br/>".$result->nb." appels durant ".$result->sum."h<br/>";
 
     ksort($tabType);
 

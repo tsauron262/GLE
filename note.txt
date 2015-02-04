@@ -1038,4 +1038,13 @@ dans chrono chiffres du mois + chiffres du moi precedent
 arrondit prepacommande
 
 
-dans stat voir ajouter appel hotline
+- dans stat voir ajouter appel hotline
+
+
+
+hotline ajout tu tech referent. du contrat  +  ligne lier au produit
+
+
+dans prise en charge afficher numero de contrat dans pdf aussi
+
+voir calendrier di sans produit client

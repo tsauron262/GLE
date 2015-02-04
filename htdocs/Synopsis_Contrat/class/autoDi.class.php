@@ -58,7 +58,7 @@ class autoDi {
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
                     if (count($lignes->tabProdCli) == 0)
-                        die("Attention !!!!!!! Finalisation impossible : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a>");
+                        echo("Attention !!!!!!! Finalisation sans site : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a>");
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
                         $tabT = getElementElement("site", "productCli", null, $prod);

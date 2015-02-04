@@ -57,8 +57,11 @@ class autoDi {
                 if ($type == 'tele' && $lignes->GMAO_Mixte['telemaintenance'] && $lignes->qty > 1)
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
-                    if (count($lignes->tabProdCli) == 0)
-                        echo("Attention !!!!!!! Finalisation sans site : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a>");
+                    if (count($lignes->tabProdCli) == 0){
+                        echo("Attention !!!!!!! Finalisation sans site : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a><br/><br/>");
+                        $lignes->tabProdCli = array(0);
+                    }
+                        
                     foreach ($lignes->tabProdCli as $prod) {
                         $site = 0;
                         $tabT = getElementElement("site", "productCli", null, $prod);
@@ -79,6 +82,7 @@ class autoDi {
                 $this->processDet->validate("1");
                 $this->processDet->fetch($this->processDet->id);
                 $this->contrat->activeAllLigne();
+                echo "Contrat activé.";
             }
         } else {
 

@@ -81,8 +81,7 @@ class gsxDatas {
     public function setSerial($serial) {
         if (preg_match('/^[0-9]{15,16}$/', $serial)) {
             $this->isIphone = true;
-        }
-        else
+        } else
             $this->isIphone = false;
         $this->serial = $serial;
     }
@@ -342,7 +341,7 @@ class gsxDatas {
         foreach ($requests as $name => $label) {
 //            if (!$this->isIphone ||
 //                    ($this->isIphone && ($name == 'CreateCarryInRepair')))
-                $html .= '<option value="' . $name . '">' . $label . '</option>';
+            $html .= '<option value="' . $name . '">' . $label . '</option>';
         }
         $html .= '</select>';
 //        $html .= '</div>'."\n";
@@ -573,27 +572,40 @@ class gsxDatas {
 //                        $valDef['componentCheckDetails']['componentSerialNumber'] = $this->serial;
 //                    }
                     $valDef['customerAddress']['companyName'] = $chrono->societe->name;
+                    
+                    
+                    
+                    
+                            $valDef['customerAddress']['city'] = $chrono->societe->town;
+                            $valDef['customerAddress']['primaryPhone'] = $chrono->societe->phone;
+                            $valDef['customerAddress']['secondaryPhone'] = $chrono->societe->phone;
+                            $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
+                            $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
+                            $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
+                    
+                    
+                    
                     if (isset($chrono->contact->id)) {
                         $valDef['customerAddress']['street'] = $chrono->contact->address;
                         $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
-                        if($chrono->contact->town != "")
-                        $valDef['customerAddress']['city'] = $chrono->contact->town;
+                        if ($chrono->contact->town != "")
+                            $valDef['customerAddress']['city'] = $chrono->contact->town;
                         $valDef['customerAddress']['country'] = "FRANCE";
                         $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
                         $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
-                        if($chrono->contact->phone_pro != "")
-                        $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
-                        if($chrono->contact->phone_mobile != "")
-                        $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
-                        if($chrono->contact->zip != "")
-                        $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
-                        if($chrono->contact->zip != "")
-                        $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
-                        if($chrono->contact->email != "")
-                        $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
+                        if ($chrono->contact->phone_pro != "")
+                            $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                        if ($chrono->contact->phone_mobile != "")
+                            $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                        if ($chrono->contact->zip != "")
+                            $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                        if ($chrono->contact->zip != "")
+                            $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                        if ($chrono->contact->email != "")
+                            $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
                     }
                 }
                 break;
@@ -643,19 +655,19 @@ class gsxDatas {
             $client = $GSXRequest->requestName;
             $request = $GSXRequest->request;
             $wrapper = $GSXRequest->wrapper;
-            
-  
-            
-            
-            
-            
+
+
+
+
+
+
             if ($this->isIphone) {
                 switch ($requestType) {
                     case 'CreateWholeUnitExchange':
                         $responseNames = array("CreateIPhoneWholeUnitExchangeResponse");
                         $client = "CreateIPhoneWholeUnitExchange";
                         $request = "CreateIPhoneWholeUnitExchangeRequest";
-                    
+
                     case 'CreateCarryInRepair':
                         $responseNames = array(
                             'IPhoneCreateCarryInResponse',
@@ -689,11 +701,10 @@ class gsxDatas {
                         );
                         $client = 'IPhoneKGBSerialNumberUpdate';
                         $request = 'UpdateIPhoneKGBSerialNumberRequest';
-                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13){
+                        if (isset($result['serialNumber']) && strlen($result['serialNumber']) > 13) {
                             $result['imeiNumber'] = $result['serialNumber'];
                             $result['serialNumber'] = '';
-                        }
-                        else{
+                        } else {
                             $result['imeiNumber'] = "";
                         }
                         break;
@@ -730,10 +741,10 @@ class gsxDatas {
             if (count($this->gsx->errors['soap'])) {
                 $html .= '<p class="error">Echec de l\'envoi de la requête</p>' . "\n";
                 $html .= $this->getGSXErrorsHtml();
-                dol_syslog("erreur GSX : ". $this->getGSXErrorsHtml() ."Requete :". print_r($requestData, true) ." Reponsse : ". print_r($response, true), 4,0,"_apple");
+                dol_syslog("erreur GSX : " . $this->getGSXErrorsHtml() . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
             } else {
-                if($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
-                    dol_syslog("iciici" . "Requete :". print_r($requestData, true) ." Reponsse : ". print_r($response, true), 4,0,"_apple");
+                if ($requestType == "CreateMailInRepair" || $requestType == "KGBSerialNumberUpdate")
+                    dol_syslog("iciici" . "Requete :" . print_r($requestData, true) . " Reponsse : " . print_r($response, true), 4, 0, "_apple");
                 $ok = false;
                 $repair = new Repair($db, $this->gsx, $this->isIphone);
                 $confirmNumber = null;
@@ -776,7 +787,7 @@ class gsxDatas {
 //                        print_r($response);
 //                        echo '</pre>';
                         if (isset($responseName) && isset($response[$responseName]['repairConfirmationNumber'])) {
-                            if($response[$responseName]['updateStatus'] == "Y"){
+                            if ($response[$responseName]['updateStatus'] == "Y") {
                                 $confirmNumber = $response[$responseName]['repairConfirmationNumber'];
                                 if (isset($_GET['repairRowId'])) {
                                     $repair->rowId = $_GET['repairRowId'];
@@ -834,7 +845,7 @@ class gsxDatas {
                         $html .= '<p class="error">La requête a été correctement transmise mais les données de retour n\'ont pas pu être enregistrées correctement en base de données.<br/>';
                         $html .= 'Veuillez noter le numéro suivant (repair confirmation number) et le transmettre  à l\'équipe technique: ';
                         $html .= '<strong style="color: #3C3C3C">' . $confirmNumber . '</strong></p>';
-                dol_syslog("Erreur GSX : ".$html."  |   ". $this->getGSXErrorsHtml() . print_r($response, true), 4,0,"_apple");
+                        dol_syslog("Erreur GSX : " . $html . "  |   " . $this->getGSXErrorsHtml() . print_r($response, true), 4, 0, "_apple");
                     }
                 } else {
                     $html .= '<p class="confirmation">Requête envoyé avec succès.</p>';

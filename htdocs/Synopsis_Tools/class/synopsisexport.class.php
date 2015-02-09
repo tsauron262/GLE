@@ -121,10 +121,10 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
         $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid AND propal.extraparams is null ";
         $partReq5 .= " LEFT JOIN  llx_societe soc on  soc.rowid = propal.fk_soc ";
-        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
+//        $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN  llx_element_element el2 on  el2.sourcetype = 'propal' AND el2.targettype = 'facture' AND el2.fk_source = propal.rowid ";
         $partReq5 .= " LEFT JOIN llx_facture fact2 ON fact2.close_code is null AND fact2.rowid = el2.fk_target AND (fact2.facnumber LIKE 'AC%' || fact2.facnumber LIKE 'FA%')";
-        $partReq5 .= " LEFT JOIN llx_facture fact ON fact.close_code is null AND fact.rowid = el.fk_target AND fact.facnumber LIKE 'FA%' ";
+        $partReq5 .= " LEFT JOIN llx_facture fact ON fact.close_code is null AND fact.rowid = el2.fk_target AND fact.facnumber LIKE 'FA%' ";
         $partReq5 .= " LEFT JOIN llx_facturedet factdet ON factdet.fk_facture = fact2.rowid  AND (factdet.subprice != 0 || factdet.buy_price_ht != 0) " . $tableSus . " WHERE ";
 
 

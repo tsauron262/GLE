@@ -448,6 +448,7 @@ EOF;
             $js .=<<<EOF
             function validation_Form(obj)
             {
+                jQuery(obj).attr('disabled', 'disabled');
                 var typeValid = jQuery(obj).attr("id");
                 var valeur = jQuery(obj).parents('tr').find('select :selected').val();
                 var nota = jQuery(obj).parents('tr').find('textarea').val();

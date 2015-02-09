@@ -43,7 +43,7 @@ class autoDi {
         }
     }
 
-    function getTabSecteur() {
+    function getTabSecteur($affiche = true) {
         $this->tabType = array('visite', 'tele');
         $tabDatePrise = array();
         $tabSite = array();
@@ -58,6 +58,7 @@ class autoDi {
                     $nbVisite = $lignes->qty;
                 if ($nbVisite > 0) {
                     if (count($lignes->tabProdCli) == 0){
+                        if($affiche)
                         echo("Attention !!!!!!! Finalisation sans site : Pas de produit client en lien avec ligne contrat " . $lignes->id . ".<br/><a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $lignes->id . "'>Cliquer ici pour réparer</a><br/><br/>");
                         $lignes->tabProdCli = array(0);
                     }
@@ -177,7 +178,7 @@ class autoDi {
     }
 
     function creerFi() {
-        $this->getTabSecteur();
+        $this->getTabSecteur(false);
         $ligneFak = new Synopsis_ContratLigne($this->db);
         $tabSite = $this->tabSite;
         global $user;

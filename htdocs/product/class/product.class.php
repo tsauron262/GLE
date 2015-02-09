@@ -217,7 +217,7 @@ class Product extends CommonObject
         $error=0;
 
 		// Clean parameters
-		$this->ref = dol_string_nospecial(trim($this->ref));
+//		$this->ref = dol_string_nospecial(trim($this->ref));
 		$this->libelle = trim($this->libelle);
 		if (empty($this->type)) $this->type=0;
 		$this->price_ttc=price2num($this->price_ttc);
@@ -351,7 +351,7 @@ class Product extends CommonObject
 					$sql.= ") VALUES (";
 					$sql.= "'".$this->db->idate($now)."'";
 					$sql.= ", ".$conf->entity;
-					$sql.= ", '".$this->db->escape($this->ref)."'";
+					$sql.= ", '".$this->ref."'";
 					$sql.= ", ".(! empty($this->ref_ext)?"'".$this->db->escape($this->ref_ext)."'":"null");
 					$sql.= ", ".price2num($price_min_ht);
 					$sql.= ", ".price2num($price_min_ttc);

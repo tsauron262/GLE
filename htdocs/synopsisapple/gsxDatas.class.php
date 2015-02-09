@@ -582,11 +582,15 @@ class gsxDatas {
                             $valDef['customerAddress']['zipCode'] = $chrono->societe->zip;
                             $valDef['customerAddress']['state'] = substr($chrono->societe->zip, 0, 2);
                             $valDef['customerAddress']['emailAddress'] = $chrono->societe->email;
+                        $valDef['customerAddress']['street'] = $chrono->societe->address;
+                        $valDef['customerAddress']['addressLine1'] = $chrono->societe->address;
                     
                     
                     
                     if (isset($chrono->contact->id)) {
+                        if ($chrono->contact->address != "")
                         $valDef['customerAddress']['street'] = $chrono->contact->address;
+                        if ($chrono->contact->address != "")
                         $valDef['customerAddress']['addressLine1'] = $chrono->contact->address;
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;

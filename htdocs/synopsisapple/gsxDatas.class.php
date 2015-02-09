@@ -579,14 +579,20 @@ class gsxDatas {
 //            $valDef['addressLine2'] = $chrono->contact->;
 //            $valDef['addressLine3'] = $chrono->contact->;
 //            $valDef['addressLine4'] = $chrono->contact->;
+                        if($chrono->contact->town != "")
                         $valDef['customerAddress']['city'] = $chrono->contact->town;
                         $valDef['customerAddress']['country'] = "FRANCE";
                         $valDef['customerAddress']['firstName'] = $chrono->contact->firstname;
                         $valDef['customerAddress']['lastName'] = $chrono->contact->lastname;
+                        if($chrono->contact->phone_pro != "")
                         $valDef['customerAddress']['primaryPhone'] = $chrono->contact->phone_pro;
+                        if($chrono->contact->phone_mobile != "")
                         $valDef['customerAddress']['secondaryPhone'] = $chrono->contact->phone_mobile;
+                        if($chrono->contact->zip != "")
                         $valDef['customerAddress']['zipCode'] = $chrono->contact->zip;
+                        if($chrono->contact->zip != "")
                         $valDef['customerAddress']['state'] = substr($chrono->contact->zip, 0, 2);
+                        if($chrono->contact->email != "")
                         $valDef['customerAddress']['emailAddress'] = $chrono->contact->email;
                     }
                 }

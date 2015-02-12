@@ -3216,9 +3216,9 @@ abstract class CommonObject
 			$marginInfos['mark_rate_services'] = 100 * $marginInfos['margin_on_services'] / $marginInfos['pv_services'];
 
 		// if credit note, margin = -1 * (abs(selling_price) - buying_price)
-		if ($marginInfos['pv_total'] < 0)
+/*mod drsi		if ($marginInfos['pv_total'] < 0)
 			$marginInfos['total_margin'] = -1 * (abs($marginInfos['pv_total']) - $marginInfos['pa_total']);
-		else
+		else fmod drsi*/
 			$marginInfos['total_margin'] = $marginInfos['pv_total'] - $marginInfos['pa_total'];
 		if ($marginInfos['pa_total'] > 0)
 			$marginInfos['total_margin_rate'] = 100 * $marginInfos['total_margin'] / $marginInfos['pa_total'];

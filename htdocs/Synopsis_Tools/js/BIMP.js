@@ -161,7 +161,7 @@ $(window).load(function() {
         initTrans(elem);
     });
     initTrans(elem);
-    $("#inputautocompleteChrono-1070").focusout(function(){
+    $("#inputautocompleteChrono-1070, #inputautocompleteChrono-1071").focusout(function(){
         $("#mailTrans").attr("checked", "checked");
     });
 });

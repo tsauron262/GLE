@@ -1071,7 +1071,7 @@ Dans fiche client ne voir que les contrat actifs
 
 transmie a  tous les groupes 
 
-dans mail aj nom du client
+//dans mail aj nom du client
 
 bug dans contrat doc espace
 

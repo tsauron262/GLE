@@ -23,34 +23,34 @@ $js = "";
 $langs->load("chrono@synopsischrono");
 $msg = "";
 
-if(!$id > 0 && isset($_REQUEST['ref'])){
-    $result = $db->query("SELECT id FROM ".MAIN_DB_PREFIX."synopsischrono WHERE ref LIKE '".$_REQUEST['ref']."'");
-    if($db->num_rows($result) > 0){
+if (!$id > 0 && isset($_REQUEST['ref'])) {
+    $result = $db->query("SELECT id FROM " . MAIN_DB_PREFIX . "synopsischrono WHERE ref LIKE '" . $_REQUEST['ref'] . "'");
+    if ($db->num_rows($result) > 0) {
         $ligne = $db->fetch_object($result);
         $id = $ligne->id;
     }
 }
-    
+
 
 if ($id > 0) {
     $chr = new Chrono($db);
     $chr->fetch($id);
-    if(!$chr->id > 0)
+    if (!$chr->id > 0)
         header('Location: ' . DOL_URL_ROOT . '/synopsischrono/listByObjet.php');
     global $typeChrono;
     $typeChrono = $chr->model->id;
 }
 
-if ($action == 'addLnProp' && $chr->propalid  && isset($_REQUEST['idprod']) && $_REQUEST['idprod'] > 0) {
+if ($action == 'addLnProp' && $chr->propalid && isset($_REQUEST['idprod']) && $_REQUEST['idprod'] > 0) {
     $prod = new Product($db);
     $prod->fetch($_REQUEST['idprod']);
-    $prod->tva_tx = ($prod->tva_tx > 0)? $prod->tva_tx : 0;
-        require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
-        $prodF = new ProductFournisseur($db);
-        $prodF->find_min_price_product_fournisseur($prod->id, 1);
-    $chr->propal->addline ($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+    $prod->tva_tx = ($prod->tva_tx > 0) ? $prod->tva_tx : 0;
+    require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
+    $prodF = new ProductFournisseur($db);
+    $prodF->find_min_price_product_fournisseur($prod->id, 1);
+    $chr->propal->addline($prod->description, $prod->price, 1, $prod->tva_tx, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
     $chr->propal->fetch($chr->propal->id);
-    require_once(DOL_DOCUMENT_ROOT."/core/modules/propale/modules_propale.php");
+    require_once(DOL_DOCUMENT_ROOT . "/core/modules/propale/modules_propale.php");
     propale_pdf_create($db, $chr->propal, null, $langs);
 }
 
@@ -182,7 +182,7 @@ if ($action == 'ModifyAfterValid') {
 
 if ($action == 'modifier') {
     $chr->note = (($chr->note != "") ? $chr->note . "\n\n" : "");
-    $chr->note .= "Modifié le " . date('d-m-y H:i')." par ".$user->getFullName($langs);
+    $chr->note .= "Modifié le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
     $chr->description = addslashes($_REQUEST['description']);
     $chr->socid = addslashes($_REQUEST['socid']);
     $chr->contactid = addslashes($_REQUEST['contactid']);
@@ -214,7 +214,7 @@ if ($action == 'modifier') {
                 $res = $db->fetch_object($sql);
             if ($sql && $res->valueIsChecked == 1 && ($val == 'on' || $val == 'On' || $val == 'oN' || $val == 'ON'))
                 $dataArr[$arrTmp[1]] = 1;
-            else if ($sql && $res->valueIsChecked == 1 && isset($_REQUEST[$key."_check"]) && ($_REQUEST[$key."_check"] == 'on' || $_REQUEST[$key."_check"] == 'On' || $_REQUEST[$key."_check"] == 'oN' || $_REQUEST[$key."_check"] == 'ON'))
+            else if ($sql && $res->valueIsChecked == 1 && isset($_REQUEST[$key . "_check"]) && ($_REQUEST[$key . "_check"] == 'on' || $_REQUEST[$key . "_check"] == 'On' || $_REQUEST[$key . "_check"] == 'oN' || $_REQUEST[$key . "_check"] == 'ON'))
                 $dataArr[$arrTmp[1]] = 1;
             else if ($sql && $res->valueIsChecked == 1)
                 $dataArr[$arrTmp[1]] = 0;
@@ -241,16 +241,25 @@ if ($action == 'modifier') {
             }
         }
     }
-    
-    /*special bimp appel*/
-    if(isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on"){
-        $tech = new User($db);
-        $tech->fetch($_REQUEST["Chrono-1070"]);
-        mailSyn2 ("Transfert Appel ".$chr->societe->nom, $tech->email, null, "Bonjour ".$tech->getFullName($langs)." l'appel ".$chr->getNomUrl(1)." de ".$chr->societe->getNomUrl(1)." vous a été transmis.");
+
+    /* special bimp appel */
+    if (isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on") {
+        if (isset($_REQUEST["Chrono-1071"]) && $_REQUEST["Chrono-1071"] > 0) {
+            $group = new UserGroup($db);
+            $group->fetch($_REQUEST["Chrono-1071"]);
+            foreach ($group->members as $tech) {
+                $tech->fetch($_REQUEST["Chrono-1070"]);
+                mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " été transmis a votre group.");
+            }
+        } elseif (isset($_REQUEST["Chrono-1070"]) && $_REQUEST["Chrono-1070"] > 0) {
+            $tech = new User($db);
+            $tech->fetch($_REQUEST["Chrono-1070"]);
+            mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " vous a été transmis.");
+        }
     }
-    /*fin special bimp appel*/
-    
-    
+    /* fin special bimp appel */
+
+
     if ($res > 0) {
         header('location:?id=' . $id . ($action2 != "" ? "&action=$action2" : ""));
     } else {
@@ -373,9 +382,9 @@ if ($chr->id > 0) {
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
             print '<td  class="ui-widget-content" colspan="3">';
             if ($chr->model->typeDescription == 2)
-                print '<textarea style="width: 98%; min-height: 8em;" class="" name="description">' . stripslashes ($chr->description) . '</textarea>';
+                print '<textarea style="width: 98%; min-height: 8em;" class="" name="description">' . stripslashes($chr->description) . '</textarea>';
             else
-                print '<input type="text" name="description" class="required" value="' . stripslashes ($chr->description) . '"/>';
+                print '<input type="text" name="description" class="required" value="' . stripslashes($chr->description) . '"/>';
             print '</td>';
         }
 
@@ -615,7 +624,7 @@ if ($chr->id > 0) {
         if ($chr->model->hasDescription) {
 //print '    <td  class="ui-widget-content" colspan="3"><textarea style="width: 98%; min-height: 8em;" class="required" name="description">'.$chr->description.'</textarea></td>';
             print '<tr><th class="ui-state-default ui-widget-header" nowrap  class="ui-state-default">' . $chr->model->nomDescription;
-            print '    <td  class="ui-widget-content" colspan="1">' . str_replace("\n", "<br/>", stripslashes ($chr->description)) . '</td>';
+            print '    <td  class="ui-widget-content" colspan="1">' . str_replace("\n", "<br/>", stripslashes($chr->description)) . '</td>';
         }
 
 
@@ -850,10 +859,10 @@ if ($chr->id > 0) {
         print <<<EOF
           jQuery(document).ready(function(){
 EOF;
-        if(isset($_REQUEST['msg'])){
-            print("alert('".urldecode($_REQUEST['msg'])."');");
+        if (isset($_REQUEST['msg'])) {
+            print("alert('" . urldecode($_REQUEST['msg']) . "');");
         }
-        
+
         print <<<EOF
                 jQuery('#delDialog').dialog({
                     autoOpen: false,

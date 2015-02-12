@@ -1179,7 +1179,7 @@ class Form
         if (! empty($conf->global->USER_HIDE_INACTIVE_IN_COMBOBOX)) $sql.= " AND u.statut <> 0";
         if (! empty($morefilter)) $sql.=$morefilter;
         //mod drsi trie nom annuler
-        $sql.= " ORDER BY u.lastname ASC";
+        $sql.= " ORDER BY u.firstname ASC";
         //f mod drsi
 
         dol_syslog(get_class($this)."::select_dolusers sql=".$sql);
@@ -1219,7 +1219,7 @@ class Form
                         $out.= '>';
                     }
 
-                    $out.= $userstatic->getFullName($langs, 0, 0, $maxlength);
+                    $out.= $userstatic->getFullName($langs, 0, -1, $maxlength);
                     // Complete name with more info
                     $moreinfo=0;
                     if (! empty($conf->global->MAIN_SHOW_LOGIN))

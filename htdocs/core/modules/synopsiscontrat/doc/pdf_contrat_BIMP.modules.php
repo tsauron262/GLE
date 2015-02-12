@@ -239,6 +239,7 @@ class pdf_contrat_BIMP extends ModeleSynopsiscontrat {
                 $page = 1;
 
                 foreach ($contrat->lines as $key => $val) {
+                    break;
 //                    if ($val->statut == 0 || $val->statut == 5)
 //                        continue;
                     if ($avenant != $val->avenant && $val->avenant != 0) {
@@ -1071,12 +1072,10 @@ Signature et cachet
         }
         $pdf->SetFont('', 'B', 10);
         //Société
-        $pdf->SetXY(3.5, 54.5);
-        $pdf->MultiCell(39, 4, "Code Client : " . $object->societe->code_client, 0, "L");
-        $pdf->SetXY(17, 63);
-        $pdf->MultiCell(39, 4, "Ref : ", 0, "L");
-        $pdf->SetXY(4.5, 67);
-        $pdf->MultiCell(39, 4, $object->ref, 0, "L");
+        $pdf->SetXY(4, 54.5);
+        $pdf->MultiCell(39, 4, "Code Client \n" . $object->societe->code_client, 0, "C");
+        $pdf->SetXY(4, 68);
+        $pdf->MultiCell(39, 4, "Ref Contrat \n".$object->ref, 0, "C");
         $pdf->Rect(48, 39, 157, 235);
         $pdf->SetFont('', 'B', 7);
     }

@@ -248,8 +248,7 @@ if ($action == 'modifier') {
             $group = new UserGroup($db);
             $group->fetch($_REQUEST["Chrono-1071"]);
             foreach ($group->members as $tech) {
-                $tech->fetch($_REQUEST["Chrono-1070"]);
-                mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " été transmis a votre group.");
+                mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " été transmis a votre groupe.");
             }
         } elseif (isset($_REQUEST["Chrono-1070"]) && $_REQUEST["Chrono-1070"] > 0) {
             $tech = new User($db);

@@ -562,6 +562,7 @@ class Synopsisdemandeinterv extends CommonObject {
             $action = new ActionComm($this->db);
 
         $this->getExtra();
+        
         if ($this->tabExtraV[24] != "00:00" && $this->tabExtraV[24] != "") {
             $heureArr = $this->tabExtraV[24];
             if ($this->tabExtraV[27] != "00:00" && $this->tabExtraV[27] != "") {
@@ -580,9 +581,9 @@ class Synopsisdemandeinterv extends CommonObject {
 
         if ($this->date > 0) {
             $action->fk_action = $this->tabExtraV[37];
+            $action->type_id = $action->fk_action;
             $action->datep = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureArr . ":00");
             $action->datef = $this->db->jdate(date("Y-m-d", $this->date) . " " . $heureDep . ":00");
-            $action->type_id = 50;
             $action->elementtype = "synopsisdemandeinterv";
             $action->fk_element = $this->id;
             $action->percentage = -1;
@@ -951,7 +952,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
-        if ($user->rights->synopsisdemandeinterv->creer && $this->statut == 0) {
+        if ($user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
@@ -987,6 +988,15 @@ class Synopsisdemandeinterv extends CommonObject {
                 return -1;
             }
         }
+    }
+    
+    
+    public function setExtra($idExtraKey, $val){
+        
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
+                                         (interv_refid,extra_key_refid,extra_value,typeI)
+                                  VALUES (" .$this->id . "," . $idExtraKey . ",'" . addslashes($val) . "','DI')";
+                $sql = $this->db->query($requete);
     }
 
     /**

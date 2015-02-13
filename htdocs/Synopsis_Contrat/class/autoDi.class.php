@@ -218,6 +218,7 @@ class autoDi {
                         $textSite = (count($tabSite) > 1 ? " SITE : " . $nomSite : "");
                         $di->description = (($type == "visite") ? "Visite" : "Télémaintenance") . " " . ($numVisiste + 1) . "/" . count($site[$type]['tabVisite']) . $textSite;
                         $newId = $di->create();
+                        $di->setExtra(37, ($type == "visite" ? 60 : 61));
 //                    die($di->description . $newId);
                         $tech = new User($this->db);
                         $tech->fetch($idTech);

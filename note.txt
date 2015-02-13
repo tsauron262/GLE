@@ -1077,21 +1077,21 @@ Dans fiche client ne voir que les contrat actifs
 
 dans appel voir igne contrat lier au prod tous si pas de prod
 
-auto extact gle
+//auto extact gle
 
 voir rappel des periode de facturation
 
-dans prepacommande technicien voir que les tech 
+//dans prepacommande technicien voir que les tech 
 
 roue dans process valider
 
-dans di auto orange visite contrat
+//dans di auto orange visite contrat
 
-dans agenda changer date meme si valider
+//dans agenda changer date meme si valider
 
 si suppr di annuler rdv
 
-dans new fi que les comm non delivrer
+//dans new fi que les comm non delivrer
 
 voir doublons
 

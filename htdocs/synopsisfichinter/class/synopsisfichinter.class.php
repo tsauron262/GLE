@@ -658,6 +658,14 @@ class Synopsisfichinter extends Fichinter {
         $this->client = new Societe($this->db);
         $this->client->fetch($this->socid);
     }
+    
+    public function setExtra($idExtraKey, $val){
+        
+                $requete = "INSERT INTO " . MAIN_DB_PREFIX . "synopsisfichinter_extra_value
+                                         (interv_refid,extra_key_refid,extra_value,typeI)
+                                  VALUES (" .$this->id . "," . $idExtraKey . ",'" . addslashes($val) . "','FI')";
+                $sql = $this->db->query($requete);
+    }
 
     public function fetch_extra() {
         $requete = "SELECT ifnull(c.label,e.extra_value) as val,

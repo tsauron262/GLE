@@ -665,7 +665,7 @@ if (isset($_REQUEST["action"]) && $_REQUEST["action"] == 'create') {
             print "</SELECT>";
         }
 
-        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc =" . $societe->id;
+        $requete = "SELECT * FROM " . MAIN_DB_PREFIX . "commande WHERE fk_soc =" . $societe->id." AND fk_statut < 3";
         $sql = $db->query($requete);
         if ($db->num_rows($sql) > 0) {
             print '<tr><th class="ui-widget-header ui-state-default">' . $langs->trans("Commande") . '</th>';

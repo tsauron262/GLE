@@ -30,7 +30,7 @@ class CronSynopsis {
 
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
         $export = new synopsisexport($this->db, 'file');
-        $export->exportFactureSav();
+        $export->exportFactureSav(false);
 
 
         echo 1;

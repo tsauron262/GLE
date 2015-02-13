@@ -19,7 +19,7 @@ class synopsisexport {
         }
     }
 
-    public function exportFactureSav() {
+    public function exportFactureSav($print = true) {
 //        $result = $this->db->query("SELECT code_client, nom, phone, address, zip, town, facnumber, DATE_FORMAT(fact.datec, '%d-%m-%Y') as date, fact.rowid as factid 
 //, email , total, total_ttc, id8Sens FROM  `llx_facture` fact, llx_societe soc
 //LEFT JOIN llx_element_element el, llx_user_extrafields ue, llx_synopsischrono_view_105 chrono 
@@ -54,9 +54,10 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             }
             $return = $return1 . $return2;
 //            echo $return;
-            $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid);
+            $this->sortie($return, $ligne->facnumber, "factureSav", $ligne->factid, $print);
 
-            echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
+            if ($print)
+                echo "<br/>Facture : " . $ligne->facnumber . " exporté.<br/>";
         }
     }
 
@@ -269,7 +270,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             $this->textSortie .= $text;
     }
 
-    public function sortie($text, $nom = "temp", $type = "n/c", $idObj = null) {
+    public function sortie($text, $nom = "temp", $type = "n/c", $idObj = null, $print = true) {
         global $user;
         $text .= $this->textSortie;
 
@@ -289,7 +290,8 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             $nom = str_replace(" ", "_", $nom); //die($folder . $nom . ".txt");
             $file = $folder2 . $nom . ".txt";
             file_put_contents($folder1 . $file, $text);
-            echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
+            if ($print)
+                echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
         } else {
             echo "<style>"
             . "td{"
@@ -344,29 +346,27 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                 }
 
                 if ($nom == 'objSoc') {
-                        $tabT = explode("|", $valeur);
+                    $tabT = explode("|", $valeur);
                     if ($this->sortie == "html") {
                         require_once(DOL_DOCUMENT_ROOT . "/societe/class/societe.class.php");
                         $socStat = new Societe(null);
                         $socStat->nom = $tabT[0];
                         $socStat->id = $tabT[1];
                         $valeur = $socStat->getNomUrl(1);
-                    }
-                    else{
+                    } else {
                         $valeur = $tabT[0];
                     }
                 }
 
                 if ($nom == 'objFact') {
-                        $tabT = explode("|", $valeur);
+                    $tabT = explode("|", $valeur);
                     if ($this->sortie == "html") {
                         require_once(DOL_DOCUMENT_ROOT . "/compta/facture/class/facture.class.php");
                         $socStat = new Facture(null);
                         $socStat->ref = $tabT[0];
                         $socStat->id = $tabT[1];
                         $valeur = $socStat->getNomUrl(1);
-                    }
-                    else{
+                    } else {
                         $valeur = $tabT[0];
                     }
                 }

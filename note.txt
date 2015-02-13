@@ -1069,11 +1069,11 @@ Dans fiche client ne voir que les contrat actifs
 //Contrat code client a la ligne changer ref en ref contrat
 //+virer contenue de contrat garder resumer des service
 
-transmie a  tous les groupes 
+//transmie a  tous les groupes 
 
 //dans mail aj nom du client
 
-bug dans contrat doc espace
+//bug dans contrat doc espace
 
 dans appel voir igne contrat lier au prod tous si pas de prod
 

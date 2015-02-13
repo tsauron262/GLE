@@ -245,7 +245,6 @@ if ($object->id) {
                 if (count($filearray) > 0) {
                     $nom = (method_exists($result, "getNomUrl") ? $result->getNomUrl() : $result->ref);
                     $nomPublicT = ((stripos($nomPublic, "au") === false && stripos($nomPublic, "à l'") === false) ? "à la " : '') . $nomPublic;
-                    ;
                     $formfile->list_of_documents($filearray, $result, $typeElem, '', 0, '', 0, 0, '', 0, 'Fichiers joints ' . $nomPublicT . ' ' . $nom);
                     print "<br><br>";
                 }

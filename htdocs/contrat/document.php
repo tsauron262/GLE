@@ -128,7 +128,7 @@ if ($object->id)
 
     print '</div>';
 
-    $modulepart = 'contract';
+//    $modulepart = 'contract';
     $permission = $user->rights->contrat->creer;
     $param = '&id=' . $object->id;
     include_once DOL_DOCUMENT_ROOT . '/core/tpl/document_actions_post_headers.tpl.php';

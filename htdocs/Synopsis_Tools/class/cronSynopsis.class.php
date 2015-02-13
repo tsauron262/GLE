@@ -1,7 +1,7 @@
 <?php
 
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/class/divers.class.php");
-require_once(DOL_DOCUMENT_ROOT."/Synopsis_Tools/SynDiversFunction.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/divers.class.php");
+require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
 
 class CronSynopsis {
 
@@ -14,7 +14,7 @@ class CronSynopsis {
 
     public function netoyage() {
         $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "element_element WHERE  `sourcetype` LIKE  'resa'");
-        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '".$this->db->idate(strtotime ("-3 day"))."'");
+        $this->db->query("DELETE FROM " . MAIN_DB_PREFIX . "Synopsis_Histo_User WHERE  `tms` <  '" . $this->db->idate(strtotime("-3 day")) . "'");
     }
 
     public function testGlobal() {
@@ -26,7 +26,13 @@ class CronSynopsis {
 //        $this->majSav();
 //        $this->verif();
 //        $this->sortieMail();
-        
+
+
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
+        $export = new synopsisexport($db, 'file');
+        $export->exportFactureSav();
+
+
         echo 1;
     }
 

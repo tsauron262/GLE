@@ -1096,3 +1096,6 @@ si suppr di annuler rdv
 voir doublons
 
 
+voir apple addtopropal arrondie
+
+facture 

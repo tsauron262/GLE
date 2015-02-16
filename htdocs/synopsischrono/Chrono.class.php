@@ -280,10 +280,10 @@ class Chrono extends CommonObject {
                                       " . $res->key_id . " )";
             $sql1 = $this->db->query($requete);
         }
-        
-        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = ".$newId." WHERE id = " . $oldId;
+
+        $requete = "UPDATE " . MAIN_DB_PREFIX . "synopsischrono SET fk_statut = 3, revisionNext = " . $newId . " WHERE id = " . $oldId;
         $sqlA = $this->db->query($requete);
-        
+
         if ($sqlA && $newId > 0) {
             global $user, $langs, $conf;
             // Appel des triggers
@@ -740,13 +740,15 @@ class Chrono extends CommonObject {
     public function getKeys() {
         $this->keysListId = array();
         $this->keysList = array();
-        $requete = "SELECT *
+        if ($this->model_refid > 0) {
+            $requete = "SELECT *
                       FROM " . MAIN_DB_PREFIX . "synopsischrono_key
                      WHERE model_refid = " . $this->model_refid;
-        $sql = $this->db->query($requete);
-        while ($res = $this->db->fetch_object($sql)) {
-            $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
-            $this->keysListId[] = $res->id;
+            $sql = $this->db->query($requete);
+            while ($res = $this->db->fetch_object($sql)) {
+                $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
+                $this->keysListId[] = $res->id;
+            }
         }
     }
 

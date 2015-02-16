@@ -38,7 +38,7 @@ class partsCart {
 
         foreach ($this->partsCart as $part) {
             $prix = $this->convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, $part['stockPrice']);
+            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, round($part['stockPrice'],2));
         }
 
         if ($this->fraisP > 0) {
@@ -48,7 +48,7 @@ class partsCart {
             require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
             $prodF = new ProductFournisseur($db);
             $prodF->find_min_price_product_fournisseur($prod->id, $qte);
-            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
         }
 
 

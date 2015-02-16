@@ -35,8 +35,8 @@ $typeAff = (isset($_POST['typeAff']) ? $_POST['typeAff'] : null);
 $typeAff2 = (isset($_POST['typeAff2']) ? $_POST['typeAff2'] : null);
 $sortie = (isset($_REQUEST['sortie']) ? $_REQUEST['sortie'] : 'html');
 $paye = (isset($_REQUEST['paye']) ? 1 : 0);
-$dateDeb = (isset($_POST['dateDeb']) ? $_POST['dateDeb'] : null);
-$dateFin = (isset($_POST['dateFin']) ? $_POST['dateFin'] : null);
+$dateDeb = (isset($_POST['dateDeb']) ? $_POST['dateDeb'] : ("01/". date("m") ."/".date("Y")));
+$dateFin = (isset($_POST['dateFin']) ? $_POST['dateFin'] : ("01/". (date("m")+1) ."/".date("Y")));
 
 
 echo "<form method='POST'>";

@@ -68,6 +68,7 @@ $hookmanager->initHooks(array('contractcard'));
 
 require_once DOL_DOCUMENT_ROOT . "/Synopsis_Contrat/class/contrat.class.php";
 $object = new Synopsis_Contrat($db);
+$extrafields = new ExtraFields($db);
 
 
 

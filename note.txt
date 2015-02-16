@@ -1047,9 +1047,9 @@ hotline ajout tu tech referent. du contrat  +  ligne lier au produit
 
 dans prise en charge afficher numero de contrat dans pdf aussi
 
-voir calendrier di sans produit client
+//voir calendrier di sans produit client
 
-voir product / ref
+// voir product / ref
 
 
 
@@ -1064,7 +1064,7 @@ Voir gestion facturatin trimestrielle (
 
 Activation de contrat classer delivrer les commande
 
-Dans fiche client ne voir que les contrat actifs
+//Dans fiche client ne voir que les contrat actifs
 
 //Contrat code client a la ligne changer ref en ref contrat
 //+virer contenue de contrat garder resumer des service
@@ -1096,6 +1096,6 @@ si suppr di annuler rdv
 voir doublons
 
 
-voir apple addtopropal arrondie
+//voir apple addtopropal arrondie
 
 facture 

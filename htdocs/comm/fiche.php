@@ -660,6 +660,7 @@ if ($id > 0)
 		$sql = "SELECT s.nom, s.rowid, c.rowid as id, c.ref as ref, c.statut, c.date_contrat as dc";/*f mod drsi*/
 		$sql.= " FROM ".MAIN_DB_PREFIX."societe as s, ".MAIN_DB_PREFIX."contrat as c";
 		$sql.= " WHERE c.fk_soc = s.rowid ";
+                /*mod drsi*/$sql .= " AND c.date_cloture is null ";/*fmod drsi*/
 		$sql.= " AND s.rowid = ".$object->id;
 		$sql.= " AND c.entity = ".$conf->entity;
 		$sql.= " ORDER BY c.datec DESC";

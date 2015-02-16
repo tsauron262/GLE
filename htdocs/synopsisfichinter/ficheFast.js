@@ -34,40 +34,14 @@ jQuery(document).ready(function() {
     }
     });
 
-    autoSave();
+    autoSave(function(){
+            jQuery("form.formFast").submit();
+        });
 });
 function heureNull(str){
     if(str == "00:00" || str == "" || str == " ")
         return true;
     return false;
-}
-
-function autoSave() {
-    jQuery("*").click(function() {
-        initTimeSave();
-    });
-    jQuery("*").keypress(function() {
-        initTimeSave();
-    });
-    enreg = false;
-    function boucleSave() {
-        if (new Date().getTime() > timeMax && enreg == false) {
-            enreg = true;
-            jQuery("form.formFast").submit();
-        }
-        setTimeout(function() {
-            boucleSave();
-        }, 1000);
-    }
-    timeMax = null;
-    function initTimeSave() {
-        if (timeMax == null) {
-            timeMax = new Date().getTime() + 30000;
-            boucleSave();
-        }
-        else
-            timeMax = new Date().getTime() + 30000;
-    }
 }
 
 function initHeure(elem) {

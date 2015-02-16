@@ -338,7 +338,7 @@ if ($chr->id > 0) {
         print '<br>';
     }
 
-    if (($action == "Modify") && $user->rights->synopsischrono->Modifier) {
+    if (($action == "Modify" || $action2 == "Modify") && $user->rights->synopsischrono->Modifier) {
         print "<form id='form' action='?id=" . $chr->id . "' method=post>";
         print "<table id='chronoTable' class='border' width=100%; class='ui-state-default' style='border-collapse: collapse;' cellpadding=15>";
         print "<input type='hidden' name='action' value='modifier'>";
@@ -405,12 +405,18 @@ if ($chr->id > 0) {
 //
 //        print '<tr><th align=right class="ui-state-default ui-widget-header" nowrap colspan=4  class="ui-state-default">';
         print '</table></div><div class="divButAction">';
+        print '<input type="hidden" id="forAction2" name="action2" value="nc"/>';
+        
         print "<button onClick='location.href=\"?action=cancel&id=" . $chr->id . "\"; return(false);' class='butAction'>Annuler</button>";
-        print "<button class='butAction'>Modifier</button>";
+        print "<button id='forValid' class='butAction'>Modifier</button>";
         print '</div></form>';
 
         echo '<script>'
         . '$( document ).ready(function() {'
+               . 'autoSave(function(){
+                   $("#forAction2").attr("value", "Modify");
+                   $("#forValid").click();
+                });'
         . '});'
         . '</script>';
     } else if ($chr->id > 0) {

@@ -786,3 +786,34 @@ function cacherSuppr(element) {
     });
 }
 
+
+
+function autoSave(actionSave) {
+    jQuery("*").click(function() {
+        initTimeSave();
+    });
+    jQuery("*").keypress(function() {
+        initTimeSave();
+    });
+    enreg = false;
+    function boucleSave() {
+        if (new Date().getTime() > timeMax && enreg == false) {
+            enreg = true;
+            actionSave();
+        }
+        setTimeout(function() {
+            boucleSave();
+        }, 1000);
+    }
+    timeMax = null;
+    function initTimeSave() {
+        if (timeMax == null) {
+            timeMax = new Date().getTime() + 30000;
+            boucleSave();
+        }
+        else
+            timeMax = new Date().getTime() + 30000;
+    }
+}
+
+

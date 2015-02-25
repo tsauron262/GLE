@@ -2485,8 +2485,8 @@ class lien extends formulaireSource {
 EOF;
                 $return .= "<div id='tabsA'>";
                 $return .= "<ul class='syntab'>";
-                $return .= "<li><a href='#actif' class='default'>Service Actif</a></li>";
-                $return .= "<li><a href='#nonactif'>Service non actif</a></li>";
+                $return .= "<li><a href='#actif' class='default tab'>Service Actif</a></li>";
+                $return .= "<li><a href='#nonactif' class='tab'>Service non actif</a></li>";
                 $return .= "</ul>";
                 $return .= "<div id='nonactif'>";
                 $return .= "</div>";
@@ -2515,7 +2515,9 @@ EOF;
                             $color = "red";
                         elseif ($interval->format('%R%a') > -30)
                             $color = "orange";
-                        $html .= "<div style='background-color:" . $color . ";' class='" . ($contratdet->statut == 4 ? "actif" : "nonactif") . " syntabelem'>";
+                        else
+                            $color = "green";
+                        $html .= "<div style='clear: both; background-color:" . $color . ";' class='" . ($contratdet->statut == 4 ? "actif" : "nonactif") . " syntabelem'>";
                         $html .= "<a href='" . DOL_URL_ROOT . "/Synopsis_Contrat/contratDetail.php?id=" . $result . "'>" . $contratdet->description . "</a>";
                         $html .= "<br/>";
                         if ($contratdet->fk_product > 0) {

@@ -267,9 +267,9 @@ div.bodyline{
 div.champGr{
     width: 99%;
 }
-/*
-.syntab .actif{
-    color: blue;
+
+.syntab li.actif a{
+	background: rgba(210,210,210, 0.5)  url(/gle_dev/theme/eldy/img/nav-overlay3.png) 50% 0 repeat-x;
 }
 .syntab{
     height: 15px;
@@ -279,7 +279,7 @@ div.champGr{
     float:left;
     padding: 10px 5px;
     display: block;
-}*/
+}
 
 
 .showFormChrono{

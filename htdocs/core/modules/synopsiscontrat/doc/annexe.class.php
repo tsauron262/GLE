@@ -195,7 +195,17 @@ Tél. : Contact-external-CUSTOMER-tel
         $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_contrat = ".$contrat->id. " ORDER BY datei ASC");
         $strDi = "";
         while($result = $this->db->fetch_object($sql)){
-            $strDi .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
+            $motClef = "";
+            if(stripos($result->description, "Visite") !== false)
+                    $motClef = "Visite(s)";
+            if(stripos($result->description, "Visite") !== false)
+                    $motClef = "Télémaintenance(s)";
+            $tabTemp[$motClef] .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
+        }
+        foreach($tabTemp as $motClef => $val){
+            if($motClef != "")
+            $strDi .= "\n<g>".$motClef." : \n".$val;
+            $strDi .= $val;
         }
         $annexe = preg_replace('/Date-Di/', $strDi, $annexe);
 

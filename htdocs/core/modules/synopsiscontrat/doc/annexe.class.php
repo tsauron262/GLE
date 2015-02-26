@@ -198,7 +198,7 @@ Tél. : Contact-external-CUSTOMER-tel
             $motClef = "";
             if(stripos($result->description, "Visite") !== false)
                     $motClef = "Visite(s)";
-            if(stripos($result->description, "Visite") !== false)
+            if(stripos($result->description, "Télémaintenance") !== false)
                     $motClef = "Télémaintenance(s)";
             $tabTemp[$motClef] .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
         }

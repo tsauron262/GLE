@@ -202,6 +202,7 @@ Tél. : Contact-external-CUSTOMER-tel
                     $motClef = "Télémaintenance(s)";
             $tabTemp[$motClef] .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
         }
+        ksort($tabTemp);
         foreach($tabTemp as $motClef => $val){
             if($motClef != "")
             $strDi .= "\n<g>".$motClef." : \n".$val;

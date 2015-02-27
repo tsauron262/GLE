@@ -578,7 +578,7 @@ function afficheParType($tabIdFi) {
 //    die($req);
     $sql = $db->query($req);
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".$result->sum."h<br/>";
+    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." €<br/>";
 
     ksort($tabType);
 

@@ -557,18 +557,10 @@ function afficheParType($tabIdFi) {
     $tabType[-1111] = "TOTAL";
     $tabType[-1000] = "TOTAL Vendu";
     $tabType[-1001] = "TOTAL Non-Vendu";
-
-
-
-    $coef1 = 0.025;
-    $coef2 = 0.10;
-    $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
-    echo "<br/><table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
-    echo "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
     
-    echo "<br/>";
-
-
+    
+    
+//hotline
     $req = "SELECT COUNT(id) as nb, SUM(TO_SECONDS(STR_TO_DATE(`Date_H_Fin`, '%d/%m/%Y %H:%i')) - TO_SECONDS(STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i')))/3600 as sum FROM `llx_synopsischrono_view_100` WHERE Date_H_Debut > 0 AND Date_H_Fin > 0 ";
     
     if($_REQUEST['filterUser'] > 0)
@@ -585,6 +577,36 @@ function afficheParType($tabIdFi) {
     $sql = $db->query($req." AND Contrat is not NULL");
     $result = $db->fetch_object($sql);
     echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € sous contrat<br/>";
+    
+    
+    
+    $sql = $db->query($req." AND Contrat is not NULL");
+    $result = $db->fetch_object($sql);
+    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € au Total<br/>";
+    
+    $tabResult[-1001][2] += ($result->sum*50);
+    
+
+
+
+    $coef1 = 0.025;
+    $coef2 = 0.10;
+    $result = $tabResult[-1000][3] * $coef1 + ($tabResult[-1000][3] - $tabResult[-1000][2]) * $coef2;
+    echo "<br/>Vendue<table><tr><td>Prévue</td><td>* " . $coef1 . "</td><td>+ Bonus</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr>";
+    echo "<tr><td>" . price($tabResult[-1000][3]) . " €</td><td>* " . $coef1 . "</td><td>+ " . price($tabResult[-1000][3] - $tabResult[-1000][2]) . " €</td><td>X " . $coef2 . "</td><td>= " . price($result) . " €</td></tr></table>";
+    
+    echo "<br/>";
+    
+    
+    echo "<br/>Non Vendue<table><tr><td>Réalisé</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr>";
+    echo "<tr><td>" . price($tabResult[-1001][2]) . " €</td><td>* " . $coef1 . "</td><td>= " . price($coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
+    
+    echo "<br/>";
+    
+    echo "<br/>Total<table><tr><td>" . price($result) . " €</td><td>+ " . price($coef1 * $tabResult[-1001][2]) . "</td><td>= " . price($result + $coef1 * $tabResult[-1001][2]) . " €</td></tr></table>";
+    
+    echo "<br/>";
+
 
     ksort($tabType);
 

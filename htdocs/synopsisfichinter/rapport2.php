@@ -576,9 +576,15 @@ function afficheParType($tabIdFi) {
     if (isset($_GET['dateDeb']) && isset($_GET['dateFin']) && $_GET['dateDeb'] != '' && $_GET['dateFin'] != '')
         $req .= " AND STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i') < STR_TO_DATE('".$_GET['dateFin']."', '%d/%m/%Y') AND STR_TO_DATE(`Date_H_Debut`, '%d/%m/%Y %H:%i') > STR_TO_DATE('".$_GET['dateDeb']."', '%d/%m/%Y')";
 //    die($req);
-    $sql = $db->query($req);
+    $sql = $db->query($req." AND Contrat is NULL");
     $result = $db->fetch_object($sql);
-    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." €<br/>";
+    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € hors contrat<br/>";
+    
+    
+    
+    $sql = $db->query($req." AND Contrat is not NULL");
+    $result = $db->fetch_object($sql);
+    echo "<br/>".$result->nb." appels durant ".$result->sum."h soit ".($result->sum*50)." € sous contrat<br/>";
 
     ksort($tabType);
 

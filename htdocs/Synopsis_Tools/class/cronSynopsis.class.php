@@ -28,11 +28,15 @@ class CronSynopsis {
 //        $this->sortieMail();
 
 
+
+
+        echo 1;
+    }
+    
+    public function extractFact(){
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
         $export = new synopsisexport($this->db, 'file');
         $export->exportFactureSav(false);
-
-
         echo 1;
     }
 

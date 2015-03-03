@@ -269,6 +269,17 @@ class Facture extends CommonInvoice
 		{
 			$this->id = $this->db->last_insert_id(MAIN_DB_PREFIX.'facture');
 
+                        
+                        /*mod drsi pour lien propal remplacement */
+                        if(isset($this->fk_facture_source) && $this->fk_facture_source > 0){
+                            $tabT = getElementElement("propal", "facture", null, $this->fk_facture_source);
+                            foreach($tabT as $ligneT)
+                                addElementElement($ligneT['ts'], $ligneT['td'], $ligneT['s'], $this->id);
+                        }
+                        /*fmod drsi*/
+                        
+                        
+                        
 			// Update ref with new one
 			$this->ref='(PROV'.$this->id.')';
 			$sql = 'UPDATE '.MAIN_DB_PREFIX."facture SET facnumber='".$this->ref."' WHERE rowid=".$this->id;

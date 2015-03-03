@@ -307,7 +307,7 @@ function iniTabChronoList() {
             $hasSoc = 1;
     }
 
-    $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id");
+    $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` IN(1000, 1007) AND model_refid = c.id GROUP by c.id");
     while ($result = $db->fetch_object($sql))
         $hasContrat = true;
 

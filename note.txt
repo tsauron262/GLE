@@ -1099,3 +1099,22 @@ voir doublons
 //voir apple addtopropal arrondie
 
 facture 
+
+
+new site soc
+
+
+hotline tech referent
+
+
+ac1411-119   1411-120
+
+
+0214 AC1502-0162   -0229
+
+
+pdf contrat trie des di   +    affichage di tech
+
+
+liaison propal facture bug + avoir lier tous seul
+

@@ -143,7 +143,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $propal->addline("Prise en charge :  : " . $chrono->ref .
                     "\n" . "Machine : " . $nomMachine .
                     "\n" . "Frais de gestion devis refusé.
-", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, 0, 'HT', null, null, 1);
+", $_REQUEST['frais'] / 1.20, 1, 20, 0, 0, 0, $chrono->societe->remise_percent, 'HT', null, null, 1);
 
 
 
@@ -233,7 +233,7 @@ if (isset($_REQUEST['actionEtat'])) {
         $chrono->note = (($chrono->note != "") ? $chrono->note . "\n\n" : "");
         $chrono->note .= "Devis validé depuis le " . date('d-m-y H:i') . " par " . $user->getFullName($langs);
         $chrono->update($chrono->id);
-        $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
+        $chrono->propal->addline("Diagnostic : " . $chrono->extraValue[$chrono->id]['Diagnostic']['value'], 0, 1, 0, 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 3);
         if ($action == "attenteClient2") {
 //            die($totPa);
 //            ($desc, $pu_ht, $qty, $txtva, $txlocaltax1=0, $txlocaltax2=0, $fk_product=0, $remise_percent=0, $price_base_type='HT', $pu_ttc=0, $info_bits=0, $type=0, $rang=-1, $special_code=0, $fk_parent_line=0, $fk_fournprice=0, $pa_ht=0
@@ -255,7 +255,7 @@ if (isset($_REQUEST['actionEtat'])) {
                 }
             }
 
-            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, 0, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
+            $chrono->propal->addline("Garantie", -($totHt), 1, (($totTtc / ($totHt != 0 ? $totHt : 1) - 1) * 100), 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 1, -1, 0, 0, 0, -$totPa);
             if ($attentePiece != 1)//Sinon on vien de commander les piece sous garentie
                 $chrono->setDatas($chrono->id, array($idEtat => 3));
             $chrono->propal->valid($user);
@@ -431,7 +431,7 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
         mailSyn2("Devis " . $chrono->ref, $toMail, $fromMail, $text, $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
     } elseif ($type == "PC") {
         mailSyn2("Prise en charge " . $chrono->ref, $toMail, $fromMail, "Bonjour, merci d'avoir choisi BIMP en tant que Centre de Services Agrée Apple, la référence de votre dossier de réparation est : " . $chrono->ref . ", si vous souhaitez communiquer d'autres informations merci de répondre à ce mail ou de contacter le " . $tel . ".\n\n Cordialement."
-                , $tabFilePc, $tabFilePc2, $tabFilePc3);
+                , $tabFileProp, $tabFileProp2, $tabFileProp3, $fromMail);
         sendSms($chrono, "Bonjour, nous avons le plaisir de vous annoncer que le diagnostic de votre produit commence, nous vous recontacterons quand celui-ci sera fini. L'Equipe BIMP.");
     } elseif ($type == "commOk") {
         mailSyn2("Commande piece(s) " . $chrono->ref, $toMail, $fromMail, "Bonjour,

@@ -152,7 +152,7 @@ Pour du matériel couvert par Apple, la garantie initiale s'applique.
 Pour du matériel non couvert par Apple, la garantie est de 3 mois pour les pièces et la main d'oeuvre.
 Les pannes logicielles ne sont pas couvertes par la garantie du fabricant.
 Une garantie de 30 jours est appliquée pour les réparations logicielles.
-", 0, 1, 0, 0, 0, 0, 0, 'HT', 0, 0, 3);
+", 0, 1, 0, 0, 0, 0, $chrono->societe->remise_percent, 'HT', 0, 0, 3);
 
                     $acompte = intval($acompte);
                     if ($acompte > 0) {
@@ -202,7 +202,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                         $prodF->fetch(3422);
                         $prodF->tva_tx = ($prodF->tva_tx > 0) ? $prodF->tva_tx : 0;
                         $prodF->find_min_price_product_fournisseur($prodF->id, 1);
-                        $propal->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $prodF->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
+                        $propal->addline($prodF->description, $prodF->price, 1, $prodF->tva_tx, 0, 0, $prodF->id, $chrono->societe->remise_percent, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, $prodF->fourn_price);
                     }
 
                     $propal->fetch($propal->id);

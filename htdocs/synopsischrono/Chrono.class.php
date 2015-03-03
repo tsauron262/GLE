@@ -748,6 +748,9 @@ class Chrono extends CommonObject {
             while ($res = $this->db->fetch_object($sql)) {
                 $this->keysList[$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
                 $this->keysListId[] = $res->id;
+                
+                $this->keysListByModel[$this->model_refid][$res->id] = array("key_id" => $this->id, "nom" => $res->nom, "description" => $res->description, "type" => $res->type, "inDetList" => $res->inDetList);
+                $this->keysListIdByModel[$this->model_refid][] = $res->id;
             }
         }
     }
@@ -755,11 +758,11 @@ class Chrono extends CommonObject {
     public function getValues($chrono_id = null) {
         if ($chrono_id == null)
             $chrono_id = $this->id;
-        if (count($this->keysListId) < 1) {
+        if (count($this->keysListIdByModel[$this->model_refid]) < 1) {
             $this->getKeys();
         }
         if (count($this->keysListId) > 0) {
-            $keyStr = join(',', $this->keysListId);
+            $keyStr = join(',', $this->keysListIdByModel[$this->model_refid]);
 
             $requete = "SELECT *
                           FROM " . MAIN_DB_PREFIX . "synopsischrono_value

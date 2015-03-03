@@ -35,10 +35,18 @@ class partsCart {
 
         $this->fraisP = -1;
 
-
+        if($propal->socid > 0){
+            $soc = new Societe($db);
+            $soc->fetch($propal->socid);
+            $remise = $soc->remise_percent;
+        }
+        else {
+            $remise = 0;
+        }
+        
         foreach ($this->partsCart as $part) {
             $prix = $this->convertPrix($part['stockPrice'], $part['partNumber'], $part['partDescription']);
-            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, 0, 'HT', 0, 0, 0, 0, 0, 0, 0, round($part['stockPrice'],2));
+            $propal->addline($part['partNumber'] . " - " . $part['partDescription'], round($prix, 2), $part['qty'], "20", 0, 0, 0, $remise, 'HT', 0, 0, 0, 0, 0, 0, 0, round($part['stockPrice'],2));
         }
 
         if ($this->fraisP > 0) {
@@ -48,7 +56,7 @@ class partsCart {
             require_once(DOL_DOCUMENT_ROOT . "/fourn/class/fournisseur.product.class.php");
             $prodF = new ProductFournisseur($db);
             $prodF->find_min_price_product_fournisseur($prod->id, $qte);
-            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, 0, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
+            $propal->addline($prod->description, round($prod->price,2), $qte, ($prod->tva_tx > 0) ? $prod->tva_tx : 0, 0, 0, $prod->id, $remise, 'HT', null, null, null, null, null, null, $prodF->product_fourn_price_id, round($prodF->fourn_price, 2));
         }
 
 

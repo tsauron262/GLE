@@ -37,7 +37,7 @@ $propalSui = $revisionPropal->getPropalSuiv();
 
 
 if (isset($_REQUEST['action']) && $_REQUEST['action'] == "revisee") {
-    $newId = $revisionPropal->reviserPropal();
+    $newId = $revisionPropal->reviserPropal(array(array('Diagnostic'), null));
     if($newId)
             header("Location: " . DOL_URL_ROOT.'/comm/propal.php?id=' . $newId);
 }

@@ -55,7 +55,7 @@ if (isset($_REQUEST['obj'])) {
         $head = contract_prepare_head($ctr);
         $socid = $ctr->socid;
         $ctrId = $_REQUEST['id'];
-        $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` = 1000 AND model_refid = c.id GROUP by c.id " . (isset($modelT) ? " AND c.id=" . $modelT : ""));
+        $sql = $db->query("SELECT c.* FROM `" . MAIN_DB_PREFIX . "synopsischrono_key`, `" . MAIN_DB_PREFIX . "synopsischrono_conf` c WHERE `type_valeur` = 6 AND `type_subvaleur` IN (1000, 1007) AND model_refid = c.id GROUP by c.id " . (isset($modelT) ? " AND c.id=" . $modelT : ""));
     } else if ($_REQUEST['obj'] == "project") {
         $langs->load("project@projet");
         require_once DOL_DOCUMENT_ROOT . '/core/lib/synopsis_project.lib.php';

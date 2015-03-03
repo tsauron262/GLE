@@ -426,6 +426,7 @@ class pdf_bimp extends ModelePDFFicheinter {
                     $sql = $this->db->query($req);
                     $res99 = $this->db->fetch_object($sql);
 
+                    $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 7);
                     $pdf->SetXY(146, 14.1);
                     $pdf->MultiCell(35.5, 4, $res99->ref, 0, 'C', 0);
                     $pdf->SetFont(pdf_getPDFFont($outputlangs), '', 9);

@@ -143,7 +143,7 @@ jQuery(document).ready(function() {
     {
         extra="&type="+type;
     }
-        urlGrid = "ajax/listChrono_json.php?userId="+userId+extra;
+        urlGrid = "ajax/listChrono_json.php?userId="+userId+extra2;
 EOF;
 
 

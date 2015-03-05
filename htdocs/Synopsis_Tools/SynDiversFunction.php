@@ -602,6 +602,8 @@ function getIdInUrl($url, $nomId = "id") {
         if (stripos($val, $nomId) !== false)
             return str_replace($nomId . "=", "", $val);
     }
+    if(isset($_REQUEST[$nomId]))
+        return $_REQUEST[$nomId];
     return false;
 }
 

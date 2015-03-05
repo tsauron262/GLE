@@ -248,7 +248,7 @@ if (isset($_REQUEST['actionEtat'])) {
             $totHt = 0;
             $totTtc = 0;
             foreach ($chrono->propal->lines as $ligne) {
-                if (/*$ligne->desc != "Acompte" &&*/ $ligne->ref != "SAV-PCU") {
+                if ($ligne->desc != "Acompte" && $ligne->ref != "SAV-PCU") {
                     $totHt += $ligne->total_ht;
                     $totTtc += $ligne->total_ttc;
                     $totPa += $ligne->pa_ht;

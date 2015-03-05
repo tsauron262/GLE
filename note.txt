@@ -1118,3 +1118,4 @@ pdf contrat trie des di   +    affichage di tech
 
 liaison propal facture bug + avoir lier tous seul
 
+nom prenom dans client

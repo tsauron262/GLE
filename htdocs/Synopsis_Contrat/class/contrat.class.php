@@ -185,7 +185,7 @@ class Synopsis_Contrat extends Contrat {
         global $conf;
         $pref = "CHM";
         $oldPref = "CT";
-        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = $isEph = $isMedEPg = false;
+        $isSav = $isMaint = $isTeleMaint = $isHotline = $is8h = $isMed = $fpr = $isMed8 = $suivie = $isEph = $isMedEPg = $iscas = false;
         $this->fetch_lines();
         foreach ($this->lines as $ligne) {
             if (stripos($ligne->description, "suivi") !== false)
@@ -228,6 +228,9 @@ class Synopsis_Contrat extends Contrat {
             if (stripos($prod->ref, "serv-cmzen") !== false)
                 $suivie = true;
             
+            if (stripos($prod->ref, "serv-cmserv") !== false)
+                $iscas = true;
+            
             if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
                 $is8h = true;
 //            else echo $ligne->GMAO_Mixte['SLA']."|";
@@ -248,6 +251,8 @@ class Synopsis_Contrat extends Contrat {
             $pref = "CD8";
         if ($suivie)
             $pref = "CS4";
+        if($iscas)
+            $pref = "CAS";
         if ($isMed)
             $pref = "CMED";
         if ($isMed8)

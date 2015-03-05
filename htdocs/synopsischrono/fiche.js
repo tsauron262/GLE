@@ -67,7 +67,7 @@ function majDoubleSoc(socid, ifVide) {
     if (socid > 0) {
         if (jQuery('#socid').find('option[value=' + socid + ']').size() > 0)
             valueStr = jQuery('#socid').find('option[value=' + socid + ']').html();
-        else if(jQuery("#search_socid").size() > 0)
+        else if (jQuery("#search_socid").size() > 0)
             valueStr = jQuery("#search_socid").val();
         if (typeof valueStr !== 'undefined' && valueStr + "x" != "x") {
             valueStr = valueStr.replace(" ", "_").replace(" ", "_").replace(" ", "_").replace(" ", "_").replace("'", "_").replace("/", "_");
@@ -100,8 +100,59 @@ function majDoubleSoc(socid, ifVide) {
             });
         });
     }
+    $(".noteContrat").change(function() {
+        ajNoteContrat();
+    });
+    ajNoteContrat();
 }
+
+attenteNote = false;
+function ajNoteContrat() {
+    if (attenteNote == false) {
+        attenteNote = true;
+
+        setTimeout(function() {
+        selectCtr = $("div > .noteContrat");
+        idCtr = selectCtr.val();
+        divDest = selectCtr.parent().parent().parent().parent().parent().parent();
+
+        if (idCtr > 0) {
+            var datas = 'url=' + "/contrat/fiche.php?id=" + idCtr;
+            datas = datas + '&type=note';
+            jQuery.ajax({
+                url: DOL_URL_ROOT + '/Synopsis_Tools/ajax/note_ajax.php',
+                data: datas,
+                datatype: "xml",
+                type: "POST",
+                cache: false,
+                success: function(msg) {
+                    if (msg != "0") {
+                        if (msg.indexOf("[1]") > -1) {
+                            msg = msg.replace("[1]", "");
+                        }
+
+                        $(".destNoteContrat").fadeOut();
+                        divDest.append("<div class='destNoteContrat'>" + msg + "</div>");
+
+                    }
+                }
+            });
+        }
+
+
+
+            attenteNote = false;
+        }, 500);
+    }
+}
+
+
+
+
 jQuery(document).ready(function() {
+
+
+
     $("a.butAction").click(function() {
         lien = this;
         setTimeout(function() {

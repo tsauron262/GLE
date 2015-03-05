@@ -118,7 +118,8 @@ if (empty($reshook))
         {
             $object->particulier       = GETPOST("private");
 
-            $object->name              = dolGetFirstLastname(GETPOST('firstname'),GETPOST('nom')?GETPOST('nom'):GETPOST('name'));
+//            $object->name              = dolGetFirstLastname(GETPOST('firstname'),GETPOST('nom')?GETPOST('nom'):GETPOST('name'));
+            $object->name              = (GETPOST('nom')?GETPOST('nom'):GETPOST('name'))." ".GETPOST('firstname');
             $object->civility_id       = GETPOST('civility_id');
             // Add non official properties
             $object->name_bis          = GETPOST('name')?GETPOST('name'):GETPOST('nom');

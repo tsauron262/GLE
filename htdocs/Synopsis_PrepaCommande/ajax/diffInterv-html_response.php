@@ -36,6 +36,7 @@ $arrGrpCom = array($id=>$id);
 $arrGrp = $com->listGroupMember(true);
 foreach($arrGrp as $key=>$commandeMember)
 {
+    if($commandeMember->id > 0)
       $arrGrpCom[$commandeMember->id]=$commandeMember->id;
 }
 

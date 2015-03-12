@@ -15,15 +15,15 @@ class synopsisHook {
     function synopsisHook() {
         global $conf, $db, $tabProductType, $tabTypeLigne, $langs, $user, $tabContactPlus, $tabSelectNatureIntrv, $tabCentre;
 
-        if(defined('MAX_TIME_LOG'))
+        if (defined('MAX_TIME_LOG'))
             self::$MAX_TIME_LOG = MAX_TIME_LOG;
 
-        $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr"), "VB" => array("04 75 81 81 54", "sav07@bimp.fr"), 
-            "M" => array("04 50 22 15 55", "sav74@bimp.fr"), "AB" => array("04 50 22 15 55", "sav74@bimp.fr"), "C" => array("04 50 22 15 55", "sav74@bimp.fr"), "CB" => array("04 50 22 15 55", "sav74@bimp.fr"), 
-            'L' => array("04 78 17 30 28", "sav69@bimp.fr"), 
-            "S" => array("04 77 81 58 12", "sav42@bimp.fr"), 
-            "GB" => array("04 76 23 05 18", "sav38@bimp.fr"), "GA" => array("04 76 23 05 18", "sav38@bimp.fr"), 
-            "B" => array("09 70 72 12 33", "sav250@bimp.fr"), 
+        $tabCentre = array("V" => array("04 75 81 81 54", "sav07@bimp.fr"), "VB" => array("04 75 81 81 54", "sav07@bimp.fr"),
+            "M" => array("04 50 22 15 55", "sav74@bimp.fr"), "AB" => array("04 50 22 15 55", "sav74@bimp.fr"), "C" => array("04 50 22 15 55", "sav74@bimp.fr"), "CB" => array("04 50 22 15 55", "sav74@bimp.fr"),
+            'L' => array("04 78 17 30 28", "sav69@bimp.fr"),
+            "S" => array("04 77 81 58 12", "sav42@bimp.fr"),
+            "GB" => array("04 76 23 05 18", "sav38@bimp.fr"), "GA" => array("04 76 23 05 18", "sav38@bimp.fr"),
+            "B" => array("09 70 72 12 33", "sav250@bimp.fr"),
             "MO" => array("03 81 95 19 20", "sav252@bimp.fr"));
 
 
@@ -55,8 +55,8 @@ class synopsisHook {
 
 
         setlocale(LC_TIME, 'fr_FR.utf8', 'fra');
-        
-        if(defined("TAB_IP_INTERNE") && in_array($_SERVER['REMOTE_ADDR'], explode(",", str_replace(" ", "", TAB_IP_INTERNE))))
+
+        if (defined("TAB_IP_INTERNE") && in_array($_SERVER['REMOTE_ADDR'], explode(",", str_replace(" ", "", TAB_IP_INTERNE))))
             $conf->global->MAIN_SESSION_TIMEOUT = $conf->global->MAIN_SESSION_TIMEOUT * 6;
 
         include_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/SynDiversFunction.php");
@@ -109,8 +109,8 @@ class synopsisHook {
 
         $conf->modules_parts['tpl'][] = "/Synopsis_Tools/tpl/";
 
-if (! defined('NOLOGIN'))
-        $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
+        if (!defined('NOLOGIN'))
+            $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
 
         if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)
             $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
@@ -124,10 +124,10 @@ if (! defined('NOLOGIN'))
     function initRightsSyn() {
         global $conf, $user, $db;
 
-        
-         
+
+
         //bimp pas de logo pour sav
-        if($user->id){
+        if ($user->id) {
             require_once(DOL_DOCUMENT_ROOT . "/user/class/usergroup.class.php");
             $groupSav = new UserGroup($db);
             $groupSav->fetch('', "XX SAV");
@@ -195,9 +195,9 @@ if (! defined('NOLOGIN'))
             $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
             $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);
-            
-            
-            
+
+
+
             $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
             $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
             while ($ligne3 = $db->fetch_object($result3)) {
@@ -207,11 +207,11 @@ if (! defined('NOLOGIN'))
             $result2 = $db->query("SELECT COUNT(id) as nb, CentreVal, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_105` WHERE " . ($centre ? "CentreVal IN ('" . $centre . "') AND" : "") . " revisionNext <= 0 GROUP BY CentreVal, EtatVal");
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->CentreVal][$ligne2->EtatVal] = $ligne2->nb;
-                if(!isset($tabResult[$centre][$ligne2->EtatVal]))
+                if (!isset($tabResult[$centre][$ligne2->EtatVal]))
                     $tabResult[$centre][$ligne2->EtatVal] = 0;
                 $tabResult[$centre][$ligne2->EtatVal] += $ligne2->nb;
             }
-                    
+
             foreach ($tabGroupe as $ligne3) {
                 $centre = $ligne3['valeur']; //((isset($user->array_options['options_apple_centre']) && $user->array_options['options_apple_centre'] != "") ? $user->array_options['options_apple_centre'] : null);
                 $href = DOL_URL_ROOT . '/'
@@ -219,22 +219,22 @@ if (! defined('NOLOGIN'))
                 $return .= '<div class="menu_contenu"><span><a class="vsmenu" href="' . $href . $hrefFin . '">
                     ' . img_object("SAV", "drap0@Synopsis_Tools") . ' ' . $ligne3['label'] . '</a></span><br/>';
 
-                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7"." ORDER BY id ASC");
+                $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
                 while ($ligne = $db->fetch_object($result)) {
                     $nb = $tabResult[$centre][$ligne->valeur];
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
-                    if($nb == "")
+                    if ($nb == "")
                         $nb = "0";
-                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;".$nb : ($nb < 100 ? "&nbsp;".$nb : $nb));
+                    $nbStr = ($nb < 10 ? "&nbsp;&nbsp;" . $nb : ($nb < 100 ? "&nbsp;" . $nb : $nb));
                     $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nbStr . " : " . $ligne->label . "</a>";
                     $return .= "</span><br/>";
                 }
                 $return .= '</div>';
             }
-            
-            
-            
-            
+
+
+
+
 //            $tabGroupe = array(array('label' => "Tous", 'valeur' => $centre, 'forUrl' => 'Tous'));
 //            $result3 = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 " . ($centre ? " AND valeur IN ('" . $centre . "')" : ""));
 //            while ($ligne3 = $db->fetch_object($result3)) {
@@ -284,25 +284,25 @@ if (! defined('NOLOGIN'))
                     ' . img_object("Hotline", "phoning") . ' Appel </a><br></div>';
             $return .= '<div class="menu_contenu">';
             $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 5");
-            
-            
-                $result2 = $db->query("SELECT COUNT(id) as nb, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` group by EtatVal");
-                $tabResult = array();
+
+
+            $result2 = $db->query("SELECT COUNT(id) as nb, EtatVal FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` group by EtatVal");
+            $tabResult = array();
             while ($ligne2 = $db->fetch_object($result2)) {
                 $tabResult[$ligne2->EtatVal] = $ligne2->nb;
             }
-            
+
             while ($ligne = $db->fetch_object($result)) {
 //                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
-                
-                    $nb = $tabResult[$ligne->valeur];
-                
+
+                $nb = $tabResult[$ligne->valeur];
+
                 $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                 $return .= "<a href='" . $href . "&Etat=" . urlencode($ligne->label) . $hrefFin . "'>" . $nb . " : " . $ligne->label . "</a>";
                 $return .= "</span><br/>";
             }
-            
-            
+
+
 //            while ($ligne = $db->fetch_object($result)) {
 ////                $result2 = $db->query("SELECT COUNT(*) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono` WHERE  `id` IN (SELECT `chrono_refid` FROM `llx_synopsischrono_value` WHERE `key_id` = 1034 AND `value` = '" . $ligne->valeur . "')");
 //                $result2 = $db->query("SELECT COUNT(id) as nb FROM `" . MAIN_DB_PREFIX . "synopsischrono_view_100` WHERE  EtatVal = '" . $ligne->valeur . "'");
@@ -349,9 +349,9 @@ if (! defined('NOLOGIN'))
             require (DOL_DOCUMENT_ROOT . "/Synopsis_Tools/public/close.php");
             die;
         }
-        
-        if(defined('URL_REDIRECT') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR']))
-            header("Location:".URL_REDIRECT);
+
+        if (defined('URL_REDIRECT') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR']))
+            header("Location:" . URL_REDIRECT);
 
         $useragent = $_SERVER['HTTP_USER_AGENT'];
         $isMobile = (preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i', $useragent) || preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr($useragent, 0, 4))) ? true : false;
@@ -388,7 +388,7 @@ if (! defined('NOLOGIN'))
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
                 . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'
-                . 'var selectCentre = "'.$listCentre.'";'
+                . 'var selectCentre = "' . $listCentre . '";'
 //                . 'alert("Test en cours !!! Nombreuses errerurs de chargement possible.");'
                 . "</script>\n";
         $return .= '<script type="text/javascript" src="' . DOL_URL_ROOT . '/Synopsis_Tools/js/global.js"></script>';
@@ -580,8 +580,8 @@ if (! defined('NOLOGIN'))
                 }
                 break;
         }
-        if(is_object($obj))
-        @$obj->loadObject = false;
+        if (is_object($obj))
+            @$obj->loadObject = false;
         return array($obj, $tabMenu);
     }
 
@@ -710,7 +710,8 @@ class Synopsis_Commande extends Commande {
         $return = array();
         if ($this->db->num_rows($sql) > 0) {
             while ($result = $this->db->fetch_object($sql)) {
-                $return[$result->command_refid] = $result->command_refid;
+                if ($result->command_refid > 0)
+                    $return[$result->command_refid] = $result->command_refid;
             }
             return $return;
         }

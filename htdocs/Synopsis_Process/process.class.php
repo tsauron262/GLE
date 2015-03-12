@@ -2741,6 +2741,7 @@ class requete extends formulaireSource {
                     $requete = preg_replace('/\[\[indexField\]\]/', $this->tableName . "." . $this->indexField . "='" . $val . "'", $requete);
                 else
                     $requete = preg_replace('/\[\[indexField\]\]/', $this->indexField . "='" . $val . "'", $requete);
+                $requete = str_replace('"', "'", $requete);
                 dol_syslog($requete."mmmm", LOG_ERR);
                 eval("\$requete = \"$requete\";");
                 $sql = $this->db->query($requete);

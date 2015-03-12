@@ -1119,3 +1119,17 @@ pdf contrat trie des di   +    affichage di tech
 liaison propal facture bug + avoir lier tous seul
 
 nom prenom dans client
+
+
+
+CAS
+
+
+
+quand prepacommande tech ajouter au contrat
+
+
+
+contact fusionner vider.
+
+

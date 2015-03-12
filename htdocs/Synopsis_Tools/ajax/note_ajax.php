@@ -61,6 +61,12 @@ if (isset($_POST['url']) && isset($_POST['type']) && $_POST['type'] == 'note') {
         $droit1 = $user->rights->propal->lire;
         $droit2 = $user->rights->propal->creer;
     }
+    if (stripos($url, '/compta/facture') !== false) {
+        $table = MAIN_DB_PREFIX . "facture";
+        $droit1 = $user->rights->facture->lire;
+        $droit2 = $user->rights->facture->creer;
+        $nomId = "facid";
+    }
 
     $id = getIdInUrl($url, $nomId);
 

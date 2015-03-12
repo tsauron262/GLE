@@ -37,6 +37,7 @@ $arrGrpCom = array($id => $id);
 $arrGrp = $com->listGroupMember(true);
 if ($arrGrp && count($arrGrp) > 0)
     foreach ($arrGrp as $key => $commandeMember) {
+    if($commandeMember->id > 0)
         $arrGrpCom[$commandeMember->id] = $commandeMember->id;
     }
 

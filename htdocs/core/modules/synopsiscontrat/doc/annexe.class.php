@@ -206,6 +206,7 @@ Tél. : Contact-external-CUSTOMER-tel
         foreach($tabTemp as $motClef => $val){
             if($motClef != "")
             $strDi .= "\n<g>".$motClef." : \n".$val;
+            else
             $strDi .= $val;
         }
         $annexe = preg_replace('/Date-Di/', $strDi, $annexe);

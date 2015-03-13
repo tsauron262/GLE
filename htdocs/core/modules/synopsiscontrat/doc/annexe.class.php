@@ -192,7 +192,7 @@ Tél. : Contact-external-CUSTOMER-tel
         $socid = $contrat->socid;
 
 
-        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_contrat = ".$contrat->id. " ORDER BY datei ASC");
+        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_contrat = ".$contrat->id. " GROUP BY rowid ORDER BY datei ASC");
         $strDi = "";
         while($result = $this->db->fetch_object($sql)){
             $motClef = "";

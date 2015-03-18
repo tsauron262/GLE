@@ -244,16 +244,20 @@ if ($action == 'modifier') {
 
     /* special bimp appel */
     if (isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on") {
+        if(is_object($chr->societe))
+        $socStr = $chr->societe->getNomUrl(1);
+        else
+            $socStr = "n/c";
         if (isset($_REQUEST["Chrono-1071"]) && $_REQUEST["Chrono-1071"] > 0) {
             $group = new UserGroup($db);
             $group->fetch($_REQUEST["Chrono-1071"]);
             foreach ($group->members as $tech) {
-                mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " été transmis a votre groupe.");
+                mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $socStr . " été transmis a votre groupe.");
             }
         } elseif (isset($_REQUEST["Chrono-1070"]) && $_REQUEST["Chrono-1070"] > 0) {
             $tech = new User($db);
             $tech->fetch($_REQUEST["Chrono-1070"]);
-            mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $chr->societe->getNomUrl(1) . " vous a été transmis.");
+            mailSyn2("Transfert Appel " . $chr->societe->nom, $tech->email, null, "Bonjour " . $tech->getFullName($langs) . " l'appel " . $chr->getNomUrl(1) . " de " . $socStr . " vous a été transmis.");
         }
     }
     /* fin special bimp appel */

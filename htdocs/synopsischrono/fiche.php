@@ -244,6 +244,7 @@ if ($action == 'modifier') {
 
     /* special bimp appel */
     if (isset($_REQUEST['mailTrans']) && $_REQUEST['mailTrans'] == "on") {
+        $chr->fetch($chr->id);
         if(is_object($chr->societe))
         $socStr = $chr->societe->getNomUrl(1);
         else

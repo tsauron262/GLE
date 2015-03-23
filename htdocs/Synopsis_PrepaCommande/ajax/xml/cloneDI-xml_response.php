@@ -27,10 +27,17 @@
     $di->author = $user->id;
     $di->fetch_lines();
     
+    $di->getExtra();
+    
     if($di->date < date(time()))
         $di->date = date(time());
 
     $res = $di->create();
+    
+    
+    foreach($di->tabExtraV as $idExtraKey => $val)
+        $di->setExtra ($idExtraKey, $val);
+    
     if ($res)
     foreach($di->lignes as $key=>$val)
     {

@@ -38,7 +38,7 @@ $(window).load(function() {
                 $.getScript(DOL_URL_ROOT + "/synopsisapple/appleGsxScripts.js", function() {
                     $("head").append($(document.createElement("link")).attr({rel: "stylesheet", type: "text/css", href: DOL_URL_ROOT + "/synopsisapple/appleGSX.css"}));
                     for (i = 0; i < tabT.length; i++) {
-                        serial = tabT[i].replace(/^\s+/g,'').replace(/\s+$/g,'');
+                        serial = tabT[i].replace(/^\s+/g, '').replace(/\s+$/g, '');
                         if (/^[A-Z0-9]{11,12}$/.test(serial)) {
                             resultZone.append('<div id="requestsResponsesContainer"></div><div id="requestResult"></div>');
                             GSX.loadProduct(serial);
@@ -93,13 +93,24 @@ $(window).load(function() {
 
 
 
-    $("input#NoMachine").focusout(function() {
+    $("input#NoMachine, input#Chrono-1011").focusout(function() {
         input = $(this);
         input.val(input.val().toUpperCase());
-        inputM = $("#Machine");
-        inputG = $("#Garantie")
-        inputTG = $("#typeGarantie");
-        inputD = $("#DateAchat");
+
+        if ($(this).attr("id") == "NoMachine") {
+            inputM = $("#Machine");
+            inputG = $("#Garantie");
+            inputTG = $("#typeGarantie");
+            inputD = $("#DateAchat");
+        }
+        else {
+            inputM = $('input[name="description"]');
+            inputG = $("#Chrono-1015");
+            inputTG = $("#Chrono-1064");
+            inputD = $("#Chrono-1014");
+            input.parent().append("<div id='reponse'></div>");
+        }
+            zoneRep = $("#reponse");
         NoSerie = input.attr('value');
         datas = "serial=" + NoSerie;
         roue = $("#patientez");
@@ -125,11 +136,15 @@ $(window).load(function() {
                 else
                     reponse = msg;
 
-                inputM.attr("value", valeurM);
-                inputTG.attr("value", valeurTG);
-                inputG.attr("value", valeurG);
-                inputD.attr("value", valeurD);
-                $("#reponse").html(reponse);
+                if (valeurM != "")
+                    inputM.attr("value", valeurM);
+                if (valeurTG != "")
+                    inputTG.attr("value", valeurTG);
+                if (valeurG != "")
+                    inputG.attr("value", valeurG);
+                if (valeurD != "")
+                    inputD.attr("value", valeurD);
+                zoneRep.html(reponse);
                 roue.hide();
             }
         });
@@ -154,23 +169,23 @@ $(window).load(function() {
     $("select[name='centreRapide']").change(function() {
         inputCentre.val(inputCentre.val() + " " + $(this).val());
     });
-    
-    
+
+
     elem = "#Chrono-1034, #inputautocompleteChrono-1034";
-    $(elem).focusout(function(){
+    $(elem).focusout(function() {
         initTrans(elem);
     });
     initTrans(elem);
-    $("#inputautocompleteChrono-1070, #inputautocompleteChrono-1071").focusout(function(){
+    $("#inputautocompleteChrono-1070, #inputautocompleteChrono-1071").focusout(function() {
         $("#mailTrans").attr("checked", "checked");
     });
 });
 
 
-function initTrans(elem){
+function initTrans(elem) {
     elemA = "select.hideTrans, input.hideTrans";
-        if($(elem).val() == "1")
-            $(elemA).parent().parent().show();
-        else
-            $(elemA).parent().parent().hide();
+    if ($(elem).val() == "1")
+        $(elemA).parent().parent().show();
+    else
+        $(elemA).parent().parent().hide();
 }

@@ -397,3 +397,8 @@ textarea.grand{
 .middle{
     width: 50%;
 }
+
+table.espace th, table.espace td{
+    padding: 10px;
+    text-align: center;
+}

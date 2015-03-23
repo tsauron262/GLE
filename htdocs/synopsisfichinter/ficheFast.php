@@ -732,26 +732,7 @@ function mysqlToArray($data, $db) {
         return false;
 }
 
-function convertirDate($date, $enFr = true, $nowSiNull = false) {
-    $tabDate = explode('-', $date);
-    if (!isset($tabDate[1]))
-        $tabDate = explode('/', $date);
-    if (isset($tabDate[2]) && $date != "0000-00-00") {
-        if (($tabDate[0] > 32 && $enFr) || ($tabDate[2] > 32 && !$enFr))
-            return $tabDate[2] . '-' . $tabDate[1] . '-' . $tabDate[0];
-        else
-            return $tabDate[0] . '-' . $tabDate[1] . '-' . $tabDate[2];
-    }
-    else {
-        if ($nowSiNull)
-            if ($enFr)
-                return date("d-m-Y");
-            else
-                return date("Y-m-d");
-        else
-            return '';
-    }
-}
+
 
 llxfooter();
 ?>

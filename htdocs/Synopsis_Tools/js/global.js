@@ -125,6 +125,9 @@ $(window).load(function() {
         $(".panCache#"+$(this).attr("id").replace("but", "pan")).show();
         $(this).hide();
     });
+    
+    
+    $(".datePicker").datepicker();
 });
 
 function ajoutNotification(id, titre, msg) {

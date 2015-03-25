@@ -15,8 +15,11 @@ if ($_REQUEST['id'] > 0) {
     $actioncomm->usertodo->id = $newTabUser2[$_REQUEST['setUser']];
     $actioncomm->datep = $_REQUEST['start'] / 1000;
     $actioncomm->datef = ($_REQUEST['end'] / 1000) - 60;
-    if($_REQUEST['clone'] == "true")
+    if($_REQUEST['clone'] == "true"){
+        $actioncomm->fetch_optionals($actioncomm->id);
+        $actioncomm->array_options['options_uri'] = "";
         $actioncomm->add($user);
+    }
     else
         $actioncomm->update($user);
     }

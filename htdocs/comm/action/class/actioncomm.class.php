@@ -111,7 +111,7 @@ class ActionComm extends CommonObject
         $error=0;
         $now=dol_now();
         
-        /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id && $user->id != $this->author->id)) $this->usertodo = $user; /*fmod drsi*/
+        /*deb mod drsi */ if(!isset($user->rights->agenda->myactions->create) || !$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id && $user->id != $this->author->id)) $this->usertodo = $user; /*fmod drsi*/
         
         // Clean parameters
         $this->label=dol_trunc(trim($this->label),128);
@@ -203,7 +203,7 @@ class ActionComm extends CommonObject
         $sql.= (! empty($this->fk_element)?$this->fk_element:"null").",";
         $sql.= (! empty($this->elementtype)?"'".$this->elementtype."'":"null").",";
         $sql.= $conf->entity.",";
-        /*mod drsi */$sql.= "'".$this->ref_ext."'";
+        /*mod drsi */$sql.= "'".(isset($this->ref_ext)? $this->ref_ext : "")."'";
         $sql.= ")";
         
 
@@ -439,7 +439,7 @@ class ActionComm extends CommonObject
 
         $error=0;
         
-        
+        if($user->id != 1)
         /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
         // Clean parameters
@@ -468,7 +468,7 @@ class ActionComm extends CommonObject
 
         $sql = "UPDATE ".MAIN_DB_PREFIX."actioncomm ";
         $sql.= " SET percent = '".$this->percentage."'";
-        if ($this->fk_action > 0) $sql.= ", fk_action = '".$this->fk_action."'";
+        if (isset($this->fk_action) && $this->fk_action > 0) $sql.= ", fk_action = '".$this->fk_action."'";
         $sql.= ", label = ".($this->label ? "'".$this->db->escape($this->label)."'":"null");
         $sql.= ", datep = ".(strval($this->datep)!='' ? "'".$this->db->idate($this->datep)."'" : 'null');
         $sql.= ", datep2 = ".(strval($this->datef)!='' ? "'".$this->db->idate($this->datef)."'" : 'null');
@@ -967,7 +967,7 @@ class ActionComm extends CommonObject
                     $event['priority']=$obj->priority;
                     $event['fulldayevent']=$obj->fulldayevent;
                     $event['location']=$obj->location;
-                    $event['transparency']=(($obj->transparency > 0)?'OPAQUE':'TRANSPARENT');		// OPAQUE (busy) or TRANSPARENT (not busy)
+                    $event['transparency']=(isset($obj->transparency) && $obj->transparency > 0);		// OPAQUE (busy) or TRANSPARENT (not busy)
                     $event['category']=$obj->libelle;	// libelle type action
 					// Define $urlwithroot
 					$urlwithouturlroot=preg_replace('/'.preg_quote(DOL_URL_ROOT,'/').'$/i','',trim($dolibarr_main_url_root));

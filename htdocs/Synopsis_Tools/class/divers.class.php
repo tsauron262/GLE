@@ -1,7 +1,7 @@
 <?php
 
 include_once(DOL_DOCUMENT_ROOT . "/commande/class/commande.class.php");
-
+//die(md5("admin:BaikalDAV:"."admin@synopsis"));
 class object {
     
 }
@@ -221,7 +221,7 @@ class synopsisHook {
 
                 $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 7" . " ORDER BY id ASC");
                 while ($ligne = $db->fetch_object($result)) {
-                    $nb = $tabResult[$centre][$ligne->valeur];
+                    $nb = (isset($tabResult[$centre]) && isset($tabResult[$centre][$ligne->valeur]) ? $tabResult[$centre][$ligne->valeur] : 0);
                     $return .= '<span href="#" title="" class="vsmenu" style="font-size: 10px; margin-left:12px">';
                     if ($nb == "")
                         $nb = "0";

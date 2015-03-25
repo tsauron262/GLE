@@ -2209,9 +2209,9 @@ abstract class CommonObject
             foreach($this->array_options as $key => $value)
             {
                	$attributeKey = substr($key,8);   // Remove 'options_' prefix
-               	$attributeType  = $extrafields->attribute_type[$attributeKey];
-               	$attributeSize  = $extrafields->attribute_size[$attributeKey];
-               	$attributeLabel = $extrafields->attribute_label[$attributeKey];
+               	$attributeType  = (isset($extrafields->attribute_type[$attributeKey]) ? $extrafields->attribute_type[$attributeKey] : "");
+               	$attributeSize  = (isset($extrafields->attribute_size[$attributeKey]) ? $extrafields->attribute_size[$attributeKey] : "");
+               	$attributeLabel  = (isset($extrafields->attribute_label[$attributeKey]) ? $extrafields->attribute_label[$attributeKey] : "");
                	switch ($attributeType)
                	{
                		case 'int':
@@ -2234,6 +2234,7 @@ abstract class CommonObject
             		case 'datetime':
             			$this->array_options[$key]=$this->db->idate($this->array_options[$key]);
             			break;
+                            
                	}
             }
             $this->db->begin();
@@ -2246,7 +2247,7 @@ abstract class CommonObject
             {
             	$attributeKey = substr($key,8);   // Remove 'options_' prefix
                 // Add field of attribut
-            	if ($extrafields->attribute_type[$attributeKey] != 'separate') // Only for other type of separate
+            	if (isset($extrafields->attribute_type[$attributeKey]) && $extrafields->attribute_type[$attributeKey] != 'separate') // Only for other type of separate
                 	$sql.=",".$attributeKey;
             }
             $sql .= ") VALUES (".$this->id;
@@ -2254,7 +2255,7 @@ abstract class CommonObject
             {
             	$attributeKey = substr($key,8);   // Remove 'options_' prefix
                 // Add field o fattribut
-            	if($extrafields->attribute_type[$attributeKey] != 'separate') // Only for other type of separate)
+            	if(isset($extrafields->attribute_type[$attributeKey]) && $extrafields->attribute_type[$attributeKey] != 'separate') // Only for other type of separate)
             	{
 	                if ($this->array_options[$key] != '')
 	                {

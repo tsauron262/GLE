@@ -526,8 +526,9 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
 	if (empty($conf->syslog->enabled)) return false;
         /*mod drsi*/
         $monUrl = "http://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
-        $oldUrl = $_SERVER["HTTP_REFERER"];
-        $message = " | ".$user->login."\n".$monUrl . " | " . $oldUrl . "\n". $message. "\n";
+        $oldUrl = (isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : "n/c");
+        $nomUser = (is_object($user) && isset($user->login) ? $user->login : "n/c");
+        $message = " | ".$nomUser."\n".$monUrl . " | " . $oldUrl . "\n". $message. "\n";
 /*f mod drsi*/
 	if (! empty($level))
 	{
@@ -557,7 +558,7 @@ function dol_syslog($message, $level = LOG_INFO, $ident = 0, $suffixinfilename='
 			'message' => $message,
 			'script' => (isset($_SERVER['PHP_SELF'])? basename($_SERVER['PHP_SELF'],'.php') : false),
 			'level' => $level,
-			'user' => ((is_object($user) && $user->id) ? $user->login : false),
+			'user' => ((is_object($user) && isset($user->id)) ? $user->login : false),
 			'ip' => false
 		);
 

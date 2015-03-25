@@ -123,6 +123,9 @@ class InterfaceGoogleCalendarSynchro
 
 			$fuser->fetch($object->usertodo->id);
 
+                        if(!isset($fuser->conf->GOOGLE_LOGIN) || !isset($fuser->conf->GOOGLE_PASSWORD))
+                            return 0;
+                        
 			$user = $fuser->conf->GOOGLE_LOGIN;
 			$pwd = $fuser->conf->GOOGLE_PASSWORD;
 

@@ -61,9 +61,17 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         }
     }
 
-    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null) {
-
+    public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
+        global $user;
         $where = "1";
+        
+        if($blockCentre){
+            if($typeAff2 == "fact"){
+                echo ("Non autorisé");
+                return 1;
+            }
+            $where .= " AND CentreVal IN ('".implode("','", $blockCentre)."')";
+        }
 
         $champDate = "fact.datec";
         if ($paye) {
@@ -149,7 +157,6 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
 
 
-
 //die($partReq1 . $partReq5 . $where . $partReqFin);
 
 
@@ -217,8 +224,11 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
+            
+            
 
             $j = 0;
+            if(is_null($centre))
             $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
@@ -251,7 +261,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                     $return1 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", true);
                 }
 
-                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, "", false);
+                $return2 .= $this->textTable($ligne2, $this->separateur, $this->sautDeLigne, $titre, false);
                 $oldLigne = $ligne2;
             }
             if ($i > 1)

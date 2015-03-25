@@ -2,6 +2,8 @@
 
 require_once('../main.inc.php');
 
+
+
 $mainmenu = isset($_GET["mainmenu"]) ? $_GET["mainmenu"] : "";
 
 
@@ -28,6 +30,14 @@ EOF;
 
 llxHeader($js, "Fichier de log");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Export Sav"));
+
+if(!isset($user->rights->synopsisApple->read) || $user->rights->synopsisApple->read != 1)
+    die("Accès non autorisé").
+
+$blockCentre = (!$user->rights->synopsisApple->stat ? explode(" ", trim($user->array_options['options_apple_centre'])) : null);
+
+
+
 
 
 $centre = (isset($_POST['centre']) ? $_POST['centre'] : null);
@@ -71,7 +81,8 @@ while ($ligne = $db->fetch_object($result)) {
     $val = $ligne->valeur;
     $label = $ligne->label;
     $valSelect = $centre;
-    echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
+    if(!$blockCentre || in_array($val, $blockCentre))
+        echo "<option value='" . $val . "' " . ($val == $valSelect ? "selected='selected'" : "") . ">" . $label . "</option>";
 }
 echo "</select>";
 
@@ -117,12 +128,12 @@ if (isset($_REQUEST['reinitGarantiePa'])) {
     
     die("reinit ok");
 }
-
+//$centre = "CB";
 
 
 require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
 $export = new synopsisexport($db, $sortie);
-$export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin);
+$export->exportChronoSav($centre, $typeAff, $typeAff2, $paye, $dateDeb, $dateFin, $blockCentre);
 
 
 global $logLongTime;

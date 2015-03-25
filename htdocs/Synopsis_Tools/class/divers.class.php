@@ -191,7 +191,7 @@ class synopsisHook {
             $return .= '<div class="blockvmenupair">';
             $return .= '<div class="menu_titre">' . img_object("SAV", "drap0@Synopsis_Tools") . ' Fiche SAV</div>';
             $return .= '<div class="menu_contenu">';
-            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/Synopsis_Tools/FicheRapide.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
+            $return .= '<a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/FicheRapide.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="" title=""> Fiche rapide SAV</a>';
             $return .= '<br/><a class="vsmenu" title="Fiche rapide SAV" href="' . DOL_URL_ROOT . '/synopsisapple/test.php"> <img src="' . DOL_URL_ROOT . '/theme/eldy/img/on.png" border="0" alt="" title=""> Garantie Apple</a>';
             $return .= '</div>';
             $centre = str_replace(" ", "','", $user->array_options['options_apple_centre']);

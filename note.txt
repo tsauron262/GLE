@@ -1183,9 +1183,9 @@ Voir pour message inter negative
 Prise en charge afficher geolocalise
 
 
-Stat par centre pour tech
+//Stat par centre pour tech
 
-export centre sur chaque ligne
+//export centre sur chaque ligne
 
 
 nom de soc quand contact pas affiché

@@ -43,6 +43,9 @@ require_once(DOL_DOCUMENT_ROOT . "/core/lib/date.lib.php");
 $enJour = false;
 
 
+if (! $user->rights->synopsisficheinter->rapportTous) accessforbidden();
+
+
 $tabIdFi = array();
 
 
@@ -173,29 +176,33 @@ if ($socid > 0) {
 $sql2 = $sql2 . $sql;
 $sql1 = $sql1 . $sql . " ORDER BY $sortfield $sortorder  LIMIT $offset, $limit ";
 
-$requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
-$requete .= " WHERE f.fk_soc = s.rowid";
+//$requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
+//$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "fichinter as f ";
+//$requete .= " WHERE f.fk_soc = s.rowid";
+//
+////    $requete .= " AND datei >= '$start' AND datei < '$end'" ;
+//if ($filterUser) {
+//    $requete .= " AND fk_user_author = " . $filterUser;
+//}
+//
+//
+//$requete .= " ORDER BY $sortfield $sortorder ";
+//
+//$sqlpre1 = $db->query($requete);
+//$selSoc = "<select name='socid'>";
+//$selSoc .= "<option value=''>S&eacute;lectioner -></option>";
+//while ($respre1 = $db->fetch_object($sqlpre1)) {
+//    if ($socid > 0 && $socid == $respre1->socid) {
+//        $selSoc .= "<option SELECTED value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
+//    } else {
+//        $selSoc .= "<option value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
+//    }
+//}
+//$selSoc .= "</select>";
 
-//    $requete .= " AND datei >= '$start' AND datei < '$end'" ;
-if ($filterUser) {
-    $requete .= " AND fk_user_author = " . $filterUser;
-}
+$form = new Form($db);
+$selSoc .= $form->select_thirdparty($socid, 'socid');
 
-
-$requete .= " ORDER BY $sortfield $sortorder ";
-
-$sqlpre1 = $db->query($requete);
-$selSoc = "<select name='socid'>";
-$selSoc .= "<option value=''>S&eacute;lectioner -></option>";
-while ($respre1 = $db->fetch_object($sqlpre1)) {
-    if ($socid > 0 && $socid == $respre1->socid) {
-        $selSoc .= "<option SELECTED value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
-    } else {
-        $selSoc .= "<option value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
-    }
-}
-$selSoc .= "</select>";
 
 $req = "SELECT * FROM `" . MAIN_DB_PREFIX . "synopsisfichinter_c_typeInterv` WHERE `active` = 1";
 $sqlpre11 = $db->query($req);
@@ -266,7 +273,7 @@ if ($resql) {
     print $selectHtml2;
 
 
-    echo "<td align=center>Soci&eacute;t&eacute;";
+    echo "<td align=center>Soci&eacute;t&eacute;    ";
     print $selSoc;
     if ($user->rights->synopsisficheinter->rapportTous) {
         echo "<td align=center>Intervenant";

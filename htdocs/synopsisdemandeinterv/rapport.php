@@ -37,6 +37,11 @@ require("./pre.inc.php");
 require_once(DOL_DOCUMENT_ROOT . "/contact/class/contact.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/core/class/html.form.class.php");
 require_once(DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
+
+
+if (! $user->rights->synopsisdemandeinterv->rapportTous) accessforbidden();
+
+
 $html = new Form($db);
 if ($user->societe_id > 0) {
     $socidUser = $user->societe_id;
@@ -138,29 +143,31 @@ if(isset($_REQUEST['statut']) && $_REQUEST['statut']> 0)
 
 $sql .= " ORDER BY $sortfield $sortorder ";
 
-$requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
-$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f ";
-$requete .= " WHERE (f.fk_soc = s.rowid";
-
-$requete .= " AND datei >= '$start' AND datei < '$end'";
-if ($filterUser) {
-    $requete .= " AND (fk_user_prisencharge = " . $filterUser . " OR fk_user_target =" . $filterUser . ")";
-}
-$requete .= " ) OR s.rowid = '".$socid."'";
-
-$requete .= " ORDER BY $sortfield $sortorder ";
-//die($requete);
-$sqlpre1 = $db->query($requete);
-$selSoc = "<select name='socid'>";
-$selSoc .= "<option value=''>S&eacute;lectioner -></option>";
-while ($respre1 = $db->fetch_object($sqlpre1)) {
-    if ($socid > 0 && $socid == $respre1->socid) {
-        $selSoc .= "<option SELECTED value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
-    } else {
-        $selSoc .= "<option value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
-    }
-}
-$selSoc .= "</select>";
+//$requete = "SELECT DISTINCT s.nom,s.rowid as socid ";
+//$requete .= " FROM " . MAIN_DB_PREFIX . "societe as s, " . MAIN_DB_PREFIX . "synopsisdemandeinterv as f ";
+//$requete .= " WHERE (f.fk_soc = s.rowid";
+//
+//$requete .= " AND datei >= '$start' AND datei < '$end'";
+//if ($filterUser) {
+//    $requete .= " AND (fk_user_prisencharge = " . $filterUser . " OR fk_user_target =" . $filterUser . ")";
+//}
+//$requete .= " ) OR s.rowid = '".$socid."'";
+//
+//$requete .= " ORDER BY $sortfield $sortorder ";
+////die($requete);
+//$sqlpre1 = $db->query($requete);
+//$selSoc = "<select name='socid'>";
+//$selSoc .= "<option value=''>S&eacute;lectioner -></option>";
+//while ($respre1 = $db->fetch_object($sqlpre1)) {
+//    if ($socid > 0 && $socid == $respre1->socid) {
+//        $selSoc .= "<option SELECTED value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
+//    } else {
+//        $selSoc .= "<option value='" . $respre1->socid . "'>" . $respre1->nom . "</option>";
+//    }
+//}
+//$selSoc .= "</select>";
+$form = new Form($db);
+$selSoc .= $form->select_thirdparty($socid, 'socid');
 
 //TODO si selection société filtrer
 //print $sql;

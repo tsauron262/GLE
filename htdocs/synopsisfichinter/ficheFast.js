@@ -82,7 +82,17 @@ function initHeure(elem) {
     cacherDecacherProd();
     $(".fk_typeinterv").change(function() {
         cacherDecacherProd();
+        
+        if($(this).val() == 4){
+            $("input[name='" + $(this).attr("name").replace("fk_typeinterv", "forfait") + "']").attr("checked", "checked");
+        }
     });
+    
+    $("#for0").change(function(){
+       $("input[name='datePRDV']").val("00/00/0000");
+    });
+    
+    
     jQuery(".radioContradet").change(function() {
         actuContradet();
     });

@@ -251,7 +251,7 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 if ($socid != "") {
     echo "<div id='reponse' >";
     echo "</div>";
-    echo "<form id='form' method='post' action ='" . DOL_URL_ROOT . "/Synopsis_Tools/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
+    echo "<form id='form' method='post' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "&action=semitotal'>";
     echo "<div style='float:left' >";
     echo "<table id='chronoTable' class='border' width='100%;' style='border-collapse: collapse;' cellpadding='15'>";
     echo "<p>";
@@ -497,7 +497,7 @@ if ($socid != "") {
     echo "</div>";
     echo "</form>";
 } else {
-    echo "<form method='post' id='form' action ='" . DOL_URL_ROOT . "/Synopsis_Tools/FicheRapide.php?socid=" . $socid . "'>";
+    echo "<form method='post' id='form' action ='" . DOL_URL_ROOT . "/synopsisapple/FicheRapide.php?socid=" . $socid . "'>";
     echo "<p>";
     echo "<label for='text'>Rentrez le client avant de passer a la suite : </label>";
     echo "</p>";

@@ -404,8 +404,8 @@ if (! defined('NOLOGIN'))
         
         /*mod drsi*/
         $tabT = getElementElement("userErr", GETPOST("username","alpha",2));
-        if(isset($tabT[0]) && $tabT[0]['d'] > 2)
-            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+//        if(isset($tabT[0]) && $tabT[0]['d'] > 2)
+//            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
         /*f mod drsi*/
 
         // Verification security graphic code
@@ -494,8 +494,8 @@ if (! defined('NOLOGIN'))
                 }
                 else
                     addElementElement("userErr", GETPOST("username","alpha",2), "1", "1");
-                if(isset($tabT[0]) && $tabT[0]['d'] > 1)
-                    $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
+//                if(isset($tabT[0]) && $tabT[0]['d'] > 1)
+//                    $conf->global->MAIN_SECURITY_ENABLECAPTCHA = true;
                 /*f mod drsi*/
                 
                 

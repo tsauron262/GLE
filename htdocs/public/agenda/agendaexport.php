@@ -23,7 +23,7 @@
  * 				http://127.0.0.1/dolibarr/public/agenda/agendaexport.php?format=ical&type=event&exportkey=cle
  * 				http://127.0.0.1/dolibarr/public/agenda/agendaexport.php?format=rss&exportkey=cle
  */
-$msgStr = "Acces agenda".print_r($_REQUEST, true).print_r($GLOBALS, true);
+
 //if (! defined('NOREQUIREUSER'))  define('NOREQUIREUSER','1');
 //if (! defined('NOREQUIREDB'))    define('NOREQUIREDB','1');
 //if (! defined('NOREQUIRESOC'))   define('NOREQUIRESOC','1');
@@ -50,7 +50,7 @@ function llxHeaderVierge() { print '<html><title>Export agenda cal</title><body>
 function llxFooterVierge() { print '</body></html>'; }
 
 require '../../main.inc.php';
-dol_syslog($msgStr, 4);
+
 require_once DOL_DOCUMENT_ROOT.'/comm/action/class/actioncomm.class.php';
 
 // Security check

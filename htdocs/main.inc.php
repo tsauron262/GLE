@@ -229,7 +229,7 @@ if (isset($_SERVER["HTTP_USER_AGENT"]))
 
 
 // Force HTTPS if required ($conf->file->main_force_https is 0/1 or https dolibarr root url)
-if (! empty($conf->file->main_force_https)/*moddrsi*/ && empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on'/*fmoddrsi*/)
+if (! empty($conf->file->main_force_https)/*moddrsi*/ && (empty($_SERVER["HTTPS"]) || $_SERVER["HTTPS"] != 'on')/*fmoddrsi*/)
 {
     $newurl='';
     if (is_numeric($conf->file->main_force_https))

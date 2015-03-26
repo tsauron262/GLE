@@ -112,8 +112,8 @@ class synopsisHook {
         if (!defined('NOLOGIN'))
             $conf->global->MAIN_HTML_HEADER = (isset($conf->global->MAIN_HTML_HEADER) ? $conf->global->MAIN_HTML_HEADER : "") . $this->getHeader();
 
-        if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)
-            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
+//        if (defined('PORT_INTERNE') && $_SERVER["SERVER_PORT"] != PORT_INTERNE)
+//            $conf->global->MAIN_SECURITY_ENABLECAPTCHA = 1;
     }
 
     public static function reloadPage() {

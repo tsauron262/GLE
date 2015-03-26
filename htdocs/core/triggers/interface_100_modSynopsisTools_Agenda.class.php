@@ -153,6 +153,7 @@ class InterfaceAgenda {
                     $actionTmp->note = $object->note;
                     $actionTmp->label = $object->label;
                     $actionTmp->fk_action = $object->fk_action;
+                    $actionTmp->percentage = $object->percentage;
 
                     $actionTmp->update($user, 1);
                 }

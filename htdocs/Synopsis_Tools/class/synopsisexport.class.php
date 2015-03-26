@@ -67,7 +67,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         
         if($blockCentre){
             if($typeAff2 == "fact"){
-                echo ("Non autorisé");
+               accessforbidden("", 0,0);
                 return 1;
             }
             $where .= " AND CentreVal IN ('".implode("','", $blockCentre)."')";

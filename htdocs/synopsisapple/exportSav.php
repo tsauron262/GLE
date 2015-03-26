@@ -32,7 +32,7 @@ llxHeader($js, "Fichier de log");
 dol_fiche_head('', 'SynopsisTools', $langs->trans("Export Sav"));
 
 if(!isset($user->rights->synopsisApple->read) || $user->rights->synopsisApple->read != 1)
-     accessforbidden();
+     accessforbidden("", 0,0);
 
 $blockCentre = (!$user->rights->synopsisApple->stat ? explode(" ", trim($user->array_options['options_apple_centre'])) : null);
 

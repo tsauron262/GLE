@@ -345,7 +345,7 @@ echo "<label style='margin-left:11px' for='workHour'>Heures ouvrées : </label><
 echo "<input type='submit' value='Ok' class='butAction'/></form>";
 
 
-echo '<input type="date" id="dateChange"/>';
+echo '<input type="text" class="datePicker" id="dateChange"/>';
 echo "<button class='butAction' onclick='$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date($(\"#dateChange\").attr(\"value\")));' >Ok</button>";
 
 

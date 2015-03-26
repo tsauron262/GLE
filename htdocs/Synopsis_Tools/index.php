@@ -51,8 +51,6 @@ print" <br/><br/><a href='../synopsisapple/test.php'><span style='float: left;' 
 if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 print" <br/><br/><a href='../Synopsis_Tools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
 
-print" <br/><br/><a href='../Synopsis_Tools/exportSav.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Export SAV</span></a>";
-
 
 llxFooter();
 ?>

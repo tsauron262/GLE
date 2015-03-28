@@ -122,19 +122,34 @@ $this->menus = array();			// List of menus to add
     */
   function init()
   {
-    $sql = array(" CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, CONCAT('principals/', `login`) as principaluri, CONCAT(`lastname`, CONCAT(' ', `firstname`)) as displayname, login as uri, 
-ctag as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calendarcolor, 
+    $sql = array("CREATE TABLE IF NOT EXISTS `llx_synopsiscaldav_event` (
+  `rowid` int(11) NOT NULL AUTO_INCREMENT,
+  `fk_object` int(11) NOT NULL,
+  `etag` varchar(100) NOT NULL,
+  `uri` varchar(100) NOT NULL,
+  `agendaplus` text NOT NULL,
+  PRIMARY KEY (`rowid`)
+);",
+
+"CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, CONCAT('principals/', `login`) as principaluri, CONCAT(`lastname`, CONCAT(' ', `firstname`)) as displayname, login as uri, 
+IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calendarcolor, 
 '' as timezone, 'VEVENT,VTODO' as components, 
-0 as transparent FROM llx_user u, llx_user_extrafields WHERE fk_object = u.rowid)",
+0 as transparent FROM llx_user u LEFT JOIN llx_element_element ON sourcetype = 'user' AND targettype = 'idCaldav' AND fk_source = u.rowid)",
         
         "CREATE OR REPLACE VIEW users AS (SELECT `rowid` as id, `login` as username, `pass` as digesta1 FROM llx_user);",
 
         " CREATE OR REPLACE VIEW principals AS (SELECT `rowid` as id, CONCAT('principals/', `login`) as uri, `email`, `login` as displayname, 'null' as vcardurl FROM `llx_user`);",
 
         " "
-        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e, llx_actioncomm_extrafields WHERE fk_object = e.id);");
+        . "CREATE OR REPLACE VIEW calendarobjects AS (SELECT e.`id`, etag, uri, agendaplus, e.`fk_user_action` as calendarid, '3715' as size, UNIX_TIMESTAMP(e.`tms`) as lastmodified, 'VEVENT' as componenttype, UNIX_TIMESTAMP(e.`datep`) as firstoccurence, UNIX_TIMESTAMP(e.`datep2`) as lastoccurence FROM `llx_actioncomm` e, llx_synopsiscaldav_event WHERE fk_object = e.id);");
     
-
+    global $db;
+    $sql2 = $db->query("SELECT * FROM ".MAIN_DB_PREFIX."actioncomm");
+    while($result = $db->fetch_object($sql2)){
+            $sql[] ="INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random(15)."', '-".$result->id."', '".$result->id."')";
+    }
+    
+    
     return $this->_init($sql);
   }
 
@@ -147,5 +162,16 @@ ctag as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calenda
       $sql = array();
     return $this->_remove($sql);
   }
+}
+
+
+function random($car) {
+$string = "";
+$chaine = "abcdefghijklmnpqrstuvwxy";
+srand((double)microtime()*1000000);
+for($i=0; $i<$car; $i++) {
+$string .= $chaine[rand()%strlen($chaine)];
+}
+return $string;
 }
 ?>

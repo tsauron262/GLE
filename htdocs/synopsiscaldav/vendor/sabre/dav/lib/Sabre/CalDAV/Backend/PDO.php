@@ -456,7 +456,7 @@ class PDO extends AbstractBackend {
         global $db;
         require_once(DOL_DOCUMENT_ROOT . "/comm/action/class/actioncomm.class.php");
         $action = new \ActionComm($db);
-        
+
         $action->datep = $extraData['firstOccurence'];
         $action->datef = $extraData['lastOccurence'];
         if (isset($calendarData2['SUMMARY']))
@@ -471,8 +471,19 @@ class PDO extends AbstractBackend {
         $user->fetch($calendarId);
 
         $action->type_id = 1;
-        $action->array_options['options_uri'] = $objectUri;
+        global $objectUriTemp;
+        $objectUriTemp = $objectUri;
         $action->add($user);
+
+        $this->userIdCaldavPlus($calendarId);
+    }
+    
+    public function userIdCaldavPlus($calendarId){
+        $tabT = getElementElement("user", "idCaldav", $calendarId);
+        if (isset($tabT[0]))
+            setElementElement("user", "idCaldav", $calendarId, $tabT[0]['d']);
+        else
+            addElementElement("user", "idCaldav", $object->usertodo->id, 1);        
     }
 
     /**
@@ -494,16 +505,18 @@ class PDO extends AbstractBackend {
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
 
         $extraData = $this->getDenormalizedData($calendarData);
-dol_syslog(print_r($calendarData, true),3);
+        dol_syslog(print_r($calendarData, true), 3);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($extraData['etag'], $calendarData, /* $extraData['size'], $extraData['componentType'], $extraData['firstOccurence'], $extraData['lastOccurence'] , */ $calendarId, $objectUri));
-        $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarTableName . ' SET ctag = ctag + 1 WHERE id = ?');
-        $stmt->execute(array($calendarId));
-
+//        $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarTableName . ' SET ctag = ctag + 1 WHERE id = ?');
+//        $stmt->execute(array($calendarId));
+        
+        $this->userIdCaldavPlus($calendarId);
+        
 
         global $db, $conf;
-        $sql = $db->query("SELECT fk_object FROM " . MAIN_DB_PREFIX . "actioncomm_extrafields WHERE uri = '" . $objectUri . "'");
+        $sql = $db->query("SELECT fk_object FROM " . MAIN_DB_PREFIX . "synopsiscaldav_event WHERE uri = '" . $objectUri . "'");
         if ($db->num_rows($sql) > 0) {
             $ligne = $db->fetch_object($sql);
 
@@ -539,7 +552,7 @@ dol_syslog(print_r($calendarData, true),3);
         $tabT = explode("\n", $tab);
         foreach ($tabT as $ligneT) {
             $tabT2 = array();
-            if (stripos($ligneT, 'BEGIN:') === false && !(stripos($ligneT, 'END:') === 0) )
+            if (stripos($ligneT, 'BEGIN:') === false && !(stripos($ligneT, 'END:') === 0))
                 $tabT2 = explode(":", $ligneT);
             if (isset($tabT2[1]))
                 $tabResult[$tabT2[0]] = str_replace($tabT2[0] . ":", "", $ligneT);
@@ -566,7 +579,7 @@ dol_syslog(print_r($calendarData, true),3);
         $tabHead["TZNAME"] = "CET";
         $tabHead["TZOFFSETFROM"] = "+0200";
         $tabHead["TZOFFSETTO"] = "+0100";
-        
+
         $tabResult = array_merge(array("BEGIN:VCALENDAR"), $tabHead, array("BEGIN:VEVENT"), $tabCore, array("END:VEVENT", "END:VCALENDAR"));
 
         return $tabResult;
@@ -683,6 +696,7 @@ dol_syslog(print_r($calendarData, true),3);
         $action = new \ActionComm($db);
         $action->fetch($row['id']);
         $action->delete();
+        $this->userIdCaldavPlus($calendarId);
     }
 
     /**

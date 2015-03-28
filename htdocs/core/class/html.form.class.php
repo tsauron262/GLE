@@ -785,7 +785,7 @@ class Form
         		// For natural search
         		$scrit = explode(' ', $filterkey);
         		foreach ($scrit as $crit) {
-        			$sql.=" AND (s.nom LIKE '%".$this->db->escape($crit)."%')";
+        			$sql.=" AND (s.nom LIKE '%".$this->db->escape($crit)."%' || s.code_client LIKE '".$this->db->escape($filterkey)."%')";
         		}
         	}
         	if (! empty($conf->barcode->enabled))

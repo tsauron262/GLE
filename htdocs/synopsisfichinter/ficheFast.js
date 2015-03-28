@@ -83,8 +83,10 @@ function initHeure(elem) {
     $(".fk_typeinterv").change(function() {
         cacherDecacherProd();
         
-        if($(this).val() == 4){
+        if($(this).val() == 4 || $(this).val() == 16 || $(this).val() == 22){
             $("input[name='" + $(this).attr("name").replace("fk_typeinterv", "forfait") + "']").attr("checked", "checked");
+            textarea = $("textarea[name='" + $(this).attr("name").replace("fk_typeinterv", "descPrest") + "']");
+            textarea.val(textarea.val()+ "Déplacement");
         }
     });
     

@@ -102,11 +102,28 @@ class InterfaceCaldav {
     function run_trigger($action, $object, $user, $langs, $conf) {
         global $user, $db;
         if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE" || $action == "ACTION_DELETE") {
-            if (isset($object->usertodo->id) && $object->usertodo->id > 0)
-                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->usertodo->id);
+            if (isset($object->usertodo->id) && $object->usertodo->id > 0){
+//                $db->query("UPDATE " . MAIN_DB_PREFIX . "user_extrafields SET ctag = ctag+1 WHERE fk_object = " . $object->usertodo->id);
+                
+                
+                $tabT = getElementElement("user", "idCaldav", $object->usertodo->id);
+                if(isset($tabT[0]))
+                    setElementElement ("user", "idCaldav", $object->usertodo->id, $tabT[0]['d']);
+                else
+                    addElementElement ("user", "idCaldav", $object->usertodo->id, 1);
+            }
+                
         }
-        if ($action == "ACTION_MODIFY" || $action == "ACTION_CREATE"){
-            $db->query("UPDATE ".MAIN_DB_PREFIX."actioncomm_extrafields SET etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+        if ($action == "ACTION_MODIFY"){
+            $db->query("UPDATE ".MAIN_DB_PREFIX."synopsiscaldav_event SET etag = '".random(15)."', uri = IF(uri is not null, uri, CONCAT(CONCAT('-', fk_object), '.ics')) WHERE fk_object = ".$object->id);
+        }
+        if ($action == "ACTION_CREATE"){
+            global $objectUriTemp;
+            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id;
+            $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random(15)."', '".$objectUri2."', '".$object->id."')");
+        }
+        if ($action == "ACTION_DELETE"){
+            $db->query("DELETE FROM ".MAIN_DB_PREFIX."synopsiscaldav_event WHERE fk_object = ".$object->id);
         }
     }
 

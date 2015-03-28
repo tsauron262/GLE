@@ -9,6 +9,14 @@
 <IfModule mod_rewrite.c>
 	RewriteEngine On
 	RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization},L]
+
+        RewriteRule /.well-known/carddav /bimp/synopsiscaldav/html/card.php [R,L]
+        RewriteRule /.well-known/caldav /bimp/synopsiscaldav/html/cal.php [R,L]
+
+RedirectMatch 301 ^/.well-known/caldav /cal.php
+RedirectMatch 301 ^/.well-known/carddav /card.php
+
+
 </IfModule>
 
 <IfModule mod_expires.c>

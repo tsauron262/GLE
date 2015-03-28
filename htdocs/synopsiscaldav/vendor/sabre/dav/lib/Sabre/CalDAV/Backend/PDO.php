@@ -556,7 +556,7 @@ class PDO extends AbstractBackend {
         foreach ($tabT as $ligneT) {
             $tabT2 = array();
             if (stripos($ligneT, 'BEGIN:') === false && !(stripos($ligneT, 'END:') === 0))
-                $tabT2 = preg_split("/[:;]/", $ligneT);
+                $tabT2 = preg_split("[/:;/]", $ligneT);
             if (isset($tabT2[1]))
                 $tabResult[$tabT2[0]] = str_replace($tabT2[0] . ":", "", $ligneT);
             else

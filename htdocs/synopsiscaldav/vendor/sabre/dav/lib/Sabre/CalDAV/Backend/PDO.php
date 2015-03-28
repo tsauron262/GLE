@@ -395,7 +395,7 @@ class PDO extends AbstractBackend {
         $calendarData2 = $this->traiteTabIcs($row['agendaplus'], array());
 //        dol_syslog("1 \n".$calData,3);
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
-        $calendarData2['uid'] = str_replace(".ics", "", $row['uri']);
+        $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
         $calData = $this->traiteIcsTab($calendarData2);
 //        dol_syslog("2 \n".$calData,3);
 
@@ -409,7 +409,7 @@ class PDO extends AbstractBackend {
             'calendardata' => $calData,
         );
 
-        dol_syslog("Objet calendar " . $objectUri);
+//        dol_syslog("Objet calendar " . $objectUri." | ".print_r($calData,true),3);
 
         return $return;
     }
@@ -508,7 +508,7 @@ class PDO extends AbstractBackend {
     public function updateCalendarObject($calendarId, $objectUri, $calendarData) {
 
         $extraData = $this->getDenormalizedData($calendarData);
-        dol_syslog(print_r($calendarData, true), 3);
+//        dol_syslog(print_r($calendarData, true), 3);
 
         $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarObjectTableName . ' SET etag = ?, agendaplus = ? WHERE calendarid = ? AND uri = ?');
         $stmt->execute(array($extraData['etag'], $calendarData, /* $extraData['size'], $extraData['componentType'], $extraData['firstOccurence'], $extraData['lastOccurence'] , */ $calendarId, $objectUri));

@@ -395,6 +395,7 @@ class PDO extends AbstractBackend {
         $calendarData2 = $this->traiteTabIcs($row['agendaplus'], array());
 //        dol_syslog("1 \n".$calData,3);
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
+        $calendarData2['uid'] = str_replace(".ics", "", $row['uri']);
         $calData = $this->traiteIcsTab($calendarData2);
 //        dol_syslog("2 \n".$calData,3);
 

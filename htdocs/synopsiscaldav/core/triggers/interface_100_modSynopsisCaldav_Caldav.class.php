@@ -108,7 +108,7 @@ class InterfaceCaldav {
                 
                 $tabT = getElementElement("user", "idCaldav", $object->usertodo->id);
                 if(isset($tabT[0]))
-                    setElementElement ("user", "idCaldav", $object->usertodo->id, $tabT[0]['d']);
+                    setElementElement ("user", "idCaldav", $object->usertodo->id, $tabT[0]['d']+1);
                 else
                     addElementElement ("user", "idCaldav", $object->usertodo->id, 1);
             }

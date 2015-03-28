@@ -346,7 +346,11 @@ echo "<input type='submit' value='Ok' class='butAction'/></form>";
 
 
 echo '<input type="text" class="datePicker" id="dateChange"/>';
-echo "<button class='butAction' onclick='$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date($(\"#dateChange\").attr(\"value\")));' >Ok</button>";
+echo "<button class='butAction' onclick='"
+. "dateTab = $(\"#dateChange\").attr(\"value\").split(\"/\");"
+. "dateStr = dateTab[2] +\"-\"+ dateTab[1] +\"-\"+ dateTab[0];"
+. "$(\"#calendar\").weekCalendar(\"gotoWeek\", new Date(dateStr));"
+        . "' >Ok</button>";
 
 
 echo '

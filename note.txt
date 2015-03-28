@@ -1210,3 +1210,8 @@ petit client gerance de biens
 ERP dev en VISION
 300 client 
 FONCIA
+
+
+http://localhost/gle_dev/synopsiscaldav/html/cal.php/calendars/admin/admin
+
+https://gle.synopsis-erp.com/bimp/synopsiscaldav/html/cal.php/calendars/admin/admin

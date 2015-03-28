@@ -439,7 +439,8 @@ class ActionComm extends CommonObject
 
         $error=0;
         
-        if($user->id != 1)
+        if(!isset($user->rights->agenda->myactions->create))
+            $user->getrights();
         /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
         // Clean parameters

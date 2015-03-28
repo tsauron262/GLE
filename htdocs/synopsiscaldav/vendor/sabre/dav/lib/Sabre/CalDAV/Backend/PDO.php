@@ -115,7 +115,7 @@ class PDO extends AbstractBackend {
 
         $calendars = array();
         while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-
+            $row['principaluri'] = $principalUri;
             $components = array();
             if ($row['components']) {
                 $components = explode(',', $row['components']);

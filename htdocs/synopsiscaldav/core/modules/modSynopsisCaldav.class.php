@@ -81,9 +81,9 @@ class modSynopsisCaldav extends DolibarrModules
         $r ++;
         
         
-        $this->const[$r][0] = "synopsispanier_ADDON_PDF";
-        $this->const[$r][1] = "chaine";
-        $this->const[$r][2] = "PANIER";
+//        $this->const[$r][0] = "synopsispanier_ADDON_PDF";
+//        $this->const[$r][1] = "chaine";
+//        $this->const[$r][2] = "PANIER";
         
         
 $this->menus = array();			// List of menus to add

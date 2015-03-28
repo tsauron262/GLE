@@ -119,7 +119,7 @@ class InterfaceCaldav {
         }
         if ($action == "ACTION_CREATE"){
             global $objectUriTemp;
-            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id;
+            $objectUri2 = (isset($objectUriTemp) && $objectUriTemp != "") ? $objectUriTemp : "-".$object->id.".ics";
             $db->query("INSERT INTO ".MAIN_DB_PREFIX."synopsiscaldav_event (etag, uri, fk_object) VALUES ('".random(15)."', '".$objectUri2."', '".$object->id."')");
         }
         if ($action == "ACTION_DELETE"){

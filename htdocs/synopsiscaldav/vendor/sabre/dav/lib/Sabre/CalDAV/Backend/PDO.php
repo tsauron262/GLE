@@ -395,8 +395,8 @@ class PDO extends AbstractBackend {
         $calendarData2 = $this->traiteTabIcs($row['agendaplus'], array());
 //        dol_syslog("1 \n".$calData,3);
         $calendarData2 = $this->traiteTabIcs($calData, $calendarData2);
-//        $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
-        $calData = $this->traiteIcsTab($calendarData2);
+        $calendarData2['UID'] = str_replace(".ics", "", $row['uri']);
+        $calData ="";//$this->traiteIcsTab($calendarData2);
 //        dol_syslog("2 \n".$calData,3);
 
         $return = array(
@@ -514,6 +514,10 @@ class PDO extends AbstractBackend {
         $stmt->execute(array($extraData['etag'], $calendarData, /* $extraData['size'], $extraData['componentType'], $extraData['firstOccurence'], $extraData['lastOccurence'] , */ $calendarId, $objectUri));
 //        $stmt = $this->pdo->prepare('UPDATE ' . $this->calendarTableName . ' SET ctag = ctag + 1 WHERE id = ?');
 //        $stmt->execute(array($calendarId));
+        
+        
+        global $objectEtagTemp;
+        $objectEtagTemp = $extraData['etag'];
         
         $this->userIdCaldavPlus($calendarId);
         

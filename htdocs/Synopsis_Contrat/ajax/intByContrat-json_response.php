@@ -74,11 +74,18 @@ else{
             $arr = convDur($row->duree);
             $desc=$row->description;
             $fi->fetch($row->rowid);
-            $userT = new User($db);
+            
+            $userId = 0; $userStr = "";
+            
             if($typeObj == "FI")
-            $userT->fetch($row->fk_user_author);
+                $userId = $row->fk_user_author;
             else
-            $userT->fetch($row->fk_user_prisencharge);
+                $userId = $row->fk_user_prisencharge;
+            if($userId > 0){
+                $userT = new User($db);
+                $userT->fetch($userId);
+                $userStr = $userT->getNomUrl(1);
+            }
             
             $responce->rows[$i]['id']=$row->rowid;
             $responce->rows[$i]['cell']=array($row->rowid,
@@ -97,7 +104,7 @@ else{
                 }
                 $responce->rows[$i]['cell'][] = $resultT;
             }
-            $responce->rows[$i]['cell'][] = $userT->getNomUrl(1);
+            $responce->rows[$i]['cell'][] = $userStr;
             $responce->rows[$i]['cell'][] = $fi->getLibStatut(4);
             
             $i++;

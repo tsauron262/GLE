@@ -228,8 +228,8 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             
 
             $j = 0;
-            if(is_null($centre))
-            $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
+            if(is_null($blockCentre))
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)

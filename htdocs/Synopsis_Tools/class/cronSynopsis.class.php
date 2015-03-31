@@ -18,8 +18,7 @@ class CronSynopsis {
     }
 
     public function testGlobal() {
-        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/maj.class.php");
-        $this->sortie .= maj::sauvBdd();
+        $this->sauvBdd();
 
         $this->netoyage();
 //        $this->majChrono();
@@ -34,6 +33,7 @@ class CronSynopsis {
     }
     
     public function sauvBdd(){
+        require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/maj.class.php");
         $this->sortie .= maj::sauvBdd();
     }
     

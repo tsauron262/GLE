@@ -90,6 +90,7 @@ if (isset($_REQUEST['propalMail'])) {
     }
     foreach ($text as $id => $tab) {
         echo $tab[0]->email . "Problème technique GLE" . $tab[1];
+        mailSyn2("Problème technique GLE", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
     }
 }
 

@@ -27,7 +27,7 @@ class maj {
         $dir = DOL_DATA_ROOT . "/bdd/";
         if (!is_dir($dir))
             mkdir($dir);
-        $backup = $dir . $date . "_" .($table != "" ? $table:"").$dolibarr_main_db_name . ".sql";
+        $backup = $dir . $date . "_" .($table != "" ? $table."_":"").$dolibarr_main_db_name . ".sql";
         $command = "mysqldump --host=" . $dolibarr_main_db_host . " -P ".$dolibarr_main_db_port." --user=" . $dolibarr_main_db_user . " --password=".$dolibarr_main_db_pass." "."$dolibarr_main_db_name".($table != "" ? " ".$table : "")." > $backup";
 //        echo "Votre base est en cours de sauvegarde.......<br/>";
         $result = "inc";

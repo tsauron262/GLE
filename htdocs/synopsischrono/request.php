@@ -378,6 +378,14 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
         $tabFilePc2[] = ".pdf";
         $tabFilePc3[] = "PC-" . $chrono->ref . ".pdf";
     }
+    
+    $tabFileProp = $tabFileProp2 = $tabFileProp3 = array();
+    $fileProp = DOL_DATA_ROOT . "/propale/" . $chrono->propal->ref . "/" . $chrono->propal->ref . ".pdf";
+    if (is_file($fileProp)) {
+        $tabFileProp[] = $fileProp;
+        $tabFileProp2[] = ".pdf";
+        $tabFileProp3[] = $chrono->propal->ref . ".pdf";
+    }
 
 
     if (isset($chrono->extraValue[$chrono->id]['Technicien']['value']) && $chrono->extraValue[$chrono->id]['Technicien']['value'] > 0) {
@@ -412,13 +420,6 @@ function envoieMail($type, $chrono, $obj, $toMail, $fromMail, $tel, $nomMachine)
 \nCordialement.
 \nL'équipe BIMP.", $tabFileFact, $tabFileFact2, $tabFileFact3);
     } elseif ($type == "Devis" && is_object($chrono->propal)) {
-        $tabFileProp = $tabFileProp2 = $tabFileProp3 = array();
-        $fileProp = DOL_DATA_ROOT . "/propale/" . $chrono->propal->ref . "/" . $chrono->propal->ref . ".pdf";
-        if (is_file($fileProp)) {
-            $tabFileProp[] = $fileProp;
-            $tabFileProp2[] = ".pdf";
-            $tabFileProp3[] = $chrono->propal->ref . ".pdf";
-        }
         $text = "Bonjour, voici le devis pour la réparation de votre '" . $nomMachine . "'.
 \nVeuillez nous communiquer votre accord ou votre refus par retour de ce Mail.
 \nSi vous voulez des informations complémentaires, contactez le centre de service par téléphone au " . $tel . " (Appel non surtaxé).";

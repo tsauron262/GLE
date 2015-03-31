@@ -49,7 +49,43 @@ if (isset($conf->global->GOOGLE_ENABLE_GMAPS))
 print" <br/><br/><a href='../synopsisapple/test.php'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Test Apple</span></a>";
 
 if (isset($user->rights->SynopsisPrepaCom->import->Admin))
-print" <br/><br/><a href='../Synopsis_Tools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
+    print" <br/><br/><a href='../Synopsis_Tools/public/extractFact.php?sortie=file'><span style='float: left;' class='ui-icon ui-icon-extlink'></span><span>Extraction facture</span></a>";
+
+
+
+
+
+
+
+
+
+
+if (isset($_REQUEST['propalMail'])) {
+    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918");
+    while ($ligne = $db->fetch_object($sql)) {
+        $user = 0;
+        $sql2 = $db->query("SELECT * FROM `llx_synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
+        if ($db->num_rows($sql2) > 0) {
+            $ligne2 = $db->fetch_object($sql2);
+            $user = $ligne2->Technicien;
+//            echo "<br/>oooooooooo";
+        }
+            $prop = new Propal($db);
+            $prop->fetch($ligne->fk_propal);
+        if (!$user > 0) {
+//            echo $ligne->fk_propal.$prop->getNomUrl(1);
+            $user = $prop->user_author_id;
+        }
+        
+        echo "<br/>".$user."|";-
+        $userObj = new User($db);
+        $userObj->fetch($user);
+        echo $userObj->email."Problème technique GLE"."Suite à un problème technique certaines lignes de cette propal ne sont plus juste.<br/>Merci de vérifier l'objet en question.<br/>".$prop->getNomUrl(1);
+    }
+}
+
+
+
 
 
 llxFooter();

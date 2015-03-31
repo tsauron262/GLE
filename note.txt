@@ -1188,7 +1188,7 @@ Prise en charge afficher geolocalise
 //export centre sur chaque ligne
 
 
-nom de soc quand contact pas affiché
+//nom de soc quand contact pas affiché
 
 
 
@@ -1215,3 +1215,26 @@ FONCIA
 http://localhost/gle_dev/synopsiscaldav/html/cal.php/calendars/admin/admin
 
 https://gle.synopsis-erp.com/bimp/synopsiscaldav/html/cal.php/calendars/admin/admin
+
+
+uid pour android diferent du ...
+
+13.85 +0.5+ 3.85 + 15.358
+
+
+
+pas de refacturer dans sav deja facturé
+
+pdf iphone
+
+voir afficher ttc facture
+voir accompte => accompte prise en charge
+
+
+
+URGENT : stat pas de sav "n/c"
+
+
+voir doublons precedent dans ficherapide
+
+garantie dans propal puht * qte pas tot_ht

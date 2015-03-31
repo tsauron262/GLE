@@ -312,6 +312,16 @@ if ($chr->id > 0) {
         top_htmlhead($js, 'Fiche ' . $chr->model->titre);
     } else
         llxHeader($js, 'Fiche ' . $chr->model->titre);
+    
+    
+    
+    if(isset($_SESSION['error'])){
+        foreach($_SESSION['error'] as $error => $type){
+            dol_htmloutput_mesg($error, array(), ($type == 1)? "error" : "ok");
+        }
+        $_SESSION['error'] = array();
+    }
+    
 
 //print "<div class='titre'>Fiche chrono</div><br/>";
 

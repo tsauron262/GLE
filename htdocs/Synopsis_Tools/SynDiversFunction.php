@@ -840,7 +840,12 @@ function mailSyn2($subject, $to, $from, $msg, $filename_list = array(), $mimetyp
 //        mail($to, $sujet, $msg, $headers);
         require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
         $mailfile = new CMailFile($subject, $to, $from, $msg, $filename_list, $mimetype_list, $mimefilename_list, $addr_cc, $addr_bcc, $deliveryreceipt, $msgishtml, $errors_to, $css);
-        return $mailfile->sendfile();
+        $return = $mailfile->sendfile();
+        if(!$return)
+            $_SESSION['error']["Mail non envoyé"] = 1;
+        else
+            $_SESSION['error']["Mail envoyé"] = 0;
+        return $return;
     }
 }
 

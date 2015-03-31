@@ -362,8 +362,14 @@ function sendSms($chrono, $text) {
         require_once(DOL_DOCUMENT_ROOT . "/core/class/CSMSFile.class.php");
         $smsfile = new CSMSFile($to, $fromsms, $text);
         echo $smsfile->sendfile();
+        
+        
+        if(!$return)
+            $_SESSION['error']["SMS non envoyé"] = 1;
+        else
+            $_SESSION['error']["SMS envoyé"] = 0;
 
-        return 1;
+        return $return;
     }
 }
 

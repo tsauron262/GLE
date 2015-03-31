@@ -33,6 +33,10 @@ class CronSynopsis {
         echo 1;
     }
     
+    public function sauvBdd(){
+        $this->sortie .= maj::sauvBdd();
+    }
+    
     public function extractFact(){
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
         $export = new synopsisexport($this->db, 'file');

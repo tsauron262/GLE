@@ -62,7 +62,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 
 if (isset($_REQUEST['propalMail'])) {
     $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918");
-        $text = array();
+    $text = array();
     while ($ligne = $db->fetch_object($sql)) {
         $user = 0;
         $sql2 = $db->query("SELECT * FROM `llx_synopsischrono_view_105` WHERE propalid = " . $ligne->fk_propal);
@@ -82,11 +82,11 @@ if (isset($_REQUEST['propalMail'])) {
         -
         $userObj = new User($db);
         $userObj->fetch($user);
-        $str = "Suite à un problème technique certaines lignes de cette propal ne sont plus juste.<br/>Merci de vérifier l'objet en question.<br/>" . $prop->getNomUrl(1)."<br/><br/>";
-        if(isset($text[$user]))
-            $text[$user][1] .= $str;
-            else
-        $text[$user] = array($userObj, $str);
+        $str = "Suite à un problème technique certaines lignes de cette propal ne sont plus juste.<br/>Merci de vérifier l'objet en question.<br/>" . $prop->getNomUrl(1) . "<br/><br/>";
+        if (isset($text[$user]))
+            $text[$user][1] = $text[$user][1].$str;
+        else
+            $text[$user] = array($userObj, $str);
     }
     foreach ($text as $id => $tab) {
         echo $tab[0]->email . "Problème technique GLE" . $tab[1];

@@ -32,9 +32,9 @@ class CronSynopsis {
         echo 1;
     }
     
-    public function sauvBdd(){
+    public function sauvBdd($table = ""){
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/maj.class.php");
-        $this->sortie .= maj::sauvBdd();
+        $this->sortie .= maj::sauvBdd($table);
     }
     
     public function extractFact(){

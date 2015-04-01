@@ -221,6 +221,8 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
 //                $echo .= DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 
+                    
+                    unset($_REQUEST['action2']);
                     header('Status: 301 Moved Permanently', false, 301);
                     header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
                     die;

@@ -98,7 +98,7 @@ if(isset($_REQUEST['lienFactProp'])){
     $sql = $db->query("SELECT f.* FROM llx_facture f LEFT JOIN llx_element_element e ON `sourcetype` LIKE  'propal'
 AND  `targettype` LIKE  'facture' AND fk_target = f.rowid WHERE fk_source is null");
     while($ligne = $db->fetch_object($sql)){
-        $sql2 = $db->query("SELECT * FROM llx_propal WHERE fk_soc = ".$ligne->fk_soc);
+        $sql2 = $db->query("SELECT * FROM llx_propal WHERE fk_statut != 3 AND fk_soc = ".$ligne->fk_soc);
         $nb = $db->num_rows($sql2);
         echo $nb."|".$ligne->fk_soc. "<br/>";
         if($nb == 1){

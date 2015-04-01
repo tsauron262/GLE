@@ -242,6 +242,14 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
         } else {
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
+        
+        
+        if ($this->sortie != 'file') {
+        global $tabVal;
+        foreach($tabVal as $val => $nb)
+            if($nb > 1)
+                echo "<br/>Facture en double : ".$val;
+        }
 
         $this->sortie("", "statSav");
     }
@@ -315,6 +323,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
     }
 
     private function textTable($ligne, $separateur, $sautDeLigne, $prefLigne = '', $afficheTitre = true) {
+        global $tabVal;
         $return = "";
         $tabCacher = array('factid', 'rowid');
         if ($afficheTitre === "Total") {
@@ -354,6 +363,13 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                         $valeur = "GEN-SAV-PIECES";
                     else
                         $valeur = "";
+                }
+                
+                if($nom == "objFact"){
+                    if(isset($tabVal[$valeur]))
+                        $tabVal[$valeur] = $tabVal[$valeur] + 1;
+                    else
+                        $tabVal[$valeur] = 1;
                 }
 
                 if ($nom == 'objSoc') {

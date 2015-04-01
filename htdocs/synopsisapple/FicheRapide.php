@@ -26,7 +26,8 @@ $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContac
 $("#inputautocompletesocid").focus();    
 
 });</script>';
-llxHeader($js);
+
+$echo = "";
 
 if (isset($_REQUEST['socid']) && $_REQUEST['socid'] == "max") {
     $sql = $db->query("SELECT MAX(rowid) as max FROM " . MAIN_DB_PREFIX . "societe");
@@ -45,7 +46,7 @@ if (isset($_REQUEST['socid']) && $_REQUEST['socid'] > 0 && isset($_REQUEST['cont
 }
 
 $form = new form($db);
-echo "<h1 font size='20' align='center' ><B> Fiche Rapide </B></h1>";
+$echo .= "<h1 font size='20' align='center' ><B> Fiche Rapide </B></h1>";
 $socid = (isset($_REQUEST['socid']) ? $_REQUEST['socid'] : "");
 $NoMachine = (isset($_POST['NoMachine']) ? $_POST['NoMachine'] : "");
 $machine = (isset($_POST['Machine']) ? $_POST['Machine'] : "");
@@ -83,23 +84,23 @@ $typeGarantie = (isset($_POST["typeGarantie"]) ? $_POST["typeGarantie"] : "");
 
 if (isset($_POST["Descr"]) && !isset($_REQUEST['action2'])) {
     if (!isset($_POST["Symptomes"]) || $_POST["Symptomes"] == "")
-        echo "Renseignez les Sympomes";
+        $echo .= "Renseignez les Sympomes";
     elseif (!isset($_REQUEST['socid']) || $_REQUEST['socid'] < 1)
-        echo "Renseignez le Client";
+        $echo .= "Renseignez le Client";
     elseif (!isset($_REQUEST['contactid']) || $_REQUEST['contactid'] == "")
-        echo "Renseignez le Contact";
+        $echo .= "Renseignez le Contact";
     elseif (!isset($_POST['Machine']) || $_POST['Machine'] == "")
-        echo "Renseignez la Machine";
+        $echo .= "Renseignez la Machine";
     elseif (!isset($_POST['NoMachine']) || $_POST['NoMachine'] == "")
-        echo "Renseignez le numéro de série";
+        $echo .= "Renseignez le numéro de série";
     elseif (!isset($_POST['Retour']) || $_POST['Retour'] == "")
-        echo "Renseignez le mode de contact";
+        $echo .= "Renseignez le mode de contact";
     elseif (!isset($_POST['pass']) || $_POST['pass'] == "")
-        echo "Renseignez le mot de passe";
+        $echo .= "Renseignez le mot de passe";
     elseif (!isset($_POST['Sauv']) || $_POST['Sauv'] == "")
-        echo "Renseignez l'état de la sauvegarde";
+        $echo .= "Renseignez l'état de la sauvegarde";
     elseif (!isset($_POST['Etat']) || $_POST['Etat'] == "")
-        echo "Renseignez l'état de la machine";
+        $echo .= "Renseignez l'état de la machine";
     else {
         $chronoProd = new Chrono($db);
 
@@ -217,32 +218,45 @@ Une garantie de 30 jours est appliquée pour les réparations logicielles.
                     mkdir($repDest);
                     link(DOL_DATA_ROOT . "/propale/" . $propal->ref . "/" . $propal->ref . ".pdf", $repDest . $propal->ref . ".pdf");
                     link(DOL_DATA_ROOT . "/facture/" . $factureA->ref . "/" . $factureA->ref . ".pdf", $repDest . $factureA->ref . ".pdf");
-//                echo DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
+//                $echo .= DOL_DATA_ROOT."/facture/".$factureA->ref."/".$factureA->ref.".pdf", $repDest.$factureA->ref.".pdf";die;
 
 
-                    echo "<h3>Enregistrement effecué avec succés. </h3>"
-                    . "SAV : " . $chrono->getNomUrl(1) . " <br/>"
-                    . "Produit : " . $chronoProd->getNomUrl(1);
-
-                    // List of document
-                    echo "<br/><br/>";
-                    require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
-                    require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
-                    $formfile = new FormFile($db);
-                    $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
-                    $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
-                    echo "<h3>Nouvelle prise en charge</h3>";
+                    header('Status: 301 Moved Permanently', false, 301);
+                    header("Location: ./FicheRapide.php?idChrono=" . $chrono->id);
+                    die;
                 } else {
-                    echo "Echec de l'Enregistrement";
+                    $echo .= "Echec de l'Enregistrement";
                 }
             } else {
-                echo "Echec de l'Enregistrement";
+                $echo .= "Echec de l'Enregistrement";
             }
         } else {
-            echo "Echec de l'Enregistrement";
+            $echo .= "Echec de l'Enregistrement";
         }
     }
 }
+
+llxHeader($js);
+echo $echo;
+
+
+if (isset($_REQUEST['idChrono'])) {
+    $chrono = new Chrono($db);
+    $chrono->fetch($_REQUEST['idChrono']);
+    echo "<h3>Enregistrement effecué avec succés. </h3>"
+    . "SAV : " . $chrono->getNomUrl(1) . " <br/>";
+//                    . "Produit : " . $chronoProd->getNomUrl(1);
+    // List of document
+    echo "<br/><br/>";
+    require_once(DOL_DOCUMENT_ROOT . "/core/lib/files.lib.php");
+    require_once(DOL_DOCUMENT_ROOT . "/core/class/html.formfile.class.php");
+    $formfile = new FormFile($db);
+    $filearray = dol_dir_list(DOL_DATA_ROOT . "/synopsischrono/" . $chrono->id);
+    $formfile->list_of_documents($filearray, $chrono, 'synopsischrono', $param, 1, $chrono->id . "/");
+    echo "<h3>Nouvelle prise en charge</h3>";
+}
+
+
 
 
 
@@ -267,7 +281,7 @@ if ($socid != "") {
     echo "<th class='ui-state-default ui-widget-header'>Contact.</th>";
     echo "<td class='ui-widget-content' colspan='1'>";
     echo '<span class="addContact2 editable" style="float: left; padding : 3px 15px 0 0;"><img src="' . DOL_URL_ROOT . '/theme/eldy/img/filenew.png" border="0" alt="Create" title="Create"></span>';
-    $form->select_contacts($socid, $_REQUEST['contactid']);
+    echo  $form->selectcontacts($socid, $_REQUEST['contactid']);
     echo "<br />";
     echo "</td>";
     echo "</tr>";
@@ -512,6 +526,11 @@ if ($socid != "") {
     echo "</p>";
     echo "</form>";
 }
+
+
+
+
+
 
 function existProd($nomachine) {
     global $db;

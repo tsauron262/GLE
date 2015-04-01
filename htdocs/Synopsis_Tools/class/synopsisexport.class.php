@@ -145,9 +145,9 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
                     . "fact.fk_statut";
             $partReq5 = " FROM llx_societe soc, llx_facturedet det, llx_facture fact ";
             $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
-            $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source AND propal.fk_statut < 3 ";
+            $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
 //            $partReq5 .= " LEFT JOIN  llx_synopsischrono_view_105 chrono on  chrono.propalId = el.fk_source";
-            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND ";
+            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL) AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
@@ -228,8 +228,9 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             ksort($tabMateriel, SORT_STRING);
 
             $j = 0;
+//            echo $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin;
             if(is_null($blockCentre))
-                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)

@@ -73,6 +73,7 @@ if (isset($_REQUEST['propalMail'])) {
         }
         $prop = new Propal($db);
         $prop->fetch($ligne->fk_propal);
+        if($prop->statut != 3){
         if (!$user > 0) {
 //            echo $ligne->fk_propal.$prop->getNomUrl(1);
             $user = $prop->user_author_id;
@@ -87,9 +88,11 @@ if (isset($_REQUEST['propalMail'])) {
             $text[$user][1] = $text[$user][1].$str;
         else
             $text[$user] = array($userObj, $str);
+        }
     }
     foreach ($text as $id => $tab) {
         echo $tab[0]->email . "Problème technique GLE" . $tab[1];
+        if($_REQUEST['propalMail'] == "mail")
         mailSyn2("Problème technique GLE", $tab[0]->email.",jc.cannet@bimp.fr", "", $tab[1]);
     }
 }

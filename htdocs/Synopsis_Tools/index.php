@@ -61,7 +61,7 @@ if (isset($user->rights->SynopsisPrepaCom->import->Admin))
 
 
 if (isset($_REQUEST['propalMail'])) {
-    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918");
+    $sql = $db->query("SELECT DISTINCT(`fk_propal`) FROM `llx_propaldet` WHERE `description` LIKE '661-8153%' AND rowid > 42918 AND total_ht != 382.78");
     $text = array();
     while ($ligne = $db->fetch_object($sql)) {
         $user = 0;

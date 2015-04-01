@@ -213,6 +213,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $req = "SELECT label, valeur, propalid
 FROM  `llx_Synopsis_Process_form_list_members` ls, llx_synopsischrono_view_105 chrono
 WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
+//            $req = "SELECT label, valeur, propalid
+//FROM  llx_synopsischrono_view_105 chrono LEFT JOIN `llx_Synopsis_Process_form_list_members` ls ON `list_refid` =11 AND chrono.CentreVal = ls.valeur WHERE 1";
             if ($centre)
                 $req .= " AND centreVal = '" . $centre . "'";
             $result = $this->db->query($req);
@@ -224,17 +226,15 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             }
 //        print_r($tabMateriel);die;
             ksort($tabMateriel, SORT_STRING);
-            
-            
 
             $j = 0;
             if(is_null($blockCentre))
-                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "') " . $partReqFin);
+                $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
 //            if($j > 50)
 //                break;
-                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
+                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND propal.fk_statut != 3 AND propal.rowid IN ('" . implode("','", $val) . "') " . $partReqFin);
 //                $this->statLigneFacture($titre, $partReq1 . $partReq5 . $where . " AND CentreVal = '" . $val . "' " . $partReqFin);
 //            echo "<br/>Facture : " . $ligne['facnumber'] . " exporté.<br/>";
             }

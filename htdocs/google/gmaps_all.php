@@ -350,6 +350,7 @@ if ($resql)
 					$error='Quota reached';
 					$googlemaps->result_code='OVER_QUERY_LIMIT';
 					$googlemaps->result_label=$error;
+                                        $MAXADDRESS = 1;
 				}
 				else
 				{

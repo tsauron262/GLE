@@ -306,6 +306,13 @@ if ($resql)
 			$countgeoencoding++;
 
 			$point = geocoding($addresstosearch);
+                        
+                        if(!is_array($point) && $point == 'OVER_QUERY_LIMIT'){
+                            sleep(2);
+                            $point = geocoding($addresstosearch);
+                        }
+                        
+                        
 			if (is_array($point))
 			{
 				$object->latitude=$point['lat'];

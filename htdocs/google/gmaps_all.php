@@ -351,6 +351,7 @@ if ($resql)
 					$googlemaps->result_code='OVER_QUERY_LIMIT';
 					$googlemaps->result_label=$error;
                                         $MAXADDRESS = 1;
+                                        echo "Quota Google Atteind !!! <br/><br/>";
 				}
 				else
 				{

@@ -119,9 +119,9 @@ class modSmsDecanet extends DolibarrModules
 	}
 	
 	function sendRequest($donnees) {
-		global $conf;
+		global $conf;$conf->global->DECANETSMS_SSL = 0;
 		$url = (intval($conf->global->DECANETSMS_SSL)==1)?'https':'http';
-		$url='https://www.decanet.fr/api/sms.php';	
+		$url='http://www.decanet.fr/api/sms.php';	
 		foreach($donnees as $key=>$value) { $donnees_ctn .= $key.'='.$value.'&'; }
 		rtrim($donnees_ctn,'&');
 		$ch = curl_init();

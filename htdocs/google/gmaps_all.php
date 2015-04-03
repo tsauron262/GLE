@@ -407,6 +407,7 @@ if ($resql)
 		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=25">'.$langs->trans("By25").'</a> &nbsp;';
 		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=50">'.$langs->trans("By50").'</a> &nbsp;';
 		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=100">'.$langs->trans("By100").'</a> &nbsp;';
+		print ' &nbsp; <a href="'.$_SERVER["PHP_SELF"].'?mode='.$mode.'&max=1000">'.$langs->trans("By100").'0</a> &nbsp;';
 		//,min($num-$countgeoencodedall,$MAXADDRESS)).'</a>';
 		print '<br>';
 	}

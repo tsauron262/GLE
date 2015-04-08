@@ -23,7 +23,11 @@ $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContac
         $("#form").submit();
         }, "Contact", 1)
     });
-$("#inputautocompletesocid").focus();    
+$("#inputautocompletesocid").focus();
+
+$("form#form").submit(function(){
+                $("#Envoyer").attr("disabled", "disabled");
+});
 
 });</script>';
 

@@ -104,6 +104,9 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 ////"AND chrono.id = el2.fk_source AND chrono2.id = el2.fk_target AND el2.sourcetype = 'SAV' AND el2.targettype='productCli' ".
 ////"AND chrono2.id = (SELECT FIRST(fk_target) FROM llx_element_element WHERE sourcetype = 'SAV' AND chrono.id = fk_source  AND targettype='productCli') ".
 //                "AND factdet.total_ht != 0 AND ";
+        
+        
+        $where .= " AND (propal.fk_statut < 3 || propal.fk_statut IS NULL) ";
 
         $tableSus = "";
         $chargeAccompte = true;
@@ -147,7 +150,7 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
             $partReq5 .= " LEFT JOIN  llx_element_element el on  el.sourcetype = 'propal' AND el.targettype = 'facture' AND el.fk_target = fact.rowid ";
             $partReq5 .= " LEFT JOIN  llx_propal propal on  propal.rowid = el.fk_source ";
 //            $partReq5 .= " LEFT JOIN  llx_synopsischrono_view_105 chrono on  chrono.propalId = el.fk_source";
-            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND (propal.fk_statut < 3 || propal.fk_statut IS NULL) AND ";
+            $partReq5 .= " WHERE soc.rowid = fact.fk_soc AND det.fk_facture = fact.rowid AND fact.close_code is null AND ";
             $partReqFin = " GROUP BY fact.rowid LIMIT 0,200000";
             $chargeAccompte = false;
 //            $partReq5 = " FROM  llx_synopsischrono_view_105 chrono LEFT JOIN llx_propal propal on chrono.propalId = propal.rowid LEFT JOIN  llx_element_element on sourcetype = 'propal' AND targettype = 'facture' AND fk_source = propal.rowid LEFT JOIN llx_facture fact ON fact.rowid = fk_target AND fact.facnumber LIKE 'FA%' WHERE fact.close_code is null AND ";
@@ -242,7 +245,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
         } else {
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
-        
+        die($partReq1 . $partReq5 . $where . $partReqFin);
         
         if ($this->sortie != 'file') {
         global $tabVal;

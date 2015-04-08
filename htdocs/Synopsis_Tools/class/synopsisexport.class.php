@@ -81,6 +81,9 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         } elseif ($typeAff2 != "fact") {
             $champDate = "propal.datec";
         }
+        
+        if($typeAff2 == "nb")
+            $champDate = "chrono.date_create";
 
         if ($typeAff2 == "fact" && $typeAff != "parCentre") {
             $typeAff = null;

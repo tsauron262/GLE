@@ -245,7 +245,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
         } else {
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
-        die($partReq1 . $partReq5 . $where . $partReqFin);
+//        die($partReq1 . $partReq5 . $where . $partReqFin);
         
         if ($this->sortie != 'file') {
         global $tabVal;

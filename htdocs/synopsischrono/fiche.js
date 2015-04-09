@@ -225,7 +225,12 @@ jQuery(document).ready(function() {
         $(this).datetimepicker({showTime: true}).datepicker("setDate", date);
     });
 
-    jQuery('#form').validate();
+    jQuery('#form').validate({
+  submitHandler: function(form) { 
+                $("#Envoyer").attr("disabled", "disabled");
+                form.submit();
+  }
+});
 
     initFormChrono();
 

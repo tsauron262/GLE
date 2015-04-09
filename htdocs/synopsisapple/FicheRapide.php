@@ -26,7 +26,6 @@ $js.= '<script type="text/javascript" >$(window).load(function() { $(".addContac
 $("#inputautocompletesocid").focus();
 
 $("form#form").submit(function(){
-                $("#Envoyer").attr("disabled", "disabled");
 });
 
 });</script>';

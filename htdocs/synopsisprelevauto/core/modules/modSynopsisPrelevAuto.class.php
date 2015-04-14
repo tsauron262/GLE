@@ -42,7 +42,7 @@ class modSynopsisPrelevAuto extends DolibarrModules
 
         $this->family = "Synopsis";
         $this->name = "Synopsis Prelevement Auto";
-        $this->description = utf8_decode("Gestion des Prélèvement Automatique");
+        $this->description = utf8_decode("Gestion des Pr&eacute;l&egrave;vement Automatique");
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISPRELEVAUTO';
         $this->special = 0;

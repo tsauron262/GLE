@@ -563,7 +563,7 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 	// Check to ensure we use correct parameters
 	if ((($timestampEnd - $timestampStart) % 86400) != 0) return 'ErrorDates must use same hour and be GMT dates';
 
-	while ($timestampStart < $timestampEnd)		// Loop end when equals
+	while ($timestampStart /*modrsi*/<=/*fmod drsi*/ $timestampEnd)		// Loop end when equals
 	{
 		$ferie=false;
 		$countryfound=0;

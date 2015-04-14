@@ -1238,3 +1238,7 @@ URGENT : stat pas de sav "n/c"
 voir doublons precedent dans ficherapide
 
 garantie dans propal puht * qte pas tot_ht
+
+
+
+contact Nom - Prenom si deiferent de Societe.

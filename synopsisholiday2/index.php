@@ -29,15 +29,17 @@ require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/user/class/usergroup.class.php';
-require_once DOL_DOCUMENT_ROOT.'/holiday/common.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/synopsisholiday/common.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/functions2.lib.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/usergroups.lib.php';
 
 $langs->load('users');
 $langs->load('holidays');
+$langs->load('holiday@synopsisholiday');
 
 // Protection if external user
 if ($user->societe_id > 0) accessforbidden();
+
 $sortfield = GETPOST("sortfield",'alpha');
 $sortorder = GETPOST("sortorder",'alpha');
 $page = GETPOST("page",'int');
@@ -69,6 +71,8 @@ $search_statut   = GETPOST('select_statut');
  */
 
 // None
+
+
 
 /*
  * View
@@ -170,7 +174,10 @@ if ($id > 0)
 	$user_id = $fuser->id;
 }
 // Récupération des congés payés de l'utilisateur ou de tous les users
-if (!$user->rights->holiday->write_all || $id > 0 || !$user->rights->holiday->lire_tous)
+
+$droitWriteAll = !empty($user->rights->holiday->write_all) || !empty($user->rights->holiday->lire_tous);
+
+if (!$droitWriteAll || $id > 0)
 {
 	$holiday_payes = $holiday->fetchByUser($user_id,$order,$filter);
 }
@@ -200,7 +207,7 @@ if ($id > 0)
 	$head = user_prepare_head($fuser);
 
 	$title = $langs->trans("User");
-	dol_fiche_head($head, 'paidholidays', $title, 0, 'user');
+	dol_fiche_head($head, 'paidholidaysRtt', $title, 0, 'user');
 
 	print '<table class="border" width="100%">';
 
@@ -235,6 +242,8 @@ $nbaquis=$holiday->getCPforUser($user_id);
 $nbdeduced=$holiday->getConfCP('nbHolidayDeducted');
 $nb_holiday = $nbaquis / $nbdeduced;
 print $langs->trans('SoldeCPUser',round($nb_holiday,2)).($nbdeduced != 1 ? ' ('.$nbaquis.' / '.$nbdeduced.')' : '');
+        $nb_rtt = $holiday->getRTTforUser($user->id) / $holiday->getConfCP('nbRTTDeducted');
+        print ' &nbsp; <span>Solde de RTT: <b>'.$nb_rtt.' jours</b></span>';
 
 if ($id > 0)
 {
@@ -272,7 +281,7 @@ $formother->select_year($year_create,'year_create',1, $min_year, 0);
 print '</td>';
 
 // UTILISATEUR
-if($user->rights->holiday->write_all || $user->rights->holiday->lire_tous) {
+if($droitWriteAll) {
     print '<td class="liste_titre" align="left">';
     $form->select_users($search_employe,"search_employe",1,"",0,'');
     print '</td>';
@@ -281,7 +290,7 @@ if($user->rights->holiday->write_all || $user->rights->holiday->lire_tous) {
 }
 
 // VALIDEUR
-if (($user->rights->holiday->write_all) || ($user->rights->holiday->lire_tous))
+if($droitWriteAll)
 {
     print '<td class="liste_titre" align="left">';
 

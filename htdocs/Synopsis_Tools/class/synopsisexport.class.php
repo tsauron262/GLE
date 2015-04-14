@@ -66,9 +66,9 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         
         if ($typeAff2 != "fact")
         $where = " `revisionNext` = 0 ";
-    else {
-        $where = " 1 ";
-    }
+        else {
+            $where = " 1 ";
+        }
         
         if($blockCentre){
             if($typeAff2 == "fact"){

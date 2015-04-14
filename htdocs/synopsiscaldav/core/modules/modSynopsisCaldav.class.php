@@ -131,7 +131,7 @@ $this->menus = array();			// List of menus to add
   PRIMARY KEY (`rowid`)
 );",
 
-"CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, CONCAT('principals/', `login`) as principaluri, CONCAT(`lastname`, CONCAT(' ', `firstname`)) as displayname, login as uri, 
+"CREATE OR REPLACE VIEW calendars as (SELECT u.`rowid` as id, CONCAT('principals/', `login`) as principaluri, CONCAT(`lastname`, CONCAT('_', `firstname`)) as displayname, 'Calendar' as uri, 
 IF(fk_target, fk_target, '0') as ctag, 'Calendrier GLE' as description, 0 as calendarorder, '' as calendarcolor, 
 '' as timezone, 'VEVENT,VTODO' as components, 
 0 as transparent FROM llx_user u LEFT JOIN llx_element_element ON sourcetype = 'user' AND targettype = 'idCaldav' AND fk_source = u.rowid)",

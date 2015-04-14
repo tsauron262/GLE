@@ -106,8 +106,6 @@ class Holiday extends CommonObject {
         // Mets à jour les congés payés en début de mois
         $this->updateSoldeCP();
 
-        // Màj des RTT e, début de mois: 
-        
         // Vérifie le nombre d'utilisateur et mets à jour si besoin
         $this->verifNbUsers($this->countActiveUsersWithoutCP(), $this->getConfCP('nbUser'));
         return 1;
@@ -939,8 +937,9 @@ class Holiday extends CommonObject {
      */
     function updateSoldeCP($userID = '', $nbHoliday = '') {
         global $user, $langs;
+
         if (empty($userID) && empty($nbHoliday)) {
-            // Si mise à jour pour tout le monde en début de mois (congés payés + rtt)
+            // Si mise à jour pour tout le monde en début de mois
             $now = dol_now();
 
             // Mois actuel
@@ -961,10 +960,6 @@ class Holiday extends CommonObject {
                 $nb_holiday = $this->getConfCP('nbHolidayEveryMonth');
                 if (empty($nb_holiday))
                     $nb_holiday = 0;
-                
-                $nb_rtt = $this->getConfCP('nbRTTEveryMonth');
-                if (empty($nb_rtt))
-                    $nb_rtt = 0;
 
                 $users = $this->fetchUsers(false, false);
                 $nbUser = count($users);
@@ -973,19 +968,16 @@ class Holiday extends CommonObject {
 
                 while ($i < $nbUser) {
                     $now_holiday = $this->getCPforUser($users[$i]['rowid']);
-                    $new_solde = $now_holiday + $nb_holiday;
-                    
-                    $now_rtt = $this->getRTTforUser($users[$i]['rowid']);
-                    $new_solde_rtt = $now_rtt + $nb_rtt;
-                    
+                    $new_solde = $now_holiday + $this->getConfCP('nbHolidayEveryMonth');
+
                     // On ajoute la modification dans le LOG
                     $this->addLogCP($user->id, $users[$i]['rowid'], $langs->trans('HolidaysMonthlyUpdate'), $new_solde);
+
                     $i++;
                 }
 
                 $sql2 = "UPDATE " . MAIN_DB_PREFIX . "holiday_users SET";
                 $sql2.= " nb_holiday = nb_holiday + " . $nb_holiday;
-                $sql2.= ", nb_rtt = nb_rtt + " . $nb_rtt;
 
                 dol_syslog(get_class($this) . '::updateSoldeCP sql=' . $sql2);
                 $result = $this->db->query($sql2);
@@ -1886,7 +1878,10 @@ class Holiday extends CommonObject {
                 }
                 $ac->datep = $dateBegin->format('Y-m-d H:i:s');
                 $ac->datef = $dateEnd->format('Y-m-d H:i:s');
+
+                echo 'note avant: ' . $ac->note . '<br/>';
                 $ac->note = $this->LibStatut($this->statut);
+                echo 'note: ' . $ac->note . '<br/>';
                 $result = $ac->update($userToDo);
                 if ($result == 0) {
                     // Forçage de la màj (si $userToDo n'a pas les droits):
@@ -1919,6 +1914,7 @@ class Holiday extends CommonObject {
                     }
                 }
             } else {
+                die("suppression action ".$this->statut);
                 // Suppression:
                 $result = $ac->delete();
                 if ($result < 0)

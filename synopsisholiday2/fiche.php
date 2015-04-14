@@ -50,12 +50,11 @@ if ($user->societe_id > 0)
 
 $now = dol_now();
 
-
-$droitWriteAll = !empty($user->rights->holiday->write_all) || !empty($user->rights->holiday->lire_tous);
-
 /*
  * Actions
  */
+
+$droitWriteAll = !empty($user->rights->holiday->write_all) || !empty($user->rights->holiday->lire_tous);
 
 // Si création de la demande:
 if ($action == 'create') {
@@ -184,7 +183,7 @@ if ($action == 'update') {
     $cp = new Holiday($db);
     $cp->fetch($_POST['holiday_id']);
 
-    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && $droitWriteAll));
+    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && $user->rights->holiday->write_all));
 
     // Si en attente de validation
     if ($cp->statut == 1) {
@@ -268,7 +267,7 @@ if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
         $cp->fetch($id);
 
         $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                ($user->id != $cp->fk_user && $droitWriteAll));
+                ($user->id != $cp->fk_user && $user->rights->holiday->write_all));
 
         // Si c'est bien un brouillon
         if ($cp->statut == 1 || $cp->statut == 3) {
@@ -414,9 +413,9 @@ if ($action == 'confirm_valid') {
             $dateEnd = dol_print_date($cp->date_fin, 'day');
             $typeCp = $cp->getTypeLabel(true);
 
-            $demandeur = new User($db);
-            $demandeur->fetch($cp->fk_user);
-            $demandeurEmail = $demandeur->email;
+            $userD = new User($db);
+            $userD->fetch($cp->fk_user);
+            $userEmail = $userD->email;
 
             $validator = new User($db);
             $validator->fetch($cp->fk_validator);
@@ -429,14 +428,14 @@ if ($action == 'confirm_valid') {
             $mailErrors = array();
 
             // *** Mail au demandeur *** 
-            if ($demandeurEmail) {
+            if ($userEmail) {
                 $subject = $societeName . " - Demande de " . $typeCp . ' validée par votre superviseur';
-                $message = $langs->transnoentitiesnoconv("Hello") . " " . $demandeur->firstname . ",\n\n";
+                $message = $langs->transnoentitiesnoconv("Hello") . " " . $user->firstname . ",\n\n";
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre superviseur.';
                 $message.= "\n" . 'Cette demande reste encore en attente d\'approbation par votre Directeur des Ressouces Humaines.' . "\n\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($validator->firstname, $validator->lastname) . "\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
-                $mail = new CMailFile($subject, $demandeurEmail, $validatorEmail, $message);
+                $mail = new CMailFile($subject, $userEmail, $validatorEmail, $message);
                 if (!$mail->sendfile())
                     $mailErrors[] = $mail->error;
             }
@@ -445,12 +444,8 @@ if ($action == 'confirm_valid') {
                 $subject = $societeName . " - Demande de " . $typeCp . " à valider";
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $drh->firstname . ",\n\n";
                 $message.= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider' . "\n";
-                $message.= 'Cette demande vient d\'être pré-validée par ' . $validator->firstname . ' ' . $validator->lastname . ".\n";
-                if ((!empty($demandeur->fk_user) && $demandeur->fk_user > 0) &&
-                        $validator->id != $demandeur->fk_user)
-                    $message .= "Attention, il ne s\'agit pas du responsable hiérarchique du demandeur.\n";
-                $message .= "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($demandeur->firstname, $demandeur->lastname) . "\n";
+                $message.= 'Cette demande vient d\'être pré-validée par ' . $validator->firstname . ' ' . $validator->lastname . ".\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($user->firstname, $user->lastname) . "\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
                 $message.= "\n";
@@ -876,7 +871,6 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<table class="border" width="100%">';
         print '<tbody>';
         print '<tr>';
-        print '<td class="fieldrequired">' . $langs->trans("User") . '</td>';
         print '<td>';
         if (!$droitWriteAll) {
             print $form->select_users($userid, 'useridbis', 0, '', 1);
@@ -995,7 +989,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
             $drhUserId = $cp->getConfCP('drhUserId');
             $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                    ($user->id != $cp->fk_user && $droitWriteAll) ||
+                    ($user->id != $cp->fk_user && $user->rights->holiday->write_all) ||
                     ($user->id == $drhUserId));
 
             $valideur = new User($db);

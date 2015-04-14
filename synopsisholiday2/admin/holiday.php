@@ -32,12 +32,11 @@
 
 
 
-//require '../../main.inc.php';
+require '../../main.inc.php';
 require_once DOL_DOCUMENT_ROOT.'/holiday/class/holiday.class.php';
 require_once DOL_DOCUMENT_ROOT. '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT. '/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT. '/user/class/usergroup.class.php';
-
 
 //error_reporting(E_ALL);
 //////error_reporting(E_ERROR);
@@ -87,17 +86,10 @@ if ($action == "add")
         $error++;
     }
 
-    // Option du nombre de jours de CP à ajouter chaque mois
+    // Option du nombre de jours à ajouter chaque mois
     $nbHolidayEveryMonth = price2num($_POST['nbHolidayEveryMonth'],5);
 
     if(!$cp->updateConfCP('nbHolidayEveryMonth',$nbHolidayEveryMonth))
-    {
-        $error++;
-    }
-    
-    // Option du nombre de jours de RTT à ajouter chaque mois
-    $nbRTTEveryMonth = price2num($_POST['nbRTTEveryMonth'],5);
-    if(!$cp->updateConfCP('nbRTTEveryMonth',$nbRTTEveryMonth))
     {
         $error++;
     }
@@ -342,12 +334,6 @@ print '</tr>'."\n";
 $var=!$var;
 print '<tr '.$bc[$var].'>'."\n";
 print '<td style="padding:5px;">'.$langs->trans('nbHolidayEveryMonthCP').'</td>'."\n";
-print '<td style="padding:5px;"><input class="flat" type="text" name="nbRTTEveryMonth" value="'.$cp->getConfCP('nbRTTEveryMonth').'" size="5"/> '.$langs->trans('DurationDays').'</td>'."\n";
-print '</tr>'."\n";
-
-$var=!$var;
-print '<tr '.$bc[$var].'>'."\n";
-print '<td style="padding:5px;">Nombre de jours de RTT ajoutés chaque mois</td>'."\n";
 print '<td style="padding:5px;"><input class="flat" type="text" name="nbHolidayEveryMonth" value="'.$cp->getConfCP('nbHolidayEveryMonth').'" size="5"/> '.$langs->trans('DurationDays').'</td>'."\n";
 print '</tr>'."\n";
 

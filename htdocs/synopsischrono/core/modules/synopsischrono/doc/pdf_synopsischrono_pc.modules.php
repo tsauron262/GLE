@@ -224,7 +224,7 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                 $contact = "";
                 if ($chrono->contactid > 0) {
                     $addr = $chrono->contact;
-                    $contact = $addr->getFullName();
+                    $contact = $addr->getFullName($langs, 0, 0);
                     $tel = ($addr->phone_mobile != "") ? $addr->phone_mobile : ($addr->phone_perso != "") ? $addr->phone_perso : ($addr->phone_pro != "") ? $addr->phone_pro : "";
                     $mail = $addr->mail;
                 } else {

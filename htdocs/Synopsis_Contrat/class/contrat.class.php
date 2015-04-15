@@ -234,6 +234,14 @@ class Synopsis_Contrat extends Contrat {
             if (stripos($ligne->GMAO_Mixte['SLA'], "8") !== false)
                 $is8h = true;
 //            else echo $ligne->GMAO_Mixte['SLA']."|";
+            
+            
+            
+            if (stripos($prod->ref, "serv-cmn-") !== false)
+                $isCsserv8 = true;
+            if (stripos($prod->ref, "serv-cm-serv") !== false)
+                $isCsserv8 = true;
+            
         }
 //        if ($isSav)
 //            $pref = "SAV";
@@ -261,6 +269,10 @@ class Synopsis_Contrat extends Contrat {
             $pref = "C8-EPH";
         if ($isMedEph)
             $pref = "CMED-EPH";
+        if ($isMedEph)
+            $pref = "CMED-EPH";
+        if($isCsserv8)
+            $pref = "CSSERV8";
         $this->prefRef = substr($pref, 0, 2);
         if (isset($conf->global->CONTRACT_MAGRE_MASK))
             $conf->global->CONTRACT_MAGRE_MASK = str_replace($oldPref, $pref, $conf->global->CONTRACT_MAGRE_MASK);

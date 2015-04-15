@@ -369,15 +369,18 @@ if ($sql) {
 //                die($keyname.print_r($res, true));
             if ($model->type_valeur == 3) {
                 $value = inversDate($value);
-                $arr[] = (strtotime($value) > 0 ? date('Y-m-d H:i:s', strtotime($value)) : "");
+                $value = (strtotime($value) > 0 ? date('Y-m-d H:i:s', strtotime($value)) : "");
             } elseif ($model->type_valeur == 2) {
                 $value = inversDate($value);
-                $arr[] = (strtotime($value) > 0 ? date('Y-m-d', strtotime($value)) : "");
+                $value = (strtotime($value) > 0 ? date('Y-m-d', strtotime($value)) : "");
             } elseif ($model->type_subvaleur > 0 && $model->type_valeur != "8") {
-                $arr[] = parseValue1($res->id, $value, $model);
-            } else {
-                $arr[] = $value;
+                $value = parseValue1($res->id, $value, $model);
             }
+            
+            if(stripos($value, "<a") === false)
+                    $value = dol_trunc($value);
+            
+            $arr[] = $value;
         }
         if ($chrono->model->hasPropal && $chrono->model->propInList) {
             $html = "";

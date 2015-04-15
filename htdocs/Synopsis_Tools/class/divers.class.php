@@ -341,7 +341,7 @@ class synopsisHook {
     }
 
     static function getHeader() {
-        global $db, $langs, $isMobile;
+        global $db, $langs, $isMobile, $conf;
         self::$timeDeb = microtime(true);
 
         if (defined("CLOSE_DATE") && !stripos($_SERVER['REQUEST_URI'], 'close.php') && (!defined('IP_ADMIN') || IP_ADMIN != $_SERVER['REMOTE_ADDR'])) {
@@ -372,19 +372,23 @@ class synopsisHook {
         }
 
 
-        //Pour la liste rapide des centres
-        $listCentre = "<select name='centreRapide'>";
-        $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
-        $listCentre .= "<option value=''>Ajouter</option>";
-        while ($ligne = $db->fetch_object($result)) {
-            $val = $ligne->valeur;
-            $centre = $ligne->label;
-            $listCentre .= "<option value='" . $val . "'>" . $centre . "</option>";
+        if (isset($conf->global->MAIN_MODULE_SYNOPSISCHRONO)) {
+            //Pour la liste rapide des centres
+            $listCentre = "<select name='centreRapide'>";
+            $result = $db->query("SELECT * FROM `" . MAIN_DB_PREFIX . "Synopsis_Process_form_list_members` WHERE `list_refid` = 11 ");
+            $listCentre .= "<option value=''>Ajouter</option>";
+            while ($ligne = $db->fetch_object($result)) {
+                $val = $ligne->valeur;
+                $centre = $ligne->label;
+                $listCentre .= "<option value='" . $val . "'>" . $centre . "</option>";
+            }
+            $listCentre .= "</select>";
         }
-        $listCentre .= "</select>";
+        else
+            $listCentre = "";
 
 
-        ///js
+            ///js
         $return .= "<script type=\"text/javascript\">"
                 . 'var DOL_URL_ROOT = "' . DOL_URL_ROOT . '";'
                 . 'var idPagePrinc = "' . (isset($_SESSION['pagePrinc']) ? $_SESSION['pagePrinc'] : "") . '";'

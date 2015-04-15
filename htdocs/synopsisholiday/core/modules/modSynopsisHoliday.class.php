@@ -46,7 +46,7 @@ class modSynopsisHoliday extends DolibarrModules
         $this->version = '0.1';    // 'experimental' or 'dolibarr' or version
         $this->const_name = 'MAIN_MODULE_SYNOPSISHOLIDAY';
         $this->special = 0;
-        $this->picto='holiday@holiday';
+        $this->picto='holiday';
 
         // Dir
         $this->dirs = array();
@@ -169,8 +169,23 @@ class modSynopsisHoliday extends DolibarrModules
                             'user'=>0);
         
         
+        $r++;
+        $this->menu[$r]=array('fk_menu'=> 'fk_mainmenu=hrm,fk_leftmenu=holiday',
+                            'type'=>'left',
+                            'titre'=>'Mes Validations',
+                            'mainmenu'=>'hrm',
+                            'leftmenu'=>'1',        // To say if we can overwrite leftmenu
+                            'url'=>'/synopsisholiday/index.php?&myValid=true',
+                            'langs' => 'holiday@synopsisholiday',
+                            'position'=>5   ,
+                            'perms'=>'$user->rights->holiday->month_report',
+                            'target'=>'',
+                            'user'=>0);
+        
+        
         $this->tabs = array('user:-paidholidays',
-            'user:+paidholidaysRtt:Congés RTT:@monmodule:/synopsisholiday/index.php?id=__ID__');
+            'user:+paidholidaysRtt:Congés RTT:@monmodule:/synopsisholiday/index.php?id=__ID__',
+            'user:+paidholidaysRtt2:Valid Congés RTT:@monmodule:/synopsisholiday/index.php?search_valideur=__ID__');
         
     }
    /**

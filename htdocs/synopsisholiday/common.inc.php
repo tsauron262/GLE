@@ -23,15 +23,14 @@
  *		\brief      Common load of data
  */
 
-require_once realpath(dirname(__FILE__)).'/../main.inc.php';
+if (!isset($user))
+    require_once realpath(dirname(__FILE__)).'/../main.inc.php';
 if (! class_exists('Holiday')) {
 	require_once DOL_DOCUMENT_ROOT. '/synopsisholiday/class/holiday.class.php';
 }
-
 $langs->load("user");
 $langs->load("other");
 $langs->load('holiday@synopsisholiday');
-
 if (empty($conf->holiday->enabled))
 {
     llxHeader('',$langs->trans('CPTitreMenu'));

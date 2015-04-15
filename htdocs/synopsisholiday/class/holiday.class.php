@@ -107,7 +107,6 @@ class Holiday extends CommonObject {
         $this->updateSoldeCP();
 
         // Màj des RTT e, début de mois: 
-        
         // Vérifie le nombre d'utilisateur et mets à jour si besoin
         $this->verifNbUsers($this->countActiveUsersWithoutCP(), $this->getConfCP('nbUser'));
         return 1;
@@ -686,6 +685,7 @@ class Holiday extends CommonObject {
                 continue;  // ignore not validated holidays
 
 
+
                 
 // TODO Also use halfday for the check
             if ($dateDebut >= $infos_CP['date_debut'] && $dateDebut <= $infos_CP['date_fin'] ||
@@ -961,7 +961,7 @@ class Holiday extends CommonObject {
                 $nb_holiday = $this->getConfCP('nbHolidayEveryMonth');
                 if (empty($nb_holiday))
                     $nb_holiday = 0;
-                
+
                 $nb_rtt = $this->getConfCP('nbRTTEveryMonth');
                 if (empty($nb_rtt))
                     $nb_rtt = 0;
@@ -974,10 +974,10 @@ class Holiday extends CommonObject {
                 while ($i < $nbUser) {
                     $now_holiday = $this->getCPforUser($users[$i]['rowid']);
                     $new_solde = $now_holiday + $nb_holiday;
-                    
+
                     $now_rtt = $this->getRTTforUser($users[$i]['rowid']);
                     $new_solde_rtt = $now_rtt + $nb_rtt;
-                    
+
                     // On ajoute la modification dans le LOG
                     $this->addLogCP($user->id, $users[$i]['rowid'], $langs->trans('HolidaysMonthlyUpdate'), $new_solde);
                     $i++;
@@ -1846,8 +1846,8 @@ class Holiday extends CommonObject {
 
         if ($toLowerCase && ($this->type_conges != 2))
             return strtolower(self::$typesConges[$this->type_conges]);
-        else
-            return self::$typesConges[$this->type_conges];
+
+        return self::$typesConges[$this->type_conges];
     }
 
     /**
@@ -1858,6 +1858,7 @@ class Holiday extends CommonObject {
     function onStatusUpdate($user) {
         if (!isset($this->id) || empty($this->id))
             return false;
+        
 
         $ac = new ActionComm($this->db);
         $dateBegin = new DateTime($this->db->idate($this->date_debut));
@@ -1871,6 +1872,9 @@ class Holiday extends CommonObject {
             if ($this->statut == 2 || $this->statut == 3 || $this->statut == 6) {
                 // Mise à jour
                 // On envisage la possibilité que les dates aient pu être modifiées
+                if ($this->statut == 6)
+                    $ac->percentage = -1;
+
                 if (!$this->halfday) {
                     $dateBegin->setTime(8, 0, 0);
                     $dateEnd->setTime(19, 59, 59);
@@ -1884,16 +1888,25 @@ class Holiday extends CommonObject {
                     $dateBegin->setTime(14, 0, 0);
                     $dateEnd->setTime(19, 59, 59);
                 }
+                
+                
+                date_default_timezone_set("GMT");
+                
+                
                 $ac->datep = $dateBegin->format('Y-m-d H:i:s');
                 $ac->datef = $dateEnd->format('Y-m-d H:i:s');
                 $ac->note = $this->LibStatut($this->statut);
+                
+                
                 $result = $ac->update($userToDo);
                 if ($result == 0) {
                     // Forçage de la màj (si $userToDo n'a pas les droits):
                     $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
                     $sql .= "SET note = '" . $this->db->escape($ac->note) . "'";
-                    $sql .= ", datep = '" . $ac->datep . "'";
-                    $sql .= ", datep2 = '" . $ac->datef . "'";
+                    $sql .= ", datep = '" . $dateBegin->format('Y-m-d H:i:s') . "'";
+                    $sql .= ", datep2 = '" . $dateEnd->format('Y-m-d H:i:s') . "'";
+                    if ($this->statut == 6)
+                        $sql .= ", percent = -1";
                     $sql.= " WHERE id=" . $ac->id;
                     dol_syslog("Holiday::onStatusUpdate sql=" . $sql);
                     if ($this->db->query($sql)) {
@@ -1905,19 +1918,20 @@ class Holiday extends CommonObject {
                     }
                 } else if ($result < 0) {
                     $check = false;
-                } else {
-                    // Hack:
-                    $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
-                    $sql .= "SET datep = '" . $ac->datep . "'";
-                    $sql .= ", datep2 = '" . $ac->datef . "'";
-                    $sql.= " WHERE id=" . $ac->id;
-                    if ($this->db->query($sql)) {
-                        $this->db->commit();
-                    } else {
-                        $this->db->rollback();
-                        dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
-                    }
                 }
+//                else {
+//                    // Hack:
+//                    $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
+//                    $sql .= "SET datep = '" . $ac->datep . "'";
+//                    $sql .= ", datep2 = '" . $ac->datef . "'";
+//                    $sql.= " WHERE id=" . $ac->id;
+//                    if ($this->db->query($sql)) {
+//                        $this->db->commit();
+//                    } else {
+//                        $this->db->rollback();
+//                        dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
+//                    }
+//                }
             } else {
                 // Suppression:
                 $result = $ac->delete();
@@ -1952,20 +1966,21 @@ class Holiday extends CommonObject {
             $result = $ac->add($user);
             if ($result < 0)
                 $check = false;
-            else {
+            else 
                 $this->fk_actioncomm = $result;
-                // Hack:
-                $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
-                $sql .= "SET datep = '" . $ac->datep . "'";
-                $sql .= ", datep2 = '" . $ac->datef . "'";
-                $sql.= " WHERE id=" . $ac->id;
-                if ($this->db->query($sql)) {
-                    $this->db->commit();
-                } else {
-                    $this->db->rollback();
-                    dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
-                }
-            }
+//            {
+//                // Hack:
+//                $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";
+//                $sql .= "SET datep = '" . $ac->datep . "'";
+//                $sql .= ", datep2 = '" . $ac->datef . "'";
+//                $sql.= " WHERE id=" . $ac->id;
+//                if ($this->db->query($sql)) {
+//                    $this->db->commit();
+//                } else {
+//                    $this->db->rollback();
+//                    dol_syslog("Holiday::onStatusUpdate sqlError: " . $this->db->lasterror(), LOG_ERR);
+//                }
+//            }
         } else if ($this->statut == 1 || $this->statut == 4 || $this->statut == 5) {
             return true;
         }

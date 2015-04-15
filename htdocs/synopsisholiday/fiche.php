@@ -24,7 +24,9 @@
  * 		\ingroup    holiday
  * 		\brief      Form and file creation of paid holiday.
  */
-require('../main.inc.php');
+
+if (!isset($user))
+    require('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT . '/user/class/usergroup.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
@@ -34,9 +36,9 @@ require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/holiday.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/common.inc.php';
 
-error_reporting(E_ALL);
-error_reporting(E_ERROR);
-ini_set('display_errors', 1);
+//error_reporting(E_ALL);
+//error_reporting(E_ERROR);
+//ini_set('display_errors', 1);
 
 $myparam = GETPOST("myparam");
 $action = GETPOST('action', 'alpha');
@@ -50,9 +52,6 @@ if ($user->societe_id > 0)
 
 $now = dol_now();
 
-
-$droitWriteAll = !empty($user->rights->holiday->write_all) || !empty($user->rights->holiday->lire_tous);
-
 /*
  * Actions
  */
@@ -62,7 +61,8 @@ if ($action == 'create') {
     $cp = new Holiday($db);
 
     // Si pas le droit de créer une demande
-    if (($userid == $user->id && empty($user->rights->holiday->write)) || ($userid != $user->id && !$droitWriteAll)) {
+    if (($userid == $user->id && empty($user->rights->holiday->write)) || 
+            ($userid != $user->id && (empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous)))) {
         $error++;
         setEventMessage($langs->trans('CantCreateCP'));
         $action = 'request';
@@ -184,7 +184,8 @@ if ($action == 'update') {
     $cp = new Holiday($db);
     $cp->fetch($_POST['holiday_id']);
 
-    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && $droitWriteAll));
+    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user 
+            && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)));
 
     // Si en attente de validation
     if ($cp->statut == 1) {
@@ -268,7 +269,7 @@ if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
         $cp->fetch($id);
 
         $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                ($user->id != $cp->fk_user && $droitWriteAll));
+                ($user->id != $cp->fk_user && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)));
 
         // Si c'est bien un brouillon
         if ($cp->statut == 1 || $cp->statut == 3) {
@@ -325,7 +326,7 @@ if ($action == 'confirm_send') {
             $dateEnd = dol_print_date($cp->date_fin, 'day');
             $typeCp = $cp->getTypeLabel(true);
 
-            $subject = $societeName . " - Demande de " . $typeCp . " à valider.";
+            $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " a valider.";
 
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n";
             $message.= "\n";
@@ -430,7 +431,7 @@ if ($action == 'confirm_valid') {
 
             // *** Mail au demandeur *** 
             if ($demandeurEmail) {
-                $subject = $societeName . " - Demande de " . $typeCp . ' validée par votre superviseur';
+                $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . ' validee par votre superviseur';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $demandeur->firstname . ",\n\n";
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre superviseur.';
                 $message.= "\n" . 'Cette demande reste encore en attente d\'approbation par votre Directeur des Ressouces Humaines.' . "\n\n";
@@ -442,7 +443,7 @@ if ($action == 'confirm_valid') {
             }
             // *** Mail au DRH: 
             if ($drhEmail) {
-                $subject = $societeName . " - Demande de " . $typeCp . " à valider";
+                $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " a valider";
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $drh->firstname . ",\n\n";
                 $message.= 'Veuillez trouver ci-dessous une demande de ' . $typeCp . ' à valider' . "\n";
                 $message.= 'Cette demande vient d\'être pré-validée par ' . $validator->firstname . ' ' . $validator->lastname . ".\n";
@@ -539,7 +540,7 @@ if ($action == 'drh_confirm_valid') {
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
 
-            $subject = $societeName . " - Demande de " . $typeCp . " validée par votre DRH";
+            $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " validee par votre DRH";
 
             // Content
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
@@ -599,7 +600,7 @@ if ($action == 'confirm_refuse') {
                 $dateBegin = dol_print_date($cp->date_debut, 'day');
                 $dateEnd = dol_print_date($cp->date_fin, 'day');
                 $typeCp = $cp->getTypeLabel(true);
-                $subject = $societeName . " - Demande de " . $typeCp . " refusée par votre superviseur";
+                $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " refusee par votre superviseur";
 
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre superviseur pour le motif suivant:' . "\n";
@@ -665,7 +666,7 @@ if ($action == 'drh_confirm_refuse') {
                 $dateEnd = dol_print_date($cp->date_fin, 'day');
                 $typeCp = $cp->getTypeLabel(true);
 
-                $subject = $societeName . " - Demande de " . $typeCp . ' refusée par votre DRH';
+                $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . ' refusee par votre DRH';
                 $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre DRH pour le motif suivant:' . "\n";
                 $message.= GETPOST('detail_refuse', 'alpha') . "\n\n";
@@ -756,7 +757,7 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
             $dateEnd = dol_print_date($cp->date_fin, 'day');
             $typeCp = $cp->getTypeLabel(true);
 
-            $subject = $societeName . " - " . 'Demande de ' . $typeCp . ' annulée';
+            $subject = $societeName . " - " . 'Demande de ' . str_replace('é', 'e', $typeCp) . ' annulee';
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
             $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulée.' . "\n\n";
             $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
@@ -791,7 +792,8 @@ llxHeader(array(), $langs->trans('CPTitreMenu'));
 
 if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create') {
     // Si l'utilisateur n'a pas le droit de faire une demande
-    if (($userid == $user->id && empty($user->rights->holiday->write)) || ($userid != $user->id && !$droitWriteAll)) {
+    if (($userid == $user->id && empty($user->rights->holiday->write)) || 
+            ($userid != $user->id && empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous))) {
         $errors[] = $langs->trans('CantCreateCP');
     } else {
         // Formulaire de demande de congés payés
@@ -878,7 +880,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("User") . '</td>';
         print '<td>';
-        if (!$droitWriteAll) {
+        if (empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous)) {
             print $form->select_users($userid, 'useridbis', 0, '', 1);
             print '<input type="hidden" name="userid" value="' . $userid . '">';
         } else
@@ -995,7 +997,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
             $drhUserId = $cp->getConfCP('drhUserId');
             $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                    ($user->id != $cp->fk_user && $droitWriteAll) ||
+                    ($user->id != $cp->fk_user && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)) ||
                     ($user->id == $drhUserId));
 
             $valideur = new User($db);

@@ -25,7 +25,8 @@
  *		\brief      File that defines the balance of paid holiday of users.
  */
 
-require('../main.inc.php');
+if (!isset($user))
+    require('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/holiday/common.inc.php';
 

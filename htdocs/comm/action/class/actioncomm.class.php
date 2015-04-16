@@ -507,7 +507,7 @@ class ActionComm extends CommonObject
         	}
         	else if ($reshook < 0) $error++;
 
-        dol_syslog("update action plus".$sql, LOG_ERR);
+        dol_syslog("av triger", LOG_ERR);
             if (! $notrigger)
             {
                 // Appel des triggers
@@ -519,6 +519,7 @@ class ActionComm extends CommonObject
                 }
                 // Fin appel triggers
             }
+        dol_syslog("update action plus".$this->error, LOG_ERR);
 
             if (! $error)
             {

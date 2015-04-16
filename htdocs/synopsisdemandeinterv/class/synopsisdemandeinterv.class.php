@@ -988,6 +988,8 @@ class Synopsisdemandeinterv extends CommonObject {
                 return -1;
             }
         }
+        else
+            dol_syslog("Modification date DI interdite : ".$this->id,3);
     }
     
     

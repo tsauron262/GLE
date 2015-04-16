@@ -66,7 +66,6 @@ class Interfaces
         {
             dol_syslog(get_class($this).'::run_triggers was called with wrong parameters action='.$action.' object='.is_object($object).' user='.is_object($user).' langs='.is_object($langs).' conf='.is_object($conf), LOG_WARNING);
         }
-        dol_syslog ("deb init trigger",3);
 
         $nbfile = $nbtotal = $nbok = $nbko = 0;
 
@@ -99,7 +98,6 @@ class Interfaces
                         $nbfile++;
 
                         $modName = "Interface".ucfirst($reg[3]);
-                        dol_syslog("truger : ".$modName,3);
                         //print "file=$file"; print "modName=$modName"; exit;
                         if (in_array($modName,$modules))
                         {
@@ -112,7 +110,6 @@ class Interfaces
                             include_once $newdir.'/'.$file;
                         }
 
-                        dol_syslog("apres include : ".$newdir.'/'.$file,3);
                         // Check if trigger file is disabled by name
                         if (preg_match('/NORUN$/i',$file)) continue;
                         // Check if trigger file is for a particular module
@@ -153,7 +150,6 @@ class Interfaces
             {
                 dol_syslog(get_class($this)."::run_triggers action=".$action." Launch triggers for file '".$files[$key]."'", LOG_INFO);
 
-                        dol_syslog("avant run : ".$modName,3);
                 $result=$objMod->run_trigger($action,$object,$user,$langs,$conf);
                 if ($result > 0)
                 {

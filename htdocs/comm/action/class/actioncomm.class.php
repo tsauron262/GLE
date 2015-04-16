@@ -438,7 +438,7 @@ class ActionComm extends CommonObject
         global $langs,$conf,$hookmanager;
 
         $error=0;
-        dol_syslog("update action", LOG_ERR);
+        
         if(!isset($user->rights->agenda->myactions->create))
             $user->getrights();
         /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
@@ -507,7 +507,6 @@ class ActionComm extends CommonObject
         	}
         	else if ($reshook < 0) $error++;
 
-        dol_syslog("av triger", LOG_ERR);
             if (! $notrigger)
             {
                 // Appel des triggers
@@ -519,7 +518,6 @@ class ActionComm extends CommonObject
                 }
                 // Fin appel triggers
             }
-        dol_syslog("update action plus".$this->error, LOG_ERR);
 
             if (! $error)
             {

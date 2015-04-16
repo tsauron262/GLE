@@ -103,29 +103,19 @@ class InterfaceAgenda {
         global $user;
         if (in_array($action, array("ACTION_DELETE", "ACTION_MODIFY"))) {
             if ($action == "ACTION_MODIFY") {
-dol_syslog("av action lier1",3);
                 $object->fetch($object->id);
-dol_syslog("av action lier2",3);
                 if ($object->elementtype == "synopsisdemandeinterv" && $object->fk_element > 0) {
-dol_syslog("av action lier3",3);
                     require_once (DOL_DOCUMENT_ROOT . "/synopsisdemandeinterv/class/synopsisdemandeinterv.class.php");
-dol_syslog("av action lier4",3);
                     $di = new Synopsisdemandeinterv($this->db);
-dol_syslog("av action lier5",3);
                     $di->fetch($object->fk_element);
-dol_syslog("av action lier6",3);
                     $di->set_date_delivery($user, $object->datep, true);
-dol_syslog("av action lier7",3);
 //                    $di->getExtra();
                     if($di->fk_user_prisencharge != $object->usertodo->id)
                             $di->preparePrisencharge($object->usertodo);
-dol_syslog("av action lier8",3);
                     $di->update();
-dol_syslog("av action lier9",3);
                     return false;
                 }
             }
-dol_syslog("av action lier10",3);
 
 
             require_once DOL_DOCUMENT_ROOT . '/comm/action/class/actioncomm.class.php';
@@ -145,7 +135,7 @@ dol_syslog("av action lier10",3);
                         $idActionLier[] = $result->id;
                 }
             }
-dol_syslog("av action lier",3);
+
             foreach ($idActionLier as $id) {
                 $actionTmp = new ActionComm($this->db);
                 $actionTmp->fetch($id);

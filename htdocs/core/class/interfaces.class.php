@@ -66,6 +66,7 @@ class Interfaces
         {
             dol_syslog(get_class($this).'::run_triggers was called with wrong parameters action='.$action.' object='.is_object($object).' user='.is_object($user).' langs='.is_object($langs).' conf='.is_object($conf), LOG_WARNING);
         }
+        dol_syslog ("deb init trigger",3);
 
         $nbfile = $nbtotal = $nbok = $nbko = 0;
 

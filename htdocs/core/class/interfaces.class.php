@@ -98,7 +98,7 @@ class Interfaces
                         $nbfile++;
 
                         $modName = "Interface".ucfirst($reg[3]);
-                        dol_syslog("truger : ".$modName,3);
+                        dol_syslog("truger : ".$modNamee,3);
                         //print "file=$file"; print "modName=$modName"; exit;
                         if (in_array($modName,$modules))
                         {
@@ -111,6 +111,7 @@ class Interfaces
                             include_once $newdir.'/'.$file;
                         }
 
+                        dol_syslog("apres include : ".$newdir.'/'.$file,3);
                         // Check if trigger file is disabled by name
                         if (preg_match('/NORUN$/i',$file)) continue;
                         // Check if trigger file is for a particular module
@@ -151,6 +152,7 @@ class Interfaces
             {
                 dol_syslog(get_class($this)."::run_triggers action=".$action." Launch triggers for file '".$files[$key]."'", LOG_INFO);
 
+                        dol_syslog("avant run : ".$modName,3);
                 $result=$objMod->run_trigger($action,$object,$user,$langs,$conf);
                 if ($result > 0)
                 {

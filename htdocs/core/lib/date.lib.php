@@ -674,8 +674,11 @@ function num_public_holiday($timestampStart, $timestampEnd, $countrycode='FR')
 		if ($ferie) $nbFerie++;
 
 		// Increase number of days (on go up into loop)
-		$jour++;
+                // /*mod drsi*/
+//		$jour++;
 		$timestampStart=dol_mktime(0,0,0,$mois,$jour,$annee,1);	// Generate GMT date for next day
+                $timestampStart += (60*60*24);
+                /*mod drsi*/
 	}
 
 	return $nbFerie;

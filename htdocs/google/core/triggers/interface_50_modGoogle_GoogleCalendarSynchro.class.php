@@ -104,7 +104,7 @@ class InterfaceGoogleCalendarSynchro
 	function run_trigger($action, $object, $user, $langs, $conf)
 	{
 		global $dolibarr_main_url_root;
-dol_syslog("vvvvvvvvvvvvvv1",3);
+
 		// Création / Mise à jour / Suppression d'un évènement dans Google Calendar
 
 		if (!$conf->google->enabled) return 0; // Module non actif
@@ -114,7 +114,7 @@ dol_syslog("vvvvvvvvvvvvvv1",3);
 		//var_dump($object); exit;
 		$user = empty($conf->global->GOOGLE_LOGIN)?'':$conf->global->GOOGLE_LOGIN;
 		$pwd  = empty($conf->global->GOOGLE_PASSWORD)?'':$conf->global->GOOGLE_PASSWORD;
-dol_syslog("2",3);
+
 		if (empty($user) || empty($pwd))	// We use setup of user
 		{
 			// L'utilisateur concerné est l'utilisateur affecté à l'évènement dans Dolibarr
@@ -125,7 +125,7 @@ dol_syslog("2",3);
 
                         if(!isset($fuser->conf->GOOGLE_LOGIN) || !isset($fuser->conf->GOOGLE_PASSWORD))
                             return 0;
-           dol_syslog("2.5",3);             
+                        
 			$user = $fuser->conf->GOOGLE_LOGIN;
 			$pwd = $fuser->conf->GOOGLE_PASSWORD;
 
@@ -137,7 +137,8 @@ dol_syslog("2",3);
 			if (empty($conf->global->GOOGLE_DUPLICATE_INTO_GCAL)) return 0;
 		}
 		//print $action.' - '.$user.' - '.$pwd.' - '.$conf->global->GOOGLE_DUPLICATE_INTO_GCAL; exit;
-dol_syslog("3",3);
+
+
 
 		// Actions
 		if ($action == 'ACTION_CREATE' || $action == 'ACTION_MODIFY' || $action == 'ACTION_DELETE')
@@ -156,7 +157,7 @@ dol_syslog("3",3);
 			$service= 'cl';		// cl = calendar, cp=contact, ... Search on AUTH_SERVICE_NAME into Zend API for full list
 			$client = getClientLoginHttpClient($user, $pwd, $service);
 			//var_dump($client); exit;
-dol_syslog("4",3);
+
 			if ($client == null)
 			{
 				dol_syslog("Failed to login to Google for login ".$user, LOG_ERR);
@@ -246,7 +247,7 @@ dol_syslog("4",3);
 				}
 			}
 		}
-dol_syslog("5",3);
+
 		return 0;
 	}
 

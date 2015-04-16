@@ -135,7 +135,7 @@ class InterfaceAgenda {
                         $idActionLier[] = $result->id;
                 }
             }
-
+dol_syslog("av action lier",3);
             foreach ($idActionLier as $id) {
                 $actionTmp = new ActionComm($this->db);
                 $actionTmp->fetch($id);

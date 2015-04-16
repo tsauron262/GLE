@@ -104,7 +104,7 @@ class InterfaceGoogleCalendarSynchro
 	function run_trigger($action, $object, $user, $langs, $conf)
 	{
 		global $dolibarr_main_url_root;
-dol_syslog("1",3);
+dol_syslog("vvvvvvvvvvvvvv1",3);
 		// Création / Mise à jour / Suppression d'un évènement dans Google Calendar
 
 		if (!$conf->google->enabled) return 0; // Module non actif

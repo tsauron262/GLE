@@ -98,6 +98,7 @@ class Interfaces
                         $nbfile++;
 
                         $modName = "Interface".ucfirst($reg[3]);
+                        dol_syslog("truger : ".$modName,3);
                         //print "file=$file"; print "modName=$modName"; exit;
                         if (in_array($modName,$modules))
                         {

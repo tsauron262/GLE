@@ -443,7 +443,6 @@ class ActionComm extends CommonObject
             $user->getrights();
         /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
-        dol_syslog("update action plus", LOG_ERR);
         // Clean parameters
         $this->label=trim($this->label);
         $this->note=trim($this->note);
@@ -487,6 +486,7 @@ class ActionComm extends CommonObject
         $sql.= ", fk_user_done=".($this->userdone->id > 0 ? "'".$this->userdone->id."'":"null");
         $sql.= " WHERE id=".$this->id;
 
+        dol_syslog("update action plus".$sql, LOG_ERR);
         dol_syslog(get_class($this)."::update sql=".$sql);
         if ($this->db->query($sql))
         {

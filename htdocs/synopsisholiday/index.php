@@ -95,8 +95,10 @@ if ((isset($_REQUEST['search_valideur']) || isset($_REQUEST['myValid'])) && $hol
     $search_statut = 3;
     unset($_REQUEST['search_valideur']);
 }
-elseif (isset($_REQUEST['myValid']))
+elseif (isset($_REQUEST['myValid'])){
     $_POST['search_valideur'] = $user->id;
+    $search_statut = 2;
+}
 
 $id2 = GETPOST('search_valideur');
 

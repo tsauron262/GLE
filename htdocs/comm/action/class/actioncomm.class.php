@@ -438,11 +438,12 @@ class ActionComm extends CommonObject
         global $langs,$conf,$hookmanager;
 
         $error=0;
-        
+        dol_syslog("update action", LOG_ERR);
         if(!isset($user->rights->agenda->myactions->create))
             $user->getrights();
         /*deb mod drsi */ if(!$user->rights->agenda->myactions->create || (!$user->rights->agenda->allactions->create && $user->id != $this->usertodo->id)) return 0; /*fmod drsi*/
 
+        dol_syslog("update action plus", LOG_ERR);
         // Clean parameters
         $this->label=trim($this->label);
         $this->note=trim($this->note);

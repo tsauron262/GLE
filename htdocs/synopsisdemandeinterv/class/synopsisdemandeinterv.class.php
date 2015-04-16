@@ -952,21 +952,26 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
+dol_syslog("av action lier11",3);
         if ($user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/) {
+dol_syslog("av action lier12",3);
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";
 
+dol_syslog("av action lier13",3);
             if ($this->db->query($sql)) {
                 $this->date_delivery = $date_delivery;
 
 
+dol_syslog("av action lier14",3);
                 $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeintervdet ";
                 $sql.= " SET date = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
                 $sql.= " WHERE fk_synopsisdemandeinterv = " . $this->id . "";
                 $this->db->query($sql);
                 
                 
+dol_syslog("av action lier15",3);
                 if(!$no_trigger){
                 // Appel des triggers
                 include_once(DOL_DOCUMENT_ROOT . "/core/class/interfaces.class.php");
@@ -980,9 +985,11 @@ class Synopsisdemandeinterv extends CommonObject {
                 }
                 $this->date = $date_delivery;
                 
+dol_syslog("av action lier16",3);
                 // Fin appel triggers
                 return 1;
             } else {
+dol_syslog("av action lier20",3);
                 $this->error = $this->db->error();
                 dol_syslog("synopsisdemandeinterv::set_date_delivery Erreur SQL");
                 return -1;

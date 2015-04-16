@@ -486,7 +486,6 @@ class ActionComm extends CommonObject
         $sql.= ", fk_user_done=".($this->userdone->id > 0 ? "'".$this->userdone->id."'":"null");
         $sql.= " WHERE id=".$this->id;
 
-        dol_syslog("update action plus".$sql, LOG_ERR);
         dol_syslog(get_class($this)."::update sql=".$sql);
         if ($this->db->query($sql))
         {
@@ -508,6 +507,7 @@ class ActionComm extends CommonObject
         	}
         	else if ($reshook < 0) $error++;
 
+        dol_syslog("update action plus".$sql, LOG_ERR);
             if (! $notrigger)
             {
                 // Appel des triggers

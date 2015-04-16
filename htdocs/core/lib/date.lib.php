@@ -731,7 +731,7 @@ function num_open_day($timestampStart, $timestampEnd, $inhour=0, $lastday=0, $ha
 	//print 'num_open_day timestampStart='.$timestampStart.' timestampEnd='.$timestampEnd.' bit='.$lastday;
 	if ($timestampStart < $timestampEnd)
 	{
-		$nbOpenDay = num_between_day($timestampStart, $timestampEnd, $lastday) - num_public_holiday($timestampStart, $timestampEnd, $lastday);
+		$nbOpenDay = num_between_day($timestampStart, $timestampEnd, $lastday) - num_public_holiday($timestampStart, $timestampEnd/*, $lastday*/);
 		$nbOpenDay.= " " . $langs->trans("Days");
 		if ($inhour == 1 && $nbOpenDay <= 3) $nbOpenDay = $nbOpenDay*24 . $langs->trans("HourShort");
 		return $nbOpenDay - (($inhour == 1 ? 12 : 0.5) * abs($halfday));

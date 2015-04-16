@@ -995,6 +995,8 @@ dol_syslog("av action lier20",3);
                 return -1;
             }
         }
+        
+dol_syslog("av action lier30",3);
     }
     
     

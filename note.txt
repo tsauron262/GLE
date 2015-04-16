@@ -1241,4 +1241,7 @@ garantie dans propal puht * qte pas tot_ht
 
 
 
-contact Nom - Prenom si deiferent de Societe.
+//contact Nom - Prenom si deiferent de Societe.
+
+
+voir pour controle des rdv deja prie

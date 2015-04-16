@@ -904,8 +904,8 @@ Au " . dol_print_date($val->date_fin_validite)), 0, 'C', 1);
         }
 
         $clause = "Entre les soussignés";
-        $clause1 = "BIMP INFORMATIQUE";
-        $clause2 = "Société Anonyme OLYS au capital de 85 372 Euros, dont le siège social sis 4 rue du Cdt. Dubois
+        $clause1 = "BIMP";
+        $clause2 = "Société Anonyme OLYS au capital de 1 085 372 Euros, dont le siège social sis 4 rue du Cdt. Dubois
 69003 LYON, représentée par Monsieur Christian CONSTANTIN-BERTIN, Président Directeur Général.
 
 d'une part
@@ -919,7 +919,7 @@ Représenté(e) légalement par
 ";
 
         $clause5 = "1 OBJET";
-        $clause6 = "Le présent contrat a pour objet de définir les modalités d'intervention de la Société BIMP INFORMATIQUE auprès de " . utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom) . "
+        $clause6 = "Le présent contrat a pour objet de définir les modalités d'intervention de la Société BIMP auprès de " . utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom) . "
 
 ";
 
@@ -1015,7 +1015,7 @@ Le ...................,
         $pdf->SetFont('', '', 9);
         $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'L');
         $remY = $pdf->GetY();
-        $signature2 = "Pour BIMP Informatique :
+        $signature2 = "Pour BIMP :
 M. Christian CONSTANTIN-BERTIN
 Signature et cachet";
 
@@ -1116,7 +1116,7 @@ Signature et cachet
             $ligne .= " - APE " . MAIN_INFO_APE;
         if (defined('MAIN_INFO_TVAINTRA'))
             $ligne .= " - TVA/CEE " . MAIN_INFO_TVAINTRA;
-        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";
+        $ligne .= "\n" . "RIB : CREDIT COOPERATIF - 42559.00091.41000013628.34";
 
 //        $ligne = "SA OLYS au capital de 85 372" . EURO . "    -   320 387 483 R.C.S. Lyon   -   APE 4741Z   -   TVA/CEE FR 34 320387483";
 //        $ligne .= "\n" . "RIB : BPLL  -  13907. 00000.00202704667.45  -  CCP 11 158 41U Lyon";

@@ -273,7 +273,7 @@ $classAnnexe->getAnnexe($contrat, $pdf, $this, $outputlangs);
         }
 
         $clause = "Entre les soussignés";
-        $clause1 = "BIMP INFORMATIQUE";
+        $clause1 = "BIMP";
         $clause2 = "Société Anonyme OLYS au capital de 85 372 Euros, dont le siège social sis 4 rue du Cdt. Dubois
 69003 LYON, représentée par Monsieur Christian CONSTANTIN-BERTIN, Président Directeur Général.
 
@@ -288,7 +288,7 @@ Représenté(e) légalement par
 ";
 
         $clause5 = "1 OBJET";
-        $clause6 = "Le présent contrat a pour objet de définir les modalités d'intervention de la Société BIMP INFORMATIQUE auprès de " . utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom) . "
+        $clause6 = "Le présent contrat a pour objet de définir les modalités d'intervention de la Société BIMP auprès de " . utf8_encodeRien($this->contrat->societe->titre) . " " . utf8_encodeRien($this->contrat->societe->nom) . "
 
 ";
 
@@ -384,7 +384,7 @@ Le ...................,
         $pdf->SetFont('', '', 9);
         $pdf->MultiCell(155, 4, utf8_encodeRien($clause16), 0, 'L');
         $remY = $pdf->GetY();
-        $signature2 = "Pour BIMP Informatique :
+        $signature2 = "Pour BIMP :
 M. Christian CONSTANTIN-BERTIN
 Signature et cachet";
 

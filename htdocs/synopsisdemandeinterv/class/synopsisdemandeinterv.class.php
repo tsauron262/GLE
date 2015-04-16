@@ -952,7 +952,7 @@ class Synopsisdemandeinterv extends CommonObject {
     function set_date_delivery($user, $date_delivery, $no_trigger = false) {
         global $langs, $conf;
 
-        if (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/) {
+        if (1 || (isset($user->rights) && isset($user->rights->synopsisdemandeinterv) && $user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/)) {
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");
             $sql.= " WHERE rowid = " . $this->id . " AND fk_statut = 0";

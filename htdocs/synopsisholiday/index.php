@@ -97,8 +97,11 @@ if ((isset($_REQUEST['search_valideur']) || isset($_REQUEST['myValid'])) && $hol
 }
 elseif (isset($_REQUEST['myValid'])){
     $_POST['search_valideur'] = $user->id;
-    $search_statut = 2;
 }
+
+//deuxieme test pour le filtre
+if(isset($_REQUEST['search_valideur']))
+    $search_statut = 2;
 
 $id2 = GETPOST('search_valideur');
 

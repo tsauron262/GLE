@@ -1899,6 +1899,9 @@ class Holiday extends CommonObject {
                 
                 
                 $result = $ac->update($userToDo);
+                
+                date_default_timezone_set("Europe/Paris");
+                
                 if ($result == 0) {
                     // Forçage de la màj (si $userToDo n'a pas les droits):
                     $sql = "UPDATE " . MAIN_DB_PREFIX . "actioncomm ";

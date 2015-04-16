@@ -953,7 +953,7 @@ class Synopsisdemandeinterv extends CommonObject {
         global $langs, $conf;
 
 dol_syslog("av action lier11",3);
-        if ($user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/) {
+        if (1/*$user->rights->synopsisdemandeinterv->creer/* && $this->statut == 0*/) {
 dol_syslog("av action lier12",3);
             $sql = "UPDATE " . MAIN_DB_PREFIX . "synopsisdemandeinterv ";
             $sql.= " SET datei = " . ($date_delivery > 0 ? "'" . $this->db->idate($date_delivery) . "'" : "null");

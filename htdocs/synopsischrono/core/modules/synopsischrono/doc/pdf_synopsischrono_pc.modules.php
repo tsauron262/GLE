@@ -232,11 +232,16 @@ class pdf_synopsischrono_pc extends ModeleSynopsischrono {
                     $tel = $addr->phone;
                     $mail = $addr->email;
                 }
-                $address = $chrono->societe->name . "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
+                $address = $chrono->societe->name;
+                
+                if($contact != "" && $contact != $chrono->societe->name)
+                    $address .= "\n".$contact;
+                
+                $address .= "\n" . $chrono->societe->address . "\n" . $chrono->societe->zip . " " . $chrono->societe->town;
 
                 $pdf->SetXY('20', '71');
                 $pdf->SetFont('', '', 12);
-                $pdf->MultiCell(300, 6, ($contact != "" && $contact != $chrono->societe->name ? $contact . "\n" : "") . $address . "\n" . $tel . "\n" . $mail, 0, 'L');
+                $pdf->MultiCell(300, 6, $address . "\n" . $tel . "\n" . $mail, 0, 'L');
 
 
 

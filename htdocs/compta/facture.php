@@ -3378,7 +3378,7 @@ if ($action == 'create')
 				|| ($object->type == Facture::TYPE_CREDIT_NOTE && empty($discount->id))
 				|| ($object->type == Facture::TYPE_DEPOSIT && empty($discount->id)))
 				&& ($object->statut == 2 || $object->statut == 3)
-				&& $user->rights->facture->creer)				// A paid invoice (partially or completely)
+				&& $user->rights->facture->supprimer)				// A paid invoice (partially or completely)
 			{
 				if (! $objectidnext && $object->close_code != 'replaced') 				// Not replaced by another invoice
 				{

@@ -1103,7 +1103,7 @@ function print_left_eldy_menu($db,$menu_array_before,$menu_array_after,&$tabMenu
 		if ($mainmenu == 'hrm')
 		{
 			// Holiday module
-			if (! empty($conf->holiday->enabled))
+			if (! empty($conf->holiday->enabled2))
 			{
 				$langs->load("holiday");
 

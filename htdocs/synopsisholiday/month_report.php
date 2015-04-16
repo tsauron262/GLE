@@ -28,7 +28,7 @@ require_once DOL_DOCUMENT_ROOT.'/user/class/user.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.form.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/class/html.formother.class.php';
 require_once DOL_DOCUMENT_ROOT.'/core/lib/date.lib.php';
-require_once DOL_DOCUMENT_ROOT.'/holiday/common.inc.php';
+require_once DOL_DOCUMENT_ROOT.'/synopsisholiday/common.inc.php';
 
 // Protection if external user
 if ($user->societe_id > 0) accessforbidden();

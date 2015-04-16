@@ -793,7 +793,7 @@ class Holiday extends CommonObject {
                 return $langs->trans('FinalApprovedCP') . ' ' . img_picto($langs->trans('FinalApprovedCP'), $pictoapproved);
         }
 
-//        die ($statut);
+        die ($statut);
         return $statut;
     }
 

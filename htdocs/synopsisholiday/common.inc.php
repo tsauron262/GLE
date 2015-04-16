@@ -18,7 +18,7 @@
  */
 
 /**
- *   	\file       htdocs/holiday/common.inc.php
+ *   	\file       htdocs/synopsisholiday/common.inc.php
  *		\ingroup    holiday
  *		\brief      Common load of data
  */

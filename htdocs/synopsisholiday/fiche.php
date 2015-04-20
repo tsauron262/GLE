@@ -56,13 +56,16 @@ $now = dol_now();
  * Actions
  */
 
+$droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) || (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
+
+
 // Si création de la demande:
 if ($action == 'create') {
     $cp = new Holiday($db);
 
     // Si pas le droit de créer une demande
     if (($userid == $user->id && empty($user->rights->holiday->write)) || 
-            ($userid != $user->id && (empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous)))) {
+            ($userid != $user->id && !$droitAll)) {
         $error++;
         setEventMessage($langs->trans('CantCreateCP'));
         $action = 'request';
@@ -185,7 +188,7 @@ if ($action == 'update') {
     $cp->fetch($_POST['holiday_id']);
 
     $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user 
-            && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)));
+            && ($droitAll)));
 
     // Si en attente de validation
     if ($cp->statut == 1) {
@@ -269,7 +272,7 @@ if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
         $cp->fetch($id);
 
         $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                ($user->id != $cp->fk_user && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)));
+                ($user->id != $cp->fk_user && ($droitAll)));
 
         // Si c'est bien un brouillon
         if ($cp->statut == 1 || $cp->statut == 3) {
@@ -793,7 +796,7 @@ llxHeader(array(), $langs->trans('CPTitreMenu'));
 if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create') {
     // Si l'utilisateur n'a pas le droit de faire une demande
     if (($userid == $user->id && empty($user->rights->holiday->write)) || 
-            ($userid != $user->id && empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous))) {
+            ($userid != $user->id && !$droitAll)) {
         $errors[] = $langs->trans('CantCreateCP');
     } else {
         // Formulaire de demande de congés payés
@@ -880,7 +883,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("User") . '</td>';
         print '<td>';
-        if (empty($user->rights->holiday->write_all) && empty($user->rights->holiday->lire_tous)) {
+        if (!$droitAll) {
             print $form->select_users($userid, 'useridbis', 0, '', 1);
             print '<input type="hidden" name="userid" value="' . $userid . '">';
         } else
@@ -997,7 +1000,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
 
             $drhUserId = $cp->getConfCP('drhUserId');
             $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                    ($user->id != $cp->fk_user && ($user->rights->holiday->write_all || $user->rights->holiday->lire_tous)) ||
+                    ($user->id != $cp->fk_user && ($droitAll)) ||
                     ($user->id == $drhUserId));
 
             $valideur = new User($db);
@@ -1067,7 +1070,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 }
 
                 // Si envoi en validation
-                if ($action == 'sendToValidate' && $cp->statut == 1 && $user->id == $cp->fk_user) {
+                if ($action == 'sendToValidate' && $cp->statut == 1 && ($user->id == $cp->fk_user) || $droitAll) {
                     print $form->formconfirm("fiche.php?id=" . $id, $langs->trans("TitleToValidCP"), $langs->trans("ConfirmToValidCP"), "confirm_send", '', 1, 1);
                 }
 
@@ -1326,7 +1329,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     if ($canedit && $cp->statut == 1) {
                         print '<a href="fiche.php?id=' . $_GET['id'] . '&action=edit" class="butAction">' . $langs->trans("EditCP") . '</a>';
                     }
-                    if ($canedit && $cp->statut == 1 && $user->id == $cp->fk_user) {
+                    if ($canedit && $cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
                         print '<a href="fiche.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
                     }
                     if ($user->rights->holiday->delete && $cp->statut == 1) { // If draft

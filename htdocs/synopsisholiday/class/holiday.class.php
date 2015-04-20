@@ -1866,6 +1866,21 @@ class Holiday extends CommonObject {
         $userToDo = new User($this->db);
         $userToDo->fetch($this->fk_user);
         $check = true;
+        
+        
+        
+        $fk_action = 0;
+        $tabDebLib = explode(" ", $this->getTypeLabel());
+        if(isset($tabDebLib[0])){
+            $sql = $this->db->query("SELECT id 
+                FROM  `".MAIN_DB_PREFIX."c_actioncomm` 
+                WHERE  `libelle` LIKE  '%".$tabDebLib[0]."%'");
+            if($this->db->num_rows($sql) > 0){
+                $ligne = $this->db->fetch_object($sql);
+                $fk_action = $ligne->id;
+            }
+        }
+        
 
         if (isset($this->fk_actioncomm) && !empty($this->fk_actioncomm)) {
             $ac->fetch($this->fk_actioncomm);
@@ -1874,6 +1889,9 @@ class Holiday extends CommonObject {
                 // On envisage la possibilité que les dates aient pu être modifiées
                 if ($this->statut == 6)
                     $ac->percentage = -1;
+                
+                if($fk_action)
+                    $ac->fk_action = $fk_action;
 
                 if (!$this->halfday) {
                     $dateBegin->setTime(8, 0, 0);
@@ -1949,6 +1967,11 @@ class Holiday extends CommonObject {
             $ac->fk_element = $this->id;
             $ac->elementtype = $this->element;
             $ac->usertodo = $userToDo;
+            
+            
+            if($fk_action)
+                $ac->type_id = $fk_action;
+                
 
             if (!$this->halfday) {
                 $dateBegin->setTime(8, 0, 0);

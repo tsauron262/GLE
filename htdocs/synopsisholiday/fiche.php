@@ -20,7 +20,7 @@
  */
 
 /**
- *   	\file       htdocs/holiday/fiche.php
+ *   	\file       htdocs/synopsisholiday/fiche.php
  * 		\ingroup    holiday
  * 		\brief      Form and file creation of paid holiday.
  */
@@ -33,7 +33,7 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formfile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/CMailFile.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
-require_once DOL_DOCUMENT_ROOT . '/core/lib/holiday.lib.php';
+require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/core/lib/synopsisholiday.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/common.inc.php';
 
 //error_reporting(E_ALL);
@@ -300,7 +300,7 @@ if ($action == 'confirm_send') {
     $cp->fetch($id);
     $drhUserId = $cp->getConfCP('drhUserId');
     // Si brouillon et créateur
-    if ($cp->statut == 1 && $user->id == $cp->fk_user) {
+    if ($cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
         $cp->statut = 2;
         $agendaCheck = $cp->onStatusUpdate($user);
         $verif = $cp->update($user->id);
@@ -365,7 +365,7 @@ if ($action == 'confirm_send') {
             $message.= "\n";
             $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
             $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
             $message.= "\n";
 
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
@@ -439,7 +439,7 @@ if ($action == 'confirm_valid') {
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre superviseur.';
                 $message.= "\n" . 'Cette demande reste encore en attente d\'approbation par votre Directeur des Ressouces Humaines.' . "\n\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($validator->firstname, $validator->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $demandeurEmail, $validatorEmail, $message);
                 if (!$mail->sendfile())
                     $mailErrors[] = $mail->error;
@@ -456,7 +456,7 @@ if ($action == 'confirm_valid') {
                 $message .= "\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("Name") . " : " . dolGetFirstLastname($demandeur->firstname, $demandeur->lastname) . "\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("Period") . " : du " . dol_print_date($cp->date_debut, 'day') . " au " . dol_print_date($cp->date_fin, 'day') . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
                 $message.= "\n";
                 $mail = new CMailFile($subject, $drhEmail, $validatorEmail, $message);
                 if (!$mail->sendfile())
@@ -549,7 +549,7 @@ if ($action == 'drh_confirm_valid') {
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
             $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre Directeur des Ressouces Humaines.' . "\n\n";
             $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
             $message.= "\n";
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
@@ -609,7 +609,7 @@ if ($action == 'confirm_refuse') {
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre superviseur pour le motif suivant:' . "\n";
                 $message.= GETPOST('detail_refuse', 'alpha') . "\n\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
                 $result = $mail->sendfile();
                 if (!$result) {
@@ -674,7 +674,7 @@ if ($action == 'drh_confirm_refuse') {
                 $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été refusée par votre DRH pour le motif suivant:' . "\n";
                 $message.= GETPOST('detail_refuse', 'alpha') . "\n\n";
                 $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
                 $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
                 $result = $mail->sendfile();
                 if (!$result) {
@@ -764,7 +764,7 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
             $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
             $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulée.' . "\n\n";
             $message.= "- " . $langs->transnoentitiesnoconv("ModifiedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/holiday/fiche.php?id=" . $cp->rowid . "\n\n";
+            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
             $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
             $result = $mail->sendfile();
             if (!$result) {
@@ -1101,7 +1101,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     print $form->formconfirm("fiche.php?id=" . $id, $langs->trans("TitleCancelCP"), $langs->trans("ConfirmCancelCP"), "confirm_cancel", '', 1, 1);
                 }
 
-                $head = holiday_prepare_head($cp);
+                $head = synopsisholiday_prepare_head($cp);
 
                 dol_fiche_head($head, 'card', $langs->trans("CPTitreMenu"), 0, 'holiday');
 

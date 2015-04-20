@@ -134,7 +134,7 @@ nbJours=Nombre jours
 TitleAdminCP=Configuration des Congés
 #Messages
 Hello=Bonjour
-HolidaysToValidate=Congés payés à valider
+HolidaysToValidate=Conges payes a valider
 HolidaysToValidateBody=Veuillez trouver ci-dessous une demande de congés payés à valider.
 HolidaysToValidateDelay=Cette demande de congés payés à été effectué dans un délai de moins de %s jours avant ceux-ci.
 HolidaysToValidateAlertSolde=L'utilisateur ayant fait cette demande de congés payés n'a pas le solde requis.

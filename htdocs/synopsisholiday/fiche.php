@@ -1070,7 +1070,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 }
 
                 // Si envoi en validation
-                if ($action == 'sendToValidate' && $cp->statut == 1 && ($user->id == $cp->fk_user) || $droitAll) {
+                if ($action == 'sendToValidate' && $cp->statut == 1 && (($user->id == $cp->fk_user) || $droitAll)) {
                     print $form->formconfirm("fiche.php?id=" . $id, $langs->trans("TitleToValidCP"), $langs->trans("ConfirmToValidCP"), "confirm_send", '', 1, 1);
                 }
 

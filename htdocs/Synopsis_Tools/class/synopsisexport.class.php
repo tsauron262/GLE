@@ -306,7 +306,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
             $folder2 .= "/";
 
             if ($type == "factureSav") {
-                $folder2 = "extractFactGle";
+                $folder2 = "extractFactGle/";
             }
 
             $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/";

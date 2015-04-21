@@ -63,19 +63,19 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
 
     public function exportChronoSav($centre = null, $typeAff = null, $typeAff2 = null, $paye = false, $dateDeb = null, $dateFin = null, $blockCentre = null) {
         global $user;
-        
+
         if ($typeAff2 != "fact")
-        $where = " `revisionNext` = 0 ";
+            $where = " `revisionNext` = 0 ";
         else {
             $where = " 1 ";
         }
-        
-        if($blockCentre){
-            if($typeAff2 == "fact"){
-               accessforbidden("", 0,0);
+
+        if ($blockCentre) {
+            if ($typeAff2 == "fact") {
+                accessforbidden("", 0, 0);
                 return 1;
             }
-            $where .= " AND CentreVal IN ('".implode("','", $blockCentre)."')";
+            $where .= " AND CentreVal IN ('" . implode("','", $blockCentre) . "')";
         }
 
         $champDate = "fact.datec";
@@ -84,8 +84,8 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         } elseif ($typeAff2 != "fact") {
             $champDate = "propal.datec";
         }
-        
-        if($typeAff2 == "nb")
+
+        if ($typeAff2 == "nb")
             $champDate = "chrono.date_create";
 
         if ($typeAff2 == "fact" && $typeAff != "parCentre") {
@@ -237,7 +237,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
 
             $j = 0;
 //            echo $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin;
-            if(is_null($blockCentre))
+            if (is_null($blockCentre))
                 $this->statLigneFacture("N/C", $partReq1 . $partReq5 . $where . " AND (propal.fk_statut != 3 OR propal.fk_statut is NULL) AND (propal.rowid Is NULL OR (propal.rowid NOT IN ('" . implode("','", $tabMaterielTot) . "'))) " . $partReqFin);
             foreach ($tabMateriel as $titre => $val) {
                 $j++;
@@ -250,13 +250,13 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
         } else {
             $this->statLigneFacture("Stat", $partReq1 . $partReq5 . $where . $partReqFin);
         }
-        
-        
+
+
         if ($this->sortie != 'file') {
-        global $tabVal;
-        foreach($tabVal as $val => $nb)
-            if($nb > 1)
-                echo "<br/>Facture en double : ".$val;
+            global $tabVal;
+            foreach ($tabVal as $val => $nb)
+                if ($nb > 1)
+                    echo "<br/>Facture en double : " . $val;
         }
 
         $this->sortie("", "statSav");
@@ -303,12 +303,12 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
 
         if ($this->sortie == 'file') {
             $folder2 = "exportGle";
+            $folder2 .= "/";
+
             if ($type == "factureSav") {
-                if ($idObj > 0)
-                    $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $idObj);
                 $folder2 = "extractFactGle";
             }
-            $folder2 .= "/";
+
             $folder1 = (defined('DIR_SYNCH') ? DIR_SYNCH : DOL_DATA_ROOT . "/synopsischrono/export/" ) . "/";
             if (!is_dir($folder1))
                 mkdir($folder1);
@@ -316,9 +316,21 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                 mkdir($folder1 . $folder2);
             $nom = str_replace(" ", "_", $nom); //die($folder . $nom . ".txt");
             $file = $folder2 . $nom . ".txt";
-            file_put_contents($folder1 . $file, $text);
-            if ($print)
-                echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
+            if (file_put_contents($folder1 . $file, $text)) {
+                if ($type == "factureSav") {
+                    if ($idObj > 0)
+                        $this->db->query("UPDATE " . MAIN_DB_PREFIX . "facture SET extraparams = 1 WHERE rowid = " . $idObj);
+                    $folder2 = "extractFactGle";
+                }
+                if ($print)
+                    echo "<a href='" . DOL_URL_ROOT . "/document.php?modulepart=synopsischrono&file=/export/" . $file . "' class='butAction'>Fichier</a>";
+            }
+            else {
+                if ($print)
+                    echo "<span style='color:red;'>Impossible d'exporté ".$file."</span>";
+            
+            }
+
         } else {
             echo "<style>"
             . "td{"
@@ -372,9 +384,9 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                     else
                         $valeur = "";
                 }
-                
-                if($nom == "objFact"){
-                    if(isset($tabVal[$valeur]))
+
+                if ($nom == "objFact") {
+                    if (isset($tabVal[$valeur]))
                         $tabVal[$valeur] = $tabVal[$valeur] + 1;
                     else
                         $tabVal[$valeur] = 1;

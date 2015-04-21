@@ -124,7 +124,7 @@ class CSMSFile
 				if ($res <= 0)
 				{
 					$this->error=$sms->error;
-					dol_syslog("CSMSFile::sendfile: sms send error=".$this->error, LOG_ERR);
+					dol_syslog("CSMSFile::sendfile: sms send error=".$this->error." Phone : ".$sms->dest, LOG_ERR);
 				}
 				else
 				{
@@ -153,7 +153,7 @@ class CSMSFile
     				if ($res <= 0)
     				{
     					$this->error=$sms->error;
-    					dol_syslog("CSMSFile::sendfile: sms send error=".$this->error, LOG_ERR);
+    					dol_syslog("CSMSFile::sendfile: sms send error=".$this->error." Phone : ".$sms->dest, LOG_ERR);
     				}
     				else
     				{

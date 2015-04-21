@@ -226,7 +226,7 @@ $js .= <<<EOF
         longDays: $.datepicker.regional['fr_FR'].dayNames,
         shortMonths: $.datepicker.regional['fr_FR'].monthNamesShort,
         longMonths: $.datepicker.regional['fr_FR'].monthNames,
-        dateFormat: 'd F y'
+        dateFormat: 'd F y (W)'
       });
     });
   })(jQuery);

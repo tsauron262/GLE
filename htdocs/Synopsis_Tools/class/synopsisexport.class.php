@@ -88,6 +88,9 @@ WHERE   fk_soc = soc.rowid AND `extraparams` IS NULL AND fact.fk_statut > 0 AND 
         if ($typeAff2 == "nb")
             $champDate = "chrono.date_create";
 
+        if ($typeAff2 == "sav")
+            $champDate = "chrono.date_create";
+
         if ($typeAff2 == "fact" && $typeAff != "parCentre") {
             $typeAff = null;
         }

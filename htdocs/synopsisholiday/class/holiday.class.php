@@ -1884,6 +1884,8 @@ class Holiday extends CommonObject {
 
         if (isset($this->fk_actioncomm) && !empty($this->fk_actioncomm)) {
             $ac->fetch($this->fk_actioncomm);
+        }
+        if($ac->id > 0){
             if ($this->statut == 2 || $this->statut == 3 || $this->statut == 6) {
                 // Mise à jour
                 // On envisage la possibilité que les dates aient pu être modifiées

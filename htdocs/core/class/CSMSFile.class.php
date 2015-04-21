@@ -130,7 +130,7 @@ class CSMSFile
 				{
 					dol_syslog("CSMSFile::sendfile: sms send success with id=".$res, LOG_DEBUG);
 					//var_dump($res);        // 1973128
-					$this->dump_sms_result($res);
+					$this->dump_sms_result($res." Phone : ".$sms->dest);
 				}
 			}
 		    else if (! empty($conf->global->MAIN_SMS_SENDMODE))    // $conf->global->MAIN_SMS_SENDMODE looks like a value 'class@module'
@@ -159,7 +159,7 @@ class CSMSFile
     				{
     					dol_syslog("CSMSFile::sendfile: sms send success with id=".$res, LOG_DEBUG);
     					//var_dump($res);        // 1973128
-    					$this->dump_sms_result($res);
+    					$this->dump_sms_result($res." Phone : ".$sms->dest);
     				}
 		        }
 		        catch(Exception $e)
@@ -231,7 +231,7 @@ class CSMSFile
         	$outputfile=$dolibarr_main_data_root."/dolibarr_sms.log";
             $fp = fopen($outputfile,"a+");
 
-            fputs($fp, "\nResult id=".$result);
+            fputs($fp, "\n".dol_print_date(time())." : Result id=".$result);
 
             fclose($fp);
             if (! empty($conf->global->MAIN_UMASK))

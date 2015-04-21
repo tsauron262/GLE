@@ -1871,7 +1871,7 @@ if (is_dir($dir)) {
          */
 //    }
     } else {
-        $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";
+        $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d'importation d&eacute;fini</div>";
     }
 
     echo $webContent;
@@ -2098,7 +2098,7 @@ EOF;
     unlink($filename);
 }
 else {
-    $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";
+    $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d'importation d&eacute;fini</div>";
     print $webContent;
 }
 

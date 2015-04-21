@@ -1958,8 +1958,10 @@ class Holiday extends CommonObject {
             } else {
                 // Suppression:
                 $result = $ac->delete();
-                if ($result < 0)
+                if ($result < 0){
+                    dol_syslog("Holiday::annulation suppression de l'event fail id action : " . $this->fk_actioncomm, LOG_ERR);
                     $check = false;
+                }
             }
         } else if ($this->statut == 2 || $this->statut == 3 || $this->statut == 6) {
             // Création

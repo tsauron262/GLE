@@ -2099,6 +2099,7 @@ EOF;
 }
 else {
     $webContent .= "<div class='ui-error error'> Pas de r&eacute;pertoire d\'importation d&eacute;fini</div>";
+    print $webContent;
 }
 
 global $logLongTime;

@@ -1232,7 +1232,7 @@ voir accompte => accompte prise en charge
 
 
 
-URGENT : stat pas de sav "n/c"
+//URGENT : stat pas de sav "n/c"
 
 
 voir doublons precedent dans ficherapide
@@ -1245,3 +1245,12 @@ garantie dans propal puht * qte pas tot_ht
 
 
 voir pour controle des rdv deja prie
+
+
+
+stat des tech aj facture
+
+
+//adresse dans pc
+
+voir reunion interne

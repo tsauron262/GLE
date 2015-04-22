@@ -49,13 +49,13 @@ class modSynopsisFinanc extends DolibarrModules
         $this->picto='tools@Synopsis_Tools';
 
         // Dir
-        //$this->dirs = array("synopsisFinanc");
+        $this->dirs = array("synopsisFinanc");
 
         // Config pages
         //$this->config_page_url = "";
         
         
-        $this->module_parts = array('triggers' => 0);
+        $this->module_parts = array('triggers' => 1);
 
         // Dependences
         $this->depends = array('');
@@ -155,55 +155,6 @@ class modSynopsisFinanc extends DolibarrModules
   function init()
   {
     $sql = array();
-//    $sql[]="CREATE TABLE IF NOT EXISTS ".MAIN_DB_PREFIX."synopsisfinancement ("
-//            . "rowid        integer not null auto_increment,"
-//            . "user_create  integer not null,"
-//            . "user_modify  integer,"
-//            . "fk_propal    integer not null,"
-//            . "fk_contrat   integer,"
-//            . "fk_facture   integer,"
-//            . "montantAF    float,"
-//            . "periode      integer,"
-//            . "duree        integer,"
-//            . "commC        float,"
-//            . "commF        float,"
-//            . "taux         float,"
-//            . "banque       varchar(25),"
-//            . "PRIMARY KEY (rowid),"
-//            . "CONSTRAINT Finance_FK_Propal FOREIGN KEY (fk_propal) REFERENCES ".MAIN_DB_PREFIX."propal (rowid),"
-//            . "CONSTRAINT Finance_FK_Contrat FOREIGN KEY (fk_contrat) REFERENCES ".MAIN_DB_PREFIX."contrat (rowid),"
-//            . "CONSTRAINT Finance_FK_Facture FOREIGN KEY (fk_facture) REFERENCES ".MAIN_DB_PREFIX."facture (rowid),"
-//            . "CONSTRAINT Finance_FK_create FOREIGN KEY (user_create) REFERENCES ".MAIN_DB_PREFIX."user (rowid),"
-//            . "CONSTRAINT Finance_FK_modify FOREIGN KEY (user_modify) REFERENCES ".MAIN_DB_PREFIX."user (rowid)"
-//        . ");";
-    $sql[] = "CREATE TABLE IF NOT EXISTS `".MAIN_DB_PREFIX."synopsisfinancement` (
-  `rowid` int(11) NOT NULL AUTO_INCREMENT,
-  `user_create` int(11) NOT NULL,
-  `user_modify` int(11) DEFAULT NULL,
-  `fk_propal` int(11) NOT NULL,
-  `fk_contrat` int(11) DEFAULT NULL,
-  `fk_facture` int(11) DEFAULT NULL,
-  `type_location` varchar(25) NOT NULL,
-  `preter` float DEFAULT NULL,
-  `VR` float DEFAULT NULL,
-  `montantAF` float DEFAULT NULL,
-  `periode` int(11) DEFAULT NULL,
-  `duree` int(11) DEFAULT NULL,
-  `commC` float DEFAULT NULL,
-  `commF` float DEFAULT NULL,
-  `taux` float DEFAULT NULL,
-  `banque` varchar(25) DEFAULT NULL,
-  PRIMARY KEY (`rowid`),
-  KEY `Finance_FK_Propal` (`fk_propal`),
-  KEY `Finance_FK_Contrat` (`fk_contrat`),
-  KEY `Finance_FK_Facture` (`fk_facture`),
-  KEY `Finance_FK_create` (`user_create`),
-  KEY `Finance_FK_modify` (`user_modify`)
-)";
-    
-    $sql[] = "INSERT INTO `".MAIN_DB_PREFIX."document_model` (`rowid`, `nom`, `entity`, `type`, `libelle`, `description`) VALUES
-(2, 'azurFinanc', 1, 'propal', NULL, NULL);";
-    
     return $this->_init($sql);
   }
 

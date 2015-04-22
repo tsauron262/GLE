@@ -1,0 +1,70 @@
+/*
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+*/
+/* 
+    Created on : 16 avr. 2015, 16:44:58
+    Author     : victor
+*/
+
+table{
+    border:1px solid black;
+    border-radius: 6px;
+}
+
+th{
+    text-align: center;
+    vertical-align: top;
+    border: 1px solid black;
+    color:black;
+    padding: 5px;
+    background-color: #6699ff;
+}
+
+td{
+    text-align: center;
+    vertical-align: auto;
+    padding: 5px;
+    color:black;
+    border: 1px solid black;
+    background-color: #999999;
+}
+
+.HG{
+    border-radius: 5px 0 0 0;
+}
+
+.HD{
+    border-radius: 0 5px 0 0;
+}
+
+.BG{
+    border-radius: 0 0 0 5px;
+}
+
+.BD{
+    border-radius: 0 0 5px 0;
+}
+
+.BB{
+    border-radius: 0 0 5px 5px;
+}
+
+.HH{
+    border-radius: 5px 5px 0 0;
+}
+
+input{
+    width: 50%;
+}
+
+input[type="radio"]{
+    width: auto;
+    margin-left: 10px;
+    margin-right: 5px;
+}
+
+select{
+    width: 60%;
+}

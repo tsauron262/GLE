@@ -427,7 +427,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
                 if ((stripos($nom, "_ht") !== false || stripos($nom, "_ttc") !== false || stripos($nom, "Total") !== false
                         ) && is_numeric($valeur)) {
                     $this->tabTot[$nom] += $valeur;
-                    $valeur = price($valeur);
+                    $valeur = str_replace(" ", "", price($valeur));
                 }
 
 

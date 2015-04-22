@@ -95,6 +95,7 @@ class Synopsisfinancement extends CommonObject {
         $req = 'INSERT INTO `' . MAIN_DB_PREFIX . 'synopsisfinancement`(`user_create`, `fk_propal`, `montantAF`, `periode`, `duree`, `commC`, `commF`, `taux`, `banque`, preter, VR, type_location) VALUES (' . $user->id . ',' . $this->propal_id . ',' . $this->montantAF . ',' . $this->periode . ',' . $this->duree . ',' . $this->commC . ',' . $this->commF . ',' . $this->taux . ',"' . $this->banque . '",' . $this->pret . ',' . $this->VR . ',"' . $this->location . '");';
         if ($this->verif_integer() == true) {
             $this->db->query($req);
+            $this->id = $this->db->last_insert_id(MAIN_DB_PREFIX . 'synopsisfinancement');
         }
     }
 

@@ -357,7 +357,7 @@ WHERE  `list_refid` =11 AND chrono.CentreVal = ls.valeur";
 
 
                 if (!is_int($nom) && !in_array($nom, $tabCacher))
-                    $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", (isset($this->tabTot[$nom]) ? price($this->tabTot[$nom]) : "TOTAL")) . $separateur;
+                    $return .= str_replace(array($sautDeLigne, $separateur, "\n", "\r"), "  ", (isset($this->tabTot[$nom]) ? str_replace(price($this->tabTot[$nom]), " ", "") : "TOTAL")) . $separateur;
             }
             $return .= $sautDeLigne;
         }

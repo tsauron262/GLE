@@ -651,6 +651,7 @@ function saveForm() {
                 $fichinterline->fk_contratdet = (isset($_POST['presta' . $i . "_contradet"]) ? $_POST['presta' . $i . "_contradet"] : 0);
                 $fichinterline->typeIntervProd = $_POST['presta' . $i . "_fk_prod"];
                 $fichinterline->isForfait = ($_POST['presta' . $i . "_forfait"] == "on");
+                if($pu_ht > 0)
                 $fichinterline->pu_ht = $pu_ht;
                 $result = $fichinterline->update($user);
             } else

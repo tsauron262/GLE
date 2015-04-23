@@ -405,6 +405,32 @@ if ($id > 0) {
     } else {
         print $ligne->GMAO_Mixte['nbVisiteAn'];
     }
+    
+    
+
+    print '<th width="25%" class="ui-widget-header ui-state-default">Nb visite curative</th>
+                                   <td colspan="1" class="ui-widget-content">';
+    if ($ligne->GMAO_Mixte['nbVisiteAnCur'] == 0) {
+        print '<b>Pas d\'intervention curative</b>';
+    } else {
+        print $ligne->GMAO_Mixte['nbVisiteAnCur'];
+    }
+    
+    
+    print '<tr><th width="25%" class="ui-widget-header ui-state-default">T&eacute;l&eacute;maintenance</th>';
+    if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
+        print '<td colspan="1" class="ui-widget-content"><b>OUI</b> '.$ligne->GMAO_Mixte['telemaintenance'];
+    } else {
+        print '<td colspan="1" class="ui-widget-content">NON';
+    }
+    
+    
+    print '<th width="25%" class="ui-widget-header ui-state-default">T&eacute;l&eacute;maintenance Curative</th>';
+    if ($ligne->GMAO_Mixte['telemaintenanceCur'] > 0) {
+        print '<td colspan="1" class="ui-widget-content"><b>OUI</b> '.$ligne->GMAO_Mixte['telemaintenanceCur'];
+    } else {
+        print '<td colspan="1" class="ui-widget-content">NON';
+    }
 
 
     if ($isTicket) {
@@ -439,12 +465,6 @@ if ($id > 0) {
 
     print '<tr><th width="25%" class="ui-widget-header ui-state-default">Hotline</th>';
     if ($ligne->GMAO_Mixte['hotline'] > 0) {
-        print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
-    } else {
-        print '<td colspan="1" class="ui-widget-content">NON';
-    }
-    print '    <th width="25%" class="ui-widget-header ui-state-default">T&eacute;l&eacute;maintenance</th>';
-    if ($ligne->GMAO_Mixte['telemaintenance'] > 0) {
         print '<td colspan="1" class="ui-widget-content"><b>OUI</b>';
     } else {
         print '<td colspan="1" class="ui-widget-content">NON';

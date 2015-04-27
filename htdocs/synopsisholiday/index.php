@@ -43,6 +43,7 @@ $langs->load('holidays');
 // Protection if external user
 if ($user->societe_id > 0)
     accessforbidden();
+
 $sortfield = GETPOST("sortfield", 'alpha');
 $sortorder = GETPOST("sortorder", 'alpha');
 $page = GETPOST("page", 'int');
@@ -254,10 +255,23 @@ if ($id > 0 || $id2 > 0) {
 }
 
 
-$nbaquis = $holiday->getCPforUser($user_id);
+$nbaquis_current = $holiday->getCurrentYearCPforUser($user_id);
+$nbaquis_next = $holiday->getNextYearCPforUser($user_id);
 $nbdeduced = $holiday->getConfCP('nbHolidayDeducted');
-$nb_holiday = $nbaquis / $nbdeduced;
-print $langs->trans('SoldeCPUser', round($nb_holiday, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis . ' / ' . $nbdeduced . ')' : '');
+$nb_holiday_current = $nbaquis_current / $nbdeduced;
+$nb_holiday_next = $nbaquis_next / $nbdeduced;
+$nextCPYearDate = $holiday->getCPNextYearDate(true, false);
+$nextCPYearDateAfter = $holiday->getCPNextYearDate(true, true);
+$nbRtt = $holiday->getRTTforUser($user_id);
+print '<b>Année en cours : </b>';
+print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
+print '&nbsp;(A utiliser avant le <b>'.$nextCPYearDate.'</b>).';
+print '<br/>';
+print '<b>Année n+1 : </b>';
+print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
+print '&nbsp;(A utiliser à partir du <b>'.$nextCPYearDate.'</b> et avant le <b>'.$nextCPYearDateAfter.'</b>).';
+print '<br/>';
+print 'Solde RTT : <b>'.round($nbRtt, 2).' jours</b>';
 
 if ($id > 0) {
     dol_fiche_end();

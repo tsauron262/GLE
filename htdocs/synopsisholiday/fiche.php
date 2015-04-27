@@ -24,7 +24,6 @@
  * 		\ingroup    holiday
  * 		\brief      Form and file creation of paid holiday.
  */
-
 if (!isset($user))
     require('../main.inc.php');
 require_once DOL_DOCUMENT_ROOT . '/core/class/html.form.class.php';
@@ -35,10 +34,6 @@ require_once DOL_DOCUMENT_ROOT . '/core/class/html.formmail.class.php';
 require_once DOL_DOCUMENT_ROOT . '/core/lib/date.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/core/lib/synopsisholiday.lib.php';
 require_once DOL_DOCUMENT_ROOT . '/synopsisholiday/common.inc.php';
-
-//error_reporting(E_ALL);
-//error_reporting(E_ERROR);
-//ini_set('display_errors', 1);
 
 $myparam = GETPOST("myparam");
 $action = GETPOST('action', 'alpha');
@@ -56,7 +51,9 @@ $now = dol_now();
  * Actions
  */
 
-$droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) || (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
+
+$droitAll = ((!empty($user->rights->holiday->write_all) && $user->rights->holiday->write_all) ||
+        (!empty($user->rights->holiday->lire_tous) && $user->rights->holiday->lire_tous));
 
 
 // Si création de la demande:
@@ -64,7 +61,7 @@ if ($action == 'create') {
     $cp = new Holiday($db);
 
     // Si pas le droit de créer une demande
-    if (($userid == $user->id && empty($user->rights->holiday->write)) || 
+    if (($userid == $user->id && empty($user->rights->holiday->write)) ||
             ($userid != $user->id && !$droitAll)) {
         $error++;
         setEventMessage($langs->trans('CantCreateCP'));
@@ -115,10 +112,20 @@ if ($action == 'create') {
         if (!$verifCP) {
             header('Location: fiche.php?action=request&error=alreadyCP');
             exit;
+        } else if ($verifCP < 0) {
+            header('Location: fiche.php?action=request&error=substituteCP');
+            exit;
         }
 
         // Si aucun jours ouvrés dans la demande
         $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
+
+        // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
+        if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
+            $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
+            if ($nb_ferie)
+                $nbopenedday = 0;
+        }
         if ($nbopenedday < 1) {
             header('Location: fiche.php?action=request&error=DureeHoliday');
             exit;
@@ -187,8 +194,7 @@ if ($action == 'update') {
     $cp = new Holiday($db);
     $cp->fetch($_POST['holiday_id']);
 
-    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user 
-            && ($droitAll)));
+    $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) || ($user->id != $cp->fk_user && ($droitAll)));
 
     // Si en attente de validation
     if ($cp->statut == 1) {
@@ -223,6 +229,12 @@ if ($action == 'update') {
 
             // Si pas de jours ouvrés dans la demande
             $nbopenedday = num_open_day($date_debut_gmt, $date_fin_gmt, 0, 1, $halfday);
+            // hack (si 1 seul jour : num_open_day() ne vérifie pas s'il s'agit d'un jour férié)
+            if ($date_debut_gmt == $date_fin_gmt && $nbopenedday == 1) {
+                $nb_ferie = num_public_holiday($date_debut_gmt, $date_fin_gmt);
+                if ($nb_ferie)
+                    $nbopenedday = 0;
+            }
             if ($nbopenedday < 1) {
                 header('Location: fiche.php?id=' . $_POST['holiday_id'] . '&action=edit&error=DureeHoliday');
                 exit;
@@ -263,35 +275,25 @@ if ($action == 'update') {
 
 // Si suppression de la demande:
 if ($action == 'confirm_delete' && GETPOST('confirm') == 'yes') {
-    if ($user->rights->holiday->delete) {
+    $cp = new Holiday($db);
+    $cp->fetch($id);
+
+    if ((($user->id == $cp->fk_user) || $user->rights->holiday->delete || $droitAll) &&
+            ($cp->statut == 1)) {
         $error = 0;
 
         $db->begin();
+        $result = $cp->delete($id);
 
-        $cp = new Holiday($db);
-        $cp->fetch($id);
-
-        $canedit = (($user->id == $cp->fk_user && $user->rights->holiday->write) ||
-                ($user->id != $cp->fk_user && ($droitAll)));
-
-        // Si c'est bien un brouillon
-        if ($cp->statut == 1 || $cp->statut == 3) {
-            // Si l'utilisateur à le droit de lire cette demande, il peut la supprimer
-            if ($canedit) {
-                $result = $cp->delete($id);
-            } else {
-                $error = $langs->trans('ErrorCantDeleteCP');
-            }
-        }
-
-        if (!$error) {
+        if ($result > 0) {
             $db->commit();
             header('Location: index.php');
             exit;
         } else {
             $db->rollback();
         }
-    }
+    } else
+        $error = $langs->trans('ErrorCantDeleteCP');
 }
 
 // Si envoi de la demande:
@@ -349,13 +351,17 @@ if ($action == 'confirm_send') {
             }
             // Si l'option pour avertir le valideur en cas de solde inférieur à la demande
             if ($cp->getConfCP('AlertValidatorSolde')) {
-                $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                 if (empty($cp->type_conges) || !$cp->type_conges) {
-                    if ($nbopenedday > $cp->getCPforUser($cp->fk_user)) {
-                        $message.= "\n";
-                        $message.= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
+                    $soldes = $cp->getCPforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
+                    if (!isset($soldes['error'])) {
+                        if ($soldes['nb_holiday_current'] < $soldes['nbOpenDayCurrent'] ||
+                                $soldes['nb_holiday_next'] < $soldes['nbOpenDayNext']) {
+                            $message.= "\n";
+                            $message.= $langs->transnoentities("HolidaysToValidateAlertSolde") . "\n";
+                        }
                     }
                 } else if ($cp->type_conges == 2) {
+                    $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                     if ($nbopenedday > $cp->getRTTforUser($cp->fk_user)) {
                         $message.= "\n";
                         $message.= 'L\'utilisateur ayant fait cette demande de RTT n\'a pas le solde requis.' . "\n";
@@ -401,15 +407,6 @@ if ($action == 'confirm_valid') {
         // Si pas d'erreur SQL on redirige vers la fiche de la demande
         if ($verif > 0) {
             // *** La màj du solde se fait désormais suite à la validation par le DRH ***
-//             Calculcate number of days consummed
-//            $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1);
-//            $soldeActuel = $cp->getCpforUser($cp->fk_user);
-//            $newSolde = $soldeActuel - ($nbopenedday * $cp->getConfCP('nbHolidayDeducted'));
-//            // On ajoute la modification dans le LOG
-//            $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("Holidays"), $newSolde);
-//            // Mise à jour du solde
-//            $cp->updateSoldeCP($cp->fk_user, $newSolde);
-
             $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
             if (!empty($conf->global->MAIN_APPLICATION_TITLE))
                 $societeName = $conf->global->MAIN_APPLICATION_TITLE;
@@ -500,26 +497,45 @@ if ($action == 'drh_confirm_valid') {
 
         // Si pas d'erreur SQL on redirige vers la fiche de la demande
         if ($verif > 0) {
-            // Calcule du nombre de jours consommés: 
-            $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1);
+            $soldeUpdateError = '';
             switch ($cp->type_conges) {
                 case 0: // congés payés ordinaires
-                    $soldeActuel = $cp->getCpforUser($cp->fk_user);
-                    $newSolde = $soldeActuel - ($nbopenedday * $cp->getConfCP('nbHolidayDeducted'));
-                    // On ajoute la modification dans le LOG
-                    $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("Holidays"), $newSolde);
-                    // Mise à jour du solde
-                    $cp->updateSoldeCP($cp->fk_user, $newSolde);
+                    $nbHolidayDeducted = $cp->getConfCP('nbHolidayDeducted');
+                    // solde année en cours:
+                    $soldes = $cp->getCpforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
+                    if (isset($solde['error'])) {
+                        $soldeUpdateError = $solde['error'];
+                    } else {
+                        if ($soldes['nbOpenDayCurrent'] > 0) {
+                            $newSolde = $soldes['nb_holiday_current'] - ($soldes['nbOpenDayCurrent'] * $nbHolidayDeducted);
+                            $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("Holidays") . ' (année en cours)', $newSolde, false, true);
+                            $res = $cp->updateSoldeCP($cp->fk_user, $newSolde, true);
+                            if ($res <= 0)
+                                $soldeUpdateError = 'Echec de la mise à jour du solde des congés payés pour l\'année en cours.';
+                        }
+                        // solde année n+1
+                        if ($soldes['nbOpenDayNext'] > 0) {
+                            $newSolde = $soldes['nb_holiday_next'] - ($soldes['nbOpenDayNext'] * $nbHolidayDeducted);
+                            $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("Holidays") . ' (année suivante)', $newSolde, false, false);
+                            $res = $cp->updateSoldeCP($cp->fk_user, $newSolde, false);
+                            if ($res <= 0)
+                                $soldeUpdateError = 'Echec de la mise à jour du solde des congés payés pour l\'année n+1.';
+                        }
+                    }
                     break;
 
                 case 1: // congés exceptionnels, pas de mise à jour du solde des CP
                     break;
 
                 case 2: // RTT
+                    // Calcule du nombre de jours consommés: 
+                    $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
                     $soldeActuel = $cp->getRTTforUser($cp->fk_user);
                     $newSolde = $soldeActuel - ($nbopenedday * $cp->getConfCP('nbRTTDeducted'));
                     $cp->addLogCP($user->id, $cp->fk_user, 'RTT', $newSolde, true);
-                    $cp->updateSoldeRTT($cp->fk_user, $newSolde);
+                    $res = $cp->updateSoldeRTT($cp->fk_user, $newSolde);
+                    if ($res <= 0)
+                        $soldeUpdateError = 'Echec de la mise à jour du solde des RTT.';
                     break;
             }
 
@@ -527,32 +543,38 @@ if ($action == 'drh_confirm_valid') {
             $destinataire->fetch($cp->fk_user);
             $emailTo = $destinataire->email;
 
+            $result = 1;
             if (!$emailTo) {
-                header('Location: fiche.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
+                if (empty($soldeUpdateError)) {
+                    header('Location: fiche.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
+                    exit;
+                }
+            } else {
+                $expediteur = new User($db);
+                $expediteur->fetch($drhUserId);
+                $emailFrom = $expediteur->email;
+
+                $dateBegin = dol_print_date($cp->date_debut, 'day');
+                $dateEnd = dol_print_date($cp->date_fin, 'day');
+                $typeCp = $cp->getTypeLabel(true);
+                $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
+                if (!empty($conf->global->MAIN_APPLICATION_TITLE))
+                    $societeName = $conf->global->MAIN_APPLICATION_TITLE;
+
+                $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " validee par votre DRH";
+
+                $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
+                $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre Directeur des Ressouces Humaines.' . "\n\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
+                $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
+                $message.= "\n";
+                $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
+                $result = $mail->sendfile();
+            }
+            if (!empty($soldeUpdateError)) {
+                header('Location: fiche.php?id=' . $_GET['id'] . '&error=soldeCPUpdate&error_content=' . $soldeUpdateError);
                 exit;
             }
-
-            $expediteur = new User($db);
-            $expediteur->fetch($drhUserId);
-            $emailFrom = $expediteur->email;
-
-            $dateBegin = dol_print_date($cp->date_debut, 'day');
-            $dateEnd = dol_print_date($cp->date_fin, 'day');
-            $typeCp = $cp->getTypeLabel(true);
-            $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
-            if (!empty($conf->global->MAIN_APPLICATION_TITLE))
-                $societeName = $conf->global->MAIN_APPLICATION_TITLE;
-
-            $subject = $societeName . " - Demande de " . str_replace('é', 'e', $typeCp) . " validee par votre DRH";
-
-            // Content
-            $message = $langs->transnoentitiesnoconv("Hello") . " " . $destinataire->firstname . ",\n\n";
-            $message.= 'Votre demande de ' . $typeCp . ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été validée par votre Directeur des Ressouces Humaines.' . "\n\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("ValidatedBy") . " : " . dolGetFirstLastname($expediteur->firstname, $expediteur->lastname) . "\n";
-            $message.= "- " . $langs->transnoentitiesnoconv("Link") . " : " . $dolibarr_main_url_root . "/synopsisholiday/fiche.php?id=" . $cp->rowid . "\n\n";
-            $message.= "\n";
-            $mail = new CMailFile($subject, $emailTo, $emailFrom, $message);
-            $result = $mail->sendfile();
             if (!$result) {
                 header('Location: fiche.php?id=' . $_GET['id'] . '&error=mail&error_content=' . $mail->error);
                 exit;
@@ -712,15 +734,36 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
         $agendaCheck = $cp->onStatusUpdate($user);
         $result = $cp->update($user->id);
 
-        if ($result >= 0 && ($oldstatus == 3 || $oldstatus == 6) && $cp->type_conges != 1) { // holiday was already validated, status 3 or 6, so we must increase back sold
+        if ($result >= 0 && $oldstatus == 6 && $cp->type_conges != 1) { // holiday was already validated, status 6, so we must increase back sold
             $nbopenedday = num_open_day($cp->date_debut_gmt, $cp->date_fin_gmt, 0, 1, $cp->halfday);
             if ($cp->type_conges == 0) {
-                $soldeActuel = $cp->getCpforUser($cp->fk_user);
-                $newSolde = $soldeActuel + ($nbopenedday * $cp->getConfCP('nbHolidayDeducted'));
-                $result1 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation"), $newSolde);
-                $result2 = $cp->updateSoldeCP($cp->fk_user, $newSolde);
-                if ($result1 < 0 || $result2 < 0) {
-                    $error = $langs->trans('ErrorCantDeleteCP');
+                $soldes = $cp->getCpforUser($cp->fk_user, $cp->date_debut, $cp->date_fin, $cp->halfday, true);
+                if (isset($solde['error'])) {
+                    $error = $solde['error'];
+                } else {
+                    $nbHolidayDeducted = $cp->getConfCP('nbHolidayDeducted');
+                    // solde année en cours:
+                    if ($soldes['nbOpenDayCurrent'] > 0) {
+                        $newSolde = $soldes['nb_holiday_current'] + ($soldes['nbOpenDayCurrent'] * $nbHolidayDeducted);
+                        $result1 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année en cours)', $newSolde, false, true);
+                        $result2 = $cp->updateSoldeCP($cp->fk_user, $newSolde, true);
+                    } else {
+                        $result1 = 1;
+                        $result2 = 1;
+                    }
+                    // solde année n+1
+                    if ($soldes['nbOpenDayNext'] > 0) {
+                        $newSolde = $soldes['nb_holiday_next'] + ($soldes['nbOpenDayNext'] * $nbHolidayDeducted);
+                        $result3 = $cp->addLogCP($user->id, $cp->fk_user, $langs->transnoentitiesnoconv("HolidaysCancelation") . ' (année suivante)', $newSolde, false, false);
+                        $result4 = $cp->updateSoldeCP($cp->fk_user, $newSolde, false);
+                    } else {
+                        $result3 = 1;
+                        $result4 = 1;
+                    }
+
+                    if ($result1 < 0 || $result2 < 0 || $result3 < 0 || $result4 < 0) {
+                        $error = $langs->trans('ErrorCantDeleteCP');
+                    }
                 }
             } else if ($cp->type_conges == 2) {
                 $soldeActuel = $cp->getRTTforUser($cp->fk_user);
@@ -775,12 +818,132 @@ if ($action == 'confirm_cancel' && GETPOST('confirm') == 'yes') {
             exit;
         } else {
             // Sinon on affiche le formulaire de demande avec le message d'erreur SQL
-            header('Location: fiche.php?id=' . $_GET['id'] . '&error=SQL_Create&msg=' . $cp->error);
+            header('Location: fiche.php?id=' . $_GET['id'] . '&error=cantCancelCP&msg=' . $error);
             exit;
         }
     }
 }
 
+// Si enregistrement du remplaçant par le DRH:
+if ($action == 'save_substitute') {
+    $substitute_id = GETPOST('substitute_user_id', 'int');
+
+    $cp = new Holiday($db);
+    $cp->fetch($_GET['id']);
+
+    $cpUser = new User($db);
+    $cpUser->fetch($cp->fk_user);
+
+    $drhUserId = $cp->getConfCP('drhUserId');
+
+    $fk_old_substitute = $cp->fk_substitute;
+    $cp->fk_substitute = $substitute_id;
+
+    $agendaCheck = $cp->onStatusUpdate($user);
+    $result = $cp->update();
+
+    if ($result > 0) {
+        $rdvs = $cp->fetchRDV();
+
+        $societeName = $conf->global->MAIN_INFO_SOCIETE_NOM;
+        if (!empty($conf->global->MAIN_APPLICATION_TITLE))
+            $societeName = $conf->global->MAIN_APPLICATION_TITLE;
+
+        $dateBegin = dol_print_date($cp->date_debut, 'day');
+        $dateEnd = dol_print_date($cp->date_fin, 'day');
+
+        $mailErrors = array();
+
+        if (isset($fk_old_substitute) && $fk_old_substitute > 0) {
+            // Mail d'annulation pour l'ancien remplaçant:
+            $oldSubstitute = new User($db);
+            $oldSubstitute->fetch($fk_old_substitute);
+
+            $rdvErrors = false;
+            foreach ($rdvs as $rdv_id) {
+                $sql = 'SELECT `id` FROM '.MAIN_DB_PREFIX.'actioncomm WHERE `fk_user_action` = '.$fk_old_substitute;
+                $sql .= ' AND `fk_element` = '.$rdv_id;
+                $resql = $db->query($sql);
+                if ($resql) {
+                    $obj = $db->fetch_object($resql);
+                    if (isset($obj)) {
+                        $actioncomm = new ActionComm($db);
+                        $actioncomm->fetch($obj->id);
+                        if ($actioncomm->delete() < 0)
+                            $rdvErrors = true;
+                        unset($actioncomm);
+                    }
+                } else
+                    $rdvErrors = true;
+            }
+
+            if ($oldSubstitute->email) {
+                $subject = $societeName . ' - ' . 'Annulation de remplacement';
+                $message = $langs->transnoentitiesnoconv("Hello") . " " . $oldSubstitute->firstname . ",\n\n";
+                $message.= 'Votre remplacement dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
+                $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulé.' . "\n\n";
+                if ($rdvErrors) {
+                    $message .= 'Attention : certain rendez-vous concernant ce remplacement n\'ont pas pu être supprimés de votre agenda.'."\n";
+                    $message .= 'Veuillez les effacer manuellement.'."\n\n";
+                }
+                $mail = new CMailFile($subject, $oldSubstitute->email, $user->email, $message);
+                if (!$mail->sendfile()) {
+                    $mailErrors[] = dolGetFirstLastname($oldSubstitute->firstname, $oldSubstitute->lastname);
+                }
+            }
+        }
+        if ($substitute_id > 0) {
+            
+            $substitute = new User($db);
+            $substitute->fetch($substitute_id);
+            
+            $rdvErrors = false;
+            foreach ($rdvs as $rdv_id) {
+                $actioncomm = new ActionComm($db);
+                $actioncomm->fetch($rdv_id);
+                $actioncomm->id = null;
+                $actioncomm->fk_element = $rdv_id;
+                $actioncomm->usertodo = $substitute;
+                $note = $actioncomm->note;
+                $actioncomm->note = 'Remplacement de '.$cpUser->firstname.' '.$cpUser->lastname. ($note?' - '.$note:'');
+                if ($actioncomm->add($substitute) < 0)
+                    $rdvErrors = true;
+                unset($actioncomm);
+            }
+            if ($substitute->email) {
+                $subject = $societeName . ' - ' . 'Notification de remplacement';
+                $message = $langs->transnoentitiesnoconv("Hello") . " " . $substitute->firstname . ",\n\n";
+                $message.= 'Vous avez été désigné comme remplaçant dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
+                $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' par ' . dolGetFirstLastname($user->firstname, $user->lastname) . '.' . "\n\n";
+                if (count($rdvs)) {
+                    $message .= 'La personne que vous replacez devait effectuer '.count($rdvs).' rendez-vous durant cette période.'."\"n";
+                    if (!$rdvErrors) {
+                        $message .= 'Ceux-ci ont été ajoutés à votre agenda.';
+                    } else {
+                        $message .= 'Ceux-ci n\'ont pas pu être ajoutés à votre agenda en raison d\'une erreur technique.'."\n";
+                    }
+                    $message .= "\n\n";
+                }                
+                $mail = new CMailFile($subject, $substitute->email, $user->email, $message);
+                if (!$mail->sendfile()) {
+                    $mailErrors[] = dolGetFirstLastname($substitute->firstname, $substitute->lastname);
+                }
+            }
+        }
+
+        if (count($mailErrors)) {
+            $errorMsg = '';
+            foreach ($mailErrors as $err) {
+                $errorMsg .= $err . ' - Echec de l\'envoi du mail. ';
+            }
+            header('Location: fiche.php?id=' . $_GET['id'] . '&error=mail&error_content=' . $errorMsg);
+        }
+        header('Location: fiche.php?id=' . $_GET['id'] . ($agendaCheck ? '' : '&error=agenda&agenda_error_type=update'));
+        exit;
+    } else {
+        header('Location: fiche.php?id=' . $_GET['id'] . '&error=substitute_update&msg=' . $cp->error);
+    }
+}
 
 /*
  * View
@@ -795,7 +958,7 @@ llxHeader(array(), $langs->trans('CPTitreMenu'));
 
 if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create') {
     // Si l'utilisateur n'a pas le droit de faire une demande
-    if (($userid == $user->id && empty($user->rights->holiday->write)) || 
+    if (($userid == $user->id && empty($user->rights->holiday->write)) ||
             ($userid != $user->id && !$droitAll)) {
         $errors[] = $langs->trans('CantCreateCP');
     } else {
@@ -815,6 +978,9 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 case 'CantCreate' :
                     $errors[] = $langs->trans('CantCreateCP');
                     break;
+                case 'cantCancelCP':
+                    $errors[] = 'Echec de l\'annulation. ' . ' <b>' . htmlentities($_GET['msg']) . '</b>';
+                    break;
                 case 'Valideur' :
                     $errors[] = $langs->trans('InvalidValidatorCP');
                     break;
@@ -830,8 +996,12 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                 case 'alreadyCP' :
                     $errors[] = $langs->trans('alreadyCPexist');
                     break;
+                case 'substituteCP':
+                    $errors[] = 'Vous ne pouvez pas déposer de congés sur cette période car vous avez été désigné comme remplaçant.';
+                    break;
                 case 'BothExceptionAndRtt':
                     $errors[] = 'Veuillez ne sélectionner qu\'un seul choix dans la partie "Congés exceptionnels / RTT"';
+                    break;
             }
 
             dol_htmloutput_mesg('', $errors, 'error');
@@ -891,7 +1061,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         $nb_holiday = $cp->getCPforUser($user->id) / $cp->getConfCP('nbHolidayDeducted');
         $nb_rtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
         print ' &nbsp; <span>' . $langs->trans('SoldeCPUser', round($nb_holiday, 0)) . '</span>';
-        print ' &nbsp; <span>Solde de RTT: <b>'.$nb_rtt.' jours</b></span>';
+        print ' &nbsp; <span>Solde de RTT: <b>' . $nb_rtt . ' jours</b></span>';
         print '</td>';
         print '</tr>';
         print '<tr>';
@@ -1054,7 +1224,14 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                                 $errors[] = 'Echec de la suppression des congés dans votre agenda';
                                 break;
                         }
+                        break;
 
+                    case 'substitute_update':
+                        $errors[] = 'Echec de l\'enregistrement du remplaçant (Erreur: ' . $_GET['msg'] . ')';
+                        break;
+
+                    case 'soldeCPUpdate':
+                        $errors[] = $_GET['error_content'];
                         break;
                 }
 
@@ -1064,7 +1241,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
             // On vérifie si l'utilisateur à le droit de lire cette demande
             if ($canedit) {
                 if ($action == 'delete') {
-                    if ($user->rights->holiday->delete) {
+                    if ($user->rights->holiday->delete || $user->id == $cp->fk_user) {
                         print $form->formconfirm("fiche.php?id=" . $id, $langs->trans("TitleDeleteCP"), $langs->trans("ConfirmDeleteCP"), "confirm_delete", '', 0, 1);
                     }
                 }
@@ -1307,8 +1484,45 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     print '<td>' . dol_print_date($cp->date_refuse, 'dayhour') . '</td>';
                     print '</tr>';
                 }
+                // Indication du remplaçant:
+                if ($cp->statut != 4 && $cp->statut != 5 && !empty($cp->fk_substitute)) {
+                    print '<tr>';
+                    print '<td>Remplaçant désigné</td>';
+                    if ($cp->fk_substitute < 0)
+                        print '<td>Aucun</td>';
+                    else {
+                        $substitute = new User($db);
+                        $substitute->fetch($cp->fk_substitute);
+                        print '<td>' . $substitute->getNomUrl(1) . '</td>';
+                    }
+                    print '</tr>';
+                }
+
                 print '</tbody>';
                 print '</table>';
+
+                if ($cp->statut != 4 && $cp->statut != 5 &&
+                        ($user->id == $drhUserId || $user->id == $cp->fk_validator || $user->id == $userRequest->fk_user)) {
+                    // Choix du remplaçant (DRH, responsable ou valideur seulement):
+                    print '<br><br>';
+                    print '<form method="POST" action="' . $_SERVER['PHP_SELF'] . '?id=' . $_GET['id'] . '&action=save_substitute">';
+                    print '<table class="border" width="50%">' . "\n";
+                    print '<tbody>';
+                    print '<tr class="liste_titre">';
+                    print '<td colspan="3">Options réservées aux responsables hiérarchiques</td>';
+                    print '</tr>';
+                    print '<tr>';
+                    print '<td width="50%">Remplaçant</td>';
+                    print '<td>';
+                    $form->select_users(isset($cp->fk_substitute) ? $cp->fk_substitute : -1, 'substitute_user_id', 1, array($cp->fk_user));
+                    print '</td>';
+                    print '<td><input type="submit" value="Enregistrer" class="button"></td>';
+                    print '</tr>';
+                    print '</tbody>';
+                    print '</table>';
+                    print '</form>';
+                }
+
 
                 if ($action == 'edit' && $cp->statut == 1) {
                     print '<br><div align="center">';
@@ -1332,7 +1546,7 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
                     if ($canedit && $cp->statut == 1 && ($user->id == $cp->fk_user || $droitAll)) {
                         print '<a href="fiche.php?id=' . $_GET['id'] . '&action=sendToValidate" class="butAction">' . $langs->trans("Validate") . '</a>';
                     }
-                    if ($user->rights->holiday->delete && $cp->statut == 1) { // If draft
+                    if (($user->rights->holiday->delete || $user->id == $cp->fk_user) && $cp->statut == 1) { // If draft
                         print '<a href="fiche.php?id=' . $_GET['id'] . '&action=delete" class="butActionDelete">' . $langs->trans("DeleteCP") . '</a>';
                     }
 

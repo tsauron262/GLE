@@ -242,7 +242,7 @@ class CronSynopsis {
         global $user;
         $str = "";
         print_r($user->array_options);
-        if (isset($user->array_options['options_date_s'])) {
+        if (array_key_exists('options_date_s', $user->array_options)) {
             $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $sql2 = $this->db->query("UPDATE llx_user SET statut = 0 WHERE rowid = " . $result->fk_object);

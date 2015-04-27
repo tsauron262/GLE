@@ -861,8 +861,8 @@ if ($action == 'save_substitute') {
 
             $rdvErrors = false;
             foreach ($rdvs as $rdv_id) {
-                $sql = 'SELECT `id` FROM '.MAIN_DB_PREFIX.'actioncomm WHERE `fk_user_action` = '.$fk_old_substitute;
-                $sql .= ' AND `fk_element` = '.$rdv_id;
+                $sql = 'SELECT `id` FROM ' . MAIN_DB_PREFIX . 'actioncomm WHERE `fk_user_action` = ' . $fk_old_substitute;
+                $sql .= ' AND `fk_element` = ' . $rdv_id;
                 $resql = $db->query($sql);
                 if ($resql) {
                     $obj = $db->fetch_object($resql);
@@ -883,8 +883,8 @@ if ($action == 'save_substitute') {
                 $message.= 'Votre remplacement dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
                 $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' a été annulé.' . "\n\n";
                 if ($rdvErrors) {
-                    $message .= 'Attention : certain rendez-vous concernant ce remplacement n\'ont pas pu être supprimés de votre agenda.'."\n";
-                    $message .= 'Veuillez les effacer manuellement.'."\n\n";
+                    $message .= 'Attention : certain rendez-vous concernant ce remplacement n\'ont pas pu être supprimés de votre agenda.' . "\n";
+                    $message .= 'Veuillez les effacer manuellement.' . "\n\n";
                 }
                 $mail = new CMailFile($subject, $oldSubstitute->email, $user->email, $message);
                 if (!$mail->sendfile()) {
@@ -893,10 +893,10 @@ if ($action == 'save_substitute') {
             }
         }
         if ($substitute_id > 0) {
-            
+
             $substitute = new User($db);
             $substitute->fetch($substitute_id);
-            
+
             $rdvErrors = false;
             foreach ($rdvs as $rdv_id) {
                 $actioncomm = new ActionComm($db);
@@ -905,7 +905,7 @@ if ($action == 'save_substitute') {
                 $actioncomm->fk_element = $rdv_id;
                 $actioncomm->usertodo = $substitute;
                 $note = $actioncomm->note;
-                $actioncomm->note = 'Remplacement de '.$cpUser->firstname.' '.$cpUser->lastname. ($note?' - '.$note:'');
+                $actioncomm->note = 'Remplacement de ' . $cpUser->firstname . ' ' . $cpUser->lastname . ($note ? ' - ' . $note : '');
                 if ($actioncomm->add($substitute) < 0)
                     $rdvErrors = true;
                 unset($actioncomm);
@@ -916,14 +916,14 @@ if ($action == 'save_substitute') {
                 $message.= 'Vous avez été désigné comme remplaçant dans le cadre de la prise de congés de ' . dolGetFirstLastname($cpUser->firstname, $cpUser->lastname);
                 $message.= ' du ' . $dateBegin . ' au ' . $dateEnd . ' par ' . dolGetFirstLastname($user->firstname, $user->lastname) . '.' . "\n\n";
                 if (count($rdvs)) {
-                    $message .= 'La personne que vous replacez devait effectuer '.count($rdvs).' rendez-vous durant cette période.'."\"n";
+                    $message .= 'La personne que vous replacez devait effectuer ' . count($rdvs) . ' rendez-vous durant cette période.' . "\"n";
                     if (!$rdvErrors) {
                         $message .= 'Ceux-ci ont été ajoutés à votre agenda.';
                     } else {
-                        $message .= 'Ceux-ci n\'ont pas pu être ajoutés à votre agenda en raison d\'une erreur technique.'."\n";
+                        $message .= 'Ceux-ci n\'ont pas pu être ajoutés à votre agenda en raison d\'une erreur technique.' . "\n";
                     }
                     $message .= "\n\n";
-                }                
+                }
                 $mail = new CMailFile($subject, $substitute->email, $user->email, $message);
                 if (!$mail->sendfile()) {
                     $mailErrors[] = dolGetFirstLastname($substitute->firstname, $substitute->lastname);
@@ -1052,17 +1052,39 @@ if (empty($id) || $action == 'add' || $action == 'request' || $action == 'create
         print '<tbody>';
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("User") . '</td>';
-        print '<td>';
+        print '<td><div style="display: inline-block; vertical-align: top; margin-right: 15px;">';
         if (!$droitAll) {
             print $form->select_users($userid, 'useridbis', 0, '', 1);
             print '<input type="hidden" name="userid" value="' . $userid . '">';
         } else
             print $form->select_users(GETPOST('userid') ? GETPOST('userid') : $user->id, 'userid', 0, '', 0);
-        $nb_holiday = $cp->getCPforUser($user->id) / $cp->getConfCP('nbHolidayDeducted');
-        $nb_rtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
-        print ' &nbsp; <span>' . $langs->trans('SoldeCPUser', round($nb_holiday, 0)) . '</span>';
-        print ' &nbsp; <span>Solde de RTT: <b>' . $nb_rtt . ' jours</b></span>';
-        print '</td>';
+
+//        $nb_holiday_current = $cp->getCPforUser($user->id) / $cp->getConfCP('nbHolidayDeducted');
+//        $nb_rtt = $cp->getRTTforUser($user->id) / $cp->getConfCP('nbRTTDeducted');
+//        print ' &nbsp; <span>' . $langs->trans('SoldeCPUser', round($nb_holiday, 0)) . '</span>';
+//        print ' &nbsp; <span>Solde de RTT: <b>' . $nb_rtt . ' jours</b></span>';
+
+        print '</div><div style="display: inline-block; vertical-align: top;">';
+
+        $nbaquis_current = $cp->getCurrentYearCPforUser($user->id);
+        $nbaquis_next = $cp->getNextYearCPforUser($user->id);
+        $nbdeduced = $cp->getConfCP('nbHolidayDeducted');
+        $nb_holiday_current = $nbaquis_current / $nbdeduced;
+        $nb_holiday_next = $nbaquis_next / $nbdeduced;
+        $nextCPYearDate = $cp->getCPNextYearDate(true, false);
+        $nextCPYearDateAfter = $cp->getCPNextYearDate(true, true);
+        $nbRtt = $cp->getRTTforUser($user->id)/ $cp->getConfCP('nbRTTDeducted');
+        print '<b>Année en cours : </b>';
+        print $langs->trans('SoldeCPUser', round($nb_holiday_current, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_current . ' / ' . $nbdeduced . ')' : '');
+        print '&nbsp;(A utiliser avant le <b>' . $nextCPYearDate . '</b>).';
+        print '<br/>';
+        print '<b>Année n+1 : </b>';
+        print $langs->trans('SoldeCPUser', round($nb_holiday_next, 2)) . ($nbdeduced != 1 ? ' (' . $nbaquis_next . ' / ' . $nbdeduced . ')' : '');
+        print '&nbsp;(A utiliser à partir du <b>' . $nextCPYearDate . '</b> et avant le <b>' . $nextCPYearDateAfter . '</b>).';
+        print '<br/>';
+        print 'Solde RTT : <b>' . round($nbRtt, 2) . ' jours</b>';
+
+        print '</div></td>';
         print '</tr>';
         print '<tr>';
         print '<td class="fieldrequired">' . $langs->trans("DateDebCP") . ' (' . $langs->trans("FirstDayOfHoliday") . ')</td>';

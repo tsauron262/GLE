@@ -245,7 +245,7 @@ class CronSynopsis {
             $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $sql2 = $this->db->query("UPDATE llx_user SET statut = 0 WHERE rowid = " . $result->fk_object);
-                $str2 = "Bonjour le compte de " . $result->login . " vien détre fermé. Cordialement.";
+                $str2 = "Bonjour le compte de " . $result->login . " viens d'être fermé. Cordialement.";
                 $str .= $str2."<br/>";
                 mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr", null, $str2);
             }

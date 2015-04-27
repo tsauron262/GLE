@@ -26,18 +26,20 @@ class CronSynopsis {
 //        $this->verif();
 //        $this->sortieMail();
 
+        $this->verifCompteFermer();
+
 
 
 
         echo 1;
     }
-    
-    public function sauvBdd($table = ""){
+
+    public function sauvBdd($table = "") {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/maj.class.php");
         $this->sortie .= maj::sauvBdd($table);
     }
-    
-    public function extractFact(){
+
+    public function extractFact() {
         require_once(DOL_DOCUMENT_ROOT . "/Synopsis_Tools/class/synopsisexport.class.php");
         $export = new synopsisexport($this->db, 'file');
         $export->exportFactureSav(false);
@@ -234,6 +236,23 @@ class CronSynopsis {
                     $this->fusionChrono($idMettre, $idFaible);
             }
         }
+    }
+
+    function verifCompteFermer() {
+        global $user;
+        $str = "";
+        if (isset($user->array_options['options_date_s'])) {
+            $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
+            while ($result = $this->db->fetch_object($sql)) {
+                $sql2 = $this->db->query("UPDATE llx_user SET statut = 0 WHERE rowid = " . $result->fk_object);
+                $str2 = "Bonjour le compte de " . $result->login . " vien détre fermé. Cordialement.";
+                $str .= "<br/>".$str2;
+                mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr", null, $str2);
+            }
+        echo "Compte fermé";
+        }
+        else
+            echo "Pas d'info sur la date de sortie.";
     }
 
 //else if (isset($_GET['action']) && $_GET['action'] == "verif") {

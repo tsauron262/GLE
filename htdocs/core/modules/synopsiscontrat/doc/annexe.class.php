@@ -117,7 +117,7 @@ class annexe {
     }
 
     function replaceWithAnnexe($annexe, $contrat, $idAnnexe) {
-        global $mysoc, $user;
+        global $mysoc, $user, $langs;
 
         if (stripos(get_class($contrat), "contrat") !== false) {
             //Tritement des contact
@@ -199,7 +199,10 @@ Tél. : Contact-external-CUSTOMER-tel
         $socid = $contrat->socid;
 
 
-        $sql = $this->db->query("SELECT * FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv WHERE fk_contrat = ".$contrat->id. " GROUP BY rowid ORDER BY datei ASC");
+        $sql = $this->db->query("SELECT di.*, fi.fk_user_author FROM ".MAIN_DB_PREFIX."synopsisdemandeinterv di LEFT JOIN `".MAIN_DB_PREFIX."element_element` el ON
+ el.`fk_source` = di.rowid
+AND  el.`sourcetype` LIKE  'di'
+AND  el.`targettype` LIKE  'fi' LEFT JOIN ".MAIN_DB_PREFIX."fichinter fi ON fi.rowid = el.fk_target  WHERE di.fk_contrat = ".$contrat->id. " GROUP BY di.rowid ORDER BY di.datei ASC");
         $strDi = "";
         while($result = $this->db->fetch_object($sql)){
             $motClef = "";
@@ -207,7 +210,13 @@ Tél. : Contact-external-CUSTOMER-tel
                     $motClef = "Visite(s)";
             if(stripos($result->description, "Télémaintenance") !== false)
                     $motClef = "Télémaintenance(s)";
-            $tabTemp[$motClef] .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei))."\n";
+            $tabTemp[$motClef] .= "       - ".$result->description . " - ".dol_print_date($this->db->jdate($result->datei));
+            if(isset($result->fk_user_author)){
+                $userT = new User($this->db);
+                $userT->fetch($result->fk_user_author);
+                $tabTemp[$motClef] .= " Fait par ".$userT->getFullName($langs);
+            }
+            $tabTemp[$motClef] .= "\n";
         }
         ksort($tabTemp);
         foreach($tabTemp as $motClef => $val){

@@ -47,6 +47,8 @@ $cron = new CronSynopsis($db);
 
 if (isset($_GET['action']) && $_GET['action'] == "majSav") {
     $cron->majSav(isset($_REQUEST['mail']) && $_REQUEST['mail'] == "true");
+} elseif (isset($_GET['action']) && $_GET['action'] == "verifCompte") {
+    $cron->verifCompteFermer();
 } elseif (isset($_GET['action']) && $_GET['action'] == "fusionChrono") {
     $cron->fusionChrono($_REQUEST['id1'], $_REQUEST['id2']);
     $cron->majChrono();
@@ -184,6 +186,8 @@ echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="majFile"/><input type="submit" value="Migration fichiers" class="butAction"/></form>';
 echo "<br/>";
 echo '<form action=""><input type="hidden" name="action" value="majSav"/><input type="submit" value="Verif Sav" class="butAction"/></form>';
+echo "<br/>";
+echo '<form action=""><input type="hidden" name="action" value="verifCompte"/><input type="submit" value="Verif compte" class="butAction"/></form>';
 
 
 

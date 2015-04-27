@@ -241,16 +241,15 @@ class CronSynopsis {
     function verifCompteFermer() {
         global $user;
         $str = "";
-        print_r($user->array_options);
         if (array_key_exists('options_date_s', $user->array_options)) {
             $sql = $this->db->query("SELECT *  FROM `llx_user_extrafields`, llx_user u WHERE `date_s` < now() AND fk_object = u.rowid AND statut = 1");
             while ($result = $this->db->fetch_object($sql)) {
                 $sql2 = $this->db->query("UPDATE llx_user SET statut = 0 WHERE rowid = " . $result->fk_object);
                 $str2 = "Bonjour le compte de " . $result->login . " vien détre fermé. Cordialement.";
-                $str .= "<br/>".$str2;
+                $str .= $str2."<br/>";
                 mailSyn2("Fermeture compte " . $result->login, "tommy@drsi.fr", null, $str2);
             }
-        echo "Compte fermé";
+        echo $str." Comptes fermés";
         }
         else
             echo "Pas d'info sur la date de sortie.";

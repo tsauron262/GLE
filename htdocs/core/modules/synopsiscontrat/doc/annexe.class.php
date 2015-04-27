@@ -174,6 +174,13 @@ Tél. : Contact-external-CUSTOMER-tel
                     $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 8 visites par an.";
                 elseif ($qteTt > 0)
                     $phraseDelai = "Couplé au contrat de télémaintenance, ce contrat comprend 1 visite de suivi tous les " . (12 / $qteTt) . " mois sur site (soit " . $qteTt . " visite(s) par an).";
+                
+                
+                if($ligneContrat->GMAO_Mixte['nbVisiteAnCur'] > 0)
+                    $phraseDelai .= "\nCe contrat comprend ".$ligneContrat->GMAO_Mixte['nbVisiteAnCur']." visites curative par an.";
+                
+                if($ligneContrat->GMAO_Mixte['telemaintenanceCur'] > 0)
+                    $phraseDelai .= "\nCe contrat comprend ".$ligneContrat->GMAO_Mixte['telemaintenanceCur']." télémaintenance curative par an.";
             }
 
 

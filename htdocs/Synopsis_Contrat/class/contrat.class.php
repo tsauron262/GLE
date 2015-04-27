@@ -34,18 +34,18 @@ class Synopsis_Contrat extends Contrat {
         return($res->extraparams);
     }
 
-    function addlineSyn($qty2, $reconductionAuto, $isSav, $sla, $durValid, $hotline, $telemaintenance, $maintenance, $type, $qteTempsPerDuree, $qteTktPerDuree, $nbVisite, $desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type = 'HT', $pu_ttc = 0, $info_bits = 0, $fk_fournprice = null, $pa_ht = 0) {
+    function addlineSyn($qty2, $reconductionAuto, $isSav, $sla, $durValid, $hotline, $telemaintenance, $telemaintenanceCur, $maintenance, $type, $qteTempsPerDuree, $qteTktPerDuree, $nbVisite, $nbVisiteCur, $desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type = 'HT', $pu_ttc = 0, $info_bits = 0, $fk_fournprice = null, $pa_ht = 0) {
         $id = parent::addline($desc, $pu_ht, $qty, $txtva, $txlocaltax1, $txlocaltax2, $fk_product, $remise_percent, $date_start, $date_end, $price_base_type = 'HT', $pu_ttc = 0, $info_bits = 0, $fk_fournprice = null, $pa_ht = 0);
 
         $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
                             (contratdet_refid,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
-                            hotline, telemaintenance, maintenance,
-                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
+                            hotline, telemaintenance, telemaintenanceCur, maintenance,
+                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite, nbVisiteCur)
                      VALUES (" . $id . "," . $qty2 . ",now(),now(),'" . $reconductionAuto . "',
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($sla) . "'," . $durValid . ",
-                            " . ($hotline <> 0 ? $hotline : 0) . "," . ($telemaintenance <> 0 ? $telemaintenance : 0) . "," . ($maintenance > 0 ? 1 : 0) . ",
-                            " . $type . ", '" . $qteTempsPerDuree . "','" . $qteTktPerDuree . "','" . $nbVisite . "')";
+                            " . ($hotline <> 0 ? $hotline : 0) . "," . ($telemaintenance <> 0 ? $telemaintenance : 0) . "," . ($telemaintenanceCur <> 0 ? $telemaintenanceCur : 0) . "," . ($maintenance > 0 ? 1 : 0) . ",
+                            " . $type . ", '" . $qteTempsPerDuree . "','" . $qteTktPerDuree . "','" . $nbVisite . "','" . $nbVisiteCur . "')";
         $sql1 = $this->db->query($requete2);
     }
 
@@ -67,7 +67,7 @@ class Synopsis_Contrat extends Contrat {
         $this->fetch_lines();
         foreach ($this->lines as $lignes) {
             $dateFin = $lignes->date_fin_validite - $lignes->date_ouverture_prevue + $newContrat->date_contrat;
-            $newContrat->addlineSyn($lignes->qty2, $lignes->GMAO_Mixte['reconductionAuto'], $lignes->GMAO_Mixte['isSAV'], $lignes->GMAO_Mixte['SLA'], $lignes->GMAO_Mixte['durVal'], $lignes->GMAO_Mixte['hotline'], $lignes->GMAO_Mixte['telemaintenance'], $lignes->GMAO_Mixte['maintenance'], $lignes->type, $lignes->GMAO_Mixte['qteTempsPerDuree'], $lignes->GMAO_Mixte['qteTktPerDuree'], $lignes->GMAO_Mixte['nbVisiteAn'], $lignes->desc, $lignes->price_ht, $lignes->qty, $lignes->tva_tx, $lignes->localtax1_tx, $lignes->localtax2_tx, $lignes->fk_product, $lignes->remise_percent, $newContrat->date_contrat, $dateFin);
+            $newContrat->addlineSyn($lignes->qty2, $lignes->GMAO_Mixte['reconductionAuto'], $lignes->GMAO_Mixte['isSAV'], $lignes->GMAO_Mixte['SLA'], $lignes->GMAO_Mixte['durVal'], $lignes->GMAO_Mixte['hotline'], $lignes->GMAO_Mixte['telemaintenance'], $lignes->GMAO_Mixte['telemaintenanceCur'], $lignes->GMAO_Mixte['maintenance'], $lignes->type, $lignes->GMAO_Mixte['qteTempsPerDuree'], $lignes->GMAO_Mixte['qteTktPerDuree'], $lignes->GMAO_Mixte['nbVisiteAn'], $lignes->GMAO_Mixte['nbVisiteAnCur'], $lignes->desc, $lignes->price_ht, $lignes->qty, $lignes->tva_tx, $lignes->localtax1_tx, $lignes->localtax2_tx, $lignes->fk_product, $lignes->remise_percent, $newContrat->date_contrat, $dateFin);
         }
         $newContrat->renouvellementPart2();
         return $newContrat->id;
@@ -1092,6 +1092,14 @@ class Synopsis_Contrat extends Contrat {
             else
             echo $ligne->GMAO_Mixte['nbVisiteAn'] * $ligne->qty;
         }
+        if ($ligne->GMAO_Mixte['nbVisiteAnCur'] <> 0) {
+            echo "</td><td>";
+            echo "Nb Visite curative : ";
+            if ($ligne->GMAO_Mixte['nbVisiteAnCur'] == -1)
+                echo "illimité";
+            else
+            echo $ligne->GMAO_Mixte['nbVisiteAnCur'] * $ligne->qty;
+        }
         if ($ligne->GMAO_Mixte['telemaintenance'] <> 0) {
             echo "</td><td>";
             echo "Nb Télémaintenance : ";
@@ -1099,6 +1107,14 @@ class Synopsis_Contrat extends Contrat {
                 echo "illimité";
             else
             echo $ligne->GMAO_Mixte['telemaintenance'] * $ligne->qty;
+        }
+        if ($ligne->GMAO_Mixte['telemaintenanceCur'] <> 0) {
+            echo "</td><td>";
+            echo "Nb Télémaintenance curative : ";
+            if ($ligne->GMAO_Mixte['telemaintenanceCur'] == -1)
+                echo "illimité";
+            else
+            echo $ligne->GMAO_Mixte['telemaintenanceCur'] * $ligne->qty;
         }
         if ($ligne->GMAO_Mixte['hotline'] <> 0) {
             echo "</td><td>";
@@ -1681,12 +1697,12 @@ class Synopsis_Contrat extends Contrat {
         $requete2 = "INSERT INTO " . MAIN_DB_PREFIX . "Synopsis_contratdet_GMAO
                             (contratdet_refid,fk_contrat_prod,qte,tms,DateDeb,reconductionAuto,
                             isSAV, SLA, durValid,
-                            hotline, telemaintenance, maintenance,
-                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite)
+                            hotline, telemaintenance, telemaintenanceCur, maintenance,
+                            type, qteTempsPerDuree,  qteTktPerDuree, nbVisite, nbVisiteCur)
                      VALUES (" . $cdid . "," . $res->fk_product . "," . $qte2 . ",now(),now(),'" . $tmpProd->array_options['options_2reconductionAuto'] . "',
                             " . ($isSAV > 0 ? 1 : 0) . ",'" . addslashes($tmpProd->array_options['options_2SLA']) . "'," . $duree . ",
-                            " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
-                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 5))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "')";
+                            " . ($tmpProd->array_options['options_2hotline'] <> 0 ? $tmpProd->array_options['options_2hotline'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenance'] <> 0 ? $tmpProd->array_options['options_2teleMaintenance'] : 0) . "," . ($tmpProd->array_options['options_2teleMaintenanceCur'] <> 0 ? $tmpProd->array_options['options_2teleMaintenanceCur'] : 0) . "," . ($tmpProd->array_options['options_2maintenance'] > 0 ? 1 : 0) . ",
+                            " . ($isMnt ? 3 : ($isSAV ? 4 : ($isTkt ? 2 : 5))) . ", '" . $tmpProd->array_options['options_2timePerDuree'] . "','" . $tmpProd->array_options['options_2qtePerDuree'] . "','" . $tmpProd->array_options['options_2visiteSurSite'] . "','" . $tmpProd->array_options['options_2visiteCur'] . "')";
         $sql1 = $db->query($requete2);
 
         if ($sql && $sql1)
@@ -2460,8 +2476,14 @@ EOF;
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb visite annuelle';
         $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbVisite' . $type . '" name="nbVisite' . $type . '"></td>';
         $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Nb visite curative';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input id="nbVisite' . $type . 'Cur" name="nbVisite' . $type . 'Cur"></td>';
+        $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>T&eacute;l&eacute;maintenance';
         $html .= '</th><td class="ui-widget-content" colspan=2><input type=text id="telemaintenance' . $type . '" name="telemaintenance' . $type . '"></td>';
+        $html .= '<tr>';
+        $html .= '<th class="ui-state-default ui-widget-header" colspan=1>T&eacute;l&eacute;maintenance curative';
+        $html .= '</th><td class="ui-widget-content" colspan=2><input type=text id="telemaintenance' . $type . 'Cur" name="telemaintenance' . $type . 'Cur"></td>';
         $html .= '<tr>';
         $html .= '<th class="ui-state-default ui-widget-header" colspan=1>Hotline';
         $html .= '</th><td class="ui-widget-content" colspan=2><input type=text name="hotline' . $type . '" id="hotline' . $type . '"></td>';
@@ -2547,12 +2569,14 @@ class Synopsis_ContratLigne extends ContratLigne {
                        g.durValid as GMAO_durVal,
                        g.hotline as GMAO_hotline,
                        g.telemaintenance as GMAO_telemaintenance,
+                       g.telemaintenanceCur as GMAO_telemaintenanceCur,
                        g.maintenance as GMAO_maintenance,
                        g.SLA as GMAO_sla,
                        g.clause as GMAO_clause,
                        g.isSAV as GMAO_isSAV,
                        g.qte as GMAO_qte,
                        g.nbVisite as GMAO_nbVisite,
+                       g.nbVisiteCur as GMAO_nbVisiteCur,
                        g.fk_prod as GMAO_fk_prod,
                        g.reconductionAuto as GMAO_reconductionAuto,
                        g.maintenance as GMAO_maintenance,
@@ -2628,9 +2652,11 @@ class Synopsis_ContratLigne extends ContratLigne {
                 'ddeb' => $objp->GMAO_ddeb,
                 'hotline' => $objp->GMAO_hotline,
                 'telemaintenance' => $objp->GMAO_telemaintenance,
+                'telemaintenanceCur' => $objp->GMAO_telemaintenanceCur,
                 'maintenance' => $objp->GMAO_maintenance,
                 'SLA' => $objp->GMAO_sla,
                 'nbVisiteAn' => $objp->GMAO_nbVisite,
+                'nbVisiteAnCur' => $objp->GMAO_nbVisiteCur,
                 'isSAV' => $objp->GMAO_isSAV,
                 'fk_prod' => $objp->GMAO_fk_prod,
                 'reconductionAuto' => $objp->GMAO_reconductionAuto,

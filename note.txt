@@ -1254,3 +1254,24 @@ stat des tech aj facture
 //adresse dans pc
 
 voir reunion interne
+
+
+
+
+
+
+
+INSERT INTO `llx_extrafields` (`rowid`, `name`, `entity`, `elementtype`, `tms`, `label`, `type`, `size`, `fieldunique`, `fieldrequired`, `pos`, `param`) VALUES
+(38, '2visiteCur', 1, 'product', '2015-04-23 09:22:22', 'Visite Curative', 'int', '10', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}'),
+(39, '2teleMaintenanceCur', 1, 'product', '2015-04-23 09:32:04', 'Télémaintenance Curative', 'int', '10', 0, 0, 0, 'a:1:{s:7:"options";a:1:{s:0:"";N;}}');
+
+ALTER table `llx_product_extrafields` ADD 
+  `2teleMaintenanceCur` int(10) DEFAULT NULL,  ADD 
+  `2visiteCur` int(10) DEFAULT NULL;
+
+
+ALTER TABLE  `llx_Synopsis_contratdet_GMAO` ADD  `telemaintenanceCur` INT NOT NULL AFTER  `maintenance` ,
+ADD  `nbVisiteCur` INT NOT NULL AFTER  `telemaintenanceCur`
+
+
+windows – fait chier

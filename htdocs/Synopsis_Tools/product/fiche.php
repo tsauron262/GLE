@@ -137,9 +137,11 @@ if ($_POST["action"] == 'add' && $user->rights->produit->creer) {
             $product->array_options['options_2isSav'] = 0;
             $product->array_options['options_2reconductionAuto'] = ($_REQUEST['reconductionauto'] . "x" == "x" ? 0 : 1);
             $product->array_options['options_2visiteSurSite'] = 0;
+            $product->array_options['options_2visiteCur'] = 0;
             $product->array_options['options_2SLA'] = addslashes($_REQUEST['SLA']);
             $product->array_options['options_2maintenance'] = 0;
             $product->array_options['options_2teleMaintenance'] = 0;
+            $product->array_options['options_2teleMaintenanceCur'] = 0;
             $product->array_options['options_2hotline'] = 0;
             $product->array_options['options_2qte'] = 0;
             if ($_REQUEST['typeProd'] == 'SAV') {
@@ -148,8 +150,10 @@ if ($_POST["action"] == 'add' && $user->rights->produit->creer) {
             } else if ($_REQUEST['typeProd'] == 'MNT') {
                 $product->array_options['options_2dureeVal'] = ($_REQUEST['dureeMNT'] > 0 ? $_REQUEST['dureeMNT'] : 0);
                 $product->array_options['options_2visiteSurSite'] = ($_REQUEST['visite'] > 0 ? $_REQUEST['visite'] : 0);
+                $product->array_options['options_2visiteCur'] = ($_REQUEST['visiteCur'] > 0 ? $_REQUEST['visiteCur'] : 0);
                 $product->array_options['options_2maintenance'] = 1;
                 $product->array_options['options_2teleMaintenance'] = $_REQUEST['telemaintenance'];
+                $product->array_options['options_2teleMaintenanceCur'] = $_REQUEST['telemaintenanceCur'];
                 $product->array_options['options_2hotline'] = $_REQUEST['hotline'];
                 $product->array_options['options_2qte'] = ($_REQUEST['qteMNT'] . "x" == "x" ? 0 : $_REQUEST['qteMNT']);
                 $product->array_options['options_2qtePerDuree'] = $_REQUEST['qteTktPerDuree'];
@@ -224,8 +228,10 @@ if ($_POST["action"] == 'update' &&
         $product->array_options['options_2annexe'] = $_REQUEST["annexe"];
         if ($product->type == 2) {
             $product->array_options['options_2visiteSurSite'] = 0;
+            $product->array_options['options_2visiteCur'] = 0;
             $product->array_options['options_2maintenance'] = 0;
             $product->array_options['options_2teleMaintenance'] = 0;
+            $product->array_options['options_2teleMaintenanceCur'] = 0;
             $product->array_options['options_2hotline'] = 0;
             $product->array_options['options_2qte'] = 0;
             $product->array_options['options_2isSav'] = 0;
@@ -240,8 +246,10 @@ if ($_POST["action"] == 'update' &&
             } else if ($_REQUEST['typeProd'] == 'MNT') {
                 $product->array_options['options_2dureeVal'] = ($_REQUEST['dureeMNT'] > 0 ? $_REQUEST['dureeMNT'] : 0);
                 $product->array_options['options_2visiteSurSite'] = ($_REQUEST['visite'] <> 0 ? $_REQUEST['visite'] : 0);
+                $product->array_options['options_2visiteCur'] = ($_REQUEST['visiteCur'] <> 0 ? $_REQUEST['visiteCur'] : 0);
                 $product->array_options['options_2maintenance'] = 1;
                 $product->array_options['options_2teleMaintenance'] = $_REQUEST['telemaintenance'];
+                $product->array_options['options_2teleMaintenanceCur'] = $_REQUEST['telemaintenanceCur'];
                 $product->array_options['options_2hotline'] = $_REQUEST['hotline'];
                 $product->array_options['options_2qte'] = ($_REQUEST['qteMNT'] . "x" == "x" ? 0 : $_REQUEST['qteMNT']);
                 $product->array_options['options_2qtePerDuree'] = $_REQUEST['qteTktPerDuree'];
@@ -1505,7 +1513,7 @@ EOF;
                                <td ' . $colspan . ' class="ui-widget-content">OUI';
                 }
                 //Nombre de visite mensuel
-                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite sur site (par an)") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite préventivee (par an)") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2visiteSurSite'] > 0) {
                     print 'OUI ' . $product->array_options['options_2visiteSurSite'];
@@ -1514,12 +1522,33 @@ EOF;
                 } else {
                     print 'NON';
                 }
+                
+                //Nombre de visite curative mensuel
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite curative (par an)") . '</th>
+                               <td ' . $colspan . ' class="ui-widget-content">';
+                if ($product->array_options['options_2visiteCur'] > 0) {
+                    print 'OUI ' . $product->array_options['options_2visiteCur'];
+                }elseif ($product->array_options['options_2visiteCur'] == -1) {
+                    print 'OUI Illimité';
+                } else {
+                    print 'NON';
+                }
                 //Télémaintenance
-                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance préventive") . '</th>
                                <td ' . $colspan . ' class="ui-widget-content">';
                 if ($product->array_options['options_2teleMaintenance'] > 0) {
                     print 'OUI '.$product->array_options['options_2teleMaintenance'];
                 }elseif ($product->array_options['options_2teleMaintenance'] == -1) {
+                    print 'OUI Illimité';
+                }else {
+                    print 'NON';
+                }
+                //Télémaintenance curative
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance curative") . '</th>
+                               <td ' . $colspan . ' class="ui-widget-content">';
+                if ($product->array_options['options_2teleMaintenanceCur'] > 0) {
+                    print 'OUI '.$product->array_options['options_2teleMaintenanceCur'];
+                }elseif ($product->array_options['options_2teleMaintenanceCur'] == -1) {
                     print 'OUI Illimité';
                 }else {
                     print 'NON';
@@ -1836,11 +1865,17 @@ EOF;
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Dur&eacute;e de validit&eacute; (en mois)") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;"  size=4 type="text" name="dureeMNT" value="' . $product->array_options['options_2dureeVal'] . '">';
                 //Nombre de visite mensuel
-                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite sur site (par an)") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite préventive (par an)") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="visite" value="' . $product->array_options['options_2visiteSurSite'] . '">';
+                //Nombre de visite curative
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Visite curative (par an)") . '</th>
+                           <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="visiteCur" value="' . $product->array_options['options_2visiteCur'] . '">';
                 //Télémaintenance
-                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance") . '</th>
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance préventive") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="telemaintenance" value="' . $product->array_options['options_2teleMaintenance'] . '">';
+                //Télémaintenance curative
+                print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("T&eacute;l&eacute;-Maintenance curative") . '</th>
+                           <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="telemaintenanceCur" value="' . $product->array_options['options_2teleMaintenanceCur'] . '">';
                 //Accès à la hotline
                 print '<tr><th class="ui-widget-header ui-state-default" >' . $langs->trans("Hotline") . '</th>
                            <td class="ui-widget-content"><input style="text-align:center;" size=4 type="text" name="hotline" value="' . $product->array_options['options_2hotline'] . '">';

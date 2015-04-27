@@ -482,7 +482,8 @@ if (is_dir($dir)) {
                             unlink($dir . "temp/" . $file . '.preparse');
                         }
                     } else {
-                        $webContent .= "<tdclass='ui-widget-content'>Erreur de conversion</td>";
+                        $webContent .= "<tdclass='ui-widget-content'>Erreur de conversion : ".$dir . "temp/" . $file . ".iconv Introuvable</td>";
+                        $OKFile = false;
                     }
 
 

@@ -1235,9 +1235,11 @@ EOF;
                     var clause = jQuery(msg).find('clause').text();
                     var Hotline = jQuery(msg).find('Hotline').text();
                     var TeleMaintenance = jQuery(msg).find('TeleMaintenance').text();
+                    var TeleMaintenanceCur = jQuery(msg).find('TeleMaintenanceCur').text();
                     var Maintenance = jQuery(msg).find('Maintenance').text();
                     var SLA = jQuery(msg).find('SLA').text();
                     var VisiteSurSite = jQuery(msg).find('VisiteSurSite').text();
+                    var VisiteSurSiteCur = jQuery(msg).find('VisiteSurSiteCur').text();
                     var reconductionAuto = jQuery(msg).find('reconductionAuto').text();
                     var durValid = jQuery(msg).find('durValid').text();
                     var isSAV = jQuery(msg).find('isSAV').text();
@@ -1344,9 +1346,11 @@ EOF;
                     var clause = jQuery(msg).find('clause').text();
                     var Hotline = jQuery(msg).find('Hotline').text();
                     var TeleMaintenance = jQuery(msg).find('TeleMaintenance').text();
+                    var TeleMaintenanceCur = jQuery(msg).find('TeleMaintenanceCur').text();
                     var Maintenance = jQuery(msg).find('Maintenance').text();
                     var SLA = jQuery(msg).find('SLA').text();
                     var VisiteSurSite = jQuery(msg).find('VisiteSurSite').text();
+                    var VisiteSurSiteCur = jQuery(msg).find('VisiteSurSiteCur').text();
                     var reconductionAuto = jQuery(msg).find('reconductionAuto').text();
                     var durValid = jQuery(msg).find('durValid').text();
                     var isSAV = jQuery(msg).find('isSAV').text();
@@ -1386,6 +1390,11 @@ EOF;
                     } else {
                         jQuery('#telemaintenancemod').attr('checked',false);
                     }
+                    if (TeleMaintenanceCur == 1){
+                        jQuery('#telemaintenancemodCur').attr('checked',true);
+                    } else {
+                        jQuery('#telemaintenancemodCur').attr('checked',false);
+                    }
                     if (reconductionAuto == 1)
                     {
                         jQuery('#modrecondAuto').attr('checked',true);
@@ -1393,6 +1402,7 @@ EOF;
                         jQuery('#modrecondAuto').attr('checked',false);
                     }
                     jQuery('#nbVisitemod').val(VisiteSurSite);
+                    jQuery('#nbVisitemodCur').val(VisiteSurSiteCur);
                     jQuery('#modSLA').val(SLA);
                     jQuery('#DurSAVmod').val(durValid);
                     var clause = jQuery(msg).find('clause').text();

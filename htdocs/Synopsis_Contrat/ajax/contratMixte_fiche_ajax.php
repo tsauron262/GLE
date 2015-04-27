@@ -175,10 +175,12 @@ switch ($action) {
                             //maintenance
                             //nb visite
                             $nbVisit = ($_REQUEST['nbVisiteadd'] > 0 ? $_REQUEST['nbVisiteadd'] : 0);
+                            $nbVisitCur = ($_REQUEST['nbVisiteaddCur'] > 0 ? $_REQUEST['nbVisiteaddCur'] : 0);
                             //Tickets
                             $tickets = ($_REQUEST['nbTicketMNTadd'] . "x" != "x" ? $_REQUEST['nbTicketMNTadd'] : 0);
                             //télémaintenance
                             $telemaintenance = ($_REQUEST['telemaintenanceadd'] == "on" ? 1 : ($_REQUEST['telemaintenanceadd'] > 0 ? $_REQUEST['telemaintenanceadd'] : false));
+                            $telemaintenanceCur = ($_REQUEST['telemaintenanceaddCur'] == "on" ? 1 : ($_REQUEST['telemaintenanceaddCur'] > 0 ? $_REQUEST['telemaintenanceaddCur'] : false));
                             //Hotline
                             $hotline = ($_REQUEST['hotlineadd'] == "on" ? 1 : ($_REQUEST['hotlineadd'] > 0 ? $_REQUEST['hotlineadd'] : false));
                             $qte = 1;
@@ -291,6 +293,7 @@ switch ($action) {
                                         qte,
                                         hotline,
                                         telemaintenance,
+                                        telemaintenanceCur,
                                         maintenance,
                                         qteTempsPerDuree,
                                         qteTktPerDuree,
@@ -298,7 +301,8 @@ switch ($action) {
                                         prorataTemporis,
                                         prixAn1,
                                         prixAnDernier,
-                                        nbVisite
+                                        nbVisite,
+                                        nbVisiteCur
                                        )
                                 VALUES (now(),
                                         " . $contrat->newContractLigneId . ",
@@ -313,6 +317,7 @@ switch ($action) {
                                         " . ($isTkt == 1 ? $qte * $tickets : ($isMnt ? $tickets : ($qte ? $qte : 'NULL'))) . ",
                                         " . ($hotline ? $hotline : 'NULL') . ",
                                         " . ($telemaintenance ? $telemaintenance : 'NULL') . ",
+                                        " . ($telemaintenanceCur ? $telemaintenanceCur : 'NULL') . ",
                                         " . ($isMnt ? $isMnt : 'NULL') . ",
                                         " . $qteTempsPerDuree . ",
                                         " . $qteTktPerDuree . ",
@@ -320,7 +325,8 @@ switch ($action) {
                                         " . ($prorata == 1 ? 1 : 0) . ",
                                         " . ($prorata == 1 ? $totAn1 : "NULL") . ",
                                         " . ($prorata == 1 ? $totFin : "NULL") . ",
-                                        " . ($isMnt ? $nbVisit : "NULL") . "
+                                        " . ($isMnt ? $nbVisit : "NULL") . ",
+                                        " . ($isMnt ? $nbVisitCur : "NULL") . "
                                         )";
 //print $requete;
                     $result1 = $db->query($requete);
@@ -451,10 +457,12 @@ switch ($action) {
                             //maintenance
                             //nb visite
                             $nbVisit = ($_REQUEST['nbVisitemod'] . "x" != 'x' ? intval($_REQUEST['nbVisitemod']) : 0);
+                            $nbVisitCur = ($_REQUEST['nbVisitemodCur'] . "x" != 'x' ? intval($_REQUEST['nbVisitemodCur']) : 0);
                             //Tickets
                             $tickets = ($_REQUEST['nbTicketMNTmod'] . "x" != "x" ? $_REQUEST['nbTicketMNTmod'] : 0);
                             //télémaintenance
                             $telemaintenance = ($_REQUEST['telemaintenancemod'] == "on" ? 1 : ($_REQUEST['telemaintenancemod'] <> 0 ? $_REQUEST['telemaintenancemod'] : false));
+                            $telemaintenanceCur = ($_REQUEST['telemaintenancemodCur'] == "on" ? 1 : ($_REQUEST['telemaintenancemodCur'] <> 0 ? $_REQUEST['telemaintenancemodCur'] : false));
                             //Hotline
                             $hotline = ($_REQUEST['hotlinemod'] == "on" ? 1 : ($_REQUEST['hotlinemod'] == -1 ? -1 : ($_REQUEST['hotlinemod'] > 0 ? $_REQUEST['hotlinemod'] : false)));
 //                            $qte = 1;
@@ -568,8 +576,10 @@ switch ($action) {
                                     fk_contrat_prod = " . ($contratprodid ? $contratprodid : "NULL") . ",
                                     qte = " . ($isTkt == 1 ? $qte * $tickets : ($isMnt ? $tickets : ($qte ? $qte : 'NULL'))) . ",
                                     nbVisite = " . ($isMnt ? $nbVisit : 'NULL') . ",
+                                    nbVisiteCur = " . ($isMnt ? $nbVisitCur : 'NULL') . ",
                                     hotline = " . ($hotline ? $hotline : 'NULL') . ",
                                     telemaintenance = " . ($telemaintenance ? $telemaintenance : 'NULL') . ",
+                                    telemaintenanceCur = " . ($telemaintenanceCur ? $telemaintenanceCur : 'NULL') . ",
                                     maintenance = " . ($isMnt ? $isMnt : 'NULL') . ",
                                     qteTempsPerDuree = " . $qteTempsPerDuree . ",
                                     qteTktPerDuree = " . $qteTktPerDuree . ",
@@ -807,11 +817,13 @@ switch ($action) {
                            g.durValid as GMAO_durVal,
                            g.hotline as GMAO_hotline,
                            g.telemaintenance as GMAO_telemaintenance,
+                           g.telemaintenanceCur as GMAO_telemaintenanceCur,
                            g.maintenance as GMAO_maintenance,
                            g.SLA as GMAO_sla,
                            g.clause as GMAO_clause,
                            g.qte as GMAO_qte,
                            g.nbVisite as GMAO_nbVisite,
+                           g.nbVisiteCur as GMAO_nbVisiteCur,
                            g.isSAV as GMAO_isSAV,
                            g.fk_prod as GMAO_fk_prod,
                            g.reconductionAuto as GMAO_reconductionAuto,
@@ -895,7 +907,9 @@ switch ($action) {
                     //  hotline
                     $xml .= "<isMnt>1</isMnt>";
                     $xml .= "<nbVisiteAn><![CDATA[" . $res->GMAO_nbVisite . "]]></nbVisiteAn>";
+                    $xml .= "<nbVisiteAnCur><![CDATA[" . $res->GMAO_nbVisiteCur . "]]></nbVisiteAnCur>";
                     $xml .= "<telemaintenance><![CDATA[" . $res->GMAO_telemaintenance . "]]></telemaintenance>";
+                    $xml .= "<telemaintenanceCur><![CDATA[" . $res->GMAO_telemaintenanceCur . "]]></telemaintenanceCur>";
                     $xml .= "<hotline><![CDATA[" . $res->GMAO_hotline . "]]></hotline>";
                     $xml .= "<qteMNT><![CDATA[" . $res->GMAO_qte . "]]></qteMNT>";
                     $xml .= "<qteTktPerDuree><![CDATA[" . $res->GMAO_qteTktPerDuree . "]]></qteTktPerDuree>";

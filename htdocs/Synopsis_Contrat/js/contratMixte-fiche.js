@@ -393,6 +393,7 @@ jQuery(function() {
                 jQuery('#modserial').val(jQuery(msg).find('serial_number').text());
                 jQuery('#DurSAVmod').val(jQuery(msg).find('durSAV').text());
                 jQuery('#nbVisitemod').val(jQuery(msg).find('nbVisiteAn').text());
+                jQuery('#nbVisitemodCur').val(jQuery(msg).find('nbVisiteAnCur').text());
                 jQuery('#modClause').val(jQuery(msg).find('clause').text());
                 jQuery('#modSLA').val(jQuery(msg).find('SLA').text());
                 //setDate
@@ -405,11 +406,13 @@ jQuery(function() {
                 var Hotline = jQuery(msg).find('hotline').text();
                 var reconductionAuto = jQuery(msg).find('recondAuto').text();
                 var TeleMaintenance = jQuery(msg).find('telemaintenance').text();
+                var TeleMaintenanceCur = jQuery(msg).find('telemaintenanceCur').text();
                 var isTkt = jQuery(msg).find('isTkt').text();
                 var isMnt = jQuery(msg).find('isMnt').text();
                 var isSAV = jQuery(msg).find('isSAV').text();
                     jQuery('#hotlinemod').val(Hotline);
                     jQuery('#telemaintenancemod').val(TeleMaintenance);
+                    jQuery('#telemaintenancemodCur').val(TeleMaintenanceCur);
 //                if (Hotline == 1){
 //                    jQuery('#hotlinemod').attr('checked',true);
 //                } else {

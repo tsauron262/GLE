@@ -38,7 +38,7 @@ class modSynopsisCaldav extends DolibarrModules
     function modSynopsisCaldav($DB)
     {
         $this->db = $DB ;
-        $this->numero = 8594;
+        $this->numero = 8596;
 
         $this->family = "Synopsis";
         $this->name = "Synopsis CalDav";

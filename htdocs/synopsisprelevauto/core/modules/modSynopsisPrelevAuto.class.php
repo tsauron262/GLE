@@ -38,7 +38,7 @@ class modSynopsisPrelevAuto extends DolibarrModules
     function modSynopsisPrelevAuto($DB)
     {
         $this->db = $DB ;
-        $this->numero = 8594;
+        $this->numero = 8597;
 
         $this->family = "Synopsis";
         $this->name = "Synopsis Prelevement Auto";

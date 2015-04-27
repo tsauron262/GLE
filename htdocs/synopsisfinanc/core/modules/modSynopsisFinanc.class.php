@@ -38,7 +38,7 @@ class modSynopsisFinanc extends DolibarrModules
     function modSynopsisFinanc($DB)
     {
         $this->db = $DB ;
-        $this->numero = 8594;
+        $this->numero = 8598;
 
         $this->family = "Synopsis";
         $this->name = "SynopsisFinanc";
